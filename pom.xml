@@ -1,0 +1,83 @@
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>files</groupId>
+  <artifactId>files</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>tests</module>
+  </modules>
+
+  <properties>
+    <lib.dir/>
+    <lib.classifier/>
+    <lib.classifier.exclude/>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>lib</id>
+      <properties>
+        <lib.dir>${basedir}/libs</lib.dir>
+        <lib.classifier.exclude>sources</lib.classifier.exclude>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>libsrc</id>
+      <properties>
+        <lib.dir>${basedir}/libsrc</lib.dir>
+        <lib.classifier>sources</lib.classifier>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+        <executions>
+          <execution>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${lib.dir}</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${lib.dir}</outputDirectory>
+              <classifier>${lib.classifier}</classifier>
+              <excludeClassifiers>${lib.classifier.exclude}</excludeClassifiers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
