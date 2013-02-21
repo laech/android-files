@@ -7,7 +7,8 @@ import android.widget.FrameLayout;
 
 import com.example.files.ui.fragments.FileListFragmentTest.TestActivity;
 
-public final class FileListFragmentTest extends ActivityInstrumentationTestCase2<TestActivity> {
+public final class FileListFragmentTest
+    extends ActivityInstrumentationTestCase2<TestActivity> {
 
   public static class TestActivity extends Activity {
     private static final int VIEW_ID = 1;
@@ -19,8 +20,7 @@ public final class FileListFragmentTest extends ActivityInstrumentationTestCase2
           .commit();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView();
     }
@@ -40,13 +40,11 @@ public final class FileListFragmentTest extends ActivityInstrumentationTestCase2
     // TODO
   }
 
-  @Override
-  protected void setUp() throws Exception {
+  @Override protected void setUp() throws Exception {
     super.setUp();
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @Override protected void tearDown() throws Exception {
     super.tearDown();
   }
 

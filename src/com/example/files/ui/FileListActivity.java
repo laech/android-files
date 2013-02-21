@@ -8,8 +8,7 @@ import com.example.files.ui.fragments.FileListFragment;
 
 public final class FileListActivity extends ListActivity {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.file_list_activity);
     setFileListFragment();
