@@ -5,12 +5,13 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>files</groupId>
-  <artifactId>files</artifactId>
+  <artifactId>files-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
-    <module>tests</module>
+    <module>files-lib</module>
+    <module>files-lib-test</module>
   </modules>
 
   <properties>
