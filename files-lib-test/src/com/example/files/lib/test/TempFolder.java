@@ -35,6 +35,18 @@ public final class TempFolder {
   public File newFile(String name) throws IOException {
     File file = new File(folder, name);
     touch(file);
+    assert file.isFile();
+    return file;
+  }
+
+  public File newFolder() {
+    return newFolder(String.valueOf(nanoTime()));
+  }
+
+  public File newFolder(String name) {
+    File file = new File(folder, name);
+    file.mkdirs();
+    assert file.isDirectory();
     return file;
   }
 }

@@ -4,7 +4,6 @@
   android:id="@android:id/text1"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:drawableLeft="@drawable/ic_dir"
   android:drawablePadding="8dp"
   android:ellipsize="middle"
   android:gravity="center_vertical"

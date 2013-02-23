@@ -28,12 +28,18 @@ public final class FileListAdapter extends ArrayAdapter<File> {
     File file = getItem(position);
     setEnabled(view, file);
     setText(view, file);
+    setIcon(view, file);
 
     return view;
   }
 
   private void setEnabled(View view, File file) {
     view.setEnabled(file.canRead()); // TODO review
+  }
+
+  private void setIcon(View view, File file) {
+    ((TextView)view).setCompoundDrawablesWithIntrinsicBounds(
+        file.isDirectory() ? R.drawable.ic_dir : 0, 0, 0, 0); // TODO
   }
 
   private void setText(View view, File file) {
