@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string name="app_name">Files</string>
+  <string name="empty">Empty</string>
+  <string name="not_a_folder">Not a folder</string>
+  <string name="folder_doesnt_exist">Folder doesn\'t exist</string>
+
+</resources>
