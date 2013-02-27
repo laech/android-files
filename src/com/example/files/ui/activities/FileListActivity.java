@@ -14,7 +14,8 @@ import com.example.files.R;
 import com.example.files.ui.fragments.FileListFragment;
 import com.example.files.ui.fragments.FileListFragment.OnFileClickListener;
 
-public final class FileListActivity extends Activity {
+public final class FileListActivity
+    extends Activity implements OnFileClickListener {
 
   static final String EXTRA_FOLDER = "folder";
 
@@ -29,18 +30,16 @@ public final class FileListActivity extends Activity {
     context.startActivity(newIntent(context, folder));
   }
 
-  private final OnFileClickListener fileListener = new OnFileClickListener() {
-    @Override public void onFileClick(File file) {
-      if (file.isDirectory()) {
-        start(FileListActivity.this, file);
-      }
-    }
-  };
-
   private FileListFragment fileListFragment;
 
   public FileListFragment getFileListFragment() {
     return fileListFragment;
+  }
+
+  @Override public void onFileClick(File file) {
+    if (file.isDirectory()) {
+      start(FileListActivity.this, file);
+    }
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +50,12 @@ public final class FileListActivity extends Activity {
 
   @Override protected void onPause() {
     super.onPause();
-    fileListFragment.setOnFileClickListener(null);
+    fileListFragment.setListener(null);
   }
 
   @Override protected void onResume() {
     super.onResume();
-    fileListFragment.setOnFileClickListener(fileListener);
+    fileListFragment.setListener(this);
   }
 
   private void setFileListFragment() {
@@ -76,5 +75,4 @@ public final class FileListActivity extends Activity {
           .commit();
     }
   }
-
 }

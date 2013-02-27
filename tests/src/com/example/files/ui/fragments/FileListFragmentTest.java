@@ -12,8 +12,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
-import com.example.files.test.TestFileListFragmentActivity;
 import com.example.files.test.TempFolder;
+import com.example.files.test.TestFileListFragmentActivity;
 import com.example.files.ui.fragments.FileListFragment.OnFileClickListener;
 
 public final class FileListFragmentTest
@@ -43,7 +43,7 @@ public final class FileListFragmentTest
     final TestFileListFragmentActivity activity = getActivity();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        activity.getFragment().setOnFileClickListener(tester);
+        activity.getFragment().setListener(tester);
         assertTrue(listView().performItemClick(listView().getChildAt(0), 0, 0));
       }
     });

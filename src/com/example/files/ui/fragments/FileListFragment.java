@@ -36,7 +36,7 @@ public final class FileListFragment extends ListFragment {
 
   private OnFileClickListener listener;
 
-  public OnFileClickListener getOnFileClickListener() {
+  public OnFileClickListener getListener() {
     return listener;
   }
 
@@ -55,7 +55,7 @@ public final class FileListFragment extends ListFragment {
     notifyListenerIfAvailable((File)l.getItemAtPosition(pos));
   }
 
-  public void setOnFileClickListener(OnFileClickListener listener) {
+  public void setListener(OnFileClickListener listener) {
     this.listener = listener;
   }
 
