@@ -20,6 +20,10 @@ import com.example.files.test.TempFolder;
 public final class FileListActivityTest
     extends ActivityInstrumentationTestCase2<FileListActivity> {
 
+  private static interface FileSetup {
+    void setup(File file);
+  }
+
   private List<Activity> activitiesToFinish;
   private TempFolder folder;
 
@@ -27,21 +31,37 @@ public final class FileListActivityTest
     super(FileListActivity.class);
   }
 
-  public void testSetsFileListFragmentListenerOnResume() {
-    getInstrumentation().callActivityOnResume(getActivity());
-    assertNotNull(getActivity().getFileListFragment().getListener());
-  }
-
-  public void testShowsContentOfFolderOnClick() throws Throwable {
+  public void testClickingOnFolderWillShowItsContent() throws Throwable {
     final File expected = newFileIn(folder.newFolder());
     click(getActivity(), expected.getParentFile());
 
-    final FileListActivity newActivity = waitForActivity(newActivityMonitor());
+    final FileListActivity newActivity = waitForActivity(newMonitor(), 2000L);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         assertEquals(expected, firstItem(newActivity));
       }
     });
+  }
+
+  public void testClickingOnUnexecutableFolderWillDoNothing() throws Throwable {
+    testWillDoNothingOnClick(new FileSetup() {
+      @Override public void setup(File file) {
+        file.setExecutable(false, false);
+      }
+    });
+  }
+
+  public void testClickingOnUnreadableFolderWillDoNothing() throws Throwable {
+    testWillDoNothingOnClick(new FileSetup() {
+      @Override public void setup(File file) {
+        file.setReadable(false, false);
+      }
+    });
+  }
+
+  public void testSetsFileListFragmentListenerOnResume() {
+    getInstrumentation().callActivityOnResume(getActivity());
+    assertNotNull(getActivity().getFileListFragment().getListener());
   }
 
   public void testShowsFolderSpecified() throws Exception {
@@ -93,12 +113,6 @@ public final class FileListActivityTest
     return activity.getFileListFragment().getListView();
   }
 
-  private ActivityMonitor newActivityMonitor() {
-    ActivityMonitor monitor = new ActivityMonitor((String)null, null, false);
-    getInstrumentation().addMonitor(monitor);
-    return monitor;
-  }
-
   private File newFileIn(final File folder) throws IOException {
     final File file = new File(folder, String.valueOf(nanoTime()));
     assertTrue(file.createNewFile());
@@ -110,10 +124,29 @@ public final class FileListActivityTest
         .putExtra(EXTRA_FOLDER, folder.getAbsolutePath());
   }
 
-  private FileListActivity waitForActivity(ActivityMonitor monitor) {
-    final Activity newActivity = monitor.waitForActivityWithTimeout(5000);
-    assertNotNull(newActivity);
-    activitiesToFinish.add(newActivity);
-    return (FileListActivity)newActivity;
+  private ActivityMonitor newMonitor() {
+    ActivityMonitor monitor = new ActivityMonitor((String)null, null, false);
+    getInstrumentation().addMonitor(monitor);
+    return monitor;
+  }
+
+  private void testWillDoNothingOnClick(FileSetup setup) throws Throwable {
+    setActivityIntent(newIntent(folder.get()));
+    File subFolder = folder.newFolder();
+    setup.setup(subFolder);
+    try {
+      click(getActivity(), subFolder);
+      assertNull(waitForActivity(newMonitor(), 1000L));
+    } finally {
+      assertTrue(subFolder.delete());
+    }
+  }
+
+  private FileListActivity waitForActivity(ActivityMonitor mon, long timeout) {
+    final Activity activity = mon.waitForActivityWithTimeout(timeout);
+    if (activity != null) {
+      activitiesToFinish.add(activity);
+    }
+    return (FileListActivity)activity;
   }
 }

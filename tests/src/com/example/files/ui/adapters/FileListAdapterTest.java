@@ -1,10 +1,9 @@
 package com.example.files.ui.adapters;
 
-import static com.example.files.test.TestFileListAdapterActivity.EXTRA_FOLDER;
 import static com.example.files.test.TempFolder.newTempFolder;
+import static com.example.files.test.TestFileListAdapterActivity.EXTRA_FOLDER;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -18,8 +17,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
-import com.example.files.test.TestFileListAdapterActivity;
 import com.example.files.test.TempFolder;
+import com.example.files.test.TestFileListAdapterActivity;
 
 public final class FileListAdapterTest
     extends ActivityInstrumentationTestCase2<TestFileListAdapterActivity> {
@@ -30,13 +29,43 @@ public final class FileListAdapterTest
     super(TestFileListAdapterActivity.class);
   }
 
-  public void testViewIsDisabledForUnreadableFile() throws Exception {
-    createReadableFile(false);
+  public void testViewIsDisabledForUnexecutableFolder() throws Exception {
+    folder.newFolder().setExecutable(false, false);
     assertFalse(view(0).isEnabled());
   }
 
+  public void testViewIsDisabledForUnreadableFile() throws Exception {
+    folder.newFile().setReadable(false, false);
+    assertFalse(view(0).isEnabled());
+  }
+
+  public void testViewIsDisabledForUnreadableFolder() throws Exception {
+    folder.newFolder().setReadable(false, false);
+    assertFalse(view(0).isEnabled());
+  }
+
+  public void testViewIsEnabledForExecutableFile() throws Exception {
+    folder.newFile().setExecutable(true, false);
+    assertTrue(view(0).isEnabled());
+  }
+
+  public void testViewIsEnabledForExecutableFolder() throws Exception {
+    folder.newFolder().setExecutable(true, false);
+    assertTrue(view(0).isEnabled());
+  }
+
   public void testViewIsEnabledForReadableFile() throws Exception {
-    createReadableFile(true);
+    folder.newFile().setReadable(true, false);
+    assertTrue(view(0).isEnabled());
+  }
+
+  public void testViewIsEnabledForReadableFolder() throws Exception {
+    folder.newFolder().setReadable(true, false);
+    assertTrue(view(0).isEnabled());
+  }
+
+  public void testViewIsEnabledForUnexecutableFile() throws Exception {
+    folder.newFile().setExecutable(false, false);
     assertTrue(view(0).isEnabled());
   }
 
@@ -66,12 +95,6 @@ public final class FileListAdapterTest
 
   private void assertIcon(int expectedResId, Bitmap actual) {
     assertTrue(Arrays.equals(toBytes(expectedResId), toBytes(actual)));
-  }
-
-  private File createReadableFile(boolean readable) throws IOException {
-    File file = folder.newFile();
-    file.setReadable(readable, false);
-    return file;
   }
 
   private Bitmap getBitmap(int resId) {

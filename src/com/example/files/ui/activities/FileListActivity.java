@@ -1,5 +1,7 @@
 package com.example.files.ui.activities;
 
+import static android.widget.Toast.LENGTH_SHORT;
+import static android.widget.Toast.makeText;
 import static com.example.files.util.Objects.requires;
 
 import java.io.File;
@@ -38,7 +40,11 @@ public final class FileListActivity
 
   @Override public void onFileClick(File file) {
     if (file.isDirectory()) {
-      start(FileListActivity.this, file);
+      if (file.canRead() && file.canExecute()) {
+        start(FileListActivity.this, file);
+      } else {
+        makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
+      }
     }
   }
 
