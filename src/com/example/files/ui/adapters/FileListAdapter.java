@@ -11,11 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.files.R;
+import com.example.files.util.FileSystem;
 
 public final class FileListAdapter extends ArrayAdapter<File> {
 
-  public FileListAdapter(Context context, File[] files) {
+  private final FileSystem fs;
+
+  public FileListAdapter(Context context, File[] files, FileSystem fs) {
     super(context, R.layout.file_item, requires(files, "files"));
+    this.fs = requires(fs, "fs");
 
     for (File file : files) {
       requires(file, "file");
@@ -23,23 +27,24 @@ public final class FileListAdapter extends ArrayAdapter<File> {
   }
 
   @Override public View getView(int position, View v, ViewGroup parent) {
-    View view = super.getView(position, v, parent);
+    return updateView(super.getView(position, v, parent), getItem(position));
+  }
 
-    File file = getItem(position);
+  View updateView(View view, File file) {
     setEnabled(view, file);
     setText(view, file);
     setIcon(view, file);
-
     return view;
   }
 
   private void setEnabled(View view, File file) {
-    view.setEnabled(file.canRead()); // TODO review
+    view.setEnabled(fs.hasPermissionToRead(file)); // TODO review
   }
 
   private void setIcon(View view, File file) {
     ((TextView)view).setCompoundDrawablesWithIntrinsicBounds(
-        file.isDirectory() ? R.drawable.ic_dir : 0, 0, 0, 0); // TODO
+        file.isDirectory() ? R.drawable.ic_folder : R.drawable.ic_file,
+        0, 0, 0); // TODO
   }
 
   private void setText(View view, File file) {

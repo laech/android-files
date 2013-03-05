@@ -20,7 +20,8 @@ public final class TestFileListFragmentActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.content);
 
-    fragment = FileListFragment.create(getIntent().getStringExtra(FOLDER));
+    fragment = new FileListFragment();
+    fragment.setArguments(getIntent().getExtras());
     getFragmentManager()
         .beginTransaction()
         .replace(android.R.id.content, fragment)

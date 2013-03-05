@@ -1,7 +1,5 @@
 package com.example.files.ui.activities;
 
-import static android.widget.Toast.LENGTH_SHORT;
-import static android.widget.Toast.makeText;
 import static com.example.files.util.Objects.requires;
 
 import java.io.File;
@@ -14,18 +12,16 @@ import android.os.Bundle;
 
 import com.example.files.R;
 import com.example.files.ui.fragments.FileListFragment;
-import com.example.files.ui.fragments.FileListFragment.OnFileClickListener;
 
-public final class FileListActivity
-    extends Activity implements OnFileClickListener {
+public final class FileListActivity extends Activity {
 
-  static final String EXTRA_FOLDER = "folder";
+  public static final String ARG_FOLDER = FileListFragment.ARG_FOLDER;
 
   public static Intent newIntent(Context context, File folder) {
     requires(context, "context");
     requires(folder, "folder");
     return new Intent(context, FileListActivity.class)
-        .putExtra(EXTRA_FOLDER, folder.getAbsolutePath());
+        .putExtra(ARG_FOLDER, folder.getAbsolutePath());
   }
 
   public static void start(Context context, File folder) {
@@ -38,36 +34,16 @@ public final class FileListActivity
     return fileListFragment;
   }
 
-  @Override public void onFileClick(File file) {
-    if (file.isDirectory()) {
-      if (file.canRead() && file.canExecute()) {
-        start(FileListActivity.this, file);
-      } else {
-        makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
-      }
-    }
-  }
-
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.content);
     setFileListFragment();
   }
 
-  @Override protected void onPause() {
-    super.onPause();
-    fileListFragment.setListener(null);
-  }
-
-  @Override protected void onResume() {
-    super.onResume();
-    fileListFragment.setListener(this);
-  }
-
   private void setFileListFragment() {
-    String folder = getIntent().getStringExtra(EXTRA_FOLDER);
+    String folder = getIntent().getStringExtra(ARG_FOLDER);
     if (folder == null) {
-      folder = "/";
+      getIntent().putExtra(ARG_FOLDER, "/"); // TODO test
     }
 
     String tag = "file_list";
@@ -75,9 +51,10 @@ public final class FileListActivity
 
     fileListFragment = (FileListFragment)fm.findFragmentByTag(tag);
     if (fileListFragment == null) {
-      fileListFragment = FileListFragment.create(folder);
+      fileListFragment = new FileListFragment();
+      fileListFragment.setArguments(getIntent().getExtras());
       fm.beginTransaction()
-          .add(android.R.id.content, fileListFragment, tag) // TODO
+          .add(android.R.id.content, fileListFragment, tag)
           .commit();
     }
   }

@@ -3,8 +3,13 @@ package com.example.files.ui.fragments;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.example.files.test.TempFolder.newTempFolder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
+
+import org.mockito.ArgumentCaptor;
 
 import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
@@ -14,7 +19,8 @@ import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.test.TempFolder;
 import com.example.files.test.TestFileListFragmentActivity;
-import com.example.files.ui.fragments.FileListFragment.OnFileClickListener;
+import com.example.files.ui.events.FileClickEvent;
+import com.squareup.otto.Bus;
 
 public final class FileListFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {
@@ -32,23 +38,37 @@ public final class FileListFragmentTest
 
   public void testPostsEventOnItemClick() throws Throwable {
     final File expected = folder.newFile();
-    final int[] clicked = {0};
-    final OnFileClickListener tester = new OnFileClickListener() {
-      @Override public void onFileClick(File actual) {
-        clicked[0]++;
-        assertEquals(expected, actual);
-      }
-    };
+    getActivity().getFragment().bus = mock(Bus.class);
 
-    final TestFileListFragmentActivity activity = getActivity();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        activity.getFragment().setListener(tester);
-        assertTrue(listView().performItemClick(listView().getChildAt(0), 0, 0));
+        clickFirstListItem();
       }
     });
 
-    assertEquals(1, clicked[0]);
+    ArgumentCaptor<FileClickEvent> arg = newArgumentCaptor();
+    verify(getActivity().getFragment().bus).post(arg.capture());
+    assertEquals(expected, arg.getValue().getFile());
+    assertEquals(1, arg.getAllValues().size());
+  }
+
+  public void testPostsNoEventOnItemClickIfItemIsDisabled() throws Throwable {
+    folder.newFile();
+    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        listView().getChildAt(0).setEnabled(false);
+      }
+    });
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        clickFirstListItem();
+      }
+    });
+
+    verifyZeroInteractions(bus);
   }
 
   public void testShowsEmptyListViewIfFolderHasNoFile() {
@@ -92,6 +112,10 @@ public final class FileListFragmentTest
     assertEquals(getString(msgId), emptyView().getText().toString());
   }
 
+  private void clickFirstListItem() {
+    assertTrue(listView().performItemClick(listView().getChildAt(0), 0, 0));
+  }
+
   private TextView emptyView() {
     return (TextView)getActivity().findViewById(android.R.id.empty);
   }
@@ -104,8 +128,12 @@ public final class FileListFragmentTest
     return (ListView)getActivity().findViewById(android.R.id.list);
   }
 
+  private ArgumentCaptor<FileClickEvent> newArgumentCaptor() {
+    return ArgumentCaptor.forClass(FileClickEvent.class);
+  }
+
   private void setTestIntent(File folder) {
-    setActivityIntent(new Intent()
-        .putExtra(TestFileListFragmentActivity.FOLDER, folder.getAbsolutePath()));
+    setActivityIntent(new Intent().putExtra(
+        TestFileListFragmentActivity.FOLDER, folder.getAbsolutePath()));
   }
 }

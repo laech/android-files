@@ -1,143 +1,93 @@
 package com.example.files.ui.adapters;
 
-import static com.example.files.test.TempFolder.newTempFolder;
-import static com.example.files.test.TestFileListAdapterActivity.EXTRA_FOLDER;
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.View;
-import android.widget.ListView;
+import junit.framework.TestCase;
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.example.files.R;
-import com.example.files.test.TempFolder;
-import com.example.files.test.TestFileListAdapterActivity;
+import com.example.files.util.FileSystem;
 
-public final class FileListAdapterTest
-    extends ActivityInstrumentationTestCase2<TestFileListAdapterActivity> {
+public final class FileListAdapterTest extends TestCase {
 
-  private TempFolder folder;
+  private TextView view;
+  private File file;
+  private FileSystem fs;
+  private FileListAdapter adapter;
 
-  public FileListAdapterTest() {
-    super(TestFileListAdapterActivity.class);
+  public void testViewIsDisabledIfUserHasNoPermissionToReadFile() {
+    setAsFileWithReadPermission(file, false);
+    adapter.updateView(view, file);
+    verify(view).setEnabled(false);
   }
 
-  public void testViewIsDisabledForUnexecutableFolder() throws Exception {
-    folder.newFolder().setExecutable(false, false);
-    assertFalse(view(0).isEnabled());
-  }
-
-  public void testViewIsDisabledForUnreadableFile() throws Exception {
-    folder.newFile().setReadable(false, false);
-    assertFalse(view(0).isEnabled());
-  }
-
-  public void testViewIsDisabledForUnreadableFolder() throws Exception {
-    folder.newFolder().setReadable(false, false);
-    assertFalse(view(0).isEnabled());
-  }
-
-  public void testViewIsEnabledForExecutableFile() throws Exception {
-    folder.newFile().setExecutable(true, false);
-    assertTrue(view(0).isEnabled());
-  }
-
-  public void testViewIsEnabledForExecutableFolder() throws Exception {
-    folder.newFolder().setExecutable(true, false);
-    assertTrue(view(0).isEnabled());
-  }
-
-  public void testViewIsEnabledForReadableFile() throws Exception {
-    folder.newFile().setReadable(true, false);
-    assertTrue(view(0).isEnabled());
-  }
-
-  public void testViewIsEnabledForReadableFolder() throws Exception {
-    folder.newFolder().setReadable(true, false);
-    assertTrue(view(0).isEnabled());
-  }
-
-  public void testViewIsEnabledForUnexecutableFile() throws Exception {
-    folder.newFile().setExecutable(false, false);
-    assertTrue(view(0).isEnabled());
+  public void testViewIsDisabledIfUserHasNoPermissionToReadFolder() {
+    setAsFolderWithReadPermission(file, false);
+    adapter.updateView(view, file);
+    verify(view).setEnabled(false);
   }
 
   public void testViewShowsFileName() throws Exception {
-    File file = folder.newFile();
-    assertEquals(file.getName(), text(0));
+    given(file.getName()).willReturn("a");
+    adapter.updateView(view, file);
+    verify(view).setText("a");
+  }
+
+  public void testViewShowsIconForFile() {
+    setAsFile(file);
+    adapter.updateView(view, file);
+    verify(view).setCompoundDrawablesWithIntrinsicBounds(
+        R.drawable.ic_file, 0, 0, 0);
   }
 
   public void testViewShowsIconForFolder() {
-    folder.newFolder();
-    assertIcon(R.drawable.ic_dir, icon(0));
+    setAsFolder(file);
+    adapter.updateView(view, file);
+    verify(view).setCompoundDrawablesWithIntrinsicBounds(
+        R.drawable.ic_folder, 0, 0, 0);
   }
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    folder = newTempFolder();
-    setTestIntent(folder.get());
+
+    view = mock(TextView.class);
+    file = mock(File.class);
+    fs = mock(FileSystem.class);
+    adapter = new FileListAdapter(mockContext(), new File[]{file}, fs);
   }
 
-  @Override protected void tearDown() throws Exception {
-    try {
-      folder.delete();
-    } finally {
-      super.tearDown();
-    }
+  private Context mockContext() {
+    LayoutInflater inflater = mock(LayoutInflater.class);
+    Context ctx = mock(Context.class);
+    given(ctx.getSystemService(LAYOUT_INFLATER_SERVICE)).willReturn(inflater);
+    return ctx;
   }
 
-  private void assertIcon(int expectedResId, Bitmap actual) {
-    assertTrue(Arrays.equals(toBytes(expectedResId), toBytes(actual)));
+  private void setAsFile(File file) {
+    given(file.isDirectory()).willReturn(false);
+    given(file.isFile()).willReturn(true);
   }
 
-  private Bitmap getBitmap(int resId) {
-    return ((BitmapDrawable)getDrawable(resId)).getBitmap();
+  private void setAsFileWithReadPermission(File file, boolean hasPermission) {
+    setAsFile(file);
+    given(fs.hasPermissionToRead(file)).willReturn(hasPermission);
   }
 
-  private Drawable getDrawable(int resId) {
-    return getActivity().getResources().getDrawable(resId);
+  private void setAsFolder(File file) {
+    given(file.isDirectory()).willReturn(true);
+    given(file.isFile()).willReturn(false);
   }
 
-  private Bitmap icon(int i) {
-    Drawable drawable = textView(i).getCompoundDrawables()[0];
-    return ((BitmapDrawable)drawable).getBitmap();
+  private void setAsFolderWithReadPermission(File file, boolean hasPermission) {
+    setAsFolder(file);
+    given(fs.hasPermissionToRead(file)).willReturn(hasPermission);
   }
 
-  private ListView listView() {
-    return (ListView)getActivity().findViewById(android.R.id.list);
-  }
-
-  private void setTestIntent(File folder) {
-    setActivityIntent(new Intent()
-        .putExtra(EXTRA_FOLDER, folder.getAbsolutePath()));
-  }
-
-  private String text(int i) {
-    return textView(i).getText().toString();
-  }
-
-  private TextView textView(int i) {
-    return (TextView)view(i).findViewById(android.R.id.text1);
-  }
-
-  private byte[] toBytes(Bitmap bitmap) {
-    ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
-    bitmap.copyPixelsToBuffer(buffer);
-    return buffer.array();
-  }
-
-  private byte[] toBytes(int resId) {
-    return toBytes(getBitmap(resId));
-  }
-
-  private View view(int i) {
-    return listView().getChildAt(i);
-  }
 }

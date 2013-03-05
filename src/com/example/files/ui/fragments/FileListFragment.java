@@ -1,6 +1,10 @@
 package com.example.files.ui.fragments;
 
+import static com.example.files.FilesApp.inject;
+
 import java.io.File;
+
+import javax.inject.Inject;
 
 import android.app.ListFragment;
 import android.os.Bundle;
@@ -12,37 +16,25 @@ import android.widget.TextView;
 
 import com.example.files.R;
 import com.example.files.ui.adapters.FileListAdapter;
+import com.example.files.ui.events.FileClickEvent;
+import com.example.files.util.FileSystem;
+import com.squareup.otto.Bus;
 
 public final class FileListFragment extends ListFragment {
 
-  public static interface OnFileClickListener {
-    void onFileClick(File file);
-  }
+  public static final String ARG_FOLDER = "folder";
 
-  private static final String ARG_FOLDER = "folder";
-
-  public static FileListFragment create(File dir) {
-    return create(dir.getAbsolutePath());
-  }
-
-  public static FileListFragment create(String dir) {
-    Bundle args = new Bundle(1);
-    args.putString(ARG_FOLDER, dir);
-
-    FileListFragment fragment = new FileListFragment();
-    fragment.setArguments(args);
-    return fragment;
-  }
-
-  private OnFileClickListener listener;
-
-  public OnFileClickListener getListener() {
-    return listener;
-  }
+  @Inject Bus bus;
+  @Inject FileSystem fs;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     init();
+  }
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    inject(this);
   }
 
   @Override public View onCreateView(
@@ -52,11 +44,10 @@ public final class FileListFragment extends ListFragment {
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    notifyListenerIfAvailable((File)l.getItemAtPosition(pos));
-  }
-
-  public void setListener(OnFileClickListener listener) {
-    this.listener = listener;
+    if (v.isEnabled()) {
+      File file = (File)l.getItemAtPosition(pos);
+      bus.post(new FileClickEvent(getActivity(), file));
+    }
   }
 
   private void init() {
@@ -71,12 +62,6 @@ public final class FileListFragment extends ListFragment {
     }
   }
 
-  private void notifyListenerIfAvailable(File file) {
-    if (listener != null) {
-      listener.onFileClick(file);
-    }
-  }
-
   private void overrideEmptyText(int resId) {
     ((TextView)getView().findViewById(android.R.id.empty)).setText(resId);
   }
@@ -88,7 +73,7 @@ public final class FileListFragment extends ListFragment {
           ? R.string.not_a_folder
           : R.string.folder_doesnt_exist);
     } else {
-      setListAdapter(new FileListAdapter(getActivity(), files));
+      setListAdapter(new FileListAdapter(getActivity(), files, fs));
     }
   }
 }

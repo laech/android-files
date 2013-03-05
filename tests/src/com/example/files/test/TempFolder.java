@@ -20,21 +20,29 @@ public final class TempFolder {
     this.folder = folder;
   }
 
-  public void delete() throws IOException {
-    deleteDirectory(folder);
+  public void delete() {
+    try {
+      deleteDirectory(folder);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public File get() {
     return folder;
   }
 
-  public File newFile() throws IOException {
+  public File newFile() {
     return newFile(String.valueOf(nanoTime()));
   }
 
-  public File newFile(String name) throws IOException {
+  public File newFile(String name) {
     File file = new File(folder, name);
-    touch(file);
+    try {
+      touch(file);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     assert file.isFile();
     return file;
   }
