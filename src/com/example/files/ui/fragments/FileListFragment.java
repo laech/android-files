@@ -44,10 +44,7 @@ public final class FileListFragment extends ListFragment {
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    if (v.isEnabled()) {
-      File file = (File)l.getItemAtPosition(pos);
-      bus.post(new FileClickEvent(getActivity(), file));
-    }
+    bus.post(new FileClickEvent(getActivity(), (File)l.getItemAtPosition(pos)));
   }
 
   private void init() {

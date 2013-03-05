@@ -5,7 +5,6 @@ import static android.view.View.VISIBLE;
 import static com.example.files.test.TempFolder.newTempFolder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.io.File;
 
@@ -50,25 +49,6 @@ public final class FileListFragmentTest
     verify(getActivity().getFragment().bus).post(arg.capture());
     assertEquals(expected, arg.getValue().getFile());
     assertEquals(1, arg.getAllValues().size());
-  }
-
-  public void testPostsNoEventOnItemClickIfItemIsDisabled() throws Throwable {
-    folder.newFile();
-    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        listView().getChildAt(0).setEnabled(false);
-      }
-    });
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        clickFirstListItem();
-      }
-    });
-
-    verifyZeroInteractions(bus);
   }
 
   public void testShowsEmptyListViewIfFolderHasNoFile() {
