@@ -20,10 +20,6 @@ public final class FileListAdapter extends ArrayAdapter<File> {
   public FileListAdapter(Context context, File[] files, FileSystem fs) {
     super(context, R.layout.file_item, requires(files, "files"));
     this.fs = requires(fs, "fs");
-
-    for (File file : files) {
-      requires(file, "file");
-    }
   }
 
   @Override public View getView(int position, View v, ViewGroup parent) {
@@ -48,6 +44,6 @@ public final class FileListAdapter extends ArrayAdapter<File> {
   }
 
   private void setText(View view, File file) {
-    ((TextView)view).setText(file.getName()); // TODO review
+    ((TextView)view).setText(file.getName());
   }
 }
