@@ -12,7 +12,7 @@ public class MediaMap {
   private static final Map<String, String> TYPES;
 
   static {
-    TYPES = new HashMap<String, String>(1308);
+    TYPES = new HashMap<String, String>(1345);
     TYPES.put("123", "application/vnd.lotus-1-2-3");
     TYPES.put("3dml", "text/vnd.in3d.3dml");
     TYPES.put("3ds", "image/x-3ds");
@@ -23,6 +23,7 @@ public class MediaMap {
     TYPES.put("aac", "audio/x-aac");
     TYPES.put("aam", "application/x-authorware-map");
     TYPES.put("aas", "application/x-authorware-seg");
+    TYPES.put("abs", "audio/x-mpeg");
     TYPES.put("abw", "application/x-abiword");
     TYPES.put("ac", "application/pkix-attr-cert");
     TYPES.put("acc", "application/vnd.americandynamics.acc");
@@ -38,14 +39,17 @@ public class MediaMap {
     TYPES.put("aif", "audio/x-aiff");
     TYPES.put("aifc", "audio/x-aiff");
     TYPES.put("aiff", "audio/x-aiff");
+    TYPES.put("aim", "application/x-aim");
     TYPES.put("air", "application/vnd.adobe.air-application-installer-package+zip");
     TYPES.put("ait", "application/vnd.dvb.ait");
     TYPES.put("ami", "application/vnd.amiga.ami");
+    TYPES.put("anx", "application/annodex");
     TYPES.put("apk", "application/vnd.android.package-archive");
     TYPES.put("appcache", "text/cache-manifest");
     TYPES.put("application", "application/x-ms-application");
     TYPES.put("apr", "application/vnd.lotus-approach");
     TYPES.put("arc", "application/x-freearc");
+    TYPES.put("art", "image/x-jg");
     TYPES.put("asc", "application/pgp-signature");
     TYPES.put("asf", "video/x-ms-asf");
     TYPES.put("asm", "text/x-asm");
@@ -58,7 +62,10 @@ public class MediaMap {
     TYPES.put("atx", "application/vnd.antix.game-component");
     TYPES.put("au", "audio/basic");
     TYPES.put("avi", "video/x-msvideo");
+    TYPES.put("avx", "video/x-rad-screenplay");
     TYPES.put("aw", "application/applixware");
+    TYPES.put("axa", "audio/annodex");
+    TYPES.put("axv", "video/annodex");
     TYPES.put("azf", "application/vnd.airzip.filesecure.azf");
     TYPES.put("azs", "application/vnd.airzip.filesecure.azs");
     TYPES.put("azw", "application/vnd.amazon.ebook");
@@ -73,6 +80,7 @@ public class MediaMap {
     TYPES.put("blorb", "application/x-blorb");
     TYPES.put("bmi", "application/vnd.bmi");
     TYPES.put("bmp", "image/bmp");
+    TYPES.put("body", "text/html");
     TYPES.put("book", "application/vnd.framemaker");
     TYPES.put("box", "application/vnd.previewsystems.box");
     TYPES.put("boz", "application/x-bzip2");
@@ -102,7 +110,7 @@ public class MediaMap {
     TYPES.put("cct", "application/x-director");
     TYPES.put("ccxml", "application/ccxml+xml");
     TYPES.put("cdbcmsg", "application/vnd.contact.cmsg");
-    TYPES.put("cdf", "application/x-netcdf");
+    TYPES.put("cdf", "application/x-cdf");
     TYPES.put("cdkey", "application/vnd.mediastation.cdkey");
     TYPES.put("cdmia", "application/cdmi-capability");
     TYPES.put("cdmic", "application/cdmi-container");
@@ -122,7 +130,7 @@ public class MediaMap {
     TYPES.put("cii", "application/vnd.anser-web-certificate-issue-initiation");
     TYPES.put("cil", "application/vnd.ms-artgalry");
     TYPES.put("cla", "application/vnd.claymore");
-    TYPES.put("class", "application/java-vm");
+    TYPES.put("class", "application/java");
     TYPES.put("clkk", "application/vnd.crick.clicker.keyboard");
     TYPES.put("clkp", "application/vnd.crick.clicker.palette");
     TYPES.put("clkt", "application/vnd.crick.clicker.template");
@@ -171,6 +179,7 @@ public class MediaMap {
     TYPES.put("der", "application/x-x509-ca-cert");
     TYPES.put("dfac", "application/vnd.dreamfactory");
     TYPES.put("dgc", "application/x-dgc-compressed");
+    TYPES.put("dib", "image/bmp");
     TYPES.put("dic", "text/x-c");
     TYPES.put("dir", "application/x-director");
     TYPES.put("dis", "application/vnd.mobius.dis");
@@ -199,6 +208,7 @@ public class MediaMap {
     TYPES.put("dts", "audio/vnd.dts");
     TYPES.put("dtshd", "audio/vnd.dts.hd");
     TYPES.put("dump", "application/octet-stream");
+    TYPES.put("dv", "video/x-dv");
     TYPES.put("dvb", "video/vnd.dvb.file");
     TYPES.put("dvi", "application/x-dvi");
     TYPES.put("dwf", "model/vnd.dwf");
@@ -230,7 +240,7 @@ public class MediaMap {
     TYPES.put("etx", "text/x-setext");
     TYPES.put("eva", "application/x-eva");
     TYPES.put("evy", "application/x-envoy");
-    TYPES.put("exe", "application/x-msdownload");
+    TYPES.put("exe", "application/octet-stream");
     TYPES.put("exi", "application/exi");
     TYPES.put("ext", "application/vnd.novadigm.ext");
     TYPES.put("ez", "application/andrew-inset");
@@ -253,7 +263,7 @@ public class MediaMap {
     TYPES.put("fh7", "image/x-freehand");
     TYPES.put("fhc", "image/x-freehand");
     TYPES.put("fig", "application/x-xfig");
-    TYPES.put("flac", "audio/x-flac");
+    TYPES.put("flac", "audio/flac");
     TYPES.put("fli", "video/x-fli");
     TYPES.put("flo", "application/vnd.micrografx.flo");
     TYPES.put("flv", "video/x-flv");
@@ -307,6 +317,7 @@ public class MediaMap {
     TYPES.put("gv", "text/vnd.graphviz");
     TYPES.put("gxf", "application/gxf");
     TYPES.put("gxt", "application/vnd.geonext");
+    TYPES.put("gz", "application/x-gzip");
     TYPES.put("h", "text/x-c");
     TYPES.put("h261", "video/h261");
     TYPES.put("h263", "video/h263");
@@ -320,6 +331,7 @@ public class MediaMap {
     TYPES.put("hpid", "application/vnd.hp-hpid");
     TYPES.put("hps", "application/vnd.hp-hps");
     TYPES.put("hqx", "application/mac-binhex40");
+    TYPES.put("htc", "text/x-component");
     TYPES.put("htke", "application/vnd.kenameaapp");
     TYPES.put("htm", "text/html");
     TYPES.put("html", "text/html");
@@ -371,8 +383,10 @@ public class MediaMap {
     TYPES.put("jpgv", "video/jpeg");
     TYPES.put("jpm", "video/jpm");
     TYPES.put("js", "application/javascript");
+    TYPES.put("jsf", "text/plain");
     TYPES.put("json", "application/json");
     TYPES.put("jsonml", "application/jsonml+json");
+    TYPES.put("jspf", "text/plain");
     TYPES.put("kar", "audio/midi");
     TYPES.put("karbon", "application/vnd.kde.karbon");
     TYPES.put("kfo", "application/vnd.kde.kformula");
@@ -419,9 +433,13 @@ public class MediaMap {
     TYPES.put("m3a", "audio/mpeg");
     TYPES.put("m3u", "audio/x-mpegurl");
     TYPES.put("m3u8", "application/vnd.apple.mpegurl");
+    TYPES.put("m4a", "audio/mp4");
+    TYPES.put("m4b", "audio/mp4");
+    TYPES.put("m4r", "audio/mp4");
     TYPES.put("m4u", "video/vnd.mpegurl");
-    TYPES.put("m4v", "video/x-m4v");
+    TYPES.put("m4v", "video/mp4");
     TYPES.put("ma", "application/mathematica");
+    TYPES.put("mac", "image/x-macpaint");
     TYPES.put("mads", "application/mads+xml");
     TYPES.put("mag", "application/vnd.ecowin.chart");
     TYPES.put("maker", "application/vnd.framemaker");
@@ -448,7 +466,7 @@ public class MediaMap {
     TYPES.put("mid", "audio/midi");
     TYPES.put("midi", "audio/midi");
     TYPES.put("mie", "application/x-mie");
-    TYPES.put("mif", "application/vnd.mif");
+    TYPES.put("mif", "application/x-mif");
     TYPES.put("mime", "message/rfc822");
     TYPES.put("mj2", "video/mj2");
     TYPES.put("mjp2", "video/mj2");
@@ -466,6 +484,7 @@ public class MediaMap {
     TYPES.put("mods", "application/mods+xml");
     TYPES.put("mov", "video/quicktime");
     TYPES.put("movie", "video/x-sgi-movie");
+    TYPES.put("mp1", "audio/mpeg");
     TYPES.put("mp2", "audio/mpeg");
     TYPES.put("mp21", "application/mp21");
     TYPES.put("mp2a", "audio/mpeg");
@@ -474,9 +493,11 @@ public class MediaMap {
     TYPES.put("mp4a", "audio/mp4");
     TYPES.put("mp4s", "application/mp4");
     TYPES.put("mp4v", "video/mp4");
+    TYPES.put("mpa", "audio/mpeg");
     TYPES.put("mpc", "application/vnd.mophun.certificate");
     TYPES.put("mpe", "video/mpeg");
     TYPES.put("mpeg", "video/mpeg");
+    TYPES.put("mpega", "audio/x-mpeg");
     TYPES.put("mpg", "video/mpeg");
     TYPES.put("mpg4", "video/mp4");
     TYPES.put("mpga", "audio/mpeg");
@@ -485,6 +506,7 @@ public class MediaMap {
     TYPES.put("mpn", "application/vnd.mophun.application");
     TYPES.put("mpp", "application/vnd.ms-project");
     TYPES.put("mpt", "application/vnd.ms-project");
+    TYPES.put("mpv2", "video/mpeg2");
     TYPES.put("mpy", "application/vnd.ibm.minipay");
     TYPES.put("mqy", "application/vnd.mobius.mqy");
     TYPES.put("mrc", "application/marc");
@@ -585,7 +607,7 @@ public class MediaMap {
     TYPES.put("pcf", "application/x-font-pcf");
     TYPES.put("pcl", "application/vnd.hp-pcl");
     TYPES.put("pclxl", "application/vnd.hp-pclxl");
-    TYPES.put("pct", "image/x-pict");
+    TYPES.put("pct", "image/pict");
     TYPES.put("pcurl", "application/vnd.curl.pcurl");
     TYPES.put("pcx", "image/x-pcx");
     TYPES.put("pdb", "application/vnd.palm");
@@ -598,17 +620,19 @@ public class MediaMap {
     TYPES.put("pgm", "image/x-portable-graymap");
     TYPES.put("pgn", "application/x-chess-pgn");
     TYPES.put("pgp", "application/pgp-encrypted");
-    TYPES.put("pic", "image/x-pict");
+    TYPES.put("pic", "image/pict");
+    TYPES.put("pict", "image/pict");
     TYPES.put("pkg", "application/octet-stream");
     TYPES.put("pki", "application/pkixcmp");
     TYPES.put("pkipath", "application/pkix-pkipath");
     TYPES.put("plb", "application/vnd.3gpp.pic-bw-large");
     TYPES.put("plc", "application/vnd.mobius.plc");
     TYPES.put("plf", "application/vnd.pocketlearn");
-    TYPES.put("pls", "application/pls+xml");
+    TYPES.put("pls", "audio/x-scpls");
     TYPES.put("pml", "application/vnd.ctc-posml");
     TYPES.put("png", "image/png");
     TYPES.put("pnm", "image/x-portable-anymap");
+    TYPES.put("pnt", "image/x-macpaint");
     TYPES.put("portpkg", "application/vnd.macports.portpkg");
     TYPES.put("pot", "application/vnd.ms-powerpoint");
     TYPES.put("potm", "application/vnd.ms-powerpoint.template.macroenabled.12");
@@ -642,6 +666,8 @@ public class MediaMap {
     TYPES.put("qfx", "application/vnd.intu.qfx");
     TYPES.put("qps", "application/vnd.publishare-delta-tree");
     TYPES.put("qt", "video/quicktime");
+    TYPES.put("qti", "image/x-quicktime");
+    TYPES.put("qtif", "image/x-quicktime");
     TYPES.put("qwd", "application/vnd.quark.quarkxpress");
     TYPES.put("qwt", "application/vnd.quark.quarkxpress");
     TYPES.put("qxb", "application/vnd.quark.quarkxpress");
@@ -824,6 +850,7 @@ public class MediaMap {
     TYPES.put("udeb", "application/x-debian-package");
     TYPES.put("ufd", "application/vnd.ufdl");
     TYPES.put("ufdl", "application/vnd.ufdl");
+    TYPES.put("ulw", "audio/basic");
     TYPES.put("ulx", "application/x-glulx");
     TYPES.put("umj", "application/vnd.umajin");
     TYPES.put("unityweb", "application/vnd.unity");
@@ -981,6 +1008,7 @@ public class MediaMap {
     TYPES.put("xz", "application/x-xz");
     TYPES.put("yang", "application/yang");
     TYPES.put("yin", "application/yin+xml");
+    TYPES.put("z", "application/x-compress");
     TYPES.put("z1", "application/x-zmachine");
     TYPES.put("z2", "application/x-zmachine");
     TYPES.put("z3", "application/x-zmachine");
