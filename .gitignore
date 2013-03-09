@@ -1,7 +1,11 @@
 .settings
+.idea
+.DS_Store
 gen
 bin
 libs
 target
 libsrc
+xtend-gen
 *~
+*.iml
