@@ -10,6 +10,7 @@ import static com.example.files.util.Objects.requires;
 import java.io.File;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 
@@ -57,10 +58,14 @@ public final class FileClickEventHandler {
     String type = media.get(getFileExtension(file));
     if (type == null) {
       toaster.toast(activity, R.string.unknown_file_type, LENGTH_SHORT);
-    } else {
-      // TODO handle activity not found
+      return;
+    }
+
+    try {
       starter.startActivity(activity, new Intent(ACTION_VIEW)
           .setDataAndType(fromFile(file), type));
+    } catch (ActivityNotFoundException e) {
+      toaster.toast(activity, R.string.no_app_to_open_file, LENGTH_SHORT);
     }
   }
 

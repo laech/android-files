@@ -6,7 +6,9 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.files.ui.activities.FileListActivity.ARG_FOLDER;
 import static com.example.files.util.Files.getFileExtension;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -18,6 +20,7 @@ import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +56,17 @@ public final class FileClickEventHandlerTest extends TestCase {
     setFolder();
     handleEvent();
     assertFolderShown();
+  }
+
+  public void testShowsNoAppFoundIfNoAppCanOpenFileWithMediaType() {
+    String type = "text/plain";
+    setFileWithMediaType(type);
+    doThrow(new ActivityNotFoundException())
+        .when(starter).startActivity(any(Context.class), any(Intent.class));
+
+    handleEvent();
+
+    assertNoAppToOpenFileShown();
   }
 
   public void testShowsPermissionDeniedIfNoPermissionToReadFile() {
@@ -100,6 +114,11 @@ public final class FileClickEventHandlerTest extends TestCase {
     assertEquals(component(activity, FileListActivity.class), i.getComponent());
 
     verifyZeroInteractions(toaster);
+  }
+
+  private void assertNoAppToOpenFileShown() {
+    verify(starter).startActivity(eq(activity), any(Intent.class));
+    verify(toaster).toast(activity, R.string.no_app_to_open_file, LENGTH_SHORT);
   }
 
   private void assertPermissionDeniedShown() {
