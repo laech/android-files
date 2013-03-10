@@ -1,4 +1,6 @@
 .settings
+.classpath
+.project
 .idea
 .DS_Store
 gen
