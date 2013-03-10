@@ -14,11 +14,7 @@ public final class DefaultImageMap extends ImageMap {
       return R.drawable.ic_folder;
     }
 
-    String ext = getFileExtension(file);
-    if (ext == null) {
-      return R.drawable.ic_file;
-    }
-    ext = ext.toLowerCase(ENGLISH);
+    String ext = getFileExtension(file).toLowerCase(ENGLISH);
 
     if (IMAGES.containsKey(ext)) {
       return R.drawable.ic_image;
