@@ -1,5 +1,7 @@
 package com.example.files.ui.activities;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.os.Bundle;
@@ -26,7 +28,11 @@ public final class FileListActivity extends Activity {
   private void setFileListFragment() {
     String folder = getIntent().getStringExtra(ARG_FOLDER);
     if (folder == null) {
-      getIntent().putExtra(ARG_FOLDER, "/"); // TODO test
+      getIntent().putExtra(ARG_FOLDER, "/"); // TODO
+      setTitle(R.string.app_name);
+    } else {
+      setTitle(new File(folder).getName());
+      getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     String tag = "file_list";

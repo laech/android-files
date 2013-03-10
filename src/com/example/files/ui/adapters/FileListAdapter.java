@@ -11,15 +11,19 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.files.R;
+import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 
 public final class FileListAdapter extends ArrayAdapter<File> {
 
   private final FileSystem fs;
+  private final ImageMap images;
 
-  public FileListAdapter(Context context, File[] files, FileSystem fs) {
+  public FileListAdapter(
+      Context context, File[] files, FileSystem fs, ImageMap images) {
     super(context, R.layout.file_item, requires(files, "files"));
     this.fs = requires(fs, "fs");
+    this.images = requires(images, "images");
   }
 
   @Override public View getView(int position, View v, ViewGroup parent) {
@@ -39,8 +43,7 @@ public final class FileListAdapter extends ArrayAdapter<File> {
 
   private void setIcon(View view, File file) {
     ((TextView)view).setCompoundDrawablesWithIntrinsicBounds(
-        file.isDirectory() ? R.drawable.ic_folder : R.drawable.ic_file,
-        0, 0, 0); // TODO
+        images.get(file), 0, 0, 0);
   }
 
   private void setText(View view, File file) {

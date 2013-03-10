@@ -6,6 +6,7 @@ import android.app.Application;
 import android.app.Fragment;
 import android.content.Context;
 
+import com.example.files.media.MediaMap;
 import com.example.files.ui.ActivityStarter;
 import com.example.files.ui.Toaster;
 import com.example.files.ui.events.handlers.FileClickEventHandler;
@@ -26,6 +27,7 @@ public final class FilesApp extends Application {
 
   @Inject Bus bus;
   @Inject FileSystem fs;
+  @Inject MediaMap media;
   @Inject ActivityStarter starter;
   @Inject Toaster toaster;
 
@@ -43,6 +45,6 @@ public final class FilesApp extends Application {
   }
 
   private void registerEventHandlers() {
-    bus.register(new FileClickEventHandler(fs, starter, toaster));
+    bus.register(new FileClickEventHandler(fs, media, starter, toaster));
   }
 }

@@ -6,5 +6,6 @@
   <string name="not_a_folder">Not a folder</string>
   <string name="folder_doesnt_exist">Folder doesn\'t exist</string>
   <string name="permission_denied">Permission denied</string>
+  <string name="unknown_file_type">Unknown file type</string>
 
 </resources>

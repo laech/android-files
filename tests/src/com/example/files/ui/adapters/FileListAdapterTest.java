@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.example.files.R;
+import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 
 public final class FileListAdapterTest extends TestCase {
@@ -20,6 +21,7 @@ public final class FileListAdapterTest extends TestCase {
   private TextView view;
   private File file;
   private FileSystem fs;
+  private ImageMap images;
   private FileListAdapter adapter;
 
   public void testViewIsDisabledIfUserHasNoPermissionToReadFile() {
@@ -40,18 +42,11 @@ public final class FileListAdapterTest extends TestCase {
     verify(view).setText("a");
   }
 
-  public void testViewShowsIconForFile() {
-    setAsFile(file);
+  public void testViewShowsIcon() {
+    given(images.get(file)).willReturn(R.drawable.ic_launcher);
     adapter.updateView(view, file);
     verify(view).setCompoundDrawablesWithIntrinsicBounds(
-        R.drawable.ic_file, 0, 0, 0);
-  }
-
-  public void testViewShowsIconForFolder() {
-    setAsFolder(file);
-    adapter.updateView(view, file);
-    verify(view).setCompoundDrawablesWithIntrinsicBounds(
-        R.drawable.ic_folder, 0, 0, 0);
+        R.drawable.ic_launcher, 0, 0, 0);
   }
 
   @Override protected void setUp() throws Exception {
@@ -60,7 +55,8 @@ public final class FileListAdapterTest extends TestCase {
     view = mock(TextView.class);
     file = mock(File.class);
     fs = mock(FileSystem.class);
-    adapter = new FileListAdapter(mockContext(), new File[]{file}, fs);
+    images = mock(ImageMap.class);
+    adapter = new FileListAdapter(mockContext(), new File[]{file}, fs, images);
   }
 
   private Context mockContext() {

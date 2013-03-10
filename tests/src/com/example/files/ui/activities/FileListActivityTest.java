@@ -1,5 +1,6 @@
 package com.example.files.ui.activities;
 
+import static android.app.ActionBar.DISPLAY_HOME_AS_UP;
 import static com.example.files.test.TempFolder.newTempFolder;
 import static com.example.files.ui.activities.FileListActivity.ARG_FOLDER;
 
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 
+import com.example.files.R;
 import com.example.files.test.TempFolder;
 
 public final class FileListActivityTest
@@ -20,10 +22,31 @@ public final class FileListActivityTest
     super(FileListActivity.class);
   }
 
+  public void testShowsDefaultTitleIfNoFolderIsSpecified() {
+    FileListActivity activity = getActivity();
+    assertEquals(activity.getString(R.string.app_name), activity.getTitle());
+  }
+
+  public void testShowsFolderNameAsTitle() {
+    setActivityIntent(newIntent(folder.get()));
+    assertEquals(folder.get().getName(), getActivity().getTitle());
+  }
+
   public void testShowsFolderSpecified() {
     File file = folder.newFile();
     setActivityIntent(newIntent(folder.get()));
     assertEquals(file, listView().getItemAtPosition(0));
+  }
+
+  public void testShowsHomeAsUpDisabledIfNoFolderIsSpecified() {
+    int options = getActivity().getActionBar().getDisplayOptions();
+    assertEquals(0, options & DISPLAY_HOME_AS_UP);
+  }
+
+  public void testShowsHomeAsUpEnabledIfFolderIsSpecified() {
+    setActivityIntent(newIntent(folder.get()));
+    int options = getActivity().getActionBar().getDisplayOptions();
+    assertEquals(options, options | DISPLAY_HOME_AS_UP);
   }
 
   @Override protected void setUp() throws Exception {

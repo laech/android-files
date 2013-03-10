@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
+import com.example.files.media.ImageMap;
 import com.example.files.ui.adapters.FileListAdapter;
 import com.example.files.ui.events.FileClickEvent;
 import com.example.files.util.FileSystem;
@@ -26,6 +27,7 @@ public final class FileListFragment extends ListFragment {
 
   @Inject Bus bus;
   @Inject FileSystem fs;
+  @Inject ImageMap images;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -70,7 +72,7 @@ public final class FileListFragment extends ListFragment {
           ? R.string.not_a_folder
           : R.string.folder_doesnt_exist);
     } else {
-      setListAdapter(new FileListAdapter(getActivity(), files, fs));
+      setListAdapter(new FileListAdapter(getActivity(), files, fs, images));
     }
   }
 }
