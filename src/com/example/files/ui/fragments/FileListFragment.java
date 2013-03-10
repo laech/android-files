@@ -77,10 +77,12 @@ public final class FileListFragment
   @Override
   public void onItemCheckedStateChanged(
       ActionMode mode, int position, long id, boolean checked) {
+    int n = getListView().getCheckedItemCount();
+    mode.setTitle(getString(R.string.n_selected, n));  // TODO
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);
+    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);   // TODO
     return true;
   }
 

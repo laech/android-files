@@ -9,5 +9,6 @@
   <string name="unknown_file_type">Unknown file type</string>
   <string name="no_app_to_open_file">No application can open this file</string>
   <string name="delete">Delete</string>
+  <string name="n_selected">%d selected</string>
 
 </resources>
