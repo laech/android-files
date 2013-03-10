@@ -1,19 +1,10 @@
 package com.example.files.ui.fragments;
 
-import static com.example.files.FilesApp.inject;
-
-import java.io.File;
-
-import javax.inject.Inject;
-
 import android.app.ListFragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.example.files.R;
 import com.example.files.media.ImageMap;
 import com.example.files.ui.adapters.FileListAdapter;
@@ -21,17 +12,24 @@ import com.example.files.ui.events.FileClickEvent;
 import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 
-public final class FileListFragment extends ListFragment {
+import javax.inject.Inject;
+import java.io.File;
+
+import static android.widget.AbsListView.MultiChoiceModeListener;
+import static com.example.files.FilesApp.inject;
+
+public final class FileListFragment
+    extends ListFragment implements MultiChoiceModeListener {
 
   public static final String ARG_FOLDER = "folder";
-
   @Inject Bus bus;
   @Inject FileSystem fs;
   @Inject ImageMap images;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    init();
+    getListView().setMultiChoiceModeListener(this);
+    showContent();
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -46,10 +44,10 @@ public final class FileListFragment extends ListFragment {
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    bus.post(new FileClickEvent(getActivity(), (File)l.getItemAtPosition(pos)));
+    bus.post(new FileClickEvent(getActivity(), (File) l.getItemAtPosition(pos)));
   }
 
-  private void init() {
+  private void showContent() {
     Bundle args = getArguments();
     if (args == null) {
       return;
@@ -62,7 +60,7 @@ public final class FileListFragment extends ListFragment {
   }
 
   private void overrideEmptyText(int resId) {
-    ((TextView)getView().findViewById(android.R.id.empty)).setText(resId);
+    ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
   }
 
   private void showContent(File folder) {
@@ -74,5 +72,26 @@ public final class FileListFragment extends ListFragment {
     } else {
       setListAdapter(new FileListAdapter(getActivity(), files, fs, images));
     }
+  }
+
+  @Override
+  public void onItemCheckedStateChanged(
+      ActionMode mode, int position, long id, boolean checked) {
+  }
+
+  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);
+    return true;
+  }
+
+  @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+    return false;
+  }
+
+  @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+    return false;
+  }
+
+  @Override public void onDestroyActionMode(ActionMode mode) {
   }
 }

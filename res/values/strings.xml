@@ -8,5 +8,6 @@
   <string name="permission_denied">Permission denied</string>
   <string name="unknown_file_type">Unknown file type</string>
   <string name="no_app_to_open_file">No application can open this file</string>
+  <string name="delete">Delete</string>
 
 </resources>
