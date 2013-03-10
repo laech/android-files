@@ -1,20 +1,19 @@
 package com.example.files.ui.adapters;
 
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.widget.TextView;
+import com.example.files.R;
+import com.example.files.media.ImageMap;
+import com.example.files.util.FileSystem;
+import junit.framework.TestCase;
+
+import java.io.File;
+
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
-import java.io.File;
-
-import junit.framework.TestCase;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.widget.TextView;
-
-import com.example.files.R;
-import com.example.files.media.ImageMap;
-import com.example.files.util.FileSystem;
 
 public final class FileListAdapterTest extends TestCase {
 
@@ -23,6 +22,11 @@ public final class FileListAdapterTest extends TestCase {
   private FileSystem fs;
   private ImageMap images;
   private FileListAdapter adapter;
+
+  public void testIsEnabledReturnsFalseIfUserHasNoPermissionToReadFile() {
+    given(fs.hasPermissionToRead(file)).willReturn(false);
+    assertFalse(adapter.isEnabled(0));
+  }
 
   public void testViewIsDisabledIfUserHasNoPermissionToReadFile() {
     setAsFileWithReadPermission(file, false);
