@@ -26,7 +26,7 @@ public final class ImageMapTest extends TestCase {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    images = new DefaultImageMap();
+    images = new ImageMap();
     folder = newTempFolder();
   }
 
