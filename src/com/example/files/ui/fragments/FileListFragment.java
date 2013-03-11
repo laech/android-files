@@ -22,6 +22,7 @@ public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
 
   public static final String ARG_FOLDER = "folder";
+
   @Inject Bus bus;
   @Inject FileSystem fs;
   @Inject ImageMap images;
@@ -77,12 +78,12 @@ public final class FileListFragment
   @Override
   public void onItemCheckedStateChanged(
       ActionMode mode, int position, long id, boolean checked) {
-    int n = getListView().getCheckedItemCount();
-    mode.setTitle(getString(R.string.n_selected, n));  // TODO
+    updateActionModeTitle(mode);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);   // TODO
+    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);
+    updateActionModeTitle(mode);
     return true;
   }
 
@@ -95,5 +96,10 @@ public final class FileListFragment
   }
 
   @Override public void onDestroyActionMode(ActionMode mode) {
+  }
+
+  private void updateActionModeTitle(ActionMode mode) {
+    int n = getListView().getCheckedItemCount();
+    mode.setTitle(getString(R.string.n_selected, n));
   }
 }

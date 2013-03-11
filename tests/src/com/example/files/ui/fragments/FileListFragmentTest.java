@@ -1,25 +1,26 @@
 package com.example.files.ui.fragments;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static com.example.files.test.TempFolder.newTempFolder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-
-import org.mockito.ArgumentCaptor;
-
+import android.app.Activity;
 import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.example.files.R;
 import com.example.files.test.TempFolder;
 import com.example.files.test.TestFileListFragmentActivity;
 import com.example.files.ui.events.FileClickEvent;
 import com.squareup.otto.Bus;
+import org.mockito.ArgumentCaptor;
+
+import java.io.File;
+
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.example.files.test.TempFolder.newTempFolder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public final class FileListFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {
@@ -28,6 +29,39 @@ public final class FileListFragmentTest
 
   public FileListFragmentTest() {
     super(TestFileListFragmentActivity.class);
+  }
+
+  public void testShowsCorrectNumSelectedItemsOnRotation() throws Throwable {
+    folder.newFile();
+
+    getActivity();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getListView().setItemChecked(0, true);
+        rotate(getActivity());
+      }
+    });
+
+    assertEquals(
+        getString(R.string.n_selected, 1),
+        getActivity().getActionMode().getTitle());
+  }
+
+  public void testShowsCorrectNumSelectedItemsOnSelection() throws Throwable {
+    folder.newFile();
+    folder.newFile();
+
+    getActivity();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getListView().setItemChecked(0, true);
+        getListView().setItemChecked(1, true);
+      }
+    });
+
+    assertEquals(
+        getString(R.string.n_selected, 2),
+        getActivity().getActionMode().getTitle());
   }
 
   public void testHidesEmptyViewIfFolderHasFile() throws Exception {
@@ -52,14 +86,14 @@ public final class FileListFragmentTest
   }
 
   public void testShowsEmptyListViewIfFolderHasNoFile() {
-    assertEquals(0, listView().getChildCount());
+    assertEquals(0, getListView().getChildCount());
   }
 
   public void testShowsEmptyMessageIfNoFiles() {
     assertEmptyViewIsVisible(R.string.empty);
   }
 
-  public void testShowsFolderNotExistsIfFolderDoesntExist() throws Exception {
+  public void testShowsFolderNotExistsIfFolderDoesNotExist() throws Exception {
     folder.delete();
     assertEmptyViewIsVisible(R.string.folder_doesnt_exist);
   }
@@ -67,6 +101,14 @@ public final class FileListFragmentTest
   public void testShowsNotFolderMessageIfArgIsNotFolder() throws Exception {
     setTestIntent(folder.newFile());
     assertEmptyViewIsVisible(R.string.not_a_folder);
+  }
+
+  private void rotate(Activity activity) {
+    int orientation = activity.getRequestedOrientation();
+    activity.setRequestedOrientation(
+        orientation == SCREEN_ORIENTATION_LANDSCAPE
+            ? SCREEN_ORIENTATION_PORTRAIT
+            : SCREEN_ORIENTATION_LANDSCAPE);
   }
 
   @Override protected void setUp() throws Exception {
@@ -84,28 +126,36 @@ public final class FileListFragmentTest
   }
 
   private void assertEmptyViewIsNotVisible() {
-    assertEquals(GONE, emptyView().getVisibility());
+    assertEquals(GONE, getEmptyView().getVisibility());
   }
 
   private void assertEmptyViewIsVisible(int msgId) {
-    assertEquals(VISIBLE, emptyView().getVisibility());
-    assertEquals(getString(msgId), emptyView().getText().toString());
+    assertEquals(VISIBLE, getEmptyView().getVisibility());
+    assertEquals(getString(msgId), getEmptyView().getText().toString());
   }
 
   private void clickFirstListItem() {
-    assertTrue(listView().performItemClick(listView().getChildAt(0), 0, 0));
+    assertTrue(getListView().performItemClick(getListView().getChildAt(0), 0, 0));
   }
 
-  private TextView emptyView() {
-    return (TextView)getActivity().findViewById(android.R.id.empty);
+  private TextView getEmptyView() {
+    return (TextView) getActivity().findViewById(android.R.id.empty);
+  }
+
+  private FileListFragment getFragment() {
+    return getActivity().getFragment();
   }
 
   private String getString(int resId) {
     return getActivity().getString(resId);
   }
 
-  private ListView listView() {
-    return (ListView)getActivity().findViewById(android.R.id.list);
+  private String getString(int resId, Object... args) {
+    return getActivity().getString(resId, args);
+  }
+
+  private ListView getListView() {
+    return getFragment().getListView();
   }
 
   private ArgumentCaptor<FileClickEvent> newArgumentCaptor() {
