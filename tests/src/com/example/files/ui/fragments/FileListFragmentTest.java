@@ -1,6 +1,5 @@
 package com.example.files.ui.fragments;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
@@ -14,10 +13,9 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempFolder.newTempFolder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -101,14 +99,6 @@ public final class FileListFragmentTest
   public void testShowsNotFolderMessageIfArgIsNotFolder() throws Exception {
     setTestIntent(folder.newFile());
     assertEmptyViewIsVisible(R.string.not_a_folder);
-  }
-
-  private void rotate(Activity activity) {
-    int orientation = activity.getRequestedOrientation();
-    activity.setRequestedOrientation(
-        orientation == SCREEN_ORIENTATION_LANDSCAPE
-            ? SCREEN_ORIENTATION_PORTRAIT
-            : SCREEN_ORIENTATION_LANDSCAPE);
   }
 
   @Override protected void setUp() throws Exception {
