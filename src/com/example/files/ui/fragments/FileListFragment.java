@@ -35,6 +35,7 @@ public final class FileListFragment
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
     inject(this);
   }
 
@@ -46,6 +47,11 @@ public final class FileListFragment
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     bus.post(new FileClickEvent(getActivity(), (File) l.getItemAtPosition(pos)));
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    super.onCreateOptionsMenu(menu, inflater);
+    inflater.inflate(R.menu.file_list, menu);
   }
 
   private void showContent() {
@@ -75,9 +81,7 @@ public final class FileListFragment
     }
   }
 
-  @Override
-  public void onItemCheckedStateChanged(
-      ActionMode mode, int position, long id, boolean checked) {
+  @Override public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
     updateActionModeTitle(mode);
   }
 

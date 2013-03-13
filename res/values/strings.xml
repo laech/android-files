@@ -11,5 +11,7 @@
   <string name="delete">Delete</string>
   <string name="n_selected">%d selected</string>
   <string name="home">Home</string>
+  <string name="show_inaccessible_files">Show inaccessible files</string>
+  <string name="show_hidden_files">Show hidden files</string>
 
 </resources>

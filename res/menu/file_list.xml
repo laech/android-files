@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item
+      android:id="@android:id/paste"
+      android:title="@android:string/paste"
+      android:icon="?android:attr/actionModePasteDrawable"
+      android:showAsAction="never"/>
+
+  <item
+      android:id="@+id/show_inaccessible_files"
+      android:title="@string/show_inaccessible_files"
+      android:checkable="true"
+      android:showAsAction="never"/>
+
+  <item
+      android:id="@+id/show_hidden_files"
+      android:title="@string/show_hidden_files"
+      android:checkable="true"
+      android:showAsAction="never"/>
+
+</menu>
