@@ -21,7 +21,7 @@ import static com.example.files.FilesApp.inject;
 public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
 
-  public static final String ARG_FOLDER = "folder";
+  public static final String ARG_DIRECTORY = "directory";
 
   @Inject Bus bus;
   @Inject FileSystem fs;
@@ -54,9 +54,9 @@ public final class FileListFragment
       return;
     }
 
-    String folder = args.getString(ARG_FOLDER);
-    if (folder != null) {
-      showContent(new File(folder));
+    String directory = args.getString(ARG_DIRECTORY);
+    if (directory != null) {
+      showContent(new File(directory));
     }
   }
 
@@ -64,12 +64,12 @@ public final class FileListFragment
     ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
   }
 
-  private void showContent(File folder) {
-    File[] files = folder.listFiles();
+  private void showContent(File directory) {
+    File[] files = directory.listFiles();
     if (files == null) {
-      overrideEmptyText(folder.exists()
-          ? R.string.not_a_folder
-          : R.string.folder_doesnt_exist);
+      overrideEmptyText(directory.exists()
+          ? R.string.not_a_directory
+          : R.string.directory_doesnt_exist);
     } else {
       setListAdapter(new FileListAdapter(getActivity(), files, fs, images));
     }

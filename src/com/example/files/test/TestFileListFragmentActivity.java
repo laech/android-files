@@ -9,7 +9,7 @@ import com.example.files.ui.fragments.FileListFragment;
 
 public final class TestFileListFragmentActivity extends Activity {
 
-  public static final String FOLDER = "folder";
+  public static final String DIRECTORY = "directory";
 
   private FileListFragment fragment;
   private ActionMode mode;

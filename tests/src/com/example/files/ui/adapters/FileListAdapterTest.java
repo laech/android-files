@@ -34,8 +34,8 @@ public final class FileListAdapterTest extends TestCase {
     verify(view).setEnabled(false);
   }
 
-  public void testViewIsDisabledIfUserHasNoPermissionToReadFolder() {
-    setAsFolderWithReadPermission(file, false);
+  public void testViewIsDisabledIfUserHasNoPermissionToReadDirectory() {
+    setAsDirectoryWithReadPermission(file, false);
     adapter.updateView(view, file);
     verify(view).setEnabled(false);
   }
@@ -80,13 +80,13 @@ public final class FileListAdapterTest extends TestCase {
     given(fs.hasPermissionToRead(file)).willReturn(hasPermission);
   }
 
-  private void setAsFolder(File file) {
+  private void setAsDirectory(File file) {
     given(file.isDirectory()).willReturn(true);
     given(file.isFile()).willReturn(false);
   }
 
-  private void setAsFolderWithReadPermission(File file, boolean hasPermission) {
-    setAsFolder(file);
+  private void setAsDirectoryWithReadPermission(File file, boolean hasPermission) {
+    setAsDirectory(file);
     given(fs.hasPermissionToRead(file)).willReturn(hasPermission);
   }
 

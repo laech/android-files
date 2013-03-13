@@ -8,28 +8,28 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 import java.io.File;
 import java.io.IOException;
 
-public final class TempFolder {
+public final class TempDirectory {
 
-  public static TempFolder newTempFolder() {
-    return new TempFolder(createTempDir());
+  public static TempDirectory newTempDirectory() {
+    return new TempDirectory(createTempDir());
   }
 
-  private final File folder;
+  private final File directory;
 
-  private TempFolder(File folder) {
-    this.folder = folder;
+  private TempDirectory(File directory) {
+    this.directory = directory;
   }
 
   public void delete() {
     try {
-      deleteDirectory(folder);
+      deleteDirectory(directory);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
   public File get() {
-    return folder;
+    return directory;
   }
 
   public File newFile() {
@@ -37,24 +37,13 @@ public final class TempFolder {
   }
 
   public File newFile(String name) {
-    File file = new File(folder, name);
+    File file = new File(directory, name);
     try {
       touch(file);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
     assert file.isFile();
-    return file;
-  }
-
-  public File newFolder() {
-    return newFolder(String.valueOf(nanoTime()));
-  }
-
-  public File newFolder(String name) {
-    File file = new File(folder, name);
-    file.mkdirs();
-    assert file.isDirectory();
     return file;
   }
 }

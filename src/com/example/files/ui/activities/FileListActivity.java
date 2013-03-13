@@ -13,7 +13,7 @@ public final class FileListActivity extends Activity {
 
   private static final File HOME = getExternalStorageDirectory();
 
-  public static final String ARG_FOLDER = FileListFragment.ARG_FOLDER;
+  public static final String ARG_DIRECTORY = FileListFragment.ARG_DIRECTORY;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -22,13 +22,13 @@ public final class FileListActivity extends Activity {
   }
 
   private void setFileListFragment() {
-    String folder = getIntent().getStringExtra(ARG_FOLDER);
-    if (folder == null) {
-      folder = HOME.getAbsolutePath();
-      getIntent().putExtra(ARG_FOLDER, folder);
+    String directory = getIntent().getStringExtra(ARG_DIRECTORY);
+    if (directory == null) {
+      directory = HOME.getAbsolutePath();
+      getIntent().putExtra(ARG_DIRECTORY, directory);
     }
 
-    updateTitle(folder);
+    updateTitle(directory);
 
     String tag = "file_list";
     if (getFragmentManager().findFragmentByTag(tag) == null) {

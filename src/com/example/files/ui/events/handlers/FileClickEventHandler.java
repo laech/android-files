@@ -3,7 +3,7 @@ package com.example.files.ui.events.handlers;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.ui.activities.FileListActivity.ARG_FOLDER;
+import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static com.example.files.util.Objects.requires;
 
@@ -48,7 +48,7 @@ public final class FileClickEventHandler {
     if (!fs.hasPermissionToRead(file)) {
       showPermissionDenied(activity);
     } else if (file.isDirectory()) {
-      showFolder(activity, file);
+      showDirectory(activity, file);
     } else {
       showFile(activity, file);
     }
@@ -69,9 +69,9 @@ public final class FileClickEventHandler {
     }
   }
 
-  private void showFolder(Context context, File folder) {
+  private void showDirectory(Context context, File directory) {
     starter.startActivity(context, new Intent(context, FileListActivity.class)
-        .putExtra(ARG_FOLDER, folder.getAbsolutePath()));
+        .putExtra(ARG_DIRECTORY, directory.getAbsolutePath()));
   }
 
   private void showPermissionDenied(Context context) {

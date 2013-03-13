@@ -5,7 +5,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
-import com.example.files.test.TempFolder;
+import com.example.files.test.TempDirectory;
 import com.example.files.test.TestFileListFragmentActivity;
 import com.example.files.ui.events.FileClickEvent;
 import com.squareup.otto.Bus;
@@ -16,21 +16,21 @@ import java.io.File;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.example.files.test.Activities.rotate;
-import static com.example.files.test.TempFolder.newTempFolder;
+import static com.example.files.test.TempDirectory.newTempDirectory;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public final class FileListFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {
 
-  private TempFolder folder;
+  private TempDirectory directory;
 
   public FileListFragmentTest() {
     super(TestFileListFragmentActivity.class);
   }
 
   public void testShowsCorrectNumSelectedItemsOnRotation() throws Throwable {
-    folder.newFile();
+    directory.newFile();
 
     getActivity();
     runTestOnUiThread(new Runnable() {
@@ -46,8 +46,8 @@ public final class FileListFragmentTest
   }
 
   public void testShowsCorrectNumSelectedItemsOnSelection() throws Throwable {
-    folder.newFile();
-    folder.newFile();
+    directory.newFile();
+    directory.newFile();
 
     getActivity();
     runTestOnUiThread(new Runnable() {
@@ -62,13 +62,13 @@ public final class FileListFragmentTest
         getActivity().getActionMode().getTitle());
   }
 
-  public void testHidesEmptyViewIfFolderHasFile() throws Exception {
-    folder.newFile();
+  public void testHidesEmptyViewIfDirectoryHasFile() throws Exception {
+    directory.newFile();
     assertEmptyViewIsNotVisible();
   }
 
   public void testPostsEventOnItemClick() throws Throwable {
-    final File expected = folder.newFile();
+    final File expected = directory.newFile();
     getActivity().getFragment().bus = mock(Bus.class);
 
     runTestOnUiThread(new Runnable() {
@@ -83,7 +83,7 @@ public final class FileListFragmentTest
     assertEquals(1, arg.getAllValues().size());
   }
 
-  public void testShowsEmptyListViewIfFolderHasNoFile() {
+  public void testShowsEmptyListViewIfDirectoryHasNoFile() {
     assertEquals(0, getListView().getChildCount());
   }
 
@@ -91,25 +91,25 @@ public final class FileListFragmentTest
     assertEmptyViewIsVisible(R.string.empty);
   }
 
-  public void testShowsFolderNotExistsIfFolderDoesNotExist() throws Exception {
-    folder.delete();
-    assertEmptyViewIsVisible(R.string.folder_doesnt_exist);
+  public void testShowsDirectoryNotExistsIfDirectoryDoesNotExist() throws Exception {
+    directory.delete();
+    assertEmptyViewIsVisible(R.string.directory_doesnt_exist);
   }
 
-  public void testShowsNotFolderMessageIfArgIsNotFolder() throws Exception {
-    setTestIntent(folder.newFile());
-    assertEmptyViewIsVisible(R.string.not_a_folder);
+  public void testShowsNotDirectoryMessageIfArgIsNotDirectory() throws Exception {
+    setTestIntent(directory.newFile());
+    assertEmptyViewIsVisible(R.string.not_a_directory);
   }
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    folder = newTempFolder();
-    setTestIntent(folder.get());
+    directory = newTempDirectory();
+    setTestIntent(directory.get());
   }
 
   @Override protected void tearDown() throws Exception {
     try {
-      folder.delete();
+      directory.delete();
     } finally {
       super.tearDown();
     }
@@ -152,8 +152,8 @@ public final class FileListFragmentTest
     return ArgumentCaptor.forClass(FileClickEvent.class);
   }
 
-  private void setTestIntent(File folder) {
+  private void setTestIntent(File directory) {
     setActivityIntent(new Intent().putExtra(
-        TestFileListFragmentActivity.FOLDER, folder.getAbsolutePath()));
+        TestFileListFragmentActivity.DIRECTORY, directory.getAbsolutePath()));
   }
 }

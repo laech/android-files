@@ -3,7 +3,7 @@ package com.example.files.ui.events.handlers;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.ui.activities.FileListActivity.ARG_FOLDER;
+import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -52,10 +52,10 @@ public final class FileClickEventHandlerTest extends TestCase {
     assertFileShown(type);
   }
 
-  public void testShowsFolderIfGotPermissionToReadFolder() {
-    setFolder();
+  public void testShowsDirectoryIfGotPermissionToReadDirectory() {
+    setDirectory();
     handleEvent();
-    assertFolderShown();
+    assertDirectoryShown();
   }
 
   public void testShowsNoAppFoundIfNoAppCanOpenFileWithMediaType() {
@@ -105,12 +105,12 @@ public final class FileClickEventHandlerTest extends TestCase {
     verifyZeroInteractions(toaster);
   }
 
-  private void assertFolderShown() {
+  private void assertDirectoryShown() {
     ArgumentCaptor<Intent> arg = intentCaptor();
     verify(starter).startActivity(eq(activity), arg.capture());
 
     Intent i = arg.getValue();
-    assertEquals(file.getAbsolutePath(), i.getStringExtra(ARG_FOLDER));
+    assertEquals(file.getAbsolutePath(), i.getStringExtra(ARG_DIRECTORY));
     assertEquals(component(activity, FileListActivity.class), i.getComponent());
 
     verifyZeroInteractions(toaster);
@@ -150,7 +150,7 @@ public final class FileClickEventHandlerTest extends TestCase {
     given(fs.hasPermissionToRead(file)).willReturn(true);
   }
 
-  private void setFolder() {
+  private void setDirectory() {
     given(file.getAbsolutePath()).willReturn("/a");
     given(file.isDirectory()).willReturn(true);
     given(fs.hasPermissionToRead(file)).willReturn(true);

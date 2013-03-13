@@ -11,34 +11,34 @@ public final class FileSystemTest extends TestCase {
   private File file;
   private FileSystem fs;
 
-  public void testHasNoPermissionToReadUnexecutableFolder() throws Exception {
+  public void testHasNoPermissionToReadUnexecutableDirectory() throws Exception {
     assertTrue(file.mkdir());
-    file.setExecutable(false, false);
+    assertTrue(file.setExecutable(false, false));
     assertFalse(fs.hasPermissionToRead(file));
   }
 
   public void testHasNoPermissionToReadUnreadableFile() throws Exception {
     assertTrue(file.createNewFile());
-    file.setReadable(false, false);
+    assertTrue(file.setReadable(false, false));
     assertFalse(fs.hasPermissionToRead(file));
   }
 
-  public void testHasNoPermissionToReadUnreadableFolder() throws Exception {
+  public void testHasNoPermissionToReadUnreadableDirectory() throws Exception {
     assertTrue(file.mkdir());
-    file.setReadable(false, false);
+    assertTrue(file.setReadable(false, false));
     assertFalse(fs.hasPermissionToRead(file));
 
   }
 
   public void testHasPermissionToReadReadableFile() throws Exception {
     assertTrue(file.createNewFile());
-    file.setReadable(true, true);
+    assertTrue(file.setReadable(true, true));
     assertTrue(fs.hasPermissionToRead(file));
   }
 
-  public void testHasPermissionToReadReadableFolder() {
+  public void testHasPermissionToReadReadableDirectory() {
     assertTrue(file.mkdir());
-    file.setReadable(true, true);
+    assertTrue(file.setReadable(true, true));
     assertTrue(fs.hasPermissionToRead(file));
   }
 
@@ -46,11 +46,11 @@ public final class FileSystemTest extends TestCase {
     super.setUp();
     fs = new FileSystem();
     file = createTempFile("abc", "def");
-    file.delete();
+    assertTrue(file.delete());
   }
 
   @Override protected void tearDown() throws Exception {
     super.tearDown();
-    file.delete();
+    assertTrue(file.delete());
   }
 }
