@@ -29,6 +29,17 @@ public final class FileListFragmentTest
     super(TestFileListFragmentActivity.class);
   }
 
+  public void testSortsFilesByName() {
+    File z = directory.newFile("z");
+    File a = directory.newFile("a");
+    File c = directory.newDirectory("C");
+
+    ListView list = getListView();
+    assertEquals(a, list.getItemAtPosition(0));
+    assertEquals(c, list.getItemAtPosition(1));
+    assertEquals(z, list.getItemAtPosition(2));
+  }
+
   public void testShowsCorrectNumSelectedItemsOnRotation() throws Throwable {
     directory.newFile();
 

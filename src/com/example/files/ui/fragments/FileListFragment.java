@@ -17,6 +17,8 @@ import java.io.File;
 
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.example.files.FilesApp.inject;
+import static com.example.files.util.FileSort.BY_NAME;
+import static java.util.Arrays.sort;
 
 public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
@@ -77,6 +79,7 @@ public final class FileListFragment
           ? R.string.not_a_directory
           : R.string.directory_doesnt_exist);
     } else {
+      sort(files, BY_NAME);
       setListAdapter(new FileListAdapter(getActivity(), files, fs, images));
     }
   }
