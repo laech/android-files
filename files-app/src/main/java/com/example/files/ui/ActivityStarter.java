@@ -7,8 +7,8 @@ import android.content.Intent;
 public interface ActivityStarter {
 
   /**
-   * @see Context#startActivity(Intent)
-   * @throws ActivityNotFoundException
+   * @see android.content.Context#startActivity(android.content.Intent)
+   * @throws android.content.ActivityNotFoundException
    */
   void startActivity(Context context, Intent intent);
 

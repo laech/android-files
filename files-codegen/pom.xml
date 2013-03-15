@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>files</groupId>
-  <artifactId>util</artifactId>
-  <version>1.0</version>
+  <parent>
+    <groupId>files</groupId>
+    <artifactId>files-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>files-codegen</artifactId>
 
   <repositories>
     <repository>
@@ -22,15 +25,10 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtend</groupId>
@@ -47,15 +45,6 @@
   <build>
     <sourceDirectory>src/main/xtend</sourceDirectory>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
-        <configuration>
-          <target>1.7</target>
-          <source>1.7</source>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>xtend-maven-plugin</artifactId>
