@@ -91,6 +91,13 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>dagger-compiler</artifactId>
+            <version>0.9.1</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
