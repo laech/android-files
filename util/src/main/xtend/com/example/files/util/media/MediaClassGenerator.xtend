@@ -70,6 +70,7 @@ class MediaGenerator {
     '''
 
   def static generateImageMap(Map<String, String> types) {
+    val pdf = types.filter(key, value | key.equals("pdf"))
     val texts = types.filter(key, value | value.startsWith("text"))
     val images = types.filter(key, value | value.startsWith("image"))
     val audios = types.filter(key, value | value.startsWith("audio"))
@@ -92,10 +93,11 @@ class MediaGenerator {
        */
       public static int get(String extension) {
         switch (extension.toLowerCase(ENGLISH)) {
-          «generateCases(audios, "R.drawable.ic_image")»
-          «generateCases(videos, "R.drawable.ic_image")»
-          «generateCases(images, "R.drawable.ic_image")»
-          «generateCases(texts, "R.drawable.ic_image")»
+          «cases(pdf, "R.drawable.ic_file_pdf")»
+          «cases(audios, "R.drawable.ic_image")»
+          «cases(videos, "R.drawable.ic_image")»
+          «cases(images, "R.drawable.ic_image")»
+          «cases(texts, "R.drawable.ic_image")»
           default:
             return R.drawable.ic_file;
         }
@@ -104,7 +106,7 @@ class MediaGenerator {
     '''
   }
 
-  def static generateCases(Map<String, String> map, String result) '''
+  def static cases(Map<String, String> map, String result) '''
     «FOR entry : map.entrySet»
     case "«entry.key»":
     «ENDFOR»

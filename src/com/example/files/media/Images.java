@@ -15,6 +15,8 @@ class Images {
    */
   public static int get(String extension) {
     switch (extension.toLowerCase(ENGLISH)) {
+      case "pdf":
+        return R.drawable.ic_file_pdf;
       case "aac":
       case "abs":
       case "adp":

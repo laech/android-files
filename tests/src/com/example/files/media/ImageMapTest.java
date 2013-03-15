@@ -27,6 +27,18 @@ public final class ImageMapTest extends TestCase {
     directory.delete();
   }
 
+  public void testGetsImageForFile() {
+    assertEquals(R.drawable.ic_file, images.get(directory.newFile()));
+  }
+
+  public void testGetsImageForPdfFile() {
+    assertEquals(R.drawable.ic_file_pdf, images.get(directory.newFile("a.pdf")));
+  }
+
+  public void testGetsImageForDirectory() {
+    assertEquals(R.drawable.ic_directory, images.get(directory.get()));
+  }
+
   public void testGetsImageForAlarmsDirectory() {
     assertEquals(R.drawable.ic_directory_alarms, images.get(DIRECTORY_ALARMS));
   }
