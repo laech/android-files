@@ -1,35 +1,26 @@
 package com.example.files;
 
-import javax.inject.Inject;
-
 import android.app.Application;
 import android.app.Fragment;
 import android.content.Context;
-
-import com.example.files.media.MediaMap;
-import com.example.files.ui.ActivityStarter;
-import com.example.files.ui.Toaster;
 import com.example.files.ui.events.handlers.FileClickEventHandler;
-import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
-
 import dagger.ObjectGraph;
+
+import javax.inject.Inject;
 
 public final class FilesApp extends Application {
 
   public static void inject(Context o) {
-    ((FilesApp)o.getApplicationContext()).injector.inject(o);
+    ((FilesApp) o.getApplicationContext()).injector.inject(o);
   }
 
   public static void inject(Fragment o) {
-    ((FilesApp)o.getActivity().getApplication()).injector.inject(o);
+    ((FilesApp) o.getActivity().getApplication()).injector.inject(o);
   }
 
   @Inject Bus bus;
-  @Inject FileSystem fs;
-  @Inject MediaMap media;
-  @Inject ActivityStarter starter;
-  @Inject Toaster toaster;
+  @Inject FileClickEventHandler fileClickEventHandler;
 
   private ObjectGraph injector;
 
@@ -45,6 +36,6 @@ public final class FilesApp extends Application {
   }
 
   private void registerEventHandlers() {
-    bus.register(new FileClickEventHandler(fs, media, starter, toaster));
+    bus.register(fileClickEventHandler);
   }
 }

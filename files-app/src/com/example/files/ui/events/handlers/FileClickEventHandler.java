@@ -1,19 +1,9 @@
 package com.example.files.ui.events.handlers;
 
-import static android.content.Intent.ACTION_VIEW;
-import static android.net.Uri.fromFile;
-import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
-import static com.example.files.util.Files.getFileExtension;
-import static com.example.files.util.Objects.requires;
-
-import java.io.File;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-
 import com.example.files.R;
 import com.example.files.media.MediaMap;
 import com.example.files.ui.ActivityStarter;
@@ -23,6 +13,16 @@ import com.example.files.ui.events.FileClickEvent;
 import com.example.files.util.FileSystem;
 import com.squareup.otto.Subscribe;
 
+import javax.inject.Inject;
+import java.io.File;
+
+import static android.content.Intent.ACTION_VIEW;
+import static android.net.Uri.fromFile;
+import static android.widget.Toast.LENGTH_SHORT;
+import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
+import static com.example.files.util.Files.getFileExtension;
+import static com.example.files.util.Objects.requires;
+
 public final class FileClickEventHandler {
 
   private final FileSystem fs;
@@ -30,7 +30,7 @@ public final class FileClickEventHandler {
   private final ActivityStarter starter;
   private final Toaster toaster;
 
-  public FileClickEventHandler(
+  @Inject public FileClickEventHandler(
       FileSystem fs,
       MediaMap media,
       ActivityStarter starter,
