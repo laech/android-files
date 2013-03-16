@@ -14,7 +14,7 @@ public class ImageMap {
   private static final Map<File, Integer> DIRECTORY_IMAGES;
 
   static {
-    DIRECTORY_IMAGES = new HashMap<>();
+    DIRECTORY_IMAGES = new HashMap<File, Integer>();
     DIRECTORY_IMAGES.put(DIRECTORY_ALARMS, R.drawable.ic_directory_alarms);
     DIRECTORY_IMAGES.put(DIRECTORY_ANDROID, R.drawable.ic_directory_android);
     DIRECTORY_IMAGES.put(DIRECTORY_DCIM, R.drawable.ic_directory_dcim);
