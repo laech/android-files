@@ -1,19 +1,4 @@
-package com.example.files.ui.events.handlers;
-
-import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import com.example.files.R;
-import com.example.files.media.MediaMap;
-import com.example.files.ui.ActivityStarter;
-import com.example.files.ui.Toaster;
-import com.example.files.ui.activities.FileListActivity;
-import com.example.files.ui.events.FileClickEvent;
-import com.example.files.util.FileSystem;
-import com.squareup.otto.Subscribe;
-
-import java.io.File;
+package com.example.files.ui.activities;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
@@ -22,28 +7,44 @@ import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static com.example.files.util.Objects.requires;
 
-public final class FileClickEventHandler {
+import java.io.File;
+
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
+
+import com.example.files.R;
+import com.example.files.media.MediaMap;
+import com.example.files.ui.ActivityStarter;
+import com.example.files.ui.Toaster;
+import com.example.files.ui.fragments.FileListFragment.FileClickListener;
+import com.example.files.util.FileSystem;
+
+public final class FileClickHandler implements FileClickListener {
 
   private final FileSystem fs;
   private final MediaMap media;
   private final ActivityStarter starter;
   private final Toaster toaster;
 
-  public FileClickEventHandler(
+  public FileClickHandler( // TODO
       FileSystem fs,
       MediaMap media,
       ActivityStarter starter,
       Toaster toaster) {
+
     this.media = requires(media, "media");
     this.fs = requires(fs, "fs");
     this.starter = requires(starter, "start");
     this.toaster = requires(toaster, "toaster");
   }
 
-  @Subscribe public void handle(FileClickEvent event) {
-    File file = event.getFile();
-    Activity activity = event.getActivity();
+  public FileClickHandler() {
+    this(new FileSystem(), new MediaMap(), new ActivityStarter(), new Toaster());
+  }
 
+  @Override public void onFileClick(Activity activity, File file) {
     if (!fs.hasPermissionToRead(file)) {
       showPermissionDenied(activity);
     } else if (file.isDirectory()) {

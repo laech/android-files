@@ -9,20 +9,6 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <!--
-
-    This projects uses:
-     - dagger-androidmanifest-plugin to generate the ManifestModule class
-     - dagger-compiler to generate code for modules classes
-     - files-maven-plugin to generate the media classess from network resources
-
-    So a "mvn clean compile" is needed on change of:
-     - components (activity/service etc) listed in AndroidManifest.xml
-     - @Module classes
-     - files-maven-plugin project (or to update the generate classes with the latest resources)
-
-  -->
-
   <repositories>
     <repository>
       <id>xtend</id>
@@ -63,12 +49,6 @@
         <artifactId>android-test</artifactId>
         <version>${android.version}</version>
         <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>com.squareup</groupId>
-        <artifactId>otto</artifactId>
-        <version>1.3.3</version>
       </dependency>
 
       <dependency>

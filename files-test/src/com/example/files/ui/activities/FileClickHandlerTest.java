@@ -1,4 +1,4 @@
-package com.example.files.ui.events.handlers;
+package com.example.files.ui.activities;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
@@ -29,13 +29,11 @@ import com.example.files.R;
 import com.example.files.media.MediaMap;
 import com.example.files.ui.ActivityStarter;
 import com.example.files.ui.Toaster;
-import com.example.files.ui.activities.FileListActivity;
-import com.example.files.ui.events.FileClickEvent;
 import com.example.files.util.FileSystem;
 
-public final class FileClickEventHandlerTest extends TestCase {
+public final class FileClickHandlerTest extends TestCase {
 
-  private FileClickEventHandler handler;
+  private FileClickHandler handler;
 
   private ActivityStarter starter;
   private FileSystem fs;
@@ -90,7 +88,7 @@ public final class FileClickEventHandlerTest extends TestCase {
     file = mock(File.class);
     activity = mock(Activity.class);
     given(activity.getPackageName()).willReturn("abc");
-    handler = new FileClickEventHandler(fs, medias, starter, toaster);
+    handler = new FileClickHandler(fs, medias, starter, toaster);
   }
 
   private void assertFileShown(String type) {
@@ -136,7 +134,7 @@ public final class FileClickEventHandlerTest extends TestCase {
   }
 
   private void handleEvent() {
-    handler.handle(new FileClickEvent(activity, file));
+    handler.onFileClick(activity, file);
   }
 
   private ArgumentCaptor<Intent> intentCaptor() {

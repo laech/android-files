@@ -33,6 +33,7 @@ public final class FileListActivity extends Activity {
     String tag = "file_list";
     if (getFragmentManager().findFragmentByTag(tag) == null) {
       FileListFragment fragment = new FileListFragment();
+      fragment.setListener(new FileClickHandler());
       fragment.setArguments(getIntent().getExtras());
       getFragmentManager()
           .beginTransaction()

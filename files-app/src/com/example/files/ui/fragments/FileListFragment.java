@@ -1,36 +1,41 @@
 package com.example.files.ui.fragments;
 
-import android.app.ListFragment;
-import android.os.Bundle;
-import android.view.*;
-import android.widget.AbsListView.MultiChoiceModeListener;
-import android.widget.ListView;
-import android.widget.TextView;
-import com.example.files.FilesApp;
-import com.example.files.R;
-import com.example.files.ui.adapters.FileListAdapter;
-import com.example.files.ui.events.FileClickEvent;
-import com.example.files.widget.ListViews;
-import com.squareup.otto.Bus;
+import static com.example.files.util.FileSort.BY_NAME;
 
 import java.io.File;
 
-import static com.example.files.util.FileSort.BY_NAME;
+import android.app.Activity;
+import android.app.ListFragment;
+import android.os.Bundle;
+import android.view.ActionMode;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.example.files.R;
+import com.example.files.ui.adapters.FileListAdapter;
+import com.example.files.widget.ListViews;
 
 public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
 
-  public static final String ARG_DIRECTORY = "directory";
-
-  private Bus bus;
-  private FileListAdapter adapter;
-
-  public Bus getBus() {
-    return bus;
+  public static interface FileClickListener {
+    void onFileClick(Activity activity, File file);
   }
 
-  public void setBus(Bus bus) {
-    this.bus = bus;
+  public static final String ARG_DIRECTORY = "directory";
+
+  private FileClickListener listener;
+  private FileListAdapter adapter;
+
+  public void setListener(FileClickListener listener) {
+    this.listener = listener;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -42,7 +47,6 @@ public final class FileListFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    bus = FilesApp.getBus(this);
   }
 
   @Override public View onCreateView(
@@ -52,7 +56,9 @@ public final class FileListFragment
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    bus.post(new FileClickEvent(getActivity(), (File) l.getItemAtPosition(pos)));
+    if (listener != null) {
+      listener.onFileClick(getActivity(), (File) l.getItemAtPosition(pos));
+    }
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -107,10 +113,10 @@ public final class FileListFragment
 
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.move_to_trash:
-        ListViews.removeCheckedItems(getListView(), adapter);
-        mode.finish();
-        return true;
+    case R.id.move_to_trash:
+      ListViews.removeCheckedItems(getListView(), adapter);
+      mode.finish();
+      return true;
     }
     return false;
   }

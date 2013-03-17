@@ -1,24 +1,23 @@
 package com.example.files.ui.fragments;
 
-import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
-import android.widget.ListView;
-import android.widget.TextView;
-import com.example.files.R;
-import com.example.files.test.TempDirectory;
-import com.example.files.test.TestFileListFragmentActivity;
-import com.example.files.ui.events.FileClickEvent;
-import com.squareup.otto.Bus;
-import org.mockito.ArgumentCaptor;
-
-import java.io.File;
-
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempDirectory.newTempDirectory;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
+import android.content.Intent;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.example.files.R;
+import com.example.files.test.TempDirectory;
+import com.example.files.test.TestFileListFragmentActivity;
+import com.example.files.ui.fragments.FileListFragment.FileClickListener;
 
 public final class FileListFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {
@@ -79,8 +78,9 @@ public final class FileListFragmentTest
   }
 
   public void testPostsEventOnItemClick() throws Throwable {
-    final File expected = directory.newFile();
-    getActivity().getFragment().setBus(mock(Bus.class));
+    final File file = directory.newFile();
+    final FileClickListener listener = mock(FileClickListener.class);
+    getActivity().getFragment().setListener(listener);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
@@ -88,10 +88,7 @@ public final class FileListFragmentTest
       }
     });
 
-    ArgumentCaptor<FileClickEvent> arg = newArgumentCaptor();
-    verify(getActivity().getFragment().getBus()).post(arg.capture());
-    assertEquals(expected, arg.getValue().getFile());
-    assertEquals(1, arg.getAllValues().size());
+    verify(listener).onFileClick(getActivity(), file);
   }
 
   public void testShowsEmptyListViewIfDirectoryHasNoFile() {
@@ -157,10 +154,6 @@ public final class FileListFragmentTest
 
   private ListView getListView() {
     return getFragment().getListView();
-  }
-
-  private ArgumentCaptor<FileClickEvent> newArgumentCaptor() {
-    return ArgumentCaptor.forClass(FileClickEvent.class);
   }
 
   private void setTestIntent(File directory) {

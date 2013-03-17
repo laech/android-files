@@ -1,14 +1,17 @@
 package com.example.files.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 
-public interface ActivityStarter {
+public class ActivityStarter {
 
   /**
-   * @see android.content.Context#startActivity(android.content.Intent)
-   * @throws android.content.ActivityNotFoundException
+   * @see Context#startActivity(Intent)
+   * @throws ActivityNotFoundException
    */
-  void startActivity(Context context, Intent intent);
+  public void startActivity(Context context, Intent intent) {
+    context.startActivity(intent);
+  }
 
 }
