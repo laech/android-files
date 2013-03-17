@@ -18,7 +18,7 @@ class MediaMojo extends AbstractMojo {
   private File androidManifest;
 
   /**
-   * @parameter expression="${project.build.directory}/generated-sources/files"
+   * @parameter expression="${project.build.sourceDirectory}"
    * @required
    * @readonly
    */
@@ -31,7 +31,7 @@ class MediaMojo extends AbstractMojo {
    */
   private MavenProject project;
 
-  override execute(){
+  override execute() {
     MediaGenerator::generate(androidManifest, outputDirectory)
     project.addCompileSourceRoot(outputDirectory.absolutePath)
   }
