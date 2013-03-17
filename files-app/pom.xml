@@ -44,7 +44,7 @@
       </plugin>
       <plugin>
         <groupId>files</groupId>
-        <artifactId>files-codegen</artifactId>
+        <artifactId>files-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -14,12 +14,12 @@
     This projects uses:
      - dagger-androidmanifest-plugin to generate the ManifestModule class
      - dagger-compiler to generate code for modules classes
-     - files-codegen to generate the media classess from network resources
+     - files-maven-plugin to generate the media classess from network resources
 
     So a "mvn clean compile" is needed on change of:
      - components (activity/service etc) listed in AndroidManifest.xml
      - @Module classes
-     - files-codegen project (or to update the generate classes with the latest resources)
+     - files-maven-plugin project (or to update the generate classes with the latest resources)
 
   -->
 
@@ -44,7 +44,7 @@
   </properties>
 
   <modules>
-    <module>files-codegen</module>
+    <module>files-maven-plugin</module>
     <module>files-app</module>
     <module>files-test</module>
   </modules>
@@ -169,7 +169,7 @@
 
         <plugin>
           <groupId>files</groupId>
-          <artifactId>files-codegen</artifactId>
+          <artifactId>files-maven-plugin</artifactId>
           <version>${project.version}</version>
           <executions>
             <execution>
