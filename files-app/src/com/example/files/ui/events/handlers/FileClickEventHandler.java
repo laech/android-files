@@ -13,7 +13,6 @@ import com.example.files.ui.events.FileClickEvent;
 import com.example.files.util.FileSystem;
 import com.squareup.otto.Subscribe;
 
-import javax.inject.Inject;
 import java.io.File;
 
 import static android.content.Intent.ACTION_VIEW;
@@ -30,7 +29,7 @@ public final class FileClickEventHandler {
   private final ActivityStarter starter;
   private final Toaster toaster;
 
-  @Inject public FileClickEventHandler(
+  public FileClickEventHandler(
       FileSystem fs,
       MediaMap media,
       ActivityStarter starter,

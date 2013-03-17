@@ -1,13 +1,8 @@
 package com.example.files.test;
 
-import static com.example.files.FilesApp.inject;
-
-import javax.inject.Inject;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ActionMode;
-
 import com.example.files.R;
 import com.example.files.ui.fragments.FileListFragment;
 
@@ -15,7 +10,7 @@ public final class TestFileListFragmentActivity extends Activity {
 
   public static final String DIRECTORY = "directory";
 
-  @Inject FileListFragment fragment;
+  private FileListFragment fragment;
   private ActionMode mode;
 
   public FileListFragment getFragment() {
@@ -39,8 +34,8 @@ public final class TestFileListFragmentActivity extends Activity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.content);
-    inject(this);
 
+    fragment = new FileListFragment();
     fragment.setArguments(getIntent().getExtras());
     getFragmentManager()
         .beginTransaction()

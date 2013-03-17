@@ -1,45 +1,59 @@
 package com.example.files;
 
-import javax.inject.Inject;
-
 import android.app.Application;
+import android.app.Fragment;
 import android.content.Context;
-
+import android.content.Intent;
+import android.widget.Toast;
+import com.example.files.media.MediaMap;
+import com.example.files.ui.ActivityStarter;
+import com.example.files.ui.Toaster;
 import com.example.files.ui.events.handlers.FileClickEventHandler;
+import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 
-import dagger.ObjectGraph;
+import static com.squareup.otto.ThreadEnforcer.MAIN;
 
 public final class FilesApp extends Application {
 
-  private static volatile FilesApp instance;
-
-  public static FilesApp getInstance() {
-    return instance;
+  public static Bus getBus(Context context) {
+    return ((FilesApp)context.getApplicationContext()).getBus();
   }
 
-  public static void inject(Context o) {
-    ((FilesApp) o.getApplicationContext()).injector.inject(o);
+  public static Bus getBus(Fragment fragment) {
+    return getBus(fragment.getActivity());
   }
 
-  @Inject Bus bus;
-  @Inject FileClickEventHandler fileClickEventHandler;
+  private Bus bus;
 
-  private ObjectGraph injector;
+  public Bus getBus() {
+    return bus;
+  }
 
   @Override public void onCreate() {
     super.onCreate();
-    instance = this;
-    initInjector();
+    bus = new Bus(MAIN);
     registerEventHandlers();
   }
 
-  private void initInjector() {
-    injector = ObjectGraph.create(new FilesModule(), new ManifestModule());
-    injector.inject(this);
+  private void registerEventHandlers() {
+    bus.register(new FileClickEventHandler(
+        new FileSystem(), new MediaMap(), newActivityStarter(), newToaster())); // TODO
   }
 
-  private void registerEventHandlers() {
-    bus.register(fileClickEventHandler);
+  private ActivityStarter newActivityStarter() {
+    return new ActivityStarter() {
+      @Override public void startActivity(Context context, Intent intent) {
+        context.startActivity(intent);
+      }
+    };
+  }
+
+  private Toaster newToaster() {
+    return new Toaster() {
+      @Override public void toast(Context context, int resId, int duration) {
+        Toast.makeText(context, resId, duration).show();
+      }
+    };
   }
 }

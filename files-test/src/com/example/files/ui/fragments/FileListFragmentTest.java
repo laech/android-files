@@ -80,7 +80,7 @@ public final class FileListFragmentTest
 
   public void testPostsEventOnItemClick() throws Throwable {
     final File expected = directory.newFile();
-    getActivity().getFragment().bus = mock(Bus.class);
+    getActivity().getFragment().setBus(mock(Bus.class));
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
@@ -89,7 +89,7 @@ public final class FileListFragmentTest
     });
 
     ArgumentCaptor<FileClickEvent> arg = newArgumentCaptor();
-    verify(getActivity().getFragment().bus).post(arg.capture());
+    verify(getActivity().getFragment().getBus()).post(arg.capture());
     assertEquals(expected, arg.getValue().getFile());
     assertEquals(1, arg.getAllValues().size());
   }

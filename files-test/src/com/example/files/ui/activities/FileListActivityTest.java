@@ -1,17 +1,18 @@
 package com.example.files.ui.activities;
 
-import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
-import android.widget.ListView;
-import com.example.files.R;
-import com.example.files.test.TempDirectory;
-
-import java.io.File;
-
 import static android.os.Environment.getExternalStorageDirectory;
 import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempDirectory.newTempDirectory;
 import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
+
+import java.io.File;
+
+import android.content.Intent;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.ListView;
+
+import com.example.files.R;
+import com.example.files.test.TempDirectory;
 
 public final class FileListActivityTest
     extends ActivityInstrumentationTestCase2<FileListActivity> {

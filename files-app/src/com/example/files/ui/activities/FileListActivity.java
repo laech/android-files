@@ -4,13 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import com.example.files.R;
 import com.example.files.ui.fragments.FileListFragment;
-import dagger.Lazy;
 
-import javax.inject.Inject;
 import java.io.File;
 
 import static android.os.Environment.getExternalStorageDirectory;
-import static com.example.files.FilesApp.inject;
 
 public final class FileListActivity extends Activity {
 
@@ -18,12 +15,9 @@ public final class FileListActivity extends Activity {
 
   public static final String ARG_DIRECTORY = FileListFragment.ARG_DIRECTORY;
 
-  @Inject Lazy<FileListFragment> lazyFragment;
-
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.content);
-    inject(this);
     setFileListFragment();
   }
 
@@ -38,7 +32,7 @@ public final class FileListActivity extends Activity {
 
     String tag = "file_list";
     if (getFragmentManager().findFragmentByTag(tag) == null) {
-      FileListFragment fragment = lazyFragment.get();
+      FileListFragment fragment = new FileListFragment();
       fragment.setArguments(getIntent().getExtras());
       getFragmentManager()
           .beginTransaction()

@@ -6,13 +6,13 @@ import android.view.*;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.example.files.FilesApp;
 import com.example.files.R;
 import com.example.files.ui.adapters.FileListAdapter;
 import com.example.files.ui.events.FileClickEvent;
 import com.example.files.widget.ListViews;
 import com.squareup.otto.Bus;
 
-import javax.inject.Inject;
 import java.io.File;
 
 import static com.example.files.util.FileSort.BY_NAME;
@@ -22,8 +22,16 @@ public final class FileListFragment
 
   public static final String ARG_DIRECTORY = "directory";
 
-  @Inject Bus bus;
-  @Inject FileListAdapter adapter;
+  private Bus bus;
+  private FileListAdapter adapter;
+
+  public Bus getBus() {
+    return bus;
+  }
+
+  public void setBus(Bus bus) {
+    this.bus = bus;
+  }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -34,6 +42,7 @@ public final class FileListFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
+    bus = FilesApp.getBus(this);
   }
 
   @Override public View onCreateView(
@@ -74,13 +83,15 @@ public final class FileListFragment
           ? R.string.not_a_directory
           : R.string.directory_doesnt_exist);
     } else {
+      adapter = new FileListAdapter(getActivity().getApplicationContext());
       adapter.addAll(children);
       adapter.sort(BY_NAME);
       setListAdapter(adapter);
     }
   }
 
-  @Override public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+  @Override public void onItemCheckedStateChanged(
+      ActionMode mode, int position, long id, boolean checked) {
     updateActionModeTitle(mode);
   }
 

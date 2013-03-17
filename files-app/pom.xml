@@ -19,14 +19,6 @@
     </dependency>
     <dependency>
       <groupId>com.squareup</groupId>
-      <artifactId>dagger</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup</groupId>
-      <artifactId>dagger-compiler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup</groupId>
       <artifactId>otto</artifactId>
     </dependency>
   </dependencies>
@@ -37,10 +29,6 @@
       <plugin>
         <groupId>com.jayway.maven.plugins.android.generation2</groupId>
         <artifactId>android-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>com.squareup</groupId>
-        <artifactId>dagger-androidmanifest-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>files</groupId>
