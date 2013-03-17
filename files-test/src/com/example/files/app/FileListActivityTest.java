@@ -1,9 +1,9 @@
-package com.example.files.ui.activities;
+package com.example.files.app;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempDirectory.newTempDirectory;
-import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
 
 import java.io.File;
 

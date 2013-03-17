@@ -1,9 +1,8 @@
-package com.example.files.ui.activities;
+package com.example.files.app;
 
 import android.app.Activity;
 import android.os.Bundle;
 import com.example.files.R;
-import com.example.files.ui.fragments.FileListFragment;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.example.files.ui.fragments;
+package com.example.files.app;
 
 import static com.example.files.util.FileSort.BY_NAME;
 
@@ -19,7 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
-import com.example.files.ui.adapters.FileListAdapter;
+import com.example.files.widget.FileListAdapter;
 import com.example.files.widget.ListViews;
 
 public final class FileListFragment

@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.ActionMode;
 import com.example.files.R;
-import com.example.files.ui.fragments.FileListFragment;
+import com.example.files.app.FileListFragment;
 
 public final class TestFileListFragmentActivity extends Activity {
 

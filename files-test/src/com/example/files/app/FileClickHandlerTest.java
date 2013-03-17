@@ -1,9 +1,9 @@
-package com.example.files.ui.activities;
+package com.example.files.app;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.ui.activities.FileListActivity.ARG_DIRECTORY;
+import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -26,10 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.files.R;
+import com.example.files.content.ActivityStarter;
 import com.example.files.media.MediaMap;
-import com.example.files.ui.ActivityStarter;
-import com.example.files.ui.Toaster;
 import com.example.files.util.FileSystem;
+import com.example.files.widget.Toaster;
 
 public final class FileClickHandlerTest extends TestCase {
 

@@ -1,4 +1,4 @@
-package com.example.files.ui.fragments;
+package com.example.files.app;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -15,9 +15,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
+import com.example.files.app.FileListFragment;
+import com.example.files.app.FileListFragment.FileClickListener;
 import com.example.files.test.TempDirectory;
 import com.example.files.test.TestFileListFragmentActivity;
-import com.example.files.ui.fragments.FileListFragment.FileClickListener;
 
 public final class FileListFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {

@@ -1,19 +1,20 @@
-package com.example.files.ui.adapters;
-
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.widget.TextView;
-import com.example.files.R;
-import com.example.files.media.ImageMap;
-import com.example.files.util.FileSystem;
-import junit.framework.TestCase;
-
-import java.io.File;
+package com.example.files.widget;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
+import junit.framework.TestCase;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.widget.TextView;
+
+import com.example.files.R;
+import com.example.files.media.ImageMap;
+import com.example.files.util.FileSystem;
 
 public final class FileListAdapterTest extends TestCase {
 

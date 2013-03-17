@@ -1,4 +1,4 @@
-package com.example.files.ui;
+package com.example.files.widget;
 
 import android.content.Context;
 import android.widget.Toast;

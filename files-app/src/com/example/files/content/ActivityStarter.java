@@ -1,4 +1,4 @@
-package com.example.files.ui;
+package com.example.files.content;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;

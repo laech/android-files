@@ -1,4 +1,4 @@
-package com.example.files.ui.adapters;
+package com.example.files.widget;
 
 import android.content.Context;
 import android.view.View;
