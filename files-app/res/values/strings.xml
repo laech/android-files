@@ -8,7 +8,7 @@
   <string name="permission_denied">Permission denied</string>
   <string name="unknown_file_type">Unknown file type</string>
   <string name="no_app_to_open_file">No application can open this file</string>
-  <string name="delete">Delete</string>
+  <string name="move_to_trash">Move to trash</string>
   <string name="n_selected">%d selected</string>
   <string name="home">Home</string>
   <string name="show_inaccessible_files">Show inaccessible files</string>

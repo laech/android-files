@@ -60,7 +60,8 @@ public final class FileListAdapterTest extends TestCase {
     file = mock(File.class);
     fs = mock(FileSystem.class);
     images = mock(ImageMap.class);
-    adapter = new FileListAdapter(mockContext(), new File[]{file}, fs, images);
+    adapter = new FileListAdapter(mockContext(), fs, images);
+    adapter.add(file);
   }
 
   private Context mockContext() {

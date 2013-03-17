@@ -3,22 +3,19 @@ package com.example.files.ui.fragments;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.*;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
-import com.example.files.media.ImageMap;
 import com.example.files.ui.adapters.FileListAdapter;
 import com.example.files.ui.events.FileClickEvent;
-import com.example.files.util.FileSystem;
+import com.example.files.widget.ListViews;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
 import java.io.File;
 
-import static android.widget.AbsListView.MultiChoiceModeListener;
-import static com.example.files.FilesApp.inject;
 import static com.example.files.util.FileSort.BY_NAME;
-import static java.util.Arrays.sort;
 
 public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
@@ -26,8 +23,7 @@ public final class FileListFragment
   public static final String ARG_DIRECTORY = "directory";
 
   @Inject Bus bus;
-  @Inject FileSystem fs;
-  @Inject ImageMap images;
+  @Inject FileListAdapter adapter;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -38,7 +34,6 @@ public final class FileListFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    inject(this);
   }
 
   @Override public View onCreateView(
@@ -73,14 +68,15 @@ public final class FileListFragment
   }
 
   private void showContent(File directory) {
-    File[] files = directory.listFiles();
-    if (files == null) {
+    File[] children = directory.listFiles();
+    if (children == null) {
       overrideEmptyText(directory.exists()
           ? R.string.not_a_directory
           : R.string.directory_doesnt_exist);
     } else {
-      sort(files, BY_NAME);
-      setListAdapter(new FileListAdapter(getActivity(), files, fs, images));
+      adapter.addAll(children);
+      adapter.sort(BY_NAME);
+      setListAdapter(adapter);
     }
   }
 
@@ -99,6 +95,12 @@ public final class FileListFragment
   }
 
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.move_to_trash:
+        ListViews.removeCheckedItems(getListView(), adapter);
+        mode.finish();
+        return true;
+    }
     return false;
   }
 

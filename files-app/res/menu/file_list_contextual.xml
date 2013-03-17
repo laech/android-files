@@ -17,8 +17,8 @@
       android:title="@android:string/copy"/>
 
   <item
-      android:id="@+id/delete"
-      android:icon="@drawable/ic_action_delete"
-      android:title="@string/delete"/>
+      android:id="@+id/move_to_trash"
+      android:icon="@drawable/ic_action_trash"
+      android:title="@string/move_to_trash"/>
 
 </menu>

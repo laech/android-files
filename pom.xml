@@ -9,8 +9,22 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <!--
+
+    This projects uses:
+     - dagger-androidmanifest-plugin to generate the ManifestModule class
+     - dagger-compiler to generate code for modules classes
+
+    So a "mvn clean compile" is needed on change of:
+     - components (activity/service etc) listed in AndroidManifest.xml
+     - @Module classes
+
+  -->
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <android.version>4.1.1.4</android.version>
+    <dagger.version>0.9.1</dagger.version>
   </properties>
 
   <modules>
@@ -24,13 +38,13 @@
       <dependency>
         <groupId>com.google.android</groupId>
         <artifactId>android</artifactId>
-        <version>4.1.1.4</version>
+        <version>${android.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.google.android</groupId>
         <artifactId>android-test</artifactId>
-        <version>4.1.1.4</version>
+        <version>${android.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -41,7 +55,13 @@
       <dependency>
         <groupId>com.squareup</groupId>
         <artifactId>dagger</artifactId>
-        <version>0.9.1</version>
+        <version>${dagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup</groupId>
+        <artifactId>dagger-compiler</artifactId>
+        <version>${dagger.version}</version>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -80,6 +100,19 @@
           <version>3.5.1</version>
           <extensions>true</extensions>
         </plugin>
+        <plugin>
+          <groupId>com.squareup</groupId>
+          <artifactId>dagger-androidmanifest-plugin</artifactId>
+          <version>${dagger.version}</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -91,13 +124,6 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>dagger-compiler</artifactId>
-            <version>0.9.1</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>

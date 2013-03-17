@@ -1,22 +1,25 @@
 package com.example.files;
 
+import javax.inject.Inject;
+
 import android.app.Application;
-import android.app.Fragment;
 import android.content.Context;
+
 import com.example.files.ui.events.handlers.FileClickEventHandler;
 import com.squareup.otto.Bus;
-import dagger.ObjectGraph;
 
-import javax.inject.Inject;
+import dagger.ObjectGraph;
 
 public final class FilesApp extends Application {
 
-  public static void inject(Context o) {
-    ((FilesApp) o.getApplicationContext()).injector.inject(o);
+  private static volatile FilesApp instance;
+
+  public static FilesApp getInstance() {
+    return instance;
   }
 
-  public static void inject(Fragment o) {
-    ((FilesApp) o.getActivity().getApplication()).injector.inject(o);
+  public static void inject(Context o) {
+    ((FilesApp) o.getApplicationContext()).injector.inject(o);
   }
 
   @Inject Bus bus;
@@ -26,12 +29,13 @@ public final class FilesApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+    instance = this;
     initInjector();
     registerEventHandlers();
   }
 
   private void initInjector() {
-    injector = ObjectGraph.create(new FilesModule());
+    injector = ObjectGraph.create(new FilesModule(), new ManifestModule());
     injector.inject(this);
   }
 

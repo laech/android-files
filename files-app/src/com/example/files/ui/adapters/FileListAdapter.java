@@ -9,6 +9,7 @@ import com.example.files.R;
 import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 
+import javax.inject.Inject;
 import java.io.File;
 
 import static com.example.files.util.Objects.requires;
@@ -18,9 +19,8 @@ public final class FileListAdapter extends ArrayAdapter<File> {
   private final FileSystem fs;
   private final ImageMap images;
 
-  public FileListAdapter(
-      Context context, File[] files, FileSystem fs, ImageMap images) {
-    super(context, R.layout.file_item, requires(files, "files"));
+  @Inject public FileListAdapter(Context context, FileSystem fs, ImageMap images) {
+    super(context, R.layout.file_item);
     this.fs = requires(fs, "fs");
     this.images = requires(images, "images");
   }

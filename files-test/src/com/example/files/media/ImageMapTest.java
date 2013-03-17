@@ -36,47 +36,47 @@ public final class ImageMapTest extends TestCase {
   }
 
   public void testGetsImageForDirectory() {
-    assertEquals(R.drawable.ic_directory, images.get(directory.get()));
+    assertDirectoryImage(R.drawable.ic_directory, directory.get());
   }
 
   public void testGetsImageForAlarmsDirectory() {
-    assertEquals(R.drawable.ic_directory_alarms, images.get(DIRECTORY_ALARMS));
+    assertDirectoryImage(R.drawable.ic_directory_alarms, DIRECTORY_ALARMS);
   }
 
   public void testGetsImageForAndroidDirectory() {
-    assertEquals(R.drawable.ic_directory_android, images.get(DIRECTORY_ANDROID));
+    assertDirectoryImage(R.drawable.ic_directory_android, DIRECTORY_ANDROID);
   }
 
   public void testGetsImageForDcimDirectory() {
-    assertEquals(R.drawable.ic_directory_dcim, images.get(DIRECTORY_DCIM));
+    assertDirectoryImage(R.drawable.ic_directory_dcim, DIRECTORY_DCIM);
   }
 
   public void testGetsImageForDownloadDirectory() {
-    assertEquals(R.drawable.ic_directory_download, images.get(DIRECTORY_DOWNLOADS));
+    assertDirectoryImage(R.drawable.ic_directory_download, DIRECTORY_DOWNLOADS);
   }
 
   public void testGetsImageForMoviesDirectory() {
-    assertEquals(R.drawable.ic_directory_movies, images.get(DIRECTORY_MOVIES));
+    assertDirectoryImage(R.drawable.ic_directory_movies, DIRECTORY_MOVIES);
   }
 
   public void testGetsImageForMusicDirectory() {
-    assertEquals(R.drawable.ic_directory_music, images.get(DIRECTORY_MUSIC));
+    assertDirectoryImage(R.drawable.ic_directory_music, DIRECTORY_MUSIC);
   }
 
   public void testGetsImageForNotificationsDirectory() {
-    assertEquals(R.drawable.ic_directory_notifications, images.get(DIRECTORY_NOTIFICATIONS));
+    assertDirectoryImage(R.drawable.ic_directory_notifications, DIRECTORY_NOTIFICATIONS);
   }
 
   public void testGetsImageForPicturesDirectory() {
-    assertEquals(R.drawable.ic_directory_pictures, images.get(DIRECTORY_PICTURES));
+    assertDirectoryImage(R.drawable.ic_directory_pictures, DIRECTORY_PICTURES);
   }
 
   public void testGetsImageForPodcastsDirectory() {
-    assertEquals(R.drawable.ic_directory_podcasts, images.get(DIRECTORY_PODCASTS));
+    assertDirectoryImage(R.drawable.ic_directory_podcasts, DIRECTORY_PODCASTS);
   }
 
   public void testGetsImageForRingtonesDirectory() {
-    assertEquals(R.drawable.ic_directory_ringtones, images.get(DIRECTORY_RINGTONES));
+    assertDirectoryImage(R.drawable.ic_directory_ringtones, DIRECTORY_RINGTONES);
   }
 
   public void testGetsImageIconFromExtension() {
@@ -85,6 +85,11 @@ public final class ImageMapTest extends TestCase {
 
   public void testGetsImageIconFromExtensionIgnoringCase() {
     assertEquals(R.drawable.ic_image, images.get(createFile("jPg")));
+  }
+
+  private void assertDirectoryImage(int resId, File dir) {
+    assertTrue(dir.mkdirs() || dir.isDirectory());
+    assertEquals(resId, images.get(dir));
   }
 
   private File createFile(String ext) {
