@@ -42,6 +42,10 @@
         <groupId>com.squareup</groupId>
         <artifactId>dagger-androidmanifest-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>files</groupId>
+        <artifactId>files-codegen</artifactId>
+      </plugin>
     </plugins>
   </build>
 

@@ -11,3 +11,4 @@ libsrc
 xtend-gen
 *~
 *.iml
+generated-sources
