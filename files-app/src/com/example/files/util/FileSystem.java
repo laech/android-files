@@ -8,6 +8,8 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class FileSystem {
 
+  public static final FileSystem INSTANCE = new FileSystem();
+
   public static final File DIRECTORY_ALARMS = dir(Environment.DIRECTORY_ALARMS);
   public static final File DIRECTORY_ANDROID = dir("Android");
   public static final File DIRECTORY_DCIM = dir(Environment.DIRECTORY_DCIM);
@@ -21,6 +23,9 @@ public class FileSystem {
 
   private static File dir(String type) {
     return getExternalStoragePublicDirectory(type);
+  }
+
+  FileSystem() {
   }
 
   public boolean hasPermissionToRead(File file) {

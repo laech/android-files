@@ -6,6 +6,11 @@ import android.content.Intent;
 
 public class ActivityStarter {
 
+  public static final ActivityStarter INSTANCE = new ActivityStarter();
+
+  ActivityStarter() {
+  }
+
   /**
    * @see Context#startActivity(Intent)
    * @throws ActivityNotFoundException

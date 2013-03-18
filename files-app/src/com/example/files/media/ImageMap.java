@@ -11,6 +11,8 @@ import static com.example.files.util.Files.getFileExtension;
 
 public class ImageMap {
 
+  public static final ImageMap INSTANCE = new ImageMap();
+
   private static final Map<File, Integer> DIRECTORY_IMAGES;
 
   static {
@@ -25,6 +27,9 @@ public class ImageMap {
     DIRECTORY_IMAGES.put(DIRECTORY_PICTURES, R.drawable.ic_directory_pictures);
     DIRECTORY_IMAGES.put(DIRECTORY_PODCASTS, R.drawable.ic_directory_podcasts);
     DIRECTORY_IMAGES.put(DIRECTORY_RINGTONES, R.drawable.ic_directory_ringtones);
+  }
+
+  ImageMap() {
   }
 
   public int get(File file) {

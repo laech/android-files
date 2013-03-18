@@ -2,6 +2,11 @@ package com.example.files.media;
 
 public class MediaMap {
 
+  public static final MediaMap INSTANCE = new MediaMap();
+
+  MediaMap() {
+  }
+
   /**
    * Gets the media type for the given file extension.
    *

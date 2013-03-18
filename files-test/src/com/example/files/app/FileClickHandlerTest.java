@@ -3,7 +3,6 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -19,9 +18,7 @@ import junit.framework.TestCase;
 
 import org.mockito.ArgumentCaptor;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
@@ -40,7 +37,7 @@ public final class FileClickHandlerTest extends TestCase {
   private MediaMap medias;
   private Toaster toaster;
 
-  private Activity activity;
+  private FileListActivity activity;
   private File file;
 
   public void testShowsFileIfMediaTypeIsNotNull() {
@@ -86,9 +83,9 @@ public final class FileClickHandlerTest extends TestCase {
     toaster = mock(Toaster.class);
     medias = mock(MediaMap.class);
     file = mock(File.class);
-    activity = mock(Activity.class);
+    activity = mock(FileListActivity.class);
     given(activity.getPackageName()).willReturn("abc");
-    handler = new FileClickHandler(fs, medias, starter, toaster);
+    handler = new FileClickHandler(activity, fs, medias, starter, toaster);
   }
 
   private void assertFileShown(String type) {
@@ -104,13 +101,7 @@ public final class FileClickHandlerTest extends TestCase {
   }
 
   private void assertDirectoryShown() {
-    ArgumentCaptor<Intent> arg = intentCaptor();
-    verify(starter).startActivity(eq(activity), arg.capture());
-
-    Intent i = arg.getValue();
-    assertEquals(file.getAbsolutePath(), i.getStringExtra(ARG_DIRECTORY));
-    assertEquals(component(activity, FileListActivity.class), i.getComponent());
-
+    verify(activity).show(file.getAbsolutePath());
     verifyZeroInteractions(toaster);
   }
 
@@ -129,12 +120,8 @@ public final class FileClickHandlerTest extends TestCase {
     verifyZeroInteractions(starter);
   }
 
-  private ComponentName component(Context context, Class<?> clazz) {
-    return new ComponentName(context, clazz);
-  }
-
   private void handleEvent() {
-    handler.onFileClick(activity, file);
+    handler.onFileSelected(file);
   }
 
   private ArgumentCaptor<Intent> intentCaptor() {

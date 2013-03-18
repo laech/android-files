@@ -25,17 +25,22 @@ import com.example.files.widget.ListViews;
 public final class FileListFragment
     extends ListFragment implements MultiChoiceModeListener {
 
-  public static interface FileClickListener {
-    void onFileClick(Activity activity, File file);
+  public static interface OnFileSelectedListener {
+    void onFileSelected(File file);
   }
 
   public static final String ARG_DIRECTORY = "directory";
 
-  private FileClickListener listener;
+  private OnFileSelectedListener listener;
   private FileListAdapter adapter;
 
-  public void setListener(FileClickListener listener) {
+  void setListener(OnFileSelectedListener listener) {
     this.listener = listener;
+  }
+
+  @Override public void onAttach(Activity activity) {
+    super.onAttach(activity);
+    listener = (OnFileSelectedListener) activity;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -56,9 +61,7 @@ public final class FileListFragment
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    if (listener != null) {
-      listener.onFileClick(getActivity(), (File) l.getItemAtPosition(pos));
-    }
+    listener.onFileSelected((File) l.getItemAtPosition(pos));
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -68,14 +71,12 @@ public final class FileListFragment
 
   private void showContent() {
     Bundle args = getArguments();
-    if (args == null) {
+    if (args == null)
       return;
-    }
 
     String directory = args.getString(ARG_DIRECTORY);
-    if (directory != null) {
+    if (directory != null)
       showContent(new File(directory));
-    }
   }
 
   private void overrideEmptyText(int resId) {

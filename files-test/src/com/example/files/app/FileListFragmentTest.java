@@ -15,8 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.files.R;
-import com.example.files.app.FileListFragment;
-import com.example.files.app.FileListFragment.FileClickListener;
+import com.example.files.app.FileListFragment.OnFileSelectedListener;
 import com.example.files.test.TempDirectory;
 import com.example.files.test.TestFileListFragmentActivity;
 
@@ -80,7 +79,7 @@ public final class FileListFragmentTest
 
   public void testPostsEventOnItemClick() throws Throwable {
     final File file = directory.newFile();
-    final FileClickListener listener = mock(FileClickListener.class);
+    final OnFileSelectedListener listener = mock(OnFileSelectedListener.class);
     getActivity().getFragment().setListener(listener);
 
     runTestOnUiThread(new Runnable() {
@@ -89,7 +88,7 @@ public final class FileListFragmentTest
       }
     });
 
-    verify(listener).onFileClick(getActivity(), file);
+    verify(listener).onFileSelected(file);
   }
 
   public void testShowsEmptyListViewIfDirectoryHasNoFile() {

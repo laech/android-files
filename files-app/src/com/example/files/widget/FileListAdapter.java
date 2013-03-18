@@ -19,7 +19,7 @@ public final class FileListAdapter extends ArrayAdapter<File> {
   private final ImageMap images;
 
   public FileListAdapter(Context context) {
-    this(context, new FileSystem(), new ImageMap());
+    this(context, FileSystem.INSTANCE, ImageMap.INSTANCE);
   }
 
   public FileListAdapter(Context context, FileSystem fs, ImageMap images) {

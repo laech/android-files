@@ -1,5 +1,6 @@
 package com.example.files.app;
 
+import static android.app.ActionBar.DISPLAY_HOME_AS_UP;
 import static android.os.Environment.getExternalStorageDirectory;
 import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.test.Activities.rotate;
@@ -48,8 +49,8 @@ public final class FileListActivityTest
 
   public void testShowsExternalStorageDirIfNoDirectoryIsSpecified() {
     assertEquals(
-        getExternalStorageDirectory().getAbsolutePath(),
-        getActivity().getIntent().getStringExtra(ARG_DIRECTORY));
+        getExternalStorageDirectory(),
+        ((File) getListView().getItemAtPosition(0)).getParentFile());
 
     assertEquals(
         getActivity().getString(R.string.home),
@@ -65,6 +66,26 @@ public final class FileListActivityTest
     File file = directory.newFile();
     setActivityIntent(newIntent(directory.get()));
     assertEquals(file, getListView().getItemAtPosition(0));
+  }
+
+  public void testShowsTitleOfDirectorySelectedAndDisplayed() throws Throwable {
+    final File dir = show(directory.newDirectory());
+    assertEquals(dir.getName(), getActivity().getTitle());
+  }
+
+  public void testEnablesHomeButtonOnDisplayOfSubDirectory() throws Throwable {
+    show(directory.newDirectory());
+    assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+  }
+
+  private File show(final File dir) throws Throwable {
+    getActivity();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getActivity().show(dir.getAbsolutePath());
+      }
+    });
+    return dir;
   }
 
   private ListView getListView() {

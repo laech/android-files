@@ -1,12 +1,17 @@
 package com.example.files.test;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ActionMode;
+
 import com.example.files.R;
 import com.example.files.app.FileListFragment;
+import com.example.files.app.FileListFragment.OnFileSelectedListener;
 
-public final class TestFileListFragmentActivity extends Activity {
+public final class TestFileListFragmentActivity extends Activity
+    implements OnFileSelectedListener {
 
   public static final String DIRECTORY = "directory";
 
@@ -41,5 +46,8 @@ public final class TestFileListFragmentActivity extends Activity {
         .beginTransaction()
         .replace(android.R.id.content, fragment)
         .commit();
+  }
+
+  @Override public void onFileSelected(File file) {
   }
 }

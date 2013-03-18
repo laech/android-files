@@ -3,58 +3,62 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
 import static com.example.files.util.Files.getFileExtension;
 import static com.example.files.util.Objects.requires;
 
 import java.io.File;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 
 import com.example.files.R;
-import com.example.files.app.FileListFragment.FileClickListener;
+import com.example.files.app.FileListFragment.OnFileSelectedListener;
 import com.example.files.content.ActivityStarter;
 import com.example.files.media.MediaMap;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
 
-public final class FileClickHandler implements FileClickListener {
+final class FileClickHandler implements OnFileSelectedListener {
 
+  private final FileListActivity activity;
   private final FileSystem fs;
   private final MediaMap media;
   private final ActivityStarter starter;
   private final Toaster toaster;
 
-  public FileClickHandler( // TODO
+  FileClickHandler(
+      FileListActivity activity,
       FileSystem fs,
       MediaMap media,
       ActivityStarter starter,
       Toaster toaster) {
 
+    this.activity = requires(activity, "activity");
     this.media = requires(media, "media");
     this.fs = requires(fs, "fs");
     this.starter = requires(starter, "start");
     this.toaster = requires(toaster, "toaster");
   }
 
-  public FileClickHandler() {
-    this(new FileSystem(), new MediaMap(), new ActivityStarter(), new Toaster());
+  public FileClickHandler(FileListActivity activity) {
+    this(activity,
+        FileSystem.INSTANCE,
+        MediaMap.INSTANCE,
+        ActivityStarter.INSTANCE,
+        Toaster.INSTANCE);
   }
 
-  @Override public void onFileClick(Activity activity, File file) {
+  @Override public void onFileSelected(File file) {
     if (!fs.hasPermissionToRead(file)) {
-      showPermissionDenied(activity);
+      showPermissionDenied();
     } else if (file.isDirectory()) {
-      showDirectory(activity, file);
+      showDirectory(file);
     } else {
-      showFile(activity, file);
+      showFile(file);
     }
   }
 
-  private void showFile(Activity activity, File file) {
+  private void showFile(File file) {
     String type = media.get(getFileExtension(file));
     if (type == null) {
       toaster.toast(activity, R.string.unknown_file_type, LENGTH_SHORT);
@@ -69,12 +73,11 @@ public final class FileClickHandler implements FileClickListener {
     }
   }
 
-  private void showDirectory(Context context, File directory) {
-    starter.startActivity(context, new Intent(context, FileListActivity.class)
-        .putExtra(ARG_DIRECTORY, directory.getAbsolutePath()));
+  private void showDirectory(File directory) {
+    activity.show(directory.getAbsolutePath());
   }
 
-  private void showPermissionDenied(Context context) {
-    toaster.toast(context, R.string.permission_denied, LENGTH_SHORT);
+  private void showPermissionDenied() {
+    toaster.toast(activity, R.string.permission_denied, LENGTH_SHORT);
   }
 }
