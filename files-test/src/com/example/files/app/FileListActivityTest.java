@@ -8,6 +8,8 @@ import static com.example.files.test.TempDirectory.newTempDirectory;
 
 import java.io.File;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
@@ -73,16 +75,38 @@ public final class FileListActivityTest
     assertEquals(dir.getName(), getActivity().getTitle());
   }
 
+  public void testShowsTitleOfDirectoryOnBack() throws Throwable {
+    show(directory.newDirectory("Hello"), "tag");
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        FragmentManager fm = getActivity().getFragmentManager();
+        Fragment fragment = fm.findFragmentByTag("tag");
+        fm.beginTransaction().remove(fragment).commitAllowingStateLoss();
+
+      }
+    });
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertEquals(directory.get().getName(), getActivity().getTitle());
+      }
+    });
+  }
+
   public void testEnablesHomeButtonOnDisplayOfSubDirectory() throws Throwable {
     show(directory.newDirectory());
     assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
   }
 
   private File show(final File dir) throws Throwable {
+    return show(dir, null);
+  }
+
+  private File show(final File dir, final String tag) throws Throwable {
     getActivity();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        getActivity().show(dir.getAbsolutePath());
+        getActivity().show(dir.getAbsolutePath(), tag);
       }
     });
     return dir;

@@ -65,6 +65,10 @@ public class FileListActivity extends Activity
   }
 
   void show(String directory) {
+    show(directory, null);
+  }
+
+  void show(String directory, String tag) {
     Bundle bundle = new Bundle(1);
     bundle.putString(ARG_DIRECTORY, directory);
 
@@ -73,7 +77,7 @@ public class FileListActivity extends Activity
 
     getFragmentManager()
         .beginTransaction()
-        .replace(android.R.id.content, fragment)
+        .replace(android.R.id.content, fragment, tag)
         .addToBackStack(null)
         .setTransition(TRANSIT_FRAGMENT_FADE)
         .commitAllowingStateLoss();
