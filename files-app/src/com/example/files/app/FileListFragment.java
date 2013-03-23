@@ -1,6 +1,7 @@
 package com.example.files.app;
 
 import static com.example.files.util.FileSort.BY_NAME;
+import static com.example.files.util.Objects.requires;
 
 import java.io.File;
 
@@ -33,6 +34,11 @@ public final class FileListFragment
 
   private OnFileSelectedListener listener;
   private FileListAdapter adapter;
+  private File directory;
+
+  public File getDirectory() {
+    return directory;
+  }
 
   void setListener(OnFileSelectedListener listener) {
     this.listener = listener;
@@ -46,12 +52,19 @@ public final class FileListFragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     getListView().setMultiChoiceModeListener(this);
-    showContent();
+    showContent(directory);
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    init();
     setHasOptionsMenu(true);
+  }
+
+  private void init() {
+    Bundle args = requires(getArguments(), "arguments");
+    String path = requires(args.getString(ARG_DIRECTORY), ARG_DIRECTORY);
+    directory = new File(path);
   }
 
   @Override public View onCreateView(
@@ -67,16 +80,6 @@ public final class FileListFragment
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.file_list, menu);
-  }
-
-  private void showContent() {
-    Bundle args = getArguments();
-    if (args == null)
-      return;
-
-    String directory = args.getString(ARG_DIRECTORY);
-    if (directory != null)
-      showContent(new File(directory));
   }
 
   private void overrideEmptyText(int resId) {

@@ -9,7 +9,9 @@ import java.io.File;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager.OnBackStackChangedListener;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 
 import com.example.files.R;
@@ -22,17 +24,23 @@ public class FileListActivity extends Activity
 
   public static final String ARG_DIRECTORY = FileListFragment.ARG_DIRECTORY;
 
-  private OnFileSelectedListener fileSelectedHandler = new FileClickHandler(this);
+  private final OnFileSelectedListener fileSelectedHandler = new FileClickHandler(this);
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.content);
+
+    getFragmentManager().addOnBackStackChangedListener(this);
+
     String directory = getDirectory();
     if (savedInstanceState == null)
       show(directory);
 
-    updateActionBarUpButton();
-    getFragmentManager().addOnBackStackChangedListener(this);
+    new Handler().post(new Runnable() {
+      @Override public void run() {
+        updateActionBar();
+      }
+    });
   }
 
   private String getDirectory() {
@@ -50,7 +58,39 @@ public class FileListActivity extends Activity
   }
 
   @Override public void onBackStackChanged() {
+    updateActionBar();
+  }
+
+  @Override public void onFileSelected(File file) {
+    fileSelectedHandler.onFileSelected(file);
+  }
+
+  void show(String directory) {
+    Bundle bundle = new Bundle(1);
+    bundle.putString(ARG_DIRECTORY, directory);
+
+    FileListFragment fragment = new FileListFragment();
+    fragment.setArguments(bundle);
+
+    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+    if (getFileListFragment() != null) {
+      transaction
+          .addToBackStack(null)
+          .setTransition(TRANSIT_FRAGMENT_FADE);
+    }
+
+    transaction
+        .replace(android.R.id.content, fragment)
+        .commitAllowingStateLoss();
+  }
+
+  private FileListFragment getFileListFragment() {
+    return (FileListFragment) getFragmentManager().findFragmentById(android.R.id.content);
+  }
+
+  void updateActionBar() {
     updateActionBarUpButton();
+    updateTitle();
   }
 
   private void updateActionBarUpButton() {
@@ -60,33 +100,8 @@ public class FileListActivity extends Activity
     actionBar.setHomeButtonEnabled(canGoUp);
   }
 
-  @Override public void onFileSelected(File file) {
-    fileSelectedHandler.onFileSelected(file);
-  }
-
-  void show(String directory) {
-    show(directory, null);
-  }
-
-  void show(String directory, String tag) {
-    Bundle bundle = new Bundle(1);
-    bundle.putString(ARG_DIRECTORY, directory);
-
-    FileListFragment fragment = new FileListFragment();
-    fragment.setArguments(bundle);
-
-    getFragmentManager()
-        .beginTransaction()
-        .replace(android.R.id.content, fragment, tag)
-        .addToBackStack(null)
-        .setTransition(TRANSIT_FRAGMENT_FADE)
-        .commitAllowingStateLoss();
-
-    updateTitle(directory);
-  }
-
-  private void updateTitle(String path) {
-    File file = new File(path);
+  private void updateTitle() {
+    File file = getFileListFragment().getDirectory();
     setTitle(HOME.equals(file) ? getString(R.string.home) : file.getName());
   }
 }

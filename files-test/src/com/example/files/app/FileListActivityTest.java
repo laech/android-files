@@ -8,8 +8,6 @@ import static com.example.files.test.TempDirectory.newTempDirectory;
 
 import java.io.File;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
@@ -72,41 +70,32 @@ public final class FileListActivityTest
 
   public void testShowsTitleOfDirectorySelectedAndDisplayed() throws Throwable {
     final File dir = show(directory.newDirectory());
-    assertEquals(dir.getName(), getActivity().getTitle());
-  }
-
-  public void testShowsTitleOfDirectoryOnBack() throws Throwable {
-    show(directory.newDirectory("Hello"), "tag");
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        FragmentManager fm = getActivity().getFragmentManager();
-        Fragment fragment = fm.findFragmentByTag("tag");
-        fm.beginTransaction().remove(fragment).commitAllowingStateLoss();
-
-      }
-    });
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        assertEquals(directory.get().getName(), getActivity().getTitle());
+        assertEquals(dir.getName(), getActivity().getTitle());
       }
     });
   }
 
-  public void testEnablesHomeButtonOnDisplayOfSubDirectory() throws Throwable {
+  public void testEnablesHomeUpButtonOnDisplayOfSubDirectory() throws Throwable {
     show(directory.newDirectory());
-    assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+      }
+    });
+  }
+
+  public void testDisablesHomeUpButtonIfNoDirectoryToGoBackTo() throws Throwable {
+    setActivityIntent(newIntent(directory.get()));
+    assertEquals(0, (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
   }
 
   private File show(final File dir) throws Throwable {
-    return show(dir, null);
-  }
-
-  private File show(final File dir, final String tag) throws Throwable {
     getActivity();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        getActivity().show(dir.getAbsolutePath(), tag);
+        getActivity().show(dir.getAbsolutePath());
       }
     });
     return dir;
