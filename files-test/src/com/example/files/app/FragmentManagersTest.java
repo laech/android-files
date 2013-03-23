@@ -10,12 +10,12 @@ import android.app.FragmentManager;
 
 public final class FragmentManagersTest extends TestCase {
 
-  public void testPopsAllBackStacks() {
-    FragmentManager fm = mock(FragmentManager.class);
-    given(fm.getBackStackEntryCount()).willReturn(10);
+    public void testPopsAllBackStacks() {
+        FragmentManager fm = mock(FragmentManager.class);
+        given(fm.getBackStackEntryCount()).willReturn(10);
 
-    popAllBackStacks(fm);
+        popAllBackStacks(fm);
 
-    verify(fm, times(10)).popBackStack();
-  }
+        verify(fm, times(10)).popBackStack();
+    }
 }

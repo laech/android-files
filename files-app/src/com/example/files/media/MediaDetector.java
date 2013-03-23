@@ -11,32 +11,35 @@ import android.os.AsyncTask;
 
 public class MediaDetector {
 
-  public static interface Callback {
-    void onResult(File file, String type);
-  }
+    public static interface Callback {
+        void onResult(File file, String type);
+    }
 
-  public static final MediaDetector INSTANCE = new MediaDetector();
+    public static final MediaDetector INSTANCE = new MediaDetector();
 
-  private static final Tika TIKA = new Tika();
+    private static final Tika sTika = new Tika();
 
-  MediaDetector() {
-  }
+    MediaDetector() {
+    }
 
-  public void detect(final File file, final Callback callback) {
-    new AsyncTask<Void, Void, String>() {
+    public void detect(final File file, final Callback callback) {
+        new AsyncTask<Void, Void, String>() {
 
-      @Override protected String doInBackground(Void... params) {
-        try {
-          return TIKA.detect(file);
-        } catch (IOException e) {
-          return Medias.get(getFileExtension(file));
-        }
-      }
+            @Override
+            protected String doInBackground(Void... params) {
+                try {
+                    return sTika.detect(file);
+                } catch (IOException e) {
+                    return Medias.get(getFileExtension(file));
+                }
+            }
 
-      @Override protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        callback.onResult(file, result);
-      }
-    }.execute();
-  }
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                callback.onResult(file, result);
+            }
+
+        }.execute();
+    }
 }

@@ -10,44 +10,47 @@ import com.example.files.R;
 import com.example.files.app.FileListFragment;
 import com.example.files.app.FileListFragment.OnFileSelectedListener;
 
-public final class TestFileListFragmentActivity extends Activity
-    implements OnFileSelectedListener {
+public final class TestFileListFragmentActivity extends Activity implements OnFileSelectedListener {
 
-  public static final String DIRECTORY = "directory";
+    public static final String DIRECTORY = "directory";
 
-  private FileListFragment fragment;
-  private ActionMode mode;
+    private FileListFragment mFragment;
+    private ActionMode mMode;
 
-  public FileListFragment getFragment() {
-    return fragment;
-  }
+    public FileListFragment getFragment() {
+        return mFragment;
+    }
 
-  public ActionMode getActionMode() {
-    return mode;
-  }
+    public ActionMode getActionMode() {
+        return mMode;
+    }
 
-  @Override public void onActionModeStarted(ActionMode mode) {
-    super.onActionModeStarted(mode);
-    this.mode = mode;
-  }
+    @Override
+    public void onActionModeStarted(ActionMode mode) {
+        super.onActionModeStarted(mode);
+        this.mMode = mode;
+    }
 
-  @Override public void onActionModeFinished(ActionMode mode) {
-    super.onActionModeFinished(mode);
-    this.mode = null;
-  }
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+        super.onActionModeFinished(mode);
+        this.mMode = null;
+    }
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.content);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.content);
 
-    fragment = new FileListFragment();
-    fragment.setArguments(getIntent().getExtras());
-    getFragmentManager()
-        .beginTransaction()
-        .replace(android.R.id.content, fragment)
-        .commit();
-  }
+        mFragment = new FileListFragment();
+        mFragment.setArguments(getIntent().getExtras());
+        getFragmentManager()
+                .beginTransaction()
+                .replace(android.R.id.content, mFragment)
+                .commit();
+    }
 
-  @Override public void onFileSelected(File file) {
-  }
+    @Override
+    public void onFileSelected(File file) {
+    }
 }

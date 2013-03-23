@@ -32,120 +32,123 @@ import com.example.files.widget.Toaster;
 
 public final class FileClickHandlerTest extends TestCase {
 
-  private FileClickHandler handler;
+    private FileClickHandler mFileClickHandler;
 
-  private ActivityStarter starter;
-  private FileSystem fs;
-  private MediaDetector detector;
-  private Toaster toaster;
+    private ActivityStarter mActivityStarter;
+    private FileSystem mFileSystem;
+    private MediaDetector mMediaDetector;
+    private Toaster mToaster;
 
-  private FileListActivity activity;
-  private File file;
+    private FileListActivity mActivity;
+    private File mFile;
 
-  public void testShowsFileIfMediaTypeIsNotNull() {
-    String type = "text/plain";
-    setFileWithMediaType(type);
-    handleEvent();
-    assertFileShown(type);
-  }
+    public void testShowsFileIfMediaTypeIsNotNull() {
+        String type = "text/plain";
+        setFileWithMediaType(type);
+        handleEvent();
+        assertFileShown(type);
+    }
 
-  public void testShowsDirectoryIfGotPermissionToReadDirectory() {
-    setDirectory();
-    handleEvent();
-    assertDirectoryShown();
-  }
+    public void testShowsDirectoryIfGotPermissionToReadDirectory() {
+        setDirectory();
+        handleEvent();
+        assertDirectoryShown();
+    }
 
-  public void testShowsNoAppFoundIfNoAppCanOpenFileWithMediaType() {
-    String type = "text/plain";
-    setFileWithMediaType(type);
-    doThrow(new ActivityNotFoundException())
-        .when(starter).startActivity(any(Context.class), any(Intent.class));
+    public void testShowsNoAppFoundIfNoAppCanOpenFileWithMediaType() {
+        String type = "text/plain";
+        setFileWithMediaType(type);
+        doThrow(new ActivityNotFoundException())
+                .when(mActivityStarter).startActivity(any(Context.class), any(Intent.class));
 
-    handleEvent();
+        handleEvent();
 
-    assertNoAppToOpenFileShown();
-  }
+        assertNoAppToOpenFileShown();
+    }
 
-  public void testShowsPermissionDeniedIfNoPermissionToReadFile() {
-    given(fs.hasPermissionToRead(file)).willReturn(false);
-    handleEvent();
-    assertPermissionDeniedShown();
-  }
+    public void testShowsPermissionDeniedIfNoPermissionToReadFile() {
+        given(mFileSystem.hasPermissionToRead(mFile)).willReturn(false);
+        handleEvent();
+        assertPermissionDeniedShown();
+    }
 
-  public void testShowsUnknownFileIfUnableToDetermineMediaType() {
-    setFileWithMediaType(null);
-    handleEvent();
-    assertUnknownFileShown();
-  }
+    public void testShowsUnknownFileIfUnableToDetermineMediaType() {
+        setFileWithMediaType(null);
+        handleEvent();
+        assertUnknownFileShown();
+    }
 
-  @Override protected void setUp() throws Exception {
-    super.setUp();
-    fs = mock(FileSystem.class);
-    starter = mock(ActivityStarter.class);
-    toaster = mock(Toaster.class);
-    detector = mock(MediaDetector.class);
-    file = mock(File.class);
-    activity = mock(FileListActivity.class);
-    given(activity.getPackageName()).willReturn("abc");
-    handler = new FileClickHandler(activity, fs, detector, starter, toaster);
-  }
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mFileSystem = mock(FileSystem.class);
+        mActivityStarter = mock(ActivityStarter.class);
+        mToaster = mock(Toaster.class);
+        mMediaDetector = mock(MediaDetector.class);
+        mFile = mock(File.class);
+        mActivity = mock(FileListActivity.class);
+        given(mActivity.getPackageName()).willReturn("abc");
+        mFileClickHandler = new FileClickHandler(
+                mActivity, mFileSystem, mMediaDetector, mActivityStarter, mToaster);
+    }
 
-  private void assertFileShown(String type) {
-    ArgumentCaptor<Intent> arg = intentCaptor();
-    verify(starter).startActivity(eq(activity), arg.capture());
+    private void assertFileShown(String type) {
+        ArgumentCaptor<Intent> arg = intentCaptor();
+        verify(mActivityStarter).startActivity(eq(mActivity), arg.capture());
 
-    Intent intent = arg.getValue();
-    assertEquals(ACTION_VIEW, intent.getAction());
-    assertEquals(type, intent.getType());
-    assertEquals(fromFile(file), intent.getData());
+        Intent intent = arg.getValue();
+        assertEquals(ACTION_VIEW, intent.getAction());
+        assertEquals(type, intent.getType());
+        assertEquals(fromFile(mFile), intent.getData());
 
-    verifyZeroInteractions(toaster);
-  }
+        verifyZeroInteractions(mToaster);
+    }
 
-  private void assertDirectoryShown() {
-    verify(activity).show(file.getAbsolutePath());
-    verifyZeroInteractions(toaster);
-  }
+    private void assertDirectoryShown() {
+        verify(mActivity).show(mFile.getAbsolutePath());
+        verifyZeroInteractions(mToaster);
+    }
 
-  private void assertNoAppToOpenFileShown() {
-    verify(starter).startActivity(eq(activity), any(Intent.class));
-    verify(toaster).toast(activity, R.string.no_app_to_open_file, LENGTH_SHORT);
-  }
+    private void assertNoAppToOpenFileShown() {
+        verify(mActivityStarter).startActivity(eq(mActivity), any(Intent.class));
+        verify(mToaster).toast(mActivity, R.string.no_app_to_open_file, LENGTH_SHORT);
+    }
 
-  private void assertPermissionDeniedShown() {
-    verify(toaster).toast(activity, R.string.permission_denied, LENGTH_SHORT);
-    verifyZeroInteractions(starter);
-  }
+    private void assertPermissionDeniedShown() {
+        verify(mToaster).toast(mActivity, R.string.permission_denied, LENGTH_SHORT);
+        verifyZeroInteractions(mActivityStarter);
+    }
 
-  private void assertUnknownFileShown() {
-    verify(toaster).toast(activity, R.string.unknown_file_type, LENGTH_SHORT);
-    verifyZeroInteractions(starter);
-  }
+    private void assertUnknownFileShown() {
+        verify(mToaster).toast(mActivity, R.string.unknown_file_type, LENGTH_SHORT);
+        verifyZeroInteractions(mActivityStarter);
+    }
 
-  private void handleEvent() {
-    handler.onFileSelected(file);
-  }
+    private void handleEvent() {
+        mFileClickHandler.onFileSelected(mFile);
+    }
 
-  private ArgumentCaptor<Intent> intentCaptor() {
-    return ArgumentCaptor.forClass(Intent.class);
-  }
+    private ArgumentCaptor<Intent> intentCaptor() {
+        return ArgumentCaptor.forClass(Intent.class);
+    }
 
-  private void setFileWithMediaType(final String type) {
-    given(file.getName()).willReturn("a.txt");
-    given(file.isFile()).willReturn(true);
-    given(fs.hasPermissionToRead(file)).willReturn(true);
-    doAnswer(new Answer<Void>() {
-      @Override public Void answer(InvocationOnMock invocation) throws Throwable {
-        ((MediaDetector.Callback) invocation.getArguments()[1]).onResult(file, type);
-        return null;
-      }
-    }).when(detector).detect(eq(file), any(MediaDetector.Callback.class));
-  }
+    private void setFileWithMediaType(final String type) {
+        given(mFile.getName()).willReturn("a.txt");
+        given(mFile.isFile()).willReturn(true);
+        given(mFileSystem.hasPermissionToRead(mFile)).willReturn(true);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                ((MediaDetector.Callback) invocation.getArguments()[1]).onResult(mFile, type);
+                return null;
+            }
+        }).when(mMediaDetector).detect(eq(mFile), any(MediaDetector.Callback.class));
+    }
 
-  private void setDirectory() {
-    given(file.getAbsolutePath()).willReturn("/a");
-    given(file.isDirectory()).willReturn(true);
-    given(fs.hasPermissionToRead(file)).willReturn(true);
-  }
+    private void setDirectory() {
+        given(mFile.getAbsolutePath()).willReturn("/a");
+        given(mFile.isDirectory()).willReturn(true);
+        given(mFileSystem.hasPermissionToRead(mFile)).willReturn(true);
+    }
 
 }

@@ -18,90 +18,91 @@ import com.example.files.R;
 import com.example.files.app.FileListFragment.OnFileSelectedListener;
 
 public class FileListActivity extends Activity
-    implements OnBackStackChangedListener, OnFileSelectedListener {
+        implements OnBackStackChangedListener, OnFileSelectedListener {
 
-  private static final File HOME = getExternalStorageDirectory();
+    private static final File HOME = getExternalStorageDirectory();
 
-  public static final String ARG_DIRECTORY = FileListFragment.ARG_DIRECTORY;
+    public static final String ARG_DIRECTORY = FileListFragment.ARG_DIRECTORY;
 
-  private final OnFileSelectedListener fileSelectedHandler = new FileClickHandler(this);
+    private OnFileSelectedListener mFileSelectedHandler;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.content);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.content);
 
-    getFragmentManager().addOnBackStackChangedListener(this);
+        mFileSelectedHandler = new FileClickHandler(this);
+        getFragmentManager().addOnBackStackChangedListener(this);
 
-    String directory = getDirectory();
-    if (savedInstanceState == null)
-      show(directory);
+        String directory = getDirectory();
+        if (savedInstanceState == null) show(directory);
 
-    new Handler().post(new Runnable() {
-      @Override public void run() {
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                updateActionBar();
+            }
+        });
+    }
+
+    private String getDirectory() {
+        String directory = getIntent().getStringExtra(ARG_DIRECTORY);
+        return directory != null ? directory : HOME.getAbsolutePath();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            popAllBackStacks(getFragmentManager());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackStackChanged() {
         updateActionBar();
-      }
-    });
-  }
-
-  private String getDirectory() {
-    String directory = getIntent().getStringExtra(ARG_DIRECTORY);
-    return directory != null ? directory : HOME.getAbsolutePath();
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case android.R.id.home:
-      popAllBackStacks(getFragmentManager());
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
-  }
-
-  @Override public void onBackStackChanged() {
-    updateActionBar();
-  }
-
-  @Override public void onFileSelected(File file) {
-    fileSelectedHandler.onFileSelected(file);
-  }
-
-  void show(String directory) {
-    Bundle bundle = new Bundle(1);
-    bundle.putString(ARG_DIRECTORY, directory);
-
-    FileListFragment fragment = new FileListFragment();
-    fragment.setArguments(bundle);
-
-    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    if (getFileListFragment() != null) {
-      transaction
-          .addToBackStack(null)
-          .setTransition(TRANSIT_FRAGMENT_FADE);
     }
 
-    transaction
-        .replace(android.R.id.content, fragment)
-        .commitAllowingStateLoss();
-  }
+    @Override
+    public void onFileSelected(File file) {
+        mFileSelectedHandler.onFileSelected(file);
+    }
 
-  private FileListFragment getFileListFragment() {
-    return (FileListFragment) getFragmentManager().findFragmentById(android.R.id.content);
-  }
+    void show(String directory) {
+        Bundle bundle = new Bundle(1);
+        bundle.putString(ARG_DIRECTORY, directory);
 
-  void updateActionBar() {
-    updateActionBarUpButton();
-    updateTitle();
-  }
+        FileListFragment fragment = new FileListFragment();
+        fragment.setArguments(bundle);
 
-  private void updateActionBarUpButton() {
-    ActionBar actionBar = getActionBar();
-    boolean canGoUp = getFragmentManager().getBackStackEntryCount() > 0;
-    actionBar.setDisplayHomeAsUpEnabled(canGoUp);
-    actionBar.setHomeButtonEnabled(canGoUp);
-  }
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        if (getFileListFragment() != null) {
+            transaction.addToBackStack(null).setTransition(TRANSIT_FRAGMENT_FADE);
+        }
 
-  private void updateTitle() {
-    File file = getFileListFragment().getDirectory();
-    setTitle(HOME.equals(file) ? getString(R.string.home) : file.getName());
-  }
+        transaction.replace(android.R.id.content, fragment).commitAllowingStateLoss();
+    }
+
+    private FileListFragment getFileListFragment() {
+        return (FileListFragment) getFragmentManager().findFragmentById(android.R.id.content);
+    }
+
+    void updateActionBar() {
+        updateActionBarUpButton();
+        updateTitle();
+    }
+
+    private void updateActionBarUpButton() {
+        ActionBar actionBar = getActionBar();
+        boolean canGoUp = getFragmentManager().getBackStackEntryCount() > 0;
+        actionBar.setDisplayHomeAsUpEnabled(canGoUp);
+        actionBar.setHomeButtonEnabled(canGoUp);
+    }
+
+    private void updateTitle() {
+        File file = getFileListFragment().getDirectory();
+        setTitle(HOME.equals(file) ? getString(R.string.home) : file.getName());
+    }
 }
