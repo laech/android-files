@@ -30,11 +30,6 @@ public final class FileListAdapter extends ArrayAdapter<File> {
     }
 
     @Override
-    public boolean isEnabled(int position) {
-        return mFileSystem.hasPermissionToRead(getItem(position));
-    }
-
-    @Override
     public View getView(int position, View v, ViewGroup parent) {
         return updateView(super.getView(position, v, parent), getItem(position));
     }

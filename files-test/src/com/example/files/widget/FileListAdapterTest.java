@@ -24,11 +24,6 @@ public final class FileListAdapterTest extends TestCase {
     private ImageMap mImageMap;
     private FileListAdapter mAdapter;
 
-    public void testIsEnabledReturnsFalseIfUserHasNoPermissionToReadFile() {
-        given(mFileSystem.hasPermissionToRead(mFile)).willReturn(false);
-        assertFalse(mAdapter.isEnabled(0));
-    }
-
     public void testViewIsDisabledIfUserHasNoPermissionToReadFile() {
         setAsFileWithReadPermission(mFile, false);
         mAdapter.updateView(mView, mFile);
