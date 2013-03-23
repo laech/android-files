@@ -3,7 +3,6 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.util.Files.getFileExtension;
 import static com.example.files.util.Objects.requires;
 
 import java.io.File;
@@ -14,27 +13,27 @@ import android.content.Intent;
 import com.example.files.R;
 import com.example.files.app.FileListFragment.OnFileSelectedListener;
 import com.example.files.content.ActivityStarter;
-import com.example.files.media.MediaMap;
+import com.example.files.media.MediaDetector;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
 
-final class FileClickHandler implements OnFileSelectedListener {
+final class FileClickHandler implements OnFileSelectedListener, MediaDetector.Callback {
 
   private final FileListActivity activity;
   private final FileSystem fs;
-  private final MediaMap media;
+  private final MediaDetector detector;
   private final ActivityStarter starter;
   private final Toaster toaster;
 
   FileClickHandler(
       FileListActivity activity,
       FileSystem fs,
-      MediaMap media,
+      MediaDetector detector,
       ActivityStarter starter,
       Toaster toaster) {
 
     this.activity = requires(activity, "activity");
-    this.media = requires(media, "media");
+    this.detector = requires(detector, "detector");
     this.fs = requires(fs, "fs");
     this.starter = requires(starter, "start");
     this.toaster = requires(toaster, "toaster");
@@ -43,7 +42,7 @@ final class FileClickHandler implements OnFileSelectedListener {
   public FileClickHandler(FileListActivity activity) {
     this(activity,
         FileSystem.INSTANCE,
-        MediaMap.INSTANCE,
+        MediaDetector.INSTANCE,
         ActivityStarter.INSTANCE,
         Toaster.INSTANCE);
   }
@@ -59,7 +58,18 @@ final class FileClickHandler implements OnFileSelectedListener {
   }
 
   private void showFile(File file) {
-    String type = media.get(getFileExtension(file));
+    detector.detect(file, this);
+  }
+
+  private void showDirectory(File directory) {
+    activity.show(directory.getAbsolutePath());
+  }
+
+  private void showPermissionDenied() {
+    toaster.toast(activity, R.string.permission_denied, LENGTH_SHORT);
+  }
+
+  @Override public void onResult(File file, String type) {
     if (type == null) {
       toaster.toast(activity, R.string.unknown_file_type, LENGTH_SHORT);
       return;
@@ -71,13 +81,5 @@ final class FileClickHandler implements OnFileSelectedListener {
     } catch (ActivityNotFoundException e) {
       toaster.toast(activity, R.string.no_app_to_open_file, LENGTH_SHORT);
     }
-  }
-
-  private void showDirectory(File directory) {
-    activity.show(directory.getAbsolutePath());
-  }
-
-  private void showPermissionDenied() {
-    toaster.toast(activity, R.string.permission_denied, LENGTH_SHORT);
   }
 }

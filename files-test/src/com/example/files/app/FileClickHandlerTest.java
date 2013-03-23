@@ -3,10 +3,10 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
-import static com.example.files.util.Files.getFileExtension;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -17,6 +17,8 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -24,7 +26,7 @@ import android.content.Intent;
 
 import com.example.files.R;
 import com.example.files.content.ActivityStarter;
-import com.example.files.media.MediaMap;
+import com.example.files.media.MediaDetector;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
 
@@ -34,7 +36,7 @@ public final class FileClickHandlerTest extends TestCase {
 
   private ActivityStarter starter;
   private FileSystem fs;
-  private MediaMap medias;
+  private MediaDetector detector;
   private Toaster toaster;
 
   private FileListActivity activity;
@@ -81,11 +83,11 @@ public final class FileClickHandlerTest extends TestCase {
     fs = mock(FileSystem.class);
     starter = mock(ActivityStarter.class);
     toaster = mock(Toaster.class);
-    medias = mock(MediaMap.class);
+    detector = mock(MediaDetector.class);
     file = mock(File.class);
     activity = mock(FileListActivity.class);
     given(activity.getPackageName()).willReturn("abc");
-    handler = new FileClickHandler(activity, fs, medias, starter, toaster);
+    handler = new FileClickHandler(activity, fs, detector, starter, toaster);
   }
 
   private void assertFileShown(String type) {
@@ -128,11 +130,16 @@ public final class FileClickHandlerTest extends TestCase {
     return ArgumentCaptor.forClass(Intent.class);
   }
 
-  private void setFileWithMediaType(String type) {
+  private void setFileWithMediaType(final String type) {
     given(file.getName()).willReturn("a.txt");
     given(file.isFile()).willReturn(true);
-    given(medias.get(getFileExtension(file))).willReturn(type);
     given(fs.hasPermissionToRead(file)).willReturn(true);
+    doAnswer(new Answer<Void>() {
+      @Override public Void answer(InvocationOnMock invocation) throws Throwable {
+        ((MediaDetector.Callback) invocation.getArguments()[1]).onResult(file, type);
+        return null;
+      }
+    }).when(detector).detect(eq(file), any(MediaDetector.Callback.class));
   }
 
   private void setDirectory() {
