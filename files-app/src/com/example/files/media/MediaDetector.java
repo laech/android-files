@@ -15,9 +15,12 @@ public class MediaDetector {
         void onResult(File file, String type);
     }
 
-    public static final MediaDetector INSTANCE = new MediaDetector();
+    private static final class Holder {
+        // Lazy initialization holder, initialized on first reference to Holder
+        static final Tika sTika = new Tika();
+    }
 
-    private static final Tika sTika = new Tika();
+    public static final MediaDetector INSTANCE = new MediaDetector();
 
     MediaDetector() {
     }
@@ -28,7 +31,7 @@ public class MediaDetector {
             @Override
             protected String doInBackground(Void... params) {
                 try {
-                    return sTika.detect(file);
+                    return Holder.sTika.detect(file);
                 } catch (IOException e) {
                     return Medias.get(getFileExtension(file));
                 }
