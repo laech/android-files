@@ -2,15 +2,16 @@ package com.example.files.test;
 
 import java.io.File;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
 
 import com.example.files.R;
 import com.example.files.app.FileListFragment;
 import com.example.files.app.FileListFragment.OnFileSelectedListener;
 
-public final class TestFileListFragmentActivity extends Activity implements OnFileSelectedListener {
+public final class TestFileListFragmentActivity
+        extends FragmentActivity implements OnFileSelectedListener {
 
     public static final String DIRECTORY = "directory";
 
@@ -44,7 +45,7 @@ public final class TestFileListFragmentActivity extends Activity implements OnFi
 
         mFragment = new FileListFragment();
         mFragment.setArguments(getIntent().getExtras());
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(android.R.id.content, mFragment)
                 .commit();

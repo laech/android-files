@@ -2,7 +2,7 @@ package com.example.files.app;
 
 import static android.app.ActionBar.DISPLAY_HOME_AS_UP;
 import static android.os.Environment.getExternalStorageDirectory;
-import static com.example.files.app.FileListActivity.ARG_DIRECTORY;
+import static com.example.files.app.FileListActivity.EXTRA_DIRECTORY;
 import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempDirectory.newTempDirectory;
 
@@ -47,7 +47,7 @@ public final class FileListActivityTest
             }
         });
 
-        assertEquals(mDirectory.get().getName(), getActivity().getTitle());
+        assertEquals(mDirectory.get().getName(), getActivity().getActionBar().getTitle());
     }
 
     public void testShowsExternalStorageDirIfNoDirectoryIsSpecified() {
@@ -57,12 +57,12 @@ public final class FileListActivityTest
 
         assertEquals(
                 getActivity().getString(R.string.home),
-                getActivity().getTitle());
+                getActivity().getActionBar().getTitle());
     }
 
     public void testShowsDirectoryNameAsTitle() {
         setActivityIntent(newIntent(mDirectory.get()));
-        assertEquals(mDirectory.get().getName(), getActivity().getTitle());
+        assertEquals(mDirectory.get().getName(), getActivity().getActionBar().getTitle());
     }
 
     public void testShowsDirectorySpecified() {
@@ -72,39 +72,18 @@ public final class FileListActivityTest
     }
 
     public void testShowsTitleOfDirectorySelectedAndDisplayed() throws Throwable {
-        final File dir = show(mDirectory.newDirectory());
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(dir.getName(), getActivity().getTitle());
-            }
-        });
+        File dir = mDirectory.newDirectory();
+        setActivityIntent(newIntent(dir));
+        assertEquals(dir.getName(), getActivity().getActionBar().getTitle());
     }
 
     public void testEnablesHomeUpButtonOnDisplayOfSubDirectory() throws Throwable {
-        show(mDirectory.newDirectory());
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
-            }
-        });
+        setActivityIntent(newIntent(mDirectory.newDirectory()));
+        assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
     }
 
     public void testDisablesHomeUpButtonIfNoDirectoryToGoBackTo() throws Throwable {
-        setActivityIntent(newIntent(mDirectory.get()));
         assertEquals(0, (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
-    }
-
-    private File show(final File dir) throws Throwable {
-        getActivity();
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().show(dir.getAbsolutePath());
-            }
-        });
-        return dir;
     }
 
     private ListView getListView() {
@@ -112,7 +91,7 @@ public final class FileListActivityTest
     }
 
     private Intent newIntent(File directory) {
-        return new Intent().putExtra(ARG_DIRECTORY, directory.getAbsolutePath());
+        return new Intent().putExtra(EXTRA_DIRECTORY, directory.getAbsolutePath());
     }
 
 }

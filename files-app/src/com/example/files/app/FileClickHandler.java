@@ -3,6 +3,7 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.example.files.app.FileListActivity.EXTRA_DIRECTORY;
 import static com.example.files.util.Objects.requires;
 
 import java.io.File;
@@ -18,6 +19,8 @@ import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
 
 final class FileClickHandler implements OnFileSelectedListener, MediaDetector.Callback {
+
+    // TODO review test and implementation
 
     private final ActivityStarter mActivityStarter;
     private final FileListActivity mActivity;
@@ -64,7 +67,8 @@ final class FileClickHandler implements OnFileSelectedListener, MediaDetector.Ca
     }
 
     private void showDirectory(File directory) {
-        mActivity.show(directory.getAbsolutePath());
+        mActivityStarter.startActivity(mActivity, // TODO startActivityForResult
+                new Intent(mActivity, FileListActivity.class).putExtra(EXTRA_DIRECTORY, directory.getAbsolutePath()));
     }
 
     private void showPermissionDenied() {

@@ -3,6 +3,7 @@ package com.example.files.app;
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.example.files.app.FileListActivity.EXTRA_DIRECTORY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -21,6 +22,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
@@ -105,7 +107,13 @@ public final class FileClickHandlerTest extends TestCase {
     }
 
     private void assertDirectoryShown() {
-        verify(mActivity).show(mFile.getAbsolutePath());
+        ArgumentCaptor<Intent> arg = intentCaptor();
+        verify(mActivityStarter).startActivity(eq(mActivity), arg.capture()); // TODO startActivityForResult
+
+        Intent i = arg.getValue();
+        assertEquals(mFile.getAbsolutePath(), i.getStringExtra(EXTRA_DIRECTORY));
+        assertEquals(component(mActivity, FileListActivity.class), i.getComponent());
+
         verifyZeroInteractions(mToaster);
     }
 
@@ -122,6 +130,10 @@ public final class FileClickHandlerTest extends TestCase {
     private void assertUnknownFileShown() {
         verify(mToaster).toast(mActivity, R.string.unknown_file_type, LENGTH_SHORT);
         verifyZeroInteractions(mActivityStarter);
+    }
+
+    private ComponentName component(Context context, Class<?> clazz) {
+        return new ComponentName(context, clazz);
     }
 
     private void handleEvent() {
