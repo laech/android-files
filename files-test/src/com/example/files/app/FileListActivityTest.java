@@ -15,8 +15,7 @@ import android.widget.ListView;
 import com.example.files.R;
 import com.example.files.test.TempDirectory;
 
-public final class FileListActivityTest
-        extends ActivityInstrumentationTestCase2<FileListActivity> {
+public final class FileListActivityTest extends ActivityInstrumentationTestCase2<FileListActivity> {
 
     private TempDirectory mDirectory;
 
@@ -36,7 +35,16 @@ public final class FileListActivityTest
         super.tearDown();
     }
 
-    public void testShowsCorrectTitleOnRotate() throws Throwable {
+    public void testHomeButtonIsDisabledWhenNoDirectoryIsSpecified() {
+        assertEquals(0, (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+    }
+
+    public void testHomeButtonIsEnabledWhenDirectoryIsSpecified() {
+        setActivityIntent(newIntent(mDirectory.newDirectory()));
+        assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+    }
+
+    public void testShowsTitleCorrectlyOnScreenRotate() throws Throwable {
         setActivityIntent(newIntent(mDirectory.get()));
 
         getActivity();
@@ -50,19 +58,13 @@ public final class FileListActivityTest
         assertEquals(mDirectory.get().getName(), getActivity().getActionBar().getTitle());
     }
 
-    public void testShowsExternalStorageDirIfNoDirectoryIsSpecified() {
-        assertEquals(
-                getExternalStorageDirectory(),
-                ((File) getListView().getItemAtPosition(0)).getParentFile());
-
-        assertEquals(
-                getActivity().getString(R.string.home),
-                getActivity().getActionBar().getTitle());
-    }
-
-    public void testShowsDirectoryNameAsTitle() {
+    public void testShowsTitleUsingNameOfDirectorySpecified() {
         setActivityIntent(newIntent(mDirectory.get()));
         assertEquals(mDirectory.get().getName(), getActivity().getActionBar().getTitle());
+    }
+
+    public void testShowsTitleUsingDefaultHomeStringWhenNoDirectoryIsSpecified() {
+        assertEquals(getString(R.string.home), getActivity().getActionBar().getTitle());
     }
 
     public void testShowsDirectorySpecified() {
@@ -71,19 +73,14 @@ public final class FileListActivityTest
         assertEquals(file, getListView().getItemAtPosition(0));
     }
 
-    public void testShowsTitleOfDirectorySelectedAndDisplayed() throws Throwable {
-        File dir = mDirectory.newDirectory();
-        setActivityIntent(newIntent(dir));
-        assertEquals(dir.getName(), getActivity().getActionBar().getTitle());
-    }
+    public void testShowsExternalStorageWhenNoDirectoryIsSpecified() {
+        assertEquals(
+                getExternalStorageDirectory(),
+                ((File) getListView().getItemAtPosition(0)).getParentFile());
 
-    public void testEnablesHomeUpButtonOnDisplayOfSubDirectory() throws Throwable {
-        setActivityIntent(newIntent(mDirectory.newDirectory()));
-        assertTrue(0 < (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
-    }
-
-    public void testDisablesHomeUpButtonIfNoDirectoryToGoBackTo() throws Throwable {
-        assertEquals(0, (getActivity().getActionBar().getDisplayOptions() & DISPLAY_HOME_AS_UP));
+        assertEquals(
+                getActivity().getString(R.string.home),
+                getActivity().getActionBar().getTitle());
     }
 
     private ListView getListView() {
@@ -94,4 +91,7 @@ public final class FileListActivityTest
         return new Intent().putExtra(EXTRA_DIRECTORY, directory.getAbsolutePath());
     }
 
+    private String getString(int resId) {
+        return getActivity().getString(resId);
+    }
 }

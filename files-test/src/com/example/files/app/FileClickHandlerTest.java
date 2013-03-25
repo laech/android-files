@@ -27,7 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.files.R;
-import com.example.files.content.ActivityStarter;
+import com.example.files.app.FileListActivity.FileClickHandler;
 import com.example.files.media.MediaDetector;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
@@ -36,11 +36,9 @@ public final class FileClickHandlerTest extends TestCase {
 
     private FileClickHandler mFileClickHandler;
 
-    private ActivityStarter mActivityStarter;
     private FileSystem mFileSystem;
     private MediaDetector mMediaDetector;
     private Toaster mToaster;
-
     private FileListActivity mActivity;
     private File mFile;
 
@@ -60,8 +58,7 @@ public final class FileClickHandlerTest extends TestCase {
     public void testShowsNoAppFoundIfNoAppCanOpenFileWithMediaType() {
         String type = "text/plain";
         setFileWithMediaType(type);
-        doThrow(new ActivityNotFoundException())
-                .when(mActivityStarter).startActivity(any(Context.class), any(Intent.class));
+        doThrow(new ActivityNotFoundException()).when(mActivity).startActivity(any(Intent.class));
 
         handleEvent();
 
@@ -84,19 +81,17 @@ public final class FileClickHandlerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mFileSystem = mock(FileSystem.class);
-        mActivityStarter = mock(ActivityStarter.class);
         mToaster = mock(Toaster.class);
         mMediaDetector = mock(MediaDetector.class);
         mFile = mock(File.class);
         mActivity = mock(FileListActivity.class);
         given(mActivity.getPackageName()).willReturn("abc");
-        mFileClickHandler = new FileClickHandler(
-                mActivity, mFileSystem, mMediaDetector, mActivityStarter, mToaster);
+        mFileClickHandler = new FileClickHandler(mActivity, mFileSystem, mMediaDetector, mToaster);
     }
 
     private void assertFileShown(String type) {
         ArgumentCaptor<Intent> arg = intentCaptor();
-        verify(mActivityStarter).startActivity(eq(mActivity), arg.capture());
+        verify(mActivity).startActivity(arg.capture());
 
         Intent intent = arg.getValue();
         assertEquals(ACTION_VIEW, intent.getAction());
@@ -108,7 +103,7 @@ public final class FileClickHandlerTest extends TestCase {
 
     private void assertDirectoryShown() {
         ArgumentCaptor<Intent> arg = intentCaptor();
-        verify(mActivityStarter).startActivity(eq(mActivity), arg.capture()); // TODO startActivityForResult
+        verify(mActivity).startActivityForResult(arg.capture(), eq(0));
 
         Intent i = arg.getValue();
         assertEquals(mFile.getAbsolutePath(), i.getStringExtra(EXTRA_DIRECTORY));
@@ -118,18 +113,18 @@ public final class FileClickHandlerTest extends TestCase {
     }
 
     private void assertNoAppToOpenFileShown() {
-        verify(mActivityStarter).startActivity(eq(mActivity), any(Intent.class));
+        verify(mActivity).startActivity(any(Intent.class));
         verify(mToaster).toast(mActivity, R.string.no_app_to_open_file, LENGTH_SHORT);
     }
 
     private void assertPermissionDeniedShown() {
         verify(mToaster).toast(mActivity, R.string.permission_denied, LENGTH_SHORT);
-        verifyZeroInteractions(mActivityStarter);
+        verifyZeroInteractions(mActivity);
     }
 
     private void assertUnknownFileShown() {
         verify(mToaster).toast(mActivity, R.string.unknown_file_type, LENGTH_SHORT);
-        verifyZeroInteractions(mActivityStarter);
+        verifyZeroInteractions(mActivity);
     }
 
     private ComponentName component(Context context, Class<?> clazz) {
