@@ -93,6 +93,7 @@ public class FileListActivity extends FragmentActivity implements OnFileSelected
 
     public static final String EXTRA_DIRECTORY = FileListFragment.ARG_DIRECTORY;
 
+    private static final int RESULT_HOME_PRESSED = 100;
     private static final File HOME = getExternalStorageDirectory();
 
     private OnFileSelectedListener mFileSelectedHandler;
@@ -132,7 +133,7 @@ public class FileListActivity extends FragmentActivity implements OnFileSelected
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case android.R.id.home:
-            finishWithAnimation();
+            showHome();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -141,16 +142,22 @@ public class FileListActivity extends FragmentActivity implements OnFileSelected
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (!mIsHome) finishWithAnimation();
+        if (!mIsHome && resultCode == RESULT_HOME_PRESSED) showHome();
+    }
+
+    private void showHome() {
+        setResult(RESULT_HOME_PRESSED);
+        finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.still, R.anim.activity_disappear);
     }
 
     @Override
     public void onFileSelected(File file) {
         mFileSelectedHandler.onFileSelected(file);
-    }
-
-    private void finishWithAnimation() {
-        finish();
-        overridePendingTransition(R.anim.still, R.anim.activity_disappear);
     }
 }
