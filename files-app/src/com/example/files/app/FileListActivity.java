@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.files.R;
 import com.example.files.app.FileListFragment.OnFileSelectedListener;
@@ -126,7 +127,7 @@ public class FileListActivity extends FragmentActivity implements OnFileSelected
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(!mIsHome);
         actionBar.setHomeButtonEnabled(!mIsHome);
-        actionBar.setTitle(mIsHome ? getString(R.string.home) : directory.getName());
+        setTitle(mIsHome ? getString(R.string.home) : directory.getName());
     }
 
     @Override
@@ -159,5 +160,15 @@ public class FileListActivity extends FragmentActivity implements OnFileSelected
     @Override
     public void onFileSelected(File file) {
         mFileSelectedHandler.onFileSelected(file);
+    }
+
+    @Override
+    protected void onTitleChanged(CharSequence title, int color) {
+        super.onTitleChanged(title, color);
+        findCustomTitleView().setText(title);
+    }
+
+    private TextView findCustomTitleView() {
+        return (TextView)findViewById(R.id.action_bar_title);
     }
 }
