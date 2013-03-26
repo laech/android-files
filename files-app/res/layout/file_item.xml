@@ -12,7 +12,7 @@
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:singleLine="true"
-    android:textColor="#333"
+    android:textColor="?android:attr/textColorSecondaryInverse"
     android:textSize="15sp"
     android:shadowColor="#88FFFFFF"
     android:shadowDx="0"
