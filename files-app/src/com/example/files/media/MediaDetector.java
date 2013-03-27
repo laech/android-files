@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.tika.Tika;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class MediaDetector {
 
@@ -19,6 +20,8 @@ public class MediaDetector {
         // Lazy initialization holder, initialized on first reference to Holder
         static final Tika sTika = new Tika();
     }
+
+    private static final String TAG = MediaDetector.class.getSimpleName();
 
     public static final MediaDetector INSTANCE = new MediaDetector();
 
@@ -33,7 +36,13 @@ public class MediaDetector {
                 try {
                     return Holder.sTika.detect(file);
                 } catch (IOException e) {
+                    Log.w(TAG, e);
                     return Medias.get(getFileExtension(file));
+                } catch (RuntimeException e) {
+                    // All other errors, e.g. file no longer exists,
+                    // file has been deleted and recreated as a directory etc
+                    Log.w(TAG, e);
+                    return null;
                 }
             }
 
