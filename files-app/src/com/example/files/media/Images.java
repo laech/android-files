@@ -10,10 +10,24 @@ import com.example.files.R;
 
 class Images {
 
+  private static final Set<String> ARCHIVES = archives();
   private static final Set<String> AUDIOS = audios();
   private static final Set<String> VIDEOS = videos();
   private static final Set<String> IMAGES = images();
   private static final Set<String> TEXTS = texts();
+
+  private static Set<String> archives() {
+    Set<String> set = new HashSet<String>(10);
+    set.add("zip");
+    set.add("gz");
+    set.add("tar");
+    set.add("rar");
+    set.add("ace");
+    set.add("bz2");
+    set.add("z");
+    set.add("7z");
+    return unmodifiableSet(set);
+  }
 
   private static Set<String> audios() {
     Set<String> set = new HashSet<String>(76);
@@ -293,11 +307,11 @@ class Images {
   public static int get(String extension) {
     String ext = extension.toLowerCase(ENGLISH);
     if (ext.equals("pdf")) return R.drawable.ic_file_pdf;
-    if (AUDIOS.contains(ext)) return R.drawable.ic_image;
-    if (VIDEOS.contains(ext)) return R.drawable.ic_image;
-    if (IMAGES.contains(ext)) return R.drawable.ic_image;
-    if (TEXTS.contains(ext)) return R.drawable.ic_image;
-    if (AUDIOS.contains(ext)) return R.drawable.ic_image;
+    if (ARCHIVES.contains(ext)) return R.drawable.ic_file_archive;
+    if (AUDIOS.contains(ext)) return R.drawable.ic_file_audio;
+    if (VIDEOS.contains(ext)) return R.drawable.ic_file_video;
+    if (IMAGES.contains(ext)) return R.drawable.ic_file_image;
+    if (TEXTS.contains(ext)) return R.drawable.ic_file_text;
     return R.drawable.ic_file;
   }
 }
