@@ -1,48 +1,66 @@
 package com.example.files.media;
 
-import static com.example.files.util.Files.getFileExtension;
+import android.os.AsyncTask;
+import android.util.Log;
+import com.example.files.event.MediaDetectedEvent;
+import com.example.files.util.DebugTimer;
+import com.squareup.otto.Bus;
+import org.apache.tika.Tika;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.tika.Tika;
-
-import android.os.AsyncTask;
+import static com.example.files.util.Files.getFileExtension;
 
 public class MediaDetector {
 
-    public static interface Callback {
-        void onResult(File file, String type);
+  private static final class Holder {
+    // Lazy initialization holder, initialized on first reference to Holder
+    static final Tika TIKA;
+
+    static {
+      DebugTimer timer = DebugTimer.start(TAG);
+      TIKA = new Tika();
+      timer.log("Tika initialization");
     }
+  }
 
-    private static final class Holder {
-        // Lazy initialization holder, initialized on first reference to Holder
-        static final Tika sTika = new Tika();
-    }
+  private static final String TAG = MediaDetector.class.getSimpleName();
 
-    public static final MediaDetector INSTANCE = new MediaDetector();
+  private final Bus bus;
 
-    MediaDetector() {
-    }
+  @Inject public MediaDetector(Bus bus) {
+    this.bus = bus;
+  }
 
-    public void detect(final File file, final Callback callback) {
-        new AsyncTask<Void, Void, String>() {
+  public void detect(final File file) {
+    new AsyncTask<Void, Void, String>() {
 
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    return Holder.sTika.detect(file);
-                } catch (IOException e) {
-                    return Medias.get(getFileExtension(file));
-                }
-            }
+      @Override protected String doInBackground(Void... params) {
+        try {
 
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-                callback.onResult(file, result);
-            }
+          DebugTimer timer = DebugTimer.start(TAG);
+          String mediaType = Holder.TIKA.detect(file);
+          timer.log("detect");
+          return mediaType;
 
-        }.execute();
-    }
+        } catch (IOException e) {
+          Log.w(TAG, e);
+          return Medias.get(getFileExtension(file));
+        } catch (RuntimeException e) {
+          // All other errors, e.g. file no longer exists,
+          // file has been deleted and recreated as a directory etc
+          Log.w(TAG, e);
+          return null;
+        }
+      }
+
+      @Override protected void onPostExecute(String mediaType) {
+        super.onPostExecute(mediaType);
+        bus.post(new MediaDetectedEvent(file, mediaType));
+      }
+
+    }.execute();
+  }
 }

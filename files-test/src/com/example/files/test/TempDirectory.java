@@ -11,50 +11,50 @@ import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 public final class TempDirectory {
 
-    public static TempDirectory newTempDirectory() {
-        return new TempDirectory(createTempDir());
-    }
+  public static TempDirectory newTempDirectory() {
+    return new TempDirectory(createTempDir());
+  }
 
-    private final File mDirectory;
+  private final File directory;
 
-    private TempDirectory(File directory) {
-        this.mDirectory = directory;
-    }
+  private TempDirectory(File directory) {
+    this.directory = directory;
+  }
 
-    public void delete() {
-        try {
-            deleteDirectory(mDirectory);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+  public void delete() {
+    try {
+      deleteDirectory(directory);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    public File get() {
-        return mDirectory;
-    }
+  public File get() {
+    return directory;
+  }
 
-    public File newFile() {
-        return newFile(String.valueOf(nanoTime()));
-    }
+  public File newFile() {
+    return newFile(String.valueOf(nanoTime()));
+  }
 
-    public File newFile(String name) {
-        File file = new File(mDirectory, name);
-        try {
-            touch(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        assertTrue(file.isFile());
-        return file;
+  public File newFile(String name) {
+    File file = new File(directory, name);
+    try {
+      touch(file);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+    assertTrue(file.isFile());
+    return file;
+  }
 
-    public File newDirectory() {
-        return newDirectory(String.valueOf(nanoTime()));
-    }
+  public File newDirectory() {
+    return newDirectory(String.valueOf(nanoTime()));
+  }
 
-    public File newDirectory(String name) {
-        File file = new File(mDirectory, name);
-        assertTrue(file.mkdirs() || file.isDirectory());
-        return file;
-    }
+  public File newDirectory(String name) {
+    File file = new File(directory, name);
+    assertTrue(file.mkdirs() || file.isDirectory());
+    return file;
+  }
 }

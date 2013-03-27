@@ -10,7 +10,7 @@
     <artifactId>files-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>files-maven-plugin</artifactId>
+  <artifactId>files-codegen</artifactId>
 
   <repositories>
     <repository>
@@ -27,6 +27,10 @@
   </pluginRepositories>
 
   <dependencies>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

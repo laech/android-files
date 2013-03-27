@@ -7,96 +7,155 @@ import junit.framework.TestCase;
 import java.io.File;
 
 import static com.example.files.test.TempDirectory.newTempDirectory;
-import static com.example.files.util.FileSystem.*;
+import static com.example.files.util.FileSystem.DIRECTORY_ALARMS;
+import static com.example.files.util.FileSystem.DIRECTORY_ANDROID;
+import static com.example.files.util.FileSystem.DIRECTORY_DCIM;
+import static com.example.files.util.FileSystem.DIRECTORY_DOWNLOADS;
+import static com.example.files.util.FileSystem.DIRECTORY_MOVIES;
+import static com.example.files.util.FileSystem.DIRECTORY_MUSIC;
+import static com.example.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
+import static com.example.files.util.FileSystem.DIRECTORY_PICTURES;
+import static com.example.files.util.FileSystem.DIRECTORY_PODCASTS;
+import static com.example.files.util.FileSystem.DIRECTORY_RINGTONES;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 public final class ImageMapTest extends TestCase {
 
-    private TempDirectory mDirectory;
-    private ImageMap mImageMap;
+  private TempDirectory directory;
+  private ImageMap images;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mImageMap = new ImageMap();
-        mDirectory = newTempDirectory();
-    }
+  @Override protected void setUp() throws Exception {
+    super.setUp();
+    images = new ImageMap();
+    directory = newTempDirectory();
+  }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        mDirectory.delete();
-    }
+  @Override protected void tearDown() throws Exception {
+    directory.delete();
+    super.tearDown();
+  }
 
-    public void testGetsImageForFile() {
-        assertEquals(R.drawable.ic_file, mImageMap.get(mDirectory.newFile()));
-    }
+  public void testGetsImageForDirectory() {
+    assertDirectoryImage(
+        R.drawable.ic_directory,
+        directory.get());
+  }
 
-    public void testGetsImageForPdfFile() {
-        assertEquals(R.drawable.ic_file_pdf, mImageMap.get(mDirectory.newFile("a.pdf")));
-    }
+  public void testGetsImageForDirectoryAlarms() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_alarms,
+        DIRECTORY_ALARMS);
+  }
 
-    public void testGetsImageForDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory, mDirectory.get());
-    }
+  public void testGetsImageForDirectoryAndroid() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_android,
+        DIRECTORY_ANDROID);
+  }
 
-    public void testGetsImageForAlarmsDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_alarms, DIRECTORY_ALARMS);
-    }
+  public void testGetsImageForDirectoryDcim() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_dcim,
+        DIRECTORY_DCIM);
+  }
 
-    public void testGetsImageForAndroidDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_android, DIRECTORY_ANDROID);
-    }
+  public void testGetsImageForDirectoryDownload() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_download,
+        DIRECTORY_DOWNLOADS);
+  }
 
-    public void testGetsImageForDcimDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_dcim, DIRECTORY_DCIM);
-    }
+  public void testGetsImageForDirectoryMovies() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_movies,
+        DIRECTORY_MOVIES);
+  }
 
-    public void testGetsImageForDownloadDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_download, DIRECTORY_DOWNLOADS);
-    }
+  public void testGetsImageForDirectoryMusic() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_music,
+        DIRECTORY_MUSIC);
+  }
 
-    public void testGetsImageForMoviesDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_movies, DIRECTORY_MOVIES);
-    }
+  public void testGetsImageForDirectoryNotifications() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_notifications,
+        DIRECTORY_NOTIFICATIONS);
+  }
 
-    public void testGetsImageForMusicDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_music, DIRECTORY_MUSIC);
-    }
+  public void testGetsImageForDirectoryPictures() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_pictures,
+        DIRECTORY_PICTURES);
+  }
 
-    public void testGetsImageForNotificationsDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_notifications, DIRECTORY_NOTIFICATIONS);
-    }
+  public void testGetsImageForDirectoryPodcasts() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_podcasts,
+        DIRECTORY_PODCASTS);
+  }
 
-    public void testGetsImageForPicturesDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_pictures, DIRECTORY_PICTURES);
-    }
+  public void testGetsImageForDirectoryRingtones() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_ringtones,
+        DIRECTORY_RINGTONES);
+  }
 
-    public void testGetsImageForPodcastsDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_podcasts, DIRECTORY_PODCASTS);
-    }
+  public void testGetsImageForFile() {
+    assertEquals(
+        R.drawable.ic_file,
+        images.get(directory.newFile()));
+  }
 
-    public void testGetsImageForRingtonesDirectory() {
-        assertDirectoryImage(R.drawable.ic_directory_ringtones, DIRECTORY_RINGTONES);
-    }
+  public void testGetsImageForFilePdf() {
+    assertEquals(
+        R.drawable.ic_file_pdf,
+        images.get(directory.newFile("a.pdf")));
+  }
 
-    public void testGetsImageIconFromExtension() {
-        assertEquals(R.drawable.ic_image, mImageMap.get(createFile("jpg")));
-    }
+  public void testGetsImageForFileImage() {
+    assertEquals(
+        R.drawable.ic_file_image,
+        images.get(createFile("jpg")));
+  }
 
-    public void testGetsImageIconFromExtensionIgnoringCase() {
-        assertEquals(R.drawable.ic_image, mImageMap.get(createFile("jPg")));
-    }
+  public void testGetsImageForFileAudio() {
+    assertEquals(
+        R.drawable.ic_file_audio,
+        images.get(createFile("mp3")));
+  }
 
-    private void assertDirectoryImage(int resId, File dir) {
-        assertTrue(dir.mkdirs() || dir.isDirectory());
-        assertEquals(resId, mImageMap.get(dir));
-    }
+  public void testGetsImageForFileVideo() {
+    assertEquals(
+        R.drawable.ic_file_video,
+        images.get(createFile("mp4")));
+  }
 
-    private File createFile(String ext) {
-        File file = mock(File.class);
-        given(file.getName()).willReturn("a." + ext);
-        return file;
-    }
+  public void testGetsImageForFileArchive() {
+    assertEquals(
+        R.drawable.ic_file_archive,
+        images.get(createFile("zip")));
+  }
+
+  public void testGetsImageForFileText() {
+    assertEquals(
+        R.drawable.ic_file_text,
+        images.get(createFile("txt")));
+  }
+
+  public void testGetsImageIconFromExtensionIgnoringCase() {
+    assertEquals(R.drawable.ic_file_image, images.get(createFile("jPg")));
+  }
+
+  private void assertDirectoryImage(int resId, File dir) {
+    assertTrue(dir.mkdirs() || dir.isDirectory());
+    assertEquals(resId, images.get(dir));
+  }
+
+  private File createFile(String ext) {
+    File file = mock(File.class);
+    given(file.getName()).willReturn("a." + ext);
+    return file;
+  }
 }
