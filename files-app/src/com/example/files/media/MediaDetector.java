@@ -1,17 +1,20 @@
 package com.example.files.media;
 
-import android.os.AsyncTask;
-import android.util.Log;
-import com.example.files.event.MediaDetectedEvent;
-import com.example.files.util.DebugTimer;
-import com.squareup.otto.Bus;
-import org.apache.tika.Tika;
+import static com.example.files.util.Files.getFileExtension;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
-import static com.example.files.util.Files.getFileExtension;
+import javax.inject.Inject;
+
+import org.apache.tika.Tika;
+
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.example.files.event.MediaDetectedEvent;
+import com.example.files.util.DebugTimer;
+import com.squareup.otto.Bus;
 
 public class MediaDetector {
 
@@ -63,4 +66,5 @@ public class MediaDetector {
 
     }.execute();
   }
+
 }
