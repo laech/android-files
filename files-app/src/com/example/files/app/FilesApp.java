@@ -1,5 +1,13 @@
 package com.example.files.app;
 
+import static android.os.StrictMode.ThreadPolicy;
+import static android.os.StrictMode.VmPolicy;
+import static android.os.StrictMode.setThreadPolicy;
+import static android.os.StrictMode.setVmPolicy;
+import static com.example.files.BuildConfig.DEBUG;
+
+import javax.inject.Inject;
+
 import android.app.Application;
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -28,9 +36,23 @@ public final class FilesApp extends Application {
 
   private ObjectGraph graph;
 
+  @Inject PreferenceChangeNotifier notifier;
+
   @Override public void onCreate() {
     super.onCreate();
+    setStrictModeIf(DEBUG);
     graph = createObjectGraph();
+    graph.inject(this);
+    notifier.start();
+  }
+
+  private void setStrictModeIf(boolean set) {
+    if (set) {
+      setThreadPolicy(
+          new ThreadPolicy.Builder().detectAll().penaltyLog().build());
+      setVmPolicy(
+          new VmPolicy.Builder().detectAll().penaltyLog().build());
+    }
   }
 
   private ObjectGraph createObjectGraph() {

@@ -1,5 +1,13 @@
 package com.example.files.app;
 
+import static com.example.files.app.FilesApp.inject;
+import static com.example.files.util.FileSort.BY_NAME;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.sort;
+
+import javax.inject.Inject;
+import java.io.File;
+
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.ActionMode;
@@ -18,13 +26,6 @@ import com.example.files.util.DebugTimer;
 import com.example.files.widget.FilesAdapter;
 import com.example.files.widget.ListViews;
 import com.squareup.otto.Bus;
-
-import javax.inject.Inject;
-import java.io.File;
-
-import static com.example.files.app.FilesApp.inject;
-import static com.example.files.util.FileSort.BY_NAME;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesFragment
     extends ListFragment implements MultiChoiceModeListener {
@@ -82,8 +83,8 @@ public final class FilesFragment
           ? R.string.not_a_directory
           : R.string.directory_doesnt_exist);
     } else {
+      sort(children, BY_NAME);
       adapter.addAll(children);
-      adapter.sort(BY_NAME);
       setListAdapter(adapter);
     }
   }

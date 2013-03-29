@@ -1,9 +1,16 @@
 package com.example.files.inject;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+
+import javax.inject.Singleton;
+
 import android.app.Application;
+import android.content.SharedPreferences;
 import com.example.files.app.FilesActivity;
 import com.example.files.app.FilesActivityHelper;
+import com.example.files.app.FilesApp;
 import com.example.files.app.FilesFragment;
+import com.example.files.app.PreferenceChangeNotifier;
 import com.example.files.media.ImageMap;
 import com.example.files.media.MediaDetector;
 import com.example.files.media.MediaMap;
@@ -15,10 +22,9 @@ import com.squareup.otto.ThreadEnforcer;
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
-
 @Module(
     entryPoints = {
+        FilesApp.class,
         FilesFragment.class,
         FilesActivity.class
     },
@@ -61,6 +67,16 @@ public final class FilesModule {
   @Provides FilesAdapter provideFilesAdapter(
       Application context, FileSystem fileSystem, ImageMap images) {
     return new FilesAdapter(context, fileSystem, images);
+  }
+
+  @Provides @Singleton SharedPreferences provideSharedPreferences(
+      Application application) {
+    return getDefaultSharedPreferences(application);
+  }
+
+  @Provides @Singleton PreferenceChangeNotifier providePreferenceChangeNotifier(
+      Application application, SharedPreferences preferences, Bus bus) {
+    return new PreferenceChangeNotifier(application, preferences, bus);
   }
 }
 

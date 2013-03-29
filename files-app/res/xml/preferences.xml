@@ -4,7 +4,7 @@
   <PreferenceCategory android:title="@string/view">
 
     <CheckBoxPreference
-        android:key="pref_show_hidden_files"
+        android:key="@string/pref_show_hidden_files"
         android:title="@string/show_hidden_files"
         android:defaultValue="false"/>
 
