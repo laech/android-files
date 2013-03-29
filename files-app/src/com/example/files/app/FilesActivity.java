@@ -1,5 +1,14 @@
 package com.example.files.app;
 
+import static android.os.Environment.getExternalStorageDirectory;
+import static android.text.TextUtils.isEmpty;
+import static com.example.files.app.FilesApp.inject;
+import static com.example.files.app.FilesPagerAdapter.POSITION_FILE_LIST;
+
+import java.io.File;
+
+import javax.inject.Inject;
+
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,20 +16,12 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
-import android.widget.TextView;
+
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-
-import javax.inject.Inject;
-import java.io.File;
-
-import static android.os.Environment.getExternalStorageDirectory;
-import static android.text.TextUtils.isEmpty;
-import static com.example.files.app.FilesApp.inject;
-import static com.example.files.app.FilesPagerAdapter.POSITION_FILE_LIST;
 
 public class FilesActivity extends FragmentActivity {
 
@@ -101,15 +102,6 @@ public class FilesActivity extends FragmentActivity {
   @Override public void finish() {
     super.finish();
     overridePendingTransition(R.anim.still, R.anim.activity_disappear);
-  }
-
-  @Override protected void onTitleChanged(CharSequence title, int color) {
-    super.onTitleChanged(title, color);
-    findCustomTitleView().setText(title);
-  }
-
-  private TextView findCustomTitleView() {
-    return (TextView) findViewById(R.id.action_bar_title);
   }
 
   @Subscribe public void handle(FileSelectedEvent event) {
