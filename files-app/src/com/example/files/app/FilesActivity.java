@@ -5,9 +5,8 @@ import static android.text.TextUtils.isEmpty;
 import static com.example.files.app.FilesApp.inject;
 import static com.example.files.app.FilesPagerAdapter.POSITION_FILE_LIST;
 
-import java.io.File;
-
 import javax.inject.Inject;
+import java.io.File;
 
 import android.app.ActionBar;
 import android.content.Intent;
@@ -15,8 +14,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.view.Menu;
 import android.view.MenuItem;
-
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
@@ -80,10 +79,19 @@ public class FilesActivity extends FragmentActivity {
     bus.unregister(this);
   }
 
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    getMenuInflater().inflate(R.menu.files_activity, menu);
+    return true;
+  }
+
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case android.R.id.home:
         showHome();
+        return true;
+      case R.id.settings:
+        startActivity(new Intent(this, SettingsActivity.class));
         return true;
     }
     return super.onOptionsItemSelected(item);

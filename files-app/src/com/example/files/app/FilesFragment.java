@@ -68,7 +68,7 @@ public final class FilesFragment
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
-    inflater.inflate(R.menu.file_list, menu);
+    inflater.inflate(R.menu.files_fragment, menu);
   }
 
   private void overrideEmptyText(int resId) {
@@ -94,7 +94,7 @@ public final class FilesFragment
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    mode.getMenuInflater().inflate(R.menu.file_list_contextual, menu);
+    mode.getMenuInflater().inflate(R.menu.files_fragment_action_mode, menu);
     updateActionModeTitle(mode);
     return true;
   }
