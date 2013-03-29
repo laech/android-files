@@ -1,7 +1,5 @@
 package com.example.files.media;
 
-import static com.example.files.util.Files.getFileExtension;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -45,12 +43,12 @@ public class MediaDetector {
 
           DebugTimer timer = DebugTimer.start(TAG);
           String mediaType = Holder.TIKA.detect(file);
-          timer.log("detect");
+          timer.log("detected", mediaType);
           return mediaType;
 
         } catch (IOException e) {
           Log.w(TAG, e);
-          return Medias.get(getFileExtension(file));
+          return null;
         } catch (RuntimeException e) {
           // All other errors, e.g. file no longer exists,
           // file has been deleted and recreated as a directory etc

@@ -1,32 +1,41 @@
 package com.example.files.app;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import com.example.files.R;
-import com.example.files.event.FileSelectedEvent;
-import com.example.files.event.MediaDetectedEvent;
-import com.example.files.media.MediaDetector;
-import com.example.files.util.FileSystem;
-import com.example.files.widget.Toaster;
-
-import javax.inject.Inject;
-import java.io.File;
-
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.files.app.FilesActivity.EXTRA_DIRECTORY;
+import static com.example.files.util.Files.getFileExtension;
+
+import java.io.File;
+
+import javax.inject.Inject;
+
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+
+import com.example.files.R;
+import com.example.files.event.FileSelectedEvent;
+import com.example.files.event.MediaDetectedEvent;
+import com.example.files.media.MediaDetector;
+import com.example.files.media.MediaMap;
+import com.example.files.util.FileSystem;
+import com.example.files.widget.Toaster;
 
 public class FilesActivityHelper {
 
   private final Toaster toaster;
   private final FileSystem fileSystem;
+  private final MediaMap mediaMap;
   private final MediaDetector mediaDetector;
 
   @Inject public FilesActivityHelper(
-      FileSystem fileSystem, MediaDetector mediaDetector, Toaster toaster) {
+      FileSystem fileSystem,
+      MediaMap mediaMap,
+      MediaDetector mediaDetector,
+      Toaster toaster) {
     this.toaster = toaster;
     this.fileSystem = fileSystem;
+    this.mediaMap = mediaMap;
     this.mediaDetector = mediaDetector;
   }
 
@@ -37,7 +46,7 @@ public class FilesActivityHelper {
     } else if (file.isDirectory()) {
       showDirectory(file, activity);
     } else {
-      showFile(file);
+      showFile(file, activity);
     }
   }
 
@@ -57,8 +66,14 @@ public class FilesActivityHelper {
         .putExtra(EXTRA_DIRECTORY, dir.getAbsolutePath());
   }
 
-  private void showFile(File file) {
-    mediaDetector.detect(file);
+  private void showFile(File file, FilesActivity activity) {
+    String extension = getFileExtension(file);
+    String mediaType = mediaMap.get(extension);
+    if (mediaType != null) {
+      showFile(file, mediaType, activity);
+    } else {
+      mediaDetector.detect(file);
+    }
   }
 
   public void handle(MediaDetectedEvent event, FilesActivity activity) {

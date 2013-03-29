@@ -6,6 +6,7 @@ import com.example.files.app.FilesActivityHelper;
 import com.example.files.app.FilesFragment;
 import com.example.files.media.ImageMap;
 import com.example.files.media.MediaDetector;
+import com.example.files.media.MediaMap;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.FilesAdapter;
 import com.example.files.widget.Toaster;
@@ -45,9 +46,16 @@ public final class FilesModule {
     return new ImageMap();
   }
 
+  @Provides @Singleton MediaMap provideMediaMap() {
+    return new MediaMap();
+  }
+
   @Provides @Singleton FilesActivityHelper provideFilesActivityHelper(
-      FileSystem fileSystem, MediaDetector mediaDetector, Toaster toaster) {
-    return new FilesActivityHelper(fileSystem, mediaDetector, toaster);
+      FileSystem fileSystem,
+      MediaMap map,
+      MediaDetector detector,
+      Toaster toaster) {
+    return new FilesActivityHelper(fileSystem, map, detector, toaster);
   }
 
   @Provides FilesAdapter provideFilesAdapter(

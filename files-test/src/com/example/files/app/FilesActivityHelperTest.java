@@ -27,6 +27,7 @@ import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
 import com.example.files.media.MediaDetector;
+import com.example.files.media.MediaMap;
 import com.example.files.util.FileSystem;
 import com.example.files.widget.Toaster;
 
@@ -35,6 +36,7 @@ public final class FilesActivityHelperTest extends TestCase {
   private FilesActivityHelper helper;
 
   private FileSystem fileSystem;
+  private MediaMap mediaMap;
   private MediaDetector mediaDetector;
   private Toaster toaster;
   private FilesActivity activity;
@@ -44,18 +46,36 @@ public final class FilesActivityHelperTest extends TestCase {
     super.setUp();
     fileSystem = mock(FileSystem.class);
     toaster = mock(Toaster.class);
+    mediaMap = mock(MediaMap.class);
     mediaDetector = mock(MediaDetector.class);
     file = mock(File.class);
     activity = mock(FilesActivity.class);
     given(activity.getPackageName()).willReturn("abc");
-    helper = new FilesActivityHelper(fileSystem, mediaDetector, toaster);
+    helper = new FilesActivityHelper(
+        fileSystem, mediaMap, mediaDetector, toaster);
   }
 
-  public void testCallsMediaDetectorToDetectFileMediaType() {
-    given(fileSystem.hasPermissionToRead(file)).willReturn(true);
-    given(file.isDirectory()).willReturn(false);
+  public void testCallsMediaMapToGetFileMediaType() {
     given(file.isFile()).willReturn(true);
+    given(file.getName()).willReturn("a.txt");
+    given(mediaMap.get("txt")).willReturn("text/plain");
+    given(fileSystem.hasPermissionToRead(file)).willReturn(true);
+
     handleFileSelectedEvent();
+
+    verify(mediaMap).get("txt");
+    verifyZeroInteractions(mediaDetector);
+    assertFileShown("text/plain");
+  }
+
+  public void testCallsMediaDetectorToDetectFileMediaTypeIfMediaMapFails() {
+    given(file.isFile()).willReturn(true);
+    given(file.getName()).willReturn("a.txt");
+    given(mediaMap.get("txt")).willReturn(null);
+    given(fileSystem.hasPermissionToRead(file)).willReturn(true);
+
+    handleFileSelectedEvent();
+
     verify(mediaDetector).detect(file);
     verifyZeroInteractions(toaster);
     verifyZeroInteractions(activity);
@@ -155,5 +175,4 @@ public final class FilesActivityHelperTest extends TestCase {
     given(file.isDirectory()).willReturn(true);
     given(fileSystem.hasPermissionToRead(file)).willReturn(true);
   }
-
 }
