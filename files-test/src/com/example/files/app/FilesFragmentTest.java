@@ -1,6 +1,19 @@
 package com.example.files.app;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.example.files.test.Activities.rotate;
+import static com.example.files.test.TempDirectory.newTempDirectory;
+import static com.example.files.test.TestFileListFragmentActivity.DIRECTORY;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -9,16 +22,6 @@ import com.example.files.event.FileSelectedEvent;
 import com.example.files.test.TempDirectory;
 import com.example.files.test.TestFileListFragmentActivity;
 import com.squareup.otto.Bus;
-
-import java.io.File;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static com.example.files.test.Activities.rotate;
-import static com.example.files.test.TempDirectory.newTempDirectory;
-import static com.example.files.test.TestFileListFragmentActivity.DIRECTORY;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public final class FilesFragmentTest
     extends ActivityInstrumentationTestCase2<TestFileListFragmentActivity> {
@@ -38,6 +41,41 @@ public final class FilesFragmentTest
   @Override protected void tearDown() throws Exception {
     directory.delete();
     super.tearDown();
+  }
+
+  public void testHiddenFilesAreNotShownByDefault() {
+    clearPreferences();
+    directory.newFile(".abc");
+    assertEquals(0, getListView().getCount());
+  }
+
+  public void testHiddenFilesAreHiddenWhenSettingsSaySo() throws Throwable {
+    directory.newFile(".abc");
+    Settings s = getActivity().getFragment().settings = mock(Settings.class);
+    given(s.shouldShowHiddenFiles()).willReturn(false);
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getActivity().getFragment().checkShowHiddenFilesPreference();
+      }
+    });
+
+    assertEquals(0, getListView().getCount());
+  }
+
+
+  public void testHiddenFilesAreShownWhenSettingsSaySo() throws Throwable {
+    directory.newFile(".def");
+    Settings s = getActivity().getFragment().settings = mock(Settings.class);
+    given(s.shouldShowHiddenFiles()).willReturn(true);
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getActivity().getFragment().checkShowHiddenFilesPreference();
+      }
+    });
+
+    assertEquals(1, getListView().getCount());
   }
 
   public void testSortsFilesByName() {
@@ -157,5 +195,13 @@ public final class FilesFragmentTest
   private void setTestIntent(File directory) {
     setActivityIntent(new Intent()
         .putExtra(DIRECTORY, directory.getAbsolutePath()));
+  }
+
+  private SharedPreferences getPreference() {
+    return getDefaultSharedPreferences(getInstrumentation().getTargetContext());
+  }
+
+  private void clearPreferences() {
+    assertTrue(getPreference().edit().clear().commit());
   }
 }

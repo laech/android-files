@@ -1,8 +1,10 @@
 package com.example.files.app;
 
 import static com.example.files.app.FilesApp.inject;
+import static com.example.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static com.example.files.util.FileSort.BY_NAME;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
 
 import javax.inject.Inject;
@@ -34,11 +36,16 @@ public final class FilesFragment
 
   @Inject FilesAdapter adapter;
   @Inject Bus bus;
+  @Inject Settings settings;
+
+  private boolean showingHiddenFiles;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
+    showingHiddenFiles = settings.shouldShowHiddenFiles();
     getListView().setMultiChoiceModeListener(this);
-    showContent(getDirectory());
+    setContent(getDirectory(), showingHiddenFiles);
+    setListAdapter(adapter);
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,19 @@ public final class FilesFragment
     return view;
   }
 
+  @Override public void onResume() {
+    super.onResume();
+    checkShowHiddenFilesPreference();
+  }
+
+  void checkShowHiddenFilesPreference() {
+    boolean shouldShowHiddenFiles = settings.shouldShowHiddenFiles();
+    if (showingHiddenFiles != shouldShowHiddenFiles) {
+      showingHiddenFiles = shouldShowHiddenFiles;
+      setContent(getDirectory(), shouldShowHiddenFiles);
+    }
+  }
+
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     File file = (File) l.getItemAtPosition(pos);
@@ -76,16 +96,19 @@ public final class FilesFragment
     ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
   }
 
-  private void showContent(File directory) {
-    File[] children = directory.listFiles();
+  private void setContent(File directory, boolean showHiddenFiles) {
+    File[] children = directory
+        .listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
     if (children == null) {
-      overrideEmptyText(directory.exists()
+      overrideEmptyText(directory.exists() // TODO permission denied
           ? R.string.not_a_directory
           : R.string.directory_doesnt_exist);
     } else {
       sort(children, BY_NAME);
-      adapter.addAll(children);
-      setListAdapter(adapter);
+      adapter.setNotifyOnChange(false);
+      adapter.clear();
+      adapter.addAll(asList(children));
+      adapter.notifyDataSetChanged();
     }
   }
 

@@ -8,9 +8,8 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import com.example.files.app.FilesActivity;
 import com.example.files.app.FilesActivityHelper;
-import com.example.files.app.FilesApp;
 import com.example.files.app.FilesFragment;
-import com.example.files.app.PreferenceChangeNotifier;
+import com.example.files.app.Settings;
 import com.example.files.media.ImageMap;
 import com.example.files.media.MediaDetector;
 import com.example.files.media.MediaMap;
@@ -24,7 +23,6 @@ import dagger.Provides;
 
 @Module(
     entryPoints = {
-        FilesApp.class,
         FilesFragment.class,
         FilesActivity.class
     },
@@ -74,9 +72,9 @@ public final class FilesModule {
     return getDefaultSharedPreferences(application);
   }
 
-  @Provides @Singleton PreferenceChangeNotifier providePreferenceChangeNotifier(
-      Application application, SharedPreferences preferences, Bus bus) {
-    return new PreferenceChangeNotifier(application, preferences, bus);
+  @Provides @Singleton Settings provideSettings(
+      Application application, SharedPreferences preferences) {
+    return new Settings(application, preferences);
   }
 }
 
