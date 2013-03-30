@@ -14,5 +14,7 @@
   <string name="settings">Settings</string>
   <string name="view">View</string>
   <string name="show_hidden_files">Show hidden files</string>
+  <string name="favorites">Favorites</string>
+  <string name="favorite">Favorite</string>
 
 </resources>

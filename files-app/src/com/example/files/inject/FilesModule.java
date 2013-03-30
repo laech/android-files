@@ -6,6 +6,7 @@ import javax.inject.Singleton;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import com.example.files.app.SidebarFragment;
 import com.example.files.app.FilesActivity;
 import com.example.files.app.FilesActivityHelper;
 import com.example.files.app.FilesFragment;
@@ -23,6 +24,7 @@ import dagger.Provides;
 
 @Module(
     entryPoints = {
+        SidebarFragment.class,
         FilesFragment.class,
         FilesActivity.class
     },

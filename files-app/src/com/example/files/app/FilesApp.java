@@ -21,7 +21,7 @@ public final class FilesApp extends Application {
   public static void inject(Context context, Object instance) {
     DebugTimer timer = DebugTimer.start(TAG);
     ((FilesApp) context.getApplicationContext()).graph.inject(instance);
-    timer.log("inject", instance);
+    timer.log("inject", instance.getClass().getSimpleName());
   }
 
   public static void inject(Fragment instance) {

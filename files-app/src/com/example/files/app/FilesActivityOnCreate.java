@@ -1,5 +1,6 @@
 package com.example.files.app;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.text.TextUtils.isEmpty;
 import static com.example.files.app.FilesActivity.EXTRA_DIRECTORY;
@@ -26,12 +27,18 @@ final class FilesActivityOnCreate {
   }
 
   private static ViewPager createViewPager(FilesActivity activity, File dir) {
+    String path = dir.getAbsolutePath();
     FragmentManager fm = activity.getSupportFragmentManager();
     ViewPager pager = new ViewPager(activity);
     pager.setId(R.id.content);
-    pager.setAdapter(new FilesPagerAdapter(fm, dir.getAbsolutePath()));
+    pager.setAdapter(new FilesPagerAdapter(fm, path, isPortrait(activity)));
     pager.setCurrentItem(POSITION_FILE_LIST);
     return pager;
+  }
+
+  private static boolean isPortrait(FilesActivity activity) {
+    return activity.getResources().getConfiguration()
+        .orientation == ORIENTATION_PORTRAIT;
   }
 
   private static void updateActionBar(FilesActivity activity, File directory) {

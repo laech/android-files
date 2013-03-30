@@ -13,9 +13,4 @@
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:singleLine="true"
     android:textColor="?android:attr/textColorSecondaryInverse"
-    android:textSize="15sp"
-    android:shadowColor="#AAFFFFFF"
-    android:shadowDx="0"
-    android:shadowDy="1"
-    android:shadowRadius="1"
     tools:ignore="SelectableText"/>
