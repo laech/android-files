@@ -13,9 +13,8 @@ final class FilesActivityOnOptionsItemSelected {
         return showHome(activity);
       case R.id.settings:
         return showSettings(activity);
-      default:
-        return false;
     }
+    return false;
   }
 
   private static boolean showHome(FilesActivity activity) {

@@ -12,24 +12,19 @@ import java.io.File;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.util.DebugTimer;
-import com.example.files.widget.ListViews;
 import com.squareup.otto.Bus;
 
-public final class FilesFragment
-    extends ListFragment implements MultiChoiceModeListener {
+public final class FilesFragment extends ListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -41,9 +36,9 @@ public final class FilesFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    showingHiddenFiles = settings.shouldShowHiddenFiles();
-    getListView().setMultiChoiceModeListener(this);
-    setContent(getDirectory(), showingHiddenFiles);
+    getListView().setMultiChoiceModeListener(
+        new FilesFragmentMultiChoiceModeListener(this));
+    refresh(settings.shouldShowHiddenFiles());
     setListAdapter(adapter);
   }
 
@@ -74,10 +69,8 @@ public final class FilesFragment
 
   void checkShowHiddenFilesPreference() {
     boolean shouldShowHiddenFiles = settings.shouldShowHiddenFiles();
-    if (showingHiddenFiles != shouldShowHiddenFiles) {
-      showingHiddenFiles = shouldShowHiddenFiles;
-      setContent(getDirectory(), shouldShowHiddenFiles);
-    }
+    if (isShowingHiddenFiles() != shouldShowHiddenFiles)
+      refresh(shouldShowHiddenFiles);
   }
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
@@ -111,36 +104,16 @@ public final class FilesFragment
     }
   }
 
-  @Override public void onItemCheckedStateChanged(
-      ActionMode mode, int position, long id, boolean checked) {
-    updateActionModeTitle(mode);
+  @Override public FilesAdapter getListAdapter() {
+    return adapter;
   }
 
-  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    mode.getMenuInflater().inflate(R.menu.files_fragment_action_mode, menu);
-    updateActionModeTitle(mode);
-    return true;
+  boolean isShowingHiddenFiles() {
+    return showingHiddenFiles;
   }
 
-  @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-    return false;
-  }
-
-  @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.move_to_trash:
-        ListViews.removeCheckedItems(getListView(), adapter);
-        mode.finish();
-        return true;
-    }
-    return false;
-  }
-
-  @Override public void onDestroyActionMode(ActionMode mode) {
-  }
-
-  private void updateActionModeTitle(ActionMode mode) {
-    int n = getListView().getCheckedItemCount();
-    mode.setTitle(getString(R.string.n_selected, n));
+  void refresh(boolean showHiddenFiles) {
+    setContent(getDirectory(), showHiddenFiles);
+    this.showingHiddenFiles = showHiddenFiles;
   }
 }
