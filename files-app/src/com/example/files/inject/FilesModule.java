@@ -14,7 +14,7 @@ import com.example.files.media.ImageMap;
 import com.example.files.media.MediaDetector;
 import com.example.files.media.MediaMap;
 import com.example.files.util.FileSystem;
-import com.example.files.widget.FilesAdapter;
+import com.example.files.app.FilesAdapter;
 import com.example.files.widget.Toaster;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;

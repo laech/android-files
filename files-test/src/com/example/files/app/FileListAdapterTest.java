@@ -1,4 +1,4 @@
-package com.example.files.widget;
+package com.example.files.app;
 
 import android.app.Application;
 import android.view.LayoutInflater;

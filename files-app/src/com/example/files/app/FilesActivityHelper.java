@@ -58,7 +58,6 @@ public class FilesActivityHelper {
     int requestCode = 0;
     Intent intent = newShowDirectoryIntent(directory, activity);
     activity.startActivityForResult(intent, requestCode);
-    activity.overridePendingTransition(R.anim.activity_appear, R.anim.still);
   }
 
   private Intent newShowDirectoryIntent(File dir, FilesActivity activity) {

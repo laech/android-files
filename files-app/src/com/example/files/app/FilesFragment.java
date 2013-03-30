@@ -25,7 +25,6 @@ import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.util.DebugTimer;
-import com.example.files.widget.FilesAdapter;
 import com.example.files.widget.ListViews;
 import com.squareup.otto.Bus;
 
