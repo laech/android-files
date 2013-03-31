@@ -3,7 +3,6 @@ package com.example.files.app;
 import static com.example.files.app.FilesApp.getApp;
 import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 import static com.example.files.util.FileSystem.DIRECTORY_ROOT;
-import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.File;
 
@@ -13,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.squareup.otto.Bus;
@@ -35,7 +35,7 @@ public final class SidebarFragment extends ListFragment {
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     adapter.add(getString(R.string.favorites));
-    adapter.addAll(newArrayList(settings.getFavoriteFiles()));
+    adapter.addAll(settings.getFavoriteFiles());
     adapter.add(getString(R.string.device));
     adapter.add(DIRECTORY_HOME);
     adapter.add(DIRECTORY_ROOT);
