@@ -46,7 +46,8 @@ final class FilesActivityOnCreate {
       ActionBar actionBar = activity.getActionBar();
       actionBar.setDisplayHomeAsUpEnabled(true);
       actionBar.setHomeButtonEnabled(true);
-      actionBar.setTitle(directory.getName());
+      actionBar.setTitle(activity.fileSystem.getDisplayName(
+          directory, activity.getResources()));
     }
   }
 

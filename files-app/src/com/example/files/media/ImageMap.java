@@ -4,12 +4,14 @@ import static com.example.files.util.FileSystem.DIRECTORY_ALARMS;
 import static com.example.files.util.FileSystem.DIRECTORY_ANDROID;
 import static com.example.files.util.FileSystem.DIRECTORY_DCIM;
 import static com.example.files.util.FileSystem.DIRECTORY_DOWNLOADS;
+import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 import static com.example.files.util.FileSystem.DIRECTORY_MOVIES;
 import static com.example.files.util.FileSystem.DIRECTORY_MUSIC;
 import static com.example.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
 import static com.example.files.util.FileSystem.DIRECTORY_PICTURES;
 import static com.example.files.util.FileSystem.DIRECTORY_PODCASTS;
 import static com.example.files.util.FileSystem.DIRECTORY_RINGTONES;
+import static com.example.files.util.FileSystem.DIRECTORY_ROOT;
 import static com.example.files.util.Files.getFileExtension;
 
 import java.io.File;
@@ -27,6 +29,8 @@ public class ImageMap {
   static {
     // TODO check name only and case insensitive
     DIRECTORY_IMAGES = new HashMap<File, Integer>();
+    DIRECTORY_IMAGES.put(DIRECTORY_ROOT, R.drawable.ic_directory_device);
+    DIRECTORY_IMAGES.put(DIRECTORY_HOME, R.drawable.ic_directory_home);
     DIRECTORY_IMAGES.put(DIRECTORY_ALARMS, R.drawable.ic_directory_alarms);
     DIRECTORY_IMAGES.put(DIRECTORY_ANDROID, R.drawable.ic_directory_android);
     DIRECTORY_IMAGES.put(DIRECTORY_DCIM, R.drawable.ic_directory_dcim);

@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
+import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -22,11 +23,13 @@ public class FilesActivity extends FragmentActivity {
 
   private boolean homeActivity;
 
+  FileSystem fileSystem;
   FilesActivityHelper helper;
   Bus bus;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    fileSystem = FileSystem.INSTANCE;
     helper = FilesActivityHelper.INSTANCE;
     bus = FilesApp.BUS;
     handleOnCreate(this);

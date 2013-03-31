@@ -8,20 +8,22 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 
 import android.app.Application;
+import android.content.res.Resources;
+import android.test.AndroidTestCase;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
-import junit.framework.TestCase;
 
-public final class FileListAdapterTest extends TestCase {
+public final class FilesAdapterTest extends AndroidTestCase {
 
   private TextView view;
   private File file;
   private FileSystem fileSystem;
   private ImageMap imageMap;
   private FilesAdapter adapter;
+  private Resources resources;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
@@ -30,6 +32,7 @@ public final class FileListAdapterTest extends TestCase {
     file = mock(File.class);
     fileSystem = mock(FileSystem.class);
     imageMap = mock(ImageMap.class);
+    resources = mock(Resources.class);
     adapter = new FilesAdapter(mockApplication(), fileSystem, imageMap);
     adapter.add(file);
   }
@@ -80,7 +83,7 @@ public final class FileListAdapterTest extends TestCase {
   }
 
   public void testViewShowsFileName() throws Exception {
-    given(file.getName()).willReturn("a");
+    given(fileSystem.getDisplayName(file, resources)).willReturn("a");
     adapter.updateViewForFile(file, view);
     verify(view).setText("a");
   }
@@ -96,6 +99,7 @@ public final class FileListAdapterTest extends TestCase {
     LayoutInflater inflater = mock(LayoutInflater.class);
     Application app = mock(Application.class);
     given(app.getSystemService(LAYOUT_INFLATER_SERVICE)).willReturn(inflater);
+    given(app.getResources()).willReturn(resources);
     return app;
   }
 

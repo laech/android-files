@@ -1,56 +1,71 @@
 package com.example.files.util;
 
-import junit.framework.TestCase;
+import static com.example.files.util.FileSystem.DIRECTORY_HOME;
+import static com.example.files.util.FileSystem.DIRECTORY_ROOT;
+import static java.io.File.createTempFile;
 
 import java.io.File;
 
-import static java.io.File.createTempFile;
+import android.test.AndroidTestCase;
+import com.example.files.R;
 
-public final class FileSystemTest extends TestCase {
+public final class FileSystemTest extends AndroidTestCase {
 
-  private File files;
+  private File file;
   private FileSystem fileSystem;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     fileSystem = new FileSystem();
-    files = createTempFile("abc", "def");
-    assertTrue(files.delete());
+    file = createTempFile("abc", "def");
+    assertTrue(file.delete());
   }
 
   @Override protected void tearDown() throws Exception {
     super.tearDown();
-    assertTrue(files.delete());
+    assertTrue(file.delete() || !file.exists());
+  }
+
+  public void testGetsNameForHomeDirectory() {
+    assertEquals(
+        getContext().getString(R.string.home),
+        fileSystem.getDisplayName(DIRECTORY_HOME, getContext().getResources()));
+  }
+
+  public void testGetsNameForRootDirectory() {
+    assertEquals(
+        getContext().getString(R.string.device),
+        fileSystem.getDisplayName(DIRECTORY_ROOT, getContext().getResources()));
   }
 
   public void testHasNoPermissionToReadUnexecutableDirectory() throws Exception {
-    assertTrue(files.mkdir());
-    assertTrue(files.setExecutable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(files));
+    assertTrue(file.mkdir());
+    assertTrue(file.setExecutable(false, false));
+    assertFalse(fileSystem.hasPermissionToRead(file));
   }
 
   public void testHasNoPermissionToReadUnreadableFile() throws Exception {
-    assertTrue(files.createNewFile());
-    assertTrue(files.setReadable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(files));
+    assertTrue(file.createNewFile());
+    assertTrue(file.setReadable(false, false));
+    assertFalse(fileSystem.hasPermissionToRead(file));
   }
 
   public void testHasNoPermissionToReadUnreadableDirectory() throws Exception {
-    assertTrue(files.mkdir());
-    assertTrue(files.setReadable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(files));
+    assertTrue(file.mkdir());
+    assertTrue(file.setReadable(false, false));
+    assertFalse(fileSystem.hasPermissionToRead(file));
 
   }
 
   public void testHasPermissionToReadReadableFile() throws Exception {
-    assertTrue(files.createNewFile());
-    assertTrue(files.setReadable(true, true));
-    assertTrue(fileSystem.hasPermissionToRead(files));
+    assertTrue(file.createNewFile());
+    assertTrue(file.setReadable(true, true));
+    assertTrue(fileSystem.hasPermissionToRead(file));
   }
 
   public void testHasPermissionToReadReadableDirectory() {
-    assertTrue(files.mkdir());
-    assertTrue(files.setReadable(true, true));
-    assertTrue(fileSystem.hasPermissionToRead(files));
+    assertTrue(file.mkdir());
+    assertTrue(file.setReadable(true, true));
+    assertTrue(fileSystem.hasPermissionToRead(file));
   }
 }

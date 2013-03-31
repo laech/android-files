@@ -1,24 +1,26 @@
 package com.example.files.media;
 
-import com.example.files.R;
-import com.example.files.test.TempDirectory;
-import junit.framework.TestCase;
-
-import java.io.File;
-
 import static com.example.files.test.TempDirectory.newTempDirectory;
 import static com.example.files.util.FileSystem.DIRECTORY_ALARMS;
 import static com.example.files.util.FileSystem.DIRECTORY_ANDROID;
 import static com.example.files.util.FileSystem.DIRECTORY_DCIM;
 import static com.example.files.util.FileSystem.DIRECTORY_DOWNLOADS;
+import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 import static com.example.files.util.FileSystem.DIRECTORY_MOVIES;
 import static com.example.files.util.FileSystem.DIRECTORY_MUSIC;
 import static com.example.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
 import static com.example.files.util.FileSystem.DIRECTORY_PICTURES;
 import static com.example.files.util.FileSystem.DIRECTORY_PODCASTS;
 import static com.example.files.util.FileSystem.DIRECTORY_RINGTONES;
+import static com.example.files.util.FileSystem.DIRECTORY_ROOT;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import java.io.File;
+
+import com.example.files.R;
+import com.example.files.test.TempDirectory;
+import junit.framework.TestCase;
 
 public final class ImageMapTest extends TestCase {
 
@@ -40,6 +42,18 @@ public final class ImageMapTest extends TestCase {
     assertDirectoryImage(
         R.drawable.ic_directory,
         directory.get());
+  }
+
+  public void testGetsImageForDirectoryHome() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_home,
+        DIRECTORY_HOME);
+  }
+
+  public void testGetsImageForDirectoryRoot() {
+    assertDirectoryImage(
+        R.drawable.ic_directory_device,
+        DIRECTORY_ROOT);
   }
 
   public void testGetsImageForDirectoryAlarms() {

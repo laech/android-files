@@ -61,7 +61,7 @@ final class FilesAdapter extends ArrayAdapter<Object> {
 
   void updateViewForFile(File file, TextView view) {
     view.setEnabled(fileSystem.hasPermissionToRead(file));
-    view.setText(file.getName());
+    view.setText(fileSystem.getDisplayName(file, getContext().getResources()));
     view.setCompoundDrawablesWithIntrinsicBounds(images.get(file), 0, 0, 0);
   }
 

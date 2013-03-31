@@ -1,15 +1,19 @@
 package com.example.files.util;
 
-import static android.os.Environment.getExternalStoragePublicDirectory;
+import static android.os.Environment.*;
 
 import java.io.File;
 
+import android.content.res.Resources;
 import android.os.Environment;
+import com.example.files.R;
 
 public class FileSystem {
 
   public static final FileSystem INSTANCE = new FileSystem();
 
+  public static final File DIRECTORY_ROOT = new File("/");
+  public static final File DIRECTORY_HOME = getExternalStorageDirectory();
   public static final File DIRECTORY_ALARMS = dir(Environment.DIRECTORY_ALARMS);
   public static final File DIRECTORY_ANDROID = dir("Android");
   public static final File DIRECTORY_DCIM = dir(Environment.DIRECTORY_DCIM);
@@ -26,6 +30,12 @@ public class FileSystem {
 
   private static File dir(String type) {
     return getExternalStoragePublicDirectory(type);
+  }
+
+  public String getDisplayName(File file, Resources res) {
+    if (DIRECTORY_HOME.equals(file)) return res.getString(R.string.home);
+    if (DIRECTORY_ROOT.equals(file)) return res.getString(R.string.device);
+    return file.getName();
   }
 
   public boolean hasPermissionToRead(File file) {
