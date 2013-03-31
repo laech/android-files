@@ -28,8 +28,8 @@ public class FilesActivity extends BaseActivity {
   FilesActivityHelper helper;
   Bus bus;
 
-  private ViewPager pager;
-  private File directoryInDisplay;
+  ViewPager pager;
+  File directoryInDisplay;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
