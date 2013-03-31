@@ -72,8 +72,8 @@ public final class FilesFragment extends ListFragment {
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    File file = (File) l.getItemAtPosition(pos);
-    bus.post(new FileSelectedEvent(file));
+    Object item = l.getItemAtPosition(pos);
+    if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

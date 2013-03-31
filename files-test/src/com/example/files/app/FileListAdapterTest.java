@@ -1,5 +1,12 @@
 package com.example.files.app;
 
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
 import android.app.Application;
 import android.view.LayoutInflater;
 import android.widget.TextView;
@@ -8,13 +15,6 @@ import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 import junit.framework.TestCase;
 
-import java.io.File;
-
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 public final class FileListAdapterTest extends TestCase {
 
   private TextView view;
@@ -22,7 +22,6 @@ public final class FileListAdapterTest extends TestCase {
   private FileSystem fileSystem;
   private ImageMap imageMap;
   private FilesAdapter adapter;
-
 
   @Override protected void setUp() throws Exception {
     super.setUp();
@@ -35,27 +34,60 @@ public final class FileListAdapterTest extends TestCase {
     adapter.add(file);
   }
 
+  public void testGetViewTypeCountIs2() {
+    assertEquals(2, adapter.getViewTypeCount());
+  }
+
+  public void testGetsItemViewTypeForFile() {
+    adapter.clear();
+    adapter.add(file);
+    assertEquals(0, adapter.getItemViewType(0));
+  }
+
+  public void testGetsItemViewTypeForHeader() {
+    adapter.clear();
+    adapter.add("header");
+    assertEquals(1, adapter.getItemViewType(0));
+  }
+
+  public void testIsEnabledIfItemIsFile() {
+    adapter.clear();
+    adapter.add(file);
+    assertTrue(adapter.isEnabled(0));
+  }
+
+  public void testIsNotEnabledIfItemIsHeader() {
+    adapter.clear();
+    adapter.add("hello");
+    assertFalse(adapter.isEnabled(0));
+  }
+
+  public void testGetsViewForFile() {
+    adapter.updateViewForHeader("hello", view);
+    verify(view).setText("hello");
+  }
+
   public void testViewIsDisabledIfUserHasNoPermissionToReadFile() {
     setAsFileWithReadPermission(file, false);
-    adapter.updateView(view, file);
+    adapter.updateViewForFile(file, view);
     verify(view).setEnabled(false);
   }
 
   public void testViewIsDisabledIfUserHasNoPermissionToReadDirectory() {
     setAsDirectoryWithReadPermission(file, false);
-    adapter.updateView(view, file);
+    adapter.updateViewForFile(file, view);
     verify(view).setEnabled(false);
   }
 
   public void testViewShowsFileName() throws Exception {
     given(file.getName()).willReturn("a");
-    adapter.updateView(view, file);
+    adapter.updateViewForFile(file, view);
     verify(view).setText("a");
   }
 
   public void testViewShowsIcon() {
     given(imageMap.get(file)).willReturn(R.drawable.ic_launcher);
-    adapter.updateView(view, file);
+    adapter.updateViewForFile(file, view);
     verify(view).setCompoundDrawablesWithIntrinsicBounds(
         R.drawable.ic_launcher, 0, 0, 0);
   }

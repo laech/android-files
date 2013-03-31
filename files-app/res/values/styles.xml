@@ -1,28 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <style name="Theme" parent="@android:style/Theme.Holo.Light">
+  <style name="Theme" parent="android:Theme.Holo.Light">
     <item name="android:actionBarStyle">@style/ActionBar</item>
-    <item name="android:actionBarWidgetTheme">@style/Widget.ActionBar</item>
+    <item name="android:actionBarWidgetTheme">@style/ActionBarWidget</item>
   </style>
 
-  <style name="ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
-    <item name="android:titleTextStyle">@style/ActionBar.Title</item>
+  <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
+    <item name="android:titleTextStyle">@style/ActionBarTitle</item>
   </style>
 
-  <style name="ActionBar.Title" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+  <style name="ActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
     <item name="android:textColor">#AA000000</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
-  <style name="Widget.ActionBar" parent="android:Theme.Holo.Light">
-    <item name="android:itemTextAppearance">@style/TextApperance.Item</item>
+  <style name="ActionBarWidget" parent="android:Theme.Holo.Light">
+    <item name="android:itemTextAppearance">@style/ActionBarOverflowItem</item>
   </style>
 
-  <style name="TextApperance.Item" parent="android:TextAppearance.Holo.Medium">
+  <style name="ActionBarOverflowItem" parent="android:TextAppearance.Holo.Medium">
     <item name="android:textColor">#AA000000</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
+  <style name="ShadowText" parent="android:Widget.Holo.TextView">
+    <item name="android:shadowColor">#AAFFFFFF</item>
+    <item name="android:shadowDx">0</item>
+    <item name="android:shadowDy">1</item>
+    <item name="android:shadowRadius">1</item>
+  </style>
+
+  <style name="ListEmptyText" parent="ShadowText">
+    <item name="android:layout_gravity">center</item>
+    <item name="android:paddingBottom">?android:actionBarSize</item>
+  </style>
+
+  <style name="ListView" parent="android:Widget.Holo.ListView">
+    <item name="android:paddingStart">16dp</item>
+    <item name="android:paddingEnd">16dp</item>
+    <item name="android:scrollbarStyle">outsideOverlay</item>
+  </style>
+
+  <style name="FilesList" parent="ListView">
+    <item name="android:choiceMode">multipleChoiceModal</item>
+    <item name="android:fastScrollEnabled">true</item>
+  </style>
+
+  <style name="FilesListItem" parent="ShadowText">
+    <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+    <item name="android:drawablePadding">8dp</item>
+    <item name="android:ellipsize">middle</item>
+    <item name="android:gravity">center_vertical</item>
+    <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+    <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+    <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
+    <item name="android:singleLine">true</item>
+  </style>
+
+  <style name="Sidebar" parent="ListView">
+    <item name="android:background">#DDD</item>
+    <item name="android:divider">@null</item>
+  </style>
+
+  <style name="SidebarHeader" parent="ShadowText">
+    <item name="android:paddingTop">16dp</item>
+    <item name="android:paddingBottom">2dp</item>
+    <item name="android:textAllCaps">true</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textColor">?android:attr/textColorTertiary</item>
+  </style>
 
 </resources>

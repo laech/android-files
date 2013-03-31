@@ -3,26 +3,36 @@ package com.example.files.app;
 import static com.example.files.app.FilesApp.getApp;
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.io.File;
+
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import com.example.files.R;
+import com.example.files.event.FileSelectedEvent;
+import com.squareup.otto.Bus;
 
 public final class SidebarFragment extends ListFragment {
 
+  // TODO test
+
   FilesAdapter adapter;
   Settings settings;
+  Bus bus;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
     adapter = new FilesAdapter(getApp(this));
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
+    adapter.add(getString(R.string.favorites));
     adapter.addAll(newArrayList(settings.getFavoriteFiles()));
     setListAdapter(adapter);
   }
@@ -30,5 +40,11 @@ public final class SidebarFragment extends ListFragment {
   @Override public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.sidebar_fragment, container, false);
+  }
+
+  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
+    super.onListItemClick(l, v, pos, id);
+    Object item = l.getItemAtPosition(pos);
+    if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
   }
 }
