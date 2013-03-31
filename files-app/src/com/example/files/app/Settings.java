@@ -1,7 +1,5 @@
 package com.example.files.app;
 
-import javax.inject.Inject;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Set;
@@ -25,7 +23,7 @@ public class Settings {
   private final Application application;
   private final SharedPreferences preferences;
 
-  @Inject public Settings(Application app, SharedPreferences preferences) {
+  public Settings(Application app, SharedPreferences preferences) {
     this.application = app;
     this.preferences = preferences;
   }

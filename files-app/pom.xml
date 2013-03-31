@@ -33,20 +33,6 @@
     </dependency>
     <dependency>
       <groupId>com.squareup</groupId>
-      <artifactId>dagger</artifactId>
-    </dependency>
-    <!--
-      Use compile time code generation to speed up dependency injection.
-      Need to make sure IDEs' compilers are configured properly to use
-      annotation processors. Intellij IDEA will generate code to
-      bin/classes/generated. Eclipse will use .apt_generated. 
-    -->
-    <dependency>
-      <groupId>com.squareup</groupId>
-      <artifactId>dagger-compiler</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup</groupId>
       <artifactId>otto</artifactId>
     </dependency>
   </dependencies>

@@ -19,7 +19,6 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:text="@string/empty"
-      android:textAppearance="?android:attr/textAppearanceSmall"
-      android:textIsSelectable="true"/>
+      android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 </FrameLayout>

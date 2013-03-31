@@ -3,16 +3,13 @@ package com.example.files.media;
 import java.io.File;
 import java.io.IOException;
 
-import javax.inject.Inject;
-
-import org.apache.tika.Tika;
-
 import android.os.AsyncTask;
 import android.util.Log;
-
+import com.example.files.app.FilesApp;
 import com.example.files.event.MediaDetectedEvent;
 import com.example.files.util.DebugTimer;
 import com.squareup.otto.Bus;
+import org.apache.tika.Tika;
 
 public class MediaDetector {
 
@@ -29,9 +26,15 @@ public class MediaDetector {
 
   private static final String TAG = MediaDetector.class.getSimpleName();
 
+  public static final MediaDetector INSTANCE = new MediaDetector();
+
   private final Bus bus;
 
-  @Inject public MediaDetector(Bus bus) {
+  MediaDetector() {
+    this(FilesApp.BUS);
+  }
+
+  MediaDetector(Bus bus) {
     this.bus = bus;
   }
 

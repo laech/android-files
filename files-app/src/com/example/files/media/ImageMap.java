@@ -1,11 +1,5 @@
 package com.example.files.media;
 
-import com.example.files.R;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.example.files.util.FileSystem.DIRECTORY_ALARMS;
 import static com.example.files.util.FileSystem.DIRECTORY_ANDROID;
 import static com.example.files.util.FileSystem.DIRECTORY_DCIM;
@@ -18,11 +12,20 @@ import static com.example.files.util.FileSystem.DIRECTORY_PODCASTS;
 import static com.example.files.util.FileSystem.DIRECTORY_RINGTONES;
 import static com.example.files.util.Files.getFileExtension;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.example.files.R;
+
 public class ImageMap {
+
+  public static final ImageMap INSTANCE = new ImageMap();
 
   private static final Map<File, Integer> DIRECTORY_IMAGES;
 
   static {
+    // TODO check name only and case insensitive
     DIRECTORY_IMAGES = new HashMap<File, Integer>();
     DIRECTORY_IMAGES.put(DIRECTORY_ALARMS, R.drawable.ic_directory_alarms);
     DIRECTORY_IMAGES.put(DIRECTORY_ANDROID, R.drawable.ic_directory_android);
@@ -34,6 +37,9 @@ public class ImageMap {
     DIRECTORY_IMAGES.put(DIRECTORY_PICTURES, R.drawable.ic_directory_pictures);
     DIRECTORY_IMAGES.put(DIRECTORY_PODCASTS, R.drawable.ic_directory_podcasts);
     DIRECTORY_IMAGES.put(DIRECTORY_RINGTONES, R.drawable.ic_directory_ringtones);
+  }
+
+  ImageMap() {
   }
 
   public int get(File file) {

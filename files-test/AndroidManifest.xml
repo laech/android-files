@@ -4,16 +4,16 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <uses-sdk
-        android:minSdkVersion="17"
-        android:targetSdkVersion="17"/>
+  <uses-sdk
+      android:minSdkVersion="16"
+      android:targetSdkVersion="17"/>
 
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.example.files"/>
+  <instrumentation
+      android:name="android.test.InstrumentationTestRunner"
+      android:targetPackage="com.example.files"/>
 
-    <application android:allowBackup="false">
-        <uses-library android:name="android.test.runner"/>
-    </application>
+  <application android:allowBackup="false">
+    <uses-library android:name="android.test.runner"/>
+  </application>
 
 </manifest>

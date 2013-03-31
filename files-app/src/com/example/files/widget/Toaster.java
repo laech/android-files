@@ -5,6 +5,11 @@ import android.widget.Toast;
 
 public class Toaster {
 
+  public static final Toaster INSTANCE = new Toaster();
+
+  Toaster() {
+  }
+
   /**
    * @param duration {@link Toast#LENGTH_SHORT} or {@link Toast#LENGTH_LONG}
    * @see Toast#makeText(Context, int, int)

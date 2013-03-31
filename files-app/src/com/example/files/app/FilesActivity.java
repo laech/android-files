@@ -2,9 +2,6 @@ package com.example.files.app;
 
 import static com.example.files.app.FilesActivityOnCreate.handleOnCreate;
 import static com.example.files.app.FilesActivityOnOptionsItemSelected.handleOnOptionsItemSelected;
-import static com.example.files.app.FilesApp.inject;
-
-import javax.inject.Inject;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,13 +22,14 @@ public class FilesActivity extends FragmentActivity {
 
   private boolean homeActivity;
 
-  @Inject FilesActivityHelper helper;
-  @Inject Bus bus;
+  FilesActivityHelper helper;
+  Bus bus;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    helper = FilesActivityHelper.INSTANCE;
+    bus = FilesApp.BUS;
     handleOnCreate(this);
-    inject(this);
   }
 
   @Override protected void onResume() {

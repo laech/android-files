@@ -1,9 +1,7 @@
 package com.example.files.app;
 
-import static com.example.files.app.FilesApp.inject;
+import static com.example.files.app.FilesApp.getApp;
 import static com.google.common.collect.Lists.newArrayList;
-
-import javax.inject.Inject;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -14,12 +12,13 @@ import com.example.files.R;
 
 public final class SidebarFragment extends ListFragment {
 
-  @Inject FilesAdapter adapter;
-  @Inject Settings settings;
+  FilesAdapter adapter;
+  Settings settings;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    inject(this);
+    settings = getApp(this).getSettings();
+    adapter = new FilesAdapter(getApp(this));
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {

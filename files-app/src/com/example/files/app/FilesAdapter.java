@@ -1,5 +1,7 @@
 package com.example.files.app;
 
+import java.io.File;
+
 import android.app.Application;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,16 +11,16 @@ import com.example.files.R;
 import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 
-import javax.inject.Inject;
-import java.io.File;
-
-public final class FilesAdapter extends ArrayAdapter<File> {
+final class FilesAdapter extends ArrayAdapter<File> {
 
   private final FileSystem fileSystem;
   private final ImageMap images;
 
-  @Inject public FilesAdapter(
-      Application context, FileSystem fileSystem, ImageMap images) {
+  FilesAdapter(Application context) {
+    this(context, FileSystem.INSTANCE, ImageMap.INSTANCE);
+  }
+
+  FilesAdapter(Application context, FileSystem fileSystem, ImageMap images) {
     super(context, R.layout.files_item);
     this.fileSystem = fileSystem;
     this.images = images;

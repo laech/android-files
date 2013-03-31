@@ -1,13 +1,12 @@
 package com.example.files.app;
 
-import static com.example.files.app.FilesApp.inject;
+import static com.example.files.app.FilesApp.getApp;
 import static com.example.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static com.example.files.util.FileSort.BY_NAME;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
 
-import javax.inject.Inject;
 import java.io.File;
 
 import android.os.Bundle;
@@ -21,18 +20,25 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
-import com.example.files.util.DebugTimer;
 import com.squareup.otto.Bus;
 
 public final class FilesFragment extends ListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
-  @Inject FilesAdapter adapter;
-  @Inject Bus bus;
-  @Inject Settings settings;
+  FilesAdapter adapter;
+  Bus bus;
+  Settings settings;
 
   private boolean showingHiddenFiles;
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
+    adapter = new FilesAdapter(getApp(this));
+    settings = getApp(this).getSettings();
+    bus = FilesApp.BUS;
+  }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -40,12 +46,6 @@ public final class FilesFragment extends ListFragment {
         new FilesFragmentMultiChoiceModeListener(this));
     refresh(settings.shouldShowHiddenFiles());
     setListAdapter(adapter);
-  }
-
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    inject(this);
-    setHasOptionsMenu(true);
   }
 
   private File getDirectory() {
@@ -56,10 +56,7 @@ public final class FilesFragment extends ListFragment {
 
   @Override public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    DebugTimer timer = DebugTimer.start("FilesFragment");// TODO
-    View view = inflater.inflate(R.layout.files_fragment, container, false);
-    timer.log("onCreateView");
-    return view;
+    return inflater.inflate(R.layout.files_fragment, container, false);
   }
 
   @Override public void onResume() {

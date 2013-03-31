@@ -8,11 +8,8 @@ import static com.example.files.util.Files.getFileExtension;
 
 import java.io.File;
 
-import javax.inject.Inject;
-
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
@@ -23,12 +20,22 @@ import com.example.files.widget.Toaster;
 
 public class FilesActivityHelper {
 
+  public static final FilesActivityHelper INSTANCE = new FilesActivityHelper();
+
   private final Toaster toaster;
   private final FileSystem fileSystem;
   private final MediaMap mediaMap;
   private final MediaDetector mediaDetector;
 
-  @Inject public FilesActivityHelper(
+  FilesActivityHelper() {
+    this(
+        FileSystem.INSTANCE,
+        MediaMap.INSTANCE,
+        MediaDetector.INSTANCE,
+        Toaster.INSTANCE);
+  }
+
+  FilesActivityHelper(
       FileSystem fileSystem,
       MediaMap mediaMap,
       MediaDetector mediaDetector,

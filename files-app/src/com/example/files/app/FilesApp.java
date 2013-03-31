@@ -4,40 +4,42 @@ import static android.os.StrictMode.ThreadPolicy;
 import static android.os.StrictMode.VmPolicy;
 import static android.os.StrictMode.setThreadPolicy;
 import static android.os.StrictMode.setVmPolicy;
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.example.files.BuildConfig.DEBUG;
 
 import android.app.Application;
 import android.content.Context;
 import android.support.v4.app.Fragment;
-import com.example.files.inject.ApplicationModule;
-import com.example.files.inject.FilesModule;
 import com.example.files.util.DebugTimer;
-import dagger.ObjectGraph;
+import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 
 public final class FilesApp extends Application {
 
   private static final String TAG = FilesApp.class.getSimpleName();
 
-  public static void inject(Context context, Object instance) {
-    DebugTimer timer = DebugTimer.start(TAG);
-    ((FilesApp) context.getApplicationContext()).graph.inject(instance);
-    timer.log("inject", instance.getClass().getSimpleName());
+  public static final Bus BUS = new Bus(ThreadEnforcer.MAIN);
+
+  public static FilesApp getApp(Context context) {
+    return (FilesApp) context.getApplicationContext();
   }
 
-  public static void inject(Fragment instance) {
-    inject(instance.getActivity(), instance);
+  public static FilesApp getApp(Fragment fragment) {
+    return getApp(fragment.getActivity());
   }
 
-  public static void inject(Context instance) {
-    inject(instance, instance);
-  }
-
-  private ObjectGraph graph;
+  private Settings settings;
 
   @Override public void onCreate() {
+    DebugTimer timer = DebugTimer.start(TAG);
     super.onCreate();
+    settings = new Settings(this, getDefaultSharedPreferences(this));
     setStrictModeIf(DEBUG);
-    graph = createObjectGraph();
+    timer.log("FilesApp.onCreate");
+  }
+
+  public Settings getSettings() {
+    return settings;
   }
 
   private void setStrictModeIf(boolean set) {
@@ -48,13 +50,4 @@ public final class FilesApp extends Application {
           new VmPolicy.Builder().detectAll().penaltyLog().build());
     }
   }
-
-  private ObjectGraph createObjectGraph() {
-    DebugTimer timer = DebugTimer.start(TAG);
-    ObjectGraph graph = ObjectGraph.create(
-        new ApplicationModule(this), new FilesModule());
-    timer.log("createObjectGraph");
-    return graph;
-  }
-
 }

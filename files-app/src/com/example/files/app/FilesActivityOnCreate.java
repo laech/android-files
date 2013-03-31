@@ -42,12 +42,12 @@ final class FilesActivityOnCreate {
   }
 
   private static void updateActionBar(FilesActivity activity, File directory) {
-    ActionBar actionBar = activity.getActionBar();
-    actionBar.setDisplayHomeAsUpEnabled(!activity.isHomeActivity());
-    actionBar.setHomeButtonEnabled(!activity.isHomeActivity());
-    actionBar.setTitle(activity.isHomeActivity()
-        ? activity.getString(R.string.home)
-        : directory.getName());
+    if (!activity.isHomeActivity()) {
+      ActionBar actionBar = activity.getActionBar();
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setHomeButtonEnabled(true);
+      actionBar.setTitle(directory.getName());
+    }
   }
 
   private FilesActivityOnCreate() {
