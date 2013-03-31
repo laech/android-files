@@ -63,7 +63,6 @@ public final class FilesFragmentTest
     assertEquals(0, getListView().getCount());
   }
 
-
   public void testHiddenFilesAreShownWhenSettingsSaySo() throws Throwable {
     directory.newFile(".def");
     Settings s = getActivity().getFragment().settings = mock(Settings.class);
@@ -168,8 +167,8 @@ public final class FilesFragmentTest
   }
 
   private void clickFirstListItem() {
-    assertTrue(
-        getListView().performItemClick(getListView().getChildAt(0), 0, 0));
+    assertTrue(getListView()
+        .performItemClick(getListView().getChildAt(0), 0, 0));
   }
 
   private TextView getEmptyView() {

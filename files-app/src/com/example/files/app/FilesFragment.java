@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
+import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 
 public final class FilesFragment extends ListFragment {
@@ -35,6 +36,7 @@ public final class FilesFragment extends ListFragment {
     return fragment;
   }
 
+  FileSystem fileSystem;
   FilesAdapter adapter;
   Bus bus;
   Settings settings;
@@ -44,6 +46,7 @@ public final class FilesFragment extends ListFragment {
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
+    fileSystem = FileSystem.INSTANCE;
     adapter = new FilesAdapter(getApp(this));
     settings = getApp(this).getSettings();
     bus = FilesApp.BUS;
@@ -95,19 +98,34 @@ public final class FilesFragment extends ListFragment {
   }
 
   private void setContent(File directory, boolean showHiddenFiles) {
-    File[] children = directory
-        .listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
+    File[] children = listFiles(directory, showHiddenFiles);
     if (children == null) {
-      overrideEmptyText(directory.exists() // TODO permission denied
-          ? R.string.not_a_directory
-          : R.string.directory_doesnt_exist);
+      updateUnableToShowDirectoryError(directory);
     } else {
-      sort(children, BY_NAME);
-      adapter.setNotifyOnChange(false);
-      adapter.clear();
-      adapter.addAll(asList(children));
-      adapter.notifyDataSetChanged();
+      updateAdapterContent(children);
     }
+  }
+
+  private File[] listFiles(File directory, boolean showHiddenFiles) {
+    return directory.listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
+  }
+
+  private void updateUnableToShowDirectoryError(File directory) {
+    if (!fileSystem.hasPermissionToRead(directory)) {
+      overrideEmptyText(R.string.permission_denied);
+    } else if (directory.exists()) {
+      overrideEmptyText(R.string.not_a_directory);
+    } else {
+      overrideEmptyText(R.string.directory_doesnt_exist);
+    }
+  }
+
+  private void updateAdapterContent(File[] children) {
+    sort(children, BY_NAME);
+    adapter.setNotifyOnChange(false);
+    adapter.clear();
+    adapter.addAll(asList(children));
+    adapter.notifyDataSetChanged();
   }
 
   @Override public FilesAdapter getListAdapter() {

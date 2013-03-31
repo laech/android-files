@@ -19,8 +19,6 @@ import com.squareup.otto.Bus;
 
 public final class SidebarFragment extends ListFragment {
 
-  // TODO test
-
   FilesAdapter adapter;
   Settings settings;
   Bus bus;

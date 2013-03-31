@@ -8,8 +8,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 public class FilesPagerAdapter extends FragmentPagerAdapter {
 
-  // TODO experimental
-
   public static final int POSITION_SIDEBAR = 0;
   public static final int POSITION_FILES = 1;
 
