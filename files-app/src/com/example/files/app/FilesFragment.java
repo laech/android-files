@@ -26,6 +26,15 @@ public final class FilesFragment extends ListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
+  public static FilesFragment create(String directory) {
+    Bundle args = new Bundle(1);
+    args.putString(ARG_DIRECTORY, directory);
+
+    FilesFragment fragment = new FilesFragment();
+    fragment.setArguments(args);
+    return fragment;
+  }
+
   FilesAdapter adapter;
   Bus bus;
   Settings settings;

@@ -1,10 +1,9 @@
 package com.example.files.app;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-public final class SettingsActivity extends Activity {
+public final class SettingsActivity extends BaseActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

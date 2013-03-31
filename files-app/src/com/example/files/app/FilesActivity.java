@@ -1,11 +1,16 @@
 package com.example.files.app;
 
-import static com.example.files.app.FilesActivityOnCreate.handleOnCreate;
-import static com.example.files.app.FilesActivityOnOptionsItemSelected.handleOnOptionsItemSelected;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static com.example.files.app.FilesPagerAdapter.POSITION_FILES;
+import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 
+import java.io.File;
+
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.example.files.R;
@@ -15,24 +20,52 @@ import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-public class FilesActivity extends FragmentActivity {
+public class FilesActivity extends BaseActivity {
 
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
-
-  private static final int RESULT_SHOW_HOME = 100;
-
-  private boolean homeActivity;
 
   FileSystem fileSystem;
   FilesActivityHelper helper;
   Bus bus;
+
+  private ViewPager pager;
+  private File directoryInDisplay;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     fileSystem = FileSystem.INSTANCE;
     helper = FilesActivityHelper.INSTANCE;
     bus = FilesApp.BUS;
-    handleOnCreate(this);
+
+    String path = getIntent().getStringExtra(EXTRA_DIRECTORY);
+    directoryInDisplay = path == null ? DIRECTORY_HOME : new File(path);
+    pager = createViewPager(directoryInDisplay);
+    setContentView(pager);
+    updateActionBarWithDirectoryIf(path != null, directoryInDisplay);
+  }
+
+  private ViewPager createViewPager(File dir) {
+    String path = dir.getAbsolutePath();
+    FragmentManager fm = getSupportFragmentManager();
+    ViewPager pager = new ViewPager(this);
+    pager.setId(R.id.content);
+    pager.setAdapter(new FilesPagerAdapter(fm, path, isPortrait()));
+    pager.setCurrentItem(POSITION_FILES);
+    return pager;
+  }
+
+  private boolean isPortrait() {
+    return getResources().getConfiguration()
+        .orientation == ORIENTATION_PORTRAIT;
+  }
+
+  private void updateActionBarWithDirectoryIf(boolean update, File directory) {
+    if (update) {
+      ActionBar actionBar = getActionBar();
+      actionBar.setDisplayHomeAsUpEnabled(true);
+      actionBar.setHomeButtonEnabled(true);
+      actionBar.setTitle(fileSystem.getDisplayName(directory, getResources()));
+    }
   }
 
   @Override protected void onResume() {
@@ -52,42 +85,37 @@ public class FilesActivity extends FragmentActivity {
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    return handleOnOptionsItemSelected(this, item);
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        goHome();
+        return true;
+      case R.id.settings:
+        startActivity(new Intent(this, SettingsActivity.class));
+        return true;
+    }
+    return super.onOptionsItemSelected(item);
   }
 
   @Override protected void onActivityResult(int request, int result, Intent i) {
     super.onActivityResult(request, result, i);
-    if (!isHomeActivity() && result == RESULT_SHOW_HOME) goHome();
-  }
-
-  @Override public void startActivityForResult(Intent intent, int requestCode) {
-    super.startActivityForResult(intent, requestCode);
-    overridePendingTransition(R.anim.activity_appear, R.anim.still);
-  }
-
-  @Override public void finish() {
-    super.finish();
-    overridePendingTransition(R.anim.still, R.anim.activity_disappear);
+    goHome();
   }
 
   @Subscribe public void handle(FileSelectedEvent event) {
-    helper.handle(event, this);
+    if (directoryInDisplay.equals(event.file())) {
+      boolean smoothScroll = true;
+      pager.setCurrentItem(POSITION_FILES, smoothScroll);
+    } else {
+      helper.handle(event, this);
+    }
   }
 
   @Subscribe public void handle(MediaDetectedEvent event) {
     helper.handle(event, this);
   }
 
-  boolean isHomeActivity() {
-    return homeActivity;
-  }
-
-  void setHomeActivity(boolean homeActivity) {
-    this.homeActivity = homeActivity;
-  }
-
-  void goHome() {
-    setResult(RESULT_SHOW_HOME);
-    finish();
+  private void goHome() {
+    boolean hasParentActivity = getIntent().hasExtra(EXTRA_DIRECTORY);
+    if (hasParentActivity) finish();
   }
 }

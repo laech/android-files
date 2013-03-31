@@ -1,6 +1,7 @@
 package com.example.files.app;
 
-import android.os.Bundle;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -9,34 +10,31 @@ public class FilesPagerAdapter extends FragmentPagerAdapter {
 
   // TODO experimental
 
-  public static final int POSITION_MENU = 0;
-  public static final int POSITION_FILE_LIST = 1;
+  public static final int POSITION_SIDEBAR = 0;
+  public static final int POSITION_FILES = 1;
 
   private final boolean portrait;
   private final String directory;
 
-  public FilesPagerAdapter(FragmentManager fm, String dir, boolean portait) {
+  public FilesPagerAdapter(FragmentManager fm, String dir, boolean portrait) {
     super(fm);
-    this.directory = dir;
-    this.portrait = portait;
+    this.directory = checkNotNull(dir, "dir");
+    this.portrait = portrait;
   }
 
   @Override public float getPageWidth(int position) {
-    if (position == POSITION_MENU) {
-      return portrait ? 0.618f : 0.382f;
+    switch (position) {
+      case POSITION_SIDEBAR:
+        return portrait ? 0.618f : 0.382f;
+      default:
+        return super.getPageWidth(position);
     }
-    return super.getPageWidth(position);
   }
 
   @Override public Fragment getItem(int position) {
     switch (position) {
-      case POSITION_FILE_LIST:
-        Bundle args = new Bundle(1);
-        args.putString(FilesFragment.ARG_DIRECTORY, directory == null ? "/" : directory);
-        Fragment fragment = new FilesFragment();
-        fragment.setArguments(args);
-        return fragment;
-
+      case POSITION_FILES:
+        return FilesFragment.create(directory);
       default:
         return new SidebarFragment();
     }
