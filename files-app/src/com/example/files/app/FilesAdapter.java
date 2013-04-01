@@ -23,7 +23,7 @@ public class FilesAdapter extends ArrayAdapter<Object> {
   }
 
   FilesAdapter(Application context, FileSystem fileSystem, ImageMap images) {
-    super(context, R.layout.files_item);
+    super(context, 0);
     this.fileSystem = fileSystem;
     this.images = images;
   }
@@ -48,15 +48,23 @@ public class FilesAdapter extends ArrayAdapter<Object> {
   }
 
   private View getViewForFile(File file, View view, ViewGroup parent) {
-    if (view == null) view = inflate(R.layout.files_item, parent);
+    if (view == null) view = inflate(getItemTextViewResourceId(), parent);
     updateViewForFile(file, (TextView) view);
     return view;
   }
 
+  protected int getItemTextViewResourceId() {
+    return R.layout.files_item;
+  }
+
   private View getViewForHeader(Object header, View view, ViewGroup parent) {
-    if (view == null) view = inflate(R.layout.files_item_header, parent);
+    if (view == null) view = inflate(getHeaderTextViewResourceId(), parent);
     updateViewForHeader(header, (TextView) view);
     return view;
+  }
+
+  protected int getHeaderTextViewResourceId() {
+    return R.layout.files_item_header;
   }
 
   void updateViewForFile(File file, TextView view) {

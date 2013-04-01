@@ -40,7 +40,11 @@ public final class SidebarFragment
     fileSystem = FileSystem.INSTANCE;
     bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
-    adapter = new FilesAdapter(getApp(this));
+    adapter = new FilesAdapter(getApp(this)) {
+      @Override protected int getItemTextViewResourceId() {
+        return R.layout.sidebar_item;
+      }
+    };
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
