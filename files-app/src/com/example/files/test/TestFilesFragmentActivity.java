@@ -6,7 +6,7 @@ import android.view.ActionMode;
 import android.view.View;
 import com.example.files.app.FilesFragment;
 
-public final class TestFileListFragmentActivity extends FragmentActivity {
+public final class TestFilesFragmentActivity extends FragmentActivity {
 
   public static final String DIRECTORY = "directory";
 

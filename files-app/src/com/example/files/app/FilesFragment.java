@@ -1,5 +1,6 @@
 package com.example.files.app;
 
+import static com.example.files.BuildConfig.DEBUG;
 import static com.example.files.app.FilesApp.getApp;
 import static com.example.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static com.example.files.util.FileSort.BY_NAME;
@@ -11,16 +12,17 @@ import java.io.File;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
-import com.example.files.util.FileSystem;
 import com.squareup.otto.Bus;
 
 public final class FilesFragment extends ListFragment {
@@ -36,20 +38,20 @@ public final class FilesFragment extends ListFragment {
     return fragment;
   }
 
-  FileSystem fileSystem;
   FilesAdapter adapter;
   Bus bus;
   Settings settings;
 
   private boolean showingHiddenFiles;
+  private File directoryInDisplay;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    fileSystem = FileSystem.INSTANCE;
     adapter = new FilesAdapter(getApp(this));
     settings = getApp(this).getSettings();
     bus = FilesApp.BUS;
+    directoryInDisplay = getDirectory();
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -77,9 +79,8 @@ public final class FilesFragment extends ListFragment {
   }
 
   void checkShowHiddenFilesPreference() {
-    boolean shouldShowHiddenFiles = settings.shouldShowHiddenFiles();
-    if (isShowingHiddenFiles() != shouldShowHiddenFiles)
-      refresh(shouldShowHiddenFiles);
+    boolean showHiddenFiles = settings.shouldShowHiddenFiles();
+    if (isShowingHiddenFiles() != showHiddenFiles) refresh(showHiddenFiles);
   }
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
@@ -91,6 +92,29 @@ public final class FilesFragment extends ListFragment {
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     inflater.inflate(R.menu.files_fragment, menu);
+  }
+
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    MenuItem fav = menu.findItem(R.id.favorite);
+    if (fav != null) fav.setChecked(settings.isFavorite(directoryInDisplay));
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+    case R.id.favorite:
+      return handleFavoriteChange(!item.isChecked());
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
+  private boolean handleFavoriteChange(boolean favorite) {
+    if (favorite) {
+      settings.addFavorite(directoryInDisplay);
+    } else {
+      settings.removeFavorite(directoryInDisplay);
+    }
+    return true;
   }
 
   private void overrideEmptyText(int resId) {
@@ -111,12 +135,12 @@ public final class FilesFragment extends ListFragment {
   }
 
   private void updateUnableToShowDirectoryError(File directory) {
-    if (!fileSystem.hasPermissionToRead(directory)) {
-      overrideEmptyText(R.string.permission_denied);
-    } else if (directory.exists()) {
+    if (!directory.exists()) {
+      overrideEmptyText(R.string.directory_doesnt_exist);
+    } else if (!directory.isDirectory()) {
       overrideEmptyText(R.string.not_a_directory);
     } else {
-      overrideEmptyText(R.string.directory_doesnt_exist);
+      overrideEmptyText(R.string.permission_denied);
     }
   }
 
@@ -137,7 +161,8 @@ public final class FilesFragment extends ListFragment {
   }
 
   void refresh(boolean showHiddenFiles) {
-    setContent(getDirectory(), showHiddenFiles);
+    if (DEBUG) Log.d("FilesFragment", "refresh");
+    setContent(directoryInDisplay, showHiddenFiles);
     this.showingHiddenFiles = showHiddenFiles;
   }
 }

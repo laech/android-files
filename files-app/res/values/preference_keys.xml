@@ -2,4 +2,5 @@
 <resources>
   <string name="pref_show_hidden_files">pref_show_hidden_files</string>
   <string name="pref_favorites">pref_favorites</string>
+  <string name="pref_favorites_updated_timestamp">pref_favorites_updated_timestamp</string>
 </resources>

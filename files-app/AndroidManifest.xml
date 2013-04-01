@@ -30,7 +30,8 @@
         android:name=".app.SettingsActivity"
         android:label="@string/settings"/>
 
-    <activity android:name=".test.TestFileListFragmentActivity"/>
+    <activity android:name=".test.TestFilesFragmentActivity"/>
+    <activity android:name=".test.TestSidebarFragmentActivity"/>
 
   </application>
 

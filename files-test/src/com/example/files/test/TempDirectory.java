@@ -1,13 +1,12 @@
 package com.example.files.test;
 
-import java.io.File;
-import java.io.IOException;
-
 import static com.google.common.io.Files.createTempDir;
 import static com.google.common.io.Files.touch;
 import static java.lang.System.nanoTime;
 import static junit.framework.Assert.assertTrue;
-import static org.apache.commons.io.FileUtils.deleteDirectory;
+
+import java.io.File;
+import java.io.IOException;
 
 public final class TempDirectory {
 
@@ -22,11 +21,19 @@ public final class TempDirectory {
   }
 
   public void delete() {
-    try {
-      deleteDirectory(directory);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    delete(directory);
+  }
+
+  private void delete(File file) {
+    if (file.isDirectory()) file.setExecutable(true, true);
+    file.setReadable(true, true);
+    File[] children = file.listFiles();
+    if (children != null) {
+      for (File child : children) {
+        delete(child);
+      }
     }
+    file.delete();
   }
 
   public File get() {

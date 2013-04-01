@@ -13,7 +13,7 @@ import com.example.files.R;
 import com.example.files.media.ImageMap;
 import com.example.files.util.FileSystem;
 
-final class FilesAdapter extends ArrayAdapter<Object> {
+public class FilesAdapter extends ArrayAdapter<Object> {
 
   private final FileSystem fileSystem;
   private final ImageMap images;

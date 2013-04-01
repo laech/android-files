@@ -4,6 +4,7 @@ import static android.app.ActionBar.DISPLAY_HOME_AS_UP;
 import static android.os.Environment.getExternalStorageDirectory;
 import static com.example.files.app.FilesActivity.EXTRA_DIRECTORY;
 import static com.example.files.app.FilesPagerAdapter.POSITION_FILES;
+import static com.example.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
 import static com.example.files.test.Activities.rotate;
 import static com.example.files.test.TempDirectory.newTempDirectory;
 import static org.mockito.Mockito.mock;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import java.io.File;
 
 import android.content.Intent;
-import android.support.v4.view.ViewPager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 
@@ -113,16 +113,21 @@ public final class FilesActivityTest
     assertEquals(file, getListView().getItemAtPosition(0));
   }
 
-  public void testScrollsToFilesViewIfDirectorySpecifiedIsAlreadyDisplayed() {
-    File dir = directory.newDirectory();
-    FilesActivity activity = getActivity();
-    activity.pager = mock(ViewPager.class);
+  public void testScrollsToFilesViewIfDirectorySpecifiedIsAlreadyDisplayed()
+      throws Throwable {
+    final File dir = directory.newDirectory();
+    final FilesActivity activity = getActivity();
     activity.helper = mock(FilesActivityHelper.class);
     activity.directoryInDisplay = dir;
 
-    activity.handle(new FileSelectedEvent(dir));
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        activity.pager.setCurrentItem(POSITION_SIDEBAR);
+        activity.handle(new FileSelectedEvent(dir));
+      }
+    });
 
-    verify(activity.pager).setCurrentItem(POSITION_FILES, true);
+    assertEquals(POSITION_FILES, activity.pager.getCurrentItem());
     verifyZeroInteractions(activity.helper);
   }
 

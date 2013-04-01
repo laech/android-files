@@ -1,24 +1,34 @@
 package com.example.files.app;
 
+import static com.example.files.util.FileSystem.DIRECTORY_DCIM;
+import static com.example.files.util.FileSystem.DIRECTORY_DOWNLOADS;
+import static com.example.files.util.FileSystem.DIRECTORY_MOVIES;
+import static com.example.files.util.FileSystem.DIRECTORY_MUSIC;
+import static com.example.files.util.FileSystem.DIRECTORY_PICTURES;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.unmodifiableSet;
+
 import java.io.File;
-import java.util.Collections;
 import java.util.Set;
 
 import android.app.Application;
 import android.content.SharedPreferences;
 import com.example.files.R;
-import com.example.files.util.FileSystem;
 import com.google.common.collect.ImmutableSet;
 
 public class Settings {
 
-  private static final Set<File> DEFAULT_FAVORITES = ImmutableSet.of(
-      FileSystem.DIRECTORY_DCIM,
-      FileSystem.DIRECTORY_DOWNLOADS,
-      FileSystem.DIRECTORY_MOVIES,
-      FileSystem.DIRECTORY_MUSIC,
-      FileSystem.DIRECTORY_PICTURES
-  );
+  private static final Set<String> DEFAULT_FAVORITES = ImmutableSet.of(
+      getPath(DIRECTORY_DCIM),
+      getPath(DIRECTORY_DOWNLOADS),
+      getPath(DIRECTORY_MOVIES),
+      getPath(DIRECTORY_MUSIC),
+      getPath(DIRECTORY_PICTURES));
+
+  private static String getPath(File file) {
+    return file.getAbsolutePath();
+  }
 
   private final Application application;
   private final SharedPreferences preferences;
@@ -28,23 +38,62 @@ public class Settings {
     this.preferences = preferences;
   }
 
-  private String showHiddenFilesKey() {
-    return application.getString(R.string.pref_show_hidden_files);
+  public SharedPreferences getPreferences() {
+    return preferences;
   }
 
   public boolean shouldShowHiddenFiles() {
-    return preferences.getBoolean(showHiddenFilesKey(), false);
+    return preferences.getBoolean(getShowHiddenFilesKey(), false);
   }
 
-  private String favoritesKey() {
+  public String getShowHiddenFilesKey() {
+    return application.getString(R.string.pref_show_hidden_files);
+  }
+
+  public void addFavorite(File file) {
+    Set<String> favorites = newHashSet(getFavorites());
+    if (favorites.add(getPath(file))) {
+      preferences
+          .edit()
+          .putStringSet(getFavoritesKey(), favorites)
+          .putLong(getFavoritesUpdatedTimestampKey(), now())
+          .apply();
+    }
+  }
+
+  public void removeFavorite(File file) {
+    Set<String> favorites = newHashSet(getFavorites());
+    if (favorites.remove(getPath(file))) {
+      preferences
+          .edit()
+          .putStringSet(getFavoritesKey(), favorites)
+          .putLong(getFavoritesUpdatedTimestampKey(), now())
+          .apply();
+    }
+  }
+
+  private long now() {
+    return currentTimeMillis();
+  }
+
+  public boolean isFavorite(File file) {
+    return getFavorites().contains(getPath(file));
+  }
+
+  public Set<String> getFavorites() {
+    return unmodifiableSet(preferences.getStringSet(
+        getFavoritesKey(), DEFAULT_FAVORITES));
+  }
+
+  public String getFavoritesKey() {
     return application.getString(R.string.pref_favorites);
   }
 
-  public Set<String> getFavoriteFilePaths() { // TODO
-    return preferences.getStringSet(favoritesKey(), Collections.<String>emptySet());
+  public long getFavoritesUpdatedTimestamp() {
+    return preferences.getLong(getFavoritesUpdatedTimestampKey(), -1);
   }
 
-  public Set<File> getFavoriteFiles() { // TODO
-    return DEFAULT_FAVORITES;
+  public String getFavoritesUpdatedTimestampKey() {
+    return application.getString(R.string.pref_favorites_updated_timestamp);
   }
 }
