@@ -2,7 +2,6 @@ package com.example.files.app;
 
 import static com.example.files.BuildConfig.DEBUG;
 import static com.example.files.app.FilesApp.getApp;
-import static com.example.files.util.FileSort.BY_NAME;
 import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 import static com.example.files.util.FileSystem.DIRECTORY_ROOT;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -10,6 +9,7 @@ import static java.util.Collections.sort;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +76,13 @@ public final class SidebarFragment
       File f = new File(path);
       if (f.isDirectory() && fileSystem.hasPermissionToRead(f)) dirs.add(f);
     }
-    sort(dirs, BY_NAME);
+    sort(dirs, new Comparator<File>() {
+      @Override public int compare(File a, File b) {
+        String x = fileSystem.getDisplayName(a, getResources());
+        String y = fileSystem.getDisplayName(b, getResources());
+        return x.compareToIgnoreCase(y);
+      }
+    });
     return dirs;
   }
 
