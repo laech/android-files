@@ -6,6 +6,7 @@ import static java.io.File.createTempFile;
 
 import java.io.File;
 
+import android.os.Build;
 import android.test.AndroidTestCase;
 import com.example.files.R;
 
@@ -34,7 +35,7 @@ public final class FileSystemTest extends AndroidTestCase {
 
   public void testGetsNameForRootDirectory() {
     assertEquals(
-        getContext().getString(R.string.device),
+        Build.MODEL,
         fileSystem.getDisplayName(DIRECTORY_ROOT, getContext().getResources()));
   }
 

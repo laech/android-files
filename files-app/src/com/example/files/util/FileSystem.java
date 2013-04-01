@@ -5,6 +5,7 @@ import static android.os.Environment.*;
 import java.io.File;
 
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Environment;
 import com.example.files.R;
 
@@ -34,7 +35,7 @@ public class FileSystem {
 
   public String getDisplayName(File file, Resources res) {
     if (DIRECTORY_HOME.equals(file)) return res.getString(R.string.home);
-    if (DIRECTORY_ROOT.equals(file)) return res.getString(R.string.device);
+    if (DIRECTORY_ROOT.equals(file)) return Build.MODEL;
     return file.getName();
   }
 
