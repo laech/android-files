@@ -4,6 +4,7 @@ import static com.example.files.BuildConfig.DEBUG;
 import static com.example.files.app.FilesApp.getApp;
 import static com.example.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static com.example.files.util.FileSort.BY_NAME;
+import static com.example.files.widget.ListViews.removeCheckedItems;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
@@ -13,6 +14,7 @@ import java.io.File;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,11 +23,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AbsListView.MultiChoiceModeListener;
+
 import com.example.files.R;
 import com.example.files.event.FileSelectedEvent;
 import com.squareup.otto.Bus;
 
-public final class FilesFragment extends ListFragment {
+public final class FilesFragment
+    extends ListFragment implements MultiChoiceModeListener {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -56,8 +61,7 @@ public final class FilesFragment extends ListFragment {
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    getListView().setMultiChoiceModeListener(
-        new FilesFragmentMultiChoiceModeListener(this));
+    getListView().setMultiChoiceModeListener(this);
     refresh(settings.shouldShowHiddenFiles());
     setListAdapter(adapter);
   }
@@ -164,5 +168,42 @@ public final class FilesFragment extends ListFragment {
     if (DEBUG) Log.d("FilesFragment", "refresh");
     setContent(directoryInDisplay, showHiddenFiles);
     this.showingHiddenFiles = showHiddenFiles;
+  }
+
+  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    mode.getMenuInflater().inflate(R.menu.files_fragment_action_mode, menu);
+    updateActionModeTitle(mode);
+    return true;
+  }
+
+  @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+    return false;
+  }
+
+  @Override public void onItemCheckedStateChanged(
+      ActionMode mode, int position, long id, boolean checked) {
+    updateActionModeTitle(mode);
+  }
+
+  @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+    switch (item.getItemId()) {
+    case R.id.move_to_trash:
+      return moveCheckedItemsToTrash(mode);
+    }
+    return false;
+  }
+
+  @Override public void onDestroyActionMode(ActionMode mode) {
+  }
+
+  private boolean moveCheckedItemsToTrash(ActionMode mode) {
+    removeCheckedItems(getListView(), getListAdapter());
+    mode.finish();
+    return true;
+  }
+
+  private void updateActionModeTitle(ActionMode mode) {
+    int n = getListView().getCheckedItemCount();
+    mode.setTitle(getString(R.string.n_selected, n));
   }
 }
