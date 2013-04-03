@@ -17,10 +17,10 @@ import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import com.example.files.R;
+import com.example.files.event.EventBus;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.test.TempDirectory;
 import com.example.files.test.TestSidebarFragmentActivity;
-import com.squareup.otto.Bus;
 
 public final class SidebarFragmentTest
     extends ActivityInstrumentationTestCase2<TestSidebarFragmentActivity> {
@@ -43,7 +43,7 @@ public final class SidebarFragmentTest
 
   public void testBusIsNotifiedOnFileSelection() throws Throwable {
     final File file = new File("/");
-    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
+    EventBus bus = getActivity().getFragment().bus = mock(EventBus.class);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
@@ -57,7 +57,7 @@ public final class SidebarFragmentTest
   }
 
   public void testBusIsNotNotifiedOnNonFileSelection() throws Throwable {
-    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
+    EventBus bus = getActivity().getFragment().bus = mock(EventBus.class);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {

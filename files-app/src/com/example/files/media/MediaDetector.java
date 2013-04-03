@@ -6,9 +6,9 @@ import java.io.IOException;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.example.files.app.FilesApp;
+import com.example.files.event.EventBus;
 import com.example.files.event.MediaDetectedEvent;
 import com.example.files.util.DebugTimer;
-import com.squareup.otto.Bus;
 import org.apache.tika.Tika;
 
 public class MediaDetector {
@@ -28,13 +28,13 @@ public class MediaDetector {
 
   public static final MediaDetector INSTANCE = new MediaDetector();
 
-  private final Bus bus;
+  private final EventBus bus;
 
   MediaDetector() {
     this(FilesApp.BUS);
   }
 
-  MediaDetector(Bus bus) {
+  MediaDetector(EventBus bus) {
     this.bus = bus;
   }
 

@@ -1,9 +1,10 @@
 package com.example.files.app;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
-public final class SettingsActivity extends BaseActivity {
+public final class SettingsActivity extends FragmentActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -18,9 +19,9 @@ public final class SettingsActivity extends BaseActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case android.R.id.home:
-        finish();
-        return true;
+    case android.R.id.home:
+      finish();
+      return true;
     }
     return super.onOptionsItemSelected(item);
   }

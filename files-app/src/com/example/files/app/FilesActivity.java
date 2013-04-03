@@ -2,46 +2,75 @@ package com.example.files.app;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static com.example.files.app.FilesPagerAdapter.POSITION_FILES;
-import static com.example.files.util.FileSystem.DIRECTORY_HOME;
 
 import java.io.File;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.example.files.R;
+import com.example.files.event.EventBus;
+import com.example.files.event.EventHandler;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
 import com.example.files.util.FileSystem;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import com.google.common.base.Optional;
 
-public class FilesActivity extends BaseActivity {
+public class FilesActivity extends FragmentActivity {
 
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
+  final EventHandler<FileSelectedEvent> fileSelectedEventHandler =
+      new EventHandler<FileSelectedEvent>() {
+        @Override public void handle(FileSelectedEvent event) {
+          if (directoryInDisplay.equals(event.file())) {
+            boolean smoothScroll = true;
+            pager.setCurrentItem(POSITION_FILES, smoothScroll);
+          } else {
+            helper.handle(event, FilesActivity.this);
+          }
+        }
+      };
+
+  final EventHandler<MediaDetectedEvent> mediaDetectedEventHandler =
+      new EventHandler<MediaDetectedEvent>() {
+        @Override public void handle(MediaDetectedEvent event) {
+          helper.handle(event, FilesActivity.this);
+        }
+      };
+
   FileSystem fileSystem;
   FilesActivityHelper helper;
-  Bus bus;
+  EventBus bus;
 
   ViewPager pager;
   File directoryInDisplay;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    Optional<File> directory = getDirectoryToDisplay();
+    if (!directory.isPresent()) {
+      finish();
+      return;
+    }
+
     fileSystem = FileSystem.INSTANCE;
     helper = FilesActivityHelper.INSTANCE;
     bus = FilesApp.BUS;
-
-    String path = getIntent().getStringExtra(EXTRA_DIRECTORY);
-    directoryInDisplay = path == null ? DIRECTORY_HOME : new File(path);
+    directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
+    setTitle(fileSystem.getDisplayName(directoryInDisplay, getResources()));
     setContentView(pager);
-    updateActionBarWithDirectoryIf(path != null, directoryInDisplay);
+  }
+
+  protected Optional<File> getDirectoryToDisplay() {
+    String path = getIntent().getStringExtra(EXTRA_DIRECTORY);
+    return path == null ? Optional.<File>absent() : Optional.of(new File(path));
   }
 
   private ViewPager createViewPager(File dir) {
@@ -59,23 +88,16 @@ public class FilesActivity extends BaseActivity {
         .orientation == ORIENTATION_PORTRAIT;
   }
 
-  private void updateActionBarWithDirectoryIf(boolean update, File directory) {
-    if (update) {
-      ActionBar actionBar = getActionBar();
-      actionBar.setDisplayHomeAsUpEnabled(true);
-      actionBar.setHomeButtonEnabled(true);
-      actionBar.setTitle(fileSystem.getDisplayName(directory, getResources()));
-    }
-  }
-
   @Override protected void onResume() {
     super.onResume();
-    bus.register(this);
+    bus.register(FileSelectedEvent.class, fileSelectedEventHandler);
+    bus.register(MediaDetectedEvent.class, mediaDetectedEventHandler);
   }
 
   @Override protected void onPause() {
     super.onPause();
-    bus.unregister(this);
+    bus.unregister(fileSelectedEventHandler);
+    bus.unregister(mediaDetectedEventHandler);
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,36 +108,10 @@ public class FilesActivity extends BaseActivity {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case android.R.id.home:
-        goHome();
-        return true;
-      case R.id.settings:
-        startActivity(new Intent(this, SettingsActivity.class));
-        return true;
+    case R.id.settings:
+      startActivity(new Intent(this, SettingsActivity.class));
+      return true;
     }
     return super.onOptionsItemSelected(item);
-  }
-
-  @Override protected void onActivityResult(int request, int result, Intent i) {
-    super.onActivityResult(request, result, i);
-    goHome();
-  }
-
-  @Subscribe public void handle(FileSelectedEvent event) {
-    if (directoryInDisplay.equals(event.file())) {
-      boolean smoothScroll = true;
-      pager.setCurrentItem(POSITION_FILES, smoothScroll);
-    } else {
-      helper.handle(event, this);
-    }
-  }
-
-  @Subscribe public void handle(MediaDetectedEvent event) {
-    helper.handle(event, this);
-  }
-
-  private void goHome() {
-    boolean hasParentActivity = getIntent().hasExtra(EXTRA_DIRECTORY);
-    if (hasParentActivity) finish();
   }
 }

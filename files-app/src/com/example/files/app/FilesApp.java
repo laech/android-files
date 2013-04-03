@@ -10,12 +10,11 @@ import static com.example.files.BuildConfig.DEBUG;
 import android.app.Application;
 import android.content.Context;
 import android.support.v4.app.Fragment;
-import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
+import com.example.files.event.EventBus;
 
 public final class FilesApp extends Application {
 
-  public static final Bus BUS = new Bus(ThreadEnforcer.MAIN);
+  public static final EventBus BUS = new EventBus();
 
   public static FilesApp getApp(Context context) {
     return (FilesApp) context.getApplicationContext();

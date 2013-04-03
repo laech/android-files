@@ -22,11 +22,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-
 import com.example.files.R;
+import com.example.files.event.EventBus;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.util.FileSystem;
-import com.squareup.otto.Bus;
 
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
@@ -34,7 +33,7 @@ public final class SidebarFragment
   FileSystem fileSystem;
   FilesAdapter adapter;
   Settings settings;
-  Bus bus;
+  EventBus bus;
 
   private long favoritesUpdatedTimestamp;
 

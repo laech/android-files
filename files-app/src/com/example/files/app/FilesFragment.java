@@ -21,13 +21,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AbsListView.MultiChoiceModeListener;
-
 import com.example.files.R;
+import com.example.files.event.EventBus;
 import com.example.files.event.FileSelectedEvent;
-import com.squareup.otto.Bus;
 
 public final class FilesFragment
     extends ListFragment implements MultiChoiceModeListener {
@@ -44,7 +43,7 @@ public final class FilesFragment
   }
 
   FilesAdapter adapter;
-  Bus bus;
+  EventBus bus;
   Settings settings;
 
   private boolean showingHiddenFiles;

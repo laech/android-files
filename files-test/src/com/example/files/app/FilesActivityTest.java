@@ -1,7 +1,5 @@
 package com.example.files.app;
 
-import static android.app.ActionBar.DISPLAY_HOME_AS_UP;
-import static android.os.Environment.getExternalStorageDirectory;
 import static com.example.files.app.FilesActivity.EXTRA_DIRECTORY;
 import static com.example.files.app.FilesPagerAdapter.POSITION_FILES;
 import static com.example.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
@@ -17,11 +15,10 @@ import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 
-import com.example.files.R;
+import com.example.files.event.EventBus;
 import com.example.files.event.FileSelectedEvent;
 import com.example.files.event.MediaDetectedEvent;
 import com.example.files.test.TempDirectory;
-import com.squareup.otto.Bus;
 
 public final class FilesActivityTest
     extends ActivityInstrumentationTestCase2<FilesActivity> {
@@ -35,6 +32,7 @@ public final class FilesActivityTest
   @Override protected void setUp() throws Exception {
     super.setUp();
     directory = newTempDirectory();
+    setActivityIntent(newIntent(directory.get()));
   }
 
   @Override protected void tearDown() throws Exception {
@@ -42,47 +40,63 @@ public final class FilesActivityTest
     super.tearDown();
   }
 
-  public void testListenerRegisteredOnResume() throws Throwable {
-    getActivity().bus = mock(Bus.class);
+  public void testRegistersFileSelectedEventHandlerOnResume() throws Throwable {
+    getActivity().bus = mock(EventBus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnResume(getActivity());
       }
     });
-    verify(getActivity().bus).register(getActivity());
+    verify(getActivity().bus).register(
+        FileSelectedEvent.class,
+        getActivity().fileSelectedEventHandler);
   }
 
-  public void testListenerUnregisteredOnPause() throws Throwable {
-    getActivity().bus = mock(Bus.class);
+  public void testRegistersMediaDetectedEventHandlerOnResume() throws Throwable {
+    getActivity().bus = mock(EventBus.class);
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getInstrumentation().callActivityOnResume(getActivity());
+      }
+    });
+    verify(getActivity().bus).register(
+        MediaDetectedEvent.class,
+        getActivity().mediaDetectedEventHandler);
+  }
+
+  public void testUnregistersFileSelectedEventHandlerOnPause() throws Throwable {
+    getActivity().bus = mock(EventBus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnPause(getActivity());
       }
     });
-    verify(getActivity().bus).unregister(getActivity());
+    verify(getActivity().bus).unregister(getActivity().fileSelectedEventHandler);
+  }
+
+  public void testUnregistersMediaDetectedHandlerOnPause() throws Throwable {
+    getActivity().bus = mock(EventBus.class);
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getInstrumentation().callActivityOnPause(getActivity());
+      }
+    });
+    verify(getActivity().bus).unregister(getActivity().mediaDetectedEventHandler);
   }
 
   public void testCallsHelperToHandleFileSelectedEvent() {
+    setActivityIntent(newIntent(directory.newDirectory()));
     getActivity().helper = mock(FilesActivityHelper.class);
     FileSelectedEvent event = new FileSelectedEvent(directory.get());
-    getActivity().handle(event);
+    getActivity().fileSelectedEventHandler.handle(event);
     verify(getActivity().helper).handle(event, getActivity());
   }
 
   public void testCallsHelperToHandleMediaDetectedEvent() {
     getActivity().helper = mock(FilesActivityHelper.class);
     MediaDetectedEvent event = new MediaDetectedEvent(directory.get(), "a");
-    getActivity().handle(event);
+    getActivity().mediaDetectedEventHandler.handle(event);
     verify(getActivity().helper).handle(event, getActivity());
-  }
-
-  public void testHomeButtonIsDisabledWhenNoDirectoryIsSpecified() {
-    assertEquals(0, (getDisplayOptions() & DISPLAY_HOME_AS_UP));
-  }
-
-  public void testHomeButtonIsEnabledWhenDirectoryIsSpecified() {
-    setActivityIntent(newIntent(directory.newDirectory()));
-    assertTrue(0 < (getDisplayOptions() & DISPLAY_HOME_AS_UP));
   }
 
   public void testShowsTitleCorrectlyOnScreenRotate() throws Throwable {
@@ -103,10 +117,6 @@ public final class FilesActivityTest
     assertEquals(directory.get().getName(), getTitle());
   }
 
-  public void testShowsTitleUsingDefaultHomeStringWhenNoDirectoryIsSpecified() {
-    assertEquals(getString(R.string.home), getTitle());
-  }
-
   public void testShowsDirectorySpecified() {
     File file = directory.newFile();
     setActivityIntent(newIntent(directory.get()));
@@ -123,22 +133,12 @@ public final class FilesActivityTest
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         activity.pager.setCurrentItem(POSITION_SIDEBAR);
-        activity.handle(new FileSelectedEvent(dir));
+        activity.fileSelectedEventHandler.handle(new FileSelectedEvent(dir));
       }
     });
 
     assertEquals(POSITION_FILES, activity.pager.getCurrentItem());
     verifyZeroInteractions(activity.helper);
-  }
-
-  public void testShowsExternalStorageWhenNoDirectoryIsSpecified() {
-    assertEquals(
-        getExternalStorageDirectory(),
-        ((File) getListView().getItemAtPosition(0)).getParentFile());
-
-    assertEquals(
-        getActivity().getString(R.string.home),
-        getTitle());
   }
 
   private ListView getListView() {
@@ -147,14 +147,6 @@ public final class FilesActivityTest
 
   private Intent newIntent(File directory) {
     return new Intent().putExtra(EXTRA_DIRECTORY, directory.getAbsolutePath());
-  }
-
-  private String getString(int resId) {
-    return getActivity().getString(resId);
-  }
-
-  private int getDisplayOptions() {
-    return getActivity().getActionBar().getDisplayOptions();
   }
 
   private CharSequence getTitle() {
