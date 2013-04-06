@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.files.test"
+    package="l.files.shared.test"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -10,11 +10,11 @@
 
   <instrumentation
       android:name="android.test.InstrumentationTestRunner"
-      android:targetPackage="com.example.files.test"/>
+      android:targetPackage="l.files.shared.test"/>
 
   <application
       android:allowBackup="false"
-      android:name="com.example.files.app.FilesApp">
+      android:name="l.files.shared.app.FilesApp">
     <uses-library android:name="android.test.runner"/>
   </application>
 
