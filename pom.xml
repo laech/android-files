@@ -12,7 +12,6 @@
 
   <modules>
     <module>files-codegen</module>
-    <module>files-trash</module>
     <module>files-app</module>
     <module>files-test</module>
   </modules>
