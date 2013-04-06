@@ -10,9 +10,11 @@
 
   <instrumentation
       android:name="android.test.InstrumentationTestRunner"
-      android:targetPackage="com.example.files"/>
+      android:targetPackage="com.example.files.test"/>
 
-  <application android:allowBackup="false">
+  <application
+      android:allowBackup="false"
+      android:name="com.example.files.app.FilesApp">
     <uses-library android:name="android.test.runner"/>
   </application>
 

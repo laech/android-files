@@ -10,8 +10,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>files-app</artifactId>
-  <packaging>apk</packaging>
-
+  <packaging>apklib</packaging>
 
   <dependencies>
     <dependency>

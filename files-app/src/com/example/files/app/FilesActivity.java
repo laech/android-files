@@ -107,8 +107,8 @@ public class FilesActivity extends FragmentActivity {
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.settings:
+    int itemId = item.getItemId();
+    if (itemId == R.id.settings) {
       startActivity(new Intent(this, SettingsActivity.class));
       return true;
     }

@@ -104,8 +104,8 @@ public final class FilesFragment
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.favorite:
+    int itemId = item.getItemId();
+    if (itemId == R.id.favorite) {
       return handleFavoriteChange(!item.isChecked());
     }
     return super.onOptionsItemSelected(item);
@@ -185,8 +185,8 @@ public final class FilesFragment
   }
 
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.move_to_trash:
+    int itemId = item.getItemId();
+    if (itemId == R.id.move_to_trash) {
       return moveCheckedItemsToTrash(mode);
     }
     return false;
