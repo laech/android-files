@@ -12,7 +12,7 @@
 
   <application>
     <activity
-        android:name=".app.HomeActivity"
+        android:name="l.files.shared.app.HomeActivity"
         android:label="@string/home"
         android:launchMode="singleTop">
       <intent-filter android:label="@string/app_name">
@@ -22,15 +22,15 @@
     </activity>
 
     <activity
-        android:name=".app.FilesActivity"
-        android:parentActivityName=".app.HomeActivity"/>
+        android:name="l.files.shared.app.FilesActivity"
+        android:parentActivityName="l.files.shared.app.HomeActivity"/>
 
     <activity
-        android:name=".app.SettingsActivity"
+        android:name="l.files.shared.app.SettingsActivity"
         android:label="@string/settings"/>
 
-    <activity android:name=".test.TestFilesFragmentActivity"/>
-    <activity android:name=".test.TestSidebarFragmentActivity"/>
+    <activity android:name="l.files.shared.test.TestFilesFragmentActivity"/>
+    <activity android:name="l.files.shared.test.TestSidebarFragmentActivity"/>
   </application>
 
 </manifest>
