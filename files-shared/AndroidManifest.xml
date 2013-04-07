@@ -31,7 +31,6 @@
 
     <activity android:name=".test.TestFilesFragmentActivity"/>
     <activity android:name=".test.TestSidebarFragmentActivity"/>
-
   </application>
 
 </manifest>

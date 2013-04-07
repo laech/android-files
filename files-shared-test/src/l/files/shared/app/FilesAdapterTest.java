@@ -90,10 +90,10 @@ public final class FilesAdapterTest extends AndroidTestCase {
   }
 
   public void testViewShowsIcon() {
-    given(imageMap.get(file)).willReturn(R.drawable.ic_launcher);
+    given(imageMap.get(file)).willReturn(R.drawable.ic_directory);
     adapter.updateViewForFile(file, view);
     verify(view).setCompoundDrawablesWithIntrinsicBounds(
-        R.drawable.ic_launcher, 0, 0, 0);
+        R.drawable.ic_directory, 0, 0, 0);
   }
 
   private Application mockApplication() {
