@@ -10,7 +10,7 @@
       style="@style/Sidebar"/>
 
   <View
-      android:layout_width="5dp"
+      android:layout_width="3dp"
       android:layout_height="match_parent"
       android:layout_alignParentRight="true"
       android:background="@drawable/sidebar_shadow"/>

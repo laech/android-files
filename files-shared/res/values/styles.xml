@@ -4,14 +4,17 @@
   <style name="Theme" parent="android:Theme.Holo.Light">
     <item name="android:actionBarStyle">@style/ActionBar</item>
     <item name="android:actionBarWidgetTheme">@style/ActionBarWidget</item>
+    <item name="android:windowContentOverlay">@drawable/action_bar_shadow</item>
+    <item name="android:windowBackground">@drawable/window_background</item>
   </style>
 
   <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
     <item name="android:titleTextStyle">@style/ActionBarTitle</item>
+    <item name="android:background">@drawable/action_bar_background</item>
   </style>
 
   <style name="ActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-    <item name="android:textColor">#AA000000</item>
+    <item name="android:textColor">#474747</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
@@ -25,10 +28,13 @@
   </style>
 
   <style name="ShadowText" parent="android:Widget.Holo.TextView">
-    <item name="android:shadowColor">#AAFFFFFF</item>
+    <item name="android:shadowColor">#88FFFFFF</item>
     <item name="android:shadowDx">0</item>
-    <item name="android:shadowDy">1</item>
+    <item name="android:shadowDy">2</item>
     <item name="android:shadowRadius">1</item>
+    <item name="android:fontFamily">sans-serif-condensed</item>
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">#474747</item>
   </style>
 
   <style name="ListEmptyText" parent="ShadowText">
@@ -37,8 +43,6 @@
   </style>
 
   <style name="ListView" parent="android:Widget.Holo.ListView">
-    <item name="android:paddingLeft">16dp</item>
-    <item name="android:paddingRight">16dp</item>
     <item name="android:scrollbarStyle">outsideOverlay</item>
   </style>
 
@@ -57,12 +61,16 @@
   </style>
 
   <style name="FilesListItem" parent="ListItem">
+    <item name="android:drawablePadding">16dp</item>
+    <item name="android:paddingLeft">16dp</item>
     <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
     <item name="android:ellipsize">middle</item>
   </style>
 
   <style name="Sidebar" parent="ListView">
-    <item name="android:background">#DDD</item>
+    <item name="android:paddingLeft">16dp</item>
+    <item name="android:paddingRight">16dp</item>
+    <item name="android:background">@drawable/sidebar_background</item>
     <item name="android:divider">@null</item>
   </style>
 
@@ -75,7 +83,9 @@
     <item name="android:paddingBottom">2dp</item>
     <item name="android:textAllCaps">true</item>
     <item name="android:textStyle">bold</item>
-    <item name="android:textColor">?android:attr/textColorTertiary</item>
+    <item name="android:textColor">#676767</item>
+    <item name="android:textSize">14sp</item>
+    <item name="android:fontFamily">sans</item>
   </style>
 
 </resources>
