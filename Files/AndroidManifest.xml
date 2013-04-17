@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="l.files"
+  android:versionCode="1"
+  android:versionName="1.0">
+
+  <uses-sdk
+    android:minSdkVersion="16"
+    android:targetSdkVersion="17"/>
+
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+  <application
+    android:name="l.files.app.FilesApp"
+    android:allowBackup="true"
+    android:icon="@drawable/ic_launcher"
+    android:label="@string/app_name">
+
+    <activity
+      android:name="l.files.app.HomeActivity"
+      android:label="@string/home"
+      android:launchMode="singleTop">
+      <intent-filter android:label="@string/app_name">
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    
+    <activity
+      android:name="l.files.app.FilesActivity"
+      android:parentActivityName="l.files.app.HomeActivity"/>
+    
+    <activity
+      android:name="l.files.app.SettingsActivity"
+      android:label="@string/settings"/>
+    
+    <activity android:name="l.files.test.TestFilesFragmentActivity"/>
+    <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
+  </application>
+
+</manifest>
