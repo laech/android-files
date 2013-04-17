@@ -8,6 +8,12 @@
     android:minSdkVersion="16"
     android:targetSdkVersion="17"/>
 
-  <application android:allowBackup="false"/>
+  <instrumentation
+    android:name="android.test.InstrumentationTestRunner"
+    android:targetPackage="l.files.shared"/>
+
+  <application android:allowBackup="false">
+    <uses-library android:name="android.test.runner"/>
+  </application>
 
 </manifest>
