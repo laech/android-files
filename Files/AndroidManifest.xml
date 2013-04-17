@@ -14,7 +14,8 @@
     android:name="l.files.app.FilesApp"
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher"
-    android:label="@string/app_name">
+    android:label="@string/app_name"
+    android:theme="@style/Theme">
 
     <activity
       android:name="l.files.app.HomeActivity"
