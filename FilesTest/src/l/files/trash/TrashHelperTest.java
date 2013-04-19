@@ -1,52 +1,94 @@
 package l.files.trash;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.Files.createTempDir;
 import static com.google.common.io.Files.write;
-import static java.io.File.createTempFile;
-import static l.files.test.TempDirectory.newTempDirectory;
+import static java.lang.System.nanoTime;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 import java.io.File;
 import java.io.IOException;
 
 import android.test.AndroidTestCase;
-import l.files.test.TempDirectory;
 
 public final class TrashHelperTest extends AndroidTestCase {
 
-  private TempDirectory trashDir;
+  private File internalTrashDir;
+  private File externalTrashDir;
+
   private TrashHelper helper;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    trashDir = newTempDirectory();
-    helper = new TrashHelper(trashDir.get(), trashDir.get());
+    internalTrashDir = new File(getCacheDir(), randomName());
+    externalTrashDir = new File(getExternalCacheDir(), randomName());
+    helper = new TrashHelper(internalTrashDir, externalTrashDir);
+  }
+
+  private String randomName() {
+    return String.valueOf(nanoTime());
+  }
+
+  private File getExternalCacheDir() {
+    return getContext().getExternalCacheDir();
+  }
+
+  private File getCacheDir() {
+    return getContext().getCacheDir();
   }
 
   @Override protected void tearDown() throws Exception {
     super.tearDown();
-    trashDir.delete();
+    deleteDirectory(internalTrashDir);
+    deleteDirectory(externalTrashDir);
   }
 
-  public void testMovesFileToTrash() throws Exception {
-    testMovesToTrash(createTempFile("temp", "test"));
+  public void testMovesExternalFileToExternalTrash() throws Exception {
+    testMovesFileToTrash(getExternalCacheDir(), externalTrashDir);
   }
 
-  public void testMovesDirectoryToTrash() throws Exception {
-    File dir = createTempDir();
+  public void testMovesInternalFileToInternalTrash() throws Exception {
+    testMovesFileToTrash(getCacheDir(), internalTrashDir);
+  }
+
+  private void testMovesFileToTrash(File fileDir, File trashDir) throws IOException {
+    File file = createTestFile(fileDir);
+    testMovesToTrash(file, trashDir);
+  }
+
+  private File createTestFile(File parentDir) throws IOException {
+    File file = new File(parentDir, randomName());
+    assertTrue(file.createNewFile());
+    return file;
+  }
+
+  public void testMovesExternalDirectoryToExternalTrash() throws Exception {
+    testMovesDirectoryToTrash(getExternalCacheDir(), externalTrashDir);
+  }
+
+  public void testMovesInternalDirectoryToInternalTrash() throws Exception {
+    testMovesDirectoryToTrash(getCacheDir(), internalTrashDir);
+  }
+
+  private void testMovesDirectoryToTrash(File fileDir, File trashDir) throws IOException {
+    File dir = createTestDirectory(fileDir);
+    testMovesToTrash(dir, trashDir);
+  }
+
+  private File createTestDirectory(File parentDir) throws IOException {
+    File dir = new File(parentDir, randomName());
+    assertTrue(dir.mkdir());
     write("blah", new File(dir, "0"), UTF_8);
     assertTrue(new File(dir, "1").createNewFile());
     assertTrue(new File(dir, "2").mkdir());
-
-    testMovesToTrash(dir);
+    return dir;
   }
 
-  private void testMovesToTrash(File file) throws IOException {
-    assertTrue(file.exists());
+  private void testMovesToTrash(File fileToDelete, File trashDir) throws IOException {
+    assertTrue(fileToDelete.exists());
+    helper.moveToTrash(fileToDelete);
 
-    helper.moveToTrash(file);
-
-    assertFalse(file.exists());
-    assertTrue(new File(trashDir.get(), file.getName()).exists());
+    assertFalse(fileToDelete.exists());
+    assertTrue(new File(trashDir, fileToDelete.getName()).exists());
   }
+
 }

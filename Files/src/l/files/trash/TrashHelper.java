@@ -2,8 +2,9 @@ package l.files.trash;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.os.Environment.getExternalStorageDirectory;
-import static android.os.Environment.isExternalStorageEmulated;
 import static java.util.Locale.ENGLISH;
+import static org.apache.commons.io.FileUtils.moveDirectory;
+import static org.apache.commons.io.FileUtils.moveFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +33,11 @@ final class TrashHelper {
 
   public File moveToTrash(File file) throws IOException {
     File trashFile = getTrashFile(file);
-    if (!file.renameTo(trashFile))
-      throw new IOException("Failed to move to trash: " + file);
+    if (file.isDirectory()) {
+      moveDirectory(file, trashFile);
+    } else {
+      moveFile(file, trashFile);
+    }
     return trashFile;
   }
 
@@ -51,7 +55,6 @@ final class TrashHelper {
   }
 
   private boolean isExternalFile(File file) {
-    return isExternalStorageEmulated() ? false
-        : file.getAbsolutePath().toLowerCase(ENGLISH).startsWith(EXTERNAL_DIRECTORY_PATH);
+    return file.getAbsolutePath().toLowerCase(ENGLISH).startsWith(EXTERNAL_DIRECTORY_PATH);
   }
 }
