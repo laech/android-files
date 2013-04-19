@@ -26,17 +26,19 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    
+
     <activity
       android:name="l.files.app.FilesActivity"
       android:parentActivityName="l.files.app.HomeActivity"/>
-    
+
     <activity
       android:name="l.files.app.SettingsActivity"
       android:label="@string/settings"/>
-    
+
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
+
+    <service android:name="l.files.trash.TrashService"/>
   </application>
 
 </manifest>

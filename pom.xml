@@ -10,9 +10,9 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>files-codegen</module>
-    <module>files-app</module>
-    <module>files-test</module>
+    <module>Codegen</module>
+    <module>Files</module>
+    <module>FilesTest</module>
   </modules>
 
   <properties>
