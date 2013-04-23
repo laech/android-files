@@ -59,6 +59,10 @@ public final class TempDirectory {
     return newDirectory(String.valueOf(nanoTime()));
   }
 
+  public TempDirectory newSubTempDirectory() {
+    return new TempDirectory(newDirectory());
+  }
+
   public File newDirectory(String name) {
     File file = new File(directory, name);
     assertTrue(file.mkdirs() || file.isDirectory());
