@@ -1,28 +1,5 @@
 package l.files.app;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.test.Activities.rotate;
-import static l.files.test.Preferences.countDownOnChange;
-import static l.files.test.Preferences.newPreferences;
-import static l.files.test.Preferences.newSettings;
-import static l.files.test.TempDirectory.newTempDirectory;
-import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-
-import l.files.R;
-import l.files.event.EventBus;
-import l.files.event.FileSelectedEvent;
-import l.files.test.TempDirectory;
-import l.files.test.TestFilesFragmentActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
@@ -30,9 +7,30 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.squareup.otto.Bus;
+import l.files.R;
+import l.files.event.FileSelectedEvent;
+import l.files.test.TempDirectory;
+import l.files.test.TestFilesFragmentActivity;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.test.Activities.rotate;
+import static l.files.test.Preferences.*;
+import static l.files.test.TempDirectory.newTempDirectory;
+import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public final class FilesFragmentTest
-extends ActivityInstrumentationTestCase2<TestFilesFragmentActivity> {
+    extends ActivityInstrumentationTestCase2<TestFilesFragmentActivity> {
 
   private TempDirectory directory;
 
@@ -97,11 +95,11 @@ extends ActivityInstrumentationTestCase2<TestFilesFragmentActivity> {
     latch.await(2, SECONDS);
 
     String expected = directory.get().getAbsolutePath();
-    Set<String> actuals = getSet(pref, R.string.pref_favorites);
+    Set<String> actual = getSet(pref, R.string.pref_favorites);
     if (add) {
-      assertTrue(actuals.contains(expected));
+      assertTrue(actual.contains(expected));
     } else {
-      assertFalse(actuals.contains(expected));
+      assertFalse(actual.contains(expected));
     }
   }
 
@@ -197,7 +195,7 @@ extends ActivityInstrumentationTestCase2<TestFilesFragmentActivity> {
 
   public void testPostsEventOnItemClick() throws Throwable {
     final File file = directory.newFile();
-    EventBus bus = getActivity().getFragment().bus = mock(EventBus.class);
+    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
@@ -262,7 +260,7 @@ extends ActivityInstrumentationTestCase2<TestFilesFragmentActivity> {
 
   private void setTestIntent(File directory) {
     setActivityIntent(new Intent()
-    .putExtra(DIRECTORY, directory.getAbsolutePath()));
+        .putExtra(DIRECTORY, directory.getAbsolutePath()));
   }
 
   private MenuItem mockCheckedMenuItem(boolean checked, int id) {

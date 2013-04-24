@@ -1,8 +1,8 @@
 package l.files.util;
 
 import android.os.Handler;
+import com.squareup.otto.Bus;
 import junit.framework.TestCase;
-import l.files.event.EventBus;
 import l.files.test.TempDirectory;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public final class DirectoryObserverTest extends TestCase {
     monitored = newTempDirectory();
     unmonitored = newTempDirectory();
     latch = new CountDownLatch(1);
-    observer = new DirectoryObserverTester(monitored.get(), mock(EventBus.class), new Handler()) {
+    observer = new DirectoryObserverTester(monitored.get(), mock(Bus.class), new Handler()) {
       @Override public void onEvent(int eventType, String path) {
         super.onEvent(eventType, path);
         latch.countDown();
@@ -169,7 +169,7 @@ public final class DirectoryObserverTest extends TestCase {
 
     final AtomicInteger count = new AtomicInteger(0);
 
-    public DirectoryObserverTester(File directory, EventBus bus, Handler handler) {
+    public DirectoryObserverTester(File directory, Bus bus, Handler handler) {
       super(directory, bus, handler);
     }
 

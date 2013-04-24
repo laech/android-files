@@ -1,37 +1,42 @@
 package l.files.app;
 
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.ListFragment;
+import android.util.Log;
+import android.view.*;
+import android.widget.AbsListView.MultiChoiceModeListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+import l.files.R;
+import l.files.event.FileSelectedEvent;
+import l.files.trash.TrashService;
+import l.files.util.DirectoryObserver;
+
+import java.io.File;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.FilesApp.getApp;
+import static l.files.util.DirectoryObserver.DirectoryChangedEvent;
 import static l.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static l.files.util.FileSort.BY_NAME;
-import static l.files.widget.ListViews.removeCheckedItems;
-
-import java.io.File;
-
-import l.files.R;
-import l.files.event.EventBus;
-import l.files.event.FileSelectedEvent;
-import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.util.Log;
-import android.view.ActionMode;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView.MultiChoiceModeListener;
-import android.widget.ListView;
-import android.widget.TextView;
+import static l.files.widget.ListViews.getCheckedItems;
 
 public final class FilesFragment
     extends ListFragment implements MultiChoiceModeListener {
 
   public static final String ARG_DIRECTORY = "directory";
+  FilesAdapter adapter;
+  Bus bus;
+  Settings settings;
+  DirectoryObserver observer;
+  private boolean showingHiddenFiles;
+  private File directoryInDisplay;
 
   public static FilesFragment create(String directory) {
     Bundle args = new Bundle(1);
@@ -42,13 +47,6 @@ public final class FilesFragment
     return fragment;
   }
 
-  FilesAdapter adapter;
-  EventBus bus;
-  Settings settings;
-
-  private boolean showingHiddenFiles;
-  private File directoryInDisplay;
-
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
@@ -56,6 +54,7 @@ public final class FilesFragment
     settings = getApp(this).getSettings();
     bus = FilesApp.BUS;
     directoryInDisplay = getDirectory();
+    observer = new DirectoryObserver(directoryInDisplay, bus, new Handler());
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -79,6 +78,14 @@ public final class FilesFragment
   @Override public void onResume() {
     super.onResume();
     checkShowHiddenFilesPreference();
+    bus.register(this);
+    observer.startWatching();
+  }
+
+  @Override public void onPause() {
+    super.onPause();
+    bus.unregister(this);
+    observer.stopWatching();
   }
 
   void checkShowHiddenFilesPreference() {
@@ -187,7 +194,7 @@ public final class FilesFragment
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
     int itemId = item.getItemId();
     if (itemId == R.id.move_to_trash) {
-      return moveCheckedItemsToTrash(mode);
+      return moveCheckedFilesToTrash(mode);
     }
     return false;
   }
@@ -195,14 +202,35 @@ public final class FilesFragment
   @Override public void onDestroyActionMode(ActionMode mode) {
   }
 
-  private boolean moveCheckedItemsToTrash(ActionMode mode) {
-    removeCheckedItems(getListView(), getListAdapter());
+  private boolean moveCheckedFilesToTrash(ActionMode mode) {
+    TrashService.moveToTrash(getCheckedFiles(), getActivity());
     mode.finish();
     return true;
+  }
+
+  private Iterable<File> getCheckedFiles() {
+    return getCheckedItems(getListView(), File.class);
   }
 
   private void updateActionModeTitle(ActionMode mode) {
     int n = getListView().getCheckedItemCount();
     mode.setTitle(getString(R.string.n_selected, n));
+  }
+
+  @Subscribe public void handle(DirectoryChangedEvent event) {
+
+//    File[] newFiles = listFiles(directoryInDisplay, showingHiddenFiles);
+//    if (newFiles == null) {
+//      newFiles = new File[0];
+//    }
+//    Set<File> files = newHashSet(adapter.getFiles());
+//    files.removeAll(asList(newFiles));
+//
+//    ListViews.removeItems(getListView(), adapter, files, new Runnable() {
+//      @Override public void run() {
+    refresh(showingHiddenFiles);
+//      }
+//    });
+
   }
 }

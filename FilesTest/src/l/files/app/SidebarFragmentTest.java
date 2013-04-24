@@ -1,26 +1,24 @@
 package l.files.app;
 
+import android.content.SharedPreferences;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.ListView;
+import com.squareup.otto.Bus;
+import l.files.R;
+import l.files.event.FileSelectedEvent;
+import l.files.test.TempDirectory;
+import l.files.test.TestSidebarFragmentActivity;
+
+import java.io.File;
+import java.util.Set;
+
 import static java.lang.System.nanoTime;
 import static java.util.Collections.singleton;
 import static l.files.test.Preferences.newPreferences;
 import static l.files.test.Preferences.newSettings;
 import static l.files.test.TempDirectory.newTempDirectory;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.io.File;
-import java.util.Set;
-
-import l.files.R;
-import l.files.event.EventBus;
-import l.files.event.FileSelectedEvent;
-import l.files.test.TempDirectory;
-import l.files.test.TestSidebarFragmentActivity;
-import android.content.SharedPreferences;
-import android.test.ActivityInstrumentationTestCase2;
-import android.widget.ListView;
+import static org.mockito.Mockito.*;
 
 public final class SidebarFragmentTest
     extends ActivityInstrumentationTestCase2<TestSidebarFragmentActivity> {
@@ -43,7 +41,7 @@ public final class SidebarFragmentTest
 
   public void testBusIsNotifiedOnFileSelection() throws Throwable {
     final File file = new File("/");
-    EventBus bus = getActivity().getFragment().bus = mock(EventBus.class);
+    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
@@ -57,7 +55,7 @@ public final class SidebarFragmentTest
   }
 
   public void testBusIsNotNotifiedOnNonFileSelection() throws Throwable {
-    EventBus bus = getActivity().getFragment().bus = mock(EventBus.class);
+    Bus bus = getActivity().getFragment().bus = mock(Bus.class);
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {

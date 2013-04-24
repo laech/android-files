@@ -1,16 +1,5 @@
 package l.files.app;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.app.FilesPagerAdapter.POSITION_FILES;
-
-import java.io.File;
-
-import l.files.R;
-import l.files.event.EventBus;
-import l.files.event.EventHandler;
-import l.files.event.FileSelectedEvent;
-import l.files.event.MediaDetectedEvent;
-import l.files.util.FileSystem;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -18,36 +7,26 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.google.common.base.Optional;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+import l.files.R;
+import l.files.event.FileSelectedEvent;
+import l.files.event.MediaDetectedEvent;
+import l.files.util.FileSystem;
+
+import java.io.File;
+
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 
 public class FilesActivity extends FragmentActivity {
 
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
-  final EventHandler<FileSelectedEvent> fileSelectedEventHandler =
-      new EventHandler<FileSelectedEvent>() {
-        @Override public void handle(FileSelectedEvent event) {
-          if (directoryInDisplay.equals(event.file())) {
-            boolean smoothScroll = true;
-            pager.setCurrentItem(POSITION_FILES, smoothScroll);
-          } else {
-            helper.handle(event, FilesActivity.this);
-          }
-        }
-      };
-
-  final EventHandler<MediaDetectedEvent> mediaDetectedEventHandler =
-      new EventHandler<MediaDetectedEvent>() {
-        @Override public void handle(MediaDetectedEvent event) {
-          helper.handle(event, FilesActivity.this);
-        }
-      };
-
   FileSystem fileSystem;
   FilesActivityHelper helper;
-  EventBus bus;
-
+  Bus bus;
   ViewPager pager;
   File directoryInDisplay;
 
@@ -91,14 +70,12 @@ public class FilesActivity extends FragmentActivity {
 
   @Override protected void onResume() {
     super.onResume();
-    bus.register(FileSelectedEvent.class, fileSelectedEventHandler);
-    bus.register(MediaDetectedEvent.class, mediaDetectedEventHandler);
+    bus.register(this);
   }
 
   @Override protected void onPause() {
     super.onPause();
-    bus.unregister(fileSelectedEventHandler);
-    bus.unregister(mediaDetectedEventHandler);
+    bus.unregister(this);
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -114,5 +91,18 @@ public class FilesActivity extends FragmentActivity {
       return true;
     }
     return super.onOptionsItemSelected(item);
+  }
+
+  @Subscribe public void handle(FileSelectedEvent event) {
+    if (directoryInDisplay.equals(event.file())) {
+      boolean smoothScroll = true;
+      pager.setCurrentItem(POSITION_FILES, smoothScroll);
+    } else {
+      helper.handle(event, FilesActivity.this);
+    }
+  }
+
+  @Subscribe public void handle(MediaDetectedEvent event) {
+    helper.handle(event, FilesActivity.this);
   }
 }

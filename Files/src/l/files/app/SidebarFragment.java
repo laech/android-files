@@ -1,22 +1,5 @@
 package l.files.app;
 
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static java.util.Collections.sort;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.app.FilesApp.getApp;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import l.files.R;
-import l.files.event.EventBus;
-import l.files.event.FileSelectedEvent;
-import l.files.util.FileSystem;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -26,6 +9,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import com.squareup.otto.Bus;
+import l.files.R;
+import l.files.event.FileSelectedEvent;
+import l.files.util.FileSystem;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static java.util.Collections.sort;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.app.FilesApp.getApp;
+import static l.files.util.FileSystem.DIRECTORY_HOME;
+import static l.files.util.FileSystem.DIRECTORY_ROOT;
 
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
@@ -33,7 +33,7 @@ public final class SidebarFragment
   FileSystem fileSystem;
   FilesAdapter adapter;
   Settings settings;
-  EventBus bus;
+  Bus bus;
 
   private long favoritesUpdatedTimestamp;
 

@@ -1,13 +1,19 @@
 package l.files.trash;
 
+import android.app.IntentService;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import com.google.common.base.Preconditions;
+
 import java.io.File;
 import java.io.IOException;
 
-import android.app.IntentService;
-import android.content.Intent;
-import android.util.Log;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class TrashService extends IntentService {
+
+  // TODO test
 
   public static final String ACTION_MOVE_TO_TRASH =
       "l.files.intent.action.MOVE_TO_TRASH";
@@ -21,6 +27,18 @@ public final class TrashService extends IntentService {
 
   public TrashService() {
     super("TrashService");
+  }
+
+  public static void moveToTrash(Iterable<File> files, Context context) {
+    for (File file : files) moveToTrash(file, context);
+  }
+
+  public static void moveToTrash(File file, Context context) {
+    checkNotNull(file, "file");
+    checkNotNull(context, "context");
+    context.startService(new Intent(context, TrashService.class)
+        .setAction(ACTION_MOVE_TO_TRASH)
+        .putExtra(EXTRA_FILE_PATH, file.getAbsolutePath()));
   }
 
   @Override public void onCreate() {

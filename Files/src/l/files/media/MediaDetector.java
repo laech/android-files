@@ -1,42 +1,29 @@
 package l.files.media;
 
+import android.os.AsyncTask;
+import android.util.Log;
+import com.squareup.otto.Bus;
+import l.files.app.FilesApp;
+import l.files.event.MediaDetectedEvent;
+import l.files.util.DebugTimer;
+import org.apache.tika.Tika;
+
 import java.io.File;
 import java.io.IOException;
 
-import l.files.app.FilesApp;
-import l.files.event.EventBus;
-import l.files.event.MediaDetectedEvent;
-import l.files.util.DebugTimer;
-
-import org.apache.tika.Tika;
-
-import android.os.AsyncTask;
-import android.util.Log;
-
 public class MediaDetector {
-
-  private static final class Holder {
-    // Lazy initialization holder, initialized on first reference to Holder
-    static final Tika TIKA;
-
-    static {
-      DebugTimer timer = DebugTimer.start(TAG);
-      TIKA = new Tika();
-      timer.log("Tika initialization");
-    }
-  }
 
   private static final String TAG = MediaDetector.class.getSimpleName();
 
   public static final MediaDetector INSTANCE = new MediaDetector();
 
-  private final EventBus bus;
+  private final Bus bus;
 
   MediaDetector() {
     this(FilesApp.BUS);
   }
 
-  MediaDetector(EventBus bus) {
+  MediaDetector(Bus bus) {
     this.bus = bus;
   }
 
@@ -68,6 +55,17 @@ public class MediaDetector {
       }
 
     }.execute();
+  }
+
+  private static final class Holder {
+    // Lazy initialization holder, initialized on first reference to Holder
+    static final Tika TIKA;
+
+    static {
+      DebugTimer timer = DebugTimer.start(TAG);
+      TIKA = new Tika();
+      timer.log("Tika initialization");
+    }
   }
 
 }

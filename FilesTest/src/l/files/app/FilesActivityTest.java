@@ -1,23 +1,21 @@
 package l.files.app;
 
+import android.content.Intent;
+import android.test.ActivityInstrumentationTestCase2;
+import android.widget.ListView;
+import com.squareup.otto.Bus;
+import l.files.event.FileSelectedEvent;
+import l.files.event.MediaDetectedEvent;
+import l.files.test.TempDirectory;
+
+import java.io.File;
+
 import static l.files.app.FilesActivity.EXTRA_DIRECTORY;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
 import static l.files.test.Activities.rotate;
 import static l.files.test.TempDirectory.newTempDirectory;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.io.File;
-
-import l.files.event.EventBus;
-import l.files.event.FileSelectedEvent;
-import l.files.event.MediaDetectedEvent;
-import l.files.test.TempDirectory;
-import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
-import android.widget.ListView;
+import static org.mockito.Mockito.*;
 
 
 public final class FilesActivityTest
@@ -41,61 +39,57 @@ public final class FilesActivityTest
   }
 
   public void testRegistersFileSelectedEventHandlerOnResume() throws Throwable {
-    getActivity().bus = mock(EventBus.class);
+    getActivity().bus = mock(Bus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnResume(getActivity());
       }
     });
-    verify(getActivity().bus).register(
-        FileSelectedEvent.class,
-        getActivity().fileSelectedEventHandler);
+    verify(getActivity().bus).register(getActivity());
   }
 
   public void testRegistersMediaDetectedEventHandlerOnResume() throws Throwable {
-    getActivity().bus = mock(EventBus.class);
+    getActivity().bus = mock(Bus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnResume(getActivity());
       }
     });
-    verify(getActivity().bus).register(
-        MediaDetectedEvent.class,
-        getActivity().mediaDetectedEventHandler);
+    verify(getActivity().bus).register(getActivity());
   }
 
   public void testUnregistersFileSelectedEventHandlerOnPause() throws Throwable {
-    getActivity().bus = mock(EventBus.class);
+    getActivity().bus = mock(Bus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnPause(getActivity());
       }
     });
-    verify(getActivity().bus).unregister(getActivity().fileSelectedEventHandler);
+    verify(getActivity().bus).unregister(getActivity());
   }
 
   public void testUnregistersMediaDetectedHandlerOnPause() throws Throwable {
-    getActivity().bus = mock(EventBus.class);
+    getActivity().bus = mock(Bus.class);
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getInstrumentation().callActivityOnPause(getActivity());
       }
     });
-    verify(getActivity().bus).unregister(getActivity().mediaDetectedEventHandler);
+    verify(getActivity().bus).unregister(getActivity());
   }
 
   public void testCallsHelperToHandleFileSelectedEvent() {
     setActivityIntent(newIntent(directory.newDirectory()));
     getActivity().helper = mock(FilesActivityHelper.class);
     FileSelectedEvent event = new FileSelectedEvent(directory.get());
-    getActivity().fileSelectedEventHandler.handle(event);
+    getActivity().handle(event);
     verify(getActivity().helper).handle(event, getActivity());
   }
 
   public void testCallsHelperToHandleMediaDetectedEvent() {
     getActivity().helper = mock(FilesActivityHelper.class);
     MediaDetectedEvent event = new MediaDetectedEvent(directory.get(), "a");
-    getActivity().mediaDetectedEventHandler.handle(event);
+    getActivity().handle(event);
     verify(getActivity().helper).handle(event, getActivity());
   }
 
@@ -133,7 +127,7 @@ public final class FilesActivityTest
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         activity.pager.setCurrentItem(POSITION_SIDEBAR);
-        activity.fileSelectedEventHandler.handle(new FileSelectedEvent(dir));
+        activity.handle(new FileSelectedEvent(dir));
       }
     });
 
