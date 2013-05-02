@@ -17,5 +17,6 @@
   <string name="favorites">Favorites</string>
   <string name="favorite">Favorite</string>
   <string name="device">Device</string>
+  <string name="new_dir">New folder</string>
 
 </resources>

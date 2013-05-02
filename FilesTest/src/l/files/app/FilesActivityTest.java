@@ -18,13 +18,18 @@ import static l.files.test.TempDirectory.newTempDirectory;
 import static org.mockito.Mockito.*;
 
 
-public final class FilesActivityTest
-    extends ActivityInstrumentationTestCase2<FilesActivity> {
+public class FilesActivityTest<T extends FilesActivity>
+    extends ActivityInstrumentationTestCase2<T> {
 
   private TempDirectory directory;
 
+  @SuppressWarnings("unchecked")
   public FilesActivityTest() {
-    super(FilesActivity.class);
+    super((Class<T>) FilesActivity.class);
+  }
+
+  public FilesActivityTest(Class<T> clazz) {
+    super(clazz);
   }
 
   @Override protected void setUp() throws Exception {

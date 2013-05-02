@@ -1,42 +1,45 @@
 package l.files.app;
 
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.*;
+import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.event.FileSelectedEvent;
 import l.files.trash.TrashService;
-import l.files.util.DirectoryObserver;
 
 import java.io.File;
+import java.util.Random;
 
+import static android.widget.AbsListView.OnScrollListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.FilesApp.getApp;
-import static l.files.util.DirectoryObserver.DirectoryChangedEvent;
 import static l.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static l.files.util.FileSort.BY_NAME;
 import static l.files.widget.ListViews.getCheckedItems;
 
 public final class FilesFragment
-    extends ListFragment implements MultiChoiceModeListener {
+    extends ListFragment implements MultiChoiceModeListener, OnScrollListener {
 
   public static final String ARG_DIRECTORY = "directory";
-  FilesAdapter adapter;
+
+  private static final String TAG = FilesFragment.class.getSimpleName();
+
+  FilesAdapter2 adapter;
   Bus bus;
   Settings settings;
-  DirectoryObserver observer;
   private boolean showingHiddenFiles;
-  private File directoryInDisplay;
+  private File dir;
+  private FileObserver fileObserver;
 
   public static FilesFragment create(String directory) {
     Bundle args = new Bundle(1);
@@ -47,21 +50,22 @@ public final class FilesFragment
     return fragment;
   }
 
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setHasOptionsMenu(true);
-    adapter = new FilesAdapter(getApp(this));
-    settings = getApp(this).getSettings();
-    bus = FilesApp.BUS;
-    directoryInDisplay = getDirectory();
-    observer = new DirectoryObserver(directoryInDisplay, bus, new Handler());
-  }
-
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    getListView().setMultiChoiceModeListener(this);
+
+
+    ListView listView = getListView();
+    adapter = new FilesAdapter2(listView);
+    settings = getApp(this).getSettings();
+    bus = FilesApp.BUS;
+    dir = getDirectory();
+    fileObserver = new FilesAdapterObserver(dir, adapter, new Handler());
+
+    listView.setMultiChoiceModeListener(this);
+    listView.setOnScrollListener(this);
     refresh(settings.shouldShowHiddenFiles());
     setListAdapter(adapter);
+    setHasOptionsMenu(true);
   }
 
   private File getDirectory() {
@@ -78,14 +82,12 @@ public final class FilesFragment
   @Override public void onResume() {
     super.onResume();
     checkShowHiddenFilesPreference();
-    bus.register(this);
-    observer.startWatching();
+    fileObserver.startWatching();
   }
 
   @Override public void onPause() {
     super.onPause();
-    bus.unregister(this);
-    observer.stopWatching();
+    fileObserver.stopWatching();
   }
 
   void checkShowHiddenFilesPreference() {
@@ -107,22 +109,28 @@ public final class FilesFragment
   @Override public void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
     MenuItem fav = menu.findItem(R.id.favorite);
-    if (fav != null) fav.setChecked(settings.isFavorite(directoryInDisplay));
+    if (fav != null) fav.setChecked(settings.isFavorite(dir));
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int itemId = item.getItemId();
     if (itemId == R.id.favorite) {
       return handleFavoriteChange(!item.isChecked());
+    } else if (itemId == R.id.new_dir) {
+      return handleNewDir();
     }
     return super.onOptionsItemSelected(item);
   }
 
+  private boolean handleNewDir() {
+    return new File(dir, new Random().nextInt() + "").mkdir(); // TODO
+  }
+
   private boolean handleFavoriteChange(boolean favorite) {
     if (favorite) {
-      settings.addFavorite(directoryInDisplay);
+      settings.addFavorite(dir);
     } else {
-      settings.removeFavorite(directoryInDisplay);
+      settings.removeFavorite(dir);
     }
     return true;
   }
@@ -136,7 +144,7 @@ public final class FilesFragment
     if (children == null) {
       updateUnableToShowDirectoryError(directory);
     } else {
-      updateAdapterContent(children);
+      adapter.replaceAll(asList(children), BY_NAME);
     }
   }
 
@@ -154,25 +162,13 @@ public final class FilesFragment
     }
   }
 
-  private void updateAdapterContent(File[] children) {
-    sort(children, BY_NAME);
-    adapter.setNotifyOnChange(false);
-    adapter.clear();
-    adapter.addAll(asList(children));
-    adapter.notifyDataSetChanged();
-  }
-
-  @Override public FilesAdapter getListAdapter() {
-    return adapter;
-  }
-
   boolean isShowingHiddenFiles() {
     return showingHiddenFiles;
   }
 
   void refresh(boolean showHiddenFiles) {
-    if (DEBUG) Log.d("FilesFragment", "refresh");
-    setContent(directoryInDisplay, showHiddenFiles);
+    if (DEBUG) Log.d(TAG, "refresh");
+    setContent(dir, showHiddenFiles);
     this.showingHiddenFiles = showHiddenFiles;
   }
 
@@ -217,20 +213,12 @@ public final class FilesFragment
     mode.setTitle(getString(R.string.n_selected, n));
   }
 
-  @Subscribe public void handle(DirectoryChangedEvent event) {
+  @Override
+  public void onScrollStateChanged(AbsListView view, int scrollState) {
+    adapter.clearPendingAnimations();
+  }
 
-//    File[] newFiles = listFiles(directoryInDisplay, showingHiddenFiles);
-//    if (newFiles == null) {
-//      newFiles = new File[0];
-//    }
-//    Set<File> files = newHashSet(adapter.getFiles());
-//    files.removeAll(asList(newFiles));
-//
-//    ListViews.removeItems(getListView(), adapter, files, new Runnable() {
-//      @Override public void run() {
-    refresh(showingHiddenFiles);
-//      }
-//    });
-
+  @Override
+  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
   }
 }

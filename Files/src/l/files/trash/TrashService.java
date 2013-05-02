@@ -4,12 +4,12 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import com.google.common.base.Preconditions;
 
 import java.io.File;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.BuildConfig.DEBUG;
 
 public final class TrashService extends IntentService {
 
@@ -58,11 +58,19 @@ public final class TrashService extends IntentService {
 
   private void handleMoveToTrash(Intent intent) throws IOException {
     String path = intent.getStringExtra(EXTRA_FILE_PATH);
-    if (path == null) return;
+    if (path == null) {
+      Log.d(TAG, "Not provided: " + EXTRA_FILE_PATH);
+      return;
+    }
 
     File file = new File(path);
-    if (!file.exists()) return;
+    if (!file.exists()) {
+      Log.d(TAG, "Ignored a file that doesn't exist: " + file);
+      return;
+    }
 
     helper.moveToTrash(file);
+
+    if (DEBUG) Log.d(TAG, "Moved to trash: " + file);
   }
 }
