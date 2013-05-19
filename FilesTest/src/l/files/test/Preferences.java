@@ -1,15 +1,15 @@
 package l.files.test;
 
-import static android.content.Context.MODE_PRIVATE;
-import static java.lang.System.nanoTime;
-
-import java.util.concurrent.CountDownLatch;
-
-import l.files.app.Settings;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import l.files.Settings;
+
+import java.util.concurrent.CountDownLatch;
+
+import static android.content.Context.MODE_PRIVATE;
+import static java.lang.System.nanoTime;
 
 public final class Preferences {
 

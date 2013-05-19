@@ -1,9 +1,9 @@
 package l.files.test;
 
-import l.files.app.SidebarFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import l.files.ui.app.sidebar.SidebarFragment;
 
 public final class TestSidebarFragmentActivity extends FragmentActivity {
 

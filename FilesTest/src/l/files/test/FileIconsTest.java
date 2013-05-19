@@ -1,10 +1,10 @@
 package l.files.test;
 
-import static android.os.Environment.getExternalStorageDirectory;
+import android.test.AndroidTestCase;
 
 import java.io.File;
 
-import android.test.AndroidTestCase;
+import static android.os.Environment.getExternalStorageDirectory;
 
 public class FileIconsTest extends AndroidTestCase {
 

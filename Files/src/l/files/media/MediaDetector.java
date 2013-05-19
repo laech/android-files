@@ -3,8 +3,8 @@ package l.files.media;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.squareup.otto.Bus;
-import l.files.app.FilesApp;
-import l.files.event.MediaDetectedEvent;
+import l.files.FilesApp;
+import l.files.ui.event.MediaDetectedEvent;
 import l.files.util.DebugTimer;
 import org.apache.tika.Tika;
 

@@ -1,8 +1,9 @@
 package l.files.util;
 
-import static l.files.BuildConfig.DEBUG;
 import android.os.SystemClock;
 import android.util.Log;
+
+import static l.files.BuildConfig.DEBUG;
 
 public final class DebugTimer {
 

@@ -1,26 +1,15 @@
 package l.files.media;
 
-import static l.files.test.TempDirectory.newTempDirectory;
-import static l.files.util.FileSystem.DIRECTORY_ALARMS;
-import static l.files.util.FileSystem.DIRECTORY_ANDROID;
-import static l.files.util.FileSystem.DIRECTORY_DCIM;
-import static l.files.util.FileSystem.DIRECTORY_DOWNLOADS;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_MOVIES;
-import static l.files.util.FileSystem.DIRECTORY_MUSIC;
-import static l.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
-import static l.files.util.FileSystem.DIRECTORY_PICTURES;
-import static l.files.util.FileSystem.DIRECTORY_PODCASTS;
-import static l.files.util.FileSystem.DIRECTORY_RINGTONES;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-import java.io.File;
-
 import junit.framework.TestCase;
 import l.files.R;
 import l.files.test.TempDirectory;
+
+import java.io.File;
+
+import static l.files.test.TempDirectory.newTempDirectory;
+import static l.files.util.FileSystem.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public final class ImageMapTest extends TestCase {
 

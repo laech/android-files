@@ -1,14 +1,14 @@
 package l.files.util;
 
-import static java.io.File.createTempFile;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
+import android.os.Build;
+import android.test.AndroidTestCase;
+import l.files.R;
 
 import java.io.File;
 
-import l.files.R;
-import android.os.Build;
-import android.test.AndroidTestCase;
+import static java.io.File.createTempFile;
+import static l.files.util.FileSystem.DIRECTORY_HOME;
+import static l.files.util.FileSystem.DIRECTORY_ROOT;
 
 public final class FileSystemTest extends AndroidTestCase {
 

@@ -1,10 +1,10 @@
 package l.files.util;
 
-import static l.files.util.FileSort.BY_NAME;
+import junit.framework.TestCase;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import static l.files.util.FileSort.BY_NAME;
 
 public final class FileSortTest extends TestCase {
 

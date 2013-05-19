@@ -1,14 +1,14 @@
 package l.files.trash;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.Files.write;
-import static java.lang.System.nanoTime;
-import static org.apache.commons.io.FileUtils.deleteDirectory;
+import android.test.AndroidTestCase;
 
 import java.io.File;
 import java.io.IOException;
 
-import android.test.AndroidTestCase;
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Files.write;
+import static java.lang.System.nanoTime;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 public final class TrashHelperTest extends AndroidTestCase {
 

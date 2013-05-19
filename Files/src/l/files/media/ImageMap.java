@@ -1,24 +1,13 @@
 package l.files.media;
 
-import static l.files.util.FileSystem.DIRECTORY_ALARMS;
-import static l.files.util.FileSystem.DIRECTORY_ANDROID;
-import static l.files.util.FileSystem.DIRECTORY_DCIM;
-import static l.files.util.FileSystem.DIRECTORY_DOWNLOADS;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_MOVIES;
-import static l.files.util.FileSystem.DIRECTORY_MUSIC;
-import static l.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
-import static l.files.util.FileSystem.DIRECTORY_PICTURES;
-import static l.files.util.FileSystem.DIRECTORY_PODCASTS;
-import static l.files.util.FileSystem.DIRECTORY_RINGTONES;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
-import static l.files.util.Files.getFileExtension;
+import l.files.R;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import l.files.R;
+import static l.files.util.FileSystem.*;
+import static l.files.util.Files.getFileExtension;
 
 public class ImageMap {
 

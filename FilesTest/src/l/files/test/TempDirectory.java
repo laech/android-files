@@ -1,12 +1,12 @@
 package l.files.test;
 
+import java.io.File;
+import java.io.IOException;
+
 import static com.google.common.io.Files.createTempDir;
 import static com.google.common.io.Files.touch;
 import static java.lang.System.nanoTime;
 import static junit.framework.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
 
 public final class TempDirectory {
 

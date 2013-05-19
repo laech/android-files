@@ -1,14 +1,14 @@
 package l.files.util;
 
-import static android.os.Environment.getExternalStorageDirectory;
-import static android.os.Environment.getExternalStoragePublicDirectory;
-
-import java.io.File;
-
-import l.files.R;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Environment;
+import l.files.R;
+
+import java.io.File;
+
+import static android.os.Environment.getExternalStorageDirectory;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class FileSystem {
 

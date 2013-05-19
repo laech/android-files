@@ -1,8 +1,9 @@
 package l.files.test;
 
+import android.app.Activity;
+
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import android.app.Activity;
 
 public final class Activities {
 

@@ -1,10 +1,10 @@
 package l.files.util;
 
-import static l.files.util.Files.getFileExtension;
+import junit.framework.TestCase;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import static l.files.util.Files.getFileExtension;
 
 public final class FilesTest extends TestCase {
 

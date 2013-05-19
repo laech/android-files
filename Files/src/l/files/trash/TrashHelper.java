@@ -1,15 +1,15 @@
 package l.files.trash;
 
+import android.content.Context;
+
+import java.io.File;
+import java.io.IOException;
+
 import static android.content.Context.MODE_PRIVATE;
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.util.Locale.ENGLISH;
 import static org.apache.commons.io.FileUtils.moveDirectory;
 import static org.apache.commons.io.FileUtils.moveFile;
-
-import java.io.File;
-import java.io.IOException;
-
-import android.content.Context;
 
 final class TrashHelper {
 
