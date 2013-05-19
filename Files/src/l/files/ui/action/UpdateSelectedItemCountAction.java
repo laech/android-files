@@ -10,10 +10,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class UpdateSelectedItemCountAction
     extends MultiChoiceModeActionAdapter {
 
-  private final AbsListView listView;
+  private final AbsListView list;
 
-  public UpdateSelectedItemCountAction(AbsListView listView) {
-    this.listView = checkNotNull(listView, "listView");
+  public UpdateSelectedItemCountAction(AbsListView list) {
+    this.list = checkNotNull(list, "list");
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -27,8 +27,8 @@ public final class UpdateSelectedItemCountAction
   }
 
   private void updateSelectedItemCount(ActionMode mode) {
-    int n = listView.getCheckedItemCount();
-    mode.setTitle(listView.getResources().getString(R.string.n_selected, n));
+    int n = list.getCheckedItemCount();
+    mode.setTitle(list.getResources().getString(R.string.n_selected, n));
   }
 
 }

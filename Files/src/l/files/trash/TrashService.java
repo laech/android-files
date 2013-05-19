@@ -70,11 +70,6 @@ public final class TrashService extends IntentService {
       this.context = checkNotNull(context, "context");
     }
 
-    public void moveToTrash(Iterable<File> files) {
-      checkNotNull(files, "files");
-      for (File file : files) moveToTrash(file);
-    }
-
     public void moveToTrash(File file) {
       context.startService(newIntent(checkNotNull(file, "file")));
     }

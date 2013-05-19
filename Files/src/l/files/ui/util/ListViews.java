@@ -1,6 +1,7 @@
 package l.files.ui.util;
 
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public final class ListViews {
   private ListViews() {
   }
 
-  public static List<Object> getCheckedItems(ListView list) {
+  public static List<Object> getCheckedItems(AbsListView list) {
     int n = list.getCheckedItemCount();
     List<Object> items = newArrayListWithCapacity(n);
     for (int i = 0; i < list.getCount(); i++) {
@@ -24,11 +25,11 @@ public final class ListViews {
     return items;
   }
 
-  public static <T> Iterable<T> getCheckedItems(ListView list, Class<T> type) {
+  public static <T> Iterable<T> getCheckedItems(AbsListView list, Class<T> type) {
     return filter(getCheckedItems(list), type);
   }
 
-  public static List<Object> getVisibleItems(ListView listView) {
+  public static List<Object> getVisibleItems(AbsListView listView) {
     int count = listView.getChildCount();
     if (0 == count) return emptyList();
 

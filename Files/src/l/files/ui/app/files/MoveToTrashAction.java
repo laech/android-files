@@ -3,7 +3,7 @@ package l.files.ui.app.files;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.AbsListView;
 import l.files.R;
 import l.files.ui.action.MultiChoiceModeActionAdapter;
 
@@ -11,17 +11,18 @@ import java.io.File;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
 public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
 
-  private final ListView listView;
+  private final AbsListView list;
   private final TrashMover mover;
 
-  public MoveToTrashAction(ListView listView, TrashMover mover) {
-    this.listView = listView;
-    this.mover = mover;
+  public MoveToTrashAction(AbsListView list, TrashMover mover) {
+    this.list = checkNotNull(list, "list");
+    this.mover = checkNotNull(mover, "mover");
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -31,13 +32,15 @@ public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
   }
 
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-    mover.moveToTrash(getCheckedFiles());
+    for (File file : getCheckedFiles()) {
+      mover.moveToTrash(file);
+    }
     mode.finish();
     return true;
   }
 
   private Iterable<File> getCheckedFiles() {
-    return getCheckedItems(listView, File.class);
+    return getCheckedItems(list, File.class);
   }
 
   @Override public int getItemId() {
