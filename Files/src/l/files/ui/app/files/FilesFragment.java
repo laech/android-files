@@ -14,7 +14,7 @@ import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
 import l.files.ui.action.MultiChoiceModeDelegate;
-import l.files.ui.action.UpdateSelectedItemCount;
+import l.files.ui.action.UpdateSelectedItemCountAction;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
@@ -64,8 +64,8 @@ public final class FilesFragment
     fileObserver = new FilesAdapterObserver(dir, adapter, new Handler());
 
     listView.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
-        new UpdateSelectedItemCount(getListView()),
-        new MoveToTrash(getListView(), new TrashMover(getActivity()))
+        new UpdateSelectedItemCountAction(getListView()),
+        new MoveToTrashAction(getListView(), new TrashMover(getActivity()))
     ));
     listView.setOnScrollListener(this);
     refresh(settings.shouldShowHiddenFiles());

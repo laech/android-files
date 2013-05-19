@@ -7,11 +7,12 @@ import l.files.R;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class UpdateSelectedItemCount extends MultiChoiceModeActionAdapter {
+public final class UpdateSelectedItemCountAction
+    extends MultiChoiceModeActionAdapter {
 
   private final ListView listView;
 
-  public UpdateSelectedItemCount(ListView listView) {
+  public UpdateSelectedItemCountAction(ListView listView) {
     this.listView = checkNotNull(listView, "listView");
   }
 

@@ -14,12 +14,12 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
-public final class MoveToTrash extends MultiChoiceModeActionAdapter {
+public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
 
   private final ListView listView;
   private final TrashMover mover;
 
-  public MoveToTrash(ListView listView, TrashMover mover) {
+  public MoveToTrashAction(ListView listView, TrashMover mover) {
     this.listView = listView;
     this.mover = mover;
   }
