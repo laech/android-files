@@ -2,7 +2,7 @@ package l.files.ui.action;
 
 import android.view.ActionMode;
 import android.view.Menu;
-import android.widget.ListView;
+import android.widget.AbsListView;
 import l.files.R;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -10,9 +10,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class UpdateSelectedItemCountAction
     extends MultiChoiceModeActionAdapter {
 
-  private final ListView listView;
+  private final AbsListView listView;
 
-  public UpdateSelectedItemCountAction(ListView listView) {
+  public UpdateSelectedItemCountAction(AbsListView listView) {
     this.listView = checkNotNull(listView, "listView");
   }
 
