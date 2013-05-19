@@ -29,18 +29,6 @@ public final class TrashService extends IntentService {
     super("TrashService");
   }
 
-  public static void moveToTrash(Iterable<File> files, Context context) {
-    for (File file : files) moveToTrash(file, context);
-  }
-
-  public static void moveToTrash(File file, Context context) {
-    checkNotNull(file, "file");
-    checkNotNull(context, "context");
-    context.startService(new Intent(context, TrashService.class)
-        .setAction(ACTION_MOVE_TO_TRASH)
-        .putExtra(EXTRA_FILE_PATH, file.getAbsolutePath()));
-  }
-
   @Override public void onCreate() {
     super.onCreate();
     helper = TrashHelper.create(this);
@@ -72,5 +60,29 @@ public final class TrashService extends IntentService {
     helper.moveToTrash(file);
 
     if (DEBUG) Log.d(TAG, "Moved to trash: " + file);
+  }
+
+  public static class TrashMover {
+
+    private final Context context;
+
+    public TrashMover(Context context) {
+      this.context = checkNotNull(context, "context");
+    }
+
+    public void moveToTrash(Iterable<File> files) {
+      checkNotNull(files, "files");
+      for (File file : files) moveToTrash(file);
+    }
+
+    public void moveToTrash(File file) {
+      context.startService(newIntent(checkNotNull(file, "file")));
+    }
+
+    private Intent newIntent(File file) {
+      return new Intent(context, TrashService.class)
+          .setAction(ACTION_MOVE_TO_TRASH)
+          .putExtra(EXTRA_FILE_PATH, file.getAbsolutePath());
+    }
   }
 }
