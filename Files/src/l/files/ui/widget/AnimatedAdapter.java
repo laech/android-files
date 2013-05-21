@@ -70,14 +70,15 @@ public abstract class AnimatedAdapter<T>
     return LayoutInflater.from(context).inflate(viewId, parent, false);
   }
 
-  @Override
-  public void addAll(
+  @Override public void addAll(
       Collection<? extends T> itemsToAdd, Comparator<? super T> comparator) {
     if (itemsToAdd.isEmpty()) return;
 
     newItemsToBeAnimated.addAll(itemsToAdd);
     items.addAll(itemsToAdd);
-    sort(items, comparator);
+    if (comparator != null) {
+      sort(items, comparator);
+    }
     notifyDataSetChanged();
   }
 
