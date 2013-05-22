@@ -1,4 +1,4 @@
-package l.files.ui.action;
+package l.files.ui.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
