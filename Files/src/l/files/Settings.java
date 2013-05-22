@@ -67,6 +67,11 @@ public class Settings {
     }
   }
 
+  public void setFavorite(File file, boolean favorite) {
+    if (favorite) addFavorite(file);
+    else removeFavorite(file);
+  }
+
   private long now() {
     return currentTimeMillis();
   }
