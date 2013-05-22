@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
-public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
+final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
 
   private final AbsListView list;
   private final TrashMover mover;
