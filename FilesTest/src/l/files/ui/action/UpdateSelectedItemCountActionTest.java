@@ -6,6 +6,7 @@ import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.widget.ListView;
 import l.files.R;
+import l.files.ui.app.files.UpdateSelectedItemCountAction;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

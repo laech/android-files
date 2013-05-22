@@ -1,9 +1,10 @@
-package l.files.ui.action;
+package l.files.ui.app.files;
 
 import android.view.ActionMode;
 import android.view.Menu;
 import android.widget.AbsListView;
 import l.files.R;
+import l.files.ui.action.MultiChoiceModeActionAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
