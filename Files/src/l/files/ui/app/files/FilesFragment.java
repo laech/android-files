@@ -3,9 +3,10 @@ package l.files.ui.app.files;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,11 +15,11 @@ import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
 import l.files.ui.action.MultiChoiceModeDelegate;
-import l.files.ui.action.UpdateSelectedItemCountAction;
+import l.files.ui.menu.OptionsMenu;
+import l.files.ui.app.BaseListFragment;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
-import java.util.Random;
 
 import static android.widget.AbsListView.OnScrollListener;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,7 +31,7 @@ import static l.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static l.files.util.FileSort.BY_NAME;
 
 public final class FilesFragment
-    extends ListFragment implements OnScrollListener {
+    extends BaseListFragment implements OnScrollListener {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -70,7 +71,11 @@ public final class FilesFragment
     listView.setOnScrollListener(this);
     refresh(settings.shouldShowHiddenFiles());
     setListAdapter(adapter);
-    setHasOptionsMenu(true);
+
+    setOptionsMenu(new OptionsMenu(
+        new FavoriteAction(dir, settings),
+        new NewDirectoryAction(dir)
+    ));
   }
 
   private File getDirectory() {
@@ -104,40 +109,6 @@ public final class FilesFragment
     super.onListItemClick(l, v, pos, id);
     Object item = l.getItemAtPosition(pos);
     if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
-  }
-
-  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    super.onCreateOptionsMenu(menu, inflater);
-    inflater.inflate(R.menu.files_fragment, menu);
-  }
-
-  @Override public void onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    MenuItem fav = menu.findItem(R.id.favorite);
-    if (fav != null) fav.setChecked(settings.isFavorite(dir));
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    int itemId = item.getItemId();
-    if (itemId == R.id.favorite) {
-      return handleFavoriteChange(!item.isChecked());
-    } else if (itemId == R.id.new_dir) {
-      return handleNewDir();
-    }
-    return super.onOptionsItemSelected(item);
-  }
-
-  private boolean handleNewDir() {
-    return new File(dir, new Random().nextInt() + "").mkdir(); // TODO
-  }
-
-  private boolean handleFavoriteChange(boolean favorite) {
-    if (favorite) {
-      settings.addFavorite(dir);
-    } else {
-      settings.removeFavorite(dir);
-    }
-    return true;
   }
 
   private void overrideEmptyText(int resId) {

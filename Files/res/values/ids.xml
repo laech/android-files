@@ -3,5 +3,7 @@
 
   <item name="content" type="id"/>
   <item name="move_to_trash" type="id"/>
+  <item name="new_dir" type="id"/>
+  <item name="favorite" type="id"/>
 
 </resources>
