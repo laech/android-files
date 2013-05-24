@@ -1,21 +1,18 @@
 package l.files.ui.app.files;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuItem;
 import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.FilesApp;
 import l.files.R;
+import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
-import l.files.ui.app.settings.SettingsActivity;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
+import l.files.ui.menu.OptionsMenu;
 import l.files.util.FileSystem;
 
 import java.io.File;
@@ -23,7 +20,7 @@ import java.io.File;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
-public class FilesActivity extends FragmentActivity {
+public class FilesActivity extends BaseFragmentActivity {
 
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
@@ -49,6 +46,10 @@ public class FilesActivity extends FragmentActivity {
     pager = createViewPager(directoryInDisplay);
     setTitle(fileSystem.getDisplayName(directoryInDisplay, getResources()));
     setContentView(pager);
+
+    setOptionsMenu(new OptionsMenu(
+        new SettingsAction(this)
+    ));
   }
 
   protected Optional<File> getDirectoryToDisplay() {
@@ -79,21 +80,6 @@ public class FilesActivity extends FragmentActivity {
   @Override protected void onPause() {
     super.onPause();
     bus.unregister(this);
-  }
-
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    getMenuInflater().inflate(R.menu.files_activity, menu);
-    return true;
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    int itemId = item.getItemId();
-    if (itemId == R.id.settings) {
-      startActivity(new Intent(this, SettingsActivity.class));
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Subscribe public void handle(FileSelectedEvent event) {

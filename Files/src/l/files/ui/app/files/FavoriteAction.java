@@ -9,10 +9,12 @@ import l.files.ui.menu.OptionsMenuActionAdapter;
 import java.io.File;
 
 import static android.view.Menu.NONE;
+import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class FavoriteAction extends OptionsMenuActionAdapter {
+final class FavoriteAction
+    extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
 
   private final Settings settings;
   private final File file;
@@ -22,26 +24,22 @@ final class FavoriteAction extends OptionsMenuActionAdapter {
     this.file = checkNotNull(file, "file");
   }
 
-  @Override public int getItemId() {
-    return R.id.favorite;
-  }
-
-  @Override public void onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    MenuItem item = menu.add(NONE, getItemId(), NONE, R.string.favorite);
-    item.setShowAsAction(SHOW_AS_ACTION_NEVER);
+  @Override public void onCreate(Menu menu) {
+    super.onCreate(menu);
+    MenuItem item = menu.add(NONE, R.id.favorite, NONE, R.string.favorite);
+    item.setOnMenuItemClickListener(this);
     item.setCheckable(true);
+    item.setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
-  @Override public void onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
+  @Override public void onPrepare(Menu menu) {
+    super.onPrepare(menu);
     MenuItem item = menu.findItem(R.id.favorite);
     if (item != null) item.setChecked(settings.isFavorite(file));
   }
 
-  @Override public void onOptionsItemSelected(MenuItem item) {
-    super.onOptionsItemSelected(item);
+  @Override public boolean onMenuItemClick(MenuItem item) {
     settings.setFavorite(file, !item.isChecked());
+    return true;
   }
-
 }

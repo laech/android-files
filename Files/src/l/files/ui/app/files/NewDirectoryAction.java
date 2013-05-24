@@ -9,10 +9,12 @@ import java.io.File;
 import java.util.Random;
 
 import static android.view.Menu.NONE;
+import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class NewDirectoryAction extends OptionsMenuActionAdapter {
+public final class NewDirectoryAction
+    extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
 
   private final File parent;
 
@@ -20,18 +22,15 @@ public final class NewDirectoryAction extends OptionsMenuActionAdapter {
     this.parent = checkNotNull(parent, "parent");
   }
 
-  @Override public int getItemId() {
-    return R.id.new_dir;
-  }
-
-  @Override public void onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
+  @Override public void onCreate(Menu menu) {
+    super.onCreate(menu);
     menu.add(NONE, R.id.new_dir, NONE, R.string.new_dir)
+        .setOnMenuItemClickListener(this)
         .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
-  @Override public void onOptionsItemSelected(MenuItem item) {
-    super.onOptionsItemSelected(item);
+  @Override public boolean onMenuItemClick(MenuItem item) {
     new File(parent, new Random().nextInt() + "").mkdir(); // TODO
+    return true;
   }
 }

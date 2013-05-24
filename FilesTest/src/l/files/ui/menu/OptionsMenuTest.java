@@ -1,11 +1,10 @@
 package l.files.ui.menu;
 
 import android.view.Menu;
-import android.view.MenuItem;
 import junit.framework.TestCase;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public final class OptionsMenuTest extends TestCase {
 
@@ -24,38 +23,15 @@ public final class OptionsMenuTest extends TestCase {
   public void testOnCreateOptionsMenuIsDelegated() {
     Menu menu = mock(Menu.class);
     optionsMenu.onCreateOptionsMenu(menu);
-    verify(action1).onCreateOptionsMenu(menu);
-    verify(action2).onCreateOptionsMenu(menu);
+    verify(action1).onCreate(menu);
+    verify(action2).onCreate(menu);
   }
 
   public void testOnPrepareOptionsMenuIsDelegated() {
     Menu menu = mock(Menu.class);
     optionsMenu.onPrepareOptionsMenu(menu);
-    verify(action1).onPrepareOptionsMenu(menu);
-    verify(action2).onPrepareOptionsMenu(menu);
-  }
-
-  public void testOnOptionsItemSelectedIsDelegatedToActionWithSameItemId() {
-    MenuItem item = mock(MenuItem.class);
-    given(item.getItemId()).willReturn(1);
-    given(action1.getItemId()).willReturn(1);
-
-    assertTrue(optionsMenu.onOptionsItemSelected(item));
-
-    verify(action1).onOptionsItemSelected(item);
-    verify(action2, never()).onOptionsItemSelected(item);
-  }
-
-  public void testOnOptionsItemSelectedIsNotDelegatedIfActionHasNoItemIdAndMenuItemHasNoId() {
-    MenuItem item = mock(MenuItem.class);
-    given(item.getItemId()).willReturn(0);
-    given(action1.getItemId()).willReturn(0);
-    given(action2.getItemId()).willReturn(1);
-
-    assertFalse(optionsMenu.onOptionsItemSelected(item));
-
-    verify(action1, never()).onOptionsItemSelected(item);
-    verify(action2, never()).onOptionsItemSelected(item);
+    verify(action1).onPrepare(menu);
+    verify(action2).onPrepare(menu);
   }
 
 }

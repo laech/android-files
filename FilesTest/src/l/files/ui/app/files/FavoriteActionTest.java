@@ -28,20 +28,17 @@ public final class FavoriteActionTest extends TestCase {
     action = new FavoriteAction(file, settings);
   }
 
-  public void testGetItemIdReturnsIdOfFavorite() {
-    assertEquals(R.id.favorite, action.getItemId());
-  }
-
   public void testOnCreateOptionsMenuCreatesCheckableFavoriteMenuItem() {
     MenuItem item = mock(MenuItem.class);
     Menu menu = mock(Menu.class);
     given(callAddMenuItem(menu)).willReturn(item);
 
-    action.onCreateOptionsMenu(menu);
+    action.onCreate(menu);
 
     callAddMenuItem(verify(menu));
     verify(item).setShowAsAction(SHOW_AS_ACTION_NEVER);
     verify(item).setCheckable(true);
+    verify(item).setOnMenuItemClickListener(action);
   }
 
   private MenuItem callAddMenuItem(Menu menu) {
@@ -62,27 +59,27 @@ public final class FavoriteActionTest extends TestCase {
     given(menu.findItem(R.id.favorite)).willReturn(item);
     given(settings.isFavorite(file)).willReturn(favorite);
 
-    action.onPrepareOptionsMenu(menu);
+    action.onPrepare(menu);
 
     verify(item).setChecked(favorite);
   }
 
   public void testOnPrepareOptionsMenuDoesNotCrashIfItemNotFound() {
-    action.onPrepareOptionsMenu(mock(Menu.class));
+    action.onPrepare(mock(Menu.class));
   }
 
-  public void testOnOptionsItemSelectedWillAddFileToFavoriteOnCheckingOfMenuItem() {
-    testOnOptionsItemSelected(false);
+  public void testOnMenuItemClickWillAddFileToFavoriteOnCheckingOfMenuItem() {
+    testOnMenuItemClick(false);
   }
 
-  public void testOnOptionsItemSelectedWillRemoveFileFromFavoriteOnUncheckingOfMenuItem() {
-    testOnOptionsItemSelected(true);
+  public void testOnMenuItemClickWillRemoveFileFromFavoriteOnUncheckingOfMenuItem() {
+    testOnMenuItemClick(true);
   }
 
-  private void testOnOptionsItemSelected(boolean favorite) {
+  private void testOnMenuItemClick(boolean favorite) {
     MenuItem item = mock(MenuItem.class);
     given(item.isChecked()).willReturn(favorite);
-    action.onOptionsItemSelected(item);
+    assertTrue(action.onMenuItemClick(item));
     verify(settings).setFavorite(file, !favorite);
   }
 
