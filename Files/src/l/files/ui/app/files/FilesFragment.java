@@ -15,9 +15,9 @@ import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
 import l.files.ui.action.MultiChoiceModeDelegate;
-import l.files.ui.menu.OptionsMenu;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.event.FileSelectedEvent;
+import l.files.ui.menu.OptionsMenu;
 
 import java.io.File;
 
@@ -27,8 +27,8 @@ import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
 import static l.files.trash.TrashService.TrashMover;
-import static l.files.util.FileFilters.HIDE_HIDDEN_FILES;
 import static l.files.util.FileSort.BY_NAME;
+import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
     extends BaseListFragment implements OnScrollListener {
@@ -40,6 +40,7 @@ public final class FilesFragment
   FilesAdapter adapter;
   Bus bus;
   Settings settings;
+
   private boolean showingHiddenFiles;
   private File dir;
   private FileObserver fileObserver;
@@ -56,26 +57,32 @@ public final class FilesFragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-
-    ListView listView = getListView();
-    adapter = new FilesAdapter(listView);
+    adapter = new FilesAdapter(getListView());
     settings = getApp(this).getSettings();
     bus = FilesApp.BUS;
     dir = getDirectory();
     fileObserver = new FilesAdapterObserver(dir, adapter, new Handler());
 
-    listView.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
-        new UpdateSelectedItemCountAction(getListView()),
-        new MoveToTrashAction(getListView(), new TrashMover(getActivity()))
-    ));
-    listView.setOnScrollListener(this);
-    refresh(settings.shouldShowHiddenFiles());
-    setListAdapter(adapter);
+    configureListView();
+    configureOptionsMenu();
+    refresh();
+  }
 
+  private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
         new FavoriteAction(dir, settings),
         new NewDirectoryAction(dir)
     ));
+  }
+
+  private void configureListView() {
+    ListView list = getListView();
+    list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
+        new UpdateSelectedItemCountAction(list),
+        new MoveToTrashAction(list, new TrashMover(getActivity()))
+    ));
+    list.setOnScrollListener(this);
+    setListAdapter(adapter);
   }
 
   private File getDirectory() {
@@ -100,32 +107,10 @@ public final class FilesFragment
     fileObserver.stopWatching();
   }
 
-  void checkShowHiddenFilesPreference() {
-    boolean showHiddenFiles = settings.shouldShowHiddenFiles();
-    if (isShowingHiddenFiles() != showHiddenFiles) refresh(showHiddenFiles);
-  }
-
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     Object item = l.getItemAtPosition(pos);
     if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
-  }
-
-  private void overrideEmptyText(int resId) {
-    ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
-  }
-
-  private void setContent(File directory, boolean showHiddenFiles) {
-    File[] children = listFiles(directory, showHiddenFiles);
-    if (children == null) {
-      updateUnableToShowDirectoryError(directory);
-    } else {
-      adapter.replaceAll(asList(children), BY_NAME);
-    }
-  }
-
-  private File[] listFiles(File directory, boolean showHiddenFiles) {
-    return directory.listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
   }
 
   private void updateUnableToShowDirectoryError(File directory) {
@@ -138,14 +123,32 @@ public final class FilesFragment
     }
   }
 
-  boolean isShowingHiddenFiles() {
-    return showingHiddenFiles;
+  private void overrideEmptyText(int resId) {
+    ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
   }
 
-  void refresh(boolean showHiddenFiles) {
+  void checkShowHiddenFilesPreference() {
+    boolean show = settings.shouldShowHiddenFiles();
+    if (showingHiddenFiles != show) refresh(show);
+  }
+
+  private void refresh() {
+    refresh(showingHiddenFiles);
+  }
+
+  private void refresh(boolean showHiddenFiles) {
     if (DEBUG) Log.d(TAG, "refresh");
     setContent(dir, showHiddenFiles);
     this.showingHiddenFiles = showHiddenFiles;
+  }
+
+  private void setContent(File directory, boolean showHiddenFiles) {
+    File[] children = listFiles(directory, showHiddenFiles);
+    if (children == null) {
+      updateUnableToShowDirectoryError(directory);
+    } else {
+      adapter.replaceAll(asList(children), BY_NAME);
+    }
   }
 
   @Override

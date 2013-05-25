@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Bus;
@@ -15,15 +14,12 @@ import l.files.test.TestFilesFragmentActivity;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.test.Activities.rotate;
-import static l.files.test.Preferences.*;
+import static l.files.test.Preferences.newPreferences;
+import static l.files.test.Preferences.newSettings;
 import static l.files.test.TempDirectory.newTempDirectory;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.mockito.BDDMockito.given;
@@ -50,58 +46,11 @@ public final class FilesFragmentTest
     super.tearDown();
   }
 
-  public void testFavoritesMenuItemIsCheckedIfDirectoryIsFavorite() {
-    testFavoriteMenuItemChecked(true);
-  }
-
-  public void testFavoritesMenuItemIsUncheckedIfDirectoryIsNotFavorite() {
-    testFavoriteMenuItemChecked(false);
-  }
-
-  private void testFavoriteMenuItemChecked(boolean checked) {
-    Settings settings = mock(Settings.class);
-    given(settings.isFavorite(directory.get())).willReturn(checked);
-    getActivity().getFragment().settings = settings;
-
-    MenuItem item = mock(MenuItem.class);
-    Menu menu = mock(Menu.class);
-    given(menu.findItem(R.id.favorite)).willReturn(item);
-
-    getActivity().getFragment().onPrepareOptionsMenu(menu);
-
-    verify(item).setChecked(checked);
-  }
-
   public void testFavoritesMenuItemIsOptional() {
     Menu menu = mock(Menu.class);
     given(menu.findItem(R.id.favorite)).willReturn(null);
     getActivity().getFragment().onPrepareOptionsMenu(menu);
     // No crash
-  }
-
-  public void testFavoriteCanBeAdded() throws Exception {
-    testFavorite(true);
-  }
-
-  public void testFavoriteCanBeRemoved() throws Exception {
-    testFavorite(false);
-  }
-
-  private void testFavorite(boolean add) throws Exception {
-    SharedPreferences pref = mockFragmentSettings();
-    CountDownLatch latch = countDownOnChange(pref);
-    MenuItem item = mockCheckedMenuItem(!add, R.id.favorite);
-
-    getActivity().getFragment().onOptionsItemSelected(item);
-    latch.await(2, SECONDS);
-
-    String expected = directory.get().getAbsolutePath();
-    Set<String> actual = getSet(pref, R.string.pref_favorites);
-    if (add) {
-      assertTrue(actual.contains(expected));
-    } else {
-      assertFalse(actual.contains(expected));
-    }
   }
 
   private SharedPreferences mockFragmentSettings() {
@@ -262,16 +211,5 @@ public final class FilesFragmentTest
   private void setTestIntent(File directory) {
     setActivityIntent(new Intent()
         .putExtra(DIRECTORY, directory.getAbsolutePath()));
-  }
-
-  private MenuItem mockCheckedMenuItem(boolean checked, int id) {
-    MenuItem item = mock(MenuItem.class);
-    given(item.getItemId()).willReturn(id);
-    given(item.isChecked()).willReturn(checked);
-    return item;
-  }
-
-  private Set<String> getSet(SharedPreferences pref, int key) {
-    return pref.getStringSet(getString(key), Collections.<String>emptySet());
   }
 }
