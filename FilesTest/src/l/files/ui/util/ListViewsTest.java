@@ -1,19 +1,33 @@
 package l.files.ui.util;
 
+import android.content.Context;
+import android.test.AndroidTestCase;
 import android.widget.ListView;
-import junit.framework.TestCase;
 
 import static l.files.ui.util.ListViews.getCheckedItems;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
-public final class ListViewsTest extends TestCase {
+public final class ListViewsTest extends AndroidTestCase {
 
   public void testGetCheckedItemsReturnsAllCheckedItems() {
-    ListView listView = mock(ListView.class);
-    given(listView.getCheckedItemCount()).willReturn(1);
-    given(listView.getCount()).willReturn(5);
-    given(listView.isItemChecked(2)).willReturn(true);
+    class MockListView extends ListView {
+      public MockListView(Context context) {
+        super(context);
+      }
+
+      @Override public int getCheckedItemCount() {
+        return 1;
+      }
+
+      @Override public int getCount() {
+        return 5;
+      }
+
+      @Override public boolean isItemChecked(int position) {
+        return position == 2;
+      }
+    }
+
+    ListView listView = new MockListView(getContext());
     assertEquals(1, getCheckedItems(listView).size());
   }
 }
