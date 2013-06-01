@@ -109,7 +109,7 @@ public final class SidebarFragmentTest
 
   public void testRefreshCalledOnResumeIfFavoritesChanged() throws Exception {
     SharedPreferences preferences = mockFragmentSettings();
-    updateFavoritesTimestamp(preferences);
+    updateBookmarksTimestamp(preferences);
     getFragment().adapter = mock(SidebarAdapter.class);
 
     getFragment().onResume();
@@ -117,9 +117,9 @@ public final class SidebarFragmentTest
     verify(getFragment().adapter).notifyDataSetChanged();
   }
 
-  private void updateFavoritesTimestamp(SharedPreferences preferences) {
+  private void updateBookmarksTimestamp(SharedPreferences preferences) {
     String key = getActivity().getString(
-        R.string.pref_favorites_updated_timestamp);
+        R.string.pref_bookmarks_updated_timestamp);
     preferences
         .edit()
         .putLong(key, nanoTime())
@@ -143,7 +143,7 @@ public final class SidebarFragmentTest
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         getFragment().onSharedPreferenceChanged(preferences,
-            getActivity().getString(R.string.pref_favorites_updated_timestamp));
+            getActivity().getString(R.string.pref_bookmarks_updated_timestamp));
         verify(getFragment().adapter).notifyDataSetChanged();
       }
     });
@@ -219,7 +219,7 @@ public final class SidebarFragmentTest
 
   private void addFavorite(final SharedPreferences preferences, File file)
       throws Throwable {
-    final String key = getActivity().getString(R.string.pref_favorites);
+    final String key = getActivity().getString(R.string.pref_bookmarks);
     final Set<String> favorites = singleton(file.getAbsolutePath());
     runTestOnUiThread(new Runnable() {
       @Override public void run() {

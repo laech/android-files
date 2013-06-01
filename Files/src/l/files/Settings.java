@@ -14,7 +14,7 @@ import static l.files.util.FileSystem.*;
 
 public class Settings {
 
-  private static final Set<String> DEFAULT_FAVORITES = ImmutableSet.of(
+  private static final Set<String> DEFAULT_BOOKMARKS = ImmutableSet.of(
       getPath(DIRECTORY_DCIM),
       getPath(DIRECTORY_DOWNLOADS),
       getPath(DIRECTORY_MOVIES),
@@ -46,7 +46,7 @@ public class Settings {
   }
 
   public void addFavorite(File file) {
-    Set<String> favorites = newHashSet(getFavorites());
+    Set<String> favorites = newHashSet(getBookmarks());
     if (favorites.add(getPath(file))) {
       preferences
           .edit()
@@ -57,7 +57,7 @@ public class Settings {
   }
 
   public void removeFavorite(File file) {
-    Set<String> favorites = newHashSet(getFavorites());
+    Set<String> favorites = newHashSet(getBookmarks());
     if (favorites.remove(getPath(file))) {
       preferences
           .edit()
@@ -76,17 +76,17 @@ public class Settings {
     return currentTimeMillis();
   }
 
-  public boolean isFavorite(File file) {
-    return getFavorites().contains(getPath(file));
+  public boolean isBookmark(File file) {
+    return getBookmarks().contains(getPath(file));
   }
 
-  public Set<String> getFavorites() {
+  public Set<String> getBookmarks() {
     return unmodifiableSet(preferences.getStringSet(
-        getFavoritesKey(), DEFAULT_FAVORITES));
+        getFavoritesKey(), DEFAULT_BOOKMARKS));
   }
 
   public String getFavoritesKey() {
-    return application.getString(R.string.pref_favorites);
+    return application.getString(R.string.pref_bookmarks);
   }
 
   public long getFavoritesUpdatedTimestamp() {
@@ -94,6 +94,6 @@ public class Settings {
   }
 
   public String getFavoritesUpdatedTimestampKey() {
-    return application.getString(R.string.pref_favorites_updated_timestamp);
+    return application.getString(R.string.pref_bookmarks_updated_timestamp);
   }
 }

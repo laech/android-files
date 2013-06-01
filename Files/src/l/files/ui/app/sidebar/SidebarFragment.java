@@ -62,16 +62,16 @@ public final class SidebarFragment
     favoritesUpdatedTimestamp = settings.getFavoritesUpdatedTimestamp();
     adapter.setNotifyOnChange(false);
     adapter.clear();
-    adapter.add(getString(R.string.favorites));
-    adapter.addAll(getFavorites());
+    adapter.add(getString(R.string.bookmarks));
+    adapter.addAll(getBookmarks());
     adapter.add(getString(R.string.device));
     adapter.add(DIRECTORY_HOME);
     adapter.add(DIRECTORY_ROOT);
     adapter.notifyDataSetChanged();
   }
 
-  private Collection<File> getFavorites() {
-    Set<String> paths = settings.getFavorites();
+  private Collection<File> getBookmarks() {
+    Set<String> paths = settings.getBookmarks();
     List<File> dirs = newArrayListWithCapacity(paths.size());
     for (String path : paths) {
       File f = new File(path);

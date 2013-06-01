@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="pref_show_hidden_files">pref_show_hidden_files</string>
-  <string name="pref_favorites">pref_favorites</string>
-  <string name="pref_favorites_updated_timestamp">pref_favorites_updated_timestamp</string>
+  <string name="pref_bookmarks">pref_favorites</string>
+  <string name="pref_bookmarks_updated_timestamp">pref_favorites_updated_timestamp</string>
 </resources>

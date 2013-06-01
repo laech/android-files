@@ -14,18 +14,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class FavoriteActionTest extends TestCase {
+public final class BookmarkActionTest extends TestCase {
 
   private Settings settings;
   private File file;
 
-  private FavoriteAction action;
+  private BookmarkAction action;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     settings = mock(Settings.class);
     file = new File("a");
-    action = new FavoriteAction(file, settings);
+    action = new BookmarkAction(file, settings);
   }
 
   public void testOnCreateOptionsMenuCreatesCheckableFavoriteMenuItem() {
@@ -42,7 +42,7 @@ public final class FavoriteActionTest extends TestCase {
   }
 
   private MenuItem callAddMenuItem(Menu menu) {
-    return menu.add(NONE, R.id.favorite, NONE, R.string.favorite);
+    return menu.add(NONE, R.id.bookmark, NONE, R.string.bookmark);
   }
 
   public void testOnPrepareOptionsMenuUnchecksMenuItemIfFileIsAFavorite() {
@@ -56,8 +56,8 @@ public final class FavoriteActionTest extends TestCase {
   private void testOnPrepareOptionsMenu(boolean favorite) {
     MenuItem item = mock(MenuItem.class);
     Menu menu = mock(Menu.class);
-    given(menu.findItem(R.id.favorite)).willReturn(item);
-    given(settings.isFavorite(file)).willReturn(favorite);
+    given(menu.findItem(R.id.bookmark)).willReturn(item);
+    given(settings.isBookmark(file)).willReturn(favorite);
 
     action.onPrepare(menu);
 

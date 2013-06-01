@@ -13,20 +13,20 @@ import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class FavoriteAction
+final class BookmarkAction
     extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
 
   private final Settings settings;
   private final File file;
 
-  public FavoriteAction(File file, Settings settings) {
+  public BookmarkAction(File file, Settings settings) {
     this.settings = checkNotNull(settings, "settings");
     this.file = checkNotNull(file, "file");
   }
 
   @Override public void onCreate(Menu menu) {
     super.onCreate(menu);
-    MenuItem item = menu.add(NONE, R.id.favorite, NONE, R.string.favorite);
+    MenuItem item = menu.add(NONE, R.id.bookmark, NONE, R.string.bookmark);
     item.setOnMenuItemClickListener(this);
     item.setCheckable(true);
     item.setShowAsAction(SHOW_AS_ACTION_NEVER);
@@ -34,8 +34,8 @@ final class FavoriteAction
 
   @Override public void onPrepare(Menu menu) {
     super.onPrepare(menu);
-    MenuItem item = menu.findItem(R.id.favorite);
-    if (item != null) item.setChecked(settings.isFavorite(file));
+    MenuItem item = menu.findItem(R.id.bookmark);
+    if (item != null) item.setChecked(settings.isBookmark(file));
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {

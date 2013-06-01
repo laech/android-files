@@ -14,7 +14,6 @@ import com.squareup.otto.Bus;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
-import l.files.ui.action.MultiChoiceModeDelegate;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.menu.OptionsMenu;
@@ -26,7 +25,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
-import static l.files.trash.TrashService.TrashMover;
 import static l.files.util.FileSort.BY_NAME;
 import static l.files.util.Files.listFiles;
 
@@ -70,17 +68,17 @@ public final class FilesFragment
 
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
-        new FavoriteAction(dir, settings),
-        new NewDirectoryAction(dir)
+        new BookmarkAction(dir, settings)
+//        new NewDirectoryAction(dir)
     ));
   }
 
   private void configureListView() {
     ListView list = getListView();
-    list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
-        new UpdateSelectedItemCountAction(list),
-        new MoveToTrashAction(list, new TrashMover(getActivity()))
-    ));
+//    list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
+//        new UpdateSelectedItemCountAction(list),
+//        new MoveToTrashAction(list, new TrashMover(getActivity()))
+//    ));
     list.setOnScrollListener(this);
     setListAdapter(adapter);
   }

@@ -22,9 +22,9 @@ public final class SettingsTest extends AndroidTestCase {
     settings = new Settings(getApplication(), newPreferences(getApplication()));
   }
 
-  public void testFavoritesUpdatedTimestampStaysSameOnAddingDuplicate() {
+  public void testBookmarksUpdatedTimestampStaysSameOnAddingDuplicate() {
     File file = new File("/");
-    addFavoriteToUnderlyingPreferences(file);
+    addBookmarkToUnderlyingPreferences(file);
 
     long old = settings.getFavoritesUpdatedTimestamp();
     settings.addFavorite(file);
@@ -33,23 +33,23 @@ public final class SettingsTest extends AndroidTestCase {
     assertEquals(old, updated);
   }
 
-  public void testFavoritesUpdatedTimestampChangesOnRemovingFavoriteThatDoesNotExist() {
+  public void testBookmarksUpdatedTimestampChangesOnRemovingFavoriteThatDoesNotExist() {
     long old = settings.getFavoritesUpdatedTimestamp();
     settings.removeFavorite(new File("/no_such_favorite"));
     long updated = settings.getFavoritesUpdatedTimestamp();
     assertEquals(old, updated);
   }
 
-  public void testFavoritesUpdatedTimestampChangesOnAddingFavorite() {
+  public void testBookmarksUpdatedTimestampChangesOnAddingFavorite() {
     long old = settings.getFavoritesUpdatedTimestamp();
     settings.addFavorite(new File("/"));
     long updated = settings.getFavoritesUpdatedTimestamp();
     assertFalse(old == updated);
   }
 
-  public void testFavoritesUpdatedTimestampChangesOnRemovingFavorite() {
+  public void testBookmarksUpdatedTimestampChangesOnRemovingFavorite() {
     File file = new File("/");
-    addFavoriteToUnderlyingPreferences(file);
+    addBookmarkToUnderlyingPreferences(file);
 
     long old = settings.getFavoritesUpdatedTimestamp();
     settings.removeFavorite(file);
@@ -58,36 +58,36 @@ public final class SettingsTest extends AndroidTestCase {
     assertFalse(old == updated);
   }
 
-  public void testFavoriteCanBeAdded() throws Exception {
+  public void testBookmarkCanBeAdded() throws Exception {
     File expected = new File("/abc");
     CountDownLatch latch = countDownOnChange(newPreferences(getApplication()));
 
     settings.addFavorite(expected);
 
     latch.await(2, SECONDS);
-    assertTrue(settings.isFavorite(expected));
+    assertTrue(settings.isBookmark(expected));
   }
 
-  public void testFavoriteCanBeRemoved() throws Exception {
+  public void testBookmarkCanBeRemoved() throws Exception {
     File expected = new File("/def");
-    addFavoriteToUnderlyingPreferences(expected);
+    addBookmarkToUnderlyingPreferences(expected);
     CountDownLatch latch = countDownOnChange(settings.getPreferences());
 
     settings.removeFavorite(expected);
 
     latch.await(2, SECONDS);
-    assertFalse(settings.isFavorite(expected));
+    assertFalse(settings.isBookmark(expected));
   }
 
-  private void addFavoriteToUnderlyingPreferences(File expected) {
+  private void addBookmarkToUnderlyingPreferences(File expected) {
     settings.getPreferences()
         .edit()
-        .putStringSet(favoritesKey(), newHashSet(expected.getAbsolutePath()))
+        .putStringSet(bookmarksKey(), newHashSet(expected.getAbsolutePath()))
         .commit();
   }
 
-  private String favoritesKey() {
-    return getContext().getString(R.string.pref_favorites);
+  private String bookmarksKey() {
+    return getContext().getString(R.string.pref_bookmarks);
   }
 
   private Application getApplication() {

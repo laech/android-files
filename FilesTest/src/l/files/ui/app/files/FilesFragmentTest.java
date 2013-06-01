@@ -48,7 +48,7 @@ public final class FilesFragmentTest
 
   public void testFavoritesMenuItemIsOptional() {
     Menu menu = mock(Menu.class);
-    given(menu.findItem(R.id.favorite)).willReturn(null);
+    given(menu.findItem(R.id.bookmark)).willReturn(null);
     getActivity().getFragment().onPrepareOptionsMenu(menu);
     // No crash
   }
