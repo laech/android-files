@@ -29,7 +29,7 @@
 
     <activity
       android:name=".ui.app.files.FilesActivity"
-      android:parentActivityName="l.files.app.HomeActivity"/>
+      android:parentActivityName=".ui.app.home.HomeActivity"/>
 
     <activity
       android:name=".ui.app.settings.SettingsActivity"
