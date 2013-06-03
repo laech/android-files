@@ -1,5 +1,25 @@
 package l.files.ui.app.files;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Arrays.asList;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.FilesApp.getApp;
+import static l.files.util.FileSort.BY_NAME;
+import static l.files.util.Files.listFiles;
+
+import java.io.File;
+
+import l.files.FilesApp;
+import l.files.R;
+import l.files.Settings;
+import l.files.media.ImageMap;
+import l.files.trash.TrashService.TrashMover;
+import l.files.ui.action.MultiChoiceModeDelegate;
+import l.files.ui.app.BaseListFragment;
+import l.files.ui.event.FileSelectedEvent;
+import l.files.ui.menu.OptionsMenu;
+import l.files.util.DateTimeFormat;
+import l.files.util.FileSystem;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -8,25 +28,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.squareup.otto.Bus;
-import l.files.FilesApp;
-import l.files.R;
-import l.files.Settings;
-import l.files.ui.app.BaseListFragment;
-import l.files.ui.event.FileSelectedEvent;
-import l.files.ui.menu.OptionsMenu;
-
-import java.io.File;
-
-import static android.widget.AbsListView.OnScrollListener;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Arrays.asList;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.FilesApp.getApp;
-import static l.files.util.FileSort.BY_NAME;
-import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
     extends BaseListFragment implements OnScrollListener {
@@ -55,7 +61,8 @@ public final class FilesFragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    adapter = new FilesAdapter(getListView());
+    adapter = new FilesAdapter(getListView(), FileSystem.INSTANCE,
+        ImageMap.INSTANCE, new DateTimeFormat(getActivity()));
     settings = getApp(this).getSettings();
     bus = FilesApp.BUS;
     dir = getDirectory();
@@ -68,17 +75,15 @@ public final class FilesFragment
 
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
-        new BookmarkAction(dir, settings)
-//        new NewDirectoryAction(dir)
-    ));
+        new BookmarkAction(dir, settings),
+        new NewDirectoryAction(dir)));
   }
 
   private void configureListView() {
     ListView list = getListView();
-//    list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
-//        new UpdateSelectedItemCountAction(list),
-//        new MoveToTrashAction(list, new TrashMover(getActivity()))
-//    ));
+    list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
+        new UpdateSelectedItemCountAction(list),
+        new MoveToTrashAction(list, new TrashMover(getActivity()))));
     list.setOnScrollListener(this);
     setListAdapter(adapter);
   }
@@ -149,12 +154,10 @@ public final class FilesFragment
     }
   }
 
-  @Override
-  public void onScrollStateChanged(AbsListView view, int scrollState) {
+  @Override public void onScrollStateChanged(AbsListView view, int scrollState) {
     adapter.clearPendingAnimations();
   }
 
-  @Override
-  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-  }
+  @Override public void onScroll(AbsListView view, int firstVisibleItem,
+      int visibleItemCount, int totalItemCount) {}
 }

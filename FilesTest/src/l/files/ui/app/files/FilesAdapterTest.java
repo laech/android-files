@@ -1,24 +1,30 @@
 package l.files.ui.app.files;
 
-import android.test.AndroidTestCase;
-import android.widget.ListView;
-import android.widget.TextView;
-import l.files.media.ImageMap;
-import l.files.util.FileSystem;
-
-import java.io.File;
-
+import static android.text.format.Formatter.formatShortFileSize;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
+
+import l.files.R;
+import l.files.media.ImageMap;
+import l.files.ui.app.files.FilesAdapter.ViewHolder;
+import l.files.util.DateTimeFormat;
+import l.files.util.FileSystem;
+import android.test.AndroidTestCase;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+
 public final class FilesAdapterTest extends AndroidTestCase {
 
   private File file;
-  private FileSystem fileSystem;
-  private ImageMap imageMap;
+  private FileSystem files;
+  private ImageMap images;
   private ListView list;
+  private DateTimeFormat format;
 
   private FilesAdapter adapter;
 
@@ -27,36 +33,81 @@ public final class FilesAdapterTest extends AndroidTestCase {
 
     file = mock(File.class);
     given(file.getName()).willReturn("a");
-    fileSystem = mock(FileSystem.class);
-    imageMap = mock(ImageMap.class);
+
+    files = mock(FileSystem.class);
+    images = mock(ImageMap.class);
     list = new ListView(getContext());
-    adapter = new FilesAdapter(list, fileSystem, imageMap);
+    format = new DateTimeFormat(getContext());
+
+    adapter = new FilesAdapter(list, files, images, format);
     adapter.addAll(asList(file), null);
   }
 
-  public void testViewShowsIcon() {
-    int imageResId = 101;
-    given(imageMap.get(file)).willReturn(imageResId);
-    verify(view()).setCompoundDrawablesWithIntrinsicBounds(imageResId, 0, 0, 0);
+  public void testViewShowsDirectoryUpdatedTime() {
+    ViewHolder holder = new ViewHolder();
+    holder.info = new TextView(getContext());
+    given(file.lastModified()).willReturn(1010L);
+    given(file.isFile()).willReturn(false);
+    given(file.isDirectory()).willReturn(true);
+
+    adapter.showFileInfo(file, holder);
+
+    String expected = format.format(file.lastModified());
+    assertEquals(expected, holder.info.getText());
+  }
+
+  public void testViewShowsFileSizeAndUpdatedTime() {
+    ViewHolder holder = new ViewHolder();
+    holder.info = new TextView(getContext());
+    given(file.lastModified()).willReturn(1010L);
+    given(file.length()).willReturn(101L);
+    given(file.isFile()).willReturn(true);
+    given(file.isDirectory()).willReturn(false);
+
+    adapter.showFileInfo(file, holder);
+
+    String size = formatShortFileSize(getContext(), file.length());
+    String updated = format.format(file.lastModified());
+    assertEquals(
+        getContext().getString(R.string.file_size_updated, size, updated),
+        holder.info.getText());
   }
 
   public void testViewShowsFilename() {
-    String name = "name-a";
-    given(file.getName()).willReturn(name);
-    verify(view()).setText(name);
+    assertEquals(file.getName(), filename(view()));
+  }
+
+  public void testViewShowsIcon() {
+    view();
+    verify(images).get(file);
   }
 
   public void testViewIsDisabledIfHasNoPermissionToReadFile() {
-    given(fileSystem.hasPermissionToRead(file)).willReturn(false);
-    verify(view()).setEnabled(false);
+    given(files.hasPermissionToRead(file)).willReturn(false);
+    assertFalse(view().isEnabled());
+  }
+
+  public void testViewFilenameIsDisabledIfHasNoPermissionToReadFile() {
+    given(files.hasPermissionToRead(file)).willReturn(false);
+    assertFalse(view().findViewById(R.id.name).isEnabled());
   }
 
   public void testViewIsEnabledIfHasPermissionToReadFile() {
-    given(fileSystem.hasPermissionToRead(file)).willReturn(true);
-    verify(view()).setEnabled(true);
+    given(files.hasPermissionToRead(file)).willReturn(true);
+    assertTrue(view().isEnabled());
   }
 
-  private TextView view() {
-    return (TextView) adapter.getView(0, mock(TextView.class), null);
+  public void testViewFilenameIsEnabledIfHasPermissionToReadFile() {
+    given(files.hasPermissionToRead(file)).willReturn(true);
+    assertTrue(view().findViewById(R.id.name).isEnabled());
   }
+
+  private View view() {
+    return adapter.getView(0, null, list);
+  }
+
+  private CharSequence filename(View view) {
+    return ((TextView) view.findViewById(R.id.name)).getText();
+  }
+
 }

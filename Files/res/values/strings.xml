@@ -18,5 +18,6 @@
   <string name="bookmark">Bookmark</string>
   <string name="device">Device</string>
   <string name="new_dir">New folder</string>
+  <string name="file_size_updated">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
 
 </resources>

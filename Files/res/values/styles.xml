@@ -46,40 +46,52 @@
     <item name="android:scrollbarStyle">outsideOverlay</item>
   </style>
 
-  <style name="ListItem" parent="ShadowText">
+  <style name="ListItemContainer">
+    <item name="android:paddingLeft">16dp</item>
+    <item name="android:paddingRight">16dp</item>
+    <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+  </style>
+
+  <style name="ListItemText" parent="ShadowText">
     <item name="android:drawablePadding">8dp</item>
     <item name="android:gravity">center_vertical</item>
-    <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
-    <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
-    <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
     <item name="android:singleLine">true</item>
   </style>
 
   <style name="FilesList" parent="ListView">
-    <!--<item name="android:choiceMode">multipleChoiceModal</item>-->
+    <item name="android:choiceMode">multipleChoiceModal</item>
     <item name="android:fastScrollEnabled">true</item>
   </style>
 
-  <style name="FilesListItem" parent="ListItem">
-    <item name="android:drawablePadding">16dp</item>
-    <item name="android:paddingLeft">16dp</item>
+  <style name="FilesListItemContainer" parent="ListItemContainer">
     <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+  </style>
+
+  <style name="FilesListItemText" parent="ListItemText">
+    <item name="android:drawablePadding">16dp</item>
     <item name="android:ellipsize">middle</item>
   </style>
 
+  <style name="FilesListItemSecondaryText" parent="ListItemText">
+    <item name="android:textColor">?android:attr/textColorTertiary</item>
+    <item name="android:textSize">13sp</item>
+    <item name="android:minHeight">0dp</item>
+  </style>
+
   <style name="Sidebar" parent="ListView">
-    <item name="android:paddingLeft">16dp</item>
-    <item name="android:paddingRight">16dp</item>
     <item name="android:background">@drawable/sidebar_background</item>
     <item name="android:divider">@null</item>
   </style>
 
-  <style name="SideBarItem" parent="ListItem">
+  <style name="SideBarItem" parent="ListItemText">
     <item name="android:ellipsize">end</item>
+    <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+    <item name="android:paddingLeft">16dp</item>
   </style>
 
   <style name="SidebarHeader" parent="ShadowText">
     <item name="android:paddingTop">16dp</item>
+    <item name="android:paddingLeft">16dp</item>
     <item name="android:paddingBottom">2dp</item>
     <item name="android:textAllCaps">true</item>
     <item name="android:textStyle">bold</item>
