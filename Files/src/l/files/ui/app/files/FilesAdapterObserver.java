@@ -24,7 +24,7 @@ public class FilesAdapterObserver extends FileObserver {
    * this is more efficient and avoids interrupting any animations for the
    * previous update.
    */
-  private static final long BATCH_UPDATE_DELAY = 50;
+  static final long BATCH_UPDATE_DELAY = 50;
   private static final int MASK = CREATE | DELETE | MOVED_FROM | MOVED_TO;
 
   private final List<File> removals = newArrayList();
