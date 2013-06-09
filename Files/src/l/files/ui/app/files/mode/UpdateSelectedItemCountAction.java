@@ -1,14 +1,14 @@
-package l.files.ui.app.files;
+package l.files.ui.app.files.mode;
 
 import android.view.ActionMode;
 import android.view.Menu;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.ui.action.MultiChoiceModeActionAdapter;
+import l.files.ui.mode.MultiChoiceModeActionAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class UpdateSelectedItemCountAction
+public final class UpdateSelectedItemCountAction
     extends MultiChoiceModeActionAdapter {
 
   private final AbsListView list;

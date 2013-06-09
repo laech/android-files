@@ -1,4 +1,4 @@
-package l.files.ui.app.files;
+package l.files.ui.app.files.menu;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,7 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class SettingsAction extends OptionsMenuActionAdapter {
+public final class SettingsAction extends OptionsMenuActionAdapter {
 
   private final Context context;
 

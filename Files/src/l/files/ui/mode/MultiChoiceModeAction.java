@@ -1,4 +1,4 @@
-package l.files.ui.action;
+package l.files.ui.mode;
 
 import android.view.ActionMode;
 import android.view.MenuItem;
@@ -6,9 +6,10 @@ import android.view.MenuItem;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 
 /**
- * A {@link MultiChoiceModeAction} is a {@MultiChoiceModeListener} that handles
- * only a single action. {@link #onActionItemClicked(ActionMode, MenuItem)} will
- * only be called if {@link #getItemId()} matches the ID of the clicked item.
+ * A {@link MultiChoiceModeAction} is a {@link MultiChoiceModeListener} that
+ * handles only a single action.
+ * {@link #onActionItemClicked(ActionMode, MenuItem)} will only be called if
+ * {@link #getItemId()} matches the ID of the clicked item.
  */
 public interface MultiChoiceModeAction extends MultiChoiceModeListener {
 

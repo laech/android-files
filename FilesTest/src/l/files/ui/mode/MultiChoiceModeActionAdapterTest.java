@@ -1,4 +1,4 @@
-package l.files.ui.action;
+package l.files.ui.mode;
 
 import junit.framework.TestCase;
 

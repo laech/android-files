@@ -1,4 +1,4 @@
-package l.files.ui.app.files;
+package l.files.ui.app.files.mode;
 
 import android.content.Context;
 import android.content.res.Resources;

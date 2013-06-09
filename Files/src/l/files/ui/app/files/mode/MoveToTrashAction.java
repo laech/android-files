@@ -1,11 +1,11 @@
-package l.files.ui.app.files;
+package l.files.ui.app.files.mode;
 
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.ui.action.MultiChoiceModeActionAdapter;
+import l.files.ui.mode.MultiChoiceModeActionAdapter;
 
 import java.io.File;
 
@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
-final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
+public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
 
   private final AbsListView list;
   private final TrashMover mover;

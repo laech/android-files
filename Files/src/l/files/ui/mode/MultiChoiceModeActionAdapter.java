@@ -1,4 +1,4 @@
-package l.files.ui.action;
+package l.files.ui.mode;
 
 import android.view.ActionMode;
 import android.view.Menu;

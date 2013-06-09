@@ -9,6 +9,7 @@ import com.squareup.otto.Subscribe;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.ui.app.BaseFragmentActivity;
+import l.files.ui.app.files.menu.SettingsAction;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;

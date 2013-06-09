@@ -1,4 +1,4 @@
-package l.files.ui.app.files;
+package l.files.ui.app.files.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +13,7 @@ import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class BookmarkAction
+public final class BookmarkAction
     extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
 
   private final Settings settings;
