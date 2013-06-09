@@ -3,34 +3,30 @@ package l.files.ui.app.files;
 import android.os.Handler;
 import android.test.AndroidTestCase;
 import l.files.test.TempDirectory;
-import l.files.ui.widget.UpdatableAdapter;
 
 import java.io.File;
 
 import static java.lang.Thread.sleep;
-import static java.util.Arrays.asList;
 import static l.files.test.TempDirectory.newTempDirectory;
-import static l.files.ui.app.files.FilesAdapterObserver.BATCH_UPDATE_DELAY;
-import static l.files.util.FileSort.BY_NAME;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static l.files.ui.app.files.DirectoryObserver.BATCH_UPDATE_DELAY;
+import static org.mockito.Mockito.*;
 
-public final class FilesAdapterObserverTest extends AndroidTestCase {
+public final class DirectoryObserverTest extends AndroidTestCase {
 
   private Handler handler = new Handler();
   private TempDirectory monitored;
   private TempDirectory unmonitored;
-  private UpdatableAdapter<File> adapter;
+  private Runnable listener;
 
-  private FilesAdapterObserver observer;
+  private DirectoryObserver observer;
 
   @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
     monitored = newTempDirectory();
     unmonitored = newTempDirectory();
-    adapter = mock(UpdatableAdapter.class);
-    observer = new FilesAdapterObserver(monitored.get(), adapter, handler);
+    listener = mock(Runnable.class);
+    observer = new DirectoryObserver(monitored.get(), handler, listener);
   }
 
   @Override protected void tearDown() throws Exception {
@@ -40,9 +36,9 @@ public final class FilesAdapterObserverTest extends AndroidTestCase {
 
   public void testNotifiesOnFileAddition() throws Exception {
     observer.startWatching();
-    File file = monitored.newFile();
+    monitored.newFile();
     waitForUpdate();
-    verify(adapter).addAll(asList(file), BY_NAME);
+    verify(listener).run();
   }
 
   public void testNotifiesOnFileMovedInToMonitoredDir() throws Exception {
@@ -53,7 +49,7 @@ public final class FilesAdapterObserverTest extends AndroidTestCase {
     assertTrue(from.renameTo(to));
 
     waitForUpdate();
-    verify(adapter).addAll(asList(to), BY_NAME);
+    verify(listener).run();
   }
 
   public void testNotifiesOnFileRemoval() throws Exception {
@@ -63,7 +59,7 @@ public final class FilesAdapterObserverTest extends AndroidTestCase {
     assertTrue(file.delete());
 
     waitForUpdate();
-    verify(adapter).removeAll(asList(file));
+    verify(listener).run();
   }
 
   public void testNotifiesOnFileMovedOutOfMonitoredDir() throws Exception {
@@ -74,15 +70,15 @@ public final class FilesAdapterObserverTest extends AndroidTestCase {
     assertTrue(from.renameTo(to));
 
     waitForUpdate();
-    verify(adapter).removeAll(asList(from));
+    verify(listener).run();
   }
 
   public void testBatchNotifiesOnFilesAddition() throws Exception {
     observer.startWatching();
-    File file1 = monitored.newFile();
-    File file2 = monitored.newFile();
+    monitored.newFile();
+    monitored.newFile();
     waitForUpdate();
-    verify(adapter).addAll(asList(file1, file2), BY_NAME);
+    verify(listener, times(1)).run();
   }
 
   public void testBatchNotifiesOnFilesRemoval() throws Exception {
@@ -94,7 +90,7 @@ public final class FilesAdapterObserverTest extends AndroidTestCase {
     assertTrue(file2.delete());
 
     waitForUpdate();
-    verify(adapter).removeAll(asList(file1, file2));
+    verify(listener, times(1)).run();
   }
 
   private void waitForUpdate() throws InterruptedException {
