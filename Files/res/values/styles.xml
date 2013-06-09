@@ -28,7 +28,7 @@
   </style>
 
   <style name="ShadowText" parent="android:Widget.Holo.TextView">
-    <item name="android:shadowColor">#FFFFFFFF</item>
+    <item name="android:shadowColor">#DDFFFFFF</item>
     <item name="android:shadowDx">0</item>
     <item name="android:shadowDy">1</item>
     <item name="android:shadowRadius">1</item>
@@ -70,12 +70,14 @@
   <style name="FilesListItemText" parent="ListItemText">
     <item name="android:drawablePadding">16dp</item>
     <item name="android:ellipsize">middle</item>
+    <item name="android:shadowColor">#AAFFFFFF</item>
   </style>
 
   <style name="FilesListItemSecondaryText" parent="ListItemText">
     <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textSize">13sp</item>
     <item name="android:minHeight">0dp</item>
+    <item name="android:shadowColor">#AAFFFFFF</item>
   </style>
 
   <style name="Sidebar" parent="ListView">
