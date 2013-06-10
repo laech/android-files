@@ -14,7 +14,7 @@
   </style>
 
   <style name="ActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-    <item name="android:textColor">#474747</item>
+    <item name="android:textColor">@color/text</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
@@ -23,18 +23,18 @@
   </style>
 
   <style name="ActionBarOverflowItem" parent="android:TextAppearance.Holo.Medium">
-    <item name="android:textColor">#AA000000</item>
+    <item name="android:textColor">@color/text</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
   <style name="ShadowText" parent="android:Widget.Holo.TextView">
-    <item name="android:shadowColor">#DDFFFFFF</item>
+    <item name="android:shadowColor">@color/text_shadow</item>
     <item name="android:shadowDx">0</item>
     <item name="android:shadowDy">1</item>
     <item name="android:shadowRadius">1</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
     <item name="android:textSize">16sp</item>
-    <item name="android:textColor">#474747</item>
+    <item name="android:textColor">@color/text</item>
   </style>
 
   <style name="ListEmptyText" parent="ShadowText">
@@ -70,14 +70,14 @@
   <style name="FilesListItemText" parent="ListItemText">
     <item name="android:drawablePadding">16dp</item>
     <item name="android:ellipsize">middle</item>
-    <item name="android:shadowColor">#AAFFFFFF</item>
+    <item name="android:shadowColor">@color/text_shadow_light</item>
   </style>
 
   <style name="FilesListItemSecondaryText" parent="ListItemText">
     <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textSize">13sp</item>
     <item name="android:minHeight">0dp</item>
-    <item name="android:shadowColor">#AAFFFFFF</item>
+    <item name="android:shadowColor">@color/text_shadow_light</item>
   </style>
 
   <style name="Sidebar" parent="ListView">
@@ -97,9 +97,24 @@
     <item name="android:paddingBottom">2dp</item>
     <item name="android:textAllCaps">true</item>
     <item name="android:textStyle">bold</item>
-    <item name="android:textColor">#676767</item>
+    <item name="android:textColor">@color/sidebar_header</item>
     <item name="android:textSize">14sp</item>
     <item name="android:fontFamily">sans</item>
+  </style>
+
+  <style name="DialogWindowTitle" parent="android:TextAppearance.Holo.DialogWindowTitle">
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
+  <style name="Dialog" parent="android:Theme.Holo.Light.Dialog">
+    <item name="android:windowTitleStyle">@style/DialogWindowTitle</item>
+  </style>
+
+  <style name="SortByListItemText" parent="ListItemText">
+    <item name="android:paddingLeft">16dp</item>
+    <item name="android:paddingRight">16dp</item>
+    <item name="android:minHeight">?android:listPreferredItemHeightSmall</item>
+    <item name="android:textSize">18sp</item>
   </style>
 
 </resources>

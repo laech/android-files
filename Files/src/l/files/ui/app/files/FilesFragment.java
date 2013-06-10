@@ -18,6 +18,8 @@ import l.files.media.ImageMap;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.app.files.menu.BookmarkAction;
 import l.files.ui.app.files.menu.NewDirectoryAction;
+import l.files.ui.app.files.menu.SortByAction;
+import l.files.ui.app.files.menu.SortByDialog;
 import l.files.ui.app.files.mode.MoveToTrashAction;
 import l.files.ui.app.files.mode.UpdateSelectedItemCountAction;
 import l.files.ui.mode.MultiChoiceModeDelegate;
@@ -82,7 +84,8 @@ public final class FilesFragment
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
         new BookmarkAction(dir, settings),
-        new NewDirectoryAction(dir)));
+        new NewDirectoryAction(dir),
+        new SortByAction(getFragmentManager(), SortByDialog.CREATOR)));
   }
 
   private void configureListView() {

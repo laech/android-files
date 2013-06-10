@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <item name="content" type="id"/>
-  <item name="move_to_trash" type="id"/>
-  <item name="new_dir" type="id"/>
-  <item name="bookmark" type="id"/>
-  <item name="settings" type="id"/>
+  <item type="id" name="content"/>
+  <item type="id" name="move_to_trash"/>
+  <item type="id" name="new_dir"/>
+  <item type="id" name="bookmark"/>
+  <item type="id" name="settings"/>
+  <item type="id" name="sort_by"/>
 
 </resources>
