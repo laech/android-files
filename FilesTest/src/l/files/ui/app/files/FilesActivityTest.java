@@ -117,9 +117,9 @@ public class FilesActivityTest<T extends FilesActivity>
   }
 
   public void testShowsDirectorySpecified() {
-    File file = directory.newFile();
+    directory.newFile();
     setActivityIntent(newIntent(directory.get()));
-    assertEquals(file, getListView().getItemAtPosition(0));
+    assertEquals(directory.get(), anyFile().getParentFile());
   }
 
   public void testScrollsToFilesViewIfDirectorySpecifiedIsAlreadyDisplayed()
@@ -150,5 +150,14 @@ public class FilesActivityTest<T extends FilesActivity>
 
   private CharSequence getTitle() {
     return getActivity().getActionBar().getTitle();
+  }
+
+  private File anyFile() {
+    ListView list = getListView();
+    for (int i = 0; i < list.getCount(); i++) {
+      Object item = list.getItemAtPosition(i);
+      if (item instanceof File) return (File) item;
+    }
+    throw new AssertionError("No file found");
   }
 }
