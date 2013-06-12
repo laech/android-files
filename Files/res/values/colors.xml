@@ -4,4 +4,6 @@
   <color name="text_shadow">#DDFFFFFF</color>
   <color name="text_shadow_light">#AAFFFFFF</color>
   <color name="sidebar_header">#676767</color>
+  <color name="list_section_header">#676767</color>
+  <color name="list_section_header_background">#DDFFFFFF</color>
 </resources>

@@ -10,7 +10,7 @@ public class Sets {
   private Sets() {
   }
 
-  public static <T> Set<T> difference(
+  public static <T> Set<T> minus(
       Collection<? extends T> xs, Collection<? extends T> ys) {
     Set<T> set = newHashSet(xs);
     set.removeAll(ys);

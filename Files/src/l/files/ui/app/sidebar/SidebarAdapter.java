@@ -64,7 +64,7 @@ public class SidebarAdapter extends ArrayAdapter<Object> {
   }
 
   protected int getHeaderTextViewResourceId() {
-    return R.layout.files_item_header;
+    return R.layout.sidebar_item_header;
   }
 
   void updateViewForFile(File file, TextView view) {

@@ -32,12 +32,15 @@
     <item name="android:shadowDx">0</item>
     <item name="android:shadowDy">1</item>
     <item name="android:shadowRadius">1</item>
+  </style>
+
+  <style name="NormalText" parent="ShadowText">
     <item name="android:fontFamily">sans-serif-condensed</item>
     <item name="android:textSize">16sp</item>
     <item name="android:textColor">@color/text</item>
   </style>
 
-  <style name="ListEmptyText" parent="ShadowText">
+  <style name="ListEmptyText" parent="NormalText">
     <item name="android:layout_gravity">center</item>
     <item name="android:paddingBottom">?android:actionBarSize</item>
   </style>
@@ -52,7 +55,7 @@
     <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
   </style>
 
-  <style name="ListItemText" parent="ShadowText">
+  <style name="ListItemText" parent="NormalText">
     <item name="android:drawablePadding">8dp</item>
     <item name="android:gravity">center_vertical</item>
     <item name="android:singleLine">true</item>
@@ -73,6 +76,17 @@
     <item name="android:shadowColor">@color/text_shadow_light</item>
   </style>
 
+  <style name="FileListItemHeaderText" parent="ShadowText">
+    <item name="android:paddingTop">4dp</item>
+    <item name="android:paddingBottom">4dp</item>
+    <item name="android:paddingLeft">8dp</item>
+    <item name="android:paddingRight">8dp</item>
+    <item name="android:textColor">@color/list_section_header</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:background">@color/list_section_header_background</item>
+  </style>
+
   <style name="FilesListItemSecondaryText" parent="ListItemText">
     <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textSize">13sp</item>
@@ -91,7 +105,7 @@
     <item name="android:paddingLeft">16dp</item>
   </style>
 
-  <style name="SidebarHeader" parent="ShadowText">
+  <style name="SidebarHeader" parent="NormalText">
     <item name="android:paddingTop">16dp</item>
     <item name="android:paddingLeft">16dp</item>
     <item name="android:paddingBottom">2dp</item>

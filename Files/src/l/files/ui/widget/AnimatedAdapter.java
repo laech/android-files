@@ -9,16 +9,18 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Collections.sort;
 import static l.files.ui.animation.Animations.*;
 import static l.files.ui.util.ListViews.getFirstChildScrollOffset;
 import static l.files.ui.util.ListViews.getVisibleItems;
-import static l.files.util.Sets.difference;
+import static l.files.util.Sets.minus;
 
 public abstract class AnimatedAdapter<T>
     extends BaseAdapter implements UpdatableAdapter<T> {
@@ -70,26 +72,17 @@ public abstract class AnimatedAdapter<T>
     return LayoutInflater.from(context).inflate(viewId, parent, false);
   }
 
-  @Override public void addAll(
-      Collection<? extends T> itemsToAdd, Comparator<? super T> comparator) {
-    if (itemsToAdd.isEmpty()) return;
-
-    newItemsToBeAnimated.addAll(itemsToAdd);
-    items.addAll(itemsToAdd);
-    if (comparator != null) {
-      sort(items, comparator);
+  private void removeAllWithCallback(final Collection<?> items, final Runnable callback) {
+    if (items.isEmpty()) {
+      if (callback != null) callback.run();
+      return;
     }
-    notifyDataSetChanged();
-  }
 
-  @Override public void removeAll(final Collection<?> itemsToRemove) {
-    if (itemsToRemove.isEmpty()) return;
-
-    final Map<?, Animator> animators =
-        newRemovalAnimationForVisibleItems(itemsToRemove, list);
+    final Map<?, Animator> animators = newRemovalAnimationForVisibleItems(items, list);
 
     if (animators.isEmpty()) {
-      removeAndRestoreState(itemsToRemove);
+      removeAndRestoreState(items);
+      if (callback != null) callback.run();
       return;
     }
 
@@ -98,7 +91,7 @@ public abstract class AnimatedAdapter<T>
         removeAndRestoreState(animators.keySet());
         list.post(new Runnable() {
           @Override public void run() {
-            removeAll(difference(itemsToRemove, animators.keySet()));
+            removeAllWithCallback(minus(items, animators.keySet()), callback);
           }
         });
       }
@@ -127,24 +120,14 @@ public abstract class AnimatedAdapter<T>
     }
   }
 
-  @Override public void replaceAll(
-      Collection<? extends T> newItems, Comparator<? super T> comparator) {
-
-    newItemsToBeAnimated.clear();
-    newItemsToBeAnimated.addAll(newItems);
-    newItemsToBeAnimated.removeAll(items);
-
-    final List<T> toBeRemoved = newArrayList(items);
-    toBeRemoved.removeAll(newItems);
-
-    items.removeAll(newItems);
-    items.addAll(newItems);
-    sort(items, comparator);
-    notifyDataSetChanged();
-
-    list.post(new Runnable() {
+  @Override public void replaceAll(final Collection<? extends T> newItems) {
+    removeAllWithCallback(minus(items, newItems), new Runnable() {
       @Override public void run() {
-        removeAll(toBeRemoved);
+        newItemsToBeAnimated.clear();
+        newItemsToBeAnimated.addAll(minus(newItems, items));
+        items.clear();
+        items.addAll(newItems);
+        notifyDataSetChanged();
       }
     });
   }

@@ -2,6 +2,7 @@ package l.files.ui.app.files;
 
 import static android.text.format.Formatter.formatShortFileSize;
 import static java.util.Arrays.asList;
+import static l.files.ui.app.files.FilesAdapter.ViewHolder;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,6 @@ import java.io.File;
 
 import l.files.R;
 import l.files.media.ImageMap;
-import l.files.ui.app.files.FilesAdapter.ViewHolder;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
 import android.test.AndroidTestCase;
@@ -40,7 +40,7 @@ public final class FilesAdapterTest extends AndroidTestCase {
     format = new DateTimeFormat(getContext());
 
     adapter = new FilesAdapter(list, files, images, format);
-    adapter.addAll(asList(file), null);
+    adapter.replaceAll(asList(file));
   }
 
   public void testViewShowsDirectoryUpdatedTime() {
