@@ -91,7 +91,7 @@ public final class FilesFragmentTest
       }
     });
 
-    assertEquals(1, getListView().getCount());
+    assertTrue(getListView().getCount() > 0);
   }
 
   public void testSortsFilesByName() {
@@ -149,7 +149,7 @@ public final class FilesFragmentTest
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        clickFirstListItem();
+        clickFirstFileItem();
       }
     });
 
@@ -183,9 +183,15 @@ public final class FilesFragmentTest
     assertEquals(getString(msgId), getEmptyView().getText().toString());
   }
 
-  private void clickFirstListItem() {
-    assertTrue(getListView()
-        .performItemClick(getListView().getChildAt(0), 0, 0));
+  private void clickFirstFileItem() {
+    ListView list = getListView();
+    for (int i = 0; i < list.getCount(); i++) {
+      if (list.getItemAtPosition(i) instanceof  File) {
+        assertTrue(list.performItemClick(list.getChildAt(i), i, 0));
+        return;
+      }
+    }
+    throw new AssertionError("No file found");
   }
 
   private TextView getEmptyView() {
