@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Character.toUpperCase;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
 import static l.files.BuildConfig.DEBUG;
@@ -145,7 +146,9 @@ public final class FilesFragment
   }
 
   private void overrideEmptyText(int resId) {
-    ((TextView) getView().findViewById(android.R.id.empty)).setText(resId);
+    View root = getView();
+    if (root != null)
+      ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
   }
 
   void checkShowHiddenFilesPreference() {
@@ -175,7 +178,7 @@ public final class FilesFragment
       Multimap<Character, File> map = TreeMultimap.create(Multimaps.index(asList(children), new Function<File, Character>() {
         @Override
         public Character apply(File input) {
-          return input.getName().charAt(0);
+          return toUpperCase(input.getName().charAt(0));
         }
       }));
 

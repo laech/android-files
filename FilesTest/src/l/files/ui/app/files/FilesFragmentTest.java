@@ -14,9 +14,12 @@ import l.files.test.TestFilesFragmentActivity;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
+import java.util.List;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
 import static l.files.test.Activities.rotate;
 import static l.files.test.Preferences.newPreferences;
 import static l.files.test.Preferences.newSettings;
@@ -98,11 +101,17 @@ public final class FilesFragmentTest
     File z = directory.newFile("z");
     File a = directory.newFile("a");
     File c = directory.newDirectory("C");
+    assertEquals(asList(a, c, z), getFiles());
+  }
 
+  private List<File> getFiles() {
+    List<File> files = newArrayList();
     ListView list = getListView();
-    assertEquals(a, list.getItemAtPosition(0));
-    assertEquals(c, list.getItemAtPosition(1));
-    assertEquals(z, list.getItemAtPosition(2));
+    for (int i = 0; i < list.getCount(); i++) {
+      Object item = list.getItemAtPosition(i);
+      if (item instanceof File) files.add((File) item);
+    }
+    return files;
   }
 
   public void testShowsCorrectNumSelectedItemsOnRotation() throws Throwable {
@@ -186,7 +195,7 @@ public final class FilesFragmentTest
   private void clickFirstFileItem() {
     ListView list = getListView();
     for (int i = 0; i < list.getCount(); i++) {
-      if (list.getItemAtPosition(i) instanceof  File) {
+      if (list.getItemAtPosition(i) instanceof File) {
         assertTrue(list.performItemClick(list.getChildAt(i), i, 0));
         return;
       }
