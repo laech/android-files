@@ -10,11 +10,8 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.common.base.Function;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.TreeMultimap;
 import com.squareup.otto.Bus;
+import java.io.File;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
@@ -33,23 +30,12 @@ import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Character.toUpperCase;
-import static java.util.Arrays.asList;
-import static java.util.Arrays.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
-import static l.files.util.FileSort.BY_NAME;
 import static l.files.util.Files.listFiles;
 
-public final class FilesFragment
-    extends BaseListFragment implements OnScrollListener {
+public final class FilesFragment extends BaseListFragment implements OnScrollListener {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -171,23 +157,8 @@ public final class FilesFragment
     if (children == null) {
       updateUnableToShowDirectoryError(directory);
     } else {
-      sort(children, BY_NAME);
-
       // TODO: delete
-
-      Multimap<Character, File> map = TreeMultimap.create(Multimaps.index(asList(children), new Function<File, Character>() {
-        @Override
-        public Character apply(File input) {
-          return toUpperCase(input.getName().charAt(0));
-        }
-      }));
-
-      List<Object> items = new ArrayList<Object>();
-      for (Map.Entry<Character, Collection<File>> entry : map.asMap().entrySet()) {
-        items.add(entry.getKey());
-        items.addAll(entry.getValue());
-      }
-      adapter.replaceAll(items);
+      adapter.replaceAll(new SortByDateModified(getActivity()).apply(children));
     }
   }
 
