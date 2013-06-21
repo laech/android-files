@@ -12,3 +12,7 @@ xtend-gen
 *~
 *.iml
 generated-sources
+local.properties
+build
+.gradle
+gradle
