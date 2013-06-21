@@ -12,8 +12,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Supplier;
 import l.files.R;
+import l.files.settings.SortSetting;
 
 import static android.widget.AdapterView.OnItemClickListener;
+import static l.files.FilesApp.getApp;
+import static l.files.settings.SortSetting.Sort.DATE_MODIFIED;
+import static l.files.settings.SortSetting.Sort.NAME;
 
 public class SortByDialog extends DialogFragment implements OnItemClickListener {
 
@@ -23,11 +27,7 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
     }
   };
 
-  public static final Integer[] OPTIONS = new Integer[]{
-      R.string.name,
-      R.string.date_modified,
-      R.string.size
-  };
+  private SortSetting setting;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -36,6 +36,7 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
+    setting = getApp(getActivity()).getSortSetting();
     getDialog().setTitle(R.string.sort_by);
 
     ListView list = (ListView) getView().findViewById(android.R.id.list);
@@ -53,19 +54,22 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    // TODO
+    setting.set((SortSetting.Sort) parent.getItemAtPosition(position));
+    getDialog().dismiss();
   }
 
-  static class SortByAdapter extends ArrayAdapter<Integer> {
+  static class SortByAdapter extends ArrayAdapter<SortSetting.Sort> {
 
     SortByAdapter(Context context) {
-      super(context, R.layout.sort_by_item, OPTIONS);
+      super(context, R.layout.sort_by_item, new SortSetting.Sort[]{
+          NAME, DATE_MODIFIED
+      });
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       TextView view = (TextView) super.getView(position, convertView, parent);
-      view.setText(view.getContext().getString(getItem(position)));
+      view.setText(getItem(position).label(view.getContext()));
       return view;
     }
   }

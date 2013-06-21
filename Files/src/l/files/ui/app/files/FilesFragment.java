@@ -11,11 +11,12 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Bus;
-import java.io.File;
+import com.squareup.otto.Subscribe;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
 import l.files.media.ImageMap;
+import l.files.settings.SortSetting;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.app.files.menu.BookmarkAction;
@@ -30,9 +31,12 @@ import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
 
+import java.io.File;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
+import static l.files.settings.SortSetting.Sort;
 import static l.files.util.Files.listFiles;
 
 public final class FilesFragment extends BaseListFragment implements OnScrollListener {
@@ -44,10 +48,13 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
   FilesAdapter adapter;
   Bus bus;
   Settings settings;
+  SortSetting sortSetting;
 
-  private boolean showingHiddenFiles;
   private File dir;
   private DirectoryObserver fileObserver;
+
+  private boolean showingHiddenFiles;
+  private Sort currentSort;
 
   public static FilesFragment create(String directory) {
     Bundle args = new Bundle(1);
@@ -61,9 +68,9 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    adapter = new FilesAdapter(getListView(), FileSystem.INSTANCE,
-        ImageMap.INSTANCE, new DateTimeFormat(getActivity()));
+    adapter = newListAdapter();
     settings = getApp(this).getSettings();
+    sortSetting = getApp(this).getSortSetting();
     bus = FilesApp.BUS;
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
@@ -71,6 +78,9 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
         refresh();
       }
     });
+
+    currentSort = sortSetting.get();
+    showingHiddenFiles = settings.shouldShowHiddenFiles();
 
     configureListView();
     configureOptionsMenu();
@@ -106,13 +116,15 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
 
   @Override public void onResume() {
     super.onResume();
-    checkShowHiddenFilesPreference();
+    checkPreferences();
     fileObserver.startWatching();
+    bus.register(this);
   }
 
   @Override public void onPause() {
     super.onPause();
     fileObserver.stopWatching();
+    bus.unregister(this);
   }
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
@@ -137,28 +149,27 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
       ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
   }
 
-  void checkShowHiddenFilesPreference() {
+  void checkPreferences() { // TODO
     boolean show = settings.shouldShowHiddenFiles();
-    if (showingHiddenFiles != show) refresh(show);
+    Sort sort = sortSetting.get();
+    if (showingHiddenFiles != show || currentSort != sort) {
+      showingHiddenFiles = show;
+      currentSort = sort;
+      refresh();
+    }
   }
 
   private void refresh() {
-    refresh(showingHiddenFiles);
-  }
-
-  private void refresh(boolean showHiddenFiles) {
     if (DEBUG) Log.d(TAG, "refresh");
-    setContent(dir, showHiddenFiles);
-    this.showingHiddenFiles = showHiddenFiles;
+    setContent(dir);
   }
 
-  private void setContent(File directory, boolean showHiddenFiles) {
-    File[] children = listFiles(directory, showHiddenFiles);
+  private void setContent(File directory) {
+    File[] children = listFiles(directory, showingHiddenFiles);
     if (children == null) {
       updateUnableToShowDirectoryError(directory);
     } else {
-      // TODO: delete
-      adapter.replaceAll(new SortByDateModified(getActivity()).apply(children));
+      adapter.replaceAll(currentSort.transform(getActivity(), children));
     }
   }
 
@@ -169,5 +180,22 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
 
   @Override public void onScroll(AbsListView view, int firstVisibleItem,
       int visibleItemCount, int totalItemCount) {
+  }
+
+  @Subscribe public void handle(Sort sort) {
+    if (currentSort != sort) {
+      currentSort = sort;
+      adapter = newListAdapter();
+      setListAdapter(adapter);
+      refresh();
+    }
+  }
+
+  private FilesAdapter newListAdapter() {
+    return new FilesAdapter
+        (getListView(),
+        FileSystem.INSTANCE,
+        ImageMap.INSTANCE,
+        new DateTimeFormat(getActivity()));
   }
 }

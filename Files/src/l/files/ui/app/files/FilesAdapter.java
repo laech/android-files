@@ -10,12 +10,12 @@ import l.files.media.ImageMap;
 import l.files.ui.widget.AnimatedAdapter;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
+import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
 
 import java.io.File;
 
 import static android.text.format.Formatter.formatShortFileSize;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
 
 public final class FilesAdapter
     extends AnimatedAdapter<Object> implements PinnedSectionedHeaderAdapter {

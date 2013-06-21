@@ -11,6 +11,8 @@ import static l.files.BuildConfig.DEBUG;
 
 public class DirectoryObserver extends FileObserver {
 
+  // TODO listen to date modified for sorting
+
   private static final String TAG = DirectoryObserver.class.getSimpleName();
 
   /**

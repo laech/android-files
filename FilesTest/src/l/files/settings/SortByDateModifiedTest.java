@@ -1,4 +1,4 @@
-package l.files.ui.app.files;
+package l.files.settings;
 
 import android.test.AndroidTestCase;
 import l.files.R;
@@ -17,7 +17,7 @@ public final class SortByDateModifiedTest extends AndroidTestCase {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    sort = new SortByDateModified(getContext());
+    sort = new SortByDateModified();
   }
 
   public void testFilesWithinTheSameSectionAreSortedDesc() {
@@ -26,7 +26,7 @@ public final class SortByDateModifiedTest extends AndroidTestCase {
     File c = fileModifiedAt("3", 3);
     assertEquals(
         asList(string(R.string.earlier), c, b, a),
-        sort.apply(c, a, b));
+        sort.transform(getContext(), c, a, b));
   }
 
   public void testOrderIs_unknown_today_yesterday_7Days_30Days_earlier() {
@@ -47,7 +47,7 @@ public final class SortByDateModifiedTest extends AndroidTestCase {
             string(R.string.previous_30_days), last30Days,
             string(R.string.earlier), earlier
         ),
-        sort.apply(
+        sort.transform(getContext(),
             earlier,
             last30Days,
             yesterday,

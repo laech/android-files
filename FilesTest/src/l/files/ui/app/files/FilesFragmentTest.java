@@ -76,7 +76,7 @@ public final class FilesFragmentTest
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        getActivity().getFragment().checkShowHiddenFilesPreference();
+        getActivity().getFragment().checkPreferences();
       }
     });
 
@@ -90,7 +90,7 @@ public final class FilesFragmentTest
 
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        getActivity().getFragment().checkShowHiddenFilesPreference();
+        getActivity().getFragment().checkPreferences();
       }
     });
 

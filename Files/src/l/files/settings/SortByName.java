@@ -1,14 +1,16 @@
-package l.files.ui.app.files;
+package l.files.settings;
 
-import com.google.common.base.Function;
+import android.content.Context;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
+import static l.files.settings.SortSetting.Transformer;
 
-public final class SortByName implements Function<File[], List<File>> {
+final class SortByName implements Transformer {
 
   private static final Comparator<File> BY_NAME = new Comparator<File>() {
     @Override public int compare(File x, File y) {
@@ -16,9 +18,9 @@ public final class SortByName implements Function<File[], List<File>> {
     }
   };
 
-  @Override public List<File> apply(File... fs) {
+  @Override public List<Object> transform(Context context, File... fs) {
     File[] files = fs.clone();
     sort(files, BY_NAME);
-    return asList(files);
+    return Arrays.<Object>asList(files);
   }
 }

@@ -14,6 +14,8 @@ import static l.files.util.FileSystem.*;
 
 public class Settings {
 
+  // TODO separate out different settings object for show hidden files and favs
+
   private static final Set<String> DEFAULT_BOOKMARKS = ImmutableSet.of(
       getPath(DIRECTORY_DCIM),
       getPath(DIRECTORY_DOWNLOADS),

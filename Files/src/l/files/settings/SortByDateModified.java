@@ -1,4 +1,4 @@
-package l.files.ui.app.files;
+package l.files.settings;
 
 import android.content.Context;
 import com.google.common.base.Function;
@@ -6,19 +6,20 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import l.files.R;
 import org.joda.time.DateMidnight;
+import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.sort;
+import static l.files.settings.SortSetting.Transformer;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
-public final class SortByDateModified implements Function<File[], List<Object>> {
+final class SortByDateModified implements Transformer {
 
   private static enum When {
     UNKNOWN(R.string.unknown),
@@ -45,16 +46,10 @@ public final class SortByDateModified implements Function<File[], List<Object>> 
     }
   };
 
-  private final Context context;
-
-  public SortByDateModified(Context context) {
-    this.context = checkNotNull(context, "context");
-  }
-
-  public List<Object> apply(File... fs) {
+  @Override public List<Object> transform(Context context, File... fs) {
     File[] files = fs.clone();
     sort(files, BY_DATE_MODIFIED_DESC);
-    return toList(groupByDateModified(files), files);
+    return toList(groupByDateModified(files), files, context);
   }
 
   private Multimap<When, File> groupByDateModified(File[] files) {
@@ -78,7 +73,9 @@ public final class SortByDateModified implements Function<File[], List<Object>> 
     });
   }
 
-  private List<Object> toList(Multimap<When, File> groups, File[] files) {
+  private List<Object> toList(
+      Multimap<When, File> groups, File[] files, Context context) {
+
     When[] whens = When.values();
     List<Object> result = newArrayListWithCapacity(files.length + whens.length);
     for (When when : whens) {
