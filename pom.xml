@@ -90,21 +90,45 @@
       </dependency>
 
       <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.robolectric</groupId>
+        <artifactId>robolectric</artifactId>
+        <version>2.1.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.easytesting</groupId>
+        <artifactId>fest-assert-core</artifactId>
+        <version>2.0M10</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
         <version>1.9.5</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
         <groupId>com.google.dexmaker</groupId>
         <artifactId>dexmaker</artifactId>
         <version>1.0</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>
         <groupId>com.google.dexmaker</groupId>
         <artifactId>dexmaker-mockito</artifactId>
         <version>1.0</version>
+        <scope>test</scope>
       </dependency>
 
     </dependencies>
@@ -121,7 +145,7 @@
           <extensions>true</extensions>
           <configuration>
             <sdk>
-                <platform>17</platform>
+              <platform>17</platform>
             </sdk>
           </configuration>
         </plugin>
