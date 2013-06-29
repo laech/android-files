@@ -38,35 +38,4 @@ public final class FileSystemTest extends AndroidTestCase {
         Build.MODEL,
         fileSystem.getDisplayName(DIRECTORY_ROOT, getContext().getResources()));
   }
-
-  public void testHasNoPermissionToReadUnexecutableDirectory() throws Exception {
-    assertTrue(file.mkdir());
-    assertTrue(file.setExecutable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(file));
-  }
-
-  public void testHasNoPermissionToReadUnreadableFile() throws Exception {
-    assertTrue(file.createNewFile());
-    assertTrue(file.setReadable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(file));
-  }
-
-  public void testHasNoPermissionToReadUnreadableDirectory() throws Exception {
-    assertTrue(file.mkdir());
-    assertTrue(file.setReadable(false, false));
-    assertFalse(fileSystem.hasPermissionToRead(file));
-
-  }
-
-  public void testHasPermissionToReadReadableFile() throws Exception {
-    assertTrue(file.createNewFile());
-    assertTrue(file.setReadable(true, true));
-    assertTrue(fileSystem.hasPermissionToRead(file));
-  }
-
-  public void testHasPermissionToReadReadableDirectory() {
-    assertTrue(file.mkdir());
-    assertTrue(file.setReadable(true, true));
-    assertTrue(fileSystem.hasPermissionToRead(file));
-  }
 }

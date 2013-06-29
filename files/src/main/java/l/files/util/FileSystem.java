@@ -40,7 +40,7 @@ public class FileSystem {
     return file.getName();
   }
 
-  public boolean hasPermissionToRead(File file) {
-    return file.canRead() && (!file.isDirectory() || file.canExecute());
+  public boolean hasPermissionToRead(File file) { // TODO remove
+    return file.canRead();
   }
 }
