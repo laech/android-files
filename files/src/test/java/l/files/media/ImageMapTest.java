@@ -1,6 +1,5 @@
 package l.files.media;
 
-import static java.lang.System.nanoTime;
 import static l.files.util.FileSystem.DIRECTORY_ALARMS;
 import static l.files.util.FileSystem.DIRECTORY_ANDROID;
 import static l.files.util.FileSystem.DIRECTORY_DCIM;
@@ -14,32 +13,31 @@ import static l.files.util.FileSystem.DIRECTORY_PODCASTS;
 import static l.files.util.FileSystem.DIRECTORY_RINGTONES;
 import static l.files.util.FileSystem.DIRECTORY_ROOT;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
-import java.io.IOException;
 
 import l.files.R;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public final class ImageMapTest {
 
-  @Rule public TemporaryFolder dir = new TemporaryFolder();
-
+  private File file;
   private ImageMap images;
 
-  @Before public void setUp() throws Exception {
+  @Before public void setUp() {
+    file = mock(File.class);
     images = new ImageMap();
   }
 
-  @Test public void getsImageForDirectory() throws Exception {
-    assertDirImg(R.drawable.ic_directory, dir.newFolder());
+  @Test public void getsImageForDirectory() {
+    assertDirImg(R.drawable.ic_directory, getDir());
   }
 
   @Test public void getsImageForDirectoryHome() {
@@ -90,36 +88,36 @@ public final class ImageMapTest {
     assertDirImg(R.drawable.ic_directory_ringtones, DIRECTORY_RINGTONES);
   }
 
-  @Test public void getsImageForFile() throws Exception {
+  @Test public void getsImageForFile() {
     assertFileImg(R.drawable.ic_file, "");
   }
 
-  @Test public void getsImageForFilePdf() throws Exception {
-    assertFileImg(R.drawable.ic_file_pdf, "pdf");
+  @Test public void getsImageForFilePdf() {
+    assertFileImg(R.drawable.ic_file_pdf, "a.pdf");
   }
 
   @Test public void getsImageForFileImage() {
-    assertFileImg(R.drawable.ic_file_image, "jpg");
+    assertFileImg(R.drawable.ic_file_image, "a.jpg");
   }
 
   @Test public void getsImageForFileAudio() {
-    assertFileImg(R.drawable.ic_file_audio, "mp3");
+    assertFileImg(R.drawable.ic_file_audio, "a.mp3");
   }
 
   @Test public void getsImageForFileVideo() {
-    assertFileImg(R.drawable.ic_file_video, "mp4");
+    assertFileImg(R.drawable.ic_file_video, "a.mp4");
   }
 
   @Test public void getsImageForFileArchive() {
-    assertFileImg(R.drawable.ic_file_archive, "zip");
+    assertFileImg(R.drawable.ic_file_archive, "a.zip");
   }
 
   @Test public void getsImageForFileText() {
-    assertFileImg(R.drawable.ic_file_text, "txt");
+    assertFileImg(R.drawable.ic_file_text, "a.txt");
   }
 
   @Test public void getsImageForFileExtensionIgnoringCase() {
-    assertFileImg(R.drawable.ic_file_image, "jPg");
+    assertFileImg(R.drawable.ic_file_image, "a.jPg");
   }
 
   private void assertDirImg(int resId, File dir) {
@@ -127,15 +125,18 @@ public final class ImageMapTest {
     assertThat(images.get(dir)).isEqualTo(resId);
   }
 
-  private void assertFileImg(int resId, String ext) {
-    assertThat(images.get(createFile(ext))).isEqualTo(resId);
+  private void assertFileImg(int resId, String filename) {
+    assertThat(images.get(getFile(filename))).isEqualTo(resId);
   }
 
-  private File createFile(String ext) {
-    try {
-      return dir.newFile(String.valueOf(nanoTime()) + "." + ext);
-    } catch (IOException e) {
-      throw new AssertionError(e);
-    }
+  private File getFile(String filename) {
+    given(file.isFile()).willReturn(true);
+    given(file.getName()).willReturn(filename);
+    return file;
+  }
+
+  private File getDir() {
+    given(file.isDirectory()).willReturn(true);
+    return file;
   }
 }
