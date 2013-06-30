@@ -53,7 +53,6 @@ public final class SidebarFragment
     bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
     adapter = new SidebarAdapter(getApp(this),
-        FileSystem.INSTANCE, 
         new FileDrawableProvider(getResources()),
         labels) {
       @Override protected int getItemTextViewResourceId() {
@@ -86,7 +85,7 @@ public final class SidebarFragment
     List<File> dirs = newArrayListWithCapacity(paths.size());
     for (String path : paths) {
       File f = new File(path);
-      if (f.isDirectory() && fileSystem.hasPermissionToRead(f)) dirs.add(f);
+      if (f.isDirectory() && f.canRead()) dirs.add(f);
     }
     sort(dirs, new Comparator<File>() {
       @Override public int compare(File a, File b) {

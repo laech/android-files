@@ -3,7 +3,6 @@ package l.files.ui.app.sidebar;
 import java.io.File;
 
 import l.files.R;
-import l.files.util.FileSystem;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -17,17 +16,14 @@ import com.google.common.base.Function;
 
 public class SidebarAdapter extends ArrayAdapter<Object> {
 
-  private final FileSystem fileSystem;
   private final Function<File, Drawable> drawables;
   private final Function<File, String> labels;
 
   SidebarAdapter(
       Application context, 
-      FileSystem fileSystem, 
       Function<File, Drawable> drawables,
       Function<File, String> labels) {
     super(context, 0);
-    this.fileSystem = fileSystem;
     this.drawables = drawables;
     this.labels = labels;
   }
@@ -72,7 +68,7 @@ public class SidebarAdapter extends ArrayAdapter<Object> {
   }
 
   void updateViewForFile(File file, TextView view) {
-    view.setEnabled(fileSystem.hasPermissionToRead(file));
+    view.setEnabled(file.canRead());
     view.setText(labels.apply(file));
     view.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(file), null, null, null);
   }

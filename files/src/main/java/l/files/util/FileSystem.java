@@ -31,7 +31,4 @@ public class FileSystem {
     return getExternalStoragePublicDirectory(type);
   }
 
-  public boolean hasPermissionToRead(File file) { // TODO remove
-    return file.canRead();
-  }
 }

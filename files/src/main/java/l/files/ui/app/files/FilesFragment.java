@@ -25,7 +25,6 @@ import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.menu.OptionsMenu;
 import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
-import l.files.util.FileSystem;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -195,7 +194,6 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
   private FilesAdapter newListAdapter() {
     return new FilesAdapter
         (getListView(),
-        FileSystem.INSTANCE,
         new FileDrawableProvider(getResources()),
         new DateTimeFormat(getActivity()));
   }

@@ -7,46 +7,37 @@ import static l.files.ui.app.files.FilesActivity.EXTRA_DIRECTORY;
 
 import java.io.File;
 
-import com.google.common.net.MediaType;
-
 import l.files.R;
 import l.files.io.MediaTypeDetector;
 import l.files.io.MediaTypeDetectors;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
 import l.files.ui.util.Toaster;
-import l.files.util.FileSystem;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.AsyncTask;
+
+import com.google.common.net.MediaType;
 
 public class FilesActivityHelper {
 
   public static final FilesActivityHelper INSTANCE = new FilesActivityHelper();
 
   private final Toaster toaster;
-  private final FileSystem fileSystem;
   private final MediaTypeDetector detector;
 
   FilesActivityHelper() {
-    this(
-        FileSystem.INSTANCE,
-        MediaTypeDetectors.getDefault(),
-        Toaster.INSTANCE);
+    this(MediaTypeDetectors.getDefault(), Toaster.INSTANCE);
   }
 
-  FilesActivityHelper(
-      FileSystem fileSystem,
-      MediaTypeDetector detector,
-      Toaster toaster) {
+  FilesActivityHelper(MediaTypeDetector detector, Toaster toaster) {
     this.toaster = toaster;
-    this.fileSystem = fileSystem;
     this.detector = detector;
   }
 
   public void handle(FileSelectedEvent event, FilesActivity activity) {
     File file = event.file();
-    if (!fileSystem.hasPermissionToRead(file)) {
+    if (!file.canRead()) {
       showPermissionDenied(activity);
     } else if (file.isDirectory()) {
       showDirectory(file, activity);

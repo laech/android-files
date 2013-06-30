@@ -8,7 +8,6 @@ import java.io.File;
 import l.files.R;
 import l.files.ui.widget.AnimatedAdapter;
 import l.files.util.DateTimeFormat;
-import l.files.util.FileSystem;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -22,17 +21,14 @@ import com.google.common.base.Function;
 public final class FilesAdapter
     extends AnimatedAdapter<Object> implements PinnedSectionedHeaderAdapter {
 
-  private final FileSystem files;
   private final Function<File, Drawable> drawables;
   private final DateTimeFormat format;
 
   public FilesAdapter(
       ListView parent,
-      FileSystem fileSystem,
       Function<File, Drawable> drawables,
       DateTimeFormat format) {
     super(parent);
-    this.files = checkNotNull(fileSystem, "files");
     this.drawables = checkNotNull(drawables, "drawables");
     this.format = checkNotNull(format, "format");
   }
@@ -105,7 +101,7 @@ public final class FilesAdapter
   }
 
   private void bindFileView(File file, View view) {
-    boolean hasPermissionToRead = files.hasPermissionToRead(file);
+    boolean hasPermissionToRead = file.canRead();
     view.setEnabled(hasPermissionToRead);
     ViewHolder holder = (ViewHolder) view.getTag();
 
@@ -122,7 +118,7 @@ public final class FilesAdapter
   }
 
   void showFilename(File f, ViewHolder holder) {
-    holder.name.setEnabled(files.hasPermissionToRead(f));
+    holder.name.setEnabled(f.canRead());
     holder.name.setText(f.getName());
     holder.name.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(f), null, null, null);
   }
@@ -130,7 +126,7 @@ public final class FilesAdapter
   void showFileInfo(File file, ViewHolder holder) {
     if (holder.info == null) return;
 
-    holder.info.setEnabled(files.hasPermissionToRead(file));
+    holder.info.setEnabled(file.canRead()); // TODO file.canRead repeated multiple times
     Context context = holder.info.getContext();
     String updated = format.format(file.lastModified());
     if (file.isFile()) {
