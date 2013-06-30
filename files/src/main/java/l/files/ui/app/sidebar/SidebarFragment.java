@@ -1,5 +1,26 @@
 package l.files.ui.app.sidebar;
 
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static java.util.Collections.sort;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.FilesApp.getApp;
+import static l.files.util.FileSystem.DIRECTORY_HOME;
+import static l.files.util.FileSystem.DIRECTORY_ROOT;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import l.files.FilesApp;
+import l.files.R;
+import l.files.Settings;
+import l.files.ui.FileDrawableProvider;
+import l.files.ui.FileLabelProvider;
+import l.files.ui.event.FileSelectedEvent;
+import l.files.util.FileSystem;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -10,27 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.google.common.base.Function;
 import com.squareup.otto.Bus;
-
-import l.files.FilesApp;
-import l.files.R;
-import l.files.Settings;
-import l.files.ui.FileDrawableProvider;
-import l.files.ui.event.FileSelectedEvent;
-import l.files.util.FileSystem;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static java.util.Collections.sort;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.FilesApp.getApp;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
 
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
@@ -41,13 +43,19 @@ public final class SidebarFragment
   Bus bus;
 
   private long favoritesUpdatedTimestamp;
+  
+  private Function<File, String> labels;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    labels = new FileLabelProvider(getResources());
     fileSystem = FileSystem.INSTANCE;
     bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
-    adapter = new SidebarAdapter(getApp(this), FileSystem.INSTANCE, new FileDrawableProvider(getResources())) {
+    adapter = new SidebarAdapter(getApp(this),
+        FileSystem.INSTANCE, 
+        new FileDrawableProvider(getResources()),
+        labels) {
       @Override protected int getItemTextViewResourceId() {
         return R.layout.sidebar_item;
       }
@@ -82,8 +90,8 @@ public final class SidebarFragment
     }
     sort(dirs, new Comparator<File>() {
       @Override public int compare(File a, File b) {
-        String x = fileSystem.getDisplayName(a, getResources());
-        String y = fileSystem.getDisplayName(b, getResources());
+        String x = nullToEmpty(labels.apply(a));
+        String y = nullToEmpty(labels.apply(b));
         return x.compareToIgnoreCase(y);
       }
     });

@@ -3,11 +3,14 @@ package l.files.ui.app.files;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+
 import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+
 import l.files.FilesApp;
 import l.files.R;
+import l.files.ui.FileLabelProvider;
 import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.files.menu.SettingsAction;
 import l.files.ui.app.home.HomePagerAdapter;
@@ -45,7 +48,7 @@ public class FilesActivity extends BaseFragmentActivity {
     bus = FilesApp.BUS;
     directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
-    setTitle(fileSystem.getDisplayName(directoryInDisplay, getResources()));
+    setTitle(new FileLabelProvider(getResources()).apply(directoryInDisplay));
     setContentView(pager);
 
     setOptionsMenu(new OptionsMenu(

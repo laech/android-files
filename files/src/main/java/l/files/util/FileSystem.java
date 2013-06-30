@@ -1,14 +1,11 @@
 package l.files.util;
 
-import android.content.res.Resources;
-import android.os.Build;
-import android.os.Environment;
-import l.files.R;
+import static android.os.Environment.getExternalStorageDirectory;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 import java.io.File;
 
-import static android.os.Environment.getExternalStorageDirectory;
-import static android.os.Environment.getExternalStoragePublicDirectory;
+import android.os.Environment;
 
 public class FileSystem {
 
@@ -32,12 +29,6 @@ public class FileSystem {
 
   private static File dir(String type) {
     return getExternalStoragePublicDirectory(type);
-  }
-
-  public String getDisplayName(File file, Resources res) {
-    if (DIRECTORY_HOME.equals(file)) return res.getString(R.string.home);
-    if (DIRECTORY_ROOT.equals(file)) return Build.MODEL;
-    return file.getName();
   }
 
   public boolean hasPermissionToRead(File file) { // TODO remove

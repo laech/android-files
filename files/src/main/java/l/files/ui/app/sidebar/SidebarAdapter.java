@@ -19,11 +19,17 @@ public class SidebarAdapter extends ArrayAdapter<Object> {
 
   private final FileSystem fileSystem;
   private final Function<File, Drawable> drawables;
+  private final Function<File, String> labels;
 
-  SidebarAdapter(Application context, FileSystem fileSystem, Function<File, Drawable> drawables) {
+  SidebarAdapter(
+      Application context, 
+      FileSystem fileSystem, 
+      Function<File, Drawable> drawables,
+      Function<File, String> labels) {
     super(context, 0);
     this.fileSystem = fileSystem;
     this.drawables = drawables;
+    this.labels = labels;
   }
 
   @Override public boolean isEnabled(int position) {
@@ -67,7 +73,7 @@ public class SidebarAdapter extends ArrayAdapter<Object> {
 
   void updateViewForFile(File file, TextView view) {
     view.setEnabled(fileSystem.hasPermissionToRead(file));
-    view.setText(fileSystem.getDisplayName(file, getContext().getResources()));
+    view.setText(labels.apply(file));
     view.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(file), null, null, null);
   }
 
