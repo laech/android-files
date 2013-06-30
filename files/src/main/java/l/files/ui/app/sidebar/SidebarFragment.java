@@ -1,10 +1,12 @@
 package l.files.ui.app.sidebar;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
+import static l.files.setting.Settings.getBookmarksSetting;
 import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.UserDirs.DIR_ROOT;
 
@@ -16,7 +18,7 @@ import java.util.Set;
 
 import l.files.FilesApp;
 import l.files.R;
-import l.files.Settings;
+import l.files.setting.SetSetting;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.FileLabelProvider;
 import l.files.ui.event.FileSelectedEvent;
@@ -37,18 +39,21 @@ public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
 
   SidebarAdapter adapter;
-  Settings settings;
+  SetSetting<File> setting;
   Bus bus;
 
-  private long favoritesUpdatedTimestamp;
+  private Set<File> bookmarks;
   
   private Function<File, String> labels;
+  
+  private SharedPreferences pref;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     labels = new FileLabelProvider(getResources());
     bus = FilesApp.BUS;
-    settings = getApp(this).getSettings();
+    pref = getDefaultSharedPreferences(getActivity());
+    setting = getBookmarksSetting(pref);
     adapter = new SidebarAdapter(getApp(this),
         new FileDrawableProvider(getResources()),
         labels) {
@@ -66,7 +71,7 @@ public final class SidebarFragment
 
   void refresh() {
     if (DEBUG) Log.d("SidebarFragment", "refresh");
-    favoritesUpdatedTimestamp = settings.getFavoritesUpdatedTimestamp();
+    bookmarks = setting.get();
     adapter.setNotifyOnChange(false);
     adapter.clear();
     adapter.add(getString(R.string.bookmarks));
@@ -78,12 +83,7 @@ public final class SidebarFragment
   }
 
   private Collection<File> getBookmarks() {
-    Set<String> paths = settings.getBookmarks();
-    List<File> dirs = newArrayListWithCapacity(paths.size());
-    for (String path : paths) {
-      File f = new File(path);
-      if (f.isDirectory() && f.canRead()) dirs.add(f);
-    }
+    List<File> dirs = newArrayList(setting.get());
     sort(dirs, new Comparator<File>() {
       @Override public int compare(File a, File b) {
         String x = nullToEmpty(labels.apply(a));
@@ -96,14 +96,16 @@ public final class SidebarFragment
 
   @Override public void onResume() {
     super.onResume();
-    settings.getPreferences().registerOnSharedPreferenceChangeListener(this);
-    long timestamp = settings.getFavoritesUpdatedTimestamp();
-    if (favoritesUpdatedTimestamp != timestamp) refresh();
+    pref.registerOnSharedPreferenceChangeListener(this);
+    Set<File> files = setting.get();
+    if (files.equals(bookmarks)) {
+      refresh();
+    }
   }
 
   @Override public void onPause() {
     super.onPause();
-    settings.getPreferences().unregisterOnSharedPreferenceChangeListener(this);
+    pref.unregisterOnSharedPreferenceChangeListener(this);
   }
 
   @Override public View onCreateView(
@@ -119,6 +121,6 @@ public final class SidebarFragment
 
   @Override public void onSharedPreferenceChanged(
       SharedPreferences preferences, String key) {
-    if (settings.getFavoritesUpdatedTimestampKey().equals(key)) refresh();
+    if (setting.key().equals(key)) refresh();
   }
 }

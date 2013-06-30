@@ -1,15 +1,18 @@
 package l.files.ui.app.files;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
+import static l.files.setting.Settings.getBookmarksSetting;
+import static l.files.setting.Settings.getShowHiddenFilesSetting;
 import static l.files.util.Files.listFiles;
 
 import java.io.File;
 
 import l.files.FilesApp;
 import l.files.R;
-import l.files.Settings;
+import l.files.setting.Setting;
 import l.files.settings.SortSetting;
 import l.files.settings.SortSetting.Sort;
 import l.files.trash.TrashService.TrashMover;
@@ -47,7 +50,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
 
   FilesAdapter adapter;
   Bus bus;
-  Settings settings;
+  Setting<Boolean> settingShowHiddenFiles;
   SortSetting sortSetting;
 
   private File dir;
@@ -69,7 +72,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     super.onActivityCreated(savedInstanceState);
 
     adapter = newListAdapter();
-    settings = getApp(this).getSettings();
+    settingShowHiddenFiles = getShowHiddenFilesSetting(getDefaultSharedPreferences(getActivity()));
     sortSetting = getApp(this).getSortSetting();
     bus = FilesApp.BUS;
     dir = getDirectory();
@@ -80,7 +83,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     });
 
     currentSort = sortSetting.get();
-    showingHiddenFiles = settings.shouldShowHiddenFiles();
+    showingHiddenFiles = settingShowHiddenFiles.get();
 
     configureListView();
     configureOptionsMenu();
@@ -89,7 +92,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
 
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
-        new BookmarkAction(dir, settings),
+        new BookmarkAction(dir, getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
         new NewDirectoryAction(dir),
         new SortByAction(getFragmentManager(), SortByDialog.CREATOR)));
   }
@@ -150,7 +153,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
   }
 
   void checkPreferences() { // TODO
-    boolean show = settings.shouldShowHiddenFiles();
+    boolean show = settingShowHiddenFiles.get();
     Sort sort = sortSetting.get();
     if (showingHiddenFiles != show || currentSort != sort) {
       showingHiddenFiles = show;

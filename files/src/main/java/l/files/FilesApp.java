@@ -16,7 +16,6 @@ public class FilesApp extends Application {
 
   public static final Bus BUS = new Bus(ThreadEnforcer.MAIN);
 
-  private Settings settings;
   private SortSetting sortSetting;
 
   public static FilesApp getApp(Context context) {
@@ -30,13 +29,8 @@ public class FilesApp extends Application {
   @Override public void onCreate() {
     super.onCreate();
     SharedPreferences preferences = getDefaultSharedPreferences(this);
-    settings = new Settings(this, preferences);
     sortSetting = SortSetting.create(preferences, BUS);
-     if (DEBUG) StrictMode.enableDefaults();
-  }
-
-  public Settings getSettings() {
-    return settings;
+    if (DEBUG) StrictMode.enableDefaults();
   }
 
   public SortSetting getSortSetting() {
