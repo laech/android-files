@@ -14,5 +14,9 @@ public final class Settings {
     return new BookmarksSetting(pref);
   }
 
+  public static Setting<Boolean> getShowHiddenFilesSetting(SharedPreferences pref) {
+    return new ShowHiddenFilesSetting(pref);
+  }
+
   private Settings() {}
 }
