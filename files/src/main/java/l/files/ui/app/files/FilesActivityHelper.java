@@ -7,18 +7,18 @@ import static l.files.ui.app.files.FilesActivity.EXTRA_DIRECTORY;
 
 import java.io.File;
 
+import com.google.common.net.MediaType;
+
 import l.files.R;
-import l.files.io.FilenameMediaTypeProvider;
-import l.files.io.MediaDetector;
+import l.files.io.MediaTypeDetector;
+import l.files.io.MediaTypeDetectors;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
 import l.files.ui.util.Toaster;
 import l.files.util.FileSystem;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import android.os.AsyncTask;
 
 public class FilesActivityHelper {
 
@@ -26,26 +26,22 @@ public class FilesActivityHelper {
 
   private final Toaster toaster;
   private final FileSystem fileSystem;
-  private final Function<File, Optional<String>> mediaTypes;
-  private final MediaDetector mediaDetector;
+  private final MediaTypeDetector detector;
 
   FilesActivityHelper() {
     this(
         FileSystem.INSTANCE,
-        new FilenameMediaTypeProvider(),
-        MediaDetector.INSTANCE,
+        MediaTypeDetectors.getDefault(),
         Toaster.INSTANCE);
   }
 
   FilesActivityHelper(
       FileSystem fileSystem,
-      Function<File, Optional<String>> mediaTypes,
-      MediaDetector mediaDetector,
+      MediaTypeDetector detector,
       Toaster toaster) {
     this.toaster = toaster;
     this.fileSystem = fileSystem;
-    this.mediaTypes = mediaTypes;
-    this.mediaDetector = mediaDetector;
+    this.detector = detector;
   }
 
   public void handle(FileSelectedEvent event, FilesActivity activity) {
@@ -74,13 +70,16 @@ public class FilesActivityHelper {
         .putExtra(EXTRA_DIRECTORY, dir.getAbsolutePath());
   }
 
-  private void showFile(File file, FilesActivity activity) {
-    Optional<String> mediaType = mediaTypes.apply(file);
-    if (mediaType.isPresent()) {
-      showFile(file, mediaType.get(), activity);
-    } else {
-      mediaDetector.detect(file);
-    }
+  private void showFile(final File file, final FilesActivity activity) {
+    new AsyncTask<Void, Void, MediaType>() {
+      @Override protected MediaType doInBackground(Void... params) {
+        return detector.apply(file);
+      }
+
+      @Override protected void onPostExecute(MediaType result) {
+        showFile(file, result.toString(), activity);
+      };
+    }.execute();
   }
 
   public void handle(MediaDetectedEvent event, FilesActivity activity) {
