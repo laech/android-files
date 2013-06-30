@@ -1,12 +1,11 @@
 package l.files.media;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import junit.framework.TestCase;
 
-import org.junit.Test;
+public final class MediaMapTest extends TestCase {
 
-public final class MediaMapTest {
-
-  @Test public void getsMediaTypeIgnoringCase() {
+  public void testGetsMediaTypeIgnoringCase() {
     String media1 = new MediaMap().get("txt");
     String media2 = new MediaMap().get("tXT");
     assertThat(media1).isEqualTo(media2);

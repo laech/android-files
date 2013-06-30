@@ -18,105 +18,101 @@ import static org.mockito.Mockito.mock;
 
 import java.io.File;
 
+import junit.framework.TestCase;
 import l.files.R;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
-@RunWith(RobolectricTestRunner.class)
-public final class ImageMapTest {
+public final class ImageMapTest extends TestCase {
 
   private File file;
   private ImageMap images;
 
-  @Before public void setUp() {
+  @Override protected void setUp() throws Exception {
+    super.setUp();
     file = mock(File.class);
     images = new ImageMap();
   }
 
-  @Test public void getsImageForDirectory() {
+  public void testGetsImageForDirectory() {
     assertDirImg(R.drawable.ic_directory, getDir());
   }
 
-  @Test public void getsImageForDirectoryHome() {
+  public void testGetsImageForDirectoryHome() {
     assertDirImg(R.drawable.ic_directory_home, DIRECTORY_HOME);
   }
 
-  @Test public void getsImageForDirectoryRoot() {
+  public void testGetsImageForDirectoryRoot() {
     assertDirImg(R.drawable.ic_directory_device, DIRECTORY_ROOT);
   }
 
-  @Test public void getsImageForDirectoryAlarms() {
+  public void testGetsImageForDirectoryAlarms() {
     assertDirImg(R.drawable.ic_directory_alarms, DIRECTORY_ALARMS);
   }
 
-  @Test public void getsImageForDirectoryAndroid() {
+  public void testGetsImageForDirectoryAndroid() {
     assertDirImg(R.drawable.ic_directory_android, DIRECTORY_ANDROID);
   }
 
-  @Test public void getsImageForDirectoryDcim() {
+  public void testGetsImageForDirectoryDcim() {
     assertDirImg(R.drawable.ic_directory_dcim, DIRECTORY_DCIM);
   }
 
-  @Test public void getsImageForDirectoryDownload() {
+  public void testGetsImageForDirectoryDownload() {
     assertDirImg(R.drawable.ic_directory_download, DIRECTORY_DOWNLOADS);
   }
 
-  @Test public void getsImageForDirectoryMovies() {
+  public void testGetsImageForDirectoryMovies() {
     assertDirImg(R.drawable.ic_directory_movies, DIRECTORY_MOVIES);
   }
 
-  @Test public void getsImageForDirectoryMusic() {
+  public void testGetsImageForDirectoryMusic() {
     assertDirImg(R.drawable.ic_directory_music, DIRECTORY_MUSIC);
   }
 
-  @Test public void getsImageForDirectoryNotifications() {
+  public void testGetsImageForDirectoryNotifications() {
     assertDirImg(R.drawable.ic_directory_notifications, DIRECTORY_NOTIFICATIONS);
   }
 
-  @Test public void getsImageForDirectoryPictures() {
+  public void testGetsImageForDirectoryPictures() {
     assertDirImg(R.drawable.ic_directory_pictures, DIRECTORY_PICTURES);
   }
 
-  @Test public void getsImageForDirectoryPodcasts() {
+  public void testGetsImageForDirectoryPodcasts() {
     assertDirImg(R.drawable.ic_directory_podcasts, DIRECTORY_PODCASTS);
   }
 
-  @Test public void getsImageForDirectoryRingtones() {
+  public void testGetsImageForDirectoryRingtones() {
     assertDirImg(R.drawable.ic_directory_ringtones, DIRECTORY_RINGTONES);
   }
 
-  @Test public void getsImageForFile() {
+  public void testGetsImageForFile() {
     assertFileImg(R.drawable.ic_file, "");
   }
 
-  @Test public void getsImageForFilePdf() {
+  public void testGetsImageForFilePdf() {
     assertFileImg(R.drawable.ic_file_pdf, "a.pdf");
   }
 
-  @Test public void getsImageForFileImage() {
+  public void testGetsImageForFileImage() {
     assertFileImg(R.drawable.ic_file_image, "a.jpg");
   }
 
-  @Test public void getsImageForFileAudio() {
+  public void testGetsImageForFileAudio() {
     assertFileImg(R.drawable.ic_file_audio, "a.mp3");
   }
 
-  @Test public void getsImageForFileVideo() {
+  public void testGetsImageForFileVideo() {
     assertFileImg(R.drawable.ic_file_video, "a.mp4");
   }
 
-  @Test public void getsImageForFileArchive() {
+  public void testGetsImageForFileArchive() {
     assertFileImg(R.drawable.ic_file_archive, "a.zip");
   }
 
-  @Test public void getsImageForFileText() {
+  public void testGetsImageForFileText() {
     assertFileImg(R.drawable.ic_file_text, "a.txt");
   }
 
-  @Test public void getsImageForFileExtensionIgnoringCase() {
+  public void testGetsImageForFileExtensionIgnoringCase() {
     assertFileImg(R.drawable.ic_file_image, "a.jPg");
   }
 

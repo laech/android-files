@@ -1,10 +1,12 @@
 package l.files;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static l.files.BuildConfig.DEBUG;
 import l.files.settings.SortSetting;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 
 import com.squareup.otto.Bus;
@@ -30,7 +32,7 @@ public class FilesApp extends Application {
     SharedPreferences preferences = getDefaultSharedPreferences(this);
     settings = new Settings(this, preferences);
     sortSetting = SortSetting.create(preferences, BUS);
-    // if (DEBUG) StrictMode.enableDefaults();
+     if (DEBUG) StrictMode.enableDefaults();
   }
 
   public Settings getSettings() {
