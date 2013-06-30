@@ -1,4 +1,4 @@
-package l.files.media;
+package l.files.ui;
 
 import static l.files.util.FileSystem.DIRECTORY_ALARMS;
 import static l.files.util.FileSystem.DIRECTORY_ANDROID;
@@ -20,16 +20,20 @@ import java.io.File;
 
 import junit.framework.TestCase;
 import l.files.R;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 
-public final class ImageMapTest extends TestCase {
+public final class FileDrawableProviderTest extends TestCase {
 
+  private Resources res;
   private File file;
-  private ImageMap images;
+  private FileDrawableProvider images;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
+    res = mock(Resources.class);
     file = mock(File.class);
-    images = new ImageMap();
+    images = new FileDrawableProvider(res);
   }
 
   public void testGetsImageForDirectory() {
@@ -117,12 +121,19 @@ public final class ImageMapTest extends TestCase {
   }
 
   private void assertDirImg(int resId, File dir) {
-    assertThat(dir.mkdirs() || dir.isDirectory()).isTrue();
-    assertThat(images.get(dir)).isEqualTo(resId);
+    Drawable drawable = getDrawable(resId);
+    assertThat(images.apply(dir)).isEqualTo(drawable);
   }
 
   private void assertFileImg(int resId, String filename) {
-    assertThat(images.get(getFile(filename))).isEqualTo(resId);
+    Drawable drawable = getDrawable(resId);
+    assertThat(images.apply(getFile(filename))).isEqualTo(drawable);
+  }
+
+  private Drawable getDrawable(int resId) {
+    Drawable drawable = mock(Drawable.class);
+    given(res.getDrawable(resId)).willReturn(drawable);
+    return drawable;
   }
 
   private File getFile(String filename) {

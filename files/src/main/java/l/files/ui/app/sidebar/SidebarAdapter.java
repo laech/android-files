@@ -1,31 +1,29 @@
 package l.files.ui.app.sidebar;
 
+import java.io.File;
+
+import l.files.R;
+import l.files.util.FileSystem;
 import android.app.Application;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import l.files.R;
-import l.files.media.ImageMap;
-import l.files.util.FileSystem;
 
-import java.io.File;
+import com.google.common.base.Function;
 
 public class SidebarAdapter extends ArrayAdapter<Object> {
 
   private final FileSystem fileSystem;
-  private final ImageMap images;
+  private final Function<File, Drawable> drawables;
 
-  SidebarAdapter(Application context) {
-    this(context, FileSystem.INSTANCE, ImageMap.INSTANCE);
-  }
-
-  SidebarAdapter(Application context, FileSystem fileSystem, ImageMap images) {
+  SidebarAdapter(Application context, FileSystem fileSystem, Function<File, Drawable> drawables) {
     super(context, 0);
     this.fileSystem = fileSystem;
-    this.images = images;
+    this.drawables = drawables;
   }
 
   @Override public boolean isEnabled(int position) {
@@ -70,7 +68,7 @@ public class SidebarAdapter extends ArrayAdapter<Object> {
   void updateViewForFile(File file, TextView view) {
     view.setEnabled(fileSystem.hasPermissionToRead(file));
     view.setText(fileSystem.getDisplayName(file, getContext().getResources()));
-    view.setCompoundDrawablesWithIntrinsicBounds(images.get(file), 0, 0, 0);
+    view.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(file), null, null, null);
   }
 
   void updateViewForHeader(Object header, TextView view) {

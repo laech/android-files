@@ -9,10 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
 import com.squareup.otto.Bus;
+
 import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
+import l.files.ui.FileDrawableProvider;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.util.FileSystem;
 
@@ -44,11 +47,11 @@ public final class SidebarFragment
     fileSystem = FileSystem.INSTANCE;
     bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
-    adapter = new SidebarAdapter(getApp(this)) {
+    adapter = new SidebarAdapter(getApp(this), FileSystem.INSTANCE, new FileDrawableProvider(getResources())) {
       @Override protected int getItemTextViewResourceId() {
         return R.layout.sidebar_item;
       }
-    };
+    }; // TODO fix?
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {

@@ -1,37 +1,39 @@
 package l.files.ui.app.files;
 
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TextView;
+import static android.text.format.Formatter.formatShortFileSize;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.File;
+
 import l.files.R;
-import l.files.media.ImageMap;
 import l.files.ui.widget.AnimatedAdapter;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.io.File;
-
-import static android.text.format.Formatter.formatShortFileSize;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Function;
 
 public final class FilesAdapter
     extends AnimatedAdapter<Object> implements PinnedSectionedHeaderAdapter {
 
   private final FileSystem files;
-  private final ImageMap images;
+  private final Function<File, Drawable> drawables;
   private final DateTimeFormat format;
 
   public FilesAdapter(
       ListView parent,
       FileSystem fileSystem,
-      ImageMap images,
+      Function<File, Drawable> drawables,
       DateTimeFormat format) {
     super(parent);
     this.files = checkNotNull(fileSystem, "files");
-    this.images = checkNotNull(images, "images");
+    this.drawables = checkNotNull(drawables, "drawables");
     this.format = checkNotNull(format, "format");
   }
 
@@ -122,7 +124,7 @@ public final class FilesAdapter
   void showFilename(File f, ViewHolder holder) {
     holder.name.setEnabled(files.hasPermissionToRead(f));
     holder.name.setText(f.getName());
-    holder.name.setCompoundDrawablesWithIntrinsicBounds(images.get(f), 0, 0, 0);
+    holder.name.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(f), null, null, null);
   }
 
   void showFileInfo(File file, ViewHolder holder) {

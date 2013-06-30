@@ -1,23 +1,19 @@
 package l.files.ui.app.files;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.ListView;
-import android.widget.TextView;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.FilesApp.getApp;
+import static l.files.util.Files.listFiles;
+
+import java.io.File;
+
 import l.files.FilesApp;
 import l.files.R;
 import l.files.Settings;
-import l.files.media.ImageMap;
 import l.files.settings.SortSetting;
+import l.files.settings.SortSetting.Sort;
 import l.files.trash.TrashService.TrashMover;
+import l.files.ui.FileDrawableProvider;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.app.files.menu.BookmarkAction;
 import l.files.ui.app.files.menu.NewDirectoryAction;
@@ -30,14 +26,19 @@ import l.files.ui.menu.OptionsMenu;
 import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
 import l.files.util.FileSystem;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.io.File;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.FilesApp.getApp;
-import static l.files.settings.SortSetting.Sort;
-import static l.files.util.Files.listFiles;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 public final class FilesFragment extends BaseListFragment implements OnScrollListener {
 
@@ -195,7 +196,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     return new FilesAdapter
         (getListView(),
         FileSystem.INSTANCE,
-        ImageMap.INSTANCE,
+        new FileDrawableProvider(getResources()),
         new DateTimeFormat(getActivity()));
   }
 }
