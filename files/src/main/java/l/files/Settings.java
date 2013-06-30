@@ -2,6 +2,7 @@ package l.files;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
@@ -10,18 +11,18 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableSet;
-import static l.files.util.FileSystem.*;
+import static l.files.ui.UserDirs.*;
 
 public class Settings {
 
   // TODO separate out different settings object for show hidden files and favs
 
   private static final Set<String> DEFAULT_BOOKMARKS = ImmutableSet.of(
-      getPath(DIRECTORY_DCIM),
-      getPath(DIRECTORY_DOWNLOADS),
-      getPath(DIRECTORY_MOVIES),
-      getPath(DIRECTORY_MUSIC),
-      getPath(DIRECTORY_PICTURES));
+      getPath(DIR_DCIM),
+      getPath(DIR_DOWNLOADS),
+      getPath(DIR_MOVIES),
+      getPath(DIR_MUSIC),
+      getPath(DIR_PICTURES));
 
   private static String getPath(File file) {
     return file.getAbsolutePath();

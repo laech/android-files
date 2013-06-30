@@ -1,12 +1,9 @@
 package l.files.ui.app.files;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
-import com.google.common.base.Optional;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import java.io.File;
 
 import l.files.FilesApp;
 import l.files.R;
@@ -17,18 +14,18 @@ import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
 import l.files.ui.menu.OptionsMenu;
-import l.files.util.FileSystem;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 
-import java.io.File;
-
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
+import com.google.common.base.Optional;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 public class FilesActivity extends BaseFragmentActivity {
 
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
-  FileSystem fileSystem;
   FilesActivityHelper helper;
   Bus bus;
   ViewPager pager;
@@ -43,7 +40,6 @@ public class FilesActivity extends BaseFragmentActivity {
       return;
     }
 
-    fileSystem = FileSystem.INSTANCE;
     helper = FilesActivityHelper.INSTANCE;
     bus = FilesApp.BUS;
     directoryInDisplay = directory.get();

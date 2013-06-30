@@ -1,7 +1,7 @@
 package l.files.ui;
 
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_ROOT;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -26,11 +26,11 @@ public final class FileLabelProviderTest extends TestCase {
 
   public void testGetsNameForHomeDirectory() {
     given(res.getString(R.string.home)).willReturn("1");
-    assertThat(labels.apply(DIRECTORY_HOME)).isEqualTo("1");
+    assertThat(labels.apply(DIR_HOME)).isEqualTo("1");
   }
 
   public void testGetsNameForRootDirectory() {
-    assertThat(labels.apply(DIRECTORY_ROOT)).isEqualTo(Build.MODEL);
+    assertThat(labels.apply(DIR_ROOT)).isEqualTo(Build.MODEL);
   }
 
   public void testGetsNameOfFileForNormalFile() {

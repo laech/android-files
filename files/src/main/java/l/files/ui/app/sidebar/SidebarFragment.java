@@ -5,8 +5,8 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.Collections.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_ROOT;
 
 import java.io.File;
 import java.util.Collection;
@@ -20,7 +20,6 @@ import l.files.Settings;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.FileLabelProvider;
 import l.files.ui.event.FileSelectedEvent;
-import l.files.util.FileSystem;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -37,7 +36,6 @@ import com.squareup.otto.Bus;
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
 
-  FileSystem fileSystem;
   SidebarAdapter adapter;
   Settings settings;
   Bus bus;
@@ -49,7 +47,6 @@ public final class SidebarFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     labels = new FileLabelProvider(getResources());
-    fileSystem = FileSystem.INSTANCE;
     bus = FilesApp.BUS;
     settings = getApp(this).getSettings();
     adapter = new SidebarAdapter(getApp(this),
@@ -75,8 +72,8 @@ public final class SidebarFragment
     adapter.add(getString(R.string.bookmarks));
     adapter.addAll(getBookmarks());
     adapter.add(getString(R.string.device));
-    adapter.add(DIRECTORY_HOME);
-    adapter.add(DIRECTORY_ROOT);
+    adapter.add(DIR_HOME);
+    adapter.add(DIR_ROOT);
     adapter.notifyDataSetChanged();
   }
 

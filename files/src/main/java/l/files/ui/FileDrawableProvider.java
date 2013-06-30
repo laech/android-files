@@ -1,18 +1,18 @@
 package l.files.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.util.FileSystem.DIRECTORY_ALARMS;
-import static l.files.util.FileSystem.DIRECTORY_ANDROID;
-import static l.files.util.FileSystem.DIRECTORY_DCIM;
-import static l.files.util.FileSystem.DIRECTORY_DOWNLOADS;
-import static l.files.util.FileSystem.DIRECTORY_HOME;
-import static l.files.util.FileSystem.DIRECTORY_MOVIES;
-import static l.files.util.FileSystem.DIRECTORY_MUSIC;
-import static l.files.util.FileSystem.DIRECTORY_NOTIFICATIONS;
-import static l.files.util.FileSystem.DIRECTORY_PICTURES;
-import static l.files.util.FileSystem.DIRECTORY_PODCASTS;
-import static l.files.util.FileSystem.DIRECTORY_RINGTONES;
-import static l.files.util.FileSystem.DIRECTORY_ROOT;
+import static l.files.ui.UserDirs.DIR_ALARMS;
+import static l.files.ui.UserDirs.DIR_ANDROID;
+import static l.files.ui.UserDirs.DIR_DCIM;
+import static l.files.ui.UserDirs.DIR_DOWNLOADS;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_MOVIES;
+import static l.files.ui.UserDirs.DIR_MUSIC;
+import static l.files.ui.UserDirs.DIR_NOTIFICATIONS;
+import static l.files.ui.UserDirs.DIR_PICTURES;
+import static l.files.ui.UserDirs.DIR_PODCASTS;
+import static l.files.ui.UserDirs.DIR_RINGTONES;
+import static l.files.ui.UserDirs.DIR_ROOT;
 import static l.files.util.Files.getFileExtension;
 
 import java.io.File;
@@ -29,18 +29,18 @@ public final class FileDrawableProvider implements Function<File, Drawable> {
 
   private static final Map<File, Integer> DIR_IMGS = ImmutableMap
       .<File, Integer> builder()
-      .put(DIRECTORY_ROOT, R.drawable.ic_directory_device)
-      .put(DIRECTORY_HOME, R.drawable.ic_directory_home)
-      .put(DIRECTORY_ALARMS, R.drawable.ic_directory_alarms)
-      .put(DIRECTORY_ANDROID, R.drawable.ic_directory_android)
-      .put(DIRECTORY_DCIM, R.drawable.ic_directory_dcim)
-      .put(DIRECTORY_DOWNLOADS, R.drawable.ic_directory_download)
-      .put(DIRECTORY_MOVIES, R.drawable.ic_directory_movies)
-      .put(DIRECTORY_MUSIC, R.drawable.ic_directory_music)
-      .put(DIRECTORY_NOTIFICATIONS, R.drawable.ic_directory_notifications)
-      .put(DIRECTORY_PICTURES, R.drawable.ic_directory_pictures)
-      .put(DIRECTORY_PODCASTS, R.drawable.ic_directory_podcasts)
-      .put(DIRECTORY_RINGTONES, R.drawable.ic_directory_ringtones)
+      .put(DIR_ROOT, R.drawable.ic_directory_device)
+      .put(DIR_HOME, R.drawable.ic_directory_home)
+      .put(DIR_ALARMS, R.drawable.ic_directory_alarms)
+      .put(DIR_ANDROID, R.drawable.ic_directory_android)
+      .put(DIR_DCIM, R.drawable.ic_directory_dcim)
+      .put(DIR_DOWNLOADS, R.drawable.ic_directory_download)
+      .put(DIR_MOVIES, R.drawable.ic_directory_movies)
+      .put(DIR_MUSIC, R.drawable.ic_directory_music)
+      .put(DIR_NOTIFICATIONS, R.drawable.ic_directory_notifications)
+      .put(DIR_PICTURES, R.drawable.ic_directory_pictures)
+      .put(DIR_PODCASTS, R.drawable.ic_directory_podcasts)
+      .put(DIR_RINGTONES, R.drawable.ic_directory_ringtones)
       .build();
 
   private final Resources res;
