@@ -1,22 +1,24 @@
 package l.files.ui.app.files;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import l.files.R;
-import l.files.media.MediaDetector;
-import l.files.media.MediaMap;
-import l.files.ui.event.FileSelectedEvent;
-import l.files.ui.event.MediaDetectedEvent;
-import l.files.ui.util.Toaster;
-import l.files.util.FileSystem;
-
-import java.io.File;
-
 import static android.content.Intent.ACTION_VIEW;
 import static android.net.Uri.fromFile;
 import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.ui.app.files.FilesActivity.EXTRA_DIRECTORY;
-import static l.files.util.Files.getFileExtension;
+
+import java.io.File;
+
+import l.files.R;
+import l.files.io.FilenameMediaTypeProvider;
+import l.files.io.MediaDetector;
+import l.files.ui.event.FileSelectedEvent;
+import l.files.ui.event.MediaDetectedEvent;
+import l.files.ui.util.Toaster;
+import l.files.util.FileSystem;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
 
 public class FilesActivityHelper {
 
@@ -24,25 +26,25 @@ public class FilesActivityHelper {
 
   private final Toaster toaster;
   private final FileSystem fileSystem;
-  private final MediaMap mediaMap;
+  private final Function<File, Optional<String>> mediaTypes;
   private final MediaDetector mediaDetector;
 
   FilesActivityHelper() {
     this(
         FileSystem.INSTANCE,
-        MediaMap.INSTANCE,
+        new FilenameMediaTypeProvider(),
         MediaDetector.INSTANCE,
         Toaster.INSTANCE);
   }
 
   FilesActivityHelper(
       FileSystem fileSystem,
-      MediaMap mediaMap,
+      Function<File, Optional<String>> mediaTypes,
       MediaDetector mediaDetector,
       Toaster toaster) {
     this.toaster = toaster;
     this.fileSystem = fileSystem;
-    this.mediaMap = mediaMap;
+    this.mediaTypes = mediaTypes;
     this.mediaDetector = mediaDetector;
   }
 
@@ -73,10 +75,9 @@ public class FilesActivityHelper {
   }
 
   private void showFile(File file, FilesActivity activity) {
-    String extension = getFileExtension(file);
-    String mediaType = mediaMap.get(extension);
-    if (mediaType != null) {
-      showFile(file, mediaType, activity);
+    Optional<String> mediaType = mediaTypes.apply(file);
+    if (mediaType.isPresent()) {
+      showFile(file, mediaType.get(), activity);
     } else {
       mediaDetector.detect(file);
     }
