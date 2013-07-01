@@ -10,7 +10,7 @@
   <modules>
     <module>Codegen</module>
     <module>files</module>
-    <module>tests</module>
+    <module>unit-tests</module>
   </modules>
 
   <properties>

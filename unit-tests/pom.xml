@@ -8,7 +8,7 @@
     <artifactId>files-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>tests</artifactId>
+  <artifactId>unit-tests</artifactId>
   <packaging>apk</packaging>
 
   <dependencies>
