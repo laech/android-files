@@ -27,7 +27,7 @@ public class FilesActivityHelper {
   private final MediaTypeDetector detector;
 
   FilesActivityHelper() {
-    this(MediaTypeDetectors.getDefault(), Toaster.INSTANCE);
+    this(MediaTypeDetectors.get(), Toaster.INSTANCE);
   }
 
   FilesActivityHelper(MediaTypeDetector detector, Toaster toaster) {
