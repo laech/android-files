@@ -13,7 +13,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.common.base.Function;
@@ -24,11 +23,7 @@ public final class FilesAdapter
   private final Function<File, Drawable> drawables;
   private final DateTimeFormat format;
 
-  public FilesAdapter(
-      ListView parent,
-      Function<File, Drawable> drawables,
-      DateTimeFormat format) {
-    super(parent);
+  public FilesAdapter(Function<File, Drawable> drawables, DateTimeFormat format) {
     this.drawables = checkNotNull(drawables, "drawables");
     this.format = checkNotNull(format, "format");
   }
@@ -44,8 +39,8 @@ public final class FilesAdapter
     return position; // This will be -1 if no header
   }
 
-  @Override
-  public View getSectionHeaderView(int section, View convertView, ViewGroup parent) {
+  @Override public View getSectionHeaderView(
+      int section, View convertView, ViewGroup parent) {
     if (section == -1) {// See getSectionForPosition
       return emptySectionHeaderView(convertView, parent);
     }
@@ -87,8 +82,11 @@ public final class FilesAdapter
   }
 
   @Override protected void bindView(Object item, View view) {
-    if (item instanceof File) bindFileView((File) item, view);
-    else bindHeaderView(item, view);
+    if (item instanceof File) {
+      bindFileView((File) item, view);
+    } else {
+      bindHeaderView(item, view);
+    }
   }
 
   private View newFileView(ViewGroup parent) {
@@ -120,7 +118,8 @@ public final class FilesAdapter
   void showFilename(File f, ViewHolder holder) {
     holder.name.setEnabled(f.canRead());
     holder.name.setText(f.getName());
-    holder.name.setCompoundDrawablesWithIntrinsicBounds(drawables.apply(f), null, null, null);
+    holder.name.setCompoundDrawablesWithIntrinsicBounds(
+        drawables.apply(f), null, null, null);
   }
 
   void showFileInfo(File file, ViewHolder holder) {

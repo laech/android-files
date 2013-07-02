@@ -1,41 +1,31 @@
 package l.files.ui.widget;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static l.files.util.Sets.minus;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-import static l.files.ui.animation.Animations.*;
-import static l.files.ui.util.ListViews.getFirstChildScrollOffset;
-import static l.files.ui.util.ListViews.getVisibleItems;
-import static l.files.util.Sets.minus;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnPreDrawListener;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 
-public abstract class AnimatedAdapter<T>
-    extends BaseAdapter implements UpdatableAdapter<T> {
+public abstract class AnimatedAdapter<T> extends BaseAdapter {
 
-  private final ListView list;
-  private final List<T> items;
-  private final Set<T> newItemsToBeAnimated;
-  private boolean initialDataSet;
+  private static final int ANIMATE_DURATION = 300;
 
-  public AnimatedAdapter(ListView parent) {
-    list = checkNotNull(parent, "parent");
-    items = newArrayList();
-    newItemsToBeAnimated = newHashSet();
-    initialDataSet = true;
-  }
+  private long seq = 0;
+
+  private final Map<T, Long> ids = newHashMap();
+
+  private final List<T> items = newArrayList();
 
   @Override public int getCount() {
     return items.size();
@@ -46,14 +36,17 @@ public abstract class AnimatedAdapter<T>
   }
 
   @Override public long getItemId(int position) {
-    return position;
+    return ids.get(getItem(position));
+  }
+
+  @Override public boolean hasStableIds() {
+    return true;
   }
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     T item = getItem(position);
     if (view == null) view = newView(item, parent);
     bindView(item, view);
-    animateAddition(item, view);
     return view;
   }
 
@@ -61,90 +54,101 @@ public abstract class AnimatedAdapter<T>
 
   protected abstract void bindView(T item, View view);
 
-  protected boolean animateAddition(T item, View view) {
-    boolean animate = newItemsToBeAnimated.remove(item);
-    if (animate) newListItemAdditionAnimation(view).start();
-    return animate;
+  protected View inflate(int id, ViewGroup parent) {
+    return LayoutInflater.from(parent.getContext()).inflate(id, parent, false);
   }
 
-  protected View inflate(int viewId, ViewGroup parent) {
-    Context context = parent.getContext();
-    return LayoutInflater.from(context).inflate(viewId, parent, false);
-  }
+  public void replaceAll(final ListView list,
+      final Collection<? extends T> newItems, boolean animate) {
 
-  private void removeAllWithCallback(final Collection<?> items, final Runnable callback) {
-    if (items.isEmpty()) {
-      if (callback != null) callback.run();
-      return;
-    }
-
-    final Map<?, Animator> animators = newRemovalAnimationForVisibleItems(items, list);
-
-    if (animators.isEmpty()) {
-      removeAndRestoreState(items);
-      if (callback != null) callback.run();
-      return;
-    }
-
-    newAnimatorSet(animators.values(), new AnimatorListenerAdapter() {
-      @Override public void onAnimationEnd(Animator animation) {
-        removeAndRestoreState(animators.keySet());
-        list.post(new Runnable() {
-          @Override public void run() {
-            removeAllWithCallback(minus(items, animators.keySet()), callback);
-          }
-        });
-      }
-    }).start();
-  }
-
-  private void removeAndRestoreState(Collection<?> itemsToRemove) {
-    final List<Object> visibleItems = getVisibleItems(list);
-    final int top = getFirstChildScrollOffset(list);
-    removeAndNotify(itemsToRemove);
-    restore(visibleItems, top);
-  }
-
-  private void removeAndNotify(Collection<?> itemsToRemove) {
-    items.removeAll(itemsToRemove);
+    final Map<Long, Integer> idToTops = mapIdToViewTops(list);
+    final List<Long> oldVisibleIds = getVisibleIds(list);
+    final List<Long> oldIds = newArrayList(ids.values());
+    updateIds(newItems);
+    updateItems(newItems);
     notifyDataSetChanged();
-  }
+    
+    if (!animate) return;
 
-  private void restore(List<Object> visibleItems, int top) {
-    for (Object item : visibleItems) {
-      final int index = items.indexOf(item);
-      if (index > -1) {
-        list.setSelectionFromTop(index, top);
-        return;
-      }
-    }
-  }
+    list.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
+      @Override public boolean onPreDraw() {
+        list.getViewTreeObserver().removeOnPreDrawListener(this);
 
-  @Override public void replaceAll(final Collection<? extends T> newItems) {
-    removeAllWithCallback(minus(items, newItems), new Runnable() {
-      @Override public void run() {
-        newItemsToBeAnimated.clear();
-        newItemsToBeAnimated.addAll(minus(newItems, items));
-        items.clear();
-        items.addAll(newItems);
-        notifyDataSetChanged();
+        int nRemovedVisibleItems = minus(oldVisibleIds, getVisibleIds(list))
+            .size();
+        for (int i = 0; i < list.getChildCount(); i++) {
+
+          View child = list.getChildAt(i);
+          int position = list.getPositionForView(child);
+          int newTop = child.getTop();
+          Integer oldTop = idToTops.get(getItemId(position));
+
+          if (oldTop != null) {
+            animateItemMovement(child, oldTop, newTop);
+          } else if (oldIds.contains(getItemId(position))) {
+            animateOldItemEntrance(child, nRemovedVisibleItems, list);
+          } else {
+            animateNewItemEntrance(child);
+          }
+        }
+
+        return true;
       }
     });
   }
 
-  @Override public void notifyDataSetChanged() {
-    super.notifyDataSetChanged();
-    noAdditionAnimationOnInitialDataSet();
+  private void updateItems(final Collection<? extends T> newItems) {
+    items.clear();
+    items.addAll(newItems);
   }
 
-  private void noAdditionAnimationOnInitialDataSet() {
-    if (initialDataSet) {
-      initialDataSet = false;
-      newItemsToBeAnimated.clear();
+  private List<Long> getVisibleIds(ListView list) {
+    int n = list.getChildCount();
+    List<Long> items = newArrayListWithCapacity(n);
+    for (int i = 0; i < n; i++) {
+      int position = list.getPositionForView(list.getChildAt(i));
+      items.add(list.getItemIdAtPosition(position));
+    }
+    return items;
+  }
+
+  private Map<Long, Integer> mapIdToViewTops(ListView list) {
+    int n = list.getChildCount();
+    Map<Long, Integer> idToTops = newHashMapWithExpectedSize(n);
+    for (int i = 0; i < n; i++) {
+      int position = list.getPositionForView(list.getChildAt(i));
+      idToTops.put(getItemId(position), list.getChildAt(i).getTop());
+    }
+    return idToTops;
+  }
+
+  private void updateIds(final Collection<? extends T> items) {
+    for (T item : items) {
+      if (!ids.containsKey(item)) ids.put(item, seq++);
+    }
+    ids.keySet().retainAll(items);
+  }
+
+  private void animateItemMovement(View child, int oldTop, int newTop) {
+    if (oldTop != newTop) {
+      int delta = oldTop - newTop;
+      child.setTranslationY(delta);
+      child.animate().setDuration(ANIMATE_DURATION).translationY(0);
     }
   }
 
-  public void clearPendingAnimations() {
-    newItemsToBeAnimated.clear();
+  private void animateOldItemEntrance(View child, int nVisibleItemsRemoved,
+      ListView list) {
+    child.setTranslationY(list.indexOfChild(child) == 0
+        ? child.getHeight() * -1
+        : child.getHeight() * nVisibleItemsRemoved);
+    child.animate().setDuration(300).translationY(0);
   }
+
+  private void animateNewItemEntrance(View child) {
+    child.setAlpha(0);
+    child.setTranslationY(-child.getHeight());
+    child.animate().setDuration(ANIMATE_DURATION * 2).alpha(1).translationY(0);
+  }
+
 }

@@ -2,6 +2,9 @@ package l.files.ui.app.files;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.tryFind;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.FilesApp.getApp;
 import static l.files.setting.Settings.getBookmarksSetting;
@@ -9,6 +12,7 @@ import static l.files.setting.Settings.getShowHiddenFilesSetting;
 import static l.files.util.Files.listFiles;
 
 import java.io.File;
+import java.util.List;
 
 import l.files.FilesApp;
 import l.files.R;
@@ -28,21 +32,20 @@ import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.menu.OptionsMenu;
 import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
+import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-public final class FilesFragment extends BaseListFragment implements OnScrollListener {
+public final class FilesFragment extends BaseListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -78,7 +81,7 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
-        refresh();
+        refresh(true);
       }
     });
 
@@ -87,12 +90,13 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
 
     configureListView();
     configureOptionsMenu();
-    refresh();
+    refresh(false);
   }
 
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
-        new BookmarkAction(dir, getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
+        new BookmarkAction(dir,
+            getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
         new NewDirectoryAction(dir),
         new SortByAction(getFragmentManager(), SortByDialog.CREATOR)));
   }
@@ -102,7 +106,6 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     list.setMultiChoiceModeListener(new MultiChoiceModeDelegate(
         new UpdateSelectedItemCountAction(list),
         new MoveToTrashAction(list, new TrashMover(getActivity()))));
-    list.setOnScrollListener(this);
     setListAdapter(adapter);
   }
 
@@ -158,45 +161,48 @@ public final class FilesFragment extends BaseListFragment implements OnScrollLis
     if (showingHiddenFiles != show || currentSort != sort) {
       showingHiddenFiles = show;
       currentSort = sort;
-      refresh();
+      refresh(false);
     }
   }
 
-  private void refresh() {
+  private void refresh(boolean animate) {
     if (DEBUG) Log.d(TAG, "refresh");
-    setContent(dir);
+    setContent(dir, animate);
   }
 
-  private void setContent(File directory) {
+  private void setContent(File directory, boolean animate) {
+    final PinnedHeaderListView list = (PinnedHeaderListView) getListView();
+    list.setPinHeaders(false);
+
     File[] children = listFiles(directory, showingHiddenFiles);
     if (children == null) {
       updateUnableToShowDirectoryError(directory);
     } else {
-      adapter.replaceAll(currentSort.transform(getActivity(), children));
+      List<Object> items = currentSort.transform(getActivity(), children);
+      adapter.replaceAll(list, items, animate);
+      if (hasHeaders(items)) {
+        list.post(new Runnable() {
+          @Override public void run() {
+            list.setPinHeaders(true);
+          }
+        });
+      }
     }
   }
 
-  @Override
-  public void onScrollStateChanged(AbsListView view, int scrollState) {
-    adapter.clearPendingAnimations();
-  }
-
-  @Override public void onScroll(AbsListView view, int firstVisibleItem,
-      int visibleItemCount, int totalItemCount) {
+  private boolean hasHeaders(List<Object> items) {
+    return tryFind(items, not(instanceOf(File.class))).isPresent();
   }
 
   @Subscribe public void handle(Sort sort) {
     if (currentSort != sort) {
       currentSort = sort;
-      adapter = newListAdapter();
-      setListAdapter(adapter);
-      refresh();
+      refresh(true);
     }
   }
 
   private FilesAdapter newListAdapter() {
-    return new FilesAdapter
-        (getListView(),
+    return new FilesAdapter(
         new FileDrawableProvider(getResources()),
         new DateTimeFormat(getActivity()));
   }
