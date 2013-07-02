@@ -12,12 +12,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Supplier;
 import l.files.R;
-import l.files.settings.SortSetting;
+import l.files.setting.Setting;
+import l.files.setting.SortBy;
+import l.files.ui.app.files.sort.Sorter;
+import l.files.ui.app.files.sort.Sorters;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.AdapterView.OnItemClickListener;
-import static l.files.FilesApp.getApp;
-import static l.files.settings.SortSetting.Sort.DATE_MODIFIED;
-import static l.files.settings.SortSetting.Sort.NAME;
+import static l.files.setting.Settings.getSortSetting;
 
 public class SortByDialog extends DialogFragment implements OnItemClickListener {
 
@@ -27,7 +29,7 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
     }
   };
 
-  private SortSetting setting;
+  private Setting<SortBy> setting;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -36,7 +38,7 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    setting = getApp(getActivity()).getSortSetting();
+    setting = getSortSetting(getDefaultSharedPreferences(getActivity()));
     getDialog().setTitle(R.string.sort_by);
 
     ListView list = (ListView) getView().findViewById(android.R.id.list);
@@ -54,22 +56,20 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    setting.set((SortSetting.Sort) parent.getItemAtPosition(position));
+    setting.set(((Sorter) parent.getItemAtPosition(position)).id());
     getDialog().dismiss();
   }
 
-  static class SortByAdapter extends ArrayAdapter<SortSetting.Sort> {
+  class SortByAdapter extends ArrayAdapter<Sorter> {
 
     SortByAdapter(Context context) {
-      super(context, R.layout.sort_by_item, new SortSetting.Sort[]{
-          NAME, DATE_MODIFIED
-      });
+      super(context, R.layout.sort_by_item, Sorters.get(getResources()));
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       TextView view = (TextView) super.getView(position, convertView, parent);
-      view.setText(getItem(position).label(view.getContext()));
+      view.setText(getItem(position).name(getResources()));
       return view;
     }
   }

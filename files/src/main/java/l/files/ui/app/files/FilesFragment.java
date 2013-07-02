@@ -1,24 +1,20 @@
 package l.files.ui.app.files;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.instanceOf;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Iterables.tryFind;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.FilesApp.getApp;
-import static l.files.setting.Settings.getBookmarksSetting;
-import static l.files.setting.Settings.getShowHiddenFilesSetting;
-import static l.files.util.Files.listFiles;
-
-import java.io.File;
-import java.util.List;
-
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.google.common.base.Optional;
+import com.squareup.otto.Bus;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.setting.Setting;
-import l.files.settings.SortSetting;
-import l.files.settings.SortSetting.Sort;
+import l.files.setting.SortBy;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.app.BaseListFragment;
@@ -28,24 +24,30 @@ import l.files.ui.app.files.menu.SortByAction;
 import l.files.ui.app.files.menu.SortByDialog;
 import l.files.ui.app.files.mode.MoveToTrashAction;
 import l.files.ui.app.files.mode.UpdateSelectedItemCountAction;
+import l.files.ui.app.files.sort.Sorter;
+import l.files.ui.app.files.sort.Sorters;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.menu.OptionsMenu;
 import l.files.ui.mode.MultiChoiceModeDelegate;
 import l.files.util.DateTimeFormat;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import java.io.File;
+import java.util.List;
 
-public final class FilesFragment extends BaseListFragment {
+import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.tryFind;
+import static java.util.Arrays.asList;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.setting.Settings.*;
+import static l.files.util.Files.listFiles;
+
+public final class FilesFragment
+    extends BaseListFragment implements OnSharedPreferenceChangeListener {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -54,13 +56,15 @@ public final class FilesFragment extends BaseListFragment {
   FilesAdapter adapter;
   Bus bus;
   Setting<Boolean> settingShowHiddenFiles;
-  SortSetting sortSetting;
+  Setting<SortBy> sortSetting;
 
   private File dir;
   private DirectoryObserver fileObserver;
 
   private boolean showingHiddenFiles;
-  private Sort currentSort;
+  private SortBy currentSort;
+
+  private List<Sorter> sorters;
 
   public static FilesFragment create(String directory) {
     Bundle args = new Bundle(1);
@@ -74,9 +78,12 @@ public final class FilesFragment extends BaseListFragment {
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
+    SharedPreferences pref = getDefaultSharedPreferences(getActivity());
+    pref.registerOnSharedPreferenceChangeListener(this);
+    settingShowHiddenFiles = getShowHiddenFilesSetting(pref);
+    sortSetting = getSortSetting(pref);
+    sorters = Sorters.get(getResources());
     adapter = newListAdapter();
-    settingShowHiddenFiles = getShowHiddenFilesSetting(getDefaultSharedPreferences(getActivity()));
-    sortSetting = getApp(this).getSortSetting();
     bus = FilesApp.BUS;
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
@@ -157,7 +164,7 @@ public final class FilesFragment extends BaseListFragment {
 
   void checkPreferences() { // TODO
     boolean show = settingShowHiddenFiles.get();
-    Sort sort = sortSetting.get();
+    SortBy sort = sortSetting.get();
     if (showingHiddenFiles != show || currentSort != sort) {
       showingHiddenFiles = show;
       currentSort = sort;
@@ -178,14 +185,17 @@ public final class FilesFragment extends BaseListFragment {
     if (children == null) {
       updateUnableToShowDirectoryError(directory);
     } else {
-      List<Object> items = currentSort.transform(getActivity(), children);
-      adapter.replaceAll(list, items, animate);
-      if (hasHeaders(items)) {
-        list.post(new Runnable() {
-          @Override public void run() {
-            list.setPinHeaders(true);
-          }
-        });
+      Optional<Sorter> sorter = getSorter();
+      if (sorter.isPresent()) {
+        List<Object> items = sorter.get().apply(asList(children));
+        adapter.replaceAll(list, items, animate);
+        if (hasHeaders(items)) {
+          list.post(new Runnable() {
+            @Override public void run() {
+              list.setPinHeaders(true);
+            }
+          });
+        }
       }
     }
   }
@@ -194,16 +204,28 @@ public final class FilesFragment extends BaseListFragment {
     return tryFind(items, not(instanceOf(File.class))).isPresent();
   }
 
-  @Subscribe public void handle(Sort sort) {
-    if (currentSort != sort) {
-      currentSort = sort;
-      refresh(true);
-    }
-  }
-
   private FilesAdapter newListAdapter() {
     return new FilesAdapter(
         new FileDrawableProvider(getResources()),
         new DateTimeFormat(getActivity()));
+  }
+
+  private Optional<Sorter> getSorter() {
+    for (Sorter sorter : sorters) {
+      if (sorter.id().equals(currentSort)) {
+        return Optional.of(sorter);
+      }
+    }
+    return Optional.absent();
+  }
+
+  @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    if (sortSetting.key().equals(key)) {
+      SortBy sort = sortSetting.get();
+      if (currentSort != sort) {
+        currentSort = sort;
+        refresh(true);
+      }
+    }
   }
 }
