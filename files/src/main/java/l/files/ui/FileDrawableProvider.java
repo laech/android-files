@@ -1,5 +1,13 @@
 package l.files.ui;
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import java.io.File;
+import java.util.Map;
+import l.files.R;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.ui.UserDirs.DIR_ALARMS;
 import static l.files.ui.UserDirs.DIR_ANDROID;
@@ -13,22 +21,11 @@ import static l.files.ui.UserDirs.DIR_PICTURES;
 import static l.files.ui.UserDirs.DIR_PODCASTS;
 import static l.files.ui.UserDirs.DIR_RINGTONES;
 import static l.files.ui.UserDirs.DIR_ROOT;
-import static l.files.util.Files.getFileExtension;
-
-import java.io.File;
-import java.util.Map;
-
-import l.files.R;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public final class FileDrawableProvider implements Function<File, Drawable> {
 
-  private static final Map<File, Integer> DIR_IMGS = ImmutableMap
-      .<File, Integer> builder()
+  private static final Map<File, Integer> DIR_IMGS = ImmutableMap.<File, Integer>builder()
       .put(DIR_ROOT, R.drawable.ic_directory_device)
       .put(DIR_HOME, R.drawable.ic_directory_home)
       .put(DIR_ALARMS, R.drawable.ic_directory_alarms)
@@ -54,7 +51,6 @@ public final class FileDrawableProvider implements Function<File, Drawable> {
       Integer id = DIR_IMGS.get(file);
       return res.getDrawable(id != null ? id : R.drawable.ic_directory);
     }
-    return res.getDrawable(Images.get(getFileExtension(file)));
+    return res.getDrawable(Images.get(getExtension(file.getName())));
   }
-
 }
