@@ -19,8 +19,6 @@ import l.files.trash.TrashService.TrashMover;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.app.files.menu.NewDirectoryAction;
-import l.files.ui.app.files.menu.SortByAction;
-import l.files.ui.app.files.menu.SortByDialog;
 import l.files.ui.app.files.mode.MoveToTrashAction;
 import l.files.ui.app.files.mode.UpdateSelectedItemCountAction;
 import l.files.ui.app.files.sort.Sorter;
@@ -44,6 +42,7 @@ import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.*;
 import static l.files.ui.app.files.menu.Menus.newBookmarkAction;
+import static l.files.ui.app.files.menu.Menus.newSortAction;
 import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
@@ -105,7 +104,7 @@ public final class FilesFragment
         newBookmarkAction(dir,
             getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
         new NewDirectoryAction(dir),
-        new SortByAction(getFragmentManager(), SortByDialog.CREATOR)));
+        newSortAction(getFragmentManager())));
   }
 
   private void configureListView() {

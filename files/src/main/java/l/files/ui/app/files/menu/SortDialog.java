@@ -21,11 +21,11 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.setting.Settings.getSortSetting;
 
-public class SortByDialog extends DialogFragment implements OnItemClickListener {
+final class SortDialog extends DialogFragment implements OnItemClickListener {
 
-  public static final Supplier<SortByDialog> CREATOR = new Supplier<SortByDialog>() {
-    @Override public SortByDialog get() {
-      return new SortByDialog();
+  static final Supplier<SortDialog> CREATOR = new Supplier<SortDialog>() {
+    @Override public SortDialog get() {
+      return new SortDialog();
     }
   };
 
@@ -42,7 +42,7 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
     getDialog().setTitle(R.string.sort_by);
 
     ListView list = (ListView) getView().findViewById(android.R.id.list);
-    list.setAdapter(new SortByAdapter(getActivity()));
+    list.setAdapter(new SorterAdapter(getActivity()));
     list.setOnItemClickListener(this);
   }
 
@@ -60,9 +60,9 @@ public class SortByDialog extends DialogFragment implements OnItemClickListener 
     getDialog().dismiss();
   }
 
-  class SortByAdapter extends ArrayAdapter<Sorter> {
+  class SorterAdapter extends ArrayAdapter<Sorter> {
 
-    SortByAdapter(Context context) {
+    SorterAdapter(Context context) {
       super(context, R.layout.sort_by_item, Sorters.get(getResources()));
     }
 

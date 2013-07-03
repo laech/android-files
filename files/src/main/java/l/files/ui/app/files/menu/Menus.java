@@ -1,6 +1,7 @@
 package l.files.ui.app.files.menu;
 
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import l.files.setting.SetSetting;
 import l.files.ui.menu.OptionsMenuAction;
 
@@ -14,6 +15,10 @@ public final class Menus {
 
   public static OptionsMenuAction newSettingsAction(Context context) {
     return new SettingsAction(context);
+  }
+
+  public static OptionsMenuAction newSortAction(FragmentManager manager) {
+    return new SortAction(manager, SortDialog.CREATOR);
   }
 
   private Menus() {}
