@@ -1,13 +1,16 @@
 package l.files.ui.menu;
 
 import android.view.Menu;
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 public final class OptionsMenu {
 
-  private final OptionsMenuAction[] actions;
+  private final List<OptionsMenuAction> actions;
 
   public OptionsMenu(OptionsMenuAction... actions) {
-    this.actions = actions;
+    this.actions = ImmutableList.copyOf(actions);
   }
 
   public void onCreateOptionsMenu(Menu menu) {
@@ -19,6 +22,6 @@ public final class OptionsMenu {
   }
 
   public boolean isEmpty() {
-    return actions.length == 0;
+    return actions.isEmpty();
   }
 }
