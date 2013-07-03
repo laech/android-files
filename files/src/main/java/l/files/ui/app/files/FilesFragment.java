@@ -18,7 +18,6 @@ import l.files.setting.SortBy;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.app.BaseListFragment;
-import l.files.ui.app.files.menu.BookmarkAction;
 import l.files.ui.app.files.menu.NewDirectoryAction;
 import l.files.ui.app.files.menu.SortByAction;
 import l.files.ui.app.files.menu.SortByDialog;
@@ -44,6 +43,7 @@ import static com.google.common.collect.Iterables.tryFind;
 import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.*;
+import static l.files.ui.app.files.menu.Menus.newBookmarkAction;
 import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
@@ -102,7 +102,7 @@ public final class FilesFragment
 
   private void configureOptionsMenu() {
     setOptionsMenu(new OptionsMenu(
-        new BookmarkAction(dir,
+        newBookmarkAction(dir,
             getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
         new NewDirectoryAction(dir),
         new SortByAction(getFragmentManager(), SortByDialog.CREATOR)));
