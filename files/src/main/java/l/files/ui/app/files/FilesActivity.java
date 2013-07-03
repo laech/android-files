@@ -1,26 +1,25 @@
 package l.files.ui.app.files;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
-
-import java.io.File;
-
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
+import com.google.common.base.Optional;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.ui.FileLabelProvider;
 import l.files.ui.app.BaseFragmentActivity;
-import l.files.ui.app.files.menu.SettingsAction;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
 import l.files.ui.menu.OptionsMenu;
-import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
 
-import com.google.common.base.Optional;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
+import java.io.File;
+
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.ui.app.files.menu.Menus.newSettingsAction;
+import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
 public class FilesActivity extends BaseFragmentActivity {
 
@@ -48,7 +47,7 @@ public class FilesActivity extends BaseFragmentActivity {
     setContentView(pager);
 
     setOptionsMenu(new OptionsMenu(
-        new SettingsAction(this)
+        newSettingsAction(this)
     ));
   }
 

@@ -13,6 +13,8 @@ import org.mockito.ArgumentCaptor;
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
+import static l.files.test.Mocks.mockMenuItem;
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,8 +36,8 @@ public final class SettingsActionTest extends TestCase {
     return context;
   }
 
-  public void testOnCreateCreatesMenuItem() {
-    MenuItem item = mock(MenuItem.class);
+  public void testOnCreate() {
+    MenuItem item = mockMenuItem();
     Menu menu = mock(Menu.class);
     given(callAddMenuItem(menu)).willReturn(item);
 
@@ -50,8 +52,8 @@ public final class SettingsActionTest extends TestCase {
     ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
     verify(item).setIntent(captor.capture());
 
-    ComponentName expected = new ComponentName(context, SettingsActivity.class);
-    assertEquals(expected, captor.getValue().getComponent());
+    assertThat(captor.getValue().getComponent())
+        .isEqualTo(new ComponentName(context, SettingsActivity.class));
   }
 
   private MenuItem callAddMenuItem(Menu menu) {
