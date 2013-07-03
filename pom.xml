@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>files</groupId>
   <artifactId>files-parent</artifactId>
@@ -11,6 +12,7 @@
     <module>Codegen</module>
     <module>files</module>
     <module>unit-tests</module>
+    <module>integration-tests</module>
   </modules>
 
   <properties>
@@ -129,29 +131,6 @@
             <sdk>
               <platform>17</platform>
             </sdk>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>2.5</version>
-          <configuration>
-            <filesets>
-              <fileset>
-                <directory>${basedir}/libs</directory>
-              </fileset>
-            </filesets>
-          </configuration>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.6</version>
-          <configuration>
-            <excludeArtifactIds>android</excludeArtifactIds>
-            <outputDirectory>${basedir}/libs</outputDirectory>
           </configuration>
         </plugin>
 

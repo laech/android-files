@@ -1,21 +1,20 @@
 package l.files.ui.app.files;
 
-import static android.text.format.Formatter.formatShortFileSize;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.File;
-
-import l.files.R;
-import l.files.ui.widget.AnimatedAdapter;
-import l.files.util.DateTimeFormat;
-import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.google.common.base.Function;
+import l.files.R;
+import l.files.ui.format.DateTimeFormat;
+import l.files.ui.widget.AnimatedAdapter;
+import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
+
+import java.io.File;
+
+import static android.text.format.Formatter.formatShortFileSize;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesAdapter
     extends AnimatedAdapter<Object> implements PinnedSectionedHeaderAdapter {

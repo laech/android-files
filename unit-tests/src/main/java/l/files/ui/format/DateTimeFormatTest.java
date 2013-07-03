@@ -1,12 +1,13 @@
-package l.files.util;
+package l.files.ui.format;
+
+import android.test.AndroidTestCase;
+
+import java.util.Date;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static java.lang.System.currentTimeMillis;
-
-import java.util.Date;
-
-import android.test.AndroidTestCase;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public final class DateTimeFormatTest extends AndroidTestCase {
 
@@ -23,18 +24,20 @@ public final class DateTimeFormatTest extends AndroidTestCase {
     Date yesterday = new Date(currentTimeMillis() - ONE_DAY_MILLIS);
     String expected = getDateFormat(getContext()).format(yesterday);
     String actual = format.format(yesterday.getTime());
-    assertEquals(expected, actual);
+    assertThat(actual).isEqualTo(expected);
   }
 
   public void testFormatsTimestampAsTimeWithoutDateWhenTimestampIsWithinToday() {
     Date today = new Date();
     String expected = getTimeFormat(getContext()).format(today);
     String actual = format.format(today.getTime());
-    assertEquals(expected, actual);
+    assertThat(actual).isEqualTo(expected);
   }
 
   public void testCanBeReused() { // Because we use some caching
     long millis = new Date().getTime();
-    assertEquals(format.format(millis), format.format(millis));
+    assertThat(format.format(millis))
+        .isEqualTo(format.format(millis))
+        .isEqualTo(format.format(millis));
   }
 }

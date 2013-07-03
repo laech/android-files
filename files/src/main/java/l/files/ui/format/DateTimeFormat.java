@@ -1,4 +1,4 @@
-package l.files.util;
+package l.files.ui.format;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;

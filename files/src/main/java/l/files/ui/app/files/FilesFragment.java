@@ -23,9 +23,9 @@ import l.files.ui.app.files.mode.UpdateSelectedItemCountAction;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 import l.files.ui.event.FileSelectedEvent;
+import l.files.ui.format.DateTimeFormat;
 import l.files.ui.menu.OptionsMenu;
 import l.files.ui.mode.MultiChoiceModeDelegate;
-import l.files.util.DateTimeFormat;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
 
 import java.io.File;
