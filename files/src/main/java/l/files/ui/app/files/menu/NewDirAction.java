@@ -13,12 +13,12 @@ import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class NewDirectoryAction
+final class NewDirAction
     extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
 
   private final File parent;
 
-  public NewDirectoryAction(File parent) {
+  NewDirAction(File parent) {
     this.parent = checkNotNull(parent, "parent");
   }
 

@@ -21,5 +21,9 @@ public final class Menus {
     return new SortAction(manager, SortDialog.CREATOR);
   }
 
+  public static OptionsMenuAction newDirAction(File parent) {
+    return new NewDirAction(parent);
+  }
+
   private Menus() {}
 }
