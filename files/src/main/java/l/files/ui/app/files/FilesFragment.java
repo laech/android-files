@@ -62,6 +62,7 @@ public final class FilesFragment
   private SortBy currentSort;
 
   private List<Sorter> sorters;
+  private SharedPreferences pref;
 
   public static FilesFragment create(String directory) {
     Bundle args = new Bundle(1);
@@ -75,8 +76,7 @@ public final class FilesFragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    SharedPreferences pref = getDefaultSharedPreferences(getActivity());
-    pref.registerOnSharedPreferenceChangeListener(this);
+    pref = getDefaultSharedPreferences(getActivity());
     settingShowHiddenFiles = getShowHiddenFilesSetting(pref);
     sortSetting = getSortSetting(pref);
     sorters = Sorters.get(getResources());
@@ -128,12 +128,14 @@ public final class FilesFragment
     checkPreferences();
     fileObserver.startWatching();
     bus.register(this);
+    pref.registerOnSharedPreferenceChangeListener(this);
   }
 
   @Override public void onPause() {
     super.onPause();
     fileObserver.stopWatching();
     bus.unregister(this);
+    pref.unregisterOnSharedPreferenceChangeListener(this);
   }
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
