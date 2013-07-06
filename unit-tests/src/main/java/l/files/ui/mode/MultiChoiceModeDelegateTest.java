@@ -5,6 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import junit.framework.TestCase;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -22,9 +23,11 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     delegate = new MultiChoiceModeDelegate(action1, action2);
   }
 
-  public void testOnCreateActionModeIsDelegated() {
+  public void testOnCreateActionMode_isDelegated() {
     ActionMode mode = mock(ActionMode.class);
     Menu menu = mock(Menu.class);
+    given(action1.onCreateActionMode(mode, menu)).willReturn(true);
+    given(action2.onCreateActionMode(mode, menu)).willReturn(true);
 
     delegate.onCreateActionMode(mode, menu);
 
@@ -32,25 +35,31 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     verify(action2).onCreateActionMode(mode, menu);
   }
 
-  public void testOnCreateActionModeReturnsFalseIfAnyActionSaysItShouldNotBeCreated() {
+  public void testOnCreateActionMode_returnsFalseIfAnyActionSaysItShouldNotBeCreated() {
     given(action1.onCreateActionMode(null, null)).willReturn(true);
     given(action2.onCreateActionMode(null, null)).willReturn(false);
-    assertFalse(delegate.onCreateActionMode(null, null));
+    assertThat(delegate.onCreateActionMode(null, null)).isFalse();
   }
 
-  public void testOnCreateActionModeReturnsFalseIfAllActionsSayItShouldNotBeCreated() {
+  public void testOnCreateActionMode_stopsExecutingSubsequentActionsWhenAnAnyActionSayItShouldNotBeCreated() {
+    given(action1.onCreateActionMode(null, null)).willReturn(false);
+    delegate.onCreateActionMode(null, null);
+    verifyZeroInteractions(action2);
+  }
+
+  public void testOnCreateActionMode_returnsFalseIfAllActionsSayItShouldNotBeCreated() {
     given(action1.onCreateActionMode(null, null)).willReturn(false);
     given(action2.onCreateActionMode(null, null)).willReturn(false);
-    assertFalse(delegate.onCreateActionMode(null, null));
+    assertThat(delegate.onCreateActionMode(null, null)).isFalse();
   }
 
-  public void testOnCreateActionModeReturnsTrueIfAllActionsSayItShouldBeCreated() {
+  public void testOnCreateActionMode_returnsTrueIfAllActionsSayItShouldBeCreated() {
     given(action1.onCreateActionMode(null, null)).willReturn(true);
     given(action2.onCreateActionMode(null, null)).willReturn(true);
-    assertTrue(delegate.onCreateActionMode(null, null));
+    assertThat(delegate.onCreateActionMode(null, null)).isTrue();
   }
 
-  public void testOnPrepareActionModeIsDelegated() {
+  public void testOnPrepareActionMode_isDelegated() {
     ActionMode mode = mock(ActionMode.class);
     Menu menu = mock(Menu.class);
 
@@ -60,25 +69,25 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     verify(action2).onPrepareActionMode(mode, menu);
   }
 
-  public void testOnPrepareActionModeReturnsTrueIfAnyActionSaysUpdateIsNeeded() {
+  public void testOnPrepareActionMode_returnsTrueIfAnyActionSaysUpdateIsNeeded() {
     given(action1.onPrepareActionMode(null, null)).willReturn(false);
     given(action2.onPrepareActionMode(null, null)).willReturn(true);
-    assertTrue(delegate.onPrepareActionMode(null, null));
+    assertThat(delegate.onPrepareActionMode(null, null)).isTrue();
   }
 
-  public void testOnPrepareActionModeReturnsFalseIfAllActionsSayUpdateIsNotNeeded() {
+  public void testOnPrepareActionMode_returnsFalseIfAllActionsSayUpdateIsNotNeeded() {
     given(action1.onPrepareActionMode(null, null)).willReturn(false);
     given(action2.onPrepareActionMode(null, null)).willReturn(false);
-    assertFalse(delegate.onPrepareActionMode(null, null));
+    assertThat(delegate.onPrepareActionMode(null, null)).isFalse();
   }
 
-  public void testOnPrepareActionModeReturnsTrueIfAllActionsSayUpdateIsNeeded() {
+  public void testOnPrepareActionMode_returnsTrueIfAllActionsSayUpdateIsNeeded() {
     given(action1.onPrepareActionMode(null, null)).willReturn(true);
     given(action2.onPrepareActionMode(null, null)).willReturn(true);
-    assertTrue(delegate.onPrepareActionMode(null, null));
+    assertThat(delegate.onPrepareActionMode(null, null)).isTrue();
   }
 
-  public void testOnActionItemClickedIsDelegatedToActionWithSameItemId() {
+  public void testOnActionItemClicked_isDelegatedToActionWithSameItemId() {
     MenuItem item = mock(MenuItem.class);
     given(item.getItemId()).willReturn(2);
     given(action1.getItemId()).willReturn(1);
@@ -90,7 +99,7 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     verify(action2).onActionItemClicked(null, item);
   }
 
-  public void testOnActionItemClickedReturnsTrueIfHasActionWithSameItemIdToHandleEvent() {
+  public void testOnActionItemClicked_returnsTrueIfHasActionWithSameItemIdToHandleEvent() {
     MenuItem item = mock(MenuItem.class);
     given(item.getItemId()).willReturn(2);
     given(action1.getItemId()).willReturn(1);
@@ -98,15 +107,15 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     assertTrue(delegate.onActionItemClicked(null, item));
   }
 
-  public void testOnActionItemClickedReturnsFalseIfHasNoActionWithSameItemIdToHandleEvent() {
+  public void testOnActionItemClicked_returnsFalseIfHasNoActionWithSameItemIdToHandleEvent() {
     MenuItem item = mock(MenuItem.class);
     given(item.getItemId()).willReturn(3);
     given(action1.getItemId()).willReturn(1);
     given(action2.getItemId()).willReturn(2);
-    assertFalse(delegate.onActionItemClicked(null, item));
+    assertThat(delegate.onActionItemClicked(null, item)).isFalse();
   }
 
-  public void testOnActionItemClickedWillNotBeDelegatedToActionsWithNoIdEvenIfMenuItemHasNoId() {
+  public void testOnActionItemClicked_willNotBeDelegatedToActionsWithNoIdEvenIfMenuItemHasNoId() {
     MenuItem item = mock(MenuItem.class);
     given(item.getItemId()).willReturn(0);
     given(action1.getItemId()).willReturn(0);
@@ -118,14 +127,14 @@ public final class MultiChoiceModeDelegateTest extends TestCase {
     verify(action2, never()).onActionItemClicked(null, item);
   }
 
-  public void testOnDestroyActionModeIsDelegated() {
+  public void testOnDestroyActionMode_isDelegated() {
     ActionMode mode = mock(ActionMode.class);
     delegate.onDestroyActionMode(mode);
     verify(action1).onDestroyActionMode(mode);
     verify(action2).onDestroyActionMode(mode);
   }
 
-  public void testOnItemCheckedStateChangedIsDelegated() {
+  public void testOnItemCheckedStateChanged_isDelegated() {
     ActionMode mode = mock(ActionMode.class);
     delegate.onItemCheckedStateChanged(mode, 1, 2, true);
     verify(action1).onItemCheckedStateChanged(mode, 1, 2, true);

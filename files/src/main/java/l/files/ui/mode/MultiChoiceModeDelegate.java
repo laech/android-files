@@ -3,23 +3,25 @@ package l.files.ui.mode;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 import static android.widget.AbsListView.MultiChoiceModeListener;
 
-public class MultiChoiceModeDelegate implements MultiChoiceModeListener {
+final class MultiChoiceModeDelegate implements MultiChoiceModeListener {
 
-  private final MultiChoiceModeAction[] actions;
+  private final List<MultiChoiceModeAction> actions;
 
-  public MultiChoiceModeDelegate(MultiChoiceModeAction... actions) {
-    this.actions = actions;
+  MultiChoiceModeDelegate(MultiChoiceModeAction... actions) {
+    this.actions = ImmutableList.copyOf(actions);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    boolean result = true;
     for (MultiChoiceModeAction action : actions) {
-      result &= action.onCreateActionMode(mode, menu);
+      if (!action.onCreateActionMode(mode, menu)) return false;
     }
-    return result;
+    return true;
   }
 
   @Override public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
