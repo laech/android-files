@@ -5,45 +5,48 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.ui.mode.MultiChoiceModeActionAdapter;
+import l.files.ui.mode.MultiChoiceModeAdapter;
 
 import java.io.File;
 
 import static android.view.Menu.NONE;
+import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
-public final class MoveToTrashAction extends MultiChoiceModeActionAdapter {
+final class MoveToTrashAction
+    extends MultiChoiceModeAdapter implements OnMenuItemClickListener {
 
   private final AbsListView list;
   private final TrashMover mover;
+
+  private ActionMode mode;
 
   public MoveToTrashAction(AbsListView list, TrashMover mover) {
     this.list = checkNotNull(list, "list");
     this.mover = checkNotNull(mover, "mover");
   }
 
-  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    MenuItem item = menu.add(NONE, getItemId(), NONE, R.string.move_to_trash);
-    item.setShowAsAction(SHOW_AS_ACTION_NEVER);
-    return true;
-  }
-
-  @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-    for (File file : getCheckedFiles()) {
-      mover.moveToTrash(file);
-    }
-    mode.finish();
-    return true;
+  @Override public void onCreate(ActionMode mode, Menu menu) {
+    this.mode = mode;
+    menu.add(NONE, R.id.move_to_trash, NONE, R.string.move_to_trash)
+        .setOnMenuItemClickListener(this)
+        .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
   private Iterable<File> getCheckedFiles() {
     return getCheckedItems(list, File.class);
   }
 
-  @Override public int getItemId() {
-    return R.id.move_to_trash;
+  @Override public boolean onMenuItemClick(MenuItem item) {
+    for (File file : getCheckedFiles()) {
+      mover.moveToTrash(file);
+    }
+    if (mode != null) {
+      mode.finish();
+    }
+    return true;
   }
 }

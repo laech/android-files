@@ -18,13 +18,12 @@ import l.files.setting.SortBy;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.FileDrawableProvider;
 import l.files.ui.app.BaseListFragment;
-import l.files.ui.app.files.mode.MoveToTrashAction;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.format.DateTimeFormat;
 import l.files.ui.menu.OptionsMenus;
-import l.files.ui.mode.MultiChoiceModeListeners;
+import l.files.ui.mode.MultiChoiceModes;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
 
 import java.io.File;
@@ -41,6 +40,7 @@ import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.*;
 import static l.files.ui.app.files.menu.Menus.*;
 import static l.files.ui.app.files.mode.Modes.newCountSelectedItemsAction;
+import static l.files.ui.app.files.mode.Modes.newMoveToTrashAction;
 import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
@@ -106,9 +106,9 @@ public final class FilesFragment
 
   private void configureListView() {
     ListView list = getListView();
-    list.setMultiChoiceModeListener(MultiChoiceModeListeners.of(
+    list.setMultiChoiceModeListener(MultiChoiceModes.asListener(
         newCountSelectedItemsAction(list),
-        new MoveToTrashAction(list, new TrashMover(getActivity()))));
+        newMoveToTrashAction(list, new TrashMover(getActivity()))));
     setListAdapter(adapter);
   }
 
