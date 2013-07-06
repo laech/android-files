@@ -7,13 +7,14 @@ import android.view.ActionMode;
 import android.widget.ListView;
 import l.files.R;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class UpdateSelectedItemCountActionTest extends AndroidTestCase {
+public final class CountSelectedItemsActionTest extends AndroidTestCase {
 
-  private UpdateSelectedItemCountAction action;
+  private CountSelectedItemsAction action;
 
   private ActionMode mode;
   private MockListView list;
@@ -22,7 +23,7 @@ public final class UpdateSelectedItemCountActionTest extends AndroidTestCase {
     super.setUp();
     list = new MockListView(getContext());
     mode = mock(ActionMode.class);
-    action = new UpdateSelectedItemCountAction(list);
+    action = new CountSelectedItemsAction(list);
   }
 
   /**
@@ -34,7 +35,7 @@ public final class UpdateSelectedItemCountActionTest extends AndroidTestCase {
    */
   public void testUpdatesSelectedItemCountOnCreateActionMode() {
     String expected = list.setCheckedItemCount(11);
-    assertTrue(action.onCreateActionMode(mode, null));
+    assertThat(action.onCreateActionMode(mode, null)).isTrue();
     verify(mode).setTitle(expected);
   }
 

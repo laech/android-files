@@ -8,12 +8,11 @@ import l.files.ui.mode.MultiChoiceModeActionAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class UpdateSelectedItemCountAction
-    extends MultiChoiceModeActionAdapter {
+final class CountSelectedItemsAction extends MultiChoiceModeActionAdapter {
 
   private final AbsListView list;
 
-  public UpdateSelectedItemCountAction(AbsListView list) {
+  public CountSelectedItemsAction(AbsListView list) {
     this.list = checkNotNull(list, "list");
   }
 
