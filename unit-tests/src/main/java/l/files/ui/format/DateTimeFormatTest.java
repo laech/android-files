@@ -8,10 +8,9 @@ import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static java.lang.System.currentTimeMillis;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 public final class DateTimeFormatTest extends AndroidTestCase {
-
-  private static final long ONE_DAY_MILLIS = 1000 * 60 * 60 * 24;
 
   private DateTimeFormat format;
 
@@ -21,7 +20,7 @@ public final class DateTimeFormatTest extends AndroidTestCase {
   }
 
   public void testFormatsTimestampAsDateWithoutTimeWhenTimestampIsBeforeToday() {
-    Date yesterday = new Date(currentTimeMillis() - ONE_DAY_MILLIS);
+    Date yesterday = new Date(currentTimeMillis() - MILLIS_PER_DAY);
     String expected = getDateFormat(getContext()).format(yesterday);
     String actual = format.format(yesterday.getTime());
     assertThat(actual).isEqualTo(expected);
