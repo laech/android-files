@@ -13,12 +13,11 @@ import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.event.MediaDetectedEvent;
-import l.files.ui.menu.OptionsMenu;
 
 import java.io.File;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.ui.app.files.menu.Menus.newSettingsAction;
+import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
 public class FilesActivity extends BaseFragmentActivity {
@@ -46,9 +45,7 @@ public class FilesActivity extends BaseFragmentActivity {
     setTitle(new FileLabelProvider(getResources()).apply(directoryInDisplay));
     setContentView(pager);
 
-    setOptionsMenu(new OptionsMenu(
-        newSettingsAction(this)
-    ));
+    setOptionsMenu(newSettingsMenu(this));
   }
 
   protected Optional<File> getDirectoryToDisplay() {

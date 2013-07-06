@@ -23,7 +23,7 @@ import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.format.DateTimeFormat;
-import l.files.ui.menu.OptionsMenu;
+import l.files.ui.menu.OptionsMenus;
 import l.files.ui.mode.MultiChoiceModeListeners;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
 
@@ -98,11 +98,10 @@ public final class FilesFragment
   }
 
   private void configureOptionsMenu() {
-    setOptionsMenu(new OptionsMenu(
-        newBookmarkAction(dir,
-            getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
-        newDirAction(dir),
-        newSortAction(getFragmentManager())));
+    setOptionsMenu(OptionsMenus.compose(
+        newBookmarkMenu(dir, getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
+        newDirMenu(dir),
+        newSortMenu(getFragmentManager())));
   }
 
   private void configureListView() {

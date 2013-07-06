@@ -15,18 +15,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class SortActionTest extends TestCase {
+public final class SortMenuTest extends TestCase {
 
   private FragmentManager manager;
   private DialogFragment dialog;
 
-  private SortAction action;
+  private SortMenu action;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     manager = mock(FragmentManager.class);
     dialog = mock(DialogFragment.class);
-    action = new SortAction(manager, new Supplier<DialogFragment>() {
+    action = new SortMenu(manager, new Supplier<DialogFragment>() {
       @Override public DialogFragment get() {
         return dialog;
       }

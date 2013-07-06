@@ -6,21 +6,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.google.common.base.Supplier;
 import l.files.R;
-import l.files.ui.menu.OptionsMenuActionAdapter;
+import l.files.ui.menu.OptionsMenuAdapter;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class SortAction
-    extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
+final class SortMenu
+    extends OptionsMenuAdapter implements OnMenuItemClickListener {
 
   private final FragmentManager manager;
   private final Supplier<DialogFragment> dialog;
 
   @SuppressWarnings("unchecked")
-  SortAction(FragmentManager manager, Supplier<? extends DialogFragment> dialog) {
+  SortMenu(FragmentManager manager, Supplier<? extends DialogFragment> dialog) {
     this.manager = checkNotNull(manager, "manager");
     this.dialog = (Supplier<DialogFragment>) checkNotNull(dialog, "dialog");
   }

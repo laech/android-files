@@ -5,18 +5,18 @@ import android.content.Intent;
 import android.view.Menu;
 import l.files.R;
 import l.files.ui.app.settings.SettingsActivity;
-import l.files.ui.menu.OptionsMenuActionAdapter;
+import l.files.ui.menu.OptionsMenuAdapter;
 
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class SettingsAction extends OptionsMenuActionAdapter {
+final class SettingsMenu extends OptionsMenuAdapter {
 
   private final Context context;
 
-  SettingsAction(Context context) {
+  SettingsMenu(Context context) {
     this.context = checkNotNull(context, "context");
   }
 

@@ -2,7 +2,7 @@ package l.files.ui.menu;
 
 import android.view.Menu;
 
-public class OptionsMenuActionAdapter implements OptionsMenuAction {
+public class OptionsMenuAdapter implements OptionsMenu {
 
   @Override public void onCreate(Menu menu) {
   }

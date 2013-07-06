@@ -11,23 +11,24 @@ import java.io.File;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.test.Mocks.mockMenuItem;
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class BookmarkActionTest extends TestCase {
+public final class BookmarkMenuTest extends TestCase {
 
   private SetSetting<File> setting;
   private File dir;
 
-  private BookmarkAction action;
+  private BookmarkMenu action;
 
   @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
     setting = mock(SetSetting.class);
     dir = mock(File.class);
-    action = new BookmarkAction(dir, setting);
+    action = new BookmarkMenu(dir, setting);
   }
 
   public void testOnCreate() {
@@ -81,7 +82,7 @@ public final class BookmarkActionTest extends TestCase {
   private void testOnMenuItemClick(boolean from, boolean to) {
     MenuItem item = mock(MenuItem.class);
     given(item.isChecked()).willReturn(from);
-    assertTrue(action.onMenuItemClick(item));
+    assertThat(action.onMenuItemClick(item)).isTrue();
     if (to) {
       verify(setting).add(dir);
     } else {

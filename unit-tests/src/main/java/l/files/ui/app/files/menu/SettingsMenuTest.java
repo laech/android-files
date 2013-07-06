@@ -19,15 +19,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class SettingsActionTest extends TestCase {
+public final class SettingsMenuTest extends TestCase {
 
   private Context context;
-  private SettingsAction action;
+  private SettingsMenu action;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     context = mockContext();
-    action = new SettingsAction(context);
+    action = new SettingsMenu(context);
   }
 
   private Context mockContext() {

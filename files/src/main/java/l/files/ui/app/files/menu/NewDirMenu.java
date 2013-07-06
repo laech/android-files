@@ -3,7 +3,7 @@ package l.files.ui.app.files.menu;
 import android.view.Menu;
 import android.view.MenuItem;
 import l.files.R;
-import l.files.ui.menu.OptionsMenuActionAdapter;
+import l.files.ui.menu.OptionsMenuAdapter;
 
 import java.io.File;
 import java.util.Random;
@@ -13,12 +13,12 @@ import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class NewDirAction
-    extends OptionsMenuActionAdapter implements OnMenuItemClickListener {
+final class NewDirMenu
+    extends OptionsMenuAdapter implements OnMenuItemClickListener {
 
   private final File parent;
 
-  NewDirAction(File parent) {
+  NewDirMenu(File parent) {
     this.parent = checkNotNull(parent, "parent");
   }
 
