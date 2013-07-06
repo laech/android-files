@@ -9,7 +9,7 @@ public class BaseFragmentActivity extends FragmentActivity {
   private OptionsMenu optionsMenu;
 
   public void setOptionsMenu(OptionsMenu menu) {
-    optionsMenu = menu != null ? menu : new OptionsMenu();
+    optionsMenu = OptionsMenu.nullToEmpty(menu);
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {

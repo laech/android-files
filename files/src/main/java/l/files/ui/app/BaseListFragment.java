@@ -10,7 +10,7 @@ public class BaseListFragment extends ListFragment {
   private OptionsMenu optionsMenu;
 
   public void setOptionsMenu(OptionsMenu menu) {
-    optionsMenu = menu != null ? menu : new OptionsMenu();
+    optionsMenu = OptionsMenu.nullToEmpty(menu);
     setHasOptionsMenu(!optionsMenu.isEmpty());
   }
 
