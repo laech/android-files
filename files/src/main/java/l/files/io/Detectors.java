@@ -13,7 +13,7 @@ public final class Detectors {
    * Do not use the returned detector on the main application thread.
    */
   public static Function<File, MediaType> newDetector() {
-    return new CompositeDetector(new ExtensionDetector(), new ContentDetector());
+    return new ContentDetector();
   }
 
   private Detectors() {}
