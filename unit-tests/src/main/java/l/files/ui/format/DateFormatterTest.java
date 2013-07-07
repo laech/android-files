@@ -10,33 +10,26 @@ import static java.lang.System.currentTimeMillis;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
-public final class DateTimeFormatTest extends AndroidTestCase {
+public final class DateFormatterTest extends AndroidTestCase {
 
-  private DateTimeFormat format;
+  private DateFormatter formatter;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    format = new DateTimeFormat(getContext());
+    formatter = new DateFormatter(getContext());
   }
 
   public void testFormatsTimestampAsDateWithoutTimeWhenTimestampIsBeforeToday() {
     Date yesterday = new Date(currentTimeMillis() - MILLIS_PER_DAY);
     String expected = getDateFormat(getContext()).format(yesterday);
-    String actual = format.format(yesterday.getTime());
+    String actual = formatter.apply(yesterday.getTime());
     assertThat(actual).isEqualTo(expected);
   }
 
   public void testFormatsTimestampAsTimeWithoutDateWhenTimestampIsWithinToday() {
     Date today = new Date();
     String expected = getTimeFormat(getContext()).format(today);
-    String actual = format.format(today.getTime());
+    String actual = formatter.apply(today.getTime());
     assertThat(actual).isEqualTo(expected);
-  }
-
-  public void testCanBeReused() { // Because we use some caching
-    long millis = new Date().getTime();
-    assertThat(format.format(millis))
-        .isEqualTo(format.format(millis))
-        .isEqualTo(format.format(millis));
   }
 }

@@ -1,30 +1,32 @@
 package l.files.ui.app.files;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.google.common.base.Function;
 import l.files.R;
-import l.files.ui.format.DateTimeFormat;
 import l.files.ui.widget.AnimatedAdapter;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView.PinnedSectionedHeaderAdapter;
 
 import java.io.File;
 
-import static android.text.format.Formatter.formatShortFileSize;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesAdapter
     extends AnimatedAdapter<Object> implements PinnedSectionedHeaderAdapter {
 
   private final Function<File, Drawable> drawables;
-  private final DateTimeFormat format;
+  private final Function<Long, String> dateFormatter;
+  private final Function<Long, String> sizeFormatter;
 
-  public FilesAdapter(Function<File, Drawable> drawables, DateTimeFormat format) {
+  public FilesAdapter(
+      Function<File, Drawable> drawables,
+      Function<Long, String> dateFormatter,
+      Function<Long, String> sizeFormatter) {
     this.drawables = checkNotNull(drawables, "drawables");
-    this.format = checkNotNull(format, "format");
+    this.dateFormatter = checkNotNull(dateFormatter, "dateFormatter");
+    this.sizeFormatter = checkNotNull(sizeFormatter, "sizeFormatter");
   }
 
   @Override public boolean isSectionHeader(int position) {
@@ -98,12 +100,11 @@ public final class FilesAdapter
   }
 
   private void bindFileView(File file, View view) {
-    boolean hasPermissionToRead = file.canRead();
-    view.setEnabled(hasPermissionToRead);
+    boolean canRead = file.canRead();
+    view.setEnabled(canRead);
     ViewHolder holder = (ViewHolder) view.getTag();
-
-    showFilename(file, holder);
-    showFileInfo(file, holder);
+    showFilename(file, holder, canRead);
+    showFileInfo(file, holder, canRead);
   }
 
   private View newHeaderView(ViewGroup parent) {
@@ -114,25 +115,24 @@ public final class FilesAdapter
     ((TextView) view.findViewById(R.id.title)).setText(header.toString());
   }
 
-  void showFilename(File f, ViewHolder holder) {
-    holder.name.setEnabled(f.canRead());
+  void showFilename(File f, ViewHolder holder, boolean enable) {
+    holder.name.setEnabled(enable);
     holder.name.setText(f.getName());
     holder.name.setCompoundDrawablesWithIntrinsicBounds(
         drawables.apply(f), null, null, null);
   }
 
-  void showFileInfo(File file, ViewHolder holder) {
+  void showFileInfo(File file, ViewHolder holder, boolean enable) {
     if (holder.info == null) return;
 
-    holder.info.setEnabled(file.canRead()); // TODO file.canRead repeated multiple times
-    Context context = holder.info.getContext();
-    String updated = format.format(file.lastModified());
+    holder.info.setEnabled(enable);
     if (file.isFile()) {
-      String size = formatShortFileSize(context, file.length());
-      int template = R.string.file_size_updated;
-      holder.info.setText(context.getString(template, size, updated));
+      holder.info.setText(holder.info.getResources().getString(
+          R.string.file_size_updated,
+          sizeFormatter.apply(file.length()),
+          dateFormatter.apply(file.lastModified())));
     } else {
-      holder.info.setText(updated);
+      holder.info.setText(dateFormatter.apply(file.lastModified()));
     }
   }
 
