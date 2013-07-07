@@ -52,13 +52,8 @@ public final class SidebarFragment
     bus = FilesApp.BUS;
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
-    adapter = new SidebarAdapter(getActivity(),
-        newFileDrawableProvider(getResources()),
-        labels) {
-      @Override protected int getItemTextViewResourceId() {
-        return R.layout.sidebar_item;
-      }
-    }; // TODO fix?
+    adapter = new SidebarAdapter(
+        getActivity(), newFileDrawableProvider(getResources()), labels);
     refresh();
     setListAdapter(adapter);
   }
