@@ -1,15 +1,16 @@
 package l.files.io;
 
+import com.google.common.base.Function;
+import com.google.common.net.MediaType;
+
+import java.io.File;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.util.Locale.ENGLISH;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-import java.io.File;
-
-import com.google.common.net.MediaType;
-
-final class ExtensionDetector implements MediaTypeDetector {
+final class ExtensionDetector implements Function<File, MediaType> {
 
   @Override public MediaType apply(File file) {
     checkNotNull(file, "file");

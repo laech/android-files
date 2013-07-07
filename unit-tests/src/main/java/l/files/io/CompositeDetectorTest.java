@@ -1,39 +1,67 @@
 package l.files.io;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
-import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
-import static org.fest.assertions.api.Assertions.assertThat;
+import com.google.common.base.Function;
+import com.google.common.net.MediaType;
+import junit.framework.TestCase;
 
 import java.io.File;
 
-import junit.framework.TestCase;
-
-import com.google.common.net.MediaType;
+import static com.google.common.net.MediaType.OCTET_STREAM;
+import static com.google.common.net.MediaType.PLAIN_TEXT_UTF_8;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public final class CompositeDetectorTest extends TestCase {
 
-  private static class TestDetector implements MediaTypeDetector {
-    private final MediaType result;
+  private Function<File, MediaType> detector1;
+  private Function<File, MediaType> detector2;
 
-    public TestDetector(MediaType result) {
-      this.result = result;
-    }
+  private Function<File, MediaType> composite;
 
-    @Override public MediaType apply(File file) {
-      return result;
-    }
+  @SuppressWarnings("unchecked")
+  @Override protected void setUp() throws Exception {
+    super.setUp();
+    detector1 = mock(Function.class);
+    detector2 = mock(Function.class);
+    composite = new CompositeDetector(detector1, detector2);
   }
 
-  public void testReturnsDefaultMediaTypeForUnknown() {
-    assertThat(new CompositeDetector().apply(new File("")))
-        .isEqualTo(OCTET_STREAM);
+  public void testReturnsFirstNonOctetStreamMediaType() {
+    test(
+        OCTET_STREAM,
+        PLAIN_TEXT_UTF_8,
+        PLAIN_TEXT_UTF_8);
   }
 
-  public void testReturnsFirstSuccessfulDetectionFromSubDetectors() {
-    CompositeDetector detector = new CompositeDetector(
-        new TestDetector(OCTET_STREAM),
-        new TestDetector(PLAIN_TEXT_UTF_8),
-        new TestDetector(OCTET_STREAM));
-    assertThat(detector.apply(new File(""))).isEqualTo(PLAIN_TEXT_UTF_8);
+  public void testReturnsFirstNonNullMediaType() {
+    test(
+        null,
+        PLAIN_TEXT_UTF_8,
+        PLAIN_TEXT_UTF_8);
+  }
+
+  public void testReturnsOctetStreamIfAllInnerDetectorsReturnNull() {
+    test(
+        null,
+        null,
+        OCTET_STREAM);
+  }
+
+  public void testReturnsOctetStreamIfAllInnerDetectorsReturnOctetStream() {
+    test(
+        OCTET_STREAM,
+        OCTET_STREAM,
+        OCTET_STREAM);
+  }
+
+  private void test(
+      MediaType forDetector1,
+      MediaType forDetector2,
+      MediaType expected) {
+    File file = mock(File.class);
+    given(detector1.apply(file)).willReturn(forDetector1);
+    given(detector2.apply(file)).willReturn(forDetector2);
+    assertThat(composite.apply(file)).isEqualTo(expected);
   }
 }

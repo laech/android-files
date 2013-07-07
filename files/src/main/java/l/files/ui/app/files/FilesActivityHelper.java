@@ -1,36 +1,36 @@
 package l.files.ui.app.files;
 
-import static android.content.Intent.ACTION_VIEW;
-import static android.net.Uri.fromFile;
-import static android.widget.Toast.LENGTH_SHORT;
-import static l.files.ui.app.files.FilesActivity.EXTRA_DIRECTORY;
-
-import java.io.File;
-
-import l.files.R;
-import l.files.io.MediaTypeDetector;
-import l.files.io.MediaTypeDetectors;
-import l.files.ui.event.FileSelectedEvent;
-import l.files.ui.event.MediaDetectedEvent;
-import l.files.ui.util.Toaster;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.AsyncTask;
-
+import com.google.common.base.Function;
 import com.google.common.net.MediaType;
+import l.files.R;
+import l.files.io.Detectors;
+import l.files.ui.event.FileSelectedEvent;
+import l.files.ui.event.MediaDetectedEvent;
+import l.files.ui.util.Toaster;
+
+import java.io.File;
+
+import static android.content.Intent.ACTION_VIEW;
+import static android.net.Uri.fromFile;
+import static android.widget.Toast.LENGTH_SHORT;
+import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.ui.app.files.FilesActivity.EXTRA_DIRECTORY;
 
 public class FilesActivityHelper {
 
   public static final FilesActivityHelper INSTANCE = new FilesActivityHelper();
 
   private final Toaster toaster;
-  private final MediaTypeDetector detector;
+  private final Function<File, MediaType> detector;
 
   FilesActivityHelper() {
-    this(MediaTypeDetectors.get(), Toaster.INSTANCE);
+    this(Detectors.newDetector(), Toaster.INSTANCE);
   }
 
-  FilesActivityHelper(MediaTypeDetector detector, Toaster toaster) {
+  FilesActivityHelper(Function<File, MediaType> detector, Toaster toaster) {
     this.toaster = toaster;
     this.detector = detector;
   }
@@ -68,8 +68,12 @@ public class FilesActivityHelper {
       }
 
       @Override protected void onPostExecute(MediaType result) {
+        if (result == null) {
+          result = OCTET_STREAM;
+        }
         showFile(file, result.toString(), activity);
-      };
+      }
+
     }.execute();
   }
 

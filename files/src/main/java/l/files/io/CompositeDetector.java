@@ -1,25 +1,26 @@
 package l.files.io;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.net.MediaType;
 
 import java.io.File;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.net.MediaType;
+import static com.google.common.net.MediaType.OCTET_STREAM;
 
-final class CompositeDetector implements MediaTypeDetector {
+final class CompositeDetector implements Function<File, MediaType> {
 
-  private List<MediaTypeDetector> detectors;
+  private List<Function<File, MediaType>> detectors;
 
-  public CompositeDetector(MediaTypeDetector... detectors) {
+  CompositeDetector(Function<File, MediaType>... detectors) {
     this.detectors = ImmutableList.copyOf(detectors);
   }
 
   @Override public MediaType apply(File file) {
-    for (MediaTypeDetector detector : detectors) {
+    for (Function<File, MediaType> detector : detectors) {
       MediaType media = detector.apply(file);
-      if (!OCTET_STREAM.equals(media)) {
+      if (media != null && !media.equals(OCTET_STREAM)) {
         return media;
       }
     }

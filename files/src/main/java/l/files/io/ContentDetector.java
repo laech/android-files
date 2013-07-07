@@ -1,16 +1,16 @@
 package l.files.io;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.MediaType.OCTET_STREAM;
+import com.google.common.base.Function;
+import com.google.common.net.MediaType;
+import org.apache.tika.Tika;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.tika.Tika;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.OCTET_STREAM;
 
-import com.google.common.net.MediaType;
-
-final class ContentDetector implements MediaTypeDetector {
+final class ContentDetector implements Function<File, MediaType> {
 
   private static final class LazyHolder {
     static final Tika TIKA = new Tika();
