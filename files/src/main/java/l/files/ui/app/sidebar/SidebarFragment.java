@@ -14,8 +14,6 @@ import com.squareup.otto.Bus;
 import l.files.FilesApp;
 import l.files.R;
 import l.files.setting.SetSetting;
-import l.files.ui.FileDrawableProvider;
-import l.files.ui.FileLabelProvider;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
@@ -30,6 +28,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.getBookmarksSetting;
+import static l.files.ui.Labels.newFileDrawableProvider;
+import static l.files.ui.Labels.newFileLabelProvider;
 import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.UserDirs.DIR_ROOT;
 
@@ -48,12 +48,12 @@ public final class SidebarFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    labels = new FileLabelProvider(getResources());
+    labels = newFileLabelProvider(getResources());
     bus = FilesApp.BUS;
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
     adapter = new SidebarAdapter(getActivity(),
-        new FileDrawableProvider(getResources()),
+        newFileDrawableProvider(getResources()),
         labels) {
       @Override protected int getItemTextViewResourceId() {
         return R.layout.sidebar_item;

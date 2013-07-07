@@ -8,7 +8,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.FilesApp;
 import l.files.R;
-import l.files.ui.FileLabelProvider;
 import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
@@ -17,6 +16,7 @@ import l.files.ui.event.MediaDetectedEvent;
 import java.io.File;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.ui.Labels.newFileLabelProvider;
 import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
@@ -42,7 +42,7 @@ public class FilesActivity extends BaseFragmentActivity {
     bus = FilesApp.BUS;
     directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
-    setTitle(new FileLabelProvider(getResources()).apply(directoryInDisplay));
+    setTitle(newFileLabelProvider(getResources()).apply(directoryInDisplay));
     setContentView(pager);
 
     setOptionsMenu(newSettingsMenu(this));
