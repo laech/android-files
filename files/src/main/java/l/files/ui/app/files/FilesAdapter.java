@@ -17,8 +17,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.R.layout.files_item_header;
 import static l.files.io.FilePredicates.canRead;
 import static l.files.ui.FileFunctions.*;
-import static l.files.ui.format.Formats.dateFormat;
-import static l.files.ui.format.Formats.sizeFormat;
+import static l.files.ui.format.Formats.date;
+import static l.files.ui.format.Formats.size;
 import static l.files.ui.widget.Viewers.*;
 
 final class FilesAdapter
@@ -29,8 +29,8 @@ final class FilesAdapter
         name(),
         drawable(context.getResources()),
         summary(context.getResources(),
-            dateFormat(context),
-            sizeFormat(context)
+            date(context),
+            size(context)
         )
     );
   }
