@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.io;
 
 import junit.framework.TestCase;
 
@@ -14,7 +14,7 @@ public final class FileNameFunctionTest extends TestCase {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    function = new FileNameFunction();
+    function = FileNameFunction.INSTANCE;
   }
 
   public void testGetsNameOfFile() {

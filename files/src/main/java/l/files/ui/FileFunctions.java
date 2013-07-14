@@ -9,13 +9,6 @@ import java.io.File;
 public final class FileFunctions {
 
   /**
-   * Function to return the name of the file.
-   */
-  public static Function<File, String> name() {
-    return FileNameFunction.INSTANCE;
-  }
-
-  /**
    * Function to return the label of the file - usually the name of the file,
    * but some special directories will have different labels than their name
    * when displayed in special places like the sidebar or activity title.
