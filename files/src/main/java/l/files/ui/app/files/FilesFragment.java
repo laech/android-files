@@ -36,12 +36,9 @@ import static com.google.common.collect.Iterables.tryFind;
 import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.*;
-import static l.files.ui.Labels.newFileDrawableProvider;
 import static l.files.ui.app.files.menu.Menus.*;
 import static l.files.ui.app.files.mode.Modes.newCountSelectedItemsAction;
 import static l.files.ui.app.files.mode.Modes.newMoveToTrashAction;
-import static l.files.ui.format.Formatters.newDateFormatter;
-import static l.files.ui.format.Formatters.newSizeFormatter;
 import static l.files.util.Files.listFiles;
 
 public final class FilesFragment
@@ -81,7 +78,7 @@ public final class FilesFragment
     settingShowHiddenFiles = getShowHiddenFilesSetting(pref);
     sortSetting = getSortSetting(pref);
     sorters = Sorters.get(getResources());
-    adapter = newListAdapter();
+    adapter = FilesAdapter.get(getActivity());
     bus = FilesApp.BUS;
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
@@ -187,7 +184,7 @@ public final class FilesFragment
       Optional<Sorter> sorter = getSorter();
       if (sorter.isPresent()) {
         List<Object> items = sorter.get().apply(asList(children));
-        adapter.replaceAll(list, items, animate);
+        adapter.replace(list, items, animate);
         if (hasHeaders(items)) {
           list.post(new Runnable() {
             @Override public void run() {
@@ -201,13 +198,6 @@ public final class FilesFragment
 
   private boolean hasHeaders(List<Object> items) {
     return tryFind(items, not(instanceOf(File.class))).isPresent();
-  }
-
-  private FilesAdapter newListAdapter() {
-    return new FilesAdapter(
-        newFileDrawableProvider(getResources()),
-        newDateFormatter(getActivity()),
-        newSizeFormatter(getActivity()));
   }
 
   private Optional<Sorter> getSorter() {
