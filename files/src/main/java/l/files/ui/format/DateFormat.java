@@ -10,11 +10,11 @@ import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.isToday;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class DateFormatter implements Function<Long, String> {
+final class DateFormat implements Function<Long, String> {
 
   private final Context context;
 
-  DateFormatter(Context context) {
+  DateFormat(Context context) {
     this.context = checkNotNull(context, "context");
   }
 

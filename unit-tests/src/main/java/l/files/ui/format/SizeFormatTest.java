@@ -5,13 +5,13 @@ import android.test.AndroidTestCase;
 import static android.text.format.Formatter.formatShortFileSize;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public final class SizeFormatterTest extends AndroidTestCase {
+public final class SizeFormatTest extends AndroidTestCase {
 
-  private SizeFormatter formatter;
+  private SizeFormat formatter;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    formatter = new SizeFormatter(getContext());
+    formatter = new SizeFormat(getContext());
   }
 
   public void testFormat() {

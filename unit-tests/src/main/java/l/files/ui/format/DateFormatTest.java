@@ -10,13 +10,13 @@ import static java.lang.System.currentTimeMillis;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
-public final class DateFormatterTest extends AndroidTestCase {
+public final class DateFormatTest extends AndroidTestCase {
 
-  private DateFormatter formatter;
+  private DateFormat formatter;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    formatter = new DateFormatter(getContext());
+    formatter = new DateFormat(getContext());
   }
 
   public void testFormatsTimestampAsDateWithoutTimeWhenTimestampIsBeforeToday() {
