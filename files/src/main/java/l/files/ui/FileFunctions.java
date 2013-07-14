@@ -12,7 +12,7 @@ public final class FileFunctions {
    * Function to return the name of the file.
    */
   public static Function<File, String> name() {
-    return new FileNameFunction();
+    return FileNameFunction.INSTANCE;
   }
 
   /**
