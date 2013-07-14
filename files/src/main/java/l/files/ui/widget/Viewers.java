@@ -5,17 +5,12 @@ import com.google.common.base.Function;
 
 public final class Viewers {
 
-  public static <T> Viewer<T> compose(final Viewer<T>... viewers) {
+  public static <T> Viewer<T> compose(Viewer<? super T>... viewers) {
     return new CompositeViewer<T>(viewers);
   }
 
   public static <T> Viewer<T> layout(int resId) {
     return new LayoutViewer<T>(resId);
-  }
-
-  @SuppressWarnings("UnusedParameters")
-  public static <T> Viewer<T> layout(int resId, Class<? super T> clazz) {
-    return layout(resId);
   }
 
   public static <T> Viewer<T> text(

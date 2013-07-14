@@ -12,17 +12,19 @@ import static com.google.common.base.Functions.toStringFunction;
 
 final class SidebarAdapter extends ObjectAdapter {
 
+  // TODO animate
+
   @SuppressWarnings("unchecked") SidebarAdapter(
       Function<? super File, ? extends String> labels,
       Function<? super File, ? extends Drawable> drawables) {
 
     addViewer(Object.class, Viewers.compose(
-        Viewers.layout(R.layout.sidebar_item_header, Object.class),
+        Viewers.layout(R.layout.sidebar_item_header),
         Viewers.text(android.R.id.title, toStringFunction())
     ));
 
     addViewer(File.class, Viewers.compose(
-        Viewers.layout(R.layout.sidebar_item, File.class),
+        Viewers.layout(R.layout.sidebar_item),
         Viewers.text(android.R.id.title, labels),
         Viewers.draw(android.R.id.title, drawables)
     ));

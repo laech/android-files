@@ -9,8 +9,8 @@ final class CompositeViewer<T> implements Viewer<T> {
 
   private final Viewer<T>[] viewers;
 
-  CompositeViewer(Viewer<T>... viewers) {
-    this.viewers = checkNotNull(viewers, "viewers").clone();
+  @SuppressWarnings("unchecked") CompositeViewer(Viewer<? super T>... viewers) {
+    this.viewers = (Viewer<T>[]) checkNotNull(viewers, "viewers").clone();
   }
 
   @Override public View getView(T item, View view, ViewGroup parent) {
