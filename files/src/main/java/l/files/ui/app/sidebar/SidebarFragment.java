@@ -52,8 +52,7 @@ public final class SidebarFragment
     bus = FilesApp.BUS;
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
-    adapter = new SidebarAdapter(
-        getActivity(), newFileDrawableProvider(getResources()), labels);
+    adapter = new SidebarAdapter(labels, newFileDrawableProvider(getResources()));
     refresh();
     setListAdapter(adapter);
   }
@@ -61,7 +60,6 @@ public final class SidebarFragment
   void refresh() {
     if (DEBUG) Log.d("SidebarFragment", "refresh");
     bookmarks = setting.get();
-    adapter.setNotifyOnChange(false);
     adapter.clear();
     adapter.add(getString(R.string.bookmarks));
     adapter.addAll(getBookmarks());

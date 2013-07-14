@@ -25,7 +25,7 @@ public final class SidebarAdapterTest extends AndroidTestCase {
     super.setUp();
     labels = mock(Function.class);
     drawables = mock(Function.class);
-    adapter = new SidebarAdapter(getContext(), drawables, labels);
+    adapter = new SidebarAdapter(labels, drawables);
   }
 
   public void testIsEnabled_trueIfItemIsFile() {
@@ -38,30 +38,13 @@ public final class SidebarAdapterTest extends AndroidTestCase {
     assertThat(adapter.isEnabled(0)).isFalse();
   }
 
-  public void testGetItemViewType_forFile() {
-    adapter.add(mock(File.class));
-    assertThat(adapter.getItemViewType(0)).isEqualTo(0);
-  }
-
-  public void testGetItemViewType_forHeader() {
-    adapter.add("header");
-    assertThat(adapter.getItemViewType(0)).isEqualTo(1);
-  }
-
-  public void testGetViewTypeCount_is2ForFileAndHeader() {
-    assertThat(adapter.getViewTypeCount()).isEqualTo(2);
-  }
-
   public void testGetView_forFile() {
-    File file = mock(File.class);
-    given(labels.apply(file)).willReturn("abc");
-
-    Drawable drawable = new ColorDrawable();
-    given(drawables.apply(file)).willReturn(drawable);
+    File file = setFile();
+    Drawable drawable = setDrawable(file);
 
     adapter.add(file);
 
-    TextView view = (TextView) adapter.getView(0, null, new ListView(getContext()));
+    TextView view = getTitleView();
     assertThat(view.getText()).isEqualTo("abc");
     assertThat(view.getCompoundDrawables())
         .containsExactly(drawable, null, null, null);
@@ -69,8 +52,27 @@ public final class SidebarAdapterTest extends AndroidTestCase {
 
   public void testGetView_forHeader() {
     adapter.add("header");
-    TextView view = (TextView) adapter.getView(0, null, new ListView(getContext()));
+    TextView view = getTitleView();
     assertThat(view.getText()).isEqualTo("header");
+    assertThat(view.getCompoundDrawables())
+        .containsExactly(null, null, null, null);
+  }
+
+  private TextView getTitleView() {
+    return (TextView) adapter.getView(0, null, new ListView(getContext()))
+        .findViewById(android.R.id.title);
+  }
+
+  private File setFile() {
+    File file = mock(File.class);
+    given(labels.apply(file)).willReturn("abc");
+    return file;
+  }
+
+  private Drawable setDrawable(File file) {
+    Drawable drawable = new ColorDrawable();
+    given(drawables.apply(file)).willReturn(drawable);
+    return drawable;
   }
 
 }
