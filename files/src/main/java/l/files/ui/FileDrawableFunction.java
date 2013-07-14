@@ -23,7 +23,7 @@ import static l.files.ui.UserDirs.DIR_RINGTONES;
 import static l.files.ui.UserDirs.DIR_ROOT;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-final class FileDrawableProvider implements Function<File, Drawable> {
+final class FileDrawableFunction implements Function<File, Drawable> {
 
   private static final Map<File, Integer> DIR_IMGS = ImmutableMap.<File, Integer>builder()
       .put(DIR_ROOT, R.drawable.ic_directory_device)
@@ -42,7 +42,7 @@ final class FileDrawableProvider implements Function<File, Drawable> {
 
   private final Resources res;
 
-  FileDrawableProvider(Resources res) {
+  FileDrawableFunction(Resources res) {
     this.res = checkNotNull(res, "res");
   }
 

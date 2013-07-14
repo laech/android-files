@@ -8,13 +8,13 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class FileNameProviderTest extends TestCase {
+public final class FileNameFunctionTest extends TestCase {
 
-  private FileNameProvider function;
+  private FileNameFunction function;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    function = new FileNameProvider();
+    function = new FileNameFunction();
   }
 
   public void testGetsNameOfFile() {

@@ -13,15 +13,15 @@ import l.files.R;
 import android.content.res.Resources;
 import android.os.Build;
 
-public final class FileLabelProviderTest extends TestCase {
+public final class FileLabelFunctionTest extends TestCase {
 
   private Resources res;
-  private FileLabelProvider labels;
+  private FileLabelFunction labels;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     res = mock(Resources.class);
-    labels = new FileLabelProvider(res);
+    labels = new FileLabelFunction(res);
   }
 
   public void testGetsNameForHomeDirectory() {

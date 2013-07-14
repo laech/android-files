@@ -28,8 +28,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.getBookmarksSetting;
-import static l.files.ui.Labels.newFileDrawableProvider;
-import static l.files.ui.Labels.newFileLabelProvider;
+import static l.files.ui.FileFunctions.drawable;
+import static l.files.ui.FileFunctions.label;
 import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.UserDirs.DIR_ROOT;
 
@@ -48,11 +48,11 @@ public final class SidebarFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    labels = newFileLabelProvider(getResources());
+    labels = label(getResources());
     bus = FilesApp.BUS;
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
-    adapter = new SidebarAdapter(labels, newFileDrawableProvider(getResources()));
+    adapter = new SidebarAdapter(labels, drawable(getResources()));
     refresh();
     setListAdapter(adapter);
   }

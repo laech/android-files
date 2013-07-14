@@ -16,7 +16,7 @@ import l.files.ui.event.MediaDetectedEvent;
 import java.io.File;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.ui.Labels.newFileLabelProvider;
+import static l.files.ui.FileFunctions.label;
 import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
@@ -42,7 +42,7 @@ public class FilesActivity extends BaseFragmentActivity {
     bus = FilesApp.BUS;
     directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
-    setTitle(newFileLabelProvider(getResources()).apply(directoryInDisplay));
+    setTitle(label(getResources()).apply(directoryInDisplay));
     setContentView(pager);
 
     setOptionsMenu(newSettingsMenu(this));
@@ -80,8 +80,7 @@ public class FilesActivity extends BaseFragmentActivity {
 
   @Subscribe public void handle(FileSelectedEvent event) {
     if (directoryInDisplay.equals(event.file())) {
-      boolean smoothScroll = true;
-      pager.setCurrentItem(POSITION_FILES, smoothScroll);
+      pager.setCurrentItem(POSITION_FILES, true);
     } else {
       helper.handle(event, FilesActivity.this);
     }

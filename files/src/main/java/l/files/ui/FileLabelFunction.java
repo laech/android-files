@@ -12,11 +12,11 @@ import android.os.Build;
 
 import com.google.common.base.Function;
 
-final class FileLabelProvider implements Function<File, String> {
+final class FileLabelFunction implements Function<File, String> {
 
   private final Resources res;
 
-  FileLabelProvider(Resources res) {
+  FileLabelFunction(Resources res) {
     this.res = checkNotNull(res, "res");
   }
 

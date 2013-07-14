@@ -16,7 +16,7 @@ import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.R.layout.files_item_header;
 import static l.files.io.FilePredicates.canRead;
-import static l.files.ui.Labels.*;
+import static l.files.ui.FileFunctions.*;
 import static l.files.ui.format.Formats.dateFormat;
 import static l.files.ui.format.Formats.sizeFormat;
 import static l.files.ui.widget.Viewers.*;
@@ -26,9 +26,9 @@ final class FilesAdapter
 
   static FilesAdapter get(Context context) {
     return new FilesAdapter(
-        newFileNameProvider(),
-        newFileDrawableProvider(context.getResources()),
-        newFileSummaryProvider(context.getResources(),
+        name(),
+        drawable(context.getResources()),
+        summary(context.getResources(),
             dateFormat(context),
             sizeFormat(context)
         )

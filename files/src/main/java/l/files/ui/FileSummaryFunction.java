@@ -8,13 +8,13 @@ import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class FileSummaryProvider implements Function<File, String> {
+final class FileSummaryFunction implements Function<File, String> {
 
   private final Resources res;
   private final Function<Long, String> date;
   private final Function<Long, String> size;
 
-  @SuppressWarnings("unchecked") FileSummaryProvider(
+  @SuppressWarnings("unchecked") FileSummaryFunction(
       Resources res,
       Function<? super Long, ? extends CharSequence> date,
       Function<? super Long, ? extends CharSequence> size) {

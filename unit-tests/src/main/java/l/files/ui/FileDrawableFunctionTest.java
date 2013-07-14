@@ -23,17 +23,17 @@ import l.files.R;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
-public final class FileDrawableProviderTest extends TestCase {
+public final class FileDrawableFunctionTest extends TestCase {
 
   private Resources res;
   private File file;
-  private FileDrawableProvider images;
+  private FileDrawableFunction images;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     res = mock(Resources.class);
     file = mock(File.class);
-    images = new FileDrawableProvider(res);
+    images = new FileDrawableFunction(res);
   }
 
   public void testGetsImageForDirectory() {
