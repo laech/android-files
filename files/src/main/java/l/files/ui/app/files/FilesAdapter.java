@@ -14,19 +14,19 @@ import java.io.File;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.R.layout.files_item_header;
 import static l.files.io.FileFunctions.name;
 import static l.files.io.FilePredicates.canRead;
 import static l.files.ui.FileFunctions.drawable;
 import static l.files.ui.FileFunctions.summary;
 import static l.files.ui.format.Formats.date;
 import static l.files.ui.format.Formats.size;
-import static l.files.ui.widget.Viewers.*;
+import static l.files.ui.widget.Decorators.*;
+import static l.files.ui.widget.Viewers.decorate;
 
 final class FilesAdapter
     extends AnimatedAdapter implements PinnedSectionedHeaderAdapter {
 
-  private static final int NO_SECTION = Integer.MIN_VALUE;
+  static final int NO_SECTION = Integer.MIN_VALUE;
 
   static FilesAdapter get(Context context) {
     return new FilesAdapter(
@@ -59,19 +59,17 @@ final class FilesAdapter
     addViewerForHeader();
     addViewerForFile(names, drawables, summaries);
 
-    stickyHeaderViewer = compose(
-        layout(R.layout.files_item_header_sticky),
+    stickyHeaderViewer = decorate(R.layout.files_item_header_sticky,
         text(android.R.id.title, toStringFunction())
     );
 
-    emptyHeaderViewer = layout(R.layout.files_item_header_none);
+    emptyHeaderViewer = decorate(R.layout.files_item_header_none);
 
   }
 
   @SuppressWarnings("unchecked")
   private void addViewerForHeader() {
-    addViewer(Object.class, compose(
-        layout(files_item_header),
+    addViewer(Object.class, decorate(R.layout.files_item_header,
         text(android.R.id.title, toStringFunction())
     ));
   }
@@ -82,20 +80,15 @@ final class FilesAdapter
       Function<? super File, ? extends Drawable> drawables,
       Function<? super File, ? extends CharSequence> summaries) {
 
-    addViewer(File.class, compose(
-        compose(
-            layout(R.layout.files_item),
-            enable(android.R.id.content, canRead())
-        ),
-        compose(
-            text(android.R.id.title, names),
-            draw(android.R.id.title, drawables),
-            enable(android.R.id.title, canRead())
-        ),
-        nullable(android.R.id.summary, compose(
+    addViewer(File.class, decorate(R.layout.files_item,
+        text(android.R.id.title, names),
+        draw(android.R.id.title, drawables),
+        enable(android.R.id.title, canRead()),
+        enable(android.R.id.content, canRead()),
+        nullable(android.R.id.summary,
             text(android.R.id.summary, summaries),
             enable(android.R.id.summary, canRead())
-        ))
+        )
     ));
   }
 

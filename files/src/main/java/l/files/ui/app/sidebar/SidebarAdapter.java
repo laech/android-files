@@ -4,11 +4,13 @@ import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import l.files.R;
 import l.files.ui.widget.ObjectAdapter;
-import l.files.ui.widget.Viewers;
 
 import java.io.File;
 
 import static com.google.common.base.Functions.toStringFunction;
+import static l.files.ui.widget.Decorators.draw;
+import static l.files.ui.widget.Decorators.text;
+import static l.files.ui.widget.Viewers.decorate;
 
 final class SidebarAdapter extends ObjectAdapter {
 
@@ -18,15 +20,13 @@ final class SidebarAdapter extends ObjectAdapter {
       Function<? super File, ? extends String> labels,
       Function<? super File, ? extends Drawable> drawables) {
 
-    addViewer(Object.class, Viewers.compose(
-        Viewers.layout(R.layout.sidebar_item_header),
-        Viewers.text(android.R.id.title, toStringFunction())
+    addViewer(Object.class, decorate(R.layout.sidebar_item_header,
+        text(android.R.id.title, toStringFunction())
     ));
 
-    addViewer(File.class, Viewers.compose(
-        Viewers.layout(R.layout.sidebar_item),
-        Viewers.text(android.R.id.title, labels),
-        Viewers.draw(android.R.id.title, drawables)
+    addViewer(File.class, decorate(R.layout.sidebar_item,
+        text(android.R.id.title, labels),
+        draw(android.R.id.title, drawables)
     ));
 
   }

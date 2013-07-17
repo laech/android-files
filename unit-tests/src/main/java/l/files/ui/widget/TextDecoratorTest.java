@@ -8,18 +8,18 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class LabelViewerTest extends TestCase {
+public final class TextDecoratorTest extends TestCase {
 
   private int textViewId;
   private Function<Object, String> labels;
-  private LabelViewer<Object> viewer;
+  private TextDecorator<Object> decorator;
 
   @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
     textViewId = 2;
     labels = mock(Function.class);
-    viewer = new LabelViewer<Object>(textViewId, labels);
+    decorator = new TextDecorator<Object>(textViewId, labels);
   }
 
   public void testSetsTextToTextView() {
@@ -27,7 +27,7 @@ public final class LabelViewerTest extends TestCase {
     given(labels.apply(item)).willReturn("hello");
     TextView view = setTextView();
 
-    viewer.getView(item, view, null);
+    decorator.decorate(view, item);
 
     verify(view).findViewById(textViewId);
     verify(view).setText("hello");
