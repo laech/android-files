@@ -4,15 +4,14 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.google.common.base.Function;
 import com.squareup.otto.Bus;
-import l.files.FilesApp;
 import l.files.R;
+import l.files.event.Events;
 import l.files.setting.SetSetting;
 import l.files.ui.event.FileSelectedEvent;
 
@@ -26,7 +25,6 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
-import static l.files.BuildConfig.DEBUG;
 import static l.files.setting.Settings.getBookmarksSetting;
 import static l.files.ui.FileFunctions.drawable;
 import static l.files.ui.FileFunctions.label;
@@ -49,7 +47,7 @@ public final class SidebarFragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     labels = label(getResources());
-    bus = FilesApp.BUS;
+    bus = Events.bus();
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
     adapter = new SidebarAdapter(labels, drawable(getResources()));
@@ -58,7 +56,6 @@ public final class SidebarFragment
   }
 
   void refresh() {
-    if (DEBUG) Log.d("SidebarFragment", "refresh");
     bookmarks = setting.get();
     adapter.clear();
     adapter.add(getString(R.string.bookmarks));

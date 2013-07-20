@@ -6,8 +6,8 @@ import android.support.v4.view.ViewPager;
 import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import l.files.FilesApp;
 import l.files.R;
+import l.files.event.Events;
 import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
@@ -39,7 +39,7 @@ public class FilesActivity extends BaseFragmentActivity {
     }
 
     helper = FilesActivityHelper.INSTANCE;
-    bus = FilesApp.BUS;
+    bus = Events.bus();
     directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
     setTitle(label(getResources()).apply(directoryInDisplay));

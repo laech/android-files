@@ -11,8 +11,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
-import l.files.FilesApp;
 import l.files.R;
+import l.files.event.Events;
 import l.files.setting.Setting;
 import l.files.setting.SortBy;
 import l.files.trash.TrashService.TrashMover;
@@ -79,7 +79,7 @@ public final class FilesFragment
     sortSetting = getSortSetting(pref);
     sorters = Sorters.get(getResources());
     adapter = FilesAdapter.get(getActivity());
-    bus = FilesApp.BUS;
+    bus = Events.bus();
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
