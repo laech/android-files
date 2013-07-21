@@ -22,9 +22,9 @@ import static l.files.setting.Settings.getBookmarksSetting;
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
 
-  private Bus bus;
-  private SetSetting<File> setting;
-  private SharedPreferences pref;
+  Bus bus;
+  SetSetting<File> setting;
+  SharedPreferences pref;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
