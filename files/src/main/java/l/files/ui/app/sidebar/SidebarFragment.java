@@ -8,83 +8,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import com.google.common.base.Function;
 import com.squareup.otto.Bus;
 import l.files.R;
-import l.files.event.Events;
 import l.files.setting.SetSetting;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static com.google.common.base.Strings.nullToEmpty;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.sort;
+import static l.files.event.Events.bus;
 import static l.files.setting.Settings.getBookmarksSetting;
-import static l.files.ui.FileFunctions.drawable;
-import static l.files.ui.FileFunctions.label;
-import static l.files.ui.UserDirs.DIR_HOME;
-import static l.files.ui.UserDirs.DIR_ROOT;
 
 public final class SidebarFragment
     extends ListFragment implements OnSharedPreferenceChangeListener {
 
-  SidebarAdapter adapter;
-  SetSetting<File> setting;
-  Bus bus;
-
-  private Set<File> bookmarks;
-
-  private Function<File, String> labels;
-
+  private Bus bus;
+  private SetSetting<File> setting;
   private SharedPreferences pref;
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    labels = label(getResources());
-    bus = Events.bus();
+
+    bus = bus();
     pref = getDefaultSharedPreferences(getActivity());
     setting = getBookmarksSetting(pref);
-    adapter = new SidebarAdapter(labels, drawable(getResources()));
-    refresh();
-    setListAdapter(adapter);
-  }
 
-  void refresh() {
-    bookmarks = setting.get();
-    adapter.clear();
-    adapter.add(getString(R.string.bookmarks));
-    adapter.addAll(getBookmarks());
-    adapter.add(getString(R.string.device));
-    adapter.add(DIR_HOME);
-    adapter.add(DIR_ROOT);
-    adapter.notifyDataSetChanged();
-  }
-
-  private Collection<File> getBookmarks() {
-    List<File> dirs = newArrayList(setting.get());
-    sort(dirs, new Comparator<File>() {
-      @Override public int compare(File a, File b) {
-        String x = nullToEmpty(labels.apply(a));
-        String y = nullToEmpty(labels.apply(b));
-        return x.compareToIgnoreCase(y);
-      }
-    });
-    return dirs;
+    setListAdapter(SidebarAdapter.get(getResources()));
   }
 
   @Override public void onResume() {
     super.onResume();
     pref.registerOnSharedPreferenceChangeListener(this);
-    Set<File> files = setting.get();
-    if (files.equals(bookmarks)) {
-      refresh();
-    }
+    refresh();
   }
 
   @Override public void onPause() {
@@ -100,11 +55,22 @@ public final class SidebarFragment
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     Object item = l.getItemAtPosition(pos);
-    if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
+    if (item instanceof File) {
+      bus.post(new FileSelectedEvent((File) item));
+    }
   }
 
   @Override public void onSharedPreferenceChanged(
       SharedPreferences preferences, String key) {
     if (setting.key().equals(key)) refresh();
   }
+
+  @Override public SidebarAdapter getListAdapter() {
+    return (SidebarAdapter) super.getListAdapter();
+  }
+
+  private void refresh() {
+    getListAdapter().set(setting, getResources());
+  }
+
 }
