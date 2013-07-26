@@ -10,19 +10,24 @@ public class BaseListFragment extends ListFragment {
 
   private OptionsMenu optionsMenu;
 
-  public void setOptionsMenu(OptionsMenu menu) {
+  public final void setOptionsMenu(OptionsMenu menu) {
     optionsMenu = OptionsMenus.nullToEmpty(menu);
     setHasOptionsMenu(menu != null);
   }
 
-  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+  @Override
+  public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
     optionsMenu.onCreate(menu);
   }
 
-  @Override public void onPrepareOptionsMenu(Menu menu) {
+  @Override public final void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
     optionsMenu.onPrepare(menu);
   }
 
+  @Override public final void onOptionsMenuClosed(Menu menu) {
+    super.onOptionsMenuClosed(menu);
+    optionsMenu.onClose(menu);
+  }
 }
