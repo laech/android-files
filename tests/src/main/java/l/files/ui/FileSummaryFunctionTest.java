@@ -41,8 +41,9 @@ public final class FileSummaryFunctionTest extends AndroidTestCase {
 
   public void testShowsModifiedTimeForDir() {
     given(file.isDirectory()).willReturn(true);
-    given(file.length()).willReturn(1L);
+    given(file.lastModified()).willReturn(1L);
     given(date.apply(1L)).willReturn("a");
     assertThat(summary.apply(file)).isEqualTo("a");
   }
+
 }

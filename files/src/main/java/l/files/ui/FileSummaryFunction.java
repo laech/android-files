@@ -25,12 +25,14 @@ final class FileSummaryFunction implements Function<File, String> {
 
   @Override public String apply(File file) {
 
-    if (file.isDirectory()) return date.apply(file.length());
+    String modified = date.apply(file.lastModified());
+
+    if (file.isDirectory()) return modified;
 
     return res.getString(
         R.string.file_size_updated,
         size.apply(file.length()),
-        date.apply(file.lastModified())
+        modified
     );
   }
 
