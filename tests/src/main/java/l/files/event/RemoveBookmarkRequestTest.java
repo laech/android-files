@@ -1,8 +1,7 @@
-package l.files;
+package l.files.event;
 
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
-import l.files.event.RemoveBookmarkRequest;
 
 import java.io.File;
 
