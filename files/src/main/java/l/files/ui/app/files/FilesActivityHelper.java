@@ -8,7 +8,6 @@ import com.google.common.net.MediaType;
 import l.files.R;
 import l.files.io.Detectors;
 import l.files.ui.event.FileSelectedEvent;
-import l.files.ui.event.MediaDetectedEvent;
 import l.files.ui.util.Toaster;
 
 import java.io.File;
@@ -51,9 +50,8 @@ public class FilesActivityHelper {
   }
 
   private void showDirectory(File directory, FilesActivity activity) {
-    int requestCode = 0;
     Intent intent = newShowDirectoryIntent(directory, activity);
-    activity.startActivityForResult(intent, requestCode);
+    activity.startActivityForResult(intent, 0);
   }
 
   private Intent newShowDirectoryIntent(File dir, FilesActivity activity) {
@@ -75,14 +73,6 @@ public class FilesActivityHelper {
       }
 
     }.execute();
-  }
-
-  public void handle(MediaDetectedEvent event, FilesActivity activity) {
-    if (!event.mediaType().isPresent()) {
-      toaster.toast(activity, R.string.unknown_file_type, LENGTH_SHORT);
-    } else {
-      showFile(event.file(), event.mediaType().get(), activity);
-    }
   }
 
   private void showFile(File file, String mediaType, FilesActivity activity) {

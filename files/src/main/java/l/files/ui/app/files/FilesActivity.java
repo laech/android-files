@@ -11,7 +11,6 @@ import l.files.event.Events;
 import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
 import l.files.ui.event.FileSelectedEvent;
-import l.files.ui.event.MediaDetectedEvent;
 
 import java.io.File;
 
@@ -86,7 +85,4 @@ public class FilesActivity extends BaseFragmentActivity {
     }
   }
 
-  @Subscribe public void handle(MediaDetectedEvent event) {
-    helper.handle(event, FilesActivity.this);
-  }
 }
