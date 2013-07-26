@@ -10,6 +10,12 @@ enum FilePredicate implements Predicate<File> {
     @Override public boolean apply(File file) {
       return file.canRead();
     }
+  },
+
+  EXISTS {
+    @Override public boolean apply(File file) {
+      return file.exists();
+    }
   }
 
 }

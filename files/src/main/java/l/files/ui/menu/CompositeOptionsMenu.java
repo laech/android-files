@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-final class CompositeOptionsMenu implements OptionsMenu {
+final class CompositeOptionsMenu extends OptionsMenuAdapter {
 
   private final List<OptionsMenu> actions;
 

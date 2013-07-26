@@ -3,8 +3,12 @@ package l.files.ui.app.files.menu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.setting.SetSetting;
+import l.files.event.AddBookmarkRequest;
+import l.files.event.BookmarksEvent;
+import l.files.event.RemoveBookmarkRequest;
 import l.files.ui.menu.OptionsMenuAdapter;
 
 import java.io.File;
@@ -16,11 +20,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class BookmarkMenu
     extends OptionsMenuAdapter implements OnMenuItemClickListener {
 
-  private final SetSetting<File> setting;
+  private Menu menu;
+
+  private final Bus bus;
   private final File dir;
 
-  BookmarkMenu(File dir, SetSetting<File> setting) {
-    this.setting = checkNotNull(setting, "setting");
+  BookmarkMenu(Bus bus, File dir) {
+    this.bus = checkNotNull(bus, "bus");
     this.dir = checkNotNull(dir, "dir");
   }
 
@@ -34,18 +40,27 @@ final class BookmarkMenu
 
   @Override public void onPrepare(Menu menu) {
     super.onPrepare(menu);
-    MenuItem item = menu.findItem(R.id.bookmark);
-    if (item != null) {
-      item.setChecked(setting.contains(dir));
-    }
+    this.menu = menu;
+    bus.register(this);
+  }
+
+  @Override public void onClose(Menu menu) {
+    super.onClose(menu);
+    bus.unregister(this);
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
     if (!item.isChecked()) {
-      setting.add(dir);
+      bus.post(new AddBookmarkRequest(dir));
     } else {
-      setting.remove(dir);
+      bus.post(new RemoveBookmarkRequest(dir));
     }
     return true;
   }
+
+  @Subscribe public void handle(BookmarksEvent event) {
+    MenuItem item = menu.findItem(R.id.bookmark);
+    if (item != null) item.setChecked(event.bookmarks().contains(dir));
+  }
+
 }

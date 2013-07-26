@@ -1,17 +1,18 @@
 package l.files.ui.app.sidebar;
 
-import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
-import l.files.setting.SetSetting;
+import com.squareup.otto.Subscribe;
+import l.files.event.BookmarksEvent;
 import l.files.test.TestSidebarFragmentActivity;
 import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
-import static java.util.Collections.singleton;
-import static org.mockito.BDDMockito.given;
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public final class SidebarFragmentTest
@@ -21,95 +22,59 @@ public final class SidebarFragmentTest
     super(TestSidebarFragmentActivity.class);
   }
 
+  @UiThreadTest
+  public void testBusIsRegisteredOnResume() {
+    fragment().bus = mock(Bus.class);
+    fragment().onResume();
+    verify(fragment().bus).register(fragment());
+  }
+
+  @UiThreadTest
+  public void testBusIsUnregisteredOnPause() {
+    fragment().bus = mock(Bus.class);
+    fragment().onResume();
+    fragment().onPause();
+    verify(fragment().bus).unregister(fragment());
+  }
+
+  @UiThreadTest
   public void testBusIsNotifiedOnFileSelection() throws Throwable {
     final File file = new File("/");
-    Bus bus = fragment().bus = mock(Bus.class);
+    fragment().bus = mock(Bus.class);
 
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        adapter().clear();
-        adapter().add(file);
-        listView().performItemClick(null, 0, 0);
-      }
-    });
+    adapter().clear();
+    adapter().add(file);
+    listView().performItemClick(null, 0, 0);
 
-    verify(bus).post(new FileSelectedEvent(file));
+    verify(fragment().bus).post(new FileSelectedEvent(file));
   }
 
+  @UiThreadTest
   public void testBusIsNotNotifiedOnNonFileSelection() throws Throwable {
-    Bus bus = fragment().bus = mock(Bus.class);
+    fragment().bus = mock(Bus.class);
 
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        adapter().clear();
-        adapter().add("hello");
-        listView().performItemClick(null, 0, 0);
-      }
-    });
+    adapter().clear();
+    adapter().add("hello");
+    listView().performItemClick(null, 0, 0);
 
-    verifyZeroInteractions(bus);
+    verifyZeroInteractions(fragment().bus);
   }
 
-  public void testPreferenceListenerIsRegisteredOnResume() throws Throwable {
-    fragment().pref = mock(SharedPreferences.class);
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        fragment().onResume();
-      }
-    });
-
-    verify(fragment().pref).registerOnSharedPreferenceChangeListener(fragment());
-  }
-
-  public void testPreferenceListenerIsUnregisteredOnPause() throws Throwable {
-    fragment().pref = mock(SharedPreferences.class);
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        fragment().onPause();
-      }
-    });
-
-    verify(fragment().pref).unregisterOnSharedPreferenceChangeListener(fragment());
-  }
-
-  @SuppressWarnings("unchecked")
-  public void testRefreshesOnFavoritesChange() throws Throwable {
-    File file = new File("/");
-    SetSetting<File> setting = fragment().setting = mock(SetSetting.class);
-    given(setting.key()).willReturn("test-key");
-    given(setting.get()).willReturn(singleton(file));
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        fragment().onSharedPreferenceChanged(null, fragment().setting.key());
-      }
-    });
-
+  @UiThreadTest
+  public void testHandlesBookmarkChanges() throws Throwable {
+    final File file = new File("/");
+    fragment().handle(new BookmarksEvent(file));
     assertAdapterContains(file);
   }
 
-  @SuppressWarnings("unchecked")
-  public void testIncludesFavoriteInSidebar() throws Throwable {
-    File file = new File("/");
-    SetSetting<File> setting = fragment().setting = mock(SetSetting.class);
-    given(setting.get()).willReturn(singleton(file));
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        fragment().onResume();
-      }
-    });
-
-    assertAdapterContains(file);
+  public void testBookmarksChangedHandlerMethodIsAnnotated() throws Exception {
+    Method method = SidebarFragment.class.getMethod("handle", BookmarksEvent.class);
+    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
   private void assertAdapterContains(File file) {
     for (int i = 0; i < adapter().getCount(); i++) {
-      if (file.equals(adapter().getItem(i))) {
-        return;
-      }
+      if (file.equals(adapter().getItem(i))) return;
     }
     fail();
   }
@@ -125,4 +90,5 @@ public final class SidebarFragmentTest
   private SidebarAdapter adapter() {
     return fragment().getListAdapter();
   }
+
 }

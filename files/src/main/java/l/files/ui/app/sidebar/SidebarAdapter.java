@@ -4,13 +4,13 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import l.files.R;
-import l.files.setting.SetSetting;
 import l.files.ui.widget.ObjectAdapter;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -66,21 +66,21 @@ final class SidebarAdapter extends ObjectAdapter {
     return getItem(position) instanceof File;
   }
 
-  void set(SetSetting<File> setting, Resources res) {
+  void set(Set<File> bookmarks, Resources res) {
 
     // TODO remove root, rename home to something more appropriate, name of user?
 
     clear();
     add(res.getString(R.string.bookmarks));
-    addAll(getBookmarks(setting));
+    addAll(arrange(bookmarks));
     add(res.getString(R.string.device));
     add(DIR_HOME);
     add(DIR_ROOT);
     notifyDataSetChanged();
   }
 
-  private Collection<File> getBookmarks(SetSetting<File> setting) {
-    List<File> dirs = newArrayList(setting.get());
+  private Collection<File> arrange(Set<File> bookmarks) {
+    List<File> dirs = newArrayList(bookmarks);
     sort(dirs, new Comparator<File>() {
       @Override public int compare(File a, File b) {
         String x = labels.apply(a).toString();

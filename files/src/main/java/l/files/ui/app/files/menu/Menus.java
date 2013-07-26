@@ -2,15 +2,15 @@ package l.files.ui.app.files.menu;
 
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
-import l.files.setting.SetSetting;
+import com.squareup.otto.Bus;
 import l.files.ui.menu.OptionsMenu;
 
 import java.io.File;
 
 public final class Menus {
 
-  public static OptionsMenu newBookmarkMenu(File dir, SetSetting<File> setting) {
-    return new BookmarkMenu(dir, setting);
+  public static OptionsMenu newBookmarkMenu(Bus bus, File dir) {
+    return new BookmarkMenu(bus, dir);
   }
 
   public static OptionsMenu newSettingsMenu(Context context) {

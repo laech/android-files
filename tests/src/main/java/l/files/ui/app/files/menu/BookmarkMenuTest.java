@@ -2,9 +2,12 @@ package l.files.ui.app.files.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.setting.SetSetting;
+import l.files.event.AddBookmarkRequest;
+import l.files.event.BookmarksEvent;
+import l.files.event.RemoveBookmarkRequest;
 
 import java.io.File;
 
@@ -18,7 +21,7 @@ import static org.mockito.Mockito.verify;
 
 public final class BookmarkMenuTest extends TestCase {
 
-  private SetSetting<File> setting;
+  private Bus bus;
   private File dir;
 
   private BookmarkMenu action;
@@ -26,9 +29,9 @@ public final class BookmarkMenuTest extends TestCase {
   @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
-    setting = mock(SetSetting.class);
-    dir = mock(File.class);
-    action = new BookmarkMenu(dir, setting);
+    bus = mock(Bus.class);
+    dir = new File("/");
+    action = new BookmarkMenu(bus, dir);
   }
 
   public void testOnCreate() {
@@ -44,50 +47,54 @@ public final class BookmarkMenuTest extends TestCase {
     verify(item).setOnMenuItemClickListener(action);
   }
 
-  public void testOnPrepare_unchecksMenuItemIfDirIsNotBookmarked() {
-    testOnPrepare(false);
+  public void testMenuItemIsUncheckedIfDirIsNotBookmarked() {
+    testMenuItemChecked(false);
   }
 
-  public void testOnPrepare_checksMenuItemIfFileIsBookmarked() {
-    testOnPrepare(true);
+  public void testMenuItemIsCheckedIfFileIsBookmarked() {
+    testMenuItemChecked(true);
   }
 
-  public void testOnPrepare_doesNotCrashIfItemNotFound() {
-    action.onPrepare(mock(Menu.class));
-  }
-
-  public void testOnMenuItemClick_bookmarksDirOnCheckingOfMenuItem() {
-    testOnMenuItemClick(false, true);
-  }
-
-  public void testOnMenuItemClick_undoBookmarkingOfDirOnUncheckingOfMenuItem() {
-    testOnMenuItemClick(true, false);
-  }
-
-  private void testOnPrepare(boolean favorite) {
+  private void testMenuItemChecked(boolean favorite) {
     MenuItem item = mockMenuItem();
     Menu menu = mock(Menu.class);
     given(menu.findItem(R.id.bookmark)).willReturn(item);
-    given(setting.contains(dir)).willReturn(favorite);
 
     action.onPrepare(menu);
+    if (favorite) {
+      action.handle(new BookmarksEvent(dir));
+    } else {
+      action.handle(new BookmarksEvent(new File("/xyz")));
+    }
 
     verify(item).setChecked(favorite);
   }
 
-  private MenuItem callAddMenuItem(Menu menu) {
-    return menu.add(NONE, R.id.bookmark, NONE, R.string.bookmark);
+  public void testOnPrepareDoesNotCrashIfItemNotFound() {
+    action.onPrepare(mock(Menu.class));
   }
 
-  private void testOnMenuItemClick(boolean from, boolean to) {
+  public void testBookmarkIsAddedOnCheckingOfMenuItem() {
+    testBookmark(false, true);
+  }
+
+  public void testBookmarkIsRemovedOnUncheckingOfMenuItem() {
+    testBookmark(true, false);
+  }
+
+  private void testBookmark(boolean from, boolean to) {
     MenuItem item = mock(MenuItem.class);
     given(item.isChecked()).willReturn(from);
     assertThat(action.onMenuItemClick(item)).isTrue();
     if (to) {
-      verify(setting).add(dir);
+      verify(bus).post(new AddBookmarkRequest(dir));
     } else {
-      verify(setting).remove(dir);
+      verify(bus).post(new RemoveBookmarkRequest(dir));
     }
+  }
+
+  private MenuItem callAddMenuItem(Menu menu) {
+    return menu.add(NONE, R.id.bookmark, NONE, R.string.bookmark);
   }
 
 }

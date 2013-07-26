@@ -10,6 +10,10 @@ public final class FilePredicates {
     return FilePredicate.CAN_READ;
   }
 
+  public static Predicate<File> exists() {
+    return FilePredicate.EXISTS;
+  }
+
   private FilePredicates() {}
 
 }

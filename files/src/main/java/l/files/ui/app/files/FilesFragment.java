@@ -35,7 +35,8 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Iterables.tryFind;
 import static java.util.Arrays.asList;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.setting.Settings.*;
+import static l.files.setting.Settings.getShowHiddenFilesSetting;
+import static l.files.setting.Settings.getSortSetting;
 import static l.files.ui.app.files.menu.Menus.*;
 import static l.files.ui.app.files.mode.Modes.newCountSelectedItemsAction;
 import static l.files.ui.app.files.mode.Modes.newMoveToTrashAction;
@@ -49,7 +50,7 @@ public final class FilesFragment
   private static final String TAG = FilesFragment.class.getSimpleName();
 
   FilesAdapter adapter;
-  Bus bus;
+  Bus bus = Events.bus();
   Setting<Boolean> settingShowHiddenFiles;
   Setting<SortBy> sortSetting;
 
@@ -79,7 +80,6 @@ public final class FilesFragment
     sortSetting = getSortSetting(pref);
     sorters = Sorters.get(getResources());
     adapter = FilesAdapter.get(getActivity());
-    bus = Events.bus();
     dir = getDirectory();
     fileObserver = new DirectoryObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
@@ -97,7 +97,7 @@ public final class FilesFragment
 
   private void configureOptionsMenu() {
     setOptionsMenu(OptionsMenus.compose(
-        newBookmarkMenu(dir, getBookmarksSetting(getDefaultSharedPreferences(getActivity()))),
+        newBookmarkMenu(bus, dir),
         newDirMenu(dir),
         newSortMenu(getFragmentManager())));
   }
