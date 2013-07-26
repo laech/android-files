@@ -10,7 +10,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.event.BookmarksEvent;
-import l.files.ui.event.FileSelectedEvent;
+import l.files.event.OpenFileRequest;
 
 import java.io.File;
 
@@ -44,7 +44,7 @@ public final class SidebarFragment extends ListFragment {
     super.onListItemClick(l, v, pos, id);
     Object item = l.getItemAtPosition(pos);
     if (item instanceof File) {
-      bus.post(new FileSelectedEvent((File) item));
+      bus.post(new OpenFileRequest((File) item));
     }
   }
 

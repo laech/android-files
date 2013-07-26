@@ -8,9 +8,9 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.event.Events;
+import l.files.event.OpenFileRequest;
 import l.files.ui.app.BaseFragmentActivity;
 import l.files.ui.app.home.HomePagerAdapter;
-import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
 
@@ -77,11 +77,11 @@ public class FilesActivity extends BaseFragmentActivity {
     bus.unregister(this);
   }
 
-  @Subscribe public void handle(FileSelectedEvent event) {
-    if (directoryInDisplay.equals(event.file())) {
+  @Subscribe public void handle(OpenFileRequest request) {
+    if (directoryInDisplay.equals(request.file())) {
       pager.setCurrentItem(POSITION_FILES, true);
     } else {
-      helper.handle(event, FilesActivity.this);
+      helper.handle(request, FilesActivity.this);
     }
   }
 

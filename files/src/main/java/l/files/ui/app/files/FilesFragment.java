@@ -13,13 +13,13 @@ import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import l.files.R;
 import l.files.event.Events;
+import l.files.event.OpenFileRequest;
 import l.files.setting.Setting;
 import l.files.setting.SortBy;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.app.BaseListFragment;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
-import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.menu.OptionsMenus;
 import l.files.ui.mode.MultiChoiceModes;
 import za.co.immedia.pinnedheaderlistview.PinnedHeaderListView;
@@ -139,7 +139,7 @@ public final class FilesFragment
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     Object item = l.getItemAtPosition(pos);
-    if (item instanceof File) bus.post(new FileSelectedEvent((File) item));
+    if (item instanceof File) bus.post(new OpenFileRequest((File) item));
   }
 
   private void updateUnableToShowDirectoryError(File directory) {

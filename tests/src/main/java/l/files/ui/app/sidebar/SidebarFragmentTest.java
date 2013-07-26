@@ -6,8 +6,8 @@ import android.widget.ListView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.event.BookmarksEvent;
+import l.files.event.OpenFileRequest;
 import l.files.test.TestSidebarFragmentActivity;
-import l.files.ui.event.FileSelectedEvent;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -46,7 +46,7 @@ public final class SidebarFragmentTest
     adapter().add(file);
     listView().performItemClick(null, 0, 0);
 
-    verify(fragment().bus).post(new FileSelectedEvent(file));
+    verify(fragment().bus).post(new OpenFileRequest(file));
   }
 
   @UiThreadTest

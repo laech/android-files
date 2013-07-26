@@ -6,8 +6,8 @@ import android.os.AsyncTask;
 import com.google.common.base.Function;
 import com.google.common.net.MediaType;
 import l.files.R;
+import l.files.event.OpenFileRequest;
 import l.files.io.Detectors;
-import l.files.ui.event.FileSelectedEvent;
 import l.files.ui.util.Toaster;
 
 import java.io.File;
@@ -34,8 +34,8 @@ public class FilesActivityHelper {
     this.detector = detector;
   }
 
-  public void handle(FileSelectedEvent event, FilesActivity activity) {
-    File file = event.file();
+  public void handle(OpenFileRequest request, FilesActivity activity) {
+    File file = request.file();
     if (!file.canRead()) {
       showPermissionDenied(activity);
     } else if (file.isDirectory()) {
