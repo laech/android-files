@@ -85,6 +85,23 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava-testlib</artifactId>
+        <version>14.0.1</version>
+      </dependency>
+
+      <!--
+        guava-testlib depends on an older version of junit that bundles
+        hamcrest, causing errors, this dependency updates junit to the latest
+        version that fixes this issue (by not bundling hamcrest)
+        -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.jdom</groupId>
         <artifactId>jdom2</artifactId>
         <version>2.0.4</version>

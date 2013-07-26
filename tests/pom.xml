@@ -23,6 +23,23 @@
       <groupId>com.google.android</groupId>
       <artifactId>android</artifactId>
     </dependency>
+    <!--
+      guava is depended on by guavalib, and files, we set scrope to provided for
+      tests project to avoid runtime error on Android.
+     -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-testlib</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>

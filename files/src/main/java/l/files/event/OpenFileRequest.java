@@ -2,13 +2,35 @@ package l.files.event;
 
 import java.io.File;
 
+import static com.google.common.base.Objects.toStringHelper;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Event representing a request to open a file.
  */
-public final class OpenFileRequest extends FileEvent {
+public final class OpenFileRequest {
+
+  private final File file;
 
   public OpenFileRequest(File file) {
-    super(file);
+    this.file = checkNotNull(file, "file");
+  }
+
+  public File file() {
+    return file;
+  }
+
+  @Override public final int hashCode() {
+    return file().hashCode();
+  }
+
+  @Override public final boolean equals(Object o) {
+    return o instanceof OpenFileRequest
+        && ((OpenFileRequest) o).file().equals(file());
+  }
+
+  @Override public final String toString() {
+    return toStringHelper(this).addValue(file()).toString();
   }
 
 }
