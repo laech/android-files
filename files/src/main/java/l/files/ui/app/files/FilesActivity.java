@@ -24,7 +24,7 @@ public class FilesActivity extends BaseFragmentActivity {
   public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
   FilesActivityHelper helper;
-  Bus bus;
+  Bus bus = Events.bus();
   ViewPager pager;
   File directoryInDisplay;
 
@@ -38,7 +38,6 @@ public class FilesActivity extends BaseFragmentActivity {
     }
 
     helper = FilesActivityHelper.INSTANCE;
-    bus = Events.bus();
     directoryInDisplay = directory.get();
     pager = createViewPager(directoryInDisplay);
     setTitle(label(getResources()).apply(directoryInDisplay));
@@ -53,11 +52,10 @@ public class FilesActivity extends BaseFragmentActivity {
   }
 
   private ViewPager createViewPager(File dir) {
-    String path = dir.getAbsolutePath();
     FragmentManager fm = getSupportFragmentManager();
     ViewPager pager = new ViewPager(this);
     pager.setId(R.id.content);
-    pager.setAdapter(new HomePagerAdapter(fm, path, isPortrait()));
+    pager.setAdapter(new HomePagerAdapter(fm, dir, isPortrait()));
     pager.setCurrentItem(POSITION_FILES);
     return pager;
   }

@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import l.files.ui.app.files.FilesFragment;
 import l.files.ui.app.sidebar.SidebarFragment;
 
+import java.io.File;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class HomePagerAdapter extends FragmentPagerAdapter {
@@ -14,11 +16,11 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
   public static final int POSITION_FILES = 1;
 
   private final boolean portrait;
-  private final String directory;
+  private final File dir;
 
-  public HomePagerAdapter(FragmentManager fm, String dir, boolean portrait) {
+  public HomePagerAdapter(FragmentManager fm, File dir, boolean portrait) {
     super(fm);
-    this.directory = checkNotNull(dir, "dir");
+    this.dir = checkNotNull(dir, "dir");
     this.portrait = portrait;
   }
 
@@ -34,7 +36,7 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
   @Override public Fragment getItem(int position) {
     switch (position) {
       case POSITION_FILES:
-        return FilesFragment.create(directory);
+        return FilesFragment.create(dir);
       default:
         return new SidebarFragment();
     }

@@ -29,9 +29,9 @@ public final class FilesFragment extends BaseFileListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
-  public static FilesFragment create(String directory) {
+  public static FilesFragment create(File dir) {
     Bundle args = new Bundle(1);
-    args.putString(ARG_DIRECTORY, directory);
+    args.putString(ARG_DIRECTORY, dir.getAbsolutePath());
 
     FilesFragment fragment = new FilesFragment();
     fragment.setArguments(args);
