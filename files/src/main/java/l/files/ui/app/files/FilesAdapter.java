@@ -10,18 +10,16 @@ import java.io.File;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.FileFunctions.name;
-import static l.files.io.FilePredicates.canRead;
-import static l.files.ui.FileFunctions.drawable;
-import static l.files.ui.FileFunctions.summary;
+import static l.files.io.Files.name;
+import static l.files.io.Files.canRead;
+import static l.files.ui.Files.drawable;
+import static l.files.ui.Files.summary;
 import static l.files.ui.format.Formats.date;
 import static l.files.ui.format.Formats.size;
 import static l.files.ui.widget.Decorators.*;
 import static l.files.ui.widget.Viewers.decorate;
 
 final class FilesAdapter extends AnimatedAdapter {
-
-  static final int NO_SECTION = Integer.MIN_VALUE;
 
   static FilesAdapter get(Context context) {
     return new FilesAdapter(

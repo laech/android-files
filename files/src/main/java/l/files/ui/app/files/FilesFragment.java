@@ -22,7 +22,7 @@ import static java.util.Arrays.asList;
 import static l.files.ui.app.files.menu.Menus.*;
 import static l.files.ui.app.files.mode.Modes.newCountSelectedItemsAction;
 import static l.files.ui.app.files.mode.Modes.newMoveToTrashAction;
-import static l.files.util.Files.listFiles;
+import static l.files.io.Files.listFiles;
 
 public final class FilesFragment extends BaseFileListFragment {
 

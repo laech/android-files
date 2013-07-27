@@ -22,8 +22,8 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.union;
 import static java.util.Collections.singleton;
-import static l.files.io.FilePredicates.canRead;
-import static l.files.io.FilePredicates.exists;
+import static l.files.io.Files.canRead;
+import static l.files.io.Files.exists;
 import static l.files.ui.UserDirs.*;
 
 final class BookmarkHandler

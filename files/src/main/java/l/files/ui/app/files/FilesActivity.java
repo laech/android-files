@@ -15,7 +15,7 @@ import l.files.ui.app.home.HomePagerAdapter;
 import java.io.File;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.ui.FileFunctions.label;
+import static l.files.ui.Files.label;
 import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 

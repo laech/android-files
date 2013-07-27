@@ -6,7 +6,7 @@ import com.google.common.base.Function;
 
 import java.io.File;
 
-public final class FileFunctions {
+public final class Files {
 
   /**
    * Function to return the label of the file - usually the name of the file,
@@ -37,6 +37,6 @@ public final class FileFunctions {
     return new FileDrawableFunction(res);
   }
 
-  private FileFunctions() {}
+  private Files() {}
 
 }
