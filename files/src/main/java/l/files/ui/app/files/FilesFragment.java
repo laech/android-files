@@ -38,7 +38,7 @@ public final class FilesFragment extends BaseFileListFragment {
   }
 
   private File dir;
-  private DirectoryObserver observer;
+  private DirObserver observer;
   private ViewEvent current;
 
   public FilesFragment() {
@@ -49,7 +49,7 @@ public final class FilesFragment extends BaseFileListFragment {
     super.onActivityCreated(savedInstanceState);
 
     dir = new File(getArguments().getString(ARG_DIRECTORY));
-    observer = new DirectoryObserver(dir, new Handler(), new Runnable() {
+    observer = new DirObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
         if (current != null) refresh(current, true);
       }

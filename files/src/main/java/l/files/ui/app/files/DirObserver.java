@@ -9,11 +9,9 @@ import java.io.File;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
 
-public class DirectoryObserver extends FileObserver {
+final class DirObserver extends FileObserver {
 
-  // TODO listen to date modified for sorting
-
-  private static final String TAG = DirectoryObserver.class.getSimpleName();
+  private static final String TAG = DirObserver.class.getSimpleName();
 
   /**
    * Wait for this amount of milliseconds when an event is received before
@@ -23,13 +21,13 @@ public class DirectoryObserver extends FileObserver {
    */
   static final long BATCH_UPDATE_DELAY = 50;
 
-  static final int DIR_CHANGED_MASK = CREATE | DELETE | MOVED_FROM | MOVED_TO;
+  static final int DIR_CHANGED_MASK = CREATE | DELETE | MOVED_FROM | MOVED_TO | MODIFY;
 
   private final File dir;
   private final Handler handler;
   private final Runnable listener;
 
-  public DirectoryObserver(File dir, Handler handler, Runnable listener) {
+  DirObserver(File dir, Handler handler, Runnable listener) {
     super(checkNotNull(dir, "dir").getAbsolutePath(), DIR_CHANGED_MASK);
     this.dir = dir;
     this.handler = checkNotNull(handler, "handler");
@@ -67,4 +65,5 @@ public class DirectoryObserver extends FileObserver {
         ", lastModified=" + dir.lastModified() +
         ", path=" + path);
   }
+
 }

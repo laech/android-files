@@ -8,15 +8,15 @@ import static com.google.common.io.Files.touch;
 import static java.lang.System.nanoTime;
 import static junit.framework.Assert.assertTrue;
 
-public final class TempDirectory {
+public final class TempDir {
 
-  public static TempDirectory newTempDirectory() {
-    return new TempDirectory(createTempDir());
+  public static TempDir create() {
+    return new TempDir(createTempDir());
   }
 
   private final File directory;
 
-  private TempDirectory(File directory) {
+  private TempDir(File directory) {
     this.directory = directory;
   }
 
@@ -55,11 +55,11 @@ public final class TempDirectory {
     return file;
   }
 
-  public File newDirectory() {
-    return newDirectory(String.valueOf(nanoTime()));
+  public File newDir() {
+    return newDir(String.valueOf(nanoTime()));
   }
 
-  public File newDirectory(String name) {
+  public File newDir(String name) {
     File file = new File(directory, name);
     assertTrue(file.mkdirs() || file.isDirectory());
     return file;

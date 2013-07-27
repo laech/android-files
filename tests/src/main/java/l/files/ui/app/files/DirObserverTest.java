@@ -2,36 +2,48 @@ package l.files.ui.app.files;
 
 import android.os.Handler;
 import android.test.AndroidTestCase;
-import l.files.test.TempDirectory;
+import l.files.test.TempDir;
 
 import java.io.File;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Files.write;
 import static java.lang.Thread.sleep;
-import static l.files.test.TempDirectory.newTempDirectory;
-import static l.files.ui.app.files.DirectoryObserver.BATCH_UPDATE_DELAY;
+import static l.files.ui.app.files.DirObserver.BATCH_UPDATE_DELAY;
 import static org.mockito.Mockito.*;
 
-public final class DirectoryObserverTest extends AndroidTestCase {
+public final class DirObserverTest extends AndroidTestCase {
 
   private Handler handler = new Handler();
-  private TempDirectory monitored;
-  private TempDirectory unmonitored;
   private Runnable listener;
+  private TempDir monitored;
+  private TempDir unmonitored;
 
-  private DirectoryObserver observer;
+  private DirObserver observer;
 
-  @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
-    monitored = newTempDirectory();
-    unmonitored = newTempDirectory();
+    monitored = TempDir.create();
+    unmonitored = TempDir.create();
     listener = mock(Runnable.class);
-    observer = new DirectoryObserver(monitored.get(), handler, listener);
+    observer = new DirObserver(monitored.get(), handler, listener);
   }
 
   @Override protected void tearDown() throws Exception {
     super.tearDown();
     observer.stopWatching();
+    monitored.delete();
+    unmonitored.delete();
+  }
+
+  public void testNotifiesOnFileModification() throws Exception {
+    File file = monitored.newFile();
+
+    observer.startWatching();
+    write("test", file, UTF_8);
+
+    waitForUpdate();
+    verify(listener).run();
   }
 
   public void testNotifiesOnFileAddition() throws Exception {
@@ -73,6 +85,18 @@ public final class DirectoryObserverTest extends AndroidTestCase {
     verify(listener).run();
   }
 
+  public void testBatchNotifiesOnFilesModification() throws Exception {
+    File file1 = monitored.newFile();
+    File file2 = monitored.newFile();
+
+    observer.startWatching();
+    write("test1", file1, UTF_8);
+    write("test2", file2, UTF_8);
+
+    waitForUpdate();
+    verify(listener, times(1)).run();
+  }
+
   public void testBatchNotifiesOnFilesAddition() throws Exception {
     observer.startWatching();
     monitored.newFile();
@@ -96,4 +120,5 @@ public final class DirectoryObserverTest extends AndroidTestCase {
   private void waitForUpdate() throws InterruptedException {
     sleep(BATCH_UPDATE_DELAY * 2);
   }
+
 }
