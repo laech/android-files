@@ -1,6 +1,7 @@
 package l.files.ui.app.files;
 
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
@@ -19,10 +20,10 @@ import java.io.File;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static l.files.io.Files.listFiles;
 import static l.files.ui.app.files.menu.Menus.*;
 import static l.files.ui.app.files.mode.Modes.newCountSelectedItemsAction;
 import static l.files.ui.app.files.mode.Modes.newMoveToTrashAction;
-import static l.files.io.Files.listFiles;
 
 public final class FilesFragment extends BaseFileListFragment {
 
@@ -37,8 +38,9 @@ public final class FilesFragment extends BaseFileListFragment {
     return fragment;
   }
 
+  FileObserver observer;
+
   private File dir;
-  private DirObserver observer;
   private ViewEvent current;
 
   public FilesFragment() {
@@ -83,12 +85,11 @@ public final class FilesFragment extends BaseFileListFragment {
     File[] children = listFiles(dir, event.showHiddenFiles());
     if (children == null) {
       updateUnableToShowDirectoryError(dir);
-      return;
+    } else {
+      Sorter sorter = Sorters.get(getResources(), event.sort());
+      List<?> items = sorter.apply(asList(children));
+      getListAdapter().replace(getListView(), items, animate);
     }
-
-    Sorter sorter = Sorters.get(getResources(), event.sort());
-    List<Object> items = sorter.apply(asList(children));
-    getListAdapter().replace(getListView(), items, animate);
   }
 
   private void updateUnableToShowDirectoryError(File directory) {

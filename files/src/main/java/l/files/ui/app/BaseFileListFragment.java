@@ -12,7 +12,6 @@ import java.io.File;
 
 import static l.files.event.Events.bus;
 
-// TODO
 public class BaseFileListFragment extends BaseListFragment {
 
   private Bus bus = bus();

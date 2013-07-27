@@ -28,8 +28,11 @@ public final class Files {
     return FilePredicate.EXISTS;
   }
 
-  public static File[] listFiles(File directory, boolean showHiddenFiles) {
-    return directory.listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
+  /**
+   * @see File#listFiles()
+   */
+  public static File[] listFiles(File dir, boolean showHiddenFiles) {
+    return dir.listFiles(showHiddenFiles ? null : HIDE_HIDDEN_FILES);
   }
 
 }
