@@ -1,10 +1,10 @@
 package l.files.ui.app.files.sort;
 
-import java.util.List;
-
 import android.content.res.Resources;
-
 import com.google.common.collect.ImmutableList;
+import l.files.setting.SortBy;
+
+import java.util.List;
 
 public final class Sorters {
 
@@ -14,6 +14,18 @@ public final class Sorters {
    */
   public static List<Sorter> get(Resources res) {
     return ImmutableList.of(new NameSorter(), new DateModifiedSorter(res));
+  }
+
+  // TODO
+  public static Sorter get(Resources res, SortBy sort) {
+    switch (sort) {
+      case NAME:
+        return new NameSorter();
+      case DATE_MODIFIED:
+        return new DateModifiedSorter(res);
+      default:
+        throw new AssertionError(sort);
+    }
   }
 
   private Sorters() {}

@@ -11,7 +11,6 @@ import com.google.common.base.Function;
 import java.io.File;
 
 import static java.util.Arrays.asList;
-import static l.files.ui.app.files.FilesAdapter.NO_SECTION;
 import static org.fest.assertions.api.ANDROID.assertThat;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -85,45 +84,6 @@ public final class FilesAdapterTest extends AndroidTestCase {
   public void testIsEnabled_falseForNonFile() {
     adapter.replace(list, asList(new Object()), false);
     assertThat(adapter.isEnabled(0)).isFalse();
-  }
-
-  public void testIsSectionHeader_trueForNonFile() {
-    adapter.replace(list, asList(new Object()), false);
-    assertThat(adapter.isSectionHeader(0)).isTrue();
-  }
-
-  public void testIsSectionHeader_falseForFile() {
-    adapter.replace(list, asList(file), false);
-    assertThat(adapter.isSectionHeader(0)).isFalse();
-  }
-
-  public void testGetSectionForPosition_returnsNoSectionIfThereIsNoSection() {
-    adapter.replace(list, asList(file), false);
-    assertThat(adapter.getSectionForPosition(0)).isEqualTo(NO_SECTION);
-  }
-
-  public void testGetSectionForPosition_returnsPositionOfSectionHeader() {
-    adapter.replace(list, asList(
-        new Object(), // 0
-        file,         // 1
-        "",           // 2
-        file          // 3
-    ), false);
-    assertThat(adapter.getSectionForPosition(0)).isEqualTo(0);
-    assertThat(adapter.getSectionForPosition(1)).isEqualTo(0);
-    assertThat(adapter.getSectionForPosition(2)).isEqualTo(2);
-    assertThat(adapter.getSectionForPosition(3)).isEqualTo(2);
-  }
-
-  public void testGetSectionHeaderView_showsSectionHeader() {
-    adapter.replace(list, asList("hello"), false);
-    View view = adapter.getSectionHeaderView(0, null, list);
-    TextView title = (TextView) view.findViewById(android.R.id.title);
-    assertThat(title).hasText("hello");
-  }
-
-  public void testGetSectionHeaderView_showsNothingWhenNoSection() {
-    adapter.getSectionHeaderView(NO_SECTION, null, list); // No error
   }
 
   private View getView() {

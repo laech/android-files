@@ -11,15 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Supplier;
+import com.squareup.otto.Bus;
 import l.files.R;
-import l.files.setting.Setting;
+import l.files.event.SortRequest;
 import l.files.setting.SortBy;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.AdapterView.OnItemClickListener;
-import static l.files.setting.Settings.getSortSetting;
+import static l.files.event.Events.bus;
 
 final class SortDialog extends DialogFragment implements OnItemClickListener {
 
@@ -29,7 +29,7 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
     }
   };
 
-  private Setting<SortBy> setting;
+  Bus bus = bus();
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -38,7 +38,6 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    setting = getSortSetting(getDefaultSharedPreferences(getActivity()));
     getDialog().setTitle(R.string.sort_by);
 
     ListView list = (ListView) getView().findViewById(android.R.id.list);
@@ -56,7 +55,8 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    setting.set(((Sorter) parent.getItemAtPosition(position)).id());
+    SortBy sort = ((Sorter) parent.getItemAtPosition(position)).id();
+    bus.post(new SortRequest(sort));
     getDialog().dismiss();
   }
 

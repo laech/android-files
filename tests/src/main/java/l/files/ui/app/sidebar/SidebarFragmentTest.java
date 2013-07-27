@@ -24,40 +24,40 @@ public final class SidebarFragmentTest
 
   @UiThreadTest
   public void testBusIsRegisteredOnResume() {
-    fragment().bus = mock(Bus.class);
+    fragment().setBus(mock(Bus.class));
     fragment().onResume();
-    verify(fragment().bus).register(fragment());
+    verify(fragment().getBus()).register(fragment());
   }
 
   @UiThreadTest
   public void testBusIsUnregisteredOnPause() {
-    fragment().bus = mock(Bus.class);
+    fragment().setBus(mock(Bus.class));
     fragment().onResume();
     fragment().onPause();
-    verify(fragment().bus).unregister(fragment());
+    verify(fragment().getBus()).unregister(fragment());
   }
 
   @UiThreadTest
   public void testBusIsNotifiedOnFileSelection() throws Throwable {
     final File file = new File("/");
-    fragment().bus = mock(Bus.class);
+    fragment().setBus(mock(Bus.class));
 
     adapter().clear();
     adapter().add(file);
     listView().performItemClick(null, 0, 0);
 
-    verify(fragment().bus).post(new OpenFileRequest(file));
+    verify(fragment().getBus()).post(new OpenFileRequest(file));
   }
 
   @UiThreadTest
   public void testBusIsNotNotifiedOnNonFileSelection() throws Throwable {
-    fragment().bus = mock(Bus.class);
+    fragment().setBus(mock(Bus.class));
 
     adapter().clear();
     adapter().add("hello");
     listView().performItemClick(null, 0, 0);
 
-    verifyZeroInteractions(fragment().bus);
+    verifyZeroInteractions(fragment().getBus());
   }
 
   @UiThreadTest

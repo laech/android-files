@@ -24,9 +24,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
 
 public final class BookmarkHandlerTest extends TestCase {
@@ -44,14 +41,13 @@ public final class BookmarkHandlerTest extends TestCase {
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
     bus = mock(Bus.class);
-    handler = BookmarkHandler.register(bus, this.pref);
+    handler = BookmarkHandler.register(bus, pref);
   }
 
   public void testListensOnSharedPreferences() {
-    verify(pref).registerOnSharedPreferenceChangeListener(notNull(BookmarkHandler.class));
+    verify(pref).registerOnSharedPreferenceChangeListener(handler);
   }
 
-  @SuppressWarnings("unchecked")
   public void testAddBookmarkRequestIsHandled() {
     bookmark("/a");
     handler.handle(new AddBookmarkRequest(new File("/")));

@@ -38,7 +38,7 @@ final class BookmarkHandler
       toPath(DIR_MUSIC),
       toPath(DIR_PICTURES));
 
-  public static BookmarkHandler register(Bus bus, SharedPreferences pref) {
+  static BookmarkHandler register(Bus bus, SharedPreferences pref) {
     BookmarkHandler handler = new BookmarkHandler(bus, pref);
     pref.registerOnSharedPreferenceChangeListener(handler);
     bus.register(handler);
