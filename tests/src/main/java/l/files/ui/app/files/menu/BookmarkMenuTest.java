@@ -26,7 +26,6 @@ public final class BookmarkMenuTest extends TestCase {
 
   private BookmarkMenu action;
 
-  @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
     bus = mock(Bus.class);

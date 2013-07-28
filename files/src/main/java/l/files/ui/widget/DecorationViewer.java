@@ -15,7 +15,7 @@ final class DecorationViewer<T> implements Viewer<T> {
   DecorationViewer(int layoutResId, Decorator<? super T>... decorators) {
     this.layoutResId = layoutResId;
     this.decorators = (Decorator<T>[]) checkNotNull(decorators, "decorators");
-    for (Decorator decorator : decorators) checkNotNull(decorator, "decorator");
+    for (Decorator<?> decorator : decorators) checkNotNull(decorator, "decorator");
   }
 
   @Override public View getView(T item, View view, ViewGroup parent) {

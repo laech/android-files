@@ -11,7 +11,7 @@ final class CompositeDecorator<T> implements Decorator<T> {
   @SuppressWarnings("unchecked")
   CompositeDecorator(Decorator<? super T>... decorators) {
     this.decorators = (Decorator<T>[]) checkNotNull(decorators, "decorators").clone();
-    for (Decorator decorator : decorators) checkNotNull(decorator, "decorator");
+    for (Decorator<?> decorator : decorators) checkNotNull(decorator, "decorator");
   }
 
   @Override public void decorate(View view, T item) {

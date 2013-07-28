@@ -26,6 +26,7 @@ public final class ViewerAdapterTest extends TestCase {
     adapter = create();
   }
 
+  @SuppressWarnings("unchecked")
   public void testGetViewTypeCount_returnsTheNumberOfViewers() {
     adapter.addViewer(String.class, mock(Viewer.class));
     adapter.addViewer(Integer.class, mock(Viewer.class));
@@ -33,6 +34,7 @@ public final class ViewerAdapterTest extends TestCase {
     assertThat(adapter.getViewTypeCount()).isEqualTo(3);
   }
 
+  @SuppressWarnings("unchecked")
   public void testGetItemViewType_returnsDifferentValueForEachViewer() {
     adapter.addViewer(String.class, mock(Viewer.class));
     adapter.addViewer(Integer.class, mock(Viewer.class));
@@ -44,12 +46,14 @@ public final class ViewerAdapterTest extends TestCase {
     assertThat(adapter.getItemViewType(2)).isEqualTo(1);
   }
 
+  @SuppressWarnings("unchecked")
   public void testGetItemViewType_supportsItemOfSubclass() {
     items.add(new ArrayList<Object>());
     adapter.addViewer(Collection.class, mock(Viewer.class));
     assertThat(adapter.getItemViewType(0)).isEqualTo(0);
   }
 
+  @SuppressWarnings("unchecked")
   public void testGetItemViewType_usesViewerOfMostSpecificMatch() {
     adapter.addViewer(Object.class, mock(Viewer.class));
     adapter.addViewer(Collection.class, mock(Viewer.class));
@@ -73,7 +77,7 @@ public final class ViewerAdapterTest extends TestCase {
     assertThat(adapter.getView(0, null, null)).isSameAs(view);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testGetView_usesViewerOfMostSpecificMatch() {
     Viewer<Object> objectViewer = mock(Viewer.class);
     Viewer<Collection> collectionViewer = mock(Viewer.class);
