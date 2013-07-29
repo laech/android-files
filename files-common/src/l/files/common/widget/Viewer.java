@@ -4,8 +4,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 
+/**
+ * Gets the view for an adapter item.
+ *
+ * @param <T> the item type
+ * @see Adapter
+ */
 public interface Viewer<T> {
-
   /**
    * @see Adapter#getView(int, View, ViewGroup)
    */

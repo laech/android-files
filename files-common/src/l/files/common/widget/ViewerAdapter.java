@@ -17,20 +17,19 @@ import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
  *   {@code adapter.addViewer(Object.class, objectViewer);}
  *   {@code adapter.addViewer(String.class, stringViewer);}
  * </pre>
- * The {@code objectViewer} will be used to handle all items that are subtypes
- * of {@code Object}, but not {@link String}s, because we've configured {@code
- * stringViewer} for that. The lookup of the viewer is bottom up from the type
- * hierarchy of the item - if we can't find a viewer to handle the exact type of
- * an item, we try to find one that can handle the interfaces the item directly
- * implements (if the item implements multiple interfaces and there are viewers
- * configured for more than one of those interfaces, one of those viewers will
- * be used at random), if still not found, we repeat for the superclasses of the
- * item's type. If no viewer can be found, an {@link IllegalStateException} will
- * be thrown.
+ * In this example, the {@code objectViewer} will be used to handle all items
+ * that are subtypes of {@code Object}, but not {@link String}s, because we've
+ * configured {@code stringViewer} for that. The lookup of the viewer is bottom
+ * up from the type hierarchy of the item - if we can't find a viewer to handle
+ * the exact type of an item, we try to find one that can handle the interfaces
+ * the item directly implements (if the item implements multiple interfaces and
+ * there are viewers configured for more than one of those interfaces, one of
+ * those viewers will be used at random), if still not found, we repeat for the
+ * superclasses of the item's type. If no viewer can be found, an {@link
+ * IllegalStateException} will be thrown.
  *
  * @see Viewer
  * @see #addViewer(Class, Viewer)
- * @see #getViewer(Object)
  */
 public abstract class ViewerAdapter extends BaseAdapter {
 
@@ -55,17 +54,6 @@ public abstract class ViewerAdapter extends BaseAdapter {
     types.put(c, types.size());
   }
 
-  /**
-   * Gets the viewer that can get view for the item at the given position.
-   *
-   * @throws IllegalStateException if no viewer has been configured to handle
-   * the item type
-   */
-  @SuppressWarnings("unchecked")
-  public <T, E extends T> Viewer<T> getViewer(E item) {
-    return (Viewer<T>) viewers.get(findClass(item));
-  }
-
   @Override public int getItemViewType(int position) {
     Object item = getItem(position);
     return types.get(findClass(item));
@@ -84,12 +72,15 @@ public abstract class ViewerAdapter extends BaseAdapter {
   @SuppressWarnings("unchecked")
   private <T, E extends T> Class<T> findClass(E item) {
     for (Class<?> c = item.getClass(); c != null; c = c.getSuperclass()) {
-      if (viewers.containsKey(c)) return (Class<T>) c;
-
-      for (Class<?> inf : c.getInterfaces())
-        if (viewers.containsKey(inf)) return (Class<T>) inf;
+      if (viewers.containsKey(c)) {
+        return (Class<T>) c;
+      }
+      for (Class<?> inf : c.getInterfaces()) {
+        if (viewers.containsKey(inf)) {
+          return (Class<T>) inf;
+        }
+      }
     }
-
     throw new IllegalStateException("No viewer found for: " + item);
   }
 }
