@@ -24,7 +24,7 @@ import static com.google.common.collect.Sets.union;
 import static java.util.Collections.singleton;
 import static l.files.io.Files.canRead;
 import static l.files.io.Files.exists;
-import static l.files.ui.UserDirs.*;
+import static l.files.io.UserDirs.*;
 
 final class BookmarkHandler
     implements Supplier<BookmarksEvent>, OnSharedPreferenceChangeListener {

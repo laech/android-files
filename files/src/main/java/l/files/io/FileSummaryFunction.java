@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.io;
 
 import android.content.res.Resources;
 import com.google.common.base.Function;
@@ -35,5 +35,4 @@ final class FileSummaryFunction implements Function<File, String> {
         modified
     );
   }
-
 }

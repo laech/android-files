@@ -15,8 +15,8 @@ import l.files.ui.app.BaseFragmentActivity;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static l.files.event.Events.bus;
-import static l.files.ui.Files.label;
-import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.io.Files.label;
+import static l.files.io.UserDirs.DIR_HOME;
 import static l.files.ui.app.files.FilesPagerAdapter.POSITION_FILES;
 import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 

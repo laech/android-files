@@ -1,8 +1,8 @@
-package l.files.ui;
+package l.files.io;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.ui.UserDirs.DIR_HOME;
-import static l.files.ui.UserDirs.DIR_ROOT;
+import static l.files.io.UserDirs.DIR_HOME;
+import static l.files.io.UserDirs.DIR_ROOT;
 
 import java.io.File;
 

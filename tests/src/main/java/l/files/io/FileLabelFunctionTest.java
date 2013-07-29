@@ -1,7 +1,7 @@
-package l.files.ui;
+package l.files.io;
 
-import static l.files.ui.UserDirs.DIR_HOME;
-import static l.files.ui.UserDirs.DIR_ROOT;
+import static l.files.io.UserDirs.DIR_HOME;
+import static l.files.io.UserDirs.DIR_ROOT;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

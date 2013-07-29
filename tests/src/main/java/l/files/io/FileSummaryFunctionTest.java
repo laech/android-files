@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.io;
 
 import android.test.AndroidTestCase;
 import com.google.common.base.Function;
@@ -45,5 +45,4 @@ public final class FileSummaryFunctionTest extends AndroidTestCase {
     given(date.apply(1L)).willReturn("a");
     assertThat(summary.apply(file)).isEqualTo("a");
   }
-
 }
