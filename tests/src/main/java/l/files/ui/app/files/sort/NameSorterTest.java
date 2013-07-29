@@ -9,7 +9,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 import android.content.res.Resources;
 
 public final class NameSorterTest extends TestCase {
@@ -34,7 +34,7 @@ public final class NameSorterTest extends TestCase {
   }
 
   public void testId() {
-    assertThat(sorter.id()).isEqualTo(SortBy.NAME);
+    assertThat(sorter.id()).isEqualTo(Sort.NAME);
   }
 
   public void testName() {

@@ -3,8 +3,8 @@ package l.files.event;
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
 
-import static l.files.setting.SortBy.DATE_MODIFIED;
-import static l.files.setting.SortBy.NAME;
+import static l.files.event.Sort.DATE_MODIFIED;
+import static l.files.event.Sort.NAME;
 
 public final class SortRequestTest extends TestCase {
 

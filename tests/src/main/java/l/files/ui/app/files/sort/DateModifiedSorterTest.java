@@ -11,7 +11,7 @@ import java.io.File;
 
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 import android.content.res.Resources;
 
 public final class DateModifiedSorterTest extends TestCase {
@@ -75,7 +75,7 @@ public final class DateModifiedSorterTest extends TestCase {
   }
 
   public void testId() {
-    assertThat(sorter.id()).isEqualTo(SortBy.DATE_MODIFIED);
+    assertThat(sorter.id()).isEqualTo(Sort.DATE_MODIFIED);
   }
 
   public void testName() {

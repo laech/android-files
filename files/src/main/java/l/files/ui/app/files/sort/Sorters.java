@@ -2,7 +2,7 @@ package l.files.ui.app.files.sort;
 
 import android.content.res.Resources;
 import com.google.common.collect.ImmutableList;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public final class Sorters {
   }
 
   // TODO
-  public static Sorter get(Resources res, SortBy sort) {
+  public static Sorter get(Resources res, Sort sort) {
     switch (sort) {
       case NAME:
         return new NameSorter();

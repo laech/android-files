@@ -5,9 +5,9 @@ import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
+import l.files.event.Sort;
 import l.files.event.SortRequest;
 import l.files.event.ViewEvent;
-import l.files.setting.SortBy;
 
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,12 +47,12 @@ final class ViewHandler
     return pref.getBoolean(KEY_HIDDEN_FILES, false);
   }
 
-  private SortBy sort() {
-    String value = pref.getString(KEY_SORT, SortBy.NAME.name());
+  private Sort sort() {
+    String value = pref.getString(KEY_SORT, Sort.NAME.name());
     try {
-      return SortBy.valueOf(value);
+      return Sort.valueOf(value);
     } catch (IllegalArgumentException e) {
-      return SortBy.NAME;
+      return Sort.NAME;
     }
   }
 

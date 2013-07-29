@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.R;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 import android.content.res.Resources;
 
 final class NameSorter implements Sorter {
@@ -28,8 +28,8 @@ final class NameSorter implements Sorter {
     return Collections.<Object> unmodifiableList(result);
   }
 
-  @Override public SortBy id() {
-    return SortBy.NAME;
+  @Override public Sort id() {
+    return Sort.NAME;
   }
 
   @Override public String name(Resources res) {

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 
 import junit.framework.TestCase;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 import android.content.res.Resources;
 
 import com.google.common.base.Function;
@@ -16,11 +16,11 @@ public final class SortersTest extends TestCase {
 
   public void testGetsSortersInRightOrder() {
     List<Sorter> sorters = Sorters.get(mock(Resources.class));
-    List<SortBy> ids = transform(sorters, new Function<Sorter, SortBy>() {
-      @Override public SortBy apply(Sorter sorter) {
+    List<Sort> ids = transform(sorters, new Function<Sorter, Sort>() {
+      @Override public Sort apply(Sorter sorter) {
         return sorter.id();
       }
     });
-    assertThat(ids).containsExactly(SortBy.NAME, SortBy.DATE_MODIFIED);
+    assertThat(ids).containsExactly(Sort.NAME, Sort.DATE_MODIFIED);
   }
 }

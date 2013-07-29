@@ -13,8 +13,8 @@ import android.widget.TextView;
 import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import l.files.R;
+import l.files.event.Sort;
 import l.files.event.SortRequest;
-import l.files.setting.SortBy;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 
@@ -55,7 +55,7 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    SortBy sort = ((Sorter) parent.getItemAtPosition(position)).id();
+    Sort sort = ((Sorter) parent.getItemAtPosition(position)).id();
     bus.post(new SortRequest(sort));
     getDialog().dismiss();
   }

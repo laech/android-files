@@ -1,7 +1,6 @@
 package l.files.event;
 
 import com.google.common.base.Objects;
-import l.files.setting.SortBy;
 
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -14,14 +13,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class ViewEvent {
 
   private final boolean showHiddenFiles;
-  private final SortBy sort;
+  private final Sort sort;
 
-  public ViewEvent(SortBy sort, boolean showHiddenFiles) {
+  public ViewEvent(Sort sort, boolean showHiddenFiles) {
     this.sort = checkNotNull(sort, "sort");
     this.showHiddenFiles = showHiddenFiles;
   }
 
-  public SortBy sort() {
+  public Sort sort() {
     return sort;
   }
 

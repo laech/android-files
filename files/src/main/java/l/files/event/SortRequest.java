@@ -1,7 +1,5 @@
 package l.files.event;
 
-import l.files.setting.SortBy;
-
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -10,13 +8,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class SortRequest {
 
-  private final SortBy sort;
+  private final Sort sort;
 
-  public SortRequest(SortBy sort) {
+  public SortRequest(Sort sort) {
     this.sort = checkNotNull(sort, "sort");
   }
 
-  public SortBy sort() {
+  public Sort sort() {
     return sort;
   }
 

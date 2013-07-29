@@ -10,8 +10,8 @@ import l.files.event.ViewEvent;
 
 import java.lang.reflect.Method;
 
-import static l.files.setting.SortBy.DATE_MODIFIED;
-import static l.files.setting.SortBy.NAME;
+import static l.files.event.Sort.DATE_MODIFIED;
+import static l.files.event.Sort.NAME;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;

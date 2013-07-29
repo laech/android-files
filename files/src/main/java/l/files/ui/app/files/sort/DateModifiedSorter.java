@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.R;
-import l.files.setting.SortBy;
+import l.files.event.Sort;
 
 import org.joda.time.DateMidnight;
 
@@ -92,8 +92,8 @@ final class DateModifiedSorter implements Sorter {
     return result;
   }
 
-  @Override public SortBy id() {
-    return SortBy.DATE_MODIFIED;
+  @Override public Sort id() {
+    return Sort.DATE_MODIFIED;
   }
 
   @Override public String name(Resources res) {
