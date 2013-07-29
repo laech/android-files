@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.ui.mode.MultiChoiceModeAdapter;
+import l.files.common.widget.MultiChoiceModeAdapter;
 
 import java.io.File;
 

@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
+import l.files.common.app.BaseListFragment;
 import l.files.event.OpenFileRequest;
 
 import java.io.File;

@@ -8,9 +8,9 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import l.files.R;
-import l.files.base.Consumer;
+import l.files.common.base.Consumer;
 import l.files.event.OpenFileRequest;
-import l.files.ui.app.BaseFragmentActivity;
+import l.files.common.app.BaseFragmentActivity;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;

@@ -3,7 +3,7 @@ package l.files.ui.app.files.menu;
 import android.view.Menu;
 import android.view.MenuItem;
 import l.files.R;
-import l.files.ui.menu.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAdapter;
 
 import java.io.File;
 import java.util.Random;

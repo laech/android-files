@@ -6,10 +6,10 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
+import l.files.common.app.OptionsMenuAdapter;
 import l.files.event.AddBookmarkRequest;
 import l.files.event.BookmarksEvent;
 import l.files.event.RemoveBookmarkRequest;
-import l.files.ui.menu.OptionsMenuAdapter;
 
 import java.io.File;
 
@@ -20,10 +20,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class BookmarkMenu
     extends OptionsMenuAdapter implements OnMenuItemClickListener {
 
-  private Menu menu;
-
   private final Bus bus;
   private final File dir;
+  private Menu menu;
 
   BookmarkMenu(Bus bus, File dir) {
     this.bus = checkNotNull(bus, "bus");
@@ -62,5 +61,4 @@ final class BookmarkMenu
     MenuItem item = menu.findItem(R.id.bookmark);
     if (item != null) item.setChecked(event.bookmarks().contains(dir));
   }
-
 }

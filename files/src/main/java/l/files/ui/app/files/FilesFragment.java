@@ -13,8 +13,8 @@ import l.files.trash.TrashService.TrashMover;
 import l.files.ui.app.BaseFileListFragment;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
-import l.files.ui.menu.OptionsMenus;
-import l.files.ui.mode.MultiChoiceModes;
+import l.files.common.app.OptionsMenus;
+import l.files.common.widget.MultiChoiceModes;
 
 import java.io.File;
 import java.util.List;
@@ -29,15 +29,6 @@ public final class FilesFragment extends BaseFileListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
-  public static FilesFragment create(File dir) {
-    Bundle args = new Bundle(1);
-    args.putString(ARG_DIRECTORY, dir.getAbsolutePath());
-
-    FilesFragment fragment = new FilesFragment();
-    fragment.setArguments(args);
-    return fragment;
-  }
-
   FileObserver observer;
 
   private File dir;
@@ -45,6 +36,15 @@ public final class FilesFragment extends BaseFileListFragment {
 
   public FilesFragment() {
     super(R.layout.files_fragment);
+  }
+
+  public static FilesFragment create(File dir) {
+    Bundle args = new Bundle(1);
+    args.putString(ARG_DIRECTORY, dir.getAbsolutePath());
+
+    FilesFragment fragment = new FilesFragment();
+    fragment.setArguments(args);
+    return fragment;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -121,5 +121,4 @@ public final class FilesFragment extends BaseFileListFragment {
         newCountSelectedItemsAction(listView),
         newMoveToTrashAction(listView, new TrashMover(getActivity()))));
   }
-
 }

@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import l.files.R;
-import l.files.ui.widget.ObjectAdapter;
+import l.files.common.widget.ObjectAdapter;
 
 import java.io.File;
 import java.util.Collection;
@@ -20,15 +20,11 @@ import static l.files.io.Files.drawable;
 import static l.files.io.Files.label;
 import static l.files.io.UserDirs.DIR_HOME;
 import static l.files.io.UserDirs.DIR_ROOT;
-import static l.files.ui.widget.Decorators.draw;
-import static l.files.ui.widget.Decorators.text;
-import static l.files.ui.widget.Viewers.decorate;
+import static l.files.common.widget.Decorators.draw;
+import static l.files.common.widget.Decorators.text;
+import static l.files.common.widget.Viewers.decorate;
 
 final class SidebarAdapter extends ObjectAdapter {
-
-  static SidebarAdapter get(Resources res) {
-    return new SidebarAdapter(label(res), drawable(res));
-  }
 
   private final Function<File, CharSequence> labels;
 
@@ -45,6 +41,10 @@ final class SidebarAdapter extends ObjectAdapter {
     addFileViewer(labels, drawables);
   }
 
+  static SidebarAdapter get(Resources res) {
+    return new SidebarAdapter(label(res), drawable(res));
+  }
+
   @SuppressWarnings("unchecked") private void addFileViewer(
       Function<? super File, ? extends CharSequence> labels,
       Function<? super File, ? extends Drawable> drawables) {
@@ -53,7 +53,6 @@ final class SidebarAdapter extends ObjectAdapter {
         text(android.R.id.title, labels),
         draw(android.R.id.title, drawables)
     ));
-
   }
 
   @SuppressWarnings("unchecked") private void addHeaderViewer() {

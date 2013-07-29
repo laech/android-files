@@ -4,33 +4,19 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import l.files.R;
-import l.files.ui.widget.AnimatedAdapter;
+import l.files.common.widget.AnimatedAdapter;
 
 import java.io.File;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.Files.name;
-import static l.files.io.Files.canRead;
-import static l.files.io.Files.drawable;
-import static l.files.io.Files.summary;
+import static l.files.common.widget.Decorators.*;
+import static l.files.common.widget.Viewers.decorate;
+import static l.files.io.Files.*;
 import static l.files.ui.format.Formats.date;
 import static l.files.ui.format.Formats.size;
-import static l.files.ui.widget.Decorators.*;
-import static l.files.ui.widget.Viewers.decorate;
 
 final class FilesAdapter extends AnimatedAdapter {
-
-  static FilesAdapter get(Context context) {
-    return new FilesAdapter(
-        name(),
-        drawable(context.getResources()),
-        summary(context.getResources(),
-            date(context),
-            size(context)
-        )
-    );
-  }
 
   /**
    * @param names the function to return the name of the file
@@ -48,6 +34,17 @@ final class FilesAdapter extends AnimatedAdapter {
 
     addViewerForHeader();
     addViewerForFile(names, drawables, summaries);
+  }
+
+  static FilesAdapter get(Context context) {
+    return new FilesAdapter(
+        name(),
+        drawable(context.getResources()),
+        summary(context.getResources(),
+            date(context),
+            size(context)
+        )
+    );
   }
 
   @SuppressWarnings("unchecked")
@@ -78,5 +75,4 @@ final class FilesAdapter extends AnimatedAdapter {
   @Override public boolean isEnabled(int position) {
     return getItem(position) instanceof File;
   }
-
 }

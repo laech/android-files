@@ -7,7 +7,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.lang.reflect.Method;
-import l.files.base.Consumer;
+import l.files.common.base.Consumer;
 import l.files.event.OpenFileRequest;
 import l.files.test.TempDir;
 

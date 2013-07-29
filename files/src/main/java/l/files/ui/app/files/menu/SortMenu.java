@@ -6,7 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.google.common.base.Supplier;
 import l.files.R;
-import l.files.ui.menu.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAdapter;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.OnMenuItemClickListener;

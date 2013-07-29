@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.view.Menu;
 import l.files.R;
 import l.files.ui.app.settings.SettingsActivity;
-import l.files.ui.menu.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAdapter;
 
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
