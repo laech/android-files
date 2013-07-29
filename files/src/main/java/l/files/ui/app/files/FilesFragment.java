@@ -8,13 +8,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
+import l.files.common.widget.MultiChoiceActions;
 import l.files.event.ViewEvent;
 import l.files.trash.TrashService.TrashMover;
 import l.files.ui.app.BaseFileListFragment;
 import l.files.ui.app.files.sort.Sorter;
 import l.files.ui.app.files.sort.Sorters;
 import l.files.common.app.OptionsMenus;
-import l.files.common.widget.MultiChoiceModes;
 
 import java.io.File;
 import java.util.List;
@@ -117,7 +117,7 @@ public final class FilesFragment extends BaseFileListFragment {
 
   private void configureListView() {
     ListView listView = getListView();
-    listView.setMultiChoiceModeListener(MultiChoiceModes.asListener(
+    listView.setMultiChoiceModeListener(MultiChoiceActions.asListener(
         newCountSelectedItemsAction(listView),
         newMoveToTrashAction(listView, new TrashMover(getActivity()))));
   }

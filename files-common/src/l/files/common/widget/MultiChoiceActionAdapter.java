@@ -3,7 +3,10 @@ package l.files.common.widget;
 import android.view.ActionMode;
 import android.view.Menu;
 
-public class MultiChoiceModeAdapter implements MultiChoiceMode {
+/**
+ * An implementation that does nothing by default.
+ */
+public class MultiChoiceActionAdapter implements MultiChoiceAction {
 
   @Override public void onCreate(ActionMode mode, Menu menu) {}
 

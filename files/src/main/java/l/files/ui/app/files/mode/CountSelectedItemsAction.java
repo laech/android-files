@@ -4,11 +4,11 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.common.widget.MultiChoiceModeAdapter;
+import l.files.common.widget.MultiChoiceActionAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class CountSelectedItemsAction extends MultiChoiceModeAdapter {
+final class CountSelectedItemsAction extends MultiChoiceActionAdapter {
 
   private final AbsListView list;
 

@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.common.widget.MultiChoiceModeAdapter;
+import l.files.common.widget.MultiChoiceActionAdapter;
 
 import java.io.File;
 
@@ -17,7 +17,7 @@ import static l.files.trash.TrashService.TrashMover;
 import static l.files.ui.util.ListViews.getCheckedItems;
 
 final class MoveToTrashAction
-    extends MultiChoiceModeAdapter implements OnMenuItemClickListener {
+    extends MultiChoiceActionAdapter implements OnMenuItemClickListener {
 
   private final AbsListView list;
   private final TrashMover mover;
