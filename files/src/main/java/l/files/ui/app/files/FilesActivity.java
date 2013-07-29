@@ -1,68 +1,45 @@
 package l.files.ui.app.files;
 
+import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import com.google.common.base.Optional;
+import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import java.io.File;
 import l.files.R;
-import l.files.event.Events;
+import l.files.base.Consumer;
 import l.files.event.OpenFileRequest;
 import l.files.ui.app.BaseFragmentActivity;
-import l.files.ui.app.home.HomePagerAdapter;
 
-import java.io.File;
-
+import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.event.Events.bus;
 import static l.files.ui.Files.label;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.app.files.FilesPagerAdapter.POSITION_FILES;
 import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
-import static l.files.ui.app.home.HomePagerAdapter.POSITION_FILES;
 
-public class FilesActivity extends BaseFragmentActivity {
+public final class FilesActivity extends BaseFragmentActivity {
 
-  public static final String EXTRA_DIRECTORY = FilesFragment.ARG_DIRECTORY;
+  public static final String EXTRA_DIR = FilesFragment.ARG_DIRECTORY;
 
-  FilesActivityHelper helper;
-  Bus bus = Events.bus();
+  Consumer<OpenFileRequest> helper;
+  Bus bus;
+  File dir;
   ViewPager pager;
-  File directoryInDisplay;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setContentView(R.layout.files_activity);
 
-    Optional<File> directory = getDirectoryToDisplay();
-    if (!directory.isPresent()) {
-      finish();
-      return;
-    }
-
-    helper = FilesActivityHelper.INSTANCE;
-    directoryInDisplay = directory.get();
-    pager = createViewPager(directoryInDisplay);
-    setTitle(label(getResources()).apply(directoryInDisplay));
-    setContentView(pager);
-
+    bus = bus();
+    dir = getDir();
+    helper = OpenFileRequestConsumer.get(this);
+    pager = setViewPagerAdapter();
+    setTitle(label(getResources()).apply(dir));
+    setActionBarAppearance();
     setOptionsMenu(newSettingsMenu(this));
-  }
-
-  protected Optional<File> getDirectoryToDisplay() {
-    String path = getIntent().getStringExtra(EXTRA_DIRECTORY);
-    return path == null ? Optional.<File>absent() : Optional.of(new File(path));
-  }
-
-  private ViewPager createViewPager(File dir) {
-    FragmentManager fm = getSupportFragmentManager();
-    ViewPager pager = new ViewPager(this);
-    pager.setId(R.id.content);
-    pager.setAdapter(new HomePagerAdapter(fm, dir, isPortrait()));
-    pager.setCurrentItem(POSITION_FILES);
-    return pager;
-  }
-
-  private boolean isPortrait() {
-    return getResources().getConfiguration()
-        .orientation == ORIENTATION_PORTRAIT;
   }
 
   @Override protected void onResume() {
@@ -75,12 +52,45 @@ public class FilesActivity extends BaseFragmentActivity {
     bus.unregister(this);
   }
 
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    super.onOptionsItemSelected(item);
+    if (android.R.id.home == item.getItemId()) {
+      finish();
+      return true;
+    }
+    return false;
+  }
+
   @Subscribe public void handle(OpenFileRequest request) {
-    if (directoryInDisplay.equals(request.file())) {
+    File file = request.file();
+    if (dir.equals(file)) {
       pager.setCurrentItem(POSITION_FILES, true);
     } else {
-      helper.handle(request, FilesActivity.this);
+      helper.take(request);
     }
   }
 
+  private ViewPager setViewPagerAdapter() {
+    ViewPager pager = (ViewPager) findViewById(R.id.pager);
+    pager.setAdapter(new FilesPagerAdapter(getSupportFragmentManager(), dir, isPortrait()));
+    pager.setCurrentItem(POSITION_FILES);
+    return pager;
+  }
+
+  private void setActionBarAppearance() {
+    ActionBar actionBar = getActionBar();
+    if (actionBar != null) {
+      boolean isLauncherIntent = ACTION_MAIN.equals(getIntent().getAction());
+      actionBar.setDisplayHomeAsUpEnabled(!isLauncherIntent);
+    }
+  }
+
+  private File getDir() {
+    String path = getIntent().getStringExtra(EXTRA_DIR);
+    return path == null ? DIR_HOME : new File(path);
+  }
+
+  private boolean isPortrait() {
+    return getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
+  }
 }

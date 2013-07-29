@@ -6,7 +6,6 @@
   <string name="not_a_directory">Not a directory</string>
   <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
   <string name="permission_denied">Permission denied</string>
-  <string name="unknown_file_type">Unknown file type</string>
   <string name="no_app_to_open_file">No application can open this file</string>
   <string name="move_to_trash">Move to trash</string>
   <string name="n_selected">%d selected</string>

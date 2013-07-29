@@ -5,17 +5,17 @@ import android.widget.Toast;
 
 public class Toaster {
 
-  public static final Toaster INSTANCE = new Toaster();
+  private static final Toaster INSTANCE = new Toaster();
+
+  public static Toaster get() {
+    return INSTANCE;
+  }
 
   Toaster() {
   }
 
-  /**
-   * @param duration {@link Toast#LENGTH_SHORT} or {@link Toast#LENGTH_LONG}
-   * @see Toast#makeText(Context, int, int)
-   */
-  public void toast(Context context, int resId, int duration) {
-    Toast.makeText(context, resId, duration).show();
+  public void toast(Context context, int resId) {
+    Toast.makeText(context, resId, Toast.LENGTH_SHORT).show();
   }
 
 }

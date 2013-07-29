@@ -39,7 +39,7 @@ public final class Decorators {
    * within hierarchy that has the given view ID, if found the delegates will be
    * executed.
    */
-  public static <T> Decorator<T> nullable(int nullableViewId, Decorator<T>... delegates) {
+  public static <T> Decorator<T> nullable(int nullableViewId, Decorator<? super T>... delegates) {
     return new NullableDecorator<T>(nullableViewId, compose(delegates));
   }
 

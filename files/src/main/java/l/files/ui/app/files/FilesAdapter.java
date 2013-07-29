@@ -37,7 +37,7 @@ final class FilesAdapter extends AnimatedAdapter {
    * @param drawables the function to return the icon of the file
    * @param summaries the function to return additional summary of the file
    */
-  @SuppressWarnings("unchecked") FilesAdapter(
+  FilesAdapter(
       Function<? super File, ? extends CharSequence> names,
       Function<? super File, ? extends Drawable> drawables,
       Function<? super File, ? extends CharSequence> summaries) {

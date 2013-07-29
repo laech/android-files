@@ -12,7 +12,7 @@ public final class Detectors {
    * <p/>
    * Do not use the returned detector on the main application thread.
    */
-  public static Function<File, MediaType> newDetector() {
+  public static Function<File, MediaType> get() {
     return new ContentDetector();
   }
 
