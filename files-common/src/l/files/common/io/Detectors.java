@@ -1,4 +1,4 @@
-package l.files.io;
+package l.files.common.io;
 
 import com.google.common.base.Function;
 import com.google.common.net.MediaType;
@@ -6,6 +6,7 @@ import com.google.common.net.MediaType;
 import java.io.File;
 
 public final class Detectors {
+  private Detectors() {}
 
   /**
    * Gets a media detector with default configurations.
@@ -15,7 +16,4 @@ public final class Detectors {
   public static Function<File, MediaType> get() {
     return new ContentDetector();
   }
-
-  private Detectors() {}
-
 }

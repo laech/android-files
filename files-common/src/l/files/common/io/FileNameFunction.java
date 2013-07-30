@@ -1,4 +1,4 @@
-package l.files.io;
+package l.files.common.io;
 
 import com.google.common.base.Function;
 
@@ -11,5 +11,4 @@ enum FileNameFunction implements Function<File, String> {
   @Override public String apply(File file) {
     return file.getName();
   }
-
 }

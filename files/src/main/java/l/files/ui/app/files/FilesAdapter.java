@@ -10,6 +10,8 @@ import java.io.File;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.common.io.Files.canRead;
+import static l.files.common.io.Files.name;
 import static l.files.common.widget.Decorators.*;
 import static l.files.common.widget.Viewers.decorate;
 import static l.files.io.Files.*;

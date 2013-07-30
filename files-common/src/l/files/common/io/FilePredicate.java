@@ -1,4 +1,4 @@
-package l.files.io;
+package l.files.common.io;
 
 import com.google.common.base.Predicate;
 
@@ -17,5 +17,4 @@ enum FilePredicate implements Predicate<File> {
       return file.exists();
     }
   }
-
 }

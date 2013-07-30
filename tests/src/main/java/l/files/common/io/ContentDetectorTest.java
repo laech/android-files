@@ -1,16 +1,14 @@
-package l.files.io;
+package l.files.common.io;
+
+import com.google.common.net.MediaType;
+import junit.framework.TestCase;
+
+import java.io.File;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.io.File.createTempFile;
-import static org.fest.assertions.api.Assertions.assertThat;
-
-import java.io.File;
-
-import junit.framework.TestCase;
-
-import com.google.common.net.MediaType;
 
 public final class ContentDetectorTest extends TestCase {
 
@@ -30,12 +28,10 @@ public final class ContentDetectorTest extends TestCase {
 
   public void testDetectsFileContentMediaType() throws Exception {
     write("hello", file, UTF_8);
-    MediaType media = detector.apply(file);
-    assertThat(media).isEqualTo(MediaType.parse("text/plain"));
+    assertEquals(MediaType.parse("text/plain"), detector.apply(file));
   }
 
   public void testReturnsDefaultMediaTypeForUnknown() {
-    MediaType media = detector.apply(file);
-    assertThat(media).isEqualTo(OCTET_STREAM);
+    assertEquals(OCTET_STREAM, detector.apply(file));
   }
 }

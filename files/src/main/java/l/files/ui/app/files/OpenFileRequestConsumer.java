@@ -10,7 +10,7 @@ import l.files.R;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.base.Consumer;
 import l.files.event.OpenFileRequest;
-import l.files.io.Detectors;
+import l.files.common.io.Detectors;
 import l.files.ui.util.Toaster;
 
 import static com.google.common.base.Preconditions.checkNotNull;

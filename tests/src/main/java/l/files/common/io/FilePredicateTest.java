@@ -1,23 +1,24 @@
-package l.files.io;
+package l.files.common.io;
 
 import junit.framework.TestCase;
 
 import java.io.File;
 
-import static l.files.io.FilePredicate.CAN_READ;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static l.files.common.io.FilePredicate.CAN_READ;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 public final class FilePredicateTest extends TestCase {
 
-  public void testCanRead() {
+  public void testCanRead_trueForReadableFile() {
     File file = mock(File.class);
-
     given(file.canRead()).willReturn(true);
-    assertThat(CAN_READ.apply(file)).isTrue();
+    assertTrue(CAN_READ.apply(file));
+  }
 
+  public void testCanRead_falseForUnreadableFile() {
+    File file = mock(File.class);
     given(file.canRead()).willReturn(false);
-    assertThat(CAN_READ.apply(file)).isFalse();
+    assertFalse(CAN_READ.apply(file));
   }
 }

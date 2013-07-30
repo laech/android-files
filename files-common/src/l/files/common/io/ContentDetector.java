@@ -1,4 +1,4 @@
-package l.files.io;
+package l.files.common.io;
 
 import com.google.common.base.Function;
 import com.google.common.net.MediaType;
@@ -24,5 +24,4 @@ final class ContentDetector implements Function<File, MediaType> {
       return OCTET_STREAM;
     }
   }
-
 }
