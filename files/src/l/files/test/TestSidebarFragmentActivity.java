@@ -3,7 +3,7 @@ package l.files.test;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import l.files.ui.app.sidebar.SidebarFragment;
+import l.files.app.SidebarFragment;
 
 public final class TestSidebarFragmentActivity extends FragmentActivity {
 

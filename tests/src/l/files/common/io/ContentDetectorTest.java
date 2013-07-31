@@ -13,12 +13,10 @@ import static java.io.File.createTempFile;
 public final class ContentDetectorTest extends TestCase {
 
   private File file;
-  private ContentDetector detector;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     file = createTempFile("abc", "123");
-    detector = new ContentDetector();
   }
 
   @Override protected void tearDown() throws Exception {
@@ -28,10 +26,10 @@ public final class ContentDetectorTest extends TestCase {
 
   public void testDetectsFileContentMediaType() throws Exception {
     write("hello", file, UTF_8);
-    assertEquals(MediaType.parse("text/plain"), detector.apply(file));
+    assertEquals(MediaType.parse("text/plain"), ContentDetector.INSTANCE.detect(file));
   }
 
   public void testReturnsDefaultMediaTypeForUnknown() {
-    assertEquals(OCTET_STREAM, detector.apply(file));
+    assertEquals(OCTET_STREAM, ContentDetector.INSTANCE.detect(file));
   }
 }

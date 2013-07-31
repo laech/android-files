@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
 import android.view.View;
-import l.files.ui.app.files.FilesFragment;
+import l.files.app.FilesFragment;
 
 public final class TestFilesFragmentActivity extends FragmentActivity {
 
