@@ -3,15 +3,16 @@ package l.files.ui.app.files;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.os.AsyncTask;
-import com.google.common.base.Function;
 import com.google.common.net.MediaType;
-import java.io.File;
 import l.files.R;
-import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.base.Consumer;
-import l.files.event.OpenFileRequest;
+import l.files.common.io.Detector;
 import l.files.common.io.Detectors;
+import l.files.common.os.AsyncTaskExecutor;
+import l.files.event.OpenFileRequest;
 import l.files.ui.util.Toaster;
+
+import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -26,13 +27,13 @@ final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
   }
 
   private final Context context;
-  private final Function<File, MediaType> detector;
+  private final Detector detector;
   private final Toaster toaster;
   private final AsyncTaskExecutor executor;
 
   OpenFileRequestConsumer(
       Context context,
-      Function<File, MediaType> detector,
+      Detector detector,
       Toaster toaster,
       AsyncTaskExecutor executor) {
     this.context = checkNotNull(context, "context");
@@ -72,7 +73,7 @@ final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
     }
 
     @Override protected MediaType doInBackground(Void... params) {
-      return detector.apply(file);
+      return detector.detect(file);
     }
 
     @Override protected void onPostExecute(MediaType type) {
