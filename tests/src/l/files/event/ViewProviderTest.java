@@ -1,12 +1,10 @@
-package l.files;
+package l.files.event;
 
 import android.content.SharedPreferences;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 import junit.framework.TestCase;
-import l.files.event.SortRequest;
-import l.files.event.ViewEvent;
 
 import java.lang.reflect.Method;
 
@@ -18,7 +16,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-public final class ViewHandlerTest extends TestCase {
+public final class ViewProviderTest extends TestCase {
 
   private static final String KEY_SORT = "sort";
   private static final String KEY_HIDDEN_FILES = "show-hidden-files";
@@ -27,16 +25,15 @@ public final class ViewHandlerTest extends TestCase {
   private SharedPreferences pref;
   private SharedPreferences.Editor editor;
 
-  private ViewHandler handler;
+  private ViewProvider handler;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     bus = mock(Bus.class);
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
-    handler = ViewHandler.register(bus, pref);
+    handler = ViewProvider.register(bus, pref);
   }
-
 
   public void testListensOnSharedPreferences() {
     verify(pref).registerOnSharedPreferenceChangeListener(handler);
@@ -49,7 +46,18 @@ public final class ViewHandlerTest extends TestCase {
   }
 
   public void testSortRequestHandlerMethodIsConfigured() throws Exception {
-    Method method = ViewHandler.class.getMethod("handle", SortRequest.class);
+    Method method = ViewProvider.class.getMethod("handle", SortRequest.class);
+    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
+  }
+
+  public void testShowHiddenFilesRequestIsHandled() {
+    handler.handle(new ShowHiddenFilesRequest(true));
+    verify(editor).putBoolean(KEY_HIDDEN_FILES, true);
+    verify(editor).apply();
+  }
+
+  public void testShowHiddenFilesRequestHandlerMethodIsConfigured() throws Exception {
+    Method method = ViewProvider.class.getMethod("handle", ShowHiddenFilesRequest.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
@@ -78,7 +86,7 @@ public final class ViewHandlerTest extends TestCase {
     given(pref.getBoolean(KEY_HIDDEN_FILES, false)).willReturn(true);
     assertThat(handler.get()).isEqualTo(new ViewEvent(DATE_MODIFIED, true));
 
-    Method producer = ViewHandler.class.getMethod("get");
+    Method producer = ViewProvider.class.getMethod("get");
     assertThat(producer.getAnnotation(Produce.class)).isNotNull();
   }
 
@@ -94,5 +102,4 @@ public final class ViewHandlerTest extends TestCase {
     given(editor.putBoolean(anyString(), anyBoolean())).willReturn(editor);
     return editor;
   }
-
 }

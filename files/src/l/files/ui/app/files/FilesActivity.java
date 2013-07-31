@@ -6,11 +6,12 @@ import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import java.io.File;
 import l.files.R;
+import l.files.common.app.BaseFragmentActivity;
 import l.files.common.base.Consumer;
 import l.files.event.OpenFileRequest;
-import l.files.common.app.BaseFragmentActivity;
+
+import java.io.File;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -18,7 +19,6 @@ import static l.files.event.Events.bus;
 import static l.files.io.Files.label;
 import static l.files.io.UserDirs.DIR_HOME;
 import static l.files.ui.app.files.FilesPagerAdapter.POSITION_FILES;
-import static l.files.ui.app.files.menu.Menus.newSettingsMenu;
 
 public final class FilesActivity extends BaseFragmentActivity {
 
@@ -39,7 +39,6 @@ public final class FilesActivity extends BaseFragmentActivity {
     pager = setViewPagerAdapter();
     setTitle(label(getResources()).apply(dir));
     setActionBarAppearance();
-    setOptionsMenu(newSettingsMenu(this));
   }
 
   @Override protected void onResume() {

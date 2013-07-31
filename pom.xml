@@ -10,6 +10,7 @@
 
   <modules>
     <module>files-common</module>
+    <module>files-event</module>
     <module>files</module>
     <module>tests</module>
   </modules>

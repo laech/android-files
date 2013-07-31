@@ -25,10 +25,6 @@
       </intent-filter>
     </activity>
 
-    <activity
-        android:name=".ui.app.settings.SettingsActivity"
-        android:label="@string/settings"/>
-
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
 

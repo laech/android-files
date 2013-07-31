@@ -112,7 +112,8 @@ public final class FilesFragment extends BaseFileListFragment {
     setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(getBus(), dir),
         newDirMenu(dir),
-        newSortMenu(getFragmentManager())));
+        newSortMenu(getFragmentManager()),
+        newShowHiddenFilesMenu(getBus())));
   }
 
   private void configureListView() {

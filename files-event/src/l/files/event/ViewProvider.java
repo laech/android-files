@@ -1,25 +1,22 @@
-package l.files;
+package l.files.event;
 
 import android.content.SharedPreferences;
 import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-import l.files.event.Sort;
-import l.files.event.SortRequest;
-import l.files.event.ViewEvent;
 
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class ViewHandler
+final class ViewProvider
     implements Supplier<ViewEvent>, OnSharedPreferenceChangeListener {
 
   private static final String KEY_HIDDEN_FILES = "show-hidden-files";
   private static final String KEY_SORT = "sort";
 
-  static ViewHandler register(Bus bus, SharedPreferences pref) {
-    ViewHandler handler = new ViewHandler(bus, pref);
+  static ViewProvider register(Bus bus, SharedPreferences pref) {
+    ViewProvider handler = new ViewProvider(bus, pref);
     bus.register(handler);
     pref.registerOnSharedPreferenceChangeListener(handler);
     return handler;
@@ -28,7 +25,7 @@ final class ViewHandler
   private final Bus bus;
   private final SharedPreferences pref;
 
-  private ViewHandler(Bus bus, SharedPreferences pref) {
+  private ViewProvider(Bus bus, SharedPreferences pref) {
     this.bus = checkNotNull(bus, "bus");
     this.pref = checkNotNull(pref, "pref");
   }
@@ -36,6 +33,12 @@ final class ViewHandler
   @Subscribe public void handle(SortRequest request) {
     pref.edit()
         .putString(KEY_SORT, request.sort().name())
+        .apply();
+  }
+
+  @Subscribe public void handle(ShowHiddenFilesRequest request) {
+    pref.edit()
+        .putBoolean(KEY_HIDDEN_FILES, request.show())
         .apply();
   }
 
@@ -60,5 +63,4 @@ final class ViewHandler
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (KEY_HIDDEN_FILES.equals(key) || KEY_SORT.equals(key)) bus.post(get());
   }
-
 }

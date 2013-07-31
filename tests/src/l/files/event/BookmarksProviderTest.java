@@ -1,4 +1,4 @@
-package l.files;
+package l.files.event;
 
 import android.content.SharedPreferences;
 import com.google.common.collect.ImmutableSet;
@@ -6,9 +6,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 import junit.framework.TestCase;
-import l.files.event.AddBookmarkRequest;
-import l.files.event.BookmarksEvent;
-import l.files.event.RemoveBookmarkRequest;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -19,29 +16,30 @@ import java.util.Set;
 import static android.content.SharedPreferences.Editor;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
-import static l.files.io.UserDirs.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.*;
 
-public final class BookmarkHandlerTest extends TestCase {
+public final class BookmarksProviderTest extends TestCase {
 
   public static final String KEY = "bookmarks";
 
   private Bus bus;
   private SharedPreferences pref;
   private Editor editor;
+  private Set<File> defaults;
 
-  private BookmarkHandler handler;
+  private BookmarksProvider handler;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
     bus = mock(Bus.class);
-    handler = BookmarkHandler.register(bus, pref);
+    defaults = ImmutableSet.of(new File("/"));
+    handler = BookmarksProvider.register(bus, pref, defaults);
   }
 
   public void testListensOnSharedPreferences() {
@@ -56,7 +54,7 @@ public final class BookmarkHandlerTest extends TestCase {
   }
 
   public void testAddBookmarkRequestHandlerMethodIsConfigured() throws Exception {
-    Method method = BookmarkHandler.class.getMethod("handle", AddBookmarkRequest.class);
+    Method method = BookmarksProvider.class.getMethod("handle", AddBookmarkRequest.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
@@ -68,7 +66,7 @@ public final class BookmarkHandlerTest extends TestCase {
   }
 
   public void testRemoveBookmarkRequestHandlerMethodIsConfigured() throws Exception {
-    Method method = BookmarkHandler.class.getMethod("handle", RemoveBookmarkRequest.class);
+    Method method = BookmarksProvider.class.getMethod("handle", RemoveBookmarkRequest.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
@@ -88,7 +86,7 @@ public final class BookmarkHandlerTest extends TestCase {
     bookmark("/");
     assertThat(handler.get()).isEqualTo(new BookmarksEvent(new File("/")));
 
-    Method producer = BookmarkHandler.class.getMethod("get");
+    Method producer = BookmarksProvider.class.getMethod("get");
     assertThat(producer.getAnnotation(Produce.class)).isNotNull();
   }
 
@@ -99,12 +97,7 @@ public final class BookmarkHandlerTest extends TestCase {
         return (Set<String>) invocation.getArguments()[1];
       }
     });
-    assertThat(handler.get()).isEqualTo(new BookmarksEvent(
-        DIR_DCIM,
-        DIR_DOWNLOADS,
-        DIR_MOVIES,
-        DIR_MUSIC,
-        DIR_PICTURES));
+    assertThat(handler.get()).isEqualTo(new BookmarksEvent(defaults));
   }
 
   public void testSkipsFilesThatDoNotExist() {
@@ -129,5 +122,4 @@ public final class BookmarkHandlerTest extends TestCase {
     given(editor.putStringSet(anyString(), anySet())).willReturn(editor);
     return editor;
   }
-
 }
