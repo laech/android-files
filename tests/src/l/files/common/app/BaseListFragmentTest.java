@@ -34,4 +34,11 @@ public final class BaseListFragmentTest extends TestCase {
     fragment.onOptionsMenuClosed(menu);
     verify(optionsMenu).onClose(menu);
   }
+
+  public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
+    BaseListFragment fragment = new BaseListFragment();
+    fragment.onCreateOptionsMenu(null, null);
+    fragment.onPrepareOptionsMenu(null);
+    fragment.onOptionsMenuClosed(null);
+  }
 }

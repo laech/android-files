@@ -34,4 +34,11 @@ public final class BaseFragmentActivityTest extends TestCase {
     activity.onOptionsMenuClosed(menu);
     verify(optionsMenu).onClose(menu);
   }
+
+  public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
+    BaseFragmentActivity activity = new BaseFragmentActivity();
+    activity.onCreateOptionsMenu(null);
+    activity.onPrepareOptionsMenu(null);
+    activity.onOptionsMenuClosed(null);
+  }
 }

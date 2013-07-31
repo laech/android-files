@@ -6,7 +6,7 @@ import android.view.MenuInflater;
 
 public class BaseListFragment extends ListFragment {
 
-  private OptionsMenu optionsMenu;
+  private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
   public final void setOptionsMenu(OptionsMenu menu) {
     optionsMenu = OptionsMenus.nullToEmpty(menu);

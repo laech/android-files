@@ -2,7 +2,7 @@ package l.files.common.app;
 
 public final class OptionsMenus {
 
-  private static final OptionsMenu EMPTY = new OptionsMenuAdapter();
+  public static final OptionsMenu EMPTY = new OptionsMenuAdapter();
 
   private OptionsMenus() {}
 

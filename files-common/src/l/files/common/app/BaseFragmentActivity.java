@@ -5,7 +5,7 @@ import android.view.Menu;
 
 public class BaseFragmentActivity extends FragmentActivity {
 
-  private OptionsMenu optionsMenu;
+  private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
   public final void setOptionsMenu(OptionsMenu menu) {
     optionsMenu = OptionsMenus.nullToEmpty(menu);
