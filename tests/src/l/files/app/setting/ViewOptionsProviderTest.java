@@ -1,6 +1,7 @@
 package l.files.app.setting;
 
 import android.content.SharedPreferences;
+import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
@@ -8,8 +9,6 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
 
-import static l.files.app.setting.Sort.DATE_MODIFIED;
-import static l.files.app.setting.Sort.NAME;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -40,8 +39,8 @@ public final class ViewOptionsProviderTest extends TestCase {
   }
 
   public void testSortRequestIsHandled() {
-    handler.handle(new SortRequest(NAME));
-    verify(editor).putString(KEY_SORT, NAME.name());
+    handler.handle(new SortRequest("x"));
+    verify(editor).putString(KEY_SORT, "x");
     verify(editor).apply();
   }
 
@@ -70,10 +69,10 @@ public final class ViewOptionsProviderTest extends TestCase {
   }
 
   private void testNotify(String key) {
-    given(pref.getString(KEY_SORT, NAME.name())).willReturn(DATE_MODIFIED.name());
+    given(pref.getString(KEY_SORT, null)).willReturn("y");
     given(pref.getBoolean(KEY_HIDDEN_FILES, false)).willReturn(true);
     handler.onSharedPreferenceChanged(pref, key);
-    verify(bus).post(new ViewOptionsEvent(DATE_MODIFIED, true));
+    verify(bus).post(new ViewOptionsEvent(Optional.of("y"), true));
   }
 
   public void testNotifiesNothingIfSharePreferencesChangeIsUnrelated() {
@@ -82,9 +81,9 @@ public final class ViewOptionsProviderTest extends TestCase {
   }
 
   public void testProvidesViewEventAtInitialRegistration() throws Exception {
-    given(pref.getString(KEY_SORT, NAME.name())).willReturn(DATE_MODIFIED.name());
+    given(pref.getString(KEY_SORT, null)).willReturn("z");
     given(pref.getBoolean(KEY_HIDDEN_FILES, false)).willReturn(true);
-    assertThat(handler.get()).isEqualTo(new ViewOptionsEvent(DATE_MODIFIED, true));
+    assertThat(handler.get()).isEqualTo(new ViewOptionsEvent(Optional.of("z"), true));
 
     Method producer = ViewOptionsProvider.class.getMethod("get");
     assertThat(producer.getAnnotation(Produce.class)).isNotNull();

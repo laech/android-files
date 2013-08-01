@@ -6,9 +6,11 @@ import android.test.UiThreadTest;
 import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.common.base.Optional;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.app.setting.ViewOptionsEvent;
+import l.files.sort.Sorters;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;
 
@@ -22,8 +24,6 @@ import static android.view.View.VISIBLE;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.app.setting.Sort.DATE_MODIFIED;
-import static l.files.app.setting.Sort.NAME;
 import static l.files.test.Activities.rotate;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.fest.assertions.api.ANDROID.assertThat;
@@ -86,14 +86,14 @@ public final class FilesFragmentTest
   public void testHiddenFilesCanBeHidden() throws Throwable {
     dir.newFile(".hidden");
     File expected = dir.newFile("shown");
-    post(new ViewOptionsEvent(NAME, false));
+    post(new ViewOptionsEvent(Optional.of(Sorters.NAME), false));
     assertThat(getFiles()).containsExactly(expected);
   }
 
   public void testHiddenFilesCanBeShown() throws Throwable {
     File hidden = dir.newFile(".hidden");
     File shown = dir.newFile("shown");
-    post(new ViewOptionsEvent(NAME, true));
+    post(new ViewOptionsEvent(Optional.of(Sorters.NAME), true));
     assertThat(getFiles()).containsExactly(hidden, shown);
   }
 
@@ -102,7 +102,7 @@ public final class FilesFragmentTest
     final File file2 = dir.newFile("shown");
     assertTrue(file1.setLastModified(0));
     assertTrue(file2.setLastModified(10000));
-    post(new ViewOptionsEvent(DATE_MODIFIED, true));
+    post(new ViewOptionsEvent(Optional.of(Sorters.DATE_MODIFIED), true));
     assertThat(getFiles()).isEqualTo(asList(file2, file1));
   }
 

@@ -1,13 +1,11 @@
-package l.files.app.sort;
+package l.files.sort;
 
 import android.content.res.Resources;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.app.setting.Sort;
 
 import java.io.File;
 
-import static java.util.Arrays.asList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -24,17 +22,13 @@ public final class NameSorterTest extends TestCase {
   public void testSortsByNameIgnoringCase() {
     File x = new File("/x");
     File y = new File("/Y");
-    assertThat(sorter.apply(asList(y, x))).containsExactly(x, y);
+    assertThat(sorter.apply(null, y, x)).containsExactly(x, y);
   }
 
   public void testSortsByNameComparingNamePartsOnly() {
     File x = new File("/1/x");
     File y = new File("/0/y");
-    assertThat(sorter.apply(asList(y, x))).containsExactly(x, y);
-  }
-
-  public void testId() {
-    assertThat(sorter.id()).isEqualTo(Sort.NAME);
+    assertThat(sorter.apply(null, y, x)).containsExactly(x, y);
   }
 
   public void testName() {

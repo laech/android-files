@@ -1,11 +1,8 @@
-package l.files.app.sort;
+package l.files.sort;
 
 import android.content.res.Resources;
-import l.files.R;
-import l.files.app.setting.Sort;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +11,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.util.Collections.sort;
 
-final class NameSorter implements Sorter {
+final class NameSorter implements SortHelper {
 
   private static final Comparator<File> BY_NAME = new Comparator<File>() {
     @Override public int compare(File x, File y) {
@@ -22,14 +19,10 @@ final class NameSorter implements Sorter {
     }
   };
 
-  @Override public List<Object> apply(Collection<File> files) {
+  @Override public List<Object> apply(Resources res, File... files) {
     List<File> result = newArrayList(files);
     sort(result, BY_NAME);
     return Collections.<Object>unmodifiableList(result);
-  }
-
-  @Override public Sort id() {
-    return Sort.NAME;
   }
 
   @Override public String name(Resources res) {

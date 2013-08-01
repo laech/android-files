@@ -19,14 +19,5 @@
   <string name="new_dir">New folder</string>
   <string name="file_size_updated">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
   <string name="sort_by">Sort by</string>
-  <string name="name">Name</string>
-  <string name="date_modified">Date modified</string>
-  <string name="size">Size</string>
-  <string name="today">Today</string>
-  <string name="yesterday">Yesterday</string>
-  <string name="previous_7_days">Previous 7 days</string>
-  <string name="previous_30_days">Previous 30 days</string>
-  <string name="earlier">Earlier</string>
-  <string name="unknown">Unknown</string>
 
 </resources>

@@ -2,6 +2,7 @@ package l.files.app.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
@@ -10,7 +11,6 @@ import l.files.app.setting.ViewOptionsEvent;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static l.files.app.setting.Sort.NAME;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -56,9 +56,9 @@ public final class ShowHiddenFilesMenuTest extends TestCase {
 
     action.onPrepare(menu);
     if (showHiddenFiles) {
-      action.handle(new ViewOptionsEvent(NAME, true));
+      action.handle(new ViewOptionsEvent(Optional.of("x"), true));
     } else {
-      action.handle(new ViewOptionsEvent(NAME, false));
+      action.handle(new ViewOptionsEvent(Optional.of("x"), false));
     }
 
     verify(item).setChecked(showHiddenFiles);

@@ -13,10 +13,9 @@ import android.widget.TextView;
 import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import l.files.R;
-import l.files.app.sort.Sorter;
-import l.files.app.sort.Sorters;
-import l.files.app.setting.Sort;
 import l.files.app.setting.SortRequest;
+import l.files.sort.Sorter;
+import l.files.sort.Sorters;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.app.FilesApp.getBus;
@@ -56,7 +55,7 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    Sort sort = ((Sorter) parent.getItemAtPosition(position)).id();
+    String sort = ((Sorter) parent.getItemAtPosition(position)).id();
     bus.post(new SortRequest(sort));
     getDialog().dismiss();
   }
@@ -64,7 +63,7 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
   class SorterAdapter extends ArrayAdapter<Sorter> {
 
     SorterAdapter(Context context) {
-      super(context, R.layout.sort_by_item, Sorters.get(getResources()));
+      super(context, R.layout.sort_by_item, Sorters.get());
     }
 
     @Override

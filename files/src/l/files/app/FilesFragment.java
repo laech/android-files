@@ -9,20 +9,18 @@ import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.app.setting.ViewOptionsEvent;
-import l.files.app.sort.Sorter;
-import l.files.app.sort.Sorters;
+import l.files.sort.Sorters;
+import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceActions;
 import l.files.trash.TrashService.TrashMover;
-import l.files.common.app.OptionsMenus;
 
 import java.io.File;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static l.files.common.io.Files.listFiles;
 import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newMoveToTrashAction;
+import static l.files.common.io.Files.listFiles;
 
 public final class FilesFragment extends BaseFileListFragment {
 
@@ -85,8 +83,7 @@ public final class FilesFragment extends BaseFileListFragment {
     if (children == null) {
       updateUnableToShowDirectoryError(dir);
     } else {
-      Sorter sorter = Sorters.get(getResources(), event.sort());
-      List<?> items = sorter.apply(asList(children));
+      List<?> items = Sorters.apply(event.sort(), getResources(), children);
       getListAdapter().replace(getListView(), items, animate);
     }
   }

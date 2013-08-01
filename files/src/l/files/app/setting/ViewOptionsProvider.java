@@ -1,6 +1,7 @@
 package l.files.app.setting;
 
 import android.content.SharedPreferences;
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
@@ -32,7 +33,7 @@ final class ViewOptionsProvider
 
   @Subscribe public void handle(SortRequest request) {
     pref.edit()
-        .putString(KEY_SORT, request.sort().name())
+        .putString(KEY_SORT, request.sort())
         .apply();
   }
 
@@ -50,13 +51,8 @@ final class ViewOptionsProvider
     return pref.getBoolean(KEY_HIDDEN_FILES, false);
   }
 
-  private Sort sort() {
-    String value = pref.getString(KEY_SORT, Sort.NAME.name());
-    try {
-      return Sort.valueOf(value);
-    } catch (IllegalArgumentException e) {
-      return Sort.NAME;
-    }
+  private Optional<String> sort() {
+    return Optional.fromNullable(pref.getString(KEY_SORT, null));
   }
 
   @Override

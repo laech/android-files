@@ -1,11 +1,11 @@
-package l.files.app.sort;
+package l.files.sort;
 
 import android.content.res.Resources;
-import junit.framework.TestCase;
+import android.test.AndroidTestCase;
 import l.files.R;
-import l.files.app.setting.Sort;
 
 import java.io.File;
+import java.util.List;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
@@ -14,7 +14,7 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class DateModifiedSorterTest extends TestCase {
+public final class DateModifiedSorterTest extends AndroidTestCase {
 
   private Resources res;
   private DateModifiedSorter sorter;
@@ -22,7 +22,7 @@ public final class DateModifiedSorterTest extends TestCase {
   @Override protected void setUp() throws Exception {
     super.setUp();
     res = mock(Resources.class);
-    sorter = new DateModifiedSorter(res);
+    sorter = new DateModifiedSorter();
   }
 
   public void testSortsFilesByDateModifiedDescendinglyWithinTheSameSection() {
@@ -31,11 +31,9 @@ public final class DateModifiedSorterTest extends TestCase {
     File c = fileModifiedAt("3", 3);
 
     String header = setString(R.string.earlier, "earlier");
-    assertThat(sorter.apply(asList(c, a, b))).containsExactly(
-        header,
-        c,
-        b,
-        a);
+    List<?> expected = asList(header, c, b, a);
+    List<?> actual = sorter.apply(getContext().getResources(), c, a, b);
+    assertEquals(expected, actual);
   }
 
   public void testSortsFilesByDateModifiedDescendinglyForAllSections() {
@@ -54,28 +52,21 @@ public final class DateModifiedSorterTest extends TestCase {
     String header30Days = setString(R.string.previous_30_days, "30 days");
     String headerEarlier = setString(R.string.earlier, "earlier");
 
-    assertThat(
-
-        sorter.apply(asList(
-            earlier,
-            last30Days,
-            yesterday,
-            last7Days,
-            today,
-            tomorrow)))
-
-        .containsExactly(
-
-            headerUnknown, tomorrow,
-            headerToday, today,
-            headerYesterday, yesterday,
-            header7Days, last7Days,
-            header30Days, last30Days,
-            headerEarlier, earlier);
-  }
-
-  public void testId() {
-    assertThat(sorter.id()).isEqualTo(Sort.DATE_MODIFIED);
+    List<?> expected = asList(
+        headerUnknown, tomorrow,
+        headerToday, today,
+        headerYesterday, yesterday,
+        header7Days, last7Days,
+        header30Days, last30Days,
+        headerEarlier, earlier);
+    List<?> actual = sorter.apply(getContext().getResources(),
+        earlier,
+        last30Days,
+        yesterday,
+        last7Days,
+        today,
+        tomorrow);
+    assertEquals(expected, actual);
   }
 
   public void testName() {

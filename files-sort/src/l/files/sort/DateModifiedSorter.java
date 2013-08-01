@@ -1,12 +1,10 @@
-package l.files.app.sort;
+package l.files.sort;
 
 import android.content.res.Resources;
 import com.google.common.base.Function;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.primitives.Longs;
-import l.files.R;
-import l.files.app.setting.Sort;
 import org.joda.time.DateMidnight;
 
 import java.io.File;
@@ -14,12 +12,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
-final class DateModifiedSorter implements Sorter {
+final class DateModifiedSorter implements SortHelper {
 
   private static enum When {
 
@@ -45,13 +42,7 @@ final class DateModifiedSorter implements Sorter {
     }
   };
 
-  private final Resources res;
-
-  public DateModifiedSorter(Resources res) {
-    this.res = checkNotNull(res, "res");
-  }
-
-  @Override public List<Object> apply(Collection<File> files) {
+  @Override public List<Object> apply(Resources res, File... files) {
     List<File> result = newArrayList(files);
     sort(result, BY_DATE_MODIFIED_DESC);
     return toList(groupByDateModified(result), res);
@@ -87,10 +78,6 @@ final class DateModifiedSorter implements Sorter {
       }
     }
     return result;
-  }
-
-  @Override public Sort id() {
-    return Sort.DATE_MODIFIED;
   }
 
   @Override public String name(Resources res) {

@@ -8,13 +8,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class SortRequest {
 
-  private final Sort sort;
+  private final String sort;
 
-  public SortRequest(Sort sort) {
+  public SortRequest(String sort) {
     this.sort = checkNotNull(sort, "sort");
   }
 
-  public Sort sort() {
+  /**
+   * Returns the identifier of this sort.
+   */
+  public String sort() {
     return sort;
   }
 
