@@ -12,7 +12,7 @@
     <module>files-common</module>
     <module>files-setting</module>
     <module>files-sort</module>
-    <module>files</module>
+    <module>files-app</module>
     <module>tests</module>
   </modules>
 
