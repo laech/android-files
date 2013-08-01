@@ -9,13 +9,13 @@
     <artifactId>files-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <artifactId>tests</artifactId>
+  <artifactId>files-test</artifactId>
   <packaging>apk</packaging>
 
   <dependencies>
     <dependency>
       <groupId>files</groupId>
-      <artifactId>files</artifactId>
+      <artifactId>files-app</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
