@@ -2,7 +2,7 @@ package l.files.app;
 
 import android.test.UiThreadTest;
 import com.squareup.otto.Subscribe;
-import l.files.event.BookmarksEvent;
+import l.files.app.setting.BookmarksEvent;
 import l.files.test.TestSidebarFragmentActivity;
 
 import java.io.File;

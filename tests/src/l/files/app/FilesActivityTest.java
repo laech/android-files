@@ -8,7 +8,6 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.lang.reflect.Method;
 import l.files.common.base.Consumer;
-import l.files.event.OpenFileRequest;
 import l.files.test.TempDir;
 
 import static l.files.test.Activities.rotate;

@@ -15,11 +15,11 @@ import com.squareup.otto.Bus;
 import l.files.R;
 import l.files.app.sort.Sorter;
 import l.files.app.sort.Sorters;
-import l.files.event.Sort;
-import l.files.event.SortRequest;
+import l.files.app.setting.Sort;
+import l.files.app.setting.SortRequest;
 
 import static android.widget.AdapterView.OnItemClickListener;
-import static l.files.event.Events.bus;
+import static l.files.app.FilesApp.getBus;
 
 final class SortDialog extends DialogFragment implements OnItemClickListener {
 
@@ -29,10 +29,11 @@ final class SortDialog extends DialogFragment implements OnItemClickListener {
     }
   };
 
-  Bus bus = bus();
+  Bus bus;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    bus = getBus(this);
     setStyle(STYLE_NORMAL, R.style.Dialog);
   }
 

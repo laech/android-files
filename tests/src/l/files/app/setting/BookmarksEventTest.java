@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
@@ -23,5 +23,4 @@ public final class BookmarksEventTest extends TestCase {
             new BookmarksEvent(new File("/"), new File("abc")))
         .testEquals();
   }
-
 }

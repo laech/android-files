@@ -1,18 +1,20 @@
 package l.files.app;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.StrictMode;
+import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
-import l.files.event.Events;
+import com.squareup.otto.ThreadEnforcer;
+import l.files.app.setting.Settings;
 
 import java.io.File;
 import java.util.Set;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.event.Events.bus;
 import static l.files.app.UserDirs.*;
 
 public final class FilesApp extends Application {
@@ -25,13 +27,23 @@ public final class FilesApp extends Application {
       DIR_PICTURES,
       DIR_DOWNLOADS);
 
+  public static Bus getBus(Fragment fragment) {
+    return getBus(fragment.getActivity());
+  }
+
+  public static Bus getBus(Context context) {
+    return ((FilesApp) context.getApplicationContext()).bus;
+  }
+
+  private Bus bus;
+
   @Override public void onCreate() {
     super.onCreate();
 
-    Bus bus = bus();
+    bus = new Bus(ThreadEnforcer.MAIN);
     SharedPreferences pref = getDefaultSharedPreferences(this);
-    Events.registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);
-    Events.registerViewProvider(bus, pref);
+    Settings.registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);
+    Settings.registerViewOptionsProvider(bus, pref);
 
     if (DEBUG) {
       StrictMode.enableDefaults();

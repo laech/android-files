@@ -1,24 +1,13 @@
-package l.files.event;
+package l.files.app.setting;
 
 import android.content.SharedPreferences;
 import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 
 import java.io.File;
 import java.util.Set;
 
-public final class Events {
-
-  private static final Bus BUS = new Bus(ThreadEnforcer.MAIN);
-
-  private Events() {}
-
-  /**
-   * Gets the main thread event bus.
-   */
-  public static Bus bus() {
-    return BUS;
-  }
+public final class Settings {
+  private Settings() {}
 
   /**
    * Registers a provide to handle bookmarks.
@@ -41,9 +30,9 @@ public final class Events {
    * to the bus: {@link SortRequest}, {@link ShowHiddenFilesRequest}.
    * <p/>
    * And the following event will be posted to the bus when the preference
-   * changes: {@link ViewEvent}.
+   * changes: {@link ViewOptionsEvent}.
    */
-  public static void registerViewProvider(Bus bus, SharedPreferences pref) {
-    ViewProvider.register(bus, pref);
+  public static void registerViewOptionsProvider(Bus bus, SharedPreferences pref) {
+    ViewOptionsProvider.register(bus, pref);
   }
 }

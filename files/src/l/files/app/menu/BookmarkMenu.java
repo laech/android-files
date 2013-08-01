@@ -7,9 +7,9 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.common.app.OptionsMenuAdapter;
-import l.files.event.AddBookmarkRequest;
-import l.files.event.BookmarksEvent;
-import l.files.event.RemoveBookmarkRequest;
+import l.files.app.setting.AddBookmarkRequest;
+import l.files.app.setting.BookmarksEvent;
+import l.files.app.setting.RemoveBookmarkRequest;
 
 import java.io.File;
 

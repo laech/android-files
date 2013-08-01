@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
@@ -42,5 +42,4 @@ public final class BookmarksEvent {
   @Override public String toString() {
     return Objects.toStringHelper(this).addValue(bookmarks()).toString();
   }
-
 }

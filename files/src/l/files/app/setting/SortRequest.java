@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,5 +30,4 @@ public final class SortRequest {
   @Override public String toString() {
     return toStringHelper(this).addValue(sort()).toString();
   }
-
 }

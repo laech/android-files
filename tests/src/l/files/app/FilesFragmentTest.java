@@ -8,7 +8,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.event.ViewEvent;
+import l.files.app.setting.ViewOptionsEvent;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;
 
@@ -22,8 +22,8 @@ import static android.view.View.VISIBLE;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.event.Sort.DATE_MODIFIED;
-import static l.files.event.Sort.NAME;
+import static l.files.app.setting.Sort.DATE_MODIFIED;
+import static l.files.app.setting.Sort.NAME;
 import static l.files.test.Activities.rotate;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.fest.assertions.api.ANDROID.assertThat;
@@ -79,21 +79,21 @@ public final class FilesFragmentTest
   }
 
   public void testViewEventHandlerMethodIsAnnotated() throws Exception {
-    Method method = FilesFragment.class.getMethod("handle", ViewEvent.class);
+    Method method = FilesFragment.class.getMethod("handle", ViewOptionsEvent.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
   public void testHiddenFilesCanBeHidden() throws Throwable {
     dir.newFile(".hidden");
     File expected = dir.newFile("shown");
-    post(new ViewEvent(NAME, false));
+    post(new ViewOptionsEvent(NAME, false));
     assertThat(getFiles()).containsExactly(expected);
   }
 
   public void testHiddenFilesCanBeShown() throws Throwable {
     File hidden = dir.newFile(".hidden");
     File shown = dir.newFile("shown");
-    post(new ViewEvent(NAME, true));
+    post(new ViewOptionsEvent(NAME, true));
     assertThat(getFiles()).containsExactly(hidden, shown);
   }
 
@@ -102,7 +102,7 @@ public final class FilesFragmentTest
     final File file2 = dir.newFile("shown");
     assertTrue(file1.setLastModified(0));
     assertTrue(file2.setLastModified(10000));
-    post(new ViewEvent(DATE_MODIFIED, true));
+    post(new ViewOptionsEvent(DATE_MODIFIED, true));
     assertThat(getFiles()).isEqualTo(asList(file2, file1));
   }
 
@@ -177,7 +177,7 @@ public final class FilesFragmentTest
     return getActivity().getActionMode();
   }
 
-  private void post(final ViewEvent event) throws Throwable {
+  private void post(final ViewOptionsEvent event) throws Throwable {
     final CountDownLatch latch = new CountDownLatch(1);
     final FilesFragment fragment = fragment();
     runTestOnUiThread(new Runnable() {

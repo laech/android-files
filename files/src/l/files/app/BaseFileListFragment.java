@@ -7,15 +7,12 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
 import l.files.common.app.BaseListFragment;
-import l.files.event.OpenFileRequest;
 
 import java.io.File;
 
-import static l.files.event.Events.bus;
-
 class BaseFileListFragment extends BaseListFragment {
 
-  private Bus bus = bus();
+  private Bus bus;
   private final int layoutResourceId;
 
   public BaseFileListFragment(int layoutResourceId) {
@@ -28,6 +25,11 @@ class BaseFileListFragment extends BaseListFragment {
 
   public void setBus(Bus bus) {
     this.bus = bus;
+  }
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    bus = FilesApp.getBus(this);
   }
 
   @Override public void onResume() {

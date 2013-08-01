@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import android.content.SharedPreferences;
 import com.google.common.base.Supplier;

@@ -2,7 +2,7 @@ package l.files.app.sort;
 
 import android.content.res.Resources;
 import com.google.common.collect.ImmutableList;
-import l.files.event.Sort;
+import l.files.app.setting.Sort;
 
 import java.util.List;
 

@@ -5,9 +5,9 @@ import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
+import l.files.app.setting.ViewOptionsEvent;
 import l.files.common.app.OptionsMenuAdapter;
-import l.files.event.ShowHiddenFilesRequest;
-import l.files.event.ViewEvent;
+import l.files.app.setting.ShowHiddenFilesRequest;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
@@ -47,7 +47,7 @@ final class ShowHiddenFilesMenu
     return true;
   }
 
-  @Subscribe public void handle(ViewEvent event) {
+  @Subscribe public void handle(ViewOptionsEvent event) {
     MenuItem item = menu.findItem(R.id.show_hidden_files);
     if (item != null) {
       item.setChecked(event.showHiddenFiles());

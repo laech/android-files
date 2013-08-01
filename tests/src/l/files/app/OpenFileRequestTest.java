@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app;
 
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
@@ -17,5 +17,4 @@ public final class OpenFileRequestTest extends TestCase {
             new OpenFileRequest(new File("abc")))
         .testEquals();
   }
-
 }

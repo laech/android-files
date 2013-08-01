@@ -9,14 +9,13 @@ import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.base.Consumer;
-import l.files.event.OpenFileRequest;
 
 import java.io.File;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
-import static l.files.event.Events.bus;
+import static l.files.app.FilesApp.getBus;
 import static l.files.app.format.Formats.label;
 import static l.files.app.UserDirs.DIR_HOME;
 
@@ -33,7 +32,7 @@ public final class FilesActivity extends BaseFragmentActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.files_activity);
 
-    bus = bus();
+    bus = getBus(this);
     dir = getDir();
     helper = OpenFileRequestConsumer.get(this);
     pager = setViewPagerAdapter();

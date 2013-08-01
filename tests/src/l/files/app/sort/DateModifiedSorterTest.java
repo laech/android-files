@@ -3,7 +3,7 @@ package l.files.app.sort;
 import android.content.res.Resources;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.event.Sort;
+import l.files.app.setting.Sort;
 
 import java.io.File;
 

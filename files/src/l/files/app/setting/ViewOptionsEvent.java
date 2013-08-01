@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import com.google.common.base.Objects;
 
@@ -10,12 +10,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * it will also be fired on initial registration to the event bus for providing
  * the current viewing preferences.
  */
-public final class ViewEvent {
+public final class ViewOptionsEvent {
 
   private final boolean showHiddenFiles;
   private final Sort sort;
 
-  public ViewEvent(Sort sort, boolean showHiddenFiles) {
+  public ViewOptionsEvent(Sort sort, boolean showHiddenFiles) {
     this.sort = checkNotNull(sort, "sort");
     this.showHiddenFiles = showHiddenFiles;
   }
@@ -33,8 +33,8 @@ public final class ViewEvent {
   }
 
   @Override public boolean equals(Object o) {
-    if (o instanceof ViewEvent) {
-      ViewEvent that = (ViewEvent) o;
+    if (o instanceof ViewOptionsEvent) {
+      ViewOptionsEvent that = (ViewOptionsEvent) o;
       return Objects.equal(that.sort(), sort())
           && Objects.equal(that.showHiddenFiles(), showHiddenFiles());
     }
@@ -47,5 +47,4 @@ public final class ViewEvent {
         .add("showHiddenFiles", showHiddenFiles())
         .toString();
   }
-
 }

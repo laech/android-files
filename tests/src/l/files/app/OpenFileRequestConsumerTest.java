@@ -11,7 +11,6 @@ import l.files.R;
 import l.files.common.io.Detector;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
-import l.files.event.OpenFileRequest;
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;

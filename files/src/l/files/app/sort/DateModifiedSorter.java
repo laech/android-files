@@ -6,7 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.primitives.Longs;
 import l.files.R;
-import l.files.event.Sort;
+import l.files.app.setting.Sort;
 import org.joda.time.DateMidnight;
 
 import java.io.File;

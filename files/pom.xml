@@ -17,9 +17,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>files</groupId>
-      <artifactId>files-event</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.squareup</groupId>
+      <artifactId>otto</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.android</groupId>

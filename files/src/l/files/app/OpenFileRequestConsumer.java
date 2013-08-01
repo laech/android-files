@@ -10,7 +10,6 @@ import l.files.common.io.Detector;
 import l.files.common.io.Detectors;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
-import l.files.event.OpenFileRequest;
 
 import java.io.File;
 

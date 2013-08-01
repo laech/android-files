@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import java.io.File;
 
@@ -32,5 +32,4 @@ public final class AddBookmarkRequest {
   @Override public final String toString() {
     return toStringHelper(this).addValue(file()).toString();
   }
-
 }

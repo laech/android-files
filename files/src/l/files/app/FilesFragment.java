@@ -8,10 +8,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
+import l.files.app.setting.ViewOptionsEvent;
 import l.files.app.sort.Sorter;
 import l.files.app.sort.Sorters;
 import l.files.common.widget.MultiChoiceActions;
-import l.files.event.ViewEvent;
 import l.files.trash.TrashService.TrashMover;
 import l.files.common.app.OptionsMenus;
 
@@ -31,7 +31,7 @@ public final class FilesFragment extends BaseFileListFragment {
   FileObserver observer;
 
   private File dir;
-  private ViewEvent current;
+  private ViewOptionsEvent current;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -75,12 +75,12 @@ public final class FilesFragment extends BaseFileListFragment {
     return (FilesAdapter) super.getListAdapter();
   }
 
-  @Subscribe public void handle(ViewEvent event) {
+  @Subscribe public void handle(ViewOptionsEvent event) {
     current = event;
     refresh(event, false);
   }
 
-  private void refresh(ViewEvent event, boolean animate) {
+  private void refresh(ViewOptionsEvent event, boolean animate) {
     File[] children = listFiles(dir, event.showHiddenFiles());
     if (children == null) {
       updateUnableToShowDirectoryError(dir);

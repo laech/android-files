@@ -6,8 +6,6 @@ import android.test.UiThreadTest;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
-import l.files.app.BaseFileListFragment;
-import l.files.event.OpenFileRequest;
 
 import java.io.File;
 
@@ -57,5 +55,4 @@ public abstract class BaseFileListFragmentTest<T extends Activity>
   }
 
   protected abstract BaseFileListFragment fragment();
-
 }

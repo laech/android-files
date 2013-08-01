@@ -1,4 +1,4 @@
-package l.files.event;
+package l.files.app.setting;
 
 import android.content.SharedPreferences;
 import com.squareup.otto.Bus;
@@ -8,15 +8,15 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
 
-import static l.files.event.Sort.DATE_MODIFIED;
-import static l.files.event.Sort.NAME;
+import static l.files.app.setting.Sort.DATE_MODIFIED;
+import static l.files.app.setting.Sort.NAME;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-public final class ViewProviderTest extends TestCase {
+public final class ViewOptionsProviderTest extends TestCase {
 
   private static final String KEY_SORT = "sort";
   private static final String KEY_HIDDEN_FILES = "show-hidden-files";
@@ -25,14 +25,14 @@ public final class ViewProviderTest extends TestCase {
   private SharedPreferences pref;
   private SharedPreferences.Editor editor;
 
-  private ViewProvider handler;
+  private ViewOptionsProvider handler;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     bus = mock(Bus.class);
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
-    handler = ViewProvider.register(bus, pref);
+    handler = ViewOptionsProvider.register(bus, pref);
   }
 
   public void testListensOnSharedPreferences() {
@@ -46,7 +46,7 @@ public final class ViewProviderTest extends TestCase {
   }
 
   public void testSortRequestHandlerMethodIsConfigured() throws Exception {
-    Method method = ViewProvider.class.getMethod("handle", SortRequest.class);
+    Method method = ViewOptionsProvider.class.getMethod("handle", SortRequest.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
@@ -57,7 +57,7 @@ public final class ViewProviderTest extends TestCase {
   }
 
   public void testShowHiddenFilesRequestHandlerMethodIsConfigured() throws Exception {
-    Method method = ViewProvider.class.getMethod("handle", ShowHiddenFilesRequest.class);
+    Method method = ViewOptionsProvider.class.getMethod("handle", ShowHiddenFilesRequest.class);
     assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
   }
 
@@ -73,7 +73,7 @@ public final class ViewProviderTest extends TestCase {
     given(pref.getString(KEY_SORT, NAME.name())).willReturn(DATE_MODIFIED.name());
     given(pref.getBoolean(KEY_HIDDEN_FILES, false)).willReturn(true);
     handler.onSharedPreferenceChanged(pref, key);
-    verify(bus).post(new ViewEvent(DATE_MODIFIED, true));
+    verify(bus).post(new ViewOptionsEvent(DATE_MODIFIED, true));
   }
 
   public void testNotifiesNothingIfSharePreferencesChangeIsUnrelated() {
@@ -84,9 +84,9 @@ public final class ViewProviderTest extends TestCase {
   public void testProvidesViewEventAtInitialRegistration() throws Exception {
     given(pref.getString(KEY_SORT, NAME.name())).willReturn(DATE_MODIFIED.name());
     given(pref.getBoolean(KEY_HIDDEN_FILES, false)).willReturn(true);
-    assertThat(handler.get()).isEqualTo(new ViewEvent(DATE_MODIFIED, true));
+    assertThat(handler.get()).isEqualTo(new ViewOptionsEvent(DATE_MODIFIED, true));
 
-    Method producer = ViewProvider.class.getMethod("get");
+    Method producer = ViewOptionsProvider.class.getMethod("get");
     assertThat(producer.getAnnotation(Produce.class)).isNotNull();
   }
 

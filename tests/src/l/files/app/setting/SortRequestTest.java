@@ -1,10 +1,10 @@
-package l.files.event;
+package l.files.app.setting;
 
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
 
-import static l.files.event.Sort.DATE_MODIFIED;
-import static l.files.event.Sort.NAME;
+import static l.files.app.setting.Sort.DATE_MODIFIED;
+import static l.files.app.setting.Sort.NAME;
 
 public final class SortRequestTest extends TestCase {
 
@@ -18,6 +18,5 @@ public final class SortRequestTest extends TestCase {
             new SortRequest(DATE_MODIFIED))
         .testEquals();
   }
-
 }
 
