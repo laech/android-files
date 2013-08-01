@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;

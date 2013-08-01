@@ -5,9 +5,9 @@ import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.app.setting.ViewOptionsEvent;
+import l.files.setting.ViewOptionsEvent;
 import l.files.common.app.OptionsMenuAdapter;
-import l.files.app.setting.ShowHiddenFilesRequest;
+import l.files.setting.ShowHiddenFilesRequest;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;

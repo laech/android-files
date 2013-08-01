@@ -3,7 +3,7 @@ package l.files.app;
 import android.os.Bundle;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.app.setting.BookmarksEvent;
+import l.files.setting.BookmarksEvent;
 
 public final class SidebarFragment extends BaseFileListFragment {
 

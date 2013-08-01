@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import static com.google.common.base.Objects.toStringHelper;
 

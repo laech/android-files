@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
-import l.files.app.setting.Settings;
+import l.files.setting.Settings;
 
 import java.io.File;
 import java.util.Set;

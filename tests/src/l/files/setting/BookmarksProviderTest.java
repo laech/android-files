@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import android.content.SharedPreferences;
 import com.google.common.collect.ImmutableSet;
@@ -6,10 +6,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 import junit.framework.TestCase;
-import l.files.app.setting.AddBookmarkRequest;
-import l.files.app.setting.BookmarksEvent;
-import l.files.app.setting.BookmarksProvider;
-import l.files.app.setting.RemoveBookmarkRequest;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 

@@ -6,8 +6,8 @@ import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.app.setting.ShowHiddenFilesRequest;
-import l.files.app.setting.ViewOptionsEvent;
+import l.files.setting.ShowHiddenFilesRequest;
+import l.files.setting.ViewOptionsEvent;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;

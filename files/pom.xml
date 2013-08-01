@@ -18,6 +18,11 @@
     </dependency>
     <dependency>
       <groupId>files</groupId>
+      <artifactId>files-setting</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>files</groupId>
       <artifactId>files-sort</artifactId>
       <version>${project.version}</version>
       <type>apklib</type>
@@ -43,5 +48,4 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
   </build>
-
 </project>

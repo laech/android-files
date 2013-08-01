@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import android.content.SharedPreferences;
 import com.squareup.otto.Bus;

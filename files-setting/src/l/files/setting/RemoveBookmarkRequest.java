@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import java.io.File;
 
@@ -6,13 +6,13 @@ import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Event representing a request for a bookmark to be added.
+ * Event representing a request for a bookmark to be removed.
  */
-public final class AddBookmarkRequest {
+public final class RemoveBookmarkRequest {
 
   private final File file;
 
-  public AddBookmarkRequest(File file) {
+  public RemoveBookmarkRequest(File file) {
     this.file = checkNotNull(file, "file");
   }
 
@@ -25,8 +25,8 @@ public final class AddBookmarkRequest {
   }
 
   @Override public final boolean equals(Object o) {
-    return o instanceof AddBookmarkRequest
-        && ((AddBookmarkRequest) o).file().equals(file());
+    return o instanceof RemoveBookmarkRequest
+        && ((RemoveBookmarkRequest) o).file().equals(file());
   }
 
   @Override public final String toString() {

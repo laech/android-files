@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import l.files.R;
-import l.files.app.setting.SortRequest;
+import l.files.setting.SortRequest;
 import l.files.sort.Sorter;
 import l.files.sort.Sorters;
 

@@ -8,7 +8,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.app.setting.ViewOptionsEvent;
+import l.files.setting.ViewOptionsEvent;
 import l.files.sort.Sorters;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceActions;

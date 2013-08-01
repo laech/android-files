@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.google.common.base.Optional;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.app.setting.ViewOptionsEvent;
+import l.files.setting.ViewOptionsEvent;
 import l.files.sort.Sorters;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;

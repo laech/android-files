@@ -1,4 +1,4 @@
-package l.files.app.setting;
+package l.files.setting;
 
 import com.google.common.testing.EqualsTester;
 import junit.framework.TestCase;
