@@ -1,7 +1,7 @@
 package l.files.sort;
 
 import android.content.res.Resources;
-import android.test.AndroidTestCase;
+import junit.framework.TestCase;
 import l.files.R;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class DateModifiedSorterTest extends AndroidTestCase {
+public final class DateModifiedSorterTest extends TestCase {
 
   private Resources res;
   private DateModifiedSorter sorter;
@@ -32,7 +32,7 @@ public final class DateModifiedSorterTest extends AndroidTestCase {
 
     String header = setString(R.string.earlier, "earlier");
     List<?> expected = asList(header, c, b, a);
-    List<?> actual = sorter.apply(getContext().getResources(), c, a, b);
+    List<?> actual = sorter.apply(res, c, a, b);
     assertEquals(expected, actual);
   }
 
@@ -59,7 +59,7 @@ public final class DateModifiedSorterTest extends AndroidTestCase {
         header7Days, last7Days,
         header30Days, last30Days,
         headerEarlier, earlier);
-    List<?> actual = sorter.apply(getContext().getResources(),
+    List<?> actual = sorter.apply(res,
         earlier,
         last30Days,
         yesterday,
