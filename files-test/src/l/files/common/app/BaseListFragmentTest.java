@@ -30,11 +30,6 @@ public final class BaseListFragmentTest extends TestCase {
     verify(optionsMenu).onPrepare(menu);
   }
 
-  public void testOnOptionsMenuClosed_isDelegated() {
-    fragment.onOptionsMenuClosed(menu);
-    verify(optionsMenu).onClose(menu);
-  }
-
   public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
     BaseListFragment fragment = new BaseListFragment();
     fragment.onCreateOptionsMenu(null, null);

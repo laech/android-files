@@ -30,11 +30,6 @@ public final class BaseFragmentActivityTest extends TestCase {
     verify(optionsMenu).onPrepare(menu);
   }
 
-  public void testOnOptionsMenuClosed_isDelegated() {
-    activity.onOptionsMenuClosed(menu);
-    verify(optionsMenu).onClose(menu);
-  }
-
   public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
     BaseFragmentActivity activity = new BaseFragmentActivity();
     activity.onCreateOptionsMenu(null);

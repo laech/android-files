@@ -8,14 +8,14 @@ import junit.framework.TestCase;
 import l.files.R;
 import l.files.setting.ShowHiddenFilesRequest;
 import l.files.setting.ViewOptionsEvent;
+import org.mockito.InOrder;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public final class ShowHiddenFilesMenuTest extends TestCase {
 
@@ -62,6 +62,14 @@ public final class ShowHiddenFilesMenuTest extends TestCase {
     }
 
     verify(item).setChecked(showHiddenFiles);
+  }
+
+  public void testBusIsRegisteredAndUnregisteredOnPrepareToAvoidMemoryLeak() {
+    action.onPrepare(null);
+    InOrder order = inOrder(bus);
+    order.verify(bus).register(action);
+    order.verify(bus).unregister(action);
+    order.verifyNoMoreInteractions();
   }
 
   public void testOnPrepareDoesNotCrashIfItemNotFound() {

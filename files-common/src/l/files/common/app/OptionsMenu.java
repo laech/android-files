@@ -22,10 +22,4 @@ public interface OptionsMenu {
    * @see Fragment#onPrepareOptionsMenu(Menu)
    */
   void onPrepare(Menu menu);
-
-  /**
-   * @see Activity#onOptionsMenuClosed(Menu)
-   * @see Fragment#onOptionsMenuClosed(Menu)
-   */
-  void onClose(Menu menu);
 }

@@ -32,11 +32,4 @@ public final class CompositeMenuTest extends TestCase {
     verify(action1).onPrepare(menu);
     verify(action2).onPrepare(menu);
   }
-
-  public void testOnCloseIsDelegated() {
-    Menu menu = mock(Menu.class);
-    composite.onClose(menu);
-    verify(action1).onClose(menu);
-    verify(action2).onClose(menu);
-  }
 }

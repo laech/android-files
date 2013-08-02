@@ -22,9 +22,4 @@ public class BaseFragmentActivity extends FragmentActivity {
     optionsMenu.onPrepare(menu);
     return true;
   }
-
-  @Override public final void onOptionsMenuClosed(Menu menu) {
-    super.onOptionsMenuClosed(menu);
-    optionsMenu.onClose(menu);
-  }
 }

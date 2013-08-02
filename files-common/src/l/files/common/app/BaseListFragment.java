@@ -23,9 +23,4 @@ public class BaseListFragment extends ListFragment {
     super.onPrepareOptionsMenu(menu);
     optionsMenu.onPrepare(menu);
   }
-
-  @Override public final void onOptionsMenuClosed(Menu menu) {
-    super.onOptionsMenuClosed(menu);
-    optionsMenu.onClose(menu);
-  }
 }

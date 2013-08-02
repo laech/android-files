@@ -24,10 +24,4 @@ final class CompositeMenu implements OptionsMenu {
       action.onPrepare(menu);
     }
   }
-
-  @Override public void onClose(Menu menu) {
-    for (OptionsMenu action : actions) {
-      action.onClose(menu);
-    }
-  }
 }

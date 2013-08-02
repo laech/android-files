@@ -41,10 +41,6 @@ final class BookmarkMenu
     super.onPrepare(menu);
     this.menu = menu;
     bus.register(this);
-  }
-
-  @Override public void onClose(Menu menu) {
-    super.onClose(menu);
     bus.unregister(this);
   }
 

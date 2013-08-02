@@ -8,6 +8,7 @@ import l.files.R;
 import l.files.setting.AddBookmarkRequest;
 import l.files.setting.BookmarksEvent;
 import l.files.setting.RemoveBookmarkRequest;
+import org.mockito.InOrder;
 
 import java.io.File;
 
@@ -16,6 +17,7 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -67,6 +69,14 @@ public final class BookmarkMenuTest extends TestCase {
     }
 
     verify(item).setChecked(favorite);
+  }
+
+  public void testBusIsRegisteredAndUnregisteredOnPrepareToAvoidMemoryLeak() {
+    action.onPrepare(null);
+    InOrder order = inOrder(bus);
+    order.verify(bus).register(action);
+    order.verify(bus).unregister(action);
+    order.verifyNoMoreInteractions();
   }
 
   public void testOnPrepareDoesNotCrashIfItemNotFound() {
