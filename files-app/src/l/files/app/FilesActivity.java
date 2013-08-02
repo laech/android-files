@@ -12,12 +12,11 @@ import l.files.common.base.Consumer;
 
 import java.io.File;
 
-import static android.content.Intent.ACTION_MAIN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.FilesApp.getBus;
-import static l.files.app.format.Formats.label;
+import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.UserDirs.DIR_HOME;
+import static l.files.app.format.Formats.label;
 
 public final class FilesActivity extends BaseFragmentActivity {
 
@@ -78,8 +77,7 @@ public final class FilesActivity extends BaseFragmentActivity {
   private void setActionBarAppearance() {
     ActionBar actionBar = getActionBar();
     if (actionBar != null) {
-      boolean isLauncherIntent = ACTION_MAIN.equals(getIntent().getAction());
-      actionBar.setDisplayHomeAsUpEnabled(!isLauncherIntent);
+      actionBar.setDisplayHomeAsUpEnabled(getIntent().hasExtra(EXTRA_DIR));
     }
   }
 
