@@ -3,7 +3,7 @@ package l.files.app;
 import android.os.Bundle;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.setting.BookmarksEvent;
+import l.files.setting.BookmarksSetting;
 
 public final class SidebarFragment extends BaseFileListFragment {
 
@@ -20,7 +20,7 @@ public final class SidebarFragment extends BaseFileListFragment {
     return (SidebarAdapter) super.getListAdapter();
   }
 
-  @Subscribe public void handle(BookmarksEvent event) {
-    getListAdapter().set(event.bookmarks(), getResources());
+  @Subscribe public void handle(BookmarksSetting setting) {
+    getListAdapter().set(setting.value(), getResources());
   }
 }

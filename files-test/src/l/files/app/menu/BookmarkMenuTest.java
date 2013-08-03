@@ -6,7 +6,7 @@ import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
 import l.files.setting.AddBookmarkRequest;
-import l.files.setting.BookmarksEvent;
+import l.files.setting.BookmarksSetting;
 import l.files.setting.RemoveBookmarkRequest;
 import org.mockito.InOrder;
 
@@ -15,11 +15,8 @@ import java.io.File;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.test.Mocks.mockMenuItem;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public final class BookmarkMenuTest extends TestCase {
 
@@ -63,9 +60,9 @@ public final class BookmarkMenuTest extends TestCase {
 
     action.onPrepare(menu);
     if (favorite) {
-      action.handle(new BookmarksEvent(dir));
+      action.handle(new BookmarksSetting(dir));
     } else {
-      action.handle(new BookmarksEvent(new File("/xyz")));
+      action.handle(new BookmarksSetting(new File("/xyz")));
     }
 
     verify(item).setChecked(favorite);
@@ -94,7 +91,7 @@ public final class BookmarkMenuTest extends TestCase {
   private void testBookmark(boolean from, boolean to) {
     MenuItem item = mock(MenuItem.class);
     given(item.isChecked()).willReturn(from);
-    assertThat(action.onMenuItemClick(item)).isTrue();
+    assertTrue(action.onMenuItemClick(item));
     if (to) {
       verify(bus).post(new AddBookmarkRequest(dir));
     } else {

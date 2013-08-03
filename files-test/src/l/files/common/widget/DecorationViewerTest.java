@@ -4,7 +4,6 @@ import android.test.AndroidTestCase;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -22,7 +21,7 @@ public final class DecorationViewerTest extends AndroidTestCase {
 
   public void testGetViewWillInflatesNewViewIfViewIsNull() {
     View view = viewer.getView(null, null, new FrameLayout(getContext()));
-    assertThat(view).isNotNull();
+    assertNotNull(view);
     verify(decorator).decorate(view, null);
   }
 
@@ -30,7 +29,7 @@ public final class DecorationViewerTest extends AndroidTestCase {
     Object item = new Object();
     View view = new View(getContext());
     View actual = viewer.getView(item, view, new FrameLayout(getContext()));
-    assertThat(actual).isSameAs(view);
+    assertSame(view, actual);
     verify(decorator).decorate(view, item);
   }
 }

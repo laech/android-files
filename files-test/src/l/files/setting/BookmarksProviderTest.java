@@ -1,6 +1,7 @@
 package l.files.setting;
 
 import android.content.SharedPreferences;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
@@ -14,11 +15,10 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import static android.content.SharedPreferences.Editor;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.singleton;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.*;
 
@@ -26,10 +26,9 @@ public final class BookmarksProviderTest extends TestCase {
 
   public static final String KEY = "bookmarks";
 
-  private Bus bus;
   private SharedPreferences pref;
   private Editor editor;
-  private Set<File> defaults;
+  private Set<String> defaults;
 
   private BookmarksProvider handler;
 
@@ -37,13 +36,9 @@ public final class BookmarksProviderTest extends TestCase {
     super.setUp();
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
-    bus = mock(Bus.class);
-    defaults = ImmutableSet.of(new File("/"));
-    handler = BookmarksProvider.register(bus, pref, defaults);
-  }
-
-  public void testListensOnSharedPreferences() {
-    verify(pref).registerOnSharedPreferenceChangeListener(handler);
+    defaults = ImmutableSet.of("/");
+    handler = new BookmarksProvider(defaults);
+    handler.register(mock(Bus.class), pref);
   }
 
   public void testAddBookmarkRequestIsHandled() {
@@ -55,7 +50,7 @@ public final class BookmarksProviderTest extends TestCase {
 
   public void testAddBookmarkRequestHandlerMethodIsConfigured() throws Exception {
     Method method = BookmarksProvider.class.getMethod("handle", AddBookmarkRequest.class);
-    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
+    assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
   public void testRemoveBookmarkRequestIsHandled() {
@@ -67,27 +62,17 @@ public final class BookmarksProviderTest extends TestCase {
 
   public void testRemoveBookmarkRequestHandlerMethodIsConfigured() throws Exception {
     Method method = BookmarksProvider.class.getMethod("handle", RemoveBookmarkRequest.class);
-    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
+    assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
-  public void testNotifiesOnBookmarkChanges() {
+  public void testProducesBookmarksFromPreference() throws Exception {
     bookmark("/");
-    handler.onSharedPreferenceChanged(pref, KEY);
-    verify(bus).post(new BookmarksEvent(new File("/")));
+    assertEquals(new BookmarksSetting(new File("/")), handler.get());
   }
 
-  public void testNotifiesNothingIfSharePreferencesChangeIsNotRelatedToBookmarks() {
-    bookmark("/");
-    handler.onSharedPreferenceChanged(pref, KEY + "xyz");
-    verify(bus, never()).post(any());
-  }
-
-  public void testProvidesBookmarksAtInitialRegistration() throws Exception {
-    bookmark("/");
-    assertThat(handler.get()).isEqualTo(new BookmarksEvent(new File("/")));
-
+  public void testProducerMethodIsAnnotated() throws Exception {
     Method producer = BookmarksProvider.class.getMethod("get");
-    assertThat(producer.getAnnotation(Produce.class)).isNotNull();
+    assertNotNull(producer.getAnnotation(Produce.class));
   }
 
   @SuppressWarnings("unchecked")
@@ -97,12 +82,20 @@ public final class BookmarksProviderTest extends TestCase {
         return (Set<String>) invocation.getArguments()[1];
       }
     });
-    assertThat(handler.get()).isEqualTo(new BookmarksEvent(defaults));
+    assertEquals(new BookmarksSetting(defaultFiles()), handler.get());
+  }
+
+  private Iterable<File> defaultFiles() {
+    return transform(defaults, new Function<String, File>() {
+      @Override public File apply(String input) {
+        return new File(input);
+      }
+    });
   }
 
   public void testSkipsFilesThatDoNotExist() {
     bookmark("/", "/does-not-exits");
-    assertThat(handler.get()).isEqualTo(new BookmarksEvent(new File("/")));
+    assertEquals(new BookmarksSetting(new File("/")), handler.get());
   }
 
   @SuppressWarnings("unchecked")

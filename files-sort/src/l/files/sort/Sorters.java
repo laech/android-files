@@ -1,11 +1,12 @@
 package l.files.sort;
 
 import android.content.res.Resources;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class Sorters {
 
@@ -26,18 +27,12 @@ public final class Sorters {
    * Applies a sorter with the given sort identifier, if unknown, apply the
    * default sorter.
    */
-  public static List<Object> apply(Optional<String> sort, Resources res, File... files) {
-    if (!sort.isPresent()) {
-      return defaultApply(res, files);
-    }
+  public static List<Object> apply(String sort, Resources res, File... files) {
+    checkNotNull(sort, "sort");
     try {
-      return Sort.valueOf(sort.get()).apply(res, files);
+      return Sort.valueOf(sort).apply(res, files);
     } catch (IllegalArgumentException e) {
-      return defaultApply(res, files);
+      return Sort.NAME.apply(res, files);
     }
-  }
-
-  private static List<Object> defaultApply(Resources res, File[] files) {
-    return Sort.NAME.apply(res, files);
   }
 }

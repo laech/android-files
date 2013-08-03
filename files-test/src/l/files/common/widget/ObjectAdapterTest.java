@@ -3,7 +3,6 @@ package l.files.common.widget;
 import junit.framework.TestCase;
 
 import static java.util.Arrays.asList;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public final class ObjectAdapterTest extends TestCase {
 
@@ -17,18 +16,18 @@ public final class ObjectAdapterTest extends TestCase {
   public void testAdd() {
     adapter.add("a");
     adapter.add("b");
-    assertThat(adapter.getCount()).isEqualTo(2);
+    assertEquals(2, adapter.getCount());
   }
 
   public void testAddAll() {
     adapter.addAll(asList("a", "a"));
-    assertThat(adapter.getCount()).isEqualTo(2);
+    assertEquals(2, adapter.getCount());
   }
 
   public void testClear() {
     adapter.add("a");
     adapter.add("b");
     adapter.clear();
-    assertThat(adapter.getCount()).isEqualTo(0);
+    assertEquals(0, adapter.getCount());
   }
 }

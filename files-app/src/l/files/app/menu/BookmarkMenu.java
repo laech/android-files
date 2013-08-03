@@ -8,7 +8,7 @@ import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.common.app.OptionsMenuAdapter;
 import l.files.setting.AddBookmarkRequest;
-import l.files.setting.BookmarksEvent;
+import l.files.setting.BookmarksSetting;
 import l.files.setting.RemoveBookmarkRequest;
 
 import java.io.File;
@@ -53,8 +53,8 @@ final class BookmarkMenu
     return true;
   }
 
-  @Subscribe public void handle(BookmarksEvent event) {
+  @Subscribe public void handle(BookmarksSetting setting) {
     MenuItem item = menu.findItem(R.id.bookmark);
-    if (item != null) item.setChecked(event.bookmarks().contains(dir));
+    if (item != null) item.setChecked(setting.value().contains(dir));
   }
 }

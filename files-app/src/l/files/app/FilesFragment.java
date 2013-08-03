@@ -8,10 +8,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.setting.ViewOptionsEvent;
-import l.files.sort.Sorters;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceActions;
+import l.files.setting.Value;
+import l.files.setting.ShowHiddenFilesSetting;
+import l.files.setting.SortSetting;
+import l.files.sort.Sorters;
 import l.files.trash.TrashService.TrashMover;
 
 import java.io.File;
@@ -29,7 +31,9 @@ public final class FilesFragment extends BaseFileListFragment {
   FileObserver observer;
 
   private File dir;
-  private ViewOptionsEvent current;
+
+  private Value<String> sort;
+  private Value<Boolean> showHiddenFiles;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -50,7 +54,7 @@ public final class FilesFragment extends BaseFileListFragment {
     dir = new File(getArguments().getString(ARG_DIRECTORY));
     observer = new DirObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
-        if (current != null) refresh(current, true);
+        refresh(true);
       }
     });
 
@@ -73,17 +77,25 @@ public final class FilesFragment extends BaseFileListFragment {
     return (FilesAdapter) super.getListAdapter();
   }
 
-  @Subscribe public void handle(ViewOptionsEvent event) {
-    current = event;
-    refresh(event, false);
+  @Subscribe public void handle(ShowHiddenFilesSetting setting) {
+    showHiddenFiles = setting;
+    refresh(!getListAdapter().isEmpty());
   }
 
-  private void refresh(ViewOptionsEvent event, boolean animate) {
-    File[] children = listFiles(dir, event.showHiddenFiles());
+  @Subscribe public void handle(SortSetting setting) {
+    sort = setting;
+    refresh(!getListAdapter().isEmpty());
+  }
+
+  private void refresh(boolean animate) {
+    if (showHiddenFiles == null || sort == null) {
+      return;
+    }
+    File[] children = listFiles(dir, showHiddenFiles.value());
     if (children == null) {
       updateUnableToShowDirectoryError(dir);
     } else {
-      List<?> items = Sorters.apply(event.sort(), getResources(), children);
+      List<?> items = Sorters.apply(sort.value(), getResources(), children);
       getListAdapter().replace(getListView(), items, animate);
     }
   }

@@ -9,7 +9,7 @@ import com.google.common.base.Function;
 
 import java.io.File;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -30,12 +30,12 @@ public final class SidebarAdapterTest extends AndroidTestCase {
 
   public void testIsEnabled_trueIfItemIsFile() {
     adapter.add(mock(File.class));
-    assertThat(adapter.isEnabled(0)).isTrue();
+    assertTrue(adapter.isEnabled(0));
   }
 
   public void testIsEnabled_falseIfItemIsHeader() {
     adapter.add("hello");
-    assertThat(adapter.isEnabled(0)).isFalse();
+    assertFalse(adapter.isEnabled(0));
   }
 
   public void testGetView_forFile() {
@@ -45,17 +45,19 @@ public final class SidebarAdapterTest extends AndroidTestCase {
     adapter.add(file);
 
     TextView view = getTitleView();
-    assertThat(view.getText()).isEqualTo("abc");
-    assertThat(view.getCompoundDrawables())
-        .containsExactly(drawable, null, null, null);
+    assertEquals("abc", view.getText());
+    assertEquals(
+        asList(drawable, null, null, null),
+        asList(view.getCompoundDrawables()));
   }
 
   public void testGetView_forHeader() {
     adapter.add("header");
     TextView view = getTitleView();
-    assertThat(view.getText()).isEqualTo("header");
-    assertThat(view.getCompoundDrawables())
-        .containsExactly(null, null, null, null);
+    assertEquals("header", view.getText());
+    assertEquals(
+        asList(null, null, null, null),
+        asList(view.getCompoundDrawables()));
   }
 
   private TextView getTitleView() {

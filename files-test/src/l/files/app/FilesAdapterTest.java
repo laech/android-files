@@ -7,13 +7,10 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Function;
-import l.files.app.FilesAdapter;
 
 import java.io.File;
 
 import static java.util.Arrays.asList;
-import static org.fest.assertions.api.ANDROID.assertThat;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -43,25 +40,26 @@ public final class FilesAdapterTest extends AndroidTestCase {
    */
   public void testGetView_containerViewIsDisabledIfFileCanNotBeRead() {
     given(file.canRead()).willReturn(false);
-    assertThat(getView()).isDisabled();
+    assertFalse(getView().isEnabled());
   }
 
   public void testGetView_containerViewIsEnabledIfFileCanBeRead() {
     given(file.canRead()).willReturn(true);
-    assertThat(getView()).isEnabled();
+    assertTrue(getView().isEnabled());
   }
 
   public void testGetView_titleViewShowsFileName() {
     given(names.apply(file)).willReturn("test");
-    assertThat(this.<TextView>findView(android.R.id.title)).hasText("test");
+    assertEquals("test", ((TextView) findView(android.R.id.title)).getText());
   }
 
   public void testGetView_titleViewShowsIcon() {
     ColorDrawable drawable = new ColorDrawable();
     given(drawables.apply(file)).willReturn(drawable);
     TextView text = findView(android.R.id.title);
-    assertThat(text.getCompoundDrawables())
-        .containsExactly(drawable, null, null, null);
+    assertEquals(
+        asList(drawable, null, null, null),
+        asList(text.getCompoundDrawables()));
   }
 
   /*
@@ -69,22 +67,22 @@ public final class FilesAdapterTest extends AndroidTestCase {
    */
   public void testGetView_titleViewIsDisabledIfFileCanNotBeRead() {
     given(file.canRead()).willReturn(false);
-    assertThat(findView(android.R.id.title)).isDisabled();
+    assertFalse(findView(android.R.id.title).isEnabled());
   }
 
   public void testGetView_titleViewIsEnabledIfFileCanBeRead() {
     given(file.canRead()).willReturn(true);
-    assertThat(findView(android.R.id.title)).isEnabled();
+    assertTrue(findView(android.R.id.title).isEnabled());
   }
 
   public void testIsEnabled_trueForFile() {
     adapter.replace(list, asList(file), false);
-    assertThat(adapter.isEnabled(0)).isTrue();
+    assertTrue(adapter.isEnabled(0));
   }
 
   public void testIsEnabled_falseForNonFile() {
     adapter.replace(list, asList(new Object()), false);
-    assertThat(adapter.isEnabled(0)).isFalse();
+    assertFalse(adapter.isEnabled(0));
   }
 
   private View getView() {
@@ -95,5 +93,4 @@ public final class FilesAdapterTest extends AndroidTestCase {
   private <T extends View> T findView(int id) {
     return (T) getView().findViewById(id);
   }
-
 }

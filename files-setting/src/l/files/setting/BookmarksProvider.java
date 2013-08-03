@@ -1,70 +1,38 @@
 package l.files.setting;
 
-import android.content.SharedPreferences;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
-import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.util.Set;
 
-import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 
-final class BookmarksProvider
-    implements Supplier<BookmarksEvent>, OnSharedPreferenceChangeListener {
-
-  private static final String KEY = "bookmarks";
-
-  static BookmarksProvider register(Bus bus, SharedPreferences pref, Set<File> defaults) {
-    Set<String> paths = getAbsolutePaths(defaults);
-    BookmarksProvider handler = new BookmarksProvider(bus, pref, paths);
-    pref.registerOnSharedPreferenceChangeListener(handler);
-    bus.register(handler);
-    return handler;
-  }
-
-  private static Set<String> getAbsolutePaths(Set<File> files) {
-    Set<String> paths = newHashSetWithExpectedSize(files.size());
-    for (File file : files) {
-      paths.add(file.getAbsolutePath());
-    }
-    return paths;
-  }
+final class BookmarksProvider extends SettingProvider<BookmarksSetting> {
 
   private final Set<String> defaults;
-  private final SharedPreferences pref;
-  private final Bus bus;
 
-  private BookmarksProvider(Bus bus, SharedPreferences pref, Set<String> defaults) {
-    this.bus = checkNotNull(bus, "bus");
-    this.pref = checkNotNull(pref, "pref");
-    this.defaults = ImmutableSet.copyOf(checkNotNull(defaults, "defaults"));
+  BookmarksProvider(Set<String> defaults) {
+    super("bookmarks");
+    this.defaults = ImmutableSet.copyOf(defaults);
+  }
+
+  @Override @Produce public BookmarksSetting get() {
+    return new BookmarksSetting(toBookmarkFiles(getBookmarkPaths()));
   }
 
   @Subscribe public void handle(AddBookmarkRequest request) {
     Set<String> paths = newHashSet(getBookmarkPaths());
-    paths.add(request.file().getAbsolutePath());
+    paths.add(request.value().getAbsolutePath());
     save(paths);
   }
 
   @Subscribe public void handle(RemoveBookmarkRequest request) {
     Set<String> paths = newHashSet(getBookmarkPaths());
-    paths.remove(request.file().getAbsolutePath());
+    paths.remove(request.value().getAbsolutePath());
     save(paths);
-  }
-
-  @Override @Produce public BookmarksEvent get() {
-    return new BookmarksEvent(toBookmarkFiles(getBookmarkPaths()));
-  }
-
-  @Override
-  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (KEY.equals(key)) bus.post(get());
   }
 
   private Set<File> toBookmarkFiles(Set<String> paths) {
@@ -79,12 +47,12 @@ final class BookmarksProvider
   }
 
   private Set<String> getBookmarkPaths() {
-    return pref.getStringSet(KEY, defaults);
+    return pref.getStringSet(key, defaults);
   }
 
   private void save(Set<String> paths) {
     pref.edit()
-        .putStringSet(KEY, paths)
+        .putStringSet(key, paths)
         .apply();
   }
 }

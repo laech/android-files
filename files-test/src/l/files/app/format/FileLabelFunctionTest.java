@@ -9,7 +9,6 @@ import java.io.File;
 
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.UserDirs.DIR_ROOT;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -26,14 +25,14 @@ public final class FileLabelFunctionTest extends TestCase {
 
   public void testGetsNameForHomeDirectory() {
     given(res.getString(R.string.home)).willReturn("1");
-    assertThat(labels.apply(DIR_HOME)).isEqualTo("1");
+    assertEquals("1", labels.apply(DIR_HOME));
   }
 
   public void testGetsNameForRootDirectory() {
-    assertThat(labels.apply(DIR_ROOT)).isEqualTo(Build.MODEL);
+    assertEquals(Build.MODEL, labels.apply(DIR_ROOT));
   }
 
   public void testGetsNameOfFileForNormalFile() {
-    assertThat(labels.apply(new File("abc"))).isEqualTo("abc");
+    assertEquals("abc", labels.apply(new File("abc")));
   }
 }

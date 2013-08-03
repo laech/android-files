@@ -8,7 +8,6 @@ import l.files.R;
 import java.io.File;
 
 import static l.files.app.UserDirs.*;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -111,12 +110,12 @@ public final class FileDrawableFunctionTest extends TestCase {
 
   private void assertDirImg(int resId, File dir) {
     Drawable drawable = getDrawable(resId);
-    assertThat(images.apply(dir)).isEqualTo(drawable);
+    assertEquals(drawable, images.apply(dir));
   }
 
   private void assertFileImg(int resId, String filename) {
     Drawable drawable = getDrawable(resId);
-    assertThat(images.apply(getFile(filename))).isEqualTo(drawable);
+    assertEquals(drawable, images.apply(getFile(filename)));
   }
 
   private Drawable getDrawable(int resId) {

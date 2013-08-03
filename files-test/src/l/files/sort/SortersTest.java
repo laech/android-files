@@ -1,6 +1,5 @@
 package l.files.sort;
 
-import com.google.common.base.Optional;
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -21,7 +20,7 @@ public final class SortersTest extends TestCase {
     File y = new File("y");
     File z = new File("z");
     List<?> expected = asList(x, y, z);
-    List<?> actual = Sorters.apply(Optional.of("unknown-sorter-id"), null, x, z, y);
+    List<?> actual = Sorters.apply("unknown-sorter-id", null, x, z, y);
     assertEquals(expected, actual);
   }
 }

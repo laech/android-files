@@ -2,13 +2,11 @@ package l.files.app;
 
 import android.test.UiThreadTest;
 import com.squareup.otto.Subscribe;
-import l.files.setting.BookmarksEvent;
+import l.files.setting.BookmarksSetting;
 import l.files.test.TestSidebarFragmentActivity;
 
 import java.io.File;
 import java.lang.reflect.Method;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public final class SidebarFragmentTest
     extends BaseFileListFragmentTest<TestSidebarFragmentActivity> {
@@ -19,13 +17,13 @@ public final class SidebarFragmentTest
 
   @UiThreadTest public void testBookmarksChangeIsHandled() {
     final File file = new File("/");
-    fragment().handle(new BookmarksEvent(file));
+    fragment().handle(new BookmarksSetting(file));
     assertAdapterContains(file);
   }
 
   public void testBookmarksChangedHandlerMethodIsAnnotated() throws Exception {
-    Method method = SidebarFragment.class.getMethod("handle", BookmarksEvent.class);
-    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
+    Method method = SidebarFragment.class.getMethod("handle", BookmarksSetting.class);
+    assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
   private void assertAdapterContains(File file) {

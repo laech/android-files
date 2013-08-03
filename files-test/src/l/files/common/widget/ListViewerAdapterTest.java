@@ -2,8 +2,6 @@ package l.files.common.widget;
 
 import junit.framework.TestCase;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 public final class ListViewerAdapterTest extends TestCase {
 
   private ListViewerAdapter adapter;
@@ -16,18 +14,18 @@ public final class ListViewerAdapterTest extends TestCase {
   public void testGetCount_returnsSizeOfSize() {
     adapter.items.add("a");
     adapter.items.add("a");
-    assertThat(adapter.getCount()).isEqualTo(2);
+    assertEquals(2, adapter.getCount());
   }
 
   public void testGetItem_returnsItemInList() {
     adapter.items.add("a");
-    assertThat(adapter.getItem(0)).isEqualTo("a");
+    assertEquals("a", adapter.getItem(0));
   }
 
   public void testGetItemId_returnsPosition() {
     adapter.items.add("a");
     adapter.items.add("b");
-    assertThat(adapter.getItemId(0)).isEqualTo(0);
-    assertThat(adapter.getItemId(1)).isEqualTo(1);
+    assertEquals(0, adapter.getItemId(0));
+    assertEquals(1, adapter.getItemId(1));
   }
 }

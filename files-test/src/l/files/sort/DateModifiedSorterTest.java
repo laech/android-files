@@ -9,7 +9,6 @@ import java.util.List;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -71,7 +70,7 @@ public final class DateModifiedSorterTest extends TestCase {
 
   public void testName() {
     given(res.getString(R.string.date_modified)).willReturn("a");
-    assertThat(sorter.name(res)).isEqualTo("a");
+    assertEquals("a", sorter.name(res));
   }
 
   private String setString(int id, String value) {

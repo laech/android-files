@@ -19,7 +19,7 @@ final class DirObserver extends FileObserver {
    * this is more efficient and avoids interrupting any animations for the
    * previous update.
    */
-  static final long BATCH_UPDATE_DELAY = 50;
+  static final long BATCH_UPDATE_DELAY = 75;
 
   static final int DIR_CHANGED_MASK = CREATE | DELETE | MOVED_FROM | MOVED_TO | MODIFY;
 

@@ -2,34 +2,12 @@ package l.files.setting;
 
 import java.io.File;
 
-import static com.google.common.base.Objects.toStringHelper;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Event representing a request for a bookmark to be removed.
  */
-public final class RemoveBookmarkRequest {
-
-  private final File file;
+public final class RemoveBookmarkRequest extends Value<File> {
 
   public RemoveBookmarkRequest(File file) {
-    this.file = checkNotNull(file, "file");
-  }
-
-  public File file() {
-    return file;
-  }
-
-  @Override public final int hashCode() {
-    return file().hashCode();
-  }
-
-  @Override public final boolean equals(Object o) {
-    return o instanceof RemoveBookmarkRequest
-        && ((RemoveBookmarkRequest) o).file().equals(file());
-  }
-
-  @Override public final String toString() {
-    return toStringHelper(this).addValue(file()).toString();
+    super(file);
   }
 }

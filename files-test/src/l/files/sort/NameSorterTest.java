@@ -6,7 +6,7 @@ import l.files.R;
 
 import java.io.File;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -22,18 +22,18 @@ public final class NameSorterTest extends TestCase {
   public void testSortsByNameIgnoringCase() {
     File x = new File("/x");
     File y = new File("/Y");
-    assertThat(sorter.apply(null, y, x)).containsExactly(x, y);
+    assertEquals(asList(x, y), sorter.apply(null, y, x));
   }
 
   public void testSortsByNameComparingNamePartsOnly() {
     File x = new File("/1/x");
     File y = new File("/0/y");
-    assertThat(sorter.apply(null, y, x)).containsExactly(x, y);
+    assertEquals(asList(x, y), sorter.apply(null, y, x));
   }
 
   public void testName() {
     Resources res = mock(Resources.class);
     given(res.getString(R.string.name)).willReturn("a");
-    assertThat(sorter.name(res)).isEqualTo("a");
+    assertEquals("a", sorter.name(res));
   }
 }

@@ -4,7 +4,6 @@ import android.view.ActionMode;
 import android.view.Menu;
 import junit.framework.TestCase;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public final class MultiChoiceModeListenerAdapterTest extends TestCase {
@@ -21,7 +20,7 @@ public final class MultiChoiceModeListenerAdapterTest extends TestCase {
   public void testOnCreateActionModeIsDelegated() {
     ActionMode actionMode = mock(ActionMode.class);
     Menu menu = mock(Menu.class);
-    assertThat(adapter.onCreateActionMode(actionMode, menu)).isTrue();
+    assertTrue(adapter.onCreateActionMode(actionMode, menu));
     verify(mode).onCreate(actionMode, menu);
   }
 
@@ -32,7 +31,7 @@ public final class MultiChoiceModeListenerAdapterTest extends TestCase {
   }
 
   public void testOnPrepareActionModeReturnsFalseToIndicateNoNeedToUpdate() {
-    assertThat(adapter.onPrepareActionMode(null, null)).isFalse();
+    assertFalse(adapter.onPrepareActionMode(null, null));
     verifyZeroInteractions(mode);
   }
 }

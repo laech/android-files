@@ -1,36 +1,11 @@
 package l.files.setting;
 
-import static com.google.common.base.Objects.toStringHelper;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Event representing a request for changing the way files are sorted.
  */
-public final class SortRequest {
-
-  private final String sort;
+public final class SortRequest extends Value<String> {
 
   public SortRequest(String sort) {
-    this.sort = checkNotNull(sort, "sort");
-  }
-
-  /**
-   * Returns the identifier of this sort.
-   */
-  public String sort() {
-    return sort;
-  }
-
-  @Override public int hashCode() {
-    return sort().hashCode();
-  }
-
-  @Override public boolean equals(Object o) {
-    return o instanceof SortRequest
-        && ((SortRequest) o).sort().equals(sort());
-  }
-
-  @Override public String toString() {
-    return toStringHelper(this).addValue(sort()).toString();
+    super(sort);
   }
 }

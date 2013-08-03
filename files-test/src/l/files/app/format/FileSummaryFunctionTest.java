@@ -6,7 +6,6 @@ import l.files.R;
 
 import java.io.File;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -35,14 +34,15 @@ public final class FileSummaryFunctionTest extends AndroidTestCase {
     given(file.lastModified()).willReturn(2L);
     given(date.apply(2L)).willReturn("b");
 
-    assertThat(summary.apply(file)).isEqualTo(
-        getContext().getString(R.string.file_size_updated, "a", "b"));
+    String expected = getContext().getString(R.string.file_size_updated, "a", "b");
+    String actual = summary.apply(file);
+    assertEquals(expected, actual);
   }
 
   public void testShowsModifiedTimeForDir() {
     given(file.isDirectory()).willReturn(true);
     given(file.lastModified()).willReturn(1L);
     given(date.apply(1L)).willReturn("a");
-    assertThat(summary.apply(file)).isEqualTo("a");
+    assertEquals("a", summary.apply(file));
   }
 }

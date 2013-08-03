@@ -2,18 +2,16 @@ package l.files.app.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import com.google.common.base.Optional;
 import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
 import l.files.setting.ShowHiddenFilesRequest;
-import l.files.setting.ViewOptionsEvent;
+import l.files.setting.ShowHiddenFilesSetting;
 import org.mockito.InOrder;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.test.Mocks.mockMenuItem;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -56,9 +54,9 @@ public final class ShowHiddenFilesMenuTest extends TestCase {
 
     action.onPrepare(menu);
     if (showHiddenFiles) {
-      action.handle(new ViewOptionsEvent(Optional.of("x"), true));
+      action.handle(new ShowHiddenFilesSetting(true));
     } else {
-      action.handle(new ViewOptionsEvent(Optional.of("x"), false));
+      action.handle(new ShowHiddenFilesSetting(false));
     }
 
     verify(item).setChecked(showHiddenFiles);
@@ -87,7 +85,7 @@ public final class ShowHiddenFilesMenuTest extends TestCase {
   private void testShowHiddenFiles(boolean beforeState, boolean newState) {
     MenuItem item = mock(MenuItem.class);
     given(item.isChecked()).willReturn(beforeState);
-    assertThat(action.onMenuItemClick(item)).isTrue();
+    assertTrue(action.onMenuItemClick(item));
     if (newState) {
       verify(bus).post(new ShowHiddenFilesRequest(newState));
     } else {

@@ -6,10 +6,10 @@ import android.test.UiThreadTest;
 import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.common.base.Optional;
 import com.squareup.otto.Subscribe;
 import l.files.R;
-import l.files.setting.ViewOptionsEvent;
+import l.files.setting.ShowHiddenFilesSetting;
+import l.files.setting.SortSetting;
 import l.files.sort.Sorters;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;
@@ -26,8 +26,6 @@ import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.test.Activities.rotate;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
-import static org.fest.assertions.api.ANDROID.assertThat;
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -78,32 +76,37 @@ public final class FilesFragmentTest
     verify(fragment().observer).stopWatching();
   }
 
-  public void testViewEventHandlerMethodIsAnnotated() throws Exception {
-    Method method = FilesFragment.class.getMethod("handle", ViewOptionsEvent.class);
-    assertThat(method.getAnnotation(Subscribe.class)).isNotNull();
+  public void testShowHiddenFilesHandlerMethodIsAnnotated() throws Exception {
+    Method method = FilesFragment.class.getMethod("handle", ShowHiddenFilesSetting.class);
+    assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
   public void testHiddenFilesCanBeHidden() throws Throwable {
     dir.newFile(".hidden");
     File expected = dir.newFile("shown");
-    post(new ViewOptionsEvent(Optional.of(Sorters.NAME), false));
-    assertThat(getFiles()).containsExactly(expected);
+    post(new ShowHiddenFilesSetting(false));
+    assertEquals(asList(expected), getFiles());
   }
 
   public void testHiddenFilesCanBeShown() throws Throwable {
     File hidden = dir.newFile(".hidden");
     File shown = dir.newFile("shown");
-    post(new ViewOptionsEvent(Optional.of(Sorters.NAME), true));
-    assertThat(getFiles()).containsExactly(hidden, shown);
+    post(new ShowHiddenFilesSetting(true));
+    assertEquals(asList(hidden, shown), getFiles());
+  }
+
+  public void testSortHandlerMethodIsAnnotated() throws Exception {
+    Method method = FilesFragment.class.getMethod("handle", SortSetting.class);
+    assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
   public void testFilesCanBeSorted() throws Throwable {
-    final File file1 = dir.newFile(".hidden");
-    final File file2 = dir.newFile("shown");
+    final File file1 = dir.newFile("a");
+    final File file2 = dir.newFile("b");
     assertTrue(file1.setLastModified(0));
     assertTrue(file2.setLastModified(10000));
-    post(new ViewOptionsEvent(Optional.of(Sorters.DATE_MODIFIED), true));
-    assertThat(getFiles()).isEqualTo(asList(file2, file1));
+    post(new SortSetting(Sorters.DATE_MODIFIED));
+    assertEquals(asList(file2, file1), getFiles());
   }
 
   @UiThreadTest public void testShowsCorrectNumberOfSelectedItemsOnRotation() {
@@ -112,7 +115,7 @@ public final class FilesFragmentTest
     listView().setItemChecked(0, true);
     rotate(getActivity());
 
-    assertThat(actionMode()).hasTitle(string(R.string.n_selected, 1));
+    assertEquals(string(R.string.n_selected, 1), actionMode().getTitle());
   }
 
   @UiThreadTest public void testShowsCorrectNumSelectedItemsOnSelection() {
@@ -122,7 +125,7 @@ public final class FilesFragmentTest
     listView().setItemChecked(0, true);
     listView().setItemChecked(1, true);
 
-    assertThat(actionMode()).hasTitle(string(R.string.n_selected, 2));
+    assertEquals(string(R.string.n_selected, 2), actionMode().getTitle());
   }
 
   public void testHidesEmptyViewIfDirHasFile() throws Exception {
@@ -131,7 +134,7 @@ public final class FilesFragmentTest
   }
 
   public void testShowsEmptyListViewIfDirHasNoFile() {
-    assertThat(listView()).hasChildCount(0);
+    assertEquals(0, listView().getChildCount());
   }
 
   public void testShowsEmptyMessageIfNoFiles() {
@@ -149,12 +152,12 @@ public final class FilesFragmentTest
   }
 
   private void assertEmptyViewIsNotVisible() {
-    assertThat(emptyView()).hasVisibility(GONE);
+    assertEquals(GONE, emptyView().getVisibility());
   }
 
   private void assertEmptyViewIsVisible(int msgId) {
-    assertThat(emptyView()).hasVisibility(VISIBLE);
-    assertThat(emptyView()).hasText(msgId);
+    assertEquals(VISIBLE, emptyView().getVisibility());
+    assertEquals(string(msgId), emptyView().getText());
   }
 
   private TextView emptyView() {
@@ -177,12 +180,16 @@ public final class FilesFragmentTest
     return getActivity().getActionMode();
   }
 
-  private void post(final ViewOptionsEvent event) throws Throwable {
+  private void post(final Object event) throws Throwable {
     final CountDownLatch latch = new CountDownLatch(1);
     final FilesFragment fragment = fragment();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        fragment.handle(event);
+        if (event instanceof ShowHiddenFilesSetting) {
+          fragment.handle((ShowHiddenFilesSetting) event);
+        } else {
+          fragment.handle((SortSetting) event);
+        }
         fragment.getListView().post(new Runnable() {
           @Override public void run() {
             latch.countDown();

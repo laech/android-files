@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
-import l.files.setting.Settings;
 
 import java.io.File;
 import java.util.Set;
@@ -16,6 +15,8 @@ import java.util.Set;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.UserDirs.*;
+import static l.files.setting.Settings.*;
+import static l.files.sort.Sorters.NAME;
 
 public final class FilesApp extends Application {
 
@@ -42,8 +43,9 @@ public final class FilesApp extends Application {
 
     bus = new Bus(ThreadEnforcer.MAIN);
     SharedPreferences pref = getDefaultSharedPreferences(this);
-    Settings.registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);
-    Settings.registerViewOptionsProvider(bus, pref);
+    registerSortProvider(bus, pref, NAME);
+    registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);
+    registerShowHiddenFilesProvider(bus, pref, false);
 
     if (DEBUG) {
       StrictMode.enableDefaults();
