@@ -4,13 +4,12 @@
   <style name="Theme" parent="android:Theme.Holo.Light">
     <item name="android:actionBarStyle">@style/ActionBar</item>
     <item name="android:actionBarWidgetTheme">@style/ActionBarWidget</item>
-    <item name="android:windowContentOverlay">@drawable/action_bar_shadow</item>
-    <item name="android:windowBackground">@drawable/window_background</item>
+    <!-- https://code.google.com/p/android/issues/detail?id=58280 -->
+    <item name="android:windowContentOverlay">@null</item>
   </style>
 
   <style name="ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
     <item name="android:titleTextStyle">@style/ActionBarTitle</item>
-    <item name="android:background">@drawable/action_bar_background</item>
   </style>
 
   <style name="ActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
@@ -81,9 +80,9 @@
     <item name="android:paddingBottom">4dp</item>
     <item name="android:paddingLeft">8dp</item>
     <item name="android:paddingRight">8dp</item>
-    <item name="android:textColor">@color/list_section_header</item>
+    <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textStyle">bold</item>
-    <item name="android:background">@color/list_section_header_background</item>
+    <item name="android:background">@android:color/white</item>
   </style>
 
   <style name="FilesListItemSecondaryText" parent="ListItemText">
@@ -95,7 +94,6 @@
   </style>
 
   <style name="Sidebar" parent="ListView">
-    <item name="android:background">@drawable/sidebar_background</item>
     <item name="android:divider">@null</item>
   </style>
 
@@ -111,7 +109,7 @@
     <item name="android:paddingBottom">2dp</item>
     <item name="android:textAllCaps">true</item>
     <item name="android:textStyle">bold</item>
-    <item name="android:textColor">@color/sidebar_header</item>
+    <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textSize">14sp</item>
     <item name="android:fontFamily">sans</item>
   </style>
