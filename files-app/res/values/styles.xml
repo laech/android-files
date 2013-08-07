@@ -61,7 +61,6 @@
   </style>
 
   <style name="FilesList" parent="ListView">
-    <item name="android:choiceMode">multipleChoiceModal</item>
     <item name="android:fastScrollEnabled">true</item>
   </style>
 

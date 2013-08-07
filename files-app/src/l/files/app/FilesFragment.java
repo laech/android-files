@@ -9,29 +9,24 @@ import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.common.app.OptionsMenus;
-import l.files.common.widget.MultiChoiceActions;
-import l.files.setting.Value;
 import l.files.setting.ShowHiddenFilesSetting;
 import l.files.setting.SortSetting;
+import l.files.setting.Value;
 import l.files.sort.Sorters;
-import l.files.trash.TrashService.TrashMover;
 
 import java.io.File;
 import java.util.List;
 
+import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
+import static l.files.BuildConfig.DEBUG;
 import static l.files.app.menu.Menus.*;
-import static l.files.app.mode.Modes.newCountSelectedItemsAction;
-import static l.files.app.mode.Modes.newMoveToTrashAction;
 import static l.files.common.io.Files.listFiles;
 
 public final class FilesFragment extends BaseFileListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
-
   FileObserver observer;
-
   private File dir;
-
   private Value<String> sort;
   private Value<Boolean> showHiddenFiles;
 
@@ -117,17 +112,25 @@ public final class FilesFragment extends BaseFileListFragment {
   }
 
   private void configureOptionsMenu() {
-    setOptionsMenu(OptionsMenus.compose(
-        newBookmarkMenu(getBus(), dir),
-        newDirMenu(dir),
-        newSortMenu(getFragmentManager()),
-        newShowHiddenFilesMenu(getBus())));
+    if (DEBUG) {
+      setOptionsMenu(OptionsMenus.compose(
+          newBookmarkMenu(getBus(), dir),
+          newDirMenu(dir),
+          newSortMenu(getFragmentManager()),
+          newShowHiddenFilesMenu(getBus())));
+    } else {
+      setOptionsMenu(OptionsMenus.compose(
+          newBookmarkMenu(getBus(), dir),
+          newSortMenu(getFragmentManager()),
+          newShowHiddenFilesMenu(getBus())));
+    }
   }
 
   private void configureListView() {
     ListView listView = getListView();
-    listView.setMultiChoiceModeListener(MultiChoiceActions.asListener(
-        newCountSelectedItemsAction(listView),
-        newMoveToTrashAction(listView, new TrashMover(getActivity()))));
+//    listView.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
+//    listView.setMultiChoiceModeListener(MultiChoiceActions.asListener(
+//        newCountSelectedItemsAction(listView),
+//        newMoveToTrashAction(listView, new TrashMover(getActivity()))));
   }
 }
