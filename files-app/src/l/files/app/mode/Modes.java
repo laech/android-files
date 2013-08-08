@@ -1,9 +1,8 @@
 package l.files.app.mode;
 
+import android.content.Context;
 import android.widget.AbsListView;
 import l.files.common.widget.MultiChoiceAction;
-
-import static l.files.trash.TrashService.TrashMover;
 
 public final class Modes {
   private Modes() {}
@@ -12,7 +11,7 @@ public final class Modes {
     return new CountSelectedItemsAction(list);
   }
 
-  public static MultiChoiceAction newMoveToTrashAction(AbsListView list, TrashMover mover) {
-    return new MoveToTrashAction(list, mover);
+  public static MultiChoiceAction newDeleteAction(Context context, AbsListView list) {
+    return new DeleteAction(context, list);
   }
 }

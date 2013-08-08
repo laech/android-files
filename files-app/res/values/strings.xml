@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Files (Preview)</string>
+  <string name="app_name">Files</string>
   <string name="empty">Empty</string>
   <string name="not_a_directory">Not a directory</string>
   <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
   <string name="permission_denied">Permission denied</string>
   <string name="no_app_to_open_file">No application can open this file</string>
-  <string name="move_to_trash">Move to trash</string>
+  <string name="delete">Delete</string>
   <string name="n_selected">%d selected</string>
   <string name="home">Home</string>
   <string name="settings">Settings</string>

@@ -2,7 +2,7 @@
 <resources>
 
   <item type="id" name="content"/>
-  <item type="id" name="move_to_trash"/>
+  <item type="id" name="delete"/>
   <item type="id" name="new_dir"/>
   <item type="id" name="bookmark"/>
   <item type="id" name="sort_by"/>

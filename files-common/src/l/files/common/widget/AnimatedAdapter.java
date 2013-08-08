@@ -10,7 +10,7 @@ import static l.files.common.widget.Animations.animatePreDataSetChange;
 public abstract class AnimatedAdapter extends ListViewerAdapter {
 
   public void replace(ListView list, Collection<?> items, boolean animate) {
-//    if (animate) animatePreDataSetChange(list);
+    if (animate) animatePreDataSetChange(list);
     this.items = newArrayList(items);
     notifyDataSetChanged();
   }

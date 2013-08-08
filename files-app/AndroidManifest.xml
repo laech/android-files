@@ -2,14 +2,15 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="l.files"
-    android:versionCode="1"
-    android:versionName="0.1">
+    android:versionCode="2"
+    android:versionName="0.2">
 
   <uses-sdk
       android:minSdkVersion="14"
       android:targetSdkVersion="18"/>
 
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
 
   <application
       android:name=".app.FilesApp"
@@ -25,10 +26,9 @@
       </intent-filter>
     </activity>
 
+    <service android:name=".app.TrashService"/>
+
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
-
-    <service android:name="l.files.trash.TrashService"/>
   </application>
-
 </manifest>
