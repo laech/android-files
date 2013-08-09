@@ -20,7 +20,7 @@ import l.files.sort.Sorters;
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.app.FilesApp.getBus;
 
-final class SortDialog extends DialogFragment implements OnItemClickListener {
+public final class SortDialog extends DialogFragment implements OnItemClickListener {
 
   static final Supplier<SortDialog> CREATOR = new Supplier<SortDialog>() {
     @Override public SortDialog get() {
