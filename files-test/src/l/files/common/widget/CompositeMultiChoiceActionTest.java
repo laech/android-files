@@ -34,4 +34,11 @@ public final class CompositeMultiChoiceActionTest extends TestCase {
     verify(action1).onChange(mode, 0, 1, true);
     verify(action2).onChange(mode, 0, 1, true);
   }
+
+  public void testOnDestroyIsDelegated() {
+    ActionMode mode = mock(ActionMode.class);
+    composite.onDestroy(mode);
+    verify(action1).onDestroy(mode);
+    verify(action2).onDestroy(mode);
+  }
 }

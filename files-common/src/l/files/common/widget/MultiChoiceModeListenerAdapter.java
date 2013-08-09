@@ -36,5 +36,7 @@ final class MultiChoiceModeListenerAdapter implements MultiChoiceModeListener {
     return true;
   }
 
-  @Override public void onDestroyActionMode(ActionMode mode) {}
+  @Override public void onDestroyActionMode(ActionMode actionMode) {
+    mode.onDestroy(actionMode);
+  }
 }

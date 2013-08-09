@@ -20,4 +20,9 @@ public interface MultiChoiceAction {
    * @see MultiChoiceModeListener#onItemCheckedStateChanged(ActionMode, int, long, boolean)
    */
   void onChange(ActionMode mode, int position, long id, boolean checked);
+
+  /**
+   * @see MultiChoiceModeListener#onDestroyActionMode(ActionMode)
+   */
+  void onDestroy(ActionMode mode);
 }

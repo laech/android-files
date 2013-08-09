@@ -26,4 +26,10 @@ final class CompositeMultiChoiceAction implements MultiChoiceAction {
       action.onChange(mode, position, id, checked);
     }
   }
+
+  @Override public void onDestroy(ActionMode mode) {
+    for (MultiChoiceAction action : actions) {
+      action.onDestroy(mode);
+    }
+  }
 }

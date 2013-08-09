@@ -34,4 +34,10 @@ public final class MultiChoiceModeListenerAdapterTest extends TestCase {
     assertFalse(adapter.onPrepareActionMode(null, null));
     verifyZeroInteractions(mode);
   }
+
+  public void testOnDestroyActionModeIsDelegated() {
+    ActionMode actionMode = mock(ActionMode.class);
+    adapter.onDestroyActionMode(actionMode);
+    verify(mode).onDestroy(actionMode);
+  }
 }
