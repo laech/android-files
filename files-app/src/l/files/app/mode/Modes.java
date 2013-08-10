@@ -1,6 +1,6 @@
 package l.files.app.mode;
 
-import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.widget.AbsListView;
 import l.files.common.widget.MultiChoiceAction;
 
@@ -11,7 +11,7 @@ public final class Modes {
     return new CountSelectedItemsAction(list);
   }
 
-  public static MultiChoiceAction newDeleteAction(Context context, AbsListView list) {
-    return new DeleteAction(context, list);
+  public static MultiChoiceAction newDeleteAction(FragmentManager manager, AbsListView list) {
+    return new DeleteFilesAction(manager, list);
   }
 }

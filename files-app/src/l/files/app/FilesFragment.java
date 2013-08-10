@@ -3,12 +3,15 @@ package l.files.app;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
+import android.view.ActionMode;
+import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import l.files.R;
 import l.files.common.app.OptionsMenus;
+import l.files.common.widget.MultiChoiceAction;
 import l.files.common.widget.MultiChoiceActions;
 import l.files.setting.ShowHiddenFilesSetting;
 import l.files.setting.SortSetting;
@@ -25,13 +28,17 @@ import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newDeleteAction;
 import static l.files.common.io.Files.listFiles;
 
-public final class FilesFragment extends BaseFileListFragment {
+public final class FilesFragment
+    extends BaseFileListFragment implements MultiChoiceAction {
 
   public static final String ARG_DIRECTORY = "directory";
+
   FileObserver observer;
+
   private File dir;
   private Value<String> sort;
   private Value<Boolean> showHiddenFiles;
+  private ActionMode mode;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -85,6 +92,11 @@ public final class FilesFragment extends BaseFileListFragment {
     refresh(!getListAdapter().isEmpty());
   }
 
+  @Subscribe public void handle(
+      @SuppressWarnings("UnusedParameters") DeleteFilesRequest request) {
+    if (null != mode) mode.finish();
+  }
+
   private void refresh(boolean animate) {
     if (showHiddenFiles == null || sort == null) {
       return;
@@ -133,7 +145,19 @@ public final class FilesFragment extends BaseFileListFragment {
     ListView listView = getListView();
     listView.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
     listView.setMultiChoiceModeListener(MultiChoiceActions.asListener(
+        this,
         newCountSelectedItemsAction(listView),
-        newDeleteAction(getActivity(), listView)));
+        newDeleteAction(getActivity().getSupportFragmentManager(), listView)));
   }
+
+  @Override public void onCreate(ActionMode mode, Menu menu) {
+    this.mode = mode;
+  }
+
+  @Override public void onDestroy(ActionMode mode) {
+    this.mode = null;
+  }
+
+  @Override
+  public void onChange(ActionMode mode, int position, long id, boolean checked) {}
 }

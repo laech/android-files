@@ -1,22 +1,25 @@
 package l.files.app;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.support.v4.app.DialogFragment;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import java.io.File;
-import java.lang.reflect.Method;
+import l.files.R;
+import l.files.app.menu.SortDialog;
 import l.files.common.base.Consumer;
 import l.files.test.TempDir;
 
-import static l.files.test.Activities.rotate;
+import java.io.File;
+import java.lang.reflect.Method;
+
 import static l.files.app.FilesActivity.EXTRA_DIR;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static l.files.test.Activities.rotate;
+import static org.mockito.Mockito.*;
 
 public final class FilesActivityTest
     extends ActivityInstrumentationTestCase2<FilesActivity> {
@@ -36,6 +39,25 @@ public final class FilesActivityTest
   @Override protected void tearDown() throws Exception {
     dir.delete();
     super.tearDown();
+  }
+
+  public void testSortDialogIsShownOnSortMenuClick() throws Throwable {
+    getActivity();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        getInstrumentation().callActivityOnResume(getActivity());
+      }
+    });
+
+    getInstrumentation().invokeMenuActionSync(getActivity(), R.id.sort_by, 0);
+
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        DialogFragment fragment = (DialogFragment) getActivity().getSupportFragmentManager().findFragmentByTag(SortDialog.FRAGMENT_TAG);
+        Dialog dialog = fragment.getDialog();
+        assertTrue(dialog.isShowing());
+      }
+    });
   }
 
   @UiThreadTest public void testBusIsRegisteredOnResume() throws Throwable {
@@ -72,6 +94,7 @@ public final class FilesActivityTest
     assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
+  // TODO verify this actually works
   public void testShowsTitleCorrectlyOnScreenRotate() throws Throwable {
     final FilesActivity activity = getActivity();
     runTestOnUiThread(new Runnable() {

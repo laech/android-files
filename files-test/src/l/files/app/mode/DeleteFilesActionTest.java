@@ -1,38 +1,40 @@
 package l.files.app.mode;
 
-import android.content.Context;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AbsListView;
 import android.widget.ListView;
 import l.files.R;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static l.files.app.mode.DeleteFilesDialog.FRAGMENT_TAG;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class DeleteActionTest extends AndroidTestCase {
+public final class DeleteFilesActionTest extends AndroidTestCase {
 
   private Menu menu;
   private MenuItem item;
   private ActionMode mode;
-  private AbsListView list;
-  private Context context;
-  private DeleteAction action;
+  private FragmentManager manager;
+
+  private DeleteFilesAction action;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     item = mockMenuItem();
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
-    list = new ListView(getContext());
-    context = mock(Context.class);
-    action = new DeleteAction(context, list);
+    manager = mock(FragmentManager.class);
+    action = new DeleteFilesAction(manager, new ListView(getContext()));
   }
 
   public void testCreatesMenuItemCorrectly() {
@@ -42,10 +44,14 @@ public final class DeleteActionTest extends AndroidTestCase {
     verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
   }
 
-  public void testFinishesModeOnClick() {
-    action.onCreate(mode, mockMenu(item));
+  public void testShowsConfirmDialogOnClick() {
+    FragmentTransaction transaction = mock(FragmentTransaction.class);
+    given(manager.beginTransaction()).willReturn(transaction);
+
     action.onMenuItemClick(item);
-    verify(mode).finish();
+
+    verify(transaction).add(notNull(DeleteFilesDialog.class), eq(FRAGMENT_TAG));
+    verify(transaction).commit();
   }
 
   private Menu mockMenu(MenuItem item) {

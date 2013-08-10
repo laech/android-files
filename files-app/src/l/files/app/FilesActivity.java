@@ -67,6 +67,10 @@ public final class FilesActivity extends BaseFragmentActivity {
     }
   }
 
+  @Subscribe public void handle(DeleteFilesRequest request) {
+    TrashService.delete(request.files(), this);
+  }
+
   private ViewPager setViewPagerAdapter() {
     ViewPager pager = (ViewPager) findViewById(R.id.pager);
     pager.setAdapter(new FilesPagerAdapter(getSupportFragmentManager(), dir, isPortrait()));
