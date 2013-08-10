@@ -1,17 +1,17 @@
 package l.files.sort;
 
-import android.content.res.Resources;
-import junit.framework.TestCase;
-import l.files.R;
-
-import java.io.File;
-import java.util.List;
-
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import java.io.File;
+import java.util.List;
+
+import junit.framework.TestCase;
+import l.files.R;
+import android.content.res.Resources;
 
 public final class DateModifiedSorterTest extends TestCase {
 
@@ -29,7 +29,7 @@ public final class DateModifiedSorterTest extends TestCase {
     File b = fileModifiedAt("2", 2);
     File c = fileModifiedAt("3", 3);
 
-    String header = setString(R.string.earlier, "earlier");
+    Object header = setString(R.string.earlier, "earlier");
     List<?> expected = asList(header, c, b, a);
     List<?> actual = sorter.apply(res, c, a, b);
     assertEquals(expected, actual);
@@ -44,12 +44,12 @@ public final class DateModifiedSorterTest extends TestCase {
     File last30Days = fileModifiedAt("30 days", now() - MILLIS_PER_DAY * 20L);
     File earlier = fileModifiedAt("earlier", now() - MILLIS_PER_DAY * 100L);
 
-    String headerUnknown = setString(R.string.unknown, "unknown");
-    String headerToday = setString(R.string.today, "today");
-    String headerYesterday = setString(R.string.yesterday, "yesterday");
-    String header7Days = setString(R.string.previous_7_days, "7 days");
-    String header30Days = setString(R.string.previous_30_days, "30 days");
-    String headerEarlier = setString(R.string.earlier, "earlier");
+    Object headerUnknown = setString(R.string.unknown, "unknown");
+    Object headerToday = setString(R.string.today, "today");
+    Object headerYesterday = setString(R.string.yesterday, "yesterday");
+    Object header7Days = setString(R.string.previous_7_days, "7 days");
+    Object header30Days = setString(R.string.previous_30_days, "30 days");
+    Object headerEarlier = setString(R.string.earlier, "earlier");
 
     List<?> expected = asList(
         headerUnknown, tomorrow,

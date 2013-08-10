@@ -1,25 +1,24 @@
 package l.files.app;
 
-import android.app.Dialog;
-import android.content.Intent;
-import android.support.v4.app.DialogFragment;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
-import l.files.R;
-import l.files.app.menu.SortDialog;
-import l.files.common.base.Consumer;
-import l.files.test.TempDir;
-
-import java.io.File;
-import java.lang.reflect.Method;
-
 import static l.files.app.FilesActivity.EXTRA_DIR;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
 import static l.files.test.Activities.rotate;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+
+import java.io.File;
+import java.lang.reflect.Method;
+
+import l.files.common.base.Consumer;
+import l.files.test.TempDir;
+import android.content.Intent;
+import android.test.ActivityInstrumentationTestCase2;
+import android.test.UiThreadTest;
+
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 public final class FilesActivityTest
     extends ActivityInstrumentationTestCase2<FilesActivity> {
@@ -41,25 +40,6 @@ public final class FilesActivityTest
     super.tearDown();
   }
 
-  public void testSortDialogIsShownOnSortMenuClick() throws Throwable {
-    getActivity();
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        getInstrumentation().callActivityOnResume(getActivity());
-      }
-    });
-
-    getInstrumentation().invokeMenuActionSync(getActivity(), R.id.sort_by, 0);
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        DialogFragment fragment = (DialogFragment) getActivity().getSupportFragmentManager().findFragmentByTag(SortDialog.FRAGMENT_TAG);
-        Dialog dialog = fragment.getDialog();
-        assertTrue(dialog.isShowing());
-      }
-    });
-  }
-
   @UiThreadTest public void testBusIsRegisteredOnResume() throws Throwable {
     FilesActivity activity = getActivity();
     activity.bus = mock(Bus.class);
@@ -78,8 +58,7 @@ public final class FilesActivityTest
     verify(activity.bus).unregister(activity);
   }
 
-  @SuppressWarnings("unchecked")
-  public void testOpenFileRequestIsHandled() {
+  @SuppressWarnings("unchecked") public void testOpenFileRequestIsHandled() {
     FilesActivity activity = getActivity();
     activity.helper = mock(Consumer.class);
     OpenFileRequest event = new OpenFileRequest(dir.newDir());
@@ -110,7 +89,7 @@ public final class FilesActivityTest
     assertEquals(dir.get().getName(), title());
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")//
   public void testScrollsToFilesViewIfDirSpecifiedIsAlreadyDisplayed() throws Throwable {
     dir.newFile();
     final FilesActivity activity = getActivity();
