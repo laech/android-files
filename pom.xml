@@ -107,9 +107,6 @@
         <version>3.6.0</version>
         <extensions>true</extensions>
         <configuration>
-          <testPackages>
-            <package>l.files</package>
-          </testPackages>
           <extractDuplicates>true</extractDuplicates>
           <sdk>
             <platform>17</platform>
