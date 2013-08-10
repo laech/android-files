@@ -14,7 +14,7 @@ public final class Menus {
   }
 
   public static OptionsMenu newSortMenu(FragmentManager manager) {
-    return new SortMenu(manager, SortDialog.CREATOR);
+    return new SortMenu(manager);
   }
 
   public static OptionsMenu newDirMenu(File parent) {

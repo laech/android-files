@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.common.base.Supplier;
 import com.squareup.otto.Bus;
 import l.files.R;
 import l.files.setting.SortRequest;
@@ -22,11 +21,7 @@ import static l.files.app.FilesApp.getBus;
 
 public final class SortDialog extends DialogFragment implements OnItemClickListener {
 
-  static final Supplier<SortDialog> CREATOR = new Supplier<SortDialog>() {
-    @Override public SortDialog get() {
-      return new SortDialog();
-    }
-  };
+  public static final String FRAGMENT_TAG = "sort-dialog";
 
   Bus bus;
 

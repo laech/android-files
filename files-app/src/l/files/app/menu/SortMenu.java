@@ -1,10 +1,8 @@
 package l.files.app.menu;
 
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import com.google.common.base.Supplier;
 import l.files.R;
 import l.files.common.app.OptionsMenuAdapter;
 
@@ -17,12 +15,9 @@ final class SortMenu
     extends OptionsMenuAdapter implements OnMenuItemClickListener {
 
   private final FragmentManager manager;
-  private final Supplier<DialogFragment> dialog;
 
-  @SuppressWarnings("unchecked")
-  SortMenu(FragmentManager manager, Supplier<? extends DialogFragment> dialog) {
+  @SuppressWarnings("unchecked") SortMenu(FragmentManager manager) {
     this.manager = checkNotNull(manager, "manager");
-    this.dialog = (Supplier<DialogFragment>) checkNotNull(dialog, "dialog");
   }
 
   @Override public void onCreate(Menu menu) {
@@ -33,7 +28,7 @@ final class SortMenu
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
-    dialog.get().show(manager, null);
+    new SortDialog().show(manager, SortDialog.FRAGMENT_TAG);
     return true;
   }
 }
