@@ -24,7 +24,6 @@ import static android.view.View.VISIBLE;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.test.Activities.rotate;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -107,15 +106,6 @@ public final class FilesFragmentTest
     assertTrue(file2.setLastModified(10000));
     post(new SortSetting(Sorters.DATE_MODIFIED));
     assertEquals(asList(file2, file1), getFiles());
-  }
-
-  @UiThreadTest public void testShowsCorrectNumberOfSelectedItemsOnRotation() {
-    dir.newFile();
-
-    listView().setItemChecked(0, true);
-    rotate(getActivity());
-
-    assertEquals(string(R.string.n_selected, 1), actionMode().getTitle());
   }
 
   @UiThreadTest public void testShowsCorrectNumSelectedItemsOnSelection() {
