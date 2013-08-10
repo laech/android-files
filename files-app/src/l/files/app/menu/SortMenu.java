@@ -16,7 +16,7 @@ final class SortMenu
 
   private final FragmentManager manager;
 
-  @SuppressWarnings("unchecked") SortMenu(FragmentManager manager) {
+  SortMenu(FragmentManager manager) {
     this.manager = checkNotNull(manager, "manager");
   }
 

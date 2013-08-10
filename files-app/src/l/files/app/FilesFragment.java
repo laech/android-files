@@ -92,8 +92,7 @@ public final class FilesFragment
     refresh(!getListAdapter().isEmpty());
   }
 
-  @Subscribe public void handle(
-      @SuppressWarnings("UnusedParameters") DeleteFilesRequest request) {
+  @Subscribe public void handle(DeleteFilesRequest request) {
     if (null != mode) mode.finish();
   }
 

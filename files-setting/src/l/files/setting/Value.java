@@ -21,7 +21,7 @@ public class Value<T> {
 
   @Override public final boolean equals(Object o) {
     if (o != null && o.getClass().equals(getClass())) {
-      return ((Value) o).value().equals(value());
+      return ((Value<?>) o).value().equals(value());
     }
     return false;
   }
