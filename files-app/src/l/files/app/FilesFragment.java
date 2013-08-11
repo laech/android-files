@@ -1,14 +1,18 @@
 package l.files.app;
 
-import android.os.Bundle;
-import android.os.FileObserver;
-import android.os.Handler;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.TextView;
-import com.squareup.otto.Subscribe;
+import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
+import static l.files.BuildConfig.DEBUG;
+import static l.files.app.menu.Menus.newBookmarkMenu;
+import static l.files.app.menu.Menus.newDirMenu;
+import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
+import static l.files.app.menu.Menus.newSortMenu;
+import static l.files.app.mode.Modes.newCountSelectedItemsAction;
+import static l.files.app.mode.Modes.newDeleteAction;
+import static l.files.common.io.Files.listFiles;
+
+import java.io.File;
+import java.util.List;
+
 import l.files.R;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceAction;
@@ -17,16 +21,16 @@ import l.files.setting.ShowHiddenFilesSetting;
 import l.files.setting.SortSetting;
 import l.files.setting.Value;
 import l.files.sort.Sorters;
+import android.os.Bundle;
+import android.os.FileObserver;
+import android.os.Handler;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.io.File;
-import java.util.List;
-
-import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
-import static l.files.BuildConfig.DEBUG;
-import static l.files.app.menu.Menus.*;
-import static l.files.app.mode.Modes.newCountSelectedItemsAction;
-import static l.files.app.mode.Modes.newDeleteAction;
-import static l.files.common.io.Files.listFiles;
+import com.squareup.otto.Subscribe;
 
 public final class FilesFragment
     extends BaseFileListFragment implements MultiChoiceAction {
@@ -39,6 +43,16 @@ public final class FilesFragment
   private Value<String> sort;
   private Value<Boolean> showHiddenFiles;
   private ActionMode mode;
+
+  /**
+   * Flag to control whether list data changes should be animated.
+   * <p/>
+   * When users changes view settings on activity A, animation should happen on
+   * activity A, but when user clicks the back button to go back to activity B,
+   * B will receive the new view settings, but B should not animate, should just
+   * show the latest view.
+   */
+  private boolean animate;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -59,7 +73,7 @@ public final class FilesFragment
     dir = new File(getArguments().getString(ARG_DIRECTORY));
     observer = new DirObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
-        refresh(true);
+        refresh(animate);
       }
     });
 
@@ -69,8 +83,12 @@ public final class FilesFragment
   }
 
   @Override public void onResume() {
-    super.onResume();
-    observer.startWatching();
+    animate = false;
+    {
+      super.onResume();
+      observer.startWatching();
+    }
+    animate = true;
   }
 
   @Override public void onPause() {
@@ -84,12 +102,12 @@ public final class FilesFragment
 
   @Subscribe public void handle(ShowHiddenFilesSetting setting) {
     showHiddenFiles = setting;
-    refresh(!getListAdapter().isEmpty());
+    refresh(animate);
   }
 
   @Subscribe public void handle(SortSetting setting) {
     sort = setting;
-    refresh(!getListAdapter().isEmpty());
+    refresh(animate);
   }
 
   @Subscribe public void handle(DeleteFilesRequest request) {
@@ -157,6 +175,6 @@ public final class FilesFragment
     this.mode = null;
   }
 
-  @Override
-  public void onChange(ActionMode mode, int position, long id, boolean checked) {}
+  @Override public void onChange(ActionMode mode, int position, long id, boolean checked) {
+  }
 }
