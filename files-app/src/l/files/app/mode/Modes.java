@@ -14,4 +14,8 @@ public final class Modes {
   public static MultiChoiceAction newDeleteAction(FragmentManager manager, AbsListView list) {
     return new DeleteFilesAction(manager, list);
   }
+
+  public static MultiChoiceAction newSelectAllAction(AbsListView list) {
+    return new SelectAllAction(list);
+  }
 }

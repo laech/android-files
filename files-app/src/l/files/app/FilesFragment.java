@@ -8,6 +8,7 @@ import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newDeleteAction;
+import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.common.io.Files.listFiles;
 
 import java.io.File;
@@ -159,12 +160,13 @@ public final class FilesFragment
   }
 
   private void configureListView() {
-    ListView listView = getListView();
-    listView.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-    listView.setMultiChoiceModeListener(MultiChoiceActions.asListener(
+    ListView list = getListView();
+    list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
+    list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
         this,
-        newCountSelectedItemsAction(listView),
-        newDeleteAction(getActivity().getSupportFragmentManager(), listView)));
+        newCountSelectedItemsAction(list),
+        newSelectAllAction(list),
+        newDeleteAction(getActivity().getSupportFragmentManager(), list)));
   }
 
   @Override public void onCreate(ActionMode mode, Menu menu) {
