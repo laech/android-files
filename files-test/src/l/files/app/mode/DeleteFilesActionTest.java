@@ -39,7 +39,7 @@ public final class DeleteFilesActionTest extends AndroidTestCase {
 
   public void testCreatesMenuItemCorrectly() {
     action.onCreate(mode, menu);
-    verify(item).setIcon(android.R.drawable.ic_menu_delete);
+    verify(item).setIcon(R.drawable.ic_menu_delete);
     verify(item).setOnMenuItemClickListener(action);
     verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
   }
