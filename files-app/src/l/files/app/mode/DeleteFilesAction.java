@@ -30,7 +30,7 @@ final class DeleteFilesAction
   @Override public void onCreate(ActionMode mode, Menu menu) {
     menu.add(NONE, R.id.delete, NONE, R.string.delete)
         .setOnMenuItemClickListener(this)
-        .setIcon(android.R.drawable.ic_menu_delete)
+        .setIcon(R.drawable.ic_menu_delete)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
   }
 
