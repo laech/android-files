@@ -43,7 +43,7 @@ public final class DeleteFilesDialog extends DialogFragment {
     final ArrayList<String> paths = getArguments().getStringArrayList(ARG_PATHS);
     return new AlertDialog.Builder(getActivity())
         .setMessage(getConfirmMessage(paths.size()))
-        .setNegativeButton(R.string.cancel, null)
+        .setNegativeButton(android.R.string.cancel, null)
         .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
           @Override public void onClick(DialogInterface dialog, int which) {
             requestDelete(paths);
