@@ -11,7 +11,7 @@ import l.files.R;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static l.files.app.mode.DeleteFilesDialog.FRAGMENT_TAG;
+import static l.files.app.mode.DeleteDialog.FRAGMENT_TAG;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
@@ -19,14 +19,14 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class DeleteFilesActionTest extends AndroidTestCase {
+public final class DeleteActionTest extends AndroidTestCase {
 
   private Menu menu;
   private MenuItem item;
   private ActionMode mode;
   private FragmentManager manager;
 
-  private DeleteFilesAction action;
+  private DeleteAction action;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
@@ -34,7 +34,7 @@ public final class DeleteFilesActionTest extends AndroidTestCase {
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
     manager = mock(FragmentManager.class);
-    action = new DeleteFilesAction(manager, new ListView(getContext()));
+    action = new DeleteAction(manager, new ListView(getContext()));
   }
 
   public void testCreatesMenuItemCorrectly() {
@@ -50,7 +50,7 @@ public final class DeleteFilesActionTest extends AndroidTestCase {
 
     action.onMenuItemClick(item);
 
-    verify(transaction).add(notNull(DeleteFilesDialog.class), eq(FRAGMENT_TAG));
+    verify(transaction).add(notNull(DeleteDialog.class), eq(FRAGMENT_TAG));
     verify(transaction).commit();
   }
 

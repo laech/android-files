@@ -16,13 +16,13 @@ import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItems;
 
-final class DeleteFilesAction
+final class DeleteAction
     extends MultiChoiceActionAdapter implements OnMenuItemClickListener {
 
   private final FragmentManager manager;
   private final AbsListView list;
 
-  public DeleteFilesAction(FragmentManager manager, AbsListView list) {
+  public DeleteAction(FragmentManager manager, AbsListView list) {
     this.manager = checkNotNull(manager, "manager");
     this.list = checkNotNull(list, "list");
   }
@@ -35,7 +35,7 @@ final class DeleteFilesAction
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
-    DeleteFilesDialog.create(getCheckedFiles()).show(manager, DeleteFilesDialog.FRAGMENT_TAG);
+    DeleteDialog.create(getCheckedFiles()).show(manager, DeleteDialog.FRAGMENT_TAG);
     return true;
   }
 

@@ -17,14 +17,14 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static l.files.app.FilesApp.getBus;
 
-public final class DeleteFilesDialog extends DialogFragment {
+public final class DeleteDialog extends DialogFragment {
 
   public static final String FRAGMENT_TAG = "delete-files-dialog";
   public static final String ARG_PATHS = "paths";
 
   Bus bus;
 
-  static DeleteFilesDialog create(Iterable<File> files) {
+  static DeleteDialog create(Iterable<File> files) {
     ArrayList<String> paths = newArrayList();
     for (File file : files) {
       paths.add(file.getAbsolutePath());
@@ -33,7 +33,7 @@ public final class DeleteFilesDialog extends DialogFragment {
     Bundle args = new Bundle(1);
     args.putStringArrayList(ARG_PATHS, paths);
 
-    DeleteFilesDialog dialog = new DeleteFilesDialog();
+    DeleteDialog dialog = new DeleteDialog();
     dialog.setArguments(args);
     return dialog;
   }
