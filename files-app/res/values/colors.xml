@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="text">#BE000000</color>
   <color name="text_shadow">#DDFFFFFF</color>
   <color name="text_shadow_light">#AAFFFFFF</color>
 </resources>

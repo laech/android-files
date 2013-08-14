@@ -13,7 +13,7 @@
   </style>
 
   <style name="ActionBarTitle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-    <item name="android:textColor">@color/text</item>
+    <item name="android:textColor">?android:attr/textColorSecondary</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
@@ -22,7 +22,7 @@
   </style>
 
   <style name="ActionBarOverflowItem" parent="android:TextAppearance.Holo.Medium">
-    <item name="android:textColor">@color/text</item>
+    <item name="android:textColor">?android:attr/textColorSecondary</item>
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
@@ -36,7 +36,7 @@
   <style name="NormalText" parent="ShadowText">
     <item name="android:fontFamily">sans-serif-condensed</item>
     <item name="android:textSize">16sp</item>
-    <item name="android:textColor">@color/text</item>
+    <item name="android:textColor">?android:attr/textColorSecondary</item>
   </style>
 
   <style name="ListEmptyText" parent="NormalText">
