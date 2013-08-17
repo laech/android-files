@@ -1,7 +1,9 @@
 package l.files.setting;
 
-import com.google.common.collect.ImmutableSet;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Arrays.asList;
 
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.util.Set;
 import l.files.common.base.Value;
@@ -14,10 +16,11 @@ import l.files.common.base.Value;
 public final class BookmarksSetting extends Value<Set<File>> {
 
   public BookmarksSetting(File... bookmarks) {
-    super(ImmutableSet.copyOf(bookmarks));
+    this(asList(bookmarks));
   }
 
   public BookmarksSetting(Iterable<File> bookmarks) {
     super(ImmutableSet.copyOf(bookmarks));
+    checkArgument(!value().isEmpty());
   }
 }

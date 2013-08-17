@@ -1,27 +1,12 @@
 package l.files.app;
 
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
+import static com.google.common.collect.Lists.newArrayList;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.app.menu.Menus.newBookmarkMenu;
-import static l.files.app.menu.Menus.newDirMenu;
-import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
-import static l.files.app.menu.Menus.newSortMenu;
-import static l.files.app.mode.Modes.newCountSelectedItemsAction;
-import static l.files.app.mode.Modes.newDeleteAction;
-import static l.files.app.mode.Modes.newSelectAllAction;
+import static l.files.app.menu.Menus.*;
+import static l.files.app.mode.Modes.*;
 import static l.files.common.io.Files.listFiles;
 
-import java.io.File;
-import java.util.List;
-
-import l.files.R;
-import l.files.common.app.OptionsMenus;
-import l.files.common.widget.MultiChoiceAction;
-import l.files.common.widget.MultiChoiceActions;
-import l.files.setting.ShowHiddenFilesSetting;
-import l.files.setting.SortSetting;
-import l.files.setting.Value;
-import l.files.sort.Sorters;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -30,9 +15,18 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.squareup.otto.Subscribe;
+import java.io.File;
+import java.util.List;
+import l.files.R;
+import l.files.common.app.OptionsMenu;
+import l.files.common.app.OptionsMenus;
 import l.files.common.base.Value;
+import l.files.common.widget.MultiChoiceAction;
+import l.files.common.widget.MultiChoiceActions;
+import l.files.setting.ShowHiddenFilesSetting;
+import l.files.setting.SortSetting;
+import l.files.sort.Sorters;
 
 public final class FilesFragment
     extends BaseFileListFragment implements MultiChoiceAction {
@@ -113,10 +107,10 @@ public final class FilesFragment
   }
 
   @Subscribe public void handle(DeleteFilesRequest request) {
-    if (null != mode) mode.finish();
+    if (null != mode) mode.finish(); // TODO better handle this
   }
 
-  private void refresh(boolean animate) {
+  private void refresh(boolean animate) { // TODO do this in async task for large dir
     if (showHiddenFiles == null || sort == null) {
       return;
     }
@@ -146,18 +140,16 @@ public final class FilesFragment
   }
 
   private void configureOptionsMenu() {
+    List<OptionsMenu> menus = newArrayList(
+        newBookmarkMenu(getBus(), dir),
+        newSortMenu(getFragmentManager()),
+        newShowHiddenFilesMenu(getBus()));
+
     if (DEBUG) {
-      setOptionsMenu(OptionsMenus.compose(
-          newBookmarkMenu(getBus(), dir),
-          newDirMenu(dir),
-          newSortMenu(getFragmentManager()),
-          newShowHiddenFilesMenu(getBus())));
-    } else {
-      setOptionsMenu(OptionsMenus.compose(
-          newBookmarkMenu(getBus(), dir),
-          newSortMenu(getFragmentManager()),
-          newShowHiddenFilesMenu(getBus())));
+      menus.add(newDirMenu(dir));
     }
+
+    setOptionsMenu(OptionsMenus.compose(menus));
   }
 
   private void configureListView() {
@@ -166,8 +158,9 @@ public final class FilesFragment
     list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
         this,
         newCountSelectedItemsAction(list),
-        newSelectAllAction(list),
-        newDeleteAction(getActivity().getSupportFragmentManager(), list)));
+        newCutAction(list, getBus()),
+        newDeleteAction(list, getFragmentManager()),
+        newSelectAllAction(list)));
   }
 
   @Override public void onCreate(ActionMode mode, Menu menu) {
@@ -178,6 +171,7 @@ public final class FilesFragment
     this.mode = null;
   }
 
-  @Override public void onChange(ActionMode mode, int position, long id, boolean checked) {
+  @Override
+  public void onChange(ActionMode mode, int position, long id, boolean checked) {
   }
 }

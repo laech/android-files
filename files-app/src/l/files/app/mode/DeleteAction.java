@@ -22,7 +22,7 @@ final class DeleteAction
   private final FragmentManager manager;
   private final AbsListView list;
 
-  public DeleteAction(FragmentManager manager, AbsListView list) {
+  public DeleteAction(AbsListView list, FragmentManager manager) {
     this.manager = checkNotNull(manager, "manager");
     this.list = checkNotNull(list, "list");
   }

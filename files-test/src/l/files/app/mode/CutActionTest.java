@@ -1,28 +1,24 @@
 package l.files.app.mode;
 
-import static android.content.ClipDescription.MIMETYPE_TEXT_INTENT;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
-import static l.files.app.Intents.ACTION_CUT;
+import static com.google.common.collect.Sets.newHashSet;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.*;
 
-import android.content.ClipData;
-import android.content.ClipDescription;
-import android.content.ClipboardManager;
-import android.content.Intent;
-import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import com.squareup.otto.Bus;
 import java.io.File;
 import l.files.R;
+import l.files.setting.CutRequest;
 import org.mockito.ArgumentCaptor;
 
 public final class CutActionTest extends AndroidTestCase {
@@ -31,7 +27,7 @@ public final class CutActionTest extends AndroidTestCase {
   private MenuItem item;
   private ActionMode mode;
   private ListView list;
-  private ClipboardManager manager;
+  private Bus bus;
 
   private CutAction action;
 
@@ -40,9 +36,10 @@ public final class CutActionTest extends AndroidTestCase {
     item = mockMenuItem();
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
-    manager = mock(ClipboardManager.class);
+    bus = mock(Bus.class);
     list = new ListView(getContext());
-    action = new CutAction(list, manager);
+    list.setChoiceMode(CHOICE_MODE_MULTIPLE);
+    action = new CutAction(list, bus);
   }
 
   public void testCreatesMenuItemCorrectly() {
@@ -70,26 +67,23 @@ public final class CutActionTest extends AndroidTestCase {
 
     action.onMenuItemClick(item);
 
-    ClipData clip = captureClipData();
-    assertDescription(clip.getDescription());
-    assertIntent(clip.getItemAt(0).getIntent(), new File("a"));
-    assertIntent(clip.getItemAt(1).getIntent(), new File("c"));
-    assertEquals(2, clip.getItemCount());
+    CutRequest request = captureRequest();
+    assertEquals(newHashSet(new File("a"), new File("c")), request.value());
   }
 
-  private static void assertIntent(Intent intent, File file) {
-    assertEquals(ACTION_CUT, intent.getAction());
-    assertEquals(Uri.fromFile(file), intent.getData());
+  public void testCutsNothingIfNoCheckedFiles() {
+    list.setChoiceMode(CHOICE_MODE_MULTIPLE);
+    list.setAdapter(new ArrayAdapter<Object>(getContext(), 0, new String[]{"1"}));
+    list.setItemChecked(0, true);
+
+    action.onMenuItemClick(item);
+
+    verify(bus, never()).post(anyObject());
   }
 
-  private static void assertDescription(ClipDescription description) {
-    assertEquals(1, description.getMimeTypeCount());
-    assertEquals(MIMETYPE_TEXT_INTENT, description.getMimeType(0));
-  }
-
-  private ClipData captureClipData() {
-    ArgumentCaptor<ClipData> arg = ArgumentCaptor.forClass(ClipData.class);
-    verify(manager).setPrimaryClip(arg.capture());
+  private CutRequest captureRequest() {
+    ArgumentCaptor<CutRequest> arg = ArgumentCaptor.forClass(CutRequest.class);
+    verify(bus).post(arg.capture());
     return arg.getValue();
   }
 

@@ -10,7 +10,7 @@ public final class OptionsMenus {
     return menu == null ? EMPTY : menu;
   }
 
-  public static OptionsMenu compose(OptionsMenu... menus) {
+  public static OptionsMenu compose(Iterable<OptionsMenu> menus) {
     return new CompositeMenu(menus);
   }
 }

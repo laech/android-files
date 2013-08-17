@@ -34,7 +34,7 @@ public final class DeleteActionTest extends AndroidTestCase {
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
     manager = mock(FragmentManager.class);
-    action = new DeleteAction(manager, new ListView(getContext()));
+    action = new DeleteAction(new ListView(getContext()), manager);
   }
 
   public void testCreatesMenuItemCorrectly() {
