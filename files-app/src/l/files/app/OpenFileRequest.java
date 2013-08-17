@@ -1,35 +1,11 @@
 package l.files.app;
 
 import java.io.File;
+import l.files.common.base.Value;
 
-import static com.google.common.base.Objects.toStringHelper;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-/**
- * Event representing a request to open a file.
- */
-final class OpenFileRequest {
-
-  private final File file;
+final class OpenFileRequest extends Value<File> {
 
   public OpenFileRequest(File file) {
-    this.file = checkNotNull(file, "file");
-  }
-
-  public File file() {
-    return file;
-  }
-
-  @Override public final int hashCode() {
-    return file().hashCode();
-  }
-
-  @Override public final boolean equals(Object o) {
-    return o instanceof OpenFileRequest
-        && ((OpenFileRequest) o).file().equals(file());
-  }
-
-  @Override public final String toString() {
-    return toStringHelper(this).addValue(file()).toString();
+    super(file);
   }
 }

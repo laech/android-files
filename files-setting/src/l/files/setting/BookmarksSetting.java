@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.util.Set;
+import l.files.common.base.Value;
 
 /**
  * This event will be fired when the bookmarks are being added/removed, and it

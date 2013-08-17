@@ -1,8 +1,8 @@
-package l.files.setting;
-
-import junit.framework.TestCase;
+package l.files.common.base;
 
 import static java.lang.Boolean.TRUE;
+
+import junit.framework.TestCase;
 
 public final class ValueTest extends TestCase {
 

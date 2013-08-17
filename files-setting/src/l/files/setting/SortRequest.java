@@ -1,5 +1,7 @@
 package l.files.setting;
 
+import l.files.common.base.Value;
+
 /**
  * Event representing a request for changing the way files are sorted.
  */

@@ -42,7 +42,7 @@ final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
   }
 
   @Override public void take(OpenFileRequest request) {
-    File file = request.file();
+    File file = request.value();
     if (!file.canRead()) {
       showPermissionDenied();
     } else if (file.isDirectory()) {

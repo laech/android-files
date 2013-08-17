@@ -1,6 +1,7 @@
 package l.files.setting;
 
 import java.io.File;
+import l.files.common.base.Value;
 
 /**
  * Event representing a request for a bookmark to be removed.

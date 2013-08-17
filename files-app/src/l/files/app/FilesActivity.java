@@ -59,7 +59,8 @@ public final class FilesActivity extends BaseFragmentActivity {
   }
 
   @Subscribe public void handle(OpenFileRequest request) {
-    File file = request.file();
+    // TODO register helper directly and checkout onNewIntent
+    File file = request.value();
     if (dir.equals(file)) {
       pager.setCurrentItem(POSITION_FILES, true);
     } else {
@@ -68,7 +69,7 @@ public final class FilesActivity extends BaseFragmentActivity {
   }
 
   @Subscribe public void handle(DeleteFilesRequest request) {
-    TrashService.delete(request.files(), this);
+    TrashService.delete(request.value(), this);
   }
 
   private ViewPager setViewPagerAdapter() {

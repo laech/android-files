@@ -1,4 +1,4 @@
-package l.files.setting;
+package l.files.common.base;
 
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -20,10 +20,9 @@ public class Value<T> {
   }
 
   @Override public final boolean equals(Object o) {
-    if (o != null && o.getClass().equals(getClass())) {
-      return ((Value<?>) o).value().equals(value());
-    }
-    return false;
+    return null != o
+        && getClass().equals(o.getClass())
+        && value().equals(((Value<?>) o).value());
   }
 
   @Override public final String toString() {

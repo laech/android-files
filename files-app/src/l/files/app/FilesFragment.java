@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.otto.Subscribe;
+import l.files.common.base.Value;
 
 public final class FilesFragment
     extends BaseFileListFragment implements MultiChoiceAction {
