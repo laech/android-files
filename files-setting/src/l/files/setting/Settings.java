@@ -1,9 +1,10 @@
 package l.files.setting;
 
-import android.content.SharedPreferences;
-import com.google.common.collect.Sets;
-import com.squareup.otto.Bus;
+import static l.files.common.io.Files.toAbsolutePaths;
 
+import android.content.ClipboardManager;
+import android.content.SharedPreferences;
+import com.squareup.otto.Bus;
 import java.io.File;
 import java.util.Set;
 
@@ -22,15 +23,11 @@ public final class Settings {
 
   public static void registerBookmarksProvider(
       Bus bus, SharedPreferences pref, Set<File> defaults) {
-    Set<String> paths = getAbsolutePaths(defaults);
+    Set<String> paths = toAbsolutePaths(defaults);
     new BookmarksProvider(paths).register(bus, pref);
   }
 
-  private static Set<String> getAbsolutePaths(Set<File> files) {
-    Set<String> paths = Sets.newHashSetWithExpectedSize(files.size());
-    for (File bookmark : files) {
-      paths.add(bookmark.getAbsolutePath());
-    }
-    return paths;
+  public static void registerClipboardProvider(Bus bus, ClipboardManager manager) {
+    bus.register(new ClipboardProvider(manager));
   }
 }
