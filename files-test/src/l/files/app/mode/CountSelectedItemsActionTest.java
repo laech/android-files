@@ -1,26 +1,25 @@
 package l.files.app.mode;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.test.AndroidTestCase;
-import android.view.ActionMode;
-import android.widget.ListView;
-import l.files.R;
-
-import static org.mockito.BDDMockito.given;
+import static android.widget.AbsListView.CHOICE_MODE_SINGLE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import android.test.AndroidTestCase;
+import android.view.ActionMode;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import l.files.R;
 
 public final class CountSelectedItemsActionTest extends AndroidTestCase {
 
   private CountSelectedItemsAction action;
 
   private ActionMode mode;
-  private MockListView list;
+  private ListView list;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    list = new MockListView(getContext());
+    list = new ListView(getContext());
     mode = mock(ActionMode.class);
     action = new CountSelectedItemsAction(list);
   }
@@ -33,41 +32,32 @@ public final class CountSelectedItemsActionTest extends AndroidTestCase {
    * mode is created).
    */
   public void testUpdatesSelectedItemCountOnCreateActionMode() {
-    String expected = list.setCheckedItemCount(11);
-    action.onCreate(mode, null);
-    verify(mode).setTitle(expected);
+    testUpdatesTitle(new Runnable() {
+      @Override public void run() {
+        action.onCreate(mode, null);
+      }
+    });
   }
 
   public void testUpdatesSelectedItemCountOnItemCheckStateChange() {
-    String expected = list.setCheckedItemCount(100);
-    action.onChange(mode, 0, 0, true);
-    verify(mode).setTitle(expected);
+    testUpdatesTitle(new Runnable() {
+      @Override public void run() {
+        action.onChange(mode, 0, 0, true);
+      }
+    });
   }
 
-  // https://code.google.com/p/dexmaker/issues/detail?id=9
-  private static class MockListView extends ListView {
+  public void testUpdatesTitle(Runnable code) {
+    list.setAdapter(new ArrayAdapter<Object>(getContext(), 0, new Object[]{"a"}));
+    list.setChoiceMode(CHOICE_MODE_SINGLE);
+    list.setItemChecked(0, true);
 
-    private final Resources res = mock(Resources.class);
-    private int checkedItemCount = -1;
+    code.run();
 
-    MockListView(Context context) {
-      super(context);
-    }
+    verify(mode).setTitle(nSelectedString(1));
+  }
 
-    @Override public int getCheckedItemCount() {
-      return checkedItemCount;
-    }
-
-    @Override public Resources getResources() {
-      return res;
-    }
-
-    String setCheckedItemCount(int count) {
-      checkedItemCount = count;
-      String template = "count: %s";
-      String expected = String.format(template, count);
-      given(res.getString(R.string.n_selected, count)).willReturn(expected);
-      return expected;
-    }
+  private String nSelectedString(int n) {
+    return getContext().getResources().getString(R.string.n_selected, n);
   }
 }
