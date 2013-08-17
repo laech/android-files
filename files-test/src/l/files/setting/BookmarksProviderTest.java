@@ -1,26 +1,24 @@
 package l.files.setting;
 
+import static android.content.SharedPreferences.Editor;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.singleton;
+import static l.files.common.io.Files.toFiles;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.*;
+
 import android.content.SharedPreferences;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-import junit.framework.TestCase;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Set;
-
-import static android.content.SharedPreferences.Editor;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Collections.singleton;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.*;
+import junit.framework.TestCase;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 public final class BookmarksProviderTest extends TestCase {
 
@@ -28,7 +26,7 @@ public final class BookmarksProviderTest extends TestCase {
 
   private SharedPreferences pref;
   private Editor editor;
-  private Set<String> defaults;
+  private String[] defaults;
 
   private BookmarksProvider handler;
 
@@ -36,8 +34,8 @@ public final class BookmarksProviderTest extends TestCase {
     super.setUp();
     editor = mockEditor();
     pref = mockSharedPreferences(editor);
-    defaults = ImmutableSet.of("/");
-    handler = new BookmarksProvider(defaults);
+    defaults = new String[]{"/"};
+    handler = new BookmarksProvider(newHashSet(defaults));
     handler.register(mock(Bus.class), pref);
   }
 
@@ -85,12 +83,8 @@ public final class BookmarksProviderTest extends TestCase {
     assertEquals(new BookmarksSetting(defaultFiles()), handler.get());
   }
 
-  private Iterable<File> defaultFiles() {
-    return transform(defaults, new Function<String, File>() {
-      @Override public File apply(String input) {
-        return new File(input);
-      }
-    });
+  private File[] defaultFiles() {
+    return toFiles(defaults);
   }
 
   public void testSkipsFilesThatDoNotExist() {

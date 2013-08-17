@@ -7,9 +7,9 @@ import java.io.File;
 import java.util.Set;
 import l.files.common.base.Value;
 
-public final class DeleteFilesRequest extends Value<Set<File>> {
+public final class DeleteRequest extends Value<Set<File>> {
 
-  public DeleteFilesRequest(Iterable<File> files) {
+  public DeleteRequest(File... files) {
     super(ImmutableSet.copyOf(checkNotNull(files, "files")));
   }
 }

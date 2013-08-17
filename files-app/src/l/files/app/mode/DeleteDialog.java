@@ -1,21 +1,18 @@
 package l.files.app.mode;
 
+import static l.files.app.FilesApp.getBus;
+import static l.files.common.io.Files.toAbsolutePaths;
+import static l.files.common.io.Files.toFiles;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import com.google.common.base.Function;
 import com.squareup.otto.Bus;
-import l.files.R;
-import l.files.app.DeleteFilesRequest;
-
 import java.io.File;
-import java.util.ArrayList;
-
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newArrayList;
-import static l.files.app.FilesApp.getBus;
+import l.files.R;
+import l.files.app.DeleteRequest;
 
 public final class DeleteDialog extends DialogFragment {
 
@@ -24,14 +21,9 @@ public final class DeleteDialog extends DialogFragment {
 
   Bus bus;
 
-  static DeleteDialog create(Iterable<File> files) {
-    ArrayList<String> paths = newArrayList();
-    for (File file : files) {
-      paths.add(file.getAbsolutePath());
-    }
-
+  static DeleteDialog create(File... files) {
     Bundle args = new Bundle(1);
-    args.putStringArrayList(ARG_PATHS, paths);
+    args.putStringArray(ARG_PATHS, toAbsolutePaths(files));
 
     DeleteDialog dialog = new DeleteDialog();
     dialog.setArguments(args);
@@ -40,9 +32,9 @@ public final class DeleteDialog extends DialogFragment {
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     bus = getBus(getActivity());
-    final ArrayList<String> paths = getArguments().getStringArrayList(ARG_PATHS);
+    final String[] paths = getArguments().getStringArray(ARG_PATHS);
     return new AlertDialog.Builder(getActivity())
-        .setMessage(getConfirmMessage(paths.size()))
+        .setMessage(getConfirmMessage(paths.length))
         .setNegativeButton(android.R.string.cancel, null)
         .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
           @Override public void onClick(DialogInterface dialog, int which) {
@@ -52,12 +44,8 @@ public final class DeleteDialog extends DialogFragment {
         .create();
   }
 
-  private void requestDelete(ArrayList<String> paths) {
-    bus.post(new DeleteFilesRequest(transform(paths, new Function<String, File>() {
-      @Override public File apply(String path) {
-        return new File(path);
-      }
-    })));
+  private void requestDelete(String[] paths) {
+    if (0 != paths.length) bus.post(new DeleteRequest(toFiles(paths)));
   }
 
   private String getConfirmMessage(int size) {

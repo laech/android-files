@@ -106,7 +106,7 @@ public final class FilesFragment
     refresh(animate);
   }
 
-  @Subscribe public void handle(DeleteFilesRequest request) {
+  @Subscribe public void handle(DeleteRequest request) {
     if (null != mode) mode.finish(); // TODO better handle this
   }
 

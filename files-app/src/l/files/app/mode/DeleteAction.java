@@ -1,20 +1,20 @@
 package l.files.app.mode;
 
-import android.support.v4.app.FragmentManager;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.AbsListView;
-import l.files.R;
-import l.files.common.widget.MultiChoiceActionAdapter;
-
-import java.io.File;
-
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItems;
+
+import android.support.v4.app.FragmentManager;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.AbsListView;
+import java.io.File;
+import java.util.List;
+import l.files.R;
+import l.files.common.widget.MultiChoiceActionAdapter;
 
 final class DeleteAction
     extends MultiChoiceActionAdapter implements OnMenuItemClickListener {
@@ -39,7 +39,8 @@ final class DeleteAction
     return true;
   }
 
-  private Iterable<File> getCheckedFiles() {
-    return getCheckedItems(list, File.class);
+  private File[] getCheckedFiles() {
+    List<File> files = getCheckedItems(list, File.class);
+    return files.toArray(new File[files.size()]);
   }
 }

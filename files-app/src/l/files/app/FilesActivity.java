@@ -68,8 +68,8 @@ public final class FilesActivity extends BaseFragmentActivity {
     }
   }
 
-  @Subscribe public void handle(DeleteFilesRequest request) {
-    TrashService.delete(request.value(), this);
+  @Subscribe public void handle(DeleteRequest request) {
+    TrashService.delete(request.value(), this); // TODO handle this elsewhere
   }
 
   private ViewPager setViewPagerAdapter() {

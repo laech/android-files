@@ -1,5 +1,16 @@
 package l.files.app.mode;
 
+import static android.view.Menu.NONE;
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
+import static l.files.app.mode.DeleteDialog.FRAGMENT_TAG;
+import static l.files.test.Mocks.mockMenuItem;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.test.AndroidTestCase;
@@ -8,16 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import l.files.R;
-
-import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static l.files.app.mode.DeleteDialog.FRAGMENT_TAG;
-import static l.files.test.Mocks.mockMenuItem;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 public final class DeleteActionTest extends AndroidTestCase {
 
@@ -34,7 +35,10 @@ public final class DeleteActionTest extends AndroidTestCase {
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
     manager = mock(FragmentManager.class);
-    action = new DeleteAction(new ListView(getContext()), manager);
+
+    ListView list = new ListView(getContext());
+    list.setChoiceMode(CHOICE_MODE_MULTIPLE);
+    action = new DeleteAction(list, manager);
   }
 
   public void testCreatesMenuItemCorrectly() {
