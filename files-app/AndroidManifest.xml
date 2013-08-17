@@ -27,6 +27,7 @@
     </activity>
 
     <service android:name=".app.TrashService"/>
+    <service android:name=".app.FileService"/>
 
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
