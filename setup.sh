@@ -1,6 +1,7 @@
 #!/bin/sh
 
 shopt -s nullglob
+set -e
 
 function setup() {
     local proj=$1
