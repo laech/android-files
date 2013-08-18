@@ -1,6 +1,7 @@
 package l.files.app;
 
-import static l.files.app.Intents.*;
+import static l.files.app.Intents.EXTRA_DESTINATION;
+import static l.files.app.Intents.EXTRA_FILE;
 import static org.apache.commons.io.FileUtils.*;
 
 import android.app.IntentService;
@@ -10,9 +11,43 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 
-public final class FileService extends IntentService {
+public abstract class FileService extends IntentService {
 
-  private static final String TAG = FileService.class.getSimpleName();
+  static abstract class CutOrCopy extends FileService {
+    @Override protected final void handle(Intent intent) throws IOException {
+      File srcFile = new File(intent.getStringExtra(EXTRA_FILE));
+      File dstDir = new File(intent.getStringExtra(EXTRA_DESTINATION));
+      handle(srcFile, getDestinationFile(srcFile, dstDir));
+    }
+
+    protected abstract void handle(File from, File to) throws IOException;
+  }
+
+  public static final class Cut extends CutOrCopy {
+    @Override protected void handle(File from, File to) throws IOException {
+      if (from.isDirectory()) {
+        moveDirectory(from, to);
+      } else {
+        moveFile(from, to);
+      }
+    }
+  }
+
+  public static final class Copy extends CutOrCopy {
+    @Override protected void handle(File from, File to) throws IOException {
+      if (from.isDirectory()) {
+        copyDirectory(from, to);
+      } else {
+        copyFile(from, to);
+      }
+    }
+  }
+
+  public static final class Delete extends FileService {
+    @Override protected void handle(Intent intent) throws IOException {
+      forceDelete(new File(intent.getStringExtra(EXTRA_FILE)));
+    }
+  }
 
   /**
    * Creates new a intent to move a file to new destination.
@@ -23,8 +58,8 @@ public final class FileService extends IntentService {
    * @param srcFile the source file/directory to be moved.
    * @param dstDir the destination directory to hold the moved file.
    */
-  public static Intent cut(File srcFile, File dstDir, Context context) {
-    return newIntent(srcFile, dstDir, context, ACTION_CUT);
+  public static Intent cut(Context context, File srcFile, File dstDir) {
+    return cutOrCopy(context, srcFile, dstDir, Cut.class);
   }
 
   /**
@@ -36,51 +71,20 @@ public final class FileService extends IntentService {
    * @param srcFile the source file/directory to be moved.
    * @param dstDir the destination directory to hold the moved file.
    */
-  public static Intent copy(File srcFile, File dstDir, Context context) {
-    return newIntent(srcFile, dstDir, context, ACTION_COPY);
+  public static Intent copy(Context context, File srcFile, File dstDir) {
+    return cutOrCopy(context, srcFile, dstDir, Copy.class);
   }
 
-  private static Intent newIntent(
-      File srcFile, File dstDir, Context context, String action) {
-    return new Intent(action)
-        .setClass(context, FileService.class)
+  private static Intent cutOrCopy(
+      Context context, File srcFile, File dstDir, Class<?> service) {
+    return new Intent(context, service)
         .putExtra(EXTRA_FILE, srcFile.getAbsolutePath())
         .putExtra(EXTRA_DESTINATION, dstDir.getAbsolutePath());
   }
 
-  public FileService() {
-    super("FileService");
-  }
-
-  @Override protected void onHandleIntent(Intent intent) {
-    String action = intent.getAction();
-    File src = new File(intent.getStringExtra(EXTRA_FILE));
-    File dst = new File(intent.getStringExtra(EXTRA_DESTINATION));
-    try {
-      if (ACTION_CUT.equals(action)) {
-        cut(src, dst);
-      } else if (ACTION_COPY.equals(action)) {
-        copy(src, dst);
-      }
-    } catch (IOException e) {
-      Log.w(TAG, e);
-    }
-  }
-
-  private void cut(File src, File dst) throws IOException {
-    if (src.isDirectory()) {
-      moveDirectory(src, getDestinationFile(src, dst));
-    } else {
-      moveFile(src, getDestinationFile(src, dst));
-    }
-  }
-
-  private void copy(File src, File dst) throws IOException {
-    if (src.isDirectory()) {
-      copyDirectory(src, getDestinationFile(src, dst));
-    } else {
-      copyFile(src, getDestinationFile(src, dst));
-    }
+  public static Intent delete(Context context, File file) {
+    return new Intent(context, Delete.class)
+        .putExtra(EXTRA_FILE, file.getAbsolutePath());
   }
 
   private static File getDestinationFile(File srcFile, File dstDir) {
@@ -90,4 +94,18 @@ public final class FileService extends IntentService {
     }
     return file;
   }
+
+  public FileService() {
+    super("FileService");
+  }
+
+  @Override protected void onHandleIntent(Intent intent) {
+    try {
+      handle(intent);
+    } catch (IOException e) {
+      Log.w(getClass().getSimpleName(), e);
+    }
+  }
+
+  protected abstract void handle(Intent intent) throws IOException;
 }

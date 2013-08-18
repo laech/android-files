@@ -1,22 +1,21 @@
 package l.files.app;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static l.files.app.FilesApp.getBus;
+import static l.files.app.FilesPagerAdapter.POSITION_FILES;
+import static l.files.app.UserDirs.DIR_HOME;
+import static l.files.app.format.Formats.label;
+
 import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import java.io.File;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.base.Consumer;
-
-import java.io.File;
-
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static l.files.app.FilesApp.getBus;
-import static l.files.app.FilesPagerAdapter.POSITION_FILES;
-import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.app.format.Formats.label;
 
 public final class FilesActivity extends BaseFragmentActivity {
 
@@ -69,7 +68,9 @@ public final class FilesActivity extends BaseFragmentActivity {
   }
 
   @Subscribe public void handle(DeleteRequest request) {
-    TrashService.delete(request.value(), this); // TODO handle this elsewhere
+    for (File file : request.value()) {
+      FileService.delete(this, file); // TODO handle this elsewhere
+    }
   }
 
   private ViewPager setViewPagerAdapter() {

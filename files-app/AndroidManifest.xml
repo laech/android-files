@@ -26,8 +26,9 @@
       </intent-filter>
     </activity>
 
-    <service android:name=".app.TrashService"/>
-    <service android:name=".app.FileService"/>
+    <service android:name=".app.FileService$Cut"/>
+    <service android:name=".app.FileService$Copy"/>
+    <service android:name=".app.FileService$Delete"/>
 
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
