@@ -9,20 +9,17 @@ import static l.files.event.ClipboardProvider.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.Intent;
-
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-
 import junit.framework.TestCase;
-
 import org.mockito.ArgumentCaptor;
 
 public final class ClipboardProviderTest extends TestCase {
@@ -85,6 +82,12 @@ public final class ClipboardProviderTest extends TestCase {
     Clipboard clip = provider.get();
     assertTrue(clazz.isInstance(clip));
     assertEquals(newHashSet(new File("/")), clip.value());
+  }
+
+  public void testGetReturnsNullIfFileDoesNotExists() {
+    given(manager.getPrimaryClip()).willReturn(newIntent(null,
+        new Intent(ACTION_COPY).putExtra(EXTRA_FILES, new String[]{"abc123"})));
+    assertNull(provider.get());
   }
 
   public void testGetReturnsNullIfNoFileClip() {

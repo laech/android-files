@@ -2,8 +2,8 @@ package l.files.event;
 
 import static android.content.ClipData.newIntent;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static l.files.common.io.Files.toAbsolutePaths;
-import static l.files.common.io.Files.toFiles;
 
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -30,8 +30,8 @@ final class ClipboardProvider implements Supplier<Clipboard> {
 
       Intent intent = manager.getPrimaryClip().getItemAt(0).getIntent();
       String action = intent.getAction();
-      if (ACTION_CUT.equals(action)) return new Clipboard.Cut(getFiles(intent));
-      if (ACTION_COPY.equals(action)) return new Clipboard.Copy(getFiles(intent));
+      if (ACTION_CUT.equals(action)) return new Clipboard.Cut(files(intent));
+      if (ACTION_COPY.equals(action)) return new Clipboard.Copy(files(intent));
       return null;
 
     } catch (NullPointerException e) {
@@ -57,7 +57,15 @@ final class ClipboardProvider implements Supplier<Clipboard> {
         new Intent(action).putExtra(EXTRA_FILES, paths)));
   }
 
-  public static File[] getFiles(Intent intent) {
-    return toFiles(intent.getStringArrayExtra(EXTRA_FILES));
+  public static Set<File> files(Intent intent) {
+    String[] paths = intent.getStringArrayExtra(EXTRA_FILES);
+    Set<File> files = newHashSetWithExpectedSize(paths.length);
+    for (String path : paths) {
+      File file = new File(path);
+      if (file.exists()) {
+        files.add(file);
+      }
+    }
+    return files;
   }
 }

@@ -23,4 +23,8 @@ public final class Modes {
   public static MultiChoiceAction newCutAction(AbsListView list, Bus bus) {
     return new CutAction(list, bus);
   }
+
+  public static MultiChoiceAction newCopyAction(AbsListView list, Bus bus) {
+    return new CopyAction(list, bus);
+  }
 }

@@ -16,7 +16,7 @@ import l.files.common.base.Value;
 public abstract class Clipboard extends Value<Set<File>> {
 
   public static final class Cut extends Clipboard {
-    public Cut(File... files) {
+    public Cut(Set<File> files) {
       super(files);
     }
 
@@ -26,7 +26,7 @@ public abstract class Clipboard extends Value<Set<File>> {
   }
 
   public static final class Copy extends Clipboard {
-    public Copy(File... files) {
+    public Copy(Set<File> files) {
       super(files);
     }
 
@@ -35,7 +35,7 @@ public abstract class Clipboard extends Value<Set<File>> {
     }
   }
 
-  private Clipboard(File... files) {
+  private Clipboard(Set<File> files) {
     super(ImmutableSet.copyOf(checkNotNull(files, "files")));
     checkArgument(!value().isEmpty());
   }

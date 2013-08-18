@@ -143,6 +143,7 @@ public final class FilesFragment
   private void configureOptionsMenu() {
     List<OptionsMenu> menus = newArrayList(
         newBookmarkMenu(getBus(), dir),
+        newPasteMenu(getBus(), dir),
         newSortMenu(getFragmentManager()),
         newShowHiddenFilesMenu(getBus()));
 
@@ -159,9 +160,10 @@ public final class FilesFragment
     list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
         this,
         newCountSelectedItemsAction(list),
+        newSelectAllAction(list),
         newCutAction(list, getBus()),
-        newDeleteAction(list, getFragmentManager()),
-        newSelectAllAction(list)));
+        newCopyAction(list, getBus()),
+        newDeleteAction(list, getFragmentManager())));
   }
 
   @Override public void onCreate(ActionMode mode, Menu menu) {
