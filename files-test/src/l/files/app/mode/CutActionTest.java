@@ -18,7 +18,7 @@ import android.widget.ListView;
 import com.squareup.otto.Bus;
 import java.io.File;
 import l.files.R;
-import l.files.setting.CutRequest;
+import l.files.event.CutRequest;
 import org.mockito.ArgumentCaptor;
 
 public final class CutActionTest extends AndroidTestCase {

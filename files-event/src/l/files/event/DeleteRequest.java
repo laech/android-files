@@ -1,4 +1,4 @@
-package l.files.app;
+package l.files.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

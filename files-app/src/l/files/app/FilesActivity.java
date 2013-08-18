@@ -16,6 +16,7 @@ import java.io.File;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.base.Consumer;
+import l.files.event.DeleteRequest;
 
 public final class FilesActivity extends BaseFragmentActivity {
 

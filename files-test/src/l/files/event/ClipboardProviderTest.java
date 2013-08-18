@@ -1,11 +1,11 @@
-package l.files.setting;
+package l.files.event;
 
 import static android.content.ClipData.newIntent;
 import static android.content.ClipData.newPlainText;
 import static android.content.ClipDescription.MIMETYPE_TEXT_INTENT;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.toAbsolutePaths;
-import static l.files.setting.ClipboardProvider.*;
+import static l.files.event.ClipboardProvider.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

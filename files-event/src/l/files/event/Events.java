@@ -1,4 +1,4 @@
-package l.files.setting;
+package l.files.event;
 
 import static l.files.common.io.Files.toAbsolutePaths;
 
@@ -8,8 +8,8 @@ import com.squareup.otto.Bus;
 import java.io.File;
 import java.util.Set;
 
-public final class Settings {
-  private Settings() {}
+public final class Events {
+  private Events() {}
 
   public static void registerShowHiddenFilesProvider(
       Bus bus, SharedPreferences pref, boolean showByDefault) {

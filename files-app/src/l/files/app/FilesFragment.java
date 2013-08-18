@@ -24,8 +24,9 @@ import l.files.common.app.OptionsMenus;
 import l.files.common.base.Value;
 import l.files.common.widget.MultiChoiceAction;
 import l.files.common.widget.MultiChoiceActions;
-import l.files.setting.ShowHiddenFilesSetting;
-import l.files.setting.SortSetting;
+import l.files.event.DeleteRequest;
+import l.files.event.ShowHiddenFilesSetting;
+import l.files.event.SortSetting;
 import l.files.sort.Sorters;
 
 public final class FilesFragment

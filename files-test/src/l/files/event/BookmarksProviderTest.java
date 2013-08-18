@@ -1,4 +1,4 @@
-package l.files.setting;
+package l.files.event;
 
 import static android.content.SharedPreferences.Editor;
 import static com.google.common.collect.Sets.newHashSet;

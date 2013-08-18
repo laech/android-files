@@ -1,4 +1,4 @@
-package l.files.setting;
+package l.files.event;
 
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;

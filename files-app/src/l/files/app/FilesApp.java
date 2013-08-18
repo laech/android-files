@@ -3,7 +3,7 @@ package l.files.app;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.UserDirs.*;
-import static l.files.setting.Settings.*;
+import static l.files.event.Events.*;
 import static l.files.sort.Sorters.NAME;
 
 import android.app.Application;

@@ -1,11 +1,11 @@
-package l.files.setting;
+package l.files.event;
 
 import static android.content.ClipData.newIntent;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
-import static l.files.setting.Clipboard.copy;
-import static l.files.setting.Clipboard.cut;
+import static l.files.event.Clipboard.copy;
+import static l.files.event.Clipboard.cut;
 
 import android.content.ClipboardManager;
 import android.content.Intent;

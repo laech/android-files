@@ -1,4 +1,4 @@
-package l.files.setting;
+package l.files.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.squareup.otto.Produce;

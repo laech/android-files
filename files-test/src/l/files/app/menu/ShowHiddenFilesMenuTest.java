@@ -5,8 +5,8 @@ import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.setting.ShowHiddenFilesRequest;
-import l.files.setting.ShowHiddenFilesSetting;
+import l.files.event.ShowHiddenFilesRequest;
+import l.files.event.ShowHiddenFilesSetting;
 import org.mockito.InOrder;
 
 import static android.view.Menu.NONE;

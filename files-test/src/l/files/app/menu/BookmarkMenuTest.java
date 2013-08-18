@@ -5,9 +5,9 @@ import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import junit.framework.TestCase;
 import l.files.R;
-import l.files.setting.AddBookmarkRequest;
-import l.files.setting.BookmarksSetting;
-import l.files.setting.RemoveBookmarkRequest;
+import l.files.event.AddBookmarkRequest;
+import l.files.event.BookmarksSetting;
+import l.files.event.RemoveBookmarkRequest;
 import org.mockito.InOrder;
 
 import java.io.File;

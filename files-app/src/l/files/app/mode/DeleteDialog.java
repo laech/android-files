@@ -12,7 +12,7 @@ import android.support.v4.app.DialogFragment;
 import com.squareup.otto.Bus;
 import java.io.File;
 import l.files.R;
-import l.files.app.DeleteRequest;
+import l.files.event.DeleteRequest;
 
 public final class DeleteDialog extends DialogFragment {
 

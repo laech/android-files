@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.List;
 import l.files.R;
 import l.files.common.widget.MultiChoiceActionAdapter;
-import l.files.setting.CutRequest;
+import l.files.event.CutRequest;
 
 final class CutAction
     extends MultiChoiceActionAdapter implements OnMenuItemClickListener {
