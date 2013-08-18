@@ -1,5 +1,6 @@
 package l.files.event;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
@@ -11,5 +12,6 @@ public final class DeleteRequest extends Value<Set<File>> {
 
   public DeleteRequest(File... files) {
     super(ImmutableSet.copyOf(checkNotNull(files, "files")));
+    checkArgument(!value().isEmpty());
   }
 }

@@ -2,6 +2,7 @@ package l.files.event;
 
 import static l.files.common.io.Files.toAbsolutePaths;
 
+import android.app.Application;
 import android.content.ClipboardManager;
 import android.content.SharedPreferences;
 import com.squareup.otto.Bus;
@@ -29,5 +30,9 @@ public final class Events {
 
   public static void registerClipboardProvider(Bus bus, ClipboardManager manager) {
     bus.register(new ClipboardProvider(manager));
+  }
+
+  public static void registerIoProvider(Bus bus, Application context) {
+    bus.register(new IoProvider(context));
   }
 }

@@ -1,38 +1,41 @@
-package l.files.app;
+package l.files.event.internal;
 
-import static l.files.app.FileService.Cut;
-import static l.files.app.FileService.cut;
+import static l.files.event.internal.FileService.Copy;
+import static l.files.event.internal.FileService.copy;
 
 import java.io.File;
+import java.io.IOException;
 
-public final class FileServiceCutTest extends FileServiceTest<Cut> {
+public final class FileServiceCopyTest extends FileServiceTest<Copy> {
 
-  public FileServiceCutTest() {
-    super(Cut.class);
+  public FileServiceCopyTest() {
+    super(Copy.class);
   }
 
-  public void testCutsFile() {
+  public void testCopiesFile() {
     File src = dir.newFile();
     File dst = dir.newDir();
 
-    startService(cut(getContext(), src, dst));
+    startService(copy(getContext(), src, dst));
 
     waitForExistence(new File(dst, src.getName()));
-    assertFalse(src.exists());
+    assertTrue(src.exists());
   }
 
-  public void testCutsDir() throws Exception {
+  public void testCopiesDir() throws IOException {
     File dst = dir.newDir();
     File src = dir.newDir();
     assertTrue(new File(src, "1").createNewFile());
     assertTrue(new File(src, "2").createNewFile());
 
-    startService(cut(getContext(), src, dst));
+    startService(copy(getContext(), src, dst));
 
     File expected = new File(dst, src.getName());
     waitForExistence(new File(expected, "1"));
     waitForExistence(new File(expected, "2"));
-    assertFalse(src.exists());
+    assertTrue(src.exists());
+    assertTrue(new File(src, "1").exists());
+    assertTrue(new File(src, "2").exists());
   }
 
   public void testRenamesFileIfDestinationFileExists() throws Exception {
@@ -40,7 +43,7 @@ public final class FileServiceCutTest extends FileServiceTest<Cut> {
     File dst = dir.newDir();
     assertTrue(new File(dst, "a").createNewFile());
 
-    startService(cut(getContext(), src, dst));
+    startService(copy(getContext(), src, dst));
 
     File expected = new File(dst, "a 2");
     waitForExistence(expected);
@@ -52,7 +55,7 @@ public final class FileServiceCutTest extends FileServiceTest<Cut> {
     File dst = dir.newDir();
     assertTrue(new File(dst, "a").mkdir());
 
-    startService(cut(getContext(), src, dst));
+    startService(copy(getContext(), src, dst));
 
     File expected = new File(dst, "a 2");
     waitForExistence(expected);

@@ -1,7 +1,5 @@
-package l.files.app;
+package l.files.event.internal;
 
-import static l.files.app.Intents.EXTRA_DESTINATION;
-import static l.files.app.Intents.EXTRA_FILE;
 import static org.apache.commons.io.FileUtils.*;
 
 import android.app.IntentService;
@@ -94,6 +92,9 @@ public abstract class FileService extends IntentService {
     }
     return file;
   }
+
+  static final String EXTRA_FILE = "l.files.intent.extra.FILE";
+  static final String EXTRA_DESTINATION = "l.files.intent.extra.DESTINATION";
 
   public FileService() {
     super("FileService");

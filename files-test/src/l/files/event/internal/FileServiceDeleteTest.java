@@ -1,7 +1,7 @@
-package l.files.app;
+package l.files.event.internal;
 
-import static l.files.app.FileService.Delete;
-import static l.files.app.FileService.delete;
+import static l.files.event.internal.FileService.Delete;
+import static l.files.event.internal.FileService.delete;
 
 import java.io.File;
 

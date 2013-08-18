@@ -16,7 +16,6 @@ import java.io.File;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.base.Consumer;
-import l.files.event.DeleteRequest;
 
 public final class FilesActivity extends BaseFragmentActivity {
 
@@ -65,12 +64,6 @@ public final class FilesActivity extends BaseFragmentActivity {
       pager.setCurrentItem(POSITION_FILES, true);
     } else {
       helper.take(request);
-    }
-  }
-
-  @Subscribe public void handle(DeleteRequest request) {
-    for (File file : request.value()) {
-      FileService.delete(this, file); // TODO handle this elsewhere
     }
   }
 

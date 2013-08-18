@@ -47,6 +47,7 @@ public final class FilesApp extends Application {
     registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);
     registerShowHiddenFilesProvider(bus, pref, false);
     registerClipboardProvider(bus, getClipboardManager());
+    registerIoProvider(bus, this);
 
     if (DEBUG) {
       StrictMode.enableDefaults();

@@ -4,8 +4,6 @@ import static android.content.ClipData.newIntent;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
-import static l.files.event.Clipboard.copy;
-import static l.files.event.Clipboard.cut;
 
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -32,8 +30,8 @@ final class ClipboardProvider implements Supplier<Clipboard> {
 
       Intent intent = manager.getPrimaryClip().getItemAt(0).getIntent();
       String action = intent.getAction();
-      if (ACTION_CUT.equals(action)) return cut(getFiles(intent));
-      if (ACTION_COPY.equals(action)) return copy(getFiles(intent));
+      if (ACTION_CUT.equals(action)) return new Clipboard.Cut(getFiles(intent));
+      if (ACTION_COPY.equals(action)) return new Clipboard.Copy(getFiles(intent));
       return null;
 
     } catch (NullPointerException e) {

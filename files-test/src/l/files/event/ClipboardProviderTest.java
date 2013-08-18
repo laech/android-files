@@ -69,13 +69,21 @@ public final class ClipboardProviderTest extends TestCase {
     assertEquals(1, clip.getItemCount());
   }
 
-  public void testGetsCurrentClip() {
-    String[] paths = toAbsolutePaths(new File("/"));
+  public void testGetsCurrentClipCut() {
+    testGetsCurrentClip(ACTION_CUT, Clipboard.Cut.class);
+  }
+
+  public void testGetsCurrentClipCopy() {
+    testGetsCurrentClip(ACTION_COPY, Clipboard.Copy.class);
+  }
+
+  private void testGetsCurrentClip(
+      String action, Class<? extends Clipboard> clazz) {
     given(manager.getPrimaryClip()).willReturn(newIntent(null,
-        new Intent(ACTION_CUT).putExtra(EXTRA_FILES, paths)));
+        new Intent(action).putExtra(EXTRA_FILES, new String[]{"/"})));
 
     Clipboard clip = provider.get();
-    assertTrue(clip.isCut());
+    assertTrue(clazz.isInstance(clip));
     assertEquals(newHashSet(new File("/")), clip.value());
   }
 

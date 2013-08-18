@@ -13,26 +13,26 @@ import l.files.common.base.Value;
  * providing the current clipboard to the event handler, if there is file
  * content in the clipboard.
  */
-public class Clipboard extends Value<Set<File>> {
+public abstract class Clipboard extends Value<Set<File>> {
 
-  private static final class Cut extends Clipboard {
-    private Cut(File... files) {
+  public static final class Cut extends Clipboard {
+    public Cut(File... files) {
       super(files);
+    }
+
+    @Override public PasteRequest.Cut paste(File dir) {
+      return new PasteRequest.Cut(value(), dir);
     }
   }
 
-  private static final class Copy extends Clipboard {
-    private Copy(File... files) {
+  public static final class Copy extends Clipboard {
+    public Copy(File... files) {
       super(files);
     }
-  }
 
-  public static Clipboard cut(File... files) {
-    return new Cut(files);
-  }
-
-  public static Clipboard copy(File... files) {
-    return new Copy(files);
+    @Override public PasteRequest.Copy paste(File dir) {
+      return new PasteRequest.Copy(value(), dir);
+    }
   }
 
   private Clipboard(File... files) {
@@ -40,11 +40,5 @@ public class Clipboard extends Value<Set<File>> {
     checkArgument(!value().isEmpty());
   }
 
-  public boolean isCut() {
-    return this instanceof Cut;
-  }
-
-  public boolean isCopy() {
-    return this instanceof Copy;
-  }
+  public abstract PasteRequest paste(File dir);
 }
