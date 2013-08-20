@@ -25,55 +25,55 @@ public final class FileDrawableFunctionTest extends TestCase {
   }
 
   public void testGetsImageForDirectory() {
-    assertDirImg(R.drawable.ic_directory, getDir());
+    assertDirImg(R.drawable.ic_dir, getDir());
   }
 
   public void testGetsImageForDirectoryHome() {
-    assertDirImg(R.drawable.ic_directory_home, DIR_HOME);
+    assertDirImg(R.drawable.ic_dir_home, DIR_HOME);
   }
 
   public void testGetsImageForDirectoryRoot() {
-    assertDirImg(R.drawable.ic_directory_device, DIR_ROOT);
+    assertDirImg(R.drawable.ic_dir_device, DIR_ROOT);
   }
 
   public void testGetsImageForDirectoryAlarms() {
-    assertDirImg(R.drawable.ic_directory_alarms, DIR_ALARMS);
+    assertDirImg(R.drawable.ic_dir_alarms, DIR_ALARMS);
   }
 
   public void testGetsImageForDirectoryAndroid() {
-    assertDirImg(R.drawable.ic_directory_android, DIR_ANDROID);
+    assertDirImg(R.drawable.ic_dir_android, DIR_ANDROID);
   }
 
   public void testGetsImageForDirectoryDcim() {
-    assertDirImg(R.drawable.ic_directory_dcim, DIR_DCIM);
+    assertDirImg(R.drawable.ic_dir_dcim, DIR_DCIM);
   }
 
   public void testGetsImageForDirectoryDownload() {
-    assertDirImg(R.drawable.ic_directory_download, DIR_DOWNLOADS);
+    assertDirImg(R.drawable.ic_dir_download, DIR_DOWNLOADS);
   }
 
   public void testGetsImageForDirectoryMovies() {
-    assertDirImg(R.drawable.ic_directory_movies, DIR_MOVIES);
+    assertDirImg(R.drawable.ic_dir_movies, DIR_MOVIES);
   }
 
   public void testGetsImageForDirectoryMusic() {
-    assertDirImg(R.drawable.ic_directory_music, DIR_MUSIC);
+    assertDirImg(R.drawable.ic_dir_music, DIR_MUSIC);
   }
 
   public void testGetsImageForDirectoryNotifications() {
-    assertDirImg(R.drawable.ic_directory_notifications, DIR_NOTIFICATIONS);
+    assertDirImg(R.drawable.ic_dir_notifications, DIR_NOTIFICATIONS);
   }
 
   public void testGetsImageForDirectoryPictures() {
-    assertDirImg(R.drawable.ic_directory_pictures, DIR_PICTURES);
+    assertDirImg(R.drawable.ic_dir_pictures, DIR_PICTURES);
   }
 
   public void testGetsImageForDirectoryPodcasts() {
-    assertDirImg(R.drawable.ic_directory_podcasts, DIR_PODCASTS);
+    assertDirImg(R.drawable.ic_dir_podcasts, DIR_PODCASTS);
   }
 
   public void testGetsImageForDirectoryRingtones() {
-    assertDirImg(R.drawable.ic_directory_ringtones, DIR_RINGTONES);
+    assertDirImg(R.drawable.ic_dir_ringtones, DIR_RINGTONES);
   }
 
   public void testGetsImageForFile() {
