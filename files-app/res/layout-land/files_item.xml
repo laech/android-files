@@ -5,6 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+  <!-- TODO better handle this layout -->
+
+  <TextView
+      android:id="@android:id/icon"
+      style="@style/FilesListItemIconFont"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerVertical="true"/>
+
   <TextView
       android:id="@android:id/title"
       style="@style/FilesListItemText"

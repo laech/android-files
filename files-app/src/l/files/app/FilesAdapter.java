@@ -1,13 +1,5 @@
 package l.files.app;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import com.google.common.base.Function;
-import l.files.R;
-import l.files.common.widget.AnimatedAdapter;
-
-import java.io.File;
-
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.app.format.Formats.*;
@@ -16,30 +8,41 @@ import static l.files.common.io.Files.name;
 import static l.files.common.widget.Decorators.*;
 import static l.files.common.widget.Viewers.decorate;
 
+import android.content.Context;
+import android.graphics.Typeface;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import com.google.common.base.Function;
+import com.squareup.picasso.Picasso;
+import java.io.File;
+import l.files.R;
+import l.files.common.widget.AnimatedAdapter;
+
 final class FilesAdapter extends AnimatedAdapter {
 
   /**
    * @param names the function to return the name of the file
-   * @param drawables the function to return the icon of the file
+   * @param fonts the function to return the icon font of the file
    * @param summaries the function to return additional summary of the file
    */
   FilesAdapter(
       Function<? super File, ? extends CharSequence> names,
-      Function<? super File, ? extends Drawable> drawables,
+      Function<? super File, ? extends Typeface> fonts,
       Function<? super File, ? extends CharSequence> summaries) {
 
     checkNotNull(names, "names");
-    checkNotNull(drawables, "drawables");
+    checkNotNull(fonts, "fonts");
     checkNotNull(summaries, "summaries");
 
     addViewerForHeader();
-    addViewerForFile(names, drawables, summaries);
+    addViewerForFile(names, fonts, summaries);
   }
 
   static FilesAdapter get(Context context) {
     return new FilesAdapter(
         name(),
-        drawable(context.getResources()),
+        iconFont(context.getAssets()),
         summary(context.getResources(),
             date(context),
             size(context)
@@ -57,12 +60,13 @@ final class FilesAdapter extends AnimatedAdapter {
   @SuppressWarnings("unchecked")
   private void addViewerForFile(
       Function<? super File, ? extends CharSequence> names,
-      Function<? super File, ? extends Drawable> drawables,
+      Function<? super File, ? extends Typeface> fonts,
       Function<? super File, ? extends CharSequence> summaries) {
 
     addViewer(File.class, decorate(R.layout.files_item,
+        font(android.R.id.icon, fonts),
         text(android.R.id.title, names),
-        draw(android.R.id.title, drawables),
+        enable(android.R.id.icon, canRead()),
         enable(android.R.id.title, canRead()),
         enable(android.R.id.content, canRead()),
         nullable(android.R.id.summary,

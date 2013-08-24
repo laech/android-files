@@ -1,23 +1,22 @@
 package l.files.app;
 
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
+import static android.graphics.Typeface.MONOSPACE;
+import static java.util.Arrays.asList;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+import android.graphics.Typeface;
 import android.test.AndroidTestCase;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Function;
-
 import java.io.File;
-
-import static java.util.Arrays.asList;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 public final class FilesAdapterTest extends AndroidTestCase {
 
   private Function<File, String> names;
-  private Function<File, Drawable> drawables;
+  private Function<File, Typeface> fonts;
 
   private ListView list;
   private File file;
@@ -29,8 +28,8 @@ public final class FilesAdapterTest extends AndroidTestCase {
     list = new ListView(getContext());
     file = mock(File.class);
     names = mock(Function.class);
-    drawables = mock(Function.class);
-    adapter = new FilesAdapter(names, drawables, mock(Function.class));
+    fonts = mock(Function.class);
+    adapter = new FilesAdapter(names, fonts, mock(Function.class));
     adapter.replace(list, asList(file), false);
   }
 
@@ -38,41 +37,45 @@ public final class FilesAdapterTest extends AndroidTestCase {
    * If container view is disabled, on selection of the item the background is
    * grey.
    */
-  public void testGetView_containerViewIsDisabledIfFileCanNotBeRead() {
-    given(file.canRead()).willReturn(false);
-    assertFalse(getView().isEnabled());
+  public void testContainerViewIsDisabledIfFileCanNotBeRead() {
+    testViewEnabled(false, android.R.id.content);
   }
 
-  public void testGetView_containerViewIsEnabledIfFileCanBeRead() {
-    given(file.canRead()).willReturn(true);
-    assertTrue(getView().isEnabled());
+  public void testContainerViewIsEnabledIfFileCanBeRead() {
+    testViewEnabled(true, android.R.id.content);
   }
 
-  public void testGetView_titleViewShowsFileName() {
+  public void testTitleViewShowsFileName() {
     given(names.apply(file)).willReturn("test");
     assertEquals("test", ((TextView) findView(android.R.id.title)).getText());
   }
 
-  public void testGetView_titleViewShowsIcon() {
-    ColorDrawable drawable = new ColorDrawable();
-    given(drawables.apply(file)).willReturn(drawable);
-    TextView text = findView(android.R.id.title);
-    assertEquals(
-        asList(drawable, null, null, null),
-        asList(text.getCompoundDrawables()));
+  public void testIconViewShowsIcon() {
+    given(fonts.apply(file)).willReturn(MONOSPACE);
+    TextView text = findView(android.R.id.icon);
+    assertEquals(MONOSPACE, text.getTypeface());
   }
 
   /*
    * If the title view is disabled, the file name will be grey out.
    */
-  public void testGetView_titleViewIsDisabledIfFileCanNotBeRead() {
-    given(file.canRead()).willReturn(false);
-    assertFalse(findView(android.R.id.title).isEnabled());
+  public void testTitleViewIsDisabledIfFileCanNotBeRead() {
+    testViewEnabled(false, android.R.id.title);
   }
 
-  public void testGetView_titleViewIsEnabledIfFileCanBeRead() {
-    given(file.canRead()).willReturn(true);
-    assertTrue(findView(android.R.id.title).isEnabled());
+  public void testTitleViewIsEnabledIfFileCanBeRead() {
+    testViewEnabled(true, android.R.id.title);
+  }
+
+  /*
+   * If the icon view is disabled, icon will be of a different color.
+   */
+  public void testIconViewIsDisabledIfFileCanNotBeRead() {
+    testViewEnabled(false, android.R.id.icon);
+  }
+
+  public void testIconViewIsEnabledIfFileCanBeRead() {
+    testViewEnabled(true, android.R.id.icon);
   }
 
   public void testIsEnabled_trueForFile() {
@@ -89,8 +92,12 @@ public final class FilesAdapterTest extends AndroidTestCase {
     return adapter.getView(0, null, list);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends View> T findView(int id) {
+  @SuppressWarnings("unchecked") private <T extends View> T findView(int id) {
     return (T) getView().findViewById(id);
+  }
+
+  private void testViewEnabled(boolean enabled, final int id) {
+    given(file.canRead()).willReturn(enabled);
+    assertEquals(enabled, findView(id).isEnabled());
   }
 }

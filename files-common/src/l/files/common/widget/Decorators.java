@@ -1,5 +1,6 @@
 package l.files.common.widget;
 
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -55,5 +56,15 @@ public final class Decorators {
    */
   public static <T> Decorator<T> enable(int viewId, Predicate<T> predicate) {
     return new EnableStateDecorator<T>(viewId, predicate);
+  }
+
+  /**
+   * Returns a decorator upon execution will set the font of the text view
+   * identified by the given id, using the font returned by applying the
+   * given function to the item.
+   */
+  public static <T> Decorator<T> font(
+      int textViewId, Function<? super T, ? extends Typeface> fonts) {
+    return new FontDecorator<T>(textViewId, fonts);
   }
 }

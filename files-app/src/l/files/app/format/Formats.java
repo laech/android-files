@@ -1,10 +1,11 @@
 package l.files.app.format;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
-
 import java.io.File;
 
 public final class Formats {
@@ -51,5 +52,12 @@ public final class Formats {
    */
   public static Function<File, Drawable> drawable(Resources res) {
     return new FileDrawableFunction(res);
+  }
+
+  /**
+   * Function to return icon fonts for files.
+   */
+  public static Function<File, Typeface> iconFont(AssetManager assets) {
+    return new IconFontFunction(assets);
   }
 }

@@ -24,4 +24,10 @@
     <item quantity="other">Delete these %s files permanently?</item>
   </plurals>
 
+  <!--
+    The character of all icon fonts in assets folder,
+    created at http://icomoon.io/app/ with the "IcoMoon - Free" icon set
+   -->
+  <string name="ic_font_char">0</string>
+
 </resources>
