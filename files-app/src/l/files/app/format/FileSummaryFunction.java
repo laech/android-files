@@ -30,9 +30,9 @@ final class FileSummaryFunction implements Function<File, String> {
     if (file.isDirectory()) return modified;
 
     return res.getString(
-        R.string.file_size_updated,
-        size.apply(file.length()),
-        modified
+        R.string.file_summary,
+        modified,
+        size.apply(file.length())
     );
   }
 }

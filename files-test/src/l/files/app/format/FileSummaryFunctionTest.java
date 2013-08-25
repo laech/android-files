@@ -1,13 +1,12 @@
 package l.files.app.format;
 
-import android.test.AndroidTestCase;
-import com.google.common.base.Function;
-import l.files.R;
-
-import java.io.File;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import android.test.AndroidTestCase;
+import com.google.common.base.Function;
+import java.io.File;
+import l.files.R;
 
 public final class FileSummaryFunctionTest extends AndroidTestCase {
 
@@ -34,7 +33,7 @@ public final class FileSummaryFunctionTest extends AndroidTestCase {
     given(file.lastModified()).willReturn(2L);
     given(date.apply(2L)).willReturn("b");
 
-    String expected = getContext().getString(R.string.file_size_updated, "a", "b");
+    String expected = getContext().getString(R.string.file_summary, "b", "a");
     String actual = summary.apply(file);
     assertEquals(expected, actual);
   }

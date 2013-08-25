@@ -17,7 +17,7 @@
   <string name="bookmark">Bookmark</string>
   <string name="device">Device</string>
   <string name="new_dir">New folder</string>
-  <string name="file_size_updated">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
+  <string name="file_summary">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
   <string name="sort_by">Sort by</string>
   <plurals name="confirm_delete_question">
     <item quantity="one">Delete this file permanently?</item>

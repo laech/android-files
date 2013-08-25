@@ -26,14 +26,7 @@
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
-  <style name="ShadowText" parent="android:Widget.Holo.TextView">
-    <item name="android:shadowColor">@color/text_shadow</item>
-    <item name="android:shadowDx">0</item>
-    <item name="android:shadowDy">1</item>
-    <item name="android:shadowRadius">1</item>
-  </style>
-
-  <style name="NormalText" parent="ShadowText">
+  <style name="NormalText">
     <item name="android:fontFamily">sans-serif-condensed</item>
     <item name="android:textSize">16sp</item>
     <item name="android:textColor">?android:attr/textColorSecondary</item>
@@ -48,33 +41,15 @@
     <item name="android:scrollbarStyle">outsideOverlay</item>
   </style>
 
-  <style name="ListItemContainer">
-    <item name="android:paddingLeft">16dp</item>
-    <item name="android:paddingRight">16dp</item>
-    <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
-  </style>
-
   <style name="ListItemText" parent="NormalText">
-    <item name="android:drawablePadding">8dp</item>
     <item name="android:gravity">center_vertical</item>
-    <item name="android:singleLine">true</item>
   </style>
 
   <style name="FilesList" parent="ListView">
     <item name="android:fastScrollEnabled">true</item>
   </style>
 
-  <style name="FilesListItemContainer" parent="ListItemContainer">
-    <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
-  </style>
-
-  <style name="FilesListItemText" parent="ListItemText">
-    <item name="android:drawablePadding">16dp</item>
-    <item name="android:ellipsize">middle</item>
-    <item name="android:shadowColor">@color/text_shadow_light</item>
-  </style>
-
-  <style name="FileListItemHeaderText" parent="ShadowText">
+  <style name="FileListItemHeaderText">
     <item name="android:paddingTop">4dp</item>
     <item name="android:paddingBottom">4dp</item>
     <item name="android:paddingLeft">8dp</item>
@@ -82,21 +57,6 @@
     <item name="android:textColor">?android:attr/textColorTertiary</item>
     <item name="android:textStyle">bold</item>
     <item name="android:background">@android:color/white</item>
-  </style>
-
-  <style name="FilesListItemSecondaryText" parent="ListItemText">
-    <item name="android:textColor">?android:attr/textColorTertiary</item>
-    <item name="android:textSize">13sp</item>
-    <item name="android:minHeight">0dp</item>
-    <item name="android:shadowColor">@color/text_shadow_light</item>
-    <item name="android:layout_marginLeft">8dp</item>
-  </style>
-
-  <style name="FilesListItemIconFont" parent="android:Widget.Holo.TextView">
-    <item name="android:textColor">@color/ic_font</item>
-    <item name="android:textSize">18sp</item>
-    <item name="android:text">@string/ic_font_char</item>
-    <item name="android:layout_marginRight">16dp</item>
   </style>
 
   <style name="Sidebar" parent="ListView">
@@ -107,6 +67,7 @@
     <item name="android:ellipsize">end</item>
     <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
     <item name="android:paddingLeft">16dp</item>
+    <item name="android:singleLine">true</item>
   </style>
 
   <style name="SidebarHeader" parent="NormalText">

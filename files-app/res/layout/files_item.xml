@@ -1,22 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/content"
-    style="@style/FilesListItemContainer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:background="?android:attr/activatedBackgroundIndicator">
 
   <TextView
       android:id="@android:id/icon"
-      style="@style/FilesListItemIconFont"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerVertical="true"/>
+      android:layout_width="?android:attr/listPreferredItemHeight"
+      android:layout_height="?android:attr/listPreferredItemHeight"
+      android:layout_marginLeft="4dp"
+      android:layout_centerVertical="true"
+      android:gravity="center"
+      android:textColor="@color/ic_font"
+      android:textSize="20sp"
+      android:text="@string/ic_font_char"/>
 
-  <TextView
-      android:id="@android:id/title"
-      style="@style/FilesListItemText"
+  <ImageView
+      android:id="@android:id/background"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_centerVertical="true"/>
+      android:layout_centerVertical="true"
+      android:contentDescription="@null"/>
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="?android:attr/listPreferredItemHeight"
+      android:layout_centerVertical="true"
+      android:paddingLeft="8dp">
+
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-condensed"
+        android:maxLines="2"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@android:id/summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@android:id/title"
+        android:fontFamily="sans-serif-light"
+        android:textColor="?android:attr/textColorTertiary"
+        android:textSize="11sp"/>
+
+  </RelativeLayout>
 
 </RelativeLayout>
