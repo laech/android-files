@@ -29,7 +29,7 @@ public final class FilesAdapterTest extends AndroidTestCase {
     file = mock(File.class);
     names = mock(Function.class);
     fonts = mock(Function.class);
-    adapter = new FilesAdapter(names, fonts, mock(Function.class));
+    adapter = new FilesAdapter(names, fonts, mock(Function.class), 100);
     adapter.replace(list, asList(file), false);
   }
 

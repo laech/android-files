@@ -4,6 +4,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import java.io.File;
 
 /**
  * Static utility methods pertaining to {@code Decorator} instances.
@@ -60,11 +61,19 @@ public final class Decorators {
 
   /**
    * Returns a decorator upon execution will set the font of the text view
-   * identified by the given id, using the font returned by applying the
-   * given function to the item.
+   * identified by the given id, using the font returned by applying the given
+   * function to the item.
    */
   public static <T> Decorator<T> font(
       int textViewId, Function<? super T, ? extends Typeface> fonts) {
     return new FontDecorator<T>(textViewId, fonts);
+  }
+
+  /**
+   * Returns a decorator upon execution will load a square thumbnail image from
+   * the given file (if it's an image) into an image view.
+   */
+  public static Decorator<File> image(int imageViewId, int size) {
+    return new ImageDecorator(imageViewId, size);
   }
 }
