@@ -38,7 +38,7 @@ public final class FileServiceCopyTest extends FileServiceTest<Copy> {
     assertTrue(new File(src, "2").exists());
   }
 
-  public void testRenamesFileIfDestinationFileExists() throws Exception {
+  public void testRenamesExtensionLessFileIfDestinationFileExists() throws Exception {
     File src = dir.newFile("a");
     File dst = dir.newDir();
     assertTrue(new File(dst, "a").createNewFile());
@@ -48,6 +48,23 @@ public final class FileServiceCopyTest extends FileServiceTest<Copy> {
     File expected = new File(dst, "a 2");
     waitForExistence(expected);
     assertTrue(expected.isFile());
+    testRenamesFile("a", "a 2");
+  }
+
+  public void testRenamesFileWithExtensionIfDestinationFileExists() throws Exception {
+    testRenamesFile("a.txt", "a 2.txt");
+  }
+
+  private void testRenamesFile(String original, String expected) throws IOException {
+    File src = dir.newFile(original);
+    File dst = dir.newDir();
+    assertTrue(new File(dst, original).createNewFile());
+
+    startService(copy(getContext(), src, dst));
+
+    File file = new File(dst, expected);
+    waitForExistence(file);
+    assertTrue(file.isFile());
   }
 
   public void testRenamesDirIfDestinationDirExists() throws Exception {

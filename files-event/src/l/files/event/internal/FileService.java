@@ -1,6 +1,8 @@
 package l.files.event.internal;
 
 import static org.apache.commons.io.FileUtils.*;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -86,9 +88,12 @@ public abstract class FileService extends IntentService {
   }
 
   private static File getDestinationFile(File srcFile, File dstDir) {
+    String name = srcFile.getName();
+    String base = getBaseName(name);
+    String ext = getExtension(name);
     File file = new File(dstDir, srcFile.getName());
     for (int i = 2; file.exists(); ++i) {
-      file = new File(dstDir, srcFile.getName() + " " + i);
+      file = new File(dstDir, base + " " + i + (ext.equals("") ? "" : "." + ext));
     }
     return file;
   }
