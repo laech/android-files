@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@android:id/title"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@style/SideBarItem"
-    tools:ignore="SelectableText"/>
+    android:layout_height="?android:attr/listPreferredItemHeightSmall"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="16dp">
+
+  <TextView
+      android:id="@android:id/icon"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center"
+      android:textColor="@color/ic_font"
+      android:text="@string/ic_font_char"
+      android:textSize="18sp"/>
+
+  <TextView
+      android:id="@android:id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="8dp"
+      android:layout_marginRight="8dp"
+      android:ellipsize="end"
+      android:fontFamily="sans-serif-condensed"
+      android:maxLines="2"
+      android:singleLine="true"
+      android:textColor="?android:attr/textColorSecondary"
+      android:textSize="16sp"/>
+
+</LinearLayout>

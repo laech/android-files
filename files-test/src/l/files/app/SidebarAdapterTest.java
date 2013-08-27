@@ -1,21 +1,20 @@
 package l.files.app;
 
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.test.AndroidTestCase;
-import android.widget.ListView;
-import android.widget.TextView;
-import com.google.common.base.Function;
-
-import java.io.File;
-
-import static java.util.Arrays.asList;
+import static android.graphics.Typeface.MONOSPACE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import android.graphics.Typeface;
+import android.test.AndroidTestCase;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.google.common.base.Function;
+import java.io.File;
+
 public final class SidebarAdapterTest extends AndroidTestCase {
 
-  private Function<File, Drawable> drawables;
+  private Function<File, Typeface> drawables;
   private Function<File, String> labels;
 
   private SidebarAdapter adapter;
@@ -28,41 +27,50 @@ public final class SidebarAdapterTest extends AndroidTestCase {
     adapter = new SidebarAdapter(labels, drawables);
   }
 
-  public void testIsEnabled_trueIfItemIsFile() {
-    adapter.add(mock(File.class));
-    assertTrue(adapter.isEnabled(0));
+  public void testFileIsEnabled() {
+    testEnabled(true, mock(File.class));
   }
 
-  public void testIsEnabled_falseIfItemIsHeader() {
-    adapter.add("hello");
-    assertFalse(adapter.isEnabled(0));
+  public void testHeaderIsNotEnabled() {
+    testEnabled(false, "hello");
   }
 
-  public void testGetView_forFile() {
+  private void testEnabled(boolean enabled, Object obj) {
+    adapter.add(obj);
+    assertEquals(enabled, adapter.isEnabled(adapter.getCount() - 1));
+  }
+
+  public void testGetsFileView() {
     File file = setFile();
-    Drawable drawable = setDrawable(file);
+    Typeface typeface = setIconFont(file);
 
     adapter.add(file);
 
-    TextView view = getTitleView();
-    assertEquals("abc", view.getText());
-    assertEquals(
-        asList(drawable, null, null, null),
-        asList(view.getCompoundDrawables()));
+    TextView view = getIconView();
+    assertEquals(typeface, view.getTypeface());
   }
 
-  public void testGetView_forHeader() {
+  public void testGetsHeaderView() {
     adapter.add("header");
     TextView view = getTitleView();
     assertEquals("header", view.getText());
-    assertEquals(
-        asList(null, null, null, null),
-        asList(view.getCompoundDrawables()));
   }
 
   private TextView getTitleView() {
-    return (TextView) adapter.getView(0, null, new ListView(getContext()))
-        .findViewById(android.R.id.title);
+    return findView(android.R.id.title);
+  }
+
+  private TextView getIconView() {
+    return findView(android.R.id.icon);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T extends View> T findView(int id) {
+    return (T) getView().findViewById(id);
+  }
+
+  private View getView() {
+    return adapter.getView(0, null, new ListView(getContext()));
   }
 
   private File setFile() {
@@ -71,9 +79,8 @@ public final class SidebarAdapterTest extends AndroidTestCase {
     return file;
   }
 
-  private Drawable setDrawable(File file) {
-    Drawable drawable = new ColorDrawable();
-    given(drawables.apply(file)).willReturn(drawable);
-    return drawable;
+  private Typeface setIconFont(File file) {
+    given(drawables.apply(file)).willReturn(MONOSPACE);
+    return MONOSPACE;
   }
 }

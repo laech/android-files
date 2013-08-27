@@ -1,28 +1,27 @@
 package l.files.app;
 
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import com.google.common.base.Function;
-import l.files.R;
-import l.files.common.widget.ObjectAdapter;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.sort;
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.UserDirs.DIR_ROOT;
-import static l.files.app.format.Formats.drawable;
+import static l.files.app.format.Formats.iconFont;
 import static l.files.app.format.Formats.label;
-import static l.files.common.widget.Decorators.draw;
+import static l.files.common.widget.Decorators.font;
 import static l.files.common.widget.Decorators.text;
 import static l.files.common.widget.Viewers.decorate;
+
+import android.content.res.Resources;
+import android.graphics.Typeface;
+import com.google.common.base.Function;
+import java.io.File;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import l.files.R;
+import l.files.common.widget.ObjectAdapter;
 
 final class SidebarAdapter extends ObjectAdapter {
 
@@ -32,26 +31,26 @@ final class SidebarAdapter extends ObjectAdapter {
 
   @SuppressWarnings("unchecked") SidebarAdapter(
       Function<? super File, ? extends CharSequence> labels,
-      Function<? super File, ? extends Drawable> drawables) {
+      Function<? super File, ? extends Typeface> icons) {
 
     this.labels = (Function<File, CharSequence>) checkNotNull(labels, "labels");
-    checkNotNull(drawables, "drawables");
+    checkNotNull(icons, "icons");
 
     addHeaderViewer();
-    addFileViewer(labels, drawables);
+    addFileViewer(labels, icons);
   }
 
   static SidebarAdapter get(Resources res) {
-    return new SidebarAdapter(label(res), drawable(res));
+    return new SidebarAdapter(label(res), iconFont(res.getAssets()));
   }
 
   @SuppressWarnings("unchecked") private void addFileViewer(
       Function<? super File, ? extends CharSequence> labels,
-      Function<? super File, ? extends Drawable> drawables) {
+      Function<? super File, ? extends Typeface> icons) {
 
     addViewer(File.class, decorate(R.layout.sidebar_item,
         text(android.R.id.title, labels),
-        draw(android.R.id.title, drawables)
+        font(android.R.id.icon, icons)
     ));
   }
 
