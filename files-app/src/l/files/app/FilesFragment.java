@@ -77,6 +77,16 @@ public final class FilesFragment
     configureListView();
     configureOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
+
+    if (DEBUG) {
+      final ListView list = getListView();
+      list.post(new Runnable() {
+        @Override public void run() {
+          list.invalidate();
+          list.post(this);
+        }
+      });
+    }
   }
 
   @Override public void onResume() {

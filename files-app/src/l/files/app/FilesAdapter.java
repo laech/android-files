@@ -2,19 +2,26 @@ package l.files.app;
 
 import static com.google.common.base.Functions.toStringFunction;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.app.format.Formats.*;
+import static l.files.app.format.Formats.date;
+import static l.files.app.format.Formats.iconFont;
+import static l.files.app.format.Formats.size;
+import static l.files.app.format.Formats.summary;
 import static l.files.common.io.Files.canRead;
 import static l.files.common.io.Files.name;
-import static l.files.common.widget.Decorators.*;
+import static l.files.common.widget.Decorators.enable;
+import static l.files.common.widget.Decorators.font;
+import static l.files.common.widget.Decorators.text;
 import static l.files.common.widget.Viewers.decorate;
 
+import java.io.File;
+
+import l.files.R;
+import l.files.common.widget.AnimatedAdapter;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.TypedValue;
+
 import com.google.common.base.Function;
-import java.io.File;
-import l.files.R;
-import l.files.common.widget.AnimatedAdapter;
 
 final class FilesAdapter extends AnimatedAdapter {
 
@@ -71,11 +78,8 @@ final class FilesAdapter extends AnimatedAdapter {
         font(android.R.id.icon, fonts),
         text(android.R.id.title, names),
         text(android.R.id.summary, summaries),
-        image(android.R.id.background, thumbnailSize),
-        enable(android.R.id.icon, canRead()),
-        enable(android.R.id.title, canRead()),
-        enable(android.R.id.content, canRead()),
-        enable(android.R.id.summary, canRead())
+//        image(android.R.id.background, thumbnailSize),
+        enable(canRead())
     ));
   }
 

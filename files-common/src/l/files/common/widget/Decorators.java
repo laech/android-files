@@ -51,12 +51,11 @@ public final class Decorators {
   }
 
   /**
-   * Returns a decorator upon execution will enable/disable the view with the
-   * given view ID depending on the result of applying the predicate to the
-   * item.
+   * Returns a decorator upon execution will enable/disable the view tree with
+   * the result of applying the predicate to the item.
    */
-  public static <T> Decorator<T> enable(int viewId, Predicate<T> predicate) {
-    return new EnableStateDecorator<T>(viewId, predicate);
+  public static <T> Decorator<T> enable(Predicate<T> pred) {
+    return new EnableStateDecorator<T>(pred);
   }
 
   /**

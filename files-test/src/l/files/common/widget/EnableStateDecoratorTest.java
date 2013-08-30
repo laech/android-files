@@ -1,42 +1,38 @@
 package l.files.common.widget;
 
+import android.test.AndroidTestCase;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import com.google.common.base.Predicate;
-import junit.framework.TestCase;
+import com.google.common.base.Predicates;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+public final class EnableStateDecoratorTest extends AndroidTestCase {
 
-public final class EnableStateDecoratorTest extends TestCase {
-
-  private int viewId;
-  private Predicate<Object> predicate;
-  private EnableStateDecorator<Object> decorator;
-
-  @SuppressWarnings("unchecked")
-  @Override protected void setUp() throws Exception {
-    super.setUp();
-    viewId = 1;
-    predicate = mock(Predicate.class);
-    decorator = new EnableStateDecorator<Object>(viewId, predicate);
-  }
-
-  public void testEnablesViewIfPredicateReturnsTrue() {
+  public void testEnablesViewTreeIfPredicateReturnsTrue() {
     testEnable(true);
   }
 
-  public void testDisablesViewIfPredicateReturnsFalse() {
+  public void testDisablesViewTreeIfPredicateReturnsFalse() {
     testEnable(false);
   }
 
   private void testEnable(boolean enable) {
-    View view = mock(View.class);
-    given(view.findViewById(viewId)).willReturn(view);
-    given(predicate.apply("x")).willReturn(enable);
+    View child = new TextView(getContext());
+    ViewGroup parent = new LinearLayout(getContext());
+    parent.addView(child);
+    parent.setEnabled(true);
+    child.setEnabled(true);
 
-    decorator.decorate(view, "x");
+    decorator(Predicates.alwaysFalse()).decorate(parent, "x");
 
-    verify(view).setEnabled(enable);
+    assertFalse(parent.isEnabled());
+    assertFalse(child.isEnabled());
+  }
+
+  private <T> EnableStateDecorator<T> decorator(Predicate<T> pred) {
+    return new EnableStateDecorator<T>(pred);
   }
 }
