@@ -16,8 +16,8 @@ public final class Menus {
     return new SortMenu(manager);
   }
 
-  public static OptionsMenu newDirMenu(File parent) {
-    return new NewDirMenu(parent);
+  public static OptionsMenu newDirMenu(FragmentManager manager, File parent) {
+    return new NewDirMenu(manager, parent);
   }
 
   public static OptionsMenu newShowHiddenFilesMenu(Bus bus) {

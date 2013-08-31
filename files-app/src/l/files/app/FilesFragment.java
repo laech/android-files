@@ -1,11 +1,10 @@
 package l.files.app;
 
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
-import static com.google.common.collect.Lists.newArrayList;
-import static l.files.BuildConfig.DEBUG;
 import static java.util.Collections.emptyList;
 import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
+import static l.files.common.app.OptionsMenus.compose;
 import static l.files.common.io.Files.listFiles;
 
 import android.os.AsyncTask;
@@ -15,13 +14,12 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.common.annotations.VisibleForTesting;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Executor;
 import l.files.R;
-import l.files.common.app.OptionsMenu;
-import l.files.common.app.OptionsMenus;
 import l.files.common.base.Value;
 import l.files.common.widget.MultiChoiceActions;
 import l.files.event.ShowHiddenFilesSetting;
@@ -106,7 +104,7 @@ public final class FilesFragment extends BaseFileListFragment {
     refresh(animate);
   }
 
-  private void refresh(final boolean animate) {
+  @VisibleForTesting void refresh(final boolean animate) {
     if (showHiddenFiles == null || sort == null) {
       return;
     }
@@ -154,17 +152,13 @@ public final class FilesFragment extends BaseFileListFragment {
   }
 
   private void configureOptionsMenu() {
-    List<OptionsMenu> menus = newArrayList(
+    setOptionsMenu(compose(
         newBookmarkMenu(getBus(), dir),
+        newDirMenu(getFragmentManager(), dir),
         newPasteMenu(getBus(), dir),
         newSortMenu(getFragmentManager()),
-        newShowHiddenFilesMenu(getBus()));
-
-    if (DEBUG) {
-      menus.add(newDirMenu(dir));
-    }
-
-    setOptionsMenu(OptionsMenus.compose(menus));
+        newShowHiddenFilesMenu(getBus())
+    ));
   }
 
   private void configureListView() {

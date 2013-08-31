@@ -23,6 +23,9 @@
     <item quantity="one">Delete this file permanently?</item>
     <item quantity="other">Delete these %s files permanently?</item>
   </plurals>
+  <string name="untitled_dir">untitled folder</string>
+  <string name="untitled_dir_n">untitled folder %s</string>
+  <string name="mkdir_failed">Failed to create folder</string>
 
   <!--
     The character of all icon fonts in assets folder,

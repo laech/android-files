@@ -12,7 +12,7 @@ final class CompositeMenu implements OptionsMenu {
     this.actions = ImmutableList.copyOf(actions);
   }
 
-  CompositeMenu(Iterable<OptionsMenu> actions) {
+  CompositeMenu(List<OptionsMenu> actions) {
     this.actions = ImmutableList.copyOf(actions);
   }
 
