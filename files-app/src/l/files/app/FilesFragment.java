@@ -108,31 +108,7 @@ public final class FilesFragment extends BaseFileListFragment {
     if (showHiddenFiles == null || sort == null) {
       return;
     }
-
-    new AsyncTask<Void, Void, List<?>>() {
-
-      @Override protected List<?> doInBackground(Void... params) {
-        File[] children = listFiles(dir, showHiddenFiles.value());
-        return children != null
-            ? Sorters.apply(sort.value(), getResources(), children)
-            : null;
-      }
-
-      @Override protected void onPostExecute(List<?> result) {
-        super.onPostExecute(result);
-        if (result == null) {
-          updateUnableToShowDirectoryError(dir);
-        } else if (result.isEmpty()) {
-          overrideEmptyText(R.string.empty);
-        }
-
-        if (result == null) {
-          result = emptyList();
-        }
-        getListAdapter().replace(getListView(), result, animate);
-      }
-
-    }.executeOnExecutor(executor);
+    new RefreshTask(animate).executeOnExecutor(executor);
   }
 
   private void updateUnableToShowDirectoryError(File directory) {
@@ -170,5 +146,42 @@ public final class FilesFragment extends BaseFileListFragment {
         newCutAction(list, getBus()),
         newCopyAction(list, getBus()),
         newDeleteAction(list, getBus())));
+  }
+
+  public static enum Event {
+    REFRESH_START,
+    REFRESH_END
+  }
+
+  private final class RefreshTask extends AsyncTask<Void, Void, List<?>> {
+    private final boolean animate;
+
+    public RefreshTask(boolean animate) {
+      this.animate = animate;
+    }
+
+    @Override protected void onPreExecute() {
+      super.onPreExecute();
+      getBus().post(Event.REFRESH_START);
+    }
+
+    @Override protected List<?> doInBackground(Void... params) {
+      File[] children = listFiles(dir, showHiddenFiles.value());
+      return children != null
+          ? Sorters.apply(sort.value(), getResources(), children)
+          : null;
+    }
+
+    @Override protected void onPostExecute(List<?> result) {
+      super.onPostExecute(result);
+      if (result == null) {
+        updateUnableToShowDirectoryError(dir);
+      } else if (result.isEmpty()) {
+        overrideEmptyText(R.string.empty);
+      }
+      getListAdapter().replace(
+          getListView(), result == null ? emptyList() : result, animate);
+      getBus().post(Event.REFRESH_END);
+    }
   }
 }

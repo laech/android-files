@@ -5,6 +5,8 @@ import static android.view.View.VISIBLE;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.app.FilesFragment.Event.REFRESH_END;
+import static l.files.app.FilesFragment.Event.REFRESH_START;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.mockito.Mockito.*;
 
@@ -14,6 +16,7 @@ import android.test.UiThreadTest;
 import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -161,6 +164,14 @@ public final class FilesFragmentTest
         assertEquals(0, listView().getCount());
       }
     });
+  }
+
+  public void testPostsEventOnRefresh() {
+    fragment().setBus(mock(Bus.class));
+    fragment().refresh(false);
+    verify(fragment().getBus()).post(REFRESH_START);
+    verify(fragment().getBus()).post(REFRESH_END);
+    verifyNoMoreInteractions(fragment().getBus());
   }
 
   private void assertEmptyViewIsNotVisible() {
