@@ -1,5 +1,13 @@
 package l.files.app;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
+import static org.mockito.Mockito.*;
+
 import android.content.Intent;
 import android.os.FileObserver;
 import android.test.UiThreadTest;
@@ -7,6 +15,10 @@ import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import l.files.R;
 import l.files.event.ShowHiddenFilesSetting;
@@ -14,21 +26,6 @@ import l.files.event.SortSetting;
 import l.files.sort.Sorters;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public final class FilesFragmentTest
     extends BaseFileListFragmentTest<TestFilesFragmentActivity> {
@@ -51,7 +48,9 @@ public final class FilesFragmentTest
   }
 
   @Override protected FilesFragment fragment() {
-    return getActivity().getFragment();
+    FilesFragment fragment = getActivity().getFragment();
+    fragment.executor = sameThreadExecutor();
+    return fragment;
   }
 
   private List<File> getFiles() {
@@ -114,12 +113,8 @@ public final class FilesFragmentTest
   }
 
   @UiThreadTest public void testShowsCorrectNumSelectedItemsOnSelection() {
-    dir.newFile();
-    dir.newFile();
-
     listView().setItemChecked(0, true);
     listView().setItemChecked(1, true);
-
     assertEquals(string(R.string.n_selected, 2), actionMode().getTitle());
   }
 
@@ -144,6 +139,28 @@ public final class FilesFragmentTest
   public void testShowsNotDirMessageIfArgIsNotDir() {
     setTestIntent(dir.newFile());
     assertEmptyViewIsVisible(R.string.not_a_directory);
+  }
+
+  public void testShowsEmptyListIfAllFilesAreDeleted() throws Throwable {
+    File file = dir.newFile();
+    fragment();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertEquals(1, listView().getCount());
+      }
+    });
+
+    assertTrue(file.delete());
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        fragment().refresh(false);
+      }
+    });
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertEquals(0, listView().getCount());
+      }
+    });
   }
 
   private void assertEmptyViewIsNotVisible() {
@@ -178,11 +195,6 @@ public final class FilesFragmentTest
   private void post(final Object event) throws Throwable {
     final CountDownLatch latch = new CountDownLatch(1);
     final FilesFragment fragment = fragment();
-    fragment.executor = new Executor() {
-      @Override public void execute(Runnable command) {
-        command.run();
-      }
-    };
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         if (event instanceof ShowHiddenFilesSetting) {
@@ -198,5 +210,13 @@ public final class FilesFragmentTest
       }
     });
     latch.await(5, SECONDS);
+  }
+
+  private Executor sameThreadExecutor() {
+    return new Executor() {
+      @Override public void execute(Runnable command) {
+        command.run();
+      }
+    };
   }
 }

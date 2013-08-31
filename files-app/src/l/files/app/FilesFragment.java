@@ -3,6 +3,7 @@ package l.files.app;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static com.google.common.collect.Lists.newArrayList;
 import static l.files.BuildConfig.DEBUG;
+import static java.util.Collections.emptyList;
 import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
 import static l.files.common.io.Files.listFiles;
@@ -125,9 +126,12 @@ public final class FilesFragment extends BaseFileListFragment {
           updateUnableToShowDirectoryError(dir);
         } else if (result.isEmpty()) {
           overrideEmptyText(R.string.empty);
-        } else {
-          getListAdapter().replace(getListView(), result, animate);
         }
+
+        if (result == null) {
+          result = emptyList();
+        }
+        getListAdapter().replace(getListView(), result, animate);
       }
 
     }.executeOnExecutor(executor);
