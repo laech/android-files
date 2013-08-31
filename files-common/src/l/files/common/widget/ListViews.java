@@ -14,6 +14,9 @@ public final class ListViews {
     SparseBooleanArray checks = list.getCheckedItemPositions();
     List<T> items = newArrayListWithCapacity(checks.size());
     for (int i = 0; i < checks.size(); ++i) {
+      if (!checks.valueAt(i)) {
+        continue;
+      }
       Object item = list.getItemAtPosition(checks.keyAt(i));
       if (type.isInstance(item)) {
         items.add((T) item);

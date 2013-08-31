@@ -23,4 +23,17 @@ public final class ListViewsTest extends AndroidTestCase {
 
     assertEquals(3, getCheckedItems(list, String.class).size());
   }
+
+  public void testGetCheckedItemsReturnsAllCurrentlyCheckedItemsOnly() {
+    ListView list = new ListView(getContext());
+    list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+    list.setAdapter(new ArrayAdapter<Object>(getContext(), 0, new Object[]{
+        "0", "1"
+    }));
+    list.setItemChecked(0, true);
+    list.setItemChecked(1, true);
+    list.setItemChecked(1, false);
+
+    assertEquals(1, getCheckedItems(list, Object.class).size());
+  }
 }
