@@ -10,16 +10,6 @@ import java.io.File;
 
 public final class Intents {
 
-  public static final String ACTION_CUT = "l.files.intent.action.CUT";
-  public static final String ACTION_COPY = "l.files.intent.action.COPY";
-
-  public static final String EXTRA_FILE = "l.files.intent.extra.FILE";
-  public static final String EXTRA_DESTINATION = "l.files.intent.extra.DESTINATION";
-
-  public static Intent cut(File file) {
-    return new Intent(ACTION_CUT).setData(fromFile(file));
-  }
-
   public static Intent viewFile(File file, MediaType type) {
     return new Intent(ACTION_VIEW).setDataAndType(fromFile(file), type.toString());
   }
