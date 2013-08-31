@@ -7,6 +7,7 @@ import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.otto.Subscribe;
+import java.util.concurrent.Executor;
 import l.files.R;
 import l.files.event.ShowHiddenFilesSetting;
 import l.files.event.SortSetting;
@@ -27,6 +28,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public final class FilesFragmentTest
     extends BaseFileListFragmentTest<TestFilesFragmentActivity> {
@@ -66,13 +68,16 @@ public final class FilesFragmentTest
     fragment().observer = mock(FileObserver.class);
     fragment().onResume();
     verify(fragment().observer).startWatching();
+    verifyNoMoreInteractions(fragment().observer);
   }
 
   @UiThreadTest public void testDirObserverIsStoppedOnPause() {
     fragment().observer = mock(FileObserver.class);
     fragment().onResume();
     fragment().onPause();
+    verify(fragment().observer).startWatching();
     verify(fragment().observer).stopWatching();
+    verifyNoMoreInteractions(fragment().observer);
   }
 
   public void testShowHiddenFilesHandlerMethodIsAnnotated() throws Exception {
@@ -173,6 +178,11 @@ public final class FilesFragmentTest
   private void post(final Object event) throws Throwable {
     final CountDownLatch latch = new CountDownLatch(1);
     final FilesFragment fragment = fragment();
+    fragment.executor = new Executor() {
+      @Override public void execute(Runnable command) {
+        command.run();
+      }
+    };
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
         if (event instanceof ShowHiddenFilesSetting) {

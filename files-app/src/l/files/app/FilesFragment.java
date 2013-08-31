@@ -7,6 +7,7 @@ import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
 import static l.files.common.io.Files.listFiles;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Executor;
 import l.files.R;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenus;
@@ -34,6 +36,7 @@ public final class FilesFragment
 
   public static final String ARG_DIRECTORY = "directory";
 
+  Executor executor;
   FileObserver observer;
 
   private File dir;
@@ -68,6 +71,7 @@ public final class FilesFragment
     super.onActivityCreated(savedInstanceState);
 
     dir = new File(getArguments().getString(ARG_DIRECTORY));
+    executor = AsyncTask.SERIAL_EXECUTOR;
     observer = new DirObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
         refresh(animate);
@@ -77,16 +81,6 @@ public final class FilesFragment
     configureListView();
     configureOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
-
-    if (DEBUG) {
-      final ListView list = getListView();
-      list.post(new Runnable() {
-        @Override public void run() {
-          list.invalidate();
-          list.post(this);
-        }
-      });
-    }
   }
 
   @Override public void onResume() {
@@ -121,17 +115,32 @@ public final class FilesFragment
     if (null != mode) mode.finish(); // TODO better handle this
   }
 
-  private void refresh(boolean animate) { // TODO do this in async task for large dir
+  private void refresh(final boolean animate) {
     if (showHiddenFiles == null || sort == null) {
       return;
     }
-    File[] children = listFiles(dir, showHiddenFiles.value());
-    if (children == null) {
-      updateUnableToShowDirectoryError(dir);
-    } else {
-      List<?> items = Sorters.apply(sort.value(), getResources(), children);
-      getListAdapter().replace(getListView(), items, animate);
-    }
+
+    new AsyncTask<Void, Void, List<?>>() {
+
+      @Override protected List<?> doInBackground(Void... params) {
+        File[] children = listFiles(dir, showHiddenFiles.value());
+        return children != null
+            ? Sorters.apply(sort.value(), getResources(), children)
+            : null;
+      }
+
+      @Override protected void onPostExecute(List<?> result) {
+        super.onPostExecute(result);
+        if (result == null) {
+          updateUnableToShowDirectoryError(dir);
+        } else if (result.isEmpty()) {
+          overrideEmptyText(R.string.empty);
+        } else {
+          getListAdapter().replace(getListView(), result, animate);
+        }
+      }
+
+    }.executeOnExecutor(executor);
   }
 
   private void updateUnableToShowDirectoryError(File directory) {
