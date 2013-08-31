@@ -16,16 +16,15 @@ final class IoProvider {
   }
 
   @Subscribe public void handle(DeleteRequest request) {
-    for (File file : request.value())
-      context.startService(delete(context, file));
+    context.startService(delete(context, request.value()));
   }
 
-  @Subscribe public void handle(PasteRequest.Cut request) {
+  @Subscribe public void handle(PasteRequest.Cut request) { // TODO
     for (File file : request.files())
       context.startService(cut(context, file, request.destination()));
   }
 
-  @Subscribe public void handle(PasteRequest.Copy request) {
+  @Subscribe public void handle(PasteRequest.Copy request) { // TODO
     for (File file : request.files())
       context.startService(copy(context, file, request.destination()));
   }

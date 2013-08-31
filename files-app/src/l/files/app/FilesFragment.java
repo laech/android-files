@@ -11,8 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
-import android.view.ActionMode;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,15 +22,12 @@ import l.files.R;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenus;
 import l.files.common.base.Value;
-import l.files.common.widget.MultiChoiceAction;
 import l.files.common.widget.MultiChoiceActions;
-import l.files.event.DeleteRequest;
 import l.files.event.ShowHiddenFilesSetting;
 import l.files.event.SortSetting;
 import l.files.sort.Sorters;
 
-public final class FilesFragment
-    extends BaseFileListFragment implements MultiChoiceAction {
+public final class FilesFragment extends BaseFileListFragment {
 
   public static final String ARG_DIRECTORY = "directory";
 
@@ -42,7 +37,6 @@ public final class FilesFragment
   private File dir;
   private Value<String> sort;
   private Value<Boolean> showHiddenFiles;
-  private ActionMode mode;
 
   /**
    * Flag to control whether list data changes should be animated.
@@ -111,10 +105,6 @@ public final class FilesFragment
     refresh(animate);
   }
 
-  @Subscribe public void handle(DeleteRequest request) {
-    if (null != mode) mode.finish(); // TODO better handle this
-  }
-
   private void refresh(final boolean animate) {
     if (showHiddenFiles == null || sort == null) {
       return;
@@ -177,23 +167,10 @@ public final class FilesFragment
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
     list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
-        this,
         newCountSelectedItemsAction(list),
         newSelectAllAction(list),
         newCutAction(list, getBus()),
         newCopyAction(list, getBus()),
-        newDeleteAction(list, getFragmentManager())));
-  }
-
-  @Override public void onCreate(ActionMode mode, Menu menu) {
-    this.mode = mode;
-  }
-
-  @Override public void onDestroy(ActionMode mode) {
-    this.mode = null;
-  }
-
-  @Override
-  public void onChange(ActionMode mode, int position, long id, boolean checked) {
+        newDeleteAction(list, getBus())));
   }
 }

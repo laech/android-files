@@ -1,17 +1,11 @@
 package l.files.event;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
-import java.util.Set;
 import l.files.common.base.Value;
 
-public final class DeleteRequest extends Value<Set<File>> {
+public final class DeleteRequest extends Value<File> {
 
-  public DeleteRequest(File... files) {
-    super(ImmutableSet.copyOf(checkNotNull(files, "files")));
-    checkArgument(!value().isEmpty());
+  public DeleteRequest(File file) {
+    super(file);
   }
 }
