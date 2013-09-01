@@ -10,32 +10,22 @@ import static org.mockito.Mockito.verify;
 
 public final class TextDecoratorTest extends TestCase {
 
-  private int textViewId;
   private Function<Object, String> labels;
   private TextDecorator<Object> decorator;
 
   @SuppressWarnings("unchecked")
   @Override protected void setUp() throws Exception {
     super.setUp();
-    textViewId = 2;
     labels = mock(Function.class);
-    decorator = new TextDecorator<Object>(textViewId, labels);
+    decorator = new TextDecorator<Object>(labels);
   }
 
   public void testSetsTextToTextView() {
-    Object item = new Object();
-    given(labels.apply(item)).willReturn("hello");
-    TextView view = setTextView();
-
-    decorator.decorate(view, item);
-
-    verify(view).findViewById(textViewId);
-    verify(view).setText("hello");
-  }
-
-  private TextView setTextView() {
+    given(labels.apply("a")).willReturn("hello");
     TextView view = mock(TextView.class);
-    given(view.findViewById(textViewId)).willReturn(view);
-    return view;
+
+    decorator.decorate(view, "a");
+
+    verify(view).setText("hello");
   }
 }

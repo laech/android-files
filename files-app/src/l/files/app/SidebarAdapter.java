@@ -8,8 +8,7 @@ import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.UserDirs.DIR_ROOT;
 import static l.files.app.format.Formats.iconFont;
 import static l.files.app.format.Formats.label;
-import static l.files.common.widget.Decorators.font;
-import static l.files.common.widget.Decorators.text;
+import static l.files.common.widget.Decorators.*;
 import static l.files.common.widget.Viewers.decorate;
 
 import android.content.res.Resources;
@@ -36,28 +35,18 @@ final class SidebarAdapter extends ObjectAdapter {
     this.labels = (Function<File, CharSequence>) checkNotNull(labels, "labels");
     checkNotNull(icons, "icons");
 
-    addHeaderViewer();
-    addFileViewer(labels, icons);
+    addViewer(Object.class, decorate(R.layout.sidebar_item_header,
+        on(android.R.id.title, text(toStringFunction()))
+    ));
+
+    addViewer(File.class, decorate(R.layout.sidebar_item,
+        on(android.R.id.title, text(labels)),
+        on(android.R.id.icon, font(icons))
+    ));
   }
 
   static SidebarAdapter get(Resources res) {
     return new SidebarAdapter(label(res), iconFont(res.getAssets()));
-  }
-
-  @SuppressWarnings("unchecked") private void addFileViewer(
-      Function<? super File, ? extends CharSequence> labels,
-      Function<? super File, ? extends Typeface> icons) {
-
-    addViewer(File.class, decorate(R.layout.sidebar_item,
-        text(android.R.id.title, labels),
-        font(android.R.id.icon, icons)
-    ));
-  }
-
-  @SuppressWarnings("unchecked") private void addHeaderViewer() {
-    addViewer(Object.class, decorate(R.layout.sidebar_item_header,
-        text(android.R.id.title, toStringFunction())
-    ));
   }
 
   @Override public boolean isEnabled(int position) {
