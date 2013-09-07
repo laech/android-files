@@ -1,14 +1,14 @@
 package l.files.common.widget;
 
-import android.widget.TextView;
-import com.google.common.base.Function;
-import junit.framework.TestCase;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class TextDecoratorTest extends TestCase {
+import android.widget.TextView;
+import com.google.common.base.Function;
+import l.files.test.BaseTest;
+
+public final class TextDecoratorTest extends BaseTest {
 
   private Function<Object, String> labels;
   private TextDecorator<Object> decorator;

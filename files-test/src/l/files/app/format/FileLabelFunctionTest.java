@@ -1,18 +1,17 @@
 package l.files.app.format;
 
-import android.content.res.Resources;
-import android.os.Build;
-import junit.framework.TestCase;
-import l.files.R;
-
-import java.io.File;
-
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.UserDirs.DIR_ROOT;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class FileLabelFunctionTest extends TestCase {
+import android.content.res.Resources;
+import android.os.Build;
+import java.io.File;
+import l.files.R;
+import l.files.test.BaseTest;
+
+public final class FileLabelFunctionTest extends BaseTest {
 
   private Resources res;
   private FileLabelFunction labels;

@@ -7,14 +7,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import l.files.R;
+import l.files.test.BaseTest;
 
-public final class SelectAllActionTest extends AndroidTestCase {
+public final class SelectAllActionTest extends BaseTest {
 
   private Menu menu;
   private MenuItem item;

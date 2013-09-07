@@ -6,14 +6,13 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import android.content.res.Resources;
 import java.io.File;
 import java.util.List;
-
-import junit.framework.TestCase;
 import l.files.R;
-import android.content.res.Resources;
+import l.files.test.BaseTest;
 
-public final class DateModifiedSorterTest extends TestCase {
+public final class DateModifiedSorterTest extends BaseTest {
 
   private Resources res;
   private DateModifiedSorter sorter;

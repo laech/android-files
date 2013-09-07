@@ -1,13 +1,13 @@
 package l.files.common.widget;
 
-import android.test.AndroidTestCase;
-import android.view.View;
-import android.widget.FrameLayout;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class DecorationViewerTest extends AndroidTestCase {
+import android.view.View;
+import android.widget.FrameLayout;
+import l.files.test.BaseTest;
+
+public final class DecorationViewerTest extends BaseTest {
 
   private Viewer<Object> viewer;
   private Decorator<Object> decorator;

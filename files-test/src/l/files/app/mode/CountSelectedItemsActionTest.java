@@ -4,13 +4,13 @@ import static android.widget.AbsListView.CHOICE_MODE_SINGLE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import l.files.R;
+import l.files.test.BaseTest;
 
-public final class CountSelectedItemsActionTest extends AndroidTestCase {
+public final class CountSelectedItemsActionTest extends BaseTest {
 
   private CountSelectedItemsAction action;
 

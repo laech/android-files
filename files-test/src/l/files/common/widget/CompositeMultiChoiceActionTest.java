@@ -1,13 +1,13 @@
 package l.files.common.widget;
 
-import android.view.ActionMode;
-import android.view.Menu;
-import junit.framework.TestCase;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class CompositeMultiChoiceActionTest extends TestCase {
+import android.view.ActionMode;
+import android.view.Menu;
+import l.files.test.BaseTest;
+
+public final class CompositeMultiChoiceActionTest extends BaseTest {
 
   private MultiChoiceAction action1;
   private MultiChoiceAction action2;

@@ -5,14 +5,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import android.graphics.Typeface;
-import android.test.AndroidTestCase;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Function;
 import java.io.File;
+import l.files.test.BaseTest;
 
-public final class SidebarAdapterTest extends AndroidTestCase {
+public final class SidebarAdapterTest extends BaseTest {
 
   private Function<File, Typeface> drawables;
   private Function<File, String> labels;

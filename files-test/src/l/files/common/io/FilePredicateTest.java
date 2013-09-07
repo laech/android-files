@@ -1,14 +1,13 @@
 package l.files.common.io;
 
-import junit.framework.TestCase;
-
-import java.io.File;
-
 import static l.files.common.io.FilePredicate.CAN_READ;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class FilePredicateTest extends TestCase {
+import java.io.File;
+import l.files.test.BaseTest;
+
+public final class FilePredicateTest extends BaseTest {
 
   public void testCanRead_trueForReadableFile() {
     File file = mock(File.class);

@@ -1,20 +1,19 @@
 package l.files.event;
 
-import android.content.SharedPreferences;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Produce;
-import com.squareup.otto.Subscribe;
-import junit.framework.TestCase;
-
-import java.lang.reflect.Method;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class ShowHiddenFilesProviderTest extends TestCase {
+import android.content.SharedPreferences;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Produce;
+import com.squareup.otto.Subscribe;
+import java.lang.reflect.Method;
+import l.files.test.BaseTest;
+
+public final class ShowHiddenFilesProviderTest extends BaseTest {
 
   private static final String KEY = "show-hidden-files";
 

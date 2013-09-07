@@ -8,12 +8,12 @@ import android.app.Application;
 import android.content.Intent;
 import com.squareup.otto.Subscribe;
 import java.lang.reflect.Method;
-import junit.framework.TestCase;
 import l.files.event.internal.FileService;
+import l.files.test.BaseTest;
 import l.files.test.TempDir;
 import org.mockito.ArgumentCaptor;
 
-public final class IoProviderTest extends TestCase {
+public final class IoProviderTest extends BaseTest {
 
   private TempDir dir;
   private Application context;

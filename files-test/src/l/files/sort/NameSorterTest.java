@@ -1,16 +1,15 @@
 package l.files.sort;
 
-import android.content.res.Resources;
-import junit.framework.TestCase;
-import l.files.R;
-
-import java.io.File;
-
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class NameSorterTest extends TestCase {
+import android.content.res.Resources;
+import java.io.File;
+import l.files.R;
+import l.files.test.BaseTest;
+
+public final class NameSorterTest extends BaseTest {
 
   private NameSorter sorter;
 

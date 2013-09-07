@@ -19,10 +19,10 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import junit.framework.TestCase;
+import l.files.test.BaseTest;
 import org.mockito.ArgumentCaptor;
 
-public final class ClipboardProviderTest extends TestCase {
+public final class ClipboardProviderTest extends BaseTest {
 
   private ClipboardManager manager;
   private ClipboardProvider provider;

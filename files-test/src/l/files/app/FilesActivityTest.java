@@ -4,24 +4,20 @@ import static l.files.app.FilesActivity.EXTRA_DIR;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
 import static l.files.test.Activities.rotate;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
-import java.io.File;
-import java.lang.reflect.Method;
-
-import l.files.common.base.Consumer;
-import l.files.test.TempDir;
 import android.content.Intent;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
-
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import java.io.File;
+import java.lang.reflect.Method;
+import l.files.common.base.Consumer;
+import l.files.test.BaseActivityTest;
+import l.files.test.TempDir;
 
 public final class FilesActivityTest
-    extends ActivityInstrumentationTestCase2<FilesActivity> {
+    extends BaseActivityTest<FilesActivity> {
 
   private TempDir dir;
 

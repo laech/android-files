@@ -3,12 +3,12 @@ package l.files.app.format;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import android.test.AndroidTestCase;
 import com.google.common.base.Function;
 import java.io.File;
 import l.files.R;
+import l.files.test.BaseTest;
 
-public final class FileSummaryFunctionTest extends AndroidTestCase {
+public final class FileSummaryFunctionTest extends BaseTest {
 
   private File file;
   private Function<Long, String> date;

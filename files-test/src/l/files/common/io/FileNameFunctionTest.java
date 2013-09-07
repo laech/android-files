@@ -1,13 +1,12 @@
 package l.files.common.io;
 
-import junit.framework.TestCase;
-
-import java.io.File;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class FileNameFunctionTest extends TestCase {
+import java.io.File;
+import l.files.test.BaseTest;
+
+public final class FileNameFunctionTest extends BaseTest {
 
   public void testGetsNameOfFile() {
     File file = mock(File.class);

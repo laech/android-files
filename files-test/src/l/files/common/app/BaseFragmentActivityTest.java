@@ -1,12 +1,12 @@
 package l.files.common.app;
 
-import android.view.Menu;
-import junit.framework.TestCase;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class BaseFragmentActivityTest extends TestCase {
+import android.view.Menu;
+import l.files.test.BaseTest;
+
+public final class BaseFragmentActivityTest extends BaseTest {
 
   private Menu menu;
   private OptionsMenu optionsMenu;

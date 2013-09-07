@@ -1,12 +1,12 @@
 package l.files.common.widget;
 
-import android.view.View;
-import junit.framework.TestCase;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class CompositeDecoratorTest extends TestCase {
+import android.view.View;
+import l.files.test.BaseTest;
+
+public final class CompositeDecoratorTest extends BaseTest {
 
   private Decorator<Object> delegate1;
   private Decorator<Object> delegate2;

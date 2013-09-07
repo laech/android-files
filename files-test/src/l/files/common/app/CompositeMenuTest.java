@@ -1,12 +1,12 @@
 package l.files.common.app;
 
-import android.view.Menu;
-import junit.framework.TestCase;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class CompositeMenuTest extends TestCase {
+import android.view.Menu;
+import l.files.test.BaseTest;
+
+public final class CompositeMenuTest extends BaseTest {
 
   private OptionsMenu action1;
   private OptionsMenu action2;

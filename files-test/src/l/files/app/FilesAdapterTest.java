@@ -6,14 +6,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import android.graphics.Typeface;
-import android.test.AndroidTestCase;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Function;
 import java.io.File;
+import l.files.test.BaseTest;
 
-public final class FilesAdapterTest extends AndroidTestCase {
+public final class FilesAdapterTest extends BaseTest {
 
   private Function<File, String> names;
   private Function<File, Typeface> fonts;
@@ -38,11 +38,11 @@ public final class FilesAdapterTest extends AndroidTestCase {
    * grey.
    */
   public void testContainerViewIsDisabledIfFileCanNotBeRead() {
-    testViewEnabled(false, android.R.id.content);
+    testViewEnabled(false);
   }
 
   public void testContainerViewIsEnabledIfFileCanBeRead() {
-    testViewEnabled(true, android.R.id.content);
+    testViewEnabled(true);
   }
 
   public void testTitleViewShowsFileName() {
@@ -99,5 +99,11 @@ public final class FilesAdapterTest extends AndroidTestCase {
   private void testViewEnabled(boolean enabled, final int id) {
     given(file.canRead()).willReturn(enabled);
     assertEquals(enabled, findView(id).isEnabled());
+  }
+
+
+  private void testViewEnabled(boolean enabled) {
+    given(file.canRead()).willReturn(enabled);
+    assertEquals(enabled, getView().isEnabled());
   }
 }

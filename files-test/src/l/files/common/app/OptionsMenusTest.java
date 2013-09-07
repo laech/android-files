@@ -1,10 +1,10 @@
 package l.files.common.app;
 
-import junit.framework.TestCase;
-
 import static org.mockito.Mockito.mock;
 
-public final class OptionsMenusTest extends TestCase {
+import l.files.test.BaseTest;
+
+public final class OptionsMenusTest extends BaseTest {
 
   public void testNullToEmpty_notNull() {
     OptionsMenu menu = mock(OptionsMenu.class);

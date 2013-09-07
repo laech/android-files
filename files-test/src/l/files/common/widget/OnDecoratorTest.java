@@ -4,10 +4,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.test.AndroidTestCase;
 import android.view.View;
+import l.files.test.BaseTest;
 
-public final class OnDecoratorTest extends AndroidTestCase {
+public final class OnDecoratorTest extends BaseTest {
 
   private int id;
   private Decorator<Object> delegate;

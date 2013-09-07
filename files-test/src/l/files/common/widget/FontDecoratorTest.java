@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Typeface;
 import android.widget.TextView;
 import com.google.common.base.Function;
-import junit.framework.TestCase;
+import l.files.test.BaseTest;
 
-public final class FontDecoratorTest extends TestCase {
+public final class FontDecoratorTest extends BaseTest {
 
   private Function<Object, Typeface> fonts;
   private FontDecorator<Object> decorator;

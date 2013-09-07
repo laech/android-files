@@ -1,17 +1,16 @@
 package l.files.app.format;
 
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import junit.framework.TestCase;
-import l.files.R;
-
-import java.io.File;
-
 import static l.files.app.UserDirs.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public final class FileDrawableFunctionTest extends TestCase {
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import java.io.File;
+import l.files.R;
+import l.files.test.BaseTest;
+
+public final class FileDrawableFunctionTest extends BaseTest {
 
   private Resources res;
   private File file;
