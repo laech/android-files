@@ -1,12 +1,12 @@
 package l.files.app;
 
+import static android.os.SystemClock.sleep;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.app.FilesFragment.Event.REFRESH_END;
-import static l.files.app.FilesFragment.Event.REFRESH_START;
+import static l.files.common.widget.ListViews.getItems;
 import static l.files.test.TestFilesFragmentActivity.DIRECTORY;
 import static org.mockito.Mockito.*;
 
@@ -16,13 +16,11 @@ import android.test.UiThreadTest;
 import android.view.ActionMode;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import l.files.R;
 import l.files.event.ShowHiddenFilesSetting;
 import l.files.event.SortSetting;
@@ -51,19 +49,50 @@ public final class FilesFragmentTest
   }
 
   @Override protected FilesFragment fragment() {
-    FilesFragment fragment = getActivity().getFragment();
-    fragment.executor = sameThreadExecutor();
-    return fragment;
+    return getActivity().getFragment();
   }
 
-  private List<File> getFiles() {
-    List<File> files = newArrayList();
-    ListView list = listView();
-    for (int i = 0; i < list.getCount(); i++) {
-      Object item = list.getItemAtPosition(i);
-      if (item instanceof File) files.add((File) item);
-    }
-    return files;
+  @UiThreadTest public void testDoesNotRefreshWhenChangingShowHiddenFilesToSameValue() {
+    dir.newFile();
+    fragment().onResume();
+    fragment().handle(new ShowHiddenFilesSetting(true));
+    fragment().setListAdapter(null);
+    fragment().handle(new ShowHiddenFilesSetting(true));
+  }
+
+  @UiThreadTest public void testDoesNotRefreshWhenChangingSortToSameValue() {
+    dir.newFile();
+    fragment().onResume();
+    fragment().handle(new SortSetting(Sorters.NAME));
+    fragment().setListAdapter(null);
+    fragment().handle(new SortSetting(Sorters.NAME));
+  }
+
+  public void testDoesNotRefreshOnResumeIfDirNotChanged() throws Throwable {
+    fragment();
+    resume();
+    pause();
+    sleep(DirObserver.BATCH_UPDATE_DELAY * 2);
+    resume();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertTrue(getItems(listView()).isEmpty());
+      }
+    });
+  }
+
+  public void testRefreshesOnResumeIfDirChanged() throws Throwable {
+    fragment();
+    resume();
+    pause();
+    final File file = dir.newFile();
+    sleep(DirObserver.BATCH_UPDATE_DELAY * 2);
+    resume();
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        assertTrue(getItems(listView()).contains(file));
+      }
+    });
   }
 
   @UiThreadTest public void testDirObserverIsStartedOnResume() {
@@ -75,11 +104,8 @@ public final class FilesFragmentTest
 
   @UiThreadTest public void testDirObserverIsStoppedOnPause() {
     fragment().observer = mock(FileObserver.class);
-    fragment().onResume();
     fragment().onPause();
-    verify(fragment().observer).startWatching();
     verify(fragment().observer).stopWatching();
-    verifyNoMoreInteractions(fragment().observer);
   }
 
   public void testShowHiddenFilesHandlerMethodIsAnnotated() throws Exception {
@@ -145,18 +171,18 @@ public final class FilesFragmentTest
   }
 
   public void testShowsEmptyListIfAllFilesAreDeleted() throws Throwable {
-    File file = dir.newFile();
+    final File file = dir.newFile();
     fragment();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        assertEquals(1, listView().getCount());
+        assertEquals(singletonList(file), getItems(listView(), File.class));
       }
     });
 
     assertTrue(file.delete());
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        fragment().refresh(false);
+        fragment().refresh();
       }
     });
     runTestOnUiThread(new Runnable() {
@@ -164,14 +190,6 @@ public final class FilesFragmentTest
         assertEquals(0, listView().getCount());
       }
     });
-  }
-
-  public void testPostsEventOnRefresh() {
-    fragment().setBus(mock(Bus.class));
-    fragment().refresh(false);
-    verify(fragment().getBus()).post(REFRESH_START);
-    verify(fragment().getBus()).post(REFRESH_END);
-    verifyNoMoreInteractions(fragment().getBus());
   }
 
   private void assertEmptyViewIsNotVisible() {
@@ -223,11 +241,23 @@ public final class FilesFragmentTest
     latch.await(5, SECONDS);
   }
 
-  private Executor sameThreadExecutor() {
-    return new Executor() {
-      @Override public void execute(Runnable command) {
-        command.run();
+  private List<File> getFiles() {
+    return getItems(listView(), File.class);
+  }
+
+  private void pause() throws Throwable {
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        fragment().onPause();
       }
-    };
+    });
+  }
+
+  private void resume() throws Throwable {
+    runTestOnUiThread(new Runnable() {
+      @Override public void run() {
+        fragment().onResume();
+      }
+    });
   }
 }

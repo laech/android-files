@@ -1,18 +1,17 @@
 package l.files.app;
 
+import static org.mockito.Mockito.*;
+
 import android.app.Activity;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
-
 import java.io.File;
-
-import static org.mockito.Mockito.*;
+import l.files.test.BaseActivityTest;
 
 public abstract class BaseFileListFragmentTest<T extends Activity>
-    extends ActivityInstrumentationTestCase2<T> {
+    extends BaseActivityTest<T> {
 
   public BaseFileListFragmentTest(Class<T> activityClass) {
     super(activityClass);

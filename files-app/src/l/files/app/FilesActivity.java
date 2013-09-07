@@ -10,7 +10,6 @@ import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
-import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
@@ -29,9 +28,7 @@ public final class FilesActivity extends BaseFragmentActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    requestWindowFeature(Window.FEATURE_PROGRESS);
     setContentView(R.layout.files_activity);
-    setProgressBarIndeterminate(true);
 
     bus = getBus(this);
     dir = getDir();
@@ -58,17 +55,6 @@ public final class FilesActivity extends BaseFragmentActivity {
       return true;
     }
     return false;
-  }
-
-  @Subscribe public void handle(FilesFragment.Event event) {
-    switch (event) {
-      case REFRESH_START:
-        setProgressBarVisibility(true);
-        break;
-      case REFRESH_END:
-        setProgressBarVisibility(false);
-        break;
-    }
   }
 
   @Subscribe public void handle(OpenFileRequest request) {

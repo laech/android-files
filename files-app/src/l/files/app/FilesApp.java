@@ -1,6 +1,7 @@
 package l.files.app;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static com.google.common.collect.Sets.newHashSet;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.UserDirs.*;
 import static l.files.event.Events.*;
@@ -41,7 +42,20 @@ public final class FilesApp extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
-    bus = new Bus(ThreadEnforcer.MAIN);
+    bus = new Bus(ThreadEnforcer.MAIN) {
+
+      // TODO
+      private final Set<Object> objects = newHashSet();
+
+      @Override public void register(Object object) {
+        if (objects.add(object)) super.register(object);
+      }
+
+      @Override public void unregister(Object object) {
+        if (objects.remove(object)) super.unregister(object);
+      }
+
+    };
     SharedPreferences pref = getDefaultSharedPreferences(this);
     registerSortProvider(bus, pref, NAME);
     registerBookmarksProvider(bus, pref, DEFAULT_BOOKMARKS);

@@ -21,6 +21,7 @@ public final class SidebarFragment extends BaseFileListFragment {
   }
 
   @Subscribe public void handle(BookmarksSetting setting) {
+    // TODO: this will be called on resume everytime
     getListAdapter().set(setting.value(), getResources());
   }
 }
