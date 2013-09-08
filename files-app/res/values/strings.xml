@@ -20,8 +20,8 @@
   <string name="file_summary">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
   <string name="sort_by">Sort by</string>
   <plurals name="confirm_delete_question">
-    <item quantity="one">Delete this file permanently?</item>
-    <item quantity="other">Delete these %s files permanently?</item>
+    <item quantity="one">Delete this item permanently?</item>
+    <item quantity="other">Delete these %s items permanently?</item>
   </plurals>
   <string name="untitled_dir">untitled folder</string>
   <string name="untitled_dir_n">untitled folder %s</string>
