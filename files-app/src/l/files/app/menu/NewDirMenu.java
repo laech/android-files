@@ -31,7 +31,7 @@ final class NewDirMenu
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
-    NewDirFragment.create(parent).show(manager, null);
+    NewDirFragment.create(parent).show(manager, NewDirFragment.TAG);
     return true;
   }
 }

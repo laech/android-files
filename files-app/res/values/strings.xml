@@ -25,7 +25,8 @@
   </plurals>
   <string name="untitled_dir">untitled folder</string>
   <string name="untitled_dir_n">untitled folder %s</string>
-  <string name="mkdir_failed">Failed to create folder</string>
+  <string name="mkdir_failed">Failed to create folder.</string>
+  <string name="dir_exists">This name is already taken.</string>
 
   <!--
     The character of all icon fonts in assets folder,
