@@ -1,9 +1,11 @@
 package l.files.common.widget;
 
 import android.graphics.Typeface;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import java.io.File;
 
 public final class Decorators {
   private Decorators() {}
@@ -46,5 +48,13 @@ public final class Decorators {
    */
   public static <T> Decorator<T> font(final Function<? super T, ? extends Typeface> fonts) {
     return new FontDecorator<T>(fonts);
+  }
+
+  /**
+   * Returns a decorator upon execution will load a square thumbnail image from
+   * the given file (if it's an image) into the {@link ImageView}.
+   */
+  public static Decorator<File> image(int size) {
+    return new ImageDecorator(size);
   }
 }

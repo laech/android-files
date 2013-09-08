@@ -20,7 +20,8 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_centerVertical="true"
-      android:contentDescription="@null"/>
+      android:contentDescription="@null"
+      android:background="@android:color/white"/>
 
   <RelativeLayout
       android:layout_width="match_parent"

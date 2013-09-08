@@ -172,6 +172,7 @@ public final class FilesFragment extends BaseFileListFragment {
       if (!newFiles.equals(oldFiles)) {
         setContent(files);
       }
+      // TODO refresh visible items that may have last updated timestamp changed
     }
 
     private void setEmptyContent() {

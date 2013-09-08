@@ -10,6 +10,7 @@ import static l.files.common.widget.Viewers.decorate;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.TypedValue;
 import com.google.common.base.Function;
 import java.io.File;
 import l.files.R;
@@ -21,11 +22,13 @@ final class FilesAdapter extends AnimatedAdapter {
    * @param names the function to return the name of the file
    * @param icons the function to return the icon font of the file
    * @param summaries the function to return additional summary of the file
+   * @param thumbnailSize the width and height in pixels for square image thumbnails
    */
   @SuppressWarnings("unchecked") FilesAdapter(
       Function<? super File, ? extends CharSequence> names,
       Function<? super File, ? extends Typeface> icons,
-      Function<? super File, ? extends CharSequence> summaries) {
+      Function<? super File, ? extends CharSequence> summaries,
+      int thumbnailSize) {
 
     checkNotNull(names, "names");
     checkNotNull(icons, "icons");
@@ -39,18 +42,23 @@ final class FilesAdapter extends AnimatedAdapter {
         on(android.R.id.icon, font(icons)),
         on(android.R.id.title, text(names)),
         on(android.R.id.summary, text(summaries)),
+        on(android.R.id.background, image(thumbnailSize)),
         enable(canRead())
     ));
   }
 
   static FilesAdapter get(Context context) {
+    TypedValue value = new TypedValue();
+    context.getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+    int thumbnailSize = (int) value.getDimension(context.getResources().getDisplayMetrics());
     return new FilesAdapter(
         name(),
         iconFont(context.getAssets()),
         summary(context.getResources(),
             date(context),
             size(context)
-        )
+        ),
+        thumbnailSize
     );
   }
 
