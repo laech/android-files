@@ -1,20 +1,33 @@
 package l.files.common.widget;
 
-import static java.util.Locale.ENGLISH;
-import static org.apache.commons.io.FilenameUtils.getExtension;
-
+import android.util.LruCache;
 import android.view.View;
 import android.widget.ImageView;
-import com.google.common.collect.ImmutableSet;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import java.io.File;
-import java.util.Set;
 
 final class ImageDecorator implements Decorator<File> {
 
-  // See http://developer.android.com/guide/appendix/media-formats.html
-  private static final Set<String> SUPPORTED_FORMATS =
-      ImmutableSet.of("jpg", "gif", "png", "bmp", "webp");
+  // TODO release bitmaps that are no longer needed
+  // TODO this currently treats every file as an image the first time it encounter them
+
+
+  private static final class FileCallback implements Callback {
+    private final File file;
+
+    FileCallback(File file) {
+      this.file = file;
+    }
+
+    @Override public void onSuccess() {}
+
+    @Override public void onError() {
+      errors.put(file, file);
+    }
+  }
+
+  private static final LruCache<File, Object> errors = new LruCache<File, Object>(1000);
 
   private final int size;
 
@@ -25,17 +38,12 @@ final class ImageDecorator implements Decorator<File> {
   @Override public void decorate(View view, File file) {
     ImageView image = (ImageView) view;
     image.setImageBitmap(null);
-    if (file.isFile() && isImage(file)) {
+    if (file.isFile() && errors.get(file) == null) {
       Picasso.with(view.getContext())
           .load(file)
           .resize(size, size)
           .centerCrop()
-          .into(image);
+          .into(image, new FileCallback(file));
     }
-  }
-
-  private boolean isImage(File file) {
-    String ext = getExtension(file.getName()).toLowerCase(ENGLISH);
-    return SUPPORTED_FORMATS.contains(ext);
   }
 }
