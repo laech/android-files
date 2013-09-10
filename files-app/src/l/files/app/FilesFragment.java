@@ -1,15 +1,16 @@
 package l.files.app;
 
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static l.files.BuildConfig.DEBUG;
+import static l.files.app.FilesFragment.Event.REFRESH_END;
+import static l.files.app.FilesFragment.Event.REFRESH_START;
 import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
 import static l.files.common.app.OptionsMenus.compose;
 import static l.files.common.io.Files.listFiles;
-import static l.files.common.widget.ListViews.getItems;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -22,8 +23,8 @@ import com.google.common.base.Objects;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 import l.files.R;
+import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.MultiChoiceActions;
 import l.files.event.ShowHiddenFilesSetting;
 import l.files.event.SortSetting;
@@ -36,15 +37,17 @@ public final class FilesFragment extends BaseFileListFragment {
   public static FilesFragment create(File dir) {
     Bundle args = new Bundle(1);
     args.putString(ARG_DIRECTORY, dir.getAbsolutePath());
-
     FilesFragment fragment = new FilesFragment();
     fragment.setArguments(args);
     return fragment;
   }
 
+  AsyncTaskExecutor executor;
   FileObserver observer;
   private File dir;
   private Refresher refresher;
+
+  private boolean started = false;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -53,29 +56,41 @@ public final class FilesFragment extends BaseFileListFragment {
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     dir = new File(getArguments().getString(ARG_DIRECTORY));
+    executor = AsyncTaskExecutor.DEFAULT;
     refresher = new Refresher();
     observer = new DirObserver(dir, new Handler(), new Runnable() {
       @Override public void run() {
-        refresh();
+        if (started) {
+          refresher.refresh();
+        } else {
+          refresher.markDirty();
+        }
       }
     });
 
-    configureListView();
-    configureOptionsMenu();
+    setupListView();
+    setupOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
-  }
 
-  @Override public void onResume() {
-    refresher.setAnimate(false);
-    super.onResume();
     observer.startWatching();
-    refresher.setAnimate(true);
-    refresher.setContentIfDirChanged();
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override public void onDestroy() {
+    super.onDestroy();
     observer.stopWatching();
+  }
+
+  @Override public void onStart() {
+    refresher.setAnimate(false);
+    super.onStart();
+    refresher.refreshIfDirty();
+    refresher.setAnimate(true);
+    started = true;
+  }
+
+  @Override public void onStop() {
+    super.onStop();
+    started = false;
   }
 
   @Override public FilesAdapter getListAdapter() {
@@ -94,7 +109,7 @@ public final class FilesFragment extends BaseFileListFragment {
     refresher.refresh();
   }
 
-  private void configureOptionsMenu() {
+  private void setupOptionsMenu() {
     setOptionsMenu(compose(
         newBookmarkMenu(getBus(), dir),
         newDirMenu(getFragmentManager(), dir),
@@ -104,7 +119,7 @@ public final class FilesFragment extends BaseFileListFragment {
     ));
   }
 
-  private void configureListView() {
+  private void setupListView() {
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
     list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
@@ -115,22 +130,56 @@ public final class FilesFragment extends BaseFileListFragment {
         newDeleteAction(list, getBus())));
   }
 
+  private void updateUnableToShowDirectoryError(File directory) {
+    if (!directory.exists()) {
+      overrideEmptyText(R.string.directory_doesnt_exist);
+    } else if (!directory.isDirectory()) {
+      overrideEmptyText(R.string.not_a_directory);
+    } else {
+      overrideEmptyText(R.string.permission_denied);
+    }
+  }
+
+  private void overrideEmptyText(int resId) {
+    View root = getView();
+    if (root != null) {
+      ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
+    }
+  }
+
+  private void setEmptyContent() {
+    overrideEmptyText(R.string.empty);
+    getListAdapter().replace(getListView(), emptyList(), false);
+  }
+
   private final class Refresher {
     private Boolean showHiddenFiles;
     private String sort;
     private boolean animate = false;
+    private boolean dirty = false;
 
     void setShowHiddenFiles(Boolean showHiddenFiles) {
       if (!Objects.equal(this.showHiddenFiles, showHiddenFiles)) {
         this.showHiddenFiles = showHiddenFiles;
-        refresh(true);
+        refresh();
       }
     }
 
     void setSort(String sort) {
       if (!Objects.equal(this.sort, sort)) {
         this.sort = sort;
-        refresh(true);
+        refresh();
+      }
+    }
+
+    void markDirty() {
+      dirty = true;
+    }
+
+    void refreshIfDirty() {
+      if (dirty) {
+        refresh();
+        dirty = false;
       }
     }
 
@@ -139,70 +188,58 @@ public final class FilesFragment extends BaseFileListFragment {
     }
 
     void refresh() {
-      refresh(false);
-    }
-
-    private void refresh(boolean triggeredByPropertyChange) {
       if (this.showHiddenFiles == null || this.sort == null) {
         return;
       }
-
-      final File[] files = listFiles(dir, showHiddenFiles);
-      if (files == null) {
-        updateUnableToShowDirectoryError(dir);
-      } else if (files.length == 0) {
-        setEmptyContent();
-      } else if (triggeredByPropertyChange) {
-        setContent(files);
-      } else {
-        setContentIfDirChanged(files);
-      }
-    }
-
-    void setContentIfDirChanged() {
-      File[] files = listFiles(dir, showHiddenFiles);
-      if (files != null && files.length != 0) {
-        setContentIfDirChanged(files);
-      }
-    }
-
-    private void setContentIfDirChanged(File[] files) {
-      Set<File> newFiles = newHashSet(files);
-      Set<File> oldFiles = newHashSet(getItems(getListView(), File.class));
-      if (!newFiles.equals(oldFiles)) {
-        setContent(files);
-      }
-      // TODO refresh visible items that may have last updated timestamp changed
-    }
-
-    private void setEmptyContent() {
-      overrideEmptyText(R.string.empty);
-      getListAdapter().replace(getListView(), emptyList(), animate);
-    }
-
-    private void setContent(File[] files) {
       if (DEBUG) {
-        Log.d("FilesFragment", "setting new content");
+        Log.d("FilesFragment", "refresh");
       }
+      executor.execute(new RefreshTask(dir, showHiddenFiles, sort, animate));
+    }
+  }
+
+  public static enum Event {
+    REFRESH_START,
+    REFRESH_END
+  }
+
+  final class RefreshTask extends AsyncTask<Void, Void, List<?>> {
+    private final File dir;
+    private final boolean showHiddenFiles;
+    private final String sort;
+    private final boolean animate;
+
+    RefreshTask(File dir, boolean showHiddenFiles, String sort, boolean animate) {
+      this.dir = dir;
+      this.showHiddenFiles = showHiddenFiles;
+      this.sort = sort;
+      this.animate = animate;
+    }
+
+    @Override protected void onPreExecute() {
+      super.onPreExecute();
+      getBus().post(REFRESH_START);
+    }
+
+    @Override protected List<?> doInBackground(Void... params) {
       // Sorting takes some time on large directory, do it only if necessary
-      List<Object> result = Sorters.apply(sort, getResources(), files);
-      getListAdapter().replace(getListView(), result, animate);
-    }
-
-    private void updateUnableToShowDirectoryError(File directory) {
-      if (!directory.exists()) {
-        overrideEmptyText(R.string.directory_doesnt_exist);
-      } else if (!directory.isDirectory()) {
-        overrideEmptyText(R.string.not_a_directory);
+      File[] files = listFiles(dir, showHiddenFiles);
+      if (files != null) {
+        return Sorters.apply(sort, getResources(), files);
       } else {
-        overrideEmptyText(R.string.permission_denied);
+        return null;
       }
     }
 
-    private void overrideEmptyText(int resId) {
-      View root = getView();
-      if (root != null) {
-        ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
+    @Override protected void onPostExecute(List<?> result) {
+      super.onPostExecute(result);
+      getBus().post(REFRESH_END);
+      if (result == null) {
+        updateUnableToShowDirectoryError(dir);
+      } else if (result.size() == 0) {
+        setEmptyContent();
+      } else {
+        getListAdapter().replace(getListView(), result, animate);
       }
     }
   }

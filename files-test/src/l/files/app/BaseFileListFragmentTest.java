@@ -17,16 +17,16 @@ public abstract class BaseFileListFragmentTest<T extends Activity>
     super(activityClass);
   }
 
-  @UiThreadTest public void testBusIsRegisteredOnResume() {
+  @UiThreadTest public void testBusIsRegisteredOnStart() {
     fragment().setBus(mock(Bus.class));
-    fragment().onResume();
+    fragment().onStart();
     verify(fragment().getBus()).register(fragment());
   }
 
-  @UiThreadTest public void testBusIsUnregisteredOnPause() {
+  @UiThreadTest public void testBusIsUnregisteredOnStop() {
     fragment().setBus(mock(Bus.class));
-    fragment().onResume();
-    fragment().onPause();
+    fragment().onStart();
+    fragment().onStop();
     verify(fragment().getBus()).unregister(fragment());
   }
 

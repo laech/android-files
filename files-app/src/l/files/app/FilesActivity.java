@@ -1,6 +1,7 @@
 package l.files.app;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Window.FEATURE_PROGRESS;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.UserDirs.DIR_HOME;
@@ -28,7 +29,9 @@ public final class FilesActivity extends BaseFragmentActivity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    requestWindowFeature(FEATURE_PROGRESS);
     setContentView(R.layout.files_activity);
+    setProgressBarIndeterminate(true);
 
     bus = getBus(this);
     dir = getDir();
@@ -55,6 +58,17 @@ public final class FilesActivity extends BaseFragmentActivity {
       return true;
     }
     return false;
+  }
+
+  @Subscribe public void handle(FilesFragment.Event event) {
+    switch (event) {
+      case REFRESH_START:
+        setProgressBarVisibility(true);
+        break;
+      case REFRESH_END:
+        setProgressBarVisibility(false);
+        break;
+    }
   }
 
   @Subscribe public void handle(OpenFileRequest request) {

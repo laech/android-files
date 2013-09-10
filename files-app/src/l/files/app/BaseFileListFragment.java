@@ -6,9 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import com.squareup.otto.Bus;
-import l.files.common.app.BaseListFragment;
-
 import java.io.File;
+import l.files.common.app.BaseListFragment;
 
 class BaseFileListFragment extends BaseListFragment {
 
@@ -32,13 +31,13 @@ class BaseFileListFragment extends BaseListFragment {
     bus = FilesApp.getBus(this);
   }
 
-  @Override public void onResume() {
-    super.onResume();
+  @Override public void onStart() {
+    super.onStart();
     bus.register(this);
   }
 
-  @Override public void onPause() {
-    super.onPause();
+  @Override public void onStop() {
+    super.onStop();
     bus.unregister(this);
   }
 
