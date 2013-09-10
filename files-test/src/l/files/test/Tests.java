@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public final class Tests {
   private Tests() {}
 
-  public static void waitUntilSuccess(Runnable code, long time, TimeUnit unit) {
+  public static void waitUntilSuccessful(Runnable code, long time, TimeUnit unit) {
     long start = currentTimeMillis();
     long duration = unit.toMillis(time);
     Throwable err = null;

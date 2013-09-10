@@ -3,7 +3,7 @@ package l.files.features;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.test.Tests.waitUntilSuccess;
+import static l.files.test.Tests.waitUntilSuccessful;
 
 import android.app.AlertDialog;
 import android.support.v4.app.DialogFragment;
@@ -108,7 +108,7 @@ public final class NewFolderTest extends BaseFilesActivityTest {
   }
 
   private void waitUntilExists(final File file) {
-    waitUntilSuccess(new Runnable() {
+    waitUntilSuccessful(new Runnable() {
       @Override public void run() {
         assertTrue(file.exists());
       }
