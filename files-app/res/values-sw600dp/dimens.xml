@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="separator">1px</dimen>
+  <dimen name="text_size_list_item_primary">18sp</dimen>
+  <dimen name="text_size_list_item_secondary">12sp</dimen>
+  <dimen name="text_size_list_icon_font">26sp</dimen>
+  <dimen name="text_size_sidebar_item">18sp</dimen>
+  <dimen name="text_size_sidebar_icon_font">24sp</dimen>
+  <dimen name="list_preferred_item_height">80dp</dimen>
+</resources>
