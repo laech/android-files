@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:background="?android:attr/activatedBackgroundIndicator">
+    style="@style/FileListItemContainer">
 
   <TextView
       android:id="@android:id/icon"
@@ -10,10 +10,7 @@
       android:layout_height="?android:attr/listPreferredItemHeight"
       android:layout_marginLeft="4dp"
       android:layout_centerVertical="true"
-      android:gravity="center"
-      android:textColor="@color/ic_font"
-      android:textSize="20sp"
-      android:text="@string/ic_font_char"/>
+      style="@style/FileListIconFont"/>
 
   <ImageView
       android:id="@android:id/background"
@@ -35,21 +32,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif-condensed"
-        android:maxLines="2"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="16sp"/>
+        style="@style/FileListItemTextPrimary"/>
 
     <TextView
         android:id="@android:id/summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"
-        android:fontFamily="sans-serif-light"
-        android:textColor="?android:attr/textColorTertiary"
-        android:textSize="11sp"/>
+        style="@style/FileListItemTextSecondary"/>
 
   </RelativeLayout>
-
 </RelativeLayout>

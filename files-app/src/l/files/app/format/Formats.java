@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import com.google.common.base.Function;
 import java.io.File;
 
@@ -45,13 +44,6 @@ public final class Formats {
       Function<? super Long, ? extends CharSequence> dateFormat,
       Function<? super Long, ? extends CharSequence> sizeFormat) {
     return new FileSummaryFunction(res, dateFormat, sizeFormat);
-  }
-
-  /**
-   * Function to return a drawable icon for the file.
-   */
-  public static Function<File, Drawable> drawable(Resources res) {
-    return new FileDrawableFunction(res);
   }
 
   /**

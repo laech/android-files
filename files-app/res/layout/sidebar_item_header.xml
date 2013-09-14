@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@android:id/title"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/SidebarHeader"
-    tools:ignore="SelectableText"/>
+    android:orientation="vertical">
+
+  <TextView
+      android:id="@android:id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      style="@style/SidebarHeader"/>
+
+  <View style="@style/SidebarHeaderSeparator"/>
+
+</LinearLayout>
