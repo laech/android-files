@@ -11,8 +11,8 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="16dp"
       android:layout_marginBottom="8dp"
-      style="@style/FileListItemHeaderText"/>
+      style="@style/Theme.ListView.Item.Header"/>
 
-  <View style="@style/FileListItemHeaderSeparator"/>
+  <View style="@style/Theme.ListView.Item.Header.Separator"/>
 
 </LinearLayout>

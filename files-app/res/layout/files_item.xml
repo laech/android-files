@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    style="@style/FileListItemContainer">
+    style="@style/Theme.ListView.Item.Container">
 
   <TextView
       android:id="@android:id/icon"
@@ -10,7 +10,7 @@
       android:layout_height="?android:attr/listPreferredItemHeight"
       android:layout_marginLeft="4dp"
       android:layout_centerVertical="true"
-      style="@style/FileListIconFont"/>
+      style="@style/Theme.ListView.Item.IconFont"/>
 
   <ImageView
       android:id="@android:id/background"
@@ -32,14 +32,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
-        style="@style/FileListItemTextPrimary"/>
+        style="@style/Theme.ListView.Item.Primary"/>
 
     <TextView
         android:id="@android:id/summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"
-        style="@style/FileListItemTextSecondary"/>
+        style="@style/Theme.ListView.Item.Secondary"/>
 
   </RelativeLayout>
 </RelativeLayout>

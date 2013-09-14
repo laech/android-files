@@ -7,10 +7,10 @@
       android:id="@android:id/list"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      style="@style/Sidebar"/>
+      style="@style/Theme.Sidebar"/>
 
   <View
       android:layout_alignParentRight="true"
-      style="@style/SidebarSeparator"/>
+      style="@style/Theme.Sidebar.Separator"/>
 
 </RelativeLayout>

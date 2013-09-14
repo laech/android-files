@@ -9,8 +9,8 @@
       android:id="@android:id/title"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      style="@style/SidebarHeader"/>
+      style="@style/Theme.Sidebar.Header"/>
 
-  <View style="@style/SidebarHeaderSeparator"/>
+  <View style="@style/Theme.Sidebar.Header.Separator"/>
 
 </LinearLayout>

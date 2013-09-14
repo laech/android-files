@@ -28,7 +28,7 @@ public final class SortDialog extends DialogFragment implements OnItemClickListe
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     bus = getBus(this);
-    setStyle(STYLE_NORMAL, R.style.Dialog);
+    setStyle(STYLE_NORMAL, R.style.Theme_Dialog);
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
