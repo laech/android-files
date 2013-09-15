@@ -2,8 +2,7 @@ package l.files.app.mode;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.OnMenuItemClickListener;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItems;
 
@@ -38,7 +37,7 @@ final class DeleteAction
     menu.add(NONE, R.id.delete, NONE, R.string.delete)
         .setOnMenuItemClickListener(this)
         .setIcon(R.drawable.ic_menu_delete)
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
+        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {

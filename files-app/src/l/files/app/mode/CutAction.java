@@ -1,8 +1,7 @@
 package l.files.app.mode;
 
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.OnMenuItemClickListener;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItems;
 
@@ -36,7 +35,7 @@ final class CutAction
     menu.add(NONE, android.R.id.cut, NONE, android.R.string.cut)
         .setIcon(R.drawable.ic_menu_cut)
         .setOnMenuItemClickListener(this)
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
+        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
