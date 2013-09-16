@@ -1,8 +1,7 @@
 package l.files.event.internal;
 
+import static l.files.common.io.Files.getNonExistentDestinationFile;
 import static org.apache.commons.io.FileUtils.*;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -15,9 +14,9 @@ public abstract class FileService extends IntentService {
 
   static abstract class CutOrCopy extends FileService {
     @Override protected final void handle(Intent intent) throws IOException {
-      File srcFile = new File(intent.getStringExtra(EXTRA_FILE));
+      File source = new File(intent.getStringExtra(EXTRA_SOURCE));
       File dstDir = new File(intent.getStringExtra(EXTRA_DESTINATION));
-      handle(srcFile, getDestinationFile(srcFile, dstDir));
+      handle(source, getNonExistentDestinationFile(source, dstDir));
     }
 
     protected abstract void handle(File from, File to) throws IOException;
@@ -45,7 +44,7 @@ public abstract class FileService extends IntentService {
 
   public static final class Delete extends FileService {
     @Override protected void handle(Intent intent) throws IOException {
-      forceDelete(new File(intent.getStringExtra(EXTRA_FILE)));
+      forceDelete(new File(intent.getStringExtra(EXTRA_SOURCE)));
     }
   }
 
@@ -78,27 +77,16 @@ public abstract class FileService extends IntentService {
   private static Intent cutOrCopy(
       Context context, File srcFile, File dstDir, Class<?> service) {
     return new Intent(context, service)
-        .putExtra(EXTRA_FILE, srcFile.getAbsolutePath())
+        .putExtra(EXTRA_SOURCE, srcFile.getAbsolutePath())
         .putExtra(EXTRA_DESTINATION, dstDir.getAbsolutePath());
   }
 
   public static Intent delete(Context context, File file) {
     return new Intent(context, Delete.class)
-        .putExtra(EXTRA_FILE, file.getAbsolutePath());
+        .putExtra(EXTRA_SOURCE, file.getAbsolutePath());
   }
 
-  private static File getDestinationFile(File srcFile, File dstDir) {
-    String name = srcFile.getName();
-    String base = getBaseName(name);
-    String ext = getExtension(name);
-    File file = new File(dstDir, srcFile.getName());
-    for (int i = 2; file.exists(); ++i) {
-      file = new File(dstDir, base + " " + i + (ext.equals("") ? "" : "." + ext));
-    }
-    return file;
-  }
-
-  static final String EXTRA_FILE = "l.files.intent.extra.FILE";
+  static final String EXTRA_SOURCE = "l.files.intent.extra.SOURCE";
   static final String EXTRA_DESTINATION = "l.files.intent.extra.DESTINATION";
 
   public FileService() {

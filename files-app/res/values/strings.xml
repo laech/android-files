@@ -24,9 +24,10 @@
     <item quantity="other">Delete these %s items permanently?</item>
   </plurals>
   <string name="untitled_dir">untitled folder</string>
-  <string name="untitled_dir_n">untitled folder %s</string>
   <string name="mkdir_failed">Failed to create folder.</string>
-  <string name="dir_exists">This name is already taken.</string>
+  <string name="name_exists">This name is already taken.</string>
+  <string name="rename">Rename</string>
+  <string name="failed_to_rename_file">Failed to rename file.</string>
 
   <!--
     The character of all icon fonts in assets folder,

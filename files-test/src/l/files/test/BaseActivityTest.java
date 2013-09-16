@@ -13,4 +13,8 @@ public class BaseActivityTest<T extends Activity> extends ActivityInstrumentatio
     super.setUp();
     Dexmaker.setup(this);
   }
+
+  protected final T activity() {
+    return getActivity();
+  }
 }

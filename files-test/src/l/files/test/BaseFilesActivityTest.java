@@ -5,6 +5,7 @@ import static l.files.app.FilesActivity.EXTRA_DIR;
 import android.content.Intent;
 import java.io.File;
 import l.files.app.FilesActivity;
+import l.files.features.object.UiFileActivity;
 
 public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
@@ -25,7 +26,11 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     super.tearDown();
   }
 
-  protected TempDir dir() {
+  protected final UiFileActivity ui() {
+    return new UiFileActivity(getInstrumentation(), getActivity());
+  }
+
+  protected final TempDir dir() {
     return dir;
   }
 

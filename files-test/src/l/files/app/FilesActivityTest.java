@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import android.content.Intent;
 import android.test.UiThreadTest;
+import android.view.ActionMode;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
@@ -34,6 +35,19 @@ public final class FilesActivityTest
   @Override protected void tearDown() throws Exception {
     dir.delete();
     super.tearDown();
+  }
+
+  @UiThreadTest public void testFinishesActionModeOnRequest() {
+    activity().currentActionMode = mock(ActionMode.class);
+    activity().handle(CloseActionModeRequest.INSTANCE);
+    verify(activity().currentActionMode).finish();
+    verifyNoMoreInteractions(activity().currentActionMode);
+  }
+
+  @UiThreadTest public void testFinishesActionModeOnRequestWillSkipIfNoActionMode() {
+    activity().currentActionMode = null;
+    activity().handle(CloseActionModeRequest.INSTANCE);
+    // No error
   }
 
   @UiThreadTest public void testBusIsRegisteredOnResume() throws Throwable {

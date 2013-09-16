@@ -9,6 +9,7 @@ import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
 import static l.files.common.io.Files.listFiles;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.FileObserver;
@@ -127,7 +128,8 @@ public final class FilesFragment extends BaseFileListFragment {
         newSelectAllAction(list),
         newCutAction(list, getBus()),
         newCopyAction(list, getBus()),
-        newDeleteAction(list, getBus())));
+        newDeleteAction(list, getBus()),
+        newRenameAction(list, getFragmentManager())));
   }
 
   private void updateUnableToShowDirectoryError(File directory) {
@@ -223,17 +225,30 @@ public final class FilesFragment extends BaseFileListFragment {
 
     @Override protected List<?> doInBackground(Void... params) {
       // Sorting takes some time on large directory, do it only if necessary
+      Activity activity = getActivity();
+      if (activity == null) {
+        cancel(true);
+        return null;
+      }
       File[] files = listFiles(dir, showHiddenFiles);
       if (files != null) {
-        return Sorters.apply(sort, getResources(), files);
+        return Sorters.apply(sort, activity.getResources(), files);
       } else {
         return null;
       }
     }
 
+    @Override protected void onCancelled() {
+      super.onCancelled();
+      getBus().post(REFRESH_END);
+    }
+
     @Override protected void onPostExecute(List<?> result) {
       super.onPostExecute(result);
       getBus().post(REFRESH_END);
+      if (getView() == null) {
+        return;
+      }
       if (result == null) {
         updateUnableToShowDirectoryError(dir);
       } else if (result.size() == 0) {

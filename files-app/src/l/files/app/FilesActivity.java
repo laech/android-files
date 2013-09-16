@@ -10,6 +10,7 @@ import static l.files.app.format.Formats.label;
 import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.view.ActionMode;
 import android.view.MenuItem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -26,6 +27,9 @@ public final class FilesActivity extends BaseFragmentActivity {
   Bus bus;
   File dir;
   ViewPager pager;
+
+  ActionMode currentActionMode;
+  ActionMode.Callback currentActionModeCallback;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -58,6 +62,32 @@ public final class FilesActivity extends BaseFragmentActivity {
       return true;
     }
     return false;
+  }
+
+  @Override public void onActionModeFinished(ActionMode mode) {
+    super.onActionModeFinished(mode);
+    this.currentActionMode = null;
+    this.currentActionModeCallback = null;
+  }
+
+  @Override public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+    this.currentActionMode = super.onWindowStartingActionMode(callback);
+    this.currentActionModeCallback = callback;
+    return this.currentActionMode;
+  }
+
+  public ActionMode getCurrentActionMode() {
+    return currentActionMode;
+  }
+
+  public ActionMode.Callback getCurrentActionModeCallback() {
+    return currentActionModeCallback;
+  }
+
+  @Subscribe public void handle(CloseActionModeRequest request) {
+    if (currentActionMode != null) {
+      currentActionMode.finish();
+    }
   }
 
   @Subscribe public void handle(FilesFragment.Event event) {

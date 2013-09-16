@@ -2,6 +2,7 @@ package l.files.app.mode;
 
 import static android.widget.AbsListView.MultiChoiceModeListener;
 
+import android.support.v4.app.FragmentManager;
 import android.widget.AbsListView;
 import com.squareup.otto.Bus;
 
@@ -26,5 +27,9 @@ public final class Modes {
 
   public static MultiChoiceModeListener newCopyAction(AbsListView list, Bus bus) {
     return new CopyAction(list, bus);
+  }
+
+  public static MultiChoiceModeListener newRenameAction(AbsListView list, FragmentManager manager) {
+    return new RenameAction(list, manager);
   }
 }

@@ -1,11 +1,11 @@
 package l.files.common.io;
 
-import junit.framework.TestCase;
-import l.files.test.TempDir;
+import static java.util.Arrays.asList;
+import static l.files.common.io.Files.getNonExistentDestinationFile;
 
 import java.io.File;
-
-import static java.util.Arrays.asList;
+import junit.framework.TestCase;
+import l.files.test.TempDir;
 
 public final class FilesTest extends TestCase {
 
@@ -19,6 +19,31 @@ public final class FilesTest extends TestCase {
   @Override protected void tearDown() throws Exception {
     super.tearDown();
     dir.delete();
+  }
+
+  public void testGetNonExistentDestinationFile_renamesFileWithExtensionIfDestinationFileExists() {
+    File source = dir.newFile("abc.txt");
+    assertEquals(new File(dir.get(), "abc 2.txt"),
+        getNonExistentDestinationFile(source, dir.get()));
+  }
+
+  public void testGetNonExistentDestinationFile_renamesFileWithoutExtensionIfDestinationFileExists() {
+    File source = dir.newFile("abc");
+    assertEquals(new File(dir.get(), "abc 2"),
+        getNonExistentDestinationFile(source, dir.get()));
+  }
+
+
+  public void testGetNonExistentDestinationFile_renamesFileWithoutBaseNameIfDestinationFileExists() {
+    File source = dir.newFile(".abc");
+    assertEquals(new File(dir.get(), ".abc 2"),
+        getNonExistentDestinationFile(source, dir.get()));
+  }
+
+  public void testGetNonExistentDestinationFile_renamesDirectoryIfDestinationFileExists() {
+    File source = dir.newDir("abc.txt");
+    assertEquals(new File(dir.get(), "abc.txt 2"),
+        getNonExistentDestinationFile(source, dir.get()));
   }
 
   public void testListFiles_showHiddenFiles() {

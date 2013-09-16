@@ -7,5 +7,6 @@
   <item type="id" name="bookmark"/>
   <item type="id" name="sort_by"/>
   <item type="id" name="show_hidden_files"/>
+  <item type="id" name="rename"/>
 
 </resources>

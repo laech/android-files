@@ -38,11 +38,11 @@ public final class NewFolderTest extends BaseFilesActivityTest {
 
   public void testShowsDialogWithNewNameSuggestionIfInitialNamesAreTaken() throws Throwable {
     dir().newFile(string(R.string.untitled_dir));
-    dir().newFile(string(R.string.untitled_dir_n, 2));
+    dir().newFile(string(R.string.untitled_dir) + " " + 2);
     clickNewFolderMenu();
     runTestOnUiThread(new Runnable() {
       @Override public void run() {
-        assertEquals(string(R.string.untitled_dir_n, 3), titleText());
+        assertEquals(string(R.string.untitled_dir) + " " + 3, titleText());
       }
 
     });
@@ -56,7 +56,7 @@ public final class NewFolderTest extends BaseFilesActivityTest {
 
         EditText edit = title();
         edit.setText("a");
-        assertEquals(string(R.string.dir_exists), edit.getError());
+        assertEquals(string(R.string.name_exists), edit.getError());
         assertFalse(dialog().getButton(BUTTON_POSITIVE).isEnabled());
 
         edit.setText("b");
@@ -78,8 +78,8 @@ public final class NewFolderTest extends BaseFilesActivityTest {
     });
   }
 
-  private String string(int id, Object... args) {
-    return getActivity().getString(id, args);
+  private String string(int id) {
+    return getActivity().getString(id);
   }
 
   private DialogFragment fragment() {
