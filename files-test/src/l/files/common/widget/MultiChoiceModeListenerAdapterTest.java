@@ -1,43 +1,25 @@
 package l.files.common.widget;
 
-import android.view.ActionMode;
-import android.view.Menu;
-import junit.framework.TestCase;
+import l.files.test.BaseTest;
 
-import static org.mockito.Mockito.*;
+public final class MultiChoiceModeListenerAdapterTest extends BaseTest {
 
-public final class MultiChoiceModeListenerAdapterTest extends TestCase {
-
-  private MultiChoiceAction mode;
   private MultiChoiceModeListenerAdapter adapter;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    mode = mock(MultiChoiceAction.class);
-    adapter = new MultiChoiceModeListenerAdapter(mode);
+    adapter = new MultiChoiceModeListenerAdapter();
   }
 
-  public void testOnCreateActionModeIsDelegated() {
-    ActionMode actionMode = mock(ActionMode.class);
-    Menu menu = mock(Menu.class);
-    assertTrue(adapter.onCreateActionMode(actionMode, menu));
-    verify(mode).onCreate(actionMode, menu);
+  public void testOnCreateReturnsTrueToIndicateActionModeShouldBeCreated() {
+    assertTrue(adapter.onCreateActionMode(null, null));
   }
 
-  public void testOnItemCheckedStateChangedIsDelegated() {
-    ActionMode actionMode = mock(ActionMode.class);
-    adapter.onItemCheckedStateChanged(actionMode, 0, 1, true);
-    verify(mode).onChange(actionMode, 0, 1, true);
-  }
-
-  public void testOnPrepareActionModeReturnsFalseToIndicateNoNeedToUpdate() {
+  public void testOnPrepareReturnsFalseToIndicateMenuDoesNotNeedToBeUpdated() {
     assertFalse(adapter.onPrepareActionMode(null, null));
-    verifyZeroInteractions(mode);
   }
 
-  public void testOnDestroyActionModeIsDelegated() {
-    ActionMode actionMode = mock(ActionMode.class);
-    adapter.onDestroyActionMode(actionMode);
-    verify(mode).onDestroy(actionMode);
+  public void testOnClickReturnsFalseToIndicateActionIsNotHandled() {
+    assertFalse(adapter.onActionItemClicked(null, null));
   }
 }

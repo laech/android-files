@@ -2,6 +2,7 @@ package l.files.app.mode;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static l.files.test.Mocks.mockMenuItem;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -31,10 +32,9 @@ public final class SelectAllActionTest extends BaseTest {
   }
 
   public void testCreatesMenuItemCorrectly() {
-    action.onCreate(mode, menu);
+    assertTrue(action.onCreateActionMode(mode, menu));
     verify(item).setIcon(R.drawable.ic_menu_select_all);
-    verify(item).setOnMenuItemClickListener(action);
-    verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
+    verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 
   private Menu mockMenu(MenuItem item) {

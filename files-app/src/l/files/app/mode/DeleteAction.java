@@ -2,7 +2,8 @@ package l.files.app.mode;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.*;
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItems;
 
@@ -16,31 +17,31 @@ import com.squareup.otto.Bus;
 import java.io.File;
 import java.util.List;
 import l.files.R;
-import l.files.common.widget.MultiChoiceActionAdapter;
+import l.files.common.widget.SingleAction;
 import l.files.event.DeleteRequest;
 
-final class DeleteAction
-    extends MultiChoiceActionAdapter implements OnMenuItemClickListener {
+final class DeleteAction extends SingleAction {
 
   private final AbsListView list;
   private final Bus bus;
-
-  private ActionMode mode;
 
   public DeleteAction(AbsListView list, Bus bus) {
     this.bus = checkNotNull(bus, "bus");
     this.list = checkNotNull(list, "list");
   }
 
-  @Override public void onCreate(ActionMode mode, Menu menu) {
-    this.mode = mode;
-    menu.add(NONE, R.id.delete, NONE, R.string.delete)
-        .setOnMenuItemClickListener(this)
+  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    menu.add(NONE, id(), NONE, R.string.delete)
         .setIcon(R.drawable.ic_menu_delete)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
+    return true;
   }
 
-  @Override public boolean onMenuItemClick(MenuItem item) {
+  @Override protected int id() {
+    return R.id.delete;
+  }
+
+  @Override protected void handleActionItemClicked(final ActionMode mode, MenuItem item) {
     final List<File> files = getCheckedItems(list, File.class);
     new AlertDialog.Builder(list.getContext())
         .setMessage(getConfirmMessage(files.size()))
@@ -48,11 +49,10 @@ final class DeleteAction
         .setPositiveButton(R.string.delete, new OnClickListener() {
           @Override public void onClick(DialogInterface dialog, int which) {
             requestDelete(files);
-            if (mode != null) mode.finish();
+            mode.finish();
           }
         })
         .show();
-    return true;
   }
 
   private void requestDelete(List<File> files) {

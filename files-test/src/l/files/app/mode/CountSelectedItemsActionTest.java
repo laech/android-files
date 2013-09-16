@@ -34,7 +34,7 @@ public final class CountSelectedItemsActionTest extends BaseTest {
   public void testUpdatesSelectedItemCountOnCreateActionMode() {
     testUpdatesTitle(new Runnable() {
       @Override public void run() {
-        action.onCreate(mode, null);
+        assertTrue(action.onCreateActionMode(mode, null));
       }
     });
   }
@@ -42,7 +42,7 @@ public final class CountSelectedItemsActionTest extends BaseTest {
   public void testUpdatesSelectedItemCountOnItemCheckStateChange() {
     testUpdatesTitle(new Runnable() {
       @Override public void run() {
-        action.onChange(mode, 0, 0, true);
+        action.onItemCheckedStateChanged(mode, 0, 0, true);
       }
     });
   }

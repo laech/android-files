@@ -4,11 +4,11 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.widget.AbsListView;
 import l.files.R;
-import l.files.common.widget.MultiChoiceActionAdapter;
+import l.files.common.widget.MultiChoiceModeListenerAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class CountSelectedItemsAction extends MultiChoiceActionAdapter {
+final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
 
   private final AbsListView list;
 
@@ -16,11 +16,12 @@ final class CountSelectedItemsAction extends MultiChoiceActionAdapter {
     this.list = checkNotNull(list, "list");
   }
 
-  @Override public void onCreate(ActionMode mode, Menu menu) {
+  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     updateSelectedItemCount(mode);
+    return true;
   }
 
-  @Override public void onChange(
+  @Override public void onItemCheckedStateChanged(
       ActionMode mode, int position, long id, boolean checked) {
     updateSelectedItemCount(mode);
   }

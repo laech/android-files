@@ -2,6 +2,7 @@ package l.files.app.mode;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.test.Mocks.mockMenuItem;
@@ -33,7 +34,7 @@ public final class CopyActionTest extends AndroidTestCase {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    item = mockMenuItem();
+    item = mockMenuItem(android.R.id.copy);
     menu = mockMenu(item);
     mode = mock(ActionMode.class);
     bus = mock(Bus.class);
@@ -43,15 +44,14 @@ public final class CopyActionTest extends AndroidTestCase {
   }
 
   public void testCreatesMenuItemCorrectly() {
-    action.onCreate(mode, menu);
+    assertTrue(action.onCreateActionMode(mode, menu));
     verify(item).setIcon(R.drawable.ic_menu_copy);
-    verify(item).setOnMenuItemClickListener(action);
-    verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
+    verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 
   public void testFinishActionModeOnClick() {
-    action.onCreate(mode, menu);
-    action.onMenuItemClick(item);
+    assertTrue(action.onCreateActionMode(mode, menu));
+    assertTrue(action.onActionItemClicked(mode, item));
     verify(mode).finish();
   }
 
@@ -65,7 +65,7 @@ public final class CopyActionTest extends AndroidTestCase {
     list.setItemChecked(0, true);
     list.setItemChecked(2, true);
 
-    action.onMenuItemClick(item);
+    assertTrue(action.onActionItemClicked(mode, item));
 
     CopyRequest request = captureRequest();
     assertEquals(newHashSet(new File("a"), new File("c")), request.value());
@@ -76,7 +76,7 @@ public final class CopyActionTest extends AndroidTestCase {
     list.setAdapter(new ArrayAdapter<Object>(getContext(), 0, new String[]{"1"}));
     list.setItemChecked(0, true);
 
-    action.onMenuItemClick(item);
+    action.onActionItemClicked(mode, item);
 
     verify(bus, never()).post(anyObject());
   }

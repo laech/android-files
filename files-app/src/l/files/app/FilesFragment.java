@@ -7,7 +7,6 @@ import static l.files.app.FilesFragment.Event.REFRESH_END;
 import static l.files.app.FilesFragment.Event.REFRESH_START;
 import static l.files.app.menu.Menus.*;
 import static l.files.app.mode.Modes.*;
-import static l.files.common.app.OptionsMenus.compose;
 import static l.files.common.io.Files.listFiles;
 
 import android.os.AsyncTask;
@@ -24,8 +23,9 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.List;
 import l.files.R;
+import l.files.common.app.OptionsMenus;
 import l.files.common.os.AsyncTaskExecutor;
-import l.files.common.widget.MultiChoiceActions;
+import l.files.common.widget.MultiChoiceModeListeners;
 import l.files.event.ShowHiddenFilesSetting;
 import l.files.event.SortSetting;
 import l.files.sort.Sorters;
@@ -110,7 +110,7 @@ public final class FilesFragment extends BaseFileListFragment {
   }
 
   private void setupOptionsMenu() {
-    setOptionsMenu(compose(
+    setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(getBus(), dir),
         newDirMenu(getFragmentManager(), dir),
         newPasteMenu(getBus(), dir),
@@ -122,7 +122,7 @@ public final class FilesFragment extends BaseFileListFragment {
   private void setupListView() {
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-    list.setMultiChoiceModeListener(MultiChoiceActions.asListener(
+    list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
         newCountSelectedItemsAction(list),
         newSelectAllAction(list),
         newCutAction(list, getBus()),

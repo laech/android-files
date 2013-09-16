@@ -1,21 +1,26 @@
 package l.files.test;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.view.ActionProvider;
-import android.view.MenuItem;
-import android.view.View;
-
 import static android.view.MenuItem.OnActionExpandListener;
 import static android.view.MenuItem.OnMenuItemClickListener;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.view.ActionProvider;
+import android.view.MenuItem;
+import android.view.View;
+
 public final class Mocks {
 
   public static MenuItem mockMenuItem() {
+    return mockMenuItem(0);
+  }
+
+  public static MenuItem mockMenuItem(int id) {
     MenuItem item = mock(MenuItem.class);
+    given(item.getItemId()).willReturn(id);
     given(item.setActionProvider(any(ActionProvider.class))).willReturn(item);
     given(item.setActionView(anyInt())).willReturn(item);
     given(item.setActionView(any(View.class))).willReturn(item);
