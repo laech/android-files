@@ -42,7 +42,7 @@ final class FilesAdapter extends AnimatedAdapter {
         on(android.R.id.icon, font(icons)),
         on(android.R.id.title, text(names)),
         on(android.R.id.summary, text(summaries)),
-        on(android.R.id.background, image(thumbnailSize)),
+        on(android.R.id.background, image(thumbnailSize)), // TODO show/hide icon instead of making image view background white
         enable(canRead())
     ));
   }

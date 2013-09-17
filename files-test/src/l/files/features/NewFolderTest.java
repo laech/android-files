@@ -15,6 +15,8 @@ import l.files.test.BaseFilesActivityTest;
 
 public final class NewFolderTest extends BaseFilesActivityTest {
 
+  // TODO use feature.object
+
   public void testCreatesFolderWithNameSpecified() throws Throwable {
     final File file = new File(dir().get(), "test-" + currentTimeMillis());
     clickNewFolderMenu();

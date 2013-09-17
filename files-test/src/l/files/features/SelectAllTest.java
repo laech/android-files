@@ -13,6 +13,8 @@ import l.files.test.BaseFilesActivityTest;
 
 public final class SelectAllTest extends BaseFilesActivityTest {
 
+  // TODO use feature.object
+
   public void testSelectsAll() throws Throwable {
     final Set<File> files = createFilesInDir(3);
     waitUntilLoaded();
