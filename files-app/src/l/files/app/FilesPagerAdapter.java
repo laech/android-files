@@ -1,12 +1,11 @@
 package l.files.app;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-
 import java.io.File;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 final class FilesPagerAdapter extends FragmentPagerAdapter {
 
@@ -34,7 +33,7 @@ final class FilesPagerAdapter extends FragmentPagerAdapter {
   @Override public Fragment getItem(int position) {
     switch (position) {
       case POSITION_FILES:
-        return FilesFragment.create(dir);
+        return FileListContainerFragment.create(dir);
       default:
         return new SidebarFragment();
     }

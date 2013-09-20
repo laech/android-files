@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
@@ -33,6 +34,7 @@ import l.files.sort.Sorters;
 
 public final class FilesFragment extends BaseFileListFragment {
 
+  public static final String TAG = FilesFragment.class.getSimpleName();
   public static final String ARG_DIRECTORY = "directory";
 
   public static FilesFragment create(File dir) {
@@ -54,31 +56,26 @@ public final class FilesFragment extends BaseFileListFragment {
     super(R.layout.files_fragment);
   }
 
+  public File directory() {
+    return dir;
+  }
+
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     dir = new File(getArguments().getString(ARG_DIRECTORY));
     executor = AsyncTaskExecutor.DEFAULT;
     refresher = new Refresher();
-    observer = new DirObserver(dir, new Handler(), new Runnable() {
-      @Override public void run() {
-        if (started) {
-          refresher.refresh();
-        } else {
-          refresher.markDirty();
-        }
-      }
-    });
 
     setupListView();
     setupOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
-
-    observer.startWatching();
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    observer.stopWatching();
+    if (observer != null) {
+      observer.stopWatching();
+    }
   }
 
   @Override public void onStart() {
@@ -87,6 +84,18 @@ public final class FilesFragment extends BaseFileListFragment {
     refresher.refreshIfDirty();
     refresher.setAnimate(true);
     started = true;
+    if (observer == null) {
+      observer = new DirObserver(dir, new Handler(), new Runnable() {
+        @Override public void run() {
+          if (started) {
+            refresher.refresh();
+          } else {
+            refresher.markDirty();
+          }
+        }
+      });
+      observer.startWatching();
+    }
   }
 
   @Override public void onStop() {
@@ -111,11 +120,12 @@ public final class FilesFragment extends BaseFileListFragment {
   }
 
   private void setupOptionsMenu() {
+    FragmentManager manager = getActivityFragmentManager();
     setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(getBus(), dir),
-        newDirMenu(getFragmentManager(), dir),
+        newDirMenu(manager, dir),
         newPasteMenu(getBus(), dir),
-        newSortMenu(getFragmentManager()),
+        newSortMenu(manager),
         newShowHiddenFilesMenu(getBus())
     ));
   }
@@ -123,13 +133,18 @@ public final class FilesFragment extends BaseFileListFragment {
   private void setupListView() {
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
+    FragmentManager manager = getActivityFragmentManager();
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
         newCountSelectedItemsAction(list),
         newSelectAllAction(list),
         newCutAction(list, getBus()),
         newCopyAction(list, getBus()),
         newDeleteAction(list, getBus()),
-        newRenameAction(list, getFragmentManager())));
+        newRenameAction(list, manager)));
+  }
+
+  private FragmentManager getActivityFragmentManager() {
+    return getActivity().getSupportFragmentManager();
   }
 
   private void updateUnableToShowDirectoryError(File directory) {

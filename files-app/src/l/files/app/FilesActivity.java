@@ -5,9 +5,7 @@ import static android.view.Window.FEATURE_PROGRESS;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.FilesPagerAdapter.POSITION_FILES;
 import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.app.format.Formats.label;
 
-import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.ActionMode;
@@ -17,13 +15,11 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
-import l.files.common.base.Consumer;
 
 public final class FilesActivity extends BaseFragmentActivity {
 
-  public static final String EXTRA_DIR = FilesFragment.ARG_DIRECTORY;
+  public static final String EXTRA_DIR = FileListContainerFragment.ARG_DIRECTORY;
 
-  Consumer<OpenFileRequest> helper;
   Bus bus;
   File dir;
   ViewPager pager;
@@ -32,17 +28,14 @@ public final class FilesActivity extends BaseFragmentActivity {
   ActionMode.Callback currentActionModeCallback;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
     requestWindowFeature(FEATURE_PROGRESS);
+    super.onCreate(savedInstanceState);
     setContentView(R.layout.files_activity);
     setProgressBarIndeterminate(true);
 
     bus = getBus(this);
     dir = getDir();
-    helper = OpenFileRequestConsumer.get(this);
     pager = setViewPagerAdapter();
-    setTitle(label(getResources()).apply(dir));
-    setActionBarAppearance();
   }
 
   @Override protected void onResume() {
@@ -56,12 +49,11 @@ public final class FilesActivity extends BaseFragmentActivity {
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    super.onOptionsItemSelected(item);
     if (android.R.id.home == item.getItemId()) {
-      finish();
+      bus.post(OnHomePressedEvent.INSTANCE);
       return true;
     }
-    return false;
+    return super.onOptionsItemSelected(item);
   }
 
   @Override public void onActionModeFinished(ActionMode mode) {
@@ -101,28 +93,11 @@ public final class FilesActivity extends BaseFragmentActivity {
     }
   }
 
-  @Subscribe public void handle(OpenFileRequest request) {
-    // TODO register helper directly and checkout onNewIntent
-    File file = request.value();
-    if (dir.equals(file)) {
-      pager.setCurrentItem(POSITION_FILES, true);
-    } else {
-      helper.take(request);
-    }
-  }
-
   private ViewPager setViewPagerAdapter() {
     ViewPager pager = (ViewPager) findViewById(R.id.pager);
     pager.setAdapter(new FilesPagerAdapter(getSupportFragmentManager(), dir, isPortrait()));
     pager.setCurrentItem(POSITION_FILES);
     return pager;
-  }
-
-  private void setActionBarAppearance() {
-    ActionBar actionBar = getActionBar();
-    if (actionBar != null) {
-      actionBar.setDisplayHomeAsUpEnabled(getIntent().hasExtra(EXTRA_DIR));
-    }
   }
 
   private File getDir() {

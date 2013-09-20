@@ -1,19 +1,15 @@
 package l.files.app;
 
 import static l.files.app.FilesActivity.EXTRA_DIR;
-import static l.files.app.FilesPagerAdapter.POSITION_FILES;
-import static l.files.app.FilesPagerAdapter.POSITION_SIDEBAR;
-import static l.files.test.Activities.rotate;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import android.content.Intent;
 import android.test.UiThreadTest;
 import android.view.ActionMode;
+import android.view.MenuItem;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import java.io.File;
-import java.lang.reflect.Method;
-import l.files.common.base.Consumer;
 import l.files.test.BaseActivityTest;
 import l.files.test.TempDir;
 
@@ -68,52 +64,16 @@ public final class FilesActivityTest
     verify(activity.bus).unregister(activity);
   }
 
-  @SuppressWarnings("unchecked") public void testOpenFileRequestIsHandled() {
-    FilesActivity activity = getActivity();
-    activity.helper = mock(Consumer.class);
-    OpenFileRequest event = new OpenFileRequest(dir.newDir());
-
-    activity.handle(event);
-
-    verify(activity.helper).take(event);
-  }
-
-  public void testOpenFileRequestHandlerMethodIsAnnotated() throws Exception {
-    Method method = FilesActivity.class.getMethod("handle", OpenFileRequest.class);
-    assertNotNull(method.getAnnotation(Subscribe.class));
-  }
-
-  // TODO verify this actually works
-  public void testShowsTitleCorrectlyOnScreenRotate() throws Throwable {
-    final FilesActivity activity = getActivity();
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        rotate(activity);
-      }
-    });
-
-    assertEquals(dir.get().getName(), title());
+  @UiThreadTest public void testPostsEventOnHomePressed() {
+    MenuItem item = mock(MenuItem.class);
+    given(item.getItemId()).willReturn(android.R.id.home);
+    activity().bus = mock(Bus.class);
+    activity().onOptionsItemSelected(item);
+    verify(activity().bus).post(OnHomePressedEvent.INSTANCE);
   }
 
   public void testShowsTitleUsingNameOfDirSpecified() {
     assertEquals(dir.get().getName(), title());
-  }
-
-  @SuppressWarnings("unchecked")//
-  public void testScrollsToFilesViewIfDirSpecifiedIsAlreadyDisplayed() throws Throwable {
-    dir.newFile();
-    final FilesActivity activity = getActivity();
-    activity.helper = mock(Consumer.class);
-
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        activity.pager.setCurrentItem(POSITION_SIDEBAR);
-        activity.handle(new OpenFileRequest(dir.get()));
-      }
-    });
-
-    assertEquals(POSITION_FILES, getActivity().pager.getCurrentItem());
-    verifyZeroInteractions(activity.helper);
   }
 
   private Intent newIntent(File dir) {

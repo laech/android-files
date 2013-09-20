@@ -1,9 +1,14 @@
 package l.files.app;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.app.Intents.viewFile;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.os.AsyncTask;
 import com.google.common.net.MediaType;
+import java.io.File;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.io.Detector;
@@ -11,17 +16,10 @@ import l.files.common.io.Detectors;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
 
-import java.io.File;
+final class FileOpener implements Consumer<File> {
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.MediaType.OCTET_STREAM;
-import static l.files.app.Intents.viewDir;
-import static l.files.app.Intents.viewFile;
-
-final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
-
-  public static OpenFileRequestConsumer get(Context context) {
-    return new OpenFileRequestConsumer(
+  public static FileOpener get(Context context) {
+    return new FileOpener(
         context, Detectors.get(), Toaster.get(), AsyncTaskExecutor.DEFAULT);
   }
 
@@ -30,7 +28,7 @@ final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
   private final Toaster toaster;
   private final AsyncTaskExecutor executor;
 
-  OpenFileRequestConsumer(
+  FileOpener(
       Context context,
       Detector detector,
       Toaster toaster,
@@ -41,26 +39,7 @@ final class OpenFileRequestConsumer implements Consumer<OpenFileRequest> {
     this.executor = checkNotNull(executor, "executor");
   }
 
-  @Override public void take(OpenFileRequest request) {
-    File file = request.value();
-    if (!file.canRead()) {
-      showPermissionDenied();
-    } else if (file.isDirectory()) {
-      showDir(file);
-    } else {
-      showFile(file);
-    }
-  }
-
-  private void showPermissionDenied() {
-    toaster.toast(context, R.string.permission_denied);
-  }
-
-  private void showDir(File dir) {
-    context.startActivity(viewDir(dir, context));
-  }
-
-  private void showFile(final File file) {
+  @Override public void apply(File file) {
     executor.execute(new ShowFileTask(file));
   }
 
