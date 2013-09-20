@@ -11,6 +11,7 @@ import static l.files.app.format.Formats.label;
 
 import android.app.ActionBar;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.KeyEvent;
@@ -28,6 +29,10 @@ import l.files.common.widget.Toaster;
 public final class FileListContainerFragment extends Fragment
     implements OnKeyListener, OnBackStackChangedListener {
 
+  public static interface DrawableToggleActivity {
+    ActionBarDrawerToggle getActionBarDrawerToggle();
+  }
+
   public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
   public static FileListContainerFragment create(File dir) {
@@ -38,6 +43,8 @@ public final class FileListContainerFragment extends Fragment
   Toaster toaster;
   Consumer<File> fileOpener;
   FragmentManager manager;
+
+  private boolean inActionMode;
 
   @Override public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -77,18 +84,23 @@ public final class FileListContainerFragment extends Fragment
     bus.unregister(this);
   }
 
+  @Override public void onBackStackChanged() {
+    updateActivityActionBar();
+  }
+
   @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
     if (keyCode == KEYCODE_BACK
         && event.getAction() == ACTION_UP
-        && manager.getBackStackEntryCount() > 0) {
+        && manager.getBackStackEntryCount() > 0
+        && !inActionMode) {
       manager.popBackStack();
       return true;
     }
     return false;
   }
 
-  @Override public void onBackStackChanged() {
-    updateActivityActionBar();
+  @Subscribe public void handle(ActionModeEvent event) {
+    inActionMode = event == ActionModeEvent.START;
   }
 
   @Subscribe public void handle(OpenFileRequest request) {
@@ -107,13 +119,15 @@ public final class FileListContainerFragment extends Fragment
   }
 
   private void updateActivityActionBar() {
-    boolean hasMoreBackStackEntry = manager.getBackStackEntryCount() > 0;
     FilesFragment fragment = findCurrentFragment();
     File dir = fragment.directory();
     ActionBar actionBar = getActivity().getActionBar();
     actionBar.setTitle(label(getResources()).apply(dir));
-    actionBar.setDisplayHomeAsUpEnabled(hasMoreBackStackEntry);
-    actionBar.setHomeButtonEnabled(hasMoreBackStackEntry);
+    if (getActivity() instanceof DrawableToggleActivity) {
+      ((DrawableToggleActivity) getActivity())
+          .getActionBarDrawerToggle()
+          .setDrawerIndicatorEnabled(manager.getBackStackEntryCount() == 0);
+    }
   }
 
   private void showPermissionDenied() {

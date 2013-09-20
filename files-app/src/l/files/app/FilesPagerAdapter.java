@@ -9,37 +9,18 @@ import java.io.File;
 
 final class FilesPagerAdapter extends FragmentPagerAdapter {
 
-  public static final int POSITION_SIDEBAR = 0;
-  public static final int POSITION_FILES = 1;
-
-  private final boolean portrait;
   private final File dir;
 
-  public FilesPagerAdapter(FragmentManager fm, File dir, boolean portrait) {
+  public FilesPagerAdapter(FragmentManager fm, File dir) {
     super(fm);
     this.dir = checkNotNull(dir, "dir");
-    this.portrait = portrait;
-  }
-
-  @Override public float getPageWidth(int position) {
-    switch (position) {
-      case POSITION_SIDEBAR:
-        return portrait ? 0.618f : 0.382f;
-      default:
-        return super.getPageWidth(position);
-    }
   }
 
   @Override public Fragment getItem(int position) {
-    switch (position) {
-      case POSITION_FILES:
-        return FileListContainerFragment.create(dir);
-      default:
-        return new SidebarFragment();
-    }
+    return FileListContainerFragment.create(dir);
   }
 
   @Override public int getCount() {
-    return 2;
+    return 1;
   }
 }

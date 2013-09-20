@@ -64,16 +64,28 @@ public final class FilesActivityTest
     verify(activity.bus).unregister(activity);
   }
 
-  @UiThreadTest public void testPostsEventOnHomePressed() {
-    MenuItem item = mock(MenuItem.class);
-    given(item.getItemId()).willReturn(android.R.id.home);
+  @UiThreadTest public void testPostsEventOnHomePressedIfDrawerIndicatorIsDisabled() {
+    activity().getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
     activity().bus = mock(Bus.class);
-    activity().onOptionsItemSelected(item);
+    activity().onOptionsItemSelected(mockHomeItem());
     verify(activity().bus).post(OnHomePressedEvent.INSTANCE);
+  }
+
+  @UiThreadTest public void testPostsNoEventOnHomePressedIfDrawerIndicatorIsEnabled() {
+    activity().getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+    activity().bus = mock(Bus.class);
+    activity().onOptionsItemSelected(mockHomeItem());
+    verifyZeroInteractions(activity().bus);
   }
 
   public void testShowsTitleUsingNameOfDirSpecified() {
     assertEquals(dir.get().getName(), title());
+  }
+
+  private MenuItem mockHomeItem() {
+    MenuItem item = mock(MenuItem.class);
+    given(item.getItemId()).willReturn(android.R.id.home);
+    return item;
   }
 
   private Intent newIntent(File dir) {
