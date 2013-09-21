@@ -20,9 +20,9 @@ import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 
 public final class FilesActivity extends BaseFragmentActivity
-    implements FileListContainerFragment.DrawableToggleActivity {
+    implements FilesPagerFragment.DrawableToggleActivity {
 
-  public static final String EXTRA_DIR = FileListContainerFragment.ARG_DIRECTORY;
+  public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
 
   Bus bus;
   File dir;

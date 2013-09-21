@@ -17,7 +17,7 @@ final class FilesPagerAdapter extends FragmentPagerAdapter {
   }
 
   @Override public Fragment getItem(int position) {
-    return FileListContainerFragment.create(dir);
+    return FilesPagerFragment.create(dir);
   }
 
   @Override public int getCount() {

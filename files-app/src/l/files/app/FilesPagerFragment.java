@@ -26,7 +26,7 @@ import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 
-public final class FileListContainerFragment extends Fragment
+public final class FilesPagerFragment extends Fragment
     implements OnKeyListener, OnBackStackChangedListener {
 
   public static interface DrawableToggleActivity {
@@ -35,8 +35,8 @@ public final class FileListContainerFragment extends Fragment
 
   public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
-  public static FileListContainerFragment create(File dir) {
-    return setArgs(new FileListContainerFragment(), ARG_DIRECTORY, dir.getAbsolutePath());
+  public static FilesPagerFragment create(File dir) {
+    return setArgs(new FilesPagerFragment(), ARG_DIRECTORY, dir.getAbsolutePath());
   }
 
   Bus bus;

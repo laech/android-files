@@ -3,15 +3,15 @@ package l.files.test;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import l.files.app.FileListContainerFragment;
+import l.files.app.FilesPagerFragment;
 
 public final class TestFileListContainerFragmentActivity extends FragmentActivity {
 
-  public static final String DIRECTORY = FileListContainerFragment.ARG_DIRECTORY;
+  public static final String DIRECTORY = FilesPagerFragment.ARG_DIRECTORY;
 
-  private FileListContainerFragment fragment;
+  private FilesPagerFragment fragment;
 
-  public FileListContainerFragment fragment() {
+  public FilesPagerFragment fragment() {
     return fragment;
   }
 
@@ -22,7 +22,7 @@ public final class TestFileListContainerFragmentActivity extends FragmentActivit
     view.setId(android.R.id.content);
     setContentView(view);
 
-    fragment = new FileListContainerFragment();
+    fragment = new FilesPagerFragment();
     fragment.setArguments(getIntent().getExtras());
     getSupportFragmentManager()
         .beginTransaction()

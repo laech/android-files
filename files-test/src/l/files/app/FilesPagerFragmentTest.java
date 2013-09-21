@@ -21,13 +21,13 @@ import l.files.test.TempDir;
 import l.files.test.TestFileListContainerFragmentActivity;
 import org.mockito.ArgumentCaptor;
 
-public final class FileListContainerFragmentTest
+public final class FilesPagerFragmentTest
     extends BaseActivityTest<TestFileListContainerFragmentActivity> {
 
   private File file;
   private TempDir dir;
 
-  public FileListContainerFragmentTest() {
+  public FilesPagerFragmentTest() {
     super(TestFileListContainerFragmentActivity.class);
   }
 
@@ -53,7 +53,7 @@ public final class FileListContainerFragmentTest
   }
 
   public void testOpenFileRequestHandlerMethodIsAnnotated() throws Exception {
-    Method method = FileListContainerFragment.class.getMethod("handle", OpenFileRequest.class);
+    Method method = FilesPagerFragment.class.getMethod("handle", OpenFileRequest.class);
     assertNotNull(method.getAnnotation(Subscribe.class));
   }
 
@@ -104,7 +104,7 @@ public final class FileListContainerFragmentTest
     return manager;
   }
 
-  private FileListContainerFragment fragment() {
+  private FilesPagerFragment fragment() {
     return activity().fragment();
   }
 }
