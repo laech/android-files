@@ -56,7 +56,7 @@ public final class FilesFragment extends BaseFileListFragment {
     super(R.layout.files_fragment);
   }
 
-  public File directory() {
+  public File getDirectory() {
     return dir;
   }
 

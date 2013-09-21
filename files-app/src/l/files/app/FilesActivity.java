@@ -4,25 +4,48 @@ import static android.graphics.Color.TRANSPARENT;
 import static android.view.Window.FEATURE_PROGRESS;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.UserDirs.DIR_HOME;
+import static l.files.app.format.Formats.label;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 
-public final class FilesActivity extends BaseFragmentActivity
-    implements FilesPagerFragment.DrawableToggleActivity {
+public final class FilesActivity extends BaseFragmentActivity  {
 
   public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
+
+  private class FilesPagerAdapter extends FragmentPagerAdapter {
+    FilesPagerAdapter() {
+      super(getSupportFragmentManager());
+    }
+
+    @Override public Fragment getItem(int position) {
+      return FilesPagerFragment.create(dir);
+    }
+
+    @Override public void setPrimaryItem(ViewGroup container, int position, Object object) {
+      super.setPrimaryItem(container, position, object);
+      currentPage = (FilesPagerFragment) object;
+      updateActivityActionBar(currentPage);
+    }
+
+    @Override public int getCount() {
+      return 2;
+    }
+  }
 
   Bus bus;
   File dir;
@@ -30,6 +53,8 @@ public final class FilesActivity extends BaseFragmentActivity
 
   ActionMode currentActionMode;
   ActionMode.Callback currentActionModeCallback;
+
+  private FilesPagerFragment currentPage;
 
   private DrawerLayout drawerLayout;
   private ActionBarDrawerToggle drawerToggle;
@@ -77,7 +102,7 @@ public final class FilesActivity extends BaseFragmentActivity
     if (drawerToggle.onOptionsItemSelected(item)) {
       return true;
     } else if (android.R.id.home == item.getItemId()) {
-      bus.post(OnHomePressedEvent.INSTANCE);
+      currentPage.getChildFragmentManager().popBackStackImmediate();
       return true;
     }
     return super.onOptionsItemSelected(item);
@@ -87,18 +112,18 @@ public final class FilesActivity extends BaseFragmentActivity
     super.onActionModeFinished(mode);
     currentActionMode = null;
     currentActionModeCallback = null;
-    bus.post(ActionModeEvent.END);
   }
 
   @Override public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
     currentActionMode = super.onWindowStartingActionMode(callback);
     currentActionModeCallback = callback;
-    bus.post(ActionModeEvent.START);
     return this.currentActionMode;
   }
 
-  @Override public ActionBarDrawerToggle getActionBarDrawerToggle() {
-    return drawerToggle;
+  @Override public void onBackPressed() {
+    if (!currentPage.getChildFragmentManager().popBackStackImmediate()) {
+      super.onBackPressed();
+    }
   }
 
   public ActionMode getCurrentActionMode() {
@@ -126,18 +151,25 @@ public final class FilesActivity extends BaseFragmentActivity
     }
   }
 
-  @Subscribe public void handle(OpenFileRequest request) {
+  @Subscribe public void handle(final OpenFileRequest request) {
+    currentPage.show(request.value());
     drawerLayout.closeDrawers();
   }
 
   private ViewPager setViewPagerAdapter() {
     ViewPager pager = (ViewPager) findViewById(R.id.pager);
-    pager.setAdapter(new FilesPagerAdapter(getSupportFragmentManager(), dir));
+    pager.setAdapter(new FilesPagerAdapter());
     return pager;
   }
 
   private File getDir() {
     String path = getIntent().getStringExtra(EXTRA_DIR);
     return path == null ? DIR_HOME : new File(path);
+  }
+
+  private void updateActivityActionBar(FilesPagerFragment fragment) { // TODO
+    getActionBar().setTitle(label(getResources()).apply(fragment.getCurrentDirectory()));
+    drawerToggle.setDrawerIndicatorEnabled(
+        fragment.getChildFragmentManager().getBackStackEntryCount() == 0);
   }
 }

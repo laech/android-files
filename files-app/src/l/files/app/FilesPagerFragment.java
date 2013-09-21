@@ -1,37 +1,21 @@
 package l.files.app;
 
-import static android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static android.view.KeyEvent.ACTION_UP;
-import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.view.View.OnKeyListener;
-import static l.files.app.FilesApp.getBus;
 import static l.files.app.Fragments.setArgs;
-import static l.files.app.format.Formats.label;
 
-import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import java.io.File;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 
-public final class FilesPagerFragment extends Fragment
-    implements OnKeyListener, OnBackStackChangedListener {
-
-  public static interface DrawableToggleActivity {
-    ActionBarDrawerToggle getActionBarDrawerToggle();
-  }
+public final class FilesPagerFragment extends Fragment {
 
   public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY;
 
@@ -39,12 +23,9 @@ public final class FilesPagerFragment extends Fragment
     return setArgs(new FilesPagerFragment(), ARG_DIRECTORY, dir.getAbsolutePath());
   }
 
-  Bus bus;
   Toaster toaster;
   Consumer<File> fileOpener;
   FragmentManager manager;
-
-  private boolean inActionMode;
 
   @Override public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,14 +36,11 @@ public final class FilesPagerFragment extends Fragment
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    bus = getBus(this);
     toaster = Toaster.get();
     fileOpener = FileOpener.get(getActivity());
     manager = getChildFragmentManager();
-    manager.addOnBackStackChangedListener(this);
     if (savedInstanceState == null) {
-      File dir = new File(getArguments().getString(ARG_DIRECTORY));
-      FilesFragment fragment = FilesFragment.create(dir);
+      FilesFragment fragment = FilesFragment.create(getInitialDirectory());
       manager
           .beginTransaction()
           .add(android.R.id.content, fragment, FilesFragment.TAG)
@@ -70,41 +48,19 @@ public final class FilesPagerFragment extends Fragment
     }
   }
 
-  @Override public void onResume() {
-    super.onResume();
-    bus.register(this);
-    getView().setFocusableInTouchMode(true);
-    getView().requestFocus();
-    getView().setOnKeyListener(this);
-    updateActivityActionBar();
-  }
-
-  @Override public void onPause() {
-    super.onPause();
-    bus.unregister(this);
-  }
-
-  @Override public void onBackStackChanged() {
-    updateActivityActionBar();
-  }
-
-  @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
-    if (keyCode == KEYCODE_BACK
-        && event.getAction() == ACTION_UP
-        && manager.getBackStackEntryCount() > 0
-        && !inActionMode) {
-      manager.popBackStack();
-      return true;
+  public File getCurrentDirectory() {
+    FilesFragment fragment = findCurrentFragment();
+    if (fragment == null) {
+      return getInitialDirectory();
     }
-    return false;
+    return fragment.getDirectory();
   }
 
-  @Subscribe public void handle(ActionModeEvent event) {
-    inActionMode = event == ActionModeEvent.START;
+  private File getInitialDirectory() {
+    return new File(getArguments().getString(ARG_DIRECTORY));
   }
 
-  @Subscribe public void handle(OpenFileRequest request) {
-    File file = request.value();
+  public void show(File file) {
     if (!file.canRead()) {
       showPermissionDenied();
     } else if (file.isDirectory()) {
@@ -114,29 +70,13 @@ public final class FilesPagerFragment extends Fragment
     }
   }
 
-  @Subscribe public void handle(OnHomePressedEvent event) {
-    manager.popBackStack();
-  }
-
-  private void updateActivityActionBar() {
-    FilesFragment fragment = findCurrentFragment();
-    File dir = fragment.directory();
-    ActionBar actionBar = getActivity().getActionBar();
-    actionBar.setTitle(label(getResources()).apply(dir));
-    if (getActivity() instanceof DrawableToggleActivity) {
-      ((DrawableToggleActivity) getActivity())
-          .getActionBarDrawerToggle()
-          .setDrawerIndicatorEnabled(manager.getBackStackEntryCount() == 0);
-    }
-  }
-
   private void showPermissionDenied() {
     toaster.toast(getActivity(), R.string.permission_denied);
   }
 
   private void showDirectory(File dir) {
     FilesFragment current = findCurrentFragment();
-    if (current != null && current.directory().equals(dir)) {
+    if (current != null && current.getDirectory().equals(dir)) {
       return;
     }
     FilesFragment fragment = FilesFragment.create(dir);
