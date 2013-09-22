@@ -1,6 +1,5 @@
 package l.files.app;
 
-import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
 
 import android.os.Bundle;
@@ -48,6 +47,22 @@ public final class FilesPagerFragment extends Fragment {
     }
   }
 
+  @Override public void setHasOptionsMenu(boolean hasMenu) {
+    super.setHasOptionsMenu(hasMenu);
+    FilesFragment fragment = findCurrentFragment();
+    if (fragment != null) {
+      fragment.setHasOptionsMenu(hasMenu);
+    }
+  }
+
+  public boolean popBackStack() {
+    return getChildFragmentManager().popBackStackImmediate();
+  }
+
+  public boolean hasBackStack() {
+    return getChildFragmentManager().getBackStackEntryCount() > 0;
+  }
+
   public File getCurrentDirectory() {
     FilesFragment fragment = findCurrentFragment();
     if (fragment == null) {
@@ -92,7 +107,7 @@ public final class FilesPagerFragment extends Fragment {
          */
         .replace(android.R.id.content, fragment, FilesFragment.TAG)
         .addToBackStack(null)
-        .setTransition(TRANSIT_FRAGMENT_OPEN)
+//        .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
   }
 

@@ -10,7 +10,6 @@ public class BaseListFragment extends ListFragment {
 
   public final void setOptionsMenu(OptionsMenu menu) {
     optionsMenu = OptionsMenus.nullToEmpty(menu);
-    setHasOptionsMenu(menu != null);
   }
 
   @Override

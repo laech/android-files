@@ -34,6 +34,8 @@ import l.files.sort.Sorters;
 
 public final class FilesFragment extends BaseFileListFragment {
 
+  // TODO if fragment is paused, refresh on resume for changes?
+
   public static final String TAG = FilesFragment.class.getSimpleName();
   public static final String ARG_DIRECTORY = "directory";
 

@@ -64,20 +64,6 @@ public final class FilesActivityTest
     verify(activity.bus).unregister(activity);
   }
 
-  @UiThreadTest public void testPostsEventOnHomePressedIfDrawerIndicatorIsDisabled() {
-    activity().getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
-    activity().bus = mock(Bus.class);
-    activity().onOptionsItemSelected(mockHomeItem());
-    verify(activity().bus).post(OnHomePressedEvent.INSTANCE);
-  }
-
-  @UiThreadTest public void testPostsNoEventOnHomePressedIfDrawerIndicatorIsEnabled() {
-    activity().getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-    activity().bus = mock(Bus.class);
-    activity().onOptionsItemSelected(mockHomeItem());
-    verifyZeroInteractions(activity().bus);
-  }
-
   public void testShowsTitleUsingNameOfDirSpecified() {
     assertEquals(dir.get().getName(), title());
   }
