@@ -108,7 +108,11 @@ public final class ViewPagerTabBar
     final int position = container.indexOfChild(view);
     if (position == pager.getCurrentItem()) {
       scrollToTab(position);
-      view.setSelected(true);
+    }
+
+    for (int i = 0; i < tabs.getChildCount(); i++) {
+      TextView tab = (TextView) tabs.getChildAt(i);
+      tab.setSelected(i == pager.getCurrentItem());
     }
   }
 }

@@ -7,6 +7,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.Window.FEATURE_PROGRESS;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static l.files.app.Bundles.getInt;
 import static l.files.app.Bundles.getParcelableArrayList;
 import static l.files.app.FilesApp.getBus;
@@ -29,6 +30,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 
@@ -42,10 +44,12 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   private class FilesPagerAdapter extends FragmentPagerAdapter {
 
     private final ArrayList<TabItem> items;
+    private final Map<Object, Integer> positions;
 
     FilesPagerAdapter(ArrayList<TabItem> items) {
       super(getSupportFragmentManager());
       this.items = items;
+      this.positions = newHashMap();
     }
 
     @Override public long getItemId(int position) {
@@ -53,7 +57,9 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     }
 
     @Override public Fragment getItem(int position) {
-      return FilesPagerFragment.create(dir);
+      Fragment fragment = FilesPagerFragment.create(dir);
+      positions.put(fragment, position);
+      return fragment;
     }
 
     @Override public void setPrimaryItem(ViewGroup container, final int position, Object object) {
@@ -86,7 +92,8 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     }
 
     @Override public int getItemPosition(Object object) {
-      return POSITION_NONE;
+      Integer position = positions.get(object);
+      return position != null ? position : POSITION_NONE;
     }
 
     ArrayList<TabItem> getItems() {
@@ -103,10 +110,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     void removeCurrentItem() {
       tabs.removeTab(pager.getCurrentItem());
       items.remove(pager.getCurrentItem());
-      getSupportFragmentManager()
-          .beginTransaction()
-          .remove(currentPage)
-          .commit();
+      positions.remove(currentPage);
       notifyDataSetChanged();
       if (pager.getCurrentItem() >= getCount()) {
         pager.setCurrentItem(getCount() - 1);
