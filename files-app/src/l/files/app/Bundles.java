@@ -1,28 +1,27 @@
 package l.files.app;
 
-import static java.util.Collections.emptyList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import android.os.Bundle;
-import java.util.List;
+import java.util.ArrayList;
 
 public final class Bundles {
 
-  public static int getInt(Bundle bundle, String key, int defaultVal) {
-    if (bundle == null) {
+  public static int getInt(Bundle nullableBundle, String key, int defaultVal) {
+    if (nullableBundle == null) {
       return defaultVal;
     }
-    return bundle.getInt(key, defaultVal);
+    return nullableBundle.getInt(key, defaultVal);
   }
 
-  public static List<String> getStringList(Bundle bundle, String key) {
-    if (bundle == null) {
-      return emptyList();
+  public static ArrayList<String> getStringList(Bundle nullableBundle, String key) {
+    if (nullableBundle != null) {
+      ArrayList<String> strings = nullableBundle.getStringArrayList(key);
+      if (strings != null) {
+        return strings;
+      }
     }
-    List<String> strings = bundle.getStringArrayList(key);
-    if (strings != null) {
-      return strings;
-    }
-    return emptyList();
+    return newArrayListWithCapacity(0);
   }
 
   private Bundles() {}

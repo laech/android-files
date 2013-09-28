@@ -1,35 +1,34 @@
 package l.files.app;
 
-import static android.app.ActionBar.*;
+import static android.app.ActionBar.LayoutParams;
 import static android.graphics.Color.TRANSPARENT;
-import static android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.Window.FEATURE_PROGRESS;
-import static l.files.app.ActionBars.*;
+import static com.google.common.collect.Lists.newArrayList;
+import static l.files.app.Bundles.getInt;
+import static l.files.app.Bundles.getStringList;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.format.Formats.label;
 import static l.files.app.menu.Menus.newTabMenu;
 
 import android.app.ActionBar;
-import android.app.FragmentTransaction;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.ViewGroup;
 import com.google.common.base.Function;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
@@ -38,37 +37,70 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
   public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
 
+  private static final String STATE_TAB_COUNT = "tabCount";
+  private static final String STATE_TAB_TITLES = "tabTitles";
   private static final int DEFAULT_TAB_COUNT = 1;
 
   private class FilesPagerAdapter extends FragmentPagerAdapter {
 
+    private ArrayList<String> titles;
     private int size;
 
-    FilesPagerAdapter(int size) {
+    FilesPagerAdapter(int size, List<String> titles) {
       super(getSupportFragmentManager());
       this.size = size;
+      this.titles = newArrayList();
+      this.titles.addAll(titles);
+      while (this.titles.size() < size) {
+        this.titles.add("");
+      }
     }
 
     @Override public Fragment getItem(int position) {
       return FilesPagerFragment.create(dir);
     }
 
-    @Override public void setPrimaryItem(ViewGroup container, int position, Object object) {
+    @Override public void setPrimaryItem(ViewGroup container, final int position, Object object) {
       super.setPrimaryItem(container, position, object);
       if (currentPage != null && currentPage != object) {
         currentPage.setHasOptionsMenu(false);
       }
+
       currentPage = (FilesPagerFragment) object;
       currentPage.setHasOptionsMenu(true);
-      updateActionBar(currentPage, position);
+      updateTabTitle(position);
+    }
+
+    private void updateTabTitle(final int position) {
+      final String title = labels.apply(currentPage.getCurrentDirectory());
+      titles.set(position, title);
+      handler.post(new Runnable() {
+        @Override public void run() {
+          tabBar.setTabText(position, title);
+        }
+      });
     }
 
     @Override public int getCount() {
       return size;
     }
 
+    @Override public CharSequence getPageTitle(int position) {
+      if (titles.size() > position) {
+        return titles.get(position);
+      }
+      return "";
+    }
+
+    ArrayList<String> getTitles() {
+      return titles;
+    }
+
     public void addItem() {
       size += 1;
+      String title = labels.apply(dir);
+      titles.add(title);
+      tabBar.addTab(title);
       notifyDataSetChanged();
     }
   }
@@ -76,36 +108,27 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   Bus bus;
   File dir;
   ViewPager pager;
+  ViewPagerTabBar tabBar;
 
   ActionMode currentActionMode;
   ActionMode.Callback currentActionModeCallback;
 
   private FilesPagerFragment currentPage;
-
-  private ActionBar actionBar;
-  private ActionBarDrawerToggle actionBarDrawerToggle;
   private DrawerLayout drawerLayout;
-
   private Function<File, String> labels;
 
   private final Handler handler = new Handler();
 
-  private final ActionBar.TabListener tabListener = new SimpleTabListener() {
-    @Override public void onTabSelected(final Tab tab, FragmentTransaction ft) {
-      pager.setCurrentItem(tab.getPosition(), true);
-    }
-  };
-
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override protected void onCreate(Bundle state) {
     requestWindowFeature(FEATURE_PROGRESS);
-    super.onCreate(savedInstanceState);
+    super.onCreate(state);
     setContentView(R.layout.files_activity);
     setProgressBarIndeterminate(true);
 
-    int tabCount = getSavedActionBarTabCount(savedInstanceState, DEFAULT_TAB_COUNT);
-    List<String> tabTitles = getSavedActionBarTabTitles(savedInstanceState);
+    int tabCount = getInt(state, STATE_TAB_COUNT, DEFAULT_TAB_COUNT);
+    List<String> tabTitles = getStringList(state, STATE_TAB_TITLES);
     initFields();
-    setPager(tabCount);
+    setPager(tabCount, tabTitles);
     setDrawer();
     setActionBar(tabCount, tabTitles);
     setOptionsMenu(newTabMenu(this));
@@ -118,40 +141,29 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
   private void initFields() {
     labels = label(getResources());
-    actionBar = getActionBar();
     bus = getBus(this);
     dir = getInitialDirectory();
     pager = (ViewPager) findViewById(R.id.pager);
+    tabBar = new ViewPagerTabBar(this);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-    actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, 0, 0);
   }
 
-  private void setPager(int tabCount) {
-    pager.setAdapter(new FilesPagerAdapter(tabCount));
-    pager.setOnPageChangeListener(new SimpleOnPageChangeListener() {
-      @Override public void onPageSelected(int position) {
-//        if (actionBar.getSelectedNavigationIndex() != position) {
-        actionBar.setSelectedNavigationItem(position);
-//        }
-      }
-    });
+  private void setPager(int tabCount, List<String> titles) {
+    pager.setAdapter(new FilesPagerAdapter(tabCount, titles));
+    tabBar.setViewPager(pager);
   }
 
   private void setDrawer() {
-    drawerLayout.setDrawerListener(actionBarDrawerToggle);
     drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
     drawerLayout.setScrimColor(TRANSPARENT);
   }
 
   private void setActionBar(int tabCount, List<String> tabTitles) {
-    actionBar.setHomeButtonEnabled(true);
-    actionBar.setDisplayHomeAsUpEnabled(true);
-    addTabs(tabCount, tabTitles);
-  }
-
-  @Override protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    actionBarDrawerToggle.syncState();
+    ActionBar actionBar = getActionBar();
+    actionBar.setDisplayShowTitleEnabled(false);
+    actionBar.setDisplayShowHomeEnabled(false);
+    actionBar.setDisplayShowCustomEnabled(true);
+    actionBar.setCustomView(tabBar.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
   }
 
   @Override protected void onResume() {
@@ -166,23 +178,9 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
   @Override protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    saveActionBarTabCount(outState, actionBar);
-    saveActionBarTabTitles(outState, actionBar);
-  }
-
-  @Override public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    actionBarDrawerToggle.onConfigurationChanged(newConfig);
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
-      return true;
-    } else if (android.R.id.home == item.getItemId()) {
-      currentPage.popBackStack();
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
+    FilesPagerAdapter adapter = (FilesPagerAdapter) pager.getAdapter();
+    outState.putInt(STATE_TAB_COUNT, adapter.getCount());
+    outState.putStringArrayList(STATE_TAB_TITLES, adapter.getTitles());
   }
 
   @Override public void onBackPressed() {
@@ -217,9 +215,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   }
 
   @Override public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-//    currentActionMode = super.onWindowStartingActionMode(callback);
     currentActionModeCallback = callback;
-//    return this.currentActionMode;
     return super.onWindowStartingActionMode(callback);
   }
 
@@ -254,52 +250,8 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   }
 
   @Override public void openNewTab() {
-    addTab(null);
     FilesPagerAdapter adapter = (FilesPagerAdapter) pager.getAdapter();
     adapter.addItem();
     pager.setCurrentItem(adapter.getCount() - 1, true);
-  }
-
-  private void addTabs(int n, List<String> tabTitles) {
-    for (int i = 0; i < n; i++) {
-      addTab(tabTitles.size() > i ? tabTitles.get(i) : null);
-    }
-  }
-
-  private void addTab(String title) {
-    actionBar.addTab(actionBar.newTab().setText(title).setTabListener(tabListener));
-    updateActionBarNavigationMode();
-  }
-
-  private void updateActionBar(final FilesPagerFragment page, final int position) {
-    /*
-     * Break updates to action bar into discrete commands, otherwise sometimes
-     * menu action items and action mode action items will not show. See
-     * https://code.google.com/p/android/issues/detail?id=29472 and
-     * http://stackoverflow.com/questions/9338122/action-items-from-viewpager-initial-fragment-not-being-displayed
-     * for more details.
-     */
-    final String title = labels.apply(page.getCurrentDirectory());
-    handler.post(new Runnable() {
-      @Override public void run() {
-        actionBar.getTabAt(position).setText(title);
-      }
-    });
-    handler.post(new Runnable() {
-      @Override public void run() {
-        actionBar.setTitle(title);
-      }
-    });
-
-    actionBarDrawerToggle.setDrawerIndicatorEnabled(!page.hasBackStack());
-  }
-
-  private void updateActionBarNavigationMode() {
-    boolean moreThanOneTab = actionBar.getTabCount() > 1;
-    actionBar.setDisplayShowTitleEnabled(!moreThanOneTab);
-    int mode = moreThanOneTab ? NAVIGATION_MODE_TABS : NAVIGATION_MODE_STANDARD;
-    if (actionBar.getNavigationMode() != mode) {
-      actionBar.setNavigationMode(mode);
-    }
   }
 }

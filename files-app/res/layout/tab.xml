@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@drawable/tab_indicator"
+    android:gravity="center_vertical"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp"
+    android:textAllCaps="true"
+    android:textSize="12sp"
+    android:textColor="#666666"
+    android:typeface="normal"
+    android:fontFamily="sans"
+    android:textStyle="bold"
+    android:singleLine="true"/>
+
+  <!--TODO put in styles-->
