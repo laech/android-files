@@ -8,7 +8,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.Window.FEATURE_PROGRESS;
 import static com.google.common.collect.Lists.newArrayList;
 import static l.files.app.Bundles.getInt;
-import static l.files.app.Bundles.getStringList;
+import static l.files.app.Bundles.getParcelableArrayList;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.format.Formats.label;
@@ -29,7 +29,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
 
@@ -37,23 +36,20 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
   public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
 
-  private static final String STATE_TAB_COUNT = "tabCount";
-  private static final String STATE_TAB_TITLES = "tabTitles";
-  private static final int DEFAULT_TAB_COUNT = 1;
+  private static final String STATE_TAB_ITEMS = "tabTitles";
+  private static final String STATE_ID_SEED = "idGenerator";
 
   private class FilesPagerAdapter extends FragmentPagerAdapter {
 
-    private ArrayList<String> titles;
-    private int size;
+    private final ArrayList<TabItem> items;
 
-    FilesPagerAdapter(int size, List<String> titles) {
+    FilesPagerAdapter(ArrayList<TabItem> items) {
       super(getSupportFragmentManager());
-      this.size = size;
-      this.titles = newArrayList();
-      this.titles.addAll(titles);
-      while (this.titles.size() < size) {
-        this.titles.add("");
-      }
+      this.items = items;
+    }
+
+    @Override public long getItemId(int position) {
+      return items.get(position).getId();
     }
 
     @Override public Fragment getItem(int position) {
@@ -73,42 +69,55 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
     private void updateTabTitle(final int position) {
       final String title = labels.apply(currentPage.getCurrentDirectory());
-      titles.set(position, title);
+      items.get(position).setTitle(title);
       handler.post(new Runnable() {
         @Override public void run() {
-          tabBar.setTabText(position, title);
+          tabs.setTabText(position, title);
         }
       });
     }
 
     @Override public int getCount() {
-      return size;
+      return items.size();
     }
 
     @Override public CharSequence getPageTitle(int position) {
-      if (titles.size() > position) {
-        return titles.get(position);
-      }
-      return "";
+      return items.get(position).getTitle();
     }
 
-    ArrayList<String> getTitles() {
-      return titles;
+    @Override public int getItemPosition(Object object) {
+      return POSITION_NONE;
     }
 
-    public void addItem() {
-      size += 1;
+    ArrayList<TabItem> getItems() {
+      return items;
+    }
+
+    void addItem(int id) {
       String title = labels.apply(dir);
-      titles.add(title);
-      tabBar.addTab(title);
+      items.add(new TabItem(id, title));
+      tabs.addTab(title);
       notifyDataSetChanged();
+    }
+
+    void removeCurrentItem() {
+      tabs.removeTab(pager.getCurrentItem());
+      items.remove(pager.getCurrentItem());
+      getSupportFragmentManager()
+          .beginTransaction()
+          .remove(currentPage)
+          .commit();
+      notifyDataSetChanged();
+      if (pager.getCurrentItem() >= getCount()) {
+        pager.setCurrentItem(getCount() - 1);
+      }
     }
   }
 
   Bus bus;
   File dir;
   ViewPager pager;
-  ViewPagerTabBar tabBar;
+  ViewPagerTabBar tabs;
 
   ActionMode currentActionMode;
   ActionMode.Callback currentActionModeCallback;
@@ -116,6 +125,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   private FilesPagerFragment currentPage;
   private DrawerLayout drawerLayout;
   private Function<File, String> labels;
+  private IdGenerator idGenerator;
 
   private final Handler handler = new Handler();
 
@@ -125,13 +135,19 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     setContentView(R.layout.files_activity);
     setProgressBarIndeterminate(true);
 
-    int tabCount = getInt(state, STATE_TAB_COUNT, DEFAULT_TAB_COUNT);
-    List<String> tabTitles = getStringList(state, STATE_TAB_TITLES);
-    initFields();
-    setPager(tabCount, tabTitles);
+    initFields(getSavedId(state));
+    setPager(getSavedTabItems(state));
     setDrawer();
-    setActionBar(tabCount, tabTitles);
+    setActionBar();
     setOptionsMenu(newTabMenu(this));
+  }
+
+  private int getSavedId(Bundle state) {
+    return getInt(state, STATE_ID_SEED, 0);
+  }
+
+  private ArrayList<TabItem> getSavedTabItems(Bundle state) {
+    return getParcelableArrayList(state, STATE_TAB_ITEMS, TabItem.class);
   }
 
   private File getInitialDirectory() {
@@ -139,18 +155,22 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     return path == null ? DIR_HOME : new File(path);
   }
 
-  private void initFields() {
+  private void initFields(int idSeed) {
+    idGenerator = new IdGenerator(idSeed);
     labels = label(getResources());
     bus = getBus(this);
     dir = getInitialDirectory();
     pager = (ViewPager) findViewById(R.id.pager);
-    tabBar = new ViewPagerTabBar(this);
+    tabs = new ViewPagerTabBar(this);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
   }
 
-  private void setPager(int tabCount, List<String> titles) {
-    pager.setAdapter(new FilesPagerAdapter(tabCount, titles));
-    tabBar.setViewPager(pager);
+  private void setPager(ArrayList<TabItem> items) {
+    if (items.isEmpty()) {
+      items = newArrayList(new TabItem(idGenerator.get(), labels.apply(dir)));
+    }
+    pager.setAdapter(new FilesPagerAdapter(items));
+    tabs.setViewPager(pager);
   }
 
   private void setDrawer() {
@@ -158,12 +178,12 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     drawerLayout.setScrimColor(TRANSPARENT);
   }
 
-  private void setActionBar(int tabCount, List<String> tabTitles) {
+  private void setActionBar() {
     ActionBar actionBar = getActionBar();
     actionBar.setDisplayShowTitleEnabled(false);
     actionBar.setDisplayShowHomeEnabled(false);
     actionBar.setDisplayShowCustomEnabled(true);
-    actionBar.setCustomView(tabBar.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    actionBar.setCustomView(tabs.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
   }
 
   @Override protected void onResume() {
@@ -178,24 +198,18 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
 
   @Override protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    FilesPagerAdapter adapter = (FilesPagerAdapter) pager.getAdapter();
-    outState.putInt(STATE_TAB_COUNT, adapter.getCount());
-    outState.putStringArrayList(STATE_TAB_TITLES, adapter.getTitles());
+    outState.putInt(STATE_ID_SEED, idGenerator.get());
+    outState.putParcelableArrayList(STATE_TAB_ITEMS, getPagerAdapter().getItems());
   }
 
   @Override public void onBackPressed() {
-    if (!currentPage.popBackStack()) {
-      /*
-       * Overriding the default behaviour here. When user presses back to go back
-       * to the home screen, the activity is by default consider destroyed forever,
-       * next time it will be created fresh without any state, which means all tabs
-       * and back stack will be lost, therefore this default behavior is overridden
-       * to simple put this activity to the back instead of destroying it, if it's
-       * later destroyed by the system, that it's okay as the system will restore
-       * it's state the next time it's created, the tabs and back stacks will be
-       * restored.
-       */
-      moveTaskToBack(true);
+    if (currentPage.popBackStack()) {
+      return;
+    }
+    if (pager.getAdapter().getCount() > 1) {
+      closeCurrentTab();
+    } else {
+      super.onBackPressed();
     }
   }
 
@@ -227,7 +241,11 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     return currentActionModeCallback;
   }
 
-  @Subscribe public void handle(CloseActionModeRequest request) {
+  private FilesPagerAdapter getPagerAdapter() {
+    return (FilesPagerAdapter) pager.getAdapter();
+  }
+
+  @Subscribe public void handle(@SuppressWarnings("UnusedParameters") CloseActionModeRequest request) {
     if (currentActionMode != null) {
       currentActionMode.finish();
     }
@@ -250,8 +268,12 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
   }
 
   @Override public void openNewTab() {
-    FilesPagerAdapter adapter = (FilesPagerAdapter) pager.getAdapter();
-    adapter.addItem();
+    FilesPagerAdapter adapter = getPagerAdapter();
+    adapter.addItem(idGenerator.get());
     pager.setCurrentItem(adapter.getCount() - 1, true);
+  }
+
+  public void closeCurrentTab() {
+    getPagerAdapter().removeCurrentItem();
   }
 }

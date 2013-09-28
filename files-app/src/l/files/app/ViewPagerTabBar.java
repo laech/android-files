@@ -58,6 +58,10 @@ public final class ViewPagerTabBar
     tabs.addView(tab, new LayoutParams(WRAP_CONTENT, MATCH_PARENT));
   }
 
+  public void removeTab(int position) {
+    tabs.removeViewAt(position);
+  }
+
   private View inflate(Context context, int layoutResId) {
     return LayoutInflater.from(context).inflate(layoutResId, null, false);
   }
@@ -104,6 +108,7 @@ public final class ViewPagerTabBar
     final int position = container.indexOfChild(view);
     if (position == pager.getCurrentItem()) {
       scrollToTab(position);
+      view.setSelected(true);
     }
   }
 }
