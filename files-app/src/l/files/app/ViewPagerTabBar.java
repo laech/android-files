@@ -3,7 +3,7 @@ package l.files.app;
 import static android.animation.LayoutTransition.CHANGING;
 import static android.animation.LayoutTransition.TransitionListener;
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
-import static android.view.View.OnClickListener;
+import static android.view.View.*;
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import l.files.R;
@@ -52,10 +53,10 @@ public final class ViewPagerTabBar
   }
 
   public void addTab(CharSequence title) {
-    TextView tab = (TextView) inflate(pager.getContext(), R.layout.tab);
-    tab.setText(title);
-    tab.setOnClickListener(this);
-    tabs.addView(tab, new LayoutParams(WRAP_CONTENT, MATCH_PARENT));
+    ViewHolder holder = new ViewHolder(inflate(pager.getContext(), R.layout.tab));
+    holder.root.setOnClickListener(this);
+    holder.title.setText(title);
+    tabs.addView(holder.root, new LayoutParams(WRAP_CONTENT, MATCH_PARENT));
   }
 
   public void removeTab(int position) {
@@ -70,8 +71,10 @@ public final class ViewPagerTabBar
     pager.setCurrentItem(tabs.indexOfChild(v), true);
   }
 
-  public void setTabText(final int position, CharSequence text) {
-    ((TextView) tabs.getChildAt(position)).setText(text);
+  public void updateTab(final int position, CharSequence title, boolean showBack) {
+    ViewHolder holder = ViewHolder.get(tabs.getChildAt(position));
+    holder.title.setText(title);
+    holder.back.setVisibility(showBack ? VISIBLE : GONE);
   }
 
   private void scrollToTab(int position) {
@@ -89,10 +92,7 @@ public final class ViewPagerTabBar
   }
 
   @Override public void onPageSelected(int position) {
-    for (int i = 0; i < tabs.getChildCount(); i++) {
-      TextView tab = (TextView) tabs.getChildAt(i);
-      tab.setSelected(i == position);
-    }
+    updateTabsStatus(position);
     if (!transition.isRunning()) {
       scrollToTab(position);
     }
@@ -109,10 +109,34 @@ public final class ViewPagerTabBar
     if (position == pager.getCurrentItem()) {
       scrollToTab(position);
     }
+    updateTabsStatus(pager.getCurrentItem());
+  }
 
+  private void updateTabsStatus(int current) {
     for (int i = 0; i < tabs.getChildCount(); i++) {
-      TextView tab = (TextView) tabs.getChildAt(i);
-      tab.setSelected(i == pager.getCurrentItem());
+      boolean selected = i == current;
+      ViewHolder holder = ViewHolder.get(tabs.getChildAt(i));
+      holder.root.setSelected(selected);
+      if (!selected) {
+        holder.back.setVisibility(GONE);
+      }
+    }
+  }
+
+  static class ViewHolder {
+    final View root;
+    final TextView title;
+    final ImageView back;
+
+    ViewHolder(View root) {
+      this.root = root;
+      this.title = (TextView) root.findViewById(R.id.title);
+      this.back = (ImageView) root.findViewById(R.id.back_indicator);
+      root.setTag(this);
+    }
+
+    static ViewHolder get(View root) {
+      return (ViewHolder) root.getTag();
     }
   }
 }

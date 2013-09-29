@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@drawable/tab_indicator"
-    android:gravity="center_vertical"
-    android:paddingLeft="24dp"
-    android:paddingRight="24dp"
-    android:textAllCaps="true"
-    android:textSize="12sp"
-    android:textColor="#666666"
-    android:typeface="normal"
-    android:fontFamily="sans"
-    android:textStyle="bold"
-    android:singleLine="true"/>
+    style="@style/Theme.Tab">
+
+  <ImageView
+      android:id="@+id/back_indicator"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerVertical="true"
+      android:layout_marginLeft="4dp"
+      android:contentDescription="@null"
+      style="@style/Theme.TabBackIndicator"/>
+
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerInParent="true"
+      style="@style/Theme.TabText"/>
 
   <!--TODO put in styles-->
+</RelativeLayout>

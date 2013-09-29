@@ -60,6 +60,10 @@ public final class FilesPagerFragment extends Fragment {
     return getChildFragmentManager().popBackStackImmediate();
   }
 
+  public boolean hasBackStack() {
+    return getChildFragmentManager().getBackStackEntryCount() > 0;
+  }
+
   public File getCurrentDirectory() {
     FilesFragment fragment = findCurrentFragment();
     if (fragment == null) {

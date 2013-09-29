@@ -80,7 +80,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
       items.get(position).setTitle(title);
       handler.post(new Runnable() {
         @Override public void run() {
-          tabs.setTabText(position, title);
+          tabs.updateTab(position, title, currentPage.hasBackStack());
         }
       });
     }
