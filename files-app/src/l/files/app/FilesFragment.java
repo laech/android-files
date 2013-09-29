@@ -16,6 +16,7 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.LruCache;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,6 +39,8 @@ public final class FilesFragment extends BaseFileListFragment {
 
   public static final String TAG = FilesFragment.class.getSimpleName();
   public static final String ARG_DIRECTORY = "directory";
+
+  private static final LruCache<File, List<?>> cache = new LruCache<File, List<?>>(10);
 
   public static FilesFragment create(File dir) {
     Bundle args = new Bundle(1);
@@ -71,6 +74,11 @@ public final class FilesFragment extends BaseFileListFragment {
     setupListView();
     setupOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
+
+    List<?> result = cache.get(dir);
+    if (result != null) {
+      setContent(result, false);
+    }
   }
 
   @Override public void onDestroy() {
@@ -163,6 +171,14 @@ public final class FilesFragment extends BaseFileListFragment {
     View root = getView();
     if (root != null) {
       ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
+    }
+  }
+
+  private void setContent(List<?> result, boolean animate) {
+    if (result.size() == 0) {
+      setEmptyContent();
+    } else {
+      getListAdapter().replace(getListView(), result, animate);
     }
   }
 
@@ -268,10 +284,9 @@ public final class FilesFragment extends BaseFileListFragment {
       }
       if (result == null) {
         updateUnableToShowDirectoryError(dir);
-      } else if (result.size() == 0) {
-        setEmptyContent();
       } else {
-        getListAdapter().replace(getListView(), result, animate);
+        cache.put(dir, result);
+        setContent(result, animate);
       }
     }
   }
