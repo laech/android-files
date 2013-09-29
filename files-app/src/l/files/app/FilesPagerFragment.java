@@ -1,5 +1,6 @@
 package l.files.app;
 
+import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
 
 import android.os.Bundle;
@@ -103,7 +104,7 @@ public final class FilesPagerFragment extends Fragment {
          */
         .replace(android.R.id.content, fragment, FilesFragment.TAG)
         .addToBackStack(null)
-//        .setTransition(TRANSIT_FRAGMENT_OPEN)
+        .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
   }
 
