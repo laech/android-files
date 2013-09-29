@@ -9,5 +9,6 @@
   <item type="id" name="show_hidden_files"/>
   <item type="id" name="rename"/>
   <item type="id" name="new_tab"/>
+  <item type="id" name="close_tab"/>
 
 </resources>

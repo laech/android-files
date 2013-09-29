@@ -11,24 +11,24 @@ import l.files.R;
 import l.files.app.TabHandler;
 import l.files.common.app.OptionsMenuAdapter;
 
-public final class NewTabMenu extends OptionsMenuAdapter
+public final class CloseTabMenu extends OptionsMenuAdapter
     implements OnMenuItemClickListener {
 
   private final TabHandler handler;
 
-  public NewTabMenu(TabHandler handler) {
+  public CloseTabMenu(TabHandler handler) {
     this.handler = checkNotNull(handler, "handler");
   }
 
   @Override public void onCreate(Menu menu) {
     super.onCreate(menu);
-    menu.add(NONE, R.id.new_tab, NONE, R.string.new_tab)
+    menu.add(NONE, R.id.close_tab, NONE, R.string.close_tab)
         .setOnMenuItemClickListener(this)
         .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
   @Override public boolean onMenuItemClick(MenuItem item) {
-    handler.openNewTab();
+    handler.closeCurrentTab();
     return true;
   }
 }

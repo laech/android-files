@@ -13,6 +13,7 @@ import static l.files.app.Bundles.getParcelableArrayList;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.format.Formats.label;
+import static l.files.app.menu.Menus.newCloseTabMenu;
 import static l.files.app.menu.Menus.newTabMenu;
 
 import android.app.ActionBar;
@@ -33,8 +34,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import l.files.R;
 import l.files.common.app.BaseFragmentActivity;
+import l.files.common.app.OptionsMenus;
 
-public final class FilesActivity extends BaseFragmentActivity implements TabOpener {
+public final class FilesActivity extends BaseFragmentActivity implements TabHandler {
 
   public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
 
@@ -143,7 +145,9 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     setPager(getSavedTabItems(state));
     setDrawer();
     setActionBar();
-    setOptionsMenu(newTabMenu(this));
+    setOptionsMenu(OptionsMenus.compose(
+        newTabMenu(this),
+        newCloseTabMenu(this)));
   }
 
   private int getSavedId(Bundle state) {
@@ -277,7 +281,11 @@ public final class FilesActivity extends BaseFragmentActivity implements TabOpen
     pager.setCurrentItem(adapter.getCount() - 1, true);
   }
 
-  public void closeCurrentTab() {
-    getPagerAdapter().removeCurrentItem();
+  @Override public void closeCurrentTab() {
+    if (getPagerAdapter().getCount() == 1) {
+      finish();
+    } else {
+      getPagerAdapter().removeCurrentItem();
+    }
   }
 }

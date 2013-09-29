@@ -3,7 +3,7 @@ package l.files.app.menu;
 import android.support.v4.app.FragmentManager;
 import com.squareup.otto.Bus;
 import java.io.File;
-import l.files.app.TabOpener;
+import l.files.app.TabHandler;
 import l.files.common.app.OptionsMenu;
 
 public final class Menus {
@@ -29,7 +29,11 @@ public final class Menus {
     return new PasteMenu(bus, dir);
   }
 
-  public static OptionsMenu newTabMenu(TabOpener opener) {
-    return new NewTabMenu(opener);
+  public static OptionsMenu newTabMenu(TabHandler handler) {
+    return new NewTabMenu(handler);
+  }
+
+  public static OptionsMenu newCloseTabMenu(TabHandler handler) {
+    return new CloseTabMenu(handler);
   }
 }
