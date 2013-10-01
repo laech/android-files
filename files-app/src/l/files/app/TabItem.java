@@ -3,47 +3,61 @@ package l.files.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.File;
+
 public final class TabItem implements Parcelable {
 
-  @SuppressWarnings("UnusedDeclaration")
-  public static final Creator<TabItem> CREATOR = new Creator<TabItem>() {
-    @Override public TabItem createFromParcel(Parcel source) {
-      int id = source.readInt();
-      String title = source.readString();
-      return new TabItem(id, title);
+    @SuppressWarnings("UnusedDeclaration")
+    public static final Creator<TabItem> CREATOR = new Creator<TabItem>() {
+        @Override
+        public TabItem createFromParcel(Parcel source) {
+            final int id = source.readInt();
+            final String path = source.readString();
+            final String title = source.readString();
+            return new TabItem(id, new File(path), title);
+        }
+
+        @Override
+        public TabItem[] newArray(int size) {
+            return new TabItem[size];
+        }
+    };
+
+    private final int mId;
+    private final File mDirectory;
+    private String mTitle;
+
+    public TabItem(int id, File directory, String title) {
+        mId = id;
+        mDirectory = directory;
+        mTitle = title;
     }
 
-    @Override public TabItem[] newArray(int size) {
-      return new TabItem[size];
+    public int getId() {
+        return mId;
     }
-  };
 
-  private final int id;
-  private String title;
+    public File getDirectory() {
+        return mDirectory;
+    }
 
-  public TabItem(int id, String title) {
-    this.id = id;
-    this.title = title;
-  }
+    public String getTitle() {
+        return mTitle;
+    }
 
-  public int getId() {
-    return id;
-  }
+    public void setTitle(String title) {
+        mTitle = title;
+    }
 
-  public String getTitle() {
-    return title;
-  }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  @Override public int describeContents() {
-    return 0;
-  }
-
-  @Override public void writeToParcel(Parcel dest, int flags) {
-    dest.writeInt(id);
-    dest.writeString(title);
-  }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
+        dest.writeString(mDirectory.getAbsolutePath());
+        dest.writeString(mTitle);
+    }
 }

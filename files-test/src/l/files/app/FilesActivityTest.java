@@ -1,84 +1,83 @@
 package l.files.app;
 
-import static l.files.app.FilesActivity.EXTRA_DIR;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-
 import android.content.Intent;
 import android.test.UiThreadTest;
 import android.view.ActionMode;
-import android.view.MenuItem;
 import com.squareup.otto.Bus;
-import java.io.File;
 import l.files.test.BaseActivityTest;
 import l.files.test.TempDir;
 
-public final class FilesActivityTest
-    extends BaseActivityTest<FilesActivity> {
+import java.io.File;
 
-  private TempDir dir;
+import static l.files.app.FilesActivity.EXTRA_DIR;
+import static org.mockito.Mockito.*;
 
-  public FilesActivityTest() {
-    super(FilesActivity.class);
-  }
+public final class FilesActivityTest extends BaseActivityTest<FilesActivity> {
 
-  @Override protected void setUp() throws Exception {
-    super.setUp();
-    dir = TempDir.create();
-    setActivityIntent(newIntent(dir.get()));
-  }
+    private TempDir mDir;
 
-  @Override protected void tearDown() throws Exception {
-    dir.delete();
-    super.tearDown();
-  }
+    public FilesActivityTest() {
+        super(FilesActivity.class);
+    }
 
-  @UiThreadTest public void testFinishesActionModeOnRequest() {
-    activity().currentActionMode = mock(ActionMode.class);
-    activity().handle(CloseActionModeRequest.INSTANCE);
-    verify(activity().currentActionMode).finish();
-    verifyNoMoreInteractions(activity().currentActionMode);
-  }
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        mDir = TempDir.create();
+        setActivityIntent(newIntent(mDir.get()));
+    }
 
-  @UiThreadTest public void testFinishesActionModeOnRequestWillSkipIfNoActionMode() {
-    activity().currentActionMode = null;
-    activity().handle(CloseActionModeRequest.INSTANCE);
-    // No error
-  }
+    @Override
+    protected void tearDown() throws Exception {
+        mDir.delete();
+        super.tearDown();
+    }
 
-  @UiThreadTest public void testBusIsRegisteredOnResume() throws Throwable {
-    FilesActivity activity = getActivity();
-    activity.bus = mock(Bus.class);
+    @UiThreadTest
+    public void testFinishesActionModeOnRequest() {
+        activity().mCurrentActionMode = mock(ActionMode.class);
+        activity().handle(CloseActionModeRequest.INSTANCE);
+        verify(activity().mCurrentActionMode).finish();
+        verifyNoMoreInteractions(activity().mCurrentActionMode);
+    }
 
-    getInstrumentation().callActivityOnResume(activity);
+    @UiThreadTest
+    public void testFinishesActionModeOnRequestWillSkipIfNoActionMode() {
+        activity().mCurrentActionMode = null;
+        activity().handle(CloseActionModeRequest.INSTANCE);
+        // No error
+    }
 
-    verify(activity.bus).register(activity);
-  }
+    @UiThreadTest
+    public void testBusIsRegisteredOnResume() throws Throwable {
+        FilesActivity activity = getActivity();
+        activity.mBus = mock(Bus.class);
 
-  @UiThreadTest public void testBusIsUnregisteredOnPause() throws Throwable {
-    FilesActivity activity = getActivity();
-    activity.bus = mock(Bus.class);
+        getInstrumentation().callActivityOnResume(activity);
 
-    getInstrumentation().callActivityOnPause(activity);
+        verify(activity.mBus).register(activity);
+    }
 
-    verify(activity.bus).unregister(activity);
-  }
+    @UiThreadTest
+    public void testBusIsUnregisteredOnPause() throws Throwable {
+        FilesActivity activity = getActivity();
+        activity.mBus = mock(Bus.class);
 
-  public void testShowsTitleUsingNameOfDirSpecified() {
-    assertEquals(dir.get().getName(), title());
-  }
+        getInstrumentation().callActivityOnPause(activity);
 
-  private MenuItem mockHomeItem() {
-    MenuItem item = mock(MenuItem.class);
-    given(item.getItemId()).willReturn(android.R.id.home);
-    return item;
-  }
+        verify(activity.mBus).unregister(activity);
+    }
 
-  private Intent newIntent(File dir) {
-    return new Intent().putExtra(EXTRA_DIR, dir.getAbsolutePath());
-  }
+    public void testShowsTitleUsingNameOfDirSpecified() {
+        assertEquals(mDir.get().getName(), getTitle());
+    }
 
-  private CharSequence title() {
-    return getActivity().getActionBar().getTitle();
-  }
+    private Intent newIntent(File dir) {
+        return new Intent().putExtra(EXTRA_DIR, dir.getAbsolutePath());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private CharSequence getTitle() {
+        return getActivity().getActionBar().getTitle();
+    }
 }

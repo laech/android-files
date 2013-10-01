@@ -26,7 +26,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     super.tearDown();
   }
 
-  protected final UiFileActivity ui() {
+  protected final UiFileActivity screen() {
     return new UiFileActivity(getInstrumentation(), getActivity());
   }
 
