@@ -192,7 +192,6 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
 
     private void setDrawer() {
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
-        mDrawerLayout.setScrimColor(TRANSPARENT);
     }
 
     private void setActionBar(ActionBar actionBar) {

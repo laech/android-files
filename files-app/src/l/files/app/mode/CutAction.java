@@ -29,7 +29,7 @@ final class CutAction extends SingleAction {
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, android.R.string.cut)
-        .setIcon(R.drawable.ic_menu_cut)
+        .setIcon(R.drawable.ic_action_cut)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
     return true;
   }

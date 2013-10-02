@@ -32,7 +32,7 @@ final class DeleteAction extends SingleAction {
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, R.string.delete)
-        .setIcon(R.drawable.ic_menu_delete)
+        .setIcon(R.drawable.ic_action_discard)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
     return true;
   }

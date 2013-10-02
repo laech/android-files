@@ -45,7 +45,7 @@ public final class CutActionTest extends AndroidTestCase {
 
   public void testCreatesMenuItemCorrectly() {
     assertTrue(action.onCreateActionMode(mode, menu));
-    verify(item).setIcon(R.drawable.ic_menu_cut);
+    verify(item).setIcon(R.drawable.ic_action_cut);
     verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 

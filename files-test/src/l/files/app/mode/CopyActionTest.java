@@ -45,7 +45,7 @@ public final class CopyActionTest extends AndroidTestCase {
 
   public void testCreatesMenuItemCorrectly() {
     assertTrue(action.onCreateActionMode(mode, menu));
-    verify(item).setIcon(R.drawable.ic_menu_copy);
+    verify(item).setIcon(R.drawable.ic_action_copy);
     verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 

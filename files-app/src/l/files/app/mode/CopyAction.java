@@ -29,7 +29,7 @@ final class CopyAction extends SingleAction {
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, android.R.string.copy)
-        .setIcon(R.drawable.ic_menu_copy)
+        .setIcon(R.drawable.ic_action_copy)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
     return true;
   }
