@@ -129,7 +129,7 @@ public final class ViewPagerTabBar
     @Override
     public void onClick(View v) {
         if (v.isSelected()) {
-            mBus.post(OnBackSelected.INSTANCE);
+            mBus.post(OnUpSelected.INSTANCE);
         } else {
             mPager.setCurrentItem(mTabs.indexOfChild(v), true);
         }
@@ -202,7 +202,7 @@ public final class ViewPagerTabBar
         }
     }
 
-    enum OnBackSelected {
+    enum OnUpSelected {
         INSTANCE
     }
 }

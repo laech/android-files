@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import com.google.common.base.Function;
 import com.squareup.otto.Bus;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import static android.app.ActionBar.LayoutParams;
-import static android.graphics.Color.TRANSPARENT;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -44,8 +44,227 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
     private static final String STATE_TAB_ITEMS = "tabTitles";
     private static final String STATE_ID_SEED = "idGenerator";
 
-    class FilesPagerAdapter extends FragmentPagerAdapter {
+    Bus mBus;
+    File mDirectory;
 
+    ViewPager mViewPager;
+    ViewPagerTabBar mTabs;
+
+    ActionMode mCurrentActionMode;
+    ActionMode.Callback mCurrentActionModeCallback;
+
+    FilesPagerFragment mCurrentPagerFragment;
+    DrawerLayout mDrawerLayout;
+    DrawerListener mDrawerListener;
+    Function<File, String> mLabels;
+    IdGenerator mIdGenerator;
+
+    final Handler mHandler = new Handler();
+
+    @Override
+    protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        setContentView(R.layout.files_activity);
+
+        initFields(getSavedId(state));
+        setViewPager(getSavedTabItems(state));
+        setDrawer();
+        setActionBar(getActionBar());
+        setOptionsMenu(OptionsMenus.compose(
+                newTabMenu(this),
+                newCloseTabMenu(this)));
+    }
+
+    private int getSavedId(Bundle state) {
+        return getInt(state, STATE_ID_SEED, 0);
+    }
+
+    private ArrayList<TabItem> getSavedTabItems(Bundle state) {
+        return getParcelableArrayList(state, STATE_TAB_ITEMS, TabItem.class);
+    }
+
+    private File getInitialDirectory() {
+        String path = getIntent().getStringExtra(EXTRA_DIR);
+        return path == null ? DIR_HOME : new File(path);
+    }
+
+    private void initFields(int idSeed) {
+        mIdGenerator = new IdGenerator(idSeed);
+        mLabels = label(getResources());
+        mBus = getBus(this);
+        mDirectory = getInitialDirectory();
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mTabs = new ViewPagerTabBar(this, mBus);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerListener = new DrawerListener();
+    }
+
+    private void setViewPager(ArrayList<TabItem> items) {
+        if (items.isEmpty()) {
+            items = newArrayList(new TabItem(mIdGenerator.get(), mDirectory, mLabels.apply(mDirectory)));
+        }
+        mViewPager.setAdapter(new FilesPagerAdapter(items));
+        mViewPager.setOffscreenPageLimit(2);
+        mTabs.setViewPager(mViewPager);
+    }
+
+    private void setDrawer() {
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
+        mDrawerLayout.setDrawerListener(mDrawerListener);
+    }
+
+    private void setActionBar(ActionBar actionBar) {
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(mTabs.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBus.register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mBus.unregister(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_ID_SEED, mIdGenerator.get());
+        outState.putParcelableArrayList(STATE_TAB_ITEMS, newArrayList(getPagerAdapter().getItems()));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mCurrentPagerFragment.popBackStack()) {
+            return;
+        }
+        if (mViewPager.getAdapter().getCount() > 1) {
+            closeCurrentTab();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+        super.onActionModeFinished(mode);
+        mCurrentActionMode = null;
+        mCurrentActionModeCallback = null;
+        mViewPager.setEnabled(true);
+        mDrawerLayout.setDrawerLockMode(LOCK_MODE_UNLOCKED);
+    }
+
+    @Override
+    public void onActionModeStarted(ActionMode mode) {
+        super.onActionModeStarted(mode);
+        mCurrentActionMode = mode;
+        mViewPager.setEnabled(false);
+        mDrawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+    }
+
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+        mCurrentActionModeCallback = callback;
+        return super.onWindowStartingActionMode(callback);
+    }
+
+    public ActionMode getCurrentActionMode() {
+        return mCurrentActionMode;
+    }
+
+    public ActionMode.Callback getCurrentActionModeCallback() {
+        return mCurrentActionModeCallback;
+    }
+
+    public DrawerLayout getDrawerLayout() {
+        return mDrawerLayout;
+    }
+
+    public ViewPager getViewPager() {
+        return mViewPager;
+    }
+
+    public ViewPagerTabBar getViewPagerTabBar() {
+        return mTabs;
+    }
+
+    public FilesPagerFragment getCurrentPagerFragment() {
+        return mCurrentPagerFragment;
+    }
+
+    private FilesPagerAdapter getPagerAdapter() {
+        return (FilesPagerAdapter) mViewPager.getAdapter();
+    }
+
+    @Subscribe
+    public void handle(@SuppressWarnings("UnusedParameters") CloseActionModeRequest request) {
+        if (mCurrentActionMode != null) {
+            mCurrentActionMode.finish();
+        }
+    }
+
+    @Subscribe
+    public void handle(final OpenFileRequest request) {
+        runOnDrawerClosed(new Runnable() {
+            @Override
+            public void run() {
+                mCurrentPagerFragment.show(request.value());
+            }
+        });
+    }
+
+    @Subscribe
+    public void handle(@SuppressWarnings("UnusedParameters") ViewPagerTabBar.OnUpSelected up) {
+        if (mCurrentPagerFragment.popBackStack()
+                || mDrawerLayout.isDrawerOpen(Gravity.START)) {
+            mDrawerLayout.closeDrawers();
+        } else {
+            mDrawerLayout.openDrawer(Gravity.START);
+        }
+    }
+
+    @Override
+    public void openNewTab() {
+        runOnDrawerClosed(new Runnable() {
+            @Override
+            public void run() {
+                FilesPagerAdapter adapter = getPagerAdapter();
+                adapter.addItem(mIdGenerator.get());
+                mViewPager.setCurrentItem(adapter.getCount() - 1, true);
+            }
+        });
+    }
+
+    @Override
+    public void closeCurrentTab() {
+        if (getPagerAdapter().getCount() == 1) {
+            finish();
+        } else {
+            runOnDrawerClosed(new Runnable() {
+                @Override
+                public void run() {
+                    getPagerAdapter().removeCurrentItem();
+                }
+            });
+        }
+    }
+
+    private void runOnDrawerClosed(Runnable runnable) {
+        if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
+            mDrawerListener.mRunOnClosed = runnable;
+            mDrawerLayout.closeDrawers();
+        } else {
+            runnable.run();
+        }
+    }
+
+    class FilesPagerAdapter extends FragmentPagerAdapter {
         private final List<TabItem> mItems;
         private final Map<Object, Integer> mPositions;
 
@@ -128,188 +347,17 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         }
     }
 
-    Bus mBus;
-    File mDirectory;
+    class DrawerListener extends DrawerLayout.SimpleDrawerListener {
 
-    ViewPager mViewPager;
-    ViewPagerTabBar mTabs;
+        Runnable mRunOnClosed;
 
-    ActionMode mCurrentActionMode;
-    ActionMode.Callback mCurrentActionModeCallback;
-
-    FilesPagerFragment mCurrentPagerFragment;
-    DrawerLayout mDrawerLayout;
-    Function<File, String> mLabels;
-    IdGenerator mIdGenerator;
-
-    final Handler mHandler = new Handler();
-
-    @Override
-    protected void onCreate(Bundle state) {
-        super.onCreate(state);
-        setContentView(R.layout.files_activity);
-
-        initFields(getSavedId(state));
-        setViewPager(getSavedTabItems(state));
-        setDrawer();
-        setActionBar(getActionBar());
-        setOptionsMenu(OptionsMenus.compose(
-                newTabMenu(this),
-                newCloseTabMenu(this)));
-    }
-
-    private int getSavedId(Bundle state) {
-        return getInt(state, STATE_ID_SEED, 0);
-    }
-
-    private ArrayList<TabItem> getSavedTabItems(Bundle state) {
-        return getParcelableArrayList(state, STATE_TAB_ITEMS, TabItem.class);
-    }
-
-    private File getInitialDirectory() {
-        String path = getIntent().getStringExtra(EXTRA_DIR);
-        return path == null ? DIR_HOME : new File(path);
-    }
-
-    private void initFields(int idSeed) {
-        mIdGenerator = new IdGenerator(idSeed);
-        mLabels = label(getResources());
-        mBus = getBus(this);
-        mDirectory = getInitialDirectory();
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mTabs = new ViewPagerTabBar(this, mBus);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-    }
-
-    private void setViewPager(ArrayList<TabItem> items) {
-        if (items.isEmpty()) {
-            items = newArrayList(new TabItem(mIdGenerator.get(), mDirectory, mLabels.apply(mDirectory)));
-        }
-        mViewPager.setAdapter(new FilesPagerAdapter(items));
-        mViewPager.setOffscreenPageLimit(2);
-        mTabs.setViewPager(mViewPager);
-    }
-
-    private void setDrawer() {
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
-    }
-
-    private void setActionBar(ActionBar actionBar) {
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setCustomView(mTabs.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mBus.register(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mBus.unregister(this);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_ID_SEED, mIdGenerator.get());
-        outState.putParcelableArrayList(STATE_TAB_ITEMS, newArrayList(getPagerAdapter().getItems()));
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mCurrentPagerFragment.popBackStack()) {
-            return;
-        }
-        if (mViewPager.getAdapter().getCount() > 1) {
-            closeCurrentTab();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void onActionModeFinished(ActionMode mode) {
-        super.onActionModeFinished(mode);
-        mCurrentActionMode = null;
-        mCurrentActionModeCallback = null;
-        mViewPager.setEnabled(true);
-        mDrawerLayout.setDrawerLockMode(LOCK_MODE_UNLOCKED);
-    }
-
-    @Override
-    public void onActionModeStarted(ActionMode mode) {
-        super.onActionModeStarted(mode);
-        mCurrentActionMode = mode;
-        mViewPager.setEnabled(false);
-        mDrawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
-    }
-
-    @Override
-    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-        mCurrentActionModeCallback = callback;
-        return super.onWindowStartingActionMode(callback);
-    }
-
-    public ActionMode getCurrentActionMode() {
-        return mCurrentActionMode;
-    }
-
-    public ActionMode.Callback getCurrentActionModeCallback() {
-        return mCurrentActionModeCallback;
-    }
-
-    public ViewPager getViewPager() {
-        return mViewPager;
-    }
-
-    public ViewPagerTabBar getViewPagerTabBar() {
-        return mTabs;
-    }
-
-    public FilesPagerFragment getCurrentPagerFragment() {
-        return mCurrentPagerFragment;
-    }
-
-    private FilesPagerAdapter getPagerAdapter() {
-        return (FilesPagerAdapter) mViewPager.getAdapter();
-    }
-
-    @Subscribe
-    public void handle(@SuppressWarnings("UnusedParameters") CloseActionModeRequest request) {
-        if (mCurrentActionMode != null) {
-            mCurrentActionMode.finish();
-        }
-    }
-
-    @Subscribe
-    public void handle(OpenFileRequest request) {
-        mCurrentPagerFragment.show(request.value());
-        mDrawerLayout.closeDrawers();
-    }
-
-    @Subscribe
-    public void handle(@SuppressWarnings("UnusedParameters") ViewPagerTabBar.OnBackSelected back) {
-        mCurrentPagerFragment.popBackStack();
-    }
-
-    @Override
-    public void openNewTab() {
-        FilesPagerAdapter adapter = getPagerAdapter();
-        adapter.addItem(mIdGenerator.get());
-        mViewPager.setCurrentItem(adapter.getCount() - 1, true);
-    }
-
-    @Override
-    public void closeCurrentTab() {
-        if (getPagerAdapter().getCount() == 1) {
-            finish();
-        } else {
-            getPagerAdapter().removeCurrentItem();
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            super.onDrawerClosed(drawerView);
+            if (mRunOnClosed != null) {
+                mRunOnClosed.run();
+                mRunOnClosed = null;
+            }
         }
     }
 }

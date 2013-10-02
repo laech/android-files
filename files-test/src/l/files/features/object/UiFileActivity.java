@@ -2,6 +2,7 @@ package l.files.features.object;
 
 import android.app.Instrumentation;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -83,7 +84,7 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity selectTab(final int position) {
+    public UiFileActivity selectTabAt(final int position) {
         return awaitOnMainThread(mInstrumentation, new Callable<UiFileActivity>() {
             @Override
             public UiFileActivity call() throws Exception {
@@ -98,6 +99,16 @@ public final class UiFileActivity {
         return this;
     }
 
+    public UiFileActivity openDrawer() {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                mActivity.getDrawerLayout().openDrawer(Gravity.START);
+            }
+        });
+        return assertDrawerIsOpened(true);
+    }
+
     public UiFileActivity pressBack() {
         return awaitOnMainThread(mInstrumentation, new Callable<UiFileActivity>() {
             @Override
@@ -108,7 +119,7 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity assertCanRename(final boolean can) {
+    public UiFileActivity assertCanRename(final boolean can) { // TODO
         assertEquals(can, getRenameMenuItem().isEnabled());
         return this;
     }
@@ -192,6 +203,21 @@ public final class UiFileActivity {
                         .getText());
             }
         });
+        return this;
+    }
+
+    public UiFileActivity assertDrawerIsOpened(final boolean opened) {
+        awaitOnMainThread(mInstrumentation, new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return opened == mActivity.getDrawerLayout().isDrawerOpen(Gravity.START);
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity closeCurrentTab() {
+        mInstrumentation.invokeMenuActionSync(mActivity, R.id.close_tab, 0);
         return this;
     }
 }

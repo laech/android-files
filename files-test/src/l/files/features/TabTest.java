@@ -13,6 +13,20 @@ public final class TabTest extends BaseFilesActivityTest {
                 .assertTabCount(2);
     }
 
+    public void testOpeningNewTabWillCloseOpenedDrawer() {
+        screen().openDrawer()
+                .openNewTab()
+                .assertDrawerIsOpened(false);
+    }
+
+    public void testClosingTabWillCloseOpenedDrawer() {
+        screen().openNewTab()
+                .openDrawer()
+                .closeCurrentTab()
+                .assertTabCount(1)
+                .assertDrawerIsOpened(false);
+    }
+
     public void testSelectsNewlyOpenedTab() {
         screen().openNewTab()
                 .assertSelectedTabPosition(1);
@@ -75,21 +89,35 @@ public final class TabTest extends BaseFilesActivityTest {
         final File dir = dir().newDir();
         screen().selectItem(dir)
                 .openNewTab()
-                .selectTab(0)
+                .selectTabAt(0)
                 .assertCurrentDirectory(dir);
     }
 
-    public void testClickingOnCurrentTabWillDoNothingIfNoBackStack() {
-        screen().selectTab(0)
-                .assertCurrentDirectory(dir().get())
-                .selectTab(0)
-                .selectTab(0)
-                .assertCurrentDirectory(dir().get());
+    public void testClickingOnCurrentTabWillOpenDrawerIfThereIsNoBackStack() {
+        screen().assertDrawerIsOpened(false)
+                .selectTabAt(0)
+                .assertDrawerIsOpened(true);
+    }
+
+    public void testClickingOnCurrentTabWillCloseDrawerIfDrawerIsOpenedAndThereIsNoBackStack() {
+        screen().selectTabAt(0)
+                .assertDrawerIsOpened(true)
+                .selectTabAt(0)
+                .assertDrawerIsOpened(false);
+    }
+
+    public void testClickingOnCurrentTabWillCloseDrawerIfDrawerIsOpenedAndThereIsBackStack() {
+        screen().selectItem(dir().newDir())
+                .assertTabBackIndicatorVisibleAt(0, true)
+                .openDrawer()
+                .assertDrawerIsOpened(true)
+                .selectTabAt(0)
+                .assertDrawerIsOpened(false);
     }
 
     public void testClickingOnCurrentTabWillGoBackIfThereIsBackStack() {
         final File dir = dir().newDir();
         screen().selectItem(dir).assertCurrentDirectory(dir)
-                .selectTab(0).assertCurrentDirectory(dir().get());
+                .selectTabAt(0).assertCurrentDirectory(dir().get());
     }
 }
