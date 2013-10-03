@@ -11,13 +11,13 @@ public class BaseFragmentActivity extends FragmentActivity {
     optionsMenu = OptionsMenus.nullToEmpty(menu);
   }
 
-  @Override public final boolean onCreateOptionsMenu(Menu menu) {
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
     super.onCreateOptionsMenu(menu);
     optionsMenu.onCreate(menu);
     return true;
   }
 
-  @Override public final boolean onPrepareOptionsMenu(Menu menu) {
+  @Override public boolean onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
     optionsMenu.onPrepare(menu);
     return true;

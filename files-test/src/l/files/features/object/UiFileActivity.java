@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static l.files.common.widget.ListViews.getItems;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 
@@ -49,7 +50,7 @@ public final class UiFileActivity {
             public UiRename call() {
                 final ActionMode mode = mActivity.getCurrentActionMode();
                 final ActionMode.Callback callback = mActivity.getCurrentActionModeCallback();
-                callback.onActionItemClicked(mode, getRenameMenuItem());
+                assertTrue(callback.onActionItemClicked(mode, getRenameMenuItem()));
                 return new UiRename(mInstrumentation, mActivity);
             }
         });
@@ -67,7 +68,7 @@ public final class UiFileActivity {
                 final int firstVisiblePosition = list.getFirstVisiblePosition();
                 final int viewPosition = position - firstVisiblePosition;
                 final View view = list.getChildAt(viewPosition);
-                list.performItemClick(view, viewPosition, position);
+                assertTrue(list.performItemClick(view, viewPosition, position));
                 return UiFileActivity.this;
             }
         });
@@ -88,14 +89,14 @@ public final class UiFileActivity {
         return awaitOnMainThread(mInstrumentation, new Callable<UiFileActivity>() {
             @Override
             public UiFileActivity call() throws Exception {
-                mActivity.getViewPagerTabBar().getTabAt(position).getRootView().performClick();
+                assertTrue(mActivity.getViewPagerTabBar().getTabAt(position).getRootView().performClick());
                 return UiFileActivity.this;
             }
         });
     }
 
     public UiFileActivity openNewTab() {
-        mInstrumentation.invokeMenuActionSync(mActivity, R.id.new_tab, 0);
+        assertTrue(mInstrumentation.invokeMenuActionSync(mActivity, R.id.new_tab, 0));
         return this;
     }
 
@@ -217,7 +218,7 @@ public final class UiFileActivity {
     }
 
     public UiFileActivity closeCurrentTab() {
-        mInstrumentation.invokeMenuActionSync(mActivity, R.id.close_tab, 0);
+        assertTrue(mInstrumentation.invokeMenuActionSync(mActivity, R.id.close_tab, 0));
         return this;
     }
 }

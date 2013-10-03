@@ -13,18 +13,17 @@ public final class TabTest extends BaseFilesActivityTest {
                 .assertTabCount(2);
     }
 
-    public void testOpeningNewTabWillCloseOpenedDrawer() {
-        screen().openDrawer()
+    public void testClosesTab() {
+        final File dir = dir().newDir();
+        screen().selectItem(dir)
                 .openNewTab()
-                .assertDrawerIsOpened(false);
-    }
-
-    public void testClosingTabWillCloseOpenedDrawer() {
-        screen().openNewTab()
-                .openDrawer()
+                .openNewTab()
+                .assertTabCount(3)
+                .closeCurrentTab()
+                .assertTabCount(2)
                 .closeCurrentTab()
                 .assertTabCount(1)
-                .assertDrawerIsOpened(false);
+                .assertCurrentDirectory(dir);
     }
 
     public void testSelectsNewlyOpenedTab() {

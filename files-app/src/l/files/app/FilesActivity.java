@@ -7,10 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.view.ActionMode;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import com.google.common.base.Function;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -174,6 +171,17 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         return super.onWindowStartingActionMode(callback);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (!mDrawerLayout.isDrawerOpen(Gravity.START)) {
+            return super.onPrepareOptionsMenu(menu);
+        }
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setVisible(false);
+        }
+        return false;
+    }
+
     public ActionMode getCurrentActionMode() {
         return mCurrentActionMode;
     }
@@ -231,14 +239,9 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
 
     @Override
     public void openNewTab() {
-        runOnDrawerClosed(new Runnable() {
-            @Override
-            public void run() {
-                FilesPagerAdapter adapter = getPagerAdapter();
-                adapter.addItem(mIdGenerator.get());
-                mViewPager.setCurrentItem(adapter.getCount() - 1, true);
-            }
-        });
+        FilesPagerAdapter adapter = getPagerAdapter();
+        adapter.addItem(mIdGenerator.get());
+        mViewPager.setCurrentItem(adapter.getCount() - 1, true);
     }
 
     @Override
@@ -246,12 +249,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         if (getPagerAdapter().getCount() == 1) {
             finish();
         } else {
-            runOnDrawerClosed(new Runnable() {
-                @Override
-                public void run() {
-                    getPagerAdapter().removeCurrentItem();
-                }
-            });
+            getPagerAdapter().removeCurrentItem();
         }
     }
 
@@ -352,8 +350,15 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         Runnable mRunOnClosed;
 
         @Override
+        public void onDrawerOpened(View drawerView) {
+            super.onDrawerOpened(drawerView);
+            invalidateOptionsMenu();
+        }
+
+        @Override
         public void onDrawerClosed(View drawerView) {
             super.onDrawerClosed(drawerView);
+            invalidateOptionsMenu();
             if (mRunOnClosed != null) {
                 mRunOnClosed.run();
                 mRunOnClosed = null;
