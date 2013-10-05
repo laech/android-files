@@ -6,14 +6,19 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
+import com.google.common.base.Function;
 import l.files.R;
 import l.files.app.FilesActivity;
 
 import java.io.File;
 import java.util.concurrent.Callable;
 
+import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.View.VISIBLE;
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static l.files.app.format.Formats.*;
 import static l.files.common.widget.ListViews.getItems;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 
@@ -219,6 +224,32 @@ public final class UiFileActivity {
             }
         });
         return this;
+    }
+
+    public UiFileActivity assertFileSummaryIsUpToDate(final File file) {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                assertNotEqual(0, getListView().getCount());
+                final CharSequence text = getFileSummaryView(file).getText();
+                assertEquals(getFileSummaryFormatter().apply(file), text);
+            }
+        });
+        return this;
+    }
+
+    private TextView getFileSummaryView(File file) {
+        return (TextView) getView(file).findViewById(android.R.id.summary);
+    }
+
+    private View getView(File file) {
+        final ListView list = getListView();
+        final int index = getItems(list).indexOf(file);
+        return list.getChildAt(index - list.getFirstVisiblePosition());
+    }
+
+    private Function<File, String> getFileSummaryFormatter() {
+        return summary(mActivity.getResources(), date(mActivity), size(mActivity));
     }
 
     private ListView getListView() {

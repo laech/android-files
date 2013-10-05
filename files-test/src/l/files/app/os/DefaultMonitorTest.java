@@ -11,10 +11,12 @@ import l.files.test.BaseTest;
 import l.files.test.TempDir;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static l.files.app.os.Monitor.Callback;
+import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -57,6 +59,7 @@ public final class DefaultMonitorTest extends BaseTest {
         assertTrue(mMonitor.getCallbacks(dir).contains(callback1));
         assertTrue(mMonitor.getCallbacks(dir).contains(callback2));
         assertNotNull(mMonitor.getObserver(dir));
+        assertEquals(dir.listFiles((FileFilter) directoryFileFilter()).length, mMonitor.getChildObservers(dir).size());
 
         final Optional<List<Object>> contents = mMonitor.getContents(dir);
         verify(callback1).onRefreshed(contents);
@@ -72,15 +75,21 @@ public final class DefaultMonitorTest extends BaseTest {
         mMonitor.unregister(callback, dir);
 
         assertTrue(mMonitor.getCallbacks(dir).isEmpty());
-        assertNull(mMonitor.getObserver(dir));
         assertNull(mMonitor.getContents(dir));
+        assertNull(mMonitor.getObserver(dir));
+        assertTrue(mMonitor.getChildObservers(dir).isEmpty());
     }
 
     static class RefreshTaskExecutor implements AsyncTaskExecutor {
         @Override
         public <Params> void execute(AsyncTask<Params, ?, ?> t, Params... params) {
-            DefaultMonitor.RefreshTask task = (DefaultMonitor.RefreshTask) t;
-            task.onPostExecute(task.doInBackground());
+            if (t instanceof DefaultMonitor.RefreshTask) {
+                DefaultMonitor.RefreshTask task = (DefaultMonitor.RefreshTask) t;
+                task.onPostExecute(task.doInBackground());
+            } else {
+                DefaultMonitor.ChildObserverTask task = (DefaultMonitor.ChildObserverTask) t;
+                task.onPostExecute(task.doInBackground());
+            }
         }
     }
 }

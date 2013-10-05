@@ -34,9 +34,14 @@ public final class Instrumentations {
                         result[0] = mDelegate.call();
                     } catch (Exception e) {
                         error[0] = e;
+                    } catch (AssertionError e) {
+                        error[0] = e;
                     }
                 }
             });
+            if (error[0] instanceof AssertionError) {
+                throw (AssertionError) error[0];
+            }
             if (error[0] != null) {
                 throw new AssertionError(error[0]);
             }
@@ -66,6 +71,7 @@ public final class Instrumentations {
     public static <T> T await(Callable<T> callable, long time, TimeUnit unit) {
         long start = currentTimeMillis();
         long duration = unit.toMillis(time);
+        AssertionError error = null;
         while ((start + duration) > currentTimeMillis()) {
             try {
                 T result = callable.call();
@@ -74,10 +80,14 @@ public final class Instrumentations {
                 }
             } catch (Exception e) {
                 throw new AssertionError(e);
+            } catch (AssertionError e) {
+                error = e;
             }
             sleep(5);
         }
-        throw new AssertionError("timed out");
+        if (error == null)
+            error = new AssertionError("failed");
+        throw error;
     }
 
     private Instrumentations() {

@@ -22,14 +22,28 @@ final class DirObserver extends FileObserver {
      */
     static final long BATCH_UPDATE_DELAY = 75;
 
+    /**
+     * Mask for all change events within a directory.
+     */
     static final int DIR_CHANGED_MASK = CREATE | DELETE | MOVED_FROM | MOVED_TO | MODIFY;
+
+    /**
+     * Mask for all change events within a directory, except modifications, this is
+     * useful when you only want to be notified when contents are being added/removed,
+     * but not when they are modified.
+     */
+    static final int DIR_CHANGED_MASK_NO_MODIFY = CREATE | DELETE | MOVED_FROM | MOVED_TO;
 
     private final File mDirectory;
     private final Handler mHandler;
     private final Runnable mListener;
 
     DirObserver(File dir, Handler handler, Runnable listener) {
-        super(checkNotNull(dir, "dir").getAbsolutePath(), DIR_CHANGED_MASK);
+        this(dir, handler, listener, DIR_CHANGED_MASK);
+    }
+
+    DirObserver(File dir, Handler handler, Runnable listener, int mask) {
+        super(checkNotNull(dir, "dir").getAbsolutePath(), mask);
         this.mDirectory = dir;
         this.mHandler = checkNotNull(handler, "handler");
         this.mListener = checkNotNull(listener, "listener");

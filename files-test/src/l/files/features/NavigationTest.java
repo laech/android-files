@@ -3,6 +3,11 @@ package l.files.features;
 import l.files.test.BaseFilesActivityTest;
 
 import java.io.File;
+import java.io.IOException;
+
+import static android.test.MoreAsserts.assertNotEqual;
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Files.write;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
@@ -23,8 +28,34 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(delete(file), false);
     }
 
+    public void testUpdatesViewOnChildDirectoryModified() throws Exception {
+        testUpdatesViewOnChildModified(dir().newDir());
+    }
+
+    public void testUpdatesViewOnChildFileModified() throws Exception {
+        testUpdatesViewOnChildModified(dir().newFile());
+    }
+
+    private void testUpdatesViewOnChildModified(File f) throws IOException {
+        assertTrue(f.setLastModified(0));
+        screen().assertFileSummaryIsUpToDate(f)
+                .assertFileSummaryIsUpToDate(modify(f));
+    }
+
     private File delete(File file) {
         assertTrue(file.delete());
+        return file;
+    }
+
+    private File modify(File file) throws IOException {
+        final long lastModifiedBefore = file.lastModified();
+        if (file.isDirectory()) {
+            assertTrue(new File(file, String.valueOf(System.nanoTime())).mkdir());
+        } else {
+            write("test", file, UTF_8);
+        }
+        final long lastModifiedAfter = file.lastModified();
+        assertNotEqual(lastModifiedBefore, lastModifiedAfter);
         return file;
     }
 }

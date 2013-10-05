@@ -12,6 +12,8 @@ import java.io.IOException;
 
 public abstract class FileService extends IntentService {
 
+  // TODO show error on failure
+
   static abstract class CutOrCopy extends FileService {
     @Override protected final void handle(Intent intent) throws IOException {
       File source = new File(intent.getStringExtra(EXTRA_SOURCE));
