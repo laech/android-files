@@ -31,7 +31,6 @@
     <service android:name=".event.internal.FileService$Copy"/>
     <service android:name=".event.internal.FileService$Delete"/>
 
-    <activity android:name="l.files.test.TestFileListContainerFragmentActivity"/>
     <activity android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:name="l.files.test.TestSidebarFragmentActivity"/>
   </application>

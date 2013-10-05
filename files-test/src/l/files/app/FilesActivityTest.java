@@ -68,16 +68,7 @@ public final class FilesActivityTest extends BaseActivityTest<FilesActivity> {
         verify(activity.mBus).unregister(activity);
     }
 
-    public void testShowsTitleUsingNameOfDirSpecified() {
-        assertEquals(mDir.get().getName(), getTitle());
-    }
-
     private Intent newIntent(File dir) {
         return new Intent().putExtra(EXTRA_DIR, dir.getAbsolutePath());
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private CharSequence getTitle() {
-        return getActivity().getActionBar().getTitle();
     }
 }

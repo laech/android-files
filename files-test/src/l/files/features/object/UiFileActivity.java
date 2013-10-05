@@ -13,8 +13,7 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 import static android.view.View.VISIBLE;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static l.files.common.widget.ListViews.getItems;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 
@@ -100,6 +99,11 @@ public final class UiFileActivity {
         return this;
     }
 
+    public UiFileActivity closeCurrentTab() {
+        assertTrue(mInstrumentation.invokeMenuActionSync(mActivity, R.id.close_tab, 0));
+        return this;
+    }
+
     public UiFileActivity openDrawer() {
         awaitOnMainThread(mInstrumentation, new Runnable() {
             @Override
@@ -123,10 +127,6 @@ public final class UiFileActivity {
     public UiFileActivity assertCanRename(final boolean can) { // TODO
         assertEquals(can, getRenameMenuItem().isEnabled());
         return this;
-    }
-
-    private MenuItem getRenameMenuItem() {
-        return mActivity.getCurrentActionMode().getMenu().findItem(R.id.rename);
     }
 
     public UiFileActivity assertTabCount(final int count) {
@@ -157,12 +157,6 @@ public final class UiFileActivity {
             }
         });
         return this;
-    }
-
-    private ListView getListView() {
-        return (ListView) mActivity
-                .findViewById(R.id.file_list_fragment)
-                .findViewById(android.R.id.list);
     }
 
     public UiFileActivity assertTabHighlightedAt(final int position, final boolean highlighted) {
@@ -217,8 +211,24 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity closeCurrentTab() {
-        assertTrue(mInstrumentation.invokeMenuActionSync(mActivity, R.id.close_tab, 0));
+    public UiFileActivity assertListViewContains(final Object item, final boolean contains) {
+        awaitOnMainThread(mInstrumentation, new Callable<Boolean>() {
+            @Override
+            public Boolean call() {
+                return contains == getItems(getListView()).contains(item);
+            }
+        });
         return this;
+    }
+
+    private ListView getListView() {
+        return (ListView) mActivity
+                .getCurrentPagerFragment()
+                .getView()
+                .findViewById(android.R.id.list);
+    }
+
+    private MenuItem getRenameMenuItem() {
+        return mActivity.getCurrentActionMode().getMenu().findItem(R.id.rename);
     }
 }
