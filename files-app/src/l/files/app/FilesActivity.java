@@ -219,7 +219,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
 
     @Subscribe
     public void handle(final OpenFileRequest request) {
-        runOnDrawerClosed(new Runnable() {
+        closeDrawerThenRun(new Runnable() {
             @Override
             public void run() {
                 mCurrentPagerFragment.show(request.value());
@@ -229,8 +229,14 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
 
     @Subscribe
     public void handle(@SuppressWarnings("UnusedParameters") ViewPagerTabBar.OnUpSelected up) {
-        if (mCurrentPagerFragment.popBackStack()
-                || mDrawerLayout.isDrawerOpen(Gravity.START)) {
+        if (mCurrentPagerFragment.hasBackStack()) {
+            closeDrawerThenRun(new Runnable() {
+                @Override
+                public void run() {
+                    mCurrentPagerFragment.popBackStack();
+                }
+            });
+        } else if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerLayout.closeDrawers();
         } else {
             mDrawerLayout.openDrawer(Gravity.START);
@@ -253,7 +259,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         }
     }
 
-    private void runOnDrawerClosed(Runnable runnable) {
+    private void closeDrawerThenRun(Runnable runnable) {
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerListener.mRunOnClosed = runnable;
             mDrawerLayout.closeDrawers();
