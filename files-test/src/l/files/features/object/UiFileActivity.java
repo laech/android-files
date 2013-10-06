@@ -1,10 +1,7 @@
 package l.files.features.object;
 
 import android.app.Instrumentation;
-import android.view.ActionMode;
-import android.view.Gravity;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.base.Function;
@@ -127,6 +124,16 @@ public final class UiFileActivity {
                 return UiFileActivity.this;
             }
         });
+    }
+
+    public UiFileActivity longPressBack() {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(mActivity.onKeyLongPress(KeyEvent.KEYCODE_BACK, null));
+            }
+        });
+        return this;
     }
 
     public UiFileActivity assertCanRename(final boolean can) { // TODO

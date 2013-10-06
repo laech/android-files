@@ -23,6 +23,7 @@ import java.util.Map;
 import static android.app.ActionBar.LayoutParams;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
+import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
@@ -146,6 +147,17 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KEYCODE_BACK) {
+            while (mCurrentPagerFragment.hasBackStack()) {
+                mCurrentPagerFragment.popBackStack();
+            }
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
     }
 
     @Override

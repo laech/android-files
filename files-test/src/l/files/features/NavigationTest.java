@@ -11,6 +11,14 @@ import static com.google.common.io.Files.write;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+    public void testLongPressBackWillClearBackStack() {
+        screen().selectItem(dir().newDir("a"))
+                .selectItem(dir().newDir("a/b"))
+                .selectItem(dir().newDir("a/b/c"))
+                .longPressBack()
+                .assertCurrentDirectory(dir().get());
+    }
+
     public void testOpenNewDirectoryWillCloseOpenedDrawer() {
         final File dir = dir().newDir();
         screen().openDrawer()

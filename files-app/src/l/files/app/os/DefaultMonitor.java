@@ -276,9 +276,12 @@ final class DefaultMonitor implements Monitor {
         @Override
         protected void onPostExecute(List<FileObserver> observers) {
             super.onPostExecute(observers);
-            mChildObservers.putAll(mParent, observers);
-            for (FileObserver observer : observers) {
-                observer.startWatching();
+            final boolean stillValid = mObservers.get(mParent) != null;
+            if (stillValid) {
+                mChildObservers.putAll(mParent, observers);
+                for (FileObserver observer : observers) {
+                    observer.startWatching();
+                }
             }
             if (DEBUG) {
                 Log.d(TAG, DefaultMonitor.this.toString());
