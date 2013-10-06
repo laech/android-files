@@ -38,7 +38,7 @@ final class ImageDecorator implements Decorator<File> {
   @Override public void decorate(View view, File file) {
     ImageView image = (ImageView) view;
     image.setImageBitmap(null);
-    if (file.canRead() && file.isFile() && errors.get(file) == null) {
+    if (errors.get(file) == null && file.canRead() && file.isFile()) {
       Picasso.with(view.getContext())
           .load(file)
           .resize(size, size)
