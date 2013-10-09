@@ -10,58 +10,63 @@ import static junit.framework.Assert.assertTrue;
 
 public final class TempDir {
 
-  public static TempDir create() {
-    return new TempDir(createTempDir());
-  }
-
-  private final File directory;
-
-  private TempDir(File directory) {
-    this.directory = directory;
-  }
-
-  public void delete() {
-    delete(directory);
-  }
-
-  private void delete(File file) {
-    if (file.isDirectory()) file.setExecutable(true, true);
-    file.setReadable(true, true);
-    File[] children = file.listFiles();
-    if (children != null) {
-      for (File child : children) {
-        delete(child);
-      }
+    public static TempDir create() {
+        return new TempDir(createTempDir());
     }
-    file.delete();
-  }
 
-  public File get() {
-    return directory;
-  }
+    private final File mDir;
 
-  public File newFile() {
-    return newFile(String.valueOf(nanoTime()));
-  }
-
-  public File newFile(String name) {
-    File file = new File(directory, name);
-    try {
-      touch(file);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    private TempDir(File dir) {
+        this.mDir = dir;
     }
-    assertTrue(file.isFile());
-    return file;
-  }
 
-  public File newDir() {
-    return newDir(String.valueOf(nanoTime()));
-  }
+    public void delete() {
+        delete(mDir);
+    }
 
-  public File newDir(String name) {
-    File file = new File(directory, name);
-    assertTrue(file.mkdirs() || file.isDirectory());
-    return file;
-  }
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void delete(File file) {
+        if (file.isDirectory()) {
+            file.setExecutable(true, true);
+        }
+        file.setReadable(true, true);
+        final File[] children = file.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                delete(child);
+            }
+        }
+        file.delete();
+    }
+
+    public File get() {
+        return mDir;
+    }
+
+    public File newFile() {
+        return newFile(String.valueOf(nanoTime()));
+    }
+
+    public File newFile(String name) {
+        final File file = new File(mDir, name);
+        final File parent = file.getParentFile();
+        assertTrue(parent.exists() || parent.mkdirs());
+        try {
+            touch(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        assertTrue(file.isFile());
+        return file;
+    }
+
+    public File newDir() {
+        return newDir(String.valueOf(nanoTime()));
+    }
+
+    public File newDir(String name) {
+        final File file = new File(mDir, name);
+        assertTrue(file.mkdirs() || file.isDirectory());
+        return file;
+    }
 }

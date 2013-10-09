@@ -43,7 +43,7 @@ final class PasteMenu
 
   @Override public boolean onMenuItemClick(MenuItem item) {
     if (null != clipboard) {
-      bus.post(clipboard.paste(dir));
+      bus.post(clipboard.paste(dir)); // TODO show error message
     }
     return true;
   }

@@ -13,10 +13,10 @@ import java.util.concurrent.Callable;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.View.VISIBLE;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static l.files.app.format.Formats.*;
 import static l.files.common.widget.ListViews.getItems;
+import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 
 public final class UiFileActivity {
@@ -24,8 +24,8 @@ public final class UiFileActivity {
     private final Instrumentation mInstrumentation;
     private final FilesActivity mActivity;
 
-    public UiFileActivity(Instrumentation instrumentation, FilesActivity activity) {
-        mInstrumentation = instrumentation;
+    public UiFileActivity(Instrumentation in, FilesActivity activity) {
+        mInstrumentation = in;
         mActivity = activity;
     }
 
@@ -46,15 +46,23 @@ public final class UiFileActivity {
     }
 
     public UiRename rename() {
-        return awaitOnMainThread(mInstrumentation, new Callable<UiRename>() {
+        selectActionModeAction(R.id.rename);
+        return new UiRename(mInstrumentation, mActivity);
+    }
+
+    public UiFileActivity copy() {
+        return selectActionModeAction(android.R.id.copy);
+    }
+
+    public UiFileActivity paste() {
+        await(new Runnable() {
             @Override
-            public UiRename call() {
-                final ActionMode mode = mActivity.getCurrentActionMode();
-                final ActionMode.Callback callback = mActivity.getCurrentActionModeCallback();
-                assertTrue(callback.onActionItemClicked(mode, getRenameMenuItem()));
-                return new UiRename(mInstrumentation, mActivity);
+            public void run() {
+                assertTrue(mInstrumentation.invokeMenuActionSync(
+                        mActivity, android.R.id.paste, 0));
             }
         });
+        return this;
     }
 
     public UiFileActivity selectItem(final File file) {
@@ -74,7 +82,6 @@ public final class UiFileActivity {
             }
         });
     }
-
 
     public UiFileActivity selectPage(final int position) {
         return awaitOnMainThread(mInstrumentation, new Callable<UiFileActivity>() {
@@ -268,5 +275,29 @@ public final class UiFileActivity {
 
     private MenuItem getRenameMenuItem() {
         return mActivity.getCurrentActionMode().getMenu().findItem(R.id.rename);
+    }
+
+    private UiFileActivity selectActionModeAction(final int id) {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                final ActionMode mode = mActivity.getCurrentActionMode();
+                final MenuItem item = mode.getMenu().findItem(id);
+                assertTrue(mActivity
+                        .getCurrentActionModeCallback()
+                        .onActionItemClicked(mode, item));
+            }
+        });
+        return waitForActionModeToFinish();
+    }
+
+    private UiFileActivity waitForActionModeToFinish() {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                assertNull(mActivity.getCurrentActionMode());
+            }
+        });
+        return this;
     }
 }

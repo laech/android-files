@@ -66,8 +66,12 @@ public final class Instrumentations {
     /**
      * Awaits the for {@code callable} to return a successful value
      * (a successful value is anything that is not null or false),
-     * or until the specified duration times out - in this case an error will be thrown.
+     * or until the specified duration times out - in this case an error will be
+     * thrown.
+     *
+     * @deprecated use {@link #await(Runnable, long, TimeUnit)} instead
      */
+    @Deprecated
     public static <T> T await(Callable<T> callable, long time, TimeUnit unit) {
         long start = currentTimeMillis();
         long duration = unit.toMillis(time);
@@ -88,6 +92,33 @@ public final class Instrumentations {
         if (error == null)
             error = new AssertionError("failed");
         throw error;
+    }
+
+    /**
+     * Awaits for the runnable to return without an error, or until the
+     * specified duration times out - in this case an error will be thrown.
+     */
+    public static void await(Runnable runnable, long time, TimeUnit unit) {
+        final long start = currentTimeMillis();
+        final long duration = unit.toMillis(time);
+        AssertionError error = null;
+        while ((start + duration) > currentTimeMillis()) {
+            try {
+                runnable.run();
+                return;
+            } catch (AssertionError e) {
+                error = e;
+                sleep(5);
+            }
+        }
+        if (error == null) {
+            error = new AssertionError("Timed out.");
+        }
+        throw error;
+    }
+
+    public static void await(Runnable runnable) {
+        await(runnable, 1, SECONDS);
     }
 
     private Instrumentations() {
