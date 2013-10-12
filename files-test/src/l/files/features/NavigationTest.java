@@ -11,6 +11,14 @@ import static com.google.common.io.Files.write;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+    public void testPressActionBarUpIndicatorWillGoBack() {
+        final File dir = dir().newDir();
+        screen().selectItem(dir)
+                .assertCurrentDirectory(dir)
+                .pressActionBarUpIndicator()
+                .assertCurrentDirectory(dir.getParentFile());
+    }
+
     public void testActionBarTitleShowsNameOfDirectory() {
         screen().selectItem(dir().newDir("a"))
                 .assertActionBarTitle("a");

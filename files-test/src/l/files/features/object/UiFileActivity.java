@@ -20,6 +20,7 @@ import static l.files.app.format.Formats.*;
 import static l.files.common.widget.ListViews.getItems;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
+import static l.files.test.Mocks.mockMenuItem;
 
 public final class UiFileActivity {
 
@@ -142,6 +143,17 @@ public final class UiFileActivity {
             @Override
             public void run() {
                 assertTrue(mActivity.onKeyLongPress(KeyEvent.KEYCODE_BACK, null));
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity pressActionBarUpIndicator() {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                final MenuItem item = mockMenuItem(android.R.id.home);
+                assertTrue(mActivity.onOptionsItemSelected(item));
             }
         });
         return this;

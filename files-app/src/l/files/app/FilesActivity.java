@@ -161,6 +161,17 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // TODO update to use OptionsMenu
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onActionModeFinished(ActionMode mode) {
         super.onActionModeFinished(mode);
         mCurrentActionMode = null;
@@ -333,6 +344,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
                     final boolean hasBackStack = mCurrentPagerFragment.hasBackStack();
                     mActionBar.setTitle(title);
                     mActionBar.setDisplayHomeAsUpEnabled(hasBackStack);
+                    mActionBar.setHomeButtonEnabled(hasBackStack);
                     mTabs.updateTab(position, title, hasBackStack);
                 }
             });
