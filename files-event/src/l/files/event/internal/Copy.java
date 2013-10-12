@@ -1,7 +1,6 @@
 package l.files.event.internal;
 
 import android.util.Log;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -9,6 +8,7 @@ import java.nio.channels.FileChannel;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.BuildConfig.DEBUG;
 import static l.files.common.io.Files.canonicalStartsWith;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 final class Copy extends FileOperation {
 
@@ -16,7 +16,7 @@ final class Copy extends FileOperation {
 
     private static final long ONE_KB = 1024;
     private static final long ONE_MB = ONE_KB * ONE_KB;
-    private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30; // TODO verify
+    private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30;
 
     private final File source;
     private final File destination;
@@ -80,20 +80,30 @@ final class Copy extends FileOperation {
             long count;
             while (pos < size) {
                 if (isCancelled()) {
-                    return;
+                    break;
                 }
-                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                count = size -
+                        (pos > FILE_COPY_BUFFER_SIZE
+                                ? FILE_COPY_BUFFER_SIZE
+                                : size - pos);
                 pos += output.transferFrom(input, pos, count);
             }
         } finally {
-            IOUtils.closeQuietly(output);
-            IOUtils.closeQuietly(fos);
-            IOUtils.closeQuietly(input);
-            IOUtils.closeQuietly(fis);
+            closeQuietly(output);
+            closeQuietly(fos);
+            closeQuietly(input);
+            closeQuietly(fis);
         }
 
         if (srcFile.length() != destFile.length()) {
-            throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
+            if (isCancelled()) {
+                if (!destFile.delete() && DEBUG) {
+                    Log.d(TAG, "Failed to delete file on cancel: " + destFile);
+                }
+                return;
+            } else {
+                throw new IOException("Failed to copy full contents from '" + srcFile + "' to '" + destFile + "'");
+            }
         }
         if (!destFile.setLastModified(srcFile.lastModified())) {
             if (DEBUG) {
