@@ -82,10 +82,9 @@ final class Copy extends FileOperation {
                 if (isCancelled()) {
                     break;
                 }
-                count = size -
-                        (pos > FILE_COPY_BUFFER_SIZE
-                                ? FILE_COPY_BUFFER_SIZE
-                                : size - pos);
+                count = (size - pos) > FILE_COPY_BUFFER_SIZE
+                        ? FILE_COPY_BUFFER_SIZE
+                        : size - pos;
                 pos += output.transferFrom(input, pos, count);
             }
         } finally {
