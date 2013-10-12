@@ -119,4 +119,22 @@ public final class TabTest extends BaseFilesActivityTest {
         screen().selectItem(dir).assertCurrentDirectory(dir)
                 .selectTabAt(0).assertCurrentDirectory(dir().get());
     }
+
+    public void testHidesTabBarIfThereIsOnlyOneTabInitially() {
+        screen().assertTabCount(1)
+                .assertTabBarIsVisible(false);
+    }
+
+    public void testShowsTabBarIfThereIsMoreThanOneTab() {
+        screen().openNewTab()
+                .assertTabCount(2)
+                .assertTabBarIsVisible(true);
+    }
+
+    public void testHidesTabBarIfTabsAreClosedWithOneLeft() {
+        screen().openNewTab()
+                .assertTabCount(2)
+                .closeCurrentTab()
+                .assertTabBarIsVisible(false);
+    }
 }

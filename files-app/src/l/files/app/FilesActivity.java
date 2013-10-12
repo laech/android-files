@@ -48,6 +48,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
     ViewPager mViewPager;
     ViewPagerTabBar mTabs;
 
+    ActionBar mActionBar;
     ActionMode mCurrentActionMode;
     ActionMode.Callback mCurrentActionModeCallback;
 
@@ -67,10 +68,11 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         initFields(getSavedId(state));
         setViewPager(getSavedTabItems(state));
         setDrawer();
-        setActionBar(getActionBar());
+        setActionBar();
         setOptionsMenu(OptionsMenus.compose(
                 newTabMenu(this),
                 newCloseTabMenu(this)));
+        updateShowTabs();
     }
 
     private int getSavedId(Bundle state) {
@@ -92,6 +94,7 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         mBus = getBus(this);
         mDirectory = getInitialDirectory();
         mViewPager = (ViewPager) findViewById(R.id.pager);
+        mActionBar = getActionBar();
         mTabs = new ViewPagerTabBar(this, mBus);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerListener = new DrawerListener();
@@ -111,11 +114,8 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         mDrawerLayout.setDrawerListener(mDrawerListener);
     }
 
-    private void setActionBar(ActionBar actionBar) {
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setCustomView(mTabs.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
+    private void setActionBar() {
+        mActionBar.setCustomView(mTabs.getRootContainer(), new LayoutParams(MATCH_PARENT, MATCH_PARENT));
     }
 
     @Override
@@ -271,6 +271,16 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         }
     }
 
+    private void updateShowTabs() {
+        setShowTabs(getPagerAdapter().getCount() > 1);
+    }
+
+    private void setShowTabs(boolean showTabs) {
+        mActionBar.setDisplayShowTitleEnabled(!showTabs);
+        mActionBar.setDisplayShowHomeEnabled(!showTabs);
+        mActionBar.setDisplayShowCustomEnabled(showTabs);
+    }
+
     private void closeDrawerThenRun(Runnable runnable) {
         if (mDrawerLayout.isDrawerOpen(Gravity.START)) {
             mDrawerListener.mRunOnClosed = runnable;
@@ -320,7 +330,10 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mTabs.updateTab(position, title, mCurrentPagerFragment.hasBackStack());
+                    final boolean hasBackStack = mCurrentPagerFragment.hasBackStack();
+                    mActionBar.setTitle(title);
+                    mActionBar.setDisplayHomeAsUpEnabled(hasBackStack);
+                    mTabs.updateTab(position, title, hasBackStack);
                 }
             });
         }
@@ -339,6 +352,12 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         public int getItemPosition(Object object) {
             final Integer position = mPositions.get(object);
             return position != null ? position : POSITION_NONE;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+            updateShowTabs();
         }
 
         List<TabItem> getItems() {

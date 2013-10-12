@@ -1,5 +1,6 @@
 package l.files.features.object;
 
+import android.app.ActionBar;
 import android.app.Instrumentation;
 import android.view.*;
 import android.widget.ListView;
@@ -11,6 +12,7 @@ import l.files.app.FilesActivity;
 import java.io.File;
 import java.util.concurrent.Callable;
 
+import static android.app.ActionBar.*;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.*;
@@ -51,7 +53,9 @@ public final class UiFileActivity {
     }
 
     public UiFileActivity copy() {
-        return selectActionModeAction(android.R.id.copy);
+        selectActionModeAction(android.R.id.copy);
+        waitForActionModeToFinish();
+        return this;
     }
 
     public UiFileActivity paste() {
@@ -252,6 +256,54 @@ public final class UiFileActivity {
         return this;
     }
 
+    public UiFileActivity assertTabBarIsVisible(final boolean visible) {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                final ActionBar actionBar = mActivity.getActionBar();
+                final int showHome = actionBar.getDisplayOptions() & DISPLAY_SHOW_HOME;
+                final int showTitle = actionBar.getDisplayOptions() & DISPLAY_SHOW_TITLE;
+                final int showCustom = actionBar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM;
+                if (visible) {
+                    assertEquals(0, showHome);
+                    assertEquals(0, showTitle);
+                    assertNotEqual(0, showCustom);
+                } else {
+                    assertEquals(0, showHome);
+                    assertEquals(0, showTitle);
+                    assertNotEqual(0, showCustom);
+                }
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity assertActionBarTitle(final String title) {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(title, mActivity.getActionBar().getTitle());
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity assertActionBarUpIndicatorIsVisible(final boolean visible) {
+        awaitOnMainThread(mInstrumentation, new Runnable() {
+            @Override
+            public void run() {
+                final int displayOptions = mActivity.getActionBar().getDisplayOptions();
+                final int actual = displayOptions & DISPLAY_HOME_AS_UP;
+                if (visible) {
+                    assertNotEqual(0, actual);
+                } else {
+                    assertEquals(0, actual);
+                }
+            }
+        });
+        return this;
+    }
+
     private TextView getFileSummaryView(File file) {
         return (TextView) getView(file).findViewById(android.R.id.summary);
     }
@@ -277,7 +329,7 @@ public final class UiFileActivity {
         return mActivity.getCurrentActionMode().getMenu().findItem(R.id.rename);
     }
 
-    private UiFileActivity selectActionModeAction(final int id) {
+    private void selectActionModeAction(final int id) {
         awaitOnMainThread(mInstrumentation, new Runnable() {
             @Override
             public void run() {
@@ -288,16 +340,14 @@ public final class UiFileActivity {
                         .onActionItemClicked(mode, item));
             }
         });
-        return waitForActionModeToFinish();
     }
 
-    private UiFileActivity waitForActionModeToFinish() {
+    private void waitForActionModeToFinish() {
         awaitOnMainThread(mInstrumentation, new Runnable() {
             @Override
             public void run() {
                 assertNull(mActivity.getCurrentActionMode());
             }
         });
-        return this;
     }
 }

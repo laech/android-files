@@ -11,6 +11,26 @@ import static com.google.common.io.Files.write;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+    public void testActionBarTitleShowsNameOfDirectory() {
+        screen().selectItem(dir().newDir("a"))
+                .assertActionBarTitle("a");
+    }
+
+    public void testActionBarHidesUpIndicatorWhenThereIsNoBackStackInitially() {
+        screen().assertActionBarUpIndicatorIsVisible(false);
+    }
+
+    public void testActionBarShowsUpIndicatorWhenThereIsBackStack() {
+        screen().selectItem(dir().newDir())
+                .assertActionBarUpIndicatorIsVisible(true);
+    }
+
+    public void testActionBarHidesUpIndicatorWhenThereIsNoBackStackToGoBackTo() {
+        screen().selectItem(dir().newDir())
+                .pressBack()
+                .assertActionBarUpIndicatorIsVisible(false);
+    }
+
     public void testLongPressBackWillClearBackStack() {
         screen().selectItem(dir().newDir("a"))
                 .selectItem(dir().newDir("a/b"))
