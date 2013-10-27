@@ -30,6 +30,11 @@
   <string name="failed_to_rename_file">Failed to rename file.</string>
   <string name="new_tab">New tab</string>
   <string name="close_tab">Close tab</string>
+  <string name="preparing_to_copy_to_x">Preparing to copy to \"%s\"</string>
+  <string name="preparing_to_copy_x_items">Preparing to copy %s items</string>
+  <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
+  <string name="preparing_to_move_x_items">Preparing to move %s items</string>
+  <string name="waiting">Waiting…</string>
 
   <!--
     The character of all icon fonts in assets folder,
