@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.SparseArray;
@@ -21,9 +22,7 @@ import java.util.Set;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
-import static l.files.app.io.PasteInspection.Type;
-import static l.files.app.io.PasteInspection.Type.COPY;
-import static l.files.app.io.PasteInspection.Type.MOVE;
+import static l.files.app.io.PasteInspection.Progress;
 import static l.files.common.app.SystemServices.getNotificationManager;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
@@ -43,20 +42,19 @@ public final class PreparationService extends Service {
   private SparseArray<Task> operations;
   private NotificationManager notificationManager;
   private BroadcastReceiver receiver;
-  private NumberFormat numberFormat;
 
   public static void prepareMove(
       Context context, Set<File> sources, File destDir) {
-    start(context, sources, destDir, MOVE);
+    start(context, sources, destDir, NotificationType.MOVE);
   }
 
   public static void prepareCopy(
       Context context, Set<File> sources, File destDir) {
-    start(context, sources, destDir, COPY);
+    start(context, sources, destDir, NotificationType.COPY);
   }
 
   private static void start(
-      Context context, Set<File> sources, File destDir, Type type) {
+      Context context, Set<File> sources, File destDir, NotificationType type) {
     context.startService(new Intent(context, PreparationService.class)
         .putExtra(EXTRA_SOURCES, toAbsolutePaths(sources))
         .putExtra(EXTRA_DEST_DIR, destDir.getAbsolutePath())
@@ -65,7 +63,6 @@ public final class PreparationService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    numberFormat = NumberFormat.getIntegerInstance();
     operations = new SparseArray<Task>();
     notificationManager = getNotificationManager(this);
     receiver = new CancellationReceiver();
@@ -93,8 +90,8 @@ public final class PreparationService extends Service {
     return START_STICKY;
   }
 
-  private Type type(Intent intent) {
-    return (Type) intent.getSerializableExtra(EXTRA_TYPE);
+  private NotificationType type(Intent intent) {
+    return (NotificationType) intent.getSerializableExtra(EXTRA_TYPE);
   }
 
   private File destDir(Intent intent) {
@@ -108,7 +105,10 @@ public final class PreparationService extends Service {
   }
 
   private Notification.Builder newCancellableNotification(
-      int startId, boolean showProgressBar, String title, String text) {
+      int startId,
+      boolean showProgressBar,
+      CharSequence title,
+      CharSequence text) {
 
     Notification.Builder builder = new Notification.Builder(this)
         .setContentTitle(title)
@@ -160,23 +160,56 @@ public final class PreparationService extends Service {
     }
   }
 
+  private static enum NotificationType {
+    MOVE(R.string.preparing_to_move_to_x, R.string.preparing_to_move_x_items),
+    COPY(R.string.preparing_to_copy_to_x, R.string.preparing_to_copy_x_items);
+
+    private static NumberFormat fmt = NumberFormat.getIntegerInstance();
+
+    private final int contentTitleResId;
+    private final int contentTextResId;
+
+    NotificationType(int contentTitleResId, int contentTextResId) {
+      this.contentTitleResId = contentTitleResId;
+      this.contentTextResId = contentTextResId;
+    }
+
+    CharSequence getContentTitle(Resources res, File destDir) {
+      return res.getString(contentTitleResId, destDir.getName());
+    }
+
+    CharSequence getContentText(Resources res, Progress progress) {
+      if (progress == null) {
+        return res.getString(R.string.waiting);
+      }
+      return res.getString(contentTextResId, fmt.format(progress.count()));
+    }
+  }
+
   private final class Task extends PasteInspection {
-    Task(int id, Set<File> sources, File destDir, Type type) {
-      super(id, sources, destDir, type);
+    private final NotificationType type;
+
+    Task(int id, Set<File> sources, File destDir, NotificationType type) {
+      super(id, sources, destDir);
+      this.type = type;
     }
 
     @Override protected void onPreExecute() {
       startForeground(id(), newCancellableNotification(id(), false,
-          getContentTitle(), getString(R.string.waiting)).build());
+          getContentTitle(), getContentText(null)).build());
     }
 
     @Override protected void onProgressUpdate(Progress... values) {
-      Progress progress = values[0];
-      Notification notification = newCancellableNotification(id(), true,
-          getContentTitle(),
-          getContentText(progress.count())).build();
+      notificationManager.notify(id(), newCancellableNotification(id(), true,
+          getContentTitle(), getContentText(values[0])).build());
+    }
 
-      notificationManager.notify(id(), notification);
+    private CharSequence getContentText(Progress progress) {
+      return type.getContentText(getResources(), progress);
+    }
+
+    private CharSequence getContentTitle() {
+      return type.getContentTitle(getResources(), destination());
     }
 
     @Override protected void onPostExecute(Result result) {
@@ -193,18 +226,6 @@ public final class PreparationService extends Service {
       notificationManager.cancel(id());
       operations.remove(id());
       if (operations.size() == 0) stopSelf();
-    }
-
-    private String getContentTitle() {
-      return getString(type() == COPY
-          ? R.string.preparing_to_copy_to_x
-          : R.string.preparing_to_move_to_x, destination().getName());
-    }
-
-    private String getContentText(int count) {
-      return getString(type() == COPY
-          ? R.string.preparing_to_copy_x_items
-          : R.string.preparing_to_move_x_items, numberFormat.format(count));
     }
   }
 }

@@ -33,19 +33,16 @@ class PasteInspection
   private final int id;
   private final Set<File> sources;
   private final File destDir;
-  private final Type type;
 
   /**
    * @param id the ID to assign to this inspection
    * @param sources the inspection target, sources to be pasted
    * @param destDir the destination directory for the sources to be pasted into
-   * @param type the type of inspection
    */
-  PasteInspection(int id, Set<File> sources, File destDir, Type type) {
+  PasteInspection(int id, Set<File> sources, File destDir) {
     this.id = id;
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
     this.destDir = checkNotNull(destDir, "destDir");
-    this.type = checkNotNull(type, "type");
   }
 
   public int id() {
@@ -58,10 +55,6 @@ class PasteInspection
 
   protected File destination() {
     return destDir;
-  }
-
-  protected Type type() {
-    return type;
   }
 
   @Override protected Result doInBackground(Void... params) {
@@ -89,10 +82,6 @@ class PasteInspection
     }
 
     return new Result(conflicts, errors);
-  }
-
-  public static enum Type {
-    MOVE, COPY
   }
 
   public static final class Result extends ValueObject {

@@ -27,6 +27,11 @@
       </intent-filter>
     </activity>
 
+    <activity
+        android:exported="false"
+        android:name=".app.io.ConflictsActivity"
+        android:label="@string/conflicts_activity_label"/>
+
     <service android:exported="false" android:name=".app.io.PreparationService"/>
     <service android:exported="false" android:name=".event.internal.FileService$Cut"/>
     <service android:exported="false" android:name=".event.internal.FileService$Copy"/>

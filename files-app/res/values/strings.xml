@@ -35,6 +35,25 @@
   <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
   <string name="preparing_to_move_x_items">Preparing to move %s items</string>
   <string name="waiting">Waiting…</string>
+  <string name="conflicts_activity_label">Resolve conflicts</string>
+
+  <plurals name="replace_dest_files">
+    <item quantity="one">Replace destination item</item>
+    <item quantity="other">Replace destination items</item>
+  </plurals>
+
+  <plurals name="skip_files">
+    <item quantity="one">Skip this item</item>
+    <item quantity="other">Skip these items</item>
+  </plurals>
+
+  <string name="keep_all">Keep all, rename new items</string>
+  <string name="let_me_choose">Let me choose</string>
+
+  <plurals name="conflicts_summary_html">
+    <item quantity="one"><![CDATA[<b>%1$s</b> already has <b>%2$s</b>]]></item>
+    <item quantity="other"><![CDATA[<b>%1$s</b> already has %3$s items with the same names (such as <b>%2$s</b>)]]></item>
+  </plurals>
 
   <!--
     The character of all icon fonts in assets folder,

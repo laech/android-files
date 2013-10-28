@@ -190,4 +190,17 @@
     <item name="android:visibility">gone</item>
   </style>
 
+  <style name="Theme.ListButton" parent="Theme.TextView">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
+    <item name="android:background">?android:attr/selectableItemBackground</item>
+    <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
+    <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
+    <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
+    <item name="android:textColor">@color/text_primary</item>
+    <item name="android:gravity">start|center_vertical</item>
+    <item name="android:drawablePadding">?android:attr/listPreferredItemPaddingLeft</item>
+  </style>
+
 </resources>
