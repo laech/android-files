@@ -3,10 +3,4 @@
           android:id="@android:id/title"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:paddingTop="16dp"
-          android:paddingBottom="8dp"
-          android:textColor="?android:attr/textColorSecondary"
-          android:textAllCaps="true"
-          android:textAppearance="?android:attr/textAppearanceSmall"
-          android:fontFamily="sans-serif-light"
-          android:gravity="center_horizontal"/>
+          style="?android:attr/listSeparatorTextViewStyle"/>

@@ -11,7 +11,9 @@
       android:id="@android:id/icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@style/Theme.Sidebar.IconFont"/>
+      android:text="@string/ic_font_char"
+      android:textColor="?android:attr/textColorPrimary"
+      android:textAppearance="?android:attr/textAppearanceSmall"/>
 
   <TextView
       android:id="@android:id/title"
@@ -21,6 +23,7 @@
       android:layout_marginRight="8dp"
       android:singleLine="true"
       android:ellipsize="marquee"
-      android:textSize="@dimen/text_size_sidebar_item"/>
+      android:textColor="?android:attr/textColorPrimary"
+      android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 </LinearLayout>
