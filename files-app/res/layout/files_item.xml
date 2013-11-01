@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    style="@style/Theme.ListView.Item.Container">
+    android:background="?android:attr/activatedBackgroundIndicator">
 
   <TextView
       android:id="@android:id/icon"
@@ -33,13 +33,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
-        style="@style/Theme.ListView.Item.Primary"/>
+        android:textSize="@dimen/text_size_list_item_primary"/>
 
     <TextView
         android:id="@android:id/summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/Theme.ListView.Item.Secondary"/>
+        android:fontFamily="sans-serif-light"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/text_size_list_item_secondary"/>
 
   </LinearLayout>
 </RelativeLayout>
