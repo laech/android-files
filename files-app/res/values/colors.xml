@@ -13,6 +13,7 @@
   <color name="text_primary_inverse_normal">#e6e5e3</color>
   <color name="text_primary_inverse_disabled">#77e6e5e3</color>
   <color name="text_secondary_normal">#a09f9d</color>
+  <color name="action_bar_menu_background">#43423f</color>
   <color name="action_bar_background">#e9e7e2</color>
   <color name="action_bar_outline">#d8d7d3</color>
 </resources>
