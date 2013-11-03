@@ -1,1 +1,1 @@
-include ':files-app', ':files-common', ':files-sort', ':files-event'
+include ':files-app', ':files-common', ':files-sort', ':files-event', ':files-provider'
