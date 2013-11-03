@@ -1,20 +1,13 @@
-package l.files.provider.vfs;
+package l.files.provider;
 
 import android.database.AbstractCursor;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
-import static l.files.provider.FilesContract.FileInfo.COLUMN_FILE_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_WRITABLE;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static com.google.common.collect.Maps.newHashMap;
+import static l.files.provider.FilesContract.FileInfo.*;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class FileCursor extends AbstractCursor {
@@ -26,7 +19,7 @@ final class FileCursor extends AbstractCursor {
   public FileCursor(File[] files, String[] columns) {
     this.files = files;
     this.columns = columns;
-    this.infos = new HashMap<>();
+    this.infos = newHashMap();
   }
 
   private Info getCurrentFileInfo() {
@@ -49,38 +42,28 @@ final class FileCursor extends AbstractCursor {
   }
 
   @Override public String getString(int column) {
-    switch (columns[column]) {
-      case COLUMN_FILE_ID:
-        return getCurrentFileInfo().path;
-      case COLUMN_MEDIA_TYPE:
-        return getCurrentFileInfo().mediaType;
-      case COLUMN_NAME:
-        return getCurrentFileInfo().name;
-      default:
-        throw new IllegalArgumentException();
-    }
+    Info info = getCurrentFileInfo();
+    String col = columns[column];
+    if (COLUMN_NAME.equals(col)) return info.name;
+    if (COLUMN_FILE_ID.equals(col)) return info.path;
+    if (COLUMN_MEDIA_TYPE.equals(col)) return info.mediaType;
+    throw new IllegalArgumentException();
   }
 
   @Override public int getInt(int column) {
-    switch (columns[column]) {
-      case COLUMN_READABLE:
-        return getCurrentFileInfo().canRead ? 1 : 0;
-      case COLUMN_WRITABLE:
-        return getCurrentFileInfo().canWrite ? 1 : 0;
-      default:
-        throw new IllegalArgumentException();
-    }
+    Info info = getCurrentFileInfo();
+    String col = columns[column];
+    if (COLUMN_READABLE.equals(col)) return info.canRead ? 1 : 0;
+    if (COLUMN_WRITABLE.equals(col)) return info.canWrite ? 1 : 0;
+    throw new IllegalArgumentException();
   }
 
   @Override public long getLong(int column) {
-    switch (columns[column]) {
-      case COLUMN_LAST_MODIFIED:
-        return getCurrentFileInfo().lastModified;
-      case COLUMN_SIZE:
-        return getCurrentFileInfo().length;
-      default:
-        throw new IllegalArgumentException();
-    }
+    Info info = getCurrentFileInfo();
+    String col = columns[column];
+    if (COLUMN_SIZE.equals(col)) return info.length;
+    if (COLUMN_LAST_MODIFIED.equals(col)) return info.lastModified;
+    throw new IllegalArgumentException();
   }
 
   @Override public short getShort(int column) {

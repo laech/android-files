@@ -1,4 +1,4 @@
-package l.files.provider.vfs;
+package l.files.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
