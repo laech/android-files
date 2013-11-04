@@ -1,8 +1,12 @@
 package l.files.provider;
 
+import android.content.UriMatcher;
 import android.net.Uri;
 
+import java.io.File;
 import java.util.List;
+
+import static android.content.UriMatcher.NO_MATCH;
 
 public final class FilesContract {
 
@@ -12,10 +16,19 @@ public final class FilesContract {
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
 
+  static final int MATCH_PATHS_CHILDREN = 1;
+
+  static UriMatcher newMatcher() {
+    UriMatcher matcher = new UriMatcher(NO_MATCH);
+    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN,
+        MATCH_PATHS_CHILDREN);
+    return matcher;
+  }
+
   private FilesContract() {}
 
-  public static Uri buildRootsUri() {
-    return AUTHORITY_URI.buildUpon().appendPath(PATH_FILES).build();
+  public static Uri buildChildFilesUri(File file) {
+    return buildChildFilesUri(file.getAbsolutePath());
   }
 
   public static Uri buildChildFilesUri(String fileId) {
@@ -38,7 +51,7 @@ public final class FilesContract {
     return segments.get(1);
   }
 
-  public final static class File {
+  public final static class FileInfo {
 
     /**
      * Unique ID of a file. This value is always available.
@@ -100,6 +113,6 @@ public final class FilesContract {
      */
     public static final String MEDIA_TYPE_DIR = "application/x-directory";
 
-    private File() {}
+    private FileInfo() {}
   }
 }

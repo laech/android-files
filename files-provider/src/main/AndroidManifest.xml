@@ -7,6 +7,11 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="19"/>
 
-    <application/>
+    <application>
+        <provider
+            android:authorities="l.files"
+            android:name=".FilesProvider"
+            android:exported="false"/>
+    </application>
 
 </manifest>

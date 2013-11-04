@@ -23,4 +23,6 @@ android {
 }
 
 dependencies {
+  compile project.libs.commons_io
+  compile project.libs.guava
 }
