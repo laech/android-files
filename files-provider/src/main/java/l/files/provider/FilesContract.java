@@ -27,21 +27,21 @@ public final class FilesContract {
 
   private FilesContract() {}
 
-  public static Uri buildChildFilesUri(File file) {
-    return buildChildFilesUri(file.getAbsolutePath());
+  public static Uri buildChildFilesContentUri(File file) {
+    return buildChildFilesContentUri(file.toURI().toString());
   }
 
-  public static Uri buildChildFilesUri(String fileId) {
+  public static Uri buildChildFilesContentUri(String fileUri) {
     return AUTHORITY_URI
         .buildUpon()
         .appendPath(PATH_FILES)
-        .appendPath(fileId)
+        .appendPath(fileUri)
         .appendPath(PATH_CHILDREN)
         .build();
   }
 
-  public static String getFileId(Uri uri) {
-    List<String> segments = uri.getPathSegments();
+  public static String getFileUri(Uri contentUri) {
+    List<String> segments = contentUri.getPathSegments();
     if (segments == null || segments.size() < 2) {
       throw new IllegalArgumentException();
     }
@@ -54,11 +54,11 @@ public final class FilesContract {
   public final static class FileInfo {
 
     /**
-     * Unique ID of a file. This value is always available.
+     * Unique URI of a file.
      * <p/>
      * Type: STRING
      */
-    public static final String COLUMN_FILE_ID = "file_id";
+    public static final String COLUMN_URI = "file_uri";
 
     /**
      * Concrete MIME type of a file. For example, "image/png" or

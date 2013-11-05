@@ -7,12 +7,12 @@ import java.io.File;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_FILE_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_URI;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_WRITABLE;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -51,8 +51,8 @@ final class FileCursor extends AbstractCursor {
   @Override public String getString(int column) {
     Info info = getCurrentFileInfo();
     String col = columns[column];
+    if (COLUMN_URI.equals(col)) return info.uri();
     if (COLUMN_NAME.equals(col)) return info.name();
-    if (COLUMN_FILE_ID.equals(col)) return info.path();
     if (COLUMN_MEDIA_TYPE.equals(col)) return info.mime();
     throw new IllegalArgumentException();
   }
@@ -90,7 +90,7 @@ final class FileCursor extends AbstractCursor {
   }
 
   private static final class Info {
-    private String path;
+    private String uri;
     private String name;
     private String mediaType;
     private int canRead = -1;
@@ -104,9 +104,9 @@ final class FileCursor extends AbstractCursor {
       this.file = file;
     }
 
-    String path() {
-      if (path == null) path = file.getAbsolutePath();
-      return path;
+    String uri() {
+      if (uri == null) uri = "file:" + file.getAbsolutePath();
+      return uri;
     }
 
     String name() {

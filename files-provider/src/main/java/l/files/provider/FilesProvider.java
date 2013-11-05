@@ -7,22 +7,23 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.io.File;
+import java.net.URI;
 
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.MATCH_PATHS_CHILDREN;
-import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getFileUri;
 import static l.files.provider.FilesContract.newMatcher;
 
 public final class FilesProvider extends ContentProvider {
 
   private static final String[] DEFAULT_COLUMNS = {
-      FileInfo.COLUMN_FILE_ID,
-      FileInfo.COLUMN_LAST_MODIFIED,
-      FileInfo.COLUMN_MEDIA_TYPE,
+      FileInfo.COLUMN_URI,
       FileInfo.COLUMN_NAME,
-      FileInfo.COLUMN_READABLE,
       FileInfo.COLUMN_SIZE,
+      FileInfo.COLUMN_READABLE,
       FileInfo.COLUMN_WRITABLE,
+      FileInfo.COLUMN_MEDIA_TYPE,
+      FileInfo.COLUMN_LAST_MODIFIED,
   };
 
   private static final UriMatcher matcher = newMatcher();
@@ -39,8 +40,8 @@ public final class FilesProvider extends ContentProvider {
     }
     switch (matcher.match(uri)) {
       case MATCH_PATHS_CHILDREN: {
-        String path = getFileId(uri);
-        File[] children = new File(path).listFiles();
+        String fileUri = getFileUri(uri);
+        File[] children = new File(URI.create(fileUri)).listFiles();
         if (children == null) {
           children = new File[0];
         }
