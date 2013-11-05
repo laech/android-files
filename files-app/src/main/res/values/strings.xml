@@ -61,4 +61,6 @@
    -->
   <string name="ic_font_char">0</string>
 
+  <string name="failed_to_get_file_info">Failed to get file information</string>
+
 </resources>

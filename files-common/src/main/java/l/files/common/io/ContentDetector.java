@@ -1,13 +1,9 @@
 package l.files.common.io;
 
-import com.google.common.net.MediaType;
 import org.apache.tika.Tika;
 
-import java.io.File;
 import java.io.IOException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.MediaType.OCTET_STREAM;
+import java.io.InputStream;
 
 enum ContentDetector implements Detector {
 
@@ -17,12 +13,7 @@ enum ContentDetector implements Detector {
     static final Tika TIKA = new Tika();
   }
 
-  @Override public MediaType detect(File file) {
-    checkNotNull(file, "file");
-    try {
-      return MediaType.parse(LazyHolder.TIKA.detect(file));
-    } catch (IOException e) {
-      return OCTET_STREAM;
-    }
+  @Override public String detect(InputStream stream) throws IOException {
+    return LazyHolder.TIKA.detect(stream);
   }
 }

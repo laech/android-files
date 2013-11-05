@@ -1,13 +1,13 @@
 package l.files.common.io;
 
-import com.google.common.net.MediaType;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
-import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.io.File.createTempFile;
 
 public final class ContentDetectorTest extends TestCase {
@@ -26,10 +26,21 @@ public final class ContentDetectorTest extends TestCase {
 
   public void testDetectsFileContentMediaType() throws Exception {
     write("hello", file, UTF_8);
-    assertEquals(MediaType.parse("text/plain"), ContentDetector.INSTANCE.detect(file));
+    FileInputStream stream = new FileInputStream(file);
+    try {
+      assertEquals("text/plain", ContentDetector.INSTANCE.detect(stream));
+    } finally {
+      stream.close();
+    }
   }
 
-  public void testReturnsDefaultMediaTypeForUnknown() {
-    assertEquals(OCTET_STREAM, ContentDetector.INSTANCE.detect(file));
+  public void testReturnsDefaultMediaTypeForUnknown() throws IOException {
+    FileInputStream stream = new FileInputStream(file);
+    try {
+      assertEquals("application/octet-stream",
+          ContentDetector.INSTANCE.detect(stream));
+    } finally {
+      stream.close();
+    }
   }
 }

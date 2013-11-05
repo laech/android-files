@@ -27,6 +27,14 @@ public final class FilesContract {
 
   private FilesContract() {}
 
+  public static Uri buildFileContentUri(String fileUri) {
+    return AUTHORITY_URI
+        .buildUpon()
+        .appendPath(PATH_FILES)
+        .appendPath(fileUri)
+        .build();
+  }
+
   public static Uri buildChildFilesContentUri(File file) {
     return buildChildFilesContentUri(file.toURI().toString());
   }

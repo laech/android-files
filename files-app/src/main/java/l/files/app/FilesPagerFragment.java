@@ -25,7 +25,7 @@ public final class FilesPagerFragment extends Fragment {
     }
 
     Toaster mToaster;
-    Consumer<File> mFileOpener;
+    Consumer<String> mFileOpener;
     FragmentManager mManager;
 
     @Override
@@ -124,7 +124,7 @@ public final class FilesPagerFragment extends Fragment {
     }
 
     private void showFile(File file) {
-        mFileOpener.apply(file);
+        mFileOpener.apply(file.toURI().toString());
     }
 
     private FilesFragment findCurrentFragment() {
