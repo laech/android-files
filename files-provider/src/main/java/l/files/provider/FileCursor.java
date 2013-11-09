@@ -106,7 +106,7 @@ final class FileCursor extends AbstractCursor {
     }
 
     String uri() {
-      if (uri == null) uri = "file:" + file.getAbsolutePath();
+      if (uri == null) uri = file.toURI().toString();
       return uri;
     }
 

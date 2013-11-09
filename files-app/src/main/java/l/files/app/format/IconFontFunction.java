@@ -1,11 +1,15 @@
 package l.files.app.format;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
+import android.webkit.MimeTypeMap;
+
 import com.google.common.base.Function;
+
 import java.io.File;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class IconFontFunction implements Function<File, Typeface> {
 
@@ -17,9 +21,10 @@ final class IconFontFunction implements Function<File, Typeface> {
 
   @Override public Typeface apply(File file) {
     if (file.isDirectory()) {
-      return IconFonts.dir(assets, file);
+      return IconFonts.forDirectoryUri(assets, file.toURI().toString());
     } else {
-      return IconFonts.file(assets, file);
+      return IconFonts.forFileMediaType(assets, MimeTypeMap.getSingleton()
+          .getMimeTypeFromExtension(getExtension(file.getName())));
     }
   }
 }
