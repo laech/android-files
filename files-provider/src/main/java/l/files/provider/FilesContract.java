@@ -36,7 +36,7 @@ public final class FilesContract {
   }
 
   public static Uri buildChildFilesContentUri(File file) {
-    return buildChildFilesContentUri(file.toURI().toString());
+    return buildChildFilesContentUri(getFileUri(file));
   }
 
   public static Uri buildChildFilesContentUri(String fileUri) {
@@ -46,6 +46,10 @@ public final class FilesContract {
         .appendPath(fileUri)
         .appendPath(PATH_CHILDREN)
         .build();
+  }
+
+  public static String getFileUri(File file) {
+    return file.toURI().toString();
   }
 
   public static String getFileUri(Uri contentUri) {

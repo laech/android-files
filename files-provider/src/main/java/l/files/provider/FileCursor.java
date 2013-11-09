@@ -90,13 +90,14 @@ final class FileCursor extends AbstractCursor {
   }
 
   private static final class Info {
+    private static final int NONE = -1;
     private String uri;
     private String name;
     private String mediaType;
-    private int canRead = -1;
-    private int canWrite = -1;
-    private long length = -1;
-    private long lastModified = 1;
+    private int canRead = NONE;
+    private int canWrite = NONE;
+    private long length = NONE;
+    private long lastModified = NONE;
 
     private final File file;
 
@@ -125,22 +126,22 @@ final class FileCursor extends AbstractCursor {
     }
 
     long length() {
-      if (length < 0) length = file.length();
+      if (length == NONE) length = file.length();
       return length;
     }
 
     long modified() {
-      if (lastModified < 0) lastModified = file.lastModified();
+      if (lastModified == NONE) lastModified = file.lastModified();
       return lastModified;
     }
 
     int readable() {
-      if (canRead < 0) canRead = file.canRead() ? 1 : 0;
+      if (canRead == NONE) canRead = file.canRead() ? 1 : 0;
       return canRead;
     }
 
     int writable() {
-      if (canWrite < 0) canWrite = file.canWrite() ? 1 : 0;
+      if (canWrite == NONE) canWrite = file.canWrite() ? 1 : 0;
       return canWrite;
     }
   }

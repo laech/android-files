@@ -12,9 +12,11 @@ import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 
 import java.io.File;
+import java.net.URI;
 
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
+import static l.files.provider.FilesContract.getFileUri;
 
 public final class FilesPagerFragment extends Fragment {
 
@@ -43,7 +45,7 @@ public final class FilesPagerFragment extends Fragment {
         mFileOpener = FileOpener.get(getActivity());
         mManager = getChildFragmentManager();
         if (savedInstanceState == null) {
-            FilesFragment fragment = FilesFragment.create(getInitialDirectory());
+            FilesFragment fragment = FilesFragment.create(getFileUri(getInitialDirectory()));
             mManager
                     .beginTransaction()
                     .add(android.R.id.content, fragment, FilesFragment.TAG)
@@ -77,7 +79,7 @@ public final class FilesPagerFragment extends Fragment {
         if (fragment == null) {
             return getInitialDirectory();
         }
-        return fragment.getDirectory();
+        return new File(URI.create(fragment.getDirectory()));
     }
 
     private File getInitialDirectory() {
@@ -103,10 +105,10 @@ public final class FilesPagerFragment extends Fragment {
 
     private void showDirectory(File dir) {
         FilesFragment current = findCurrentFragment();
-        if (current != null && current.getDirectory().equals(dir)) {
+        if (current != null && current.getDirectory().equals(getFileUri(dir))) {
             return;
         }
-        FilesFragment fragment = FilesFragment.create(dir);
+        FilesFragment fragment = FilesFragment.create(getFileUri(dir));
         mManager
                 .beginTransaction()
                 /*

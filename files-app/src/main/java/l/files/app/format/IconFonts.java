@@ -5,6 +5,7 @@ import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.util.Locale.ENGLISH;
 import static l.files.app.UserDirs.*;
 import static l.files.app.format.FileExtensions.*;
+import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 import android.content.res.AssetManager;
@@ -14,12 +15,22 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-final class IconFonts {
+public final class IconFonts {
 
   private static Map<File, Typeface> ic_dirs;
   private static Map<String, Typeface> ic_files;
   private static Typeface ic_dir;
   private static Typeface ic_file;
+
+  public static Typeface forDirectoryUri(AssetManager assets, String directoryUri) {
+    init(assets);
+    return ic_dir;
+  }
+
+  public static Typeface forFileMediaType(AssetManager assets, String mediaType) {
+    init(assets);
+    return ic_file;
+  }
 
   static Typeface dir(AssetManager assets, File dir) {
     init(assets);
