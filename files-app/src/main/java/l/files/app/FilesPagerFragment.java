@@ -15,7 +15,6 @@ import java.net.URI;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
-import l.files.provider.FilesContract;
 
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
@@ -24,7 +23,7 @@ import static l.files.provider.FilesContract.getFileId;
 
 public final class FilesPagerFragment extends Fragment {
 
-  public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY;
+  public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY_ID;
 
   public static FilesPagerFragment create(File dir) {
     return setArgs(new FilesPagerFragment(), ARG_DIRECTORY,

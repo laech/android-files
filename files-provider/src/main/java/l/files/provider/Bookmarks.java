@@ -18,6 +18,7 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
+import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 import static l.files.provider.FilesContract.toFileId;
 import static l.files.provider.FilesContract.toURI;
@@ -43,8 +44,18 @@ final class Bookmarks {
     return toFileId(file);
   }
 
+  static File[] getBookmark(SharedPreferences pref, String fileId) {
+    Set<String> bookmarks = new HashSet<>(pref.getStringSet(KEY, DEFAULTS));
+    bookmarks.retainAll(asList(fileId));
+    return toFiles(bookmarks);
+  }
+
   static File[] getBookmarks(SharedPreferences pref) {
     Set<String> fileIds = pref.getStringSet(KEY, DEFAULTS);
+    return toFiles(fileIds);
+  }
+
+  private static File[] toFiles(Set<String> fileIds) {
     List<File> bookmarks = new ArrayList<>(fileIds.size());
     for (String fileId : fileIds) {
       try {

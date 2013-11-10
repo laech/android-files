@@ -1,5 +1,6 @@
 package l.files.provider;
 
+import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
 
@@ -70,7 +71,8 @@ public final class FilesContract {
     if (segments == null || segments.size() < 2) {
       throw new IllegalArgumentException();
     }
-    if (!PATH_FILES.equals(segments.get(0))) {
+    if (!PATH_FILES.equals(segments.get(0)) &&
+        !PATH_BOOKMARKS.equals(segments.get(0))) {
       throw new IllegalArgumentException();
     }
     return segments.get(1);
@@ -91,6 +93,14 @@ public final class FilesContract {
 
   static URI toURI(String fileId) {
     return URI.create(fileId);
+  }
+
+  public static void insertBookmark(ContentResolver resolver, String fileId) {
+    resolver.insert(buildBookmarkUri(fileId), null);
+  }
+
+  public static void deleteBookmark(ContentResolver resolver, String fileId) {
+    resolver.delete(buildBookmarkUri(fileId), null, null);
   }
 
   public final static class FileInfo {

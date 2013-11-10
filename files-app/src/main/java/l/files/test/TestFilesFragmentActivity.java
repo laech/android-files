@@ -8,7 +8,7 @@ import l.files.app.FilesFragment;
 
 public final class TestFilesFragmentActivity extends FragmentActivity {
 
-  public static final String DIRECTORY = FilesFragment.ARG_DIRECTORY;
+  public static final String DIRECTORY = FilesFragment.ARG_DIRECTORY_ID;
 
   private FilesFragment fragment;
   private ActionMode mode;

@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
@@ -69,6 +70,8 @@ public final class FilesProvider extends ContentProvider
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS:
         return queryBookmarks(uri, projection);
+      case MATCH_BOOKMARKS_ID:
+        return queryBookmark(uri, projection);
       case MATCH_FILES_CHILDREN:
         return queryFiles(uri, projection);
       default:
@@ -76,18 +79,24 @@ public final class FilesProvider extends ContentProvider
     }
   }
 
+  private Cursor queryBookmark(Uri uri, String[] projection) {
+    File[] bookmark = getBookmark(getPreference(), getFileId(uri));
+    return newCursor(uri, projection, bookmark);
+  }
+
   private Cursor queryBookmarks(Uri uri, String[] projection) {
-    Cursor c = new FileCursor(getBookmarks(getPreference()), projection);
-    c.setNotificationUri(getContentResolver(), uri);
-    return c;
+    File[] bookmarks = getBookmarks(getPreference());
+    return newCursor(uri, projection, bookmarks);
   }
 
   private Cursor queryFiles(Uri uri, String[] projection) {
     File[] children = new File(toURI(getFileId(uri))).listFiles();
-    if (children == null) {
-      children = new File[0];
-    }
-    Cursor c = new FileCursor(children, projection);
+    if (children == null) children = new File[0];
+    return newCursor(uri, projection, children);
+  }
+
+  private Cursor newCursor(Uri uri, String[] projection, File[] files) {
+    Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);
     return c;
   }

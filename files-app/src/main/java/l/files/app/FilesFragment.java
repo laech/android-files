@@ -1,7 +1,11 @@
 package l.files.app;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -20,6 +24,7 @@ import l.files.common.widget.MultiChoiceModeListeners;
 
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
+import static l.files.app.menu.Menus.newBookmarkMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
@@ -29,16 +34,17 @@ public final class FilesFragment
     extends BaseListFragment implements LoaderCallbacks<Cursor> {
 
   public static final String TAG = FilesFragment.class.getSimpleName();
-  public static final String ARG_DIRECTORY = "directory";
+  public static final String ARG_DIRECTORY_ID = "directory_id";
 
-  private String mDirectory;
+  private String directoryId;
 
-  public static FilesFragment create(String dir) {
-    return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY, dir);
+  public static FilesFragment create(String directoryId) {
+    return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY_ID,
+        directoryId);
   }
 
   public String getDirectory() {
-    return mDirectory;
+    return directoryId;
   }
 
   @Override public View onCreateView(
@@ -48,7 +54,7 @@ public final class FilesFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    mDirectory = getArguments().getString(ARG_DIRECTORY);
+    directoryId = getArguments().getString(ARG_DIRECTORY_ID);
 
     setupListView();
     setupOptionsMenu();
@@ -63,8 +69,11 @@ public final class FilesFragment
 
   private void setupOptionsMenu() {
 //    FragmentManager manager = getActivityFragmentManager();
+    FragmentActivity context = getActivity();
+    LoaderManager loaders = getLoaderManager();
+    ContentResolver resolver = context.getContentResolver();
     setOptionsMenu(OptionsMenus.compose(
-//        newBookmarkMenu(getBus(), mDirectory),
+        newBookmarkMenu(context, loaders, resolver, directoryId)
 //        newDirMenu(manager, mDirectory),
 //        newPasteMenu(getBus(), mDirectory),
 //        newSortMenu(manager),
@@ -101,13 +110,8 @@ public final class FilesFragment
   }
 
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-    return new CursorLoader(
-        getActivity(),
-        buildFileChildrenUri(mDirectory),
-        null,
-        null,
-        null,
-        null);
+    Uri uri = buildFileChildrenUri(directoryId);
+    return new CursorLoader(getActivity(), uri, null, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
