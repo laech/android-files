@@ -4,6 +4,7 @@ import android.content.UriMatcher;
 import android.net.Uri;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 import static android.content.UriMatcher.NO_MATCH;
@@ -16,43 +17,40 @@ public final class FilesContract {
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
 
-  static final int MATCH_PATHS_CHILDREN = 1;
-
-  static UriMatcher newMatcher() {
-    UriMatcher matcher = new UriMatcher(NO_MATCH);
-    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN,
-        MATCH_PATHS_CHILDREN);
-    return matcher;
-  }
+  static final int MATCH_FILES_ID = 1;
+  static final int MATCH_FILES_CHILDREN = 2;
 
   private FilesContract() {}
 
-  public static Uri buildFileContentUri(String fileUri) {
+  static UriMatcher newMatcher() {
+    UriMatcher matcher = new UriMatcher(NO_MATCH);
+    matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_ID);
+    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_CHILDREN);
+    return matcher;
+  }
+
+  public static Uri buildFileUri(String fileId) {
     return AUTHORITY_URI
         .buildUpon()
         .appendPath(PATH_FILES)
-        .appendPath(fileUri)
+        .appendPath(fileId)
         .build();
   }
 
-  public static Uri buildChildFilesContentUri(File file) {
-    return buildChildFilesContentUri(getFileUri(file));
-  }
-
-  public static Uri buildChildFilesContentUri(String fileUri) {
+  public static Uri buildFileChildrenUri(String fileId) {
     return AUTHORITY_URI
         .buildUpon()
         .appendPath(PATH_FILES)
-        .appendPath(fileUri)
+        .appendPath(fileId)
         .appendPath(PATH_CHILDREN)
         .build();
   }
 
-  public static String getFileUri(File file) {
-    return file.toURI().toString();
+  public static String getFileId(File file) {
+    return toFileId(file.toURI());
   }
 
-  public static String getFileUri(Uri contentUri) {
+  public static String getFileId(Uri contentUri) {
     List<String> segments = contentUri.getPathSegments();
     if (segments == null || segments.size() < 2) {
       throw new IllegalArgumentException();
@@ -63,14 +61,26 @@ public final class FilesContract {
     return segments.get(1);
   }
 
+  public static Uri getFileSystemUri(Uri uri) {
+    return Uri.parse(getFileId(uri));
+  }
+
+  static String toFileId(URI uri) {
+    return uri.toString();
+  }
+
+  static URI toURI(String fileId) {
+    return URI.create(fileId);
+  }
+
   public final static class FileInfo {
 
     /**
-     * Unique URI of a file.
+     * Unique ID of a file.
      * <p/>
      * Type: STRING
      */
-    public static final String COLUMN_URI = "file_uri";
+    public static final String COLUMN_ID = "file_id";
 
     /**
      * Concrete MIME type of a file. For example, "image/png" or

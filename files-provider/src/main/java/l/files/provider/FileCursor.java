@@ -7,14 +7,16 @@ import java.io.File;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Locale.ENGLISH;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_URI;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_WRITABLE;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FilesContract.getFileId;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class FileCursor extends AbstractCursor {
@@ -51,7 +53,7 @@ final class FileCursor extends AbstractCursor {
   @Override public String getString(int column) {
     Info info = getCurrentFileInfo();
     String col = columns[column];
-    if (COLUMN_URI.equals(col)) return info.uri();
+    if (COLUMN_ID.equals(col)) return info.id();
     if (COLUMN_NAME.equals(col)) return info.name();
     if (COLUMN_MEDIA_TYPE.equals(col)) return info.mime();
     throw new IllegalArgumentException();
@@ -91,7 +93,7 @@ final class FileCursor extends AbstractCursor {
 
   private static final class Info {
     private static final int NONE = -1;
-    private String uri;
+    private String id;
     private String name;
     private String mediaType;
     private int canRead = NONE;
@@ -105,9 +107,9 @@ final class FileCursor extends AbstractCursor {
       this.file = file;
     }
 
-    String uri() {
-      if (uri == null) uri = file.toURI().toString();
-      return uri;
+    String id() {
+      if (id == null) id = getFileId(file);
+      return id;
     }
 
     String name() {
@@ -120,7 +122,7 @@ final class FileCursor extends AbstractCursor {
         mediaType = file.isDirectory()
             ? MEDIA_TYPE_DIR
             : MimeTypeMap.getSingleton()
-            .getMimeTypeFromExtension(getExtension(name));
+            .getMimeTypeFromExtension(getExtension(name).toLowerCase(ENGLISH));
       }
       return mediaType;
     }

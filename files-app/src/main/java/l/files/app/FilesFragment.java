@@ -22,8 +22,8 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_URI;
-import static l.files.provider.FilesContract.buildChildFilesContentUri;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
+import static l.files.provider.FilesContract.buildFileChildrenUri;
 
 public final class FilesFragment
     extends BaseListFragment implements LoaderCallbacks<Cursor> {
@@ -95,7 +95,7 @@ public final class FilesFragment
   public void onListItemClick(ListView l, View v, int position, long id) {
     super.onListItemClick(l, v, position, id);
     Cursor cursor = (Cursor) l.getItemAtPosition(position);
-    String uri = cursor.getString(cursor.getColumnIndex(COLUMN_URI));
+    String uri = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
     FilesApp.getBus(this).post(new OpenFileRequest(new File(URI.create(uri))));
     // TODO
   }
@@ -103,7 +103,7 @@ public final class FilesFragment
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
     return new CursorLoader(
         getActivity(),
-        buildChildFilesContentUri(mDirectory),
+        buildFileChildrenUri(mDirectory),
         null,
         null,
         null,

@@ -31,7 +31,7 @@ import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_URI;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 
 final class FilesAdapter extends BaseAdapter {
@@ -68,7 +68,7 @@ final class FilesAdapter extends BaseAdapter {
   public void setCursor(Cursor cursor) {
     this.cursor = cursor;
     if (cursor != null) {
-      columnUri = cursor.getColumnIndexOrThrow(COLUMN_URI);
+      columnUri = cursor.getColumnIndexOrThrow(COLUMN_ID);
       columnName = cursor.getColumnIndexOrThrow(COLUMN_NAME);
       columnSize = cursor.getColumnIndexOrThrow(COLUMN_SIZE);
       columnReadable = cursor.getColumnIndexOrThrow(COLUMN_READABLE);
