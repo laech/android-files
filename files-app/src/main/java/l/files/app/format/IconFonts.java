@@ -23,6 +23,7 @@ import static l.files.app.UserDirs.DIR_PICTURES;
 import static l.files.app.UserDirs.DIR_PODCASTS;
 import static l.files.app.UserDirs.DIR_RINGTONES;
 import static l.files.app.UserDirs.DIR_ROOT;
+import static l.files.provider.FilesContract.getFileId;
 
 public final class IconFonts {
 
@@ -38,9 +39,9 @@ public final class IconFonts {
   private static Typeface iconPdf;
   private static Set<String> mimeArchive;
 
-  public static Typeface forDirectoryUri(AssetManager assets, String uri) {
+  public static Typeface forDirectoryId(AssetManager assets, String fileId) {
     init(assets);
-    Typeface icon = iconByDirectoryUri.get(uri);
+    Typeface icon = iconByDirectoryUri.get(fileId);
     if (icon != null) return icon;
     return iconDirectory;
   }
@@ -82,23 +83,19 @@ public final class IconFonts {
     iconDirectory = createFromAsset(assets, "ic_dir.ttf");
     iconFile = createFromAsset(assets, "ic_file.ttf");
     iconByDirectoryUri = ImmutableMap.<String, Typeface>builder()
-        .put(uri(DIR_ROOT), createFromAsset(assets, "ic_dir_device.ttf"))
-        .put(uri(DIR_HOME), createFromAsset(assets, "ic_dir_home.ttf"))
-        .put(uri(DIR_DCIM), createFromAsset(assets, "ic_dir_dcim.ttf"))
-        .put(uri(DIR_MUSIC), createFromAsset(assets, "ic_dir_music.ttf"))
-        .put(uri(DIR_ALARMS), createFromAsset(assets, "ic_dir_alarms.ttf"))
-        .put(uri(DIR_MOVIES), createFromAsset(assets, "ic_dir_movies.ttf"))
-        .put(uri(DIR_ANDROID), createFromAsset(assets, "ic_dir_android.ttf"))
-        .put(uri(DIR_PICTURES), createFromAsset(assets, "ic_dir_pictures.ttf"))
-        .put(uri(DIR_PODCASTS), createFromAsset(assets, "ic_dir_podcasts.ttf"))
-        .put(uri(DIR_DOWNLOADS), createFromAsset(assets, "ic_dir_download.ttf"))
-        .put(uri(DIR_RINGTONES), createFromAsset(assets, "ic_dir_ringtones.ttf"))
-        .put(uri(DIR_NOTIFICATIONS), createFromAsset(assets, "ic_dir_notifications.ttf"))
+        .put(getFileId(DIR_ROOT), createFromAsset(assets, "ic_dir_device.ttf"))
+        .put(getFileId(DIR_HOME), createFromAsset(assets, "ic_dir_home.ttf"))
+        .put(getFileId(DIR_DCIM), createFromAsset(assets, "ic_dir_dcim.ttf"))
+        .put(getFileId(DIR_MUSIC), createFromAsset(assets, "ic_dir_music.ttf"))
+        .put(getFileId(DIR_ALARMS), createFromAsset(assets, "ic_dir_alarms.ttf"))
+        .put(getFileId(DIR_MOVIES), createFromAsset(assets, "ic_dir_movies.ttf"))
+        .put(getFileId(DIR_ANDROID), createFromAsset(assets, "ic_dir_android.ttf"))
+        .put(getFileId(DIR_PICTURES), createFromAsset(assets, "ic_dir_pictures.ttf"))
+        .put(getFileId(DIR_PODCASTS), createFromAsset(assets, "ic_dir_podcasts.ttf"))
+        .put(getFileId(DIR_DOWNLOADS), createFromAsset(assets, "ic_dir_download.ttf"))
+        .put(getFileId(DIR_RINGTONES), createFromAsset(assets, "ic_dir_ringtones.ttf"))
+        .put(getFileId(DIR_NOTIFICATIONS), createFromAsset(assets, "ic_dir_notifications.ttf"))
         .build();
-  }
-
-  private static String uri(File file) {
-    return file.toURI().toString(); // TODO
   }
 
   private IconFonts() {}

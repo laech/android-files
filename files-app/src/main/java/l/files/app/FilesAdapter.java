@@ -6,10 +6,8 @@ import android.graphics.Typeface;
 import android.util.LruCache;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,15 +24,15 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static com.squareup.picasso.Callback.EmptyCallback;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 
-final class FilesAdapter extends BaseAdapter {
+final class FilesAdapter extends CursorAdapter {
 
   private final int thumbnailSize;
 
@@ -54,21 +52,18 @@ final class FilesAdapter extends BaseAdapter {
   private DateFormat dateFormat;
   private DateFormat timeFormat;
 
-  private Cursor cursor;
-
-  private int columnUri;
-  private int columnName;
-  private int columnSize;
-  private int columnReadable;
-  private int columnMediaType;
-  private int columnModified;
+  private int columnId = -1;
+  private int columnName = -1;
+  private int columnSize = -1;
+  private int columnModified = -1;
+  private int columnReadable = -1;
+  private int columnMediaType = -1;
 
   private final SparseArray<Info> infos = new SparseArray<>();
 
-  public void setCursor(Cursor cursor) {
-    this.cursor = cursor;
+  @Override public void setCursor(Cursor cursor) {
     if (cursor != null) {
-      columnUri = cursor.getColumnIndexOrThrow(COLUMN_ID);
+      columnId = cursor.getColumnIndexOrThrow(COLUMN_ID);
       columnName = cursor.getColumnIndexOrThrow(COLUMN_NAME);
       columnSize = cursor.getColumnIndexOrThrow(COLUMN_SIZE);
       columnReadable = cursor.getColumnIndexOrThrow(COLUMN_READABLE);
@@ -76,25 +71,12 @@ final class FilesAdapter extends BaseAdapter {
       columnModified = cursor.getColumnIndexOrThrow(COLUMN_LAST_MODIFIED);
     }
     infos.clear();
-    notifyDataSetChanged();
-  }
-
-  @Override public int getCount() {
-    return cursor == null ? 0 : cursor.getCount();
-  }
-
-  @Override public Cursor getItem(int position) {
-    cursor.moveToPosition(position);
-    return cursor;
-  }
-
-  @Override public long getItemId(int position) {
-    return position;
+    super.setCursor(cursor);
   }
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
-      view = inflate(parent);
+      view = inflate(R.layout.files_item, parent);
       view.setTag(new ViewHolder(view));
     }
 
@@ -112,11 +94,6 @@ final class FilesAdapter extends BaseAdapter {
     holder.setImage(info, thumbnailSize);
 
     return view;
-  }
-
-  private View inflate(ViewGroup parent) {
-    return LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.files_item, parent, false);
   }
 
   private static final class ViewHolder extends EmptyCallback {
@@ -187,27 +164,27 @@ final class FilesAdapter extends BaseAdapter {
     final boolean directory;
 
     Info(Context context, int position) {
-      cursor.moveToPosition(position);
-      uri = cursor.getString(columnUri);
+      Cursor cursor = getItem(position);
+      uri = cursor.getString(columnId);
       title = cursor.getString(columnName);
       readable = cursor.getInt(columnReadable) == 1;
       directory = MEDIA_TYPE_DIR.equals(cursor.getString(columnMediaType));
       if (directory) {
         icon = getDirectoryIcon(context, cursor);
-        summary = geDirectorySummary(context);
+        summary = geDirectorySummary(context, cursor);
       } else {
         icon = getFileIcon(context, cursor);
-        summary = getFileSummary(context);
+        summary = getFileSummary(context, cursor);
       }
     }
 
-    private String getFileSummary(Context context) {
+    private String getFileSummary(Context context, Cursor cursor) {
       String size = formatShortFileSize(context, cursor.getLong(columnSize));
       String date = formatLastModified(context, cursor);
       return context.getString(R.string.file_summary, date, size);
     }
 
-    private String geDirectorySummary(Context context) {
+    private String geDirectorySummary(Context context, Cursor cursor) {
       return formatLastModified(context, cursor);
     }
 
@@ -217,8 +194,8 @@ final class FilesAdapter extends BaseAdapter {
     }
 
     private Typeface getDirectoryIcon(Context context, Cursor cursor) {
-      String uri = cursor.getString(columnUri);
-      return IconFonts.forDirectoryUri(context.getAssets(), uri);
+      String id = cursor.getString(columnId);
+      return IconFonts.forDirectoryId(context.getAssets(), id);
     }
 
     private String formatLastModified(Context context, Cursor cursor) {

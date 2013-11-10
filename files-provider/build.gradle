@@ -1,29 +1,35 @@
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
-    }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.6.+'
+  }
 }
 apply plugin: 'android-library'
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.0"
+  compileSdkVersion 19
+  buildToolsVersion "19.0.0"
 
-    defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 19
-    }
+  defaultConfig {
+    minSdkVersion 14
+    targetSdkVersion 19
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
 }
 
 dependencies {
   compile project.libs.commons_io
+  compile project.libs.commons_lang
   compile project.libs.guava
   compile project.libs.tika
 }

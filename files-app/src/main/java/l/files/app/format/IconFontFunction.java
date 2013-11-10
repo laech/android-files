@@ -21,7 +21,7 @@ final class IconFontFunction implements Function<File, Typeface> {
 
   @Override public Typeface apply(File file) {
     if (file.isDirectory()) {
-      return IconFonts.forDirectoryUri(assets, file.toURI().toString());
+      return IconFonts.forDirectoryId(assets, file.toURI().toString());
     } else {
       return IconFonts.forFileMediaType(assets, MimeTypeMap.getSingleton()
           .getMimeTypeFromExtension(getExtension(file.getName())));

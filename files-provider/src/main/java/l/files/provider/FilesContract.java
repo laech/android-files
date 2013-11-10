@@ -16,9 +16,12 @@ public final class FilesContract {
 
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
+  static final String PATH_BOOKMARKS = "bookmarks";
 
-  static final int MATCH_FILES_ID = 1;
-  static final int MATCH_FILES_CHILDREN = 2;
+  static final int MATCH_FILES_ID = 100;
+  static final int MATCH_FILES_CHILDREN = 101;
+  static final int MATCH_BOOKMARKS = 200;
+  static final int MATCH_BOOKMARKS_ID = 201;
 
   private FilesContract() {}
 
@@ -26,24 +29,36 @@ public final class FilesContract {
     UriMatcher matcher = new UriMatcher(NO_MATCH);
     matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_ID);
     matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_CHILDREN);
+    matcher.addURI(AUTHORITY, PATH_BOOKMARKS, MATCH_BOOKMARKS);
+    matcher.addURI(AUTHORITY, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_ID);
     return matcher;
   }
 
+  public static Uri buildBookmarksUri() {
+    return bookmarksUriBuilder().build();
+  }
+
+  public static Uri buildBookmarkUri(String fileId) {
+    return bookmarksUriBuilder().appendPath(fileId).build();
+  }
+
+  private static Uri.Builder bookmarksUriBuilder() {
+    return AUTHORITY_URI.buildUpon().appendPath(PATH_BOOKMARKS);
+  }
+
   public static Uri buildFileUri(String fileId) {
-    return AUTHORITY_URI
-        .buildUpon()
-        .appendPath(PATH_FILES)
-        .appendPath(fileId)
-        .build();
+    return filesUriBuilder().appendPath(fileId).build();
   }
 
   public static Uri buildFileChildrenUri(String fileId) {
-    return AUTHORITY_URI
-        .buildUpon()
-        .appendPath(PATH_FILES)
+    return filesUriBuilder()
         .appendPath(fileId)
         .appendPath(PATH_CHILDREN)
         .build();
+  }
+
+  private static Uri.Builder filesUriBuilder() {
+    return AUTHORITY_URI.buildUpon().appendPath(PATH_FILES);
   }
 
   public static String getFileId(File file) {
@@ -67,6 +82,11 @@ public final class FilesContract {
 
   static String toFileId(URI uri) {
     return uri.toString();
+  }
+
+
+  static String toFileId(File file) {
+    return toFileId(file.toURI());
   }
 
   static URI toURI(String fileId) {

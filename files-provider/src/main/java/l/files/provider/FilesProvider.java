@@ -1,7 +1,9 @@
 package l.files.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,15 +16,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
+import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
+import static l.files.provider.FilesContract.buildBookmarksUri;
 import static l.files.provider.FilesContract.getFileId;
 import static l.files.provider.FilesContract.newMatcher;
 import static l.files.provider.FilesContract.toURI;
 
-public final class FilesProvider extends ContentProvider {
+public final class FilesProvider extends ContentProvider
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+  private static final String PREF_BOOKMARKS = "bookmarks";
 
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.COLUMN_ID,
@@ -37,6 +47,7 @@ public final class FilesProvider extends ContentProvider {
   private static final UriMatcher matcher = newMatcher();
 
   @Override public boolean onCreate() {
+    getPreference().registerOnSharedPreferenceChangeListener(this);
     return true;
   }
 
@@ -50,22 +61,39 @@ public final class FilesProvider extends ContentProvider {
     return super.openFile(uri, mode);
   }
 
-  @Override public Cursor query(
-      Uri uri, String[] projection, String selection, String[] selectionArgs,
-      String sortOrder) {
+  @Override public Cursor query(Uri uri, String[] projection, String selection,
+                                String[] selectionArgs, String sortOrder) {
 
-    if (projection == null) {
-      projection = DEFAULT_COLUMNS;
-    }
+    if (projection == null) projection = DEFAULT_COLUMNS;
 
     switch (matcher.match(uri)) {
+      case MATCH_BOOKMARKS:
+        return queryBookmarks(uri, projection);
       case MATCH_FILES_CHILDREN:
-        File[] children = new File(toURI(getFileId(uri))).listFiles();
-        if (children == null) children = new File[0];
-        return new FileCursor(children, projection);
+        return queryFiles(uri, projection);
       default:
         throw new UnsupportedOperationException("Unsupported Uri: " + uri);
     }
+  }
+
+  private Cursor queryBookmarks(Uri uri, String[] projection) {
+    Cursor c = new FileCursor(getBookmarks(getPreference()), projection);
+    c.setNotificationUri(getContentResolver(), uri);
+    return c;
+  }
+
+  private Cursor queryFiles(Uri uri, String[] projection) {
+    File[] children = new File(toURI(getFileId(uri))).listFiles();
+    if (children == null) {
+      children = new File[0];
+    }
+    Cursor c = new FileCursor(children, projection);
+    c.setNotificationUri(getContentResolver(), uri);
+    return c;
+  }
+
+  private ContentResolver getContentResolver() {
+    return getContext().getContentResolver();
   }
 
   @Override public String getType(Uri uri) {
@@ -86,18 +114,37 @@ public final class FilesProvider extends ContentProvider {
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {
+    switch (matcher.match(uri)) {
+      case MATCH_BOOKMARKS_ID:
+        Bookmarks.add(getPreference(), getFileId(uri));
+        return uri;
+    }
     return null;
   }
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
+    switch (matcher.match(uri)) {
+      case MATCH_BOOKMARKS_ID:
+        Bookmarks.remove(getPreference(), getFileId(uri));
+        return 1;
+    }
+    return 0;
+  }
+
+  @Override public int update(
+      Uri uri, ContentValues values, String selection, String[] selectionArgs) {
     return 0;
   }
 
   @Override
-  public int update(Uri uri, ContentValues values, String selection,
-                    String[] selectionArgs) {
-    return 0;
+  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+    if (PREF_BOOKMARKS.equals(key))
+      getContentResolver().notifyChange(buildBookmarksUri(), null);
+  }
+
+  private SharedPreferences getPreference() {
+    return getDefaultSharedPreferences(getContext());
   }
 
   private static class TikaHolder {
