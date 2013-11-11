@@ -194,17 +194,6 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         return super.onWindowStartingActionMode(callback);
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        if (!mDrawerLayout.isDrawerOpen(Gravity.START)) {
-            return super.onPrepareOptionsMenu(menu);
-        }
-        for (int i = 0; i < menu.size(); i++) {
-            menu.getItem(i).setVisible(false);
-        }
-        return false;
-    }
-
     public ActionMode getCurrentActionMode() {
         return mCurrentActionMode;
     }
@@ -399,15 +388,8 @@ public final class FilesActivity extends BaseFragmentActivity implements TabHand
         Runnable mRunOnClosed;
 
         @Override
-        public void onDrawerOpened(View drawerView) {
-            super.onDrawerOpened(drawerView);
-            invalidateOptionsMenu();
-        }
-
-        @Override
         public void onDrawerClosed(View drawerView) {
             super.onDrawerClosed(drawerView);
-            invalidateOptionsMenu();
             if (mRunOnClosed != null) {
                 mRunOnClosed.run();
                 mRunOnClosed = null;
