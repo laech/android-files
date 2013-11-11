@@ -13,11 +13,6 @@ public final class Events {
     new ShowHiddenFilesProvider(showByDefault).register(bus, pref);
   }
 
-  public static void registerSortProvider(
-      Bus bus, SharedPreferences pref, String defaultSort) {
-    new SortProvider(defaultSort).register(bus, pref);
-  }
-
   public static void registerClipboardProvider(Bus bus, ClipboardManager manager) {
     bus.register(new ClipboardProvider(manager));
   }
