@@ -10,24 +10,21 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.squareup.otto.Bus;
+
 import l.files.R;
-import l.files.event.SortRequest;
-import l.files.sort.Sorter;
-import l.files.sort.Sorters;
+import l.files.app.Preferences;
 
 import static android.widget.AdapterView.OnItemClickListener;
-import static l.files.app.FilesApp.getBus;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 
-public final class SortDialog extends DialogFragment implements OnItemClickListener {
+public final class SortDialog
+    extends DialogFragment implements OnItemClickListener {
 
   public static final String FRAGMENT_TAG = "sort-dialog";
 
-  Bus bus;
-
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    bus = getBus(this);
     setStyle(STYLE_NORMAL, R.style.Theme_Dialog);
   }
 
@@ -50,22 +47,35 @@ public final class SortDialog extends DialogFragment implements OnItemClickListe
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    String sort = ((Sorter) parent.getItemAtPosition(position)).id();
-    bus.post(new SortRequest(sort));
+    String sortOrder = ((SortBy) parent.getItemAtPosition(position)).sort;
+    Preferences.setSortOrder(getActivity(), sortOrder);
     getDialog().dismiss();
   }
 
-  class SorterAdapter extends ArrayAdapter<Sorter> {
+  class SorterAdapter extends ArrayAdapter<SortBy> {
 
     SorterAdapter(Context context) {
-      super(context, R.layout.sort_by_item, Sorters.get());
+      super(context, R.layout.sort_by_item, SortBy.values());
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       TextView view = (TextView) super.getView(position, convertView, parent);
-      view.setText(getItem(position).name(getResources()));
+      view.setText(getItem(position).labelId);
       return view;
+    }
+  }
+
+  private static enum SortBy {
+    NAME(SORT_BY_NAME, R.string.name),
+    LAST_MODIFIED(SORT_BY_LAST_MODIFIED, R.string.date_modified);
+
+    final String sort;
+    final int labelId;
+
+    SortBy(String sort, int labelId) {
+      this.sort = sort;
+      this.labelId = labelId;
     }
   }
 }

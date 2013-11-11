@@ -81,7 +81,7 @@ public final class FilesPagerFragment extends Fragment {
     if (fragment == null) {
       return getInitialDirectory();
     }
-    return new File(URI.create(fragment.getDirectory()));
+    return new File(URI.create(fragment.getDirectoryId()));
   }
 
   private File getInitialDirectory() {
@@ -107,7 +107,7 @@ public final class FilesPagerFragment extends Fragment {
 
   private void showDirectory(File dir) {
     FilesFragment current = findCurrentFragment();
-    if (current != null && current.getDirectory().equals(getFileId(dir))) {
+    if (current != null && current.getDirectoryId().equals(getFileId(dir))) {
       return;
     }
     FilesFragment fragment = FilesFragment.create(getFileId(dir));

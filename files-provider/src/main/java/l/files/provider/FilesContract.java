@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.List;
 
 import static android.content.UriMatcher.NO_MATCH;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
 
@@ -40,6 +41,7 @@ public final class FilesContract {
   }
 
   public static Uri buildBookmarkUri(String fileId) {
+    checkNotNull(fileId, "fileId");
     return bookmarksUriBuilder().appendPath(fileId).build();
   }
 
@@ -48,10 +50,12 @@ public final class FilesContract {
   }
 
   public static Uri buildFileUri(String fileId) {
+    checkNotNull(fileId, "fileId");
     return filesUriBuilder().appendPath(fileId).build();
   }
 
   public static Uri buildFileChildrenUri(String fileId) {
+    checkNotNull(fileId, "fileId");
     return filesUriBuilder()
         .appendPath(fileId)
         .appendPath(PATH_CHILDREN)
@@ -164,6 +168,9 @@ public final class FilesContract {
      * @see #COLUMN_MEDIA_TYPE
      */
     public static final String MEDIA_TYPE_DIR = "application/x-directory";
+
+    public static final String SORT_BY_NAME = COLUMN_NAME;
+    public static final String SORT_BY_LAST_MODIFIED = COLUMN_LAST_MODIFIED;
 
     private FileInfo() {}
   }

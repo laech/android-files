@@ -1,10 +1,12 @@
 package l.files.app;
 
 import android.content.ContentResolver;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -22,19 +24,26 @@ import l.files.common.app.BaseListFragment;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
+import static android.content.SharedPreferences
+    .OnSharedPreferenceChangeListener;
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
+import static java.lang.System.identityHashCode;
+import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
+import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
-public final class FilesFragment
-    extends BaseListFragment implements LoaderCallbacks<Cursor> {
+public final class FilesFragment extends BaseListFragment
+    implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 
   public static final String TAG = FilesFragment.class.getSimpleName();
   public static final String ARG_DIRECTORY_ID = "directory_id";
+
+  private static final int LOADER_ID = identityHashCode(FilesFragment.class);
 
   private String directoryId;
 
@@ -43,7 +52,7 @@ public final class FilesFragment
         directoryId);
   }
 
-  public String getDirectory() {
+  public String getDirectoryId() {
     return directoryId;
   }
 
@@ -60,7 +69,13 @@ public final class FilesFragment
     setupOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
 
-    getLoaderManager().initLoader(0, null, this);
+    getLoaderManager().initLoader(LOADER_ID, null, this);
+    Preferences.register(getActivity(), this);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    Preferences.unregister(getActivity(), this);
   }
 
   @Override public FilesAdapter getListAdapter() {
@@ -68,15 +83,15 @@ public final class FilesFragment
   }
 
   private void setupOptionsMenu() {
-//    FragmentManager manager = getActivityFragmentManager();
+    FragmentManager manager = getActivityFragmentManager();
     FragmentActivity context = getActivity();
     LoaderManager loaders = getLoaderManager();
     ContentResolver resolver = context.getContentResolver();
     setOptionsMenu(OptionsMenus.compose(
-        newBookmarkMenu(context, loaders, resolver, directoryId)
+        newBookmarkMenu(context, loaders, resolver, directoryId),
 //        newDirMenu(manager, mDirectory),
 //        newPasteMenu(getBus(), mDirectory),
-//        newSortMenu(manager),
+        newSortMenu(manager)
 //        newShowHiddenFilesMenu(getBus())
     ));
   }
@@ -95,28 +110,30 @@ public final class FilesFragment
     ));
   }
 
-//  private FragmentManager getActivityFragmentManager() {
-//    return getActivity().getSupportFragmentManager();
-//  }
-
+  private FragmentManager getActivityFragmentManager() {
+    return getActivity().getSupportFragmentManager();
+  }
 
   @Override
   public void onListItemClick(ListView l, View v, int position, long id) {
     super.onListItemClick(l, v, position, id);
     Cursor cursor = (Cursor) l.getItemAtPosition(position);
     String uri = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
-    FilesApp.getBus(this).post(new OpenFileRequest(new File(URI.create(uri))));
+    getBus(this).post(new OpenFileRequest(new File(URI.create(uri))));
     // TODO
   }
 
-  @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+  @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     Uri uri = buildFileChildrenUri(directoryId);
-    return new CursorLoader(getActivity(), uri, null, null, null, null);
+    String sortOrder = Preferences.getSortOrder(getActivity());
+    return new CursorLoader(getActivity(), uri, null, null, null, sortOrder);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
     getListAdapter().setCursor(cursor);
-    if (cursor.getCount() == 0) overrideEmptyText(R.string.empty);
+    if (cursor.getCount() == 0) {
+      overrideEmptyText(R.string.empty);
+    }
   }
 
   private void overrideEmptyText(int resId) {
@@ -128,5 +145,12 @@ public final class FilesFragment
 
   @Override public void onLoaderReset(Loader<Cursor> loader) {
     getListAdapter().setCursor(null);
+  }
+
+  @Override
+  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+    if (Preferences.isSortOrderKey(key)) {
+      getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
   }
 }

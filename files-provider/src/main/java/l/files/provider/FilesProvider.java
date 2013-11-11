@@ -17,10 +17,13 @@ import java.io.IOException;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static java.util.Arrays.sort;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_CHILDREN;
@@ -29,6 +32,8 @@ import static l.files.provider.FilesContract.buildBookmarksUri;
 import static l.files.provider.FilesContract.getFileId;
 import static l.files.provider.FilesContract.newMatcher;
 import static l.files.provider.FilesContract.toURI;
+import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
+import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITIVE_COMPARATOR;
 
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -73,7 +78,7 @@ public final class FilesProvider extends ContentProvider
       case MATCH_BOOKMARKS_ID:
         return queryBookmark(uri, projection);
       case MATCH_FILES_CHILDREN:
-        return queryFiles(uri, projection);
+        return queryFiles(uri, projection, sortOrder);
       default:
         throw new UnsupportedOperationException("Unsupported Uri: " + uri);
     }
@@ -89,10 +94,19 @@ public final class FilesProvider extends ContentProvider
     return newCursor(uri, projection, bookmarks);
   }
 
-  private Cursor queryFiles(Uri uri, String[] projection) {
-    File[] children = new File(toURI(getFileId(uri))).listFiles();
-    if (children == null) children = new File[0];
-    return newCursor(uri, projection, children);
+  private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
+    File[] files = new File(toURI(getFileId(uri))).listFiles();
+    if (files == null) files = new File[0];
+    switch (sortOrder) {
+      case SORT_BY_LAST_MODIFIED:
+        sort(files, LASTMODIFIED_REVERSE);
+        break;
+      case SORT_BY_NAME:
+      default:
+        sort(files, NAME_INSENSITIVE_COMPARATOR);
+        break;
+    }
+    return newCursor(uri, projection, files);
   }
 
   private Cursor newCursor(Uri uri, String[] projection, File[] files) {
