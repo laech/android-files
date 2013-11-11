@@ -20,6 +20,7 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static java.util.Arrays.sort;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
+import static l.files.provider.Files.listFiles;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
@@ -28,12 +29,16 @@ import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
+import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
+import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 import static l.files.provider.FilesContract.getFileId;
 import static l.files.provider.FilesContract.newMatcher;
 import static l.files.provider.FilesContract.toURI;
-import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
-import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITIVE_COMPARATOR;
+import static org.apache.commons.io.comparator.LastModifiedFileComparator
+    .LASTMODIFIED_REVERSE;
+import static org.apache.commons.io.comparator.NameFileComparator
+    .NAME_INSENSITIVE_COMPARATOR;
 
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -95,7 +100,11 @@ public final class FilesProvider extends ContentProvider
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
-    File[] files = new File(toURI(getFileId(uri))).listFiles();
+    boolean showHidden = VALUE_SHOW_HIDDEN_YES
+        .equals(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
+
+    File[] files = listFiles(new File(toURI(getFileId(uri))), showHidden);
+
     if (files == null) files = new File[0];
     switch (sortOrder) {
       case SORT_BY_LAST_MODIFIED:

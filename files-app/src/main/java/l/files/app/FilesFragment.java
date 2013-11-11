@@ -31,6 +31,7 @@ import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
+import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
@@ -91,8 +92,8 @@ public final class FilesFragment extends BaseListFragment
         newBookmarkMenu(context, loaders, resolver, directoryId),
 //        newDirMenu(manager, mDirectory),
 //        newPasteMenu(getBus(), mDirectory),
-        newSortMenu(manager)
-//        newShowHiddenFilesMenu(getBus())
+        newSortMenu(manager),
+        newShowHiddenFilesMenu(getActivity())
     ));
   }
 
@@ -124,8 +125,9 @@ public final class FilesFragment extends BaseListFragment
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri uri = buildFileChildrenUri(directoryId);
+    boolean showHidden = Preferences.getShowHiddenFiles(getActivity());
     String sortOrder = Preferences.getSortOrder(getActivity());
+    Uri uri = buildFileChildrenUri(directoryId, showHidden);
     return new CursorLoader(getActivity(), uri, null, null, null, sortOrder);
   }
 
@@ -149,7 +151,8 @@ public final class FilesFragment extends BaseListFragment
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (Preferences.isSortOrderKey(key)) {
+    if (Preferences.isSortOrderKey(key) ||
+        Preferences.isShowHiddenFilesKey(key)) {
       getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
   }

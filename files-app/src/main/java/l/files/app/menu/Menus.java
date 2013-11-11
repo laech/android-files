@@ -29,8 +29,8 @@ public final class Menus {
     return new NewDirMenu(manager, parent);
   }
 
-  public static OptionsMenu newShowHiddenFilesMenu(Bus bus) {
-    return new ShowHiddenFilesMenu(bus);
+  public static OptionsMenu newShowHiddenFilesMenu(Context context) {
+    return new ShowHiddenFilesMenu(context);
   }
 
   public static OptionsMenu newPasteMenu(Bus bus, File dir) {

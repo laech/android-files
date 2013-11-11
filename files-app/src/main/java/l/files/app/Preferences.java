@@ -11,13 +11,26 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 public final class Preferences {
 
   private static final String PREF_SORT_ORDER = "sort_order";
+  private static final String PREF_SHOW_HIDDEN_FILES = "show_hidden_files";
+
+  public static boolean isShowHiddenFilesKey(String key) {
+    return PREF_SHOW_HIDDEN_FILES.equals(key);
+  }
 
   public static boolean isSortOrderKey(String key) {
     return PREF_SORT_ORDER.equals(key);
   }
 
+  public static boolean getShowHiddenFiles(Context context) {
+    return get(context).getBoolean(PREF_SHOW_HIDDEN_FILES, false);
+  }
+
   public static String getSortOrder(Context context) {
     return get(context).getString(PREF_SORT_ORDER, SORT_BY_NAME);
+  }
+
+  public static void setShowHiddenFiles(Context context, boolean show) {
+    get(context).edit().putBoolean(PREF_SHOW_HIDDEN_FILES, show).apply();
   }
 
   public static void setSortOrder(Context context, String sortOrder) {

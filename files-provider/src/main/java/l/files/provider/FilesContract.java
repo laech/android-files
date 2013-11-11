@@ -20,6 +20,10 @@ public final class FilesContract {
   static final String PATH_CHILDREN = "children";
   static final String PATH_BOOKMARKS = "bookmarks";
 
+  static final String PARAM_SHOW_HIDDEN = "showHidden";
+  static final String VALUE_SHOW_HIDDEN_YES = "1";
+  static final String VALUE_SHOW_HIDDEN_FILES_NO = "0";
+
   static final int MATCH_FILES_ID = 100;
   static final int MATCH_FILES_CHILDREN = 101;
   static final int MATCH_BOOKMARKS = 200;
@@ -29,10 +33,11 @@ public final class FilesContract {
 
   static UriMatcher newMatcher() {
     UriMatcher matcher = new UriMatcher(NO_MATCH);
-    matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_ID);
-    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_CHILDREN);
     matcher.addURI(AUTHORITY, PATH_BOOKMARKS, MATCH_BOOKMARKS);
     matcher.addURI(AUTHORITY, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_ID);
+    matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_ID);
+    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN,
+        MATCH_FILES_CHILDREN);
     return matcher;
   }
 
@@ -54,11 +59,14 @@ public final class FilesContract {
     return filesUriBuilder().appendPath(fileId).build();
   }
 
-  public static Uri buildFileChildrenUri(String fileId) {
+  public static Uri buildFileChildrenUri(String fileId, boolean showHidden) {
     checkNotNull(fileId, "fileId");
     return filesUriBuilder()
         .appendPath(fileId)
         .appendPath(PATH_CHILDREN)
+        .appendQueryParameter(PARAM_SHOW_HIDDEN, showHidden
+            ? VALUE_SHOW_HIDDEN_YES
+            : VALUE_SHOW_HIDDEN_FILES_NO)
         .build();
   }
 
