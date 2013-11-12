@@ -11,6 +11,7 @@
       android:layout_height="match_parent"/>
 
   <fragment
+      android:id="@+id/sidebar_fragment"
       android:name="l.files.app.SidebarFragment"
       android:layout_width="240dp"
       android:layout_height="match_parent"
