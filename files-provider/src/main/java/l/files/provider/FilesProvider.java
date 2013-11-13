@@ -162,7 +162,7 @@ public final class FilesProvider extends ContentProvider
   @Override public Uri insert(Uri uri, ContentValues values) {
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS_ID:
-        Bookmarks.add(getPreference(), getFileId(uri));
+        Bookmarks.add(getPreference(), getBookmarkFileId(uri));
         return uri;
       case MATCH_FILES_ID:
         File file = new File(toURI(getFileId(uri)));
@@ -179,7 +179,7 @@ public final class FilesProvider extends ContentProvider
   public int delete(Uri uri, String selection, String[] selectionArgs) {
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS_ID:
-        Bookmarks.remove(getPreference(), getFileId(uri));
+        Bookmarks.remove(getPreference(), getBookmarkFileId(uri));
         return 1;
     }
     return 0;
