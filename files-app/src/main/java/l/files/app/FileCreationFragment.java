@@ -1,58 +1,64 @@
 package l.files.app;
 
-import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static android.content.DialogInterface.OnClickListener;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-
 import android.app.AlertDialog;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
-import java.io.File;
+
 import l.files.R;
 
-public abstract class FileCreationFragment extends DialogFragment
-    implements OnClickListener {
+import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static android.content.DialogInterface.OnClickListener;
+import static android.support.v4.app.LoaderManager.LoaderCallbacks;
+import static android.view.WindowManager.LayoutParams
+    .SOFT_INPUT_STATE_ALWAYS_VISIBLE;
+import static java.lang.System.identityHashCode;
+import static l.files.provider.FilesContract.buildFileUri;
 
-  private File parent;
-  private EditText edit;
+public abstract class FileCreationFragment extends DialogFragment
+    implements OnClickListener, LoaderCallbacks<Cursor> {
+
+  public static final String ARG_PARENT_ID = "parent_id";
+
+  private static final int LOADER_CHECKER =
+      identityHashCode(FileCreationFragment.class);
+
+  private EditText editText;
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setStyle(STYLE_NORMAL, R.style.Theme_Dialog);
+  }
 
   @Override public void onResume() {
     super.onResume();
     getDialog().getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    if (getCurrentDestinationFile().exists()) {
-      getDialog().getButton(BUTTON_POSITIVE).setEnabled(false);
-    }
+    restartLoader();
   }
 
   @Override public AlertDialog onCreateDialog(Bundle savedInstanceState) {
-    File file = getInitialDestinationFile();
-    parent = file.getParentFile();
-    edit = createEditTextFor(file);
+    editText = createEditText();
     return new AlertDialog.Builder(getActivity())
         .setTitle(R.string.new_dir)
-        .setView(edit)
+        .setView(editText)
         .setPositiveButton(android.R.string.ok, this)
         .setNegativeButton(android.R.string.cancel, null)
         .create();
   }
 
-  private EditText createEditTextFor(File file) {
+  private EditText createEditText() {
     final EditText text = new EditText(getActivity());
     text.setId(android.R.id.text1);
-    text.setText(file.getName());
     text.setFilters(new InputFilter[]{new InputFilter.LengthFilter(255)});
     text.setSingleLine();
-    if (file.isFile()) {
-      text.setSelection(0, getBaseName(file.getName()).length());
-    } else {
-      text.selectAll();
-    }
     text.addTextChangedListener(new FileTextWatcher());
     return text;
   }
@@ -61,26 +67,74 @@ public abstract class FileCreationFragment extends DialogFragment
     return (AlertDialog) super.getDialog();
   }
 
-  protected abstract File getInitialDestinationFile();
-
-  protected File getCurrentDestinationFile() {
-    return new File(parent, edit.getText().toString());
+  private void restartLoader() {
+    getLoaderManager().restartLoader(LOADER_CHECKER, null, this);
   }
+
+  @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+    if (id == LOADER_CHECKER) {
+      return newCheckFileLoader();
+    }
+    return null;
+  }
+
+  private Loader<Cursor> newCheckFileLoader() {
+    Uri uri = buildFileUri(getParentId(), getFilename());
+    return new CursorLoader(getActivity(), uri, null, null, null, null);
+  }
+
+  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    if (loader.getId() == LOADER_CHECKER) {
+      onCheckFinished(cursor);
+    }
+  }
+
+  private void onCheckFinished(Cursor cursor) {Button ok = getOkButton();
+    if (cursor.getCount() > 0) {
+      editText.setError(getString(R.string.name_exists));
+      ok.setEnabled(false);
+    } else {
+      editText.setError(null);
+      ok.setEnabled(true);
+    }
+  }
+
+  protected String getParentId() {
+    return getArguments().getString(ARG_PARENT_ID);
+  }
+
+  protected String getFilename() {
+    return editText.getText().toString();
+  }
+
+  protected void setFilename(String name) {
+    editText.setText(name);
+  }
+
+  protected EditText getFilenameField() {
+    return editText;
+  }
+
+  private Button getOkButton() {
+    return getDialog().getButton(BUTTON_POSITIVE);
+  }
+
+  @Override public void onLoaderReset(Loader<Cursor> loader) {}
 
   class FileTextWatcher implements TextWatcher {
 
-    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-      Button ok = getDialog().getButton(BUTTON_POSITIVE);
-      if (getCurrentDestinationFile().exists()) {
-        edit.setError(edit.getResources().getString(R.string.name_exists));
-        ok.setEnabled(false);
+    @Override public void onTextChanged(
+        CharSequence s, int start, int before, int count) {
+      if (getFilename().isEmpty()) {
+        getOkButton().setEnabled(false);
       } else {
-        edit.setError(null);
-        ok.setEnabled(true);
+        restartLoader();
       }
     }
 
-    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+    @Override public void beforeTextChanged(
+        CharSequence s, int start, int count, int after) {}
 
     @Override public void afterTextChanged(Editable s) {}
   }

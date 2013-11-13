@@ -31,6 +31,7 @@ import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
+import static l.files.app.menu.Menus.newDirMenu;
 import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
@@ -90,7 +91,7 @@ public final class FilesFragment extends BaseListFragment
     ContentResolver resolver = context.getContentResolver();
     setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(context, loaders, resolver, directoryId),
-//        newDirMenu(manager, mDirectory),
+        newDirMenu(manager, directoryId),
 //        newPasteMenu(getBus(), mDirectory),
         newSortMenu(manager),
         newShowHiddenFilesMenu(getActivity())

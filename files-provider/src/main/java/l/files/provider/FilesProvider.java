@@ -27,12 +27,16 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
-import static l.files.provider.FilesContract.MATCH_FILES_CHILDREN;
+import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
+import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
 import static l.files.provider.FilesContract.buildBookmarksUri;
+import static l.files.provider.FilesContract.getBookmarkFileId;
 import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getSuggestionBasename;
+import static l.files.provider.FilesContract.getSuggestionParentId;
 import static l.files.provider.FilesContract.newMatcher;
 import static l.files.provider.FilesContract.toURI;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator
@@ -62,6 +66,23 @@ public final class FilesProvider extends ContentProvider
     return true;
   }
 
+  @Override public String getType(Uri uri) {
+    switch (matcher.match(uri)) {
+      case MATCH_FILES_ID:
+        String fileId = getFileId(uri);
+        File file = new File(toURI(fileId));
+        if (file.isDirectory()) {
+          return MEDIA_TYPE_DIR;
+        }
+        try {
+          return TikaHolder.TIKA.detect(file);
+        } catch (IOException e) {
+          return null;
+        }
+    }
+    throw new UnsupportedOperationException("Unsupported Uri: " + uri);
+  }
+
   @Override public ParcelFileDescriptor openFile(Uri uri, String mode)
       throws FileNotFoundException {
     switch (matcher.match(uri)) {
@@ -78,19 +99,39 @@ public final class FilesProvider extends ContentProvider
     if (projection == null) projection = DEFAULT_COLUMNS;
 
     switch (matcher.match(uri)) {
+      case MATCH_SUGGESTION:
+        return querySuggestion(uri, projection);
       case MATCH_BOOKMARKS:
         return queryBookmarks(uri, projection);
       case MATCH_BOOKMARKS_ID:
         return queryBookmark(uri, projection);
-      case MATCH_FILES_CHILDREN:
+      case MATCH_FILES_ID:
+        return queryFile(uri, projection);
+      case MATCH_FILES_ID_CHILDREN:
         return queryFiles(uri, projection, sortOrder);
       default:
         throw new UnsupportedOperationException("Unsupported Uri: " + uri);
     }
   }
 
+  private Cursor queryFile(Uri uri, String[] projection) {
+    File file = new File(toURI(getFileId(uri)));
+    File[] files = file.exists() ? new File[]{file} : new File[0];
+    return new FileCursor(files, projection);
+  }
+
+  private Cursor querySuggestion(Uri uri, String[] projection) {
+    File parent = new File(toURI(getSuggestionParentId(uri)));
+    String name = getSuggestionBasename(uri);
+    File file = new File(parent, name);
+    for (int i = 2; file.exists(); i++) {
+      file = new File(parent, name + " " + i);
+    }
+    return newCursor(uri, projection, new File[]{file});
+  }
+
   private Cursor queryBookmark(Uri uri, String[] projection) {
-    File[] bookmark = getBookmark(getPreference(), getFileId(uri));
+    File[] bookmark = getBookmark(getPreference(), getBookmarkFileId(uri));
     return newCursor(uri, projection, bookmark);
   }
 
@@ -118,40 +159,20 @@ public final class FilesProvider extends ContentProvider
     return newCursor(uri, projection, files);
   }
 
-  private Cursor newCursor(Uri uri, String[] projection, File[] files) {
-    Cursor c = new FileCursor(files, projection);
-    c.setNotificationUri(getContentResolver(), uri);
-    return c;
-  }
-
-  private ContentResolver getContentResolver() {
-    return getContext().getContentResolver();
-  }
-
-  @Override public String getType(Uri uri) {
-    switch (matcher.match(uri)) {
-      case MATCH_FILES_ID:
-        String fileId = getFileId(uri);
-        File file = new File(toURI(fileId));
-        if (file.isDirectory()) {
-          return MEDIA_TYPE_DIR;
-        }
-        try {
-          return TikaHolder.TIKA.detect(file);
-        } catch (IOException e) {
-          return null;
-        }
-    }
-    throw new UnsupportedOperationException("Unsupported Uri: " + uri);
-  }
-
   @Override public Uri insert(Uri uri, ContentValues values) {
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS_ID:
         Bookmarks.add(getPreference(), getFileId(uri));
         return uri;
+      case MATCH_FILES_ID:
+        File file = new File(toURI(getFileId(uri)));
+        if (file.mkdirs() || file.isDirectory()) {
+          return uri;
+        } else {
+          return null;
+        }
     }
-    return null;
+    throw new UnsupportedOperationException("Unsupported Uri: " + uri);
   }
 
   @Override
@@ -173,6 +194,17 @@ public final class FilesProvider extends ContentProvider
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (PREF_BOOKMARKS.equals(key))
       getContentResolver().notifyChange(buildBookmarksUri(), null);
+    // TODO do this in insert/delete?
+  }
+
+  private Cursor newCursor(Uri uri, String[] projection, File[] files) {
+    Cursor c = new FileCursor(files, projection);
+    c.setNotificationUri(getContentResolver(), uri);
+    return c;
+  }
+
+  private ContentResolver getContentResolver() {
+    return getContext().getContentResolver();
   }
 
   private SharedPreferences getPreference() {

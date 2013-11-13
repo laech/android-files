@@ -30,7 +30,7 @@ public final class RenameFragment extends FileCreationFragment {
     bus = getBus(this);
   }
 
-  @Override protected File getInitialDestinationFile() {
+  protected File getInitialDestinationFile() {
     return getSourceFile();
   }
 
@@ -39,9 +39,9 @@ public final class RenameFragment extends FileCreationFragment {
   }
 
   @Override public void onClick(DialogInterface dialog, int which) {
-    if (!getSourceFile().renameTo(getCurrentDestinationFile())) {
-      makeText(getActivity(), R.string.failed_to_rename_file, LENGTH_SHORT).show();
-    }
-    bus.post(CloseActionModeRequest.INSTANCE);
+//    if (!getSourceFile().renameTo(getCurrentDestinationFile())) {
+//      makeText(getActivity(), R.string.failed_to_rename_file, LENGTH_SHORT).show();
+//    }
+//    bus.post(CloseActionModeRequest.INSTANCE);
   }
 }
