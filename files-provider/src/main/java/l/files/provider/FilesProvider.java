@@ -27,8 +27,8 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
-import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
+import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
@@ -162,39 +162,46 @@ public final class FilesProvider extends ContentProvider
   @Override public Uri insert(Uri uri, ContentValues values) {
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS_ID:
-        Bookmarks.add(getPreference(), getBookmarkFileId(uri));
-        return uri;
+        return insertBookmark(uri);
       case MATCH_FILES_ID:
-        File file = new File(toURI(getFileId(uri)));
-        if (file.mkdirs() || file.isDirectory()) {
-          return uri;
-        } else {
-          return null;
-        }
+        return insertDirectory(uri);
     }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
+  }
+
+  private Uri insertBookmark(Uri uri) {
+    Bookmarks.add(getPreference(), getBookmarkFileId(uri));
+    return uri;
+  }
+
+  private Uri insertDirectory(Uri uri) {
+    File file = new File(toURI(getFileId(uri)));
+    return (file.mkdirs() || file.isDirectory()) ? uri : null;
   }
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
     switch (matcher.match(uri)) {
       case MATCH_BOOKMARKS_ID:
-        Bookmarks.remove(getPreference(), getBookmarkFileId(uri));
-        return 1;
+        return deleteBookmark(uri);
     }
-    return 0;
+    throw new UnsupportedOperationException("Unsupported Uri: " + uri);
+  }
+
+  private int deleteBookmark(Uri uri) {
+    Bookmarks.remove(getPreference(), getBookmarkFileId(uri));
+    return 1; // TODO check bookmarks contain Uri
   }
 
   @Override public int update(
       Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-    return 0;
+    throw new UnsupportedOperationException("Update not supported");
   }
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (PREF_BOOKMARKS.equals(key))
       getContentResolver().notifyChange(buildBookmarksUri(), null);
-    // TODO do this in insert/delete?
   }
 
   private Cursor newCursor(Uri uri, String[] projection, File[] files) {
