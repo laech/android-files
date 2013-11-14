@@ -41,7 +41,11 @@ public abstract class FileCreationFragment extends DialogFragment
   @Override public void onResume() {
     super.onResume();
     getDialog().getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    restartLoader();
+    if (getFilename().isEmpty()) {
+      getOkButton().setEnabled(false);
+    } else {
+      restartChecker();
+    }
   }
 
   @Override public AlertDialog onCreateDialog(Bundle savedInstanceState) {
@@ -67,18 +71,18 @@ public abstract class FileCreationFragment extends DialogFragment
     return (AlertDialog) super.getDialog();
   }
 
-  private void restartLoader() {
+  private void restartChecker() {
     getLoaderManager().restartLoader(LOADER_CHECKER, null, this);
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     if (id == LOADER_CHECKER) {
-      return newCheckFileLoader();
+      return newChecker();
     }
     return null;
   }
 
-  private Loader<Cursor> newCheckFileLoader() {
+  private Loader<Cursor> newChecker() {
     Uri uri = buildFileUri(getParentId(), getFilename());
     return new CursorLoader(getActivity(), uri, null, null, null, null);
   }
@@ -89,7 +93,8 @@ public abstract class FileCreationFragment extends DialogFragment
     }
   }
 
-  private void onCheckFinished(Cursor cursor) {Button ok = getOkButton();
+  private void onCheckFinished(Cursor cursor) {
+    Button ok = getOkButton();
     if (cursor.getCount() > 0) {
       editText.setError(getString(R.string.name_exists));
       ok.setEnabled(false);
@@ -105,10 +110,6 @@ public abstract class FileCreationFragment extends DialogFragment
 
   protected String getFilename() {
     return editText.getText().toString();
-  }
-
-  protected void setFilename(String name) {
-    editText.setText(name);
   }
 
   protected EditText getFilenameField() {
@@ -128,7 +129,7 @@ public abstract class FileCreationFragment extends DialogFragment
       if (getFilename().isEmpty()) {
         getOkButton().setEnabled(false);
       } else {
-        restartLoader();
+        restartChecker();
       }
     }
 
