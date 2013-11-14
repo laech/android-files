@@ -127,24 +127,25 @@ public final class FilesProvider extends ContentProvider
     for (int i = 2; file.exists(); i++) {
       file = new File(parent, name + " " + i);
     }
-    return newCursor(uri, projection, new File[]{file});
+    return newFileCursor(uri, projection, new File[]{file});
   }
 
   private Cursor queryBookmark(Uri uri, String[] projection) {
     File[] bookmark = getBookmark(getPreference(), getBookmarkFileId(uri));
-    return newCursor(uri, projection, bookmark);
+    return newFileCursor(uri, projection, bookmark);
   }
 
   private Cursor queryBookmarks(Uri uri, String[] projection) {
     File[] bookmarks = getBookmarks(getPreference());
-    return newCursor(uri, projection, bookmarks);
+    return newFileCursor(uri, projection, bookmarks);
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
     boolean showHidden = VALUE_SHOW_HIDDEN_YES
         .equals(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
 
-    File[] files = listFiles(new File(toURI(getFileId(uri))), showHidden);
+    File dir = new File(toURI(getFileId(uri)));
+    File[] files = listFiles(dir, showHidden);
 
     if (files == null) files = new File[0];
     switch (sortOrder) {
@@ -156,7 +157,7 @@ public final class FilesProvider extends ContentProvider
         sort(files, NAME_INSENSITIVE_COMPARATOR);
         break;
     }
-    return newCursor(uri, projection, files);
+    return newMonitoringCursor(uri, dir, projection, files);
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {
@@ -204,10 +205,16 @@ public final class FilesProvider extends ContentProvider
       getContentResolver().notifyChange(buildBookmarksUri(), null);
   }
 
-  private Cursor newCursor(Uri uri, String[] projection, File[] files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, File[] files) {
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);
     return c;
+  }
+
+  private Cursor newMonitoringCursor(
+      Uri uri, File dir, String[] projection, File[] files) {
+    Cursor cursor = newFileCursor(uri, projection, files);
+    return MonitoringCursor.create(getContentResolver(), uri, dir, cursor);
   }
 
   private ContentResolver getContentResolver() {
