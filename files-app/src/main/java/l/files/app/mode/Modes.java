@@ -29,7 +29,8 @@ public final class Modes {
     return new CopyAction(list, bus);
   }
 
-  public static MultiChoiceModeListener newRenameAction(AbsListView list, FragmentManager manager) {
-    return new RenameAction(list, manager);
+  public static MultiChoiceModeListener newRenameAction(
+      AbsListView list, FragmentManager manager, String parentId) {
+    return new RenameAction(list, manager, parentId);
   }
 }

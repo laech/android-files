@@ -21,6 +21,7 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.WindowManager.LayoutParams
     .SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
+import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
@@ -41,6 +42,10 @@ public abstract class FileCreationFragment extends DialogFragment
   @Override public void onResume() {
     super.onResume();
     getDialog().getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+  }
+
+  @Override public void onStart() {
+    super.onStart();
     if (getFilename().isEmpty()) {
       getOkButton().setEnabled(false);
     } else {
@@ -51,12 +56,18 @@ public abstract class FileCreationFragment extends DialogFragment
   @Override public AlertDialog onCreateDialog(Bundle savedInstanceState) {
     editText = createEditText();
     return new AlertDialog.Builder(getActivity())
-        .setTitle(R.string.new_dir)
+        .setTitle(getTitleResourceId())
         .setView(editText)
         .setPositiveButton(android.R.string.ok, this)
         .setNegativeButton(android.R.string.cancel, null)
         .create();
   }
+
+  protected CharSequence getError(String newFileId) {
+    return getString(R.string.name_exists);
+  }
+
+  protected abstract int getTitleResourceId();
 
   private EditText createEditText() {
     final EditText text = new EditText(getActivity());
@@ -96,7 +107,9 @@ public abstract class FileCreationFragment extends DialogFragment
   private void onCheckFinished(Cursor cursor) {
     Button ok = getOkButton();
     if (cursor.getCount() > 0) {
-      editText.setError(getString(R.string.name_exists));
+      cursor.moveToFirst();
+      String newFileId = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
+      editText.setError(getError(newFileId));
       ok.setEnabled(false);
     } else {
       editText.setError(null);

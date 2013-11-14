@@ -58,6 +58,10 @@ public final class NewDirFragment extends FileCreationFragment {
     }.execute();
   }
 
+  @Override protected int getTitleResourceId() {
+    return R.string.new_dir;
+  }
+
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     if (id == LOADER_SUGGESTION) {
       return newSuggestionLoader();

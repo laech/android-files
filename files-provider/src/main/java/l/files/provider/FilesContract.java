@@ -3,6 +3,7 @@ package l.files.provider;
 import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
+import android.os.Bundle;
 
 import java.io.File;
 import java.net.URI;
@@ -31,6 +32,10 @@ public final class FilesContract {
   static final int MATCH_BOOKMARKS = 200;
   static final int MATCH_BOOKMARKS_ID = 201;
   static final int MATCH_SUGGESTION = 300;
+
+  static final String METHOD_RENAME = "rename";
+  static final String EXTRA_NEW_NAME = "new_name";
+  static final String EXTRA_RESULT = "result";
 
   private FilesContract() {}
 
@@ -209,6 +214,20 @@ public final class FilesContract {
   public static boolean createDirectory(
       ContentResolver resolver, String parentId, String name) {
     return resolver.insert(buildFileUri(parentId, name), null) != null;
+  }
+
+  /**
+   * Renames a file.
+   *
+   * @return true if the file is successfully renamed, false otherwise
+   */
+  public static boolean rename(
+      ContentResolver resolver, String fileId, String newName) {
+    Bundle args = new Bundle(1);
+    args.putString(EXTRA_NEW_NAME, newName);
+    Uri uri = buildFileUri(fileId);
+    Bundle result = resolver.call(uri, METHOD_RENAME, fileId, args);
+    return result.getBoolean(EXTRA_RESULT);
   }
 
   public final static class FileInfo {

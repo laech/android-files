@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
 import org.apache.tika.Tika;
@@ -21,6 +22,8 @@ import static java.util.Arrays.sort;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Files.listFiles;
+import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
+import static l.files.provider.FilesContract.EXTRA_RESULT;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
@@ -30,6 +33,7 @@ import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
+import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
 import static l.files.provider.FilesContract.buildBookmarksUri;
@@ -158,6 +162,22 @@ public final class FilesProvider extends ContentProvider
         break;
     }
     return newMonitoringCursor(uri, dir, projection, files);
+  }
+
+  @Override public Bundle call(String method, String arg, Bundle extras) {
+    switch (method) {
+      case METHOD_RENAME:
+        return callRename(arg, extras);
+    }
+    return super.call(method, arg, extras);
+  }
+
+  private Bundle callRename(String fileId, Bundle extras) {
+    File from = new File(toURI(fileId));
+    File to = new File(from.getParent(), extras.getString(EXTRA_NEW_NAME));
+    Bundle out = new Bundle(1);
+    out.putBoolean(EXTRA_RESULT, from.renameTo(to));
+    return out;
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {

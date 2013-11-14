@@ -35,6 +35,7 @@ import static l.files.app.menu.Menus.newDirMenu;
 import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
+import static l.files.app.mode.Modes.newRenameAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
@@ -101,14 +102,14 @@ public final class FilesFragment extends BaseListFragment
   private void setupListView() {
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-//    FragmentManager manager = getActivityFragmentManager();
+    FragmentManager manager = getActivityFragmentManager();
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
         newCountSelectedItemsAction(list),
-        newSelectAllAction(list)
+        newSelectAllAction(list),
 //        newCutAction(list, getBus()),
 //        newCopyAction(list, getBus()),
 //        newDeleteAction(list, getBus()),
-//        newRenameAction(list, manager)
+        newRenameAction(list, manager, directoryId)
     ));
   }
 

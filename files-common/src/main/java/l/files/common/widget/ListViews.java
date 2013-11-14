@@ -1,15 +1,17 @@
 package l.files.common.widget;
 
+import android.util.SparseBooleanArray;
+import android.widget.AbsListView;
+
+import com.google.common.base.Predicate;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.common.base.Predicates.alwaysTrue;
 import static com.google.common.base.Predicates.instanceOf;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.util.Collections.unmodifiableList;
-
-import android.util.SparseBooleanArray;
-import android.widget.AbsListView;
-import com.google.common.base.Predicate;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class ListViews {
   private ListViews() {}
@@ -24,7 +26,8 @@ public final class ListViews {
   }
 
   @SuppressWarnings("unchecked")
-  public static List<Object> getItems(AbsListView list, Predicate<?> predicate) {
+  public static List<Object> getItems(AbsListView list,
+                                      Predicate<?> predicate) {
     int count = list.getCount();
     ArrayList<Object> items = newArrayListWithCapacity(count);
     for (int i = 0; i < count; i++) {
@@ -51,5 +54,15 @@ public final class ListViews {
       }
     }
     return items;
+  }
+
+  public static int getCheckedItemPosition(AbsListView list) {
+    SparseBooleanArray checks = list.getCheckedItemPositions();
+    for (int i = 0; i < checks.size(); i++) {
+      if (checks.valueAt(i)) {
+        return checks.keyAt(i);
+      }
+    }
+    throw new IllegalArgumentException("No item checked.");
   }
 }
