@@ -35,15 +35,15 @@ public final class FilesActivityTest extends BaseActivityTest<FilesActivity> {
 
     @UiThreadTest
     public void testFinishesActionModeOnRequest() {
-        activity().mCurrentActionMode = mock(ActionMode.class);
+        activity().currentActionMode = mock(ActionMode.class);
         activity().handle(CloseActionModeRequest.INSTANCE);
-        verify(activity().mCurrentActionMode).finish();
-        verifyNoMoreInteractions(activity().mCurrentActionMode);
+        verify(activity().currentActionMode).finish();
+        verifyNoMoreInteractions(activity().currentActionMode);
     }
 
     @UiThreadTest
     public void testFinishesActionModeOnRequestWillSkipIfNoActionMode() {
-        activity().mCurrentActionMode = null;
+        activity().currentActionMode = null;
         activity().handle(CloseActionModeRequest.INSTANCE);
         // No error
     }
@@ -51,21 +51,21 @@ public final class FilesActivityTest extends BaseActivityTest<FilesActivity> {
     @UiThreadTest
     public void testBusIsRegisteredOnResume() throws Throwable {
         FilesActivity activity = getActivity();
-        activity.mBus = mock(Bus.class);
+        activity.bus = mock(Bus.class);
 
         getInstrumentation().callActivityOnResume(activity);
 
-        verify(activity.mBus).register(activity);
+        verify(activity.bus).register(activity);
     }
 
     @UiThreadTest
     public void testBusIsUnregisteredOnPause() throws Throwable {
         FilesActivity activity = getActivity();
-        activity.mBus = mock(Bus.class);
+        activity.bus = mock(Bus.class);
 
         getInstrumentation().callActivityOnPause(activity);
 
-        verify(activity.mBus).unregister(activity);
+        verify(activity.bus).unregister(activity);
     }
 
     private Intent newIntent(File dir) {
