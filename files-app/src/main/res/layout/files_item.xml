@@ -15,26 +15,34 @@
         android:id="@+id/header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="16dp"
-        style="@style/Theme.ListView.Item.Header"/>
+        android:fontFamily="sans-serif"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textAllCaps="true"
+        android:textSize="12sp"/>
 
-    <View style="@style/Theme.ListView.Item.Header.Separator"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/file_list_item_header_separator"/>
   </LinearLayout>
 
   <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:minHeight="?android:attr/listPreferredItemHeight"
-      style="@style/Theme.ListView.Item.Container">
+      android:background="@drawable/selector_light">
 
     <TextView
         android:id="@+id/icon"
         android:layout_width="?android:attr/listPreferredItemHeight"
         android:layout_height="?android:attr/listPreferredItemHeight"
         android:layout_marginLeft="4dp"
-        style="@style/Theme.ListView.Item.IconFont"/>
+        android:gravity="center"
+        android:text="@string/ic_font_char"
+        android:textSize="@dimen/text_size_list_icon_font"/>
 
     <ImageView
         android:id="@+id/preview"
@@ -55,13 +63,16 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginRight="8dp"
-          style="@style/Theme.ListView.Item.Primary"/>
+          android:textSize="@dimen/text_size_list_item_primary"/>
 
       <TextView
           android:id="@+id/summary"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          style="@style/Theme.ListView.Item.Secondary"/>
+          android:paddingBottom="4dp"
+          android:fontFamily="sans-serif-light"
+          android:textColor="?android:attr/textColorSecondary"
+          android:textSize="@dimen/text_size_list_item_secondary"/>
 
     </LinearLayout>
   </RelativeLayout>
