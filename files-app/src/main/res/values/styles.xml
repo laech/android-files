@@ -12,12 +12,18 @@
     <item name="android:textColorPrimary">@color/text_primary</item>
     <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
     <item name="android:textColorSecondary">@color/text_secondary</item>
+    <item name="android:textColorAlertDialogListItem">@color/text_primary</item>
+    <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
     <item name="android:textViewStyle">@style/Theme.TextView</item>
     <item name="android:listViewStyle">@style/Theme.ListView</item>
     <item name="android:listPreferredItemHeight">@dimen/list_preferred_item_height</item>
     <!-- https://code.google.com/p/android/issues/detail?id=58280 -->
     <item name="android:windowContentOverlay">@null</item>
     <item name="android:windowBackground">@drawable/window_background</item>
+  </style>
+
+  <style name="TextAppearance.Medium" parent="android:TextAppearance.Holo.Medium">
+    <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
   <style name="Theme.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
@@ -127,14 +133,6 @@
 
   <style name="Theme.Dialog.Title" parent="android:TextAppearance.Holo.DialogWindowTitle">
     <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
-  <style name="Theme.Dialog.Item" parent="Theme.TextView">
-    <item name="android:paddingLeft">16dp</item>
-    <item name="android:paddingRight">16dp</item>
-    <item name="android:minHeight">?android:listPreferredItemHeightSmall</item>
-    <item name="android:textSize">18sp</item>
-    <item name="android:gravity">center_vertical</item>
   </style>
 
   <style name="Theme.Tab">

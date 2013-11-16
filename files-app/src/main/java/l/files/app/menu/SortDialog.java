@@ -8,13 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import l.files.R;
 import l.files.app.Preferences;
 
 import static android.widget.AdapterView.OnItemClickListener;
+import static l.files.app.Preferences.getSortOrder;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 
@@ -60,8 +61,11 @@ public final class SortDialog
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-      TextView view = (TextView) super.getView(position, convertView, parent);
-      view.setText(getItem(position).labelId);
+      View view = super.getView(position, convertView, parent);
+      SortBy item = getItem(position);
+      CheckedTextView check = (CheckedTextView) view.findViewById(R.id.title);
+      check.setText(item.labelId);
+      check.setChecked(item.sort.equals(getSortOrder(parent.getContext())));
       return view;
     }
   }
