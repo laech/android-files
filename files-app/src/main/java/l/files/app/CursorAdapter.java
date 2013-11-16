@@ -15,6 +15,10 @@ abstract class CursorAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
+  public Cursor getCursor() {
+    return cursor;
+  }
+
   @Override public int getCount() {
     return cursor == null ? 0 : cursor.getCount();
   }

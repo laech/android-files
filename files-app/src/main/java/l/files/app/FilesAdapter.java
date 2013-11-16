@@ -16,6 +16,8 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.util.Date;
 
+import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import l.files.R;
 import l.files.app.format.IconFonts;
 
@@ -48,6 +50,8 @@ final class FilesAdapter extends CursorAdapter {
         context.getResources().getDisplayMetrics());
     return new FilesAdapter(thumbnailSize);
   }
+
+  private static final TObjectLongMap<String> ids = new TObjectLongHashMap<>();
 
   private DateFormat dateFormat;
   private DateFormat timeFormat;
@@ -94,6 +98,16 @@ final class FilesAdapter extends CursorAdapter {
     holder.setImage(info, thumbnailSize);
 
     return view;
+  }
+
+  @Override public boolean hasStableIds() {
+    return true;
+  }
+
+  @Override public long getItemId(int position) {
+    String fileId = getItem(position).getString(columnId);
+    ids.putIfAbsent(fileId, ids.size() + 1);
+    return ids.get(fileId);
   }
 
   private static final class ViewHolder extends EmptyCallback {

@@ -29,6 +29,7 @@ import static android.content.SharedPreferences
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
+import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
 import static l.files.app.menu.Menus.newDirMenu;
@@ -134,6 +135,9 @@ public final class FilesFragment extends BaseListFragment
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    if (getListAdapter().getCursor() != null) {
+      animatePreDataSetChange(getListView());
+    }
     getListAdapter().setCursor(cursor);
     if (cursor.getCount() == 0) {
       overrideEmptyText(R.string.empty);
