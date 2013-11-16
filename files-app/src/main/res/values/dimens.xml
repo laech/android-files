@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <dimen name="separator">1px</dimen>
+  <dimen name="separator">1dp</dimen>
   <dimen name="text_size_list_item_primary">16sp</dimen>
   <dimen name="text_size_list_item_secondary">11sp</dimen>
   <dimen name="text_size_list_icon_font">20sp</dimen>

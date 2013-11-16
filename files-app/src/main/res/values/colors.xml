@@ -16,4 +16,5 @@
   <color name="action_bar_menu_background">#43423f</color>
   <color name="action_bar_background">#e9e7e2</color>
   <color name="action_bar_outline">#d8d7d3</color>
+  <color name="window_background">#f3f1ed</color>
 </resources>

@@ -1,43 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    style="@style/Theme.ListView.Item.Container">
-
-  <TextView
-      android:id="@android:id/icon"
-      android:layout_width="?android:attr/listPreferredItemHeight"
-      android:layout_height="?android:attr/listPreferredItemHeight"
-      android:layout_marginLeft="4dp"
-      android:layout_centerVertical="true"
-      style="@style/Theme.ListView.Item.IconFont"/>
-
-  <ImageView
-      android:id="@android:id/background"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerVertical="true"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
 
   <LinearLayout
+      android:id="@+id/header_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginLeft="?android:attr/listPreferredItemHeight"
-      android:layout_centerVertical="true"
       android:orientation="vertical"
-      android:paddingLeft="8dp">
+      android:visibility="gone">
 
     <TextView
-        android:id="@android:id/title"
+        android:id="@+id/header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
-        style="@style/Theme.ListView.Item.Primary"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        style="@style/Theme.ListView.Item.Header"/>
 
-    <TextView
-        android:id="@android:id/summary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Theme.ListView.Item.Secondary"/>
-
+    <View style="@style/Theme.ListView.Item.Header.Separator"/>
   </LinearLayout>
-</RelativeLayout>
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:minHeight="?android:attr/listPreferredItemHeight"
+      style="@style/Theme.ListView.Item.Container">
+
+    <TextView
+        android:id="@+id/icon"
+        android:layout_width="?android:attr/listPreferredItemHeight"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:layout_marginLeft="4dp"
+        style="@style/Theme.ListView.Item.IconFont"/>
+
+    <ImageView
+        android:id="@+id/preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="?android:attr/listPreferredItemHeight"
+        android:layout_centerVertical="true"
+        android:paddingLeft="8dp"
+        android:orientation="vertical">
+
+      <TextView
+          android:id="@+id/title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="8dp"
+          style="@style/Theme.ListView.Item.Primary"/>
+
+      <TextView
+          android:id="@+id/summary"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          style="@style/Theme.ListView.Item.Secondary"/>
+
+    </LinearLayout>
+  </RelativeLayout>
+</LinearLayout>

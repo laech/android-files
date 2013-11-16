@@ -138,7 +138,7 @@ public final class FilesFragment extends BaseListFragment
     if (getListAdapter().getCursor() != null && isResumed()) {
       animatePreDataSetChange(getListView());
     }
-    getListAdapter().setCursor(cursor);
+    getListAdapter().setCursor(cursor, Preferences.getSortOrder(getActivity()));
     if (cursor.getCount() == 0) {
       overrideEmptyText(R.string.empty);
     }
