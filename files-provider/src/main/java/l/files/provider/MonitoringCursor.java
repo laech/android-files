@@ -9,40 +9,39 @@ import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class MonitoringCursor extends CursorWrapper {
+final class MonitoringCursor extends CursorWrapper implements Runnable {
 
-  private final Monitor monitor;
+  private final File dir;
+  private final Uri uri;
+  private final ContentResolver resolver;
 
-  private MonitoringCursor(Cursor delegate, Monitor monitor) {
+  private MonitoringCursor(
+      Cursor delegate, ContentResolver resolver, Uri uri, File dir) {
     super(delegate);
-    this.monitor = monitor;
+    this.dir = checkNotNull(dir, "dir");
+    this.uri = checkNotNull(uri, "uri");
+    this.resolver = checkNotNull(resolver, "resolver");
   }
 
   static MonitoringCursor create(
-      ContentResolver resolver, Uri uri, File dir, Cursor delegate) {
+      ContentResolver resolver, Uri uri, File dir, Cursor cursor) {
 
     checkNotNull(dir, "dir");
     checkNotNull(resolver, "resolver");
     checkNotNull(uri, "uri");
-    checkNotNull(delegate, "delegate");
+    checkNotNull(cursor, "cursor");
 
-    Monitor monitor = newMonitor(dir, resolver, uri);
-    monitor.start();
-    return new MonitoringCursor(delegate, monitor);
-  }
-
-
-  private static Monitor newMonitor(
-      final File directory, final ContentResolver resolver, final Uri uri) {
-    return new Monitor(directory, new Runnable() {
-      @Override public void run() {
-        resolver.notifyChange(uri, null);
-      }
-    });
+    MonitoringCursor monitor = new MonitoringCursor(cursor, resolver, uri, dir);
+    Monitor.INSTANCE.register(dir, monitor);
+    return monitor;
   }
 
   @Override public void close() {
-    monitor.stop();
     super.close();
+    Monitor.INSTANCE.unregister(dir, this);
+  }
+
+  @Override public void run() {
+    resolver.notifyChange(uri, null);
   }
 }

@@ -3,89 +3,119 @@ package l.files.provider;
 import android.os.FileObserver;
 import android.util.Log;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static l.files.provider.BuildConfig.DEBUG;
-import static l.files.provider.DirObserver.DIR_CHANGED_MASK_NO_MODIFY;
 import static org.apache.commons.io.filefilter.FileFilterUtils
     .directoryFileFilter;
-import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
-final class Monitor {
+enum Monitor {
+
+  INSTANCE;
 
   private static final String TAG = Monitor.class.getSimpleName();
 
-  private final FileObserver observer;
-  private final Set<FileObserver> childObservers;
-  private final Runnable listener;
-  private final File directory;
-  private boolean started;
+  /**
+   * {@link FileObserver}s for the same directory cannot coexists (regardless of
+   * the event masks), stopping one will cause the internally shared observer
+   * thread to be stopped, and no events will be fired to other instances.
+   */
+  private final Map<File, DirObserver> observers = newHashMap();
 
-  Monitor(File directory, Runnable listener) {
-    this.directory = checkNotNull(directory, "directory");
-    this.listener = checkNotNull(listener, "listener");
-    this.observer = new DirObserver(directory, listener);
-    this.childObservers = newHashSet();
-    this.started = false;
+  private final SetMultimap<File, Runnable> listeners = HashMultimap.create();
+
+  /**
+   * Registers the listener to be notified when the given directory changes. Has
+   * no affect if already registered.
+   */
+  public void register(File directory, Runnable listener) {
+    synchronized (this) {
+      doRegisterDir(directory, listener);
+      doRegisterSubDirs(directory, listener);
+    }
+
+    if (DEBUG) {
+      Log.d(TAG, toString());
+    }
+  }
+
+  private void doRegisterDir(File directory, Runnable listener) {
+    listeners.put(directory, listener);
+    if (observers.get(directory) == null) {
+      Runnable refresher = newRefresher(directory);
+      observers.put(directory, startObserver(directory, refresher));
+    }
   }
 
   /**
-   * Starts this monitor if it's not already started.
+   * Changes in a sub directory will cause the sub directory's last updated
+   * timestamp to be updated, but this event is not fired for the parent
+   * directory, so listening on the sub directories for this.
    */
-  void start() {
-    if (started) {
-      return;
+  private void doRegisterSubDirs(File parent, Runnable listener) {
+    File[] children = parent.listFiles((FileFilter) directoryFileFilter());
+    if (children != null) {
+      for (File child : children) {
+        doRegisterDir(child, listener);
+      }
     }
-    started = true;
+  }
+
+  /**
+   * Unregisters the listener from being notified when the given directory
+   * changes. Has no affect if already unregistered.
+   */
+  public void unregister(File directory, Runnable listener) {
+    synchronized (this) {
+      doUnregisterDir(directory, listener);
+      doUnregisterSubDirs(directory, listener);
+    }
+
+    if (DEBUG) {
+      Log.d(TAG, toString());
+    }
+  }
+
+  private void doUnregisterSubDirs(File parent, Runnable listener) {
+    for (File that : newArrayList(observers.keySet())) {
+      if (that.getParentFile().equals(parent)) {
+        doUnregisterDir(that, listener);
+      }
+    }
+  }
+
+  private void doUnregisterDir(File directory, Runnable listener) {
+    Collection<Runnable> callbacks = listeners.get(directory);
+    if (callbacks.remove(listener) && callbacks.isEmpty()) {
+      observers.remove(directory).stopWatching();
+    }
+  }
+
+  private DirObserver startObserver(File directory, Runnable listener) {
+    DirObserver observer = new DirObserver(directory, listener);
     observer.startWatching();
-    startChildObservers();
-    if (DEBUG) {
-      Log.d(TAG, toString());
-    }
+    return observer;
   }
 
-  private void startChildObservers() {
-    File[] dirs = directory.listFiles((FileFilter) directoryFileFilter());
-    if (dirs == null) {return;}
-    for (File dir : dirs) {
-      childObservers.add(
-          new DirObserver(dir, listener, DIR_CHANGED_MASK_NO_MODIFY));
-    }
-    for (FileObserver childObserver : childObservers) {
-      childObserver.startWatching();
-    }
-  }
-
-  /**
-   * Stops this monitor if it's not already stopped.
-   */
-  void stop() {
-    if (!started) {
-      return;
-    }
-    started = false;
-    observer.stopWatching();
-    for (FileObserver observer : childObservers) {
-      observer.stopWatching();
-    }
-    if (DEBUG) {
-      Log.d(TAG, toString());
-    }
-  }
-
-  @Override public String toString() {
-    ToStringBuilder builder = new ToStringBuilder(this, MULTI_LINE_STYLE)
-        .append("listener", listener)
-        .append("observer", observer);
-    for (FileObserver childObserver : childObservers) {
-      builder.append("childObserver", childObserver);
-    }
-    return builder.toString();
+  private Runnable newRefresher(final File directory) {
+    return new Runnable() {
+      @Override public void run() {
+        Collection<Runnable> runnables;
+        synchronized (Monitor.this) {
+          runnables = newArrayList(listeners.get(directory));
+        }
+        for (Runnable runnable : runnables) {
+          runnable.run();
+        }
+      }
+    };
   }
 }
