@@ -11,7 +11,10 @@
       android:id="@android:id/icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      style="@style/Theme.Sidebar.IconFont"/>
+      android:gravity="center"
+      android:text="@string/ic_font_char"
+      android:textSize="@dimen/text_size_sidebar_icon_font"
+      android:textColor="?android:attr/textColorPrimaryInverse"/>
 
   <TextView
       android:id="@android:id/title"
@@ -19,6 +22,9 @@
       android:layout_height="wrap_content"
       android:layout_marginLeft="16dp"
       android:layout_marginRight="8dp"
-      style="@style/Theme.Sidebar.Item"/>
+      android:ellipsize="end"
+      android:singleLine="true"
+      android:textSize="@dimen/text_size_sidebar_item"
+      android:textColor="?android:attr/textColorPrimaryInverse"/>
 
 </LinearLayout>

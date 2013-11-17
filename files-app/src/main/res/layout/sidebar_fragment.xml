@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-  <ListView
-      android:id="@android:id/list"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      style="@style/Theme.Sidebar"/>
-
-  <View
-      android:layout_alignParentRight="true"
-      style="@style/Theme.Sidebar.Separator"/>
-
-</RelativeLayout>
+    android:layout_height="match_parent"
+    android:background="@color/sidebar_background"
+    android:listSelector="@drawable/selector_dark"/>
