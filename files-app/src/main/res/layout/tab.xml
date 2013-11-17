@@ -2,8 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    style="@style/Theme.Tab">
+    android:layout_height="match_parent">
 
   <ImageView
       android:id="@+id/back_indicator"
@@ -12,13 +11,19 @@
       android:layout_centerVertical="true"
       android:layout_marginLeft="4dp"
       android:contentDescription="@null"
-      style="@style/Theme.TabBackIndicator"/>
+      android:src="@drawable/ic_back"
+      android:visibility="gone"/>
 
   <TextView
       android:id="@+id/title"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerInParent="true"
-      style="@style/Theme.TabText"/>
+      android:layout_height="match_parent"
+      android:paddingLeft="24dp"
+      android:paddingRight="24dp"
+      android:gravity="center"
+      android:background="@drawable/tab_indicator"
+      android:singleLine="true"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:textColor="@color/text_tab"/>
 
 </RelativeLayout>
