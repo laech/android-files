@@ -14,7 +14,7 @@ import l.files.app.format.IconFonts;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 
-final class SidebarAdapter extends CursorAdapter {
+final class SidebarAdapter extends StableFilesAdapter {
 
   private int columnId = -1;
   private int columnName = -1;

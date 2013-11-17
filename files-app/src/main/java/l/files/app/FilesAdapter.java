@@ -20,8 +20,6 @@ import org.joda.time.MutableDateTime;
 import java.text.DateFormat;
 import java.util.Date;
 
-import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
 import l.files.R;
 import l.files.app.format.IconFonts;
 
@@ -41,7 +39,7 @@ import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
-final class FilesAdapter extends CursorAdapter {
+final class FilesAdapter extends StableFilesAdapter {
 
   private final int thumbnailSize;
 
@@ -57,8 +55,6 @@ final class FilesAdapter extends CursorAdapter {
         context.getResources().getDisplayMetrics());
     return new FilesAdapter(thumbnailSize);
   }
-
-  private static final TObjectLongMap<String> ids = new TObjectLongHashMap<>();
 
   private final SparseArray<Info> infos = new SparseArray<>();
 
@@ -133,16 +129,6 @@ final class FilesAdapter extends CursorAdapter {
       infos.put(position, info);
     }
     return info;
-  }
-
-  @Override public boolean hasStableIds() {
-    return true;
-  }
-
-  @Override public long getItemId(int position) {
-    String fileId = getItem(position).getString(columnId);
-    ids.putIfAbsent(fileId, ids.size() + 1);
-    return ids.get(fileId);
   }
 
   private static final class ViewHolder extends EmptyCallback {

@@ -17,6 +17,7 @@ import java.net.URI;
 import l.files.R;
 import l.files.common.app.BaseListFragment;
 
+import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 
@@ -62,6 +63,7 @@ public final class SidebarFragment extends BaseListFragment
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    animatePreDataSetChange(getListView());
     getListAdapter().setCursor(cursor);
   }
 
