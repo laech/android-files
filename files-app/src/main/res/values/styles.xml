@@ -2,72 +2,74 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
   <style name="Theme" parent="android:Theme.Holo.Light">
-    <item name="android:actionBarStyle">@style/Theme.ActionBar</item>
-    <item name="android:actionBarWidgetTheme">@style/Theme.Widget.ActionBar</item>
+    <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
+    <item name="android:actionBarWidgetTheme">@style/ActionBarTheme</item>
     <item name="android:actionBarItemBackground">@drawable/selector_light</item>
     <item name="android:actionModeBackground">@drawable/action_bar_background</item>
-    <item name="android:actionModeCloseButtonStyle">@style/Theme.ActionButton.CloseMode</item>
-    <item name="android:actionModeStyle">@style/Theme.ActionMode</item>
+    <item name="android:actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
+    <item name="android:actionModeStyle">@style/Widget.ActionMode</item>
     <item name="android:textColor">@color/text_primary</item>
     <item name="android:textColorPrimary">@color/text_primary</item>
     <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
     <item name="android:textColorSecondary">@color/text_secondary</item>
     <item name="android:textColorAlertDialogListItem">@color/text_primary</item>
+    <item name="android:textAppearanceLarge">@style/TextAppearance.Large</item>
     <item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>
     <item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>
-    <item name="android:textViewStyle">@style/Theme.TextView</item>
+    <item name="android:textViewStyle">@style/Widget.TextView</item>
     <item name="android:listViewStyle">@style/Theme.ListView</item>
     <item name="android:listPreferredItemHeight">@dimen/list_preferred_item_height</item>
-    <!-- https://code.google.com/p/android/issues/detail?id=58280 -->
     <item name="android:windowContentOverlay">@null</item>
     <item name="android:windowBackground">@drawable/window_background</item>
   </style>
 
+  <style name="ActionBarTheme" parent="android:Theme.Holo.Light">
+    <item name="android:itemTextAppearance">@style/ActionBarTheme.ItemTextAppearance</item>
+    <item name="android:dropDownListViewStyle">@style/ActionBarTheme.DropDownListViewStyle</item>
+  </style>
+
+  <style name="ActionBarTheme.ItemTextAppearance" parent="android:TextAppearance.Holo.Medium">
+    <item name="android:textColor">@color/text_primary</item>
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
+  <style name="ActionBarTheme.DropDownListViewStyle" parent="android:Widget.Holo.Light.ListView.DropDown">
+    <item name="android:background">@color/action_bar_menu_background</item>
+    <item name="android:listSelector">@drawable/selector_light</item>
+    <item name="android:divider">@null</item>
+  </style>
+
+  <style name="TextAppearance.Large" parent="android:TextAppearance.Holo.Large">
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
   <style name="TextAppearance.Medium" parent="android:TextAppearance.Holo.Medium">
     <item name="android:fontFamily">sans-serif-condensed</item>
-    <item name="android:textSize">@dimen/text_size_medium</item>
   </style>
 
   <style name="TextAppearance.Small" parent="android:TextAppearance.Holo.Small">
     <item name="android:fontFamily">sans-serif-condensed</item>
-    <item name="android:textSize">@dimen/text_size_small</item>
   </style>
 
-  <style name="Theme.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
+  <style name="TextAppearance.Widget.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
+  <style name="TextAppearance.Widget.ActionMode.Title" parent="android:TextAppearance.Holo.Widget.ActionMode.Title">
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
+  <style name="Widget.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
     <item name="android:background">@drawable/action_bar_background</item>
-    <item name="android:titleTextStyle">@style/Theme.ActionBar.Title</item>
+    <item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>
   </style>
 
-  <style name="Theme.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-    <item name="android:fontFamily">sans-serif-condensed</item>
+  <style name="Widget.ActionMode" parent="android:Widget.Holo.Light.ActionMode">
+    <item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionMode.Title</item>
   </style>
 
-  <style name="Theme.Widget.ActionBar" parent="android:Theme.Holo">
-    <item name="android:itemTextAppearance">@style/Theme.ActionBar.Item</item>
-    <item name="android:dropDownListViewStyle">@style/Theme.ListView.DropDown</item>
-  </style>
-
-  <style name="Theme.ActionBar.Item" parent="android:TextAppearance.Holo.Medium">
-    <item name="android:textColor">@color/text_primary_inverse</item>
-    <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
-  <style name="Theme.ActionMode" parent="android:Widget.Holo.Light.ActionMode">
-    <item name="android:titleTextStyle">@style/Theme.ActionMode.Title</item>
-  </style>
-
-  <style name="Theme.ActionButton.CloseMode" parent="android:Widget.Holo.Light.ActionButton.CloseMode">
+  <style name="Widget.ActionButton.CloseMode" parent="android:Widget.Holo.Light.ActionButton.CloseMode">
     <item name="android:background">@drawable/selector_light</item>
-  </style>
-
-  <style name="Theme.ActionMode.Title" parent="android:TextAppearance.Holo.Widget.ActionMode.Title">
-    <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
-  <style name="Theme.ListView.DropDown" parent="android:Widget.Holo.Light.ListView.DropDown">
-    <item name="android:background">@color/action_bar_menu_background</item>
-    <item name="android:listSelector">@drawable/selector_dark</item>
-    <item name="android:divider">@null</item>
   </style>
 
   <style name="Theme.SeparatorHorizontal">
@@ -80,11 +82,11 @@
     <item name="android:layout_height">match_parent</item>
   </style>
 
-  <style name="Theme.TextView" parent="android:Widget.Holo.Light.TextView">
+  <style name="Widget.TextView" parent="android:Widget.Holo.Light.TextView">
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
-  <style name="Theme.TextView.IconFont" parent="Theme.TextView">
+  <style name="Theme.TextView.IconFont" parent="Widget.TextView">
     <item name="android:gravity">center</item>
     <item name="android:text">@string/ic_font_char</item>
   </style>
@@ -96,7 +98,7 @@
     <item name="android:listSelector">@drawable/selector_light</item>
   </style>
 
-  <style name="Theme.ListView.Item" parent="Theme.TextView"/>
+  <style name="Theme.ListView.Item" parent="Widget.TextView"/>
 
   <style name="Theme.Sidebar" parent="Theme.ListView">
     <item name="android:divider">@null</item>
@@ -108,7 +110,7 @@
     <item name="android:background">@color/sidebar_separator</item>
   </style>
 
-  <style name="Theme.Sidebar.Header" parent="Theme.TextView">
+  <style name="Theme.Sidebar.Header" parent="Widget.TextView">
     <item name="android:paddingTop">16dp</item>
     <item name="android:paddingBottom">16dp</item>
     <item name="android:gravity">center_horizontal</item>
@@ -127,7 +129,7 @@
     <item name="android:textSize">@dimen/text_size_sidebar_icon_font</item>
   </style>
 
-  <style name="Theme.Sidebar.Item" parent="Theme.TextView">
+  <style name="Theme.Sidebar.Item" parent="Widget.TextView">
     <item name="android:ellipsize">end</item>
     <item name="android:singleLine">true</item>
     <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
@@ -142,7 +144,7 @@
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
-  <style name="Theme.ListButton" parent="Theme.TextView">
+  <style name="Theme.ListButton" parent="Widget.TextView">
     <item name="android:layout_width">match_parent</item>
     <item name="android:layout_height">wrap_content</item>
     <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>

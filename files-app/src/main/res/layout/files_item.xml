@@ -63,7 +63,8 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginRight="8dp"
-          android:textAppearance="?android:attr/textAppearanceMedium"/>
+          android:textAppearance="?android:attr/textAppearanceMedium"
+          android:textSize="@dimen/text_size_medium"/>
 
       <TextView
           android:id="@+id/summary"
@@ -72,7 +73,8 @@
           android:paddingBottom="4dp"
           android:fontFamily="sans-serif-light"
           android:textColor="?android:attr/textColorSecondary"
-          android:textAppearance="?android:attr/textAppearanceSmall"/>
+          android:textAppearance="?android:attr/textAppearanceSmall"
+          android:textSize="@dimen/text_size_small"/>
 
     </LinearLayout>
   </RelativeLayout>
