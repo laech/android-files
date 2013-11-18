@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -41,19 +42,27 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 final class FilesAdapter extends StableFilesAdapter {
 
-  private final int thumbnailSize;
+  private final int thumbnailWidth;
+  private final int thumbnailHeight;
 
-  FilesAdapter(int thumbnailSize) {
-    this.thumbnailSize = thumbnailSize;
+  FilesAdapter(int thumbnailWidth, int thumbnailHeight) {
+    this.thumbnailWidth = thumbnailWidth;
+    this.thumbnailHeight = thumbnailHeight;
   }
 
   static FilesAdapter get(Context context) {
+    Resources res = context.getResources();
+    DisplayMetrics metrics = res.getDisplayMetrics();
+
     TypedValue value = new TypedValue();
     context.getTheme().resolveAttribute(
-        android.R.attr.listPreferredItemHeight, value, true);
-    int thumbnailSize = (int) value.getDimension(
-        context.getResources().getDisplayMetrics());
-    return new FilesAdapter(thumbnailSize);
+        android.R.attr.listPreferredItemHeightLarge, value, true);
+
+    int width = metrics.widthPixels
+        - (int) value.getDimension(metrics)
+        - res.getDimensionPixelSize(R.dimen.file_item_preview_padding_right);
+
+    return new FilesAdapter(width, 100000);
   }
 
   private final SparseArray<Info> infos = new SparseArray<>();
@@ -115,7 +124,7 @@ final class FilesAdapter extends StableFilesAdapter {
     holder.setEnabled(info.readable);
     holder.setIcon(info.icon);
     holder.setSummary(info.summary);
-    holder.setImage(info, thumbnailSize);
+    holder.setImage(info, thumbnailWidth, thumbnailHeight);
     holder.setGroup(info.group, position == 0 ? null
         : getInfo(context, position - 1).group);
 
@@ -138,6 +147,7 @@ final class FilesAdapter extends StableFilesAdapter {
     final TextView title;
     final TextView icon;
     final TextView summary;
+    final View previewContainer;
     final ImageView preview;
     final TextView header;
     final View headerContainer;
@@ -148,6 +158,7 @@ final class FilesAdapter extends StableFilesAdapter {
       this.icon = (TextView) root.findViewById(R.id.icon);
       this.title = (TextView) root.findViewById(R.id.title);
       this.preview = (ImageView) root.findViewById(R.id.preview);
+      this.previewContainer = root.findViewById(R.id.preview_container);
       this.summary = (TextView) root.findViewById(R.id.summary);
       this.header = (TextView) root.findViewById(R.id.header_title);
       this.headerContainer = root.findViewById(R.id.header_container);
@@ -170,9 +181,6 @@ final class FilesAdapter extends StableFilesAdapter {
 
     void setIcon(Typeface typeface) {
       icon.setTypeface(typeface);
-      if (icon.getVisibility() != VISIBLE) {
-        icon.setVisibility(VISIBLE);
-      }
     }
 
     void setGroup(String group, String prevGroup) {
@@ -188,23 +196,31 @@ final class FilesAdapter extends StableFilesAdapter {
       }
     }
 
-    void setImage(Info info, int thumbnailSize) {
+    void setImage(Info info, int width, int height) {
       this.uri = info.uri;
       this.preview.setImageBitmap(null);
+      if (previewContainer.getVisibility() != GONE) {
+        previewContainer.setVisibility(GONE);
+      }
       if (!info.directory && info.readable && errors.get(uri) == null) {
         Picasso.with(preview.getContext())
             .load(uri)
-            .resize(thumbnailSize, thumbnailSize)
-            .centerCrop()
+            .resize(width, height)
+            .centerInside()
             .into(preview, this);
       }
     }
 
     @Override public void onSuccess() {
-      icon.setVisibility(GONE);
+      if (previewContainer.getVisibility() != VISIBLE) {
+        previewContainer.setVisibility(VISIBLE);
+      }
     }
 
     @Override public void onError() {
+      if (previewContainer.getVisibility() != GONE) {
+        previewContainer.setVisibility(GONE);
+      }
       errors.put(uri, uri);
     }
   }

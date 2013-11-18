@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@drawable/selector_light"
               android:orientation="vertical">
 
   <LinearLayout
@@ -9,6 +10,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
+      android:background="@color/window_background"
       android:visibility="gone">
 
     <TextView
@@ -32,30 +34,21 @@
   <RelativeLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:minHeight="?android:attr/listPreferredItemHeight"
-      android:background="@drawable/selector_light">
+      android:minHeight="?android:attr/listPreferredItemHeight">
 
     <TextView
         android:id="@+id/icon"
-        android:layout_width="?android:attr/listPreferredItemHeight"
+        android:layout_width="?android:attr/listPreferredItemHeightLarge"
         android:layout_height="?android:attr/listPreferredItemHeight"
-        android:layout_marginLeft="4dp"
         android:gravity="center"
         android:text="@string/ic_font_char"
         android:textSize="@dimen/text_size_list_icon_font"/>
 
-    <ImageView
-        android:id="@+id/preview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@null"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="?android:attr/listPreferredItemHeight"
+        android:layout_marginLeft="?android:attr/listPreferredItemHeightLarge"
         android:layout_centerVertical="true"
-        android:paddingLeft="8dp"
         android:orientation="vertical">
 
       <TextView
@@ -78,4 +71,22 @@
 
     </LinearLayout>
   </RelativeLayout>
+
+  <FrameLayout
+      android:id="@+id/preview_container"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="?android:attr/listPreferredItemHeightLarge"
+      android:layout_marginBottom="16dp"
+      android:background="@drawable/files_item_preview_container_background"
+      android:padding="4dp"
+      android:visibility="gone">
+
+    <ImageView
+        android:id="@+id/preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"/>
+  </FrameLayout>
+
 </LinearLayout>

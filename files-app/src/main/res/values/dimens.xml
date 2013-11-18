@@ -6,5 +6,5 @@
   <dimen name="text_size_list_icon_font">20sp</dimen>
   <dimen name="text_size_sidebar_item">16sp</dimen>
   <dimen name="text_size_sidebar_icon_font">18sp</dimen>
-  <dimen name="list_preferred_item_height">64dp</dimen>
+  <dimen name="file_item_preview_padding_right">32dp</dimen>
 </resources>

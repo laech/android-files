@@ -18,7 +18,6 @@
     <item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>
     <item name="android:textViewStyle">@style/Widget.TextView</item>
     <item name="android:listViewStyle">@style/Widget.ListView</item>
-    <item name="android:listPreferredItemHeight">@dimen/list_preferred_item_height</item>
     <item name="android:windowContentOverlay">@null</item>
     <item name="android:windowBackground">@drawable/window_background</item>
   </style>
