@@ -51,17 +51,13 @@ final class FilesAdapter extends StableFilesAdapter {
   }
 
   static FilesAdapter get(Context context) {
-    Resources res = context.getResources();
-    DisplayMetrics metrics = res.getDisplayMetrics();
+    DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 
     TypedValue value = new TypedValue();
-    context.getTheme().resolveAttribute(
-        android.R.attr.listPreferredItemHeightLarge, value, true);
+    Resources.Theme theme = context.getTheme();
+    theme.resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
 
-    int width = metrics.widthPixels
-        - (int) value.getDimension(metrics)
-        - res.getDimensionPixelSize(R.dimen.file_item_preview_padding_right);
-
+    int width = metrics.widthPixels - (int) (value.getDimension(metrics) * 2);
     int height = (int) (metrics.heightPixels * 0.6f);
 
     return new FilesAdapter(width, height);
@@ -149,7 +145,6 @@ final class FilesAdapter extends StableFilesAdapter {
     final TextView title;
     final TextView icon;
     final TextView summary;
-    final View previewContainer;
     final ImageView preview;
     final TextView header;
     final View headerContainer;
@@ -160,7 +155,6 @@ final class FilesAdapter extends StableFilesAdapter {
       this.icon = (TextView) root.findViewById(R.id.icon);
       this.title = (TextView) root.findViewById(R.id.title);
       this.preview = (ImageView) root.findViewById(R.id.preview);
-      this.previewContainer = root.findViewById(R.id.preview_container);
       this.summary = (TextView) root.findViewById(R.id.summary);
       this.header = (TextView) root.findViewById(R.id.header_title);
       this.headerContainer = root.findViewById(R.id.header_container);
@@ -201,8 +195,8 @@ final class FilesAdapter extends StableFilesAdapter {
     void setImage(Info info, int width, int height) {
       this.uri = info.uri;
       this.preview.setImageBitmap(null);
-      if (previewContainer.getVisibility() != GONE) {
-        previewContainer.setVisibility(GONE);
+      if (preview.getVisibility() != GONE) {
+        preview.setVisibility(GONE);
       }
       if (!info.directory && info.readable && errors.get(uri) == null) {
         Picasso.with(preview.getContext())
@@ -214,14 +208,14 @@ final class FilesAdapter extends StableFilesAdapter {
     }
 
     @Override public void onSuccess() {
-      if (previewContainer.getVisibility() != VISIBLE) {
-        previewContainer.setVisibility(VISIBLE);
+      if (preview.getVisibility() != VISIBLE) {
+        preview.setVisibility(VISIBLE);
       }
     }
 
     @Override public void onError() {
-      if (previewContainer.getVisibility() != GONE) {
-        previewContainer.setVisibility(GONE);
+      if (preview.getVisibility() != GONE) {
+        preview.setVisibility(GONE);
       }
       errors.put(uri, uri);
     }
