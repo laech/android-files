@@ -62,7 +62,9 @@ final class FilesAdapter extends StableFilesAdapter {
         - (int) value.getDimension(metrics)
         - res.getDimensionPixelSize(R.dimen.file_item_preview_padding_right);
 
-    return new FilesAdapter(width, 100000);
+    int height = (int) (metrics.heightPixels * 0.6f);
+
+    return new FilesAdapter(width, height);
   }
 
   private final SparseArray<Info> infos = new SparseArray<>();
