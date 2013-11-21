@@ -51,13 +51,17 @@ final class FilesAdapter extends StableFilesAdapter {
   }
 
   static FilesAdapter get(Context context) {
-    DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+    Resources res = context.getResources();
+    DisplayMetrics metrics = res.getDisplayMetrics();
 
     TypedValue value = new TypedValue();
-    Resources.Theme theme = context.getTheme();
-    theme.resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+    context.getTheme().resolveAttribute(
+        android.R.attr.listPreferredItemHeightLarge, value, true);
 
-    int width = metrics.widthPixels - (int) (value.getDimension(metrics) * 2);
+    int width = metrics.widthPixels
+        - (int) value.getDimension(metrics)
+        - res.getDimensionPixelSize(R.dimen.file_item_preview_padding_right);
+
     int height = (int) (metrics.heightPixels * 0.6f);
 
     return new FilesAdapter(width, height);
