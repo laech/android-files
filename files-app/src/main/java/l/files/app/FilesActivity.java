@@ -291,6 +291,7 @@ public final class FilesActivity
   }
 
   private void setShowTabs(boolean showTabs) {
+    actionBar.setDisplayHomeAsUpEnabled(!showTabs);
     actionBar.setDisplayShowTitleEnabled(!showTabs);
     actionBar.setDisplayShowHomeEnabled(!showTabs);
     actionBar.setDisplayShowCustomEnabled(showTabs);
