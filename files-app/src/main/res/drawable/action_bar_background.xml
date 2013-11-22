@@ -5,8 +5,4 @@
 
   <solid android:color="@color/action_bar_background"/>
 
-  <stroke
-      android:color="@color/action_bar_outline"
-      android:width="@dimen/separator"/>
-
 </shape>
