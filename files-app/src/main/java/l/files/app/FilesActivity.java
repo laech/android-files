@@ -138,6 +138,7 @@ public final class FilesActivity
   }
 
   private void setActionBar() {
+    actionBar.setIcon(R.drawable.ic_storage);
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setHomeButtonEnabled(true);
     actionBar.setCustomView(tabs.getRootContainer(),
