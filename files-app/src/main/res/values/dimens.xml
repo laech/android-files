@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="separator">1dp</dimen>
-  <dimen name="text_size_medium">16sp</dimen>
-  <dimen name="text_size_small">11sp</dimen>
+  <dimen name="text_size_small">12sp</dimen>
   <dimen name="text_size_list_icon_font">20sp</dimen>
   <dimen name="text_size_sidebar_item">16sp</dimen>
   <dimen name="text_size_sidebar_icon_font">18sp</dimen>
