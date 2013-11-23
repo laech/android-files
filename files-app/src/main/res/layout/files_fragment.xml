@@ -7,7 +7,11 @@
   <ListView
       android:id="@android:id/list"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+      android:layout_height="match_parent"
+      android:paddingLeft="@dimen/files_list_padding_side"
+      android:paddingRight="@dimen/files_list_padding_side"
+      android:fastScrollEnabled="true"
+      android:scrollbarStyle="outsideOverlay"/>
 
   <TextView
       android:id="@android:id/empty"

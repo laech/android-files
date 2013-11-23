@@ -38,6 +38,7 @@ import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
 import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 final class FilesAdapter extends StableFilesAdapter {
@@ -60,7 +61,7 @@ final class FilesAdapter extends StableFilesAdapter {
 
     int width = metrics.widthPixels
         - (int) value.getDimension(metrics)
-        - res.getDimensionPixelSize(R.dimen.file_item_preview_padding_right);
+        - res.getDimensionPixelSize(R.dimen.files_list_padding_side) * 3;
 
     int height = (int) (metrics.heightPixels * 0.6f);
 
@@ -106,6 +107,9 @@ final class FilesAdapter extends StableFilesAdapter {
     switch (nullToEmpty(sortOrder)) {
       case SORT_BY_LAST_MODIFIED:
         grouper = new DateGrouper();
+        break;
+      case SORT_BY_NAME:
+        grouper = new NameGrouper();
         break;
       default:
         grouper = Grouper.NULL;
@@ -288,6 +292,12 @@ final class FilesAdapter extends StableFilesAdapter {
 
     String getGroup(Resources res, Cursor cursor) {
       return null;
+    }
+  }
+
+  private final class NameGrouper extends Grouper {
+    @Override String getGroup(Resources res, Cursor cursor) {
+      return res.getString(R.string.name);
     }
   }
 
