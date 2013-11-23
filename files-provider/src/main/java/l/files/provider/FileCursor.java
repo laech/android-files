@@ -119,10 +119,13 @@ final class FileCursor extends AbstractCursor {
 
     String mime() {
       if (mediaType == null) {
-        mediaType = file.isDirectory()
-            ? MEDIA_TYPE_DIR
-            : MimeTypeMap.getSingleton()
-            .getMimeTypeFromExtension(getExtension(name).toLowerCase(ENGLISH));
+        if (file.isDirectory()) {
+          mediaType = MEDIA_TYPE_DIR;
+        } else {
+          String ext = getExtension(name).toLowerCase(ENGLISH);
+          String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+          mediaType = mime == null ? "application/octet-stream" : mime;
+        }
       }
       return mediaType;
     }
