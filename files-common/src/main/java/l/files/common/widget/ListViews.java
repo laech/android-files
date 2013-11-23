@@ -56,13 +56,22 @@ public final class ListViews {
     return items;
   }
 
-  public static int getCheckedItemPosition(AbsListView list) {
+  public static List<Integer> getCheckedItemPositions(AbsListView list) {
     SparseBooleanArray checks = list.getCheckedItemPositions();
+    List<Integer> positions = newArrayListWithCapacity(checks.size());
     for (int i = 0; i < checks.size(); i++) {
       if (checks.valueAt(i)) {
-        return checks.keyAt(i);
+        positions.add(checks.keyAt(i));
       }
     }
-    throw new IllegalArgumentException("No item checked.");
+    return positions;
+  }
+
+  public static int getCheckedItemPosition(AbsListView list) {
+    List<Integer> positions = getCheckedItemPositions(list);
+    if (positions.isEmpty()) {
+      throw new IllegalArgumentException("No item checked.");
+    }
+    return positions.get(0);
   }
 }

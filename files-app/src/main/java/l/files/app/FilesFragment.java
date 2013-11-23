@@ -36,6 +36,7 @@ import static l.files.app.menu.Menus.newDirMenu;
 import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
+import static l.files.app.mode.Modes.newDeleteAction;
 import static l.files.app.mode.Modes.newRenameAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
@@ -109,7 +110,7 @@ public final class FilesFragment extends BaseListFragment
         newSelectAllAction(list),
 //        newCutAction(list, getBus()),
 //        newCopyAction(list, getBus()),
-//        newDeleteAction(list, getBus()),
+        newDeleteAction(list, getActivity().getContentResolver()),
         newRenameAction(list, manager, directoryId)
     ));
   }

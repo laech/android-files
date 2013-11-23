@@ -8,6 +8,7 @@ import android.os.Bundle;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 import static android.content.UriMatcher.NO_MATCH;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -228,6 +229,10 @@ public final class FilesContract {
     Uri uri = buildFileUri(fileId);
     Bundle result = resolver.call(uri, METHOD_RENAME, fileId, args);
     return result.getBoolean(EXTRA_RESULT);
+  }
+
+  public static void deleteFiles(ContentResolver resolver, Set<String> fileIds) {
+
   }
 
   public final static class FileInfo {

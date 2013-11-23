@@ -2,6 +2,7 @@ package l.files.app.mode;
 
 import static android.widget.AbsListView.MultiChoiceModeListener;
 
+import android.content.ContentResolver;
 import android.support.v4.app.FragmentManager;
 import android.widget.AbsListView;
 import com.squareup.otto.Bus;
@@ -13,8 +14,8 @@ public final class Modes {
     return new CountSelectedItemsAction(list);
   }
 
-  public static MultiChoiceModeListener newDeleteAction(AbsListView list, Bus bus) {
-    return new DeleteAction(list, bus);
+  public static MultiChoiceModeListener newDeleteAction(AbsListView list, ContentResolver resolver) {
+    return new DeleteAction(list, resolver);
   }
 
   public static MultiChoiceModeListener newSelectAllAction(AbsListView list) {
