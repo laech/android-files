@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/icon"
-        android:layout_width="?android:attr/listPreferredItemHeightLarge"
+        android:layout_width="?android:attr/listPreferredItemHeight"
         android:layout_height="?android:attr/listPreferredItemHeight"
         android:gravity="center"
         android:text="@string/ic_font_char"
@@ -47,7 +47,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="?android:attr/listPreferredItemHeightLarge"
+        android:layout_marginLeft="?android:attr/listPreferredItemHeight"
         android:layout_centerVertical="true"
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
@@ -58,7 +58,7 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginRight="8dp"
-          android:textAppearance="?android:attr/textAppearanceMedium"/>
+          android:textSize="@dimen/file_item_title_text_size"/>
 
       <TextView
           android:id="@+id/summary"
@@ -66,8 +66,7 @@
           android:layout_height="wrap_content"
           android:fontFamily="sans-serif-light"
           android:textColor="?android:attr/textColorSecondary"
-          android:textAppearance="?android:attr/textAppearanceSmall"
-          android:textSize="@dimen/text_size_small"/>
+          android:textSize="@dimen/file_item_summary_text_size"/>
 
     </LinearLayout>
   </RelativeLayout>
@@ -77,7 +76,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
-      android:layout_marginLeft="?android:attr/listPreferredItemHeightLarge"
+      android:layout_marginLeft="59dp"
       android:background="@drawable/preview_background"
       android:visibility="gone"
       android:contentDescription="@null"/>

@@ -56,7 +56,7 @@ final class FilesAdapter extends StableFilesAdapter {
 
     TypedValue value = new TypedValue();
     context.getTheme().resolveAttribute(
-        android.R.attr.listPreferredItemHeightLarge, value, true);
+        android.R.attr.listPreferredItemHeight, value, true);
 
     int width = metrics.widthPixels
         - (int) value.getDimension(metrics)
