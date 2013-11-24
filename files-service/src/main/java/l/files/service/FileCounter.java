@@ -1,8 +1,5 @@
 package l.files.service;
 
-import android.os.AsyncTask;
-import android.os.SystemClock;
-
 import org.apache.commons.io.DirectoryWalker;
 
 import java.io.File;
@@ -10,27 +7,21 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.io.FileUtils.isSymlink;
 
-class FileCounter
-    extends AsyncTask<File, FileCounter.Result, FileCounter.Result> {
+abstract class FileCounter
+    extends ProgressService.Task<Object, FileCounter.Result, FileCounter.Result> {
 
-  private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
+  private final Set<File> files;
 
-  private final int id;
-
-  FileCounter(int id) {
-    this.id = id;
+  FileCounter(int id, ProgressService service, Set<File> files) {
+    super(id, service);
+    this.files = files;
   }
 
-  public int id() {
-    return id;
-  }
-
-  @Override protected Result doInBackground(File... files) {
+  @Override protected Result doInBackground(Object... params) {
     try {
-      return new Walker().walk(newHashSet(files));
+      return new Walker().walk(files);
     } catch (IOException e) {
       return null;
     }
@@ -68,20 +59,14 @@ class FileCounter
   }
 
   private final class Walker extends BaseWalker<Object> {
-    private long start;
     private long size;
     private int count;
 
     public Result walk(Set<File> roots) throws IOException {
-      start = now();
       for (File root : roots) {
         walk(root, null);
       }
       return new Result(count, size);
-    }
-
-    private long now() {
-      return SystemClock.elapsedRealtime();
     }
 
     @Override protected void handleFile(
@@ -90,9 +75,7 @@ class FileCounter
       count++;
       size += file.length();
 
-      long now = now();
-      if (now - start >= PROGRESS_UPDATE_DELAY_MILLIS) {
-        start = now;
+      if (setAndGetUpdateProgress()) {
         publishProgress(new Result(count, size));
       }
     }
