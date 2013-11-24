@@ -63,4 +63,11 @@
 
   <string name="failed_to_get_file_info">Failed to get file information</string>
 
+  <string name="name">Name</string>
+  <string name="date_modified">Date modified</string>
+  <string name="today">Today</string>
+  <string name="yesterday">Yesterday</string>
+  <string name="previous_7_days">Previous 7 days</string>
+  <string name="previous_30_days">Previous 30 days</string>
+  <string name="unknown">Unknown</string>
 </resources>
