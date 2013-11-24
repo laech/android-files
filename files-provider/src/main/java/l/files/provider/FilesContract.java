@@ -34,7 +34,9 @@ public final class FilesContract {
   static final int MATCH_BOOKMARKS_ID = 201;
   static final int MATCH_SUGGESTION = 300;
 
+  static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
+  static final String EXTRA_FILE_IDS = "file_ids";
   static final String EXTRA_NEW_NAME = "new_name";
   static final String EXTRA_RESULT = "result";
 
@@ -115,6 +117,10 @@ public final class FilesContract {
     checkArgument(segments.size() == 2, segments.size());
     checkArgument(segments.get(0).equals(PATH_BOOKMARKS), segments.get(0));
     return segments;
+  }
+
+  static Uri buildFilesUri() {
+    return filesUriBuilder().build();
   }
 
   /**
@@ -232,7 +238,9 @@ public final class FilesContract {
   }
 
   public static void deleteFiles(ContentResolver resolver, Set<String> fileIds) {
-
+    Bundle args = new Bundle(1);
+    args.putStringArray(EXTRA_FILE_IDS, fileIds.toArray(new String[fileIds.size()]));
+    resolver.call(buildFilesUri(), METHOD_DELETE, null, args);
   }
 
   public final static class FileInfo {

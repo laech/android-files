@@ -51,6 +51,10 @@ public final class Files {
     return file;
   }
 
+  public static File[] toFiles(Collection<String> paths) {
+    return toFiles(paths.toArray(new String[paths.size()]));
+  }
+
   public static File[] toFiles(String... absolutePaths) {
     File[] files = new File[absolutePaths.length];
     for (int i = 0; i < files.length; ++i) {
@@ -76,13 +80,6 @@ public final class Files {
    */
   public static Function<File, String> name() {
     return FileNameFunction.INSTANCE;
-  }
-
-  /**
-   * Returns a function for {@link File#canRead()}.
-   */
-  public static Predicate<File> canRead() {
-    return FilePredicate.CAN_READ;
   }
 
   /**

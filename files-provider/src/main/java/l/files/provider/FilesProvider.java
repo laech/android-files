@@ -15,13 +15,18 @@ import org.apache.tika.Tika;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Set;
+
+import l.files.service.DeleteService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Arrays.sort;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Files.listFiles;
+import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.EXTRA_RESULT;
 import static l.files.provider.FilesContract.FileInfo;
@@ -33,6 +38,7 @@ import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
+import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
@@ -43,10 +49,8 @@ import static l.files.provider.FilesContract.getSuggestionBasename;
 import static l.files.provider.FilesContract.getSuggestionParentId;
 import static l.files.provider.FilesContract.newMatcher;
 import static l.files.provider.FilesContract.toURI;
-import static org.apache.commons.io.comparator.LastModifiedFileComparator
-    .LASTMODIFIED_REVERSE;
-import static org.apache.commons.io.comparator.NameFileComparator
-    .NAME_INSENSITIVE_COMPARATOR;
+import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
+import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITIVE_COMPARATOR;
 
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -97,8 +101,12 @@ public final class FilesProvider extends ContentProvider
     return super.openFile(uri, mode);
   }
 
-  @Override public Cursor query(Uri uri, String[] projection, String selection,
-                                String[] selectionArgs, String sortOrder) {
+  @Override public Cursor query(
+      Uri uri,
+      String[] projection,
+      String selection,
+      String[] selectionArgs,
+      String sortOrder) {
 
     if (projection == null) projection = DEFAULT_COLUMNS;
 
@@ -168,6 +176,8 @@ public final class FilesProvider extends ContentProvider
     switch (method) {
       case METHOD_RENAME:
         return callRename(arg, extras);
+      case METHOD_DELETE:
+        return callDelete(extras);
     }
     return super.call(method, arg, extras);
   }
@@ -178,6 +188,16 @@ public final class FilesProvider extends ContentProvider
     Bundle out = new Bundle(1);
     out.putBoolean(EXTRA_RESULT, from.renameTo(to));
     return out;
+  }
+
+  private Bundle callDelete(Bundle extras) {
+    String[] fileIds = extras.getStringArray(EXTRA_FILE_IDS);
+    Set<File> files = newHashSetWithExpectedSize(fileIds.length);
+    for (String fileId : fileIds) {
+      files.add(new File(toURI(fileId)));
+    }
+    DeleteService.delete(getContext(), files);
+    return null;
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {

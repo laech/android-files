@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="preparing_to_delete_x_items">Preparing to delete %s items</string>
+  <string name="preparing_to_delete">Preparing to delete</string>
+  <string name="waiting">Waiting</string>
+</resources>
