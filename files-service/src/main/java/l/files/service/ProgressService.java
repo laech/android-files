@@ -142,7 +142,7 @@ abstract class ProgressService extends Service {
     }
 
     @Override protected void onPreExecute() {
-      String title = getContentTitle(null);
+      String title = getContentTitle();
       String summary = service.getString(R.string.waiting);
       service.notificationManager.notify(id,
           service.newCancellableNotification(id, false, title, summary).build());
@@ -197,6 +197,8 @@ abstract class ProgressService extends Service {
      * @see AsyncTask#publishProgress(Object[])
      * @see Notification.Builder#setContentText(CharSequence)
      */
-    protected abstract String getContentText(Progress[] values);
+    protected String getContentText(Progress[] values) {
+      return null;
+    }
   }
 }
