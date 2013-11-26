@@ -1,6 +1,8 @@
 package l.files.app;
 
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,8 +26,7 @@ import l.files.common.app.BaseListFragment;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
-import static android.content.SharedPreferences
-    .OnSharedPreferenceChangeListener;
+import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
@@ -35,10 +36,13 @@ import static l.files.app.menu.Menus.newBookmarkMenu;
 import static l.files.app.menu.Menus.newDirMenu;
 import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
+import static l.files.app.mode.Modes.newCopyAction;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
+import static l.files.app.mode.Modes.newCutAction;
 import static l.files.app.mode.Modes.newDeleteAction;
 import static l.files.app.mode.Modes.newRenameAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
+import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
@@ -104,14 +108,16 @@ public final class FilesFragment extends BaseListFragment
   private void setupListView() {
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-    FragmentManager manager = getActivityFragmentManager();
+    FragmentManager fragmentManager = getActivityFragmentManager();
+    Context context = getActivity();
+    ClipboardManager clipboardManager = getClipboardManager(context);
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
         newCountSelectedItemsAction(list),
         newSelectAllAction(list),
-//        newCutAction(list, getBus()),
-//        newCopyAction(list, getBus()),
-        newDeleteAction(list, getActivity().getContentResolver()),
-        newRenameAction(list, manager, directoryId)
+        newCutAction(list, clipboardManager),
+        newCopyAction(list, clipboardManager),
+        newDeleteAction(list, context.getContentResolver()),
+        newRenameAction(list, fragmentManager, directoryId)
     ));
   }
 

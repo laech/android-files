@@ -1,30 +1,31 @@
 package l.files.app.mode;
 
-import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.common.widget.ListViews.getCheckedItems;
-
+import android.content.ClipboardManager;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
-import com.squareup.otto.Bus;
-import java.io.File;
-import java.util.List;
+
+import com.google.common.collect.ImmutableSet;
+
 import l.files.R;
+import l.files.app.Clipboards;
 import l.files.common.widget.SingleAction;
-import l.files.event.CopyRequest;
+
+import static android.view.Menu.NONE;
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.app.ListViews.getCheckedFileIds;
 
 final class CopyAction extends SingleAction {
 
-  private final Bus bus;
   private final AbsListView list;
+  private final ClipboardManager manager;
 
-  CopyAction(AbsListView list, Bus bus) {
-    this.bus = checkNotNull(bus, "bus");
+  CopyAction(AbsListView list, ClipboardManager manager) {
     this.list = checkNotNull(list, "list");
+    this.manager = checkNotNull(manager, "manager");
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -38,11 +39,9 @@ final class CopyAction extends SingleAction {
     return android.R.id.copy;
   }
 
-  @Override protected void handleActionItemClicked(ActionMode mode, MenuItem item) {
-    List<File> files = getCheckedItems(list, File.class);
-    if (!files.isEmpty()) {
-      bus.post(new CopyRequest(files));
-    }
+  @Override
+  protected void handleActionItemClicked(ActionMode mode, MenuItem item) {
+    Clipboards.setCopy(manager, ImmutableSet.copyOf(getCheckedFileIds(list)));
     mode.finish();
   }
 }

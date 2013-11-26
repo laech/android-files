@@ -1,11 +1,11 @@
 package l.files.app.mode;
 
-import static android.widget.AbsListView.MultiChoiceModeListener;
-
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.support.v4.app.FragmentManager;
 import android.widget.AbsListView;
-import com.squareup.otto.Bus;
+
+import static android.widget.AbsListView.MultiChoiceModeListener;
 
 public final class Modes {
   private Modes() {}
@@ -22,12 +22,12 @@ public final class Modes {
     return new SelectAllAction(list);
   }
 
-  public static MultiChoiceModeListener newCutAction(AbsListView list, Bus bus) {
-    return new CutAction(list, bus);
+  public static MultiChoiceModeListener newCutAction(AbsListView list, ClipboardManager manager) {
+    return new CutAction(list, manager);
   }
 
-  public static MultiChoiceModeListener newCopyAction(AbsListView list, Bus bus) {
-    return new CopyAction(list, bus);
+  public static MultiChoiceModeListener newCopyAction(AbsListView list, ClipboardManager manager) {
+    return new CopyAction(list, manager);
   }
 
   public static MultiChoiceModeListener newRenameAction(
