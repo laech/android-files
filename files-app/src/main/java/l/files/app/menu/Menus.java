@@ -1,13 +1,10 @@
 package l.files.app.menu;
 
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
-
-import com.squareup.otto.Bus;
-
-import java.io.File;
 
 import l.files.app.TabHandler;
 import l.files.common.app.OptionsMenu;
@@ -33,8 +30,8 @@ public final class Menus {
     return new ShowHiddenFilesMenu(context);
   }
 
-  public static OptionsMenu newPasteMenu(Bus bus, File dir) {
-    return new PasteMenu(bus, dir);
+  public static OptionsMenu newPasteMenu(ClipboardManager manager, String directoryId) {
+    return new PasteMenu(manager, directoryId);
   }
 
   public static OptionsMenu newTabMenu(TabHandler handler) {

@@ -34,6 +34,7 @@ import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
 import static l.files.app.menu.Menus.newDirMenu;
+import static l.files.app.menu.Menus.newPasteMenu;
 import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
 import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCopyAction;
@@ -99,7 +100,7 @@ public final class FilesFragment extends BaseListFragment
     setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(context, loaders, resolver, directoryId),
         newDirMenu(manager, directoryId),
-//        newPasteMenu(getBus(), mDirectory),
+        newPasteMenu(getClipboardManager(context), directoryId),
         newSortMenu(manager),
         newShowHiddenFilesMenu(getActivity())
     ));

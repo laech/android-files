@@ -15,6 +15,19 @@ public final class Clipboards {
 
   private Clipboards() {}
 
+  public static boolean hasClip(ClipboardManager manager) {
+    try {
+      String action = manager.getPrimaryClip().getItemAt(0).getIntent().getAction();
+      return action.equals(ACTION_CUT)
+          || action.equals(ACTION_COPY);
+
+    } catch (NullPointerException e) {
+      return false;
+    } catch (IndexOutOfBoundsException e) {
+      return false;
+    }
+  }
+
   public static void setCut(ClipboardManager manager, Set<String> fileIds) {
     setClipData(manager, fileIds, ACTION_CUT);
   }
