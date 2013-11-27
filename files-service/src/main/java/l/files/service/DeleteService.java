@@ -34,7 +34,7 @@ public final class DeleteService extends ProgressService {
     return toFiles(newHashSet(intent.getStringArrayExtra(EXTRA_FILE_PATHS)));
   }
 
-  private final class DeleteTask extends Task<Object, Object, Void>
+  private final class DeleteTask extends Task<Object, String, Void>
       implements FilesCounter.Listener, FilesDeleter.Listener {
 
     private final Set<File> files;
@@ -48,8 +48,8 @@ public final class DeleteService extends ProgressService {
       return getString(R.string.preparing_to_delete);
     }
 
-    @Override protected String getContentTitle(Object[] values) {
-      return values[0].toString();
+    @Override protected String getContentTitle(String[] values) {
+      return values[0];
     }
 
     @Override protected Void doInBackground(Object... params) {
