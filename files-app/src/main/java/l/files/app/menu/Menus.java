@@ -30,8 +30,8 @@ public final class Menus {
     return new ShowHiddenFilesMenu(context);
   }
 
-  public static OptionsMenu newPasteMenu(ClipboardManager manager, String directoryId) {
-    return new PasteMenu(manager, directoryId);
+  public static OptionsMenu newPasteMenu(ClipboardManager manager, String directoryId, ContentResolver resolver) {
+    return new PasteMenu(manager, directoryId, resolver);
   }
 
   public static OptionsMenu newTabMenu(TabHandler handler) {

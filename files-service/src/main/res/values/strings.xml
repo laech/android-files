@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="preparing_delete_x_items">Preparing to delete %,d items</string>
+
   <string name="preparing_to_delete">Preparing to delete</string>
-  <string name="waiting">Waiting</string>
-  <string name="deleting_x_items">Deleting %,d items</string>
+  <plurals name="preparing_delete_x_items">
+    <item quantity="one">Preparing to delete %,d item</item>
+    <item quantity="other">Preparing to delete %,d items</item>
+  </plurals>
+  <plurals name="deleting_x_items">
+    <item quantity="one">Deleting %,d item</item>
+    <item quantity="other">Deleting %,d items</item>
+  </plurals>
+
+  <string name="preparing_to_copy_to_x">Preparing to copy to \"%s\"</string>
+  <plurals name="preparing_to_copy_x_items">
+    <item quantity="one">Preparing to copy %s item</item>
+    <item quantity="other">Preparing to copy %s items</item>
+  </plurals>
+  
+  <string name="copying_to_x">Copying to \"%s\"</string>
+  <plurals name="copying_x_items_x_of_x_size">
+    <item quantity="one">%1$,d item, %2$s of %3$s</item>
+    <item quantity="other">%1$,d items, %2$s of %3$s</item>
+  </plurals>
+
+  <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
+  <plurals name="preparing_to_move_x_items">
+    <item quantity="one">Preparing to move %s item</item>
+    <item quantity="other">Preparing to move %s items</item>
+  </plurals>
+
+  <string name="waiting">Waiting…</string>
 </resources>

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.SparseArray;
@@ -26,12 +27,14 @@ abstract class ProgressService extends Service {
   private SparseArray<Task<?, ?, ?>> tasks;
   private NotificationManager notificationManager;
   private BroadcastReceiver receiver;
+  private Handler handler;
 
   @Override public void onCreate() {
     super.onCreate();
     tasks = new SparseArray<>();
     notificationManager = getNotificationManager(this);
     receiver = new CancellationReceiver();
+    handler = new Handler();
   }
 
   @Override public void onDestroy() {
@@ -60,39 +63,7 @@ abstract class ProgressService extends Service {
     return null;
   }
 
-  private Notification.Builder newCancellableNotification(
-      int id, boolean showProgressBar, String title, String text) {
-
-    Notification.Builder builder = new Notification.Builder(this)
-        .setContentTitle(title)
-        .setContentText(text)
-        .setSmallIcon(R.drawable.ic_stat_notify_delete)
-        /*
-         * Set when to a fixed value to prevent flickering on update when there
-         * are multiple notifications being displayed/updated, since the when
-         * value is not displayed, so it can be any fixed value.
-         */
-        .setWhen(id)
-        .setShowWhen(false)
-        .setOnlyAlertOnce(true)
-        .setOngoing(true)
-        .addAction(
-            0,
-            getString(android.R.string.cancel),
-            newCancellationPendingIntent(id));
-
-    if (showProgressBar) builder.setProgress(0, 0, true);
-
-    return builder;
-  }
-
-  private PendingIntent newCancellationPendingIntent(int id) {
-    String action = newCancellationIntentAction(id);
-    Intent intent = new Intent(action).putExtra(EXTRA_ID, id);
-    return getBroadcast(this, id, intent, FLAG_UPDATE_CURRENT);
-  }
-
-  private IntentFilter newCancellationIntentFilter(int id) {
+  private static IntentFilter newCancellationIntentFilter(int id) {
     return new IntentFilter(newCancellationIntentAction(id));
   }
 
@@ -101,14 +72,17 @@ abstract class ProgressService extends Service {
    * share the same action, each must have a unique action for each notification
    * cancellation action to work correctly independently.
    */
-  private String newCancellationIntentAction(int id) {
+  private static String newCancellationIntentAction(int id) {
     return ACTION_CANCEL + "/" + id;
   }
 
   private final class CancellationReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
-      AsyncTask<?, ?, ?> task = tasks.get(intent.getIntExtra(EXTRA_ID, -1));
-      if (task != null) task.cancel(true);
+      int id = intent.getIntExtra(EXTRA_ID, -1);
+      AsyncTask<?, ?, ?> task = tasks.get(id);
+      if (task != null) {
+        task.cancel(true);
+      }
     }
   }
 
@@ -124,6 +98,45 @@ abstract class ProgressService extends Service {
     Task(int id, ProgressService service) {
       this.id = id;
       this.service = service;
+    }
+
+    private Notification newNotification(Progress progress) {
+      return newNotification(
+          getNotificationContentTitle(progress),
+          getNotificationContentText(progress),
+          getNotificationProgressPercentage(progress));
+    }
+
+    private Notification newNotification(String title, String text) {
+      return newNotification(title, text, 0);
+    }
+
+    private Notification newNotification(String title, String text, float progressPercentage) {
+      return new Notification.Builder(service)
+          .setContentTitle(title)
+          .setContentText(text)
+          .setSmallIcon(getNotificationSmallIcon())
+          /*
+           * Set when to a fixed value to prevent flickering on update when there
+           * are multiple notifications being displayed/updated, since the when
+           * value is not displayed, so it can be any fixed value.
+           */
+          .setWhen(id)
+          .setShowWhen(false)
+          .setOnlyAlertOnce(true)
+          .setOngoing(true)
+          .setProgress(100, (int) (progressPercentage * 100), progressPercentage == 0)
+          .addAction(
+              0,
+              service.getString(android.R.string.cancel),
+              newCancellationPendingIntent(id))
+          .build();
+    }
+
+    private PendingIntent newCancellationPendingIntent(int id) {
+      String action = newCancellationIntentAction(id);
+      Intent intent = new Intent(action).putExtra(EXTRA_ID, id);
+      return getBroadcast(service, id, intent, FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -142,17 +155,31 @@ abstract class ProgressService extends Service {
     }
 
     @Override protected void onPreExecute() {
-      String title = getContentTitle();
-      String summary = service.getString(R.string.waiting);
-      service.notificationManager.notify(id,
-          service.newCancellableNotification(id, false, title, summary).build());
+      if (!isCancelled()) {
+        String title = getNotificationContentTitle();
+        String text = service.getString(R.string.waiting);
+        service.notificationManager.notify(id, newNotification(title, text));
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override protected final Result doInBackground(Params... params) {
+      try {
+        return doTask();
+      } catch (RuntimeException e) {
+        service.handler.post(new Runnable() {
+          @Override public void run() {
+            onDone();
+          }
+        });
+        throw e;
+      }
     }
 
     @Override protected void onProgressUpdate(Progress[] values) {
-      String title = getContentTitle(values);
-      String summary = getContentText(values);
-      service.notificationManager.notify(id,
-          service.newCancellableNotification(id, true, title, summary).build());
+      if (!isCancelled()) {
+        service.notificationManager.notify(id, newNotification(values[0]));
+      }
     }
 
     private long elapsedTime() {
@@ -175,11 +202,20 @@ abstract class ProgressService extends Service {
       }
     }
 
+    protected abstract Result doTask();
+
+    /**
+     * Gets the ID of the notification icon to show.
+     *
+     * @see Notification.Builder#setSmallIcon(int)
+     */
+    protected abstract int getNotificationSmallIcon();
+
     /**
      * Gets the content title for the notification to be shown before any
      * progress has been made.
      */
-    protected abstract String getContentTitle();
+    protected abstract String getNotificationContentTitle();
 
     /**
      * Gets the content title for the notification to be shown.
@@ -187,8 +223,8 @@ abstract class ProgressService extends Service {
      * @see AsyncTask#publishProgress(Object[])
      * @see Notification.Builder#setContentTitle(CharSequence)
      */
-    protected String getContentTitle(Progress[] values) {
-      return getContentTitle();
+    protected String getNotificationContentTitle(Progress value) {
+      return getNotificationContentTitle();
     }
 
     /**
@@ -197,8 +233,18 @@ abstract class ProgressService extends Service {
      * @see AsyncTask#publishProgress(Object[])
      * @see Notification.Builder#setContentText(CharSequence)
      */
-    protected String getContentText(Progress[] values) {
+    protected String getNotificationContentText(Progress value) {
       return null;
+    }
+
+    /**
+     * Gets the current progress in percentage. Return 0 to indicate progress is
+     * indeterminate.
+     *
+     * @see Notification.Builder#setProgress(int, int, boolean)
+     */
+    protected float getNotificationProgressPercentage(Progress value) {
+      return 0;
     }
   }
 }

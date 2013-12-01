@@ -3,9 +3,12 @@ package l.files.app;
 import android.content.ClipboardManager;
 import android.content.Intent;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Set;
 
 import static android.content.ClipData.newIntent;
+import static java.util.Collections.emptySet;
 
 public final class Clipboards {
 
@@ -16,16 +19,47 @@ public final class Clipboards {
   private Clipboards() {}
 
   public static boolean hasClip(ClipboardManager manager) {
-    try {
-      String action = manager.getPrimaryClip().getItemAt(0).getIntent().getAction();
-      return action.equals(ACTION_CUT)
-          || action.equals(ACTION_COPY);
+    String action = getAction(manager);
+    return ACTION_CUT.equals(action)
+        || ACTION_COPY.equals(action);
+  }
 
-    } catch (NullPointerException e) {
-      return false;
-    } catch (IndexOutOfBoundsException e) {
-      return false;
+  public static boolean isCut(ClipboardManager manager) {
+    return ACTION_CUT.equals(getAction(manager));
+  }
+
+  public static boolean isCopy(ClipboardManager manager) {
+    return ACTION_COPY.equals(getAction(manager));
+  }
+
+  public static Set<String> getFileIds(ClipboardManager manager) {
+    Intent intent = getClipboardIntent(manager);
+    if (intent == null) {
+      return emptySet();
     }
+    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_IDS);
+    if (extras == null) {
+      return emptySet();
+    }
+    return ImmutableSet.copyOf(extras);
+  }
+
+  private static Intent getClipboardIntent(ClipboardManager manager) {
+    try {
+      return manager.getPrimaryClip().getItemAt(0).getIntent();
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IndexOutOfBoundsException e) {
+      return null;
+    }
+  }
+
+  private static String getAction(ClipboardManager manager) {
+    Intent intent = getClipboardIntent(manager);
+    if (intent == null) {
+      return null;
+    }
+    return intent.getAction();
   }
 
   public static void setCut(ClipboardManager manager, Set<String> fileIds) {

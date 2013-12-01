@@ -17,8 +17,6 @@ import static org.apache.commons.io.DirectoryWalker.CancelException;
 
 public final class DeleteService extends ProgressService {
 
-  private static final String TAG = DeleteService.class.getSimpleName();
-
   private static final String EXTRA_FILE_PATHS = "l.files.intent.extra.FILE_PATHS";
 
   public static void delete(Context context, Set<File> files) {
@@ -44,15 +42,19 @@ public final class DeleteService extends ProgressService {
       this.files = files;
     }
 
-    @Override protected String getContentTitle() {
+    @Override protected int getNotificationSmallIcon() {
+      return R.drawable.ic_stat_notify_delete;
+    }
+
+    @Override protected String getNotificationContentTitle() {
       return getString(R.string.preparing_to_delete);
     }
 
-    @Override protected String getContentTitle(String[] values) {
-      return values[0];
+    @Override protected String getNotificationContentTitle(String progress) {
+      return progress;
     }
 
-    @Override protected Void doInBackground(Object... params) {
+    @Override protected Void doTask() {
       try {
 
         FilesCounter.Result count = new FilesCounter(this, files).execute();
@@ -61,20 +63,22 @@ public final class DeleteService extends ProgressService {
       } catch (CancelException e) {
         return null;
       } catch (IOException e) {
-        Log.w(TAG, e); // TODO
+        Log.e(DeleteService.class.getSimpleName(), e.getMessage(), e); // TODO
       }
       return null;
     }
 
     @Override public void onFileCounted(int count, long length) {
       if (setAndGetUpdateProgress()) {
-        publishProgress(getString(R.string.preparing_delete_x_items, count));
+        publishProgress(getResources().getQuantityString(
+            R.plurals.preparing_delete_x_items, count, count));
       }
     }
 
     @Override public void onFileDeleted(int remaining) {
       if (setAndGetUpdateProgress()) {
-        publishProgress(getString(R.string.deleting_x_items, remaining));
+        publishProgress(getResources().getQuantityString(
+            R.plurals.deleting_x_items, remaining, remaining));
       }
     }
   }

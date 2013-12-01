@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
+import l.files.service.CopyService;
 import l.files.service.DeleteService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
@@ -26,6 +27,7 @@ import static java.util.Arrays.sort;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Files.listFiles;
+import static l.files.provider.FilesContract.EXTRA_DESTINATION_ID;
 import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.EXTRA_RESULT;
@@ -38,6 +40,7 @@ import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
+import static l.files.provider.FilesContract.METHOD_COPY;
 import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
@@ -178,8 +181,17 @@ public final class FilesProvider extends ContentProvider
         return callRename(arg, extras);
       case METHOD_DELETE:
         return callDelete(extras);
+      case METHOD_COPY:
+        return callCopy(extras);
     }
     return super.call(method, arg, extras);
+  }
+
+  private Bundle callCopy(Bundle extras) {
+    Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_IDS));
+    File destination = new File(toURI(extras.getString(EXTRA_DESTINATION_ID)));
+    CopyService.start(getContext(), files, destination);
+    return Bundle.EMPTY;
   }
 
   private Bundle callRename(String fileId, Bundle extras) {
@@ -191,13 +203,17 @@ public final class FilesProvider extends ContentProvider
   }
 
   private Bundle callDelete(Bundle extras) {
-    String[] fileIds = extras.getStringArray(EXTRA_FILE_IDS);
+    Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_IDS));
+    DeleteService.delete(getContext(), files);
+    return Bundle.EMPTY;
+  }
+
+  private Set<File> toFilesSet(String[] fileIds) {
     Set<File> files = newHashSetWithExpectedSize(fileIds.length);
     for (String fileId : fileIds) {
       files.add(new File(toURI(fileId)));
     }
-    DeleteService.delete(getContext(), files);
-    return null;
+    return files;
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {

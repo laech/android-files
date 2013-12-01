@@ -7,10 +7,12 @@ import android.os.Bundle;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import static android.content.UriMatcher.NO_MATCH;
+import static android.os.Looper.getMainLooper;
+import static android.os.Looper.myLooper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,10 +36,12 @@ public final class FilesContract {
   static final int MATCH_BOOKMARKS_ID = 201;
   static final int MATCH_SUGGESTION = 300;
 
+  static final String METHOD_COPY = "copy";
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
   static final String EXTRA_FILE_IDS = "file_ids";
   static final String EXTRA_NEW_NAME = "new_name";
+  static final String EXTRA_DESTINATION_ID = "destination";
   static final String EXTRA_RESULT = "result";
 
   private FilesContract() {}
@@ -204,10 +208,12 @@ public final class FilesContract {
   }
 
   public static void insertBookmark(ContentResolver resolver, String fileId) {
+    ensureNonMainThread();
     resolver.insert(buildBookmarkUri(fileId), null);
   }
 
   public static void deleteBookmark(ContentResolver resolver, String fileId) {
+    ensureNonMainThread();
     resolver.delete(buildBookmarkUri(fileId), null, null);
   }
 
@@ -220,6 +226,7 @@ public final class FilesContract {
    */
   public static boolean createDirectory(
       ContentResolver resolver, String parentId, String name) {
+    ensureNonMainThread();
     return resolver.insert(buildFileUri(parentId, name), null) != null;
   }
 
@@ -230,6 +237,7 @@ public final class FilesContract {
    */
   public static boolean rename(
       ContentResolver resolver, String fileId, String newName) {
+    ensureNonMainThread();
     Bundle args = new Bundle(1);
     args.putString(EXTRA_NEW_NAME, newName);
     Uri uri = buildFileUri(fileId);
@@ -237,10 +245,25 @@ public final class FilesContract {
     return result.getBoolean(EXTRA_RESULT);
   }
 
-  public static void deleteFiles(ContentResolver resolver, Set<String> fileIds) {
+  public static void delete(ContentResolver resolver, Collection<String> fileIds) {
+    ensureNonMainThread();
     Bundle args = new Bundle(1);
     args.putStringArray(EXTRA_FILE_IDS, fileIds.toArray(new String[fileIds.size()]));
     resolver.call(buildFilesUri(), METHOD_DELETE, null, args);
+  }
+
+  public static void copy(ContentResolver resolver, Collection<String> fileIds, String destinationId) {
+    ensureNonMainThread();
+    Bundle args = new Bundle(1);
+    args.putStringArray(EXTRA_FILE_IDS, fileIds.toArray(new String[fileIds.size()]));
+    args.putString(EXTRA_DESTINATION_ID, destinationId);
+    resolver.call(buildFileUri(destinationId), METHOD_COPY, null, args);
+  }
+
+  private static void ensureNonMainThread() {
+    if (myLooper() == getMainLooper()) {
+      throw new IllegalStateException("Should not call this from the main thread");
+    }
   }
 
   public final static class FileInfo {

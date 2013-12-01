@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
+// TODO avoid recursion on deep directories
 final class FilesCounter extends Traverser<FilesCounter.Result> {
 
   private final Set<File> files;
@@ -21,13 +22,22 @@ final class FilesCounter extends Traverser<FilesCounter.Result> {
 
   Result execute() throws IOException {
     for (File file : files) {
-      walk(file, null);
+      if (file.isDirectory()) {
+        walk(file, null);
+      } else {
+        countFile(file);
+      }
     }
     return new Result(count, length);
   }
 
   @Override protected void handleFile(
       File file, int depth, Collection<Result> results) throws IOException {
+    super.handleFile(file, depth, results);
+    countFile(file);
+  }
+
+  private void countFile(File file) {
     count++;
     length += file.length();
     listener.onFileCounted(count, length);

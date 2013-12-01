@@ -25,12 +25,21 @@ final class FilesDeleter extends Traverser<Void> {
 
   void execute() throws IOException {
     for (File file : files) {
-      walk(file, null);
+      if (file.isDirectory()) {
+        walk(file, null);
+      } else {
+        deleteFile(file);
+      }
     }
   }
 
   @Override protected void handleFile(
       File file, int depth, Collection<Void> results) throws IOException {
+    super.handleFile(file, depth, results);
+    deleteFile(file);
+  }
+
+  private void deleteFile(File file) {
     if (file.delete()) {
       remaining--;
       listener.onFileDeleted(remaining);
@@ -42,6 +51,7 @@ final class FilesDeleter extends Traverser<Void> {
 
   @Override protected void handleDirectoryEnd(
       File directory, int depth, Collection<Void> results) throws IOException {
+    super.handleDirectoryEnd(directory, depth, results);
     if (!directory.delete()) {
       Log.w(TAG, "Failed to delete directory " + directory.getAbsolutePath());
     }

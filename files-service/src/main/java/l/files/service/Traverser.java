@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import static org.apache.commons.io.FileUtils.isSymlink;
 
+// TODO avoid recursive StackOverflowException
 class Traverser<T> extends DirectoryWalker<T> {
 
   private final Cancellable cancellable;
@@ -16,9 +17,13 @@ class Traverser<T> extends DirectoryWalker<T> {
     this.cancellable = cancellable;
   }
 
+  protected boolean isCancelled() {
+    return cancellable.isCancelled();
+  }
+
   @Override protected boolean handleIsCancelled(
       File file, int depth, Collection<T> results) throws IOException {
-    return cancellable.isCancelled();
+    return isCancelled();
   }
 
   @Override protected boolean handleDirectory(

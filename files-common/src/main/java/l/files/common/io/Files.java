@@ -1,19 +1,36 @@
 package l.files.common.io;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public final class Files {
   private Files() {}
+
+  /**
+   * Returns a normalized path version of the given file.
+   * <p/>
+   * This resolves the ".", ".." references and returns the absolute file. This
+   * is useful when testing whether two files are really equal, for example,
+   * {@code new File("./Desktop")} and {@code new File("Desktop")} both
+   * references the same file, but {@link File#equals(Object)} will return false
+   * because the paths used to construct the two objects are different.
+   */
+  public static File normalize(File file) {
+    return new File(file.toURI().normalize());
+  }
 
   /**
    * Compares {@code target}'s canonical path to {@code prefix}'s canonical path
@@ -32,10 +49,65 @@ public final class Files {
   }
 
   /**
+   * Returns a new file with the matched path replaced with a new path.
+   * <p/>
+   * For example,
+   * <pre>
+   * File file = new File("/a/b/c");
+   * File match = new File("/a/b");
+   * File replacement = new File("/d");
+   * // replace(file, match, replacement) => new File("/d/c")
+   * </pre>
+   *
+   * @throws IllegalArgumentException if no match found
+   * @see #normalize(File)
+   */
+  public static File replace(File file, File match, File replacement) {
+    return doReplace(normalize(file), normalize(match), normalize(replacement));
+  }
+
+  private static File doReplace(
+      File normalizedFile,
+      File normalizedMatch,
+      File normalizedReplacement) {
+    checkArgument(hierarchy(normalizedFile).contains(normalizedMatch));
+    String filePath = normalizedFile.getAbsolutePath();
+    String matchPath = normalizedMatch.getAbsolutePath();
+    return new File(normalizedReplacement, filePath.substring(matchPath.length()));
+  }
+
+  /**
+   * Returns true if {@code ancestor} is the file itself or its ancestor.
+   *
+   * @see #normalize(File)
+   */
+  public static boolean isAncestorOrSelf(File file, File ancestor) {
+    return hierarchy(file).contains(normalize(ancestor));
+  }
+
+  /**
+   * Returns a set containing the file itself and all of its ancestors.
+   *
+   * @see #normalize(File)
+   */
+  public static Set<File> hierarchy(File file) {
+    checkNotNull(file, "file");
+    return hierarchy(normalize(file), new HashSet<File>());
+  }
+
+  private static Set<File> hierarchy(File file, Set<File> results) {
+    if (file == null) {
+      return results;
+    }
+    results.add(file);
+    return hierarchy(file.getParentFile(), results);
+  }
+
+  /**
    * Returns a file at {@code destDir} with the name of {@code source}, if such
    * file exists, append a number at the end of the file name (and before the
-   * extension if it's {@link java.io.File#isFile()}) until the returned file
-   * represents a nonexistent file.
+   * extension if it's {@link File#isFile()}) until the returned file represents
+   * a nonexistent file.
    */
   public static File getNonExistentDestinationFile(File source, File destDir) {
     String fullName = source.getName();
@@ -61,6 +133,10 @@ public final class Files {
       files[i] = new File(absolutePaths[i]);
     }
     return files;
+  }
+
+  public static Set<File> toFilesSet(String... absolutePaths) {
+    return ImmutableSet.copyOf(toFiles(absolutePaths));
   }
 
   public static String[] toAbsolutePaths(Collection<File> files) {

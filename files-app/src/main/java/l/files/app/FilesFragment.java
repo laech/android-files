@@ -100,7 +100,7 @@ public final class FilesFragment extends BaseListFragment
     setOptionsMenu(OptionsMenus.compose(
         newBookmarkMenu(context, loaders, resolver, directoryId),
         newDirMenu(manager, directoryId),
-        newPasteMenu(getClipboardManager(context), directoryId),
+        newPasteMenu(getClipboardManager(context), directoryId, resolver),
         newSortMenu(manager),
         newShowHiddenFilesMenu(getActivity())
     ));

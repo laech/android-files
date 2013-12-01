@@ -11,6 +11,9 @@
     <service
         android:name=".DeleteService"
         android:exported="false"/>
+    <service
+        android:name=".CopyService"
+        android:exported="false"/>
   </application>
 
 </manifest>

@@ -4,12 +4,11 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
-
-import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
 
@@ -73,8 +72,12 @@ final class DeleteAction extends SingleAction {
     return fileIds;
   }
 
-  private void requestDelete(List<String> fileIds) {
-    FilesContract.deleteFiles(resolver, ImmutableSet.copyOf(fileIds));
+  private void requestDelete(final List<String> fileIds) {
+    AsyncTask.execute(new Runnable() {
+      @Override public void run() {
+        FilesContract.delete(resolver, fileIds);
+      }
+    });
   }
 
   private String getConfirmMessage(int size) {
