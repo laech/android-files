@@ -87,7 +87,8 @@ abstract class ProgressService extends Service {
   }
 
   static abstract class Task<Params, Progress, Result>
-      extends AsyncTask<Params, Progress, Result> {
+      extends AsyncTask<Params, Progress, Result>
+      implements Cancellable {
 
     private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 

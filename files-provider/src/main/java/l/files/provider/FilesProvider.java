@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import l.files.service.CopyService;
+import l.files.service.CutService;
 import l.files.service.DeleteService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
@@ -41,6 +42,7 @@ import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
+import static l.files.provider.FilesContract.METHOD_CUT;
 import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
@@ -178,13 +180,22 @@ public final class FilesProvider extends ContentProvider
   @Override public Bundle call(String method, String arg, Bundle extras) {
     switch (method) {
       case METHOD_RENAME:
-        return callRename(arg, extras);
+        return callRename(arg, extras); // TODO remove arg
       case METHOD_DELETE:
         return callDelete(extras);
       case METHOD_COPY:
         return callCopy(extras);
+      case METHOD_CUT:
+        return callCut(extras);
     }
     return super.call(method, arg, extras);
+  }
+
+  private Bundle callCut(Bundle extras) {
+    Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_IDS));
+    File destination = new File(toURI(extras.getString(EXTRA_DESTINATION_ID)));
+    CutService.start(getContext(), files, destination);
+    return Bundle.EMPTY;
   }
 
   private Bundle callCopy(Bundle extras) {

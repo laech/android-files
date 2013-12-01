@@ -27,9 +27,10 @@ final class FilesDeleter extends Traverser<Void> {
     for (File file : files) {
       if (file.isDirectory()) {
         walk(file, null);
-      } else {
+      } else if (file.isFile()) {
         deleteFile(file);
       }
+      // else file doesn't exist, so skip
     }
   }
 

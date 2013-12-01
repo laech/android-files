@@ -9,13 +9,16 @@ import android.view.MenuItem.OnMenuItemClickListener;
 
 import l.files.app.Clipboards;
 import l.files.common.app.OptionsMenuAdapter;
-import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.app.Clipboards.clear;
 import static l.files.app.Clipboards.getFileIds;
 import static l.files.app.Clipboards.isCopy;
+import static l.files.app.Clipboards.isCut;
+import static l.files.provider.FilesContract.copy;
+import static l.files.provider.FilesContract.cut;
 
 final class PasteMenu
     extends OptionsMenuAdapter implements OnMenuItemClickListener {
@@ -49,7 +52,10 @@ final class PasteMenu
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
         if (isCopy(manager)) {
-          FilesContract.copy(resolver, getFileIds(manager), directoryId);
+          copy(resolver, getFileIds(manager), directoryId);
+        } else if (isCut(manager)) {
+          cut(resolver, getFileIds(manager), directoryId);
+          clear(manager);
         }
       }
     });

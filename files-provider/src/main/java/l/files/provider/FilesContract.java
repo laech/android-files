@@ -36,6 +36,7 @@ public final class FilesContract {
   static final int MATCH_BOOKMARKS_ID = 201;
   static final int MATCH_SUGGESTION = 300;
 
+  static final String METHOD_CUT = "cut";
   static final String METHOD_COPY = "copy";
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
@@ -253,11 +254,24 @@ public final class FilesContract {
   }
 
   public static void copy(ContentResolver resolver, Collection<String> fileIds, String destinationId) {
+    paste(resolver, fileIds, destinationId, METHOD_COPY);
+  }
+
+  public static void cut(ContentResolver resolver, Collection<String> fileIds, String destinationId) {
+    paste(resolver, fileIds, destinationId, METHOD_CUT);
+  }
+
+  private static void paste(
+      ContentResolver resolver,
+      Collection<String> fileIds,
+      String destinationId,
+      String method) {
+
     ensureNonMainThread();
-    Bundle args = new Bundle(1);
+    Bundle args = new Bundle(2);
     args.putStringArray(EXTRA_FILE_IDS, fileIds.toArray(new String[fileIds.size()]));
     args.putString(EXTRA_DESTINATION_ID, destinationId);
-    resolver.call(buildFileUri(destinationId), METHOD_COPY, null, args);
+    resolver.call(buildFileUri(destinationId), method, null, args);
   }
 
   private static void ensureNonMainThread() {

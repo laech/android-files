@@ -23,11 +23,7 @@
     <item quantity="other">%1$,d items, %2$s of %3$s</item>
   </plurals>
 
-  <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
-  <plurals name="preparing_to_move_x_items">
-    <item quantity="one">Preparing to move %s item</item>
-    <item quantity="other">Preparing to move %s items</item>
-  </plurals>
+  <string name="moving_to_x">Moving to \"%s\"</string>
 
   <string name="waiting">Waiting…</string>
 </resources>

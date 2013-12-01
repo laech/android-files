@@ -14,17 +14,28 @@ import static l.files.common.io.Files.toFilesSet;
 
 public final class CopyService extends ProgressService {
 
-  private static final String EXTRA_SOURCES = "l.files.intent.extra.SOURCES";
-  private static final String EXTRA_DESTINATION = "l.files.intent.extra.DESTINATION";
+  private static final String EXTRA_SOURCES = "sources";
+  private static final String EXTRA_DESTINATION = "destination";
+  private static final String EXTRA_DELETE_SOURCES = "delete_sources";
 
   public static void start(Context context, Set<File> sources, File destination) {
+    start(context, sources, destination, false);
+  }
+
+  public static void start(
+      Context context, Set<File> sources, File destination, boolean deleteSourcesOnComplete) {
     context.startService(new Intent(context, CopyService.class)
         .putExtra(EXTRA_SOURCES, toAbsolutePaths(sources))
-        .putExtra(EXTRA_DESTINATION, destination.getAbsolutePath()));
+        .putExtra(EXTRA_DESTINATION, destination.getAbsolutePath())
+        .putExtra(EXTRA_DELETE_SOURCES, deleteSourcesOnComplete));
   }
 
   @Override protected Task<?, ?, ?> newTask(Intent intent, int id) {
-    return new CopyTask(id, getSources(intent), getDestination(intent));
+    return new CopyTask(id, getSources(intent), getDestination(intent), getDeleteSourcesOnComplete(intent));
+  }
+
+  private boolean getDeleteSourcesOnComplete(Intent intent) {
+    return intent.getBooleanExtra(EXTRA_DELETE_SOURCES, false);
   }
 
   private File getDestination(Intent intent) {
@@ -40,11 +51,13 @@ public final class CopyService extends ProgressService {
 
     private final Set<File> sources;
     private final File destination;
+    private final boolean deleteSourcesOnComplete;
 
-    CopyTask(int id, Set<File> sources, File destination) {
+    CopyTask(int id, Set<File> sources, File destination, boolean deleteSourcesOnComplete) {
       super(id, CopyService.this);
       this.sources = sources;
       this.destination = destination;
+      this.deleteSourcesOnComplete = deleteSourcesOnComplete;
     }
 
     @Override protected int getNotificationSmallIcon() {
@@ -79,6 +92,13 @@ public final class CopyService extends ProgressService {
       }
 
       return null;
+    }
+
+    @Override protected void onPostExecute(Void none) {
+      super.onPostExecute(none);
+      if (deleteSourcesOnComplete) {
+        DeleteService.delete(CopyService.this, sources);
+      }
     }
 
     @Override public void onFileCounted(int count, long length) {

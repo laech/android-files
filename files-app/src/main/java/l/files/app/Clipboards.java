@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 import static android.content.ClipData.newIntent;
+import static android.content.ClipData.newPlainText;
 import static java.util.Collections.emptySet;
 
 public final class Clipboards {
@@ -17,6 +18,10 @@ public final class Clipboards {
   private static final String EXTRA_FILE_IDS = "l.files.intent.extra.FILE_IDS";
 
   private Clipboards() {}
+
+  public static void clear(ClipboardManager manager) {
+    manager.setPrimaryClip(newPlainText("", ""));
+  }
 
   public static boolean hasClip(ClipboardManager manager) {
     String action = getAction(manager);
