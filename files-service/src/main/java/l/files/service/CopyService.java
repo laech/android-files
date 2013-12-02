@@ -2,13 +2,15 @@ package l.files.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import static android.text.format.Formatter.formatShortFileSize;
+import static android.text.format.DateUtils.formatElapsedTime;
+import static android.text.format.Formatter.formatFileSize;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFilesSet;
 
@@ -31,7 +33,10 @@ public final class CopyService extends ProgressService {
   }
 
   @Override protected Task<?, ?, ?> newTask(Intent intent, int id) {
-    return new CopyTask(id, getSources(intent), getDestination(intent), getDeleteSourcesOnComplete(intent));
+    Set<File> sources = getSources(intent);
+    File destination = getDestination(intent);
+    boolean deleteSourcesOnComplete = getDeleteSourcesOnComplete(intent);
+    return new CopyTask(id, sources, destination, deleteSourcesOnComplete);
   }
 
   private boolean getDeleteSourcesOnComplete(Intent intent) {
@@ -52,6 +57,8 @@ public final class CopyService extends ProgressService {
     private final Set<File> sources;
     private final File destination;
     private final boolean deleteSourcesOnComplete;
+
+    private long copyStartTime = -1;
 
     CopyTask(int id, Set<File> sources, File destination, boolean deleteSourcesOnComplete) {
       super(id, CopyService.this);
@@ -74,6 +81,10 @@ public final class CopyService extends ProgressService {
 
     @Override protected String getNotificationContentText(Progress progress) {
       return progress.getNotificationContentText();
+    }
+
+    @Override protected String getNotificationContentInfo(Progress value) {
+      return value.getNotificationContentInfo();
     }
 
     @Override
@@ -109,8 +120,14 @@ public final class CopyService extends ProgressService {
 
     @Override
     public void onCopied(int remaining, long bytesCopied, long bytesTotal) {
+      if (copyStartTime < 0) {
+        copyStartTime = SystemClock.elapsedRealtime();
+      }
       if (setAndGetUpdateProgress()) {
-        publishProgress(new CopyProgress(destination, remaining, bytesCopied, bytesTotal));
+        long currentTime = SystemClock.elapsedRealtime();
+        float speed = bytesCopied / (float) (currentTime - copyStartTime);
+        long timeLeft = (long) ((bytesTotal - bytesCopied) / speed);
+        publishProgress(new CopyProgress(destination, remaining, bytesCopied, bytesTotal, timeLeft));
       }
     }
   }
@@ -121,7 +138,13 @@ public final class CopyService extends ProgressService {
 
     abstract String getNotificationContentText();
 
-    abstract float getNotificationProgressPercentage();
+    String getNotificationContentInfo() {
+      return null;
+    }
+
+    float getNotificationProgressPercentage() {
+      return 0;
+    }
   }
 
   private final class PrepareProgress extends Progress {
@@ -152,24 +175,46 @@ public final class CopyService extends ProgressService {
     private final int remaining;
     private final long bytesCopied;
     private final long bytesTotal;
+    private final long timeLeftMillis;
 
     private CopyProgress(
-        File destination, int remaining, long bytesCopied, long bytesTotal) {
+        File destination,
+        int remaining,
+        long bytesCopied,
+        long bytesTotal,
+        long timeLeftMillis) {
       this.destination = destination;
       this.remaining = remaining;
       this.bytesCopied = bytesCopied;
       this.bytesTotal = bytesTotal;
+      this.timeLeftMillis = timeLeftMillis;
     }
 
     @Override String getNotificationContentTitle() {
-      return getString(R.string.copying_to_x, destination.getName());
+      return getResources().getQuantityString(R.plurals.copying_x_items_to_x,
+          remaining, remaining, destination.getName());
     }
 
     @Override String getNotificationContentText() {
-      String copied = formatShortFileSize(CopyService.this, bytesCopied);
-      String total = formatShortFileSize(CopyService.this, bytesTotal);
-      return getResources().getQuantityString(
-          R.plurals.copying_x_items_x_of_x_size, remaining, remaining, copied, total);
+      String copied = formatFileSize(CopyService.this, bytesCopied);
+      String total = formatFileSize(CopyService.this, bytesTotal);
+      return getString(R.string.copying_x_of_x_size, copied, total);
+    }
+
+    @Override String getNotificationContentInfo() {
+      if (timeLeftMillis > 0) {
+        return getTimeLeftString();
+      }
+      return super.getNotificationContentInfo();
+    }
+
+    private String getTimeLeftString() {
+      long timeLeftSeconds = timeLeftMillis / 1000;
+      String formatted = formatElapsedTime(timeLeftSeconds);
+      if (formatted.charAt(0) == '0') {
+        formatted = formatted.substring(1);
+      }
+      return getString(R.string.x_countdown, formatted);
     }
 
     @Override float getNotificationProgressPercentage() {

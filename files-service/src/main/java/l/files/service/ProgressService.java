@@ -105,14 +105,18 @@ abstract class ProgressService extends Service {
       return newNotification(
           getNotificationContentTitle(progress),
           getNotificationContentText(progress),
+          getNotificationContentInfo(progress),
           getNotificationProgressPercentage(progress));
     }
 
     private Notification newNotification(String title, String text) {
-      return newNotification(title, text, 0);
+      return newNotification(title, text, null, 0);
     }
 
-    private Notification newNotification(String title, String text, float progressPercentage) {
+    private Notification newNotification(
+        String title, String text, String info, float progressPercentage) {
+      int percentage = (int) (progressPercentage * 100);
+      boolean indeterminate = percentage == 0;
       return new Notification.Builder(service)
           .setContentTitle(title)
           .setContentText(text)
@@ -126,7 +130,8 @@ abstract class ProgressService extends Service {
           .setShowWhen(false)
           .setOnlyAlertOnce(true)
           .setOngoing(true)
-          .setProgress(100, (int) (progressPercentage * 100), progressPercentage == 0)
+          .setProgress(100, percentage, indeterminate)
+          .setContentInfo(info)
           .addAction(
               0,
               service.getString(android.R.string.cancel),
@@ -221,7 +226,6 @@ abstract class ProgressService extends Service {
     /**
      * Gets the content title for the notification to be shown.
      *
-     * @see AsyncTask#publishProgress(Object[])
      * @see Notification.Builder#setContentTitle(CharSequence)
      */
     protected String getNotificationContentTitle(Progress value) {
@@ -231,10 +235,18 @@ abstract class ProgressService extends Service {
     /**
      * Gets the content text for the notification to be shown.
      *
-     * @see AsyncTask#publishProgress(Object[])
      * @see Notification.Builder#setContentText(CharSequence)
      */
     protected String getNotificationContentText(Progress value) {
+      return null;
+    }
+
+    /**
+     * Gets the content info for the notification to be shown.
+     *
+     * @see Notification.Builder#setContentInfo(CharSequence)
+     */
+    protected String getNotificationContentInfo(Progress value) {
       return null;
     }
 

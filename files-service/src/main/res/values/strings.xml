@@ -17,13 +17,16 @@
     <item quantity="other">Preparing to copy %s items</item>
   </plurals>
   
-  <string name="copying_to_x">Copying to \"%s\"</string>
-  <plurals name="copying_x_items_x_of_x_size">
-    <item quantity="one">%1$,d item, %2$s of %3$s</item>
-    <item quantity="other">%1$,d items, %2$s of %3$s</item>
+  <plurals name="copying_x_items_to_x">
+    <item quantity="one">Copying %1$,d item to \"%2$s\"</item>
+    <item quantity="other">Copying %1$,d items to \"%2$s\"</item>
   </plurals>
+  <string name="copying_x_of_x_size">%1$s of %2$s</string>
+  <string name="copying_x_of_x_size_x_time_left">%1$s of %2$s - %3$s</string>
 
   <string name="moving_to_x">Moving to \"%s\"</string>
 
   <string name="waiting">Waiting…</string>
+  <string name="x_countdown">-%s</string>
+
 </resources>
