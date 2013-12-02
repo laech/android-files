@@ -133,9 +133,10 @@ final class FilesCopier {
         count = (size - pos) > FILE_COPY_BUFFER_SIZE
             ? FILE_COPY_BUFFER_SIZE
             : size - pos;
-        pos += output.transferFrom(input, pos, count);
+        long copied = output.transferFrom(input, pos, count);
+        pos += copied;
 
-        bytesCopied += count;
+        bytesCopied += copied;
         listener.onCopied(remaining, bytesCopied, bytesTotal);
       }
     } finally {
