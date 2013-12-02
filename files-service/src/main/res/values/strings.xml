@@ -13,8 +13,8 @@
 
   <string name="preparing_to_copy_to_x">Preparing to copy to \"%s\"</string>
   <plurals name="preparing_to_copy_x_items">
-    <item quantity="one">Preparing to copy %s item</item>
-    <item quantity="other">Preparing to copy %s items</item>
+    <item quantity="one">Preparing to copy %,d item</item>
+    <item quantity="other">Preparing to copy %,d items</item>
   </plurals>
   
   <plurals name="copying_x_items_to_x">

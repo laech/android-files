@@ -14,12 +14,14 @@ final class FilesDeleter extends Traverser<Void> {
   private final Set<File> files;
   private final Listener listener;
 
+  private final int total;
   private int remaining;
 
   FilesDeleter(Listener listener, Set<File> files, int remaining) {
     super(listener);
     this.files = files;
     this.listener = listener;
+    this.total = remaining;
     this.remaining = remaining;
   }
 
@@ -43,7 +45,7 @@ final class FilesDeleter extends Traverser<Void> {
   private void deleteFile(File file) {
     if (file.delete()) {
       remaining--;
-      listener.onFileDeleted(remaining);
+      listener.onFileDeleted(total, remaining);
     } else {
       // TODO
       Log.w(TAG, "Failed to delete file " + file.getAbsolutePath());
@@ -59,6 +61,6 @@ final class FilesDeleter extends Traverser<Void> {
   }
 
   static interface Listener extends Cancellable {
-    void onFileDeleted(int remaining);
+    void onFileDeleted(int total, int remaining);
   }
 }

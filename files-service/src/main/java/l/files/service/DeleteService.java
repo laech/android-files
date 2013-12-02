@@ -32,7 +32,7 @@ public final class DeleteService extends ProgressService {
     return toFiles(newHashSet(intent.getStringArrayExtra(EXTRA_FILE_PATHS)));
   }
 
-  private final class DeleteTask extends Task<Object, String, Void>
+  private final class DeleteTask extends Task<Object, Progress, Void>
       implements FilesCounter.Listener, FilesDeleter.Listener {
 
     private final Set<File> files;
@@ -50,8 +50,13 @@ public final class DeleteService extends ProgressService {
       return getString(R.string.preparing_to_delete);
     }
 
-    @Override protected String getNotificationContentTitle(String progress) {
-      return progress;
+    @Override protected String getNotificationContentTitle(Progress progress) {
+      return progress.getNotificationContentTitle();
+    }
+
+    @Override
+    protected float getNotificationProgressPercentage(Progress progress) {
+      return progress.getNotificationProgressPercentage();
     }
 
     @Override protected Void doTask() {
@@ -70,16 +75,54 @@ public final class DeleteService extends ProgressService {
 
     @Override public void onFileCounted(int count, long length) {
       if (setAndGetUpdateProgress()) {
-        publishProgress(getResources().getQuantityString(
-            R.plurals.preparing_delete_x_items, count, count));
+        publishProgress(new PrepareProgress(count));
       }
     }
 
-    @Override public void onFileDeleted(int remaining) {
+    @Override public void onFileDeleted(int total, int remaining) {
       if (setAndGetUpdateProgress()) {
-        publishProgress(getResources().getQuantityString(
-            R.plurals.deleting_x_items, remaining, remaining));
+        publishProgress(new DeleteProgress(total, remaining));
       }
+    }
+  }
+
+  abstract class Progress {
+    abstract String getNotificationContentTitle();
+
+    float getNotificationProgressPercentage() {
+      return 0;
+    }
+  }
+
+  final class PrepareProgress extends Progress {
+    private final int count;
+
+    PrepareProgress(int count) {
+      this.count = count;
+    }
+
+    @Override String getNotificationContentTitle() {
+      return getResources().getQuantityString(
+          R.plurals.preparing_delete_x_items, count, count);
+    }
+  }
+
+  final class DeleteProgress extends Progress {
+    private final int total;
+    private final int remaining;
+
+    DeleteProgress(int total, int remaining) {
+      this.total = total;
+      this.remaining = remaining;
+    }
+
+    @Override String getNotificationContentTitle() {
+      return getResources().getQuantityString(
+          R.plurals.deleting_x_items, remaining, remaining);
+    }
+
+    @Override float getNotificationProgressPercentage() {
+      return (total - remaining) / (float) total;
     }
   }
 }
