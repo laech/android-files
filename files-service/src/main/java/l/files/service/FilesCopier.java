@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Queue;
@@ -29,11 +30,13 @@ final class FilesCopier {
   private static final String TAG = FilesCopier.class.getSimpleName();
 
   /*
-   * Keep the buffer size relatively small to avoid affective everything else,
-   * especially the UI. This may be related:
+   * Higher the buffer, faster the copy, but will affect the overall system
+   * performance/responsiveness more.
+   * Need to keep a good balance between speed and system performance.
+   * This may be related:
    * http://stackoverflow.com/questions/4290679/why-high-io-rate-operations-slow-everything-on-linux
    */
-  private static final long FILE_COPY_BUFFER_SIZE = 1024;
+  private static final long FILE_COPY_BUFFER_SIZE = 1024 * 4;
 
   private final Set<File> sources;
   private final File destination;
@@ -138,6 +141,10 @@ final class FilesCopier {
 
         bytesCopied += copied;
         listener.onCopied(remaining, bytesCopied, bytesTotal);
+      }
+    } catch (ClosedByInterruptException e) {
+      if (!destFile.delete() && DEBUG) {
+        Log.d(TAG, "Failed to delete file on cancel: " + destFile);
       }
     } finally {
       closeQuietly(output);
