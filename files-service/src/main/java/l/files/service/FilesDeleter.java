@@ -6,8 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
-final class FilesDeleter extends Traverser<Void> {
+final class FilesDeleter extends Traverser<Void> implements Callable<Void> {
 
   private static final String TAG = FilesDeleter.class.getSimpleName();
 
@@ -25,7 +26,7 @@ final class FilesDeleter extends Traverser<Void> {
     this.remaining = remaining;
   }
 
-  void execute() throws IOException {
+  @Override public Void call() throws IOException {
     for (File file : files) {
       if (file.isDirectory()) {
         walk(file, null);
@@ -34,6 +35,7 @@ final class FilesDeleter extends Traverser<Void> {
       }
       // else file doesn't exist, so skip
     }
+    return null;
   }
 
   @Override protected void handleFile(

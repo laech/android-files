@@ -49,7 +49,7 @@ public final class CutService extends ProgressService {
 
     @Override protected Set<File> doTask() {
       try {
-        return new FilesCutter(this, sources, destination).executeAndGetFailures();
+        return new FilesCutter(this, sources, destination).call();
       } catch (IOException e) {
         Log.e(CutService.class.getSimpleName(), e.getMessage(), e); // TODO
         return emptySet();

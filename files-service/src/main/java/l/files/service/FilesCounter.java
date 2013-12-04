@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 // TODO avoid recursion on deep directories
-final class FilesCounter extends Traverser<FilesCounter.Result> {
+final class FilesCounter extends Traverser<FilesCounter.Result>
+    implements Callable<FilesCounter.Result> {
 
   private final Set<File> files;
   private final Listener listener;
@@ -20,7 +22,7 @@ final class FilesCounter extends Traverser<FilesCounter.Result> {
     this.listener = listener;
   }
 
-  Result execute() throws IOException {
+  @Override public Result call() throws IOException {
     for (File file : files) {
       if (file.isDirectory()) {
         walk(file, null);

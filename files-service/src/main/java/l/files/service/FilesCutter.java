@@ -3,12 +3,13 @@ package l.files.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.getNonExistentDestinationFile;
 import static l.files.common.io.Files.isAncestorOrSelf;
 
-final class FilesCutter {
+final class FilesCutter implements Callable<Set<File>> {
 
   private final Cancellable listener;
   private final Set<File> sources;
@@ -20,7 +21,10 @@ final class FilesCutter {
     this.destination = destination;
   }
 
-  Set<File> executeAndGetFailures() throws IOException {
+  /**
+   * @return the files that failed to be moved
+   */
+  @Override public Set<File> call() throws IOException {
     Set<File> failures = newHashSet();
     for (File from : sources) {
       if (listener.isCancelled()) {

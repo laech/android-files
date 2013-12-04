@@ -95,8 +95,8 @@ public final class CopyService extends ProgressService {
     @Override protected Void doTask() {
       try {
 
-        FilesCounter.Result result = new FilesCounter(this, sources).execute();
-        new FilesCopier(this, sources, destination, result.count, result.length).execute();
+        FilesCounter.Result result = new FilesCounter(this, sources).call();
+        new FilesCopier(this, sources, destination, result.count, result.length).call();
 
       } catch (IOException e) {
         Log.e(CopyService.class.getSimpleName(), e.getMessage(), e); // TODO

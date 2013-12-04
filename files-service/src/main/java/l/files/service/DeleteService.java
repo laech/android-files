@@ -62,8 +62,8 @@ public final class DeleteService extends ProgressService {
     @Override protected Void doTask() {
       try {
 
-        FilesCounter.Result count = new FilesCounter(this, files).execute();
-        new FilesDeleter(this, files, count.count).execute();
+        FilesCounter.Result count = new FilesCounter(this, files).call();
+        new FilesDeleter(this, files, count.count).call();
 
       } catch (CancelException e) {
         return null;

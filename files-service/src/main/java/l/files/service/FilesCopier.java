@@ -13,6 +13,7 @@ import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -25,7 +26,7 @@ import static l.files.service.BuildConfig.DEBUG;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-final class FilesCopier {
+final class FilesCopier implements Callable<Void> {
 
   private static final String TAG = FilesCopier.class.getSimpleName();
 
@@ -53,7 +54,7 @@ final class FilesCopier {
     this.bytesTotal = length;
   }
 
-  void execute() throws IOException {
+  @Override public Void call() throws IOException {
     for (File from : sources) {
       if (listener.isCancelled()) {
         break;
@@ -65,6 +66,7 @@ final class FilesCopier {
       File to = getNonExistentDestinationFile(from, destination);
       copy(from, to);
     }
+    return null;
   }
 
   private void copy(File from, File to) throws IOException {
