@@ -9,13 +9,13 @@ import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.getNonExistentDestinationFile;
 import static l.files.common.io.Files.isAncestorOrSelf;
 
-final class FilesCutter implements Callable<Set<File>> {
+final class Mover implements Callable<Set<File>> {
 
   private final Cancellable listener;
   private final Set<File> sources;
   private final File destination;
 
-  FilesCutter(Cancellable listener, Set<File> sources, File destination) {
+  Mover(Cancellable listener, Set<File> sources, File destination) {
     this.listener = listener;
     this.sources = sources;
     this.destination = destination;

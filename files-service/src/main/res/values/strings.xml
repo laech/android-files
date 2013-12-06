@@ -12,20 +12,27 @@
   </plurals>
 
   <string name="preparing_to_copy_to_x">Preparing to copy to \"%s\"</string>
+  <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
   <plurals name="preparing_to_copy_x_items">
     <item quantity="one">Preparing to copy %,d item</item>
     <item quantity="other">Preparing to copy %,d items</item>
+  </plurals>
+  <plurals name="preparing_to_move_x_items">
+    <item quantity="one">Preparing to move %,d item</item>
+    <item quantity="other">Preparing to move %,d items</item>
   </plurals>
   
   <plurals name="copying_x_items_to_x">
     <item quantity="one">Copying %1$,d item to \"%2$s\"</item>
     <item quantity="other">Copying %1$,d items to \"%2$s\"</item>
   </plurals>
-  <string name="copying_x_of_x_size">%1$s of %2$s</string>
-  <string name="copying_x_of_x_size_x_time_left">%1$s of %2$s - %3$s</string>
+  <plurals name="moving_x_items_to_x">
+    <item quantity="one">Moving %1$,d item to \"%2$s\"</item>
+    <item quantity="other">Moving %1$,d items to \"%2$s\"</item>
+  </plurals>
 
-  <string name="moving_to_x">Moving to \"%s\"</string>
-
+  <string name="cleaning_after_move">Cleaning up after move</string>
+  <string name="x_of_x_size">%1$s of %2$s</string>
   <string name="waiting">Waiting…</string>
   <string name="x_countdown">-%s</string>
 

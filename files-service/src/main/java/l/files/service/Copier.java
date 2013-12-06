@@ -26,9 +26,9 @@ import static l.files.service.BuildConfig.DEBUG;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-final class FilesCopier implements Callable<Void> {
+final class Copier implements Callable<Void> {
 
-  private static final String TAG = FilesCopier.class.getSimpleName();
+  private static final String TAG = Copier.class.getSimpleName();
 
   /*
    * Higher the buffer, faster the copy, but will affect the overall system
@@ -46,7 +46,7 @@ final class FilesCopier implements Callable<Void> {
   private int remaining;
   private long bytesCopied;
 
-  FilesCopier(Listener listener, Set<File> sources, File destination, int remaining, long length) {
+  Copier(Listener listener, Set<File> sources, File destination, int remaining, long length) {
     this.listener = checkNotNull(listener, "listener");
     this.destination = checkNotNull(destination, "destination");
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));

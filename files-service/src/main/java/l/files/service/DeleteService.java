@@ -33,7 +33,7 @@ public final class DeleteService extends ProgressService {
   }
 
   private final class DeleteTask extends Task<Object, Progress, Void>
-      implements FilesCounter.Listener, FilesDeleter.Listener {
+      implements Counter.Listener, Deleter.Listener {
 
     private final Set<File> files;
 
@@ -62,8 +62,8 @@ public final class DeleteService extends ProgressService {
     @Override protected Void doTask() {
       try {
 
-        FilesCounter.Result count = new FilesCounter(this, files).call();
-        new FilesDeleter(this, files, count.count).call();
+        Counter.Result count = new Counter(this, files).call();
+        new Deleter(this, files, count.count).call();
 
       } catch (CancelException e) {
         return null;
@@ -86,14 +86,6 @@ public final class DeleteService extends ProgressService {
     }
   }
 
-  abstract class Progress {
-    abstract String getNotificationContentTitle();
-
-    float getNotificationProgressPercentage() {
-      return 0;
-    }
-  }
-
   final class PrepareProgress extends Progress {
     private final int count;
 
@@ -107,22 +99,15 @@ public final class DeleteService extends ProgressService {
     }
   }
 
-  final class DeleteProgress extends Progress {
-    private final int total;
-    private final int remaining;
+  final class DeleteProgress extends DeleteBaseProgress {
 
     DeleteProgress(int total, int remaining) {
-      this.total = total;
-      this.remaining = remaining;
+      super(total, remaining);
     }
 
     @Override String getNotificationContentTitle() {
       return getResources().getQuantityString(
           R.plurals.deleting_x_items, remaining, remaining);
-    }
-
-    @Override float getNotificationProgressPercentage() {
-      return (total - remaining) / (float) total;
     }
   }
 }

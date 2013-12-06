@@ -92,9 +92,10 @@ abstract class ProgressService extends Service {
 
     private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
-    private final int id;
-    private final ProgressService service;
+    final int id;
+    final ProgressService service;
     private long lastProgressTime;
+    private long startTime;
 
     Task(int id, ProgressService service) {
       this.id = id;
@@ -123,11 +124,9 @@ abstract class ProgressService extends Service {
           .setSmallIcon(getNotificationSmallIcon())
           /*
            * Set when to a fixed value to prevent flickering on update when there
-           * are multiple notifications being displayed/updated, since the when
-           * value is not displayed, so it can be any fixed value.
+           * are multiple notifications being displayed/updated.
            */
-          .setWhen(id)
-          .setShowWhen(false)
+          .setWhen(startTime)
           .setOnlyAlertOnce(true)
           .setOngoing(true)
           .setProgress(100, percentage, indeterminate)
@@ -161,6 +160,7 @@ abstract class ProgressService extends Service {
     }
 
     @Override protected void onPreExecute() {
+      startTime = System.currentTimeMillis();
       if (!isCancelled()) {
         String title = getNotificationContentTitle();
         String text = service.getString(R.string.waiting);

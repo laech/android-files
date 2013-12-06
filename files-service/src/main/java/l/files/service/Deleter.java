@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-final class FilesDeleter extends Traverser<Void> implements Callable<Void> {
+final class Deleter extends Traverser<Void> implements Callable<Void> {
 
-  private static final String TAG = FilesDeleter.class.getSimpleName();
+  private static final String TAG = Deleter.class.getSimpleName();
 
   private final Set<File> files;
   private final Listener listener;
@@ -18,7 +18,7 @@ final class FilesDeleter extends Traverser<Void> implements Callable<Void> {
   private final int total;
   private int remaining;
 
-  FilesDeleter(Listener listener, Set<File> files, int remaining) {
+  Deleter(Listener listener, Set<File> files, int remaining) {
     super(listener);
     this.files = files;
     this.listener = listener;

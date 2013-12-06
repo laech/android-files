@@ -15,7 +15,7 @@
         android:name=".CopyService"
         android:exported="false"/>
     <service
-        android:name=".CutService"
+        android:name=".MoveService"
         android:exported="false"/>
   </application>
 

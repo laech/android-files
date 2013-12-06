@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.Set;
 
 import l.files.service.CopyService;
-import l.files.service.CutService;
 import l.files.service.DeleteService;
+import l.files.service.MoveService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -194,7 +194,7 @@ public final class FilesProvider extends ContentProvider
   private Bundle callCut(Bundle extras) {
     Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_IDS));
     File destination = new File(toURI(extras.getString(EXTRA_DESTINATION_ID)));
-    CutService.start(getContext(), files, destination);
+    MoveService.start(getContext(), files, destination);
     return Bundle.EMPTY;
   }
 

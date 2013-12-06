@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 // TODO avoid recursion on deep directories
-final class FilesCounter extends Traverser<FilesCounter.Result>
-    implements Callable<FilesCounter.Result> {
+final class Counter extends Traverser<Counter.Result>
+    implements Callable<Counter.Result> {
 
   private final Set<File> files;
   private final Listener listener;
@@ -16,7 +16,7 @@ final class FilesCounter extends Traverser<FilesCounter.Result>
   private int count;
   private long length;
 
-  FilesCounter(Listener listener, Set<File> files) {
+  Counter(Listener listener, Set<File> files) {
     super(listener);
     this.files = files;
     this.listener = listener;
