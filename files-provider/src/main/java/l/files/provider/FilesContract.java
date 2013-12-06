@@ -208,12 +208,12 @@ public final class FilesContract {
     return Uri.parse(fileId);
   }
 
-  public static void insertBookmark(ContentResolver resolver, String fileId) {
+  public static void bookmark(ContentResolver resolver, String fileId) {
     ensureNonMainThread();
     resolver.insert(buildBookmarkUri(fileId), null);
   }
 
-  public static void deleteBookmark(ContentResolver resolver, String fileId) {
+  public static void unbookmark(ContentResolver resolver, String fileId) {
     ensureNonMainThread();
     resolver.delete(buildBookmarkUri(fileId), null, null);
   }

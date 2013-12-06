@@ -22,8 +22,8 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
 import static l.files.provider.FilesContract.buildBookmarkUri;
-import static l.files.provider.FilesContract.deleteBookmark;
-import static l.files.provider.FilesContract.insertBookmark;
+import static l.files.provider.FilesContract.unbookmark;
+import static l.files.provider.FilesContract.bookmark;
 
 final class BookmarkMenu extends OptionsMenuAdapter
     implements OnMenuItemClickListener, LoaderCallbacks<Cursor> {
@@ -61,8 +61,8 @@ final class BookmarkMenu extends OptionsMenuAdapter
     final boolean checked = item.isChecked();
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        if (checked) deleteBookmark(resolver, fileId);
-        else insertBookmark(resolver, fileId);
+        if (checked) unbookmark(resolver, fileId);
+        else bookmark(resolver, fileId);
       }
     });
     return true;
