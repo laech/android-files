@@ -7,7 +7,7 @@
 
   <uses-sdk
       android:minSdkVersion="16"
-      android:targetSdkVersion="18"/>
+      android:targetSdkVersion="19"/>
 
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
@@ -26,11 +26,6 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-
-    <activity
-        android:exported="false"
-        android:name=".app.io.ConflictsActivity"
-        android:label="@string/conflicts_activity_label"/>
 
     <service android:exported="false" android:name=".event.internal.FileService$Cut"/>
     <service android:exported="false" android:name=".event.internal.FileService$Copy"/>
