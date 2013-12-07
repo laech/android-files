@@ -29,10 +29,10 @@ android {
 
 dependencies {
   compile project(':files-common')
-  compile project(':files-event')
   compile project(':files-provider')
   compile project.libs.trove4j
   compile project.libs.joda_time
+  compile project.libs.otto
 
   instrumentTestCompile project.libs.mockito
 }

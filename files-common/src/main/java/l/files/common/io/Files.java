@@ -1,6 +1,5 @@
 package l.files.common.io;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
@@ -30,22 +29,6 @@ public final class Files {
    */
   public static File normalize(File file) {
     return new File(file.toURI().normalize());
-  }
-
-  /**
-   * Compares {@code target}'s canonical path to {@code prefix}'s canonical path
-   * to determine if {@code prefix} is a ancestor of {@code target}.
-   *
-   * @see File#getCanonicalPath()
-   * @see File#getCanonicalFile()
-   */
-  public static boolean canonicalStartsWith(File target, File prefix)
-      throws IOException {
-    // TODO
-    String targetPath = target.getCanonicalPath();
-    String prefixPath = prefix.getCanonicalPath();
-    return targetPath.equals(prefixPath) ||
-        targetPath.startsWith(prefixPath + "/");
   }
 
   /**
@@ -149,13 +132,6 @@ public final class Files {
       paths[i] = files[i].getAbsolutePath();
     }
     return paths;
-  }
-
-  /**
-   * Returns a function for {@link File#getName()}.
-   */
-  public static Function<File, String> name() {
-    return FileNameFunction.INSTANCE;
   }
 
   /**
