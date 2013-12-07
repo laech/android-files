@@ -11,5 +11,9 @@
   <item type="id" name="rename"/>
   <item type="id" name="new_tab"/>
   <item type="id" name="close_tab"/>
+  <item type="id" name="file_id"/>
+  <item type="id" name="file_name"/>
+  <item type="id" name="is_readable"/>
+  <item type="id" name="is_directory"/>
 
 </resources>
