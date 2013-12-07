@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:minWidth="48dp"
-    android:background="?android:attr/selectableItemBackground"
+    android:background="@drawable/selector_light"
     android:gravity="center"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
