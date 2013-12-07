@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/path_bar_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/action_bar_background"
+    android:gravity="center_vertical"
+    android:scrollbars="none"
+    android:requiresFadingEdge="horizontal"
+    android:overScrollMode="never">
+
+  <LinearLayout
+      android:id="@+id/path_item_container"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_gravity="center_vertical"
+      android:orientation="horizontal"
+      style="?android:attr/buttonBarStyle">
+
+  </LinearLayout>
+
+</HorizontalScrollView>

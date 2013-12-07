@@ -25,6 +25,7 @@ public final class FilesContract {
   static final String PATH_CHILDREN = "children";
   static final String PATH_BOOKMARKS = "bookmarks";
   static final String PATH_SUGGESTION = "suggestion";
+  static final String PATH_HIERARCHY = "hierarchy";
 
   static final String PARAM_SHOW_HIDDEN = "showHidden";
   static final String VALUE_SHOW_HIDDEN_YES = "1";
@@ -35,6 +36,7 @@ public final class FilesContract {
   static final int MATCH_BOOKMARKS = 200;
   static final int MATCH_BOOKMARKS_ID = 201;
   static final int MATCH_SUGGESTION = 300;
+  static final int MATCH_HIERARCHY = 400;
 
   static final String METHOD_CUT = "cut";
   static final String METHOD_COPY = "copy";
@@ -54,7 +56,30 @@ public final class FilesContract {
     matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_ID);
     matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_ID_CHILDREN);
     matcher.addURI(AUTHORITY, PATH_SUGGESTION + "/*/*", MATCH_SUGGESTION);
+    matcher.addURI(AUTHORITY, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
     return matcher;
+  }
+
+  /**
+   * Creates a Uri for querying the hierarchy of a file. The result cursor will
+   * contain the file itself and all the ancestor files of the hierarchy. The
+   * first item in the cursor will be the root ancestor, the last item will be
+   * the file given there.
+   */
+  public static Uri buildHierarchyUri(String fileId) {
+    checkNotNull(fileId, "fileId");
+    return AUTHORITY_URI
+        .buildUpon()
+        .appendPath(PATH_HIERARCHY)
+        .appendPath(fileId)
+        .build();
+  }
+
+  public static String getHierarchyFileId(Uri hierarchyUri) {
+    List<String> segments = hierarchyUri.getPathSegments();
+    checkArgument(segments.size() == 2, segments.size());
+    checkArgument(segments.get(0).equals(PATH_HIERARCHY), segments.get(0));
+    return segments.get(1);
   }
 
   /**

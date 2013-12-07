@@ -76,6 +76,7 @@ public final class FilesPagerFragment extends Fragment {
     return getChildFragmentManager().getBackStackEntryCount() > 0;
   }
 
+  // TODO delete
   public File getCurrentDirectory() {
     FilesFragment fragment = findCurrentFragment();
     if (fragment == null) {
@@ -84,6 +85,19 @@ public final class FilesPagerFragment extends Fragment {
     return new File(URI.create(fragment.getDirectoryId()));
   }
 
+  public String getCurrentDirectoryId() {
+    FilesFragment fragment = findCurrentFragment();
+    if (fragment == null) {
+      return getInitialDirectoryId();
+    }
+    return fragment.getDirectoryId();
+  }
+
+  private String getInitialDirectoryId() {
+    return getArguments().getString(ARG_DIRECTORY);
+  }
+
+  // TODO delete
   private File getInitialDirectory() {
     return new File(getArguments().getString(ARG_DIRECTORY));
   }

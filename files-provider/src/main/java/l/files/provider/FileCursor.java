@@ -6,6 +6,7 @@ import android.webkit.MimeTypeMap;
 import java.io.File;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Locale.ENGLISH;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
@@ -114,6 +115,7 @@ final class FileCursor extends AbstractCursor {
 
     String name() {
       if (name == null) name = file.getName();
+      if (isNullOrEmpty(name)) name = file.getPath();
       return name;
     }
 

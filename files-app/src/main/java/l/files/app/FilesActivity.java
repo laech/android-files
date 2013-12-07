@@ -1,12 +1,14 @@
 package l.files.app;
 
 import android.app.ActionBar;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
@@ -26,10 +28,12 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.app.OptionsMenus;
 
 import static android.app.ActionBar.LayoutParams;
+import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.KeyEvent.KEYCODE_BACK;
@@ -39,13 +43,15 @@ import static com.google.common.collect.Maps.newHashMap;
 import static l.files.app.Bundles.getInt;
 import static l.files.app.Bundles.getParcelableArrayList;
 import static l.files.app.FilesApp.getBus;
+import static l.files.app.Preferences.getShowPathBar;
+import static l.files.app.Preferences.isShowPathBarKey;
 import static l.files.app.UserDirs.DIR_HOME;
 import static l.files.app.format.Formats.label;
 import static l.files.app.menu.Menus.newCloseTabMenu;
 import static l.files.app.menu.Menus.newTabMenu;
 
-public final class FilesActivity
-    extends BaseFragmentActivity implements TabHandler {
+public final class FilesActivity extends BaseFragmentActivity
+    implements TabHandler, OnSharedPreferenceChangeListener {
 
   public static final String EXTRA_DIR = FilesPagerFragment.ARG_DIRECTORY;
 
@@ -69,6 +75,8 @@ public final class FilesActivity
   Function<File, String> labels;
   IdGenerator idGenerator;
 
+  private PathBarFragment pathBar;
+
   final Handler handler = new Handler();
 
   @Override protected void onCreate(Bundle state) {
@@ -79,10 +87,27 @@ public final class FilesActivity
     setViewPager(getSavedTabItems(state));
     setDrawer();
     setActionBar();
+    setPathBar();
     setOptionsMenu(OptionsMenus.compose(
         newTabMenu(this),
-        newCloseTabMenu(this)));
+        newCloseTabMenu(this),
+        new ShowPathBarMenu(this)));
     updateShowTabs();
+    Preferences.register(this, this);
+  }
+
+  private void setPathBar() {
+    if (!Preferences.getShowPathBar(this)) {
+      getSupportFragmentManager()
+          .beginTransaction()
+          .hide(pathBar)
+          .commit();
+    }
+  }
+
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    Preferences.unregister(this, this);
   }
 
   @Override protected void onPostCreate(Bundle savedInstanceState) {
@@ -117,6 +142,7 @@ public final class FilesActivity
     tabs = new ViewPagerTabBar(this, bus);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
     drawerListener = new DrawerListener();
+    pathBar = (PathBarFragment) getSupportFragmentManager().findFragmentById(R.id.path_bar_fragment);
     actionBar = getActionBar();
     actionBarDrawerToggle = new ActionBarDrawerToggle(
         this, drawerLayout, R.drawable.ic_drawer, 0, 0);
@@ -306,6 +332,21 @@ public final class FilesActivity
     }
   }
 
+  @Override
+  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+    if (isShowPathBarKey(key)) {
+      boolean show = getShowPathBar(this);
+      FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+      if (show) {
+        pathBar.set(currentPagerFragment.getCurrentDirectoryId());
+        tx.show(pathBar);
+      } else {
+        tx.hide(pathBar);
+      }
+      tx.commit();
+    }
+  }
+
   class FilesPagerAdapter extends FragmentPagerAdapter {
     private final List<TabItem> mItems;
     private final Map<Object, Integer> mPositions;
@@ -339,14 +380,14 @@ public final class FilesActivity
     }
 
     private void updateTabTitle(final int position) {
-      final String title = labels.apply(currentPagerFragment
-          .getCurrentDirectory());
+      final String title = labels.apply(currentPagerFragment.getCurrentDirectory());
       mItems.get(position).setTitle(title);
       handler.post(new Runnable() {
         @Override public void run() {
           final boolean hasBackStack = currentPagerFragment.hasBackStack();
           actionBar.setTitle(title);
           actionBarDrawerToggle.setDrawerIndicatorEnabled(!hasBackStack);
+          pathBar.set(currentPagerFragment.getCurrentDirectoryId());
           tabs.updateTab(position, title, hasBackStack);
         }
       });

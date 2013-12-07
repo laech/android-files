@@ -2,14 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical">
-
-  <View style="@style/ActionBarBottomLine"/>
+              android:orientation="vertical"
+              android:animateLayoutChanges="true"
+              android:divider="?android:attr/dividerVertical"
+              android:showDividers="beginning|middle">
 
   <android.support.v4.widget.DrawerLayout
       android:id="@+id/drawer_layout"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="0dp"
+      android:layout_weight="1">
 
     <l.files.common.widget.ViewPager
         android:id="@+id/pager"
@@ -24,4 +26,11 @@
         android:layout_gravity="start"/>
 
   </android.support.v4.widget.DrawerLayout>
+
+  <fragment
+      android:id="@+id/path_bar_fragment"
+      android:name="l.files.app.PathBarFragment"
+      android:layout_width="match_parent"
+      android:layout_height="?android:attr/actionBarSize"/>
+
 </LinearLayout>

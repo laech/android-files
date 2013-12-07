@@ -15,6 +15,7 @@ import org.apache.tika.Tika;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import l.files.service.CopyService;
@@ -23,8 +24,11 @@ import l.files.service.MoveService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Arrays.sort;
+import static java.util.Collections.reverse;
+import static l.files.common.io.Files.normalize;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Files.listFiles;
@@ -40,6 +44,7 @@ import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
+import static l.files.provider.FilesContract.MATCH_HIERARCHY;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
 import static l.files.provider.FilesContract.METHOD_CUT;
@@ -50,6 +55,7 @@ import static l.files.provider.FilesContract.VALUE_SHOW_HIDDEN_YES;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 import static l.files.provider.FilesContract.getBookmarkFileId;
 import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getHierarchyFileId;
 import static l.files.provider.FilesContract.getSuggestionBasename;
 import static l.files.provider.FilesContract.getSuggestionParentId;
 import static l.files.provider.FilesContract.newMatcher;
@@ -126,9 +132,22 @@ public final class FilesProvider extends ContentProvider
         return queryFile(uri, projection);
       case MATCH_FILES_ID_CHILDREN:
         return queryFiles(uri, projection, sortOrder);
+      case MATCH_HIERARCHY:
+        return queryHierarchy(uri, projection);
       default:
         throw new UnsupportedOperationException("Unsupported Uri: " + uri);
     }
+  }
+
+  private Cursor queryHierarchy(Uri uri, String[] projection) {
+    File file = normalize(new File(toURI(getHierarchyFileId(uri))));
+    List<File> files = newArrayList();
+    while (file != null) {
+      files.add(file);
+      file = file.getParentFile();
+    }
+    reverse(files);
+    return newFileCursor(uri, projection, files.toArray(new File[files.size()]));
   }
 
   private Cursor queryFile(Uri uri, String[] projection) {

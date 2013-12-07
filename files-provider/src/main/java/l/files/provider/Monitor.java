@@ -3,6 +3,7 @@ package l.files.provider;
 import android.os.FileObserver;
 import android.util.Log;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
@@ -14,8 +15,7 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static l.files.provider.BuildConfig.DEBUG;
-import static org.apache.commons.io.filefilter.FileFilterUtils
-    .directoryFileFilter;
+import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
 
 enum Monitor {
 
@@ -86,7 +86,7 @@ enum Monitor {
 
   private void doUnregisterSubDirs(File parent, Runnable listener) {
     for (File that : newArrayList(observers.keySet())) {
-      if (that.getParentFile().equals(parent)) {
+      if (Objects.equal(parent, that.getParentFile())) {
         doUnregisterDir(that, listener);
       }
     }
