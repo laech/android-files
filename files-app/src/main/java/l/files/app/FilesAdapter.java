@@ -22,7 +22,6 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import l.files.R;
-import l.files.app.format.IconFonts;
 
 import static android.text.format.DateUtils.isToday;
 import static android.text.format.Formatter.formatShortFileSize;

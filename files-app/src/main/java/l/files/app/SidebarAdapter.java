@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.R;
-import l.files.app.format.IconFonts;
 
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;

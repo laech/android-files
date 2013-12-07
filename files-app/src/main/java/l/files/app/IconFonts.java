@@ -1,11 +1,10 @@
-package l.files.app.format;
+package l.files.app;
 
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
