@@ -7,26 +7,18 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.File;
-import java.net.URI;
-
 import l.files.R;
-import l.files.common.app.BaseListFragment;
 
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 
-public final class SidebarFragment extends BaseListFragment
+public final class SidebarFragment extends BaseFileListFragment
     implements LoaderManager.LoaderCallbacks<Cursor> {
 
-  @Override public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.sidebar_fragment, container, false);
+  public SidebarFragment() {
+    super(R.layout.sidebar_fragment);
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -46,15 +38,6 @@ public final class SidebarFragment extends BaseListFragment
 
   @Override public SidebarAdapter getListAdapter() {
     return (SidebarAdapter) super.getListAdapter();
-  }
-
-  @Override
-  public void onListItemClick(ListView l, View v, int position, long id) {
-    super.onListItemClick(l, v, position, id);
-    Cursor cursor = (Cursor) l.getItemAtPosition(position);
-    String uri = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
-    FilesApp.getBus(this).post(new OpenFileRequest(new File(URI.create(uri))));
-    // TODO
   }
 
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {

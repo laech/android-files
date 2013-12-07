@@ -9,9 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import java.io.File;
-import java.net.URI;
-
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
@@ -19,15 +16,18 @@ import l.files.common.widget.Toaster;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
 import static l.files.provider.FilesContract.buildFileUri;
-import static l.files.provider.FilesContract.getFileId;
 
 public final class FilesPagerFragment extends Fragment {
 
+  // TODO
   public static final String ARG_DIRECTORY = FilesFragment.ARG_DIRECTORY_ID;
+  public static final String ARG_DIR_NAME = "dir_name";
 
-  public static FilesPagerFragment create(File dir) {
-    return setArgs(new FilesPagerFragment(), ARG_DIRECTORY,
-        dir.getAbsolutePath());
+  public static FilesPagerFragment create(String dirId, String dirName) {
+    Bundle args = new Bundle(2);
+    args.putString(ARG_DIRECTORY, dirId);
+    args.putString(ARG_DIR_NAME, dirName);
+    return setArgs(new FilesPagerFragment(), args);
   }
 
   Toaster toaster;
@@ -47,8 +47,7 @@ public final class FilesPagerFragment extends Fragment {
     fileOpener = FileOpener.get(getActivity());
     manager = getChildFragmentManager();
     if (savedInstanceState == null) {
-      FilesFragment fragment = FilesFragment.create(
-          getFileId(getInitialDirectory()));
+      FilesFragment fragment = FilesFragment.create(getInitialDirectoryId());
       manager
           .beginTransaction()
           .add(android.R.id.content, fragment, FilesFragment.TAG)
@@ -76,15 +75,6 @@ public final class FilesPagerFragment extends Fragment {
     return getChildFragmentManager().getBackStackEntryCount() > 0;
   }
 
-  // TODO delete
-  public File getCurrentDirectory() {
-    FilesFragment fragment = findCurrentFragment();
-    if (fragment == null) {
-      return getInitialDirectory();
-    }
-    return new File(URI.create(fragment.getDirectoryId()));
-  }
-
   public String getCurrentDirectoryId() {
     FilesFragment fragment = findCurrentFragment();
     if (fragment == null) {
@@ -93,25 +83,32 @@ public final class FilesPagerFragment extends Fragment {
     return fragment.getDirectoryId();
   }
 
+  public String getCurrentDirectoryName() {
+    if (manager.getBackStackEntryCount() == 0) {
+      return getInitialDirectoryName();
+    }
+    return manager.getBackStackEntryAt(manager.getBackStackEntryCount() - 1)
+        .getBreadCrumbTitle().toString();
+  }
+
   private String getInitialDirectoryId() {
     return getArguments().getString(ARG_DIRECTORY);
   }
 
-  // TODO delete
-  private File getInitialDirectory() {
-    return new File(getArguments().getString(ARG_DIRECTORY));
+  public String getInitialDirectoryName() {
+    return getArguments().getString(ARG_DIR_NAME);
   }
 
-  public void show(File file) {
+  public void show(OpenFileRequest request) {
     if (getActivity() == null) {
       return;
     }
-    if (!file.canRead()) {
+    if (!request.canRead()) {
       showPermissionDenied();
-    } else if (file.isDirectory()) {
-      showDirectory(file);
+    } else if (request.isDirectory()) {
+      showDirectory(request);
     } else {
-      showFile(file);
+      showFile(request);
     }
   }
 
@@ -119,22 +116,24 @@ public final class FilesPagerFragment extends Fragment {
     toaster.toast(getActivity(), R.string.permission_denied);
   }
 
-  private void showDirectory(File dir) {
+  private void showDirectory(OpenFileRequest request) {
+    String fileId = request.fileId();
     FilesFragment current = findCurrentFragment();
-    if (current != null && current.getDirectoryId().equals(getFileId(dir))) {
+    if (current != null && current.getDirectoryId().equals(fileId)) {
       return;
     }
-    FilesFragment fragment = FilesFragment.create(getFileId(dir));
+    FilesFragment fragment = FilesFragment.create(fileId);
     manager
         .beginTransaction()
         .replace(android.R.id.content, fragment, FilesFragment.TAG)
         .addToBackStack(null)
+        .setBreadCrumbTitle(request.filename())
         .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
   }
 
-  private void showFile(File file) {
-    fileOpener.apply(buildFileUri(getFileId(file)));
+  private void showFile(OpenFileRequest request) {
+    fileOpener.apply(buildFileUri(request.fileId()));
   }
 
   private FilesFragment findCurrentFragment() {

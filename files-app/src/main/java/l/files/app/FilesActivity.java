@@ -18,16 +18,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.common.base.Function;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.format.FileNames;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.app.OptionsMenus;
@@ -46,9 +45,9 @@ import static l.files.app.FilesApp.getBus;
 import static l.files.app.Preferences.getShowPathBar;
 import static l.files.app.Preferences.isShowPathBarKey;
 import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.app.format.Formats.label;
 import static l.files.app.menu.Menus.newCloseTabMenu;
 import static l.files.app.menu.Menus.newTabMenu;
+import static l.files.provider.FilesContract.getFileId;
 
 public final class FilesActivity extends BaseFragmentActivity
     implements TabHandler, OnSharedPreferenceChangeListener {
@@ -59,7 +58,7 @@ public final class FilesActivity extends BaseFragmentActivity
   private static final String STATE_ID_SEED = "idGenerator";
 
   Bus bus;
-  File directory;
+  String directoryId;
 
   ViewPager viewPager;
   ViewPagerTabBar tabs;
@@ -72,7 +71,6 @@ public final class FilesActivity extends BaseFragmentActivity
   FilesPagerFragment currentPagerFragment;
   DrawerLayout drawerLayout;
   DrawerListener drawerListener;
-  Function<File, String> labels;
   IdGenerator idGenerator;
 
   private PathBarFragment pathBar;
@@ -128,16 +126,15 @@ public final class FilesActivity extends BaseFragmentActivity
     return getParcelableArrayList(state, STATE_TAB_ITEMS, TabItem.class);
   }
 
-  private File getInitialDirectory() {
-    String path = getIntent().getStringExtra(EXTRA_DIR);
-    return path == null ? DIR_HOME : new File(path);
+  private String getInitialDirectoryId() {
+    String dirId = getIntent().getStringExtra(EXTRA_DIR);
+    return dirId == null ? getFileId(DIR_HOME) : dirId;
   }
 
   private void initFields(int idSeed) {
     idGenerator = new IdGenerator(idSeed);
-    labels = label(getResources());
     bus = getBus(this);
-    directory = getInitialDirectory();
+    directoryId = getInitialDirectoryId();
     viewPager = (ViewPager) findViewById(R.id.pager);
     tabs = new ViewPagerTabBar(this, bus);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -150,8 +147,10 @@ public final class FilesActivity extends BaseFragmentActivity
 
   private void setViewPager(ArrayList<TabItem> items) {
     if (items.isEmpty()) {
-      items = newArrayList(new TabItem(idGenerator.get(), directory,
-          labels.apply(directory)));
+      items = newArrayList(new TabItem(
+          idGenerator.get(),
+          directoryId,
+          FileNames.get(getResources(), directoryId, "")));
     }
     viewPager.setAdapter(new FilesPagerAdapter(items));
     viewPager.setOffscreenPageLimit(2);
@@ -279,7 +278,7 @@ public final class FilesActivity extends BaseFragmentActivity
   @Subscribe public void handle(final OpenFileRequest request) {
     closeDrawerThenRun(new Runnable() {
       @Override public void run() {
-        currentPagerFragment.show(request.value());
+        currentPagerFragment.show(request);
       }
     });
   }
@@ -348,23 +347,23 @@ public final class FilesActivity extends BaseFragmentActivity
   }
 
   class FilesPagerAdapter extends FragmentPagerAdapter {
-    private final List<TabItem> mItems;
-    private final Map<Object, Integer> mPositions;
+    private final List<TabItem> items;
+    private final Map<Object, Integer> positions;
 
     FilesPagerAdapter(List<TabItem> items) {
       super(getSupportFragmentManager());
-      mItems = items;
-      mPositions = newHashMap();
+      this.items = items;
+      this.positions = newHashMap();
     }
 
     @Override public long getItemId(int position) {
-      return mItems.get(position).getId();
+      return items.get(position).getId();
     }
 
     @Override public Fragment getItem(int position) {
-      final File directory = mItems.get(position).getDirectory();
-      final Fragment fragment = FilesPagerFragment.create(directory);
-      mPositions.put(fragment, position);
+      TabItem tab = items.get(position);
+      final Fragment fragment = FilesPagerFragment.create(tab.getDirectoryId(), tab.getTitle());
+      positions.put(fragment, position);
       return fragment;
     }
 
@@ -380,8 +379,11 @@ public final class FilesActivity extends BaseFragmentActivity
     }
 
     private void updateTabTitle(final int position) {
-      final String title = labels.apply(currentPagerFragment.getCurrentDirectory());
-      mItems.get(position).setTitle(title);
+      final String title = FileNames.get(
+          getResources(),
+          currentPagerFragment.getCurrentDirectoryId(),
+          currentPagerFragment.getCurrentDirectoryName());
+      items.get(position).setTitle(title);
       handler.post(new Runnable() {
         @Override public void run() {
           final boolean hasBackStack = currentPagerFragment.hasBackStack();
@@ -394,15 +396,15 @@ public final class FilesActivity extends BaseFragmentActivity
     }
 
     @Override public int getCount() {
-      return mItems.size();
+      return items.size();
     }
 
     @Override public CharSequence getPageTitle(int position) {
-      return mItems.get(position).getTitle();
+      return items.get(position).getTitle();
     }
 
     @Override public int getItemPosition(Object object) {
-      final Integer position = mPositions.get(object);
+      final Integer position = positions.get(object);
       return position != null ? position : POSITION_NONE;
     }
 
@@ -412,20 +414,21 @@ public final class FilesActivity extends BaseFragmentActivity
     }
 
     List<TabItem> getItems() {
-      return mItems;
+      return items;
     }
 
     void addItem(int id) {
-      final String title = labels.apply(DIR_HOME);
-      mItems.add(new TabItem(id, DIR_HOME, title));
+      String title = FileNames.get(
+          getResources(), getFileId(DIR_HOME), DIR_HOME.getName());
+      items.add(new TabItem(id, getFileId(DIR_HOME), title));
       tabs.addTab(title);
       notifyDataSetChanged();
     }
 
     void removeCurrentItem() {
       tabs.removeTab(viewPager.getCurrentItem());
-      mItems.remove(viewPager.getCurrentItem());
-      mPositions.remove(currentPagerFragment);
+      items.remove(viewPager.getCurrentItem());
+      positions.remove(currentPagerFragment);
       notifyDataSetChanged();
       if (viewPager.getCurrentItem() >= getCount()) {
         viewPager.setCurrentItem(getCount() - 1);

@@ -12,17 +12,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.File;
-import java.net.URI;
-
 import l.files.R;
-import l.files.common.app.BaseListFragment;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
@@ -31,7 +25,6 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.app.FilesApp.getBus;
 import static l.files.app.menu.Menus.newBookmarkMenu;
 import static l.files.app.menu.Menus.newDirMenu;
 import static l.files.app.menu.Menus.newPasteMenu;
@@ -44,10 +37,9 @@ import static l.files.app.mode.Modes.newDeleteAction;
 import static l.files.app.mode.Modes.newRenameAction;
 import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.common.app.SystemServices.getClipboardManager;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
-public final class FilesFragment extends BaseListFragment
+public final class FilesFragment extends BaseFileListFragment
     implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 
   public static final String TAG = FilesFragment.class.getSimpleName();
@@ -57,6 +49,10 @@ public final class FilesFragment extends BaseListFragment
 
   private String directoryId;
 
+  public FilesFragment() {
+    super(R.layout.files_fragment);
+  }
+
   public static FilesFragment create(String directoryId) {
     return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY_ID,
         directoryId);
@@ -64,11 +60,6 @@ public final class FilesFragment extends BaseListFragment
 
   public String getDirectoryId() {
     return directoryId;
-  }
-
-  @Override public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.files_fragment, container, false);
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -124,15 +115,6 @@ public final class FilesFragment extends BaseListFragment
 
   private FragmentManager getActivityFragmentManager() {
     return getActivity().getSupportFragmentManager();
-  }
-
-  @Override
-  public void onListItemClick(ListView l, View v, int position, long id) {
-    super.onListItemClick(l, v, position, id);
-    Cursor cursor = (Cursor) l.getItemAtPosition(position);
-    String uri = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
-    getBus(this).post(new OpenFileRequest(new File(URI.create(uri))));
-    // TODO
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {

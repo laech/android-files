@@ -12,5 +12,10 @@ public final class Fragments {
     return instance;
   }
 
+  public static <T extends Fragment> T setArgs(T instance, Bundle args) {
+    instance.setArguments(args);
+    return instance;
+  }
+
   private Fragments() {}
 }

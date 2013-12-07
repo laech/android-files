@@ -14,14 +14,10 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
-import java.io.File;
-import java.net.URI;
-
 import l.files.R;
 
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.FOCUS_RIGHT;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
 import static l.files.provider.FilesContract.buildHierarchyUri;
 
@@ -59,23 +55,20 @@ public final class PathBarFragment
   }
 
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-    String[] projection = {COLUMN_ID, COLUMN_NAME};
     Uri uri = buildHierarchyUri(fileId);
-    return new CursorLoader(getActivity(), uri, projection, null, null, null);
+    return new CursorLoader(getActivity(), uri, null, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
     itemContainer.removeAllViewsInLayout();
     if (cursor.moveToFirst()) {
-      int nameColumnIndex = cursor.getColumnIndex(COLUMN_NAME);
-      int idColumnIndex = cursor.getColumnIndex(COLUMN_ID);
       LayoutInflater inflater = LayoutInflater.from(getActivity());
       do {
         View view = inflater.inflate(R.layout.path_bar_item, itemContainer, false);
         itemContainer.addView(view);
         TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(cursor.getString(nameColumnIndex));
-        view.setTag(cursor.getString(idColumnIndex));
+        title.setText(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
+        view.setTag(OpenFileRequest.from(cursor));
         view.setOnClickListener(this);
       } while (cursor.moveToNext());
       scrollView.post(new Runnable() {
@@ -89,7 +82,6 @@ public final class PathBarFragment
   @Override public void onLoaderReset(Loader<Cursor> loader) {}
 
   @Override public void onClick(View v) {
-    // TODO
-    bus.post(new OpenFileRequest(new File(URI.create(v.getTag().toString()))));
+    bus.post(v.getTag());
   }
 }

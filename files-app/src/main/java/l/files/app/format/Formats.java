@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+
 import com.google.common.base.Function;
+
 import java.io.File;
 
 public final class Formats {
@@ -22,15 +24,6 @@ public final class Formats {
    */
   public static Function<Long, String> size(Context context) {
     return new SizeFormat(context);
-  }
-
-  /**
-   * Function to return the label of the file - usually the name of the file,
-   * but some special directories will have different labels than their name
-   * when displayed in special places like the sidebar or activity title.
-   */
-  public static Function<File, String> label(Resources res) {
-    return new FileLabelFunction(res);
   }
 
   /**
