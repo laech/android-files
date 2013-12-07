@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.menu.CloseTabMenu;
+import l.files.app.menu.NewTabMenu;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.app.OptionsMenus;
@@ -44,8 +46,6 @@ import static l.files.app.FilesApp.getBus;
 import static l.files.app.Preferences.getShowPathBar;
 import static l.files.app.Preferences.isShowPathBarKey;
 import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.app.menu.Menus.newCloseTabMenu;
-import static l.files.app.menu.Menus.newTabMenu;
 import static l.files.provider.FilesContract.getFileId;
 
 public final class FilesActivity extends BaseFragmentActivity
@@ -86,8 +86,8 @@ public final class FilesActivity extends BaseFragmentActivity
     setActionBar();
     setPathBar();
     setOptionsMenu(OptionsMenus.compose(
-        newTabMenu(this),
-        newCloseTabMenu(this),
+        new NewTabMenu(this),
+        new CloseTabMenu(this),
         new ShowPathBarMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);

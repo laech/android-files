@@ -13,12 +13,13 @@
   <string name="settings">Settings</string>
   <string name="view">View</string>
   <string name="show_hidden_files">Show hidden files</string>
+  <string name="show_path_bar">Show path bar</string>
   <string name="bookmarks">Bookmarks</string>
   <string name="bookmark">Bookmark</string>
   <string name="device">Device</string>
   <string name="new_dir">New folder</string>
   <string name="file_summary">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;%2$s</string>
-  <string name="sort_by">Sort by</string>
+  <string name="sort_by">Sort</string>
   <plurals name="confirm_delete_question">
     <item quantity="one">Delete this item permanently?</item>
     <item quantity="other">Delete these %s items permanently?</item>

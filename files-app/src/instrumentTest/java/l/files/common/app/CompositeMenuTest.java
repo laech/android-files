@@ -21,15 +21,15 @@ public final class CompositeMenuTest extends BaseTest {
 
   public void testOnCreateIsDelegated() {
     Menu menu = mock(Menu.class);
-    composite.onCreate(menu);
-    verify(action1).onCreate(menu);
-    verify(action2).onCreate(menu);
+    composite.onCreateOptionsMenu(menu);
+    verify(action1).onCreateOptionsMenu(menu);
+    verify(action2).onCreateOptionsMenu(menu);
   }
 
   public void testOnPrepareIsDelegated() {
     Menu menu = mock(Menu.class);
-    composite.onPrepare(menu);
-    verify(action1).onPrepare(menu);
-    verify(action2).onPrepare(menu);
+    composite.onPrepareOptionsMenu(menu);
+    verify(action1).onPrepareOptionsMenu(menu);
+    verify(action2).onPrepareOptionsMenu(menu);
   }
 }

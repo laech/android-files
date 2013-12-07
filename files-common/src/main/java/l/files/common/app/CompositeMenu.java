@@ -1,30 +1,34 @@
 package l.files.common.app;
 
 import android.view.Menu;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
+import android.view.MenuItem;
 
 final class CompositeMenu implements OptionsMenu {
 
-  private final List<OptionsMenu> actions;
+  private final OptionsMenu[] actions;
 
   CompositeMenu(OptionsMenu... actions) {
-    this.actions = ImmutableList.copyOf(actions);
+    this.actions = actions;
   }
 
-  CompositeMenu(List<OptionsMenu> actions) {
-    this.actions = ImmutableList.copyOf(actions);
-  }
-
-  @Override public void onCreate(Menu menu) {
+  @Override public void onCreateOptionsMenu(Menu menu) {
     for (OptionsMenu action : actions) {
-      action.onCreate(menu);
+      action.onCreateOptionsMenu(menu);
     }
   }
 
-  @Override public void onPrepare(Menu menu) {
+  @Override public void onPrepareOptionsMenu(Menu menu) {
     for (OptionsMenu action : actions) {
-      action.onPrepare(menu);
+      action.onPrepareOptionsMenu(menu);
     }
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    for (OptionsMenu action : actions) {
+      if (action.onOptionsItemSelected(item)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

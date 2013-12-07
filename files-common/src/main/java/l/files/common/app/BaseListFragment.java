@@ -3,6 +3,7 @@ package l.files.common.app;
 import android.support.v4.app.ListFragment;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class BaseListFragment extends ListFragment {
 
@@ -15,11 +16,15 @@ public class BaseListFragment extends ListFragment {
   @Override
   public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     super.onCreateOptionsMenu(menu, inflater);
-    optionsMenu.onCreate(menu);
+    optionsMenu.onCreateOptionsMenu(menu);
   }
 
   @Override public final void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    optionsMenu.onPrepare(menu);
+    optionsMenu.onPrepareOptionsMenu(menu);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    return optionsMenu.onOptionsItemSelected(item);
   }
 }

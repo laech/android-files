@@ -5,33 +5,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.common.app.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class NewDirMenu
-    extends OptionsMenuAdapter implements OnMenuItemClickListener {
+public final class NewDirMenu extends OptionsMenuAction {
 
   private final String parentId;
   private final FragmentManager manager;
 
-  NewDirMenu(FragmentManager manager, String parentId) {
+  public NewDirMenu(FragmentManager manager, String parentId) {
     this.manager = checkNotNull(manager, "manager");
     this.parentId = checkNotNull(parentId, "parentId");
   }
 
-  @Override public void onCreate(Menu menu) {
-    super.onCreate(menu);
-    menu.add(NONE, R.id.new_dir, NONE, R.string.new_dir)
-        .setOnMenuItemClickListener(this)
+  @Override protected int id() {
+    return R.id.new_dir;
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    menu.add(NONE, id(), NONE, R.string.new_dir)
         .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
-  @Override public boolean onMenuItemClick(MenuItem item) {
+  @Override protected void onItemSelected(MenuItem item) {
     NewDirFragment.create(parentId).show(manager, NewDirFragment.TAG);
-    return true;
   }
 }

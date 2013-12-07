@@ -22,12 +22,12 @@ public final class BaseListFragmentTest extends BaseTest {
 
   public void testOnCreateOptionsMenu_isDelegated() {
     fragment.onCreateOptionsMenu(menu, null);
-    verify(optionsMenu).onCreate(menu);
+    verify(optionsMenu).onCreateOptionsMenu(menu);
   }
 
   public void testOnPrepareOptionsMenu_isDelegated() {
     fragment.onPrepareOptionsMenu(menu);
-    verify(optionsMenu).onPrepare(menu);
+    verify(optionsMenu).onPrepareOptionsMenu(menu);
   }
 
   public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {

@@ -22,12 +22,12 @@ public final class BaseFragmentActivityTest extends BaseTest {
 
   public void testOnCreateOptionsMenu_isDelegated() {
     activity.onCreateOptionsMenu(menu);
-    verify(optionsMenu).onCreate(menu);
+    verify(optionsMenu).onCreateOptionsMenu(menu);
   }
 
   public void testOnPrepareOptionsMenu_isDelegated() {
     activity.onPrepareOptionsMenu(menu);
-    verify(optionsMenu).onPrepare(menu);
+    verify(optionsMenu).onPrepareOptionsMenu(menu);
   }
 
   public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {

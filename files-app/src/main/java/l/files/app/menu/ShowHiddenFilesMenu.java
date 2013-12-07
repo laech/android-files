@@ -6,39 +6,40 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.app.Preferences;
-import l.files.common.app.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class ShowHiddenFilesMenu
-    extends OptionsMenuAdapter implements MenuItem.OnMenuItemClickListener {
+public final class ShowHiddenFilesMenu extends OptionsMenuAction {
 
   private final Context context;
 
-  ShowHiddenFilesMenu(Context context) {
+  public ShowHiddenFilesMenu(Context context) {
     this.context = checkNotNull(context, "context");
   }
 
-  @Override public void onCreate(Menu menu) {
-    super.onCreate(menu);
-    menu.add(NONE, R.id.show_hidden_files, NONE, R.string.show_hidden_files)
+  @Override public void onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    menu.add(NONE, id(), NONE, R.string.show_hidden_files)
         .setCheckable(true)
-        .setOnMenuItemClickListener(this)
         .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
-  @Override public void onPrepare(Menu menu) {
-    super.onPrepare(menu);
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
     MenuItem item = menu.findItem(R.id.show_hidden_files);
     if (item != null) {
       item.setChecked(Preferences.getShowHiddenFiles(context));
     }
   }
 
-  @Override public boolean onMenuItemClick(MenuItem item) {
+  @Override protected void onItemSelected(MenuItem item) {
     Preferences.setShowHiddenFiles(context, !item.isChecked());
-    return true;
+  }
+
+  @Override protected int id() {
+    return R.id.show_hidden_files;
   }
 }

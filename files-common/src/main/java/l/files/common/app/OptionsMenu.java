@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
 /**
  * Represents a standalone implementation of the options menu of an activity or
@@ -15,11 +16,17 @@ public interface OptionsMenu {
    * @see Activity#onCreateOptionsMenu(Menu)
    * @see Fragment#onCreateOptionsMenu(Menu, MenuInflater)
    */
-  void onCreate(Menu menu);
+  void onCreateOptionsMenu(Menu menu);
 
   /**
    * @see Activity#onPrepareOptionsMenu(Menu)
    * @see Fragment#onPrepareOptionsMenu(Menu)
    */
-  void onPrepare(Menu menu);
+  void onPrepareOptionsMenu(Menu menu);
+
+  /**
+   * @see Activity#onOptionsItemSelected(MenuItem)
+   * @see Fragment#onOptionsItemSelected(MenuItem)
+   */
+  boolean onOptionsItemSelected(MenuItem item);
 }

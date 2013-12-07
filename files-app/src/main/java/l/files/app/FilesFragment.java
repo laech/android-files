@@ -17,6 +17,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import l.files.R;
+import l.files.app.menu.BookmarkMenu;
+import l.files.app.menu.NewDirMenu;
+import l.files.app.menu.PasteMenu;
+import l.files.app.menu.ShowHiddenFilesMenu;
+import l.files.app.menu.SortMenu;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
@@ -25,11 +30,6 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.app.menu.Menus.newBookmarkMenu;
-import static l.files.app.menu.Menus.newDirMenu;
-import static l.files.app.menu.Menus.newPasteMenu;
-import static l.files.app.menu.Menus.newShowHiddenFilesMenu;
-import static l.files.app.menu.Menus.newSortMenu;
 import static l.files.app.mode.Modes.newCopyAction;
 import static l.files.app.mode.Modes.newCountSelectedItemsAction;
 import static l.files.app.mode.Modes.newCutAction;
@@ -89,11 +89,11 @@ public final class FilesFragment extends BaseFileListFragment
     LoaderManager loaders = getLoaderManager();
     ContentResolver resolver = context.getContentResolver();
     setOptionsMenu(OptionsMenus.compose(
-        newBookmarkMenu(context, loaders, resolver, directoryId),
-        newDirMenu(manager, directoryId),
-        newPasteMenu(getClipboardManager(context), directoryId, resolver),
-        newSortMenu(manager),
-        newShowHiddenFilesMenu(getActivity())
+        new BookmarkMenu(context, loaders, resolver, directoryId),
+        new NewDirMenu(manager, directoryId),
+        new PasteMenu(getClipboardManager(context), directoryId, resolver),
+        new SortMenu(manager),
+        new ShowHiddenFilesMenu(getActivity())
     ));
   }
 

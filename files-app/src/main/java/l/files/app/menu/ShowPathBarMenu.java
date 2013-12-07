@@ -5,42 +5,43 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.common.app.OptionsMenuAdapter;
+import l.files.common.app.OptionsMenuAction;
 
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.OnMenuItemClickListener;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.app.Preferences.getShowPathBar;
 import static l.files.app.Preferences.setShowPathBar;
 
-public final class ShowPathBarMenu
-    extends OptionsMenuAdapter implements OnMenuItemClickListener {
+public final class ShowPathBarMenu extends OptionsMenuAction {
 
   private final Context context;
 
   public ShowPathBarMenu(Context context) {
-    this.context = context;
+    this.context = checkNotNull(context, "context");
   }
 
-  @Override public void onCreate(Menu menu) {
-    super.onCreate(menu);
-    menu.add(NONE, R.id.show_path_bar, CATEGORY_SECONDARY, "Show path bar")
+  @Override public void onCreateOptionsMenu(Menu menu) {
+    super.onCreateOptionsMenu(menu);
+    menu.add(NONE, id(), CATEGORY_SECONDARY, R.string.show_path_bar)
         .setCheckable(true)
-        .setOnMenuItemClickListener(this)
         .setShowAsAction(SHOW_AS_ACTION_NEVER);
   }
 
-  @Override public void onPrepare(Menu menu) {
-    super.onPrepare(menu);
+  @Override public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
     MenuItem item = menu.findItem(R.id.show_path_bar);
     if (item != null) {
       item.setChecked(getShowPathBar(context));
     }
   }
 
-  @Override public boolean onMenuItemClick(MenuItem item) {
+  @Override protected void onItemSelected(MenuItem item) {
     setShowPathBar(context, !item.isChecked());
-    return true;
+  }
+
+  @Override protected int id() {
+    return R.id.show_path_bar;
   }
 }
