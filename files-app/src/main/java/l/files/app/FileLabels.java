@@ -3,17 +3,16 @@ package l.files.app;
 import android.content.res.Resources;
 import android.os.Build;
 
-import java.io.File;
-
 import l.files.R;
 
-import static android.os.Environment.getExternalStorageDirectory;
+import static l.files.app.UserDirs.DIR_HOME;
+import static l.files.app.UserDirs.DIR_ROOT;
 import static l.files.provider.FilesContract.getFileId;
 
 final class FileLabels {
 
-  private static final String HOME = getFileId(getExternalStorageDirectory());
-  private static final String ROOT = getFileId(new File("/"));
+  private static final String HOME = getFileId(DIR_HOME);
+  private static final String ROOT = getFileId(DIR_ROOT);
 
   private FileLabels() {}
 

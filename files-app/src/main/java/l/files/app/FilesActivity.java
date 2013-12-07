@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.R;
-import l.files.app.format.FileNames;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.app.OptionsMenus;
@@ -150,7 +149,7 @@ public final class FilesActivity extends BaseFragmentActivity
       items = newArrayList(new TabItem(
           idGenerator.get(),
           directoryId,
-          FileNames.get(getResources(), directoryId, "")));
+          FileLabels.get(getResources(), directoryId, "")));
     }
     viewPager.setAdapter(new FilesPagerAdapter(items));
     viewPager.setOffscreenPageLimit(2);
@@ -379,7 +378,7 @@ public final class FilesActivity extends BaseFragmentActivity
     }
 
     private void updateTabTitle(final int position) {
-      final String title = FileNames.get(
+      final String title = FileLabels.get(
           getResources(),
           currentPagerFragment.getCurrentDirectoryId(),
           currentPagerFragment.getCurrentDirectoryName());
@@ -418,7 +417,7 @@ public final class FilesActivity extends BaseFragmentActivity
     }
 
     void addItem(int id) {
-      String title = FileNames.get(
+      String title = FileLabels.get(
           getResources(), getFileId(DIR_HOME), DIR_HOME.getName());
       items.add(new TabItem(id, getFileId(DIR_HOME), title));
       tabs.addTab(title);
