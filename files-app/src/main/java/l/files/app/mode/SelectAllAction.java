@@ -12,11 +12,11 @@ import android.widget.AbsListView;
 import l.files.R;
 import l.files.common.widget.SingleAction;
 
-final class SelectAllAction extends SingleAction {
+public final class SelectAllAction extends SingleAction {
 
   private final AbsListView list;
 
-  SelectAllAction(AbsListView list) {
+  public SelectAllAction(AbsListView list) {
     this.list = checkNotNull(list, "list");
   }
 

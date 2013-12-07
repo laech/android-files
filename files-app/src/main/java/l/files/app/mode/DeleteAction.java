@@ -25,7 +25,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 
-final class DeleteAction extends SingleAction {
+public final class DeleteAction extends SingleAction {
 
   private final AbsListView list;
   private final ContentResolver resolver;

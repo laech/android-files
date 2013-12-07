@@ -17,13 +17,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItemPosition;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 
-final class RenameAction extends MultiChoiceModeListenerAdapter {
+public final class RenameAction extends MultiChoiceModeListenerAdapter {
 
   private final AbsListView list;
   private final FragmentManager manager;
   private final String parentId;
 
-  RenameAction(AbsListView list, FragmentManager manager, String parentId) {
+  public RenameAction(AbsListView list, FragmentManager manager, String parentId) {
     this.list = checkNotNull(list, "list");
     this.manager = checkNotNull(manager, "manager");
     this.parentId = checkNotNull(parentId, "parentId");

@@ -8,7 +8,7 @@ import l.files.common.widget.MultiChoiceModeListenerAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
+public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
 
   private final AbsListView list;
 

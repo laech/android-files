@@ -22,6 +22,12 @@ import l.files.app.menu.NewDirMenu;
 import l.files.app.menu.PasteMenu;
 import l.files.app.menu.ShowHiddenFilesMenu;
 import l.files.app.menu.SortMenu;
+import l.files.app.mode.CopyAction;
+import l.files.app.mode.CountSelectedItemsAction;
+import l.files.app.mode.CutAction;
+import l.files.app.mode.DeleteAction;
+import l.files.app.mode.RenameAction;
+import l.files.app.mode.SelectAllAction;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
@@ -30,12 +36,6 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.app.mode.Modes.newCopyAction;
-import static l.files.app.mode.Modes.newCountSelectedItemsAction;
-import static l.files.app.mode.Modes.newCutAction;
-import static l.files.app.mode.Modes.newDeleteAction;
-import static l.files.app.mode.Modes.newRenameAction;
-import static l.files.app.mode.Modes.newSelectAllAction;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
@@ -104,12 +104,12 @@ public final class FilesFragment extends BaseFileListFragment
     Context context = getActivity();
     ClipboardManager clipboardManager = getClipboardManager(context);
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
-        newCountSelectedItemsAction(list),
-        newSelectAllAction(list),
-        newCutAction(list, clipboardManager),
-        newCopyAction(list, clipboardManager),
-        newDeleteAction(list, context.getContentResolver()),
-        newRenameAction(list, fragmentManager, directoryId)
+        new CountSelectedItemsAction(list),
+        new SelectAllAction(list),
+        new CutAction(list, clipboardManager),
+        new CopyAction(list, clipboardManager),
+        new DeleteAction(list, context.getContentResolver()),
+        new RenameAction(list, fragmentManager, directoryId)
     ));
   }
 

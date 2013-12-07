@@ -18,12 +18,12 @@ import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.app.ListViews.getCheckedFileIds;
 
-final class CopyAction extends SingleAction {
+public final class CopyAction extends SingleAction {
 
   private final AbsListView list;
   private final ClipboardManager manager;
 
-  CopyAction(AbsListView list, ClipboardManager manager) {
+  public CopyAction(AbsListView list, ClipboardManager manager) {
     this.list = checkNotNull(list, "list");
     this.manager = checkNotNull(manager, "manager");
   }

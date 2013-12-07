@@ -18,12 +18,12 @@ import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.app.ListViews.getCheckedFileIds;
 
-final class CutAction extends SingleAction {
+public final class CutAction extends SingleAction {
 
   private final AbsListView list;
   private final ClipboardManager manager;
 
-  CutAction(AbsListView list, ClipboardManager manager) {
+  public CutAction(AbsListView list, ClipboardManager manager) {
     this.list = checkNotNull(list, "list");
     this.manager = checkNotNull(manager, "manager");
   }
