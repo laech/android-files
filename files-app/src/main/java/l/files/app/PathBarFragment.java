@@ -3,6 +3,7 @@ package l.files.app;
 import android.animation.LayoutTransition;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.CursorLoader;
@@ -89,7 +90,10 @@ public final class PathBarFragment extends Fragment
         view.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(cursor.getString(columnName));
+        title.setText(cursor.isFirst() ? Build.MODEL : cursor.getString(columnName));
+
+        TextView icon = (TextView) view.findViewById(R.id.icon);
+        icon.setTypeface(IconFonts.forDirectoryId(getActivity().getAssets(), cursor.getString(columnId)));
 
       } while (cursor.moveToNext());
 

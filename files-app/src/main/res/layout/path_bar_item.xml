@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/title"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:minWidth="48dp"
+    android:orientation="horizontal"
     android:background="@drawable/selector_light"
+    android:minWidth="48dp"
     android:gravity="center"
     android:paddingLeft="12dp"
-    android:paddingRight="12dp"
-    android:textSize="16sp"/>
+    android:paddingRight="12dp">
+
+  <TextView
+      android:id="@+id/icon"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/ic_font_char"
+      android:textSize="16sp"/>
+
+  <TextView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="6dp"
+      android:textSize="16sp"/>
+
+</LinearLayout>
