@@ -33,7 +33,6 @@ public final class ViewPagerTabBar
   public ViewPagerTabBar(Context context, Bus bus) {
     this.bus = checkNotNull(bus, "bus");
     this.root = (HorizontalScrollView) inflate(context, R.layout.tab_container);
-    this.root.setHorizontalFadingEdgeEnabled(true);
     this.tabs = (LinearLayout) root.findViewById(R.id.tab_container);
     this.tabs.getLayoutTransition().addTransitionListener(this);
   }
