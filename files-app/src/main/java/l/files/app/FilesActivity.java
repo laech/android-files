@@ -14,7 +14,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -26,7 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.menu.ActionBarDrawerToggleAction;
 import l.files.app.menu.CloseTabMenu;
+import l.files.app.menu.GoBackOnHomePressedAction;
 import l.files.app.menu.NewTabMenu;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
@@ -86,6 +87,8 @@ public final class FilesActivity extends BaseFragmentActivity
     setActionBar();
     setPathBar();
     setOptionsMenu(OptionsMenus.compose(
+        new ActionBarDrawerToggleAction(actionBarDrawerToggle),
+        new GoBackOnHomePressedAction(this),
         new NewTabMenu(this),
         new CloseTabMenu(this),
         new ShowPathBarMenu(this)));
@@ -205,18 +208,6 @@ public final class FilesActivity extends BaseFragmentActivity
       return true;
     }
     return super.onKeyLongPress(keyCode, event);
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    // TODO update to use OptionsMenu
-    if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
-      return true;
-    }
-    if (item.getItemId() == android.R.id.home) {
-      onBackPressed();
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
   }
 
   @Override public void onActionModeFinished(ActionMode mode) {
