@@ -77,7 +77,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
       android:layout_marginLeft="59dp"
-      android:background="@drawable/preview_background"
+      android:background="@drawable/file_preview_background"
       android:visibility="gone"
       android:contentDescription="@null"/>
 
