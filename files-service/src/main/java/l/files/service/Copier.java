@@ -28,6 +28,15 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 final class Copier implements Callable<Void> {
 
+  /*
+   * Setting last modified time currently fails, see:
+   * https://code.google.com/p/android/issues/detail?id=18624
+   * https://code.google.com/p/android/issues/detail?id=34691
+   * https://code.google.com/p/android/issues/detail?id=1992
+   * https://code.google.com/p/android/issues/detail?id=1699
+   * https://code.google.com/p/android/issues/detail?id=25460
+   */
+
   private static final String TAG = Copier.class.getSimpleName();
 
   /*
