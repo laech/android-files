@@ -278,7 +278,7 @@ public final class FilesProvider extends ContentProvider
 
   private int deleteBookmark(Uri uri) {
     Bookmarks.remove(getPreference(), getBookmarkFileId(uri));
-    return 1; // TODO check bookmarks contain Uri
+    return 1;
   }
 
   @Override public int update(
