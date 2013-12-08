@@ -33,6 +33,7 @@ import static l.files.common.io.Files.normalize;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_ID;
+import static l.files.provider.FilesContract.EXTRA_FILE_ID;
 import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.EXTRA_RESULT;
@@ -199,7 +200,7 @@ public final class FilesProvider extends ContentProvider
   @Override public Bundle call(String method, String arg, Bundle extras) {
     switch (method) {
       case METHOD_RENAME:
-        return callRename(arg, extras); // TODO remove arg
+        return callRename(extras);
       case METHOD_DELETE:
         return callDelete(extras);
       case METHOD_COPY:
@@ -224,8 +225,8 @@ public final class FilesProvider extends ContentProvider
     return Bundle.EMPTY;
   }
 
-  private Bundle callRename(String fileId, Bundle extras) {
-    File from = new File(toURI(fileId));
+  private Bundle callRename(Bundle extras) {
+    File from = new File(toURI(extras.getString(EXTRA_FILE_ID)));
     File to = new File(from.getParent(), extras.getString(EXTRA_NEW_NAME));
     Bundle out = new Bundle(1);
     out.putBoolean(EXTRA_RESULT, from.renameTo(to));

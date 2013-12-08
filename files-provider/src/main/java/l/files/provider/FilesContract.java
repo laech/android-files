@@ -42,6 +42,7 @@ public final class FilesContract {
   static final String METHOD_COPY = "copy";
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
+  static final String EXTRA_FILE_ID = "file_id";
   static final String EXTRA_FILE_IDS = "file_ids";
   static final String EXTRA_NEW_NAME = "new_name";
   static final String EXTRA_DESTINATION_ID = "destination";
@@ -264,10 +265,11 @@ public final class FilesContract {
   public static boolean rename(
       ContentResolver resolver, String fileId, String newName) {
     ensureNonMainThread();
-    Bundle args = new Bundle(1);
+    Bundle args = new Bundle(2);
+    args.putString(EXTRA_FILE_ID, fileId);
     args.putString(EXTRA_NEW_NAME, newName);
     Uri uri = buildFileUri(fileId);
-    Bundle result = resolver.call(uri, METHOD_RENAME, fileId, args);
+    Bundle result = resolver.call(uri, METHOD_RENAME, null, args);
     return result.getBoolean(EXTRA_RESULT);
   }
 
