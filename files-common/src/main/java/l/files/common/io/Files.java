@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -87,23 +88,48 @@ public final class Files {
   }
 
   /**
-   * Returns a file at {@code destDir} with the name of {@code source}, if such
+   * Returns a file at {@code dstDir} with the name of {@code source}, if such
    * file exists, append a number at the end of the file name (and before the
    * extension if it's {@link File#isFile()}) until the returned file represents
    * a nonexistent file.
    */
-  public static File getNonExistentDestinationFile(File source, File destDir) {
-    String fullName = source.getName();
-    String baseName = getBaseName(fullName);
-    String extension = getExtension(fullName);
-    File file = new File(destDir, source.getName());
-    for (int i = 2; file.exists(); ++i) {
-      String newName = source.isFile() && !"".equals(baseName) && !"".equals(extension)
-          ? format("%s %d.%s", baseName, i, extension)
-          : format("%s %d", fullName, i);
-      file = new File(destDir, newName);
+  public static File getNonExistentDestinationFile(File source, File dstDir) {
+    String name = source.getName();
+    File dst = new File(dstDir, name);
+    if (!dst.exists()) {
+      return dst;
     }
-    return file;
+
+    Pattern pattern;
+    if (source.isDirectory()) {
+      pattern = Pattern.compile("(.*?) (\\d+)()");
+    } else {
+      pattern = Pattern.compile("(.*?) (\\d+)(\\..+)");
+    }
+
+    Matcher matcher = pattern.matcher(name);
+    String first;
+    String last;
+    int num;
+    if (matcher.matches()) {
+      first = matcher.group(1);
+      last = matcher.group(3);
+      num = Integer.parseInt(matcher.group(2)) + 1;
+    } else {
+      first = getBaseName(name);
+      last = getExtension(name);
+      if (!isNullOrEmpty(last)) {
+        last = "." + last;
+      }
+      num = 2;
+    }
+
+    do {
+      dst = new File(dstDir, first + " " + num + last);
+      num++;
+    } while (dst.exists());
+
+    return dst;
   }
 
   public static File[] toFiles(Collection<String> paths) {
