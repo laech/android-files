@@ -14,6 +14,7 @@
   <string name="view">View</string>
   <string name="show_hidden_files">Show hidden files</string>
   <string name="show_path_bar">Show path bar</string>
+  <string name="send_feedback">Send feedback</string>
   <string name="bookmarks">Bookmarks</string>
   <string name="bookmark">Bookmark</string>
   <string name="device">Device</string>

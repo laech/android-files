@@ -29,6 +29,7 @@ import l.files.app.menu.ActionBarDrawerToggleAction;
 import l.files.app.menu.CloseTabMenu;
 import l.files.app.menu.GoBackOnHomePressedAction;
 import l.files.app.menu.NewTabMenu;
+import l.files.app.menu.SendFeedbackMenu;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.BaseFragmentActivity;
 import l.files.common.app.OptionsMenus;
@@ -91,7 +92,8 @@ public final class FilesActivity extends BaseFragmentActivity
         new GoBackOnHomePressedAction(this),
         new NewTabMenu(this),
         new CloseTabMenu(this),
-        new ShowPathBarMenu(this)));
+        new ShowPathBarMenu(this),
+        new SendFeedbackMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);
   }
