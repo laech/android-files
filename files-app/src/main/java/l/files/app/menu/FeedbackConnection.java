@@ -13,7 +13,7 @@ import com.google.common.base.Optional;
 
 import static android.os.IBinder.FIRST_CALL_TRANSACTION;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.app.Activities.takeScreenshot;
+import static l.files.app.Activities.takeScreenshotForFeedback;
 
 final class FeedbackConnection implements ServiceConnection {
 
@@ -28,7 +28,7 @@ final class FeedbackConnection implements ServiceConnection {
   @Override
   public void onServiceConnected(ComponentName name, IBinder service) {
     try {
-      Optional<Bitmap> screenshot = takeScreenshot(activity);
+      Optional<Bitmap> screenshot = takeScreenshotForFeedback(activity);
       Parcel parcel = Parcel.obtain();
       if (screenshot.isPresent()) {
         screenshot.get().writeToParcel(parcel, 0);

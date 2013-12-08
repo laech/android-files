@@ -9,13 +9,12 @@ import com.google.common.base.Optional;
 
 import static android.graphics.Bitmap.Config.RGB_565;
 import static android.graphics.Bitmap.createScaledBitmap;
-import static java.lang.Math.min;
 import static java.lang.Math.round;
 
 public final class Activities {
   private Activities() {}
 
-  public static Optional<Bitmap> takeScreenshot(Activity activity) {
+  public static Optional<Bitmap> takeScreenshotForFeedback(Activity activity) {
     Window window = activity.getWindow();
     if (window == null) {
       return Optional.absent();
@@ -28,7 +27,7 @@ public final class Activities {
       Bitmap cache = view.getDrawingCache();
       int width = cache.getWidth();
       int height = cache.getHeight();
-      double scale = min(600 / (double) width, 600 / (double) height);
+      double scale = 0.65;
       int scaledWidth = (int) round(width * scale);
       int scaledHeight = (int) round(height * scale);
       Bitmap tmp = createScaledBitmap(cache, scaledWidth, scaledHeight, true);
