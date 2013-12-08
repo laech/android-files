@@ -16,5 +16,6 @@
   <item type="id" name="is_readable"/>
   <item type="id" name="is_directory"/>
   <item type="id" name="send_feedback"/>
+  <item type="id" name="about"/>
 
 </resources>

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.menu.AboutMenu;
 import l.files.app.menu.ActionBarDrawerToggleAction;
 import l.files.app.menu.CloseTabMenu;
 import l.files.app.menu.GoBackOnHomePressedAction;
@@ -93,7 +94,8 @@ public final class FilesActivity extends BaseFragmentActivity
         new NewTabMenu(this),
         new CloseTabMenu(this),
         new ShowPathBarMenu(this),
-        new SendFeedbackMenu(this)));
+        new SendFeedbackMenu(this),
+        new AboutMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);
   }
