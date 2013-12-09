@@ -35,8 +35,12 @@ public final class BookmarkMenu extends OptionsMenuAction
   private Menu menu;
   private boolean bookmarked;
 
-  public BookmarkMenu(Context context, LoaderManager loaders,
-                      ContentResolver resolver, String fileId) {
+  public BookmarkMenu(
+      Context context,
+      LoaderManager loaders,
+      ContentResolver resolver,
+      String fileId) {
+    super(R.id.bookmark);
     this.context = checkNotNull(context, "context");
     this.loaders = checkNotNull(loaders, "loaders");
     this.resolver = checkNotNull(resolver, "resolver");
@@ -58,10 +62,6 @@ public final class BookmarkMenu extends OptionsMenuAction
     if (item != null) {
       item.setChecked(bookmarked);
     }
-  }
-
-  @Override protected int id() {
-    return R.id.bookmark;
   }
 
   @Override protected void onItemSelected(MenuItem item) {

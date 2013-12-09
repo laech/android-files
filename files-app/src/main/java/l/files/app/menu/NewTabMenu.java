@@ -16,6 +16,7 @@ public final class NewTabMenu extends OptionsMenuAction {
   private final TabHandler handler;
 
   public NewTabMenu(TabHandler handler) {
+    super(R.id.new_tab);
     this.handler = checkNotNull(handler, "handler");
   }
 
@@ -27,9 +28,5 @@ public final class NewTabMenu extends OptionsMenuAction {
 
   @Override protected void onItemSelected(MenuItem item) {
     handler.openNewTab();
-  }
-
-  @Override protected int id() {
-    return R.id.new_tab;
   }
 }

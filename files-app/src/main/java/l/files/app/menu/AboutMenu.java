@@ -19,11 +19,8 @@ public final class AboutMenu extends OptionsMenuAction {
   private final Context context;
 
   public AboutMenu(Context context) {
+    super(R.id.about);
     this.context = context;
-  }
-
-  @Override protected int id() {
-    return R.id.about;
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

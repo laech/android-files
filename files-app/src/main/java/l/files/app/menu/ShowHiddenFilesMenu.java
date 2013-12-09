@@ -17,6 +17,7 @@ public final class ShowHiddenFilesMenu extends OptionsMenuAction {
   private final Context context;
 
   public ShowHiddenFilesMenu(Context context) {
+    super(R.id.show_hidden_files);
     this.context = checkNotNull(context, "context");
   }
 
@@ -37,9 +38,5 @@ public final class ShowHiddenFilesMenu extends OptionsMenuAction {
 
   @Override protected void onItemSelected(MenuItem item) {
     Preferences.setShowHiddenFiles(context, !item.isChecked());
-  }
-
-  @Override protected int id() {
-    return R.id.show_hidden_files;
   }
 }

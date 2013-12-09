@@ -12,11 +12,8 @@ public final class GoBackOnHomePressedAction extends OptionsMenuAction {
   private final Activity activity;
 
   public GoBackOnHomePressedAction(Activity activity) {
+    super(android.R.id.home);
     this.activity = checkNotNull(activity, "activity");
-  }
-
-  @Override protected int id() {
-    return android.R.id.home;
   }
 
   @Override protected void onItemSelected(MenuItem item) {

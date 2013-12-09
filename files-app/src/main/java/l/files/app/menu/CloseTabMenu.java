@@ -16,6 +16,7 @@ public final class CloseTabMenu extends OptionsMenuAction {
   private final TabHandler handler;
 
   public CloseTabMenu(TabHandler handler) {
+    super(R.id.close_tab);
     this.handler = checkNotNull(handler, "handler");
   }
 
@@ -27,9 +28,5 @@ public final class CloseTabMenu extends OptionsMenuAction {
 
   @Override protected void onItemSelected(MenuItem item) {
     handler.closeCurrentTab();
-  }
-
-  @Override protected int id() {
-    return R.id.close_tab;
   }
 }

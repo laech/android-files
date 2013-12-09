@@ -7,14 +7,25 @@ import android.view.MenuItem;
  */
 public abstract class OptionsMenuAction extends OptionsMenuAdapter {
 
-  /**
-   * The ID of the menu item.
-   */
-  protected abstract int id();
+  private final int id;
 
+  public OptionsMenuAction(int id) {
+    this.id = id;
+  }
+
+  /**
+   * The ID of this menu item.
+   */
+  protected final int id() {
+    return id;
+  }
+
+  /**
+   * Handles the click event of this menu item.
+   */
   protected abstract void onItemSelected(MenuItem item);
 
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
+  @Override public final boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == id()) {
       onItemSelected(item);
       return true;

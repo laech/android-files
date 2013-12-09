@@ -17,12 +17,9 @@ public final class NewDirMenu extends OptionsMenuAction {
   private final FragmentManager manager;
 
   public NewDirMenu(FragmentManager manager, String parentId) {
+    super(R.id.new_dir);
     this.manager = checkNotNull(manager, "manager");
     this.parentId = checkNotNull(parentId, "parentId");
-  }
-
-  @Override protected int id() {
-    return R.id.new_dir;
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

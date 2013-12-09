@@ -18,11 +18,8 @@ public final class SendFeedbackMenu extends OptionsMenuAction {
   private final Activity activity;
 
   public SendFeedbackMenu(Activity activity) {
+    super(R.id.send_feedback);
     this.activity = checkNotNull(activity, "activity");
-  }
-
-  @Override protected int id() {
-    return R.id.send_feedback;
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

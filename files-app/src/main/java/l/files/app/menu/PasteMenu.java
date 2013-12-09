@@ -27,6 +27,7 @@ public final class PasteMenu extends OptionsMenuAction {
 
   public PasteMenu(
       ClipboardManager manager, String directoryId, ContentResolver resolver) {
+    super(android.R.id.paste);
     this.resolver = checkNotNull(resolver, "resolver");
     this.manager = checkNotNull(manager, "manager");
     this.directoryId = checkNotNull(directoryId, "directoryId");
@@ -57,9 +58,5 @@ public final class PasteMenu extends OptionsMenuAction {
         }
       }
     });
-  }
-
-  @Override protected int id() {
-    return android.R.id.paste;
   }
 }

@@ -16,6 +16,7 @@ public final class SortMenu extends OptionsMenuAction {
   private final FragmentManager manager;
 
   public SortMenu(FragmentManager manager) {
+    super(R.id.sort_by);
     this.manager = checkNotNull(manager, "manager");
   }
 
@@ -27,9 +28,5 @@ public final class SortMenu extends OptionsMenuAction {
 
   @Override protected void onItemSelected(MenuItem item) {
     new SortDialog().show(manager, SortDialog.FRAGMENT_TAG);
-  }
-
-  @Override protected int id() {
-    return R.id.sort_by;
   }
 }
