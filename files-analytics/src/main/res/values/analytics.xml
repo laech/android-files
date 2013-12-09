@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!--
+    The Google Analytics tracking ID to which to send data. Dashes in the
+    ID must not be encoded. Can disable tracking by not providing this value.
+  -->
+  <string name="ga_trackingId">UA-46310112-1</string>
+
+  <!--
+    The verbosity of the SDK logger. V3 only.
+    Valid values from least to most verbose are: error,warning,info, and
+    verbose. Log level is set to warning by default.
+  -->
+  <string name="ga_logLevel">info</string>
+
+  <!--
+    Automatically track a screen view each time a user starts an Activity.
+  -->
+  <bool name="ga_autoActivityTracking">true</bool>
+
+  <!--
+    Automatically track an Exception each time an uncaught exception is thrown
+    in application.
+  -->
+  <bool name="ga_reportUncaughtExceptions">true</bool>
+
+</resources>

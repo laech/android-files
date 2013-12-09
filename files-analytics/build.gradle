@@ -6,7 +6,7 @@ buildscript {
     classpath 'com.android.tools.build:gradle:0.6.+'
   }
 }
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 repositories {
   mavenCentral()
@@ -17,7 +17,7 @@ android {
   buildToolsVersion "19.0.0"
 
   defaultConfig {
-    minSdkVersion 16
+    minSdkVersion 14
     targetSdkVersion 19
   }
 
@@ -28,12 +28,6 @@ android {
 }
 
 dependencies {
-  compile project(':files-analytics')
-  compile project(':files-common')
-  compile project(':files-provider')
-  compile project.libs.trove4j
-  compile project.libs.joda_time
-  compile project.libs.otto
-
-  instrumentTestCompile project.libs.mockito
+  compile files('lib/libGoogleAnalyticsServices-3.01.jar')
+  compile project.libs.android_support
 }
