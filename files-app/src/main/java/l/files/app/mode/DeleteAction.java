@@ -2,6 +2,7 @@ package l.files.app.mode;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -13,26 +14,41 @@ import android.widget.AbsListView;
 import java.util.List;
 
 import l.files.R;
-import l.files.common.widget.SingleAction;
+import l.files.analytics.AnalyticsAction;
+import l.files.common.widget.MultiChoiceModeAction;
 import l.files.provider.FilesContract;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
+import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 
-public final class DeleteAction extends SingleAction {
+/**
+ * Deletes selected files from the list view cursor.
+ *
+ * @see FilesContract.FileInfo
+ */
+public final class DeleteAction extends MultiChoiceModeAction {
 
   private final AbsListView list;
   private final ContentResolver resolver;
 
-  public DeleteAction(AbsListView list, ContentResolver resolver) {
+  private DeleteAction(AbsListView list, ContentResolver resolver) {
+    super(R.id.delete);
     this.list = checkNotNull(list, "list");
     this.resolver = checkNotNull(resolver, "resolver");
+  }
+
+  public static MultiChoiceModeListener create(AbsListView list) {
+    Context context = list.getContext();
+    ContentResolver resolver = context.getContentResolver();
+    MultiChoiceModeListener action = new DeleteAction(list, resolver);
+    return new AnalyticsAction(context, action, "delete");
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -42,12 +58,8 @@ public final class DeleteAction extends SingleAction {
     return true;
   }
 
-  @Override protected int id() {
-    return R.id.delete;
-  }
-
   @Override
-  protected void handleActionItemClicked(final ActionMode mode, MenuItem item) {
+  protected void onItemSelected(final ActionMode mode, MenuItem item) {
     final List<String> fileIds = getCheckedFileIds();
     new AlertDialog.Builder(list.getContext())
         .setMessage(getConfirmMessage(fileIds.size()))

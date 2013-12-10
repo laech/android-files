@@ -1,37 +1,45 @@
 package l.files.app.mode;
 
-import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
-import l.files.R;
-import l.files.common.widget.SingleAction;
 
-public final class SelectAllAction extends SingleAction {
+import l.files.R;
+import l.files.analytics.AnalyticsAction;
+import l.files.common.widget.MultiChoiceModeAction;
+
+import static android.view.Menu.NONE;
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
+import static android.widget.AbsListView.MultiChoiceModeListener;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Selects all the items in the list view.
+ */
+public final class SelectAllAction extends MultiChoiceModeAction {
 
   private final AbsListView list;
 
-  public SelectAllAction(AbsListView list) {
+  private SelectAllAction(AbsListView list) {
+    super(android.R.id.selectAll);
     this.list = checkNotNull(list, "list");
   }
 
+  public static MultiChoiceModeListener create(AbsListView list) {
+    MultiChoiceModeListener action = new SelectAllAction(list);
+    return new AnalyticsAction(list.getContext(), action, "select_all");
+  }
+
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    menu.add(NONE, android.R.id.selectAll, NONE, android.R.string.selectAll)
+    menu.add(NONE, id(), NONE, android.R.string.selectAll)
         .setIcon(R.drawable.ic_action_select_all)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
     return true;
   }
 
-  @Override protected int id() {
-    return android.R.id.selectAll;
-  }
-
-  @Override protected void handleActionItemClicked(ActionMode mode, MenuItem item) {
+  @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
     for (int i = 0; i < list.getCount(); ++i) {
       list.setItemChecked(i, true);
     }

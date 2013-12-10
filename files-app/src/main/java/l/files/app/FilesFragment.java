@@ -1,7 +1,5 @@
 package l.files.app;
 
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -34,7 +32,6 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
 public final class FilesFragment extends BaseFileListFragment
@@ -96,15 +93,13 @@ public final class FilesFragment extends BaseFileListFragment
     ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
     FragmentManager fragmentManager = getActivityFragmentManager();
-    Context context = getActivity();
-    ClipboardManager clipboardManager = getClipboardManager(context);
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
-        new CountSelectedItemsAction(list),
-        new SelectAllAction(list),
-        new CutAction(list, clipboardManager),
-        new CopyAction(list, clipboardManager),
-        new DeleteAction(list, context.getContentResolver()),
-        new RenameAction(list, fragmentManager, directoryId)
+        CountSelectedItemsAction.create(list),
+        SelectAllAction.create(list),
+        CutAction.create(list),
+        CopyAction.create(list),
+        DeleteAction.create(list),
+        RenameAction.create(list, fragmentManager, directoryId)
     ));
   }
 
