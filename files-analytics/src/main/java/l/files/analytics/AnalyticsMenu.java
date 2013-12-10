@@ -26,7 +26,7 @@ public final class AnalyticsMenu extends OptionsMenuDelegate {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     boolean handled = super.onOptionsItemSelected(item);
     if (handled) {
-      Analytics.onOptionsItemSelected(context, action);
+      Analytics.onMenuItemSelected(context, action);
     }
     return handled;
   }

@@ -14,15 +14,24 @@ public final class Analytics {
     return EasyTracker.getInstance(context);
   }
 
+  /**
+   * Tracks {@link Activity#onStart()}.
+   */
   public static void onActivityStart(Activity activity) {
     get(activity).activityStart(activity);
   }
 
+  /**
+   * Tracks {@link Activity#onStop()}.
+   */
   public static void onActivityStop(Activity activity) {
     get(activity).activityStop(activity);
   }
 
-  public static void onOptionsItemSelected(Context context, String action) {
+  /**
+   * Tracks a menu item select event.
+   */
+  public static void onMenuItemSelected(Context context, String action) {
     get(context).send(createEvent("menu", action, null, null).build());
   }
 }

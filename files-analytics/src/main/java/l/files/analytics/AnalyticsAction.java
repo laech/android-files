@@ -28,7 +28,7 @@ public final class AnalyticsAction extends MultiChoiceModeListenerDelegate {
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
     boolean handled = super.onActionItemClicked(mode, item);
     if (handled) {
-      Analytics.onOptionsItemSelected(context, action);
+      Analytics.onMenuItemSelected(context, action);
     }
     return handled;
   }
