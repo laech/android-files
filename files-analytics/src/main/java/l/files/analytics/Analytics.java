@@ -30,8 +30,22 @@ public final class Analytics {
 
   /**
    * Tracks a menu item select event.
+   *
+   * @param action the string identifying the action
    */
   public static void onMenuItemSelected(Context context, String action) {
-    get(context).send(createEvent("menu", action, null, null).build());
+    onMenuItemSelected(context, action, null, null);
+  }
+
+  /**
+   * Tracks a menu item select event.
+   *
+   * @param action the string identifying the action
+   * @param label the optional, custom label for this event
+   * @param value the optional, custom value for this event
+   */
+  public static void onMenuItemSelected(
+      Context context, String action, String label, Long value) {
+    get(context).send(createEvent("menu", action, label, value).build());
   }
 }

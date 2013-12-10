@@ -1,12 +1,13 @@
 package l.files.app.mode;
 
+import android.content.Context;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 
 import l.files.R;
-import l.files.analytics.AnalyticsAction;
+import l.files.analytics.Analytics;
 import l.files.common.widget.MultiChoiceModeAction;
 
 import static android.view.Menu.NONE;
@@ -28,8 +29,7 @@ public final class SelectAllAction extends MultiChoiceModeAction {
   }
 
   public static MultiChoiceModeListener create(AbsListView list) {
-    MultiChoiceModeListener action = new SelectAllAction(list);
-    return new AnalyticsAction(list.getContext(), action, "select_all");
+    return new SelectAllAction(list);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -40,8 +40,11 @@ public final class SelectAllAction extends MultiChoiceModeAction {
   }
 
   @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
-    for (int i = 0; i < list.getCount(); ++i) {
+    int count = list.getCount();
+    for (int i = 0; i < count; ++i) {
       list.setItemChecked(i, true);
     }
+    Context context = list.getContext();
+    Analytics.onMenuItemSelected(context, "select_all", null, (long) count);
   }
 }
