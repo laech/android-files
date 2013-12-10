@@ -1,7 +1,6 @@
 package l.files.app;
 
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -9,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.View;
@@ -84,16 +82,13 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   private void setupOptionsMenu() {
-    FragmentManager manager = getActivityFragmentManager();
     FragmentActivity context = getActivity();
-    LoaderManager loaders = getLoaderManager();
-    ContentResolver resolver = context.getContentResolver();
     setOptionsMenu(OptionsMenus.compose(
-        new BookmarkMenu(context, loaders, resolver, directoryId),
-        new NewDirMenu(manager, directoryId),
-        new PasteMenu(getClipboardManager(context), directoryId, resolver),
-        new SortMenu(manager),
-        new ShowHiddenFilesMenu(getActivity())
+        BookmarkMenu.create(context, directoryId),
+        NewDirMenu.create(context, directoryId),
+        PasteMenu.create(context, directoryId),
+        SortMenu.create(context),
+        ShowHiddenFilesMenu.create(context)
     ));
   }
 

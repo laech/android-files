@@ -1,23 +1,33 @@
 package l.files.app.menu;
 
+import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
+import l.files.analytics.AnalyticsMenu;
 import l.files.app.TabHandler;
+import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Menu to open a new tab to view files.
+ */
 public final class NewTabMenu extends OptionsMenuAction {
 
   private final TabHandler handler;
 
-  public NewTabMenu(TabHandler handler) {
+  private NewTabMenu(TabHandler handler) {
     super(R.id.new_tab);
     this.handler = checkNotNull(handler, "handler");
+  }
+
+  public static OptionsMenu create(Context context, TabHandler handler) {
+    return new AnalyticsMenu(context, new NewTabMenu(handler), "new_tab");
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

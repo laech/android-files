@@ -29,5 +29,6 @@ android {
 
 dependencies {
   compile files('lib/libGoogleAnalyticsServices-3.01.jar')
+  compile project(':files-common')
   compile project.libs.android_support
 }
