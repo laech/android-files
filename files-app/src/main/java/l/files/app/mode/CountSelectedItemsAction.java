@@ -3,7 +3,7 @@ package l.files.app.mode;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.widget.AbsListView;
-import l.files.R;
+
 import l.files.common.widget.MultiChoiceModeListenerAdapter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -28,6 +28,6 @@ public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapt
 
   private void updateSelectedItemCount(ActionMode mode) {
     int n = list.getCheckedItemCount();
-    mode.setTitle(list.getResources().getString(R.string.n_selected, n));
+    mode.setTitle(String.valueOf(n));
   }
 }
