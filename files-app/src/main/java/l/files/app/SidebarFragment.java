@@ -7,9 +7,11 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import l.files.R;
+import l.files.analytics.Analytics;
 
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.provider.FilesContract.buildBookmarksUri;
@@ -34,6 +36,11 @@ public final class SidebarFragment extends BaseFileListFragment
     ((TextView) header.findViewById(android.R.id.title))
         .setText(R.string.bookmarks);
     getListView().addHeaderView(header, null, false);
+  }
+
+  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
+    super.onListItemClick(l, v, pos, id);
+    Analytics.onEvent(getActivity(), "sidebar", "click");
   }
 
   @Override public SidebarAdapter getListAdapter() {

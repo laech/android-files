@@ -34,12 +34,12 @@ class BaseFileListFragment extends BaseListFragment {
   }
 
   @Override
-  public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
     return inflater.inflate(layoutResourceId, container, false);
   }
 
   @Override
-  public final void onListItemClick(ListView l, View v, int pos, long id) {
+  public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     Cursor cursor = (Cursor) l.getItemAtPosition(pos);
     bus.post(OpenFileRequest.from(cursor));
