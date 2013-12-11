@@ -29,6 +29,7 @@ android {
 
 dependencies {
   compile project(':files-common')
+  compile project(':files-analytics')
   compile project(':files-service')
   compile project.libs.commons_io
   compile project.libs.commons_lang

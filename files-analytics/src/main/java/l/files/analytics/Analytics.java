@@ -30,6 +30,17 @@ public final class Analytics {
   }
 
   /**
+   * Tracks a preference changed event.
+   *
+   * @param key the preference key
+   * @param value the preference value converted to string form
+   */
+  public static void onPreferenceChanged(
+      Context context, String key, String value) {
+    get(context).send(createEvent("preference", key, value, null).build());
+  }
+
+  /**
    * Tracks a menu item select event.
    *
    * @param action the string identifying the action

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.BuildConfig.DEBUG;
+import static l.files.app.Preferences.newAnalyticsListener;
 
 public final class FilesApp extends Application {
 
@@ -45,6 +46,8 @@ public final class FilesApp extends Application {
       }
 
     };
+
+    Preferences.register(this, newAnalyticsListener(this));
 
     if (DEBUG) {
       StrictMode.enableDefaults();

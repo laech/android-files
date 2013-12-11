@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import l.files.analytics.Analytics;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -32,6 +33,8 @@ import static l.files.common.io.Files.listFiles;
 import static l.files.common.io.Files.normalize;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
+import static l.files.provider.Bookmarks.getBookmarksCount;
+import static l.files.provider.Bookmarks.isBookmarksKey;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_ID;
 import static l.files.provider.FilesContract.EXTRA_FILE_ID;
 import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
@@ -66,8 +69,6 @@ import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITI
 
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-  private static final String PREF_BOOKMARKS = "bookmarks";
 
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.COLUMN_ID,
@@ -288,8 +289,11 @@ public final class FilesProvider extends ContentProvider
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (PREF_BOOKMARKS.equals(key))
+    if (isBookmarksKey(key)) {
       getContentResolver().notifyChange(buildBookmarksUri(), null);
+      String count = Integer.toString(getBookmarksCount(pref));
+      Analytics.onPreferenceChanged(getContext(), key, count);
+    }
   }
 
   private Cursor newFileCursor(Uri uri, String[] projection, File[] files) {

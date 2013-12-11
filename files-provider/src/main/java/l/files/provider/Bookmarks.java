@@ -36,6 +36,10 @@ final class Bookmarks {
       .add(toId(DIRECTORY_DOWNLOADS))
       .build();
 
+  public static boolean isBookmarksKey(String key) {
+    return KEY.equals(key);
+  }
+
   private static String toId(String name) {
     return toId(new File(getExternalStorageDirectory(), name));
   }
@@ -53,6 +57,10 @@ final class Bookmarks {
   static File[] getBookmarks(SharedPreferences pref) {
     Set<String> fileIds = pref.getStringSet(KEY, DEFAULTS);
     return toFiles(fileIds);
+  }
+
+  public static int getBookmarksCount(SharedPreferences pref) {
+    return pref.getStringSet(KEY, DEFAULTS).size();
   }
 
   private static File[] toFiles(Set<String> fileIds) {
