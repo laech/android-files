@@ -29,6 +29,19 @@ public final class Analytics {
     get(activity).activityStop(activity);
   }
 
+  public static void onEvent(Context context, String category, String action) {
+    onEvent(context, category, action, null, null);
+  }
+
+  /**
+   * @param label the optional, custom label for this event
+   * @param value the optional, custom value for this event
+   */
+  public static void onEvent(
+      Context ctx, String category, String action, String label, Long value) {
+    get(ctx).send(createEvent(category, action, label, value).build());
+  }
+
   /**
    * Tracks a preference changed event.
    *
@@ -37,7 +50,7 @@ public final class Analytics {
    */
   public static void onPreferenceChanged(
       Context context, String key, String value) {
-    get(context).send(createEvent("preference", key, value, null).build());
+    onEvent(context, "preference", key, value, null);
   }
 
   /**
@@ -49,7 +62,7 @@ public final class Analytics {
    */
   public static void onMenuItemSelected(
       Context context, String action, String label, Long value) {
-    get(context).send(createEvent("menu", action, label, value).build());
+    onEvent(context, "menu", action, label, value);
   }
 
   /**

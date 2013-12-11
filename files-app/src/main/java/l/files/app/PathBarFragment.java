@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.R;
+import l.files.analytics.Analytics;
 
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
@@ -103,5 +104,7 @@ public final class PathBarFragment extends Fragment
         (String) v.getTag(R.id.file_name),
         (boolean) v.getTag(R.id.is_readable),
         (boolean) v.getTag(R.id.is_directory)));
+
+    Analytics.onEvent(getActivity(), "path_bar", "click");
   }
 }
