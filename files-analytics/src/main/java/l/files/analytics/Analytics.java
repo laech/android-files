@@ -2,6 +2,7 @@ package l.files.analytics;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.MenuItem;
 
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -32,20 +33,27 @@ public final class Analytics {
    * Tracks a menu item select event.
    *
    * @param action the string identifying the action
-   */
-  public static void onMenuItemSelected(Context context, String action) {
-    onMenuItemSelected(context, action, null, null);
-  }
-
-  /**
-   * Tracks a menu item select event.
-   *
-   * @param action the string identifying the action
    * @param label the optional, custom label for this event
    * @param value the optional, custom value for this event
    */
   public static void onMenuItemSelected(
       Context context, String action, String label, Long value) {
     get(context).send(createEvent("menu", action, label, value).build());
+  }
+
+  /**
+   * Provides optional event labels and values for a menu item click.
+   */
+  public static interface OnMenuItemSelectedEventProvider {
+
+    /**
+     * Gets the optional custom label for this menu item selected event.
+     */
+    String getEventLabel(MenuItem item);
+
+    /**
+     * Gets the optional custom label for this menu item selected event.
+     */
+    Long getEventValue(MenuItem item);
   }
 }

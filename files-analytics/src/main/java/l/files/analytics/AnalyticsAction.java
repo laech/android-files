@@ -8,12 +8,14 @@ import l.files.common.widget.MultiChoiceModeListenerDelegate;
 
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.analytics.Analytics.OnMenuItemSelectedEventProvider;
 
 /**
  * Tracks when the wrapped action is selected. The event will be tracked using
  * the action identifier supplied to the constructor.
  */
-public final class AnalyticsAction extends MultiChoiceModeListenerDelegate {
+public class AnalyticsAction extends MultiChoiceModeListenerDelegate
+    implements OnMenuItemSelectedEventProvider {
 
   private final Context context;
   private final String action;
@@ -28,8 +30,18 @@ public final class AnalyticsAction extends MultiChoiceModeListenerDelegate {
   @Override public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
     boolean handled = super.onActionItemClicked(mode, item);
     if (handled) {
-      Analytics.onMenuItemSelected(context, action);
+      String label = getEventLabel(item);
+      Long value = getEventValue(item);
+      Analytics.onMenuItemSelected(context, action, label, value);
     }
     return handled;
+  }
+
+  @Override public String getEventLabel(MenuItem item) {
+    return null;
+  }
+
+  @Override public Long getEventValue(MenuItem item) {
+    return null;
   }
 }
