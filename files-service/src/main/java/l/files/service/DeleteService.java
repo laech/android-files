@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import l.files.analytics.Analytics;
+
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
@@ -68,6 +70,7 @@ public final class DeleteService extends ProgressService {
       } catch (CancelException e) {
         return null;
       } catch (IOException e) {
+        Analytics.onException(DeleteService.this, e);
         Log.e(DeleteService.class.getSimpleName(), e.getMessage(), e); // TODO
       }
       return null;

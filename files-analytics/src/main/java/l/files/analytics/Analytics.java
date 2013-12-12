@@ -5,8 +5,12 @@ import android.content.Context;
 import android.view.MenuItem;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.ExceptionParser;
+import com.google.analytics.tracking.android.StandardExceptionParser;
 
 import static com.google.analytics.tracking.android.MapBuilder.createEvent;
+import static com.google.analytics.tracking.android.MapBuilder.createException;
+import static java.lang.Thread.currentThread;
 
 public final class Analytics {
   private Analytics() {}
@@ -34,12 +38,23 @@ public final class Analytics {
   }
 
   /**
+   * Tracks a custom event.
+   *
    * @param label the optional, custom label for this event
    * @param value the optional, custom value for this event
    */
   public static void onEvent(
       Context ctx, String category, String action, String label, Long value) {
     get(ctx).send(createEvent(category, action, label, value).build());
+  }
+
+  /**
+   * Tracks an {@link Exception}.
+   */
+  public static void onException(Context context, Exception e) {
+    ExceptionParser parser = new StandardExceptionParser(context, null);
+    String description = parser.getDescription(currentThread().getName(), e);
+    get(context).send(createException(description, false).build());
   }
 
   /**

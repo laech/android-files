@@ -29,5 +29,6 @@ android {
 
 dependencies {
   compile project(':files-common')
+  compile project(':files-analytics')
   compile project.libs.guava
 }
