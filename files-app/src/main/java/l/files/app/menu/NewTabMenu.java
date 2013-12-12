@@ -26,8 +26,12 @@ public final class NewTabMenu extends OptionsMenuAction {
     this.handler = checkNotNull(handler, "handler");
   }
 
-  public static OptionsMenu create(Context context, TabHandler handler) {
-    return new AnalyticsMenu(context, new NewTabMenu(handler), "new_tab");
+  public static OptionsMenu create(Context context, final TabHandler handler) {
+    return new AnalyticsMenu(context, new NewTabMenu(handler), "new_tab") {
+      @Override public Long getEventValue(MenuItem item) {
+        return (long) handler.getTabCount();
+      }
+    };
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

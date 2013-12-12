@@ -5,4 +5,6 @@ public interface TabHandler {
   void openNewTab();
 
   void closeCurrentTab();
+
+  int getTabCount();
 }

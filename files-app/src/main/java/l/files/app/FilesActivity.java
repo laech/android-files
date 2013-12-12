@@ -305,6 +305,10 @@ public final class FilesActivity extends AnalyticsActivity
     }
   }
 
+  @Override public int getTabCount() {
+    return getPagerAdapter().getCount();
+  }
+
   private void updateShowTabs() {
     setShowTabs(getPagerAdapter().getCount() > 1);
   }
