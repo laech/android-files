@@ -45,8 +45,9 @@ abstract class Traverser<V> implements Callable<V> {
         onFile(file);
       }
 
-      onFinish();
     }
+
+    onFinish();
 
     return getResult();
   }

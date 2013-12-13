@@ -7,7 +7,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 
 import l.files.analytics.Analytics;
 
@@ -53,8 +52,6 @@ public final class MoveService extends ProgressService {
           new Copier(this, files, dst, result.count, result.length).call();
           new Deleter(this, files, result.count).call();
         }
-      } catch (CancellationException e) {
-        return null;
       } catch (IOException e) {
         Analytics.onException(MoveService.this, e);
         Log.e(MoveService.class.getSimpleName(), e.getMessage(), e); // TODO

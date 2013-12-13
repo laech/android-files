@@ -7,7 +7,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 
 import l.files.analytics.Analytics;
 
@@ -52,8 +51,6 @@ public final class CopyService extends ProgressService {
 
         Counter.Result result = new Counter(this, src).call();
         new Copier(this, src, dst, result.count, result.length).call();
-      } catch (CancellationException e) {
-        return null;
       } catch (IOException e) {
         Analytics.onException(CopyService.this, e);
         Log.e(CopyService.class.getSimpleName(), e.getMessage(), e); // TODO

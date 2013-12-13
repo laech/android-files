@@ -15,7 +15,6 @@ import l.files.analytics.Analytics;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
-import static org.apache.commons.io.DirectoryWalker.CancelException;
 
 public final class DeleteService extends ProgressService {
 
@@ -67,8 +66,6 @@ public final class DeleteService extends ProgressService {
         Counter.Result count = new Counter(this, files).call();
         new Deleter(this, files, count.count).call();
 
-      } catch (CancelException e) {
-        return null;
       } catch (IOException e) {
         Analytics.onException(DeleteService.this, e);
         Log.e(DeleteService.class.getSimpleName(), e.getMessage(), e); // TODO
