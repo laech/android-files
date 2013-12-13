@@ -11,20 +11,17 @@ import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static l.files.common.io.Files.getNonExistentDestinationFile;
-import static l.files.common.io.Files.isAncestorOrSelf;
 import static l.files.common.io.Files.replace;
 import static l.files.service.BuildConfig.DEBUG;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-final class Copier implements Callable<Void> {
+final class Copier extends Paster<Void> {
 
   /*
    * Setting last modified time currently fails, see:
@@ -46,37 +43,19 @@ final class Copier implements Callable<Void> {
    */
   private static final long FILE_COPY_BUFFER_SIZE = 1024 * 4;
 
-  private final Set<File> sources;
-  private final File destination;
   private final Listener listener;
   private final long bytesTotal;
   private int remaining;
   private long bytesCopied;
 
   Copier(Listener listener, Set<File> sources, File destination, int remaining, long length) {
+    super(listener, sources, destination);
     this.listener = checkNotNull(listener, "listener");
-    this.destination = checkNotNull(destination, "destination");
-    this.sources = checkNotNull(sources, "sources");
     this.remaining = remaining;
     this.bytesTotal = length;
   }
 
-  @Override public Void call() throws IOException {
-    for (File from : sources) {
-      if (listener.isCancelled()) {
-        break;
-      }
-      if (isAncestorOrSelf(destination, from)) {
-        throw new IOException("Cannot copy directory " + from +
-            " into its own sub directory " + destination);
-      }
-      File to = getNonExistentDestinationFile(from, destination);
-      copy(from, to);
-    }
-    return null;
-  }
-
-  private void copy(File from, File to) throws IOException {
+  @Override protected void paste(File from, File to) throws IOException {
     Queue<File> queue = newLinkedList(singletonList(from));
     while (!queue.isEmpty()) {
       if (listener.isCancelled()) {
