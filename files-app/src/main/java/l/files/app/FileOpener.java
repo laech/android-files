@@ -5,17 +5,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import l.files.R;
+import l.files.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
 
 import static android.content.Intent.ACTION_VIEW;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.getFileSystemUri;
 
 final class FileOpener implements Consumer<Uri> {
+
+  private static final String TAG = FileOpener.class.getSimpleName();
 
   public static FileOpener get(Context context) {
     return new FileOpener(
@@ -57,8 +62,13 @@ final class FileOpener implements Consumer<Uri> {
       }
       try {
         showFile(media);
+        Analytics.onEvent(context, "files", "open_file_success", media);
       } catch (ActivityNotFoundException e) {
         showActivityNotFound();
+        Analytics.onEvent(context, "files", "open_file_failed", media);
+        if (DEBUG) {
+          Log.d(TAG, media, e);
+        }
       }
     }
 

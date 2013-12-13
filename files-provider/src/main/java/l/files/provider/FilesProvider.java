@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import org.apache.tika.Tika;
 
@@ -70,6 +71,8 @@ import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITI
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+  private static final String TAG = FilesProvider.class.getSimpleName();
+
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.COLUMN_ID,
       FileInfo.COLUMN_NAME,
@@ -98,6 +101,7 @@ public final class FilesProvider extends ContentProvider
         try {
           return TikaHolder.TIKA.detect(file);
         } catch (IOException e) {
+          Log.w(TAG, e.getMessage(), e);
           return null;
         }
     }

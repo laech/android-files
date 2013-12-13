@@ -13,7 +13,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import l.files.R;
-import l.files.analytics.Analytics;
 import l.files.app.menu.BookmarkMenu;
 import l.files.app.menu.NewDirMenu;
 import l.files.app.menu.PasteMenu;
@@ -77,11 +76,6 @@ public final class FilesFragment extends BaseFileListFragment
 
   @Override public FilesAdapter getListAdapter() {
     return (FilesAdapter) super.getListAdapter();
-  }
-
-  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
-    super.onListItemClick(l, v, pos, id);
-    Analytics.onEvent(getActivity(), "files", "click");
   }
 
   private void setupOptionsMenu() {

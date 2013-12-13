@@ -34,7 +34,17 @@ public final class Analytics {
   }
 
   public static void onEvent(Context context, String category, String action) {
-    onEvent(context, category, action, null, null);
+    onEvent(context, category, action, null);
+  }
+
+  /**
+   * Tracks a custom event.
+   *
+   * @param label the optional, custom label for this event
+   */
+  public static void onEvent(
+      Context context, String category, String action, String label) {
+    onEvent(context, category, action, label, null);
   }
 
   /**

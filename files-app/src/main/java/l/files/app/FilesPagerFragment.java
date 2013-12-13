@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import l.files.R;
+import l.files.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 
@@ -130,6 +131,8 @@ public final class FilesPagerFragment extends Fragment {
         .setBreadCrumbTitle(request.filename())
         .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
+
+    Analytics.onEvent(getActivity(), "files", "open_directory");
   }
 
   private void showFile(OpenFileRequest request) {
