@@ -2,8 +2,6 @@ package l.files.service;
 
 import android.util.Log;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -58,7 +56,7 @@ final class Copier implements Callable<Void> {
   Copier(Listener listener, Set<File> sources, File destination, int remaining, long length) {
     this.listener = checkNotNull(listener, "listener");
     this.destination = checkNotNull(destination, "destination");
-    this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
+    this.sources = checkNotNull(sources, "sources");
     this.remaining = remaining;
     this.bytesTotal = length;
   }
@@ -90,11 +88,19 @@ final class Copier implements Callable<Void> {
         continue;
       }
 
+      File dst = replace(file, from, to);
       if (file.isDirectory()) {
         queue.addAll(getChildren(file));
+        createDirectory(dst);
       } else {
-        copyFile(file, replace(file, from, to));
+        copyFile(file, dst);
       }
+    }
+  }
+
+  private void createDirectory(File dir) {
+    if (!dir.mkdirs() && !dir.exists()) {
+      Log.w(TAG, "Failed to create directory: " + dir);
     }
   }
 
