@@ -25,6 +25,8 @@ import l.files.R;
 
 import static android.text.format.DateUtils.isToday;
 import static android.text.format.Formatter.formatShortFileSize;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Strings.nullToEmpty;
@@ -56,11 +58,13 @@ final class FilesAdapter extends StableFilesAdapter {
 
     TypedValue value = new TypedValue();
     context.getTheme().resolveAttribute(
-        android.R.attr.listPreferredItemHeight, value, true);
+        android.R.attr.listPreferredItemPaddingRight, value, true);
 
     int width = metrics.widthPixels
-        - (int) value.getDimension(metrics)
-        - res.getDimensionPixelSize(R.dimen.files_list_padding_side) * 3;
+        - res.getDimensionPixelSize(R.dimen.files_list_icon_width)
+        - res.getDimensionPixelSize(R.dimen.files_list_padding_side) * 2
+        - (int) (value.getDimension(metrics) + 0.5f)
+        - (int) (applyDimension(COMPLEX_UNIT_DIP, 2, metrics) + 0.5f);
 
     int height = (int) (metrics.heightPixels * 0.6f);
 
@@ -128,7 +132,9 @@ final class FilesAdapter extends StableFilesAdapter {
     holder.setTitle(info.title);
     holder.setEnabled(info.readable);
     holder.setIcon(info.icon);
-    holder.setSummary(info.summary);
+    holder.setDate(info.date);
+    holder.setSize(info.size);
+    holder.setDirectory(info.directory);
     holder.setImage(info, thumbnailWidth, thumbnailHeight);
     holder.setGroup(info.group, position == 0 ? null
         : getInfo(context, position - 1).group);
@@ -151,7 +157,8 @@ final class FilesAdapter extends StableFilesAdapter {
     final View root;
     final TextView title;
     final TextView icon;
-    final TextView summary;
+    final TextView date;
+    final TextView size;
     final ImageView preview;
     final TextView header;
     final View headerContainer;
@@ -162,7 +169,8 @@ final class FilesAdapter extends StableFilesAdapter {
       this.icon = (TextView) root.findViewById(R.id.icon);
       this.title = (TextView) root.findViewById(R.id.title);
       this.preview = (ImageView) root.findViewById(R.id.preview);
-      this.summary = (TextView) root.findViewById(R.id.summary);
+      this.date = (TextView) root.findViewById(R.id.date);
+      this.size = (TextView) root.findViewById(R.id.size);
       this.header = (TextView) root.findViewById(R.id.header_title);
       this.headerContainer = root.findViewById(R.id.header_container);
     }
@@ -171,15 +179,20 @@ final class FilesAdapter extends StableFilesAdapter {
       root.setEnabled(enabled);
       icon.setEnabled(enabled);
       title.setEnabled(enabled);
-      summary.setEnabled(enabled);
+      date.setEnabled(enabled);
+      size.setEnabled(enabled);
     }
 
     void setTitle(CharSequence text) {
       title.setText(text);
     }
 
-    void setSummary(CharSequence text) {
-      summary.setText(text);
+    void setDate(CharSequence text) {
+      date.setText(text);
+    }
+
+    void setSize(CharSequence text) {
+      size.setText(text);
     }
 
     void setIcon(Typeface typeface) {
@@ -214,6 +227,10 @@ final class FilesAdapter extends StableFilesAdapter {
       }
     }
 
+    void setDirectory(boolean directory) {
+      size.setVisibility(directory ? GONE : VISIBLE);
+    }
+
     @Override public void onSuccess() {
       if (preview.getVisibility() != VISIBLE) {
         preview.setVisibility(VISIBLE);
@@ -231,7 +248,8 @@ final class FilesAdapter extends StableFilesAdapter {
   private final class Info {
     final String uri;
     final CharSequence title;
-    final CharSequence summary;
+    final CharSequence date;
+    final CharSequence size;
     final Typeface icon;
     final boolean readable;
     final boolean directory;
@@ -243,24 +261,15 @@ final class FilesAdapter extends StableFilesAdapter {
       title = cursor.getString(columnName);
       readable = cursor.getInt(columnReadable) == 1;
       directory = MEDIA_TYPE_DIR.equals(cursor.getString(columnMediaType));
+      date = formatLastModified(context, cursor);
       if (directory) {
         icon = getDirectoryIcon(context, cursor);
-        summary = geDirectorySummary(context, cursor);
+        size = "";
       } else {
         icon = getFileIcon(context, cursor);
-        summary = getFileSummary(context, cursor);
+        size = formatShortFileSize(context, cursor.getLong(columnSize));
       }
       group = grouper.getGroup(context.getResources(), cursor);
-    }
-
-    private String getFileSummary(Context context, Cursor cursor) {
-      String size = formatShortFileSize(context, cursor.getLong(columnSize));
-      String date = formatLastModified(context, cursor);
-      return context.getString(R.string.file_summary, date, size);
-    }
-
-    private String geDirectorySummary(Context context, Cursor cursor) {
-      return formatLastModified(context, cursor);
     }
 
     private Typeface getFileIcon(Context context, Cursor cursor) {
