@@ -3,7 +3,9 @@ package l.files.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -14,15 +16,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.joda.time.DateMidnight;
 import org.joda.time.MutableDateTime;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import l.files.R;
+import l.files.common.graphics.drawable.SizedColorDrawable;
 
+import static android.graphics.Color.TRANSPARENT;
 import static android.text.format.DateUtils.isToday;
 import static android.text.format.Formatter.formatShortFileSize;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
@@ -30,7 +36,8 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Strings.nullToEmpty;
-import static com.squareup.picasso.Callback.EmptyCallback;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.squareup.picasso.Picasso.LoadedFrom;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
@@ -44,8 +51,21 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 final class FilesAdapter extends StableFilesAdapter {
 
+  private final SparseArray<Info> infos = new SparseArray<>();
+
   private final int thumbnailWidth;
   private final int thumbnailHeight;
+
+  private DateFormat dateFormat;
+  private DateFormat timeFormat;
+  private Grouper grouper;
+
+  private int columnId = -1;
+  private int columnName = -1;
+  private int columnSize = -1;
+  private int columnModified = -1;
+  private int columnReadable = -1;
+  private int columnMediaType = -1;
 
   FilesAdapter(int thumbnailWidth, int thumbnailHeight) {
     this.thumbnailWidth = thumbnailWidth;
@@ -70,19 +90,6 @@ final class FilesAdapter extends StableFilesAdapter {
 
     return new FilesAdapter(width, height);
   }
-
-  private final SparseArray<Info> infos = new SparseArray<>();
-
-  private DateFormat dateFormat;
-  private DateFormat timeFormat;
-  private Grouper grouper;
-
-  private int columnId = -1;
-  private int columnName = -1;
-  private int columnSize = -1;
-  private int columnModified = -1;
-  private int columnReadable = -1;
-  private int columnMediaType = -1;
 
   @Override public void setCursor(Cursor cursor) {
     setCursor(cursor, null);
@@ -151,8 +158,11 @@ final class FilesAdapter extends StableFilesAdapter {
     return info;
   }
 
-  private static final class ViewHolder extends EmptyCallback {
-    private static final LruCache<String, Object> errors = new LruCache<>(1000);
+  private final Map<String, Drawable> placeholders = newHashMap();
+
+  private static final LruCache<String, Object> errors = new LruCache<>(1000);
+
+  private final class ViewHolder implements Target {
 
     final View root;
     final TextView title;
@@ -201,29 +211,25 @@ final class FilesAdapter extends StableFilesAdapter {
 
     void setGroup(String group, String prevGroup) {
       if (group == null || group.equals(prevGroup)) {
-        if (headerContainer.getVisibility() != GONE) {
-          headerContainer.setVisibility(GONE);
-        }
+        headerContainer.setVisibility(GONE);
       } else {
         header.setText(group);
-        if (headerContainer.getVisibility() != VISIBLE) {
-          headerContainer.setVisibility(VISIBLE);
-        }
+        headerContainer.setVisibility(VISIBLE);
       }
     }
 
     void setImage(Info info, int width, int height) {
-      this.uri = info.uri;
-      this.preview.setImageBitmap(null);
-      if (preview.getVisibility() != GONE) {
-        preview.setVisibility(GONE);
-      }
+      uri = info.uri;
+      preview.setImageBitmap(null);
+      preview.setVisibility(GONE);
       if (!info.directory && info.readable && errors.get(uri) == null) {
+        Drawable placeholder = placeholders.get(uri);
         Picasso.with(preview.getContext())
             .load(uri)
+            .placeholder(placeholder)
             .resize(width, height)
             .centerInside()
-            .into(preview, this);
+            .into(this);
       }
     }
 
@@ -231,17 +237,28 @@ final class FilesAdapter extends StableFilesAdapter {
       size.setVisibility(directory ? GONE : VISIBLE);
     }
 
-    @Override public void onSuccess() {
-      if (preview.getVisibility() != VISIBLE) {
-        preview.setVisibility(VISIBLE);
+    @Override public void onBitmapLoaded(Bitmap bitmap, LoadedFrom from) {
+      if (!placeholders.containsKey(uri)) {
+        placeholders.put(uri, new SizedColorDrawable(
+            TRANSPARENT,
+            bitmap.getWidth(),
+            bitmap.getHeight()));
       }
+      preview.setImageBitmap(bitmap);
+      preview.setVisibility(VISIBLE);
+      // TODO animate
     }
 
-    @Override public void onError() {
-      if (preview.getVisibility() != GONE) {
-        preview.setVisibility(GONE);
-      }
+    @Override public void onBitmapFailed(Drawable errorDrawable) {
+      preview.setVisibility(GONE);
       errors.put(uri, uri);
+    }
+
+    @Override public void onPrepareLoad(Drawable placeHolderDrawable) {
+      preview.setImageDrawable(placeHolderDrawable);
+      if (placeHolderDrawable != null) {
+        preview.setVisibility(VISIBLE);
+      }
     }
   }
 
