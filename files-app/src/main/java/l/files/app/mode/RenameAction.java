@@ -18,7 +18,7 @@ import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItemPosition;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
+import static l.files.provider.FileCursors.getFileId;
 
 /**
  * Lets the user rename a selected file in the list view, to be renamed to the
@@ -63,7 +63,7 @@ public final class RenameAction extends MultiChoiceModeAction {
   @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
     int position = getCheckedItemPosition(list);
     Cursor cursor = (Cursor) list.getItemAtPosition(position);
-    String fileId = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
+    String fileId = getFileId(cursor);
     RenameFragment.create(parentId, fileId).show(manager, RenameFragment.TAG);
   }
 }

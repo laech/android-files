@@ -26,7 +26,7 @@ import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
+import static l.files.provider.FileCursors.getFileId;
 
 /**
  * Deletes selected files from the list view cursor.
@@ -78,8 +78,7 @@ public final class DeleteAction extends MultiChoiceModeAction {
     List<String> fileIds = newArrayListWithCapacity(positions.size());
     for (int position : positions) {
       Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      String id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID));
-      fileIds.add(id);
+      fileIds.add(getFileId(cursor));
     }
     return fileIds;
   }

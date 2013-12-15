@@ -10,21 +10,10 @@ import android.widget.TextView;
 
 import l.files.R;
 
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
+import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getFileName;
 
 final class SidebarAdapter extends StableFilesAdapter {
-
-  private int columnId = -1;
-  private int columnName = -1;
-
-  @Override public void setCursor(Cursor cursor) {
-    if (cursor != null) {
-      columnId = cursor.getColumnIndexOrThrow(COLUMN_ID);
-      columnName = cursor.getColumnIndexOrThrow(COLUMN_NAME);
-    }
-    super.setCursor(cursor);
-  }
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
@@ -36,8 +25,8 @@ final class SidebarAdapter extends StableFilesAdapter {
     Resources res = parent.getResources();
 
     Cursor cursor = getItem(position);
-    String id = cursor.getString(columnId);
-    String name = cursor.getString(columnName);
+    String id = getFileId(cursor);
+    String name = getFileName(cursor);
 
     ViewHolder holder = (ViewHolder) view.getTag();
     holder.setTitle(FileLabels.get(res, id, name));

@@ -1,5 +1,6 @@
 package l.files.app;
 
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -19,11 +20,10 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getFileName;
+import static l.files.provider.FileCursors.isDirectory;
+import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FilesContract.buildHierarchyUri;
 
 public final class PathBarFragment extends Fragment
@@ -64,10 +64,6 @@ public final class PathBarFragment extends Fragment
 
   private void updatePathBar(Cursor cursor) {
     if (cursor.moveToFirst()) {
-      int columnId = cursor.getColumnIndex(COLUMN_ID);
-      int columnName = cursor.getColumnIndex(COLUMN_NAME);
-      int columnMime = cursor.getColumnIndex(COLUMN_MEDIA_TYPE);
-      int columnReadable = cursor.getColumnIndex(COLUMN_READABLE);
       LayoutInflater inflater = LayoutInflater.from(getActivity());
 
       do {
@@ -76,18 +72,19 @@ public final class PathBarFragment extends Fragment
           view = inflater.inflate(R.layout.path_bar_item, container, false);
           container.addView(view);
         }
-        view.setTag(R.id.file_id, cursor.getString(columnId));
-        view.setTag(R.id.file_name, cursor.getString(columnName));
-        view.setTag(R.id.is_readable, cursor.getInt(columnReadable) == 1);
-        view.setTag(R.id.is_directory, cursor.getString(columnMime).equals(MEDIA_TYPE_DIR));
+        view.setTag(R.id.file_id, getFileId(cursor));
+        view.setTag(R.id.file_name, getFileName(cursor));
+        view.setTag(R.id.is_readable, isReadable(cursor));
+        view.setTag(R.id.is_directory, isDirectory(cursor));
         view.setVisibility(VISIBLE);
         view.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(cursor.isFirst() ? Build.MODEL : cursor.getString(columnName));
+        title.setText(cursor.isFirst() ? Build.MODEL : getFileName(cursor));
 
+        AssetManager asset = getActivity().getAssets();
         TextView icon = (TextView) view.findViewById(R.id.icon);
-        icon.setTypeface(IconFonts.forDirectoryId(getActivity().getAssets(), cursor.getString(columnId)));
+        icon.setTypeface(IconFonts.forDirectoryId(asset, getFileId(cursor)));
 
       } while (cursor.moveToNext());
       for (int i = cursor.getPosition(); i < container.getChildCount(); i++) {

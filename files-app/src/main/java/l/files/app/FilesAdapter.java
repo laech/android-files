@@ -38,13 +38,13 @@ import static android.view.View.VISIBLE;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.squareup.picasso.Picasso.LoadedFrom;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getFileName;
+import static l.files.provider.FileCursors.getLastModified;
+import static l.files.provider.FileCursors.getMediaType;
+import static l.files.provider.FileCursors.getSize;
+import static l.files.provider.FileCursors.isDirectory;
+import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
@@ -59,13 +59,6 @@ final class FilesAdapter extends StableFilesAdapter {
   private DateFormat dateFormat;
   private DateFormat timeFormat;
   private Grouper grouper;
-
-  private int columnId = -1;
-  private int columnName = -1;
-  private int columnSize = -1;
-  private int columnModified = -1;
-  private int columnReadable = -1;
-  private int columnMediaType = -1;
 
   FilesAdapter(int thumbnailWidth, int thumbnailHeight) {
     this.thumbnailWidth = thumbnailWidth;
@@ -97,20 +90,10 @@ final class FilesAdapter extends StableFilesAdapter {
 
   public void setCursor(Cursor cursor, String sortOrder) {
     if (cursor != null) {
-      setColumns(cursor);
       setGrouper(sortOrder);
     }
     infos.clear();
     super.setCursor(cursor);
-  }
-
-  private void setColumns(Cursor cursor) {
-    columnId = cursor.getColumnIndexOrThrow(COLUMN_ID);
-    columnName = cursor.getColumnIndexOrThrow(COLUMN_NAME);
-    columnSize = cursor.getColumnIndexOrThrow(COLUMN_SIZE);
-    columnReadable = cursor.getColumnIndexOrThrow(COLUMN_READABLE);
-    columnMediaType = cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE);
-    columnModified = cursor.getColumnIndexOrThrow(COLUMN_LAST_MODIFIED);
   }
 
   private void setGrouper(String sortOrder) {
@@ -274,28 +257,28 @@ final class FilesAdapter extends StableFilesAdapter {
 
     Info(Context context, int position) {
       Cursor cursor = getItem(position);
-      uri = cursor.getString(columnId);
-      title = cursor.getString(columnName);
-      readable = cursor.getInt(columnReadable) == 1;
-      directory = MEDIA_TYPE_DIR.equals(cursor.getString(columnMediaType));
+      uri = getFileId(cursor); // TODO fix
+      title = getFileName(cursor);
+      readable = isReadable(cursor);
+      directory = isDirectory(cursor);
       date = formatLastModified(context, cursor);
       if (directory) {
         icon = getDirectoryIcon(context, cursor);
         size = "";
       } else {
         icon = getFileIcon(context, cursor);
-        size = formatShortFileSize(context, cursor.getLong(columnSize));
+        size = formatShortFileSize(context, getSize(cursor));
       }
       group = grouper.getGroup(context.getResources(), cursor);
     }
 
     private Typeface getFileIcon(Context context, Cursor cursor) {
-      String media = cursor.getString(columnMediaType);
+      String media = getMediaType(cursor);
       return IconFonts.forFileMediaType(context.getAssets(), media);
     }
 
     private Typeface getDirectoryIcon(Context context, Cursor cursor) {
-      String id = cursor.getString(columnId);
+      String id = getFileId(cursor);
       return IconFonts.forDirectoryId(context.getAssets(), id);
     }
 
@@ -306,7 +289,7 @@ final class FilesAdapter extends StableFilesAdapter {
       if (timeFormat == null) {
         timeFormat = android.text.format.DateFormat.getTimeFormat(context);
       }
-      long modified = cursor.getLong(columnModified);
+      long modified = getLastModified(cursor);
       return (isToday(modified) ? timeFormat : dateFormat)
           .format(new Date(modified));
     }
@@ -320,13 +303,13 @@ final class FilesAdapter extends StableFilesAdapter {
     }
   }
 
-  private final class NameGrouper extends Grouper {
+  private static final class NameGrouper extends Grouper {
     @Override String getGroup(Resources res, Cursor cursor) {
       return res.getString(R.string.name);
     }
   }
 
-  private final class DateGrouper extends Grouper {
+  private static final class DateGrouper extends Grouper {
     private final MutableDateTime timestamp = new MutableDateTime();
     private final long startOfToday = DateMidnight.now().getMillis();
     private final long startOfTomorrow = startOfToday + MILLIS_PER_DAY;
@@ -336,7 +319,7 @@ final class FilesAdapter extends StableFilesAdapter {
 
     @Override public String getGroup(Resources res, Cursor cursor) {
 
-      long modified = cursor.getLong(columnModified);
+      long modified = getLastModified(cursor);
       if (modified >= startOfTomorrow)
         return res.getString(R.string.unknown);
       if (modified >= startOfToday)

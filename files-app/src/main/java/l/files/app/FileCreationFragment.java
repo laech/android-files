@@ -18,10 +18,9 @@ import l.files.R;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.content.DialogInterface.OnClickListener;
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
-import static android.view.WindowManager.LayoutParams
-    .SOFT_INPUT_STATE_ALWAYS_VISIBLE;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
+import static l.files.provider.FileCursors.getFileId;
 import static l.files.provider.FilesContract.buildFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
@@ -108,7 +107,7 @@ public abstract class FileCreationFragment extends DialogFragment
     Button ok = getOkButton();
     if (cursor.getCount() > 0) {
       cursor.moveToFirst();
-      String newFileId = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
+      String newFileId = getFileId(cursor);
       editText.setError(getError(newFileId));
       ok.setEnabled(false);
     } else {

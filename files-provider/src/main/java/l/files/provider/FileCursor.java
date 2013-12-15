@@ -1,10 +1,11 @@
 package l.files.provider;
 
-import android.database.AbstractCursor;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.util.Map;
+
+import l.files.common.database.BaseCursor;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
@@ -20,7 +21,7 @@ import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
 import static l.files.provider.FilesContract.getFileId;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-final class FileCursor extends AbstractCursor {
+final class FileCursor extends BaseCursor {
 
   private final File[] files;
   private final String[] columns;

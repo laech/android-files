@@ -19,9 +19,8 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FileCursors.getFileName;
+import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FilesContract.buildFileUri;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 
@@ -85,11 +84,10 @@ public final class RenameFragment extends FileCreationFragment {
     if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
       return;
     }
-    String name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
-    String media = cursor.getString(cursor.getColumnIndex(COLUMN_MEDIA_TYPE));
+    String name = getFileName(cursor);
     EditText field = getFilenameField();
     field.setText(name);
-    if (MEDIA_TYPE_DIR.equals(media)) {
+    if (isDirectory(cursor)) {
       field.selectAll();
     } else {
       field.setSelection(0, getBaseName(name).length());
