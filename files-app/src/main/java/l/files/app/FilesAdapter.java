@@ -18,14 +18,14 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import org.joda.time.DateMidnight;
-import org.joda.time.MutableDateTime;
-
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Map;
 
 import l.files.R;
+import l.files.app.category.Categorizer;
+import l.files.app.category.FileDateCategorizer;
+import l.files.app.category.FileNameCategorizer;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -38,6 +38,7 @@ import static android.view.View.VISIBLE;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.squareup.picasso.Picasso.LoadedFrom;
+import static java.lang.System.currentTimeMillis;
 import static l.files.provider.FileCursors.getFileId;
 import static l.files.provider.FileCursors.getFileName;
 import static l.files.provider.FileCursors.getLastModified;
@@ -47,7 +48,6 @@ import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
-import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 final class FilesAdapter extends StableFilesAdapter {
 
@@ -58,7 +58,7 @@ final class FilesAdapter extends StableFilesAdapter {
 
   private DateFormat dateFormat;
   private DateFormat timeFormat;
-  private Grouper grouper;
+  private Categorizer categorizer;
 
   FilesAdapter(int thumbnailWidth, int thumbnailHeight) {
     this.thumbnailWidth = thumbnailWidth;
@@ -90,22 +90,22 @@ final class FilesAdapter extends StableFilesAdapter {
 
   public void setCursor(Cursor cursor, String sortOrder) {
     if (cursor != null) {
-      setGrouper(sortOrder);
+      setCategorizer(sortOrder);
     }
     infos.clear();
     super.setCursor(cursor);
   }
 
-  private void setGrouper(String sortOrder) {
+  private void setCategorizer(String sortOrder) {
     switch (nullToEmpty(sortOrder)) {
       case SORT_BY_LAST_MODIFIED:
-        grouper = new DateGrouper();
+        categorizer = new FileDateCategorizer(currentTimeMillis());
         break;
       case SORT_BY_NAME:
-        grouper = new NameGrouper();
+        categorizer = FileNameCategorizer.INSTANCE;
         break;
       default:
-        grouper = Grouper.NULL;
+        categorizer = Categorizer.NULL;
         break;
     }
   }
@@ -269,7 +269,7 @@ final class FilesAdapter extends StableFilesAdapter {
         icon = getFileIcon(context, cursor);
         size = formatShortFileSize(context, getSize(cursor));
       }
-      group = grouper.getGroup(context.getResources(), cursor);
+      group = categorizer.getCategory(context.getResources(), cursor);
     }
 
     private Typeface getFileIcon(Context context, Cursor cursor) {
@@ -292,56 +292,6 @@ final class FilesAdapter extends StableFilesAdapter {
       long modified = getLastModified(cursor);
       return (isToday(modified) ? timeFormat : dateFormat)
           .format(new Date(modified));
-    }
-  }
-
-  private static class Grouper {
-    static final Grouper NULL = new Grouper();
-
-    String getGroup(Resources res, Cursor cursor) {
-      return null;
-    }
-  }
-
-  private static final class NameGrouper extends Grouper {
-    @Override String getGroup(Resources res, Cursor cursor) {
-      return res.getString(R.string.name);
-    }
-  }
-
-  private static final class DateGrouper extends Grouper {
-    private final MutableDateTime timestamp = new MutableDateTime();
-    private final long startOfToday = DateMidnight.now().getMillis();
-    private final long startOfTomorrow = startOfToday + MILLIS_PER_DAY;
-    private final long startOfYesterday = startOfToday - MILLIS_PER_DAY;
-    private final long startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
-    private final long startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
-
-    @Override public String getGroup(Resources res, Cursor cursor) {
-
-      long modified = getLastModified(cursor);
-      if (modified >= startOfTomorrow)
-        return res.getString(R.string.unknown);
-      if (modified >= startOfToday)
-        return res.getString(R.string.today);
-      if (modified >= startOfYesterday)
-        return res.getString(R.string.yesterday);
-      if (modified >= startOf7Days)
-        return res.getString(R.string.previous_7_days);
-      if (modified >= startOf30Days)
-        return res.getString(R.string.previous_30_days);
-
-      timestamp.setMillis(startOfToday);
-      int currentYear = timestamp.getYear();
-
-      timestamp.setMillis(modified);
-      int thatYear = timestamp.getYear();
-
-      if (currentYear != thatYear) {
-        return String.valueOf(thatYear);
-      }
-
-      return timestamp.monthOfYear().getAsText();
     }
   }
 }
