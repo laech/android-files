@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -26,8 +30,8 @@ import l.files.R;
 import l.files.app.category.Categorizer;
 import l.files.app.category.FileDateCategorizer;
 import l.files.app.category.FileNameCategorizer;
-import l.files.common.graphics.drawable.SizedColorDrawable;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.graphics.Color.TRANSPARENT;
 import static android.text.format.DateUtils.isToday;
 import static android.text.format.Formatter.formatShortFileSize;
@@ -141,7 +145,9 @@ final class FilesAdapter extends StableFilesAdapter {
     return info;
   }
 
-  private final Map<String, Drawable> placeholders = newHashMap();
+  // TODO clean up
+  private static final Map<String, Point> sizesPortrait = newHashMap();
+  private static final Map<String, Point> sizesLandscape = newHashMap();
 
   private static final LruCache<String, Object> errors = new LruCache<>(1000);
 
@@ -204,15 +210,30 @@ final class FilesAdapter extends StableFilesAdapter {
     void setImage(Info info, int width, int height) {
       uri = info.uri;
       preview.setImageBitmap(null);
+      preview.setMinimumWidth(0);
+      preview.setMinimumHeight(0);
       preview.setVisibility(GONE);
       if (!info.directory && info.readable && errors.get(uri) == null) {
-        Drawable placeholder = placeholders.get(uri);
+        Point size = getSizeCache().get(uri);
+        if (size != null) {
+          preview.setMinimumWidth(size.x);
+          preview.setMinimumHeight(size.y);
+          preview.setVisibility(VISIBLE);
+        }
         Picasso.with(preview.getContext())
             .load(uri)
-            .placeholder(placeholder)
             .resize(width, height)
             .centerInside()
             .into(this);
+      }
+    }
+
+    private Map<String, Point> getSizeCache() {
+      int orientation = preview.getResources().getConfiguration().orientation;
+      if (orientation == ORIENTATION_PORTRAIT) {
+        return sizesPortrait;
+      } else {
+        return sizesLandscape;
       }
     }
 
@@ -221,15 +242,24 @@ final class FilesAdapter extends StableFilesAdapter {
     }
 
     @Override public void onBitmapLoaded(Bitmap bitmap, LoadedFrom from) {
-      if (!placeholders.containsKey(uri)) {
-        placeholders.put(uri, new SizedColorDrawable(
-            TRANSPARENT,
-            bitmap.getWidth(),
-            bitmap.getHeight()));
+      Resources res = preview.getResources();
+      if (!getSizeCache().containsKey(uri)) {
+        int extra = res.getDimensionPixelSize(R.dimen.file_preview_padding) * 2;
+        getSizeCache().put(uri, new Point(
+            bitmap.getWidth() + extra,
+            bitmap.getHeight() + extra));
       }
-      preview.setImageBitmap(bitmap);
+      if (!LoadedFrom.MEMORY.equals(from)) {
+        TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
+            new ColorDrawable(TRANSPARENT),
+            new BitmapDrawable(res, bitmap)});
+        preview.setImageDrawable(drawable);
+        int duration = res.getInteger(android.R.integer.config_shortAnimTime);
+        drawable.startTransition(duration);
+      } else {
+        preview.setImageBitmap(bitmap);
+      }
       preview.setVisibility(VISIBLE);
-      // TODO animate
     }
 
     @Override public void onBitmapFailed(Drawable errorDrawable) {
