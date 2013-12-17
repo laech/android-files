@@ -125,7 +125,7 @@ final class FileCursor extends BaseCursor {
         if (file.isDirectory()) {
           mediaType = MEDIA_TYPE_DIR;
         } else {
-          String ext = getExtension(name).toLowerCase(ENGLISH);
+          String ext = getExtension(name()).toLowerCase(ENGLISH);
           String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
           mediaType = mime == null ? "application/octet-stream" : mime;
         }
