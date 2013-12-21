@@ -4,9 +4,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -50,7 +48,7 @@ public class DecodeImageTask extends AsyncTask<String, ScaledSize, Bitmap> {
           return decodeScaledBitmap(url, size);
         }
       }
-    } catch (IOException | URISyntaxException e) {
+    } catch (Exception e) {
       Log.w(TAG, e);
     }
     return null;
