@@ -115,6 +115,8 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     return new SizedColorDrawable(TRANSPARENT, size.scaledWidth, size.scaledHeight);
   }
 
+  // TODO no need to decode size again
+  // TODO check file is readable before decoding, currently crashes
   private final class DecodeTask extends DecodeImageTask {
     private final Object key;
     private final ImageView view;
