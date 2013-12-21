@@ -169,7 +169,7 @@ public final class FilesActivity extends AnalyticsActivity
   }
 
   private void setActionBar() {
-    actionBar.setIcon(R.drawable.ic_storage);
+    actionBar.setIcon(R.drawable.ic_action_storage);
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setHomeButtonEnabled(true);
     actionBar.setCustomView(tabs.getRootContainer(),
