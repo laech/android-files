@@ -22,7 +22,6 @@ import l.files.app.util.ScaledSize;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 
 import static android.graphics.Color.TRANSPARENT;
-import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -57,6 +56,7 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     ImageView image = (ImageView) view;
     image.setImageDrawable(null);
     image.setVisibility(GONE);
+    image.setTag(R.id.image_decorator_task, null);
 
     Object key = buildCacheKey(decoration().get(position, adapter));
     if (errors.contains(key)) {
@@ -89,20 +89,15 @@ final class ImageDecorator extends BaseDecorator<Uri> {
 
   private void executeTaskIfNeeded(ImageView image, Object key, int position, Adapter adapter) {
     DecodeTask task = (DecodeTask) image.getTag(R.id.image_decorator_task);
-    if (!key.equals(image.getTag(R.id.image_decorator_key))) {
-      if (task != null) {
-        task.cancel(true);
-      }
-      task = null;
+    if (task != null && task.key.equals(key)) {
+      return;
     }
-
-    if (task == null) {
-      task = new DecodeTask(key, image);
-      image.setTag(R.id.image_decorator_task, task);
-      image.setTag(R.id.image_decorator_key, key);
-      task.executeOnExecutor(THREAD_POOL_EXECUTOR,
-          decoration().get(position, adapter).toString());
+    if (task != null) {
+      task.cancel(true);
     }
+    task = new DecodeTask(key, image);
+    image.setTag(R.id.image_decorator_task, task);
+    task.execute(decoration().get(position, adapter).toString());
   }
 
   private Object buildCacheKey(Uri uri) {
@@ -131,7 +126,7 @@ final class ImageDecorator extends BaseDecorator<Uri> {
       super.onProgressUpdate(values);
       ScaledSize size = values[0];
       sizes.put(key, size);
-      if (isCurrentKey()) {
+      if (isCurrent()) {
         view.setImageDrawable(newPlaceholder(size));
         view.setVisibility(VISIBLE);
       } else {
@@ -140,9 +135,8 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     }
 
     @Override protected void onCancelled() {
-      if (isCurrentKey()) {
+      if (isCurrent()) {
         view.setTag(R.id.image_decorator_task, null);
-        view.setTag(R.id.image_decorator_key, null);
       }
     }
 
@@ -158,15 +152,14 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     private void onFailed() {
       errors.add(key);
       sizes.remove(key);
-      if (isCurrentKey()) {
+      if (isCurrent()) {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
-        view.setTag(R.id.image_decorator_key, null);
       }
     }
 
     private void onSuccess(Bitmap bitmap) {
-      if (isCurrentKey()) {
+      if (isCurrent()) {
         Resources res = view.getResources();
         TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
             new ColorDrawable(TRANSPARENT),
@@ -176,13 +169,12 @@ final class ImageDecorator extends BaseDecorator<Uri> {
         drawable.startTransition(duration);
         view.setVisibility(VISIBLE);
         view.setTag(R.id.image_decorator_task, null);
-        view.setTag(R.id.image_decorator_key, null);
       }
       cache.put(key, bitmap);
     }
 
-    private boolean isCurrentKey() {
-      return key.equals(view.getTag(R.id.image_decorator_key));
+    private boolean isCurrent() {
+      return view.getTag(R.id.image_decorator_task) == this;
     }
   }
 }
