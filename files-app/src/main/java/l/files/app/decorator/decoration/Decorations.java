@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.text.format.Time;
 import android.util.SparseArray;
 import android.widget.Adapter;
 
@@ -21,7 +22,10 @@ import l.files.app.category.Categorizer;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
-import static android.text.format.DateUtils.isToday;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_NO_YEAR;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.text.format.DateUtils.formatDateTime;
 import static android.text.format.Formatter.formatShortFileSize;
 import static l.files.common.database.Cursors.getBoolean;
 import static l.files.common.database.Cursors.getLong;
@@ -108,15 +112,27 @@ public final class Decorations {
    * cursor column name.
    */
   public static Decoration<String> cursorDateFormat(
-      final String column, Context context) {
+      final String column, final Context context) {
     final DateFormat dateFormat = getDateFormat(context);
     final DateFormat timeFormat = getTimeFormat(context);
     final Date date = new Date();
+    final Time t1 = new Time();
+    final Time t2 = new Time();
+    final int flags = FORMAT_SHOW_DATE | FORMAT_ABBREV_MONTH | FORMAT_NO_YEAR;
     return new Decoration<String>() {
       @Override public String get(int position, Adapter adapter) {
         long time = getLong(getCursor(adapter, position), column);
         date.setTime(time);
-        return (isToday(time) ? timeFormat : dateFormat).format(date);
+        t1.setToNow();
+        t2.set(time);
+        if (t1.year == t2.year) {
+          if (t1.yearDay == t2.yearDay) {
+            return timeFormat.format(date);
+          } else {
+            return formatDateTime(context, time, flags);
+          }
+        }
+        return dateFormat.format(date);
       }
     };
   }
