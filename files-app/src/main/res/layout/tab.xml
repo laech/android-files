@@ -2,30 +2,31 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    style="?android:attr/actionBarTabStyle">
 
   <ImageView
       android:id="@+id/back_indicator"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_centerVertical="true"
-      android:layout_marginLeft="4dp"
+      android:layout_marginLeft="8dp"
       android:contentDescription="@null"
-      android:src="@drawable/ic_back"
+      android:src="@drawable/ic_ab_back_holo_light_am"
       android:visibility="gone"/>
 
   <TextView
       android:id="@+id/title"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
-      android:maxWidth="250dp"
-      android:paddingLeft="24dp"
-      android:paddingRight="24dp"
+      android:paddingLeft="28dp"
+      android:paddingRight="28dp"
       android:gravity="center"
-      android:background="@drawable/tab_indicator"
       android:ellipsize="marquee"
       android:singleLine="true"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:textColor="@color/text_tab"/>
+      android:textColor="@color/text_tab"
+      style="?android:attr/actionBarTabTextStyle"/>
 
 </RelativeLayout>
