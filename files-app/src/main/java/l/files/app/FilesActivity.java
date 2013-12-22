@@ -270,6 +270,9 @@ public final class FilesActivity extends AnalyticsActivity
   }
 
   @Subscribe public void handle(final OpenFileRequest request) {
+    if (currentActionMode != null) {
+      currentActionMode.finish();
+    }
     closeDrawerThenRun(new Runnable() {
       @Override public void run() {
         currentPagerFragment.show(request);
