@@ -7,29 +7,39 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.util.LruCache;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ImageView;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
 import l.files.R;
+import l.files.analytics.Analytics;
 import l.files.app.decorator.decoration.Decoration;
-import l.files.app.util.DecodeImageTask;
 import l.files.app.util.ScaledSize;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 
 import static android.graphics.Color.TRANSPARENT;
+import static android.os.AsyncTask.SERIAL_EXECUTOR;
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static l.files.app.util.Bitmaps.decodeScaledBitmap;
+import static l.files.app.util.Bitmaps.decodeScaledSize;
 
 final class ImageDecorator extends BaseDecorator<Uri> {
+
+  private static final String TAG = ImageDecorator.class.getSimpleName();
 
   private static final Set<Object> errors = newHashSet();
   private static final Map<Object, ScaledSize> sizes = newHashMap();
@@ -53,20 +63,29 @@ final class ImageDecorator extends BaseDecorator<Uri> {
   }
 
   @Override public void decorate(int position, Adapter adapter, View view) {
+    Uri uri = decoration().get(position, adapter);
+    Object key = buildCacheKey(uri);
+
+    Task task = (Task) view.getTag(R.id.image_decorator_task);
+    if (task != null && task.uri().equals(uri)) return;
+    if (task != null) task.cancel(true);
+
     ImageView image = (ImageView) view;
     image.setImageDrawable(null);
     image.setVisibility(GONE);
     image.setTag(R.id.image_decorator_task, null);
 
-    Object key = buildCacheKey(decoration().get(position, adapter));
-    if (errors.contains(key)) {
-      return;
+    if (errors.contains(key)) return;
+    if (setCachedBitmap(image, key)) return;
+
+    ScaledSize size = sizes.get(key);
+    if (size != null) {
+      image.setVisibility(VISIBLE);
+      image.setImageDrawable(newPlaceholder(size));
+      new DecodeImage(key, image, uri, size).executeOnExecutor(SERIAL_EXECUTOR);
+    } else {
+      new DecodeSize(key, image, uri).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
-    if (setCachedBitmap(image, key)) {
-      return;
-    }
-    setPlaceholderSize(image, key);
-    executeTaskIfNeeded(image, key, position, adapter);
   }
 
   private boolean setCachedBitmap(ImageView image, Object key) {
@@ -79,27 +98,6 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     return false;
   }
 
-  private void setPlaceholderSize(ImageView view, Object key) {
-    ScaledSize size = sizes.get(key);
-    if (size != null) {
-      view.setImageDrawable(newPlaceholder(size));
-      view.setVisibility(VISIBLE);
-    }
-  }
-
-  private void executeTaskIfNeeded(ImageView image, Object key, int position, Adapter adapter) {
-    DecodeTask task = (DecodeTask) image.getTag(R.id.image_decorator_task);
-    if (task != null && task.key.equals(key)) {
-      return;
-    }
-    if (task != null) {
-      task.cancel(true);
-    }
-    task = new DecodeTask(key, image);
-    image.setTag(R.id.image_decorator_task, task);
-    task.execute(decoration().get(position, adapter).toString());
-  }
-
   private Object buildCacheKey(Uri uri) {
     return uri.buildUpon()
         .appendQueryParameter("bounds", maxWidth + "x" + maxHeight)
@@ -110,33 +108,94 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     return new SizedColorDrawable(TRANSPARENT, size.scaledWidth, size.scaledHeight);
   }
 
-  // TODO no need to decode size again
-  // TODO check file is readable before decoding, currently crashes
-  private final class DecodeTask extends DecodeImageTask {
+  private static interface Task {
+
+    Uri uri();
+
+    boolean cancel(boolean mayInterruptIfRunning);
+  }
+
+  private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
     private final Object key;
     private final ImageView view;
+    private final Uri uri;
 
-    DecodeTask(Object key, ImageView view) {
-      super(maxWidth, maxHeight);
+    DecodeSize(Object key, ImageView view, Uri uri) {
+      this.uri = uri;
       this.key = key;
       this.view = view;
     }
 
-    @Override protected void onProgressUpdate(ScaledSize... values) {
-      super.onProgressUpdate(values);
-      ScaledSize size = values[0];
-      sizes.put(key, size);
-      if (isCurrent()) {
-        view.setImageDrawable(newPlaceholder(size));
-        view.setVisibility(VISIBLE);
-      } else {
-        cancel(true);
+    @Override protected void onPreExecute() {
+      super.onPreExecute();
+      view.setTag(R.id.image_decorator_task, this);
+    }
+
+    @Override protected ScaledSize doInBackground(Void... params) {
+      if (isCancelled()) {
+        return null;
+      }
+      try {
+        URL url = new URI(uri.toString()).toURL();
+        return decodeScaledSize(url, maxWidth, maxHeight);
+      } catch (Exception e) {
+        Analytics.onException(view.getContext(), e);
+        Log.w(TAG, e);
+        return null;
       }
     }
 
-    @Override protected void onCancelled() {
-      if (isCurrent()) {
-        view.setTag(R.id.image_decorator_task, null);
+    @Override protected void onPostExecute(ScaledSize size) {
+      super.onPostExecute(size);
+      if (size == null) {
+        errors.add(key);
+        if (view.getTag(R.id.image_decorator_task) == this) {
+          view.setTag(R.id.image_decorator_task, null);
+        }
+      } else {
+        sizes.put(key, size);
+        if (view.getTag(R.id.image_decorator_task) == this) {
+          view.setTag(R.id.image_decorator_task, null);
+          view.setImageDrawable(newPlaceholder(size));
+          view.setVisibility(VISIBLE);
+          new DecodeImage(key, view, uri, size).executeOnExecutor(SERIAL_EXECUTOR);
+        }
+      }
+    }
+
+    @Override public Uri uri() {
+      return uri;
+    }
+  }
+
+  private final class DecodeImage extends AsyncTask<Void, Void, Bitmap> implements Task {
+    private final Object key;
+    private final ImageView view;
+    private final Uri uri;
+    private final ScaledSize size;
+
+    DecodeImage(Object key, ImageView view, Uri uri, ScaledSize size) {
+      this.key = key;
+      this.view = view;
+      this.uri = uri;
+      this.size = size;
+    }
+
+    @Override protected void onPreExecute() {
+      super.onPreExecute();
+      view.setTag(R.id.image_decorator_task, this);
+    }
+
+    @Override protected Bitmap doInBackground(Void... params) {
+      if (isCancelled()) {
+        return null;
+      }
+      try {
+        return decodeScaledBitmap(new URI(uri.toString()).toURL(), size);
+      } catch (Exception e) {
+        Analytics.onException(view.getContext(), e);
+        Log.w(TAG, e);
+        return null;
       }
     }
 
@@ -152,14 +211,15 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     private void onFailed() {
       errors.add(key);
       sizes.remove(key);
-      if (isCurrent()) {
+      if (view.getTag(R.id.image_decorator_task) == this) {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
       }
     }
 
     private void onSuccess(Bitmap bitmap) {
-      if (isCurrent()) {
+      if (view.getTag(R.id.image_decorator_task) == this) {
+        view.setTag(R.id.image_decorator_task, null);
         Resources res = view.getResources();
         TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
             new ColorDrawable(TRANSPARENT),
@@ -168,13 +228,12 @@ final class ImageDecorator extends BaseDecorator<Uri> {
         int duration = res.getInteger(android.R.integer.config_shortAnimTime);
         drawable.startTransition(duration);
         view.setVisibility(VISIBLE);
-        view.setTag(R.id.image_decorator_task, null);
       }
       cache.put(key, bitmap);
     }
 
-    private boolean isCurrent() {
-      return view.getTag(R.id.image_decorator_task) == this;
+    @Override public Uri uri() {
+      return uri;
     }
   }
 }
