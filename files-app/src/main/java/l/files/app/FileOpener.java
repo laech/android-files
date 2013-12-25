@@ -14,6 +14,8 @@ import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
 
 import static android.content.Intent.ACTION_VIEW;
+import static android.widget.Toast.LENGTH_SHORT;
+import static android.widget.Toast.makeText;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.getFileSystemUri;
@@ -70,6 +72,7 @@ final class FileOpener implements Consumer<Uri> {
           Log.d(TAG, media, e);
         }
       }
+      debug(media);
     }
 
     public void showFailedToGetFileInfo() {
@@ -83,6 +86,10 @@ final class FileOpener implements Consumer<Uri> {
     private void showFile(String media) throws ActivityNotFoundException {
       context.startActivity(new Intent(ACTION_VIEW)
           .setDataAndType(getFileSystemUri(uri), media));
+    }
+
+    private void debug(String media) {
+      if (DEBUG) makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
     }
   }
 }
