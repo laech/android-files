@@ -27,6 +27,7 @@
       android:gravity="center"
       android:ellipsize="marquee"
       android:singleLine="true"
+      android:fontFamily="sans-serif"
       android:textColor="@color/text_tab"
       style="?android:attr/actionBarTabTextStyle"/>
 
