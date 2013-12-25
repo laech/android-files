@@ -7,6 +7,8 @@
   <color name="sidebar_background">#4b4a47</color>
   <color name="sidebar_item_header">#e6e5e3</color>
   <color name="sidebar_item_header_separator">#3e3e3b</color>
+  <color name="text_tab_active">#444341</color>
+  <color name="text_tab_inactive">#a09f9d</color>
   <color name="text_primary_normal">#646361</color>
   <color name="text_primary_disabled">#77646361</color>
   <color name="text_primary_inverse_normal">#e6e5e3</color>

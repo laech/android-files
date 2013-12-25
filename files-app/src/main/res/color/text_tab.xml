@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
           android:exitFadeDuration="@android:integer/config_shortAnimTime">
-  <item android:color="@color/text_primary_normal" android:state_selected="true"/>
-  <item android:color="@color/text_secondary_normal"/>
+  <item android:color="@color/text_tab_active" android:state_selected="true"/>
+  <item android:color="@color/text_tab_inactive"/>
 </selector>
