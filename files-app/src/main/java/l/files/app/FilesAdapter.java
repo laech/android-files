@@ -15,7 +15,6 @@ import com.google.common.base.Supplier;
 import l.files.R;
 import l.files.app.category.Categorizer;
 import l.files.app.category.FileDateCategorizer;
-import l.files.app.category.FileNameCategorizer;
 import l.files.app.decorator.Decorator;
 import l.files.app.decorator.decoration.Decoration;
 
@@ -44,7 +43,6 @@ import static l.files.app.decorator.decoration.Decorations.isFile;
 import static l.files.app.decorator.decoration.Decorations.memoize;
 import static l.files.app.decorator.decoration.Decorations.uri;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 
 final class FilesAdapter extends StableFilesAdapter implements Supplier<Categorizer> {
 
@@ -107,9 +105,6 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     switch (nullToEmpty(sortOrder)) {
       case SORT_BY_LAST_MODIFIED:
         categorizer = new FileDateCategorizer(currentTimeMillis());
-        break;
-      case SORT_BY_NAME:
-        categorizer = FileNameCategorizer.INSTANCE;
         break;
       default:
         categorizer = Categorizer.NULL;

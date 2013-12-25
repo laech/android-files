@@ -230,11 +230,11 @@ public final class Decorations {
       final Decoration<?> decoration) {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
-        if (position == 0) {
+        Object current = decoration.get(position, adapter);
+        if (position == 0 && current != null) {
           return true;
         }
         Object previous = decoration.get(position - 1, adapter);
-        Object current = decoration.get(position, adapter);
         return !Objects.equal(current, previous);
       }
     };
