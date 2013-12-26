@@ -20,13 +20,13 @@ import static android.content.DialogInterface.OnClickListener;
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FilesContract.buildFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
     implements OnClickListener, LoaderCallbacks<Cursor> {
 
-  public static final String ARG_PARENT_ID = "parent_id";
+  public static final String ARG_PARENT_LOCATION = "parent_location";
 
   private static final int LOADER_CHECKER =
       identityHashCode(FileCreationFragment.class);
@@ -62,7 +62,7 @@ public abstract class FileCreationFragment extends DialogFragment
         .create();
   }
 
-  protected CharSequence getError(String newFileId) {
+  protected CharSequence getError(String newFileLocation) {
     return getString(R.string.name_exists);
   }
 
@@ -93,7 +93,7 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
   private Loader<Cursor> newChecker() {
-    Uri uri = buildFileUri(getParentId(), getFilename());
+    Uri uri = buildFileUri(getParentLocation(), getFilename());
     return new CursorLoader(getActivity(), uri, null, null, null, null);
   }
 
@@ -107,8 +107,8 @@ public abstract class FileCreationFragment extends DialogFragment
     Button ok = getOkButton();
     if (cursor.getCount() > 0) {
       cursor.moveToFirst();
-      String newFileId = getFileId(cursor);
-      editText.setError(getError(newFileId));
+      String newFileLocation = getLocation(cursor);
+      editText.setError(getError(newFileLocation));
       ok.setEnabled(false);
     } else {
       editText.setError(null);
@@ -116,8 +116,8 @@ public abstract class FileCreationFragment extends DialogFragment
     }
   }
 
-  protected String getParentId() {
-    return getArguments().getString(ARG_PARENT_ID);
+  protected String getParentLocation() {
+    return getArguments().getString(ARG_PARENT_LOCATION);
   }
 
   protected String getFilename() {
@@ -144,7 +144,6 @@ public abstract class FileCreationFragment extends DialogFragment
         restartChecker();
       }
     }
-
 
     @Override public void beforeTextChanged(
         CharSequence s, int start, int count, int after) {}

@@ -18,7 +18,7 @@ import static android.widget.Toast.makeText;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Fragments.setArgs;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
+import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.buildSuggestionUri;
 import static l.files.provider.FilesContract.createDirectory;
 
@@ -30,8 +30,8 @@ public final class NewDirFragment extends FileCreationFragment {
   private static final int LOADER_SUGGESTION =
       identityHashCode(NewDirFragment.class);
 
-  static NewDirFragment create(String parentId) {
-    return setArgs(new NewDirFragment(), ARG_PARENT_ID, parentId);
+  static NewDirFragment create(String parentLocation) {
+    return setArgs(new NewDirFragment(), ARG_PARENT_LOCATION, parentLocation);
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -41,12 +41,12 @@ public final class NewDirFragment extends FileCreationFragment {
 
   @Override public void onClick(DialogInterface dialog, int which) {
     final ContentResolver resolver = getActivity().getContentResolver();
-    final String parentId = getParentId();
+    final String parentLocation = getParentLocation();
     final String filename = getFilename();
 
     new AsyncTask<Void, Void, Boolean>() {
       @Override protected Boolean doInBackground(Void... params) {
-        return createDirectory(resolver, parentId, filename);
+        return createDirectory(resolver, parentLocation, filename);
       }
 
       @Override protected void onPostExecute(Boolean success) {
@@ -72,9 +72,9 @@ public final class NewDirFragment extends FileCreationFragment {
 
   private Loader<Cursor> newSuggestionLoader() {
     String basename = getString(R.string.untitled_dir);
-    Uri suggestionUri = buildSuggestionUri(getParentId(), basename);
+    Uri suggestionUri = buildSuggestionUri(getParentLocation(), basename);
     return new CursorLoader(getActivity(), suggestionUri,
-        new String[]{COLUMN_NAME}, null, null, null);
+        new String[]{NAME}, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

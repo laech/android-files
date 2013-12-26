@@ -26,7 +26,7 @@ import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
 
 /**
  * Deletes selected files from the list view cursor.
@@ -60,33 +60,33 @@ public final class DeleteAction extends MultiChoiceModeAction {
 
   @Override
   protected void onItemSelected(final ActionMode mode, MenuItem item) {
-    final List<String> fileIds = getCheckedFileIds();
+    final List<String> fileLocations = getCheckedFileLocations();
     new AlertDialog.Builder(list.getContext())
-        .setMessage(getConfirmMessage(fileIds.size()))
+        .setMessage(getConfirmMessage(fileLocations.size()))
         .setNegativeButton(android.R.string.cancel, null)
         .setPositiveButton(R.string.delete, new OnClickListener() {
           @Override public void onClick(DialogInterface dialog, int which) {
-            requestDelete(fileIds);
+            requestDelete(fileLocations);
             mode.finish();
           }
         })
         .show();
   }
 
-  private List<String> getCheckedFileIds() {
+  private List<String> getCheckedFileLocations() {
     List<Integer> positions = getCheckedItemPositions(list);
-    List<String> fileIds = newArrayListWithCapacity(positions.size());
+    List<String> fileLocations = newArrayListWithCapacity(positions.size());
     for (int position : positions) {
       Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      fileIds.add(getFileId(cursor));
+      fileLocations.add(getLocation(cursor));
     }
-    return fileIds;
+    return fileLocations;
   }
 
-  private void requestDelete(final List<String> fileIds) {
+  private void requestDelete(final List<String> fileLocations) {
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        FilesContract.delete(resolver, fileIds);
+        FilesContract.delete(resolver, fileLocations);
       }
     });
   }

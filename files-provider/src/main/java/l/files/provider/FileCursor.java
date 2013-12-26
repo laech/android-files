@@ -10,15 +10,15 @@ import l.files.common.database.BaseCursor;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Locale.ENGLISH;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_WRITABLE;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
-import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.FileInfo.LOCATION;
+import static l.files.provider.FilesContract.FileInfo.MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.MIME;
+import static l.files.provider.FilesContract.FileInfo.NAME;
+import static l.files.provider.FilesContract.FileInfo.READABLE;
+import static l.files.provider.FilesContract.FileInfo.LENGTH;
+import static l.files.provider.FilesContract.FileInfo.WRITABLE;
+import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
+import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class FileCursor extends BaseCursor {
@@ -55,25 +55,25 @@ final class FileCursor extends BaseCursor {
   @Override public String getString(int column) {
     Info info = getCurrentFileInfo();
     String col = columns[column];
-    if (COLUMN_ID.equals(col)) return info.id();
-    if (COLUMN_NAME.equals(col)) return info.name();
-    if (COLUMN_MEDIA_TYPE.equals(col)) return info.mime();
+    if (LOCATION.equals(col)) return info.id();
+    if (NAME.equals(col)) return info.name();
+    if (MIME.equals(col)) return info.mime();
     throw new IllegalArgumentException();
   }
 
   @Override public int getInt(int column) {
     Info info = getCurrentFileInfo();
     String col = columns[column];
-    if (COLUMN_READABLE.equals(col)) return info.readable();
-    if (COLUMN_WRITABLE.equals(col)) return info.writable();
+    if (READABLE.equals(col)) return info.readable();
+    if (WRITABLE.equals(col)) return info.writable();
     throw new IllegalArgumentException();
   }
 
   @Override public long getLong(int column) {
     Info info = getCurrentFileInfo();
     String col = columns[column];
-    if (COLUMN_SIZE.equals(col)) return info.length();
-    if (COLUMN_LAST_MODIFIED.equals(col)) return info.modified();
+    if (LENGTH.equals(col)) return info.length();
+    if (MODIFIED.equals(col)) return info.modified();
     throw new IllegalArgumentException();
   }
 
@@ -110,7 +110,7 @@ final class FileCursor extends BaseCursor {
     }
 
     String id() {
-      if (id == null) id = getFileId(file);
+      if (id == null) id = getFileLocation(file);
       return id;
     }
 
@@ -123,7 +123,7 @@ final class FileCursor extends BaseCursor {
     String mime() {
       if (mediaType == null) {
         if (file.isDirectory()) {
-          mediaType = MEDIA_TYPE_DIR;
+          mediaType = MIME_DIR;
         } else {
           String ext = getExtension(name()).toLowerCase(ENGLISH);
           String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);

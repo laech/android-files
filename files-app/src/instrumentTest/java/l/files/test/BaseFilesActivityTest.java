@@ -1,6 +1,6 @@
 package l.files.test;
 
-import static l.files.app.FilesActivity.EXTRA_DIR;
+import static l.files.app.FilesActivity.EXTRA_DIRECTORY;
 
 import android.content.Intent;
 import java.io.File;
@@ -35,6 +35,6 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   }
 
   private Intent newIntent(File dir) {
-    return new Intent().putExtra(EXTRA_DIR, dir.getAbsolutePath());
+    return new Intent().putExtra(EXTRA_DIRECTORY, dir.getAbsolutePath());
   }
 }

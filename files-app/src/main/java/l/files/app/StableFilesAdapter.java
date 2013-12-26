@@ -3,7 +3,7 @@ package l.files.app;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
 
 abstract class StableFilesAdapter extends CursorAdapter {
 
@@ -14,8 +14,8 @@ abstract class StableFilesAdapter extends CursorAdapter {
   }
 
   @Override public long getItemId(int position) {
-    String fileId = getFileId(getItem(position));
-    ids.putIfAbsent(fileId, ids.size() + 1);
-    return ids.get(fileId);
+    String location = getLocation(getItem(position));
+    ids.putIfAbsent(location, ids.size() + 1);
+    return ids.get(location);
   }
 }

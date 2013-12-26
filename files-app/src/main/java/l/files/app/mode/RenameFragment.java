@@ -19,7 +19,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
-import static l.files.provider.FileCursors.getFileName;
+import static l.files.provider.FileCursors.getName;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FilesContract.buildFileUri;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
@@ -28,14 +28,14 @@ public final class RenameFragment extends FileCreationFragment {
 
   public static final String TAG = RenameFragment.class.getSimpleName();
 
-  private static final String ARG_FILE_ID = "file_id";
+  private static final String ARG_FILE_LOCATION = "file_location";
 
   private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
-  static RenameFragment create(String parentId, String fileId) {
+  static RenameFragment create(String parentLocation, String fileLocation) {
     Bundle args = new Bundle(2);
-    args.putString(ARG_PARENT_ID, parentId);
-    args.putString(ARG_FILE_ID, fileId);
+    args.putString(ARG_PARENT_LOCATION, parentLocation);
+    args.putString(ARG_FILE_LOCATION, fileLocation);
     RenameFragment fragment = new RenameFragment();
     fragment.setArguments(args);
     return fragment;
@@ -48,11 +48,11 @@ public final class RenameFragment extends FileCreationFragment {
     }
   }
 
-  @Override protected CharSequence getError(String newFileId) {
-    if (getFileId().equals(newFileId)) {
+  @Override protected CharSequence getError(String newFileLocation) {
+    if (getFileLocation().equals(newFileLocation)) {
       return null;
     }
-    return super.getError(newFileId);
+    return super.getError(newFileLocation);
   }
 
   @Override protected int getTitleResourceId() {
@@ -68,7 +68,7 @@ public final class RenameFragment extends FileCreationFragment {
   }
 
   private Loader<Cursor> onCreateFileLoader() {
-    return new CursorLoader(getActivity(), buildFileUri(getFileId()),
+    return new CursorLoader(getActivity(), buildFileUri(getFileLocation()),
         null, null, null, null);
   }
 
@@ -84,7 +84,7 @@ public final class RenameFragment extends FileCreationFragment {
     if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
       return;
     }
-    String name = getFileName(cursor);
+    String name = getName(cursor);
     EditText field = getFilenameField();
     field.setText(name);
     if (isDirectory(cursor)) {
@@ -100,7 +100,7 @@ public final class RenameFragment extends FileCreationFragment {
     new AsyncTask<Void, Void, Boolean>() {
 
       @Override protected Boolean doInBackground(Void... params) {
-        return FilesContract.rename(resolver, getFileId(), getFilename());
+        return FilesContract.rename(resolver, getFileLocation(), getFilename());
       }
 
       @Override protected void onPostExecute(Boolean success) {
@@ -113,7 +113,7 @@ public final class RenameFragment extends FileCreationFragment {
     getBus(this).post(CloseActionModeRequest.INSTANCE);
   }
 
-  private String getFileId() {
-    return getArguments().getString(ARG_FILE_ID);
+  private String getFileLocation() {
+    return getArguments().getString(ARG_FILE_LOCATION);
   }
 }

@@ -20,7 +20,7 @@ import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.app.ListViews.getCheckedFileIds;
+import static l.files.app.ListViews.getCheckedFileLocations;
 import static l.files.common.app.SystemServices.getClipboardManager;
 
 /**
@@ -54,7 +54,7 @@ public final class CopyAction extends MultiChoiceModeAction {
   }
 
   @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
-    Clipboards.setCopy(manager, ImmutableSet.copyOf(getCheckedFileIds(list)));
+    Clipboards.setCopy(manager, ImmutableSet.copyOf(getCheckedFileLocations(list)));
     mode.finish();
   }
 }

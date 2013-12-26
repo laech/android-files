@@ -5,42 +5,42 @@ import android.database.Cursor;
 import static l.files.common.database.Cursors.getInt;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_MEDIA_TYPE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_SIZE;
-import static l.files.provider.FilesContract.FileInfo.MEDIA_TYPE_DIR;
+import static l.files.provider.FilesContract.FileInfo.LOCATION;
+import static l.files.provider.FilesContract.FileInfo.MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.MIME;
+import static l.files.provider.FilesContract.FileInfo.NAME;
+import static l.files.provider.FilesContract.FileInfo.READABLE;
+import static l.files.provider.FilesContract.FileInfo.LENGTH;
+import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 
 public final class FileCursors {
   private FileCursors() {}
 
-  public static String getFileId(Cursor cursor) {
-    return getString(cursor, COLUMN_ID);
+  public static String getLocation(Cursor cursor) {
+    return getString(cursor, LOCATION);
   }
 
   public static String getMediaType(Cursor cursor) {
-    return getString(cursor, COLUMN_MEDIA_TYPE);
+    return getString(cursor, MIME);
   }
 
-  public static String getFileName(Cursor cursor) {
-    return getString(cursor, COLUMN_NAME);
+  public static String getName(Cursor cursor) {
+    return getString(cursor, NAME);
   }
 
   public static long getLastModified(Cursor cursor) {
-    return getLong(cursor, COLUMN_LAST_MODIFIED);
+    return getLong(cursor, MODIFIED);
   }
 
   public static long getSize(Cursor cursor) {
-    return getLong(cursor, COLUMN_SIZE);
+    return getLong(cursor, LENGTH);
   }
 
   public static boolean isReadable(Cursor cursor) {
-    return getInt(cursor, COLUMN_READABLE) == 1;
+    return getInt(cursor, READABLE) == 1;
   }
 
   public static boolean isDirectory(Cursor cursor) {
-    return MEDIA_TYPE_DIR.equals(getMediaType(cursor));
+    return MIME_DIR.equals(getMediaType(cursor));
   }
 }

@@ -35,14 +35,14 @@ import static l.files.app.decorator.decoration.Decorations.category;
 import static l.files.app.decorator.decoration.Decorations.categoryVisible;
 import static l.files.app.decorator.decoration.Decorations.fileDate;
 import static l.files.app.decorator.decoration.Decorations.fileIcon;
-import static l.files.app.decorator.decoration.Decorations.fileId;
+import static l.files.app.decorator.decoration.Decorations.fileLocation;
 import static l.files.app.decorator.decoration.Decorations.fileName;
 import static l.files.app.decorator.decoration.Decorations.fileReadable;
 import static l.files.app.decorator.decoration.Decorations.fileSize;
 import static l.files.app.decorator.decoration.Decorations.isFile;
 import static l.files.app.decorator.decoration.Decorations.memoize;
 import static l.files.app.decorator.decoration.Decorations.uri;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 
 final class FilesAdapter extends StableFilesAdapter implements Supplier<Categorizer> {
 
@@ -59,7 +59,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     Decoration<Boolean> readable = fileReadable();
     Decoration<Boolean> categoryVisibility = categoryVisible(category);
     Decoration<Typeface> icon = memoize(fileIcon(context.getAssets()), this);
-    Decoration<Uri> uri = memoize(uri(fileId()), this);
+    Decoration<Uri> uri = memoize(uri(fileLocation()), this);
     this.decorator = compose(
         on(id.title, enable(readable), text(fileName())),
         on(id.icon, enable(readable), font(icon)),
@@ -103,7 +103,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
 
   private void setCategorizer(String sortOrder) {
     switch (nullToEmpty(sortOrder)) {
-      case SORT_BY_LAST_MODIFIED:
+      case SORT_BY_MODIFIED:
         categorizer = new FileDateCategorizer(currentTimeMillis());
         break;
       default:

@@ -16,39 +16,39 @@ import l.files.R;
 import l.files.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
-import l.files.provider.FilesContract;
 
 import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
+import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.bookmark;
 import static l.files.provider.FilesContract.buildBookmarkUri;
 import static l.files.provider.FilesContract.unbookmark;
 
 /**
- * Menu to bookmark/unbookmark a directory with the given ID.
- *
- * @see FilesContract.FileInfo#COLUMN_ID
+ * Menu to bookmark/unbookmark a directory at the given {@link
+ * FileInfo#LOCATION}.
  */
 public final class BookmarkMenu
     extends OptionsMenuAction implements LoaderCallbacks<Cursor> {
 
   private final FragmentActivity context;
-  private final String fileId;
+  private final String directoryLocation;
 
   private Menu menu;
   private boolean bookmarked;
 
-  private BookmarkMenu(FragmentActivity context, String fileId) {
+  private BookmarkMenu(FragmentActivity context, String directoryLocation) {
     super(R.id.bookmark);
     this.context = checkNotNull(context, "context");
-    this.fileId = checkNotNull(fileId, "fileId");
+    this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
   }
 
-  public static OptionsMenu create(FragmentActivity activity, String fileId) {
-    OptionsMenu menu = new BookmarkMenu(activity, fileId);
+  public static OptionsMenu create(
+      FragmentActivity activity, String directoryLocation) {
+    OptionsMenu menu = new BookmarkMenu(activity, directoryLocation);
     return new AnalyticsMenu(activity, menu, "bookmark");
   }
 
@@ -75,14 +75,14 @@ public final class BookmarkMenu
     final boolean checked = item.isChecked();
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        if (checked) unbookmark(resolver, fileId);
-        else bookmark(resolver, fileId);
+        if (checked) unbookmark(resolver, directoryLocation);
+        else bookmark(resolver, directoryLocation);
       }
     });
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri uri = buildBookmarkUri(fileId);
+    Uri uri = buildBookmarkUri(directoryLocation);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 

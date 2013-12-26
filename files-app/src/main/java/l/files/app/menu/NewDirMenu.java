@@ -9,32 +9,31 @@ import l.files.R;
 import l.files.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
-import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.provider.FilesContract.FileInfo;
 
 /**
- * Menu to allow user to create a new directory on a parent directory identified
- * by the given ID.
- *
- * @see FilesContract.FileInfo#COLUMN_ID
+ * Menu to allow user to create a new directory under a parent directory
+ * identified by the given {@link FileInfo#LOCATION}.
  */
 public final class NewDirMenu extends OptionsMenuAction {
 
-  private final String parentId;
+  private final String parentLocation;
   private final FragmentManager manager;
 
-  private NewDirMenu(FragmentManager manager, String parentId) {
+  private NewDirMenu(FragmentManager manager, String parentLocation) {
     super(R.id.new_dir);
     this.manager = checkNotNull(manager, "manager");
-    this.parentId = checkNotNull(parentId, "parentId");
+    this.parentLocation = checkNotNull(parentLocation, "parentLocation");
   }
 
-  public static OptionsMenu create(FragmentActivity activity, String parentId) {
+  public static OptionsMenu create(
+      FragmentActivity activity, String parentLocation) {
     FragmentManager manager = activity.getSupportFragmentManager();
-    OptionsMenu menu = new NewDirMenu(manager, parentId);
+    OptionsMenu menu = new NewDirMenu(manager, parentLocation);
     return new AnalyticsMenu(activity, menu, "new_dir");
   }
 
@@ -45,6 +44,6 @@ public final class NewDirMenu extends OptionsMenuAction {
   }
 
   @Override protected void onItemSelected(MenuItem item) {
-    NewDirFragment.create(parentId).show(manager, NewDirFragment.TAG);
+    NewDirFragment.create(parentLocation).show(manager, NewDirFragment.TAG);
   }
 }

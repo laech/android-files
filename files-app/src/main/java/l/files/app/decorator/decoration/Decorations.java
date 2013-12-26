@@ -30,15 +30,15 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static l.files.common.database.Cursors.getBoolean;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getMediaType;
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FilesContract.FileInfo;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_ID;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_LAST_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_NAME;
-import static l.files.provider.FilesContract.FileInfo.COLUMN_READABLE;
+import static l.files.provider.FilesContract.FileInfo.LOCATION;
+import static l.files.provider.FilesContract.FileInfo.MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.NAME;
+import static l.files.provider.FilesContract.FileInfo.READABLE;
 
 public final class Decorations {
   private Decorations() {}
@@ -138,24 +138,24 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to get the ID for each {@link FileInfo}.
+   * Returns a function to {@link FileInfo#LOCATION}.
    */
-  public static Decoration<String> fileId() {
-    return cursorString(COLUMN_ID);
+  public static Decoration<String> fileLocation() {
+    return cursorString(LOCATION);
   }
 
   /**
    * Returns a function to get the name for each {@link FileInfo}.
    */
   public static Decoration<String> fileName() {
-    return cursorString(COLUMN_NAME);
+    return cursorString(NAME);
   }
 
   /**
    * Returns a function to get the readability of each {@link FileInfo}.
    */
   public static Decoration<Boolean> fileReadable() {
-    return cursorBoolean(COLUMN_READABLE);
+    return cursorBoolean(READABLE);
   }
 
   /**
@@ -163,7 +163,7 @@ public final class Decorations {
    * FileInfo}.
    */
   public static Decoration<String> fileDate(final Context context) {
-    return cursorDateFormat(COLUMN_LAST_MODIFIED, context);
+    return cursorDateFormat(MODIFIED, context);
   }
 
   /**
@@ -174,7 +174,7 @@ public final class Decorations {
       @Override public Typeface get(int position, Adapter adapter) {
         Cursor cursor = getCursor(adapter, position);
         if (isDirectory(cursor)) {
-          return IconFonts.forDirectoryId(assets, getFileId(cursor));
+          return IconFonts.forDirectoryLocation(assets, getLocation(cursor));
         } else {
           return IconFonts.forFileMediaType(assets, getMediaType(cursor));
         }

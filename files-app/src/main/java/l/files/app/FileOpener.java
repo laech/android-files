@@ -18,7 +18,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.provider.FilesContract.getFileSystemUri;
+import static l.files.provider.FilesContract.getFileLocation;
 
 final class FileOpener implements Consumer<Uri> {
 
@@ -85,7 +85,7 @@ final class FileOpener implements Consumer<Uri> {
 
     private void showFile(String media) throws ActivityNotFoundException {
       context.startActivity(new Intent(ACTION_VIEW)
-          .setDataAndType(getFileSystemUri(uri), media));
+          .setDataAndType(Uri.parse(getFileLocation(uri)), media));
     }
 
     private void debug(String media) {

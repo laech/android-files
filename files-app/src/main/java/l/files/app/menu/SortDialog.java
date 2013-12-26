@@ -16,7 +16,7 @@ import l.files.app.Preferences;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.app.Preferences.getSortOrder;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_LAST_MODIFIED;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 
 public final class SortDialog
@@ -72,7 +72,7 @@ public final class SortDialog
 
   private static enum SortBy {
     NAME(SORT_BY_NAME, R.string.name),
-    LAST_MODIFIED(SORT_BY_LAST_MODIFIED, R.string.date_modified);
+    MODIFIED(SORT_BY_MODIFIED, R.string.date_modified);
 
     final String sort;
     final int labelId;

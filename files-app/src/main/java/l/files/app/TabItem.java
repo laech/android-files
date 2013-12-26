@@ -10,9 +10,9 @@ public final class TabItem implements Parcelable {
   public static final Creator<TabItem> CREATOR = new Creator<TabItem>() {
     @Override public TabItem createFromParcel(Parcel source) {
       final int id = source.readInt();
-      final String dirId = source.readString();
+      final String directoryLocation = source.readString();
       final String title = source.readString();
-      return new TabItem(id, dirId, title);
+      return new TabItem(id, directoryLocation, title);
     }
 
     @Override public TabItem[] newArray(int size) {
@@ -21,12 +21,12 @@ public final class TabItem implements Parcelable {
   };
 
   private final int id;
-  private final String dirId;
+  private final String directoryLocation;
   private String title;
 
-  public TabItem(int id, String dirId, String title) {
+  public TabItem(int id, String directoryLocation, String title) {
     this.id = id;
-    this.dirId = checkNotNull(dirId, "dirId");
+    this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
     this.title = checkNotNull(title, "title");
   }
 
@@ -34,8 +34,8 @@ public final class TabItem implements Parcelable {
     return id;
   }
 
-  public String getDirectoryId() {
-    return dirId;
+  public String getDirectoryLocation() {
+    return directoryLocation;
   }
 
   public String getTitle() {
@@ -52,7 +52,7 @@ public final class TabItem implements Parcelable {
 
   @Override public void writeToParcel(Parcel dst, int flags) {
     dst.writeInt(id);
-    dst.writeString(dirId);
+    dst.writeString(directoryLocation);
     dst.writeString(title);
   }
 }

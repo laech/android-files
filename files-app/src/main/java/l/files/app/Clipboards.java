@@ -15,7 +15,7 @@ public final class Clipboards {
 
   private static final String ACTION_CUT = "l.files.intent.action.CUT";
   private static final String ACTION_COPY = "l.files.intent.action.COPY";
-  private static final String EXTRA_FILE_IDS = "l.files.intent.extra.FILE_IDS";
+  private static final String EXTRA_FILE_LOCATIONS = "l.files.intent.extra.FILE_LOCATIONS";
 
   private Clipboards() {}
 
@@ -37,12 +37,12 @@ public final class Clipboards {
     return ACTION_COPY.equals(getAction(manager));
   }
 
-  public static Set<String> getFileIds(ClipboardManager manager) {
+  public static Set<String> getFileLocations(ClipboardManager manager) {
     Intent intent = getClipboardIntent(manager);
     if (intent == null) {
       return emptySet();
     }
-    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_IDS);
+    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_LOCATIONS);
     if (extras == null) {
       return emptySet();
     }
@@ -67,17 +67,20 @@ public final class Clipboards {
     return intent.getAction();
   }
 
-  public static void setCut(ClipboardManager manager, Set<String> fileIds) {
-    setClipData(manager, fileIds, ACTION_CUT);
+  public static void setCut(
+      ClipboardManager manager, Set<String> fileLocations) {
+    setClipData(manager, fileLocations, ACTION_CUT);
   }
 
-  public static void setCopy(ClipboardManager manager, Set<String> fileIds) {
-    setClipData(manager, fileIds, ACTION_COPY);
+  public static void setCopy(
+      ClipboardManager manager, Set<String> fileLocations) {
+    setClipData(manager, fileLocations, ACTION_COPY);
   }
 
-  private static void setClipData(ClipboardManager manager, Set<String> fileIds, String action) {
-    String[] data = fileIds.toArray(new String[fileIds.size()]);
-    Intent intent = new Intent(action).putExtra(EXTRA_FILE_IDS, data);
+  private static void setClipData(
+      ClipboardManager manager, Set<String> fileLocations, String action) {
+    String[] data = fileLocations.toArray(new String[fileLocations.size()]);
+    Intent intent = new Intent(action).putExtra(EXTRA_FILE_LOCATIONS, data);
     manager.setPrimaryClip(newIntent(null, intent));
   }
 }

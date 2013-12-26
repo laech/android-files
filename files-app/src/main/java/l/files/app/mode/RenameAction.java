@@ -10,7 +10,6 @@ import android.widget.AbsListView;
 import l.files.R;
 import l.files.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
-import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
@@ -18,31 +17,30 @@ import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItemPosition;
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
+import static l.files.provider.FilesContract.FileInfo;
 
 /**
  * Lets the user rename a selected file in the list view, to be renamed to the
- * directory identified by the given ID.
- *
- * @see FilesContract.FileInfo#COLUMN_ID
+ * directory identified by the given {@link FileInfo#LOCATION}.
  */
 public final class RenameAction extends MultiChoiceModeAction {
 
   private final AbsListView list;
   private final FragmentManager manager;
-  private final String parentId;
+  private final String parentLocation;
 
   private RenameAction(
-      AbsListView list, FragmentManager manager, String parentId) {
+      AbsListView list, FragmentManager manager, String parentLocation) {
     super(R.id.rename);
     this.list = checkNotNull(list, "list");
     this.manager = checkNotNull(manager, "manager");
-    this.parentId = checkNotNull(parentId, "parentId");
+    this.parentLocation = checkNotNull(parentLocation, "parentLocation");
   }
 
   public static MultiChoiceModeListener create(
-      AbsListView list, FragmentManager manager, String parentId) {
-    MultiChoiceModeListener action = new RenameAction(list, manager, parentId);
+      AbsListView list, FragmentManager manager, String parentLocation) {
+    MultiChoiceModeListener action = new RenameAction(list, manager, parentLocation);
     return new AnalyticsAction(list.getContext(), action, "rename");
   }
 
@@ -63,7 +61,7 @@ public final class RenameAction extends MultiChoiceModeAction {
   @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
     int position = getCheckedItemPosition(list);
     Cursor cursor = (Cursor) list.getItemAtPosition(position);
-    String fileId = getFileId(cursor);
-    RenameFragment.create(parentId, fileId).show(manager, RenameFragment.TAG);
+    String location = getLocation(cursor);
+    RenameFragment.create(parentLocation, location).show(manager, RenameFragment.TAG);
   }
 }

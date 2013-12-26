@@ -32,34 +32,45 @@ import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
+import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
 public final class FilesFragment extends BaseFileListFragment
     implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
 
   public static final String TAG = FilesFragment.class.getSimpleName();
-  public static final String ARG_DIRECTORY_ID = "directory_id";
+  public static final String ARG_DIRECTORY_LOCATION = "directory_location";
 
   private static final int LOADER_ID = identityHashCode(FilesFragment.class);
 
-  private String directoryId;
+  private String directoryLocation;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
   }
 
-  public static FilesFragment create(String directoryId) {
-    return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY_ID,
-        directoryId);
+  /**
+   * Creates a fragment to show the contents under the directory's {@link
+   * FileInfo#LOCATION}.
+   */
+  public static FilesFragment create(String directoryLocation) {
+    return Fragments.setArgs(
+        new FilesFragment(),
+        ARG_DIRECTORY_LOCATION,
+        directoryLocation);
   }
 
-  public String getDirectoryId() {
-    return directoryId;
+  /**
+   * Gets the {@link FileInfo#LOCATION} of the directory that this fragment is
+   * currently showing.
+   */
+  public String getDirectoryLocation() {
+    return directoryLocation;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    directoryId = getArguments().getString(ARG_DIRECTORY_ID);
+    directoryLocation = getArguments().getString(ARG_DIRECTORY_LOCATION);
 
     setupListView();
     setupOptionsMenu();
@@ -81,9 +92,9 @@ public final class FilesFragment extends BaseFileListFragment
   private void setupOptionsMenu() {
     FragmentActivity context = getActivity();
     setOptionsMenu(OptionsMenus.compose(
-        BookmarkMenu.create(context, directoryId),
-        NewDirMenu.create(context, directoryId),
-        PasteMenu.create(context, directoryId),
+        BookmarkMenu.create(context, directoryLocation),
+        NewDirMenu.create(context, directoryLocation),
+        PasteMenu.create(context, directoryLocation),
         SortMenu.create(context),
         ShowHiddenFilesMenu.create(context)
     ));
@@ -99,7 +110,7 @@ public final class FilesFragment extends BaseFileListFragment
         CutAction.create(list),
         CopyAction.create(list),
         DeleteAction.create(list),
-        RenameAction.create(list, fragmentManager, directoryId)
+        RenameAction.create(list, fragmentManager, directoryLocation)
     ));
   }
 
@@ -110,7 +121,7 @@ public final class FilesFragment extends BaseFileListFragment
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     boolean showHidden = Preferences.getShowHiddenFiles(getActivity());
     String sortOrder = Preferences.getSortOrder(getActivity());
-    Uri uri = buildFileChildrenUri(directoryId, showHidden);
+    Uri uri = buildFileChildrenUri(directoryLocation, showHidden);
     return new CursorLoader(getActivity(), uri, null, null, null, sortOrder);
   }
 

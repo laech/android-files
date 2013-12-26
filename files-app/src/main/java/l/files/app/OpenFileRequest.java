@@ -9,29 +9,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 final class OpenFileRequest extends ValueObject {
 
-  private final String fileId;
+  private final String fileLocation;
   private final String filename;
   private final boolean canRead;
   private final boolean directory;
 
   public OpenFileRequest(
-      String fileId, String filename, boolean canRead, boolean directory) {
+      String fileLocation, String filename, boolean canRead, boolean directory) {
     this.filename = checkNotNull(filename, "filename");
-    this.fileId = checkNotNull(fileId, "fileId");
+    this.fileLocation = checkNotNull(fileLocation, "fileLocation");
     this.canRead = canRead;
     this.directory = directory;
   }
 
   public static OpenFileRequest from(Cursor cursor) {
     return new OpenFileRequest(
-        FileCursors.getFileId(cursor),
-        FileCursors.getFileName(cursor),
+        FileCursors.getLocation(cursor),
+        FileCursors.getName(cursor),
         FileCursors.isReadable(cursor),
         FileCursors.isDirectory(cursor));
   }
 
-  public String fileId() {
-    return fileId;
+  public String fileLocation() {
+    return fileLocation;
   }
 
   public String filename() {

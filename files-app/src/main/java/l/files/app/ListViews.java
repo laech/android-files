@@ -7,17 +7,17 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
-import static l.files.provider.FileCursors.getFileId;
+import static l.files.provider.FileCursors.getLocation;
 
 public final class ListViews {
   private ListViews() {}
 
-  public static List<String> getCheckedFileIds(AbsListView list) {
+  public static List<String> getCheckedFileLocations(AbsListView list) {
     List<Integer> positions = getCheckedItemPositions(list);
     List<String> ids = newArrayListWithCapacity(positions.size());
     for (int position : positions) {
       Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      ids.add(getFileId(cursor));
+      ids.add(getLocation(cursor));
     }
     return ids;
   }
