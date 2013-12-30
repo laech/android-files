@@ -161,10 +161,10 @@ public final class Files {
   }
 
   /**
-   * Calls {@link File#listFiles()} but with option to filter hidden files.
+   * Calls {@link File#list()} but with option to filter hidden files.
    */
-  public static File[] listFiles(File dir, boolean showHiddenFiles) {
-    return dir.listFiles(showHiddenFiles ? null : Filter.HIDE_HIDDEN_FILES);
+  public static String[] list(File dir, boolean showHiddenFiles) {
+    return dir.list(showHiddenFiles ? null : Filter.HIDE_HIDDEN_FILES);
   }
 
   private static enum Filter implements FilenameFilter {

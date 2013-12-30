@@ -29,23 +29,23 @@ class DirObserver extends FileObserver {
   static final int DIR_CHANGED_MASK =
       CREATE | DELETE | MOVED_FROM | MOVED_TO | MODIFY;
 
-  private final File directory;
+  private final String path;
   private final Handler handler;
   private final Runnable listener;
 
-  DirObserver(File dir, Runnable listener) {
-    this(dir, listener, DIR_CHANGED_MASK);
+  DirObserver(String path, Runnable listener) {
+    this(path, listener, DIR_CHANGED_MASK);
   }
 
-  DirObserver(File dir, Runnable listener, int mask) {
-    super(checkNotNull(dir, "dir").getAbsolutePath(), mask);
-    this.directory = dir;
+  DirObserver(String path, Runnable listener, int mask) {
+    super(path, mask);
+    this.path = path;
     this.listener = checkNotNull(listener, "listener");
     this.handler = new Handler(Looper.getMainLooper());
   }
 
   @Override public String toString() {
-    return toStringHelper(this).addValue(directory).toString();
+    return toStringHelper(this).addValue(path).toString();
   }
 
   @Override public void onEvent(int event, final String path) {
@@ -75,8 +75,8 @@ class DirObserver extends FileObserver {
 
   private void debug(String event, String path) {
     Log.d(TAG, event +
-        ", dir=" + directory +
-        ", lastModified=" + directory.lastModified() +
+        ", dir=" + this.path +
+        ", lastModified=" + new File(path).lastModified() +
         ", path=" + path);
   }
 }

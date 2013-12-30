@@ -8,6 +8,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.analytics.Analytics;
+import l.files.common.io.Files;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -31,12 +33,13 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
-import static l.files.common.io.Files.listFiles;
 import static l.files.common.io.Files.normalize;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Bookmarks.getBookmarksCount;
 import static l.files.provider.Bookmarks.isBookmarksKey;
+import static l.files.provider.FileData.LAST_MODIFIED_COMPARATOR_REVERSE;
+import static l.files.provider.FileData.NAME_COMPARATOR;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
@@ -48,8 +51,8 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_LOCATION;
-import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
+import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_HIERARCHY;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
@@ -65,8 +68,6 @@ import static l.files.provider.FilesContract.getHierarchyFileLocation;
 import static l.files.provider.FilesContract.getSuggestionBasename;
 import static l.files.provider.FilesContract.getSuggestionParentUri;
 import static l.files.provider.FilesContract.newMatcher;
-import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
-import static org.apache.commons.io.comparator.NameFileComparator.NAME_INSENSITIVE_COMPARATOR;
 
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -124,7 +125,24 @@ public final class FilesProvider extends ContentProvider
       String selection,
       String[] selectionArgs,
       String sortOrder) {
+    return doQuery(uri, projection, sortOrder, null);
+  }
 
+  @Override public Cursor query(
+      Uri uri,
+      String[] projection,
+      String selection,
+      String[] selectionArgs,
+      String sortOrder,
+      CancellationSignal signal) {
+    return doQuery(uri, projection, sortOrder, signal);
+  }
+
+  private Cursor doQuery(
+      Uri uri,
+      String[] projection,
+      String sortOrder,
+      CancellationSignal signal) {
     if (projection == null) projection = DEFAULT_COLUMNS;
 
     switch (matcher.match(uri)) {
@@ -137,7 +155,7 @@ public final class FilesProvider extends ContentProvider
       case MATCH_FILES_LOCATION:
         return queryFile(uri, projection);
       case MATCH_FILES_LOCATION_CHILDREN:
-        return queryFiles(uri, projection, sortOrder);
+        return queryFiles(uri, projection, sortOrder, signal);
       case MATCH_HIERARCHY:
         return queryHierarchy(uri, projection);
       default:
@@ -153,13 +171,14 @@ public final class FilesProvider extends ContentProvider
       file = file.getParentFile();
     }
     reverse(files);
-    return newFileCursor(uri, projection, files.toArray(new File[files.size()]));
+    File[] fileArray = files.toArray(new File[files.size()]);
+    return newFileCursor(uri, projection, FileData.from(fileArray));
   }
 
   private Cursor queryFile(Uri uri, String[] projection) {
     File file = new File(URI.create(getFileLocation(uri)));
     File[] files = file.exists() ? new File[]{file} : new File[0];
-    return new FileCursor(files, projection);
+    return new FileCursor(FileData.from(files), projection);
   }
 
   private Cursor querySuggestion(Uri uri, String[] projection) {
@@ -169,37 +188,76 @@ public final class FilesProvider extends ContentProvider
     for (int i = 2; file.exists(); i++) {
       file = new File(parent, name + " " + i);
     }
-    return newFileCursor(uri, projection, new File[]{file});
+    return newFileCursor(uri, projection, new FileData(file));
   }
 
   private Cursor queryBookmark(Uri uri, String[] projection) {
-    File[] bookmark = getBookmark(getPreference(), getBookmarkLocation(uri));
-    return newFileCursor(uri, projection, bookmark);
+    File[] bookmarks = getBookmark(getPreference(), getBookmarkLocation(uri));
+    return newFileCursor(uri, projection, FileData.from(bookmarks));
   }
 
   private Cursor queryBookmarks(Uri uri, String[] projection) {
     File[] bookmarks = getBookmarks(getPreference());
-    return newFileCursor(uri, projection, bookmarks);
+    return newFileCursor(uri, projection, FileData.from(bookmarks));
   }
 
-  private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
+  /*
+   * Calling methods on java.io.File (e.g. lastModified, length, etc) is
+   * relatively expensive (except getName as it doesn't require a call to the
+   * OS), on a large directory, this process can take minutes (Galaxy Nexus,
+   * /storage/emulated/0/DCIM/.thumbnails with ~20,000 files took 1 to 4 minutes
+   * to load, where File.listFiles took around 2 ~ 3 seconds to return),
+   * therefore a CancellationSignal is used to make sure it stops as soon as
+   * possible when the result is no longer needed - i.e. the user doesn't want
+   * to wait anymore and presses the back button.
+   * <p/>
+   * It doesn't seem to make a difference in time whether only one property
+   * method is called or all properties are called. Ideally such calls to the
+   * properties can be avoided until needed, but they are need upfront because
+   * of sorting, such as sorting by last modified date.
+   * <p/>
+   * Note that when using a CursorLoader, don't use the support-v4 version as it
+   * doesn't not use a CancellationSignal.
+   */
+  private Cursor queryFiles(
+      Uri uri,
+      String[] projection,
+      String sortOrder,
+      CancellationSignal signal) {
+
     boolean showHidden = VALUE_SHOW_HIDDEN_YES
         .equals(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
 
-    File dir = new File(URI.create(getFileLocation(uri)));
-    File[] files = listFiles(dir, showHidden);
+    File parent = new File(URI.create(getFileLocation(uri)));
+    String[] children = Files.list(parent, showHidden);
+    if (children == null) {
+      children = new String[0];
+    }
 
-    if (files == null) files = new File[0];
+    FileData[] data = new FileData[children.length];
+    Set<String> dirs = newHashSetWithExpectedSize(children.length);
+    for (int i = 0; i < children.length; i++) {
+      File file = new File(parent, children[i]);
+      if (signal != null) {
+        signal.throwIfCanceled();
+      }
+      if (file.isDirectory()) {
+        dirs.add(file.getAbsolutePath());
+      }
+      data[i] = new FileData(file);
+    }
+
     switch (sortOrder) {
       case SORT_BY_MODIFIED:
-        sort(files, LASTMODIFIED_REVERSE);
+        sort(data, LAST_MODIFIED_COMPARATOR_REVERSE);
         break;
       case SORT_BY_NAME:
       default:
-        sort(files, NAME_INSENSITIVE_COMPARATOR);
+        sort(data, NAME_COMPARATOR);
         break;
     }
-    return newMonitoringCursor(uri, dir, projection, files);
+
+    return newMonitoringCursor(uri, parent.getAbsolutePath(), dirs, projection, data);
   }
 
   @Override public Bundle call(String method, String arg, Bundle extras) {
@@ -300,16 +358,16 @@ public final class FilesProvider extends ContentProvider
     }
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, File[] files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, FileData... files) {
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);
     return c;
   }
 
   private Cursor newMonitoringCursor(
-      Uri uri, File dir, String[] projection, File[] files) {
+      Uri uri, String dir, Set<String> subDirs, String[] projection, FileData[] files) {
     Cursor cursor = newFileCursor(uri, projection, files);
-    return MonitoringCursor.create(getContentResolver(), uri, dir, cursor);
+    return MonitoringCursor.create(getContentResolver(), uri, dir, subDirs, cursor);
   }
 
   private ContentResolver getContentResolver() {
