@@ -37,33 +37,36 @@ import static com.google.common.collect.Sets.newHashSet;
 import static l.files.app.util.Bitmaps.decodeScaledBitmap;
 import static l.files.app.util.Bitmaps.decodeScaledSize;
 
-final class ImageDecorator extends BaseDecorator<Uri> {
+final class ImageDecorator implements Decorator {
 
   private static final String TAG = ImageDecorator.class.getSimpleName();
 
   private static final Set<Object> errors = newHashSet();
   private static final Map<Object, ScaledSize> sizes = newHashMap();
 
+  private final Decoration<Uri> uris;
+  private final Decoration<Boolean> predicate;
   private final LruCache<Object, Bitmap> cache;
   private final int maxWidth;
   private final int maxHeight;
 
   ImageDecorator(
-      Decoration<? extends Uri> decoration,
+      Decoration<Uri> uris,
+      Decoration<Boolean> predicate,
+      LruCache<Object, Bitmap> cache,
       int maxWidth,
-      int maxHeight,
-      LruCache<Object, Bitmap> cache) {
-    super(decoration);
+      int maxHeight) {
     checkArgument(maxWidth > 0);
     checkArgument(maxHeight > 0);
-    checkNotNull(cache);
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
-    this.cache = cache;
+    this.uris = checkNotNull(uris, "uris");
+    this.predicate = checkNotNull(predicate, "predicate");
+    this.cache = checkNotNull(cache, "cache");
   }
 
   @Override public void decorate(int position, Adapter adapter, View view) {
-    Uri uri = decoration().get(position, adapter);
+    Uri uri = uris.get(position, adapter);
     Object key = buildCacheKey(uri);
 
     Task task = (Task) view.getTag(R.id.image_decorator_task);
@@ -75,6 +78,7 @@ final class ImageDecorator extends BaseDecorator<Uri> {
     image.setVisibility(GONE);
     image.setTag(R.id.image_decorator_task, null);
 
+    if (!predicate.get(position, adapter)) return;
     if (errors.contains(key)) return;
     if (setCachedBitmap(image, key)) return;
 
@@ -139,6 +143,7 @@ final class ImageDecorator extends BaseDecorator<Uri> {
         URL url = new URI(uri.toString()).toURL();
         return decodeScaledSize(url, maxWidth, maxHeight);
       } catch (Exception e) {
+        // Catch all unexpected internal errors from decoder
         Analytics.onException(view.getContext(), e);
         Log.w(TAG, e);
         return null;
@@ -193,6 +198,7 @@ final class ImageDecorator extends BaseDecorator<Uri> {
       try {
         return decodeScaledBitmap(new URI(uri.toString()).toURL(), size);
       } catch (Exception e) {
+        // Catch all unexpected internal errors from decoder
         Analytics.onException(view.getContext(), e);
         Log.w(TAG, e);
         return null;

@@ -35,6 +35,7 @@ import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getMediaType;
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
+import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
@@ -206,6 +207,17 @@ public final class Decorations {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
         return getLastModified(getCursor(adapter, position)) > 0;
+      }
+    };
+  }
+
+  /**
+   * Returns true if {@link FileInfo#READABLE} is true.
+   */
+  public static Decoration<Boolean> fileIsReadable() {
+    return new Decoration<Boolean>() {
+      @Override public Boolean get(int position, Adapter adapter) {
+        return isReadable(getCursor(adapter, position));
       }
     };
   }

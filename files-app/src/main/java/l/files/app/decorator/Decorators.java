@@ -114,15 +114,17 @@ public final class Decorators {
   /**
    * Returns a decorator that expects each view to be an {@link ImageView} and
    * sets its image by decoding a thumbnail of the {@link Uri}s provided by the
-   * decoration. If failed to decode a thumbnail, the view will be hidden. The
-   * maximum width and height parameters defines how large the thumbnails are
-   * allowed to be (large thumbnails will be scaled down to fit).
+   * {@code uris}. If failed to decode a thumbnail, or the predicate returns
+   * false for a given position, the view will be hidden. The maximum width and
+   * height parameters defines how large the thumbnails are allowed to be (large
+   * thumbnails will be scaled down to fit).
    */
   public static Decorator image(
-      Decoration<? extends Uri> decoration,
+      Decoration<Uri> uris,
+      Decoration<Boolean> predicate,
+      LruCache<Object, Bitmap> cache,
       int maxWidth,
-      int maxHeight,
-      LruCache<Object, Bitmap> bitmapCache) {
-    return new ImageDecorator(decoration, maxWidth, maxHeight, bitmapCache);
+      int maxHeight) {
+    return new ImageDecorator(uris, predicate, cache, maxWidth, maxHeight);
   }
 }

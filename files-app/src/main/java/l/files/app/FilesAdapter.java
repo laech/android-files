@@ -3,9 +3,11 @@ package l.files.app;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.util.LruCache;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +38,7 @@ import static l.files.app.decorator.decoration.Decorations.categoryVisible;
 import static l.files.app.decorator.decoration.Decorations.fileDate;
 import static l.files.app.decorator.decoration.Decorations.fileHasDate;
 import static l.files.app.decorator.decoration.Decorations.fileIcon;
+import static l.files.app.decorator.decoration.Decorations.fileIsReadable;
 import static l.files.app.decorator.decoration.Decorations.fileLocation;
 import static l.files.app.decorator.decoration.Decorations.fileName;
 import static l.files.app.decorator.decoration.Decorations.fileReadable;
@@ -59,12 +62,13 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     Decoration<Boolean> categoryVisibility = categoryVisible(category);
     Decoration<Typeface> icon = memoize(fileIcon(context.getAssets()), this);
     Decoration<Uri> uri = memoize(uri(fileLocation()), this);
+    LruCache<Object,Bitmap> cache = getBitmapCache(context);
     this.decorator = compose(
         on(id.title, enable(readable), text(fileName())),
         on(id.icon, enable(readable), font(icon)),
         on(id.date, enable(readable), text(date), visible(fileHasDate())),
         on(id.size, enable(readable), text(size), visible(isFile())),
-        on(id.preview, image(uri, width, height, getBitmapCache(context))),
+        on(id.preview, image(uri, fileIsReadable(), cache, width, height)),
         on(id.header_title, text(category)),
         on(id.header_container, visible(categoryVisibility))
     );
