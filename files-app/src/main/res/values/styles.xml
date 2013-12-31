@@ -4,9 +4,7 @@
   <style name="Theme" parent="android:Theme.Holo.Light">
     <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
     <item name="android:actionBarWidgetTheme">@style/ActionBarTheme</item>
-    <item name="android:actionBarItemBackground">@drawable/selector_light</item>
     <item name="android:actionModeBackground">@drawable/action_bar_background</item>
-    <item name="android:actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
     <item name="android:actionModeStyle">@style/Widget.ActionMode</item>
     <item name="android:textColor">@color/text_primary</item>
     <item name="android:textColorPrimary">@color/text_primary</item>
@@ -33,7 +31,6 @@
 
   <style name="ActionBarTheme.DropDownListViewStyle" parent="android:Widget.Holo.Light.ListView.DropDown">
     <item name="android:background">@color/action_bar_menu_background</item>
-    <item name="android:listSelector">@drawable/selector_light</item>
     <item name="android:divider">@null</item>
   </style>
 
@@ -66,10 +63,6 @@
     <item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionMode.Title</item>
   </style>
 
-  <style name="Widget.ActionButton.CloseMode" parent="android:Widget.Holo.Light.ActionButton.CloseMode">
-    <item name="android:background">@drawable/selector_light</item>
-  </style>
-
   <style name="Theme.SeparatorHorizontal">
     <item name="android:layout_width">match_parent</item>
     <item name="android:layout_height">@dimen/separator</item>
@@ -83,7 +76,6 @@
     <item name="android:scrollbarStyle">outsideOverlay</item>
     <item name="android:fastScrollEnabled">true</item>
     <item name="android:divider">@null</item>
-    <item name="android:listSelector">@drawable/selector_light</item>
   </style>
 
   <style name="Theme.ListView.Item" parent="Widget.TextView"/>

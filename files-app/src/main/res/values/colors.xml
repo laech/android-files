@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="item_pressed">#10000000</color>
-  <color name="item_activated">#10000000</color>
-  <color name="item_pressed_dark">#33000000</color>
   <color name="file_list_item_header_separator">#dddcd8</color>
   <color name="sidebar_background">#4b4a47</color>
   <color name="sidebar_item_header">#e6e5e3</color>
@@ -14,6 +11,7 @@
   <color name="text_primary_inverse_normal">#e6e5e3</color>
   <color name="text_primary_inverse_disabled">#77e6e5e3</color>
   <color name="text_secondary_normal">#a09f9d</color>
+  <color name="text_secondary_activated">#646361</color>
   <color name="action_bar_menu_background">@color/window_background</color>
   <color name="action_bar_background">#e9e7e2</color>
   <color name="action_bar_outline">#d8d7d3</color>
