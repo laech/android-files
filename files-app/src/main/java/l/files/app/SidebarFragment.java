@@ -1,10 +1,9 @@
 package l.files.app;
 
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
@@ -13,11 +12,12 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.analytics.Analytics;
 
+import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 
 public final class SidebarFragment extends BaseFileListFragment
-    implements LoaderManager.LoaderCallbacks<Cursor> {
+    implements LoaderCallbacks<Cursor> {
 
   public SidebarFragment() {
     super(R.layout.sidebar_fragment);
@@ -25,13 +25,13 @@ public final class SidebarFragment extends BaseFileListFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    addBookmarksHeader(savedInstanceState);
+    addBookmarksHeader();
     setListAdapter(new SidebarAdapter());
     getLoaderManager().initLoader(0, null, this);
   }
 
-  private void addBookmarksHeader(Bundle savedInstanceState) {
-    LayoutInflater inflater = getLayoutInflater(savedInstanceState);
+  private void addBookmarksHeader() {
+    LayoutInflater inflater = LayoutInflater.from(getActivity());
     View header = inflater.inflate(R.layout.sidebar_item_header, null, false);
     ((TextView) header.findViewById(android.R.id.title))
         .setText(R.string.bookmarks);

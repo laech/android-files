@@ -2,10 +2,10 @@ package l.files.app;
 
 import android.app.ActivityManager;
 import android.app.Application;
+import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.StrictMode;
-import android.support.v4.app.Fragment;
 import android.util.LruCache;
 
 import com.squareup.otto.Bus;

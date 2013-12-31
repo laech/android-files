@@ -1,8 +1,8 @@
 package l.files.analytics;
 
-import l.files.common.app.BaseFragmentActivity;
+import l.files.common.app.BaseActivity;
 
-public class AnalyticsActivity extends BaseFragmentActivity {
+public class AnalyticsActivity extends BaseActivity {
 
   @Override protected void onStart() {
     super.onStart();

@@ -1,7 +1,7 @@
 package l.files.app.menu;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -30,9 +30,8 @@ public final class NewDirMenu extends OptionsMenuAction {
     this.parentLocation = checkNotNull(parentLocation, "parentLocation");
   }
 
-  public static OptionsMenu create(
-      FragmentActivity activity, String parentLocation) {
-    FragmentManager manager = activity.getSupportFragmentManager();
+  public static OptionsMenu create(Activity activity, String parentLocation) {
+    FragmentManager manager = activity.getFragmentManager();
     OptionsMenu menu = new NewDirMenu(manager, parentLocation);
     return new AnalyticsMenu(activity, menu, "new_dir");
   }

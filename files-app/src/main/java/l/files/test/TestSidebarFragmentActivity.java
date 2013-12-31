@@ -1,11 +1,12 @@
 package l.files.test;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
+
 import l.files.app.SidebarFragment;
 
-public final class TestSidebarFragmentActivity extends FragmentActivity {
+public final class TestSidebarFragmentActivity extends Activity {
 
   private SidebarFragment fragment;
 
@@ -22,7 +23,7 @@ public final class TestSidebarFragmentActivity extends FragmentActivity {
     setContentView(view);
 
     fragment = new SidebarFragment();
-    getSupportFragmentManager()
+    getFragmentManager()
         .beginTransaction()
         .replace(android.R.id.content, fragment)
         .commit();

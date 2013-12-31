@@ -1,12 +1,12 @@
 package l.files.app;
 
 import android.app.AlertDialog;
+import android.app.DialogFragment;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -15,9 +15,9 @@ import android.widget.EditText;
 
 import l.files.R;
 
+import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.content.DialogInterface.OnClickListener;
-import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
 import static l.files.provider.FileCursors.getLocation;

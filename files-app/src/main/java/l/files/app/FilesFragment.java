@@ -1,13 +1,13 @@
 package l.files.app;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -27,8 +27,8 @@ import l.files.app.mode.SelectAllAction;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
 
+import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import static android.support.v4.app.LoaderManager.LoaderCallbacks;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
@@ -90,7 +90,7 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   private void setupOptionsMenu() {
-    FragmentActivity context = getActivity();
+    Activity context = getActivity();
     setOptionsMenu(OptionsMenus.compose(
         BookmarkMenu.create(context, directoryLocation),
         NewDirMenu.create(context, directoryLocation),
@@ -115,9 +115,23 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   private FragmentManager getActivityFragmentManager() {
-    return getActivity().getSupportFragmentManager();
+    return getActivity().getFragmentManager();
   }
 
+  /*
+   * Loading files from a large directory (e.g. /storage/emulated/0/DCIM/.thumbnails
+   * with ~20,000 files) will be an expensive and long running operation, by
+   * using the CursorLoader (the one from Android SDK, not the one from
+   * support-v4) and implementing CancellationSignal support in the
+   * ContentProvider, the load is cancelled as soon as the user no longer wants
+   * to wait anymore and leaves (by pressing the back button).
+   * <p/>
+   * This can be tested by enabling the "Show CPU usage" option in "Developer
+   * options" on the device, and navigate to the large directory, something like
+   * "sdcard" will jump to the top of the CPU usage list, while still loading,
+   * hit the back button, "sdcard" should disappear and CPU usage should return
+   * to normal - as the loading operation should have been cancelled.
+   */
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     boolean showHidden = Preferences.getShowHiddenFiles(getActivity());
     String sortOrder = Preferences.getSortOrder(getActivity());

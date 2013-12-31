@@ -1,14 +1,14 @@
 package l.files.app;
 
 import android.app.ActionBar;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
@@ -102,7 +102,7 @@ public final class FilesActivity extends AnalyticsActivity
 
   private void setPathBar() {
     if (!Preferences.getShowPathBar(this)) {
-      getSupportFragmentManager()
+      getFragmentManager()
           .beginTransaction()
           .hide(pathBar)
           .commit();
@@ -147,7 +147,7 @@ public final class FilesActivity extends AnalyticsActivity
     tabs = new ViewPagerTabBar(this, bus);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
     drawerListener = new DrawerListener();
-    pathBar = (PathBarFragment) getSupportFragmentManager().findFragmentById(R.id.path_bar_fragment);
+    pathBar = (PathBarFragment) getFragmentManager().findFragmentById(R.id.path_bar_fragment);
     actionBar = getActionBar();
     actionBarDrawerToggle = new ActionBarDrawerToggle(
         this, drawerLayout, R.drawable.ic_drawer, 0, 0);
@@ -188,7 +188,8 @@ public final class FilesActivity extends AnalyticsActivity
     bus.unregister(this);
   }
 
-  @Override protected void onSaveInstanceState(Bundle outState) {
+  @Override protected void onSaveInstanceState(
+      @SuppressWarnings("NullableProblems") Bundle outState) {
     super.onSaveInstanceState(outState);
     outState.putInt(STATE_ID_SEED, idGenerator.get());
     outState.putParcelableArrayList(STATE_TAB_ITEMS,
@@ -338,7 +339,7 @@ public final class FilesActivity extends AnalyticsActivity
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (isShowPathBarKey(key)) {
       boolean show = getShowPathBar(this);
-      FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+      FragmentTransaction tx = getFragmentManager().beginTransaction();
       if (show) {
         pathBar.set(currentPagerFragment.getCurrentDirectoryLocation());
         tx.show(pathBar);
@@ -354,7 +355,7 @@ public final class FilesActivity extends AnalyticsActivity
     private final Map<Object, Integer> positions;
 
     FilesPagerAdapter(List<TabItem> items) {
-      super(getSupportFragmentManager());
+      super(getFragmentManager());
       this.items = items;
       this.positions = newHashMap();
     }

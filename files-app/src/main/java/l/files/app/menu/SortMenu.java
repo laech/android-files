@@ -1,7 +1,7 @@
 package l.files.app.menu;
 
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -26,8 +26,8 @@ public final class SortMenu extends OptionsMenuAction {
     this.manager = checkNotNull(manager, "manager");
   }
 
-  public static OptionsMenu create(FragmentActivity activity) {
-    FragmentManager manager = activity.getSupportFragmentManager();
+  public static OptionsMenu create(Activity activity) {
+    FragmentManager manager = activity.getFragmentManager();
     return new AnalyticsMenu(activity, new SortMenu(manager), "sort");
   }
 

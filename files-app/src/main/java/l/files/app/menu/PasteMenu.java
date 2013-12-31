@@ -1,9 +1,9 @@
 package l.files.app.menu;
 
+import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -42,8 +42,7 @@ public final class PasteMenu extends OptionsMenuAction {
     this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
   }
 
-  public static OptionsMenu create(
-      FragmentActivity activity, String directoryLocation) {
+  public static OptionsMenu create(Activity activity, String directoryLocation) {
     ClipboardManager manager = getClipboardManager(activity);
     ContentResolver resolver = activity.getContentResolver();
     PasteMenu menu = new PasteMenu(manager, resolver, directoryLocation);

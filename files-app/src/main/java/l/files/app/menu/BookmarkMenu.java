@@ -1,14 +1,14 @@
 package l.files.app.menu;
 
+import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.ContentResolver;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -17,7 +17,7 @@ import l.files.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
 
-import static android.support.v4.app.LoaderManager.LoaderCallbacks;
+import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,27 +34,26 @@ import static l.files.provider.FilesContract.unbookmark;
 public final class BookmarkMenu
     extends OptionsMenuAction implements LoaderCallbacks<Cursor> {
 
-  private final FragmentActivity context;
+  private final Activity context;
   private final String directoryLocation;
 
   private Menu menu;
   private boolean bookmarked;
 
-  private BookmarkMenu(FragmentActivity context, String directoryLocation) {
+  private BookmarkMenu(Activity context, String directoryLocation) {
     super(R.id.bookmark);
     this.context = checkNotNull(context, "context");
     this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
   }
 
-  public static OptionsMenu create(
-      FragmentActivity activity, String directoryLocation) {
+  public static OptionsMenu create(Activity activity, String directoryLocation) {
     OptionsMenu menu = new BookmarkMenu(activity, directoryLocation);
     return new AnalyticsMenu(activity, menu, "bookmark");
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {
     super.onCreateOptionsMenu(menu);
-    LoaderManager loaders = context.getSupportLoaderManager();
+    LoaderManager loaders = context.getLoaderManager();
     loaders.initLoader(identityHashCode(this), null, this);
     menu.add(NONE, id(), NONE, R.string.bookmark)
         .setCheckable(true)

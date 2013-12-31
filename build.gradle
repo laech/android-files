@@ -1,7 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 project.ext.libs = [
     android_support: [
-        'com.android.support:support-v4:19.0.+'
+        'com.android.support:support-v4:19.0.+',
+        'com.android.support:support-v13:19.0.+'
     ],
     guava: [
         'com.google.guava:guava:15.0'

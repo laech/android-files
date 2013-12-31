@@ -1,7 +1,7 @@
 package l.files.app.mode;
 
+import android.app.FragmentManager;
 import android.database.Cursor;
-import android.support.v4.app.FragmentManager;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;

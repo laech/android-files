@@ -1,10 +1,10 @@
 package l.files.common.app;
 
-import android.support.v4.app.FragmentActivity;
+import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class BaseFragmentActivity extends FragmentActivity {
+public class BaseActivity extends Activity {
 
   private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 

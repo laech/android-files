@@ -1,13 +1,13 @@
 package l.files.app;
 
+import android.app.Fragment;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +16,7 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.analytics.Analytics;
 
-import static android.support.v4.app.LoaderManager.LoaderCallbacks;
+import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;

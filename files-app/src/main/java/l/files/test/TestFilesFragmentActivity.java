@@ -1,12 +1,13 @@
 package l.files.test;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.ActionMode;
 import android.view.View;
+
 import l.files.app.FilesFragment;
 
-public final class TestFilesFragmentActivity extends FragmentActivity {
+public final class TestFilesFragmentActivity extends Activity {
 
   public static final String DIRECTORY = FilesFragment.ARG_DIRECTORY_LOCATION;
 
@@ -43,7 +44,7 @@ public final class TestFilesFragmentActivity extends FragmentActivity {
 
     fragment = new FilesFragment();
     fragment.setArguments(getIntent().getExtras());
-    getSupportFragmentManager()
+    getFragmentManager()
         .beginTransaction()
         .replace(android.R.id.content, fragment)
         .commit();
