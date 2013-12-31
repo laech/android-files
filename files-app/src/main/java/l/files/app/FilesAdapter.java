@@ -34,6 +34,7 @@ import static l.files.app.decorator.Decorators.visible;
 import static l.files.app.decorator.decoration.Decorations.category;
 import static l.files.app.decorator.decoration.Decorations.categoryVisible;
 import static l.files.app.decorator.decoration.Decorations.fileDate;
+import static l.files.app.decorator.decoration.Decorations.fileHasDate;
 import static l.files.app.decorator.decoration.Decorations.fileIcon;
 import static l.files.app.decorator.decoration.Decorations.fileLocation;
 import static l.files.app.decorator.decoration.Decorations.fileName;
@@ -45,8 +46,6 @@ import static l.files.app.decorator.decoration.Decorations.uri;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 
 final class FilesAdapter extends StableFilesAdapter implements Supplier<Categorizer> {
-
-  // TODO hide date if last modified = 0?
 
   private Categorizer categorizer;
   private final Decorator decorator;
@@ -63,7 +62,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     this.decorator = compose(
         on(id.title, enable(readable), text(fileName())),
         on(id.icon, enable(readable), font(icon)),
-        on(id.date, enable(readable), text(date)),
+        on(id.date, enable(readable), text(date), visible(fileHasDate())),
         on(id.size, enable(readable), text(size), visible(isFile())),
         on(id.preview, image(uri, width, height, getBitmapCache(context))),
         on(id.header_title, text(category)),

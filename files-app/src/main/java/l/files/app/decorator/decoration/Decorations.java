@@ -30,6 +30,7 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static l.files.common.database.Cursors.getBoolean;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
+import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getMediaType;
 import static l.files.provider.FileCursors.getSize;
@@ -194,6 +195,17 @@ public final class Decorations {
         } else {
           return formatShortFileSize(context, getSize(cursor));
         }
+      }
+    };
+  }
+
+  /**
+   * Returns true if the {@link FileInfo#MODIFIED} is valid.
+   */
+  public static Decoration<Boolean> fileHasDate() {
+    return new Decoration<Boolean>() {
+      @Override public Boolean get(int position, Adapter adapter) {
+        return getLastModified(getCursor(adapter, position)) > 0;
       }
     };
   }
