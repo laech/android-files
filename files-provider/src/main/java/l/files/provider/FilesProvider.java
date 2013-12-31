@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.util.Log;
 
 import org.apache.tika.Tika;
@@ -38,6 +39,7 @@ import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
 import static l.files.provider.Bookmarks.getBookmarksCount;
 import static l.files.provider.Bookmarks.isBookmarksKey;
+import static l.files.provider.BuildConfig.DEBUG;
 import static l.files.provider.FileData.LAST_MODIFIED_COMPARATOR_REVERSE;
 import static l.files.provider.FileData.NAME_COMPARATOR;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
@@ -100,13 +102,29 @@ public final class FilesProvider extends ContentProvider
           return MIME_DIR;
         }
         try {
-          return TikaHolder.TIKA.detect(file);
+          return detectMime(file);
         } catch (IOException e) {
           Log.w(TAG, e.getMessage(), e);
           return null;
         }
     }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
+  }
+
+  private String detectMime(File file) throws IOException {
+    long start = 0;
+    if (DEBUG) {
+      start = SystemClock.elapsedRealtime();
+    }
+
+    String mime = TikaHolder.TIKA.detect(file);
+
+    if (DEBUG) {
+      long end = SystemClock.elapsedRealtime();
+      Log.d(TAG, "Detected " + mime + " in " + (end - start) + " ms: " + file);
+    }
+
+    return mime;
   }
 
   @Override public ParcelFileDescriptor openFile(Uri uri, String mode)
