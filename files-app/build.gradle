@@ -31,9 +31,9 @@ dependencies {
   compile project(':files-analytics')
   compile project(':files-common')
   compile project(':files-provider')
-  compile project.libs.trove4j
   compile project.libs.joda_time
   compile project.libs.otto
+  compile project.libs.google_play_services
 
   instrumentTestCompile project.libs.mockito
 }

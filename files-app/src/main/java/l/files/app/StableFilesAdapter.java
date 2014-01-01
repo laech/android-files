@@ -1,13 +1,13 @@
 package l.files.app;
 
-import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static l.files.provider.FileCursors.getLocation;
 
 abstract class StableFilesAdapter extends CursorAdapter {
 
-  private static final TObjectLongMap<String> ids = new TObjectLongHashMap<>();
+  private static final Map<String, Long> ids = newHashMap();
 
   @Override public boolean hasStableIds() {
     return true;
@@ -15,7 +15,11 @@ abstract class StableFilesAdapter extends CursorAdapter {
 
   @Override public long getItemId(int position) {
     String location = getLocation(getItem(position));
-    ids.putIfAbsent(location, ids.size() + 1);
-    return ids.get(location);
+    Long id = ids.get(location);
+    if (id == null) {
+      id = ids.size() + 1L;
+      ids.put(location, id);
+    }
+    return id;
   }
 }

@@ -66,4 +66,7 @@
   <string name="previous_7_days">Previous 7 days</string>
   <string name="previous_30_days">Previous 30 days</string>
   <string name="unknown">Unknown</string>
+
+  <!-- Admob ad unit ID -->
+  <string name="ad_unit_id">ca-app-pub-3251738373408970/6115914240</string>
 </resources>

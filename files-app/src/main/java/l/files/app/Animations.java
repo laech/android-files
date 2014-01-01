@@ -3,14 +3,15 @@ package l.files.app;
 import android.view.View;
 import android.widget.ListView;
 
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static android.view.ViewTreeObserver.OnPreDrawListener;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 
 final class Animations {
 
@@ -23,9 +24,9 @@ final class Animations {
    * before the content of the list adapter is changed.
    */
   public static void animatePreDataSetChange(final ListView list) {
-    final TLongSet oldItems = getItemIds(list);
-    final TLongIntMap tops = getViewTopsById(list);
-    final TLongList oldVisibleItems = getVisibleItemIds(list);
+    final Set<Long> oldItems = getItemIds(list);
+    final Map<Long, Integer> tops = getViewTopsById(list);
+    final List<Long> oldVisibleItems = getVisibleItemIds(list);
 
     list.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
 
@@ -54,18 +55,16 @@ final class Animations {
     });
   }
 
-  private static TLongSet getItemIds(ListView list) {
-    float loadFactor = 0.75f;
-    int capacity = (int) (list.getCount() / loadFactor + 1);
-    TLongSet ids = new TLongHashSet(capacity, loadFactor);
+  private static Set<Long> getItemIds(ListView list) {
+    Set<Long> ids = newHashSetWithExpectedSize(list.getCount());
     for (int i = 0; i < list.getCount(); i++) {
       ids.add(list.getItemIdAtPosition(i));
     }
     return ids;
   }
 
-  private static TLongList getVisibleItemIds(ListView list) {
-    TLongList items = new TLongArrayList(list.getChildCount());
+  private static List<Long> getVisibleItemIds(ListView list) {
+    List<Long> items = newArrayListWithCapacity(list.getChildCount());
     for (int i = 0; i < list.getChildCount(); i++) {
       int position = list.getPositionForView(list.getChildAt(i));
       items.add(list.getItemIdAtPosition(position));
@@ -73,10 +72,8 @@ final class Animations {
     return items;
   }
 
-  private static TLongIntMap getViewTopsById(ListView list) {
-    float loadFactor = 0.75f;
-    int capacity = (int) (list.getCount() / loadFactor + 1);
-    TLongIntMap tops = new TLongIntHashMap(capacity, loadFactor);
+  private static Map<Long, Integer> getViewTopsById(ListView list) {
+    Map<Long, Integer> tops = newHashMapWithExpectedSize(list.getChildCount());
     for (int i = 0; i < list.getChildCount(); i++) {
       int position = list.getPositionForView(list.getChildAt(i));
       tops.put(list.getItemIdAtPosition(position), list.getChildAt(i).getTop());
@@ -93,9 +90,9 @@ final class Animations {
   }
 
   private static void animateOldItemEntrance(
-      View child, TLongList oldVisibleItemIds, ListView list) {
+      View child, List<Long> oldVisibleItemIds, ListView list) {
 
-    TLongList diff = new TLongArrayList(oldVisibleItemIds);
+    List<Long> diff = newArrayList(oldVisibleItemIds);
     diff.removeAll(getVisibleItemIds(list));
     child.setTranslationY(list.indexOfChild(child) == 0
         ? child.getHeight() * -1

@@ -4,6 +4,9 @@ project.ext.libs = [
         'com.android.support:support-v4:19.0.+',
         'com.android.support:support-v13:19.0.+'
     ],
+    google_play_services: [
+        'com.google.android.gms:play-services:4.0.30'
+    ],
     guava: [
         'com.google.guava:guava:15.0'
     ],

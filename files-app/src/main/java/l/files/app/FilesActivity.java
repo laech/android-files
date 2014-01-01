@@ -1,6 +1,7 @@
 package l.files.app;
 
 import android.app.ActionBar;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
@@ -17,6 +18,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -41,6 +44,8 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static com.google.android.gms.common.GooglePlayServicesUtil.getErrorDialog;
+import static com.google.android.gms.common.GooglePlayServicesUtil.isGooglePlayServicesAvailable;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static l.files.app.Bundles.getInt;
@@ -79,6 +84,8 @@ public final class FilesActivity extends AnalyticsActivity
 
   final Handler handler = new Handler();
 
+  AdView ad;
+
   @Override protected void onCreate(Bundle state) {
     super.onCreate(state);
     setContentView(R.layout.files_activity);
@@ -98,6 +105,21 @@ public final class FilesActivity extends AnalyticsActivity
         AboutMenu.create(this)));
     updateShowTabs();
     Preferences.register(this, this);
+
+    checkGooglePlayServices();
+    setAdView();
+  }
+
+  private void setAdView() {
+    ad.loadAd(new AdRequest.Builder().build());
+  }
+
+  private void checkGooglePlayServices() {
+    int result = isGooglePlayServicesAvailable(this);
+    Dialog dialog = getErrorDialog(result, this, 0);
+    if (dialog != null) { // Null if services are okay
+      dialog.show();
+    }
   }
 
   private void setPathBar() {
@@ -110,8 +132,9 @@ public final class FilesActivity extends AnalyticsActivity
   }
 
   @Override protected void onDestroy() {
-    super.onDestroy();
     Preferences.unregister(this, this);
+    ad.destroy();
+    super.onDestroy();
   }
 
   @Override protected void onPostCreate(Bundle savedInstanceState) {
@@ -140,6 +163,7 @@ public final class FilesActivity extends AnalyticsActivity
   }
 
   private void initFields(int idSeed) {
+    ad = (AdView) findViewById(R.id.ad_view);
     idGenerator = new IdGenerator(idSeed);
     bus = getBus(this);
     directoryLocation = getInitialDirectoryLocation();
@@ -181,11 +205,13 @@ public final class FilesActivity extends AnalyticsActivity
   @Override protected void onResume() {
     super.onResume();
     bus.register(this);
+    ad.resume();
   }
 
   @Override protected void onPause() {
-    super.onPause();
     bus.unregister(this);
+    ad.pause();
+    super.onPause();
   }
 
   @Override protected void onSaveInstanceState(
