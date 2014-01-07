@@ -48,7 +48,7 @@ public final class MoveService extends ProgressService {
       try {
         Set<File> files = new Mover(this, src, dst).call();
         if (!files.isEmpty()) {
-          Counter.Result result = new Counter(this, files).call();
+          Counter.Result result = new Counter(this, files, this).call();
           new Copier(this, files, dst, this, result.count, result.length).call();
           new Deleter(this, files, this, result.count).call();
         }

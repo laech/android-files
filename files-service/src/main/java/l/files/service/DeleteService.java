@@ -63,7 +63,7 @@ public final class DeleteService extends ProgressService {
     @Override protected Void doTask() {
       try {
 
-        Counter.Result count = new Counter(this, files).call();
+        Counter.Result count = new Counter(this, files, this).call();
         new Deleter(this, files, this, count.count).call();
 
       } catch (IOException e) {

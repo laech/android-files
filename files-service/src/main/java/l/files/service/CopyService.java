@@ -49,7 +49,7 @@ public final class CopyService extends ProgressService {
     @Override protected Void doTask() {
       try {
 
-        Counter.Result result = new Counter(this, src).call();
+        Counter.Result result = new Counter(this, src, this).call();
         new Copier(this, src, dst, this, result.count, result.length).call();
       } catch (IOException e) {
         Analytics.onException(CopyService.this, e);
