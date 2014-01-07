@@ -3,10 +3,12 @@ package l.files.service;
 import com.google.common.io.Files;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
+import static l.files.service.Cancellables.NO_CANCEL;
 import static l.files.service.Copier.Listener;
 
 public final class CopierTest extends PasterTest {
@@ -23,7 +25,7 @@ public final class CopierTest extends PasterTest {
     File dstFile = new File(dstDir, "a/test.txt");
     write("Testing", srcFile, UTF_8);
 
-    create(NO_CANCEL, asList(srcDir), dstDir).call();
+    copy(srcDir, dstDir);
     assertEquals("Testing", Files.toString(srcFile, UTF_8));
     assertEquals("Testing", Files.toString(dstFile, UTF_8));
   }
@@ -34,9 +36,13 @@ public final class CopierTest extends PasterTest {
     File dstFile = new File(dstDir, "test.txt");
     write("Testing", srcFile, UTF_8);
 
-    create(NO_CANCEL, asList(srcFile), dstDir).call();
+    copy(srcFile, dstDir);
     assertEquals("Testing", Files.toString(srcFile, UTF_8));
     assertEquals("Testing", Files.toString(dstFile, UTF_8));
+  }
+
+  private void copy(File src, File dstDir) throws IOException {
+    create(NO_CANCEL, asList(src), dstDir).call();
   }
 
   @Override protected Copier create(

@@ -1,5 +1,7 @@
 package l.files.service;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +23,8 @@ abstract class Traverser<V> implements Callable<V> {
   private final Set<File> roots;
   private final Cancellable listener;
 
-  protected Traverser(Cancellable listener, Set<File> roots) {
-    this.roots = checkNotNull(roots, "roots");
+  protected Traverser(Cancellable listener, Iterable<File> roots) {
+    this.roots = ImmutableSet.copyOf(checkNotNull(roots, "roots"));
     this.listener = checkNotNull(listener, "listener");
   }
 
@@ -34,6 +36,12 @@ abstract class Traverser<V> implements Callable<V> {
       }
 
       File file = queue.poll();
+
+      /*
+       * Symlinks are not supported yet, e.g. there isn't a way with the current
+       * Java API to delete symlinks without deleting the actual
+       * files/directories they are linked to.
+       */
       if (isSymlink(file)) {
         continue;
       }
@@ -44,7 +52,6 @@ abstract class Traverser<V> implements Callable<V> {
       } else {
         onFile(file);
       }
-
     }
 
     onFinish();

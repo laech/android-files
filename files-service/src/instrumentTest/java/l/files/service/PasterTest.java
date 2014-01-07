@@ -9,20 +9,10 @@ import l.files.common.testing.TempDir;
 import static android.test.MoreAsserts.assertEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static l.files.service.Cancellables.CANCELLED;
+import static l.files.service.Cancellables.NO_CANCEL;
 
 public abstract class PasterTest extends BaseTest {
-
-  static final Cancellable CANCELLED = new Cancellable() {
-    @Override public boolean isCancelled() {
-      return true;
-    }
-  };
-
-  static final Cancellable NO_CANCEL = new Cancellable() {
-    @Override public boolean isCancelled() {
-      return false;
-    }
-  };
 
   protected TempDir tempDir;
 

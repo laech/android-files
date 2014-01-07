@@ -1,27 +1,27 @@
 package l.files.service;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 
 final class Deleter extends Traverser<Void> {
-
-  private static final String TAG = Deleter.class.getSimpleName();
 
   private final List<File> directories;
   private final Listener listener;
   private final int total;
   private int remaining;
 
-  Deleter(Listener listener, Set<File> files, int remaining) {
-    super(listener, files);
-    this.listener = listener;
+  Deleter(
+      Cancellable cancellable,
+      Iterable<File> files,
+      Listener listener,
+      int remaining) {
+    super(cancellable, files);
+    this.listener = checkNotNull(listener, "listener");
     this.total = remaining;
     this.remaining = remaining;
     this.directories = newLinkedList();
@@ -33,8 +33,7 @@ final class Deleter extends Traverser<Void> {
       remaining--;
       listener.onFileDeleted(total, remaining);
     } else {
-      // TODO
-      Log.w(TAG, "Failed to delete file " + file);
+      throw new IOException("Failed to delete file " + file);
     }
   }
 
@@ -48,14 +47,14 @@ final class Deleter extends Traverser<Void> {
     Iterator<File> it = directories.iterator();
     while (it.hasNext()) {
       File directory = it.next();
-      if (!directory.delete()) {
-        Log.w(TAG, "Failed to delete directory " + directory);
+      if (!directory.delete() && directory.exists()) {
+        throw new IOException("Failed to delete directory " + directory);
       }
       it.remove();
     }
   }
 
-  static interface Listener extends Cancellable {
+  static interface Listener {
     void onFileDeleted(int total, int remaining);
   }
 }

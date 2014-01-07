@@ -50,7 +50,7 @@ public final class MoveService extends ProgressService {
         if (!files.isEmpty()) {
           Counter.Result result = new Counter(this, files).call();
           new Copier(this, files, dst, this, result.count, result.length).call();
-          new Deleter(this, files, result.count).call();
+          new Deleter(this, files, this, result.count).call();
         }
       } catch (IOException e) {
         Analytics.onException(MoveService.this, e);

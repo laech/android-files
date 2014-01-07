@@ -64,7 +64,7 @@ public final class DeleteService extends ProgressService {
       try {
 
         Counter.Result count = new Counter(this, files).call();
-        new Deleter(this, files, count.count).call();
+        new Deleter(this, files, this, count.count).call();
 
       } catch (IOException e) {
         Analytics.onException(DeleteService.this, e);

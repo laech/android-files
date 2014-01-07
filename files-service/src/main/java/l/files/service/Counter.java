@@ -1,7 +1,6 @@
 package l.files.service;
 
 import java.io.File;
-import java.util.Set;
 
 final class Counter extends Traverser<Counter.Result> {
 
@@ -10,7 +9,7 @@ final class Counter extends Traverser<Counter.Result> {
   private int count;
   private long length;
 
-  Counter(Listener listener, Set<File> files) {
+  Counter(Listener listener, Iterable<File> files) {
     super(listener, files);
     this.listener = listener;
   }

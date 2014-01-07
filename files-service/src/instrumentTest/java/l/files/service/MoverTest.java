@@ -7,6 +7,7 @@ import java.io.File;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
+import static l.files.service.Cancellables.NO_CANCEL;
 
 public final class MoverTest extends PasterTest {
 
