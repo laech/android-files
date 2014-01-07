@@ -10,7 +10,6 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -41,15 +40,21 @@ final class Copier extends Paster<Void> {
    * This may be related:
    * http://stackoverflow.com/questions/4290679/why-high-io-rate-operations-slow-everything-on-linux
    */
-  private static final long FILE_COPY_BUFFER_SIZE = 1024 * 4;
+  private static final long BUFFER_SIZE = 1024 * 4;
 
   private final Listener listener;
   private final long bytesTotal;
   private int remaining;
   private long bytesCopied;
 
-  Copier(Listener listener, Set<File> sources, File destination, int remaining, long length) {
-    super(listener, sources, destination);
+  Copier(
+      Cancellable cancellable,
+      Iterable<File> sources,
+      File destination,
+      Listener listener,
+      int remaining,
+      long length) {
+    super(cancellable, sources, destination);
     this.listener = checkNotNull(listener, "listener");
     this.remaining = remaining;
     this.bytesTotal = length;
@@ -58,11 +63,15 @@ final class Copier extends Paster<Void> {
   @Override protected void paste(File from, File to) throws IOException {
     Queue<File> queue = newLinkedList(singletonList(from));
     while (!queue.isEmpty()) {
-      if (listener.isCancelled()) {
+      if (isCancelled()) {
         break;
       }
 
       File file = queue.poll();
+      /*
+       * Symlinks are not supported yet, there isn't a way to create symlinks
+       * with the current Java API.
+       */
       if (isSymlink(file)) {
         continue;
       }
@@ -91,26 +100,16 @@ final class Copier extends Paster<Void> {
     return asList(children);
   }
 
-  private void copyFile(File srcFile, File destFile) throws IOException {
-    if (listener.isCancelled()) {
-      return;
-    }
-    if (!srcFile.exists()) {
-      return;
-    }
-    File parentFile = destFile.getParentFile();
+  private void copyFile(File srcFile, File dstFile) throws IOException {
+    if (isCancelled()) return;
+    if (!srcFile.exists()) return;
+
+    File parentFile = dstFile.getParentFile();
     if (!parentFile.mkdirs() && !parentFile.isDirectory()) {
       throw new IOException("Destination '" + parentFile + "' directory cannot be created");
     }
-    if (destFile.exists() && !destFile.canWrite()) {
-      throw new IOException("Destination '" + destFile + "' exists but is read-only");
-    }
-    doCopyFile(srcFile, destFile);
-  }
-
-  private void doCopyFile(File srcFile, File destFile) throws IOException {
-    if (listener.isCancelled()) {
-      return;
+    if (dstFile.exists() && !dstFile.canWrite()) {
+      throw new IOException("Destination '" + dstFile + "' exists but is read-only");
     }
 
     FileInputStream fis = null;
@@ -119,28 +118,20 @@ final class Copier extends Paster<Void> {
     FileChannel output = null;
     try {
       fis = new FileInputStream(srcFile);
-      fos = new FileOutputStream(destFile);
+      fos = new FileOutputStream(dstFile);
       input = fis.getChannel();
       output = fos.getChannel();
       final long size = input.size();
       long pos = 0;
-      long count;
       while (pos < size) {
-        if (listener.isCancelled()) {
+        if (isCancelled()) {
           break;
         }
-        count = (size - pos) > FILE_COPY_BUFFER_SIZE
-            ? FILE_COPY_BUFFER_SIZE
-            : size - pos;
-        long copied = output.transferFrom(input, pos, count);
-        pos += copied;
-
-        bytesCopied += copied;
-        listener.onCopied(remaining, bytesCopied, bytesTotal);
+        pos = onCopy(input, output, size, pos);
       }
     } catch (ClosedByInterruptException e) {
-      if (!destFile.delete() && DEBUG) {
-        Log.d(TAG, "Failed to delete file on cancel: " + destFile);
+      if (!dstFile.delete() && DEBUG) {
+        Log.d(TAG, "Failed to delete file on cancel: " + dstFile);
       }
     } finally {
       closeQuietly(output);
@@ -149,20 +140,34 @@ final class Copier extends Paster<Void> {
       closeQuietly(fis);
     }
 
-    if (srcFile.length() != destFile.length()) {
-      if (listener.isCancelled()) {
-        if (!destFile.delete() && DEBUG) {
-          Log.d(TAG, "Failed to delete file on cancel: " + destFile);
+    onCopyFinished(srcFile, dstFile);
+  }
+
+  private long onCopy(FileChannel input, FileChannel output, long size, long pos) throws IOException {
+    long count = (size - pos) > BUFFER_SIZE ? BUFFER_SIZE : size - pos;
+    long copied = output.transferFrom(input, pos, count);
+    long newPos = pos + copied;
+
+    bytesCopied += copied;
+    listener.onCopied(remaining, bytesCopied, bytesTotal);
+    return newPos;
+  }
+
+  private void onCopyFinished(File srcFile, File dstFile) throws IOException {
+    if (srcFile.length() != dstFile.length()) {
+      if (isCancelled()) {
+        if (!dstFile.delete() && DEBUG) {
+          Log.d(TAG, "Failed to delete file on cancel: " + dstFile);
         }
         return;
       } else {
         throw new IOException("Failed to copy full contents from '"
-            + srcFile + "' to '" + destFile + "'");
+            + srcFile + "' to '" + dstFile + "'");
       }
     }
-    if (!destFile.setLastModified(srcFile.lastModified())) {
+    if (!dstFile.setLastModified(srcFile.lastModified())) {
       if (DEBUG) {
-        Log.d(TAG, "Failed to set last modified date on " + destFile);
+        Log.d(TAG, "Failed to set last modified date on " + dstFile);
       }
     }
 
@@ -170,7 +175,7 @@ final class Copier extends Paster<Void> {
     listener.onCopied(remaining, bytesCopied, bytesTotal);
   }
 
-  static interface Listener extends Cancellable {
+  static interface Listener {
     void onCopied(int remaining, long bytesCopied, long bytesTotal);
   }
 }

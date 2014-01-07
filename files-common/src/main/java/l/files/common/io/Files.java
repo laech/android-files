@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,10 +64,14 @@ public final class Files {
   /**
    * Returns true if {@code ancestor} is the file itself or its ancestor.
    *
+   * @throws IOException if failed to get the canonical path of the file
    * @see #normalize(File)
    */
-  public static boolean isAncestorOrSelf(File file, File ancestor) {
-    return hierarchy(file).contains(normalize(ancestor));
+  public static boolean isAncestorOrSelf(File file, File ancestor)
+      throws IOException {
+    Set<File> hierarchy = hierarchy(file.getCanonicalFile());
+    File normalized = normalize(ancestor.getCanonicalFile());
+    return hierarchy.contains(normalized);
   }
 
   /**

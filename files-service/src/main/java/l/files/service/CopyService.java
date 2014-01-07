@@ -50,7 +50,7 @@ public final class CopyService extends ProgressService {
       try {
 
         Counter.Result result = new Counter(this, src).call();
-        new Copier(this, src, dst, result.count, result.length).call();
+        new Copier(this, src, dst, this, result.count, result.length).call();
       } catch (IOException e) {
         Analytics.onException(CopyService.this, e);
         Log.e(CopyService.class.getSimpleName(), e.getMessage(), e); // TODO

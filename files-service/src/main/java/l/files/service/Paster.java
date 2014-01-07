@@ -1,5 +1,7 @@
 package l.files.service;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -11,24 +13,24 @@ import static l.files.common.io.Files.isAncestorOrSelf;
 
 abstract class Paster<T> implements Callable<T> {
 
-  private final Cancellable listener;
+  private final Cancellable cancellable;
   private final Set<File> sources;
   private final File destination;
 
-  Paster(Cancellable listener, Set<File> sources, File destination) {
-    this.listener = checkNotNull(listener, "listener");
+  Paster(Cancellable cancellable, Iterable<File> sources, File destination) {
+    this.cancellable = checkNotNull(cancellable, "cancellable");
     this.destination = checkNotNull(destination, "destination");
-    this.sources = checkNotNull(sources, "sources");
+    this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
   }
 
   @Override public final T call() throws IOException {
     for (File from : sources) {
-      if (listener.isCancelled()) {
+      if (isCancelled()) {
         break;
       }
       if (isAncestorOrSelf(destination, from)) {
-        throw new IOException("Cannot paste directory " + from +
-            " into its own sub directory " + destination);
+        throw new CannotPasteIntoSelfException("Cannot paste directory "
+            + from + " into its own sub directory " + destination);
       }
       File to = getNonExistentDestinationFile(from, destination);
       paste(from, to);
@@ -36,7 +38,19 @@ abstract class Paster<T> implements Callable<T> {
     return getResult();
   }
 
+  /**
+   * Pastes the source to the destination. If {@code from} is a file, write its
+   * content into {@code to}. If {@code from} is a directory, paste its content
+   * into {@code to}.
+   */
   protected abstract void paste(File from, File to) throws IOException;
 
+  /**
+   * Returns the result of executing {@link #call()}.
+   */
   protected T getResult() {return null;}
+
+  protected final boolean isCancelled() {
+    return cancellable.isCancelled();
+  }
 }

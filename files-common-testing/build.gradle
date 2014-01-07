@@ -19,6 +19,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
     }
 
     compileOptions {
@@ -28,9 +30,6 @@ android {
 }
 
 dependencies {
-  compile project(':files-common')
-  compile project(':files-analytics')
+  compile project.libs.mockito
   compile project.libs.guava
-
-  instrumentTestCompile project(':files-common-testing')
 }

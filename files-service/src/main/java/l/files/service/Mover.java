@@ -13,7 +13,7 @@ final class Mover extends Paster<Set<File>> {
 
   private final Set<File> failures;
 
-  Mover(Cancellable listener, Set<File> sources, File destination) {
+  Mover(Cancellable listener, Iterable<File> sources, File destination) {
     super(listener, sources, destination);
     this.failures = newHashSet();
   }
