@@ -18,6 +18,9 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public final class Files {
+
+  private static final Pattern NAME_WITH_NUMBER_SUFFIX = Pattern.compile("(.*?\\s+)(\\d+)");
+
   private Files() {}
 
   /**
@@ -99,42 +102,39 @@ public final class Files {
    * a nonexistent file.
    */
   public static File getNonExistentDestinationFile(File source, File dstDir) {
-    String name = source.getName();
-    File dst = new File(dstDir, name);
-    if (!dst.exists()) {
-      return dst;
-    }
 
-    Pattern pattern;
-    if (source.isDirectory()) {
-      pattern = Pattern.compile("(.*?) (\\d+)()");
-    } else {
-      pattern = Pattern.compile("(.*?) (\\d+)(\\..+)");
-    }
-
-    Matcher matcher = pattern.matcher(name);
-    String first;
+    String base;
     String last;
-    int num;
-    if (matcher.matches()) {
-      first = matcher.group(1);
-      last = matcher.group(3);
-      num = Integer.parseInt(matcher.group(2)) + 1;
+
+    if (source.isDirectory()) {
+      base = source.getName();
+      last = "";
     } else {
-      first = getBaseName(name);
+      String name = source.getName();
+      base = getBaseName(name);
       last = getExtension(name);
       if (!isNullOrEmpty(last)) {
         last = "." + last;
       }
-      num = 2;
     }
 
-    do {
-      dst = new File(dstDir, first + " " + num + last);
-      num++;
-    } while (dst.exists());
+    File dst;
+    while ((dst = new File(dstDir, base + last)).exists()) {
+      base = increment(base);
+    }
 
     return dst;
+  }
+
+  private static String increment(String base) {
+    Matcher matcher = NAME_WITH_NUMBER_SUFFIX.matcher(base);
+    if (matcher.matches()) {
+      return matcher.group(1) + (Integer.parseInt(matcher.group(2)) + 1);
+    } else if (base.equals("")) {
+      return "2";
+    } else {
+      return base + " 2";
+    }
   }
 
   public static File[] toFiles(Collection<String> paths) {
