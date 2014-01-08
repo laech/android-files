@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Integer.parseInt;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -129,7 +130,7 @@ public final class Files {
   private static String increment(String base) {
     Matcher matcher = NAME_WITH_NUMBER_SUFFIX.matcher(base);
     if (matcher.matches()) {
-      return matcher.group(1) + (Integer.parseInt(matcher.group(2)) + 1);
+      return matcher.group(1) + (parseInt(matcher.group(2)) + 1);
     } else if (base.equals("")) {
       return "2";
     } else {
@@ -153,6 +154,7 @@ public final class Files {
     return ImmutableSet.copyOf(toFiles(absolutePaths));
   }
 
+  // TODO replace
   public static String[] toAbsolutePaths(Collection<File> files) {
     return toAbsolutePaths(files.toArray(new File[files.size()]));
   }
