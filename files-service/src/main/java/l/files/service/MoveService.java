@@ -2,13 +2,10 @@ package l.files.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-
-import l.files.analytics.Analytics;
 
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFilesSet;
@@ -44,7 +41,7 @@ public final class MoveService extends ProgressService {
       super(id, MoveService.this, CUT, src, dst);
     }
 
-    @Override protected Void doTask() {
+    @Override protected IOException doTask() {
       try {
         Set<File> files = new Mover(this, src, dst).call();
         if (!files.isEmpty()) {
@@ -53,8 +50,7 @@ public final class MoveService extends ProgressService {
           new Deleter(this, files, this, result.count).call();
         }
       } catch (IOException e) {
-        Analytics.onException(MoveService.this, e);
-        Log.e(MoveService.class.getSimpleName(), e.getMessage(), e); // TODO
+        return e;
       }
       return null;
     }

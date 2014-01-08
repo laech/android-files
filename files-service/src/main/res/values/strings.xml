@@ -21,7 +21,7 @@
     <item quantity="one">Preparing to move %,d item</item>
     <item quantity="other">Preparing to move %,d items</item>
   </plurals>
-  
+
   <plurals name="copying_x_items_to_x">
     <item quantity="one">Copying %1$,d item to \"%2$s\"</item>
     <item quantity="other">Copying %1$,d items to \"%2$s\"</item>
@@ -35,5 +35,9 @@
   <string name="x_of_x_size">%1$s of %2$s</string>
   <string name="waiting">Waiting…</string>
   <string name="x_countdown">-%s</string>
+
+  <string name="failed_to_write_to_x_permission">Failed to write to: %s (Permission denied)</string>
+  <string name="failed_to_read_from_x_permission">Failed to read from: %s (Permission denied)</string>
+  <string name="unknown_operation_error">Operation failed: unknown error occurred</string>
 
 </resources>

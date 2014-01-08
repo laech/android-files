@@ -2,7 +2,6 @@ package l.files.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -10,11 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import l.files.analytics.Analytics;
-
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFiles;
+import static l.files.service.Util.showErrorMessage;
 
 public final class DeleteService extends ProgressService {
 
@@ -33,7 +31,7 @@ public final class DeleteService extends ProgressService {
     return toFiles(newHashSet(intent.getStringArrayExtra(EXTRA_FILE_PATHS)));
   }
 
-  private final class DeleteTask extends Task<Object, Progress, Void>
+  private final class DeleteTask extends Task<Object, Progress, IOException>
       implements Counter.Listener, Deleter.Listener {
 
     private final Set<File> files;
@@ -60,17 +58,23 @@ public final class DeleteService extends ProgressService {
       return progress.getNotificationProgressPercentage();
     }
 
-    @Override protected Void doTask() {
+    @Override protected IOException doTask() {
       try {
 
         Counter.Result count = new Counter(this, files, this).call();
         new Deleter(this, files, this, count.count).call();
 
       } catch (IOException e) {
-        Analytics.onException(DeleteService.this, e);
-        Log.e(DeleteService.class.getSimpleName(), e.getMessage(), e); // TODO
+        return e;
       }
       return null;
+    }
+
+    @Override protected void onPostExecute(IOException e) {
+      super.onPostExecute(e);
+      if (e != null) {
+        showErrorMessage(service, e);
+      }
     }
 
     @Override public void onFileCounted(int count, long length) {

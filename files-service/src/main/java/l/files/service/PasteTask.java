@@ -3,15 +3,17 @@ package l.files.service;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 import static android.os.SystemClock.elapsedRealtime;
 import static l.files.service.PasteType.COPY;
 import static l.files.service.PasteType.CUT;
+import static l.files.service.Util.showErrorMessage;
 
 abstract class PasteTask
-    extends ProgressService.Task<Object, Progress, Void>
+    extends ProgressService.Task<Object, Progress, IOException>
     implements Counter.Listener, Copier.Listener {
 
   private static final Map<PasteType, Integer> ICONS = ImmutableMap.of(
@@ -37,6 +39,13 @@ abstract class PasteTask
     this.src = src;
     this.dst = dst;
     this.dstName = dst.getName();
+  }
+
+  @Override protected void onPostExecute(IOException e) {
+    super.onPostExecute(e);
+    if (e != null) {
+      showErrorMessage(service, e);
+    }
   }
 
   @Override protected int getNotificationSmallIcon() {

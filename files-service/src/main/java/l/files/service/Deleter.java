@@ -33,7 +33,7 @@ final class Deleter extends Traverser<Void> {
       remaining--;
       listener.onFileDeleted(total, remaining);
     } else {
-      throw new IOException("Failed to delete file " + file);
+      throw new NoWriteException(file.getParentFile());
     }
   }
 
@@ -48,7 +48,7 @@ final class Deleter extends Traverser<Void> {
     while (it.hasNext()) {
       File directory = it.next();
       if (!directory.delete() && directory.exists()) {
-        throw new IOException("Failed to delete directory " + directory);
+        throw new NoWriteException(directory.getParentFile());
       }
       it.remove();
     }

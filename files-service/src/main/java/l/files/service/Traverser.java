@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.util.Arrays.asList;
+import static l.files.service.Util.listDirectoryChildren;
 import static org.apache.commons.io.FileUtils.isSymlink;
 
 /**
@@ -47,7 +46,7 @@ abstract class Traverser<V> implements Callable<V> {
       }
 
       if (file.isDirectory()) {
-        queue.addAll(getChildren(file));
+        queue.addAll(listDirectoryChildren(file));
         onDirectory(file);
       } else {
         onFile(file);
@@ -57,14 +56,6 @@ abstract class Traverser<V> implements Callable<V> {
     onFinish();
 
     return getResult();
-  }
-
-  private List<File> getChildren(File dir) throws RestrictedException {
-    File[] children = dir.listFiles();
-    if (children == null) {
-      throw new RestrictedException(dir);
-    }
-    return asList(children);
   }
 
   /**

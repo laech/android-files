@@ -8,15 +8,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
-import java.util.List;
 import java.util.Queue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static l.files.common.io.Files.replace;
 import static l.files.service.BuildConfig.DEBUG;
+import static l.files.service.Util.listDirectoryChildren;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -78,7 +77,7 @@ final class Copier extends Paster<Void> {
 
       File dst = replace(file, from, to);
       if (file.isDirectory()) {
-        queue.addAll(getChildren(file));
+        queue.addAll(listDirectoryChildren(file));
         createDirectory(dst);
       } else {
         copyFile(file, dst);
@@ -90,14 +89,6 @@ final class Copier extends Paster<Void> {
     if (!dir.mkdirs() && !dir.exists()) {
       Log.w(TAG, "Failed to create directory: " + dir);
     }
-  }
-
-  private List<File> getChildren(File dir) throws RestrictedException {
-    File[] children = dir.listFiles();
-    if (children == null) {
-      throw new RestrictedException(dir);
-    }
-    return asList(children);
   }
 
   private void copyFile(File srcFile, File dstFile) throws IOException {

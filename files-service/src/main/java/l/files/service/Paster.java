@@ -26,7 +26,13 @@ abstract class Paster<T> implements Callable<T> {
   @Override public final T call() throws IOException {
     for (File from : sources) {
       if (isCancelled()) {
-        break;
+        return null;
+      }
+      if (!from.canRead()) {
+        throw new NoReadException(from);
+      }
+      if (!destination.canWrite()) {
+        throw new NoWriteException(destination);
       }
       if (isAncestorOrSelf(destination, from)) {
         throw new CannotPasteIntoSelfException("Cannot paste directory "
@@ -35,6 +41,7 @@ abstract class Paster<T> implements Callable<T> {
       File to = getNonExistentDestinationFile(from, destination);
       paste(from, to);
     }
+
     return getResult();
   }
 

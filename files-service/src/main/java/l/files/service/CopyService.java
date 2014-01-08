@@ -2,13 +2,10 @@ package l.files.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-
-import l.files.analytics.Analytics;
 
 import static l.files.common.io.Files.toAbsolutePaths;
 import static l.files.common.io.Files.toFilesSet;
@@ -46,16 +43,13 @@ public final class CopyService extends ProgressService {
       super(id, CopyService.this, COPY, sources, destination);
     }
 
-    @Override protected Void doTask() {
+    @Override protected IOException doTask() {
       try {
-
         Counter.Result result = new Counter(this, src, this).call();
         new Copier(this, src, dst, this, result.count, result.length).call();
       } catch (IOException e) {
-        Analytics.onException(CopyService.this, e);
-        Log.e(CopyService.class.getSimpleName(), e.getMessage(), e); // TODO
+        return e;
       }
-
       return null;
     }
   }
