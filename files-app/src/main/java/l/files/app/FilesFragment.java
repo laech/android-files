@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.concurrent.TimeUnit;
+
 import l.files.R;
 import l.files.app.menu.BookmarkMenu;
 import l.files.app.menu.NewDirMenu;
@@ -29,6 +31,8 @@ import l.files.common.widget.MultiChoiceModeListeners;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
@@ -44,6 +48,7 @@ public final class FilesFragment extends BaseFileListFragment
   private static final int LOADER_ID = identityHashCode(FilesFragment.class);
 
   private String directoryLocation;
+  private View progress;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -74,6 +79,7 @@ public final class FilesFragment extends BaseFileListFragment
 
     setupListView();
     setupOptionsMenu();
+    setupProgressBar();
     setListAdapter(FilesAdapter.get(getActivity()));
 
     getLoaderManager().initLoader(LOADER_ID, null, this);
@@ -114,6 +120,17 @@ public final class FilesFragment extends BaseFileListFragment
     ));
   }
 
+  private void setupProgressBar() {
+    progress = getView().findViewById(android.R.id.progress);
+    progress.postDelayed(new Runnable() {
+      @Override public void run() {
+        if (isResumed() && getListAdapter().getCursor() == null) {
+          progress.setVisibility(VISIBLE);
+        }
+      }
+    }, TimeUnit.SECONDS.toMillis(1));
+  }
+
   private FragmentManager getActivityFragmentManager() {
     return getActivity().getFragmentManager();
   }
@@ -147,6 +164,7 @@ public final class FilesFragment extends BaseFileListFragment
     if (cursor.getCount() == 0) {
       overrideEmptyText(R.string.empty);
     }
+    progress.setVisibility(GONE);
   }
 
   private void overrideEmptyText(int resId) {
