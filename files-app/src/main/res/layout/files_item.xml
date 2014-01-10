@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:background="@drawable/selector_light"
+              android:background="?android:attr/activatedBackgroundIndicator"
               android:orientation="vertical">
 
   <LinearLayout
@@ -10,7 +10,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="vertical"
-      android:background="@color/window_background"
+      android:background="@drawable/window_background"
       android:visibility="gone"
       android:divider="?android:attr/dividerVertical"
       android:showDividers="end">

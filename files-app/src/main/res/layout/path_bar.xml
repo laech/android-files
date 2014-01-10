@@ -4,11 +4,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/path_bar_scroll"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/action_bar_background"
+    android:layout_height="?android:attr/actionBarSize"
+    android:background="@drawable/ab_bottom_solid_light_holo"
     android:gravity="center_vertical"
     android:scrollbars="none"
-    android:overScrollMode="never">
+    android:overScrollMode="never"
+    style="?android:attr/actionBarSplitStyle">
 
   <LinearLayout
       android:id="@+id/path_item_container"
