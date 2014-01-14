@@ -8,11 +8,15 @@ import java.io.File;
 import java.util.Comparator;
 
 import static java.util.Locale.ENGLISH;
+import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class FileData {
 
+  /**
+   * Conforms to the spec of {@link FileInfo#SORT_BY_NAME}.
+   */
   public static final Comparator<FileData> NAME_COMPARATOR =
       new Comparator<FileData>() {
         @Override public int compare(FileData a, FileData b) {
@@ -20,10 +24,26 @@ final class FileData {
         }
       };
 
+  /**
+   * Conforms to the spec of {@link FileInfo#SORT_BY_MODIFIED}.
+   */
   public static final Comparator<FileData> LAST_MODIFIED_COMPARATOR_REVERSE =
       new Comparator<FileData>() {
         @Override public int compare(FileData a, FileData b) {
           return Longs.compare(a.lastModified, b.lastModified) * -1;
+        }
+      };
+
+  /**
+   * Conforms to the spec of {@link FileInfo#SORT_BY_SIZE}.
+   */
+  public static final Comparator<FileData> SIZE_COMPARATOR_REVERSE =
+      new Comparator<FileData>() {
+        @Override public int compare(FileData a, FileData b) {
+          if (a.directory && b.directory) return NAME_COMPARATOR.compare(a, b);
+          if (a.directory) return 1;
+          if (b.directory) return -1;
+          return Longs.compare(a.length, b.length) * -1;
         }
       };
 

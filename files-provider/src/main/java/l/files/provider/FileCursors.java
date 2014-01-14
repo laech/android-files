@@ -10,7 +10,7 @@ import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
-import static l.files.provider.FilesContract.FileInfo.LENGTH;
+import static l.files.provider.FilesContract.FileInfo.SIZE;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 
 public final class FileCursors {
@@ -33,7 +33,7 @@ public final class FileCursors {
   }
 
   public static long getSize(Cursor cursor) {
-    return getLong(cursor, LENGTH);
+    return getLong(cursor, SIZE);
   }
 
   public static boolean isReadable(Cursor cursor) {

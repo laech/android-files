@@ -16,14 +16,12 @@ import com.google.common.base.Supplier;
 
 import l.files.R;
 import l.files.app.category.Categorizer;
-import l.files.app.category.FileDateCategorizer;
+import l.files.app.category.FileCategorizers;
 import l.files.app.decorator.Decorator;
 import l.files.app.decorator.decoration.Decoration;
 
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
-import static com.google.common.base.Strings.nullToEmpty;
-import static java.lang.System.currentTimeMillis;
 import static l.files.R.id;
 import static l.files.app.FilesApp.getBitmapCache;
 import static l.files.app.decorator.Decorators.compose;
@@ -46,7 +44,6 @@ import static l.files.app.decorator.decoration.Decorations.fileSize;
 import static l.files.app.decorator.decoration.Decorations.isFile;
 import static l.files.app.decorator.decoration.Decorations.memoize;
 import static l.files.app.decorator.decoration.Decorations.uri;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 
 final class FilesAdapter extends StableFilesAdapter implements Supplier<Categorizer> {
 
@@ -62,7 +59,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     Decoration<Boolean> categoryVisibility = categoryVisible(category);
     Decoration<Typeface> icon = memoize(fileIcon(context.getAssets()), this);
     Decoration<Uri> uri = memoize(uri(fileLocation()), this);
-    LruCache<Object,Bitmap> cache = getBitmapCache(context);
+    LruCache<Object, Bitmap> cache = getBitmapCache(context);
     this.decorator = compose(
         on(id.title, enable(readable), text(fileName())),
         on(id.icon, enable(readable), font(icon)),
@@ -105,14 +102,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
   }
 
   private void setCategorizer(String sortOrder) {
-    switch (nullToEmpty(sortOrder)) {
-      case SORT_BY_MODIFIED:
-        categorizer = new FileDateCategorizer(currentTimeMillis());
-        break;
-      default:
-        categorizer = Categorizer.NULL;
-        break;
-    }
+    categorizer = FileCategorizers.fromSortOrder(sortOrder);
   }
 
   @Override public View getView(int position, View view, ViewGroup parent) {

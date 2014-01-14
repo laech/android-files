@@ -17,7 +17,7 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
  *
  * @see FilesContract.FileInfo
  */
-public final class FileDateCategorizer implements Categorizer {
+final class FileDateCategorizer implements Categorizer {
 
   private final MutableDateTime timestamp = new MutableDateTime();
   private final long startOfToday;

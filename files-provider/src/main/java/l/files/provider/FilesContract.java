@@ -381,7 +381,7 @@ public final class FilesContract {
      * <p/>
      * Type: INTEGER (long)
      */
-    public static final String LENGTH = "length";
+    public static final String SIZE = "size";
 
     /**
      * Flag indicating that a file is writable.
@@ -404,8 +404,21 @@ public final class FilesContract {
      */
     public static final String MIME_DIR = "application/x-directory";
 
+    /**
+     * Sorts the files by their names alphabetically.
+     */
     public static final String SORT_BY_NAME = NAME;
+
+    /**
+     * Sorts the files by their last modified dates descending).
+     */
     public static final String SORT_BY_MODIFIED = MODIFIED;
+
+    /**
+     * Sorts the files by their sizes (descending). Sizes of directories will
+     * not be calculated, as such their will appear at the end of the list.
+     */
+    public static final String SORT_BY_SIZE = SIZE;
 
     private FileInfo() {}
   }

@@ -42,6 +42,7 @@ import static l.files.provider.Bookmarks.isBookmarksKey;
 import static l.files.provider.BuildConfig.DEBUG;
 import static l.files.provider.FileData.LAST_MODIFIED_COMPARATOR_REVERSE;
 import static l.files.provider.FileData.NAME_COMPARATOR;
+import static l.files.provider.FileData.SIZE_COMPARATOR_REVERSE;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
@@ -51,6 +52,7 @@ import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
 import static l.files.provider.FilesContract.MATCH_BOOKMARKS_LOCATION;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
@@ -79,7 +81,7 @@ public final class FilesProvider extends ContentProvider
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.LOCATION,
       FileInfo.NAME,
-      FileInfo.LENGTH,
+      FileInfo.SIZE,
       FileInfo.READABLE,
       FileInfo.WRITABLE,
       FileInfo.MIME,
@@ -268,6 +270,9 @@ public final class FilesProvider extends ContentProvider
     switch (sortOrder) {
       case SORT_BY_MODIFIED:
         sort(data, LAST_MODIFIED_COMPARATOR_REVERSE);
+        break;
+      case SORT_BY_SIZE:
+        sort(data, SIZE_COMPARATOR_REVERSE);
         break;
       case SORT_BY_NAME:
       default:

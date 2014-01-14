@@ -2,7 +2,7 @@ package l.files.provider;
 
 import l.files.common.database.BaseCursor;
 
-import static l.files.provider.FilesContract.FileInfo.LENGTH;
+import static l.files.provider.FilesContract.FileInfo.SIZE;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
@@ -53,7 +53,7 @@ final class FileCursor extends BaseCursor {
   @Override public long getLong(int column) {
     FileData file = getCurrentFile();
     String col = columns[column];
-    if (LENGTH.equals(col)) return file.length;
+    if (SIZE.equals(col)) return file.length;
     if (MODIFIED.equals(col)) return file.lastModified;
     throw new IllegalArgumentException();
   }

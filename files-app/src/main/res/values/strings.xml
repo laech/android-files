@@ -61,11 +61,21 @@
 
   <string name="name">Name</string>
   <string name="date_modified">Date modified</string>
+  <string name="size">Size</string>
+
   <string name="today">Today</string>
   <string name="yesterday">Yesterday</string>
   <string name="previous_7_days">Previous 7 days</string>
   <string name="previous_30_days">Previous 30 days</string>
   <string name="unknown">Unknown</string>
+  
+  <string name="_10gb_or_more">&gt;= 10GB</string>
+  <string name="_1gb_to_10gb">1GB — 10GB</string>
+  <string name="_100mb_to_1gb">100MB — 1GB</string>
+  <string name="_1mb_to_100mb">1MB — 100MB</string>
+  <string name="_1kb_to_1mb">1KB — 1MB</string>
+  <string name="less_than_1kb">&lt; 1KB</string>
+  <string name="__">——</string>
 
   <!-- Admob ad unit ID -->
   <string name="ad_unit_id">ca-app-pub-3251738373408970/6115914240</string>

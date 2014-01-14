@@ -13,11 +13,11 @@ import android.widget.ListView;
 
 import l.files.R;
 import l.files.app.Preferences;
+import l.files.app.category.FileCategorizers;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.app.Preferences.getSortOrder;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
+import static l.files.app.category.FileCategorizers.SortOption;
 
 public final class SortDialog
     extends DialogFragment implements OnItemClickListener {
@@ -48,38 +48,25 @@ public final class SortDialog
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    String sortOrder = ((SortBy) parent.getItemAtPosition(position)).sort;
+    String sortOrder = ((SortOption) parent.getItemAtPosition(position)).sortOrder();
     Preferences.setSortOrder(getActivity(), sortOrder);
     getDialog().dismiss();
   }
 
-  class SorterAdapter extends ArrayAdapter<SortBy> {
+  class SorterAdapter extends ArrayAdapter<SortOption> {
 
     SorterAdapter(Context context) {
-      super(context, R.layout.sort_by_item, SortBy.values());
+      super(context, R.layout.sort_by_item, FileCategorizers.getSortOptions());
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       View view = super.getView(position, convertView, parent);
-      SortBy item = getItem(position);
+      SortOption item = getItem(position);
       CheckedTextView check = (CheckedTextView) view.findViewById(R.id.title);
-      check.setText(item.labelId);
-      check.setChecked(item.sort.equals(getSortOrder(parent.getContext())));
+      check.setText(item.labelId());
+      check.setChecked(item.sortOrder().equals(getSortOrder(parent.getContext())));
       return view;
-    }
-  }
-
-  private static enum SortBy {
-    NAME(SORT_BY_NAME, R.string.name),
-    MODIFIED(SORT_BY_MODIFIED, R.string.date_modified);
-
-    final String sort;
-    final int labelId;
-
-    SortBy(String sort, int labelId) {
-      this.sort = sort;
-      this.labelId = labelId;
     }
   }
 }
