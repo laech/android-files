@@ -57,7 +57,14 @@ final class FileData {
   final String uri;
   final String mime;
 
-  public FileData(File file) {
+  /*
+   * Should not be accessing the file system from the constructor, but given the
+   * number of final fields, doing this here is more maintainable. So the
+   * constructor is private, and a public static method is used for creating an
+   * instance, this hides away the fact that this is done in the constructor,
+   * also gives the possibility of changing this in the future.
+   */
+  private FileData(File file) {
     this.lastModified = file.lastModified();
     this.length = file.length();
     this.directory = file.isDirectory();
@@ -76,6 +83,10 @@ final class FileData {
     String ext = getExtension(name).toLowerCase(ENGLISH);
     String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
     return mime == null ? "application/octet-stream" : mime;
+  }
+
+  public static FileData from(File file) {
+    return new FileData(file);
   }
 
   /**

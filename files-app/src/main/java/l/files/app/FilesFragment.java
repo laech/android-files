@@ -8,11 +8,13 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.concurrent.TimeUnit;
+import com.squareup.otto.Subscribe;
 
 import l.files.R;
 import l.files.app.menu.BookmarkMenu;
@@ -28,6 +30,9 @@ import l.files.app.mode.RenameAction;
 import l.files.app.mode.SelectAllAction;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
+import l.files.provider.event.LoadFinished;
+import l.files.provider.event.LoadProgress;
+import l.files.provider.event.LoadStarted;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -35,6 +40,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
+import static java.lang.System.nanoTime;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
@@ -48,7 +55,9 @@ public final class FilesFragment extends BaseFileListFragment
   private static final int LOADER_ID = identityHashCode(FilesFragment.class);
 
   private String directoryLocation;
-  private View progress;
+  private ProgressBar progress;
+  private Handler handler;
+  private Runnable showProgressRunnable;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
@@ -75,11 +84,18 @@ public final class FilesFragment extends BaseFileListFragment
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
+
     directoryLocation = getArguments().getString(ARG_DIRECTORY_LOCATION);
+    progress = (ProgressBar) getView().findViewById(android.R.id.progress);
+    handler = new Handler();
+    showProgressRunnable = new Runnable() {
+      @Override public void run() {
+        progress.setVisibility(VISIBLE);
+      }
+    };
 
     setupListView();
     setupOptionsMenu();
-    setupProgressBar();
     setListAdapter(FilesAdapter.get(getActivity()));
 
     getLoaderManager().initLoader(LOADER_ID, null, this);
@@ -89,6 +105,16 @@ public final class FilesFragment extends BaseFileListFragment
   @Override public void onDestroy() {
     super.onDestroy();
     Preferences.unregister(getActivity(), this);
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    getBus().register(this);
+  }
+
+  @Override public void onStop() {
+    getBus().unregister(this);
+    super.onStop();
   }
 
   @Override public FilesAdapter getListAdapter() {
@@ -120,17 +146,6 @@ public final class FilesFragment extends BaseFileListFragment
     ));
   }
 
-  private void setupProgressBar() {
-    progress = getView().findViewById(android.R.id.progress);
-    progress.postDelayed(new Runnable() {
-      @Override public void run() {
-        if (isResumed() && getListAdapter().getCursor() == null) {
-          progress.setVisibility(VISIBLE);
-        }
-      }
-    }, TimeUnit.SECONDS.toMillis(1));
-  }
-
   private FragmentManager getActivityFragmentManager() {
     return getActivity().getFragmentManager();
   }
@@ -152,19 +167,29 @@ public final class FilesFragment extends BaseFileListFragment
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
     boolean showHidden = Preferences.getShowHiddenFiles(getActivity());
     String sortOrder = Preferences.getSortOrder(getActivity());
-    Uri uri = buildFileChildrenUri(directoryLocation, showHidden);
+    /*
+     * Add dummy query param to the URI to make this URI unique from other URIs
+     * for the same directory, so that we can check it in progress update
+     * methods and only show the progress bar for this loader, not show for
+     * other loaders loading the same directory.
+     */
+    Uri uri = buildFileChildrenUri(getDirectoryLocation(), showHidden)
+        .buildUpon()
+        .appendQueryParameter("timestamp", String.valueOf(nanoTime()))
+        .build();
     return new CursorLoader(getActivity(), uri, null, null, null, sortOrder);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-    if (getListAdapter().getCursor() != null && isResumed()) {
-      animatePreDataSetChange(getListView());
+    if (getActivity() != null) {
+      if (getListAdapter().getCursor() != null && isResumed()) {
+        animatePreDataSetChange(getListView());
+      }
+      getListAdapter().setCursor(cursor, Preferences.getSortOrder(getActivity()));
+      if (cursor.getCount() == 0) {
+        overrideEmptyText(R.string.empty);
+      }
     }
-    getListAdapter().setCursor(cursor, Preferences.getSortOrder(getActivity()));
-    if (cursor.getCount() == 0) {
-      overrideEmptyText(R.string.empty);
-    }
-    progress.setVisibility(GONE);
   }
 
   private void overrideEmptyText(int resId) {
@@ -182,7 +207,45 @@ public final class FilesFragment extends BaseFileListFragment
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (Preferences.isSortOrderKey(key) ||
         Preferences.isShowHiddenFilesKey(key)) {
+      // Make sure any existing potential long running load is cancelled first,
+      // restart doesn't do this automatically.
+      getLoaderManager().getLoader(LOADER_ID).cancelLoad();
       getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
+  }
+
+  @Subscribe public void handle(LoadStarted event) {
+    if (event.getUri().equals(getLoaderUri())) {
+      // Only make progress bar visible if takes only than a second to load
+      handler.postDelayed(showProgressRunnable, SECONDS.toMillis(1));
+      progress.setIndeterminate(true);
+    }
+  }
+
+  @Subscribe public void handle(LoadProgress event) {
+    if (event.getUri().equals(getLoaderUri())) {
+      // Need to set visible again in case the user rotates screen while loading
+      // half way. Otherwise the progress bar is not visible after screen
+      // rotation.
+      progress.setVisibility(VISIBLE);
+      progress.setIndeterminate(false);
+      progress.setMax(event.getTotalChildrenCount());
+      progress.setProgress(event.getNumChildrenLoaded());
+    }
+  }
+
+  @Subscribe public void handle(LoadFinished event) {
+    if (event.getUri().equals(getLoaderUri())) {
+      handler.removeCallbacks(showProgressRunnable);
+      progress.setVisibility(GONE);
+    }
+  }
+
+  private Uri getLoaderUri() {
+    Loader<Cursor> loader = getLoaderManager().getLoader(LOADER_ID);
+    if (loader != null) {
+      return ((CursorLoader) loader).getUri();
+    }
+    return null;
   }
 }

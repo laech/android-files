@@ -25,10 +25,9 @@ android {
 dependencies {
   compile project.libs.android_support
   compile project.libs.guava
-  compile project.libs.picasso
   compile project.libs.commons_io
   compile project.libs.commons_lang
-  compile project.libs.tika
+  compile project.libs.otto
 
   instrumentTestCompile project(':files-common-testing')
 }

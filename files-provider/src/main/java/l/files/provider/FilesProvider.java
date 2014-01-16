@@ -9,9 +9,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.google.common.base.Stopwatch;
 
 import org.apache.tika.Tika;
 
@@ -24,6 +28,9 @@ import java.util.Set;
 
 import l.files.analytics.Analytics;
 import l.files.common.io.Files;
+import l.files.provider.event.LoadFinished;
+import l.files.provider.event.LoadProgress;
+import l.files.provider.event.LoadStarted;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -34,6 +41,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Arrays.sort;
 import static java.util.Collections.reverse;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.common.event.Events.bus;
+import static l.files.common.event.Events.post;
 import static l.files.common.io.Files.normalize;
 import static l.files.provider.Bookmarks.getBookmark;
 import static l.files.provider.Bookmarks.getBookmarks;
@@ -77,6 +87,8 @@ public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
   private static final String TAG = FilesProvider.class.getSimpleName();
+
+  private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.LOCATION,
@@ -208,7 +220,7 @@ public final class FilesProvider extends ContentProvider
     for (int i = 2; file.exists(); i++) {
       file = new File(parent, name + " " + i);
     }
-    return newFileCursor(uri, projection, new FileData(file));
+    return newFileCursor(uri, projection, FileData.from(file));
   }
 
   private Cursor queryBookmark(Uri uri, String[] projection) {
@@ -237,13 +249,15 @@ public final class FilesProvider extends ContentProvider
    * of sorting, such as sorting by last modified date.
    * <p/>
    * Note that when using a CursorLoader, don't use the support-v4 version as it
-   * doesn't not use a CancellationSignal.
+   * does not use a CancellationSignal.
    */
   private Cursor queryFiles(
       Uri uri,
       String[] projection,
       String sortOrder,
       CancellationSignal signal) {
+
+    post(bus(), new LoadStarted(uri), HANDLER);
 
     boolean showHidden = VALUE_SHOW_HIDDEN_YES
         .equals(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
@@ -254,6 +268,7 @@ public final class FilesProvider extends ContentProvider
       children = new String[0];
     }
 
+    Stopwatch watch = Stopwatch.createStarted();
     FileData[] data = new FileData[children.length];
     Set<String> dirs = newHashSetWithExpectedSize(children.length);
     for (int i = 0; i < children.length; i++) {
@@ -264,8 +279,14 @@ public final class FilesProvider extends ContentProvider
       if (file.isDirectory()) {
         dirs.add(file.getAbsolutePath());
       }
-      data[i] = new FileData(file);
+      data[i] = FileData.from(file);
+
+      if (watch.elapsed(MILLISECONDS) >= 500) {
+        post(bus(), new LoadProgress(uri, i + 1, children.length), HANDLER);
+        watch.reset().start();
+      }
     }
+    post(bus(), new LoadProgress(uri, children.length, children.length), HANDLER);
 
     switch (sortOrder) {
       case SORT_BY_MODIFIED:
@@ -279,6 +300,8 @@ public final class FilesProvider extends ContentProvider
         sort(data, NAME_COMPARATOR);
         break;
     }
+
+    post(bus(), new LoadFinished(uri), HANDLER);
 
     return newMonitoringCursor(uri, parent.getAbsolutePath(), dirs, projection, data);
   }

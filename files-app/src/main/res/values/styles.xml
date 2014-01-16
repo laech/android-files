@@ -55,6 +55,11 @@
     <item name="android:divider">@null</item>
   </style>
 
+  <style name="Widget.ProgressBarBelowActionBar" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+    <item name="android:indeterminateDrawable">@drawable/ab_progress_indeterminate</item>
+    <item name="android:progressDrawable">@drawable/ab_progress</item>
+  </style>
+
   <style name="Theme.ListView.Item" parent="Widget.TextView"/>
 
 

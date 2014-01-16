@@ -20,6 +20,9 @@ class BaseFileListFragment extends BaseListFragment {
     this.layoutResourceId = layoutResourceId;
   }
 
+  // TODO Review bus getter/setter is appropriate or not, possible leaks
+  // when bus is changed after an object is registered?
+
   public Bus getBus() {
     return bus;
   }
@@ -34,7 +37,10 @@ class BaseFileListFragment extends BaseListFragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
+  public View onCreateView(
+      @SuppressWarnings("NullableProblems") LayoutInflater inflater,
+      ViewGroup container,
+      Bundle state) {
     return inflater.inflate(layoutResourceId, container, false);
   }
 

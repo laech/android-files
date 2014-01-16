@@ -9,13 +9,11 @@ import android.os.StrictMode;
 import android.util.LruCache;
 
 import com.squareup.otto.Bus;
-import com.squareup.otto.ThreadEnforcer;
 
-import java.util.Set;
+import l.files.common.event.Events;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static com.google.common.collect.Sets.newHashSet;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.Preferences.newAnalyticsListener;
 
@@ -33,30 +31,14 @@ public final class FilesApp extends Application {
     return ((FilesApp) context.getApplicationContext()).bitmapCache;
   }
 
-
+  // TODO remove bus from here
   private Bus bus;
   private LruCache<Object, Bitmap> bitmapCache;
 
   @Override public void onCreate() {
     super.onCreate();
 
-    bus = new Bus(ThreadEnforcer.MAIN) {
-
-      // TODO
-      private final Set<Object> objects = newHashSet();
-
-      @Override
-      public void register(Object object) {
-        if (objects.add(object)) super.register(object);
-      }
-
-      @Override
-      public void unregister(Object object) {
-        if (objects.remove(object)) super.unregister(object);
-      }
-
-    };
-
+    bus = Events.bus();
     bitmapCache = createBitmapCache();
 
     Preferences.register(this, newAnalyticsListener(this));
