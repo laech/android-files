@@ -3,15 +3,16 @@ package l.files.app;
 import android.view.View;
 import android.widget.ListView;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static android.view.ViewTreeObserver.OnPreDrawListener;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static com.google.common.collect.Sets.union;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 final class Animations {
 
@@ -24,30 +25,35 @@ final class Animations {
    * before the content of the list adapter is changed.
    */
   public static void animatePreDataSetChange(final ListView list) {
-    final Set<Long> oldItems = getItemIds(list);
-    final Map<Long, Integer> tops = getViewTopsById(list);
-    final List<Long> oldVisibleItems = getVisibleItemIds(list);
+    final Map<Long, Integer> oldTops = getViewTops(list);
+    final Set<Long> oldVisibleItems = getOnScreenItems(list);
+    /*
+     * Note: do not make oldItems contain all IDs, as that will cause
+     * significant performance impact with large lists. Only include what's on
+     * screen and those that are near the top/bottom of the screen.
+     */
+    final Set<Long> oldItems = union(oldVisibleItems,
+        getOffScreenItems(list, list.getChildCount()));
 
     list.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {
-
       @Override public boolean onPreDraw() {
         list.getViewTreeObserver().removeOnPreDrawListener(this);
 
-        for (int i = 0; i < list.getChildCount(); i++)
-          animate(list.getChildAt(i));
-
+        int diff = difference(oldVisibleItems, getOnScreenItems(list)).size();
+        for (int i = 0; i < list.getChildCount(); i++) {
+          animate(list.getChildAt(i), diff);
+        }
         return true;
       }
 
-      private void animate(View child) {
-        int position = list.getPositionForView(child);
-        long id = list.getItemIdAtPosition(position);
-        int newTop = child.getTop();
+      private void animate(View child, int nNewItemsOnScreen) {
+        long id = list.getItemIdAtPosition(list.getPositionForView(child));
 
-        if (tops.containsKey(id)) {
-          animateItemMovement(child, tops.get(id), newTop);
+        Integer oldTop = oldTops.get(id);
+        if (oldTop != null) {
+          animateItemMovement(child, oldTop, child.getTop());
         } else if (oldItems.contains(id)) {
-          animateOldItemEntrance(child, oldVisibleItems, list);
+          animateOldItemEntrance(child, nNewItemsOnScreen, list);
         } else {
           animateNewItemEntrance(child);
         }
@@ -55,28 +61,47 @@ final class Animations {
     });
   }
 
-  private static Set<Long> getItemIds(ListView list) {
-    Set<Long> ids = newHashSetWithExpectedSize(list.getCount());
-    for (int i = 0; i < list.getCount(); i++) {
-      ids.add(list.getItemIdAtPosition(i));
-    }
-    return ids;
-  }
-
-  private static List<Long> getVisibleItemIds(ListView list) {
-    List<Long> items = newArrayListWithCapacity(list.getChildCount());
+  /**
+   * Gets the IDs of the items on screen.
+   */
+  private static Set<Long> getOnScreenItems(ListView list) {
+    Set<Long> items = newHashSetWithExpectedSize(list.getChildCount());
     for (int i = 0; i < list.getChildCount(); i++) {
-      int position = list.getPositionForView(list.getChildAt(i));
-      items.add(list.getItemIdAtPosition(position));
+      int pos = list.getPositionForView(list.getChildAt(i));
+      long id = list.getItemIdAtPosition(pos);
+      items.add(id);
     }
     return items;
   }
 
-  private static Map<Long, Integer> getViewTopsById(ListView list) {
+  /**
+   * Gets the IDs of the {@code n} items above and below the screen.
+   */
+  private static Set<Long> getOffScreenItems(ListView list, int n) {
+    Set<Long> items = newHashSetWithExpectedSize(n * 2);
+    int first = list.getFirstVisiblePosition();
+    int last = list.getLastVisiblePosition();
+    for (int i = max(0, first - n); i < first; i++) {
+      items.add(list.getItemIdAtPosition(i));
+    }
+    int end = min(list.getCount(), last + 1 + n);
+    for (int i = last + 1; i < end; i++) {
+      items.add(list.getItemIdAtPosition(i));
+    }
+    return items;
+  }
+
+  /**
+   * Collects the {@link View#getTop()}s of the items on screen, indexed by item
+   * IDs.
+   */
+  private static Map<Long, Integer> getViewTops(ListView list) {
     Map<Long, Integer> tops = newHashMapWithExpectedSize(list.getChildCount());
     for (int i = 0; i < list.getChildCount(); i++) {
-      int position = list.getPositionForView(list.getChildAt(i));
-      tops.put(list.getItemIdAtPosition(position), list.getChildAt(i).getTop());
+      View child = list.getChildAt(i);
+      int pos = list.getPositionForView(child);
+      long id = list.getItemIdAtPosition(pos);
+      tops.put(id, child.getTop());
     }
     return tops;
   }
@@ -90,13 +115,10 @@ final class Animations {
   }
 
   private static void animateOldItemEntrance(
-      View child, List<Long> oldVisibleItemIds, ListView list) {
-
-    List<Long> diff = newArrayList(oldVisibleItemIds);
-    diff.removeAll(getVisibleItemIds(list));
+      View child, int nNewItemsOnScreen, ListView list) {
     child.setTranslationY(list.indexOfChild(child) == 0
         ? child.getHeight() * -1
-        : child.getHeight() * diff.size());
+        : child.getHeight() * nNewItemsOnScreen);
     child.animate().setDuration(ANIMATE_DURATION).translationY(0);
   }
 
