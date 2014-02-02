@@ -16,14 +16,19 @@ public final class TempDir {
     return new TempDir(createTempDir());
   }
 
-  private final File mDir;
+  public static TempDir use(File directory) {
+    assertTrue(directory.isDirectory());
+    return new TempDir(directory);
+  }
+
+  private final File dir;
 
   private TempDir(File dir) {
-    this.mDir = dir;
+    this.dir = dir;
   }
 
   public void delete() {
-    delete(mDir);
+    delete(dir);
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -42,7 +47,7 @@ public final class TempDir {
   }
 
   public File get() {
-    return mDir;
+    return dir;
   }
 
   public List<File> newFiles(String... names) {
@@ -58,7 +63,7 @@ public final class TempDir {
   }
 
   public File newFile(String name) {
-    final File file = new File(mDir, name);
+    final File file = new File(dir, name);
     final File parent = file.getParentFile();
     assertTrue(parent.exists() || parent.mkdirs());
     try {
@@ -75,7 +80,7 @@ public final class TempDir {
   }
 
   public File newDirectory(String name) {
-    final File file = new File(mDir, name);
+    final File file = new File(dir, name);
     assertTrue(file.mkdirs() || file.isDirectory());
     return file;
   }

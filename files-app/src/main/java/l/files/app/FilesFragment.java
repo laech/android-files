@@ -40,9 +40,11 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
-import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.app.Animations.animatePreDataSetChange;
+import static l.files.app.Preferences.isShowHiddenFilesKey;
+import static l.files.app.Preferences.isSortOrderKey;
+import static l.files.common.database.DataTypes.booleanToString;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
@@ -150,34 +152,18 @@ public final class FilesFragment extends BaseFileListFragment
     return getActivity().getFragmentManager();
   }
 
-  /*
-   * Loading files from a large directory (e.g. /storage/emulated/0/DCIM/.thumbnails
-   * with ~20,000 files) will be an expensive and long running operation, by
-   * using the CursorLoader (the one from Android SDK, not the one from
-   * support-v4) and implementing CancellationSignal support in the
-   * ContentProvider, the load is cancelled as soon as the user no longer wants
-   * to wait anymore and leaves (by pressing the back button).
-   * <p/>
-   * This can be tested by enabling the "Show CPU usage" option in "Developer
-   * options" on the device, and navigate to the large directory, something like
-   * "sdcard" will jump to the top of the CPU usage list, while still loading,
-   * hit the back button, "sdcard" should disappear and CPU usage should return
-   * to normal - as the loading operation should have been cancelled.
-   */
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    boolean showHidden = Preferences.getShowHiddenFiles(getActivity());
-    String sortOrder = Preferences.getSortOrder(getActivity());
-    /*
-     * Add dummy query param to the URI to make this URI unique from other URIs
-     * for the same directory, so that we can check it in progress update
-     * methods and only show the progress bar for this loader, not show for
-     * other loaders loading the same directory.
-     */
-    Uri uri = buildFileChildrenUri(getDirectoryLocation(), showHidden)
-        .buildUpon()
-        .appendQueryParameter("timestamp", String.valueOf(nanoTime()))
-        .build();
-    return new CursorLoader(getActivity(), uri, null, null, null, sortOrder);
+    Activity context = getActivity();
+    boolean showHidden = Preferences.getShowHiddenFiles(context);
+    String sortOrder = Preferences.getSortOrder(context);
+    Uri uri = buildFileChildrenUri(getDirectoryLocation());
+    String where = null;
+    String[] whereArgs = null;
+    if (!showHidden) {
+      where = FileInfo.HIDDEN + "=?";
+      whereArgs = new String[]{booleanToString(false)};
+    }
+    return new CursorLoader(context, uri, null, where, whereArgs, sortOrder);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
@@ -205,18 +191,13 @@ public final class FilesFragment extends BaseFileListFragment
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (Preferences.isSortOrderKey(key) ||
-        Preferences.isShowHiddenFilesKey(key)) {
-      // Make sure any existing potential long running load is cancelled first,
-      // restart doesn't do this automatically.
-      getLoaderManager().getLoader(LOADER_ID).cancelLoad();
+    if (isSortOrderKey(key) || isShowHiddenFilesKey(key)) {
       getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
   }
 
   @Subscribe public void handle(LoadStarted event) {
     if (event.getUri().equals(getLoaderUri())) {
-      // Only make progress bar visible if takes only than a second to load
       handler.postDelayed(showProgressRunnable, SECONDS.toMillis(1));
       progress.setIndeterminate(true);
     }
@@ -224,9 +205,6 @@ public final class FilesFragment extends BaseFileListFragment
 
   @Subscribe public void handle(LoadProgress event) {
     if (event.getUri().equals(getLoaderUri())) {
-      // Need to set visible again in case the user rotates screen while loading
-      // half way. Otherwise the progress bar is not visible after screen
-      // rotation.
       progress.setVisibility(VISIBLE);
       progress.setIndeterminate(false);
       progress.setMax(event.getTotalChildrenCount());

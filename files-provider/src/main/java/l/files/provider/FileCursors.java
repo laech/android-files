@@ -6,12 +6,13 @@ import static l.files.common.database.Cursors.getInt;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
-import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.MIME;
+import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
+import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
 import static l.files.provider.FilesContract.FileInfo.SIZE;
-import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
+import static l.files.provider.FilesContract.FileInfo.WRITABLE;
 
 public final class FileCursors {
   private FileCursors() {}
@@ -38,6 +39,10 @@ public final class FileCursors {
 
   public static boolean isReadable(Cursor cursor) {
     return getInt(cursor, READABLE) == 1;
+  }
+
+  public static boolean isWritable(Cursor cursor) {
+    return getInt(cursor, WRITABLE) == 1;
   }
 
   public static boolean isDirectory(Cursor cursor) {

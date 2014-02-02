@@ -5,13 +5,13 @@ project.ext.libs = [
         'com.android.support:support-v13:19.0.+'
     ],
     google_play_services: [
-        'com.google.android.gms:play-services:4.0.30'
+        'com.google.android.gms:play-services:4.0.+'
     ],
     guava: [
-        'com.google.guava:guava:15.0'
+        'com.google.guava:guava:15.+'
     ],
     picasso: [
-        'com.squareup.picasso:picasso:2.1.1'
+        'com.squareup.picasso:picasso:2.1.+'
     ],
     commons_io: [
         'commons-io:commons-io:2.4'
@@ -23,16 +23,13 @@ project.ext.libs = [
         'org.apache.tika:tika-core:1.4'
     ],
     otto: [
-        'com.squareup:otto:1.3.4'
+        'com.squareup:otto:1.3.+'
     ],
     joda_time: [
         'joda-time:joda-time:2.2'
     ],
-    trove4j: [
-        'net.sf.trove4j:trove4j:3.0.3'
-    ],
     mockito: [
-        'org.mockito:mockito-core:1.9.5',
+        'org.mockito:mockito-core:1.9.+',
         'com.google.dexmaker:dexmaker:1.0',
         'com.google.dexmaker:dexmaker-mockito:1.0'
     ]

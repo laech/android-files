@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,10 +31,6 @@ public final class FilesContract {
   static final String PATH_BOOKMARKS = "bookmarks";
   static final String PATH_SUGGESTION = "suggestion";
   static final String PATH_HIERARCHY = "hierarchy";
-
-  static final String PARAM_SHOW_HIDDEN = "showHidden";
-  static final String VALUE_SHOW_HIDDEN_YES = "1";
-  static final String VALUE_SHOW_HIDDEN_FILES_NO = "0";
 
   static final int MATCH_FILES_LOCATION = 100;
   static final int MATCH_FILES_LOCATION_CHILDREN = 101;
@@ -206,15 +203,11 @@ public final class FilesContract {
    * the following events: {@link LoadStarted}, {@link LoadProgress}, {@link
    * LoadFinished}.
    */
-  public static Uri buildFileChildrenUri(
-      String directoryLocation, boolean showHidden) {
+  public static Uri buildFileChildrenUri(String directoryLocation) {
     checkNotNull(directoryLocation, "directoryLocation");
     return filesUriBuilder()
         .appendPath(directoryLocation)
         .appendPath(PATH_CHILDREN)
-        .appendQueryParameter(PARAM_SHOW_HIDDEN, showHidden
-            ? VALUE_SHOW_HIDDEN_YES
-            : VALUE_SHOW_HIDDEN_FILES_NO)
         .build();
   }
 
@@ -226,7 +219,15 @@ public final class FilesContract {
    * Gets the {@link FileInfo#LOCATION} of the given file.
    */
   public static String getFileLocation(File file) {
-    return file.toURI().toString();
+    /* TODO test this
+     * Don't use File.toURI as it will append a "/" to the end of the URI
+     * depending on whether or not the file is a directory, that means two calls
+     * to the method before and after the directory is deleted will create two
+     * URIs that are not equal. This will cause problems else where such as when
+     * you try to remove a record from the database after a directory is
+     * deleted. File.getAbsolutePath doesn't not have this problem and is safe.
+     */
+    return URI.create(Uri.fromFile(file).toString()).normalize().toString();
   }
 
   /**
@@ -407,6 +408,16 @@ public final class FilesContract {
     public static final String READABLE = "readable";
 
     /**
+     * Flag indicating that a file is hidden.
+     * <p/>
+     * Type: BOOLEAN
+     */
+    public static final String HIDDEN = "hidden";
+
+    static final String PARENT_LOCATION = "parent";
+    static final String IS_DIRECTORY = "is_directory";
+
+    /**
      * Media type of a directory.
      *
      * @see #MIME
@@ -421,14 +432,14 @@ public final class FilesContract {
     /**
      * Sorts the files by their last modified dates descending).
      */
-    public static final String SORT_BY_MODIFIED = MODIFIED;
+    public static final String SORT_BY_MODIFIED = MODIFIED + " desc";
 
     /**
      * Sorts the files by their sizes (descending). Sizes of directories will
      * not be calculated, as such their will appear at the end of the list.
      */
-    public static final String SORT_BY_SIZE = SIZE;
+    public static final String SORT_BY_SIZE = IS_DIRECTORY + ", " + SIZE + " desc, " + NAME;
 
-    private FileInfo() {}
+    FileInfo() {}
   }
 }

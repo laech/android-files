@@ -2,59 +2,25 @@ package l.files.provider;
 
 import android.webkit.MimeTypeMap;
 
-import com.google.common.primitives.Longs;
-
 import java.io.File;
-import java.util.Comparator;
 
 import static java.util.Locale.ENGLISH;
-import static l.files.provider.FilesContract.FileInfo;
+import static l.files.common.database.DataTypes.booleanToInt;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
+import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class FileData {
 
-  /**
-   * Conforms to the spec of {@link FileInfo#SORT_BY_NAME}.
-   */
-  public static final Comparator<FileData> NAME_COMPARATOR =
-      new Comparator<FileData>() {
-        @Override public int compare(FileData a, FileData b) {
-          return a.name.compareToIgnoreCase(b.name);
-        }
-      };
-
-  /**
-   * Conforms to the spec of {@link FileInfo#SORT_BY_MODIFIED}.
-   */
-  public static final Comparator<FileData> LAST_MODIFIED_COMPARATOR_REVERSE =
-      new Comparator<FileData>() {
-        @Override public int compare(FileData a, FileData b) {
-          return Longs.compare(a.lastModified, b.lastModified) * -1;
-        }
-      };
-
-  /**
-   * Conforms to the spec of {@link FileInfo#SORT_BY_SIZE}.
-   */
-  public static final Comparator<FileData> SIZE_COMPARATOR_REVERSE =
-      new Comparator<FileData>() {
-        @Override public int compare(FileData a, FileData b) {
-          if (a.directory && b.directory) return NAME_COMPARATOR.compare(a, b);
-          if (a.directory) return 1;
-          if (b.directory) return -1;
-          return Longs.compare(a.length, b.length) * -1;
-        }
-      };
-
   final long lastModified;
   final long length;
-  final boolean directory;
+  final int directory;
+  final int hidden;
   final int canRead;
   final int canWrite;
   final String name;
   final String path;
-  final String uri;
+  final String location;
   final String mime;
 
   /*
@@ -67,13 +33,14 @@ final class FileData {
   private FileData(File file) {
     this.lastModified = file.lastModified();
     this.length = file.length();
-    this.directory = file.isDirectory();
-    this.canRead = file.canRead() ? 1 : 0;
-    this.canWrite = file.canWrite() ? 1 : 0;
+    this.directory = booleanToInt(file.isDirectory());
+    this.canRead = booleanToInt(file.canRead());
+    this.canWrite = booleanToInt(file.canWrite());
     this.name = file.getName();
     this.path = file.getPath();
-    this.uri = file.toURI().toString();
+    this.location = getFileLocation(file);
     this.mime = mime(file, name);
+    this.hidden = booleanToInt(name.startsWith("."));
   }
 
   private static String mime(File file, String name) {

@@ -36,7 +36,7 @@ final class FileCursor extends BaseCursor {
   @Override public String getString(int column) {
     FileData file = getCurrentFile();
     String col = columns[column];
-    if (LOCATION.equals(col)) return file.uri;
+    if (LOCATION.equals(col)) return file.location;
     if (NAME.equals(col)) return file.name;
     if (MIME.equals(col)) return file.mime;
     throw new IllegalArgumentException();

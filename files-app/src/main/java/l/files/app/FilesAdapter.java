@@ -65,7 +65,7 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
         on(id.icon, enable(readable), font(icon)),
         on(id.date, enable(readable), text(date), visible(fileHasDate())),
         on(id.size, enable(readable), text(size), visible(isFile())),
-        on(id.preview, image(uri, fileIsReadable(), cache, width, height)),
+        on(id.preview, image(uri, fileIsReadable(), cache, width, height)), // TODO not directory
         on(id.header_title, text(category)),
         on(id.header_container, visible(categoryVisibility))
     );

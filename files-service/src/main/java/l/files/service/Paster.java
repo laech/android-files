@@ -28,6 +28,9 @@ abstract class Paster<T> implements Callable<T> {
       if (isCancelled()) {
         return null;
       }
+      // if (!from.exists()) {
+      // TODO Continue or not exists exception?
+      // }
       if (!from.canRead()) {
         throw new NoReadException(from);
       }
