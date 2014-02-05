@@ -5,6 +5,7 @@ import android.database.Cursor;
 import static l.files.common.database.Cursors.getInt;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
+import static l.files.common.database.DataTypes.intToBoolean;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
@@ -38,11 +39,11 @@ public final class FileCursors {
   }
 
   public static boolean isReadable(Cursor cursor) {
-    return getInt(cursor, READABLE) == 1;
+    return intToBoolean(getInt(cursor, READABLE));
   }
 
   public static boolean isWritable(Cursor cursor) {
-    return getInt(cursor, WRITABLE) == 1;
+    return intToBoolean(getInt(cursor, WRITABLE));
   }
 
   public static boolean isDirectory(Cursor cursor) {
