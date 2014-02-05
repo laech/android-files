@@ -17,6 +17,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.identityHashCode;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.app.Fragments.setArgs;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.buildSuggestionUri;
@@ -43,10 +44,10 @@ public final class NewDirFragment extends FileCreationFragment {
     final ContentResolver resolver = getActivity().getContentResolver();
     final String parentLocation = getParentLocation();
     final String filename = getFilename();
-
+    final Uri authority = getFilesProviderAuthority(this);
     new AsyncTask<Void, Void, Boolean>() {
       @Override protected Boolean doInBackground(Void... params) {
-        return createDirectory(resolver, parentLocation, filename);
+        return createDirectory(resolver, authority, parentLocation, filename);
       }
 
       @Override protected void onPostExecute(Boolean success) {
@@ -72,7 +73,8 @@ public final class NewDirFragment extends FileCreationFragment {
 
   private Loader<Cursor> newSuggestionLoader() {
     String basename = getString(R.string.untitled_dir);
-    Uri suggestionUri = buildSuggestionUri(getParentLocation(), basename);
+    Uri auth = getFilesProviderAuthority(this);
+    Uri suggestionUri = buildSuggestionUri(auth, getParentLocation(), basename);
     return new CursorLoader(getActivity(), suggestionUri,
         new String[]{NAME}, null, null, null);
   }

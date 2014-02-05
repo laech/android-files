@@ -21,13 +21,17 @@ final class UpdateChildrenListener extends DirWatcherListenerAdapter {
   private final Callback callback;
 
   UpdateChildrenListener(
-      File dir, Processor processor, SQLiteOpenHelper helper, Callback callback) {
+      Uri authority,
+      File dir,
+      Processor processor,
+      SQLiteOpenHelper helper,
+      Callback callback) {
     this.dir = checkNotNull(dir, "dir");
     this.helper = checkNotNull(helper, "helper");
     this.processor = checkNotNull(processor, "processor");
     this.callback = checkNotNull(callback, "callback");
     this.location = getFileLocation(dir);
-    this.contentUri = buildFileUri(location);
+    this.contentUri = buildFileUri(authority, location);
   }
 
   @Override public void onCreate(String path) {

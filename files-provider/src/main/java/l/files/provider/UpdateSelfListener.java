@@ -27,14 +27,19 @@ final class UpdateSelfListener extends DirWatcherListenerAdapter
   private final Callback callback;
 
   UpdateSelfListener(
-      File dir, Processor processor, SQLiteOpenHelper helper, Callback callback) {
+      Uri authority,
+      File dir,
+      Processor processor,
+      SQLiteOpenHelper helper,
+      Callback callback) {
     this.dir = checkNotNull(dir, "dir");
     this.helper = checkNotNull(helper, "helper");
     this.processor = checkNotNull(processor, "processor");
     this.callback = checkNotNull(callback, "callback");
     File parentFile = dir.getAbsoluteFile().getParentFile();
     this.parentLocation = parentFile == null ? null : getFileLocation(parentFile);
-    this.parentContentUri = parentLocation == null ? null : buildFileUri(parentLocation);
+    this.parentContentUri = parentLocation == null
+        ? null : buildFileUri(authority, parentLocation);
   }
 
   @Override public void run() {

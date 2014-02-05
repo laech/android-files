@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="l.files.provider.testapp">
+
+    <application>
+      <provider
+          android:authorities="@string/test_provider_authority"
+          android:name="l.files.provider.FilesProvider"
+          android:exported="false"/>
+    </application>
+
+</manifest>

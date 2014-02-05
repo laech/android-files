@@ -20,6 +20,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FilesContract.buildFileUri;
 
@@ -93,7 +94,8 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
   private Loader<Cursor> newChecker() {
-    Uri uri = buildFileUri(getParentLocation(), getFilename());
+    Uri authority = getFilesProviderAuthority(this);
+    Uri uri = buildFileUri(authority, getParentLocation(), getFilename());
     return new CursorLoader(getActivity(), uri, null, null, null, null);
   }
 

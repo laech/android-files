@@ -2,18 +2,24 @@ package l.files.common.testing;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static com.google.common.io.Files.createTempDir;
-import static com.google.common.io.Files.touch;
+import static java.io.File.createTempFile;
 import static java.lang.System.nanoTime;
 import static junit.framework.Assert.assertTrue;
 
 public final class TempDir {
 
   public static TempDir create() {
-    return new TempDir(createTempDir());
+    try {
+      File file = createTempFile("test", null);
+      assertTrue(file.delete());
+      assertTrue(file.mkdir());
+      return new TempDir(file);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static TempDir use(File directory) {
@@ -51,7 +57,7 @@ public final class TempDir {
   }
 
   public List<File> newFiles(String... names) {
-    List<File> files = newArrayListWithCapacity(names.length);
+    List<File> files = new ArrayList<>(names.length);
     for (String name : names) {
       files.add(newFile(name));
     }
@@ -67,7 +73,7 @@ public final class TempDir {
     final File parent = file.getParentFile();
     assertTrue(parent.exists() || parent.mkdirs());
     try {
-      touch(file);
+      assertTrue(file.createNewFile() || file.isFile());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

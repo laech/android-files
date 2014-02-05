@@ -42,6 +42,7 @@ import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static java.lang.System.identityHashCode;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.app.Animations.animatePreDataSetChange;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.app.Preferences.isShowHiddenFilesKey;
 import static l.files.app.Preferences.isSortOrderKey;
 import static l.files.common.database.DataTypes.booleanToString;
@@ -156,7 +157,8 @@ public final class FilesFragment extends BaseFileListFragment
     Activity context = getActivity();
     boolean showHidden = Preferences.getShowHiddenFiles(context);
     String sortOrder = Preferences.getSortOrder(context);
-    Uri uri = buildFileChildrenUri(getDirectoryLocation());
+    Uri authority = getFilesProviderAuthority(this);
+    Uri uri = buildFileChildrenUri(authority, getDirectoryLocation());
     String where = null;
     String[] whereArgs = null;
     if (!showHidden) {

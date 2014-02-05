@@ -31,6 +31,7 @@ import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Map.Entry;
@@ -82,9 +83,11 @@ final class FilesDb extends SQLiteOpenHelper implements
   private static final Map<String, DirWatcher> observers = newHashMap();
 
   private final ContentResolver resolver;
+  private final Uri authority;
 
-  public FilesDb(Context context) {
+  public FilesDb(Context context, Uri authority) {
     super(context, DB_NAME, null, DB_VERSION);
+    this.authority = checkNotNull(authority, "authority");
     this.resolver = context.getContentResolver();
   }
 
@@ -242,8 +245,8 @@ final class FilesDb extends SQLiteOpenHelper implements
     DirWatcher observer = new DirWatcher(dir, MODIFICATION_MASK);
     observer.setListeners(
         new StopSelfListener(observer, this),
-        new UpdateSelfListener(dir, processor, this, this),
-        new UpdateChildrenListener(dir, processor, this, this));
+        new UpdateSelfListener(authority, dir, processor, this, this),
+        new UpdateChildrenListener(authority, dir, processor, this, this));
     return observer;
   }
 

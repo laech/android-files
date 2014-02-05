@@ -3,8 +3,10 @@ package l.files.provider;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -78,13 +80,19 @@ public final class FilesProvider extends ContentProvider
       FileInfo.HIDDEN,
   };
 
-  private static final UriMatcher matcher = newMatcher();
-
+  private UriMatcher matcher;
   private FilesDb helper;
+  private Uri authority;
+
+  @Override public void attachInfo(Context context, ProviderInfo info) {
+    super.attachInfo(context, info);
+    authority = Uri.parse("content://" + info.authority);
+    matcher = newMatcher(info.authority);
+    helper = new FilesDb(getContext(), authority);
+    getPreference().registerOnSharedPreferenceChangeListener(this);
+  }
 
   @Override public boolean onCreate() {
-    getPreference().registerOnSharedPreferenceChangeListener(this);
-    helper = new FilesDb(getContext());
     return true;
   }
 
@@ -305,7 +313,7 @@ public final class FilesProvider extends ContentProvider
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (isBookmarksKey(key)) {
-      getContentResolver().notifyChange(buildBookmarksUri(), null);
+      getContentResolver().notifyChange(buildBookmarksUri(authority), null);
       String count = Integer.toString(getBookmarksCount(pref));
       Analytics.onPreferenceChanged(getContext(), key, count);
     }

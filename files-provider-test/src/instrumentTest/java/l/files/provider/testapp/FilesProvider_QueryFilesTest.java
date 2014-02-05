@@ -1,12 +1,13 @@
-package l.files.provider;
+package l.files.provider.testapp;
 
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import com.google.common.base.Stopwatch;
+
+import junit.framework.Assert;
 
 import java.io.File;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.testing.TempDir;
+import l.files.provider.FileCursors;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayList;
@@ -410,7 +412,9 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
   }
 
   private Cursor query(String selection, String[] selectionArgs, String sortOrder) {
-    Uri uri = buildFileChildrenUri(getFileLocation(monitored.get()));
+    String auth = getContext().getString(R.string.test_provider_authority);
+    Uri authUri = Uri.parse("content://" + auth);
+    Uri uri = buildFileChildrenUri(authUri, getFileLocation(monitored.get()));
     Cursor cursor = getContext().getContentResolver()
         .query(uri, null, selection, selectionArgs, sortOrder);
     cursors.add(cursor);
@@ -526,7 +530,7 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     if (cursor.moveToFirst()) {
       do {
         File file = files[cursor.getPosition()];
-        assertEquals(file.getName(), FileCursors.getName(cursor));
+        Assert.assertEquals(file.getName(), FileCursors.getName(cursor));
         assertEquals(getFileLocation(file), getLocation(cursor));
         assertEquals(file.lastModified(), getLastModified(cursor));
         assertEquals(file.length(), getSize(cursor));
@@ -541,10 +545,7 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
       throws Exception {
     WaitForChange change = registerChangeListener(cursor);
     V value = callable.call();
-    Stopwatch watch = Stopwatch.createStarted();
     assertTrue(change.latch.await(TIMEOUT, TIMEOUT_UNIT));
-    long elapsed = watch.elapsed(TimeUnit.MILLISECONDS);
-    Log.d("TESTTEST", elapsed + " ms waited for change.");
     return value;
   }
 
@@ -568,10 +569,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
       super(null);
       latch = new CountDownLatch(1);
     }
-
-//    @Override public boolean deliverSelfNotifications() {
-//      return true;
-//    }
 
     @Override public void onChange(boolean selfChange) {
       super.onChange(selfChange);

@@ -3,6 +3,8 @@ package l.files.app.menu;
 import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +21,7 @@ import static l.files.app.Clipboards.clear;
 import static l.files.app.Clipboards.getFileLocations;
 import static l.files.app.Clipboards.isCopy;
 import static l.files.app.Clipboards.isCut;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.copy;
@@ -33,10 +36,15 @@ public final class PasteMenu extends OptionsMenuAction {
   private final String directoryLocation;
   private final ClipboardManager manager;
   private final ContentResolver resolver;
+  private final Context context;
 
   private PasteMenu(
-      ClipboardManager manager, ContentResolver resolver, String directoryLocation) {
+      Context context,
+      ClipboardManager manager,
+      ContentResolver resolver,
+      String directoryLocation) {
     super(android.R.id.paste);
+    this.context = checkNotNull(context, "context");
     this.resolver = checkNotNull(resolver, "resolver");
     this.manager = checkNotNull(manager, "manager");
     this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
@@ -45,7 +53,7 @@ public final class PasteMenu extends OptionsMenuAction {
   public static OptionsMenu create(Activity activity, String directoryLocation) {
     ClipboardManager manager = getClipboardManager(activity);
     ContentResolver resolver = activity.getContentResolver();
-    PasteMenu menu = new PasteMenu(manager, resolver, directoryLocation);
+    PasteMenu menu = new PasteMenu(activity, manager, resolver, directoryLocation);
     return new AnalyticsMenu(activity, menu, "paste");
   }
 
@@ -65,12 +73,13 @@ public final class PasteMenu extends OptionsMenuAction {
   }
 
   @Override protected void onItemSelected(MenuItem item) {
+    final Uri authority = getFilesProviderAuthority(context);
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
         if (isCopy(manager)) {
-          copy(resolver, getFileLocations(manager), directoryLocation);
+          copy(resolver, authority, getFileLocations(manager), directoryLocation);
         } else if (isCut(manager)) {
-          cut(resolver, getFileLocations(manager), directoryLocation);
+          cut(resolver, authority, getFileLocations(manager), directoryLocation);
           clear(manager);
         }
       }

@@ -77,6 +77,4 @@
   <string name="less_than_1kb">&lt; 1KB</string>
   <string name="__">——</string>
 
-  <!-- Admob ad unit ID -->
-  <string name="ad_unit_id">ca-app-pub-3251738373408970/6115914240</string>
 </resources>

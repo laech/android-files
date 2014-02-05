@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -19,6 +20,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FileCursors.getName;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FilesContract.buildFileUri;
@@ -68,8 +70,9 @@ public final class RenameFragment extends FileCreationFragment {
   }
 
   private Loader<Cursor> onCreateFileLoader() {
-    return new CursorLoader(getActivity(), buildFileUri(getFileLocation()),
-        null, null, null, null);
+    Uri authority = getFilesProviderAuthority(this);
+    return new CursorLoader(getActivity(),
+        buildFileUri(authority, getFileLocation()), null, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cr) {
@@ -97,10 +100,12 @@ public final class RenameFragment extends FileCreationFragment {
   @Override public void onClick(DialogInterface dialog, int which) {
     final Context ctx = getActivity();
     final ContentResolver resolver = ctx.getContentResolver();
+    final Uri authority = getFilesProviderAuthority(this);
     new AsyncTask<Void, Void, Boolean>() {
 
       @Override protected Boolean doInBackground(Void... params) {
-        return FilesContract.rename(resolver, getFileLocation(), getFilename());
+        return FilesContract.rename(
+            resolver, authority, getFileLocation(), getFilename());
       }
 
       @Override protected void onPostExecute(Boolean success) {

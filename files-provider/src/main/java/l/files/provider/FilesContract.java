@@ -23,9 +23,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
 
-  public static final String AUTHORITY = "l.files";
-  public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
-
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
   static final String PATH_BOOKMARKS = "bookmarks";
@@ -51,14 +48,14 @@ public final class FilesContract {
 
   private FilesContract() {}
 
-  static UriMatcher newMatcher() {
+  static UriMatcher newMatcher(String authority) {
     UriMatcher matcher = new UriMatcher(NO_MATCH);
-    matcher.addURI(AUTHORITY, PATH_BOOKMARKS, MATCH_BOOKMARKS);
-    matcher.addURI(AUTHORITY, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_LOCATION);
-    matcher.addURI(AUTHORITY, PATH_FILES + "/*", MATCH_FILES_LOCATION);
-    matcher.addURI(AUTHORITY, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_LOCATION_CHILDREN);
-    matcher.addURI(AUTHORITY, PATH_SUGGESTION + "/*/*", MATCH_SUGGESTION);
-    matcher.addURI(AUTHORITY, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
+    matcher.addURI(authority, PATH_BOOKMARKS, MATCH_BOOKMARKS);
+    matcher.addURI(authority, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_LOCATION);
+    matcher.addURI(authority, PATH_FILES + "/*", MATCH_FILES_LOCATION);
+    matcher.addURI(authority, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_LOCATION_CHILDREN);
+    matcher.addURI(authority, PATH_SUGGESTION + "/*/*", MATCH_SUGGESTION);
+    matcher.addURI(authority, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
     return matcher;
   }
 
@@ -70,9 +67,9 @@ public final class FilesContract {
    *
    * @param fileLocation the {@link FileInfo#LOCATION} of the file
    */
-  public static Uri buildHierarchyUri(String fileLocation) {
+  public static Uri buildHierarchyUri(Uri authority, String fileLocation) {
     checkNotNull(fileLocation, "fileLocation");
-    return AUTHORITY_URI
+    return authority
         .buildUpon()
         .appendPath(PATH_HIERARCHY)
         .appendPath(fileLocation)
@@ -81,7 +78,7 @@ public final class FilesContract {
 
   /**
    * Gets the {@link FileInfo#LOCATION} from the given content URI built with
-   * {@link #buildHierarchyUri(String)}
+   * {@link #buildHierarchyUri(Uri, String)}
    */
   public static String getHierarchyFileLocation(Uri hierarchyUri) {
     List<String> segments = hierarchyUri.getPathSegments();
@@ -99,10 +96,11 @@ public final class FilesContract {
    * @param basename the basename for the return directory's name, if there is
    * already a file with the same name, a number will be appended
    */
-  public static Uri buildSuggestionUri(String parentLocation, String basename) {
+  public static Uri buildSuggestionUri(
+      Uri authority, String parentLocation, String basename) {
     checkNotNull(parentLocation, "parentLocation");
     checkNotNull(basename, "basename");
-    return AUTHORITY_URI
+    return authority
         .buildUpon()
         .appendPath(PATH_SUGGESTION)
         .appendPath(parentLocation)
@@ -112,7 +110,7 @@ public final class FilesContract {
 
   /**
    * Gets the {@link FileInfo#LOCATION} from the given content URI built with
-   * {@link #buildSuggestionUri(String, String)}
+   * {@link #buildSuggestionUri(Uri, String, String)}
    */
   public static String getSuggestionParentUri(Uri suggestionUri) {
     return checkSuggestionUri(suggestionUri).get(1);
@@ -120,7 +118,7 @@ public final class FilesContract {
 
   /**
    * Gets the basename from the given content URI built with {@link
-   * #buildSuggestionUri(String, String)}
+   * #buildSuggestionUri(Uri, String, String)}
    */
   public static String getSuggestionBasename(Uri uri) {
     return checkSuggestionUri(uri).get(2);
@@ -136,8 +134,8 @@ public final class FilesContract {
   /**
    * Creates a Uri for querying the list of all bookmarks.
    */
-  public static Uri buildBookmarksUri() {
-    return bookmarksUriBuilder().build();
+  public static Uri buildBookmarksUri(Uri authority) {
+    return bookmarksUriBuilder(authority).build();
   }
 
   /**
@@ -147,18 +145,18 @@ public final class FilesContract {
    *
    * @param fileLocation the {@link FileInfo#LOCATION} of the file
    */
-  public static Uri buildBookmarkUri(String fileLocation) {
+  public static Uri buildBookmarkUri(Uri authority, String fileLocation) {
     checkNotNull(fileLocation, "fileLocation");
-    return bookmarksUriBuilder().appendPath(fileLocation).build();
+    return bookmarksUriBuilder(authority).appendPath(fileLocation).build();
   }
 
-  private static Uri.Builder bookmarksUriBuilder() {
-    return AUTHORITY_URI.buildUpon().appendPath(PATH_BOOKMARKS);
+  private static Uri.Builder bookmarksUriBuilder(Uri authority) {
+    return authority.buildUpon().appendPath(PATH_BOOKMARKS);
   }
 
   /**
    * Gets the {@link FileInfo#LOCATION} from the given content URI built with
-   * {@link #buildBookmarkUri(String)}.
+   * {@link #buildBookmarkUri(Uri, String)}.
    */
   public static String getBookmarkLocation(Uri bookmarkUri) {
     return checkBookmarkUri(bookmarkUri).get(1);
@@ -171,8 +169,8 @@ public final class FilesContract {
     return segments;
   }
 
-  static Uri buildFilesUri() {
-    return filesUriBuilder().build();
+  static Uri buildFilesUri(Uri authority) {
+    return filesUriBuilder(authority).build();
   }
 
   /**
@@ -182,18 +180,18 @@ public final class FilesContract {
    *
    * @param fileLocation the {@link FileInfo#LOCATION} of the file
    */
-  public static Uri buildFileUri(String fileLocation) {
+  public static Uri buildFileUri(Uri authority, String fileLocation) {
     checkNotNull(fileLocation, "fileLocation");
-    return filesUriBuilder().appendPath(fileLocation).build();
+    return filesUriBuilder(authority).appendPath(fileLocation).build();
   }
 
   /**
    * Creates a URI based on a parent file's {@link FileInfo#LOCATION} and the
    * name of a file under that parent.
    */
-  public static Uri buildFileUri(String parentLocation, String filename) {
+  public static Uri buildFileUri(Uri authority, String parentLocation, String filename) {
     Uri uri = Uri.parse(parentLocation).buildUpon().appendPath(filename).build();
-    return buildFileUri(uri.toString());
+    return buildFileUri(authority, uri.toString());
   }
 
   /**
@@ -203,16 +201,17 @@ public final class FilesContract {
    * the following events: {@link LoadStarted}, {@link LoadProgress}, {@link
    * LoadFinished}.
    */
-  public static Uri buildFileChildrenUri(String directoryLocation) {
+  public static Uri buildFileChildrenUri(
+      Uri authority, String directoryLocation) {
     checkNotNull(directoryLocation, "directoryLocation");
-    return filesUriBuilder()
+    return filesUriBuilder(authority)
         .appendPath(directoryLocation)
         .appendPath(PATH_CHILDREN)
         .build();
   }
 
-  private static Uri.Builder filesUriBuilder() {
-    return AUTHORITY_URI.buildUpon().appendPath(PATH_FILES);
+  private static Uri.Builder filesUriBuilder(Uri authority) {
+    return authority.buildUpon().appendPath(PATH_FILES);
   }
 
   /**
@@ -232,7 +231,7 @@ public final class FilesContract {
 
   /**
    * Gets the {@link FileInfo#LOCATION} from the given URI built with {@link
-   * #buildFileUri(String)}.
+   * #buildFileUri(Uri, String)}.
    */
   public static String getFileLocation(Uri uri) {
     return checkFilesUri(uri).get(1);
@@ -249,18 +248,20 @@ public final class FilesContract {
    * Bookmarks the given {@link FileInfo#LOCATION}. Do not call this on the UI
    * thread.
    */
-  public static void bookmark(ContentResolver resolver, String fileLocation) {
+  public static void bookmark(
+      ContentResolver resolver, Uri authority, String fileLocation) {
     ensureNonMainThread();
-    resolver.insert(buildBookmarkUri(fileLocation), null);
+    resolver.insert(buildBookmarkUri(authority, fileLocation), null);
   }
 
   /**
    * Unbookmarks the given {@link FileInfo#LOCATION}.Do not call this on the UI
    * thread.
    */
-  public static void unbookmark(ContentResolver resolver, String fileLocation) {
+  public static void unbookmark(
+      ContentResolver resolver, Uri authority, String fileLocation) {
     ensureNonMainThread();
-    resolver.delete(buildBookmarkUri(fileLocation), null, null);
+    resolver.delete(buildBookmarkUri(authority, fileLocation), null, null);
   }
 
   /**
@@ -271,9 +272,13 @@ public final class FilesContract {
    * @return true if directory created successfully, false otherwise
    */
   public static boolean createDirectory(
-      ContentResolver resolver, String parentLocation, String name) {
+      ContentResolver resolver,
+      Uri authority,
+      String parentLocation,
+      String name) {
     ensureNonMainThread();
-    return resolver.insert(buildFileUri(parentLocation, name), null) != null;
+    return resolver.insert(
+        buildFileUri(authority, parentLocation, name), null) != null;
   }
 
   /**
@@ -282,12 +287,16 @@ public final class FilesContract {
    * @return true if the file is successfully renamed, false otherwise
    */
   public static boolean rename(
-      ContentResolver resolver, String fileLocation, String newName) {
+      ContentResolver resolver,
+      Uri authority,
+      String fileLocation,
+      String newName) {
+
     ensureNonMainThread();
     Bundle args = new Bundle(2);
     args.putString(EXTRA_FILE_LOCATION, fileLocation);
     args.putString(EXTRA_NEW_NAME, newName);
-    Uri uri = buildFileUri(fileLocation);
+    Uri uri = buildFileUri(authority, fileLocation);
     Bundle result = resolver.call(uri, METHOD_RENAME, null, args);
     return result.getBoolean(EXTRA_RESULT);
   }
@@ -297,12 +306,12 @@ public final class FilesContract {
    * not call this on the UI thread.
    */
   public static void delete(
-      ContentResolver resolver, Collection<String> fileLocations) {
+      ContentResolver resolver, Uri authority, Collection<String> fileLocations) {
     ensureNonMainThread();
     String[] array = fileLocations.toArray(new String[fileLocations.size()]);
     Bundle args = new Bundle(1);
     args.putStringArray(EXTRA_FILE_LOCATIONS, array);
-    resolver.call(buildFilesUri(), METHOD_DELETE, null, args);
+    resolver.call(buildFilesUri(authority), METHOD_DELETE, null, args);
   }
 
   /**
@@ -311,9 +320,10 @@ public final class FilesContract {
    */
   public static void copy(
       ContentResolver resolver,
+      Uri authority,
       Collection<String> locations,
       String destinationLocation) {
-    paste(resolver, locations, destinationLocation, METHOD_COPY);
+    paste(resolver, authority, locations, destinationLocation, METHOD_COPY);
   }
 
   /**
@@ -322,13 +332,15 @@ public final class FilesContract {
    */
   public static void cut(
       ContentResolver resolver,
+      Uri authority,
       Collection<String> fileLocations,
       String destinationLocation) {
-    paste(resolver, fileLocations, destinationLocation, METHOD_CUT);
+    paste(resolver, authority, fileLocations, destinationLocation, METHOD_CUT);
   }
 
   private static void paste(
       ContentResolver resolver,
+      Uri authority,
       Collection<String> fileLocations,
       String destinationLocation,
       String method) {
@@ -338,7 +350,7 @@ public final class FilesContract {
     Bundle args = new Bundle(2);
     args.putStringArray(EXTRA_FILE_LOCATIONS, array);
     args.putString(EXTRA_DESTINATION_LOCATION, destinationLocation);
-    resolver.call(buildFileUri(destinationLocation), method, null, args);
+    resolver.call(buildFileUri(authority, destinationLocation), method, null, args);
   }
 
   private static void ensureNonMainThread() {

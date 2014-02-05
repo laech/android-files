@@ -22,6 +22,7 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
+import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.bookmark;
 import static l.files.provider.FilesContract.buildBookmarkUri;
@@ -72,16 +73,18 @@ public final class BookmarkMenu
   @Override protected void onItemSelected(MenuItem item) {
     final ContentResolver resolver = context.getContentResolver();
     final boolean checked = item.isChecked();
+    final Uri authority = getFilesProviderAuthority(context);
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        if (checked) unbookmark(resolver, directoryLocation);
-        else bookmark(resolver, directoryLocation);
+        if (checked) unbookmark(resolver, authority, directoryLocation);
+        else bookmark(resolver, authority, directoryLocation);
       }
     });
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri uri = buildBookmarkUri(directoryLocation);
+    Uri authority = getFilesProviderAuthority(context);
+    Uri uri = buildBookmarkUri(authority, directoryLocation);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 
