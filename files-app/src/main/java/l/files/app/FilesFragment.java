@@ -113,6 +113,7 @@ public final class FilesFragment extends BaseFileListFragment
   @Override public void onStart() {
     super.onStart();
     getBus().register(this);
+    progress.setVisibility(GONE);
   }
 
   @Override public void onStop() {

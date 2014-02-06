@@ -125,7 +125,8 @@ public final class FilesDb extends SQLiteOpenHelper implements
 
     //noinspection TryFinallyCanBeTryWithResources
     try {
-      for (FileData entry : entries) {
+      for (int i = 0; i < entries.length; i++) {
+        FileData entry = entries[i];
         statement.clearBindings();
         statement.bindString(1, entry.location);
         statement.bindString(2, parentLocation);
@@ -138,6 +139,9 @@ public final class FilesDb extends SQLiteOpenHelper implements
         statement.bindLong(9, entry.canRead);
         statement.bindLong(10, entry.canWrite);
         statement.executeInsert();
+        if (i % 1000 == 0) {
+          db.yieldIfContendedSafely();
+        }
       }
     } finally {
       statement.close();
