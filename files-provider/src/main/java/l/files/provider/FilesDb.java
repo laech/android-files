@@ -7,15 +7,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
 
 import l.files.provider.event.LoadFinished;
 import l.files.provider.event.LoadProgress;
@@ -44,12 +50,12 @@ import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.PARENT_LOCATION;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesDb extends SQLiteOpenHelper implements
+@VisibleForTesting
+public final class FilesDb extends SQLiteOpenHelper implements
     StopSelfListener.Callback,
     UpdateSelfListener.Callback,
     UpdateChildrenListener.Callback {
 
-  //  private static final String TAG = FilesDb.class.getSimpleName();
   private static final String TABLE_FILES = "file";
   private static final String DB_NAME = "file.db";
   private static final int DB_VERSION = 1;
@@ -69,7 +75,7 @@ final class FilesDb extends SQLiteOpenHelper implements
    * have been called {@link #updateAndMonitor(Uri, File)}). The keys are {@link
    * FileInfo#LOCATION}s.
    */
-  private static final Map<String, File> monitored = newHashMap();
+  private static final ConcurrentMap<String, File> monitored = new ConcurrentHashMap<>();
 
   /**
    * The map of {@link FileInfo#LOCATION} to file observers.
@@ -81,6 +87,9 @@ final class FilesDb extends SQLiteOpenHelper implements
    * the same file node will stop receiving events.
    */
   private static final Map<String, DirWatcher> observers = newHashMap();
+
+  @VisibleForTesting
+  public static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
 
   private final ContentResolver resolver;
   private final Uri authority;
@@ -129,9 +138,6 @@ final class FilesDb extends SQLiteOpenHelper implements
         statement.bindLong(9, entry.canRead);
         statement.bindLong(10, entry.canWrite);
         statement.executeInsert();
-//        if (DEBUG) {
-//        Log.d(TAG, "insert " + entry.location);
-//        }
       }
     } finally {
       statement.close();
@@ -140,16 +146,10 @@ final class FilesDb extends SQLiteOpenHelper implements
 
   public static void deleteChildren(SQLiteDatabase db, String parentLocation) {
     db.delete(TABLE_FILES, PARENT_LOCATION + "=?", new String[]{parentLocation});
-//        if (DEBUG) {
-//    Log.d(TAG, "deleteChildren " + parentLocation);
-//        }
   }
 
   public static void deleteChild(SQLiteDatabase db, String childLocation) {
     db.delete(TABLE_FILES, LOCATION + "=?", new String[]{childLocation});
-//        if (DEBUG) {
-//    Log.d(TAG, "deleteChild " + childLocation);
-//        }
   }
 
   @Override public void onCreate(SQLiteDatabase db) {
@@ -190,29 +190,58 @@ final class FilesDb extends SQLiteOpenHelper implements
    * while the parent is being monitored.
    */
   public Cursor query(
-      File parent,
+      final Uri uri,
       String[] columns,
       String selection,
       String[] selectionArgs,
       String orderBy) {
 
+
+    final File parent = new File(URI.create(getFileLocation(uri)));
     String location = getFileLocation(parent);
     selection = concatenateWhere(selection, FileInfo.PARENT_LOCATION + "=?");
     selectionArgs = appendSelectionArgs(selectionArgs, new String[]{location});
+    Cursor cursor = query(columns, selection, selectionArgs, orderBy);
+
+
+    if (cursor.getCount() == 0) {
+      // If cursor is empty and the directory is not currently being monitored,
+      // update it before returning
+      if (updateAndMonitor(uri, parent)) {
+        cursor.close();
+        cursor = query(columns, selection, selectionArgs, orderBy);
+      }
+    } else if (!monitored.containsKey(location)) {
+      // If there is already data for the directory, return the cursor, then
+      // update it in the background.
+      executor.execute(new Runnable() {
+        @Override public void run() {
+          updateAndMonitor(uri, parent);
+        }
+      });
+    }
+
+    cursor.setNotificationUri(resolver, uri);
+    return cursor;
+  }
+
+  private Cursor query(
+      String[] columns, String where, String[] whereArgs, String orderBy) {
     return getReadableDatabase().query(
-        TABLE_FILES, columns, selection, selectionArgs, null, null, orderBy);
+        TABLE_FILES, columns, where, whereArgs, null, null, orderBy);
   }
 
   /**
    * Updates the database record of the given parent, and starts monitoring
    * changes in the parent and update the database accordingly. Has no affect if
-   * the given parent is already being monitored.
+   * the given parent is already being monitored. Returns true if directory will
+   * be updated and monitored, false if it's already being monitored.
    */
-  public void updateAndMonitor(Uri uri, File parent) {
+  private boolean updateAndMonitor(final Uri uri, final File parent) {
     String parentLocation = getFileLocation(parent);
     synchronized (FilesDb.class) {
       if (monitored.put(parentLocation, parent) != null) {
-        return;
+        return false;
       }
       DirWatcher parentObserver = observers.get(parentLocation);
       if (parentObserver == null) {
@@ -238,6 +267,7 @@ final class FilesDb extends SQLiteOpenHelper implements
     }
 
     resolver.notifyChange(uri, null);
+    return true;
   }
 
   private DirWatcher newObserver(File dir) {

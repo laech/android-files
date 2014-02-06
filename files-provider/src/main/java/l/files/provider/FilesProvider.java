@@ -213,12 +213,7 @@ public final class FilesProvider extends ContentProvider
       String selection,
       String[] selectArgs,
       String sortOrder) {
-
-    File parent = new File(URI.create(getFileLocation(uri)));
-    helper.updateAndMonitor(uri, parent);
-    Cursor cursor = helper.query(parent, projection, selection, selectArgs, sortOrder);
-    cursor.setNotificationUri(getContentResolver(), uri);
-    return cursor;
+    return helper.query(uri, projection, selection, selectArgs, sortOrder);
   }
 
   @Override public Bundle call(String method, String arg, Bundle extras) {

@@ -5,18 +5,18 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
-import com.google.common.base.Stopwatch;
-
 import junit.framework.Assert;
 
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.testing.TempDir;
 import l.files.provider.FileCursors;
+import l.files.provider.FilesDb;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayList;
@@ -45,14 +45,24 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
   private TempDir monitored;
   private TempDir helper;
 
+  private Executor originalExecutor;
+
   public void setUp() throws Exception {
     super.setUp();
     cursors = newArrayList();
     monitored = TempDir.create();
     helper = TempDir.create();
+    originalExecutor = FilesDb.executor;
+    //noinspection NullableProblems
+    FilesDb.executor = new Executor() {
+      @Override public void execute(Runnable command) {
+        command.run();
+      }
+    };
   }
 
   public void tearDown() throws Exception {
+    FilesDb.executor = originalExecutor;
     for (Cursor cursor : cursors) {
       cursor.close();
     }
