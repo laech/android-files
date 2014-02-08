@@ -1,7 +1,6 @@
 package l.files.provider;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -13,6 +12,8 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import l.files.common.logging.Logger;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -32,7 +33,7 @@ import static l.files.provider.FilesContract.getFileLocation;
  */
 final class Bookmarks {
 
-  private static final String TAG = Bookmarks.class.getSimpleName();
+  private static final Logger logger = Logger.get(Bookmarks.class);
 
   private static final String KEY = "bookmarks";
 
@@ -74,7 +75,7 @@ final class Bookmarks {
       try {
         bookmarks.add(new File(new URI(location)));
       } catch (URISyntaxException e) {
-        Log.w(TAG, e);
+        logger.warn(e);
       }
     }
     sort(bookmarks, NameFileComparator.NAME_INSENSITIVE_COMPARATOR);

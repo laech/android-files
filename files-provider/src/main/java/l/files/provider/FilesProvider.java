@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.apache.tika.Tika;
 
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.analytics.Analytics;
+import l.files.common.logging.Logger;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -67,7 +67,7 @@ import static l.files.provider.FilesContract.newMatcher;
 public final class FilesProvider extends ContentProvider
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-  private static final String TAG = FilesProvider.class.getSimpleName();
+  private static final Logger logger = Logger.get(FilesProvider.class);
 
   private static final String[] DEFAULT_COLUMNS = {
       FileInfo.LOCATION,
@@ -107,7 +107,7 @@ public final class FilesProvider extends ContentProvider
         try {
           return detectMime(file);
         } catch (IOException e) {
-          Log.w(TAG, e.getMessage(), e);
+          logger.warn(e);
           return null;
         }
     }
@@ -124,7 +124,7 @@ public final class FilesProvider extends ContentProvider
 
     if (DEBUG) {
       long end = SystemClock.elapsedRealtime();
-      Log.d(TAG, "Detected " + mime + " in " + (end - start) + " ms: " + file);
+      logger.debug("Detected %s in %s ms: %s", mime, (end - start), file);
     }
 
     return mime;

@@ -140,6 +140,7 @@ final class ImageDecorator implements Decorator {
         return null;
       }
       try {
+        // TODO check if exists
         URL url = new URI(uri.toString()).toURL();
         return decodeScaledSize(url, maxWidth, maxHeight);
       } catch (Exception e) {

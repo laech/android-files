@@ -1,15 +1,16 @@
 package l.files.provider;
 
 import android.os.FileObserver;
-import android.util.Log;
 
 import java.io.File;
+
+import l.files.common.logging.Logger;
 
 import static l.files.common.io.Files.normalize;
 
 public class DirWatcher extends FileObserver {
 
-  private static final String TAG = DirWatcher.class.getSimpleName();
+  private static final Logger logger = Logger.get(DirWatcher.class);
 
   private final File dir;
   private volatile DirWatcherListener[] listeners;
@@ -24,9 +25,6 @@ public class DirWatcher extends FileObserver {
   }
 
   @Override public void onEvent(int event, final String path) {
-//    if (DEBUG) {
-//      log(event, path);
-//    }
     if ((event & OPEN) != 0) onOpen(path);
     else if ((event & ACCESS) != 0) onAccess(path);
     else if ((event & ATTRIB) != 0) onAttrib(path);
@@ -39,6 +37,8 @@ public class DirWatcher extends FileObserver {
     else if ((event & CLOSE_WRITE) != 0) onCloseWrite(path);
     else if ((event & DELETE_SELF) != 0) onDeleteSelf(path);
     else if ((event & CLOSE_NOWRITE) != 0) onCloseNoWrite(path);
+
+    log(event, path);
   }
 
   private void onCloseNoWrite(String path) {
@@ -132,6 +132,6 @@ public class DirWatcher extends FileObserver {
   }
 
   private void debug(String event, String path) {
-    Log.d(TAG, event + ", parent=" + dir + ", path=" + path);
+    logger.debug("%s, parent=%s, path=%s", event, dir, path);
   }
 }
