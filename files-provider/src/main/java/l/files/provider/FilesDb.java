@@ -16,7 +16,6 @@ import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,7 +36,6 @@ import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Map.Entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -76,7 +74,8 @@ public final class FilesDb extends SQLiteOpenHelper implements
    * have been called {@link #updateAndMonitor(Uri, File)}). The keys are {@link
    * FileInfo#LOCATION}s.
    */
-  private static final ConcurrentMap<String, File> monitored = new ConcurrentHashMap<>();
+  @VisibleForTesting
+  static final ConcurrentMap<String, File> monitored = new ConcurrentHashMap<>();
 
   /**
    * The map of {@link FileInfo#LOCATION} to file observers.
@@ -87,7 +86,8 @@ public final class FilesDb extends SQLiteOpenHelper implements
    * because the states are shared globally, all observer instances watching on
    * the same file node will stop receiving events.
    */
-  private static final Map<String, DirWatcher> observers = newHashMap();
+  @VisibleForTesting
+  static final ConcurrentMap<String, DirWatcher> observers = new ConcurrentHashMap<>();
 
   @VisibleForTesting
   static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;

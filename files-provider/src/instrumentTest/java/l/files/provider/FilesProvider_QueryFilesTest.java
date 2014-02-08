@@ -53,12 +53,7 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     monitored = TempDir.create();
     helper = TempDir.create();
     originalExecutor = FilesDb.executor;
-    //noinspection NullableProblems
-    FilesDb.executor = new Executor() {
-      @Override public void execute(Runnable command) {
-        command.run();
-      }
-    };
+    FilesDb.executor = new SameThreadExecutor();
   }
 
   public void tearDown() throws Exception {
@@ -90,7 +85,7 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     File file = monitored.newFile("b");
     String selection = HIDDEN + "=?";
     String[] selectionArgs = {booleanToString(false)};
-    Cursor cursor = query(selection, selectionArgs, null);
+    Cursor cursor = query(monitored.get(), selection, selectionArgs, null);
     verify(cursor, file);
   }
 
@@ -368,39 +363,95 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     verify(query(), b);
   }
 
-  //- query files
-  //- query hidden files
-  //- add new file
-  //- delete file
-  //- update file
-  //- add new folder
-  //- delete folder
-  //- add new folder, add new file into new folder
-  //- add new folder, delete new file from new folder
-  //- add new folder, move file out new folder
-  //- add new folder, move file in new folder
-  //- move folder here, add file to new folder
-  //- move folder here, delete file from new folder
-  //- move folder here, move file in new folder
-  //- move folder here, move file out new folder
-  //- add file to existing directory
-  //- delete file from existing directory
-  // delete folder no longer monitored
-  // delete self no longer monitored
-  //- move folder out no longer monitored
-  //- move self out no longer monitored
-  //- move self out, existing child directories no longer monitored
-  //- change readable file/directory
-  //- change writable file/directory
-  //- change executable file/directory
-  //- add folder, remove the folder, add folder with same name, should be monitored
-  //- add folder, remove the folder, move folder with same name, should be monitored
-  // remove self, add self with same name, should be monitored?
-  // remove self, move self with same name, should be monitored?
-  //- move file out
-  //- move file in
-  // lost of sub directories
-  // add grand grand child directory, monitor it, remove root, add grand grand child directory and monitor it
+  public void testMoveSelfOutAddDirectoryWithSameNameAndMonitor()
+      throws Exception {
+    query();
+    assertTrue(monitored.get().renameTo(new File(helper.get(), "test")));
+    assertTrue(monitored.get().mkdirs());
+    query();
+    File file = createDirectoryAndWait("test");
+    verify(query(), file);
+  }
+
+  public void testMoveSelfOutMoveDirectoryWithSameNameInAndMonitor()
+      throws Exception {
+    query();
+    assertTrue(monitored.get().renameTo(new File(helper.get(), "test")));
+    assertTrue(helper.newDirectory().renameTo(monitored.get()));
+    query();
+    File file = createDirectoryAndWait("test");
+    verify(query(), file);
+  }
+
+  public void testDeleteSelfMoveDirectoryWithSameNameInAndMonitor()
+      throws Exception {
+    query();
+    monitored.delete();
+    assertTrue(helper.newDirectory("test").renameTo(monitored.get()));
+
+    query();
+    File file = createDirectoryAndWait("child");
+    verify(query(), file);
+  }
+
+  public void testDeleteSelfAddSelfAndMonitor() throws Exception {
+    query();
+    monitored.delete();
+    assertTrue(monitored.get().mkdirs());
+
+    query();
+    File file = createDirectoryAndWait("test");
+    verify(query(), file);
+  }
+
+  public void testDeleteSelfNoLongerMonitored() throws Exception {
+    createDirectoryAndWait("test");
+    query();
+    String location = getFileLocation(monitored.get());
+
+    assertTrue(FilesDb.monitored.containsKey(location));
+    assertTrue(FilesDb.observers.containsKey(location));
+
+    deleteAndWait(monitored.get());
+
+    assertFalse(FilesDb.monitored.containsKey(location));
+    assertFalse(FilesDb.observers.containsKey(location));
+  }
+
+  public void testDeleteSelfChildrenNoLongerMonitored() throws Exception {
+    File child = createDirectoryAndWait("test");
+    query(child);
+    String location = getFileLocation(child);
+
+    assertTrue(FilesDb.monitored.containsKey(location));
+    assertTrue(FilesDb.observers.containsKey(location));
+
+    deleteAndWait(monitored.get());
+
+    assertFalse(FilesDb.monitored.containsKey(location));
+    assertFalse(FilesDb.observers.containsKey(location));
+  }
+
+  /**
+   * When a parent directory is monitored, and one of its child directory is
+   * also monitored, delete the parent directory should stop monitoring on both
+   * directories, recreating the child directory and start monitoring on it
+   * should be of no problem.
+   */
+  public void testMonitorParentAndChildDeleteParentRecreateChildAndMonitor()
+      throws Exception {
+    File childDir = monitored.newDirectory("a/b/c");
+    query(childDir);
+    createFileAndWait("test", childDir, childDir);
+
+    deleteAndWait(monitored.get());
+    assertFalse(monitored.get().exists());
+    assertFalse(childDir.exists());
+
+    assertTrue(childDir.mkdirs());
+    File file = createFileAndWait("test", childDir, childDir);
+    verify(query(childDir), file);
+  }
 
   private void testChangeReadability(File file) throws Exception {
     changeReadable(file, file.canRead());
@@ -418,12 +469,17 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
   }
 
   private Cursor query() {
-    return query(null, null, NAME);
+    return query(monitored.get());
   }
 
-  private Cursor query(String selection, String[] selectionArgs, String order) {
+  private Cursor query(File dir) {
+    return query(dir, null, null, NAME);
+  }
+
+  private Cursor query(
+      File dir, String selection, String[] selectionArgs, String order) {
     Context context = getContext();
-    Uri uri = buildFileChildrenUri(context, getFileLocation(monitored.get()));
+    Uri uri = buildFileChildrenUri(context, getFileLocation(dir));
     ContentResolver resolver = context.getContentResolver();
     Cursor cursor = resolver.query(uri, null, selection, selectionArgs, order);
     cursors.add(cursor);
@@ -435,7 +491,12 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
   }
 
   private File createFileAndWait(String name, File parent) throws Exception {
-    return awaitContentChange(query(), newCreateFile(name, parent));
+    return createFileAndWait(name, parent, monitored.get());
+  }
+
+  private File createFileAndWait(String name, File parent, File monitoredDir)
+      throws Exception {
+    return awaitContentChange(query(monitoredDir), newCreateFile(name, parent));
   }
 
   private void deleteAndWait(File file) throws Exception {
@@ -582,6 +643,13 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     @Override public void onChange(boolean selfChange) {
       super.onChange(selfChange);
       latch.countDown();
+    }
+  }
+
+  private static class SameThreadExecutor implements Executor {
+    @Override
+    public void execute(@SuppressWarnings("NullableProblems") Runnable cmd) {
+      cmd.run();
     }
   }
 }
