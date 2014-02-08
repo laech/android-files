@@ -1,11 +1,9 @@
 package l.files.app.mode;
 
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -26,7 +24,6 @@ import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
 import static l.files.provider.FileCursors.getLocation;
 
@@ -38,18 +35,15 @@ import static l.files.provider.FileCursors.getLocation;
 public final class DeleteAction extends MultiChoiceModeAction {
 
   private final AbsListView list;
-  private final ContentResolver resolver;
 
-  private DeleteAction(AbsListView list, ContentResolver resolver) {
+  private DeleteAction(AbsListView list) {
     super(R.id.delete);
     this.list = checkNotNull(list, "list");
-    this.resolver = checkNotNull(resolver, "resolver");
   }
 
   public static MultiChoiceModeListener create(AbsListView list) {
     Context context = list.getContext();
-    ContentResolver resolver = context.getContentResolver();
-    MultiChoiceModeListener action = new DeleteAction(list, resolver);
+    MultiChoiceModeListener action = new DeleteAction(list);
     return new AnalyticsAction(context, action, "delete");
   }
 
@@ -86,10 +80,9 @@ public final class DeleteAction extends MultiChoiceModeAction {
   }
 
   private void requestDelete(final List<String> fileLocations) {
-    final Uri authority = getFilesProviderAuthority(list.getContext());
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        FilesContract.delete(resolver, authority, fileLocations);
+        FilesContract.delete(list.getContext(), fileLocations);
       }
     });
   }

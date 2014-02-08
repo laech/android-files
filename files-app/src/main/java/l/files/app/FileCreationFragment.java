@@ -1,5 +1,6 @@
 package l.files.app;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.CursorLoader;
@@ -20,7 +21,6 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FilesContract.buildFileUri;
 
@@ -94,9 +94,9 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
   private Loader<Cursor> newChecker() {
-    Uri authority = getFilesProviderAuthority(this);
-    Uri uri = buildFileUri(authority, getParentLocation(), getFilename());
-    return new CursorLoader(getActivity(), uri, null, null, null, null);
+    Activity context = getActivity();
+    Uri uri = buildFileUri(context, getParentLocation(), getFilename());
+    return new CursorLoader(context, uri, null, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

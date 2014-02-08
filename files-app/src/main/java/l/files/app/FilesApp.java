@@ -5,13 +5,11 @@ import android.app.Application;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.StrictMode;
 import android.util.LruCache;
 
 import com.squareup.otto.Bus;
 
-import l.files.R;
 import l.files.common.event.Events;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -33,34 +31,19 @@ public final class FilesApp extends Application {
     return getApp(context).bitmapCache;
   }
 
-  public static Uri getFilesProviderAuthority(Context context) {
-    return getApp(context).filesProviderAuthority;
-  }
-
-  public static Uri getFilesProviderAuthority(Fragment fragment) {
-    return getFilesProviderAuthority(fragment.getActivity());
-  }
-
   private static FilesApp getApp(Context context) {
     return (FilesApp) context.getApplicationContext();
-  }
-
-  private static FilesApp getApp(Fragment fragment) {
-    return getApp(fragment.getActivity());
   }
 
   // TODO remove bus from here
   private Bus bus;
   private LruCache<Object, Bitmap> bitmapCache;
-  private Uri filesProviderAuthority;
 
   @Override public void onCreate() {
     super.onCreate();
 
     bus = Events.bus();
     bitmapCache = createBitmapCache();
-    filesProviderAuthority = Uri.parse("content://" +
-        getString(R.string.files_provider_authority));
 
     Preferences.register(this, newAnalyticsListener(this));
 

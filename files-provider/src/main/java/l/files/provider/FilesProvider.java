@@ -82,13 +82,11 @@ public final class FilesProvider extends ContentProvider
 
   private UriMatcher matcher;
   private FilesDb helper;
-  private Uri authority;
 
   @Override public void attachInfo(Context context, ProviderInfo info) {
     super.attachInfo(context, info);
-    authority = Uri.parse("content://" + info.authority);
     matcher = newMatcher(info.authority);
-    helper = new FilesDb(getContext(), authority);
+    helper = new FilesDb(getContext());
     getPreference().registerOnSharedPreferenceChangeListener(this);
   }
 
@@ -308,7 +306,7 @@ public final class FilesProvider extends ContentProvider
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (isBookmarksKey(key)) {
-      getContentResolver().notifyChange(buildBookmarksUri(authority), null);
+      getContentResolver().notifyChange(buildBookmarksUri(getContext()), null);
       String count = Integer.toString(getBookmarksCount(pref));
       Analytics.onPreferenceChanged(getContext(), key, count);
     }

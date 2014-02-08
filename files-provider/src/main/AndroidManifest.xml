@@ -3,6 +3,11 @@
           android:versionCode="1"
           android:versionName="1.0">
 
-  <application/>
+  <application>
+    <provider
+        android:authorities="@string/files_provider_authority"
+        android:name=".FilesProvider"
+        android:exported="false"/>
+  </application>
 
 </manifest>

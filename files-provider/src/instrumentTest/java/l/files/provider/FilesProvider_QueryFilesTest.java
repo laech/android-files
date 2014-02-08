@@ -1,5 +1,7 @@
-package l.files.provider.testapp;
+package l.files.provider;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,8 +17,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.testing.TempDir;
-import l.files.provider.FileCursors;
-import l.files.provider.FilesDb;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayList;
@@ -421,12 +421,11 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     return query(null, null, NAME);
   }
 
-  private Cursor query(String selection, String[] selectionArgs, String sortOrder) {
-    String auth = getContext().getString(R.string.test_provider_authority);
-    Uri authUri = Uri.parse("content://" + auth);
-    Uri uri = buildFileChildrenUri(authUri, getFileLocation(monitored.get()));
-    Cursor cursor = getContext().getContentResolver()
-        .query(uri, null, selection, selectionArgs, sortOrder);
+  private Cursor query(String selection, String[] selectionArgs, String order) {
+    Context context = getContext();
+    Uri uri = buildFileChildrenUri(context, getFileLocation(monitored.get()));
+    ContentResolver resolver = context.getContentResolver();
+    Cursor cursor = resolver.query(uri, null, selection, selectionArgs, order);
     cursors.add(cursor);
     return cursor;
   }

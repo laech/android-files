@@ -1,9 +1,9 @@
 package l.files.app;
 
+import android.app.Activity;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +15,6 @@ import l.files.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FilesContract.buildBookmarksUri;
 
 public final class SidebarFragment extends BaseFileListFragment
@@ -50,8 +49,8 @@ public final class SidebarFragment extends BaseFileListFragment
   }
 
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-    Uri authority = getFilesProviderAuthority(this);
-    return new CursorLoader(getActivity(), buildBookmarksUri(authority),
+    Activity context = getActivity();
+    return new CursorLoader(context, buildBookmarksUri(context),
         null, null, null, null);
   }
 

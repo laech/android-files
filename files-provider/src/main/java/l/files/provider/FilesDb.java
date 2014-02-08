@@ -1,6 +1,5 @@
 package l.files.provider;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -38,7 +37,6 @@ import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Map.Entry;
@@ -92,15 +90,13 @@ public final class FilesDb extends SQLiteOpenHelper implements
   private static final Map<String, DirWatcher> observers = newHashMap();
 
   @VisibleForTesting
-  public static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
+  static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
 
-  private final ContentResolver resolver;
-  private final Uri authority;
+  private final Context context;
 
-  public FilesDb(Context context, Uri authority) {
+  public FilesDb(Context context) {
     super(context, DB_NAME, null, DB_VERSION);
-    this.authority = checkNotNull(authority, "authority");
-    this.resolver = context.getContentResolver();
+    this.context = context;
   }
 
   public static void replaceChildren(
@@ -231,7 +227,7 @@ public final class FilesDb extends SQLiteOpenHelper implements
       });
     }
 
-    cursor.setNotificationUri(resolver, uri);
+    cursor.setNotificationUri(context.getContentResolver(), uri);
     return cursor;
   }
 
@@ -276,17 +272,17 @@ public final class FilesDb extends SQLiteOpenHelper implements
       }
     }
 
-    resolver.notifyChange(uri, null);
+    context.getContentResolver().notifyChange(uri, null);
     return true;
   }
 
   private DirWatcher newObserver(File dir) {
-    Processor processor = new Processor(this, resolver);
+    Processor processor = new Processor(this, context.getContentResolver());
     DirWatcher observer = new DirWatcher(dir, MODIFICATION_MASK);
     observer.setListeners(
         new StopSelfListener(observer, this),
-        new UpdateSelfListener(authority, dir, processor, this, this),
-        new UpdateChildrenListener(authority, dir, processor, this, this));
+        new UpdateSelfListener(context, dir, processor, this, this),
+        new UpdateChildrenListener(context, dir, processor, this, this));
     return observer;
   }
 

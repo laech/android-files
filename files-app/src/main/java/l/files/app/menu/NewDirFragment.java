@@ -1,6 +1,6 @@
 package l.files.app.menu;
 
-import android.content.ContentResolver;
+import android.app.Activity;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -17,7 +17,6 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.identityHashCode;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.app.Fragments.setArgs;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.buildSuggestionUri;
@@ -41,19 +40,18 @@ public final class NewDirFragment extends FileCreationFragment {
   }
 
   @Override public void onClick(DialogInterface dialog, int which) {
-    final ContentResolver resolver = getActivity().getContentResolver();
+    final Activity context = getActivity();
     final String parentLocation = getParentLocation();
     final String filename = getFilename();
-    final Uri authority = getFilesProviderAuthority(this);
     new AsyncTask<Void, Void, Boolean>() {
       @Override protected Boolean doInBackground(Void... params) {
-        return createDirectory(resolver, authority, parentLocation, filename);
+        return createDirectory(context, parentLocation, filename);
       }
 
       @Override protected void onPostExecute(Boolean success) {
         super.onPostExecute(success);
         if (!success) {
-          makeText(getActivity(), R.string.mkdir_failed, LENGTH_SHORT).show();
+          makeText(context, R.string.mkdir_failed, LENGTH_SHORT).show();
         }
       }
     }.execute();
@@ -73,10 +71,10 @@ public final class NewDirFragment extends FileCreationFragment {
 
   private Loader<Cursor> newSuggestionLoader() {
     String basename = getString(R.string.untitled_dir);
-    Uri auth = getFilesProviderAuthority(this);
-    Uri suggestionUri = buildSuggestionUri(auth, getParentLocation(), basename);
-    return new CursorLoader(getActivity(), suggestionUri,
-        new String[]{NAME}, null, null, null);
+    Activity context = getActivity();
+    Uri suggestionUri = buildSuggestionUri(context, getParentLocation(), basename);
+    return new CursorLoader(context, suggestionUri, new String[]{NAME},
+        null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

@@ -15,7 +15,6 @@ import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.app.Fragments.setArgs;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileUri;
@@ -151,8 +150,7 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   private void showFile(OpenFileRequest request) {
-    Uri authority = getFilesProviderAuthority(this);
-    fileOpener.apply(buildFileUri(authority, request.fileLocation()));
+    fileOpener.apply(buildFileUri(getActivity(), request.fileLocation()));
   }
 
   private FilesFragment findCurrentFragment() {

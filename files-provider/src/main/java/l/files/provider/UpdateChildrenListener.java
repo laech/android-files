@@ -1,5 +1,6 @@
 package l.files.provider;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -21,7 +22,7 @@ final class UpdateChildrenListener extends DirWatcherListenerAdapter {
   private final Callback callback;
 
   UpdateChildrenListener(
-      Uri authority,
+      Context context,
       File dir,
       Processor processor,
       SQLiteOpenHelper helper,
@@ -31,7 +32,7 @@ final class UpdateChildrenListener extends DirWatcherListenerAdapter {
     this.processor = checkNotNull(processor, "processor");
     this.callback = checkNotNull(callback, "callback");
     this.location = getFileLocation(dir);
-    this.contentUri = buildFileUri(authority, location);
+    this.contentUri = buildFileUri(context, location);
   }
 
   @Override public void onCreate(String path) {

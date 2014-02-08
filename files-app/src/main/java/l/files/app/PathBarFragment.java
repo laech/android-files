@@ -1,5 +1,6 @@
 package l.files.app;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.CursorLoader;
 import android.content.Loader;
@@ -20,7 +21,6 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getName;
 import static l.files.provider.FileCursors.isDirectory;
@@ -55,8 +55,9 @@ public final class PathBarFragment extends Fragment
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-    Uri uri = buildHierarchyUri(getFilesProviderAuthority(this), fileLocation);
-    return new CursorLoader(getActivity(), uri, null, null, null, null);
+    Activity context = getActivity();
+    Uri uri = buildHierarchyUri(context, fileLocation);
+    return new CursorLoader(context, uri, null, null, null, null);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

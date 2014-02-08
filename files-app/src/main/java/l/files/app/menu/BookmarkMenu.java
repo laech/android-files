@@ -2,7 +2,6 @@ package l.files.app.menu;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -22,7 +21,6 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
-import static l.files.app.FilesApp.getFilesProviderAuthority;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.bookmark;
 import static l.files.provider.FilesContract.buildBookmarkUri;
@@ -71,20 +69,17 @@ public final class BookmarkMenu
   }
 
   @Override protected void onItemSelected(MenuItem item) {
-    final ContentResolver resolver = context.getContentResolver();
     final boolean checked = item.isChecked();
-    final Uri authority = getFilesProviderAuthority(context);
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        if (checked) unbookmark(resolver, authority, directoryLocation);
-        else bookmark(resolver, authority, directoryLocation);
+        if (checked) unbookmark(context, directoryLocation);
+        else bookmark(context, directoryLocation);
       }
     });
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri authority = getFilesProviderAuthority(context);
-    Uri uri = buildBookmarkUri(authority, directoryLocation);
+    Uri uri = buildBookmarkUri(context, directoryLocation);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 

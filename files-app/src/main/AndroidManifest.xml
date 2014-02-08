@@ -35,11 +35,6 @@
       </intent-filter>
     </activity>
 
-    <provider
-        android:authorities="l.files"
-        android:name=".provider.FilesProvider"
-        android:exported="false"/>
-
     <activity android:exported="false" android:name="l.files.test.TestFilesFragmentActivity"/>
     <activity android:exported="false" android:name="l.files.test.TestSidebarFragmentActivity"/>
   </application>
