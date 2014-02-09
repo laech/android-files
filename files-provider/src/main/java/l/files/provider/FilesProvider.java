@@ -3,10 +3,8 @@ package l.files.provider;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.UriMatcher;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -83,14 +81,10 @@ public final class FilesProvider extends ContentProvider
   private UriMatcher matcher;
   private FilesDb helper;
 
-  @Override public void attachInfo(Context context, ProviderInfo info) {
-    super.attachInfo(context, info);
-    matcher = newMatcher(info.authority);
+  @Override public boolean onCreate() {
+    matcher = newMatcher(getContext());
     helper = new FilesDb(getContext());
     getPreference().registerOnSharedPreferenceChangeListener(this);
-  }
-
-  @Override public boolean onCreate() {
     return true;
   }
 

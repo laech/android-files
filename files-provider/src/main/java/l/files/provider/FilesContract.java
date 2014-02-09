@@ -24,6 +24,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
 
+  // TODO separate bookmarks to another lib
+
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
   static final String PATH_BOOKMARKS = "bookmarks";
@@ -51,7 +53,8 @@ public final class FilesContract {
 
   private FilesContract() {}
 
-  static UriMatcher newMatcher(String authority) {
+  static UriMatcher newMatcher(Context context) {
+    String authority = getAuthorityString(context);
     UriMatcher matcher = new UriMatcher(NO_MATCH);
     matcher.addURI(authority, PATH_BOOKMARKS, MATCH_BOOKMARKS);
     matcher.addURI(authority, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_LOCATION);
@@ -64,10 +67,13 @@ public final class FilesContract {
 
   private static Uri getAuthority(Context context) {
     if (authority == null) {
-      authority = Uri.parse("content://" +
-          context.getString(R.string.files_provider_authority));
+      authority = Uri.parse("content://" + getAuthorityString(context));
     }
     return authority;
+  }
+
+  private static String getAuthorityString(Context context) {
+    return context.getString(R.string.files_provider_authority);
   }
 
   /**
