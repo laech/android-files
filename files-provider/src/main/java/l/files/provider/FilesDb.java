@@ -47,8 +47,7 @@ import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.PARENT_LOCATION;
 import static l.files.provider.FilesContract.getFileLocation;
 
-@VisibleForTesting
-public final class FilesDb extends SQLiteOpenHelper implements
+final class FilesDb extends SQLiteOpenHelper implements
     StopSelfListener.Callback,
     UpdateSelfListener.Callback,
     UpdateChildrenListener.Callback {
