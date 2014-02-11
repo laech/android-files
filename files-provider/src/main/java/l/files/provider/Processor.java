@@ -29,6 +29,7 @@ final class Processor implements Runnable {
   private final Handler handler = new Handler(Looper.getMainLooper()) {
     @Override public void handleMessage(Message msg) {
       super.handleMessage(msg);
+      // TODO use another executor
       AsyncTask.SERIAL_EXECUTOR.execute(Processor.this);
     }
   };

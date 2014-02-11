@@ -88,6 +88,7 @@ final class FilesDb extends SQLiteOpenHelper implements
   @VisibleForTesting
   static final ConcurrentMap<String, DirWatcher> observers = new ConcurrentHashMap<>();
 
+  // TODO use another executor
   @VisibleForTesting
   static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
 
