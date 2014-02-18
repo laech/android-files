@@ -52,8 +52,24 @@ public final class TempDir {
     file.delete();
   }
 
+  @Deprecated
   public File get() {
     return dir;
+  }
+
+  /**
+   * Gets the roo directory of this instance.
+   */
+  public File root(){
+    return dir;
+  }
+
+  /**
+   * Gets the file at the given path relative to {@link #root()}. The returned
+   * file may or may not exists.
+   */
+  public File get(String path) {
+    return new File(get(), path);
   }
 
   public List<File> newFiles(String... names) {

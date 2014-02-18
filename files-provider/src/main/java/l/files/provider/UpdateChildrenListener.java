@@ -14,6 +14,8 @@ import static l.files.provider.FilesContract.getFileLocation;
 
 final class UpdateChildrenListener extends DirWatcherListenerAdapter {
 
+  // TODO abstract notification away from db operations
+
   private final File dir;
   private final String location;
   private final Uri contentUri;

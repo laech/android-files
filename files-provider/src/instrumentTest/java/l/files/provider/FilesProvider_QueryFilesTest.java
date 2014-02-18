@@ -89,13 +89,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     verify(cursor, file);
   }
 
-  public void testAddFile() throws Exception {
-    File a = monitored.newFile("a");
-    verify(query(), a);
-    File b = createDirectoryAndWait("b");
-    verify(query(), a, b);
-  }
-
   public void testDeleteFile() throws Exception {
     File a = monitored.newFile("a");
     File b = monitored.newFile("b");
@@ -111,68 +104,12 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     verify(query(), a);
   }
 
-  public void testAddDirectory() throws Exception {
-    File a = monitored.newDirectory("a");
-    verify(query(), a);
-    File b = createDirectoryAndWait("b");
-    verify(query(), a, b);
-  }
-
   public void testDeleteDirectory() throws Exception {
     File a = monitored.newDirectory("a");
     File b = monitored.newDirectory("b");
     verify(query(), a, b);
     deleteAndWait(a);
     verify(query(), b);
-  }
-
-  /**
-   * Directory added after querying should be monitored for file additions to
-   * that directory, as that will change the new directory's last modified
-   * date.
-   */
-  public void testAddDirectoryThenAddFileToIt() throws Exception {
-    query();
-    File dir = createDirectoryAndWait("dir");
-    createFileAndWait("test", dir);
-    verify(query(), dir);
-  }
-
-  /**
-   * Directory added after querying should be monitored for file deletions from
-   * that directory, as that will change the new directory's last modified
-   * date.
-   */
-  public void testAddDirectoryThenDeleteFileFromIt() throws Exception {
-    query();
-    File dir = createDirectoryAndWait("dir");
-    File file = createFileAndWait("test", dir);
-    deleteAndWait(file);
-    verify(query(), dir);
-  }
-
-  /**
-   * Directory added after querying should be monitored for files additions into
-   * that directory, as that will change the new directory's last modified
-   * date.
-   */
-  public void testAddDirectoryThenMoveFileOutOfIt() throws Exception {
-    query();
-    File dir = createDirectoryAndWait("dir");
-    moveAndWait(createFileAndWait("a", dir), new File(helper.get(), "a"));
-    verify(query(), dir);
-  }
-
-  /**
-   * New directory added after querying should be monitored for files moving
-   * into that directory, as that will change the new directory's last modified
-   * date.
-   */
-  public void testAddDirectoryThenMoveFileIntoIt() throws Exception {
-    query();
-    File dir = createDirectoryAndWait("dir");
-    moveAndWait(helper.newFile("abc"), new File(dir, "123"));
-    verify(query(), dir);
   }
 
   /**
