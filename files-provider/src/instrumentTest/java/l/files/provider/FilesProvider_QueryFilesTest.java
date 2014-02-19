@@ -89,27 +89,10 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     verify(cursor, file);
   }
 
-  public void testDeleteFile() throws Exception {
-    File a = monitored.newFile("a");
-    File b = monitored.newFile("b");
-    File c = monitored.newDirectory("c");
-    verify(query(), a, b, c);
-    deleteAndWait(a);
-    verify(query(), b, c);
-  }
-
   public void testUpdateFile() throws Exception {
     File a = monitored.newFile("a");
     writeToFileAndWait(a);
     verify(query(), a);
-  }
-
-  public void testDeleteDirectory() throws Exception {
-    File a = monitored.newDirectory("a");
-    File b = monitored.newDirectory("b");
-    verify(query(), a, b);
-    deleteAndWait(a);
-    verify(query(), b);
   }
 
   /**
@@ -170,18 +153,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     File dir = monitored.newDirectory();
     query();
     createFileAndWait("test", dir);
-    verify(query(), dir);
-  }
-
-  /**
-   * Existing directory should be monitored after query for file deletions as
-   * that will change its last modified date.
-   */
-  public void testExistingDirectoryDeleteFileFromIt() throws Exception {
-    File dir = monitored.newDirectory();
-    query();
-    File file = createFileAndWait("test", dir);
-    deleteAndWait(file);
     verify(query(), dir);
   }
 
@@ -258,34 +229,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     testChangeExecutable(monitored.newDirectory());
   }
 
-  /**
-   * When a monitored directory is deleted, then a new directory is added with
-   * the same name, the new directory should be monitored.
-   */
-  public void testDeleteDirectoryThenAddDirectoryWithSameName()
-      throws Exception {
-    query();
-    File dir = createDirectoryAndWait("a");
-    deleteAndWait(dir);
-    createDirectoryAndWait(dir.getName());
-    createFileAndWait("test", dir);
-    verify(query(), dir);
-  }
-
-  /**
-   * When a monitored directory is deleted, then a new directory is moved in
-   * with the same name, the new directory should be monitored.
-   */
-  public void testDeleteDirectoryThenMoveDirectoryInWithSameName()
-      throws Exception {
-    File dir = monitored.newDirectory();
-    query();
-    deleteAndWait(dir);
-    moveAndWait(helper.newDirectory(), dir);
-    createFileAndWait("test", dir);
-    verify(query(), dir);
-  }
-
   public void testMoveFileIn() throws Exception {
     verify(query());
     File file = moveAndWait(helper.newFile(), new File(monitored.get(), "a"));
@@ -318,76 +261,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     query();
     File file = createDirectoryAndWait("test");
     verify(query(), file);
-  }
-
-  public void testDeleteSelfMoveDirectoryWithSameNameInAndMonitor()
-      throws Exception {
-    query();
-    monitored.delete();
-    assertTrue(helper.newDirectory("test").renameTo(monitored.get()));
-
-    query();
-    File file = createDirectoryAndWait("child");
-    verify(query(), file);
-  }
-
-  public void testDeleteSelfAddSelfAndMonitor() throws Exception {
-    query();
-    monitored.delete();
-    assertTrue(monitored.get().mkdirs());
-
-    query();
-    File file = createDirectoryAndWait("test");
-    verify(query(), file);
-  }
-
-  public void testDeleteSelfNoLongerMonitored() throws Exception {
-    createDirectoryAndWait("test");
-    query();
-    String location = getFileLocation(monitored.get());
-
-    assertTrue(FilesDb.monitored.containsKey(location));
-    assertTrue(FilesDb.observers.containsKey(location));
-
-    deleteAndWait(monitored.get());
-
-    assertFalse(FilesDb.monitored.containsKey(location));
-    assertFalse(FilesDb.observers.containsKey(location));
-  }
-
-  public void testDeleteSelfChildrenNoLongerMonitored() throws Exception {
-    File child = createDirectoryAndWait("test");
-    query(child);
-    String location = getFileLocation(child);
-
-    assertTrue(FilesDb.monitored.containsKey(location));
-    assertTrue(FilesDb.observers.containsKey(location));
-
-    deleteAndWait(monitored.get());
-
-    assertFalse(FilesDb.monitored.containsKey(location));
-    assertFalse(FilesDb.observers.containsKey(location));
-  }
-
-  /**
-   * When a parent directory is monitored, and one of its child directory is
-   * also monitored, delete the parent directory should stop monitoring on both
-   * directories, recreating the child directory and start monitoring on it
-   * should be of no problem.
-   */
-  public void testMonitorParentAndChildDeleteParentRecreateChildAndMonitor()
-      throws Exception {
-    File childDir = monitored.newDirectory("a/b/c");
-    query(childDir);
-    createFileAndWait("test", childDir, childDir);
-
-    deleteAndWait(monitored.get());
-    assertFalse(monitored.get().exists());
-    assertFalse(childDir.exists());
-
-    assertTrue(childDir.mkdirs());
-    File file = createFileAndWait("test", childDir, childDir);
-    verify(query(childDir), file);
   }
 
   private void testChangeReadability(File file) throws Exception {

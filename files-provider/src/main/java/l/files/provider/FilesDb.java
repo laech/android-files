@@ -90,7 +90,7 @@ final class FilesDb extends SQLiteOpenHelper implements
 
   // TODO use another executor
   @VisibleForTesting
-  static Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
+  static volatile Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
 
   private final Context context;
 

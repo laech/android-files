@@ -19,16 +19,16 @@ public final class FilesProviderCreateInitiatedTest
   }
 
   public void testCreateFileToNonEmptyDir() {
-    tmp().newFile("a");
-    tmp().newDirectory("b");
+    tmp().createFile("a");
+    tmp().createDir("b");
     tester()
         .awaitCreateFile("c")
         .verify();
   }
 
   public void testCreateDirToNonEmptyDir() {
-    tmp().newFile("a");
-    tmp().newDirectory("b");
+    tmp().createFile("a");
+    tmp().createDir("b");
     tester()
         .awaitCreateDir("c")
         .verify();
@@ -99,7 +99,7 @@ public final class FilesProviderCreateInitiatedTest
   public void testCreateDirThenMoveFileIntoIt() {
     tester()
         .awaitCreateDir("a")
-        .awaitMoveTo("a/b", helper().newDirectory("b"))
+        .awaitMoveTo("a/b", helper().createDir("b"))
         .verify();
   }
 
@@ -108,7 +108,7 @@ public final class FilesProviderCreateInitiatedTest
         .awaitCreateDir("a")
         .awaitCreateDir("b")
         .awaitCreateFile("a/c")
-        .awaitMoveTo("c", helper().newFile("c"))
+        .awaitMoveTo("c", helper().createDir("c"))
         .awaitMoveFrom("c", helper().get("d"))
         .awaitDelete("b")
         .awaitCreateFile("e")

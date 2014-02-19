@@ -2,22 +2,28 @@ package l.files.provider;
 
 import android.test.AndroidTestCase;
 
+import java.util.concurrent.Executor;
+
 import l.files.common.testing.TempDir;
 
 abstract class FilesProviderTestBase extends AndroidTestCase {
 
   private TempDir tmp;
   private TempDir helper;
-  private QueryTester tester;
+  private FilesProviderTester tester;
+  private Executor originalExecutor;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     tmp = TempDir.create();
     helper = TempDir.create();
-    tester = QueryTester.create(getContext(), tmp);
+    tester = createTester(tmp);
+    originalExecutor = FilesDb.executor;
+    FilesDb.executor = new SameThreadExecutor();
   }
 
   @Override protected void tearDown() throws Exception {
+    FilesDb.executor = originalExecutor;
     tmp.delete();
     helper.delete();
     super.tearDown();
@@ -39,9 +45,25 @@ abstract class FilesProviderTestBase extends AndroidTestCase {
   }
 
   /**
-   * Returns a test helper. This is created/destroyed per test.
+   * Returns a test helper created with {@link #tmp()}. This is
+   * created/destroyed per test.
    */
-  protected QueryTester tester() {
+  protected FilesProviderTester tester() {
     return tester;
+  }
+
+  /**
+   * Creates a new instance of {@link FilesProviderTester} using the context of
+   * this test case and the given {@code dir}.
+   */
+  protected FilesProviderTester createTester(TempDir dir) {
+    return FilesProviderTester.create(getContext(), dir);
+  }
+
+  private static class SameThreadExecutor implements Executor {
+    @Override
+    public void execute(@SuppressWarnings("NullableProblems") Runnable cmd) {
+      cmd.run();
+    }
   }
 }

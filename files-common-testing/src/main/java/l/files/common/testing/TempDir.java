@@ -33,8 +33,18 @@ public final class TempDir {
     this.dir = dir;
   }
 
+  /**
+   * Deletes {@link #root()}.
+   */
   public void delete() {
     delete(dir);
+  }
+
+  /**
+   * Creates {@link #root()} if it doesn't exists.
+   */
+  public void createRoot() {
+    assertTrue(root().isDirectory() || root().mkdirs());
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -60,7 +70,7 @@ public final class TempDir {
   /**
    * Gets the roo directory of this instance.
    */
-  public File root(){
+  public File root() {
     return dir;
   }
 
@@ -69,7 +79,7 @@ public final class TempDir {
    * file may or may not exists.
    */
   public File get(String path) {
-    return new File(get(), path);
+    return new File(root(), path);
   }
 
   public List<File> newFiles(String... names) {
@@ -84,6 +94,10 @@ public final class TempDir {
     return newFile(String.valueOf(nanoTime()));
   }
 
+  /**
+   * @deprecated use {@link #createDir(String)} instead
+   */
+  @Deprecated
   public File newFile(String name) {
     final File file = new File(dir, name);
     final File parent = file.getParentFile();
@@ -97,12 +111,41 @@ public final class TempDir {
     return file;
   }
 
+  /**
+   * Creates a new file and any of it's parents at the given path relative to
+   * {@link #root()}.
+   */
+  public File createFile(String path) {
+    final File file = new File(dir, path);
+    final File parent = file.getParentFile();
+    assertTrue(parent.exists() || parent.mkdirs());
+    try {
+      assertTrue(file.createNewFile() || file.isFile());
+      return file;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public File newDirectory() {
     return newDirectory(String.valueOf(nanoTime()));
   }
 
+  /**
+   * @deprecated use {@link #createDir(String)}
+   */
+  @Deprecated
   public File newDirectory(String name) {
     final File file = new File(dir, name);
+    assertTrue(file.mkdirs() || file.isDirectory());
+    return file;
+  }
+
+  /**
+   * Creates a new directory at the given path relative to {@link #root()}.
+   */
+  public File createDir(String path) {
+    File file = new File(dir, path);
     assertTrue(file.mkdirs() || file.isDirectory());
     return file;
   }

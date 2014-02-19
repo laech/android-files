@@ -33,80 +33,117 @@ import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATO
  * Object to help test file system operations.
  * <p/>
  * All {@code await*} methods work by first making a query to get existing
- * children of {@link #root()}, register a {@link ContentObserver} on the
+ * children of {@link #dir()}, register a {@link ContentObserver} on the
  * returned cursor, then execute the action specified, wait for the registered
  * {@link ContentObserver} to be notified as the result of the execution event
  * before returning.
+ * <p/>
+ * All {@code await*} methods will also cause {@link #dir()} to be monitored
+ * without calling {@link #monitor()} directly.
  */
-final class QueryTester {
+final class FilesProviderTester {
 
   private static final int AWAIT_TIMEOUT = 5;
   private static final TimeUnit AWAIT_TIMEOUT_UNIT = SECONDS;
 
   private final Context context;
-  private final TempDir root;
+  private final TempDir dir;
 
-  private QueryTester(Context context, TempDir root) {
+  private FilesProviderTester(Context context, TempDir dir) {
     this.context = context;
-    this.root = root;
-  }
-
-  public static QueryTester create(Context context, TempDir dir) {
-    return new QueryTester(context, dir);
-  }
-
-  public TempDir root() {
-    return root;
+    this.dir = dir;
   }
 
   /**
-   * Creates a file with the given path relative to {@link #root()} and waits
-   * for the content notification triggered by this action.
+   * @param dir the directory to use, all file operations will be relative to
+   * this directory, this can be retrieved via {@link #dir()}.
    */
-  public QueryTester awaitCreateFile(String path) {
+  public static FilesProviderTester create(Context context, TempDir dir) {
+    return new FilesProviderTester(context, dir);
+  }
+
+  /**
+   * Gets the root directory this instance is operating on.
+   */
+  public TempDir dir() {
+    return dir;
+  }
+
+  /**
+   * Executes the given runnable and returns {@code this}, allowing chaining.
+   */
+  public FilesProviderTester run(Runnable runnable) {
+    runnable.run();
+    return this;
+  }
+
+  /**
+   * Creates a file at {@code path} relative to {@link #dir()} and waits for the
+   * content notification triggered by this action.
+   */
+  public FilesProviderTester awaitCreateFile(String path) {
     awaitContentChangeClosed(query(), newCreateFile(path));
+    return this;
+  }
+
+  /**
+   * Creates a file at {@code path} relative to {@link #dir()} and waits for the
+   * content notification triggered by this action targeting {@code queryPath}.
+   */
+  public FilesProviderTester awaitCreateFile(String path, String queryPath) {
+    File dir = new File(dir().root(), queryPath);
+    awaitContentChangeClosed(query(dir), newCreateFile(path));
     return this;
   }
 
   private Runnable newCreateFile(final String path) {
     return new Runnable() {
       @Override public void run() {
-        root().newFile(path);
+        dir().createFile(path);
       }
     };
   }
 
   /**
-   * Creates a directory with the given path relative to {@link #root()} and
+   * Creates a directory with the given path relative to {@link #dir()} and
    * waits for the content notification triggered by this action.
    */
-  public QueryTester awaitCreateDir(String path) {
-    awaitContentChangeClosed(query(), newCreateDirectory(path));
+  public FilesProviderTester awaitCreateDir(String path) {
+    awaitContentChangeClosed(query(), newCreateDir(path));
     return this;
   }
 
-  private Runnable newCreateDirectory(final String name) {
+  private Runnable newCreateDir(final String name) {
     return new Runnable() {
       @Override public void run() {
-        root().newDirectory(name);
+        dir().createDir(name);
       }
     };
   }
 
   /**
-   * Deletes a file/directory at the given path relative to {@link #root()} and
+   * Deletes a file/directory at the given path relative to {@link #dir()} and
    * waits for the content notification triggered by this action.
    */
-  public QueryTester awaitDelete(String path) {
-    awaitContentChangeClosed(query(), newDelete(path));
+  public FilesProviderTester awaitDelete(String path) {
+    awaitContentChangeClosed(query(), newDelete(new File(dir().root(), path)));
     return this;
   }
 
-  private Runnable newDelete(final String path) {
+  /**
+   * Deletes a file/directory at the given path relative to {@link #dir()} and
+   * waits for the content notification triggered by this action.
+   */
+  public FilesProviderTester awaitDeleteRoot() {
+    awaitContentChangeClosed(query(), newDelete(dir().root()));
+    return this;
+  }
+
+  private Runnable newDelete(final File file) {
     return new Runnable() {
       @Override public void run() {
         try {
-          forceDelete(root().get(path));
+          forceDelete(file);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -115,21 +152,21 @@ final class QueryTester {
   }
 
   /**
-   * Moves a file/directory at the given path relative to {@link #root()} to
+   * Moves a file/directory at the given path relative to {@link #dir()} to
    * {@code dst} and waits for the content notification triggered by this
    * action.
    */
-  public QueryTester awaitMoveFrom(String path, File dst) {
-    awaitContentChangeClosed(query(), newMove(root().get(path), dst));
+  public FilesProviderTester awaitMoveFrom(String path, File dst) {
+    awaitContentChangeClosed(query(), newMove(dir().get(path), dst));
     return this;
   }
 
   /**
-   * Moves {@code src} to the given path relative to {@link #root()} and waits
+   * Moves {@code src} to the given path relative to {@link #dir()} and waits
    * for the content notification triggered by this action.
    */
-  public QueryTester awaitMoveTo(String path, File src) {
-    awaitContentChangeClosed(query(), newMove(src, root().get(path)));
+  public FilesProviderTester awaitMoveTo(String path, File src) {
+    awaitContentChangeClosed(query(), newMove(src, dir().get(path)));
     return this;
   }
 
@@ -142,13 +179,41 @@ final class QueryTester {
   }
 
   /**
-   * Verifies the data returned by a query to {@link #root()}, is the same as
+   * Performs a query to ensure {@link #dir()} is monitored by the provider.
+   */
+  public FilesProviderTester monitor() {
+    query();
+    return this;
+  }
+
+  /**
+   * Performs a query to ensure the file/directory at the given path relative to
+   * {@link #dir()} is monitored by the provider.
+   */
+  public FilesProviderTester monitor(String path) {
+    query(new File(dir().root(), path));
+    return this;
+  }
+
+  /**
+   * Verifies the data returned by a query to {@link #dir()}, is the same as
    * what's stored on the file system.
    */
-  public QueryTester verify() {
+  public FilesProviderTester verify() {
+    return verify(dir().root());
+  }
 
-    Cursor cursor = query();
-    File[] files = root().get().listFiles();
+  /**
+   * Verifies the data returned by a query to path relative to {@link #dir()},
+   * is the same as what's stored on the file system.
+   */
+  public FilesProviderTester verify(String path) {
+    return verify(new File(dir().root(), path));
+  }
+
+  private FilesProviderTester verify(File dir) {
+    Cursor cursor = query(dir);
+    File[] files = dir.listFiles();
     Arrays.sort(files, NAME_COMPARATOR);
 
     assertEquals(files.length, cursor.getCount());
@@ -187,7 +252,7 @@ final class QueryTester {
   }
 
   private Cursor query() {
-    return query(root().get());
+    return query(dir().root());
   }
 
   private Cursor query(File dir) {
