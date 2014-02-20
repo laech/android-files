@@ -26,17 +26,17 @@ public class DirWatcher extends FileObserver {
 
   @Override public void onEvent(int event, final String path) {
     if ((event & OPEN) != 0) onOpen(path);
-    else if ((event & ACCESS) != 0) onAccess(path);
-    else if ((event & ATTRIB) != 0) onAttrib(path);
-    else if ((event & CREATE) != 0) onCreate(path);
-    else if ((event & DELETE) != 0) onDelete(path);
-    else if ((event & MODIFY) != 0) onModify(path);
-    else if ((event & MOVED_TO) != 0) onMovedTo(path);
-    else if ((event & MOVE_SELF) != 0) onMoveSelf(path);
-    else if ((event & MOVED_FROM) != 0) onMovedFrom(path);
-    else if ((event & CLOSE_WRITE) != 0) onCloseWrite(path);
-    else if ((event & DELETE_SELF) != 0) onDeleteSelf(path);
-    else if ((event & CLOSE_NOWRITE) != 0) onCloseNoWrite(path);
+    if ((event & ACCESS) != 0) onAccess(path);
+    if ((event & ATTRIB) != 0) onAttrib(path);
+    if ((event & CREATE) != 0) onCreate(path);
+    if ((event & DELETE) != 0) onDelete(path);
+    if ((event & MODIFY) != 0) onModify(path);
+    if ((event & MOVED_TO) != 0) onMovedTo(path);
+    if ((event & MOVE_SELF) != 0) onMoveSelf(path);
+    if ((event & MOVED_FROM) != 0) onMovedFrom(path);
+    if ((event & CLOSE_WRITE) != 0) onCloseWrite(path);
+    if ((event & DELETE_SELF) != 0) onDeleteSelf(path);
+    if ((event & CLOSE_NOWRITE) != 0) onCloseNoWrite(path);
 
     log(event, path);
   }
@@ -117,18 +117,17 @@ public class DirWatcher extends FileObserver {
 
   private void log(int event, String path) {
     if ((event & OPEN) != 0) debug("OPEN", path);
-    else if ((event & ACCESS) != 0) debug("ACCESS", path);
-    else if ((event & ATTRIB) != 0) debug("ATTRIB", path);
-    else if ((event & CREATE) != 0) debug("CREATE", path);
-    else if ((event & DELETE) != 0) debug("DELETE", path);
-    else if ((event & MODIFY) != 0) debug("MODIFY", path);
-    else if ((event & MOVED_TO) != 0) debug("MOVED_TO", path);
-    else if ((event & MOVE_SELF) != 0) debug("MOVE_SELF", path);
-    else if ((event & MOVED_FROM) != 0) debug("MOVED_FROM", path);
-    else if ((event & CLOSE_WRITE) != 0) debug("CLOSE_WRITE", path);
-    else if ((event & DELETE_SELF) != 0) debug("DELETE_SELF", path);
-    else if ((event & CLOSE_NOWRITE) != 0) debug("CLOSE_NOWRITE", path);
-    else debug("UNKNOWN", path);
+    if ((event & ACCESS) != 0) debug("ACCESS", path);
+    if ((event & ATTRIB) != 0) debug("ATTRIB", path);
+    if ((event & CREATE) != 0) debug("CREATE", path);
+    if ((event & DELETE) != 0) debug("DELETE", path);
+    if ((event & MODIFY) != 0) debug("MODIFY", path);
+    if ((event & MOVED_TO) != 0) debug("MOVED_TO", path);
+    if ((event & MOVE_SELF) != 0) debug("MOVE_SELF", path);
+    if ((event & MOVED_FROM) != 0) debug("MOVED_FROM", path);
+    if ((event & CLOSE_WRITE) != 0) debug("CLOSE_WRITE", path);
+    if ((event & DELETE_SELF) != 0) debug("DELETE_SELF", path);
+    if ((event & CLOSE_NOWRITE) != 0) debug("CLOSE_NOWRITE", path);
   }
 
   private void debug(String event, String path) {
