@@ -99,7 +99,7 @@ final class FilesProviderTester {
    * content notification triggered by this action targeting {@code queryPath}.
    */
   public FilesProviderTester awaitCreateFile(String path, String queryPath) {
-    File dir = new File(dir().root(), queryPath);
+    File dir = new File(dir().get(), queryPath);
     awaitContentChangeClosed(query(dir), newCreate(FILE, path));
     return this;
   }
@@ -143,7 +143,7 @@ final class FilesProviderTester {
    * waits for the content notification triggered by this action.
    */
   public FilesProviderTester awaitDeleteRoot() {
-    awaitContentChangeClosed(query(), newDelete(dir().root()));
+    awaitContentChangeClosed(query(), newDelete(dir().get()));
     return this;
   }
 
@@ -221,7 +221,7 @@ final class FilesProviderTester {
    * Performs a query to ensure {@link #dir()} is monitored by the provider.
    */
   public FilesProviderTester monitor() {
-    query();
+    query().close();
     return this;
   }
 
@@ -230,7 +230,7 @@ final class FilesProviderTester {
    * {@link #dir()} is monitored by the provider.
    */
   public FilesProviderTester monitor(String path) {
-    query(dir().get(path));
+    query(dir().get(path)).close();
     return this;
   }
 
@@ -239,7 +239,7 @@ final class FilesProviderTester {
    * what's stored on the file system.
    */
   public FilesProviderTester verify() {
-    return verify(dir().root());
+    return verify(dir().get());
   }
 
   /**
@@ -250,11 +250,47 @@ final class FilesProviderTester {
     return verify(dir().get(path));
   }
 
-  private FilesProviderTester verify(File dir) {
-    Cursor cursor = query(dir);
-    File[] files = dir.listFiles();
-    Arrays.sort(files, NAME_COMPARATOR);
+  /**
+   * Verifies a query to {@link #dir()} will with the given conditions will
+   * return the expected results for the relative {@code paths}.
+   */
+  public FilesProviderTester verifyQuery(
+      String selection, String[] selectionArgs, String... paths) {
+    return verifyQuery(dir().get(), selection, selectionArgs, paths);
+  }
 
+  private FilesProviderTester verifyQuery(
+      File dir, String selection, String[] selectionArgs, String... paths) {
+
+    Cursor cursor = query(dir, selection, selectionArgs, NAME);
+    //noinspection TryFinallyCanBeTryWithResources
+    try {
+      File[] files = new File[paths.length];
+      for (int i = 0; i < paths.length; i++) {
+        files[i] = dir().get(paths[i]);
+      }
+      Arrays.sort(files, NAME_COMPARATOR);
+      verify(cursor, files);
+    } finally {
+      cursor.close();
+    }
+    return this;
+  }
+
+  private FilesProviderTester verify(File dir) {
+    Cursor cursor = query(dir, null, null, NAME);
+    //noinspection TryFinallyCanBeTryWithResources
+    try {
+      File[] files = dir.listFiles();
+      Arrays.sort(files, NAME_COMPARATOR);
+      verify(cursor, files);
+      return this;
+    } finally {
+      cursor.close();
+    }
+  }
+
+  private void verify(Cursor cursor, File[] files) {
     assertEquals(files.length, cursor.getCount());
     if (cursor.moveToFirst()) {
       do {
@@ -268,8 +304,6 @@ final class FilesProviderTester {
         assertEquals(file.canWrite(), isWritable(cursor));
       } while (cursor.moveToNext());
     }
-
-    return this;
   }
 
   private void awaitContentChangeClosed(Cursor cursor, Runnable code) {
@@ -304,7 +338,7 @@ final class FilesProviderTester {
   }
 
   private Cursor query() {
-    return query(dir().root());
+    return query(dir().get());
   }
 
   private Cursor query(File dir) {

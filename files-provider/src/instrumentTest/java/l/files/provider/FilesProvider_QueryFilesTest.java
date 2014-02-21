@@ -66,29 +66,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     super.tearDown();
   }
 
-  public void testQueryFile() {
-    File file = monitored.newFile("a.txt");
-    assertTrue(file.setReadable(false));
-    assertTrue(file.setWritable(true));
-    verify(query(), file);
-  }
-
-  public void testQueryDirectory() {
-    File file = monitored.newDirectory("dir");
-    assertTrue(file.setReadable(true));
-    assertTrue(file.setWritable(false));
-    verify(query(), file);
-  }
-
-  public void testQueryHiddenFiles() {
-    monitored.newFile(".a");
-    File file = monitored.newFile("b");
-    String selection = HIDDEN + "=?";
-    String[] selectionArgs = {booleanToString(false)};
-    Cursor cursor = query(monitored.get(), selection, selectionArgs, null);
-    verify(cursor, file);
-  }
-
   public void testUpdateFile() throws Exception {
     File a = monitored.newFile("a");
     writeToFileAndWait(a);

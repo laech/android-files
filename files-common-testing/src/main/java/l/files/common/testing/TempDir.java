@@ -34,17 +34,17 @@ public final class TempDir {
   }
 
   /**
-   * Deletes {@link #root()}.
+   * Deletes the root directory.
    */
   public void delete() {
     delete(dir);
   }
 
   /**
-   * Creates {@link #root()} if it doesn't exists.
+   * Creates the root directory if it doesn't exists.
    */
   public void createRoot() {
-    assertTrue(root().isDirectory() || root().mkdirs());
+    assertTrue(get().isDirectory() || get().mkdirs());
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -62,24 +62,19 @@ public final class TempDir {
     file.delete();
   }
 
-  @Deprecated
+  /**
+   * Gets the roo directory of this instance.
+   */
   public File get() {
     return dir;
   }
 
   /**
-   * Gets the roo directory of this instance.
-   */
-  public File root() {
-    return dir;
-  }
-
-  /**
-   * Gets the file at the given path relative to {@link #root()}. The returned
-   * file may or may not exists.
+   * Gets the file at the given path relative to the root. The returned file may
+   * or may not exists.
    */
   public File get(String path) {
-    return new File(root(), path);
+    return new File(get(), path);
   }
 
   public List<File> newFiles(String... names) {
@@ -113,7 +108,7 @@ public final class TempDir {
 
   /**
    * Creates a new file and any of it's parents at the given path relative to
-   * {@link #root()}.
+   * the root directory.
    */
   public File createFile(String path) {
     final File file = new File(dir, path);
@@ -142,7 +137,7 @@ public final class TempDir {
   }
 
   /**
-   * Creates a new directory at the given path relative to {@link #root()}.
+   * Creates a new directory at the given path relative to the root directory.
    */
   public File createDir(String path) {
     File file = new File(dir, path);

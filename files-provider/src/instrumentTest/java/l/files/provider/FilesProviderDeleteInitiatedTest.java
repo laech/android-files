@@ -154,7 +154,7 @@ public final class FilesProviderDeleteInitiatedTest
         .run(new Runnable() {
           @Override public void run() {
             tmp().delete();
-            assertTrue(helper().createDir("a").renameTo(tmp().root()));
+            assertTrue(helper().createDir("a").renameTo(tmp().get()));
           }
         })
         .awaitCreateDir("b")
@@ -194,7 +194,7 @@ public final class FilesProviderDeleteInitiatedTest
         tester()
             .awaitCreateDir("a")
             .dir()
-            .root()
+            .get()
     );
 
     // TODO turn this into a provider method
