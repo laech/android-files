@@ -203,32 +203,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     assertFalse(awaitIsChanged(query(), newWrite(to)));
   }
 
-  public void testChangeFileReadable() throws Exception {
-    testChangeReadability(monitored.newFile());
-  }
-
-  public void testChangeDirectoryReadable() throws Exception {
-    testChangeReadability(monitored.newDirectory());
-  }
-
-
-  public void testChangeFileWritable() throws Exception {
-    testChangeWritable(monitored.newFile());
-  }
-
-  public void testChangeDirectoryWritable() throws Exception {
-    testChangeWritable(monitored.newDirectory());
-  }
-
-
-  public void testChangeFileExecutable() throws Exception {
-    testChangeExecutable(monitored.newFile());
-  }
-
-  public void testChangeDirectoryExecutable() throws Exception {
-    testChangeExecutable(monitored.newDirectory());
-  }
-
   public void testMoveFileIn() throws Exception {
     verify(query());
     File file = moveAndWait(helper.newFile(), new File(monitored.get(), "a"));
@@ -260,21 +234,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     assertTrue(helper.newDirectory().renameTo(monitored.get()));
     query();
     File file = createDirectoryAndWait("test");
-    verify(query(), file);
-  }
-
-  private void testChangeReadability(File file) throws Exception {
-    changeReadable(file, file.canRead());
-    verify(query(), file);
-  }
-
-  private void testChangeWritable(File file) throws Exception {
-    changeWritable(file, !file.canWrite());
-    verify(query(), file);
-  }
-
-  private void testChangeExecutable(File file) throws Exception {
-    changeExecutable(file, !file.canExecute());
     verify(query(), file);
   }
 
@@ -315,39 +274,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
 
   private void writeToFileAndWait(File file) throws Exception {
     awaitContentChange(query(), newWrite(file));
-  }
-
-  private void changeExecutable(final File file, final boolean executable)
-      throws Exception {
-    awaitContentChange(query(), new Callable<Void>() {
-      @Override public Void call() throws Exception {
-        assertTrue(file.setExecutable(executable));
-        assertEquals(executable, file.canExecute());
-        return null;
-      }
-    });
-  }
-
-  private void changeWritable(final File file, final boolean writable)
-      throws Exception {
-    awaitContentChange(query(), new Callable<Void>() {
-      @Override public Void call() throws Exception {
-        assertTrue(file.setWritable(writable));
-        assertEquals(writable, file.canWrite());
-        return null;
-      }
-    });
-  }
-
-  private void changeReadable(final File file, final boolean readable)
-      throws Exception {
-    awaitContentChange(query(), new Callable<Void>() {
-      @Override public Void call() throws Exception {
-        assertTrue(file.setReadable(readable));
-        assertEquals(readable, file.canRead());
-        return null;
-      }
-    });
   }
 
   private File moveAndWait(File from, File to) throws Exception {

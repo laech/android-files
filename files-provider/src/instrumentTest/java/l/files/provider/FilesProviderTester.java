@@ -6,19 +6,26 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.testing.TempDir;
 
+import static com.google.common.io.Files.touch;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getLocation;
+import static l.files.provider.FileCursors.getName;
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
@@ -26,6 +33,8 @@ import static l.files.provider.FileCursors.isWritable;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesProviderTester.FileType.DIR;
+import static l.files.provider.FilesProviderTester.FileType.FILE;
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 
@@ -82,8 +91,7 @@ final class FilesProviderTester {
    * content notification triggered by this action.
    */
   public FilesProviderTester awaitCreateFile(String path) {
-    awaitContentChangeClosed(query(), newCreateFile(path));
-    return this;
+    return awaitCreate(path, FILE);
   }
 
   /**
@@ -92,16 +100,8 @@ final class FilesProviderTester {
    */
   public FilesProviderTester awaitCreateFile(String path, String queryPath) {
     File dir = new File(dir().root(), queryPath);
-    awaitContentChangeClosed(query(dir), newCreateFile(path));
+    awaitContentChangeClosed(query(dir), newCreate(FILE, path));
     return this;
-  }
-
-  private Runnable newCreateFile(final String path) {
-    return new Runnable() {
-      @Override public void run() {
-        dir().createFile(path);
-      }
-    };
   }
 
   /**
@@ -109,14 +109,22 @@ final class FilesProviderTester {
    * waits for the content notification triggered by this action.
    */
   public FilesProviderTester awaitCreateDir(String path) {
-    awaitContentChangeClosed(query(), newCreateDir(path));
+    return awaitCreate(path, DIR);
+  }
+
+  /**
+   * Creates a file/directory with the given path relative to {@link #dir()} and
+   * waits for the content notification triggered by this action.
+   */
+  public FilesProviderTester awaitCreate(String path, FileType type) {
+    awaitContentChangeClosed(query(), newCreate(type, path));
     return this;
   }
 
-  private Runnable newCreateDir(final String name) {
+  private Runnable newCreate(final FileType type, final String path) {
     return new Runnable() {
       @Override public void run() {
-        dir().createDir(name);
+        type.create(dir().get(path));
       }
     };
   }
@@ -126,7 +134,7 @@ final class FilesProviderTester {
    * waits for the content notification triggered by this action.
    */
   public FilesProviderTester awaitDelete(String path) {
-    awaitContentChangeClosed(query(), newDelete(new File(dir().root(), path)));
+    awaitContentChangeClosed(query(), newDelete(dir().get(path)));
     return this;
   }
 
@@ -179,6 +187,37 @@ final class FilesProviderTester {
   }
 
   /**
+   * Sets the permission of the file location at {@code path} relative to {@link
+   * #dir()} and waits for the content notification triggered by this action.
+   */
+  public FilesProviderTester awaitSetPermission(
+      String path, PermissionType type, boolean value) {
+    awaitContentChangeClosed(
+        query(),
+        newPermissionSetter(path, type, value),
+        newPermissionVerifier(path, type));
+    return this;
+  }
+
+  private Runnable newPermissionSetter(
+      final String path, final PermissionType type, final boolean value) {
+    return new Runnable() {
+      @Override public void run() {
+        type.set(dir().get(path), value);
+      }
+    };
+  }
+
+  private Verifier newPermissionVerifier(
+      final String path, final PermissionType type) {
+    return new Verifier(path) {
+      @Override boolean verify(File file, Cursor cursor) {
+        return type.get(cursor) == type.get(file);
+      }
+    };
+  }
+
+  /**
    * Performs a query to ensure {@link #dir()} is monitored by the provider.
    */
   public FilesProviderTester monitor() {
@@ -191,7 +230,7 @@ final class FilesProviderTester {
    * {@link #dir()} is monitored by the provider.
    */
   public FilesProviderTester monitor(String path) {
-    query(new File(dir().root(), path));
+    query(dir().get(path));
     return this;
   }
 
@@ -208,7 +247,7 @@ final class FilesProviderTester {
    * is the same as what's stored on the file system.
    */
   public FilesProviderTester verify(String path) {
-    return verify(new File(dir().root(), path));
+    return verify(dir().get(path));
   }
 
   private FilesProviderTester verify(File dir) {
@@ -234,20 +273,33 @@ final class FilesProviderTester {
   }
 
   private void awaitContentChangeClosed(Cursor cursor, Runnable code) {
+    awaitContentChangeClosed(cursor, code, Suppliers.ofInstance(true));
+  }
+
+  private void awaitContentChangeClosed(Cursor cursor, Runnable code, Supplier<Boolean> verify) {
     try {
-      awaitContentChange(cursor, code);
+      awaitContentChange(cursor, code, verify);
     } finally {
       cursor.close();
     }
   }
 
-  private void awaitContentChange(Cursor cursor, Runnable code) {
-    WaitForChange change = registerChangeListener(cursor);
+  private void awaitContentChange(Cursor cursor, Runnable code, Supplier<Boolean> verify) {
+    BlockingQueue<Object> queue = new LinkedBlockingQueue<>();
+    cursor.registerContentObserver(new WaitForChange(queue));
     code.run();
-    try {
-      assertTrue(change.latch.await(AWAIT_TIMEOUT, AWAIT_TIMEOUT_UNIT));
-    } catch (InterruptedException e) {
-      throw new AssertionError(e);
+    while (true) {
+      try {
+        Object msg = queue.poll(AWAIT_TIMEOUT, AWAIT_TIMEOUT_UNIT);
+        if (msg == null) {
+          fail("Timeout");
+        }
+        if (verify.get()) {
+          return;
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
     }
   }
 
@@ -266,23 +318,118 @@ final class FilesProviderTester {
     return resolver.query(uri, null, selection, selectionArgs, order);
   }
 
-  private WaitForChange registerChangeListener(Cursor cursor) {
-    WaitForChange change = new WaitForChange();
-    cursor.registerContentObserver(change);
-    return change;
-  }
+  /**
+   * An observer that will place a message on the given queue when it is
+   * notified of content change.
+   */
+  private final static class WaitForChange extends ContentObserver {
+    private final BlockingQueue<Object> queue;
 
-  private static class WaitForChange extends ContentObserver {
-    final CountDownLatch latch;
-
-    WaitForChange() {
+    WaitForChange(BlockingQueue<Object> queue) {
       super(null);
-      latch = new CountDownLatch(1);
+      this.queue = queue;
     }
 
     @Override public void onChange(boolean selfChange) {
       super.onChange(selfChange);
-      latch.countDown();
+      queue.add("");
     }
+  }
+
+  private abstract class Verifier implements Supplier<Boolean> {
+
+    private final String path;
+
+    Verifier(String path) {
+      this.path = path;
+    }
+
+    @Override public Boolean get() {
+      File file = dir().get(path);
+      String name = file.getName();
+      Cursor cursor = query();
+      //noinspection TryFinallyCanBeTryWithResources
+      try {
+        while (cursor.moveToNext()) {
+          if (getName(cursor).equals(name)) {
+            return verify(file, cursor);
+          }
+        }
+      } finally {
+        cursor.close();
+      }
+      return false;
+    }
+
+    abstract boolean verify(File file, Cursor cursor);
+  }
+
+  public static enum FileType {
+    FILE {
+      @Override void create(File file) {
+        try {
+          touch(file);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    },
+    DIR {
+      @Override void create(File file) {
+        assertTrue(file.mkdirs());
+      }
+    };
+
+    /**
+     * Creates the given file as the this {@link FileType}.
+     */
+    abstract void create(File file);
+  }
+
+  public static enum PermissionType {
+    READ {
+      @Override void set(File file, boolean value) {
+        assertTrue(file.setReadable(value, false));
+        assertEquals(file.canRead(), value);
+      }
+
+      @Override boolean get(Cursor cursor) {
+        return isReadable(cursor);
+      }
+
+      @Override boolean get(File file) {
+        return file.canRead();
+      }
+    },
+
+    WRITE {
+      @Override void set(File file, boolean value) {
+        assertTrue(file.setWritable(value, false));
+        assertEquals(file.canWrite(), value);
+      }
+
+      @Override boolean get(Cursor cursor) {
+        return isWritable(cursor);
+      }
+
+      @Override boolean get(File file) {
+        return file.canWrite();
+      }
+    };
+
+    /**
+     * Sets the permission value to the given file.
+     */
+    abstract void set(File file, boolean value);
+
+    /**
+     * Gets the permission value from the given cursor at the current position.
+     */
+    abstract boolean get(Cursor cursor);
+
+    /**
+     * Gets the permission value from the given file.
+     */
+    abstract boolean get(File file);
   }
 }

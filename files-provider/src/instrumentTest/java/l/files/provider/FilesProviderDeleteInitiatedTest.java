@@ -8,7 +8,7 @@ import static l.files.provider.FilesContract.getFileLocation;
 public final class FilesProviderDeleteInitiatedTest
     extends FilesProviderTestBase {
 
-  public void testDeleteFileNonEmptyDir() throws Exception {
+  public void testDeleteFileNonEmptyDir() {
     tmp().createFile("a");
     tmp().createFile("b");
     tmp().createDir("c");
@@ -17,7 +17,7 @@ public final class FilesProviderDeleteInitiatedTest
         .verify();
   }
 
-  public void testDeleteFileEmptyDir() throws Exception {
+  public void testDeleteFileEmptyDir() {
     tmp().createFile("a");
     tester()
         .awaitDelete("a")
@@ -175,6 +175,7 @@ public final class FilesProviderDeleteInitiatedTest
 
     tester().monitor("a");
 
+    // TODO turn this into a provider method
     assertTrue(FilesDb.monitored.containsKey(location));
     assertTrue(FilesDb.observers.containsKey(location));
 
@@ -188,7 +189,7 @@ public final class FilesProviderDeleteInitiatedTest
    * Deleting the monitored root directory will cause it to be stopped from
    * being monitored.
    */
-  public void testDeleteSelfNoLongerMonitored() throws Exception {
+  public void testDeleteSelfNoLongerMonitored() {
     String location = getFileLocation(
         tester()
             .awaitCreateDir("a")
@@ -196,6 +197,7 @@ public final class FilesProviderDeleteInitiatedTest
             .root()
     );
 
+    // TODO turn this into a provider method
     assertTrue(FilesDb.monitored.containsKey(location));
     assertTrue(FilesDb.observers.containsKey(location));
 
