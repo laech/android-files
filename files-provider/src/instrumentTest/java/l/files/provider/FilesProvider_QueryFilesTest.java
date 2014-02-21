@@ -64,55 +64,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     super.tearDown();
   }
 
-  /**
-   * Directory moved into the monitored directory after querying should be
-   * monitored for files additions in that directory, as that will change the
-   * new directory's last modified date.
-   */
-  public void testMoveDirectoryInThenAddFileIntoIt() throws Exception {
-    query();
-    File dir = moveAndWait(helper.newDirectory(), new File(monitored.get(), "d"));
-    createFileAndWait("test", dir);
-    verify(query(), dir);
-  }
-
-  /**
-   * Directory moved into the monitored directory after querying should be
-   * monitored for files deletions in that directory, as that will change the
-   * new directory's last modified date.
-   */
-  public void testMoveDirectoryInThenDeleteFileFromIt() throws Exception {
-    query();
-    File dir = moveAndWait(helper.newDirectory(), new File(monitored.get(), "d"));
-    File file = createFileAndWait("test", dir);
-    deleteAndWait(file);
-    verify(query(), dir);
-  }
-
-  /**
-   * Directory moved into the monitored directory after querying should be
-   * monitored for files moving into that directory, as that will change the new
-   * directory's last modified date.
-   */
-  public void testMoveDirectoryInThenMoveFileIntoIt() throws Exception {
-    query();
-    File dir = moveAndWait(helper.newDirectory(), new File(monitored.get(), "d"));
-    moveAndWait(helper.newFile(), new File(dir, "a"));
-    verify(query(), dir);
-  }
-
-  /**
-   * Directory moved into the monitored directory after querying should be
-   * monitored for files moving out of the directory, as that will change the
-   * directory's last modified date.
-   */
-  public void testMoveDirectoryInThenMoveFileOutOfIt() throws Exception {
-    query();
-    File dir = moveAndWait(helper.newDirectory(), new File(monitored.get(), "d"));
-    File file = createFileAndWait("test", dir);
-    moveAndWait(file, new File(helper.get(), "a"));
-    verify(query(), dir);
-  }
 
   /**
    * Existing directory should be monitored after query for file additions as
@@ -172,12 +123,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     assertFalse(awaitIsChanged(query(), newWrite(to)));
   }
 
-  public void testMoveFileIn() throws Exception {
-    verify(query());
-    File file = moveAndWait(helper.newFile(), new File(monitored.get(), "a"));
-    verify(query(), file);
-  }
-
   public void testMoveFileOut() throws Exception {
     File a = monitored.newFile();
     File b = monitored.newFile();
@@ -235,10 +180,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
   private File createFileAndWait(String name, File parent, File monitoredDir)
       throws Exception {
     return awaitContentChange(query(monitoredDir), newCreateFile(name, parent));
-  }
-
-  private void deleteAndWait(File file) throws Exception {
-    awaitContentChange(query(), newDelete(file));
   }
 
   private File moveAndWait(File from, File to) throws Exception {

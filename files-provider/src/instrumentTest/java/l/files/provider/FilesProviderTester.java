@@ -176,7 +176,9 @@ final class FilesProviderTester {
    * for the content notification triggered by this action.
    */
   public FilesProviderTester awaitMoveTo(String path, File src) {
-    awaitContentChangeClosed(query(), newMove(src, dir().get(path)));
+    awaitContentChangeClosed(query(),
+        newMove(src, dir().get(path)),
+        newMoveToVerifier(path));
     return this;
   }
 
@@ -184,6 +186,20 @@ final class FilesProviderTester {
     return new Runnable() {
       @Override public void run() {
         assertTrue(from.renameTo(to));
+      }
+
+      @Override public String toString() {
+        return "Move to " + to;
+      }
+    };
+  }
+
+  private Verifier newMoveToVerifier(final String path) {
+    String pathRoot = path.replaceAll("/.*", "");
+    return new Verifier(pathRoot) {
+      @Override boolean verify(File file, Cursor cursor) {
+        // If this is called, meaning file exists, so return true
+        return true;
       }
     };
   }
@@ -345,11 +361,12 @@ final class FilesProviderTester {
     BlockingQueue<Object> queue = new LinkedBlockingQueue<>();
     cursor.registerContentObserver(new WaitForChange(queue));
     code.run();
+    int count = 0;
     while (true) {
       try {
         Object msg = queue.poll(AWAIT_TIMEOUT, AWAIT_TIMEOUT_UNIT);
         if (msg == null) {
-          fail("Timeout");
+          fail("Timed out. " + code.toString() + ". Count = " + count);
         }
         if (verify.get()) {
           return;
@@ -357,6 +374,7 @@ final class FilesProviderTester {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
+      count++;
     }
   }
 
@@ -385,6 +403,10 @@ final class FilesProviderTester {
     WaitForChange(BlockingQueue<Object> queue) {
       super(null);
       this.queue = queue;
+    }
+
+    @Override public boolean deliverSelfNotifications() {
+      return true;
     }
 
     @Override public void onChange(boolean selfChange) {
