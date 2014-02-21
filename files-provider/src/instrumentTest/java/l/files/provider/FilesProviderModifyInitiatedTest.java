@@ -8,7 +8,7 @@ package l.files.provider;
 public final class FilesProviderModifyInitiatedTest
     extends FilesProviderTestBase {
 
-  public void testModifyFile() throws Exception {
+  public void testModifyFile() {
     tmp().createFile("a");
     tester()
         .awaitModify("a")
