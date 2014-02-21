@@ -22,14 +22,12 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.database.DataTypes.booleanToString;
 import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FileCursors.isWritable;
-import static l.files.provider.FilesContract.FileInfo.HIDDEN;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 import static l.files.provider.FilesContract.getFileLocation;
@@ -64,12 +62,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     monitored.delete();
     helper.delete();
     super.tearDown();
-  }
-
-  public void testUpdateFile() throws Exception {
-    File a = monitored.newFile("a");
-    writeToFileAndWait(a);
-    verify(query(), a);
   }
 
   /**
@@ -247,10 +239,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
 
   private void deleteAndWait(File file) throws Exception {
     awaitContentChange(query(), newDelete(file));
-  }
-
-  private void writeToFileAndWait(File file) throws Exception {
-    awaitContentChange(query(), newWrite(file));
   }
 
   private File moveAndWait(File from, File to) throws Exception {

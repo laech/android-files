@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 import l.files.common.testing.TempDir;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Files.append;
 import static com.google.common.io.Files.touch;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertEquals;
@@ -213,6 +215,27 @@ final class FilesProviderTester {
     return new Verifier(path) {
       @Override boolean verify(File file, Cursor cursor) {
         return type.get(cursor) == type.get(file);
+      }
+    };
+  }
+
+  /**
+   * Modifies the file location at {@code path} relative to {@link #dir()} and
+   * waits for the content notification triggered by this action.
+   */
+  public FilesProviderTester awaitModify(String path) {
+    awaitContentChangeClosed(query(), newFileModifier(dir().get(path)));
+    return this;
+  }
+
+  private Runnable newFileModifier(final File file) {
+    return new Runnable() {
+      @Override public void run() {
+        try {
+          append("0", file, UTF_8);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
       }
     };
   }
