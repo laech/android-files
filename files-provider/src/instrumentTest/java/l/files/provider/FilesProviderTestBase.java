@@ -18,6 +18,8 @@ abstract class FilesProviderTestBase extends AndroidTestCase {
     tmp = TempDir.create();
     helper = TempDir.create();
     tester = createTester(tmp);
+
+    // TODO remove this to make it a more realistic test
     originalExecutor = FilesDb.executor;
     FilesDb.executor = new SameThreadExecutor();
   }
