@@ -1,15 +1,17 @@
 package l.files.provider;
 
-import static l.files.provider.FilesProviderTester.PermissionType;
-import static l.files.provider.FilesProviderTester.PermissionType.READ;
-import static l.files.provider.FilesProviderTester.PermissionType.WRITE;
 import static l.files.provider.FilesProviderTester.FileType;
 import static l.files.provider.FilesProviderTester.FileType.DIR;
 import static l.files.provider.FilesProviderTester.FileType.FILE;
+import static l.files.provider.FilesProviderTester.PermissionType;
+import static l.files.provider.FilesProviderTester.PermissionType.READ;
+import static l.files.provider.FilesProviderTester.PermissionType.WRITE;
 
 /**
  * Tests file system operations started with change files/directories
  * attributes.
+ *
+ * @see android.os.FileObserver#ATTRIB
  */
 public final class FilesProviderAttribInitiatedTest
     extends FilesProviderTestBase {

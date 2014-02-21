@@ -4,6 +4,9 @@ import static l.files.provider.FilesContract.getFileLocation;
 
 /**
  * Tests file system operations started with deleting files/directories.
+ *
+ * @see android.os.FileObserver#DELETE
+ * @see android.os.FileObserver#DELETE_SELF
  */
 public final class FilesProviderDeleteInitiatedTest
     extends FilesProviderTestBase {
