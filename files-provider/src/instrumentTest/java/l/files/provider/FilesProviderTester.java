@@ -378,7 +378,10 @@ final class FilesProviderTester {
     }
   }
 
-  private Cursor query() {
+  /**
+   * Performs a query to {@link #dir()} .
+   */
+  public Cursor query() {
     return query(dir().get());
   }
 

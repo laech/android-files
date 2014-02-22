@@ -76,16 +76,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     verify(query(), dir);
   }
 
-  /**
-   * Move a monitored directory out, then changes to the moved directory should
-   * no longer be monitored.
-   */
-  public void testMoveDirectoryOutNoLongerMonitored() throws Exception {
-    query();
-    File from = monitored.newDirectory("dir");
-    File to = moveAndWait(from, new File(helper.get(), "dir"));
-    assertFalse(awaitIsChanged(query(), newCreateFile("test", to)));
-  }
 
   /**
    * Move the monitored root directory to somewhere else, then changes to the
@@ -112,25 +102,6 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     assertFalse(awaitIsChanged(query(), newCreateFile("b", newChild)));
   }
 
-  /**
-   * Move a file out of the directory, changes to the file will no longer be
-   * monitored.
-   */
-  public void testMoveFileOutNoLongerMonitored() throws Exception {
-    query();
-    File from = monitored.newFile();
-    File to = moveAndWait(from, new File(helper.get(), "a"));
-    assertFalse(awaitIsChanged(query(), newWrite(to)));
-  }
-
-  public void testMoveFileOut() throws Exception {
-    File a = monitored.newFile();
-    File b = monitored.newFile();
-    verify(query(), a, b);
-    moveAndWait(a, new File(helper.get(), "a"));
-    verify(query(), b);
-  }
-
   public void testMoveSelfOutAddDirectoryWithSameNameAndMonitor()
       throws Exception {
     query();
@@ -140,6 +111,8 @@ public final class FilesProvider_QueryFilesTest extends AndroidTestCase {
     File file = createDirectoryAndWait("test");
     verify(query(), file);
   }
+
+
 
   public void testMoveSelfOutMoveDirectoryWithSameNameInAndMonitor()
       throws Exception {
