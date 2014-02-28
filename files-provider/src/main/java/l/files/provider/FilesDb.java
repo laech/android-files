@@ -355,7 +355,7 @@ final class FilesDb extends SQLiteOpenHelper implements
 
   @Override public void onObserverStopped(DirWatcher observer) {
     String location = getFileLocation(observer.getDirectory());
-    synchronized (this) {
+    synchronized (FilesDb.class) {
       observers.remove(location);
       monitored.remove(location);
       String prefix = location.endsWith("/") ? location : location + "/";
