@@ -10,13 +10,13 @@ import android.os.Looper;
 import android.os.Message;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import l.files.common.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -34,16 +34,23 @@ final class Processor implements Runnable {
     }
   };
 
-  private final Set<Uri> notifications;
-  private final List<Runnable> operations;
+  private Set<Uri> notifications;
+  private List<Runnable> operations;
+
   private final SQLiteOpenHelper helper;
   private final ContentResolver resolver;
 
   Processor(SQLiteOpenHelper helper, ContentResolver resolver) {
     this.helper = checkNotNull(helper, "helper");
     this.resolver = checkNotNull(resolver, "resolver");
-    this.operations = newLinkedList();
-    this.notifications = newHashSet();
+    init();
+  }
+
+  private void init() {
+    synchronized (this) {
+      this.operations = newLinkedList();
+      this.notifications = newHashSet();
+    }
   }
 
   /**
@@ -63,16 +70,24 @@ final class Processor implements Runnable {
     Collection<Runnable> operations;
     Collection<Uri> notifications;
     synchronized (Processor.this) {
-      operations = newArrayList(Processor.this.operations);
-      notifications = newArrayList(Processor.this.notifications);
-      Processor.this.operations.clear();
-      Processor.this.notifications.clear();
+      operations = Processor.this.operations;
+      notifications = Processor.this.notifications;
+      init();
     }
 
     logger.debug("Begin transaction.");
     SQLiteDatabase db = helper.getWritableDatabase();
     db.beginTransaction();
     try {
+      Iterator<Runnable> it = operations.iterator();
+      int count = 0;
+      while (it.hasNext()) {
+        it.next().run();
+        it.remove();
+        if (++count % 500 == 0) {
+          db.yieldIfContendedSafely();
+        }
+      }
       for (Runnable operation : operations) {
         operation.run();
       }
