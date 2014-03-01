@@ -1,8 +1,6 @@
 package l.files.provider;
 
 
-import android.database.Cursor;
-
 /**
  * Tests file system operations started with moving files/directories from the
  * monitored directory.
@@ -12,8 +10,6 @@ import android.database.Cursor;
 public final class FilesProviderMoveFromInitiatedTest
     extends FilesProviderTestBase {
 
-  private static final int AWAIT_MILLIS = 500;
-
   /**
    * Move a monitored directory out, then changes to the moved directory should
    * no longer be monitored.
@@ -22,18 +18,8 @@ public final class FilesProviderMoveFromInitiatedTest
     tester()
         .awaitCreateDir("a")
         .awaitMoveFrom("a", helper().get("abc"));
-
     helper().createFile("abc/d");
-
-    Thread.sleep(AWAIT_MILLIS);
-
-    Cursor cursor = tester().query();
-    //noinspection TryFinallyCanBeTryWithResources
-    try {
-      assertEquals(0, cursor.getCount());
-    } finally {
-      cursor.close();
-    }
+    awaitEmpty();
   }
 
   public void testMoveFileOut() throws Exception {

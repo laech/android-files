@@ -22,7 +22,8 @@ public class StopSelfListenerTest extends BaseTest {
     verify(observer).stopWatching();
   }
 
-  public void testOnMoveSelf() throws Exception {
+  // Disabled for now, see StopSelfListener.onMovedSelf
+  public void _testOnMoveSelf() throws Exception {
     listener.onMoveSelf(null);
     verify(observer).stopWatching();
   }

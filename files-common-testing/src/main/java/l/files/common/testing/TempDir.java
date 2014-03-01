@@ -22,11 +22,6 @@ public final class TempDir {
     }
   }
 
-  public static TempDir use(File directory) {
-    assertTrue(directory.isDirectory());
-    return new TempDir(directory);
-  }
-
   private final File dir;
 
   private TempDir(File dir) {
@@ -47,19 +42,23 @@ public final class TempDir {
     assertTrue(get().isDirectory() || get().mkdirs());
   }
 
-  @SuppressWarnings("ResultOfMethodCallIgnored")
   private void delete(File file) {
-    if (file.isDirectory()) {
-      file.setExecutable(true, true);
+    if (!file.exists()) {
+      return;
     }
-    file.setReadable(true, true);
+    if (file.isDirectory() && !file.canExecute()) {
+      assertTrue(file.setExecutable(true));
+    }
+    if (!file.canRead()) {
+      assertTrue(file.setReadable(true));
+    }
     File[] children = file.listFiles();
     if (children != null) {
       for (File child : children) {
         delete(child);
       }
     }
-    file.delete();
+    assertTrue(file.delete());
   }
 
   /**

@@ -23,7 +23,19 @@ final class StopSelfListener extends DirWatcherListenerAdapter {
 
   @Override public void onMoveSelf(String path) {
     super.onMoveSelf(path);
-    stop();
+
+    // TODO better handle this, check the canonical file
+    /*
+     * Sometimes when a directory is moved from else where, a MOVE_TO is
+     * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
+     * after monitoring on the newly added file starts, so this is a temporary
+     * fix for that. This directory could also exists if the original is moved
+     * somewhere else and a new one is quickly added in place, then this code
+     * will be wrong.
+     */
+    if (!observer.getDirectory().exists()) {
+      stop();
+    }
   }
 
   private void stop() {

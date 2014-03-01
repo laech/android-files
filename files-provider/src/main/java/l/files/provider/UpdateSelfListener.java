@@ -26,6 +26,7 @@ final class UpdateSelfListener extends DirWatcherListenerAdapter
   private final Processor processor;
   private final SQLiteOpenHelper helper;
   private final Callback callback;
+  private final Context context;
 
   UpdateSelfListener(
       Context context,
@@ -33,6 +34,7 @@ final class UpdateSelfListener extends DirWatcherListenerAdapter
       Processor processor,
       SQLiteOpenHelper helper,
       Callback callback) {
+    this.context = checkNotNull(context, "context");
     this.dir = checkNotNull(dir, "dir");
     this.helper = checkNotNull(helper, "helper");
     this.processor = checkNotNull(processor, "processor");
@@ -74,6 +76,27 @@ final class UpdateSelfListener extends DirWatcherListenerAdapter
   @Override public void onDelete(String path) {
     super.onDelete(path);
     updateSelf();
+  }
+
+  @Override public void onMoveSelf(String path) {
+    super.onMoveSelf(path);
+    deleteSelf();
+  }
+
+  @Override public void onDeleteSelf(String path) {
+    super.onDeleteSelf(path);
+    deleteSelf();
+  }
+
+  private void deleteSelf() {
+    final String location = getFileLocation(dir);
+    final Uri uri = buildFileUri(context, location);
+    processor.post(new Runnable() {
+      @Override public void run() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        FilesDb.deleteChildren(db, location);
+      }
+    }, uri);
   }
 
   private void updateSelf() {

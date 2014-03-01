@@ -1,5 +1,6 @@
 package l.files.provider;
 
+import android.database.Cursor;
 import android.test.AndroidTestCase;
 
 import java.util.concurrent.Executor;
@@ -62,6 +63,26 @@ abstract class FilesProviderTestBase extends AndroidTestCase {
    */
   protected FilesProviderTester createTester(TempDir dir) {
     return FilesProviderTester.create(getContext(), dir);
+  }
+
+  /**
+   * Wait for a short while and make a query to the content provider for {@link
+   * #tmp()}, assert the result is empty.
+   */
+  protected void awaitEmpty() {
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      throw new AssertionError(e);
+    }
+
+    Cursor cursor = tester().query();
+    //noinspection TryFinallyCanBeTryWithResources
+    try {
+      assertEquals(0, cursor.getCount());
+    } finally {
+      cursor.close();
+    }
   }
 
   private static class SameThreadExecutor implements Executor {

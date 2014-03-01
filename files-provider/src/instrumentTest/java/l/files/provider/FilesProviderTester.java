@@ -119,7 +119,13 @@ final class FilesProviderTester {
    * waits for the content notification triggered by this action.
    */
   public FilesProviderTester awaitCreate(String path, FileType type) {
-    awaitContentChangeClosed(query(), newCreate(type, path));
+    String p = getSubPathRoot(path);
+    awaitContentChangeClosed(query(), newCreate(type, path), new Verifier(p) {
+      @Override boolean verify(File file, Cursor cursor) {
+        // If we reach here, file has been created, so return true
+        return true;
+      }
+    });
     return this;
   }
 
@@ -153,21 +159,38 @@ final class FilesProviderTester {
     return new Runnable() {
       @Override public void run() {
         try {
+          assertTrue(file.exists());
           forceDelete(file);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
+
+      @Override public String toString() {
+        return "Delete " + file;
+      }
     };
   }
 
   /**
-   * Moves a file/directory at the given path relative to {@link #dir()} to
+   * Moves the file/directory from given path relative to {@link #dir()} to
    * {@code dst} and waits for the content notification triggered by this
    * action.
    */
   public FilesProviderTester awaitMoveFrom(String path, File dst) {
-    awaitContentChangeClosed(query(), newMove(dir().get(path), dst));
+    return awaitMove(dir().get(path), dst);
+  }
+
+  /**
+   * Moves the root directory to {@code dst} and waits for the content
+   * notification triggered by this action.
+   */
+  public FilesProviderTester awaitMoveRootTo(File dst) {
+    return awaitMove(dir().get(), dst);
+  }
+
+  private FilesProviderTester awaitMove(File src, File dst) {
+    awaitContentChangeClosed(query(), newMove(src, dst));
     return this;
   }
 
@@ -195,7 +218,7 @@ final class FilesProviderTester {
   }
 
   private Verifier newMoveToVerifier(final String path) {
-    String pathRoot = path.replaceAll("/.*", "");
+    String pathRoot = getSubPathRoot(path);
     return new Verifier(pathRoot) {
       @Override boolean verify(File file, Cursor cursor) {
         // If this is called, meaning file exists, so return true
@@ -394,6 +417,15 @@ final class FilesProviderTester {
     Uri uri = buildFileChildrenUri(context, getFileLocation(dir));
     ContentResolver resolver = context.getContentResolver();
     return resolver.query(uri, null, selection, selectionArgs, order);
+  }
+
+  /**
+   * Gets the root part of this path.
+   * <p/>
+   * For example: abc/def/g => abc
+   */
+  private String getSubPathRoot(String subPath) {
+    return subPath.replaceAll("/.*", "");
   }
 
   /**
