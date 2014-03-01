@@ -4,6 +4,7 @@ import android.test.AndroidTestCase;
 
 import java.util.concurrent.Executor;
 
+import l.files.common.logging.Logger;
 import l.files.common.testing.TempDir;
 
 abstract class FilesProviderTestBase extends AndroidTestCase {
@@ -25,10 +26,11 @@ abstract class FilesProviderTestBase extends AndroidTestCase {
   }
 
   @Override protected void tearDown() throws Exception {
+    super.tearDown();
     FilesDb.executor = originalExecutor;
+    Logger.resetDebugTagPrefix();
     tmp.delete();
     helper.delete();
-    super.tearDown();
   }
 
   /**

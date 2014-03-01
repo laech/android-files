@@ -1,5 +1,7 @@
 package l.files.provider;
 
+import l.files.common.logging.Logger;
+
 import static l.files.provider.FilesContract.getFileLocation;
 
 /**
@@ -12,6 +14,7 @@ public final class FilesProviderDeleteInitiatedTest
     extends FilesProviderTestBase {
 
   public void testDeleteFileNonEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteFileNonEmptyDir");
     tmp().createFile("a");
     tmp().createFile("b");
     tmp().createDir("c");
@@ -21,6 +24,7 @@ public final class FilesProviderDeleteInitiatedTest
   }
 
   public void testDeleteFileEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteFileEmptyDir");
     tmp().createFile("a");
     tester()
         .awaitDelete("a")
@@ -28,6 +32,7 @@ public final class FilesProviderDeleteInitiatedTest
   }
 
   public void testDeleteDirNonEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteDirNonEmptyDir");
     tmp().createDir("a");
     tmp().createDir("b");
     tester()
@@ -36,6 +41,7 @@ public final class FilesProviderDeleteInitiatedTest
   }
 
   public void testDeleteDirEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteDirEmptyDir");
     tmp().createDir("a");
     tester()
         .awaitDelete("a")
@@ -47,6 +53,7 @@ public final class FilesProviderDeleteInitiatedTest
    * that will change its last modified date.
    */
   public void testDeleteFileFromExistingDirEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteFileFromExistingDirEmptyDir");
     tmp().createFile("a/b");
     tester()
         .awaitDelete("a/b")
@@ -58,6 +65,7 @@ public final class FilesProviderDeleteInitiatedTest
    * that will change its last modified date.
    */
   public void testDeleteFileFromExistingDirNonEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteFileFromExistingDirNonEmptyDir");
     tmp().createFile("a/b");
     tmp().createFile("a/c");
     tester()
@@ -70,6 +78,7 @@ public final class FilesProviderDeleteInitiatedTest
    * that will change its last modified date.
    */
   public void testDeleteDirFromExistingDirEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteDirFromExistingDirEmptyDir");
     tmp().createDir("a/b");
     tester()
         .awaitDelete("a/b")
@@ -81,6 +90,7 @@ public final class FilesProviderDeleteInitiatedTest
    * that will change its last modified date.
    */
   public void testDeleteDirFromExistingDirNonEmptyDir() {
+    Logger.setDebugTagPrefix("testDeleteDirFromExistingDirNonEmptyDir");
     tmp().createDir("a/b");
     tmp().createDir("a/c");
     tester()
@@ -95,6 +105,7 @@ public final class FilesProviderDeleteInitiatedTest
    * should be of no problem.
    */
   public void testDeleteMonitoredParentAndMonitoredChildRecreateChild() {
+    Logger.setDebugTagPrefix("testDeleteMonitoredParentAndMonitoredChildRecreateChild");
     tmp().createDir("a/b/c");
     tester()
         .awaitCreateFile("a/b/c/d", "a/b/c")
@@ -113,6 +124,7 @@ public final class FilesProviderDeleteInitiatedTest
    * the same name, the new directory should be monitored.
    */
   public void testDeleteDirThenCreateDirWithSameName() {
+    Logger.setDebugTagPrefix("testDeleteDirThenCreateDirWithSameName");
     tmp().createDir("a");
     tester()
         .awaitDelete("a")
@@ -128,6 +140,7 @@ public final class FilesProviderDeleteInitiatedTest
    * with the same name, the new directory should be monitored.
    */
   public void testDeleteDirThenMoveDirInWithSameName() {
+    Logger.setDebugTagPrefix("testDeleteDirThenMoveDirInWithSameName");
     tmp().createDir("a");
     tester()
         .awaitDelete("a")
@@ -139,6 +152,7 @@ public final class FilesProviderDeleteInitiatedTest
   }
 
   public void testDeleteSelfThenCreateSelf() {
+    Logger.setDebugTagPrefix("testDeleteSelfThenCreateSelf");
     tester()
         .monitor()
         .run(new Runnable() {
@@ -152,6 +166,7 @@ public final class FilesProviderDeleteInitiatedTest
   }
 
   public void testDeleteSelfMoveDirWithSameNameIn() {
+    Logger.setDebugTagPrefix("testDeleteSelfMoveDirWithSameNameIn");
     tester()
         .monitor()
         .run(new Runnable() {
@@ -169,6 +184,7 @@ public final class FilesProviderDeleteInitiatedTest
    * children to be stopped from being monitored.
    */
   public void testDeleteSelfChildrenWillNoLongerBeMonitored() {
+    Logger.setDebugTagPrefix("testDeleteSelfChildrenWillNoLongerBeMonitored");
     String location = getFileLocation(
         tester()
             .awaitCreateDir("a")
@@ -193,6 +209,7 @@ public final class FilesProviderDeleteInitiatedTest
    * being monitored.
    */
   public void testDeleteSelfNoLongerMonitored() {
+    Logger.setDebugTagPrefix("testDeleteSelfNoLongerMonitored");
     String location = getFileLocation(
         tester()
             .awaitCreateDir("a")
