@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
-import l.files.common.logging.Logger;
 import l.files.provider.event.LoadFinished;
 import l.files.provider.event.LoadProgress;
 import l.files.provider.event.LoadStarted;
@@ -51,8 +50,6 @@ final class FilesDb extends SQLiteOpenHelper implements
     StopSelfListener.Callback,
     UpdateSelfListener.Callback,
     UpdateChildrenListener.Callback {
-
-  private static final Logger logger = Logger.get(FilesDb.class);
 
   private static final String TABLE_FILES = "file";
   private static final String DB_NAME = "file.db";
@@ -141,7 +138,6 @@ final class FilesDb extends SQLiteOpenHelper implements
         if (i % 1000 == 0) {
           db.yieldIfContendedSafely();
         }
-        logger.debug("Insert %s", entry.location);
       }
     } finally {
       statement.close();
@@ -150,12 +146,10 @@ final class FilesDb extends SQLiteOpenHelper implements
 
   public static void deleteChildren(SQLiteDatabase db, String parentLocation) {
     db.delete(TABLE_FILES, PARENT_LOCATION + "=?", new String[]{parentLocation});
-    logger.debug("Delete children of %s", parentLocation);
   }
 
   public static void deleteChild(SQLiteDatabase db, String childLocation) {
     db.delete(TABLE_FILES, LOCATION + "=?", new String[]{childLocation});
-    logger.debug("Delete %s", childLocation);
   }
 
   @Override public void onCreate(SQLiteDatabase db) {
@@ -287,7 +281,6 @@ final class FilesDb extends SQLiteOpenHelper implements
     String parentLocation = getFileLocation(parent);
     FileData[] entries = loadChildren(uri, parent, dirs);
 
-    logger.debug("Begin transaction");
     SQLiteDatabase db = getWritableDatabase();
     db.beginTransaction();
     try {
@@ -295,7 +288,6 @@ final class FilesDb extends SQLiteOpenHelper implements
       db.setTransactionSuccessful();
     } finally {
       db.endTransaction();
-      logger.debug("End transaction");
     }
 
     post(bus(), new LoadFinished(uri), handler);

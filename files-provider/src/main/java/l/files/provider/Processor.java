@@ -14,15 +14,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import l.files.common.logging.Logger;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
 
 final class Processor implements Runnable {
-
-  private static final Logger logger = Logger.get(Processor.class);
 
   private static final int BATCH_DELAY_MILLIS = 200;
 
@@ -75,7 +71,6 @@ final class Processor implements Runnable {
       init();
     }
 
-    logger.debug("Begin transaction.");
     SQLiteDatabase db = helper.getWritableDatabase();
     db.beginTransaction();
     try {
@@ -94,12 +89,10 @@ final class Processor implements Runnable {
       db.setTransactionSuccessful();
     } finally {
       db.endTransaction();
-      logger.debug("End transaction.");
     }
 
     for (Uri uri : notifications) {
       resolver.notifyChange(uri, null);
-      logger.debug("Notify change: %s", uri);
     }
   }
 }
