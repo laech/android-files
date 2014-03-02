@@ -207,19 +207,9 @@ final class FilesDb extends SQLiteOpenHelper implements
     String location = getFileLocation(parent);
     selection = concatenateWhere(selection, FileInfo.PARENT_LOCATION + "=?");
     selectionArgs = appendSelectionArgs(selectionArgs, new String[]{location});
-    Cursor cursor = query(columns, selection, selectionArgs, orderBy);
 
-
-    if (cursor.getCount() == 0) {
-      // If cursor is empty and the directory is not currently being monitored,
-      // update it before returning
-      if (updateAndMonitor(uri, parent)) {
-        cursor.close();
-        cursor = query(columns, selection, selectionArgs, orderBy);
-      }
-    } else if (!monitored.containsKey(location)) {
-      // If there is already data for the directory, return the cursor, then
-      // update it in the background.
+    // Start before doing anything else to speed loading time
+    if (!monitored.containsKey(location)) {
       executor.execute(new Runnable() {
         @Override public void run() {
           updateAndMonitor(uri, parent);
@@ -227,6 +217,7 @@ final class FilesDb extends SQLiteOpenHelper implements
       });
     }
 
+    Cursor cursor = query(columns, selection, selectionArgs, orderBy);
     cursor.setNotificationUri(context.getContentResolver(), uri);
     return cursor;
   }
