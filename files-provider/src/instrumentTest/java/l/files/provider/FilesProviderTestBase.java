@@ -1,14 +1,14 @@
 package l.files.provider;
 
 import android.database.Cursor;
-import android.test.AndroidTestCase;
 
 import java.util.concurrent.Executor;
 
 import l.files.common.logging.Logger;
+import l.files.common.testing.BaseTest;
 import l.files.common.testing.TempDir;
 
-abstract class FilesProviderTestBase extends AndroidTestCase {
+abstract class FilesProviderTestBase extends BaseTest {
 
   private TempDir tmp;
   private TempDir helper;

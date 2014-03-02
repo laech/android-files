@@ -2,8 +2,6 @@ package l.files.provider;
 
 import l.files.common.logging.Logger;
 
-import static l.files.provider.FilesContract.getFileLocation;
-
 /**
  * Tests file system operations started with deleting files/directories.
  *
@@ -177,53 +175,5 @@ public final class FilesProviderDeleteInitiatedTest
         })
         .awaitCreateDir("b")
         .verify();
-  }
-
-  /**
-   * Deleting the monitored root directory will cause any of its monitored
-   * children to be stopped from being monitored.
-   */
-  public void testDeleteSelfChildrenWillNoLongerBeMonitored() {
-    Logger.setDebugTagPrefix("testDeleteSelfChildrenWillNoLongerBeMonitored");
-    String location = getFileLocation(
-        tester()
-            .awaitCreateDir("a")
-            .dir()
-            .get("a")
-    );
-
-    tester().monitor("a");
-
-    // TODO turn this into a provider method
-    assertTrue(FilesDb.monitored.containsKey(location));
-    assertTrue(FilesDb.observers.containsKey(location));
-
-    tester().awaitDeleteRoot();
-
-    assertFalse(FilesDb.monitored.containsKey(location));
-    assertFalse(FilesDb.observers.containsKey(location));
-  }
-
-  /**
-   * Deleting the monitored root directory will cause it to be stopped from
-   * being monitored.
-   */
-  public void testDeleteSelfNoLongerMonitored() {
-    Logger.setDebugTagPrefix("testDeleteSelfNoLongerMonitored");
-    String location = getFileLocation(
-        tester()
-            .awaitCreateDir("a")
-            .dir()
-            .get()
-    );
-
-    // TODO turn this into a provider method
-    assertTrue(FilesDb.monitored.containsKey(location));
-    assertTrue(FilesDb.observers.containsKey(location));
-
-    tester().awaitDeleteRoot();
-
-    assertFalse(FilesDb.monitored.containsKey(location));
-    assertFalse(FilesDb.observers.containsKey(location));
   }
 }

@@ -15,10 +15,7 @@ import com.google.common.base.Stopwatch;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
 import l.files.provider.event.LoadFinished;
@@ -27,16 +24,7 @@ import l.files.provider.event.LoadStarted;
 
 import static android.database.DatabaseUtils.appendSelectionArgs;
 import static android.database.DatabaseUtils.concatenateWhere;
-import static android.os.FileObserver.ATTRIB;
-import static android.os.FileObserver.CREATE;
-import static android.os.FileObserver.DELETE;
-import static android.os.FileObserver.DELETE_SELF;
-import static android.os.FileObserver.MODIFY;
-import static android.os.FileObserver.MOVED_FROM;
-import static android.os.FileObserver.MOVED_TO;
-import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Map.Entry;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.common.database.DataTypes.intToBoolean;
 import static l.files.common.event.Events.bus;
@@ -46,54 +34,29 @@ import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.PARENT_LOCATION;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesDb extends SQLiteOpenHelper implements
-    StopSelfListener.Callback,
-    UpdateSelfListener.Callback,
-    UpdateChildrenListener.Callback {
+final class FilesDb extends SQLiteOpenHelper {
 
   private static final String TABLE_FILES = "file";
   private static final String DB_NAME = "file.db";
   private static final int DB_VERSION = 1;
-  private static final int MODIFICATION_MASK = ATTRIB
-      | CREATE
-      | DELETE
-      | DELETE_SELF
-      | MODIFY
-      | MOVE_SELF
-      | MOVED_FROM
-      | MOVED_TO;
 
   private static final Handler handler = new Handler(Looper.getMainLooper());
-
-  /**
-   * The main directories that are currently being monitored (i.e. the ones that
-   * have been called {@link #updateAndMonitor(Uri, File)}). The keys are {@link
-   * FileInfo#LOCATION}s.
-   */
-  @VisibleForTesting
-  static final ConcurrentMap<String, File> monitored = new ConcurrentHashMap<>();
-
-  /**
-   * The map of {@link FileInfo#LOCATION} to file observers.
-   * <p/>
-   * {@link android.os.FileObserver} class has global shared state, there could
-   * only be one observer per file, regardless of the event mask. Stopping an
-   * observer or garbage collecting an observer will cause it to be stopped, and
-   * because the states are shared globally, all observer instances watching on
-   * the same file node will stop receiving events.
-   */
-  @VisibleForTesting
-  static final ConcurrentMap<String, DirWatcher> observers = new ConcurrentHashMap<>();
 
   // TODO use another executor
   @VisibleForTesting
   static volatile Executor executor = AsyncTask.THREAD_POOL_EXECUTOR;
 
+  private final FilesDbSync manager;
   private final Context context;
 
   public FilesDb(Context context) {
-    super(context, DB_NAME, null, DB_VERSION);
+    this(context, DB_NAME);
+  }
+
+  FilesDb(Context context, String name) {
+    super(context, name, null, DB_VERSION);
     this.context = context;
+    this.manager = new FilesDbSync(context, this);
   }
 
   public static void replaceChildren(
@@ -196,14 +159,13 @@ final class FilesDb extends SQLiteOpenHelper implements
       String[] selectionArgs,
       String orderBy) {
 
-
     final File parent = new File(URI.create(getFileLocation(uri)));
     String location = getFileLocation(parent);
     selection = concatenateWhere(selection, FileInfo.PARENT_LOCATION + "=?");
     selectionArgs = appendSelectionArgs(selectionArgs, new String[]{location});
 
     // Start before doing anything else to speed loading time
-    if (!monitored.containsKey(location)) {
+    if (!manager.isStarted(parent)) {
       executor.execute(new Runnable() {
         @Override public void run() {
           updateAndMonitor(uri, parent);
@@ -229,46 +191,18 @@ final class FilesDb extends SQLiteOpenHelper implements
    * be updated and monitored, false if it's already being monitored.
    */
   private boolean updateAndMonitor(final Uri uri, final File parent) {
-    String parentLocation = getFileLocation(parent);
-    synchronized (FilesDb.class) {
-      if (monitored.put(parentLocation, parent) != null) {
-        return false;
-      }
-      DirWatcher parentObserver = observers.get(parentLocation);
-      if (parentObserver == null) {
-        parentObserver = newObserver(parent);
-        parentObserver.startWatching();
-        observers.put(parentLocation, parentObserver);
-      }
+    if (!manager.start(parent)) {
+      return false;
     }
 
     // TODO symlinks to directories shouldn't be included
     Set<String> dirs = update(uri, parent);
-    synchronized (FilesDb.class) {
-      for (String childPath : dirs) {
-        File child = new File(childPath);
-        String childLocation = getFileLocation(child);
-        DirWatcher childObserver = observers.get(childLocation);
-        if (childObserver == null) {
-          childObserver = newObserver(child);
-          childObserver.startWatching();
-          observers.put(childLocation, childObserver);
-        }
-      }
+    for (String childPath : dirs) {
+      manager.start(new File(childPath));
     }
 
     context.getContentResolver().notifyChange(uri, null);
     return true;
-  }
-
-  private DirWatcher newObserver(File dir) {
-    Processor processor = new Processor(this, context.getContentResolver());
-    DirWatcher observer = new DirWatcher(dir, MODIFICATION_MASK);
-    observer.setListeners(
-        new StopSelfListener(observer, this),
-        new UpdateSelfListener(context, dir, processor, this, this),
-        new UpdateChildrenListener(context, dir, processor, this, this));
-    return observer;
   }
 
   /**
@@ -333,66 +267,6 @@ final class FilesDb extends SQLiteOpenHelper implements
     if (watch.elapsed(MILLISECONDS) >= 500) {
       post(bus(), new LoadProgress(uri, progress, max), handler);
       watch.reset().start();
-    }
-  }
-
-  @Override public void onObserverStopped(DirWatcher observer) {
-    String location = getFileLocation(observer.getDirectory());
-    synchronized (FilesDb.class) {
-      observers.remove(location);
-      monitored.remove(location);
-      String prefix = location.endsWith("/") ? location : location + "/";
-      removeMonitored(prefix);
-      removeObservers(prefix);
-    }
-  }
-
-  private void removeMonitored(String locationPrefix) {
-    Iterator<Entry<String, File>> it = monitored.entrySet().iterator();
-    while (it.hasNext()) {
-      if (it.next().getKey().startsWith(locationPrefix)) {
-        it.remove();
-      }
-    }
-  }
-
-  private void removeObservers(String locationPrefix) {
-    Iterator<Entry<String, DirWatcher>> it = observers.entrySet().iterator();
-    while (it.hasNext()) {
-      Entry<String, DirWatcher> entry = it.next();
-      if (entry.getKey().startsWith(locationPrefix)) {
-        entry.getValue().stopWatching();
-        it.remove();
-      }
-    }
-  }
-
-  @Override public void onChildAdded(File child, String childLocation) {
-    if (!child.isDirectory()) {
-      return;
-    }
-    synchronized (FilesDb.class) {
-      DirWatcher childObserver = observers.get(childLocation);
-      if (childObserver == null) {
-        childObserver = newObserver(child);
-        childObserver.startWatching();
-        observers.put(childLocation, childObserver);
-      }
-    }
-  }
-
-  @Override public void onChildRemoved(File child, String childLocation) {
-    synchronized (FilesDb.class) {
-      DirWatcher childObserver = observers.remove(childLocation);
-      if (childObserver != null) {
-        childObserver.stopWatching();
-      }
-    }
-  }
-
-  @Override public boolean onPreUpdateSelf(String parentLocation) {
-    synchronized (FilesDb.class) {
-      return monitored.containsKey(parentLocation);
     }
   }
 }
