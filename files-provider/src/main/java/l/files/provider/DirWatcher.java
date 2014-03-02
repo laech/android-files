@@ -25,6 +25,8 @@ public class DirWatcher extends FileObserver {
   }
 
   @Override public void onEvent(int event, final String path) {
+    // TODO any Throwable here will just be caught by FileObserver and logged, not good
+
     if ((event & OPEN) != 0) onOpen(path);
     if ((event & ACCESS) != 0) onAccess(path);
     if ((event & ATTRIB) != 0) onAttrib(path);
