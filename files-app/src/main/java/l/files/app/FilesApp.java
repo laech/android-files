@@ -12,8 +12,6 @@ import com.squareup.otto.Bus;
 
 import l.files.common.event.Events;
 
-import static android.widget.Toast.LENGTH_SHORT;
-import static android.widget.Toast.makeText;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.Preferences.newAnalyticsListener;
 
@@ -64,18 +62,8 @@ public final class FilesApp extends Application {
     };
   }
 
-  @Override public void onLowMemory() {
-    super.onLowMemory();
-    if (DEBUG) {
-      makeText(this, "onLowMemory", LENGTH_SHORT).show();
-    }
-  }
-
   @Override public void onTrimMemory(int level) {
     super.onTrimMemory(level);
-    if (DEBUG) {
-      makeText(this, "onTrimMemory: " + level, LENGTH_SHORT).show();
-    }
     if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
       bitmapCache.evictAll();
     }
