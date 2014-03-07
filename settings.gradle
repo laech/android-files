@@ -1,1 +1,1 @@
-include ':files-app', ':files-common', ':files-analytics', ':files-meta', ':files-common-testing'   , ':files-provider', ':files-service'
+include ':files-app', ':files-common', ':files-analytics', ':files-common-testing'   , ':files-provider', ':files-service'

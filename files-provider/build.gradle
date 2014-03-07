@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.8.+'
+    classpath 'com.android.tools.build:gradle:0.9.+'
   }
 }
 apply plugin: 'android-library'
@@ -14,7 +14,7 @@ repositories {
 
 android {
   compileSdkVersion 19
-  buildToolsVersion "19.0.1"
+  buildToolsVersion "19.0.3"
 
   defaultConfig {
     minSdkVersion 14
@@ -36,5 +36,5 @@ dependencies {
   compile project.libs.guava
   compile project.libs.tika
 
-  instrumentTestCompile project(':files-common-testing')
+  androidTestCompile project(':files-common-testing')
 }
