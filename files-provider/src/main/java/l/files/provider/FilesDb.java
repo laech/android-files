@@ -15,6 +15,7 @@ import com.google.common.base.Stopwatch;
 
 import java.io.File;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -25,6 +26,7 @@ import l.files.provider.event.LoadStarted;
 import static android.database.DatabaseUtils.appendSelectionArgs;
 import static android.database.DatabaseUtils.concatenateWhere;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.synchronizedSet;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.common.database.DataTypes.intToBoolean;
 import static l.files.common.event.Events.bus;
@@ -41,6 +43,8 @@ final class FilesDb extends SQLiteOpenHelper {
   private static final int DB_VERSION = 1;
 
   private static final Handler handler = new Handler(Looper.getMainLooper());
+
+  private final Set<String> queried = synchronizedSet(new HashSet<String>());
 
   // TODO use another executor
   @VisibleForTesting
@@ -165,7 +169,7 @@ final class FilesDb extends SQLiteOpenHelper {
     selectionArgs = appendSelectionArgs(selectionArgs, new String[]{location});
 
     // Start before doing anything else to speed loading time
-    if (!manager.isStarted(parent)) {
+    if (queried.add(location) || !manager.isStarted(parent)) {
       executor.execute(new Runnable() {
         @Override public void run() {
           updateAndMonitor(uri, parent);
@@ -190,19 +194,18 @@ final class FilesDb extends SQLiteOpenHelper {
    * the given parent is already being monitored. Returns true if directory will
    * be updated and monitored, false if it's already being monitored.
    */
-  private boolean updateAndMonitor(final Uri uri, final File parent) {
-    if (!manager.start(parent)) {
-      return false;
-    }
+  private void updateAndMonitor(final Uri uri, final File parent) {
+    manager.start(parent);
 
     // TODO symlinks to directories shouldn't be included
     Set<String> dirs = update(uri, parent);
-    for (String childPath : dirs) {
-      manager.start(new File(childPath));
+    synchronized (this) {
+      for (String childPath : dirs) {
+        manager.start(new File(childPath));
+      }
     }
 
     context.getContentResolver().notifyChange(uri, null);
-    return true;
   }
 
   /**

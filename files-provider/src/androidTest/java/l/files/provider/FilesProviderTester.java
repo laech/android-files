@@ -12,6 +12,7 @@ import com.google.common.base.Suppliers;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import l.files.common.testing.TempDir;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.io.Files.append;
 import static com.google.common.io.Files.touch;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -288,15 +290,6 @@ final class FilesProviderTester {
   }
 
   /**
-   * Performs a query to ensure the file/directory at the given path relative to
-   * {@link #dir()} is monitored by the provider.
-   */
-  public FilesProviderTester monitor(String path) {
-    query(dir().get(path)).close();
-    return this;
-  }
-
-  /**
    * Verifies the data returned by a query to {@link #dir()}, is the same as
    * what's stored on the file system.
    */
@@ -332,7 +325,7 @@ final class FilesProviderTester {
         files[i] = dir().get(paths[i]);
       }
       Arrays.sort(files, NAME_COMPARATOR);
-      verify(cursor, files);
+      verify(cursor, files, dir);
     } finally {
       cursor.close();
     }
@@ -345,27 +338,45 @@ final class FilesProviderTester {
     try {
       File[] files = dir.listFiles();
       Arrays.sort(files, NAME_COMPARATOR);
-      verify(cursor, files);
+      verify(cursor, files, dir);
       return this;
     } finally {
       cursor.close();
     }
   }
 
-  private void verify(Cursor cursor, File[] files) {
-    assertEquals(files.length, cursor.getCount());
-    if (cursor.moveToFirst()) {
-      do {
-        File file = files[cursor.getPosition()];
-        assertEquals(file.getName(), FileCursors.getName(cursor));
-        assertEquals(getFileLocation(file), getLocation(cursor));
-        assertEquals(file.lastModified(), getLastModified(cursor));
-        assertEquals(file.length(), getSize(cursor));
-        assertEquals(file.isDirectory(), isDirectory(cursor));
-        assertEquals(file.canRead(), isReadable(cursor));
-        assertEquals(file.canWrite(), isWritable(cursor));
-      } while (cursor.moveToNext());
+  private static void verify(Cursor cursor, File[] files, File parent) {
+    List<String> expected = getNames(files);
+    List<String> actual = getNames(cursor);
+    assertEquals("Children mismatch for dir: " + parent, expected, actual);
+    cursor.moveToPosition(-1);
+    while (cursor.moveToNext()) {
+      File file = files[cursor.getPosition()];
+      assertEquals(file.getName(), FileCursors.getName(cursor));
+      assertEquals(getFileLocation(file), getLocation(cursor));
+      assertEquals(file.lastModified(), getLastModified(cursor));
+      assertEquals(file.length(), getSize(cursor));
+      assertEquals(file.isDirectory(), isDirectory(cursor));
+      assertEquals(file.canRead(), isReadable(cursor));
+      assertEquals(file.canWrite(), isWritable(cursor));
     }
+  }
+
+  private static List<String> getNames(Cursor cursor) {
+    List<String> names = newArrayListWithCapacity(cursor.getCount());
+    cursor.moveToPosition(-1);
+    while (cursor.moveToNext()) {
+      names.add(getName(cursor));
+    }
+    return names;
+  }
+
+  private static List<String> getNames(File[] files) {
+    List<String> names = newArrayListWithCapacity(files.length);
+    for (File file : files) {
+      names.add(file.getName());
+    }
+    return names;
   }
 
   private void awaitContentChangeClosed(Cursor cursor, Runnable code) {
@@ -482,9 +493,11 @@ final class FilesProviderTester {
     FILE {
       @Override void create(File file) {
         try {
+          File parent = file.getParentFile();
+          assertTrue(parent.exists() || parent.mkdirs());
           touch(file);
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new RuntimeException("Failed to create " + file, e);
         }
       }
     },
@@ -495,7 +508,7 @@ final class FilesProviderTester {
     };
 
     /**
-     * Creates the given file as the this {@link FileType}.
+     * Creates the given file as the this {@link l.files.provider.FilesProviderTester.FileType}.
      */
     abstract void create(File file);
   }
