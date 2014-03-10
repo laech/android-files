@@ -2,24 +2,41 @@ package l.files.provider;
 
 import android.os.FileObserver;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.File;
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.common.logging.Logger;
 
 import static l.files.common.io.Files.normalize;
 
+@VisibleForTesting
 public class DirWatcher extends FileObserver {
 
   private static final Logger logger = Logger.get(DirWatcher.class);
 
   private final File dir;
-  private volatile DirWatcherListener[] listeners;
+
+  private final Set<DirWatcherListener> listeners;
 
   public DirWatcher(File dir, int mask) {
     super(dir.getAbsolutePath(), mask);
     this.dir = normalize(dir);
+    this.listeners = new CopyOnWriteArraySet<>();
   }
 
+  public void addListeners(Collection<? extends DirWatcherListener> listeners) {
+    this.listeners.addAll(listeners);
+  }
+
+  public void removeListeners(Collection<? extends DirWatcherListener> listeners) {
+    this.listeners.removeAll(listeners);
+  }
+
+  @Deprecated
   public File getDirectory() {
     return dir;
   }
@@ -111,10 +128,6 @@ public class DirWatcher extends FileObserver {
     for (DirWatcherListener listener : listeners) {
       listener.onOpen(path);
     }
-  }
-
-  public void setListeners(DirWatcherListener... listeners) {
-    this.listeners = listeners;
   }
 
   private void log(int event, String path) {

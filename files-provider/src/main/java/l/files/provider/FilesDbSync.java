@@ -4,12 +4,19 @@ import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.FileObserver;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import l.files.os.Os;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CREATE;
@@ -20,6 +27,8 @@ import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Map.Entry;
 import static l.files.provider.FilesContract.getFileLocation;
 
 final class FilesDbSync implements
@@ -27,7 +36,7 @@ final class FilesDbSync implements
     UpdateSelfListener.Callback,
     UpdateChildrenListener.Callback {
 
-  // TODO monitor on canonical file instead, and test this
+  // TODO monitor on inode instead, and test this
 
   private static final int MODIFICATION_MASK = ATTRIB
       | CREATE
@@ -41,7 +50,20 @@ final class FilesDbSync implements
   private TestListener listener;
 
   private final Set<String> monitored = new HashSet<>();
-  private final Map<String, DirWatcher> observers = new ConcurrentHashMap<>();
+
+
+  /**
+   * inotify operates on inodes, there could be multiple paths pointing to the
+   * same inode, for example, hard links, file systems mounted on different
+   * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
+   * /storage/sdcard0, they are all mount points of the same device).
+   * TODO inodes are not unique across partitions
+   * TODO simply this, too many maps for keeping states
+   */
+  private final Map<Long, DirWatcher> observersByInode = newHashMap();
+  private final Map<String, DirWatcher> observersByLocation = new ConcurrentHashMap<>();
+  private final Multimap<String, DirWatcherListener> locationListeners = HashMultimap.create();
+  private final Multimap<DirWatcher, String> locations = HashMultimap.create();
 
   private final Context context;
   private final SQLiteOpenHelper helper;
@@ -63,10 +85,10 @@ final class FilesDbSync implements
    */
   void shutdown() {
     synchronized (this) {
-      for (FileObserver observer : observers.values()) {
+      for (FileObserver observer : observersByLocation.values()) {
         observer.stopWatching();
       }
-      observers.clear();
+      observersByLocation.clear();
       monitored.clear();
     }
   }
@@ -86,16 +108,33 @@ final class FilesDbSync implements
    * @return true if monitoring started, false if already monitored
    */
   public boolean start(File file) {
+    long inode = Os.inode(file.getPath());
+    if (inode == -1) {
+      return true; // TODO handle this
+    }
     String location = getFileLocation(file);
     synchronized (this) {
       if (!monitored.add(location)) {
         return false;
       }
-      DirWatcher observer = observers.get(location);
-      if (observer == null) {
-        observer = newObserver(file);
+
+      DirWatcher observer = observersByInode.get(inode);
+      boolean newObserver = (observer == null);
+      if (newObserver) {
+        observer = new DirWatcher(file, MODIFICATION_MASK); // TODO this is only the initial file
+        observersByInode.put(inode, observer);
+        observersByLocation.put(location, observer);
+      }
+      Processor processor = new Processor(helper, context.getContentResolver());
+      Collection<DirWatcherListener> listeners = Arrays.<DirWatcherListener>asList(
+          new StopSelfListener(observer, this),
+          new UpdateSelfListener(context, file, processor, helper, this),
+          new UpdateChildrenListener(context, file, processor, helper, this));
+      observer.addListeners(listeners);
+      locationListeners.putAll(location, listeners);
+      locations.put(observer, location);
+      if (newObserver) {
         observer.startWatching();
-        observers.put(location, observer);
         if (listener != null) {
           listener.onStart(observer);
         }
@@ -104,45 +143,45 @@ final class FilesDbSync implements
     }
   }
 
-  private DirWatcher newObserver(File dir) {
-    Processor processor = new Processor(helper, context.getContentResolver());
-    DirWatcher observer = new DirWatcher(dir, MODIFICATION_MASK);
-    observer.setListeners(
-        new StopSelfListener(observer, this),
-        new UpdateSelfListener(context, dir, processor, helper, this),
-        new UpdateChildrenListener(context, dir, processor, helper, this));
-    return observer;
-  }
-
   @Override public void onObserverStopped(DirWatcher observer) {
-    String location = getFileLocation(observer.getDirectory());
     synchronized (this) {
-      observers.remove(location);
-      monitored.remove(location);
-      String prefix = location.endsWith("/") ? location : location + "/";
-      removeMonitored(prefix);
-      removeObservers(prefix);
+      for (String location : locations.removeAll(observer)) {
+        observersByLocation.remove(location);
+        monitored.remove(location);
+        observersByInode.values().remove(observer);
+        String prefix = location.endsWith("/") ? location : location + "/";
+        removeMonitored(prefix);
+        removeObservers(prefix);
+      }
     }
   }
 
   private void removeMonitored(String locationPrefix) {
     Iterator<String> it = monitored.iterator();
     while (it.hasNext()) {
-      if (it.next().startsWith(locationPrefix)) {
+      String location = it.next();
+      if (location.startsWith(locationPrefix)) {
         it.remove();
       }
     }
   }
 
   private void removeObservers(String locationPrefix) {
-    Iterator<Map.Entry<String, DirWatcher>> it = observers.entrySet().iterator();
+    Iterator<Entry<String, DirWatcher>> it = observersByLocation.entrySet().iterator();
     while (it.hasNext()) {
-      Map.Entry<String, DirWatcher> entry = it.next();
-      if (entry.getKey().startsWith(locationPrefix)) {
-        entry.getValue().stopWatching();
-        it.remove();
-        if (listener != null) {
-          listener.onStop(entry.getValue());
+      Entry<String, DirWatcher> entry = it.next();
+      String location = entry.getKey();
+      if (location.startsWith(locationPrefix)) {
+        DirWatcher observer = entry.getValue();
+        observer.removeListeners(locationListeners.removeAll(location));
+        locations.remove(observer, location);
+        if (locations.get(observer).isEmpty()) {
+          observer.stopWatching();
+          observersByInode.values().remove(observer);
+          it.remove();
+          if (listener != null) {
+            listener.onStop(observer);
+          }
         }
       }
     }
@@ -162,9 +201,15 @@ final class FilesDbSync implements
 
   @Override public void onChildRemoved(File file, String location) {
     synchronized (this) {
-      DirWatcher observer = observers.remove(location);
+      DirWatcher observer = observersByLocation.get(location);
       if (observer != null) {
-        observer.stopWatching();
+        locations.remove(observer, location);
+        locationListeners.removeAll(location);
+        if (locations.get(observer).isEmpty()) {
+          observer.stopWatching();
+          observersByLocation.remove(location);
+          observersByInode.values().remove(observer);
+        }
       }
     }
   }

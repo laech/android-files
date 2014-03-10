@@ -58,7 +58,8 @@ public final class TempDir {
         delete(child);
       }
     }
-    assertTrue(file.delete());
+//    file.delete();
+    assertTrue(file.delete() || !file.exists());
   }
 
   /**

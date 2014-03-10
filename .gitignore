@@ -1,5 +1,7 @@
 .*
 *.iml
+bin
 build
 local.properties
 gradle
+obj

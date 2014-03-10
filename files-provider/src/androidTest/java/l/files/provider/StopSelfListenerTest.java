@@ -2,6 +2,7 @@ package l.files.provider;
 
 import l.files.common.testing.BaseTest;
 
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -14,7 +15,7 @@ public class StopSelfListenerTest extends BaseTest {
     super.setUp();
     observer = mock(DirWatcher.class);
     listener = new StopSelfListener(observer, new EmptyCallback());
-    observer.setListeners(listener);
+    observer.addListeners(singleton(listener));
   }
 
   public void testOnDeleteSelf() throws Exception {

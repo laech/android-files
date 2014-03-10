@@ -1,5 +1,7 @@
 package l.files.provider;
 
+import l.files.common.logging.Logger;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -7,6 +9,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * moved.
  */
 final class StopSelfListener extends DirWatcherListenerAdapter {
+
+  private static final Logger logger = Logger.get(StopSelfListener.class);
 
   private final DirWatcher observer;
   private final Callback callback;
@@ -24,7 +28,7 @@ final class StopSelfListener extends DirWatcherListenerAdapter {
   @Override public void onMoveSelf(String path) {
     super.onMoveSelf(path);
 
-    // TODO better handle this, check the canonical file
+    // TODO better handle this, check the inode
     /*
      * Sometimes when a directory is moved from else where, a MOVE_TO is
      * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
@@ -41,6 +45,7 @@ final class StopSelfListener extends DirWatcherListenerAdapter {
   private void stop() {
     observer.stopWatching();
     callback.onObserverStopped(observer);
+    logger.debug("Stopping observer %s", observer.getDirectory());
   }
 
   static interface Callback {
