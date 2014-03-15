@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import l.files.os.Os;
+import l.files.os.io.Os;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CREATE;
