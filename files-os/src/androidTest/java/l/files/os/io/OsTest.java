@@ -27,6 +27,15 @@ public final class OsTest extends BaseTest {
     tmp.delete();
   }
 
+  public void testException(){
+    try {
+      Os.stat("/not/exist");
+      fail();
+    } catch (OsException e) {
+      // Passed
+    }
+  }
+
   public void testSymlink() throws Exception {
     File a = tmp.createFile("a");
     File b = tmp.get("b");
@@ -41,7 +50,11 @@ public final class OsTest extends BaseTest {
   public void testStat() throws Exception {
     testStatFile(new Function<File, Stat>() {
       @Override public Stat apply(File input) {
-        return Os.stat(input.getAbsolutePath());
+        try {
+          return Os.stat(input.getAbsolutePath());
+        } catch (OsException e) {
+          throw new AssertionError(e);
+        }
       }
     });
   }
@@ -49,7 +62,11 @@ public final class OsTest extends BaseTest {
   public void testLstat() throws Exception {
     testStatFile(new Function<File, Stat>() {
       @Override public Stat apply(File input) {
-        return Os.lstat(input.getAbsolutePath());
+        try {
+          return Os.lstat(input.getAbsolutePath());
+        } catch (OsException e) {
+          throw new AssertionError(e);
+        }
       }
     });
   }

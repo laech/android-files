@@ -2,11 +2,19 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 /*#include <android/log.h>*/
 
 /*#define TAG "Os.c"*/
 
-jobject doStat(JNIEnv* env, jstring jpath, jboolean is_lstat) {
+void throw_os_exception(JNIEnv *env, const char *msg) {
+  jclass c = (*env)->FindClass(env, "l/files/os/io/OsException");
+  if (NULL != c) {
+    (*env)->ThrowNew(env, c, msg);
+  }
+}
+
+jobject do_stat(JNIEnv *env, jstring jpath, jboolean is_lstat) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   if (NULL == path) {
     return NULL;
@@ -15,11 +23,12 @@ jobject doStat(JNIEnv* env, jstring jpath, jboolean is_lstat) {
   int rc = (JNI_TRUE == is_lstat)
       ? TEMP_FAILURE_RETRY(lstat(path, &sb))
       : TEMP_FAILURE_RETRY(stat(path, &sb));
-  (*env)->ReleaseStringUTFChars(env, jpath, path);
   if (-1 == rc) {
-    // TODO
-    // throwErrnoException(env, isLstat ? "lstat" : "stat");
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+    throw_os_exception(env, strerror(errno));
     return NULL;
+  } else {
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
   }
 
 /*
@@ -58,22 +67,11 @@ jobject doStat(JNIEnv* env, jstring jpath, jboolean is_lstat) {
 }
 
 jobject Java_l_files_os_io_Os_stat(JNIEnv* env, jclass clazz, jstring jpath) {
-  return doStat(env, jpath, JNI_FALSE);
+  return do_stat(env, jpath, JNI_FALSE);
 }
 
 jobject Java_l_files_os_io_Os_lstat(JNIEnv* env, jclass clazz, jstring jpath) {
-  return doStat(env, jpath, JNI_TRUE);
-}
-
-jlong Java_l_files_os_io_Os_inode(JNIEnv *env, jobject clazz, jstring jpath) {
-  const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-  if (NULL == path) {
-    return -1;
-  }
-  struct stat sb;
-  int result = TEMP_FAILURE_RETRY(stat(path, &sb));
-  (*env)->ReleaseStringUTFChars(env, jpath, path);
-  return (-1 == result) ? -1 : sb.st_ino;
+  return do_stat(env, jpath, JNI_TRUE);
 }
 
 jboolean Java_l_files_os_io_Os_symlink(JNIEnv *env, jclass clazz, jstring jsrc, jstring jdst) {

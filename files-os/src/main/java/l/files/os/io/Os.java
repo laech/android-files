@@ -13,7 +13,7 @@ public final class Os {
    * Corresponds to C's <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/stat.html">stat()</a>
    * function.
    */
-  public static native Stat stat(String path);
+  public static native Stat stat(String path) throws OsException;
 
   /**
    * Get symbolic link status.
@@ -21,14 +21,7 @@ public final class Os {
    * Corresponds to C's <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/lstat.html">lstat()</a>
    * function.
    */
-  public static native Stat lstat(String path);
-
-  /**
-   * Gets the inode number of the file at the given path.
-   *
-   * @return the inode, or -1 if failed
-   */
-  public static native long inode(String path);
+  public static native Stat lstat(String path) throws OsException;
 
   /**
    * Make a symbolic link to a file.
@@ -38,7 +31,6 @@ public final class Os {
    *
    * @param srcPath the path of the file
    * @param dstPath the path to the link
-   * @return true if successful, false otherwise
    */
-  public static native boolean symlink(String srcPath, String dstPath);
+  public static native void symlink(String srcPath, String dstPath) throws OsException;
 }

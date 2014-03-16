@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import l.files.os.io.Os;
+import l.files.os.io.OsException;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CREATE;
@@ -108,8 +109,11 @@ final class FilesDbSync implements
    * @return true if monitoring started, false if already monitored
    */
   public boolean start(File file) {
-    long inode = Os.inode(file.getPath());
-    if (inode == -1) {
+    long inode;
+    try {
+      // TODO lstat or stat?
+      inode = Os.lstat(file.getPath()).ino;
+    } catch (OsException e) {
       return true; // TODO handle this
     }
     String location = getFileLocation(file);

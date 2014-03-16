@@ -4,10 +4,10 @@ import static l.files.os.io.Os.symlink;
 
 public final class FilesProviderSymlinkTest extends FilesProviderTestBase {
 
-  public void testDifferentDirsPointingToSameInode() {
+  public void testDifferentDirsPointingToSameInode() throws Exception {
     String path1 = tmp().get().getPath();
     String path2 = helper().get("test").getPath();
-    assertTrue(symlink(path1, path2));
+    symlink(path1, path2);
 
     tmp().createFile("a");
     assertTrue(tmp().get("a").exists());
