@@ -11,6 +11,8 @@ import static l.files.os.Unistd.F_OK;
 import static l.files.os.Unistd.R_OK;
 import static l.files.os.Unistd.W_OK;
 import static l.files.os.Unistd.X_OK;
+import static l.files.os.Unistd.readlink;
+import static l.files.os.Unistd.symlink;
 
 public final class UnistdTest extends FileBaseTest {
 
@@ -19,10 +21,17 @@ public final class UnistdTest extends FileBaseTest {
     File b = tmp().get("b");
     assertFalse(b.exists());
 
-    Unistd.symlink(a.getPath(), b.getPath());
+    symlink(a.getPath(), b.getPath());
 
     assertTrue(b.exists());
     assertEquals(a.getCanonicalPath(), b.getCanonicalPath());
+  }
+
+  public void testReadlink() throws Exception {
+    File a = tmp().createFile("a");
+    File b = tmp().get("b");
+    symlink(a.getPath(), b.getPath());
+    assertEquals(a.getPath(), readlink(b.getPath()));
   }
 
   public void testAccess_R_OK_true() throws Exception {

@@ -22,4 +22,9 @@ public final class Unistd extends Native {
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/symlink.html">symlink()</a>
    */
   public static native void symlink(String srcPath, String dstPath) throws OsException;
+
+  /**
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/readlink.html">readlink()</a>
+   */
+  public static native String readlink(String link) throws OsException;
 }
