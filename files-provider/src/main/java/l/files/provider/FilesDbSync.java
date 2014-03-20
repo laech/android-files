@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import l.files.os.io.Os;
-import l.files.os.io.OsException;
+import l.files.os.OsException;
+import l.files.os.Stat;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CREATE;
@@ -112,7 +112,7 @@ final class FilesDbSync implements
     long inode;
     try {
       // TODO lstat or stat?
-      inode = Os.lstat(file.getPath()).ino;
+      inode = Stat.lstat(file.getPath()).ino;
     } catch (OsException e) {
       return true; // TODO handle this
     }

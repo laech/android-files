@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package l.files.os.io;
+package l.files.os;
 
 /**
- * File information returned by fstat(2), lstat(2), and stat(2). Corresponds to
- * C's {@code struct stat} from <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">&lt;stat.h&gt;</a>
+ * @see <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">stat.h</a>
  */
 @SuppressWarnings("OctalInteger")
-public final class Stat {
+public final class Stat extends Native {
 
   /* See /usr/include/linux/stat.h for meaning of these constants. */
 
@@ -162,4 +161,14 @@ public final class Stat {
     this.blksize = blksize;
     this.blocks = blocks;
   }
+
+  /**
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/stat.html">stat()</a>
+   */
+  public static native Stat stat(String path) throws OsException;
+
+  /**
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/lstat.html">lstat()</a>
+   */
+  public static native Stat lstat(String path) throws OsException;
 }

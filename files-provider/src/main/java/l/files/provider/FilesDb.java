@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import l.files.common.logging.Logger;
+import l.files.os.OsException;
+import l.files.os.Stat;
 import l.files.provider.event.LoadFinished;
 import l.files.provider.event.LoadProgress;
 import l.files.provider.event.LoadStarted;
@@ -37,6 +40,8 @@ import static l.files.provider.FilesContract.FileInfo.PARENT_LOCATION;
 import static l.files.provider.FilesContract.getFileLocation;
 
 final class FilesDb extends SQLiteOpenHelper {
+
+  private static final Logger logger = Logger.get(FilesDb.class);
 
   private static final String TABLE_FILES = "file";
   private static final String DB_NAME = "file.db";
@@ -255,7 +260,14 @@ final class FilesDb extends SQLiteOpenHelper {
     Stopwatch watch = Stopwatch.createStarted();
     FileData[] entries = new FileData[names.length];
     for (int i = 0; i < entries.length; i++) {
-      entries[i] = FileData.from(new File(parent, names[i]));
+      String name = names[i];
+      String path = parent.getAbsolutePath() + "/" + name;
+      try { // TODO
+        entries[i] = FileData.from(Stat.stat(path), path, name);
+      } catch (OsException e) {
+        entries[i] = FileData.from(new File(parent, name));
+        logger.warn(e);
+      }
       postLoadProgressIfOkay(watch, uri, i + 1, names.length);
       if (intToBoolean(entries[i].directory)) {
         dirs.add(entries[i].path);

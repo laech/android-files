@@ -1,6 +1,6 @@
 package l.files.provider;
 
-import static l.files.os.io.Os.symlink;
+import static l.files.os.Unistd.symlink;
 
 public final class FilesProviderSymlinkTest extends FilesProviderTestBase {
 

@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+  androidTestCompile project(':files-common')
   androidTestCompile project(':files-common-testing')
   androidTestCompile project.libs.guava
 }

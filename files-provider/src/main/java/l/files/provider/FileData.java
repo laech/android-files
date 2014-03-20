@@ -4,8 +4,13 @@ import android.webkit.MimeTypeMap;
 
 import java.io.File;
 
+import l.files.os.OsException;
+import l.files.os.Stat;
+import l.files.os.Unistd;
+
 import static java.util.Locale.ENGLISH;
 import static l.files.common.database.DataTypes.booleanToInt;
+import static l.files.common.database.DataTypes.intToBoolean;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -30,6 +35,7 @@ final class FileData {
    * instance, this hides away the fact that this is done in the constructor,
    * also gives the possibility of changing this in the future.
    */
+
   private FileData(File file) {
     this.lastModified = file.lastModified();
     this.length = file.length();
@@ -43,6 +49,36 @@ final class FileData {
     this.hidden = booleanToInt(name.startsWith("."));
   }
 
+  private FileData(Stat stat, String path, String name) {
+    this.lastModified = stat.mtime * 1000L;
+    this.length = stat.size;
+    this.directory = booleanToInt(Stat.S_ISDIR(stat.mode));
+    this.canRead = access(path, Unistd.R_OK);
+    this.canWrite = access(path, Unistd.W_OK);
+    this.name = name;
+    this.path = path;
+    this.location = getFileLocation(new File(path));
+    this.mime = mime(name, intToBoolean(this.directory));
+    this.hidden = booleanToInt(name.startsWith("."));
+  }
+
+  private int access(String path, int mode) {
+    try {
+      return booleanToInt(Unistd.access(path, mode));
+    } catch (OsException e) {
+      return booleanToInt(false);
+    }
+  }
+
+  private static String mime(String name, boolean dir) {
+    if (dir) {
+      return MIME_DIR;
+    }
+    String ext = getExtension(name).toLowerCase(ENGLISH);
+    String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+    return mime == null ? "application/octet-stream" : mime;
+  }
+
   private static String mime(File file, String name) {
     if (file.isDirectory()) {
       return MIME_DIR;
@@ -54,6 +90,10 @@ final class FileData {
 
   public static FileData from(File file) {
     return new FileData(file);
+  }
+
+  public static FileData from(Stat stat, String path, String name) {
+    return new FileData(stat, path, name);
   }
 
   /**

@@ -1,4 +1,4 @@
-package l.files.os.io;
+package l.files.os;
 
 public class OsException extends Exception {
 
