@@ -451,7 +451,7 @@ public final class FilesContract {
     /**
      * Sorts the files by their last modified dates descending).
      */
-    public static final String SORT_BY_MODIFIED = MODIFIED + " desc";
+    public static final String SORT_BY_MODIFIED = MODIFIED + " desc, " + NAME;
 
     /**
      * Sorts the files by their sizes (descending). Sizes of directories will
