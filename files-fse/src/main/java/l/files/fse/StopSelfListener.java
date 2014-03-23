@@ -1,6 +1,4 @@
-package l.files.provider;
-
-import l.files.common.logging.Logger;
+package l.files.fse;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -8,14 +6,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A listener that will stop the file observer when the directory is deleted or
  * moved.
  */
-final class StopSelfListener extends DirWatcherListenerAdapter {
+final class StopSelfListener extends EventAdapter {
 
-  private static final Logger logger = Logger.get(StopSelfListener.class);
-
-  private final DirWatcher observer;
+  private final EventObserver observer;
   private final Callback callback;
 
-  StopSelfListener(DirWatcher observer, Callback callback) {
+  StopSelfListener(EventObserver observer, Callback callback) {
     this.observer = checkNotNull(observer, "observer");
     this.callback = checkNotNull(callback, "callback");
   }
@@ -45,7 +41,6 @@ final class StopSelfListener extends DirWatcherListenerAdapter {
   private void stop() {
     observer.stopWatching();
     callback.onObserverStopped(observer);
-    logger.debug("Stopping observer %s", observer.getDirectory());
   }
 
   static interface Callback {
@@ -53,6 +48,6 @@ final class StopSelfListener extends DirWatcherListenerAdapter {
      * Called when the given observer is stopped. This will be called on the
      * same thread as the observer's event thread.
      */
-    void onObserverStopped(DirWatcher observer);
+    void onObserverStopped(EventObserver observer);
   }
 }

@@ -6,7 +6,7 @@ public abstract class FileBaseTest extends BaseTest {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    tmp = TempDir.create();
+    tmp = TempDir.create("tmp_");
   }
 
   @Override protected void tearDown() throws Exception {

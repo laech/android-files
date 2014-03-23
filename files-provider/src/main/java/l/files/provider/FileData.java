@@ -2,7 +2,11 @@ package l.files.provider;
 
 import android.webkit.MimeTypeMap;
 
+import com.google.common.collect.Lists;
+
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import l.files.os.OsException;
 import l.files.os.Stat;
@@ -94,6 +98,17 @@ final class FileData {
 
   public static FileData from(Stat stat, String path, String name) {
     return new FileData(stat, path, name);
+  }
+
+  // TODO
+  public static List<FileData> from(Map<File, Stat> stats) {
+    List<FileData> data = Lists.newArrayListWithCapacity(stats.size());
+    for (Map.Entry<File, Stat> entry : stats.entrySet()) {
+      Stat stat = entry.getValue();
+      File file = entry.getKey();
+      data.add(new FileData(stat, file.getPath(), file.getName()));
+    }
+    return data;
   }
 
   /**

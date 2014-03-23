@@ -1,230 +1,88 @@
 package l.files.provider;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.FileObserver;
+import android.net.Uri;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Optional;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import l.files.os.OsException;
+import l.files.fse.FileEventService;
+import l.files.fse.FileEventListener;
 import l.files.os.Stat;
 
-import static android.os.FileObserver.ATTRIB;
-import static android.os.FileObserver.CREATE;
-import static android.os.FileObserver.DELETE;
-import static android.os.FileObserver.DELETE_SELF;
-import static android.os.FileObserver.MODIFY;
-import static android.os.FileObserver.MOVED_FROM;
-import static android.os.FileObserver.MOVED_TO;
-import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Map.Entry;
+import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesDbSync implements
-    StopSelfListener.Callback,
-    UpdateSelfListener.Callback,
-    UpdateChildrenListener.Callback {
-
-  // TODO monitor on inode instead, and test this
-
-  private static final int MODIFICATION_MASK = ATTRIB
-      | CREATE
-      | DELETE
-      | DELETE_SELF
-      | MODIFY
-      | MOVE_SELF
-      | MOVED_FROM
-      | MOVED_TO;
-
-  private TestListener listener;
-
-  private final Set<String> monitored = new HashSet<>();
-
-
-  /**
-   * inotify operates on inodes, there could be multiple paths pointing to the
-   * same inode, for example, hard links, file systems mounted on different
-   * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
-   * /storage/sdcard0, they are all mount points of the same device).
-   * TODO inodes are not unique across partitions
-   * TODO simply this, too many maps for keeping states
-   */
-  private final Map<Long, DirWatcher> observersByInode = newHashMap();
-  private final Map<String, DirWatcher> observersByLocation = new ConcurrentHashMap<>();
-  private final Multimap<String, DirWatcherListener> locationListeners = HashMultimap.create();
-  private final Multimap<DirWatcher, String> locations = HashMultimap.create();
+final class FilesDbSync implements FileEventListener {
 
   private final Context context;
   private final SQLiteOpenHelper helper;
+  private final FileEventService manager;
 
   FilesDbSync(Context context, SQLiteOpenHelper helper) {
     this.context = checkNotNull(context, "context");
     this.helper = checkNotNull(helper, "helper");
+    this.manager = FileEventService.create();
+    this.manager.register(this);
   }
 
-  void setTestListener(TestListener listener) {
-    synchronized (this) {
-      this.listener = listener;
-    }
+  @Override public void onFileAdded(String parent, String path) {
+    onFileAddedOrChanged(parent, path);
   }
 
-  /**
-   * Shuts down this instance. This will stop all observers. Intended for
-   * testing.
-   */
-  void shutdown() {
-    synchronized (this) {
-      for (FileObserver observer : observersByLocation.values()) {
-        observer.stopWatching();
+  @Override public void onFileChanged(String parent, String path) {
+    onFileAddedOrChanged(parent, path);
+  }
+
+  private void onFileAddedOrChanged(final String parent, final String path) {
+    final String parentLocation = getFileLocation(new File(parent));
+    final Uri parentUri = buildFileUri(context, parentLocation);
+    processor(parent).post(new Runnable() {
+      @Override public void run() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        FilesDb.insertChildren(db, parentLocation, FileData.from(new File(parent, path))); // TODO use stat
       }
-      observersByLocation.clear();
-      monitored.clear();
+    }, parentUri);
+  }
+
+  @Override public void onFileRemoved(final String parent, final String path) {
+    final String parentLocation = getFileLocation(new File(parent));
+    final String childLocation = getFileLocation(new File(parent, path));
+    final Uri parentUri = buildFileUri(context, parentLocation);
+    final Uri childUri = buildFileUri(context, childLocation);
+    processor(parent).post(new Runnable() {
+      @Override public void run() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        FilesDb.deleteChild(db, childLocation);
+        FilesDb.deleteChildren(db, childLocation); // TODO
+      }
+    }, childUri, parentUri);
+  }
+
+  private final Map<String, Processor> processors = newHashMap();
+
+  private Processor processor(String path) {
+    synchronized (this) {
+      Processor processor = processors.get(path);
+      if (processor == null) {
+        processor = new Processor(helper, context.getContentResolver());
+        processors.put(path, processor);
+      }
+      return processor;
     }
   }
 
-  /**
-   * Checks whether the given file is currently being monitored.
-   */
   public boolean isStarted(File file) {
-    synchronized (this) {
-      return monitored.contains(getFileLocation(file));
-    }
+    return manager.isMonitored(file);
   }
 
-  /**
-   * Starts monitoring on the given file if hasn't already done so.
-   *
-   * @return true if monitoring started, false if already monitored
-   */
-  public boolean start(File file) {
-    long inode;
-    try {
-      // TODO lstat or stat?
-      inode = Stat.lstat(file.getPath()).ino;
-    } catch (OsException e) {
-      return true; // TODO handle this
-    }
-    String location = getFileLocation(file);
-    synchronized (this) {
-      if (!monitored.add(location)) {
-        return false;
-      }
-
-      DirWatcher observer = observersByInode.get(inode);
-      boolean newObserver = (observer == null);
-      if (newObserver) {
-        observer = new DirWatcher(file, MODIFICATION_MASK); // TODO this is only the initial file
-        observersByInode.put(inode, observer);
-        observersByLocation.put(location, observer);
-      }
-      Processor processor = new Processor(helper, context.getContentResolver());
-      Collection<DirWatcherListener> listeners = Arrays.<DirWatcherListener>asList(
-          new StopSelfListener(observer, this),
-          new UpdateSelfListener(context, file, processor, helper, this),
-          new UpdateChildrenListener(context, file, processor, helper, this));
-      observer.addListeners(listeners);
-      locationListeners.putAll(location, listeners);
-      locations.put(observer, location);
-      if (newObserver) {
-        observer.startWatching();
-        if (listener != null) {
-          listener.onStart(observer);
-        }
-      }
-      return true;
-    }
-  }
-
-  @Override public void onObserverStopped(DirWatcher observer) {
-    synchronized (this) {
-      for (String location : locations.removeAll(observer)) {
-        observersByLocation.remove(location);
-        monitored.remove(location);
-        observersByInode.values().remove(observer);
-        String prefix = location.endsWith("/") ? location : location + "/";
-        removeMonitored(prefix);
-        removeObservers(prefix);
-      }
-    }
-  }
-
-  private void removeMonitored(String locationPrefix) {
-    Iterator<String> it = monitored.iterator();
-    while (it.hasNext()) {
-      String location = it.next();
-      if (location.startsWith(locationPrefix)) {
-        it.remove();
-      }
-    }
-  }
-
-  private void removeObservers(String locationPrefix) {
-    Iterator<Entry<String, DirWatcher>> it = observersByLocation.entrySet().iterator();
-    while (it.hasNext()) {
-      Entry<String, DirWatcher> entry = it.next();
-      String location = entry.getKey();
-      if (location.startsWith(locationPrefix)) {
-        DirWatcher observer = entry.getValue();
-        observer.removeListeners(locationListeners.removeAll(location));
-        locations.remove(observer, location);
-        if (locations.get(observer).isEmpty()) {
-          observer.stopWatching();
-          observersByInode.values().remove(observer);
-          it.remove();
-          if (listener != null) {
-            listener.onStop(observer);
-          }
-        }
-      }
-    }
-  }
-
-  @Override public boolean onPreUpdateSelf(String parentLocation) {
-    synchronized (this) {
-      return monitored.contains(parentLocation);
-    }
-  }
-
-  @Override public void onChildAdded(File file, String location) {
-    if (file.isDirectory()) {
-      start(file);
-    }
-  }
-
-  @Override public void onChildRemoved(File file, String location) {
-    synchronized (this) {
-      DirWatcher observer = observersByLocation.get(location);
-      if (observer != null) {
-        locations.remove(observer, location);
-        locationListeners.removeAll(location);
-        if (locations.get(observer).isEmpty()) {
-          observer.stopWatching();
-          observersByLocation.remove(location);
-          observersByInode.values().remove(observer);
-        }
-      }
-    }
-  }
-
-  /**
-   * Listener designed for tests to hook into this class.
-   */
-  static abstract class TestListener {
-
-    void onStart(DirWatcher observer) {}
-
-    void onStop(DirWatcher observer) {}
+  public Optional<Map<File, Stat>> start(File file) {
+    return manager.monitor(file);
   }
 }

@@ -5,21 +5,20 @@ import android.database.Cursor;
 import java.util.concurrent.Executor;
 
 import l.files.common.logging.Logger;
-import l.files.common.testing.BaseTest;
+import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
+import l.files.fse.FileEventService;
 
-abstract class FilesProviderTestBase extends BaseTest {
+abstract class FilesProviderTestBase extends FileBaseTest {
 
-  private TempDir tmp;
   private TempDir helper;
   private FilesProviderTester tester;
   private Executor originalExecutor;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    tmp = TempDir.create();
-    helper = TempDir.create();
-    tester = createTester(tmp);
+    helper = TempDir.create("helper_");
+    tester = createTester(tmp());
 
     // TODO remove this to make it a more realistic test
     originalExecutor = FilesDb.executor;
@@ -27,18 +26,11 @@ abstract class FilesProviderTestBase extends BaseTest {
   }
 
   @Override protected void tearDown() throws Exception {
+    FileEventService.create().stopAll();
     super.tearDown();
     FilesDb.executor = originalExecutor;
     Logger.resetDebugTagPrefix();
-    tmp.delete();
     helper.delete();
-  }
-
-  /**
-   * Returns a temp directory for testing. This is created/destroyed per test.
-   */
-  protected TempDir tmp() {
-    return tmp;
   }
 
   /**

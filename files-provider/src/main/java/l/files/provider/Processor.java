@@ -17,6 +17,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 
 final class Processor implements Runnable {
 
@@ -52,12 +53,13 @@ final class Processor implements Runnable {
   /**
    * Posts an operation to be executed, notifies the given uri afterward.
    */
-  public void post(Runnable operation, Uri notification) {
+  public void post(Runnable operation, Uri... notificationUris) {
     synchronized (this) {
-      operations.remove(operation); // TODO necessary?
+//      operations.remove(operation); // TODO necessary?
       operations.add(operation);
-      notifications.add(notification);
+      notifications.addAll(asList(notificationUris));
     }
+    // TODO handle too frequent events causing size of queue to increase infinitely and never executes
     handler.removeMessages(0);
     handler.sendEmptyMessageDelayed(0, BATCH_DELAY_MILLIS);
   }

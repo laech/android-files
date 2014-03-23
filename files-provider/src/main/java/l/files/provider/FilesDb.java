@@ -11,29 +11,23 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Stopwatch;
+import com.google.common.base.Optional;
 
 import java.io.File;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import l.files.common.logging.Logger;
-import l.files.os.OsException;
 import l.files.os.Stat;
-import l.files.provider.event.LoadFinished;
-import l.files.provider.event.LoadProgress;
-import l.files.provider.event.LoadStarted;
 
 import static android.database.DatabaseUtils.appendSelectionArgs;
 import static android.database.DatabaseUtils.concatenateWhere;
-import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 import static java.util.Collections.synchronizedSet;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.common.database.DataTypes.intToBoolean;
-import static l.files.common.event.Events.bus;
-import static l.files.common.event.Events.post;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.PARENT_LOCATION;
@@ -70,12 +64,23 @@ final class FilesDb extends SQLiteOpenHelper {
 
   public static void replaceChildren(
       SQLiteDatabase db, String parentLocation, FileData... entries) {
+    replaceChildren(db, parentLocation, asList(entries));
+  }
+
+  public static void replaceChildren(
+      SQLiteDatabase db, String parentLocation, List<FileData> entries) {
     deleteChildren(db, parentLocation);
     insertChildren(db, parentLocation, entries);
   }
 
   public static void insertChildren(
       SQLiteDatabase db, String parentLocation, FileData... entries) {
+    insertChildren(db, parentLocation, asList(entries));
+  }
+
+  public static void insertChildren(
+      SQLiteDatabase db, String parentLocation, List<FileData> entries) {
+    // TODO assert in transaction
 
     SQLiteStatement statement = db.compileStatement("insert into " +
         TABLE_FILES + " (" +
@@ -93,8 +98,8 @@ final class FilesDb extends SQLiteOpenHelper {
 
     //noinspection TryFinallyCanBeTryWithResources
     try {
-      for (int i = 0; i < entries.length; i++) {
-        FileData entry = entries[i];
+      for (int i = 0; i < entries.size(); i++) {
+        FileData entry = entries.get(i);
         statement.clearBindings();
         statement.bindString(1, entry.location);
         statement.bindString(2, parentLocation);
@@ -110,6 +115,7 @@ final class FilesDb extends SQLiteOpenHelper {
         if (i % 1000 == 0) {
           db.yieldIfContendedSafely();
         }
+        logger.debug("Insert %s", entry.location);
       }
     } finally {
       statement.close();
@@ -118,10 +124,12 @@ final class FilesDb extends SQLiteOpenHelper {
 
   public static void deleteChildren(SQLiteDatabase db, String parentLocation) {
     db.delete(TABLE_FILES, PARENT_LOCATION + "=?", new String[]{parentLocation});
+    logger.debug("Delete children %s", parentLocation);
   }
 
   public static void deleteChild(SQLiteDatabase db, String childLocation) {
     db.delete(TABLE_FILES, LOCATION + "=?", new String[]{childLocation});
+    logger.debug("Delete %s", childLocation);
   }
 
   @Override public void onCreate(SQLiteDatabase db) {
@@ -174,7 +182,7 @@ final class FilesDb extends SQLiteOpenHelper {
     selectionArgs = appendSelectionArgs(selectionArgs, new String[]{location});
 
     // Start before doing anything else to speed loading time
-    if (queried.add(location) || !manager.isStarted(parent)) {
+    if (!manager.isStarted(parent)) {
       executor.execute(new Runnable() {
         @Override public void run() {
           updateAndMonitor(uri, parent);
@@ -200,88 +208,21 @@ final class FilesDb extends SQLiteOpenHelper {
    * be updated and monitored, false if it's already being monitored.
    */
   private void updateAndMonitor(final Uri uri, final File parent) {
-    manager.start(parent);
+    // TODO null out?
+    Optional<Map<File, Stat>> result = manager.start(parent);
+    if (result.isPresent()) {
+      String parentLocation = getFileLocation(parent);
+      List<FileData> data = FileData.from(result.get());
 
-    // TODO symlinks to directories shouldn't be included
-    Set<String> dirs = update(uri, parent);
-    synchronized (this) {
-      for (String childPath : dirs) {
-        manager.start(new File(childPath));
+      SQLiteDatabase db = getWritableDatabase();
+      db.beginTransaction();
+      try {
+        replaceChildren(db, parentLocation, data);
+        db.setTransactionSuccessful();
+      } finally {
+        db.endTransaction();
       }
     }
-
     context.getContentResolver().notifyChange(uri, null);
-  }
-
-  /**
-   * @return the paths of the children that are directories
-   */
-  private Set<String> update(Uri uri, File parent) {
-    post(bus(), new LoadStarted(uri), handler);
-
-    Set<String> dirs = newHashSet();
-    String parentLocation = getFileLocation(parent);
-    FileData[] entries = loadChildren(uri, parent, dirs);
-
-    SQLiteDatabase db = getWritableDatabase();
-    db.beginTransaction();
-    try {
-      replaceChildren(db, parentLocation, entries);
-      db.setTransactionSuccessful();
-    } finally {
-      db.endTransaction();
-    }
-
-    post(bus(), new LoadFinished(uri), handler);
-
-    return dirs;
-  }
-
-  /*
-   * Calling methods on java.io.File (e.g. lastModified, length, etc) is
-   * relatively expensive (except getName as it doesn't require a call to the
-   * OS). On a large directory, this process can take minutes (Galaxy Nexus,
-   * /storage/emulated/0/DCIM/.thumbnails with ~20,000 files took 1 to 4 minutes
-   * to load, where File.listFiles took around 2 ~ 3 seconds to return).
-   *
-   * It doesn't seem to make a difference in time whether only one property
-   * method is called or all properties are called. Ideally such calls to the
-   * properties can be avoided until needed, but they are needed upfront because
-   * of sorting, such as sorting by last modified date.
-   *
-   * So take the loading out of the transaction.
-   */
-  private FileData[] loadChildren(Uri uri, File parent, Set<String> dirs) {
-    String[] names = parent.list();
-    if (names == null) {
-      names = new String[0];
-    }
-
-    Stopwatch watch = Stopwatch.createStarted();
-    FileData[] entries = new FileData[names.length];
-    for (int i = 0; i < entries.length; i++) {
-      String name = names[i];
-      String path = parent.getAbsolutePath() + "/" + name;
-      try { // TODO
-        entries[i] = FileData.from(Stat.stat(path), path, name);
-      } catch (OsException e) {
-        entries[i] = FileData.from(new File(parent, name));
-        logger.warn(e);
-      }
-      postLoadProgressIfOkay(watch, uri, i + 1, names.length);
-      if (intToBoolean(entries[i].directory)) {
-        dirs.add(entries[i].path);
-      }
-    }
-    postLoadProgressIfOkay(watch, uri, names.length, names.length);
-    return entries;
-  }
-
-  private void postLoadProgressIfOkay(
-      Stopwatch watch, Uri uri, int progress, int max) {
-    if (watch.elapsed(MILLISECONDS) >= 500) {
-      post(bus(), new LoadProgress(uri, progress, max), handler);
-      watch.reset().start();
-    }
   }
 }

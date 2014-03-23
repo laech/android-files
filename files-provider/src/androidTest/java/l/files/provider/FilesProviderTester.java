@@ -136,6 +136,10 @@ final class FilesProviderTester {
       @Override public void run() {
         type.create(dir().get(path));
       }
+
+      @Override public String toString() {
+        return "Create \"" + path + "\" (" + type + ").";
+      }
     };
   }
 
@@ -248,6 +252,10 @@ final class FilesProviderTester {
       @Override public void run() {
         type.set(dir().get(path), value);
       }
+
+      @Override public String toString() {
+        return "Set permission (" + type + ") to " + value + ".";
+      }
     };
   }
 
@@ -346,8 +354,8 @@ final class FilesProviderTester {
   }
 
   private static void verify(Cursor cursor, File[] files, File parent) {
-    List<String> expected = getNames(files);
-    List<String> actual = getNames(cursor);
+    List<String> expected = getLocations(files);
+    List<String> actual = getLocations(cursor);
     assertEquals("Children mismatch for dir: " + parent, expected, actual);
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
@@ -362,19 +370,19 @@ final class FilesProviderTester {
     }
   }
 
-  private static List<String> getNames(Cursor cursor) {
+  private static List<String> getLocations(Cursor cursor) {
     List<String> names = newArrayListWithCapacity(cursor.getCount());
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
-      names.add(getName(cursor));
+      names.add(getLocation(cursor));
     }
     return names;
   }
 
-  private static List<String> getNames(File[] files) {
+  private static List<String> getLocations(File[] files) {
     List<String> names = newArrayListWithCapacity(files.length);
     for (File file : files) {
-      names.add(file.getName());
+      names.add(getFileLocation(file));
     }
     return names;
   }
@@ -400,7 +408,7 @@ final class FilesProviderTester {
       try {
         Object msg = queue.poll(AWAIT_TIMEOUT, AWAIT_TIMEOUT_UNIT);
         if (msg == null) {
-          fail("Timed out. " + code.toString() + ". Count = " + count);
+          fail("Timed out. Count = " + count + ". " + code.toString());
         }
         if (verify.get()) {
           return;

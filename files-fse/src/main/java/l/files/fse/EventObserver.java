@@ -1,47 +1,59 @@
-package l.files.provider;
+package l.files.fse;
 
 import android.os.FileObserver;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.io.File;
-import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.common.logging.Logger;
 
-import static l.files.common.io.Files.normalize;
+import static java.util.Arrays.asList;
 
-@VisibleForTesting
-public class DirWatcher extends FileObserver {
+final class EventObserver extends FileObserver {
 
-  private static final Logger logger = Logger.get(DirWatcher.class);
+  private static final Logger logger = Logger.get(EventObserver.class);
 
-  private final File dir;
+  private final String path;
 
-  private final Set<DirWatcherListener> listeners;
+  private final Set<EventListener> listeners;
+  private final Set<String> paths;
 
-  public DirWatcher(File dir, int mask) {
-    super(dir.getAbsolutePath(), mask);
-    this.dir = normalize(dir);
+  public EventObserver(String path, int mask) {
+    super(path, mask);
+    this.path = path;
     this.listeners = new CopyOnWriteArraySet<>();
+    this.paths = new CopyOnWriteArraySet<>();
   }
 
-  public void addListeners(Collection<? extends DirWatcherListener> listeners) {
-    this.listeners.addAll(listeners);
+  public void addListeners(EventListener... listeners) {
+    this.listeners.addAll(asList(listeners));
   }
 
-  public void removeListeners(Collection<? extends DirWatcherListener> listeners) {
-    this.listeners.removeAll(listeners);
+  public Set<String> getPaths() {
+    return paths;
   }
 
-  @Deprecated
+  public void addPath(String path) {
+    paths.add(path);
+  }
+
+  public void removePath(String path) {
+    paths.remove(path);
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  @Deprecated // TODO
   public File getDirectory() {
-    return dir;
+    return new File(path);
   }
 
   @Override public void onEvent(int event, final String path) {
+    log(event, path);
+
     // TODO any Throwable here will just be caught by FileObserver and logged, not good
 
     if ((event & OPEN) != 0) onOpen(path);
@@ -56,76 +68,74 @@ public class DirWatcher extends FileObserver {
     if ((event & CLOSE_WRITE) != 0) onCloseWrite(path);
     if ((event & DELETE_SELF) != 0) onDeleteSelf(path);
     if ((event & CLOSE_NOWRITE) != 0) onCloseNoWrite(path);
-
-    log(event, path);
   }
 
   private void onCloseNoWrite(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onCloseNoWrite(path);
     }
   }
 
   private void onDeleteSelf(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onDeleteSelf(path);
     }
   }
 
   private void onCloseWrite(String path) {
-    for (DirWatcherListener listener : listeners)
+    for (EventListener listener : listeners)
       listener.onCloseWrite(path);
   }
 
   private void onMovedFrom(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onMovedFrom(path);
     }
   }
 
   private void onMoveSelf(String path) {
-    for (DirWatcherListener listener : listeners)
+    for (EventListener listener : listeners)
       listener.onMoveSelf(path);
   }
 
   private void onMovedTo(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onMovedTo(path);
     }
   }
 
   private void onModify(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onModify(path);
     }
   }
 
   private void onDelete(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onDelete(path);
     }
   }
 
   private void onCreate(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onCreate(path);
     }
   }
 
   private void onAttrib(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onAttrib(path);
     }
   }
 
   private void onAccess(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onAccess(path);
     }
   }
 
   private void onOpen(String path) {
-    for (DirWatcherListener listener : listeners) {
+    for (EventListener listener : listeners) {
       listener.onOpen(path);
     }
   }
@@ -145,7 +155,7 @@ public class DirWatcher extends FileObserver {
     if ((event & CLOSE_NOWRITE) != 0) debug("CLOSE_NOWRITE", path);
   }
 
-  private void debug(String event, String path) {
-    logger.debug("%s, parent=%s, path=%s", event, dir, path);
+  private void debug(String event, String child) {
+    logger.debug("%s, parent=%s, path=%s", event, path, child);
   }
 }

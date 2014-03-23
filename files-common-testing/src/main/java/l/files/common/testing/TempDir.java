@@ -14,8 +14,12 @@ import static junit.framework.Assert.assertTrue;
 public final class TempDir {
 
   public static TempDir create() {
+    return create("test");
+  }
+
+  public static TempDir create(String prefix) {
     try {
-      File file = createTempFile("test", null);
+      File file = createTempFile(prefix, null);
       assertTrue(file.delete());
       assertTrue(file.mkdir());
       return new TempDir(file);
