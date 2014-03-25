@@ -1,6 +1,8 @@
 package l.files.fse;
 
 import android.os.FileObserver;
+import android.os.Handler;
+import android.os.Message;
 
 import java.io.File;
 import java.util.Set;
@@ -8,11 +10,25 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.common.logging.Logger;
 
+import static android.os.Looper.getMainLooper;
 import static java.util.Arrays.asList;
 
 final class EventObserver extends FileObserver {
 
   private static final Logger logger = Logger.get(EventObserver.class);
+
+  /**
+   * FileObserver will catch any throwable and ignore it, not good as we won't
+   * be notified of any coding errors. Instead we catch the exception and send
+   * it off to the main thread and rethrow it there, this will cause the
+   * application to crash and we can fix the root cause.
+   */
+  private static final Handler rethrow = new Handler(getMainLooper()) {
+    @Override public void handleMessage(Message msg) {
+      super.handleMessage(msg);
+      throw (RuntimeException) msg.obj;
+    }
+  };
 
   private final String path;
 
@@ -52,9 +68,16 @@ final class EventObserver extends FileObserver {
   }
 
   @Override public void onEvent(int event, final String path) {
-    log(event, path);
+    try {
+      handleEvent(event, path);
+    } catch (Throwable e) {
+      Message.obtain(rethrow, 0, e).sendToTarget();
+      stopWatching();
+    }
+  }
 
-    // TODO any Throwable here will just be caught by FileObserver and logged, not good
+  private void handleEvent(int event, String path) {
+    log(event, path);
 
     if ((event & OPEN) != 0) onOpen(path);
     if ((event & ACCESS) != 0) onAccess(path);
