@@ -78,13 +78,10 @@ public final class FileEventService_DELETE_InitiatedTest extends FileEventServic
     tmp().createDir("a/b/c");
     tester()
         .awaitCreateFile("a/b/c/d", "a/b/c")
-        .awaitDeleteRoot()
-        .run(new Runnable() {
-          @Override public void run() {
-            tmp().createDir("a/b/c");
-          }
-        })
-        .awaitCreateFile("a/b/c/d", "a/b/c");
+        .awaitDeleteRoot();
+
+    tmp().createDir("a/b/c");
+    tester().awaitCreateFile("a/b/c/d", "a/b/c");
   }
 
   /**

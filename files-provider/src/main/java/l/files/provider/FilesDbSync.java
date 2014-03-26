@@ -28,15 +28,15 @@ final class FilesDbSync implements FileEventListener {
   FilesDbSync(Context context, SQLiteOpenHelper helper) {
     this.context = checkNotNull(context, "context");
     this.helper = checkNotNull(helper, "helper");
-    this.manager = FileEventService.create();
+    this.manager = FileEventService.get();
     this.manager.register(this);
   }
 
-  @Override public void onFileAdded(String parent, String path) {
+  @Override public void onFileAdded(int event, String parent, String path) {
     onFileAddedOrChanged(parent, path);
   }
 
-  @Override public void onFileChanged(String parent, String path) {
+  @Override public void onFileChanged(int event, String parent, String path) {
     onFileAddedOrChanged(parent, path);
   }
 
@@ -51,7 +51,7 @@ final class FilesDbSync implements FileEventListener {
     }, parentUri);
   }
 
-  @Override public void onFileRemoved(final String parent, final String path) {
+  @Override public void onFileRemoved(int event, final String parent, final String path) {
     final String parentLocation = getFileLocation(new File(parent));
     final String childLocation = getFileLocation(new File(parent, path));
     final Uri parentUri = buildFileUri(context, parentLocation);

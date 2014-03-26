@@ -5,6 +5,7 @@ import android.os.FileObserver;
 import com.google.common.base.Optional;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -54,7 +55,7 @@ final class FileEventServiceImpl extends FileEventService
    * such as adding/removing files in the child directory, which will cause the
    * child directory's last modified timestamp to be changed.
    */
-  private final Set<String> monitored = new CopyOnWriteArraySet<>();
+  private final Set<String> monitored = new HashSet<>();
 
   /**
    * inotify operates on inodes, there could be multiple paths pointing to the
@@ -91,7 +92,9 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   private boolean isMonitored(String path) {
-    return monitored.contains(path);
+    synchronized (this) {
+      return monitored.contains(path);
+    }
   }
 
   @Override public boolean hasObserver(File file) {
@@ -115,8 +118,8 @@ final class FileEventServiceImpl extends FileEventService
     try {
       inode = stat(file.getPath()).ino;
     } catch (OsException e) {
-      logger.warn(e, "Failed to stat %s", file);
-      return Optional.absent();
+      // TODO
+      throw new RuntimeException(file.toString(), e);
     }
     String path = getNormalizedPath(file);
     synchronized (this) {
@@ -220,17 +223,18 @@ final class FileEventServiceImpl extends FileEventService
     return Stat.stat(path);
   }
 
-  @Override public void onFileChanged(String parent, String path) {
+  @Override public void onFileChanged(int event, String parent, String path) {
     if (isMonitored(parent)) {
       for (FileEventListener listener : listeners) {
-        listener.onFileChanged(parent, path);
+        listener.onFileChanged(event, parent, path);
       }
     }
   }
 
-  @Override public void onFileAdded(String parent, String child) {
+  @Override public void onFileAdded(int event, String parent, String child) {
     String path = parent + "/" + child;
-    if (new File(path).isDirectory() && isMonitored(parent)) {
+    File file = new File(path);
+    if (file.isDirectory() && isMonitored(parent)) {
       try {
         startObserver(path, stat(path).ino);
       } catch (OsException e) {
@@ -238,11 +242,11 @@ final class FileEventServiceImpl extends FileEventService
       }
     }
     for (FileEventListener listener : listeners) {
-      listener.onFileAdded(parent, child);
+      listener.onFileAdded(event, parent, child);
     }
   }
 
-  @Override public void onFileRemoved(String parent, String child) {
+  @Override public void onFileRemoved(int event, String parent, String child) {
     String path = parent + "/" + child;
     synchronized (this) {
       Iterator<EventObserver> it = observers.values().iterator();
@@ -259,7 +263,7 @@ final class FileEventServiceImpl extends FileEventService
       }
     }
     for (FileEventListener listener : listeners) {
-      listener.onFileRemoved(parent, child);
+      listener.onFileRemoved(event, parent, child);
     }
   }
 }

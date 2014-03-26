@@ -7,7 +7,6 @@ import java.util.concurrent.Executor;
 import l.files.common.logging.Logger;
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
-import l.files.fse.FileEventService;
 
 abstract class FilesProviderTestBase extends FileBaseTest {
 
@@ -26,7 +25,6 @@ abstract class FilesProviderTestBase extends FileBaseTest {
   }
 
   @Override protected void tearDown() throws Exception {
-    FileEventService.create().stopAll();
     super.tearDown();
     FilesDb.executor = originalExecutor;
     Logger.resetDebugTagPrefix();

@@ -8,13 +8,27 @@ import java.util.Map;
 import l.files.os.Stat;
 
 /**
- * TODO doc
+ * Service for monitoring file events.
+ * <p/>
+ * Note that by the time a listener is notified, the target file may have
+ * already be changed, therefore a robust application should have an alternative
+ * way of handling the changes.
  */
 public abstract class FileEventService {
+
+  /*
+    Note:
+    Two FileObserver instances cannot be monitoring on the same inode, if one is
+    stopped, the other will also be stopped, because FileObserver internally
+    uses global states.
+   */
+
   FileEventService() {}
 
-  public static FileEventService create() {
-    return new FileEventServiceImpl();
+  private static final FileEventService INSTANCE = new FileEventServiceImpl();
+
+  public static FileEventService get() {
+    return INSTANCE;
   }
 
   /**
@@ -54,4 +68,3 @@ public abstract class FileEventService {
    */
   public abstract boolean hasObserver(File file);
 }
-

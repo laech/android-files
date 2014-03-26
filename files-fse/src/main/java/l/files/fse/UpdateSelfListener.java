@@ -2,6 +2,13 @@ package l.files.fse;
 
 import java.io.File;
 
+import static android.os.FileObserver.ATTRIB;
+import static android.os.FileObserver.CREATE;
+import static android.os.FileObserver.DELETE;
+import static android.os.FileObserver.DELETE_SELF;
+import static android.os.FileObserver.MOVED_FROM;
+import static android.os.FileObserver.MOVED_TO;
+import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -26,45 +33,45 @@ final class UpdateSelfListener extends EventAdapter {
     super.onAttrib(path);
     boolean self = path == null;
     if (self) {
-      updateSelf();
+      updateSelf(ATTRIB);
     }
   }
 
   @Override public void onCreate(String path) {
     super.onCreate(path);
-    updateSelf();
+    updateSelf(CREATE);
   }
 
   @Override public void onMovedTo(String path) {
     super.onMovedTo(path);
-    updateSelf();
+    updateSelf(MOVED_TO);
   }
 
   @Override public void onMovedFrom(String path) {
     super.onMovedFrom(path);
-    updateSelf();
+    updateSelf(MOVED_FROM);
   }
 
   @Override public void onDelete(String path) {
     super.onDelete(path);
-    updateSelf();
+    updateSelf(DELETE);
   }
 
   @Override public void onMoveSelf(String path) {
     super.onMoveSelf(path);
-    deleteSelf();
+    deleteSelf(MOVE_SELF);
   }
 
   @Override public void onDeleteSelf(String path) {
     super.onDeleteSelf(path);
-    deleteSelf();
+    deleteSelf(DELETE_SELF);
   }
 
-  private void deleteSelf() {
-    listener.onFileRemoved(parent, path);
+  private void deleteSelf(int event) {
+    listener.onFileRemoved(event, parent, path);
   }
 
-  private void updateSelf() {
-    listener.onFileChanged(parent, path);
+  private void updateSelf(int event) {
+    listener.onFileChanged(event, parent, path);
   }
 }

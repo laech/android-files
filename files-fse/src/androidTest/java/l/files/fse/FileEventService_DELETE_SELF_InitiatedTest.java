@@ -12,26 +12,16 @@ public final class FileEventService_DELETE_SELF_InitiatedTest extends FileEventS
   public void testDeleteSelfThenCreateSelf() {
     Logger.setDebugTagPrefix("testDeleteSelfThenCreateSelf");
     tester()
-        .monitor()
-        .run(new Runnable() {
-          @Override public void run() {
-            tmp().delete();
-            tmp().createRoot();
-          }
-        })
+        .awaitDeleteRoot()
+        .awaitCreateRoot()
         .awaitCreateDir("a");
   }
 
   public void testDeleteSelfMoveDirWithSameNameIn() {
     Logger.setDebugTagPrefix("testDeleteSelfMoveDirWithSameNameIn");
     tester()
-        .monitor()
-        .run(new Runnable() {
-          @Override public void run() {
-            tmp().delete();
-            assertTrue(helper().createDir("a").renameTo(tmp().get()));
-          }
-        })
+        .awaitDeleteRoot()
+        .awaitMoveToRoot(helper().createDir("a"))
         .awaitCreateDir("b");
   }
 
