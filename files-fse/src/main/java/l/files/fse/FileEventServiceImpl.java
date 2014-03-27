@@ -161,14 +161,13 @@ final class FileEventServiceImpl extends FileEventService
       boolean newObserver = (observer == null);
       if (newObserver) {
         observer = new EventObserver(path, MODIFICATION_MASK);
-        observer.addListeners(new StopSelfListener(observer, this, inode));
+        observer.addListener(new StopSelfListener(observer, this, inode));
         observers.put(inode, observer);
       }
 
       observer.addPath(path);
-      observer.addListeners(
-          new UpdateSelfListener(path, this),
-          new UpdateChildrenListener(path, this));
+      observer.addListener(new UpdateSelfListener(path, this));
+      observer.addListener(new UpdateChildrenListener(path, this));
 
       if (newObserver) {
         observer.startWatching();

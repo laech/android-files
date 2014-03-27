@@ -10,7 +10,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import l.files.common.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
-import static java.util.Arrays.asList;
 
 final class EventObserver extends FileObserver {
 
@@ -41,8 +40,8 @@ final class EventObserver extends FileObserver {
     addPath(path);
   }
 
-  public void addListeners(EventListener... listeners) {
-    this.listeners.addAll(asList(listeners));
+  public void addListener(EventListener listener) {
+    this.listeners.add(listener);
   }
 
   /**
