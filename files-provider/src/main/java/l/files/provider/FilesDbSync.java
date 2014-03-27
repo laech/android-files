@@ -10,6 +10,7 @@ import com.google.common.base.Optional;
 import java.io.File;
 import java.util.Map;
 
+import l.files.fse.EventException;
 import l.files.fse.FileEventService;
 import l.files.fse.FileEventListener;
 import l.files.os.Stat;
@@ -82,7 +83,7 @@ final class FilesDbSync implements FileEventListener {
     return manager.isMonitored(file);
   }
 
-  public Optional<Map<File, Stat>> start(File file) {
+  public Optional<Map<File, Stat>> start(File file) throws EventException {
     return manager.monitor(file);
   }
 }

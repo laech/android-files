@@ -15,6 +15,7 @@ import com.google.common.base.Optional;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import l.files.common.logging.Logger;
+import l.files.fse.EventException;
 import l.files.os.Stat;
 
 import static android.database.DatabaseUtils.appendSelectionArgs;
@@ -209,7 +211,15 @@ final class FilesDb extends SQLiteOpenHelper {
    */
   private void updateAndMonitor(final Uri uri, final File parent) {
     // TODO null out?
-    Optional<Map<File, Stat>> result = manager.start(parent);
+    Optional<Map<File, Stat>> result;
+    try {
+      result = manager.start(parent);
+    } catch (EventException e) {
+      // Failed, likely to be no permission or no longer exists,
+      // so clear existing children
+      result = Optional.of(Collections.<File, Stat>emptyMap());
+      logger.warn(e);
+    }
     if (result.isPresent()) {
       String parentLocation = getFileLocation(parent);
       List<FileData> data = FileData.from(result.get());

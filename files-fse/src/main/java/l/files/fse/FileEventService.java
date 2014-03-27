@@ -42,9 +42,10 @@ public abstract class FileEventService {
    * path will be sent to all registered listeners.
    *
    * @return if this is the first time the path is being monitored, returns the
-   * children information (if any)
+   * children information (if any) successfully retrieved
+   * @throws EventException if failed to monitor the given file
    */
-  public abstract Optional<Map<File, Stat>> monitor(File file); // TODO return something better
+  public abstract Optional<Map<File, Stat>> monitor(File file);
 
   /**
    * Checks whether the given file is currently being monitored.

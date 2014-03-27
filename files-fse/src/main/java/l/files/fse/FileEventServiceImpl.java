@@ -114,13 +114,14 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   @Override public Optional<Map<File, Stat>> monitor(File file) {
+
     long inode;
     try {
       inode = stat(file.getPath()).ino;
     } catch (OsException e) {
-      // TODO
-      throw new RuntimeException(file.toString(), e);
+      throw new EventException("Failed to stat " + file, e);
     }
+
     String path = getNormalizedPath(file);
     synchronized (this) {
       if (!monitored.add(path)) {
