@@ -8,11 +8,17 @@ import java.util.Map;
 import l.files.os.Stat;
 
 /**
- * Service for monitoring file events.
+ * Service designed for monitoring file changes within a directory.
+ * <p/>
+ * When {@link #monitor(File)} on a directory, all files/directories of the
+ * given directory will be monitored for changes (non-recursive), including file
+ * addition/modification/deletion and anything that changes the attribute of the
+ * files/directories. This is non-recursive, meaning only changes to
+ * files/directories at the current depth level will be reported.
  * <p/>
  * Note that by the time a listener is notified, the target file may have
  * already be changed, therefore a robust application should have an alternative
- * way of handling the changes.
+ * way of handling instead of reply on this fully.
  */
 public abstract class FileEventService {
 
