@@ -62,10 +62,8 @@ final class FileEventServiceImpl extends FileEventService
    * same inode, for example, hard links, file systems mounted on different
    * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
    * /storage/sdcard0, they are all mount points of the same device).
-   * <p/>
-   * TODO inodes are not unique across partitions
    */
-  private final Map<Long, EventObserver> observers = newHashMap();
+  private final Map<Node, EventObserver> observers = newHashMap();
 
   private final Set<FileEventListener> listeners = new CopyOnWriteArraySet<>();
 
@@ -115,9 +113,9 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public Optional<Map<File, Stat>> monitor(File file) {
 
-    long inode;
+    Node node;
     try {
-      inode = stat(file.getPath()).ino;
+      node = Node.from(stat(file.getPath()));
     } catch (OsException e) {
       throw new EventException("Failed to stat " + file, e);
     }
@@ -127,7 +125,7 @@ final class FileEventServiceImpl extends FileEventService
       if (!monitored.add(path)) {
         return Optional.absent();
       }
-      startObserver(path, inode);
+      startObserver(path, node);
     }
     return startObserversForSubDirs(file);
   }
@@ -149,21 +147,21 @@ final class FileEventServiceImpl extends FileEventService
       }
       stats.put(child, stat);
       if (S_ISDIR(stat.mode)) {
-        startObserver(child.getPath(), stat.ino);
+        startObserver(child.getPath(), Node.from(stat));
       }
     }
     return Optional.of(stats);
   }
 
-  private void startObserver(String path, long inode) {
+  private void startObserver(String path, Node node) {
     synchronized (this) {
 
-      EventObserver observer = observers.get(inode);
+      EventObserver observer = observers.get(node);
       boolean newObserver = (observer == null);
       if (newObserver) {
         observer = new EventObserver(path, MODIFICATION_MASK);
-        observer.addListener(new StopSelfListener(observer, this, inode));
-        observers.put(inode, observer);
+        observer.addListener(new StopSelfListener(observer, this, node));
+        observers.put(node, observer);
       }
 
       observer.addPath(path);
@@ -236,7 +234,7 @@ final class FileEventServiceImpl extends FileEventService
     File file = new File(path);
     if (file.isDirectory() && isMonitored(parent)) {
       try {
-        startObserver(path, stat(path).ino);
+        startObserver(path, Node.from(stat(path)));
       } catch (OsException e) {
         logger.warn(e, "Failed to stat %s", path);
       }

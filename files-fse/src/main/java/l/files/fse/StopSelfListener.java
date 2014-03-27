@@ -2,9 +2,9 @@ package l.files.fse;
 
 import l.files.common.logging.Logger;
 import l.files.os.OsException;
-import l.files.os.Stat;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.os.Stat.stat;
 
 /**
  * A listener that will stop the file observer when the directory is deleted or
@@ -16,12 +16,17 @@ final class StopSelfListener extends EventAdapter {
 
   private final EventObserver observer;
   private final Callback callback;
-  private final long inode;
+  private final Node node;
 
-  StopSelfListener(EventObserver observer, Callback callback, long inode) {
+  /**
+   * @param observer the observer this listener is registered to
+   * @param callback the callback to be notified when observer is stopped
+   * @param node the node of the currently monitored file path
+   */
+  StopSelfListener(EventObserver observer, Callback callback, Node node) {
     this.observer = checkNotNull(observer, "observer");
     this.callback = checkNotNull(callback, "callback");
-    this.inode = inode;
+    this.node = checkNotNull(node, "node");
   }
 
   @Override public void onDeleteSelf(String path) {
@@ -41,7 +46,7 @@ final class StopSelfListener extends EventAdapter {
      * will be wrong.
      */
     try {
-      if (Stat.stat(observer.getPath()).ino != inode) {
+      if (!Node.from(stat(observer.getPath())).equals(node)) {
         stop();
       }
     } catch (OsException e) {
