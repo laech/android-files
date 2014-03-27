@@ -1,5 +1,9 @@
 package l.files.fse;
 
+import l.files.common.logging.Logger;
+import l.files.os.OsException;
+import l.files.os.Stat;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -8,12 +12,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class StopSelfListener extends EventAdapter {
 
+  private static final Logger logger = Logger.get(StopSelfListener.class);
+
   private final EventObserver observer;
   private final Callback callback;
+  private final long inode;
 
-  StopSelfListener(EventObserver observer, Callback callback) {
+  StopSelfListener(EventObserver observer, Callback callback, long inode) {
     this.observer = checkNotNull(observer, "observer");
     this.callback = checkNotNull(callback, "callback");
+    this.inode = inode;
   }
 
   @Override public void onDeleteSelf(String path) {
@@ -24,7 +32,6 @@ final class StopSelfListener extends EventAdapter {
   @Override public void onMoveSelf(String path) {
     super.onMoveSelf(path);
 
-    // TODO better handle this, check the inode
     /*
      * Sometimes when a directory is moved from else where, a MOVE_TO is
      * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
@@ -33,8 +40,13 @@ final class StopSelfListener extends EventAdapter {
      * somewhere else and a new one is quickly added in place, then this code
      * will be wrong.
      */
-    if (!observer.getDirectory().exists()) {
+    try {
+      if (Stat.stat(observer.getPath()).ino != inode) {
+        stop();
+      }
+    } catch (OsException e) {
       stop();
+      logger.info(e, "Stopping observer on exception %s", observer.getPath());
     }
   }
 

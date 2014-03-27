@@ -3,6 +3,7 @@ package l.files.common.logging;
 import android.util.Log;
 
 import static android.util.Log.DEBUG;
+import static android.util.Log.INFO;
 import static android.util.Log.WARN;
 import static android.util.Log.isLoggable;
 import static java.lang.String.format;
@@ -72,6 +73,12 @@ public final class Logger {
   public void warn(Throwable err) {
     if (isLoggable(tag, WARN)) {
       Log.w(debugTagPrefix + tag, err);
+    }
+  }
+
+  public void info(Throwable err, String format, String arg) {
+    if (isLoggable(tag, INFO)) {
+      Log.i(tag, format(format, arg), err);
     }
   }
 }
