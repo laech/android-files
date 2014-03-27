@@ -4,7 +4,6 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 
-import java.io.File;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -31,7 +30,6 @@ final class EventObserver extends FileObserver {
   };
 
   private final String path;
-
   private final Set<EventListener> listeners;
   private final Set<String> paths;
 
@@ -40,31 +38,43 @@ final class EventObserver extends FileObserver {
     this.path = path;
     this.listeners = new CopyOnWriteArraySet<>();
     this.paths = new CopyOnWriteArraySet<>();
+    addPath(path);
   }
 
   public void addListeners(EventListener... listeners) {
     this.listeners.addAll(asList(listeners));
   }
 
+  /**
+   * Gets the paths that has been added to this observer.
+   */
   public Set<String> getPaths() {
     return paths;
   }
 
+  /**
+   * Adds a path to this observer, the given path must have the same inode as
+   * {@link #getPath()}. This observer does not use the given path, this method
+   * exists simply as a utility for callers to keep track of paths that are
+   * pointed to the same inode. Does nothing if the path has already been
+   * added.
+   */
   public void addPath(String path) {
     paths.add(path);
   }
 
+  /**
+   * Removes the given path from this observer.
+   */
   public void removePath(String path) {
     paths.remove(path);
   }
 
+  /**
+   * Gets the initial path used to construct this observer.
+   */
   public String getPath() {
     return path;
-  }
-
-  @Deprecated // TODO
-  public File getDirectory() {
-    return new File(path);
   }
 
   @Override public void onEvent(int event, final String path) {
