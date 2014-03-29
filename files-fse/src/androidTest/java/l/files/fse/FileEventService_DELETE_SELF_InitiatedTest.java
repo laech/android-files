@@ -1,5 +1,8 @@
 package l.files.fse;
 
+import android.os.SystemClock;
+
+import l.files.common.app.SystemServices;
 import l.files.common.logging.Logger;
 
 /**
@@ -7,7 +10,7 @@ import l.files.common.logging.Logger;
  *
  * @see android.os.FileObserver#DELETE_SELF
  */
-public final class FileEventService_DELETE_SELF_InitiatedTest extends FileEventServiceBaseTest {
+public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventServiceBaseTest {
 
   public void testDeleteSelfThenCreateSelf() {
     Logger.setDebugTagPrefix("testDeleteSelfThenCreateSelf");
@@ -29,6 +32,7 @@ public final class FileEventService_DELETE_SELF_InitiatedTest extends FileEventS
    * When the monitored directory itself is deleted, stopping monitoring on it.
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
+    Logger.setDebugTagPrefix("testDeleteSelfNoLongerMonitorSelf");
     tester().monitor();
     assertTrue(manager().isMonitored(tmp().get()));
     assertTrue(manager().hasObserver(tmp().get()));

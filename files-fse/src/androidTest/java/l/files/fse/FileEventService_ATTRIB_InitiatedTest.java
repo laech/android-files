@@ -13,7 +13,7 @@ import static l.files.fse.EventServiceTester.PermissionType.WRITE;
  *
  * @see android.os.FileObserver#ATTRIB
  */
-public final class FileEventService_ATTRIB_InitiatedTest extends FileEventServiceBaseTest {
+public class FileEventService_ATTRIB_InitiatedTest extends FileEventServiceBaseTest {
 
   public void testSetFileReadable() {
     testSetAttr("fr", FILE, READ);

@@ -1,11 +1,13 @@
 package l.files.fse;
 
+import l.files.common.logging.Logger;
+
 /**
  * Tests file system operations started with move the root directory out.
  *
  * @see android.os.FileObserver#MOVE_SELF
  */
-public final class FileEventService_MOVE_SELF_InitiatedTest extends FileEventServiceBaseTest {
+public class FileEventService_MOVE_SELF_InitiatedTest extends FileEventServiceBaseTest {
 
   /**
    * When the monitored directory itself is moved, stopping monitoring on it.
@@ -25,6 +27,7 @@ public final class FileEventService_MOVE_SELF_InitiatedTest extends FileEventSer
    * children.
    */
   public void testMoveSelfNoLongerMonitorChildren() {
+    Logger.setDebugTagPrefix("testMoveSelfNoLongerMonitorChildren");
     tester().awaitCreateDir("a").monitor("a");
     assertTrue(manager().isMonitored(tmp().get("a")));
     assertTrue(manager().hasObserver(tmp().get("a")));

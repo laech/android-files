@@ -3,10 +3,11 @@ package l.files.fse;
 import android.os.FileObserver;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -25,6 +26,7 @@ import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
 
 // TODO monitoring on root directories (/, /dev, /dev/log etc) will be flooded
@@ -55,7 +57,7 @@ final class FileEventServiceImpl extends FileEventService
    * such as adding/removing files in the child directory, which will cause the
    * child directory's last modified timestamp to be changed.
    */
-  private final Set<String> monitored = new HashSet<>();
+  private final Set<String> monitored = newHashSet();
 
   /**
    * inotify operates on inodes, there could be multiple paths pointing to the
@@ -99,7 +101,7 @@ final class FileEventServiceImpl extends FileEventService
     String path = getNormalizedPath(file);
     synchronized (this) {
       for (EventObserver observer : observers.values()) {
-        if (observer.getPaths().contains(path)) {
+        if (observer.hasPath(path)) {
           return true;
         }
       }
@@ -111,8 +113,46 @@ final class FileEventServiceImpl extends FileEventService
     return new File(file.toURI().normalize()).getAbsolutePath();
   }
 
-  @Override public Optional<Map<File, Stat>> monitor(File file) {
+  /**
+   * This method checks the node in record against the given node for the path,
+   * if they are different, that means the file represented by the path has been
+   * deleted and recreated, but notification has yet to arrive, for example,
+   * delete a file, create a directory in it's place and start monitoring on it,
+   * so quickly that the file system event will be landed after the monitoring.
+   * So here cleans up the current state and will handle the late events
+   * appropriately in listener methods.
+   */
+  private void checkNode(String path, Node node) {
+    for (EventObserver observer : observers.values()) {
+      if (observer.hasPath(path)) {
+        if (!observer.getNode().equals(node)) {
+          observer.stopWatching();
+          onObserverStopped(observer);
+        }
+        return;
+      }
+    }
+  }
 
+  private EventObserver checkObserver(Node node) {
+    EventObserver observer = observers.get(node);
+    if (observer != null) {
+      List<String> removed = observer.removeNonExistPaths();
+      monitored.removeAll(removed);
+      if (observer.getPathCount() == 0) {
+        observer.stopWatching();
+        observers.values().remove(observer);
+        observer = null;
+      }
+      for (String p : removed) {
+        removeMonitored(p + "/");
+        removeObservers(p + "/");
+      }
+    }
+    return observer;
+  }
+
+  @Override public Optional<Map<File, Stat>> monitor(File file) {
     Node node;
     try {
       node = Node.from(stat(file.getPath()));
@@ -122,6 +162,7 @@ final class FileEventServiceImpl extends FileEventService
 
     String path = getNormalizedPath(file);
     synchronized (this) {
+      checkNode(path, node);
       if (!monitored.add(path)) {
         return Optional.absent();
       }
@@ -155,11 +196,11 @@ final class FileEventServiceImpl extends FileEventService
 
   private void startObserver(String path, Node node) {
     synchronized (this) {
-
-      EventObserver observer = observers.get(node);
+      checkNode(path, node);
+      EventObserver observer = checkObserver(node);
       boolean newObserver = (observer == null);
       if (newObserver) {
-        observer = new EventObserver(path, MODIFICATION_MASK);
+        observer = new EventObserver(path, node, MODIFICATION_MASK);
         observer.addListener(new StopSelfListener(observer, this, node));
         observers.put(node, observer);
       }
@@ -178,12 +219,12 @@ final class FileEventServiceImpl extends FileEventService
   @Override public void onObserverStopped(EventObserver observer) {
     logger.debug("Stopped observer %s", observer.getPath());
     synchronized (this) {
-      monitored.removeAll(observer.getPaths());
+      List<String> removed = observer.removePaths();
+      monitored.removeAll(removed);
       observers.values().remove(observer);
-      for (String location : observer.getPaths()) {
-        String prefix = location.endsWith("/") ? location : location + "/";
-        removeMonitored(prefix);
-        removeObservers(prefix);
+      for (String p : removed) {
+        removeMonitored(p + "/");
+        removeObservers(p + "/");
       }
     }
   }
@@ -191,25 +232,28 @@ final class FileEventServiceImpl extends FileEventService
   private void removeMonitored(String pathPrefix) {
     Iterator<String> it = monitored.iterator();
     while (it.hasNext()) {
-      if (it.next().startsWith(pathPrefix)) {
+      String path = it.next();
+      if (path.startsWith(pathPrefix)) {
+        logger.debug("monitored.remove %s", path);
         it.remove();
       }
     }
   }
 
-  private void removeObservers(String pathPrefix) {
+  private void removeObservers(final String pathPrefix) {
     Iterator<EventObserver> it = observers.values().iterator();
     while (it.hasNext()) {
       EventObserver observer = it.next();
-      for (String path : observer.getPaths()) {
-        if (path.startsWith(pathPrefix)) {
-          observer.removePath(path);
-          if (observer.getPaths().isEmpty()) {
-            observer.stopWatching();
-            it.remove();
-            logger.debug("Stopping observer %s", observer.getPath());
-          }
+      List<String> removed = observer.removePaths(new Predicate<String>() {
+        @Override public boolean apply(String input) {
+          return input.startsWith(pathPrefix);
         }
+      });
+      monitored.removeAll(removed);
+      if (observer.getPathCount() == 0) {
+        observer.stopWatching();
+        it.remove();
+        logger.debug("Stopping observer %s", observer.getPath());
       }
     }
   }
@@ -221,16 +265,22 @@ final class FileEventServiceImpl extends FileEventService
     return Stat.stat(path);
   }
 
-  @Override public void onFileChanged(int event, String parent, String path) {
+  @Override public void onFileChanged(int event, String parent, String child) {
+    if (!new File(parent, child).exists()) {
+      return;
+    }
     if (isMonitored(parent)) {
       for (FileEventListener listener : listeners) {
-        listener.onFileChanged(event, parent, path);
+        listener.onFileChanged(event, parent, child);
       }
     }
   }
 
   @Override public void onFileAdded(int event, String parent, String child) {
     String path = parent + "/" + child;
+    if (!new File(path).exists()) {
+      return;
+    }
     File file = new File(path);
     if (file.isDirectory() && isMonitored(parent)) {
       try {
@@ -246,13 +296,18 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public void onFileRemoved(int event, String parent, String child) {
     String path = parent + "/" + child;
+    if (new File(path).exists()) {
+      return;
+    }
     synchronized (this) {
+      monitored.remove(path);
+      removeMonitored(path + "/");
+      removeObservers(path + "/");
       Iterator<EventObserver> it = observers.values().iterator();
       while (it.hasNext()) {
         EventObserver observer = it.next();
-        if (observer.getPaths().contains(path)) {
-          observer.removePath(path);
-          if (observer.getPaths().isEmpty()) {
+        if (observer.removePath(path)) {
+          if (observer.getPathCount() == 0) {
             observer.stopWatching();
             it.remove();
           }

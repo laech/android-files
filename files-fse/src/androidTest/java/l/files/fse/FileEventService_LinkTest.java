@@ -8,7 +8,7 @@ import static java.lang.System.nanoTime;
 import static l.files.os.Stat.stat;
 import static l.files.os.Unistd.symlink;
 
-public final class FileEventServiceLinkTest extends FileEventServiceBaseTest {
+public class FileEventService_LinkTest extends FileEventServiceBaseTest {
 
   /**
    * These paths all mount points of external storage, different paths, but all

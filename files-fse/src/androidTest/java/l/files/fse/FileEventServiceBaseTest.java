@@ -6,28 +6,36 @@ import l.files.common.testing.TempDir;
 
 abstract class FileEventServiceBaseTest extends FileBaseTest {
 
-  private FileEventService manager;
+  private FileEventService service;
   private EventServiceTester tester;
   private TempDir helper;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    // TODO integration test sharing one manager for all tests
-    manager = new FileEventServiceImpl();
-    tester = EventServiceTester.create(manager, tmp());
+    service = createService();
+    tester = EventServiceTester.create(service, tmp());
     helper = TempDir.create("helper");
   }
 
   @Override protected void tearDown() throws Exception {
-    manager.stopAll();
+    if (stopServiceOnTearDown()) {
+      service.stopAll();
+    }
     helper.delete();
     Logger.resetDebugTagPrefix();
     super.tearDown();
-    // TODO integration test sharing one manager for all tests
+  }
+
+  protected FileEventService createService() {
+    return new FileEventServiceImpl();
+  }
+
+  protected boolean stopServiceOnTearDown() {
+    return true;
   }
 
   protected final FileEventService manager() {
-    return manager;
+    return service;
   }
 
   protected final TempDir helper() {

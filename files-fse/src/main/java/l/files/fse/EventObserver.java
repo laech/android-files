@@ -4,12 +4,20 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.common.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
+import static com.google.common.collect.Lists.newArrayList;
 
 final class EventObserver extends FileObserver {
 
@@ -29,26 +37,23 @@ final class EventObserver extends FileObserver {
   };
 
   private final String path;
+  private final Node node;
   private final Set<EventListener> listeners;
   private final Set<String> paths;
 
-  public EventObserver(String path, int mask) {
+  public EventObserver(String path, Node node, int mask) {
     super(path, mask);
     this.path = path;
-    this.listeners = new CopyOnWriteArraySet<>();
-    this.paths = new CopyOnWriteArraySet<>();
+    this.node = node;
+    this.listeners = new LinkedHashSet<>();
+    this.paths = new LinkedHashSet<>();
     addPath(path);
   }
 
   public void addListener(EventListener listener) {
-    this.listeners.add(listener);
-  }
-
-  /**
-   * Gets the paths that has been added to this observer.
-   */
-  public Set<String> getPaths() {
-    return paths;
+    synchronized (this) {
+      this.listeners.add(listener);
+    }
   }
 
   /**
@@ -57,23 +62,82 @@ final class EventObserver extends FileObserver {
    * exists simply as a utility for callers to keep track of paths that are
    * pointed to the same inode. Does nothing if the path has already been
    * added.
+   *
+   * @return true if path is added, false if already exists
    */
-  public void addPath(String path) {
-    paths.add(path);
+  public boolean addPath(String path) {
+    synchronized (this) {
+      return paths.add(path);
+    }
   }
 
   /**
    * Removes the given path from this observer.
+   *
+   * @return true if path is removed, false if path does not exists
    */
-  public void removePath(String path) {
-    paths.remove(path);
+  public boolean removePath(String path) {
+    synchronized (this) {
+      return paths.remove(path);
+    }
+  }
+
+  /**
+   * Remove and returns all the paths that passed the given predicate.
+   */
+  public List<String> removePaths(Predicate<String> pred) {
+    synchronized (this) {
+      List<String> result = Lists.newArrayListWithCapacity(paths.size());
+      Iterator<String> it = paths.iterator();
+      while (it.hasNext()) {
+        String path = it.next();
+        if (pred.apply(path)) {
+          it.remove();
+          result.add(path);
+        }
+      }
+      return result;
+    }
+  }
+
+  public List<String> removeNonExistPaths() {
+    return removePaths(new Predicate<String>() {
+      @Override public boolean apply(String input) {
+        return !new File(input).exists();
+      }
+    });
+  }
+
+  public List<String> removePaths() {
+    synchronized (this) {
+      List<String> result = newArrayList(paths);
+      paths.clear();
+      return result;
+    }
+  }
+
+  public int getPathCount() {
+    synchronized (this) {
+      return paths.size();
+    }
+  }
+
+  public boolean hasPath(String path) {
+    synchronized (this) {
+      return paths.contains(path);
+    }
   }
 
   /**
    * Gets the initial path used to construct this observer.
    */
+  // TODO use node
   public String getPath() {
     return path;
+  }
+
+  public Node getNode() {
+    return node;
   }
 
   @Override public void onEvent(int event, final String path) {
@@ -189,5 +253,9 @@ final class EventObserver extends FileObserver {
 
   private void debug(String event, String child) {
     logger.debug("%s, parent=%s, path=%s", event, path, child);
+  }
+
+  @Override public String toString() {
+    return Objects.toStringHelper(this).addValue(getPath()).toString();
   }
 }

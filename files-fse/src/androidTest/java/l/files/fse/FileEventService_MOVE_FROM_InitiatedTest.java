@@ -7,7 +7,7 @@ package l.files.fse;
  *
  * @see android.os.FileObserver#MOVED_FROM
  */
-public final class FileEventService_MOVE_FROM_InitiatedTest extends FileEventServiceBaseTest {
+public class FileEventService_MOVE_FROM_InitiatedTest extends FileEventServiceBaseTest {
 
   public void testMoveFileOut() throws Exception {
     tmp().createFile("a");

@@ -5,8 +5,8 @@ import android.os.SystemClock;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.logging.Logger;
@@ -27,6 +27,7 @@ import static android.os.FileObserver.OPEN;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static com.google.common.io.Files.touch;
+import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -270,9 +271,8 @@ final class EventServiceTester {
 
       try {
 
-        if (!latch.await(2, SECONDS) ||
-            !listener.tracked.contains(file)) {
-          fail("Timed out waiting for notification." +
+        if (!latch.await(2, SECONDS)) {
+          fail("Timed out waiting for notification. " + runnable.toString() +
               "\nExpected: " + getName(event) + "=" + file +
               "\nActual: " + listener.formatted);
         }
@@ -418,8 +418,8 @@ final class EventServiceTester {
   }
 
   static class TrackingListener implements FileEventListener {
-    final List<File> tracked = new CopyOnWriteArrayList<>();
-    final List<String> formatted = new CopyOnWriteArrayList<>();
+    final List<File> tracked = synchronizedList(new ArrayList<File>());
+    final List<String> formatted = synchronizedList(new ArrayList<String>());
 
     @Override public void onFileAdded(int event, String parent, String path) {
       track(event, parent, path);

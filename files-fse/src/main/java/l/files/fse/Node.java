@@ -34,4 +34,11 @@ final class Node {
     }
     return false;
   }
+
+  @Override public String toString() {
+    return Objects.toStringHelper(this)
+        .add("dev", dev)
+        .add("ino", ino)
+        .toString();
+  }
 }
