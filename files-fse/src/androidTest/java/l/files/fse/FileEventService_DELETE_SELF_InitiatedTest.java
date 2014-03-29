@@ -56,4 +56,20 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
     assertFalse(manager().isMonitored(tmp().get("a")));
     assertFalse(manager().hasObserver(tmp().get("a")));
   }
+
+  public void testDeleteRecreate() {
+    Logger.setDebugTagPrefix("testDeleteRecreate");
+    tester().monitor(tmp().get().getParentFile());
+    tmp().delete();
+    tmp().createRoot();
+    tmp().delete();
+    tmp().createRoot();
+    helper().delete();
+    helper().createRoot();
+    helper().delete();
+    helper().createRoot();
+    tester().awaitMoveRootTo(helper().get("a"));
+    assertTrue(helper().createDir("b").renameTo(tmp().get()));
+    tester().awaitCreateDir("c");
+  }
 }

@@ -3,7 +3,6 @@ package l.files.fse;
 import android.os.FileObserver;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 
 import java.io.File;
 import java.util.Iterator;
@@ -134,6 +133,11 @@ final class FileEventServiceImpl extends FileEventService
     }
   }
 
+  /**
+   * Checks the observer who is monitoring on the given node, involves removing
+   * any paths that no longer exists - these paths have been deleted/moved but
+   * file system notifications are not arrived yet.
+   */
   private EventObserver checkObserver(Node node) {
     EventObserver observer = findObserver(node);
     if (observer != null) {
@@ -145,8 +149,8 @@ final class FileEventServiceImpl extends FileEventService
         observer = null;
       }
       for (String p : removed) {
-        removeMonitored(p + "/");
-        removeObservers(p + "/");
+        removeChildMonitors(p);
+        removeChildObservers(p);
       }
     }
     return observer;
@@ -232,32 +236,28 @@ final class FileEventServiceImpl extends FileEventService
       monitored.removeAll(removed);
       observers.remove(observer);
       for (String p : removed) {
-        removeMonitored(p + "/");
-        removeObservers(p + "/");
+        removeChildMonitors(p);
+        removeChildObservers(p);
       }
     }
   }
 
-  private void removeMonitored(String pathPrefix) {
+  private void removeChildMonitors(String parent) {
+    String prefix = parent + "/";
     Iterator<String> it = monitored.iterator();
     while (it.hasNext()) {
       String path = it.next();
-      if (path.startsWith(pathPrefix)) {
-        logger.debug("monitored.remove %s", path);
+      if (path.startsWith(prefix)) {
         it.remove();
       }
     }
   }
 
-  private void removeObservers(final String pathPrefix) {
+  private void removeChildObservers(String parent) {
     Iterator<EventObserver> it = observers.iterator();
     while (it.hasNext()) {
       EventObserver observer = it.next();
-      List<String> removed = observer.removePaths(new Predicate<String>() {
-        @Override public boolean apply(String input) {
-          return input.startsWith(pathPrefix);
-        }
-      });
+      List<String> removed = observer.removeChildPaths(parent);
       monitored.removeAll(removed);
       if (observer.getPathCount() == 0) {
         observer.stopWatching();
@@ -275,9 +275,6 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   @Override public void onFileChanged(int event, String parent, String child) {
-    if (!new File(parent, child).exists()) {
-      return;
-    }
     if (isMonitored(parent)) {
       for (FileEventListener listener : listeners) {
         listener.onFileChanged(event, parent, child);
@@ -287,14 +284,12 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public void onFileAdded(int event, String parent, String child) {
     String path = parent + "/" + child;
-    if (!new File(path).exists()) {
-      return;
-    }
     File file = new File(path);
     if (file.isDirectory() && isMonitored(parent)) {
       try {
         startObserver(path, Node.from(stat(path)));
       } catch (OsException e) {
+        // Path no longer exists, permission etc, ignore and continue
         logger.warn(e, "Failed to stat %s", path);
       }
     }
@@ -305,27 +300,30 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public void onFileRemoved(int event, String parent, String child) {
     String path = parent + "/" + child;
-    if (new File(path).exists()) {
-      return;
-    }
-    synchronized (this) {
-      monitored.remove(path);
-      removeMonitored(path + "/");
-      removeObservers(path + "/");
-      Iterator<EventObserver> it = observers.iterator();
-      while (it.hasNext()) {
-        EventObserver observer = it.next();
-        if (observer.removePath(path)) {
-          if (observer.getPathCount() == 0) {
-            observer.stopWatching();
-            it.remove();
-          }
-          break;
-        }
+    if (!new File(path).exists()) {
+      synchronized (this) {
+        removePath(path);
       }
     }
     for (FileEventListener listener : listeners) {
       listener.onFileRemoved(event, parent, child);
+    }
+  }
+
+  private void removePath(String path) {
+    monitored.remove(path);
+    removeChildMonitors(path);
+    removeChildObservers(path);
+    Iterator<EventObserver> it = observers.iterator();
+    while (it.hasNext()) {
+      EventObserver observer = it.next();
+      if (observer.removePath(path)) {
+        if (observer.getPathCount() == 0) {
+          observer.stopWatching();
+          it.remove();
+        }
+        break;
+      }
     }
   }
 }

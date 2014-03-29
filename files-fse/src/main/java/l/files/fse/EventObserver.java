@@ -100,6 +100,15 @@ final class EventObserver extends FileObserver {
     }
   }
 
+  public List<String> removeChildPaths(String parent) {
+    final String prefix = parent + "/";
+    return removePaths(new Predicate<String>() {
+      @Override public boolean apply(String input) {
+        return input.startsWith(prefix);
+      }
+    });
+  }
+
   public List<String> removeNonExistPaths() {
     return removePaths(new Predicate<String>() {
       @Override public boolean apply(String input) {
