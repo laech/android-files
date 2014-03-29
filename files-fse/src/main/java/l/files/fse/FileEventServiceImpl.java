@@ -24,7 +24,7 @@ import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
-import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
@@ -60,12 +60,12 @@ final class FileEventServiceImpl extends FileEventService
   private final Set<String> monitored = newHashSet();
 
   /**
-   * inotify operates on inodes, there could be multiple paths pointing to the
+   * Observers operate on inodes, there could be multiple paths pointing to the
    * same inode, for example, hard links, file systems mounted on different
    * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
    * /storage/sdcard0, they are all mount points of the same device).
    */
-  private final Map<Node, EventObserver> observers = newHashMap();
+  private final List<EventObserver> observers = newArrayList();
 
   private final Set<FileEventListener> listeners = new CopyOnWriteArraySet<>();
 
@@ -79,7 +79,7 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public void stopAll() {
     synchronized (this) {
-      for (FileObserver observer : observers.values()) {
+      for (FileObserver observer : observers) {
         observer.stopWatching();
       }
       observers.clear();
@@ -100,7 +100,7 @@ final class FileEventServiceImpl extends FileEventService
   @Override public boolean hasObserver(File file) {
     String path = getNormalizedPath(file);
     synchronized (this) {
-      for (EventObserver observer : observers.values()) {
+      for (EventObserver observer : observers) {
         if (observer.hasPath(path)) {
           return true;
         }
@@ -123,7 +123,7 @@ final class FileEventServiceImpl extends FileEventService
    * appropriately in listener methods.
    */
   private void checkNode(String path, Node node) {
-    for (EventObserver observer : observers.values()) {
+    for (EventObserver observer : observers) {
       if (observer.hasPath(path)) {
         if (!observer.getNode().equals(node)) {
           observer.stopWatching();
@@ -135,13 +135,13 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   private EventObserver checkObserver(Node node) {
-    EventObserver observer = observers.get(node);
+    EventObserver observer = findObserver(node);
     if (observer != null) {
       List<String> removed = observer.removeNonExistPaths();
       monitored.removeAll(removed);
       if (observer.getPathCount() == 0) {
         observer.stopWatching();
-        observers.values().remove(observer);
+        observers.remove(observer);
         observer = null;
       }
       for (String p : removed) {
@@ -150,6 +150,15 @@ final class FileEventServiceImpl extends FileEventService
       }
     }
     return observer;
+  }
+
+  private EventObserver findObserver(Node node) {
+    for (EventObserver observer : observers) {
+      if (observer.getNode().equals(node)) {
+        return observer;
+      }
+    }
+    return null;
   }
 
   @Override public Optional<Map<File, Stat>> monitor(File file) {
@@ -202,7 +211,7 @@ final class FileEventServiceImpl extends FileEventService
       if (newObserver) {
         observer = new EventObserver(path, node, MODIFICATION_MASK);
         observer.addListener(new StopSelfListener(observer, this, node));
-        observers.put(node, observer);
+        observers.add(observer);
       }
 
       observer.addPath(path);
@@ -221,7 +230,7 @@ final class FileEventServiceImpl extends FileEventService
     synchronized (this) {
       List<String> removed = observer.removePaths();
       monitored.removeAll(removed);
-      observers.values().remove(observer);
+      observers.remove(observer);
       for (String p : removed) {
         removeMonitored(p + "/");
         removeObservers(p + "/");
@@ -241,7 +250,7 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   private void removeObservers(final String pathPrefix) {
-    Iterator<EventObserver> it = observers.values().iterator();
+    Iterator<EventObserver> it = observers.iterator();
     while (it.hasNext()) {
       EventObserver observer = it.next();
       List<String> removed = observer.removePaths(new Predicate<String>() {
@@ -303,7 +312,7 @@ final class FileEventServiceImpl extends FileEventService
       monitored.remove(path);
       removeMonitored(path + "/");
       removeObservers(path + "/");
-      Iterator<EventObserver> it = observers.values().iterator();
+      Iterator<EventObserver> it = observers.iterator();
       while (it.hasNext()) {
         EventObserver observer = it.next();
         if (observer.removePath(path)) {
