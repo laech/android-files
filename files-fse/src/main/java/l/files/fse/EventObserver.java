@@ -10,14 +10,15 @@ import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.common.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 final class EventObserver extends FileObserver {
 
@@ -45,15 +46,13 @@ final class EventObserver extends FileObserver {
     super(path, mask);
     this.path = path;
     this.node = node;
-    this.listeners = new LinkedHashSet<>();
-    this.paths = new LinkedHashSet<>();
+    this.listeners = new CopyOnWriteArraySet<>();
+    this.paths = newHashSet();
     addPath(path);
   }
 
   public void addListener(EventListener listener) {
-    synchronized (this) {
-      this.listeners.add(listener);
-    }
+    this.listeners.add(listener);
   }
 
   /**
