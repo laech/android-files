@@ -1,4 +1,4 @@
-package l.files.common.logging;
+package l.files.logging;
 
 import android.util.Log;
 
@@ -8,15 +8,9 @@ import static android.util.Log.WARN;
 import static android.util.Log.isLoggable;
 import static java.lang.String.format;
 
-/**
- * @deprecated use l.files.logging.Logger instead
- */
-@Deprecated
 public final class Logger {
 
-  // TODO new module
-
-  private static volatile String debugTagPrefix = "";
+  private static volatile String prefix = "";
 
   private final String tag;
 
@@ -29,21 +23,11 @@ public final class Logger {
   }
 
   /**
-   * Set a prefix for all the message tags, intended for testing. Don't forget
-   * to undo this call with {@link #resetDebugTagPrefix()} when no longer
-   * needed.
+   * Set a prefix for all the message tags. Don't forget to set to null to clear
+   * when prefix is no longer needed.
    */
-  public static void setDebugTagPrefix(String prefix) {
-    debugTagPrefix = prefix == null ? "" : prefix + " ";
-  }
-
-  /**
-   * Clears any debug tag prefix.
-   *
-   * @see #setDebugTagPrefix(String)
-   */
-  public static void resetDebugTagPrefix() {
-    setDebugTagPrefix(null);
+  public static void setPrefix(String prefix) {
+    Logger.prefix = prefix == null ? "" : prefix + " ";
   }
 
   public void debug(String message) {
@@ -64,19 +48,19 @@ public final class Logger {
 
   public void debug(String format, Object arg1, Object arg2, Object arg3, Object arg4) {
     if (isLoggable(tag, DEBUG)) {
-      Log.d(debugTagPrefix + tag, format(format, arg1, arg2, arg3, arg4));
+      Log.d(prefix + tag, format(format, arg1, arg2, arg3, arg4));
     }
   }
 
   public void warn(Throwable err, String format, Object arg) {
     if (isLoggable(tag, WARN)) {
-      Log.w(debugTagPrefix + tag, format(format, arg), err);
+      Log.w(prefix + tag, format(format, arg), err);
     }
   }
 
   public void warn(Throwable err) {
     if (isLoggable(tag, WARN)) {
-      Log.w(debugTagPrefix + tag, err);
+      Log.w(prefix + tag, err);
     }
   }
 

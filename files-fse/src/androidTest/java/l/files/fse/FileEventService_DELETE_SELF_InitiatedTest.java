@@ -1,7 +1,5 @@
 package l.files.fse;
 
-import l.files.common.logging.Logger;
-
 /**
  * Tests file system operations started with deleting files/directories.
  *
@@ -10,7 +8,6 @@ import l.files.common.logging.Logger;
 public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventServiceBaseTest {
 
   public void testDeleteSelfThenCreateSelf() {
-    Logger.setDebugTagPrefix("testDeleteSelfThenCreateSelf");
     tester()
         .awaitDeleteRoot()
         .awaitCreateRoot()
@@ -18,7 +15,6 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
   }
 
   public void testDeleteSelfMoveDirWithSameNameIn() {
-    Logger.setDebugTagPrefix("testDeleteSelfMoveDirWithSameNameIn");
     tester()
         .awaitDeleteRoot()
         .awaitMoveToRoot(helper().createDir("a"))
@@ -29,7 +25,6 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
    * When the monitored directory itself is deleted, stopping monitoring on it.
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
-    Logger.setDebugTagPrefix("testDeleteSelfNoLongerMonitorSelf");
     tester().monitor();
     assertTrue(manager().isMonitored(tmp().get()));
     assertTrue(manager().hasObserver(tmp().get()));

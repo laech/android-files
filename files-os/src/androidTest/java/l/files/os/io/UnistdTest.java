@@ -2,7 +2,6 @@ package l.files.os.io;
 
 import java.io.File;
 
-import l.files.common.base.Consumer;
 import l.files.common.testing.FileBaseTest;
 import l.files.os.OsException;
 import l.files.os.Unistd;
@@ -111,5 +110,9 @@ public final class UnistdTest extends FileBaseTest {
     } catch (OsException e) {
       // Pass
     }
+  }
+
+  private static interface Consumer<T> {
+    void apply(T input);
   }
 }

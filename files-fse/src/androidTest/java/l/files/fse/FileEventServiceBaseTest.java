@@ -1,6 +1,5 @@
 package l.files.fse;
 
-import l.files.common.logging.Logger;
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
 
@@ -22,7 +21,6 @@ abstract class FileEventServiceBaseTest extends FileBaseTest {
       service.stopAll();
     }
     helper.delete();
-    Logger.resetDebugTagPrefix();
     super.tearDown();
   }
 

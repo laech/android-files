@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.common.logging.Logger;
+import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;

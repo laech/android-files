@@ -19,20 +19,12 @@ android {
   defaultConfig {
     minSdkVersion 14
     targetSdkVersion 19
-
-    ndk {
-      moduleName 'os'
-      ldLibs 'log'
-    }
+    versionCode 1
+    versionName "1.0"
   }
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
     targetCompatibility JavaVersion.VERSION_1_7
   }
-}
-
-dependencies {
-  androidTestCompile project(':files-common-testing')
-  androidTestCompile project.libs.guava
 }

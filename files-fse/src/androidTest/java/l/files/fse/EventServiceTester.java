@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.common.logging.Logger;
+import l.files.logging.Logger;
 import l.files.common.testing.TempDir;
 
 import static android.os.FileObserver.ACCESS;

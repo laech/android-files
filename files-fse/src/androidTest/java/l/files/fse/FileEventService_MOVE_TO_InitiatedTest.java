@@ -1,7 +1,5 @@
 package l.files.fse;
 
-import l.files.common.logging.Logger;
-
 /**
  * Tests file system operations started with moving files/directories to the
  * monitored directory.
@@ -16,7 +14,6 @@ public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBase
    * modified date.
    */
   public void testMoveDirInThenAddFileIntoIt() {
-    Logger.setDebugTagPrefix("testMoveDirInThenAddFileIntoIt");
     tester()
         .awaitMoveTo("a", helper().createDir("a"))
         .awaitCreateFile("a/b");
@@ -28,7 +25,6 @@ public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBase
    * modified date.
    */
   public void testMoveDirInThenDeleteFileFromIt() {
-    Logger.setDebugTagPrefix("testMoveDirInThenDeleteFileFromIt");
     tester()
         .awaitMoveTo("a", helper().createDir("a"))
         .awaitCreateFile("a/b")
@@ -41,7 +37,6 @@ public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBase
    * modified date.
    */
   public void testMoveDirInThenMoveFileIntoIt() {
-    Logger.setDebugTagPrefix("testMoveDirInThenMoveFileIntoIt");
     tester()
         .awaitMoveTo("a", helper().createDir("a"))
         .awaitMoveTo("a/b", helper().createFile("b"));
@@ -53,7 +48,6 @@ public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBase
    * modified date.
    */
   public void testMoveDirInThenMoveFileOutOfIt() {
-    Logger.setDebugTagPrefix("testMoveDirInThenMoveFileOutOfIt");
     tester()
         .awaitMoveTo("a", helper().createDir("a"))
         .awaitCreateFile("a/b")
@@ -61,7 +55,6 @@ public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBase
   }
 
   public void testMoveFileIn() {
-    Logger.setDebugTagPrefix("testMoveFileIn");
     tester().awaitMoveTo("a", helper().createFile("a"));
   }
 }
