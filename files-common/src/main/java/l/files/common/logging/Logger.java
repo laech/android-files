@@ -76,7 +76,7 @@ public final class Logger {
     }
   }
 
-  public void info(Throwable err, String format, String arg) {
+  public void info(Throwable err, String format, Object arg) {
     if (isLoggable(tag, INFO)) {
       Log.i(tag, format(format, arg), err);
     }

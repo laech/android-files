@@ -17,16 +17,20 @@ final class StopSelfListener extends EventAdapter {
   private final EventObserver observer;
   private final Callback callback;
   private final Node node;
+  private final String path;
 
   /**
    * @param observer the observer this listener is registered to
    * @param callback the callback to be notified when observer is stopped
    * @param node the node of the currently monitored file path
+   * @param path the path of the currently monitored file
    */
-  StopSelfListener(EventObserver observer, Callback callback, Node node) {
+  StopSelfListener(
+      EventObserver observer, Callback callback, Node node, String path) {
     this.observer = checkNotNull(observer, "observer");
     this.callback = checkNotNull(callback, "callback");
     this.node = checkNotNull(node, "node");
+    this.path = checkNotNull(path, "path");
   }
 
   @Override public void onDeleteSelf(String path) {
@@ -46,12 +50,12 @@ final class StopSelfListener extends EventAdapter {
      * will be wrong.
      */
     try {
-      if (!Node.from(stat(observer.getPath())).equals(node)) {
+      if (!Node.from(stat(this.path)).equals(node)) {
         stop();
       }
     } catch (OsException e) {
       stop();
-      logger.info(e, "Stopping observer on exception %s", observer.getPath());
+      logger.info(e, "Stopping observer on exception %s", observer);
     }
   }
 

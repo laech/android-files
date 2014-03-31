@@ -214,7 +214,7 @@ final class FileEventServiceImpl extends FileEventService
       boolean newObserver = (observer == null);
       if (newObserver) {
         observer = new EventObserver(path, node, MODIFICATION_MASK);
-        observer.addListener(new StopSelfListener(observer, this, node));
+        observer.addListener(new StopSelfListener(observer, this, node, path));
         observers.add(observer);
       }
 
@@ -230,7 +230,7 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   @Override public void onObserverStopped(EventObserver observer) {
-    logger.debug("Stopped observer %s", observer.getPath());
+    logger.debug("Stopped observer %s", observer);
     synchronized (this) {
       List<String> removed = observer.removePaths();
       monitored.removeAll(removed);
@@ -262,7 +262,7 @@ final class FileEventServiceImpl extends FileEventService
       if (observer.getPathCount() == 0) {
         observer.stopWatching();
         it.remove();
-        logger.debug("Stopping observer %s", observer.getPath());
+        logger.debug("Stopping observer %s", observer);
       }
     }
   }

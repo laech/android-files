@@ -57,7 +57,7 @@ final class EventObserver extends FileObserver {
 
   /**
    * Adds a path to this observer, the given path must have the same inode as
-   * {@link #getPath()}. This observer does not use the given path, this method
+   * {@link #getNode()}. This observer does not use the given path, this method
    * exists simply as a utility for callers to keep track of paths that are
    * pointed to the same inode. Does nothing if the path has already been
    * added.
@@ -134,14 +134,6 @@ final class EventObserver extends FileObserver {
     synchronized (this) {
       return paths.contains(path);
     }
-  }
-
-  /**
-   * Gets the initial path used to construct this observer.
-   */
-  // TODO use node
-  public String getPath() {
-    return path;
   }
 
   public Node getNode() {
@@ -264,6 +256,6 @@ final class EventObserver extends FileObserver {
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(this).addValue(getPath()).toString();
+    return Objects.toStringHelper(this).addValue(paths).toString();
   }
 }
