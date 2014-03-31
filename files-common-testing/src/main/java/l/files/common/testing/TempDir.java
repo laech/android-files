@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.io.File.createTempFile;
 import static java.lang.System.nanoTime;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 public final class TempDir {
@@ -18,14 +18,11 @@ public final class TempDir {
   }
 
   public static TempDir create(String prefix) {
-    try {
-      File file = createTempFile(prefix, null);
-      assertTrue(file.delete());
-      assertTrue(file.mkdir());
-      return new TempDir(file);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    File parent = new File(System.getProperty("java.io.tmpdir"));
+    File dir = new File(parent, prefix + nanoTime());
+    assertFalse(dir.exists());
+    assertTrue(dir.mkdir());
+    return new TempDir(dir);
   }
 
   private final File dir;
