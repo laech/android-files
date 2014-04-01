@@ -16,6 +16,14 @@ public final class EventService_UnmonitorTest extends FileEventServiceBaseTest {
     assertFalse(manager().hasObserver(dir));
   }
 
+  public void testUnmonitorReMonitorIsOkay() {
+    tester()
+        .monitor()
+        .unmonitor()
+        .monitor()
+        .awaitCreateDir("a");
+  }
+
   public void testUnmonitorRemovesImmediateChildObserver() {
     File dir = tmp().createDir("a");
 

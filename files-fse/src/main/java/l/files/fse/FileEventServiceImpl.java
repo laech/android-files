@@ -5,6 +5,7 @@ import android.os.FileObserver;
 import com.google.common.base.Optional;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +129,7 @@ final class FileEventServiceImpl extends FileEventService
       if (observer.hasPath(path)) {
         if (!observer.getNode().equals(node)) {
           observer.stopWatching();
-          onObserverStopped(observer);
+          removeSubtree(observer);
         }
         return;
       }
@@ -142,19 +143,22 @@ final class FileEventServiceImpl extends FileEventService
    */
   private EventObserver checkObserver(Node node) {
     EventObserver observer = findObserver(node);
-    if (observer != null) {
-      List<String> removed = observer.removeNonExistPaths();
-      monitored.removeAll(removed);
-      if (observer.getPathCount() == 0) {
-        observer.stopWatching();
-        observers.remove(observer);
-        observer = null;
-      }
-      for (String p : removed) {
-        removeChildMonitors(p);
-        removeChildObservers(p);
-      }
+    if (observer == null) {
+      return null;
     }
+
+    List<String> removed = observer.removeNonExistPaths();
+    monitored.removeAll(removed);
+
+    if (stopAndRemoveIfNoPath(observer, observers)) {
+      observer = null;
+    }
+
+    for (String p : removed) {
+      removeChildMonitors(p);
+      removeChildObservers(p);
+    }
+
     return observer;
   }
 
@@ -192,16 +196,16 @@ final class FileEventServiceImpl extends FileEventService
       if (!monitored.remove(parent)) {
         return;
       }
-      for (EventObserver observer : observers) {
+      Iterator<EventObserver> it = observers.iterator();
+      while (it.hasNext()) {
+        EventObserver observer = it.next();
         observer.removePath(parent);
         for (String path : observer.copyPaths()) {
           if (isImmediate(parent, path) && !monitored.contains(path)) {
             observer.removePath(path);
           }
         }
-        if (observer.getPathCount() == 0) {
-          observer.stopWatching();
-        }
+        stopAndRemoveIfNoPath(observer, it);
       }
     }
   }
@@ -264,13 +268,22 @@ final class FileEventServiceImpl extends FileEventService
 
   @Override public void onObserverStopped(EventObserver observer) {
     logger.debug("Stopped observer %s", observer);
+    removeSubtree(observer);
+  }
+
+  /**
+   * When an observer is stopped due to the path being deleted/moved/invalid,
+   * call this to stop observers that are monitoring on child paths, as they are
+   * now no longer valid after the parent path being deleted/moved.
+   */
+  private void removeSubtree(EventObserver observer) {
     synchronized (this) {
       List<String> removed = observer.removePaths();
       monitored.removeAll(removed);
       observers.remove(observer);
-      for (String p : removed) {
-        removeChildMonitors(p);
-        removeChildObservers(p);
+      for (String path : removed) {
+        removeChildMonitors(path);
+        removeChildObservers(path);
       }
     }
   }
@@ -292,11 +305,7 @@ final class FileEventServiceImpl extends FileEventService
       EventObserver observer = it.next();
       List<String> removed = observer.removeChildPaths(parent);
       monitored.removeAll(removed);
-      if (observer.getPathCount() == 0) {
-        observer.stopWatching();
-        it.remove();
-        logger.debug("Stopping observer %s", observer);
-      }
+      stopAndRemoveIfNoPath(observer, it);
     }
   }
 
@@ -351,12 +360,33 @@ final class FileEventServiceImpl extends FileEventService
     while (it.hasNext()) {
       EventObserver observer = it.next();
       if (observer.removePath(path)) {
-        if (observer.getPathCount() == 0) {
-          observer.stopWatching();
-          it.remove();
-        }
+        stopAndRemoveIfNoPath(observer, it);
         break;
       }
     }
+  }
+
+  private boolean stopAndRemoveIfNoPath(
+      EventObserver observer, Collection<? extends EventObserver> observers) {
+
+    if (observer.getPathCount() == 0) {
+      logger.debug("Stopping observer %s", observer);
+      observer.stopWatching();
+      observers.remove(observer);
+      return true;
+    }
+    return false;
+  }
+
+  private boolean stopAndRemoveIfNoPath(
+      EventObserver observer, Iterator<EventObserver> it) {
+
+    if (observer.getPathCount() == 0) {
+      logger.debug("Stopping observer %s", observer);
+      observer.stopWatching();
+      it.remove();
+      return true;
+    }
+    return false;
   }
 }
