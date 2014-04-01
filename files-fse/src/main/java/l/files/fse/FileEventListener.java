@@ -18,25 +18,25 @@ public interface FileEventListener {
    *
    * @param event the original event type
    * @param parent the path of the parent directory
-   * @param path the relative path of the child file
+   * @param child the name of the child file
    */
-  void onFileAdded(int event, String parent, String path);
+  void onFileAdded(int event, String parent, String child);
 
   /**
    * A new file's attribute has changed.
    *
    * @param event the original event type
    * @param parent the path of the parent directory
-   * @param path the relative path of the child file
+   * @param child the name of the child file
    */
-  void onFileChanged(int event, String parent, String path);
+  void onFileChanged(int event, String parent, String child);
 
   /**
    * A new file has been deleted or moved out from a directory.
    *
    * @param event the original event type
    * @param parent the path of the parent directory
-   * @param path the relative path of the child file
+   * @param child the name of the child file
    */
-  void onFileRemoved(int event, String parent, String path);
+  void onFileRemoved(int event, String parent, String child);
 }

@@ -343,9 +343,9 @@ final class EventServiceTester {
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
           @Override
-          public void onFileAdded(int event, String parent, String path) {
-            super.onFileAdded(event, parent, path);
-            countDown(event, new File(parent, path));
+          public void onFileAdded(int event, String parent, String child) {
+            super.onFileAdded(event, parent, child);
+            countDown(event, new File(parent, child));
           }
         };
       }
@@ -355,9 +355,9 @@ final class EventServiceTester {
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
           @Override
-          public void onFileChanged(int event, String parent, String path) {
-            super.onFileChanged(event, parent, path);
-            countDown(event, new File(parent, path));
+          public void onFileChanged(int event, String parent, String child) {
+            super.onFileChanged(event, parent, child);
+            countDown(event, new File(parent, child));
           }
         };
       }
@@ -367,9 +367,9 @@ final class EventServiceTester {
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
           @Override
-          public void onFileRemoved(int event, String parent, String path) {
-            super.onFileRemoved(event, parent, path);
-            countDown(event, new File(parent, path));
+          public void onFileRemoved(int event, String parent, String child) {
+            super.onFileRemoved(event, parent, child);
+            countDown(event, new File(parent, child));
           }
         };
       }
@@ -421,16 +421,16 @@ final class EventServiceTester {
     final List<File> tracked = synchronizedList(new ArrayList<File>());
     final List<String> formatted = synchronizedList(new ArrayList<String>());
 
-    @Override public void onFileAdded(int event, String parent, String path) {
-      track(event, parent, path);
+    @Override public void onFileAdded(int event, String parent, String child) {
+      track(event, parent, child);
     }
 
-    @Override public void onFileChanged(int event, String parent, String path) {
-      track(event, parent, path);
+    @Override public void onFileChanged(int event, String parent, String child) {
+      track(event, parent, child);
     }
 
-    @Override public void onFileRemoved(int event, String parent, String path) {
-      track(event, parent, path);
+    @Override public void onFileRemoved(int event, String parent, String child) {
+      track(event, parent, child);
     }
 
     private void track(int event, String parent, String path) {

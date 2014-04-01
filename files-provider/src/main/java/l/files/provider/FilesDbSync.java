@@ -33,12 +33,12 @@ final class FilesDbSync implements FileEventListener {
     this.manager.register(this);
   }
 
-  @Override public void onFileAdded(int event, String parent, String path) {
-    onFileAddedOrChanged(parent, path);
+  @Override public void onFileAdded(int event, String parent, String child) {
+    onFileAddedOrChanged(parent, child);
   }
 
-  @Override public void onFileChanged(int event, String parent, String path) {
-    onFileAddedOrChanged(parent, path);
+  @Override public void onFileChanged(int event, String parent, String child) {
+    onFileAddedOrChanged(parent, child);
   }
 
   private void onFileAddedOrChanged(final String parent, final String path) {
@@ -52,9 +52,9 @@ final class FilesDbSync implements FileEventListener {
     }, parentUri);
   }
 
-  @Override public void onFileRemoved(int event, final String parent, final String path) {
+  @Override public void onFileRemoved(int event, final String parent, final String child) {
     final String parentLocation = getFileLocation(new File(parent));
-    final String childLocation = getFileLocation(new File(parent, path));
+    final String childLocation = getFileLocation(new File(parent, child));
     final Uri parentUri = buildFileUri(context, parentLocation);
     final Uri childUri = buildFileUri(context, childLocation);
     processor(parent).post(new Runnable() {
