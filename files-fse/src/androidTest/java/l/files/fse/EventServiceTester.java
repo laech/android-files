@@ -296,6 +296,11 @@ final class EventServiceTester {
     return this;
   }
 
+  public EventServiceTester unmonitor() {
+    service.unmonitor(dir().get());
+    return this;
+  }
+
   public EventServiceTester monitor(String path) {
     service.monitor(dir().get(path));
     return this;

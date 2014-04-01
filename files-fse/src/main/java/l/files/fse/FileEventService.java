@@ -48,6 +48,11 @@ public abstract class FileEventService {
   public abstract Optional<Map<File, Stat>> monitor(File file);
 
   /**
+   * Stops monitoring on the given file path.
+   */
+  public abstract void unmonitor(File file);
+
+  /**
    * Checks whether the given file is currently being monitored.
    */
   public abstract boolean isMonitored(File file);

@@ -35,6 +35,8 @@ import static l.files.os.Stat.S_ISDIR;
 final class FileEventServiceImpl extends FileEventService
     implements StopSelfListener.Callback, FileEventListener {
 
+  // TODO remove synchronization with messaging?
+
   private static final Logger logger = Logger.get(FileEventServiceImpl.class);
 
   private static final int MODIFICATION_MASK = ATTRIB
@@ -182,6 +184,37 @@ final class FileEventServiceImpl extends FileEventService
       startObserver(path, node);
     }
     return startObserversForSubDirs(file);
+  }
+
+  @Override public void unmonitor(File file) {
+    String parent = getNormalizedPath(file);
+    synchronized (this) {
+      if (!monitored.remove(parent)) {
+        return;
+      }
+      for (EventObserver observer : observers) {
+        observer.removePath(parent);
+        for (String path : observer.copyPaths()) {
+          if (isImmediate(parent, path) && !monitored.contains(path)) {
+            observer.removePath(path);
+          }
+        }
+        if (observer.getPathCount() == 0) {
+          observer.stopWatching();
+        }
+      }
+    }
+  }
+
+  private boolean isImmediate(String parent, String child) {
+    String prefix = parent + "/";
+    if (child.startsWith(prefix)) {
+      String sub = child.substring(prefix.length());
+      if (!sub.contains("/")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private Optional<Map<File, Stat>> startObserversForSubDirs(File file) {

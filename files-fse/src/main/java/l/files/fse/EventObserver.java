@@ -9,6 +9,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,12 @@ final class EventObserver extends FileObserver {
 
   public void addListener(EventListener listener) {
     this.listeners.add(listener);
+  }
+
+  public Collection<String> copyPaths() {
+    synchronized (this) {
+      return newArrayList(paths);
+    }
   }
 
   /**
