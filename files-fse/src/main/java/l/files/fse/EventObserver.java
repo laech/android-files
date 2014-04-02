@@ -263,6 +263,6 @@ final class EventObserver extends FileObserver {
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(this).addValue(paths).toString();
+    return Objects.toStringHelper(this).addValue(path).toString();
   }
 }
