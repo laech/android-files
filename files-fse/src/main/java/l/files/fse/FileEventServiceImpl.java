@@ -25,6 +25,7 @@ import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
@@ -171,6 +172,7 @@ final class FileEventServiceImpl extends FileEventService
     return null;
   }
 
+  @Deprecated
   @Override public Optional<Map<File, Stat>> monitor(File file) {
     Node node;
     try {
@@ -188,6 +190,25 @@ final class FileEventServiceImpl extends FileEventService
       startObserver(path, node);
     }
     return startObserversForSubDirs(file);
+  }
+
+  @Override public Optional<List<PathStat>> monitor2(File file) {
+    Node node;
+    try {
+      node = Node.from(stat(file.getPath()));
+    } catch (OsException e) {
+      throw new EventException("Failed to stat " + file, e);
+    }
+
+    String path = getNormalizedPath(file);
+    synchronized (this) {
+      checkNode(path, node);
+      if (!monitored.add(path)) {
+        return Optional.absent();
+      }
+      startObserver(path, node);
+    }
+    return startObserversForSubDirs2(file);
   }
 
   @Override public void unmonitor(File file) {
@@ -221,6 +242,7 @@ final class FileEventServiceImpl extends FileEventService
     return false;
   }
 
+  @Deprecated
   private Optional<Map<File, Stat>> startObserversForSubDirs(File file) {
     File[] children = file.listFiles();
     if (children == null) {
@@ -239,6 +261,30 @@ final class FileEventServiceImpl extends FileEventService
       stats.put(child, stat);
       if (S_ISDIR(stat.mode)) {
         startObserver(child.getPath(), Node.from(stat));
+      }
+    }
+    return Optional.of(stats);
+  }
+
+  private Optional<List<PathStat>> startObserversForSubDirs2(File file) {
+    String[] names = file.list();
+    if (names == null) {
+      return Optional.absent();
+    }
+
+    List<PathStat> stats = newArrayListWithCapacity(names.length);
+    for (String name : names) {
+      String path = file.getPath() + "/" + name;
+      Stat stat;
+      try {
+        stat = stat(path);
+      } catch (OsException e) {
+        logger.warn(e, "Failed to stat %s", name);
+        continue;
+      }
+      stats.add(new PathStat(path, stat));
+      if (S_ISDIR(stat.mode)) {
+        startObserver(path, Node.from(stat));
       }
     }
     return Optional.of(stats);

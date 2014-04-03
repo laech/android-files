@@ -253,7 +253,7 @@ final class EventServiceTester {
 
     service.register(listener);
     try {
-      service.monitor(monitorDir);
+      service.monitor2(monitorDir);
 
       /*
         If monitoring an entire directory subtree, and a new subdirectory is
@@ -292,7 +292,7 @@ final class EventServiceTester {
   }
 
   public EventServiceTester monitor() {
-    service.monitor(dir().get());
+    service.monitor2(dir().get());
     return this;
   }
 
@@ -302,12 +302,12 @@ final class EventServiceTester {
   }
 
   public EventServiceTester monitor(String path) {
-    service.monitor(dir().get(path));
+    service.monitor2(dir().get(path));
     return this;
   }
 
   public EventServiceTester monitor(File file) {
-    service.monitor(file);
+    service.monitor2(file);
     return this;
   }
 

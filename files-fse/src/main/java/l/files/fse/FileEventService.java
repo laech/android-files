@@ -3,6 +3,7 @@ package l.files.fse;
 import com.google.common.base.Optional;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import l.files.os.Stat;
@@ -45,7 +46,18 @@ public abstract class FileEventService {
    * children information (if any) successfully retrieved
    * @throws EventException if failed to monitor the given file
    */
+  @Deprecated
   public abstract Optional<Map<File, Stat>> monitor(File file);
+
+  /**
+   * Starts monitoring on the given file path, file systems event on the given
+   * path will be sent to all registered listeners.
+   *
+   * @return if this is the first time the path is being monitored, returns the
+   * children information (if any) successfully retrieved
+   * @throws EventException if failed to monitor the given file
+   */
+  public abstract Optional<List<PathStat>> monitor2(File file);
 
   /**
    * Stops monitoring on the given file path.
