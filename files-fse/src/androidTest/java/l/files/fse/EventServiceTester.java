@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.logging.Logger;
 import l.files.common.testing.TempDir;
+import l.files.logging.Logger;
 
 import static android.os.FileObserver.ACCESS;
 import static android.os.FileObserver.ATTRIB;
@@ -56,6 +56,32 @@ final class EventServiceTester {
 
   public TempDir dir() {
     return dir;
+  }
+
+  public EventServiceTester awaitSetFileLastModified(String path, long time) {
+    File file = dir().get(path);
+    try {
+      assertTrue(file.isFile() || file.createNewFile());
+    } catch (IOException e) {
+      throw new AssertionError(e);
+    }
+    return awaitSetLastModified(file, time);
+  }
+
+  public EventServiceTester awaitSetDirLastModified(String path, long time) {
+    File file = dir().get(path);
+    assertTrue(file.isFile() || file.mkdir());
+    return awaitSetLastModified(file, time);
+  }
+
+  private EventServiceTester awaitSetLastModified(
+      final File file, final long time) {
+    expect(ON_FILE_CHANGED, ATTRIB, file, new Runnable() {
+      @Override public void run() {
+        assertTrue(file.setLastModified(time));
+      }
+    });
+    return this;
   }
 
   /**
@@ -430,11 +456,13 @@ final class EventServiceTester {
       track(event, parent, child);
     }
 
-    @Override public void onFileChanged(int event, String parent, String child) {
+    @Override
+    public void onFileChanged(int event, String parent, String child) {
       track(event, parent, child);
     }
 
-    @Override public void onFileRemoved(int event, String parent, String child) {
+    @Override
+    public void onFileRemoved(int event, String parent, String child) {
       track(event, parent, child);
     }
 

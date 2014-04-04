@@ -15,6 +15,14 @@ import static l.files.fse.EventServiceTester.PermissionType.WRITE;
  */
 public class FileEventService_ATTRIB_InitiatedTest extends FileEventServiceBaseTest {
 
+  public void testSetFileLastModified() {
+    tester().awaitSetFileLastModified("file", 1);
+  }
+
+  public void testSetDirLastModified() {
+    tester().awaitSetDirLastModified("dir", 2);
+  }
+
   public void testSetFileReadable() {
     testSetAttr("fr", FILE, READ);
   }
