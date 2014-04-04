@@ -16,6 +16,11 @@
 
 package l.files.os;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+
 /**
  * @see <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">stat.h</a>
  */
@@ -171,4 +176,16 @@ public final class Stat extends Native {
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/lstat.html">lstat()</a>
    */
   public static native Stat lstat(String path) throws OsException;
+
+  @Override public int hashCode() {
+    return reflectionHashCode(this);
+  }
+
+  @Override public boolean equals(Object o) {
+    return reflectionEquals(this, o);
+  }
+
+  @Override public String toString() {
+    return reflectionToString(this, SHORT_PREFIX_STYLE);
+  }
 }

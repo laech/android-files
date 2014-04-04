@@ -33,6 +33,8 @@ android {
 }
 
 dependencies {
+  compile project.libs.commons_lang
+
   androidTestCompile project(':files-common-testing')
   androidTestCompile project.libs.guava
 }
