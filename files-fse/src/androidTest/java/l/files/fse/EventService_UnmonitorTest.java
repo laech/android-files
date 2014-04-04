@@ -8,12 +8,12 @@ public final class EventService_UnmonitorTest extends FileEventServiceBaseTest {
     File dir = tmp().get();
 
     tester().monitor();
-    assertTrue(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertTrue(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
 
     tester().unmonitor();
-    assertFalse(manager().isMonitored(dir));
-    assertFalse(manager().hasObserver(dir));
+    assertFalse(service().isMonitored(dir));
+    assertFalse(service().hasObserver(dir));
   }
 
   public void testUnmonitorReMonitorIsOkay() {
@@ -28,35 +28,35 @@ public final class EventService_UnmonitorTest extends FileEventServiceBaseTest {
     File dir = tmp().createDir("a");
 
     tester().monitor();
-    assertFalse(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertFalse(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
 
     tester().unmonitor();
-    assertFalse(manager().isMonitored(dir));
-    assertFalse(manager().hasObserver(dir));
+    assertFalse(service().isMonitored(dir));
+    assertFalse(service().hasObserver(dir));
   }
 
   public void testUnmonitorDoesNotRemoveImmediateChildObserverThatAreMonitored() {
     File dir = tmp().createDir("a");
 
     tester().monitor().monitor(dir);
-    assertTrue(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertTrue(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
 
     tester().unmonitor();
-    assertTrue(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertTrue(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
   }
 
   public void testUnmonitorDoesNotRemoveGrandChildObserver() {
     File dir = tmp().createDir("a/b");
 
     tester().monitor().monitor(dir.getParentFile());
-    assertFalse(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertFalse(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
 
     tester().unmonitor();
-    assertFalse(manager().isMonitored(dir));
-    assertTrue(manager().hasObserver(dir));
+    assertFalse(service().isMonitored(dir));
+    assertTrue(service().hasObserver(dir));
   }
 }

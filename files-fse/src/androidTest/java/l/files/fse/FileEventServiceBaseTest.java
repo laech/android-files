@@ -32,7 +32,7 @@ abstract class FileEventServiceBaseTest extends FileBaseTest {
     return true;
   }
 
-  protected final FileEventService manager() {
+  protected final FileEventService service() {
     return service;
   }
 

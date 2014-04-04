@@ -26,12 +26,12 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
     tester().monitor();
-    assertTrue(manager().isMonitored(tmp().get()));
-    assertTrue(manager().hasObserver(tmp().get()));
+    assertTrue(service().isMonitored(tmp().get()));
+    assertTrue(service().hasObserver(tmp().get()));
 
     tester().awaitDeleteRoot();
-    assertFalse(manager().isMonitored(tmp().get()));
-    assertFalse(manager().hasObserver(tmp().get()));
+    assertFalse(service().isMonitored(tmp().get()));
+    assertFalse(service().hasObserver(tmp().get()));
   }
 
   /**
@@ -41,11 +41,11 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
   public void testDeleteSelfNoLongerMonitorChildren() {
     tmp().createDir("a");
     tester().monitor().monitor("a");
-    assertTrue(manager().isMonitored(tmp().get("a")));
-    assertTrue(manager().hasObserver(tmp().get("a")));
+    assertTrue(service().isMonitored(tmp().get("a")));
+    assertTrue(service().hasObserver(tmp().get("a")));
 
     tester().awaitDeleteRoot();
-    assertFalse(manager().isMonitored(tmp().get("a")));
-    assertFalse(manager().hasObserver(tmp().get("a")));
+    assertFalse(service().isMonitored(tmp().get("a")));
+    assertFalse(service().hasObserver(tmp().get("a")));
   }
 }

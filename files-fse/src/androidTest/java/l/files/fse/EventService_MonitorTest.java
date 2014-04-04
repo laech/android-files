@@ -19,7 +19,7 @@ public final class EventService_MonitorTest extends FileEventServiceBaseTest {
         new PathStat(b.getPath(), stat(b.getPath())),
         new PathStat(c.getPath(), stat(c.getPath())));
 
-    List<PathStat> result = manager().monitor2(tmp().get()).get();
+    List<PathStat> result = service().monitor2(tmp().get()).get();
     Set<PathStat> actual = newHashSet(result);
 
     assertEquals(expected, actual);

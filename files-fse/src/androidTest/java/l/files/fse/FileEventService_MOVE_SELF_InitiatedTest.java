@@ -13,12 +13,12 @@ public class FileEventService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorSelf() {
     tester().monitor();
-    assertTrue(manager().isMonitored(tmp().get()));
-    assertTrue(manager().hasObserver(tmp().get()));
+    assertTrue(service().isMonitored(tmp().get()));
+    assertTrue(service().hasObserver(tmp().get()));
 
     tester().awaitMoveRootTo(helper().get("b"));
-    assertFalse(manager().isMonitored(tmp().get()));
-    assertFalse(manager().hasObserver(tmp().get()));
+    assertFalse(service().isMonitored(tmp().get()));
+    assertFalse(service().hasObserver(tmp().get()));
   }
 
   /**
@@ -27,12 +27,12 @@ public class FileEventService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorChildren() {
     tester().awaitCreateDir("a").monitor("a");
-    assertTrue(manager().isMonitored(tmp().get("a")));
-    assertTrue(manager().hasObserver(tmp().get("a")));
+    assertTrue(service().isMonitored(tmp().get("a")));
+    assertTrue(service().hasObserver(tmp().get("a")));
 
     tester().awaitMoveRootTo(helper().get("b"));
-    assertFalse(manager().isMonitored(tmp().get("a")));
-    assertFalse(manager().hasObserver(tmp().get("a")));
+    assertFalse(service().isMonitored(tmp().get("a")));
+    assertFalse(service().hasObserver(tmp().get("a")));
   }
 
   public void testMoveSelfOutAddDirWithSameName() {
