@@ -1,6 +1,7 @@
 package l.files.fse;
 
 import static android.os.FileObserver.ATTRIB;
+import static android.os.FileObserver.CLOSE_WRITE;
 import static android.os.FileObserver.CREATE;
 import static android.os.FileObserver.DELETE;
 import static android.os.FileObserver.MODIFY;
@@ -35,6 +36,11 @@ final class UpdateChildrenListener extends EventAdapter {
   @Override public void onModify(String path) {
     super.onModify(path);
     updateChild(MODIFY, path);
+  }
+
+  @Override public void onCloseWrite(String path) {
+    super.onCloseWrite(path);
+    updateChild(CLOSE_WRITE, path);
   }
 
   @Override public void onMovedFrom(String path) {

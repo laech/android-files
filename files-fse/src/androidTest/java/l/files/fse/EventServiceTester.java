@@ -216,7 +216,7 @@ final class EventServiceTester {
    */
   public EventServiceTester awaitModify(String path) {
     final File file = dir().get(path);
-    return expect(ON_FILE_CHANGED, MODIFY, file, new Runnable() {
+    return expect(ON_FILE_CHANGED, CLOSE_WRITE, file, new Runnable() {
       @Override public void run() {
         try {
           append("0", file, UTF_8);
