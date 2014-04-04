@@ -15,9 +15,9 @@ public final class EventService_MonitorTest extends FileEventServiceBaseTest {
     File c = tmp().createFile("c");
 
     Set<PathStat> expected = newHashSet(
-        new PathStat(a.getPath(), stat(a.getPath())),
-        new PathStat(b.getPath(), stat(b.getPath())),
-        new PathStat(c.getPath(), stat(c.getPath())));
+        PathStat.create(a.getPath(), stat(a.getPath())),
+        PathStat.create(b.getPath(), stat(b.getPath())),
+        PathStat.create(c.getPath(), stat(c.getPath())));
 
     List<PathStat> result = service().monitor2(tmp().get()).get();
     Set<PathStat> actual = newHashSet(result);

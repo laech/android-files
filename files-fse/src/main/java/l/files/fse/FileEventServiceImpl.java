@@ -287,7 +287,7 @@ final class FileEventServiceImpl extends FileEventService
         logger.warn(e, "Failed to stat %s", name);
         continue;
       }
-      stats.add(new PathStat(path, stat));
+      stats.add(PathStat.create(path, stat));
       if (S_ISDIR(stat.mode)) {
         startObserver(path, Node.from(stat));
       }

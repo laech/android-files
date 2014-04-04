@@ -1,31 +1,17 @@
 package l.files.fse;
 
-import com.google.common.base.Objects;
+import com.google.auto.value.AutoValue;
 
 import l.files.os.Stat;
 
-public final class PathStat {
+@AutoValue
+public abstract class PathStat {
+  PathStat() {}
 
-  private final String path;
-  private final Stat stat;
-
-  public PathStat(String path, Stat stat) {
-    this.stat = stat;
-    this.path = path;
+  public static PathStat create(String path, Stat stat) {
+    return new AutoValue_PathStat(path, stat);
   }
 
-  public Stat stat() {
-    return stat;
-  }
-
-  public String path() {
-    return path;
-  }
-
-  @Override public String toString() {
-    return Objects.toStringHelper(this)
-        .add("path", path())
-        .add("stat", stat())
-        .toString();
-  }
+  public abstract String path();
+  public abstract Stat stat();
 }
