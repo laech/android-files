@@ -1,11 +1,11 @@
 package l.files.fse;
 
-import static l.files.fse.EventServiceTester.FileType;
-import static l.files.fse.EventServiceTester.FileType.DIR;
-import static l.files.fse.EventServiceTester.FileType.FILE;
-import static l.files.fse.EventServiceTester.PermissionType;
-import static l.files.fse.EventServiceTester.PermissionType.READ;
-import static l.files.fse.EventServiceTester.PermissionType.WRITE;
+import static l.files.fse.FileEventServiceTester.FileType;
+import static l.files.fse.FileEventServiceTester.FileType.DIR;
+import static l.files.fse.FileEventServiceTester.FileType.FILE;
+import static l.files.fse.FileEventServiceTester.PermissionType;
+import static l.files.fse.FileEventServiceTester.PermissionType.READ;
+import static l.files.fse.FileEventServiceTester.PermissionType.WRITE;
 
 /**
  * Tests file system operations started with change files/directories

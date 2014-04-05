@@ -8,7 +8,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -24,16 +23,12 @@ import static android.os.FileObserver.DELETE_SELF;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
+import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
 
-// TODO monitoring on root directories (/, /dev, /dev/log etc) will be flooded
-// by events, and will slow everything down on the phone, especially the when
-// the logs are monitored, i.e. app writes to log, app get notified log modified,
-// app writes to log... infinitely...
 final class FileEventServiceImpl extends FileEventService
     implements StopSelfListener.Callback, FileEventListener {
 
@@ -56,14 +51,14 @@ final class FileEventServiceImpl extends FileEventService
       | MOVED_TO;
 
   /**
-   * These are the path being monitored, via {@link #monitor(java.io.File)}.
+   * These are the path being monitored, via {@link #monitor2(java.io.File)}.
    * <p/>
    * When a directory is being monitored, file observers are started for its
    * child directories (but child directories are not marked as monitored,
-   * unless they are explicitly monitored via {@link #monitor(java.io.File)}) as
-   * well to monitored changes that would change the child directories status,
-   * such as adding/removing files in the child directory, which will cause the
-   * child directory's last modified timestamp to be changed.
+   * unless they are explicitly monitored via {@link #monitor2(java.io.File)})
+   * as well to monitored changes that would change the child directories
+   * status, such as adding/removing files in the child directory, which will
+   * cause the child directory's last modified timestamp to be changed.
    */
   private final Set<String> monitored = newHashSet();
 
@@ -177,26 +172,6 @@ final class FileEventServiceImpl extends FileEventService
     return null;
   }
 
-  @Deprecated
-  @Override public Optional<Map<File, Stat>> monitor(File file) {
-    Node node;
-    try {
-      node = Node.from(stat(file.getPath()));
-    } catch (OsException e) {
-      throw new EventException("Failed to stat " + file, e);
-    }
-
-    String path = getNormalizedPath(file);
-    synchronized (this) {
-      checkNode(path, node);
-      if (!monitored.add(path)) {
-        return Optional.absent();
-      }
-      startObserver(path, node);
-    }
-    return startObserversForSubDirs(file);
-  }
-
   @Override public Optional<List<PathStat>> monitor2(File file) {
     Node node;
     try {
@@ -237,7 +212,7 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   private boolean isImmediate(String parent, String child) {
-    String prefix = parent + "/";
+    String prefix = makePrefix(parent);
     if (child.startsWith(prefix)) {
       String sub = child.substring(prefix.length());
       if (!sub.contains("/")) {
@@ -247,28 +222,8 @@ final class FileEventServiceImpl extends FileEventService
     return false;
   }
 
-  @Deprecated
-  private Optional<Map<File, Stat>> startObserversForSubDirs(File file) {
-    File[] children = file.listFiles();
-    if (children == null) {
-      return Optional.absent();
-    }
-
-    Map<File, Stat> stats = newHashMapWithExpectedSize(children.length);
-    for (File child : children) {
-      Stat stat;
-      try {
-        stat = stat(child.getPath());
-      } catch (OsException e) {
-        logger.warn(e, "Failed to stat %s", child);
-        continue;
-      }
-      stats.put(child, stat);
-      if (S_ISDIR(stat.mode)) {
-        startObserver(child.getPath(), Node.from(stat));
-      }
-    }
-    return Optional.of(stats);
+  private String makePrefix(String parent) {
+    return parent.equals("/") ? parent : parent + "/";
   }
 
   private Optional<List<PathStat>> startObserversForSubDirs2(File file) {
@@ -279,7 +234,7 @@ final class FileEventServiceImpl extends FileEventService
 
     List<PathStat> stats = newArrayListWithCapacity(names.length);
     for (String name : names) {
-      String path = file.getPath() + "/" + name;
+      String path = new File(file, name).getPath();
       Stat stat;
       try {
         stat = stat(path);
@@ -340,7 +295,7 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   private void removeChildMonitors(String parent) {
-    String prefix = parent + "/";
+    String prefix = makePrefix(parent);
     Iterator<String> it = monitored.iterator();
     while (it.hasNext()) {
       String path = it.next();
@@ -376,14 +331,13 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   @Override public void onFileAdded(int event, String parent, String child) {
-    String path = parent + "/" + child;
-    File file = new File(path);
+    File file = new File(parent, child);
     if (file.isDirectory() && isMonitored(parent)) {
       try {
-        startObserver(path, Node.from(stat(path)));
+        startObserver(file.getPath(), Node.from(stat(file.getPath())));
       } catch (OsException e) {
         // Path no longer exists, permission etc, ignore and continue
-        logger.warn(e, "Failed to stat %s", path);
+        logger.warn(e, "Failed to stat %s", file);
       }
     }
     for (FileEventListener listener : listeners) {
@@ -392,10 +346,10 @@ final class FileEventServiceImpl extends FileEventService
   }
 
   @Override public void onFileRemoved(int event, String parent, String child) {
-    String path = parent + "/" + child;
-    if (!new File(path).exists()) {
+    File file = new File(parent, child);
+    if (!file.exists()) {
       synchronized (this) {
-        removePath(path);
+        removePath(file.getPath());
       }
     }
     for (FileEventListener listener : listeners) {
@@ -439,5 +393,15 @@ final class FileEventServiceImpl extends FileEventService
       return true;
     }
     return false;
+  }
+
+  @Override public String toString() {
+    synchronized (this) {
+      return toStringHelper(this)
+          .add("monitors", monitored)
+          .add("observers", observers)
+          .add("listeners", listeners)
+          .toString();
+    }
   }
 }

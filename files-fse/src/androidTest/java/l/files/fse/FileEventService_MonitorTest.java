@@ -7,7 +7,13 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.stat;
 
-public final class EventService_MonitorTest extends FileEventServiceBaseTest {
+public final class FileEventService_MonitorTest extends FileEventServiceBaseTest {
+
+  public void testMonitorRootDirChildren() {
+    service().monitor2(new File("/"));
+    assertTrue(service().toString(), service().hasObserver(new File("/dev")));
+    assertTrue(service().toString(), service().hasObserver(new File("/data")));
+  }
 
   public void testMonitorReturnsChildrenInfo() throws Exception {
     File a = tmp().createDir("a");

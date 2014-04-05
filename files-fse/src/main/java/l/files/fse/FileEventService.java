@@ -4,14 +4,11 @@ import com.google.common.base.Optional;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
-
-import l.files.os.Stat;
 
 /**
  * Service designed for monitoring file changes within a directory.
  * <p/>
- * When {@link #monitor(File)} on a directory, all files/directories of the
+ * When {@link #monitor2(File)} on a directory, all files/directories of the
  * given directory will be monitored for changes (non-recursive), including file
  * addition/modification/deletion and anything that changes the attribute of the
  * files/directories. This is non-recursive, meaning only changes to
@@ -37,17 +34,6 @@ public abstract class FileEventService {
   public static FileEventService get() {
     return INSTANCE;
   }
-
-  /**
-   * Starts monitoring on the given file path, file systems event on the given
-   * path will be sent to all registered listeners.
-   *
-   * @return if this is the first time the path is being monitored, returns the
-   * children information (if any) successfully retrieved
-   * @throws EventException if failed to monitor the given file
-   */
-  @Deprecated
-  public abstract Optional<Map<File, Stat>> monitor(File file);
 
   /**
    * Starts monitoring on the given file path, file systems event on the given

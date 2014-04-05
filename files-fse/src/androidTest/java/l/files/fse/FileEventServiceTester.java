@@ -31,34 +31,34 @@ import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
-import static l.files.fse.EventServiceTester.FileType.DIR;
-import static l.files.fse.EventServiceTester.FileType.FILE;
-import static l.files.fse.EventServiceTester.ListenerType.ON_FILE_ADDED;
-import static l.files.fse.EventServiceTester.ListenerType.ON_FILE_CHANGED;
-import static l.files.fse.EventServiceTester.ListenerType.ON_FILE_REMOVED;
+import static l.files.fse.FileEventServiceTester.FileType.DIR;
+import static l.files.fse.FileEventServiceTester.FileType.FILE;
+import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_ADDED;
+import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_CHANGED;
+import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_REMOVED;
 import static org.apache.commons.io.FileUtils.forceDelete;
 
-final class EventServiceTester {
+final class FileEventServiceTester {
 
-  private static final Logger logger = Logger.get(EventServiceTester.class);
+  private static final Logger logger = Logger.get(FileEventServiceTester.class);
 
   private final TempDir dir;
   private final FileEventService service;
 
-  private EventServiceTester(FileEventService service, TempDir dir) {
+  private FileEventServiceTester(FileEventService service, TempDir dir) {
     this.dir = dir;
     this.service = service;
   }
 
-  public static EventServiceTester create(FileEventService service, TempDir dir) {
-    return new EventServiceTester(service, dir);
+  public static FileEventServiceTester create(FileEventService service, TempDir dir) {
+    return new FileEventServiceTester(service, dir);
   }
 
   public TempDir dir() {
     return dir;
   }
 
-  public EventServiceTester awaitSetFileLastModified(String path, long time) {
+  public FileEventServiceTester awaitSetFileLastModified(String path, long time) {
     File file = dir().get(path);
     try {
       assertTrue(file.isFile() || file.createNewFile());
@@ -68,13 +68,13 @@ final class EventServiceTester {
     return awaitSetLastModified(file, time);
   }
 
-  public EventServiceTester awaitSetDirLastModified(String path, long time) {
+  public FileEventServiceTester awaitSetDirLastModified(String path, long time) {
     File file = dir().get(path);
     assertTrue(file.isFile() || file.mkdir());
     return awaitSetLastModified(file, time);
   }
 
-  private EventServiceTester awaitSetLastModified(
+  private FileEventServiceTester awaitSetLastModified(
       final File file, final long time) {
     expect(ON_FILE_CHANGED, ATTRIB, file, new Runnable() {
       @Override public void run() {
@@ -88,7 +88,7 @@ final class EventServiceTester {
    * Sets the permission of the file located at {@code path} relative to {@link
    * #dir()}, and waits for the notification to be fired.
    */
-  public EventServiceTester awaitSetPermission(
+  public FileEventServiceTester awaitSetPermission(
       String path, final PermissionType type, final boolean value) {
     final File file = dir().get(path);
     return expect(ON_FILE_CHANGED, ATTRIB, file, new Runnable() {
@@ -102,7 +102,7 @@ final class EventServiceTester {
    * Creates a file at {@code path} relative to {@link #dir()}, and monitors on
    * {@code monitorPath} for the file system event.
    */
-  public EventServiceTester awaitCreateFile(String path, String monitorPath) {
+  public FileEventServiceTester awaitCreateFile(String path, String monitorPath) {
     return awaitCreate(FILE, dir().get(path), dir().get(monitorPath));
   }
 
@@ -110,7 +110,7 @@ final class EventServiceTester {
    * Creates a file at {@code path} relative to {@link #dir()}, and monitors on
    * {@link #dir()} for the file system event.
    */
-  public EventServiceTester awaitCreateFile(String path) {
+  public FileEventServiceTester awaitCreateFile(String path) {
     return awaitCreate(FILE, dir().get(path), dir().get());
   }
 
@@ -118,7 +118,7 @@ final class EventServiceTester {
    * Creates a file at {@code path} relative to {@code monitorDir}, and monitors
    * on {@code monitorDir} for the file system event.
    */
-  public EventServiceTester awaitCreateFile(String path, File monitorDir) {
+  public FileEventServiceTester awaitCreateFile(String path, File monitorDir) {
     return awaitCreate(FILE, new File(monitorDir, path), monitorDir);
   }
 
@@ -126,11 +126,11 @@ final class EventServiceTester {
    * Creates a directory at {@code path} relative to {@link #dir()}, and
    * monitors on {@link #dir()} for the file system event.
    */
-  public EventServiceTester awaitCreateDir(String path) {
+  public FileEventServiceTester awaitCreateDir(String path) {
     return awaitCreate(DIR, dir().get(path), dir().get());
   }
 
-  private EventServiceTester awaitCreate(
+  private FileEventServiceTester awaitCreate(
       final FileType type, final File file, final File monitorDir) {
     return expect(ON_FILE_ADDED, CREATE, file, monitorDir, new Runnable() {
       @Override public void run() {
@@ -143,7 +143,7 @@ final class EventServiceTester {
    * Deletes the file at {@code path} relative to {@link #dir()} and waits for
    * the file system event to be fired.
    */
-  public EventServiceTester awaitDelete(String path) {
+  public FileEventServiceTester awaitDelete(String path) {
     final File file = dir().get(path);
     return expect(ON_FILE_REMOVED, DELETE, file, new Runnable() {
       @Override public void run() {
@@ -160,7 +160,7 @@ final class EventServiceTester {
   /**
    * Creates {@link #dir()} and waits for the file system event.
    */
-  public EventServiceTester awaitCreateRoot() {
+  public FileEventServiceTester awaitCreateRoot() {
     final File dir = dir().get();
     final File parent = dir.getParentFile();
     return expect(ON_FILE_ADDED, CREATE, dir, parent, new Runnable() {
@@ -174,7 +174,7 @@ final class EventServiceTester {
   /**
    * Deletes {@link #dir()} and waits for the file system event to be fired.
    */
-  public EventServiceTester awaitDeleteRoot() {
+  public FileEventServiceTester awaitDeleteRoot() {
     File file = dir().get();
     return expect(ON_FILE_REMOVED, DELETE_SELF, file, file, new Runnable() {
       @Override public void run() {
@@ -187,7 +187,7 @@ final class EventServiceTester {
    * Moves a file from {@code path} relative to {@link #dir()} to {@code dst},
    * and waits for the file system event to be fired.
    */
-  public EventServiceTester awaitMoveFrom(String path, final File dst) {
+  public FileEventServiceTester awaitMoveFrom(String path, final File dst) {
     final File file = dir().get(path);
     return expect(ON_FILE_REMOVED, MOVED_FROM, file, new Runnable() {
       @Override public void run() {
@@ -200,7 +200,7 @@ final class EventServiceTester {
    * Moves a file to {@code path} relative to {@link #dir()} from {@code src},
    * and waits for the file system event to be fired.
    */
-  public EventServiceTester awaitMoveTo(String path, final File src) {
+  public FileEventServiceTester awaitMoveTo(String path, final File src) {
     final File file = dir().get(path);
     return expect(ON_FILE_ADDED, MOVED_TO, file, new Runnable() {
       @Override public void run() {
@@ -213,7 +213,7 @@ final class EventServiceTester {
    * Moves {@link #dir()} to {@code dst} and waits for the file system event
    * to.
    */
-  public EventServiceTester awaitMoveRootTo(final File dst) {
+  public FileEventServiceTester awaitMoveRootTo(final File dst) {
     final File file = dir().get();
     return expect(ON_FILE_REMOVED, MOVE_SELF, file, file, new Runnable() {
       @Override public void run() {
@@ -226,7 +226,7 @@ final class EventServiceTester {
    * Moves {@code src} to be {@link #dir()} and waits for the file system
    * event.
    */
-  public EventServiceTester awaitMoveToRoot(final File src) {
+  public FileEventServiceTester awaitMoveToRoot(final File src) {
     final File dir = dir().get();
     final File parent = dir.getParentFile();
     return expect(ON_FILE_ADDED, MOVED_TO, dir, parent, new Runnable() {
@@ -240,7 +240,7 @@ final class EventServiceTester {
    * Modifies a file located at {@code path} relative to {@link #dir()} and
    * waits for the file system event.
    */
-  public EventServiceTester awaitModify(String path) {
+  public FileEventServiceTester awaitModify(String path) {
     final File file = dir().get(path);
     return expect(ON_FILE_CHANGED, CLOSE_WRITE, file, new Runnable() {
       @Override public void run() {
@@ -253,7 +253,7 @@ final class EventServiceTester {
     });
   }
 
-  private EventServiceTester expect(
+  private FileEventServiceTester expect(
       ListenerType type, int event, File file, Runnable runnable) {
     return expect(type, event, file, dir().get(), runnable);
   }
@@ -267,7 +267,7 @@ final class EventServiceTester {
    * @param monitorDir the parent directory to monitor for the event
    * @param runnable the code to trigger the event
    */
-  private EventServiceTester expect(
+  private FileEventServiceTester expect(
       ListenerType type,
       int event,
       File file,
@@ -317,22 +317,22 @@ final class EventServiceTester {
     return this;
   }
 
-  public EventServiceTester monitor() {
+  public FileEventServiceTester monitor() {
     service.monitor2(dir().get());
     return this;
   }
 
-  public EventServiceTester unmonitor() {
+  public FileEventServiceTester unmonitor() {
     service.unmonitor(dir().get());
     return this;
   }
 
-  public EventServiceTester monitor(String path) {
+  public FileEventServiceTester monitor(String path) {
     service.monitor2(dir().get(path));
     return this;
   }
 
-  public EventServiceTester monitor(File file) {
+  public FileEventServiceTester monitor(File file) {
     service.monitor2(file);
     return this;
   }

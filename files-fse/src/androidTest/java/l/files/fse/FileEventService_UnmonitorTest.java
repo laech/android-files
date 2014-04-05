@@ -2,7 +2,17 @@ package l.files.fse;
 
 import java.io.File;
 
-public final class EventService_UnmonitorTest extends FileEventServiceBaseTest {
+public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTest {
+
+  public void testUnmonitorRootDirChildren() {
+    service().monitor2(new File("/"));
+    assertTrue(service().toString(), service().hasObserver(new File("/dev")));
+    assertTrue(service().toString(), service().hasObserver(new File("/data")));
+
+    service().unmonitor(new File("/"));
+    assertFalse(service().toString(), service().hasObserver(new File("/dev")));
+    assertFalse(service().toString(), service().hasObserver(new File("/data")));
+  }
 
   public void testUnmonitorSelf() {
     File dir = tmp().get();

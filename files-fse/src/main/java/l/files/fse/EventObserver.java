@@ -106,7 +106,7 @@ final class EventObserver extends FileObserver {
     }
   }
 
-  public List<String> removeChildPaths(String parent) {
+  List<String> removeChildPaths(String parent) {
     final String prefix = parent + "/";
     return removePaths(new Predicate<String>() {
       @Override public boolean apply(String input) {
@@ -259,10 +259,13 @@ final class EventObserver extends FileObserver {
   }
 
   private void debug(String event, String child) {
-    logger.debug("%s, parent=%s, path=%s", event, path, child);
+    logger.debug("%s, parent=%s, path=%s", event, paths, child);
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(this).addValue(path).toString();
+    return Objects.toStringHelper(this)
+        .add("path", path)
+        .add("paths", paths)
+        .toString();
   }
 }
