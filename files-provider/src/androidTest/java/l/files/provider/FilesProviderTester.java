@@ -34,7 +34,7 @@ import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FileCursors.isWritable;
-import static l.files.provider.FilesContract.FileInfo.NAME;
+import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 import static l.files.provider.FilesContract.getFileLocation;
 import static l.files.provider.FilesProviderTester.FileType.DIR;
@@ -317,15 +317,14 @@ final class FilesProviderTester {
    * Verifies a query to {@link #dir()} will with the given conditions will
    * return the expected results for the relative {@code paths}.
    */
-  public FilesProviderTester verifyQuery(
-      String selection, String[] selectionArgs, String... paths) {
-    return verifyQuery(dir().get(), selection, selectionArgs, paths);
+  public FilesProviderTester verifyQuery(boolean showHidden, String... paths) {
+    return verifyQuery(dir().get(), showHidden, paths);
   }
 
   private FilesProviderTester verifyQuery(
-      File dir, String selection, String[] selectionArgs, String... paths) {
+      File dir, boolean showHidden, String... paths) {
 
-    Cursor cursor = query(dir, selection, selectionArgs, NAME);
+    Cursor cursor = query(dir, showHidden, SORT_BY_NAME);
     //noinspection TryFinallyCanBeTryWithResources
     try {
       File[] files = new File[paths.length];
@@ -341,7 +340,7 @@ final class FilesProviderTester {
   }
 
   private FilesProviderTester verify(File dir) {
-    Cursor cursor = query(dir, null, null, NAME);
+    Cursor cursor = query(dir, true, SORT_BY_NAME);
     //noinspection TryFinallyCanBeTryWithResources
     try {
       File[] files = dir.listFiles();
@@ -428,14 +427,13 @@ final class FilesProviderTester {
   }
 
   private Cursor query(File dir) {
-    return query(dir, null, null, NAME);
+    return query(dir, true, SORT_BY_NAME);
   }
 
-  private Cursor query(
-      File dir, String selection, String[] selectionArgs, String order) {
-    Uri uri = buildFileChildrenUri(context, getFileLocation(dir));
+  private Cursor query(File dir, boolean showHidden, String order) {
+    Uri uri = buildFileChildrenUri(context, getFileLocation(dir), showHidden);
     ContentResolver resolver = context.getContentResolver();
-    return resolver.query(uri, null, selection, selectionArgs, order);
+    return resolver.query(uri, null, null, null, order);
   }
 
   /**

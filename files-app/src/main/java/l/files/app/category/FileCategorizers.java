@@ -2,7 +2,6 @@ package l.files.app.category;
 
 import l.files.R;
 
-import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.System.currentTimeMillis;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
@@ -21,15 +20,13 @@ public final class FileCategorizers {
    * @see FileInfo#SORT_BY_SIZE
    */
   public static Categorizer fromSortOrder(String sortOrder) {
-    switch (nullToEmpty(sortOrder)) {
-      case SORT_BY_MODIFIED:
-        return new FileDateCategorizer(currentTimeMillis());
-      case SORT_BY_SIZE:
-        return new FileSizeCategorizer();
-      case SORT_BY_NAME:
-      default:
-        return Categorizer.NULL;
+    if (SORT_BY_MODIFIED.equals(sortOrder)) {
+      return new FileDateCategorizer(currentTimeMillis());
     }
+    if (SORT_BY_SIZE.equals(sortOrder)) {
+      return new FileSizeCategorizer();
+    }
+    return Categorizer.NULL;
   }
 
   /**

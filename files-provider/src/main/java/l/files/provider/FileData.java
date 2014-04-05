@@ -2,11 +2,7 @@ package l.files.provider;
 
 import android.webkit.MimeTypeMap;
 
-import com.google.common.collect.Lists;
-
 import java.io.File;
-import java.util.List;
-import java.util.Map;
 
 import l.files.os.OsException;
 import l.files.os.Stat;
@@ -18,6 +14,10 @@ import static l.files.common.database.DataTypes.intToBoolean;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 final class FileData {
 
@@ -100,17 +100,6 @@ final class FileData {
     return new FileData(stat, path, name);
   }
 
-  // TODO
-  public static List<FileData> from(Map<File, Stat> stats) {
-    List<FileData> data = Lists.newArrayListWithCapacity(stats.size());
-    for (Map.Entry<File, Stat> entry : stats.entrySet()) {
-      Stat stat = entry.getValue();
-      File file = entry.getKey();
-      data.add(new FileData(stat, file.getPath(), file.getName()));
-    }
-    return data;
-  }
-
   /**
    * Converts the given files.
    * <p/>
@@ -123,5 +112,17 @@ final class FileData {
       data[i] = new FileData(files[i]);
     }
     return data;
+  }
+
+  @Override public int hashCode() {
+    return reflectionHashCode(this);
+  }
+
+  @Override public boolean equals(Object o) {
+    return reflectionEquals(this, o);
+  }
+
+  @Override public String toString() {
+    return reflectionToString(this, SHORT_PREFIX_STYLE);
   }
 }

@@ -14,10 +14,16 @@ final class FileCursor extends BaseCursor {
 
   private final FileData[] files;
   private final String[] columns;
+  private final Object tag; // TODO
 
   FileCursor(FileData[] files, String[] columns) {
+    this(files, columns, null);
+  }
+
+  FileCursor(FileData[] files, String[] columns, Object tag) {
     this.files = files;
     this.columns = columns;
+    this.tag = tag;
   }
 
   private FileData getCurrentFile() {

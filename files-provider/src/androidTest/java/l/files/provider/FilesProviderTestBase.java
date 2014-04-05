@@ -2,8 +2,6 @@ package l.files.provider;
 
 import android.database.Cursor;
 
-import java.util.concurrent.Executor;
-
 import l.files.common.logging.Logger;
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
@@ -12,21 +10,15 @@ abstract class FilesProviderTestBase extends FileBaseTest {
 
   private TempDir helper;
   private FilesProviderTester tester;
-  private Executor originalExecutor;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     helper = TempDir.create("helper_");
     tester = createTester(tmp());
-
-    // TODO remove this to make it a more realistic test
-    originalExecutor = FilesDb.executor;
-    FilesDb.executor = new SameThreadExecutor();
   }
 
   @Override protected void tearDown() throws Exception {
     super.tearDown();
-    FilesDb.executor = originalExecutor;
     Logger.resetDebugTagPrefix();
     helper.delete();
   }
@@ -72,13 +64,6 @@ abstract class FilesProviderTestBase extends FileBaseTest {
       assertEquals(0, cursor.getCount());
     } finally {
       cursor.close();
-    }
-  }
-
-  private static class SameThreadExecutor implements Executor {
-    @Override
-    public void execute(@SuppressWarnings("NullableProblems") Runnable cmd) {
-      cmd.run();
     }
   }
 }

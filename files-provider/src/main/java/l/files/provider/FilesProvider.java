@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.analytics.Analytics;
-import l.files.common.logging.Logger;
+import l.files.fse.FileEventService;
+import l.files.logging.Logger;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -79,11 +80,11 @@ public final class FilesProvider extends ContentProvider
   };
 
   private UriMatcher matcher;
-  private FilesDb helper;
+  private FilesQuerier helper;
 
   @Override public boolean onCreate() {
     matcher = newMatcher(getContext());
-    helper = new FilesDb(getContext());
+    helper = new FilesQuerier(getContext(), FileEventService.get());
     getPreference().registerOnSharedPreferenceChangeListener(this);
     return true;
   }
@@ -153,7 +154,7 @@ public final class FilesProvider extends ContentProvider
       case MATCH_FILES_LOCATION:
         return queryFile(uri, projection);
       case MATCH_FILES_LOCATION_CHILDREN:
-        return queryFiles(uri, projection, selection, selectionArgs, sortOrder);
+        return queryFiles(uri, projection, sortOrder);
       case MATCH_HIERARCHY:
         return queryHierarchy(uri, projection);
       default:
@@ -199,13 +200,8 @@ public final class FilesProvider extends ContentProvider
     return newFileCursor(uri, projection, FileData.from(bookmarks));
   }
 
-  private Cursor queryFiles(
-      Uri uri,
-      String[] projection,
-      String selection,
-      String[] selectArgs,
-      String sortOrder) {
-    return helper.query(uri, projection, selection, selectArgs, sortOrder);
+  private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
+    return helper.query(uri, projection, sortOrder, null);
   }
 
   @Override public Bundle call(String method, String arg, Bundle extras) {

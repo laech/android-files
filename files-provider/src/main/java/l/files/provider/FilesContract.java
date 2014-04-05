@@ -32,6 +32,8 @@ public final class FilesContract {
   static final String PATH_SUGGESTION = "suggestion";
   static final String PATH_HIERARCHY = "hierarchy";
 
+  static final String PARAM_SHOW_HIDDEN = "show-hidden";
+
   static final int MATCH_FILES_LOCATION = 100;
   static final int MATCH_FILES_LOCATION_CHILDREN = 101;
   static final int MATCH_BOOKMARKS = 200;
@@ -220,11 +222,12 @@ public final class FilesContract {
    * LoadFinished}.
    */
   public static Uri buildFileChildrenUri(
-      Context context, String directoryLocation) {
+      Context context, String directoryLocation, boolean showHidden) {
     checkNotNull(directoryLocation, "directoryLocation");
     return filesUriBuilder(context)
         .appendPath(directoryLocation)
         .appendPath(PATH_CHILDREN)
+        .appendQueryParameter(PARAM_SHOW_HIDDEN, Boolean.toString(showHidden))
         .build();
   }
 
@@ -433,9 +436,6 @@ public final class FilesContract {
      */
     public static final String HIDDEN = "hidden";
 
-    static final String PARENT_LOCATION = "parent";
-    static final String IS_DIRECTORY = "is_directory";
-
     /**
      * Media type of a directory.
      *
@@ -446,18 +446,18 @@ public final class FilesContract {
     /**
      * Sorts the files by their names alphabetically.
      */
-    public static final String SORT_BY_NAME = NAME;
+    public static final String SORT_BY_NAME = SortBy.NAME.name();
 
     /**
      * Sorts the files by their last modified dates descending).
      */
-    public static final String SORT_BY_MODIFIED = MODIFIED + " desc, " + NAME;
+    public static final String SORT_BY_MODIFIED = SortBy.DATE.name();
 
     /**
      * Sorts the files by their sizes (descending). Sizes of directories will
      * not be calculated, as such their will appear at the end of the list.
      */
-    public static final String SORT_BY_SIZE = IS_DIRECTORY + ", " + SIZE + " desc, " + NAME;
+    public static final String SORT_BY_SIZE = SortBy.SIZE.name();
 
     FileInfo() {}
   }

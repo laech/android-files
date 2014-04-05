@@ -44,7 +44,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.app.Preferences.isShowHiddenFilesKey;
 import static l.files.app.Preferences.isSortOrderKey;
-import static l.files.common.database.DataTypes.booleanToString;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
@@ -157,14 +156,8 @@ public final class FilesFragment extends BaseFileListFragment
     Activity context = getActivity();
     boolean showHidden = Preferences.getShowHiddenFiles(context);
     String sortOrder = Preferences.getSortOrder(context);
-    Uri uri = buildFileChildrenUri(context, getDirectoryLocation());
-    String where = null;
-    String[] whereArgs = null;
-    if (!showHidden) {
-      where = FileInfo.HIDDEN + "=?";
-      whereArgs = new String[]{booleanToString(false)};
-    }
-    return new CursorLoader(context, uri, null, where, whereArgs, sortOrder);
+    Uri uri = buildFileChildrenUri(context, getDirectoryLocation(), showHidden);
+    return new CursorLoader(context, uri, null, null, null, sortOrder);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

@@ -1,10 +1,5 @@
 package l.files.provider;
 
-import l.files.common.logging.Logger;
-
-import static l.files.common.database.DataTypes.booleanToString;
-import static l.files.provider.FilesContract.FileInfo.HIDDEN;
-
 public final class FilesProviderQueryTest extends FilesProviderTestBase {
 
   public void testQueryFile() {
@@ -30,13 +25,10 @@ public final class FilesProviderQueryTest extends FilesProviderTestBase {
     tmp().createFile(".b");
     tmp().createDir(".c");
     tmp().createDir("d");
-    String selection = HIDDEN + "=?";
-    String[] selectionArgs = {booleanToString(false)};
-    tester().verifyQuery(selection, selectionArgs, "a", "d");
+    tester().verifyQuery(false, "a", "d");
   }
 
   public void testQueryMultipleDirs() {
-    Logger.setDebugTagPrefix("testQueryMultipleDirs");
     tester()
         .awaitCreateDir("a")
         .awaitCreateFile("b")
@@ -51,7 +43,6 @@ public final class FilesProviderQueryTest extends FilesProviderTestBase {
   }
 
   public void testQueryExistingContent() {
-    Logger.setDebugTagPrefix("testQueryExistingContent");
     tmp().createFile("a");
     tmp().createFile("b");
     tmp().createFile("c/a");
