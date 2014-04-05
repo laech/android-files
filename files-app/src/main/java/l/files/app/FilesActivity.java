@@ -84,7 +84,7 @@ public final class FilesActivity extends AnalyticsActivity
 
   final Handler handler = new Handler();
 
-  AdView ad;
+//  AdView ad;
 
   @Override protected void onCreate(Bundle state) {
     super.onCreate(state);
@@ -107,12 +107,12 @@ public final class FilesActivity extends AnalyticsActivity
     Preferences.register(this, this);
 
     checkGooglePlayServices();
-    setAdView();
+//    setAdView();
   }
 
-  private void setAdView() {
-    ad.loadAd(new AdRequest.Builder().build());
-  }
+//  private void setAdView() {
+//    ad.loadAd(new AdRequest.Builder().build());
+//  }
 
   private void checkGooglePlayServices() {
     int result = isGooglePlayServicesAvailable(this);
@@ -133,7 +133,7 @@ public final class FilesActivity extends AnalyticsActivity
 
   @Override protected void onDestroy() {
     Preferences.unregister(this, this);
-    ad.destroy();
+//    ad.destroy();
     super.onDestroy();
   }
 
@@ -163,7 +163,7 @@ public final class FilesActivity extends AnalyticsActivity
   }
 
   private void initFields(int idSeed) {
-    ad = (AdView) findViewById(R.id.ad_view);
+//    ad = (AdView) findViewById(R.id.ad_view);
     idGenerator = new IdGenerator(idSeed);
     bus = getBus(this);
     directoryLocation = getInitialDirectoryLocation();
@@ -205,12 +205,12 @@ public final class FilesActivity extends AnalyticsActivity
   @Override protected void onResume() {
     super.onResume();
     bus.register(this);
-    ad.resume();
+//    ad.resume();
   }
 
   @Override protected void onPause() {
     bus.unregister(this);
-    ad.pause();
+//    ad.pause();
     super.onPause();
   }
 
