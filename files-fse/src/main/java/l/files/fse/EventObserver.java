@@ -149,117 +149,42 @@ final class EventObserver extends FileObserver {
 
   @Override public void onEvent(int event, final String path) {
     try {
-      handleEvent(event, path);
+      forward(event, path);
     } catch (Throwable e) {
-      Message.obtain(rethrow, 0, e).sendToTarget();
-      stopWatching();
+      rethrow(e);
     }
   }
 
-  private void handleEvent(int event, String path) {
+  private void forward(int event, String path) {
     log(event, path);
-
-    if ((event & OPEN) != 0) onOpen(path);
-    if ((event & ACCESS) != 0) onAccess(path);
-    if ((event & ATTRIB) != 0) onAttrib(path);
-    if ((event & CREATE) != 0) onCreate(path);
-    if ((event & DELETE) != 0) onDelete(path);
-    if ((event & MODIFY) != 0) onModify(path);
-    if ((event & MOVED_TO) != 0) onMovedTo(path);
-    if ((event & MOVE_SELF) != 0) onMoveSelf(path);
-    if ((event & MOVED_FROM) != 0) onMovedFrom(path);
-    if ((event & CLOSE_WRITE) != 0) onCloseWrite(path);
-    if ((event & DELETE_SELF) != 0) onDeleteSelf(path);
-    if ((event & CLOSE_NOWRITE) != 0) onCloseNoWrite(path);
-  }
-
-  private void onCloseNoWrite(String path) {
     for (EventListener listener : listeners) {
-      listener.onCloseNoWrite(path);
+      listener.onEvent(event, path);
     }
   }
 
-  private void onDeleteSelf(String path) {
-    for (EventListener listener : listeners) {
-      listener.onDeleteSelf(path);
-    }
+  private void rethrow(Throwable e) {
+    Message.obtain(rethrow, 0, e).sendToTarget();
+    stopWatching();
   }
 
-  private void onCloseWrite(String path) {
-    for (EventListener listener : listeners)
-      listener.onCloseWrite(path);
+  static String getEventName(int event) {
+    if (0 != (event & OPEN)) return "OPEN";
+    if (0 != (event & ACCESS)) return "ACCESS";
+    if (0 != (event & ATTRIB)) return "ATTRIB";
+    if (0 != (event & CREATE)) return "CREATE";
+    if (0 != (event & DELETE)) return "DELETE";
+    if (0 != (event & MODIFY)) return "MODIFY";
+    if (0 != (event & MOVED_TO)) return "MOVED_TO";
+    if (0 != (event & MOVE_SELF)) return "MOVE_SELF";
+    if (0 != (event & MOVED_FROM)) return "MOVED_FROM";
+    if (0 != (event & CLOSE_WRITE)) return "CLOSE_WRITE";
+    if (0 != (event & DELETE_SELF)) return "DELETE_SELF";
+    if (0 != (event & CLOSE_NOWRITE)) return "CLOSE_NOWRITE";
+    return "UNKNOWN";
   }
 
-  private void onMovedFrom(String path) {
-    for (EventListener listener : listeners) {
-      listener.onMovedFrom(path);
-    }
-  }
-
-  private void onMoveSelf(String path) {
-    for (EventListener listener : listeners)
-      listener.onMoveSelf(path);
-  }
-
-  private void onMovedTo(String path) {
-    for (EventListener listener : listeners) {
-      listener.onMovedTo(path);
-    }
-  }
-
-  private void onModify(String path) {
-    for (EventListener listener : listeners) {
-      listener.onModify(path);
-    }
-  }
-
-  private void onDelete(String path) {
-    for (EventListener listener : listeners) {
-      listener.onDelete(path);
-    }
-  }
-
-  private void onCreate(String path) {
-    for (EventListener listener : listeners) {
-      listener.onCreate(path);
-    }
-  }
-
-  private void onAttrib(String path) {
-    for (EventListener listener : listeners) {
-      listener.onAttrib(path);
-    }
-  }
-
-  private void onAccess(String path) {
-    for (EventListener listener : listeners) {
-      listener.onAccess(path);
-    }
-  }
-
-  private void onOpen(String path) {
-    for (EventListener listener : listeners) {
-      listener.onOpen(path);
-    }
-  }
-
-  private void log(int event, String path) {
-    if ((event & OPEN) != 0) debug("OPEN", path);
-    if ((event & ACCESS) != 0) debug("ACCESS", path);
-    if ((event & ATTRIB) != 0) debug("ATTRIB", path);
-    if ((event & CREATE) != 0) debug("CREATE", path);
-    if ((event & DELETE) != 0) debug("DELETE", path);
-    if ((event & MODIFY) != 0) debug("MODIFY", path);
-    if ((event & MOVED_TO) != 0) debug("MOVED_TO", path);
-    if ((event & MOVE_SELF) != 0) debug("MOVE_SELF", path);
-    if ((event & MOVED_FROM) != 0) debug("MOVED_FROM", path);
-    if ((event & CLOSE_WRITE) != 0) debug("CLOSE_WRITE", path);
-    if ((event & DELETE_SELF) != 0) debug("DELETE_SELF", path);
-    if ((event & CLOSE_NOWRITE) != 0) debug("CLOSE_NOWRITE", path);
-  }
-
-  private void debug(String event, String child) {
-    logger.debug("%s, parent=%s, path=%s", event, paths, child);
+  private void log(int event, String child) {
+    logger.debug("%s, parent=%s, path=%s", getEventName(event), paths, child);
   }
 
   @Override public String toString() {

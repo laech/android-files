@@ -2,7 +2,6 @@ package l.files.fse;
 
 import java.io.File;
 
-import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CREATE;
 import static android.os.FileObserver.DELETE;
 import static android.os.FileObserver.DELETE_SELF;
@@ -16,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * attributes etc) of the directory to be changed, and updates the database
  * record for the directory in the database accordingly.
  */
-final class UpdateSelfListener extends EventAdapter {
+final class UpdateSelfListener implements EventListener {
 
   private final String parent;
   private final String path;
@@ -29,49 +28,33 @@ final class UpdateSelfListener extends EventAdapter {
     this.listener = checkNotNull(listener, "listener");
   }
 
-  @Override public void onAttrib(String path) {
-    super.onAttrib(path);
-    boolean self = path == null;
-    if (self) {
-      updateSelf(ATTRIB);
+  @Override public void onEvent(int event, String path) {
+
+    if (isSelfUpdated(event)) {
+      notifySelfUpdated(event);
+
+    } else if (isSelfDeleted(event)) {
+      notifySelfDeleted(event);
     }
   }
 
-  @Override public void onCreate(String path) {
-    super.onCreate(path);
-    updateSelf(CREATE);
+  private boolean isSelfUpdated(int event) {
+    return 0 != (event & CREATE)
+        || 0 != (event & MOVED_TO)
+        || 0 != (event & MOVED_FROM)
+        || 0 != (event & DELETE);
   }
 
-  @Override public void onMovedTo(String path) {
-    super.onMovedTo(path);
-    updateSelf(MOVED_TO);
+  private boolean isSelfDeleted(int event) {
+    return 0 != (event & MOVE_SELF)
+        || 0 != (event & DELETE_SELF);
   }
 
-  @Override public void onMovedFrom(String path) {
-    super.onMovedFrom(path);
-    updateSelf(MOVED_FROM);
-  }
-
-  @Override public void onDelete(String path) {
-    super.onDelete(path);
-    updateSelf(DELETE);
-  }
-
-  @Override public void onMoveSelf(String path) {
-    super.onMoveSelf(path);
-    deleteSelf(MOVE_SELF);
-  }
-
-  @Override public void onDeleteSelf(String path) {
-    super.onDeleteSelf(path);
-    deleteSelf(DELETE_SELF);
-  }
-
-  private void deleteSelf(int event) {
-    listener.onFileRemoved(event, parent, path);
-  }
-
-  private void updateSelf(int event) {
+  private void notifySelfUpdated(int event) {
     listener.onFileChanged(event, parent, path);
+  }
+
+  private void notifySelfDeleted(int event) {
+    listener.onFileRemoved(event, parent, path);
   }
 }

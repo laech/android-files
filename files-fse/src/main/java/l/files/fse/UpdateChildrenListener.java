@@ -8,7 +8,7 @@ import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 
-final class UpdateChildrenListener extends EventAdapter {
+final class UpdateChildrenListener implements EventListener {
 
   private final String parent;
   private final FileEventListener listener;
@@ -18,52 +18,46 @@ final class UpdateChildrenListener extends EventAdapter {
     this.listener = listener;
   }
 
-  @Override public void onCreate(String path) {
-    super.onCreate(path);
-    addChild(CREATE, path);
+  @Override public void onEvent(int event, String path) {
+
+    if (isChildAdded(event)) {
+      notifyChildAdded(event, path);
+
+    } else if (isChildUpdated(event)) {
+      notifyChildUpdated(event, path);
+
+    } else if (isChildDeleted(event)) {
+      notifyChildDeleted(event, path);
+    }
   }
 
-  @Override public void onMovedTo(String path) {
-    super.onMovedTo(path);
-    addChild(MOVED_TO, path);
+  private boolean isChildAdded(int event) {
+    return 0 != (event & CREATE)
+        || 0 != (event & MOVED_TO);
   }
 
-  @Override public void onAttrib(String path) {
-    super.onAttrib(path);
-    updateChild(ATTRIB, path);
+  private boolean isChildUpdated(int event) {
+    return 0 != (event & ATTRIB)
+        || 0 != (event & MODIFY)
+        || 0 != (event & CLOSE_WRITE);
   }
 
-  @Override public void onModify(String path) {
-    super.onModify(path);
-    updateChild(MODIFY, path);
+  private boolean isChildDeleted(int event) {
+    return 0 != (event & MOVED_FROM)
+        || 0 != (event & DELETE);
   }
 
-  @Override public void onCloseWrite(String path) {
-    super.onCloseWrite(path);
-    updateChild(CLOSE_WRITE, path);
-  }
-
-  @Override public void onMovedFrom(String path) {
-    super.onMovedFrom(path);
-    deleteChild(MOVED_FROM, path);
-  }
-
-  @Override public void onDelete(String path) {
-    super.onDelete(path);
-    deleteChild(DELETE, path);
-  }
-
-  private void addChild(int event, String path) {
+  private void notifyChildAdded(int event, String path) {
     listener.onFileAdded(event, parent, path);
   }
 
-  private void updateChild(int event, String path) {
+  private void notifyChildUpdated(int event, String path) {
     if (path != null) {
       listener.onFileChanged(event, parent, path);
     }
   }
 
-  private void deleteChild(int event, String path) {
+  private void notifyChildDeleted(int event, String path) {
     listener.onFileRemoved(event, parent, path);
   }
 }

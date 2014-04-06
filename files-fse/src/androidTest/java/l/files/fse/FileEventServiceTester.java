@@ -12,18 +12,14 @@ import java.util.concurrent.CountDownLatch;
 import l.files.common.testing.TempDir;
 import l.files.logging.Logger;
 
-import static android.os.FileObserver.ACCESS;
 import static android.os.FileObserver.ATTRIB;
-import static android.os.FileObserver.CLOSE_NOWRITE;
 import static android.os.FileObserver.CLOSE_WRITE;
 import static android.os.FileObserver.CREATE;
 import static android.os.FileObserver.DELETE;
 import static android.os.FileObserver.DELETE_SELF;
-import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
-import static android.os.FileObserver.OPEN;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static com.google.common.io.Files.touch;
@@ -31,6 +27,7 @@ import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static l.files.fse.EventObserver.getEventName;
 import static l.files.fse.FileEventServiceTester.FileType.DIR;
 import static l.files.fse.FileEventServiceTester.FileType.FILE;
 import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_ADDED;
@@ -299,12 +296,12 @@ final class FileEventServiceTester {
 
         if (!latch.await(2, SECONDS)) {
           fail("Timed out waiting for notification. " + runnable.toString() +
-              "\nExpected: " + getName(event) + "=" + file +
+              "\nExpected: " + getEventName(event) + "=" + file +
               "\nActual: " + listener.formatted);
         }
 
         logger.debug("Success waiting for notification." +
-            "\nExpected: " + getName(event) + "=" + file +
+            "\nExpected: " + getEventName(event) + "=" + file +
             "\nActual: " + listener.formatted);
 
       } catch (InterruptedException e) {
@@ -335,37 +332,6 @@ final class FileEventServiceTester {
   public FileEventServiceTester monitor(File file) {
     service.monitor2(file);
     return this;
-  }
-
-  private static String getName(int event) {
-    switch (event) {
-      case ACCESS:
-        return "ACCESS";
-      case ATTRIB:
-        return "ATTRIB";
-      case CLOSE_NOWRITE:
-        return "CLOSE_NOWRITE";
-      case CLOSE_WRITE:
-        return "CLOSE_WRITE";
-      case CREATE:
-        return "CREATE";
-      case DELETE:
-        return "DELETE";
-      case DELETE_SELF:
-        return "DELETE_SELF";
-      case MODIFY:
-        return "MODIFY";
-      case MOVE_SELF:
-        return "MOVE_SELF";
-      case MOVED_FROM:
-        return "MOVED_FROM";
-      case MOVED_TO:
-        return "MOVED_TO";
-      case OPEN:
-        return "OPEN";
-      default:
-        throw new IllegalArgumentException("Unknown event: " + event);
-    }
   }
 
   static enum ListenerType {
@@ -469,7 +435,7 @@ final class FileEventServiceTester {
     private void track(int event, String parent, String path) {
       File file = new File(parent, path);
       tracked.add(file);
-      formatted.add(getName(event) + "=" + file);
+      formatted.add(getEventName(event) + "=" + file);
     }
   }
 
@@ -486,7 +452,7 @@ final class FileEventServiceTester {
 
     void countDown(int actualEvent, File actualFile) {
       if (expectedFile.equals(actualFile) &&
-          expectedEvent == actualEvent) {
+          0 != (expectedEvent & actualEvent)) {
         latch.countDown();
       }
     }

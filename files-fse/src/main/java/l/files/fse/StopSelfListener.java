@@ -2,7 +2,10 @@ package l.files.fse;
 
 import l.files.logging.Logger;
 import l.files.os.OsException;
+import l.files.os.Stat;
 
+import static android.os.FileObserver.DELETE_SELF;
+import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.os.Stat.stat;
 
@@ -10,7 +13,7 @@ import static l.files.os.Stat.stat;
  * A listener that will stop the file observer when the directory is deleted or
  * moved.
  */
-final class StopSelfListener extends EventAdapter {
+final class StopSelfListener implements EventListener {
 
   private static final Logger logger = Logger.get(StopSelfListener.class);
 
@@ -33,35 +36,41 @@ final class StopSelfListener extends EventAdapter {
     this.path = checkNotNull(path, "path");
   }
 
-  @Override public void onDeleteSelf(String path) {
-    super.onDeleteSelf(path);
-    stop();
-  }
+  @Override public void onEvent(int event, String path) {
 
-  @Override public void onMoveSelf(String path) {
-    super.onMoveSelf(path);
-
-    /*
-     * Sometimes when a directory is moved from else where, a MOVE_TO is
-     * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
-     * after monitoring on the newly added file starts, so this is a temporary
-     * fix for that. This directory could also exists if the original is moved
-     * somewhere else and a new one is quickly added in place, then this code
-     * will be wrong.
-     */
-    try {
-      if (!Node.from(stat(this.path)).equals(node)) {
-        stop();
-      }
-    } catch (OsException e) {
+    if (0 != (event & DELETE_SELF)) {
       stop();
-      logger.info(e, "Stopping observer on exception %s", observer);
+
+    } else if (0 != (event & MOVE_SELF)) {
+      checkNode();
     }
   }
 
   private void stop() {
     observer.stopWatching();
     callback.onObserverStopped(observer);
+  }
+
+  /*
+   * Sometimes when a directory is moved from else where, a MOVE_TO is
+   * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
+   * after monitoring on the newly added file starts, so this is a temporary
+   * fix for that. This directory could also exists if the original is moved
+   * somewhere else and a new one is quickly added in place, then this code
+   * will be wrong.
+   */
+  private void checkNode() {
+    try {
+
+      Stat stat = stat(this.path);
+      if (!Node.from(stat).equals(node)) {
+        stop();
+      }
+
+    } catch (OsException e) {
+      stop();
+      logger.info(e, "Stopping observer on exception %s", observer);
+    }
   }
 
   static interface Callback {
