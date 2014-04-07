@@ -8,6 +8,18 @@ import static org.apache.commons.io.FileUtils.getTempDirectory;
 
 public final class PathTest extends FileBaseTest {
 
+  public void testParent() {
+    assertEquals(null, Path.ROOT.parent());
+    assertEquals("/", Path.from("/a").parent().toString());
+    assertEquals("/a/b", Path.from("/a/b/c").parent().toString());
+  }
+
+  public void testName() {
+    assertEquals("", Path.ROOT.name());
+    assertEquals("a", Path.from("/a").name());
+    assertEquals("a.txt", Path.from("/b/c/a.txt").name());
+  }
+
   public void testFrom_file_noEndSeparatorRegardlessOfExistence() {
     File dir = new File(getTempDirectory(), "tmp");
 

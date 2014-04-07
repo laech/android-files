@@ -4,6 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import java.io.File;
 
+import static org.apache.commons.io.FilenameUtils.getFullPathNoEndSeparator;
+import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.normalizeNoEndSeparator;
 
 /**
@@ -14,6 +16,9 @@ import static org.apache.commons.io.FilenameUtils.normalizeNoEndSeparator;
 public abstract class Path {
 
   public static final Path ROOT = new AutoValue_Path("/");
+
+  private Path parent;
+  private String name;
 
   Path() {}
 
@@ -41,6 +46,36 @@ public abstract class Path {
     return from(new File(path));
   }
 
+  public File toFile() {
+    return new File(path());
+  }
+
+  /**
+   * Returns the parent of this path, or null if this is the root path.
+   */
+  public Path parent() {
+    if (ROOT.equals(this)) {
+      return null;
+    }
+    if (parent == null) {
+      parent = from(getFullPathNoEndSeparator(path()));
+    }
+    return parent;
+  }
+
+  /**
+   * Returns the name of this path, or empty if this is the root path.
+   */
+  public String name() {
+    if (name == null) {
+      name = getName(path());
+    }
+    return name;
+  }
+
+  /**
+   * Returns the path represented by this instance.
+   */
   @Override public String toString() {
     return path();
   }
