@@ -6,19 +6,19 @@ import android.os.Message;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.io.Path;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
 
 final class EventObserver extends FileObserver {
@@ -38,13 +38,13 @@ final class EventObserver extends FileObserver {
     }
   };
 
-  private final String path;
+  private final Path path;
   private final Node node;
   private final Set<EventListener> listeners;
-  private final Set<String> paths;
+  private final Set<Path> paths;
 
-  public EventObserver(String path, Node node, int mask) {
-    super(path, mask);
+  public EventObserver(Path path, Node node, int mask) {
+    super(path.toString(), mask);
     this.path = path;
     this.node = node;
     this.listeners = new CopyOnWriteArraySet<>();
@@ -56,7 +56,7 @@ final class EventObserver extends FileObserver {
     this.listeners.add(listener);
   }
 
-  public Collection<String> copyPaths() {
+  public Collection<Path> copyPaths() {
     synchronized (this) {
       return newArrayList(paths);
     }
@@ -71,7 +71,7 @@ final class EventObserver extends FileObserver {
    *
    * @return true if path is added, false if already exists
    */
-  public boolean addPath(String path) {
+  public boolean addPath(Path path) {
     synchronized (this) {
       return paths.add(path);
     }
@@ -82,7 +82,7 @@ final class EventObserver extends FileObserver {
    *
    * @return true if path is removed, false if path does not exists
    */
-  public boolean removePath(String path) {
+  public boolean removePath(Path path) {
     synchronized (this) {
       return paths.remove(path);
     }
@@ -91,12 +91,12 @@ final class EventObserver extends FileObserver {
   /**
    * Remove and returns all the paths that passed the given predicate.
    */
-  public List<String> removePaths(Predicate<String> pred) {
+  public List<Path> removePaths(Predicate<Path> pred) {
     synchronized (this) {
-      List<String> result = Lists.newArrayListWithCapacity(paths.size());
-      Iterator<String> it = paths.iterator();
+      List<Path> result = newArrayListWithCapacity(paths.size());
+      Iterator<Path> it = paths.iterator();
       while (it.hasNext()) {
-        String path = it.next();
+        Path path = it.next();
         if (pred.apply(path)) {
           it.remove();
           result.add(path);
@@ -106,26 +106,25 @@ final class EventObserver extends FileObserver {
     }
   }
 
-  List<String> removeChildPaths(String parent) {
-    final String prefix = parent + "/";
-    return removePaths(new Predicate<String>() {
-      @Override public boolean apply(String input) {
-        return input.startsWith(prefix);
+  List<Path> removeChildPaths(final Path parent) {
+    return removePaths(new Predicate<Path>() {
+      @Override public boolean apply(Path input) {
+        return input.startsWith(parent);
       }
     });
   }
 
-  public List<String> removeNonExistPaths() {
-    return removePaths(new Predicate<String>() {
-      @Override public boolean apply(String input) {
-        return !new File(input).exists();
+  public List<Path> removeNonExistPaths() {
+    return removePaths(new Predicate<Path>() {
+      @Override public boolean apply(Path input) {
+        return !input.toFile().exists();
       }
     });
   }
 
-  public List<String> removePaths() {
+  public List<Path> removePaths() {
     synchronized (this) {
-      List<String> result = newArrayList(paths);
+      List<Path> result = newArrayList(paths);
       paths.clear();
       return result;
     }
@@ -137,7 +136,7 @@ final class EventObserver extends FileObserver {
     }
   }
 
-  public boolean hasPath(String path) {
+  public boolean hasPath(Path path) {
     synchronized (this) {
       return paths.contains(path);
     }

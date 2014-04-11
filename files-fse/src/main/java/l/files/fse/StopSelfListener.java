@@ -1,5 +1,6 @@
 package l.files.fse;
 
+import l.files.io.Path;
 import l.files.logging.Logger;
 import l.files.os.OsException;
 import l.files.os.Stat;
@@ -20,7 +21,7 @@ final class StopSelfListener implements EventListener {
   private final EventObserver observer;
   private final Callback callback;
   private final Node node;
-  private final String path;
+  private final Path path;
 
   /**
    * @param observer the observer this listener is registered to
@@ -29,7 +30,7 @@ final class StopSelfListener implements EventListener {
    * @param path the path of the currently monitored file
    */
   StopSelfListener(
-      EventObserver observer, Callback callback, Node node, String path) {
+      EventObserver observer, Callback callback, Node node, Path path) {
     this.observer = checkNotNull(observer, "observer");
     this.callback = checkNotNull(callback, "callback");
     this.node = checkNotNull(node, "node");
@@ -62,7 +63,7 @@ final class StopSelfListener implements EventListener {
   private void checkNode() {
     try {
 
-      Stat stat = stat(this.path);
+      Stat stat = stat(this.path.toString());
       if (!Node.from(stat).equals(node)) {
         stop();
       }

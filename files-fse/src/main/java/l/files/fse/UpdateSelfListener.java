@@ -1,6 +1,6 @@
 package l.files.fse;
 
-import java.io.File;
+import l.files.io.Path;
 
 import static android.os.FileObserver.CREATE;
 import static android.os.FileObserver.DELETE;
@@ -18,13 +18,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class UpdateSelfListener implements EventListener {
 
   private final String parent;
-  private final String path;
+  private final String name;
   private final FileEventListener listener;
 
-  UpdateSelfListener(String path, FileEventListener listener) {
-    File file = new File(checkNotNull(path, "path"));
-    this.parent = file.getParent();
-    this.path = file.getName();
+  UpdateSelfListener(Path path, FileEventListener listener) {
+    this.parent = path.parent().toString();
+    this.name = path.name();
     this.listener = checkNotNull(listener, "listener");
   }
 
@@ -51,10 +50,10 @@ final class UpdateSelfListener implements EventListener {
   }
 
   private void notifySelfUpdated(int event) {
-    listener.onFileChanged(event, parent, path);
+    listener.onFileChanged(event, parent, name);
   }
 
   private void notifySelfDeleted(int event) {
-    listener.onFileRemoved(event, parent, path);
+    listener.onFileRemoved(event, parent, name);
   }
 }

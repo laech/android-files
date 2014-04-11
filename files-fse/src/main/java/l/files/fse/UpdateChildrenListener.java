@@ -1,5 +1,7 @@
 package l.files.fse;
 
+import l.files.io.Path;
+
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CLOSE_WRITE;
 import static android.os.FileObserver.CREATE;
@@ -10,10 +12,10 @@ import static android.os.FileObserver.MOVED_TO;
 
 final class UpdateChildrenListener implements EventListener {
 
-  private final String parent;
+  private final Path parent;
   private final FileEventListener listener;
 
-  UpdateChildrenListener(String parent, FileEventListener listener) {
+  UpdateChildrenListener(Path parent, FileEventListener listener) {
     this.parent = parent;
     this.listener = listener;
   }
@@ -48,16 +50,16 @@ final class UpdateChildrenListener implements EventListener {
   }
 
   private void notifyChildAdded(int event, String path) {
-    listener.onFileAdded(event, parent, path);
+    listener.onFileAdded(event, parent.toString(), path);
   }
 
   private void notifyChildUpdated(int event, String path) {
     if (path != null) {
-      listener.onFileChanged(event, parent, path);
+      listener.onFileChanged(event, parent.toString(), path);
     }
   }
 
   private void notifyChildDeleted(int event, String path) {
-    listener.onFileRemoved(event, parent, path);
+    listener.onFileRemoved(event, parent.toString(), path);
   }
 }
