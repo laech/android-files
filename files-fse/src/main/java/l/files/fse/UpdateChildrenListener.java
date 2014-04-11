@@ -50,16 +50,16 @@ final class UpdateChildrenListener implements EventListener {
   }
 
   private void notifyChildAdded(int event, String path) {
-    listener.onFileAdded(event, parent.toString(), path);
+    listener.onFileAdded(event, parent.child(path));
   }
 
   private void notifyChildUpdated(int event, String path) {
     if (path != null) {
-      listener.onFileChanged(event, parent.toString(), path);
+      listener.onFileChanged(event, parent.child(path));
     }
   }
 
   private void notifyChildDeleted(int event, String path) {
-    listener.onFileRemoved(event, parent.toString(), path);
+    listener.onFileRemoved(event, parent.child(path));
   }
 }

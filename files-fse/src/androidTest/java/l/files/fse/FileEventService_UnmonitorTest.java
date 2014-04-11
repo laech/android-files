@@ -1,21 +1,21 @@
 package l.files.fse;
 
-import java.io.File;
+import l.files.io.Path;
 
 public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTest {
 
   public void testUnmonitorRootDirChildren() {
-    service().monitor2(new File("/"));
-    assertTrue(service().toString(), service().hasObserver(new File("/dev")));
-    assertTrue(service().toString(), service().hasObserver(new File("/data")));
+    service().monitor(Path.from("/"));
+    assertTrue(service().toString(), service().hasObserver(Path.from("/dev")));
+    assertTrue(service().toString(), service().hasObserver(Path.from("/data")));
 
-    service().unmonitor(new File("/"));
-    assertFalse(service().toString(), service().hasObserver(new File("/dev")));
-    assertFalse(service().toString(), service().hasObserver(new File("/data")));
+    service().unmonitor(Path.from("/"));
+    assertFalse(service().toString(), service().hasObserver(Path.from("/dev")));
+    assertFalse(service().toString(), service().hasObserver(Path.from("/data")));
   }
 
   public void testUnmonitorSelf() {
-    File dir = tmp().get();
+    Path dir = Path.from(tmp().get());
 
     tester().monitor();
     assertTrue(service().isMonitored(dir));
@@ -35,7 +35,7 @@ public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTe
   }
 
   public void testUnmonitorRemovesImmediateChildObserver() {
-    File dir = tmp().createDir("a");
+    Path dir = Path.from(tmp().createDir("a"));
 
     tester().monitor();
     assertFalse(service().isMonitored(dir));
@@ -47,9 +47,9 @@ public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTe
   }
 
   public void testUnmonitorDoesNotRemoveImmediateChildObserverThatAreMonitored() {
-    File dir = tmp().createDir("a");
+    Path dir = Path.from(tmp().createDir("a"));
 
-    tester().monitor().monitor(dir);
+    tester().monitor().monitor(dir.toFile());
     assertTrue(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 
@@ -59,9 +59,9 @@ public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTe
   }
 
   public void testUnmonitorDoesNotRemoveGrandChildObserver() {
-    File dir = tmp().createDir("a/b");
+    Path dir = Path.from(tmp().createDir("a/b"));
 
-    tester().monitor().monitor(dir.getParentFile());
+    tester().monitor().monitor(dir.parent().toFile());
     assertFalse(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 

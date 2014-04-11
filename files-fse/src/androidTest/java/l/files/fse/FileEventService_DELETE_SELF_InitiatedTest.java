@@ -1,5 +1,7 @@
 package l.files.fse;
 
+import l.files.io.Path;
+
 /**
  * Tests file system operations started with deleting files/directories.
  *
@@ -26,12 +28,13 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
     tester().monitor();
-    assertTrue(service().isMonitored(tmp().get()));
-    assertTrue(service().hasObserver(tmp().get()));
+    Path path = Path.from(tmp().get());
+    assertTrue(service().isMonitored(path));
+    assertTrue(service().hasObserver(path));
 
     tester().awaitDeleteRoot();
-    assertFalse(service().isMonitored(tmp().get()));
-    assertFalse(service().hasObserver(tmp().get()));
+    assertFalse(service().isMonitored(path));
+    assertFalse(service().hasObserver(path));
   }
 
   /**
@@ -41,11 +44,12 @@ public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventService
   public void testDeleteSelfNoLongerMonitorChildren() {
     tmp().createDir("a");
     tester().monitor().monitor("a");
-    assertTrue(service().isMonitored(tmp().get("a")));
-    assertTrue(service().hasObserver(tmp().get("a")));
+    Path path = Path.from(tmp().get("a"));
+    assertTrue(service().isMonitored(path));
+    assertTrue(service().hasObserver(path));
 
     tester().awaitDeleteRoot();
-    assertFalse(service().isMonitored(tmp().get("a")));
-    assertFalse(service().hasObserver(tmp().get("a")));
+    assertFalse(service().isMonitored(path));
+    assertFalse(service().hasObserver(path));
   }
 }

@@ -1,5 +1,7 @@
 package l.files.fse;
 
+import l.files.io.Path;
+
 /**
  * Tests file system operations started with move the root directory out.
  *
@@ -13,12 +15,13 @@ public class FileEventService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorSelf() {
     tester().monitor();
-    assertTrue(service().isMonitored(tmp().get()));
-    assertTrue(service().hasObserver(tmp().get()));
+    Path path = Path.from(tmp().get());
+    assertTrue(service().isMonitored(path));
+    assertTrue(service().hasObserver(path));
 
     tester().awaitMoveRootTo(helper().get("b"));
-    assertFalse(service().isMonitored(tmp().get()));
-    assertFalse(service().hasObserver(tmp().get()));
+    assertFalse(service().isMonitored(path));
+    assertFalse(service().hasObserver(path));
   }
 
   /**
@@ -27,12 +30,13 @@ public class FileEventService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorChildren() {
     tester().awaitCreateDir("a").monitor("a");
-    assertTrue(service().isMonitored(tmp().get("a")));
-    assertTrue(service().hasObserver(tmp().get("a")));
+    Path path = Path.from(tmp().get("a"));
+    assertTrue(service().isMonitored(path));
+    assertTrue(service().hasObserver(path));
 
     tester().awaitMoveRootTo(helper().get("b"));
-    assertFalse(service().isMonitored(tmp().get("a")));
-    assertFalse(service().hasObserver(tmp().get("a")));
+    assertFalse(service().isMonitored(path));
+    assertFalse(service().hasObserver(path));
   }
 
   public void testMoveSelfOutAddDirWithSameName() {

@@ -51,10 +51,10 @@ final class UpdateSelfListener implements EventListener {
   }
 
   private void notifySelfUpdated(int event) {
-    listener.onFileChanged(event, path.parent().toString(), path.name());
+    listener.onFileChanged(event, path);
   }
 
   private void notifySelfDeleted(int event) {
-    listener.onFileRemoved(event, path.parent().toString(), path.name());
+    listener.onFileRemoved(event, path);
   }
 }

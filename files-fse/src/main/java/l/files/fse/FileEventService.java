@@ -2,13 +2,14 @@ package l.files.fse;
 
 import com.google.common.base.Optional;
 
-import java.io.File;
 import java.util.List;
+
+import l.files.io.Path;
 
 /**
  * Service designed for monitoring file changes within a directory.
  * <p/>
- * When {@link #monitor2(File)} on a directory, all files/directories of the
+ * When {@link #monitor(Path)} on a directory, all files/directories of the
  * given directory will be monitored for changes (non-recursive), including file
  * addition/modification/deletion and anything that changes the attribute of the
  * files/directories. This is non-recursive, meaning only changes to
@@ -43,17 +44,17 @@ public abstract class FileEventService {
    * children information (if any) successfully retrieved
    * @throws EventException if failed to monitor the given file
    */
-  public abstract Optional<List<PathStat>> monitor2(File file);
+  public abstract Optional<List<PathStat>> monitor(Path path);
 
   /**
    * Stops monitoring on the given file path.
    */
-  public abstract void unmonitor(File file);
+  public abstract void unmonitor(Path path);
 
   /**
    * Checks whether the given file is currently being monitored.
    */
-  public abstract boolean isMonitored(File file);
+  public abstract boolean isMonitored(Path path);
 
   /**
    * Registers a listener to be notified of events. Has no affect if the
@@ -76,5 +77,5 @@ public abstract class FileEventService {
    * Checks whether there is a running observer at the given location. Intended
    * for testing.
    */
-  public abstract boolean hasObserver(File file);
+  public abstract boolean hasObserver(Path path);
 }

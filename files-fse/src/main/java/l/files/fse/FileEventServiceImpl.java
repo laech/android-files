@@ -4,7 +4,6 @@ import android.os.FileObserver;
 
 import com.google.common.base.Optional;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -52,14 +51,14 @@ final class FileEventServiceImpl extends FileEventService
       | MOVED_TO;
 
   /**
-   * These are the path being monitored, via {@link #monitor2(java.io.File)}.
+   * These are the path being monitored, via {@link #monitor(Path)}.
    * <p/>
    * When a directory is being monitored, file observers are started for its
    * child directories (but child directories are not marked as monitored,
-   * unless they are explicitly monitored via {@link #monitor2(java.io.File)})
-   * as well to monitored changes that would change the child directories
-   * status, such as adding/removing files in the child directory, which will
-   * cause the child directory's last modified timestamp to be changed.
+   * unless they are explicitly monitored via {@link #monitor(Path)}) as well to
+   * monitored changes that would change the child directories status, such as
+   * adding/removing files in the child directory, which will cause the child
+   * directory's last modified timestamp to be changed.
    */
   private final Set<Path> monitored = newHashSet();
 
@@ -91,18 +90,13 @@ final class FileEventServiceImpl extends FileEventService
     }
   }
 
-  @Override public boolean isMonitored(File file) {
-    return isMonitored(Path.from(file));
-  }
-
-  private boolean isMonitored(Path path) {
+  @Override public boolean isMonitored(Path path) {
     synchronized (this) {
       return monitored.contains(path);
     }
   }
 
-  @Override public boolean hasObserver(File file) {
-    Path path = Path.from(file);
+  @Override public boolean hasObserver(Path path) {
     synchronized (this) {
       for (EventObserver observer : observers) {
         if (observer.hasPath(path)) {
@@ -169,15 +163,14 @@ final class FileEventServiceImpl extends FileEventService
     return null;
   }
 
-  @Override public Optional<List<PathStat>> monitor2(File file) {
+  @Override public Optional<List<PathStat>> monitor(Path path) {
     Node node;
     try {
-      node = Node.from(stat(file.getPath()));
+      node = Node.from(stat(path.toString()));
     } catch (OsException e) {
-      throw new EventException("Failed to stat " + file, e);
+      throw new EventException("Failed to stat " + path, e);
     }
 
-    Path path = Path.from(file);
     synchronized (this) {
       checkNode(path, node);
       if (!monitored.add(path)) {
@@ -185,11 +178,10 @@ final class FileEventServiceImpl extends FileEventService
       }
       startObserver(path, node);
     }
-    return startObserversForSubDirs(file);
+    return startObserversForSubDirs(path);
   }
 
-  @Override public void unmonitor(File file) {
-    Path parent = Path.from(file);
+  @Override public void unmonitor(Path parent) {
     synchronized (this) {
       if (!monitored.remove(parent)) {
         return;
@@ -208,15 +200,15 @@ final class FileEventServiceImpl extends FileEventService
     }
   }
 
-  private Optional<List<PathStat>> startObserversForSubDirs(File file) {
-    String[] names = file.list();
+  private Optional<List<PathStat>> startObserversForSubDirs(Path parent) {
+    String[] names = parent.toFile().list();
     if (names == null) {
       return Optional.absent();
     }
 
     List<PathStat> stats = newArrayListWithCapacity(names.length);
     for (String name : names) {
-      Path path = Path.from(new File(file, name));
+      Path path = parent.child(name);
       Stat stat;
       try {
         stat = stat(path.toString());
@@ -300,38 +292,36 @@ final class FileEventServiceImpl extends FileEventService
     return Stat.stat(path);
   }
 
-  @Override public void onFileChanged(int event, String parent, String child) {
-    if (isMonitored(Path.from(parent))) {
+  @Override public void onFileChanged(int event, Path path) {
+    if (isMonitored(path.parent())) {
       for (FileEventListener listener : listeners) {
-        listener.onFileChanged(event, parent, child);
+        listener.onFileChanged(event, path);
       }
     }
   }
 
-  @Override public void onFileAdded(int event, String parent, String child) {
-    File file = new File(parent, child);
-    if (file.isDirectory() && isMonitored(Path.from(parent))) {
+  @Override public void onFileAdded(int event, Path path) {
+    if (path.toFile().isDirectory() && isMonitored(path.parent())) {
       try {
-        startObserver(Path.from(file), Node.from(stat(file.getPath())));
+        startObserver(path, Node.from(stat(path.toString())));
       } catch (OsException e) {
         // Path no longer exists, permission etc, ignore and continue
-        logger.warn(e, "Failed to stat %s", file);
+        logger.warn(e, "Failed to stat %s", path);
       }
     }
     for (FileEventListener listener : listeners) {
-      listener.onFileAdded(event, parent, child);
+      listener.onFileAdded(event, path);
     }
   }
 
-  @Override public void onFileRemoved(int event, String parent, String child) {
-    File file = new File(parent, child);
-    if (!file.exists()) {
+  @Override public void onFileRemoved(int event, Path path) {
+    if (!path.toFile().exists()) {
       synchronized (this) {
-        removePath(Path.from(file));
+        removePath(path);
       }
     }
     for (FileEventListener listener : listeners) {
-      listener.onFileRemoved(event, parent, child);
+      listener.onFileRemoved(event, path);
     }
   }
 

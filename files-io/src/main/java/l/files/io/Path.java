@@ -57,20 +57,22 @@ public abstract class Path {
     if (ROOT.equals(this)) {
       return null;
     }
-    if (parent == null) {
-      parent = from(getFullPathNoEndSeparator(path()));
-    }
-    return parent;
+    return parent != null ? parent
+        : (parent = from(getFullPathNoEndSeparator(path())));
   }
 
   /**
    * Returns the name of this path, or empty if this is the root path.
    */
   public String name() {
-    if (name == null) {
-      name = getName(path());
-    }
-    return name;
+    return name != null ? name : (name = getName(path()));
+  }
+
+  /**
+   * Returns a new child path with the given name.
+   */
+  public Path child(String name) {
+    return from(new File(path(), name));
   }
 
   /**

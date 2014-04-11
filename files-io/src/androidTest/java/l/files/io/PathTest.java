@@ -8,6 +8,13 @@ import static org.apache.commons.io.FileUtils.getTempDirectory;
 
 public final class PathTest extends FileBaseTest {
 
+  public void testChild() {
+    assertEquals("/a/b", Path.from("/a").child("b").toString());
+    assertEquals("/a/b", Path.from("/a").child("/b").toString());
+    assertEquals("/a", Path.from("/").child("a").toString());
+    assertEquals("/a/b/c", Path.from("/a").child("b/c").toString());
+  }
+
   public void testParent() {
     assertEquals(null, Path.ROOT.parent());
     assertEquals("/", Path.from("/a").parent().toString());
@@ -46,19 +53,10 @@ public final class PathTest extends FileBaseTest {
     assertEquals(expected, actual);
   }
 
-  public void testStartsWith_true_equalPaths() {
+  public void testStartsWith() {
     testStartsWith(true, "/a/b", "/a/b");
-  }
-
-  public void testStartsWith_true_parentPathMatches() {
     testStartsWith(true, "/parent", "/parent/child/x");
-  }
-
-  public void testStartsWith_false_checkParentNotString() {
     testStartsWith(false, "/a", "/ab");
-  }
-
-  public void testStartsWith_false_unrelatedPaths() {
     testStartsWith(false, "/abc", "/xyz0");
   }
 

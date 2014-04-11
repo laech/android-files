@@ -1,5 +1,7 @@
 package l.files.fse;
 
+import l.files.io.Path;
+
 /**
  * Listener to be notified when files are being added/changed/removed from a
  * monitored directory.
@@ -16,27 +18,24 @@ public interface FileEventListener {
   /**
    * A new file has been added or moved to a directory.
    *
-   * @param event the original event type
-   * @param parent the path of the parent directory
-   * @param child the name of the child file
+   * @param event the original {@link android.os.FileObserver} event type
+   * @param path the path that was added to its parent
    */
-  void onFileAdded(int event, String parent, String child);
+  void onFileAdded(int event, Path path);
 
   /**
    * A new file's attribute has changed.
    *
-   * @param event the original event type
-   * @param parent the path of the parent directory
-   * @param child the name of the child file
+   * @param event the original {@link android.os.FileObserver} event type
+   * @param path the path that was changed
    */
-  void onFileChanged(int event, String parent, String child);
+  void onFileChanged(int event, Path path);
 
   /**
    * A new file has been deleted or moved out from a directory.
    *
-   * @param event the original event type
-   * @param parent the path of the parent directory
-   * @param child the name of the child file
+   * @param event the original {@link android.os.FileObserver} event type
+   * @param path the path that was removed from its parent
    */
-  void onFileRemoved(int event, String parent, String child);
+  void onFileRemoved(int event, Path path);
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.TempDir;
+import l.files.io.Path;
 import l.files.logging.Logger;
 
 import static android.os.FileObserver.ATTRIB;
@@ -276,7 +277,7 @@ final class FileEventServiceTester {
 
     service.register(listener);
     try {
-      service.monitor2(monitorDir);
+      service.monitor(Path.from(monitorDir));
 
       /*
         If monitoring an entire directory subtree, and a new subdirectory is
@@ -315,22 +316,22 @@ final class FileEventServiceTester {
   }
 
   public FileEventServiceTester monitor() {
-    service.monitor2(dir().get());
+    service.monitor(Path.from(dir().get()));
     return this;
   }
 
   public FileEventServiceTester unmonitor() {
-    service.unmonitor(dir().get());
+    service.unmonitor(Path.from(dir().get()));
     return this;
   }
 
   public FileEventServiceTester monitor(String path) {
-    service.monitor2(dir().get(path));
+    service.monitor(Path.from(dir().get(path)));
     return this;
   }
 
   public FileEventServiceTester monitor(File file) {
-    service.monitor2(file);
+    service.monitor(Path.from(file));
     return this;
   }
 
@@ -339,10 +340,9 @@ final class FileEventServiceTester {
       @Override
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
-          @Override
-          public void onFileAdded(int event, String parent, String child) {
-            super.onFileAdded(event, parent, child);
-            countDown(event, new File(parent, child));
+          @Override public void onFileAdded(int event, Path path) {
+            super.onFileAdded(event, path);
+            countDown(event, path);
           }
         };
       }
@@ -351,10 +351,9 @@ final class FileEventServiceTester {
       @Override
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
-          @Override
-          public void onFileChanged(int event, String parent, String child) {
-            super.onFileChanged(event, parent, child);
-            countDown(event, new File(parent, child));
+          @Override public void onFileChanged(int event, Path path) {
+            super.onFileChanged(event, path);
+            countDown(event, path);
           }
         };
       }
@@ -363,10 +362,9 @@ final class FileEventServiceTester {
       @Override
       TrackingListener create(CountDownLatch latch, int event, File file) {
         return new CountDownListener(latch, file, event) {
-          @Override
-          public void onFileRemoved(int event, String parent, String child) {
-            super.onFileRemoved(event, parent, child);
-            countDown(event, new File(parent, child));
+          @Override public void onFileRemoved(int event, Path path) {
+            super.onFileRemoved(event, path);
+            countDown(event, path);
           }
         };
       }
@@ -415,27 +413,24 @@ final class FileEventServiceTester {
   }
 
   static class TrackingListener implements FileEventListener {
-    final List<File> tracked = synchronizedList(new ArrayList<File>());
+    final List<Path> tracked = synchronizedList(new ArrayList<Path>());
     final List<String> formatted = synchronizedList(new ArrayList<String>());
 
-    @Override public void onFileAdded(int event, String parent, String child) {
-      track(event, parent, child);
+    @Override public void onFileAdded(int event, Path path) {
+      track(event, path);
     }
 
-    @Override
-    public void onFileChanged(int event, String parent, String child) {
-      track(event, parent, child);
+    @Override public void onFileChanged(int event, Path path) {
+      track(event, path);
     }
 
-    @Override
-    public void onFileRemoved(int event, String parent, String child) {
-      track(event, parent, child);
+    @Override public void onFileRemoved(int event, Path path) {
+      track(event, path);
     }
 
-    private void track(int event, String parent, String path) {
-      File file = new File(parent, path);
-      tracked.add(file);
-      formatted.add(getEventName(event) + "=" + file);
+    private void track(int event, Path path) {
+      tracked.add(path);
+      formatted.add(getEventName(event) + "=" + path);
     }
   }
 
@@ -450,8 +445,8 @@ final class FileEventServiceTester {
       this.expectedEvent = expectedEvent;
     }
 
-    void countDown(int actualEvent, File actualFile) {
-      if (expectedFile.equals(actualFile) &&
+    void countDown(int actualEvent, Path actualPath) {
+      if (expectedFile.equals(actualPath.toFile()) &&
           0 != (expectedEvent & actualEvent)) {
         latch.countDown();
       }

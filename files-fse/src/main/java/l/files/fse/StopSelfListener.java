@@ -39,12 +39,20 @@ final class StopSelfListener implements EventListener {
 
   @Override public void onEvent(int event, String path) {
 
-    if (0 != (event & DELETE_SELF)) {
+    if (isSelfDeleted(event)) {
       stop();
 
-    } else if (0 != (event & MOVE_SELF)) {
+    } else if (isSelfMoved(event)) {
       checkNode();
     }
+  }
+
+  private boolean isSelfMoved(int event) {
+    return 0 != (event & MOVE_SELF);
+  }
+
+  private boolean isSelfDeleted(int event) {
+    return 0 != (event & DELETE_SELF);
   }
 
   private void stop() {
