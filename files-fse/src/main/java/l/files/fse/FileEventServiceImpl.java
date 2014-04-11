@@ -236,20 +236,17 @@ final class FileEventServiceImpl extends FileEventService
     synchronized (this) {
       checkNode(path, node);
       EventObserver observer = checkObserver(node);
-      boolean newObserver = (observer == null);
-      if (newObserver) {
+      if (observer == null) {
         observer = new EventObserver(path, node, MODIFICATION_MASK);
         observer.addListener(new StopSelfListener(observer, this, node, path));
-        observers.add(observer);
-      }
-
-      observer.addPath(path);
-      observer.addListener(new UpdateSelfListener(path, this));
-      observer.addListener(new UpdateChildrenListener(path, this));
-
-      if (newObserver) {
         observer.startWatching();
-        logger.debug("Started new observer %s", path);
+        observers.add(observer);
+        logger.debug("Started observer %s", observer);
+      }
+      observer.addPath(path);
+      observer.addListener(new UpdateChildrenListener(path, this));
+      if (path.parent() != null) {
+        observer.addListener(new UpdateSelfListener(path, this));
       }
     }
   }

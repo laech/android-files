@@ -8,6 +8,7 @@ import static android.os.FileObserver.DELETE_SELF;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -17,13 +18,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class UpdateSelfListener implements EventListener {
 
-  private final String parent;
-  private final String name;
+  private final Path path;
   private final FileEventListener listener;
 
   UpdateSelfListener(Path path, FileEventListener listener) {
-    this.parent = path.parent().toString();
-    this.name = path.name();
+    checkNotNull(path, "path");
+    checkArgument(path.parent() != null, "%s has no parent", path);
+    this.path = path;
     this.listener = checkNotNull(listener, "listener");
   }
 
@@ -50,10 +51,10 @@ final class UpdateSelfListener implements EventListener {
   }
 
   private void notifySelfUpdated(int event) {
-    listener.onFileChanged(event, parent, name);
+    listener.onFileChanged(event, path.parent().toString(), path.name());
   }
 
   private void notifySelfDeleted(int event) {
-    listener.onFileRemoved(event, parent, name);
+    listener.onFileRemoved(event, path.parent().toString(), path.name());
   }
 }
