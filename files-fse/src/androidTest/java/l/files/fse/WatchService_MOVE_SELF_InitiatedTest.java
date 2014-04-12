@@ -7,8 +7,8 @@ import l.files.io.Path;
  *
  * @see android.os.FileObserver#MOVE_SELF
  */
-public class FileEventService_MOVE_SELF_InitiatedTest
-    extends FileEventServiceBaseTest {
+public class WatchService_MOVE_SELF_InitiatedTest
+    extends WatchServiceBaseTest {
 
   /**
    * When the monitored directory itself is moved, stopping monitoring on it.

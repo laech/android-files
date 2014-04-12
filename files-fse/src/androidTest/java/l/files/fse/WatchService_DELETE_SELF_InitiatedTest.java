@@ -7,7 +7,7 @@ import l.files.io.Path;
  *
  * @see android.os.FileObserver#DELETE_SELF
  */
-public class FileEventService_DELETE_SELF_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest {
 
   public void testDeleteSelfThenCreateSelf() {
     tester()

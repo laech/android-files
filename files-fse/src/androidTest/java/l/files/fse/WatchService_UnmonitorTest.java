@@ -2,7 +2,7 @@ package l.files.fse;
 
 import l.files.io.Path;
 
-public final class FileEventService_UnmonitorTest extends FileEventServiceBaseTest {
+public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
 
   public void testUnmonitorRootDirChildren() {
     service().monitor(Path.from("/"));

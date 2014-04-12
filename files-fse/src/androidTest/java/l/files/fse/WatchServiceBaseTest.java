@@ -3,16 +3,16 @@ package l.files.fse;
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
 
-abstract class FileEventServiceBaseTest extends FileBaseTest {
+abstract class WatchServiceBaseTest extends FileBaseTest {
 
-  private FileEventService service;
-  private FileEventServiceTester tester;
+  private WatchService service;
+  private WatchServiceTester tester;
   private TempDir helper;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     service = createService();
-    tester = FileEventServiceTester.create(service, tmp());
+    tester = WatchServiceTester.create(service, tmp());
     helper = TempDir.create("helper");
   }
 
@@ -24,15 +24,15 @@ abstract class FileEventServiceBaseTest extends FileBaseTest {
     super.tearDown();
   }
 
-  protected FileEventService createService() {
-    return new FileEventServiceImpl();
+  protected WatchService createService() {
+    return new WatchServiceImpl();
   }
 
   protected boolean stopServiceOnTearDown() {
     return true;
   }
 
-  protected final FileEventService service() {
+  protected final WatchService service() {
     return service;
   }
 
@@ -40,7 +40,7 @@ abstract class FileEventServiceBaseTest extends FileBaseTest {
     return helper;
   }
 
-  protected final FileEventServiceTester tester() {
+  protected final WatchServiceTester tester() {
     return tester;
   }
 }

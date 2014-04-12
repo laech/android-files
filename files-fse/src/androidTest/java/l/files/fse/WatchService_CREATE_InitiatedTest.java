@@ -5,7 +5,7 @@ package l.files.fse;
  *
  * @see android.os.FileObserver#CREATE
  */
-public class FileEventService_CREATE_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_CREATE_InitiatedTest extends WatchServiceBaseTest {
 
   public void testCreateFileToEmptyDir() {
     tester().awaitCreateFile("a");

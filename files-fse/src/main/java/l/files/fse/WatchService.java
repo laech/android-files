@@ -19,7 +19,7 @@ import l.files.io.Path;
  * already be changed, therefore a robust application should have an alternative
  * way of handling instead of reply on this fully.
  */
-public abstract class FileEventService {
+public abstract class WatchService {
 
   /*
     Note:
@@ -28,11 +28,11 @@ public abstract class FileEventService {
     uses global states.
    */
 
-  FileEventService() {}
+  WatchService() {}
 
-  private static final FileEventService INSTANCE = new FileEventServiceImpl();
+  private static final WatchService INSTANCE = new WatchServiceImpl();
 
-  public static FileEventService get() {
+  public static WatchService get() {
     return INSTANCE;
   }
 
@@ -42,7 +42,7 @@ public abstract class FileEventService {
    *
    * @return if this is the first time the path is being monitored, returns the
    * children information (if any) successfully retrieved
-   * @throws EventException if failed to monitor the given file
+   * @throws WatchException if failed to monitor the given file
    */
   public abstract Optional<List<PathStat>> monitor(Path path);
 
@@ -60,12 +60,12 @@ public abstract class FileEventService {
    * Registers a listener to be notified of events. Has no affect if the
    * listener is already registered.
    */
-  public abstract void register(FileEventListener listener);
+  public abstract void register(WatchEvent.Listener listener);
 
   /**
    * Unregisters a listener. Has no affect if the listener is not registered.
    */
-  public abstract void unregister(FileEventListener listener);
+  public abstract void unregister(WatchEvent.Listener listener);
 
   /**
    * Shuts down this instance. This will stop all observers. Intended for

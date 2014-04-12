@@ -20,9 +20,9 @@ import static l.files.fse.WatchEvent.Kind;
 final class UpdateSelfListener implements EventListener {
 
   private final Path path;
-  private final FileEventListener listener;
+  private final WatchEvent.Listener listener;
 
-  UpdateSelfListener(Path path, FileEventListener listener) {
+  UpdateSelfListener(Path path, WatchEvent.Listener listener) {
     checkNotNull(path, "path");
     checkArgument(path.parent() != null, "%s has no parent", path);
     this.path = path;

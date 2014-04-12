@@ -14,9 +14,9 @@ import static l.files.fse.WatchEvent.Kind;
 final class UpdateChildrenListener implements EventListener {
 
   private final Path parent;
-  private final FileEventListener listener;
+  private final WatchEvent.Listener listener;
 
-  UpdateChildrenListener(Path parent, FileEventListener listener) {
+  UpdateChildrenListener(Path parent, WatchEvent.Listener listener) {
     this.parent = parent;
     this.listener = listener;
   }

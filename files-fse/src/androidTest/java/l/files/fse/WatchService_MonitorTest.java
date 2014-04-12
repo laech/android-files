@@ -9,7 +9,7 @@ import l.files.io.Path;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.stat;
 
-public final class FileEventService_MonitorTest extends FileEventServiceBaseTest {
+public final class WatchService_MonitorTest extends WatchServiceBaseTest {
 
   public void testMonitorRootDirChildren() {
     service().monitor(Path.from("/"));

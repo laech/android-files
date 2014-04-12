@@ -29,12 +29,12 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
 
-final class FileEventServiceImpl extends FileEventService
-    implements StopSelfListener.Callback, FileEventListener {
+final class WatchServiceImpl extends WatchService
+    implements StopSelfListener.Callback, WatchEvent.Listener {
 
   // TODO use different lock for different paths
 
-  private static final Logger logger = Logger.get(FileEventServiceImpl.class);
+  private static final Logger logger = Logger.get(WatchServiceImpl.class);
 
   /*
    * Do not use MODIFY, use CLOSE_WRITE instead. Which is sufficient and avoids
@@ -70,13 +70,13 @@ final class FileEventServiceImpl extends FileEventService
    */
   private final List<EventObserver> observers = newArrayList();
 
-  private final Set<FileEventListener> listeners = new CopyOnWriteArraySet<>();
+  private final Set<WatchEvent.Listener> listeners = new CopyOnWriteArraySet<>();
 
-  @Override public void register(FileEventListener listener) {
+  @Override public void register(WatchEvent.Listener listener) {
     listeners.add(listener);
   }
 
-  @Override public void unregister(FileEventListener listener) {
+  @Override public void unregister(WatchEvent.Listener listener) {
     listeners.remove(listener);
   }
 
@@ -168,7 +168,7 @@ final class FileEventServiceImpl extends FileEventService
     try {
       node = Node.from(stat(path.toString()));
     } catch (OsException e) {
-      throw new EventException("Failed to stat " + path, e);
+      throw new WatchException("Failed to stat " + path, e);
     }
 
     synchronized (this) {
@@ -309,7 +309,7 @@ final class FileEventServiceImpl extends FileEventService
         throw new AssertionError(event);
     }
 
-    for (FileEventListener listener : listeners) {
+    for (WatchEvent.Listener listener : listeners) {
       listener.onEvent(event);
     }
   }

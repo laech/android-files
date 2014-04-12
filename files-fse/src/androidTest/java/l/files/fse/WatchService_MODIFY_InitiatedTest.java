@@ -5,7 +5,7 @@ package l.files.fse;
  *
  * @see android.os.FileObserver#MODIFY
  */
-public class FileEventService_MODIFY_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_MODIFY_InitiatedTest extends WatchServiceBaseTest {
 
   public void testModifyFile() {
     tmp().createFile("a");

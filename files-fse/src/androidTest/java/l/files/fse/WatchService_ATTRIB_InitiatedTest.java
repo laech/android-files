@@ -1,11 +1,11 @@
 package l.files.fse;
 
-import static l.files.fse.FileEventServiceTester.FileType;
-import static l.files.fse.FileEventServiceTester.FileType.DIR;
-import static l.files.fse.FileEventServiceTester.FileType.FILE;
-import static l.files.fse.FileEventServiceTester.PermissionType;
-import static l.files.fse.FileEventServiceTester.PermissionType.READ;
-import static l.files.fse.FileEventServiceTester.PermissionType.WRITE;
+import static l.files.fse.WatchServiceTester.FileType;
+import static l.files.fse.WatchServiceTester.FileType.DIR;
+import static l.files.fse.WatchServiceTester.FileType.FILE;
+import static l.files.fse.WatchServiceTester.PermissionType;
+import static l.files.fse.WatchServiceTester.PermissionType.READ;
+import static l.files.fse.WatchServiceTester.PermissionType.WRITE;
 
 /**
  * Tests file system operations started with change files/directories
@@ -13,7 +13,7 @@ import static l.files.fse.FileEventServiceTester.PermissionType.WRITE;
  *
  * @see android.os.FileObserver#ATTRIB
  */
-public class FileEventService_ATTRIB_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
 
   public void testSetFileLastModified() {
     tester().awaitSetFileLastModified("file", 1);

@@ -6,7 +6,7 @@ package l.files.fse;
  *
  * @see android.os.FileObserver#MOVED_TO
  */
-public class FileEventService_MOVE_TO_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_MOVE_TO_InitiatedTest extends WatchServiceBaseTest {
 
   /**
    * Directory moved into the monitored directory  should be monitored for files

@@ -5,7 +5,7 @@ package l.files.fse;
  *
  * @see android.os.FileObserver#DELETE
  */
-public class FileEventService_DELETE_InitiatedTest extends FileEventServiceBaseTest {
+public class WatchService_DELETE_InitiatedTest extends WatchServiceBaseTest {
 
   public void testDeleteFileNonEmptyDir() {
     tmp().createFile("a");
