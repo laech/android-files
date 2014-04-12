@@ -292,15 +292,29 @@ final class FileEventServiceImpl extends FileEventService
     return Stat.stat(path);
   }
 
-  @Override public void onFileChanged(int event, Path path) {
-    if (isMonitored(path.parent())) {
-      for (FileEventListener listener : listeners) {
-        listener.onFileChanged(event, path);
-      }
+  @Override public void onEvent(WatchEvent event) {
+    switch (event.kind()) {
+      case CREATE:
+        onCreate(event.path());
+        break;
+      case DELETE:
+        onDelete(event.path());
+        break;
+      case MODIFY:
+        if (!isMonitored(event.path().parent())) {
+          return;
+        }
+        break;
+      default:
+        throw new AssertionError(event);
+    }
+
+    for (FileEventListener listener : listeners) {
+      listener.onEvent(event);
     }
   }
 
-  @Override public void onFileAdded(int event, Path path) {
+  private void onCreate(Path path) {
     if (path.toFile().isDirectory() && isMonitored(path.parent())) {
       try {
         startObserver(path, Node.from(stat(path.toString())));
@@ -309,19 +323,13 @@ final class FileEventServiceImpl extends FileEventService
         logger.warn(e, "Failed to stat %s", path);
       }
     }
-    for (FileEventListener listener : listeners) {
-      listener.onFileAdded(event, path);
-    }
   }
 
-  @Override public void onFileRemoved(int event, Path path) {
+  private void onDelete(Path path) {
     if (!path.toFile().exists()) {
       synchronized (this) {
         removePath(path);
       }
-    }
-    for (FileEventListener listener : listeners) {
-      listener.onFileRemoved(event, path);
     }
   }
 

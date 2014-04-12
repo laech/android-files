@@ -1,6 +1,5 @@
 package l.files.fse;
 
-import android.os.FileObserver;
 import android.os.SystemClock;
 
 import java.io.File;
@@ -13,14 +12,6 @@ import l.files.common.testing.TempDir;
 import l.files.io.Path;
 import l.files.logging.Logger;
 
-import static android.os.FileObserver.ATTRIB;
-import static android.os.FileObserver.CLOSE_WRITE;
-import static android.os.FileObserver.CREATE;
-import static android.os.FileObserver.DELETE;
-import static android.os.FileObserver.DELETE_SELF;
-import static android.os.FileObserver.MOVED_FROM;
-import static android.os.FileObserver.MOVED_TO;
-import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static com.google.common.io.Files.touch;
@@ -28,12 +19,11 @@ import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
-import static l.files.fse.EventObserver.getEventName;
 import static l.files.fse.FileEventServiceTester.FileType.DIR;
 import static l.files.fse.FileEventServiceTester.FileType.FILE;
-import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_ADDED;
-import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_CHANGED;
-import static l.files.fse.FileEventServiceTester.ListenerType.ON_FILE_REMOVED;
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchEvent.Kind.DELETE;
+import static l.files.fse.WatchEvent.Kind.MODIFY;
 import static org.apache.commons.io.FileUtils.forceDelete;
 
 final class FileEventServiceTester {
@@ -74,7 +64,7 @@ final class FileEventServiceTester {
 
   private FileEventServiceTester awaitSetLastModified(
       final File file, final long time) {
-    expect(ON_FILE_CHANGED, ATTRIB, file, new Runnable() {
+    expect(MODIFY, file, new Runnable() {
       @Override public void run() {
         assertTrue(file.setLastModified(time));
       }
@@ -89,7 +79,7 @@ final class FileEventServiceTester {
   public FileEventServiceTester awaitSetPermission(
       String path, final PermissionType type, final boolean value) {
     final File file = dir().get(path);
-    return expect(ON_FILE_CHANGED, ATTRIB, file, new Runnable() {
+    return expect(MODIFY, file, new Runnable() {
       @Override public void run() {
         type.set(file, value);
       }
@@ -130,7 +120,7 @@ final class FileEventServiceTester {
 
   private FileEventServiceTester awaitCreate(
       final FileType type, final File file, final File monitorDir) {
-    return expect(ON_FILE_ADDED, CREATE, file, monitorDir, new Runnable() {
+    return expect(CREATE, file, monitorDir, new Runnable() {
       @Override public void run() {
         type.create(file);
       }
@@ -143,7 +133,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitDelete(String path) {
     final File file = dir().get(path);
-    return expect(ON_FILE_REMOVED, DELETE, file, new Runnable() {
+    return expect(DELETE, file, new Runnable() {
       @Override public void run() {
         assertTrue(file.exists());
         try {
@@ -161,7 +151,7 @@ final class FileEventServiceTester {
   public FileEventServiceTester awaitCreateRoot() {
     final File dir = dir().get();
     final File parent = dir.getParentFile();
-    return expect(ON_FILE_ADDED, CREATE, dir, parent, new Runnable() {
+    return expect(CREATE, dir, parent, new Runnable() {
       @Override public void run() {
         assertTrue(parent.exists());
         assertTrue(dir.mkdir());
@@ -174,7 +164,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitDeleteRoot() {
     File file = dir().get();
-    return expect(ON_FILE_REMOVED, DELETE_SELF, file, file, new Runnable() {
+    return expect(DELETE, file, file, new Runnable() {
       @Override public void run() {
         dir().delete();
       }
@@ -187,7 +177,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitMoveFrom(String path, final File dst) {
     final File file = dir().get(path);
-    return expect(ON_FILE_REMOVED, MOVED_FROM, file, new Runnable() {
+    return expect(DELETE, file, new Runnable() {
       @Override public void run() {
         assertTrue(file.renameTo(dst));
       }
@@ -200,7 +190,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitMoveTo(String path, final File src) {
     final File file = dir().get(path);
-    return expect(ON_FILE_ADDED, MOVED_TO, file, new Runnable() {
+    return expect(CREATE, file, new Runnable() {
       @Override public void run() {
         assertTrue(src.renameTo(file));
       }
@@ -213,7 +203,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitMoveRootTo(final File dst) {
     final File file = dir().get();
-    return expect(ON_FILE_REMOVED, MOVE_SELF, file, file, new Runnable() {
+    return expect(DELETE, file, file, new Runnable() {
       @Override public void run() {
         assertTrue(file.renameTo(dst));
       }
@@ -227,7 +217,7 @@ final class FileEventServiceTester {
   public FileEventServiceTester awaitMoveToRoot(final File src) {
     final File dir = dir().get();
     final File parent = dir.getParentFile();
-    return expect(ON_FILE_ADDED, MOVED_TO, dir, parent, new Runnable() {
+    return expect(CREATE, dir, parent, new Runnable() {
       @Override public void run() {
         assertTrue(src.renameTo(dir));
       }
@@ -240,7 +230,7 @@ final class FileEventServiceTester {
    */
   public FileEventServiceTester awaitModify(String path) {
     final File file = dir().get(path);
-    return expect(ON_FILE_CHANGED, CLOSE_WRITE, file, new Runnable() {
+    return expect(MODIFY, file, new Runnable() {
       @Override public void run() {
         try {
           append("0", file, UTF_8);
@@ -252,28 +242,27 @@ final class FileEventServiceTester {
   }
 
   private FileEventServiceTester expect(
-      ListenerType type, int event, File file, Runnable runnable) {
-    return expect(type, event, file, dir().get(), runnable);
+      WatchEvent.Kind kind, File file, Runnable runnable) {
+    return expect(kind, file, dir().get(), runnable);
   }
 
   /**
    * Expects an event to happen.
    *
-   * @param type the type of listener to create for tracking the event
-   * @param event the expected type of {@link FileObserver} event
+   * @param kind the expected event kind
    * @param file the expected file of the event
    * @param monitorDir the parent directory to monitor for the event
    * @param runnable the code to trigger the event
    */
   private FileEventServiceTester expect(
-      ListenerType type,
-      int event,
+      WatchEvent.Kind kind,
       File file,
       File monitorDir,
       Runnable runnable) {
 
     CountDownLatch latch = new CountDownLatch(1);
-    TrackingListener listener = type.create(latch, event, file);
+    WatchEvent expected = WatchEvent.create(kind, Path.from(file));
+    TrackingListener listener = new CountDownListener(latch, expected);
 
     service.register(listener);
     try {
@@ -297,13 +286,13 @@ final class FileEventServiceTester {
 
         if (!latch.await(2, SECONDS)) {
           fail("Timed out waiting for notification. " + runnable.toString() +
-              "\nExpected: " + getEventName(event) + "=" + file +
-              "\nActual: " + listener.formatted);
+              "\nExpected: " + kind + "=" + file +
+              "\nActual: " + listener.tracked);
         }
 
         logger.debug("Success waiting for notification." +
-            "\nExpected: " + getEventName(event) + "=" + file +
-            "\nActual: " + listener.formatted);
+            "\nExpected: " + kind + "=" + file +
+            "\nActual: " + listener.tracked);
 
       } catch (InterruptedException e) {
         throw new AssertionError(e);
@@ -333,44 +322,6 @@ final class FileEventServiceTester {
   public FileEventServiceTester monitor(File file) {
     service.monitor(Path.from(file));
     return this;
-  }
-
-  static enum ListenerType {
-    ON_FILE_ADDED {
-      @Override
-      TrackingListener create(CountDownLatch latch, int event, File file) {
-        return new CountDownListener(latch, file, event) {
-          @Override public void onFileAdded(int event, Path path) {
-            super.onFileAdded(event, path);
-            countDown(event, path);
-          }
-        };
-      }
-    },
-    ON_FILE_CHANGED {
-      @Override
-      TrackingListener create(CountDownLatch latch, int event, File file) {
-        return new CountDownListener(latch, file, event) {
-          @Override public void onFileChanged(int event, Path path) {
-            super.onFileChanged(event, path);
-            countDown(event, path);
-          }
-        };
-      }
-    },
-    ON_FILE_REMOVED {
-      @Override
-      TrackingListener create(CountDownLatch latch, int event, File file) {
-        return new CountDownListener(latch, file, event) {
-          @Override public void onFileRemoved(int event, Path path) {
-            super.onFileRemoved(event, path);
-            countDown(event, path);
-          }
-        };
-      }
-    };
-
-    abstract TrackingListener create(CountDownLatch latch, int event, File file);
   }
 
   static enum FileType {
@@ -413,41 +364,25 @@ final class FileEventServiceTester {
   }
 
   static class TrackingListener implements FileEventListener {
-    final List<Path> tracked = synchronizedList(new ArrayList<Path>());
-    final List<String> formatted = synchronizedList(new ArrayList<String>());
+    final List<WatchEvent> tracked = synchronizedList(new ArrayList<WatchEvent>());
 
-    @Override public void onFileAdded(int event, Path path) {
-      track(event, path);
-    }
-
-    @Override public void onFileChanged(int event, Path path) {
-      track(event, path);
-    }
-
-    @Override public void onFileRemoved(int event, Path path) {
-      track(event, path);
-    }
-
-    private void track(int event, Path path) {
-      tracked.add(path);
-      formatted.add(getEventName(event) + "=" + path);
+    @Override public void onEvent(WatchEvent event) {
+      tracked.add(event);
     }
   }
 
   static class CountDownListener extends TrackingListener {
     private final CountDownLatch latch;
-    private final File expectedFile;
-    private final int expectedEvent;
+    private final WatchEvent expected;
 
-    CountDownListener(CountDownLatch latch, File expectedFile, int expectedEvent) {
+    CountDownListener(CountDownLatch latch, WatchEvent expected) {
       this.latch = latch;
-      this.expectedFile = expectedFile;
-      this.expectedEvent = expectedEvent;
+      this.expected = expected;
     }
 
-    void countDown(int actualEvent, Path actualPath) {
-      if (expectedFile.equals(actualPath.toFile()) &&
-          0 != (expectedEvent & actualEvent)) {
+    @Override public void onEvent(WatchEvent event) {
+      super.onEvent(event);
+      if (event.equals(expected)) {
         latch.countDown();
       }
     }

@@ -9,6 +9,7 @@ import static android.os.FileObserver.DELETE;
 import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
+import static l.files.fse.WatchEvent.Kind;
 
 final class UpdateChildrenListener implements EventListener {
 
@@ -23,13 +24,13 @@ final class UpdateChildrenListener implements EventListener {
   @Override public void onEvent(int event, String path) {
 
     if (isChildAdded(event)) {
-      notifyChildAdded(event, path);
+      notifyEvent(Kind.CREATE, path);
 
-    } else if (isChildUpdated(event)) {
-      notifyChildUpdated(event, path);
+    } else if (isChildModified(event, path)) {
+      notifyEvent(Kind.MODIFY, path);
 
     } else if (isChildDeleted(event)) {
-      notifyChildDeleted(event, path);
+      notifyEvent(Kind.DELETE, path);
     }
   }
 
@@ -38,7 +39,10 @@ final class UpdateChildrenListener implements EventListener {
         || 0 != (event & MOVED_TO);
   }
 
-  private boolean isChildUpdated(int event) {
+  private boolean isChildModified(int event, String path) {
+    if (path == null) {
+      return false;
+    }
     return 0 != (event & ATTRIB)
         || 0 != (event & MODIFY)
         || 0 != (event & CLOSE_WRITE);
@@ -49,17 +53,7 @@ final class UpdateChildrenListener implements EventListener {
         || 0 != (event & DELETE);
   }
 
-  private void notifyChildAdded(int event, String path) {
-    listener.onFileAdded(event, parent.child(path));
-  }
-
-  private void notifyChildUpdated(int event, String path) {
-    if (path != null) {
-      listener.onFileChanged(event, parent.child(path));
-    }
-  }
-
-  private void notifyChildDeleted(int event, String path) {
-    listener.onFileRemoved(event, parent.child(path));
+  private void notifyEvent(Kind kind, String path) {
+    listener.onEvent(WatchEvent.create(kind, parent.child(path)));
   }
 }

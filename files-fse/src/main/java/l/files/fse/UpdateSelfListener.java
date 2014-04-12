@@ -10,6 +10,7 @@ import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.fse.WatchEvent.Kind;
 
 /**
  * This listener handles events that could cause the properties (last modified,
@@ -30,15 +31,15 @@ final class UpdateSelfListener implements EventListener {
 
   @Override public void onEvent(int event, String path) {
 
-    if (isSelfUpdated(event)) {
-      notifySelfUpdated(event);
+    if (isSelfModified(event)) {
+      notifyEvent(Kind.MODIFY);
 
     } else if (isSelfDeleted(event)) {
-      notifySelfDeleted(event);
+      notifyEvent(Kind.DELETE);
     }
   }
 
-  private boolean isSelfUpdated(int event) {
+  private boolean isSelfModified(int event) {
     return 0 != (event & CREATE)
         || 0 != (event & MOVED_TO)
         || 0 != (event & MOVED_FROM)
@@ -50,11 +51,7 @@ final class UpdateSelfListener implements EventListener {
         || 0 != (event & DELETE_SELF);
   }
 
-  private void notifySelfUpdated(int event) {
-    listener.onFileChanged(event, path);
-  }
-
-  private void notifySelfDeleted(int event) {
-    listener.onFileRemoved(event, path);
+  private void notifyEvent(Kind kind) {
+    listener.onEvent(WatchEvent.create(kind, path));
   }
 }
