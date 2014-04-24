@@ -1,9 +1,5 @@
 package l.files.fse;
 
-import com.google.common.base.Optional;
-
-import java.util.List;
-
 import l.files.io.Path;
 
 /**
@@ -40,11 +36,9 @@ public abstract class WatchService {
    * Starts monitoring on the given file path, file systems event on the given
    * path will be sent to all registered listeners.
    *
-   * @return if this is the first time the path is being monitored, returns the
-   * children information (if any) successfully retrieved
    * @throws WatchException if failed to monitor the given file
    */
-  public abstract Optional<List<PathStat>> monitor(Path path);
+  public abstract void monitor(Path path);
 
   /**
    * Stops monitoring on the given file path.

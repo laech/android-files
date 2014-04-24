@@ -2,8 +2,6 @@ package l.files.fse;
 
 import android.os.FileObserver;
 
-import com.google.common.base.Optional;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +23,6 @@ import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.os.Stat.S_ISDIR;
 
@@ -163,7 +160,7 @@ final class WatchServiceImpl extends WatchService
     return null;
   }
 
-  @Override public Optional<List<PathStat>> monitor(Path path) {
+  @Override public void monitor(Path path) {
     Node node;
     try {
       node = Node.from(stat(path.toString()));
@@ -174,11 +171,11 @@ final class WatchServiceImpl extends WatchService
     synchronized (this) {
       checkNode(path, node);
       if (!monitored.add(path)) {
-        return Optional.absent();
+        return;
       }
       startObserver(path, node);
     }
-    return startObserversForSubDirs(path);
+    startObserversForSubDirs(path);
   }
 
   @Override public void unmonitor(Path parent) {
@@ -200,13 +197,12 @@ final class WatchServiceImpl extends WatchService
     }
   }
 
-  private Optional<List<PathStat>> startObserversForSubDirs(Path parent) {
+  private void startObserversForSubDirs(Path parent) {
     String[] names = parent.toFile().list();
     if (names == null) {
-      return Optional.absent();
+      return;
     }
 
-    List<PathStat> stats = newArrayListWithCapacity(names.length);
     for (String name : names) {
       Path path = parent.child(name);
       Stat stat;
@@ -216,12 +212,10 @@ final class WatchServiceImpl extends WatchService
         logger.warn(e, "Failed to stat %s", name);
         continue;
       }
-      stats.add(PathStat.create(path.toString(), stat));
       if (S_ISDIR(stat.mode)) {
         startObserver(path, Node.from(stat));
       }
     }
-    return Optional.of(stats);
   }
 
   private void startObserver(Path path, Node node) {
@@ -293,6 +287,8 @@ final class WatchServiceImpl extends WatchService
   }
 
   @Override public void onEvent(WatchEvent event) {
+    logger.debug("%s", event);
+
     switch (event.kind()) {
       case CREATE:
         onCreate(event.path());
