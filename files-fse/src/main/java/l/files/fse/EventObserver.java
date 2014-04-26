@@ -25,6 +25,11 @@ final class EventObserver extends FileObserver {
 
   private static final Logger logger = Logger.get(EventObserver.class);
 
+  // Extra inotify constants not defined in FileObserver
+  private static final int IN_UNMOUNT = 0x00002000;
+  private static final int IN_Q_OVERFLOW = 0x00004000;
+  private static final int IN_IGNORED = 0x00008000;
+
   /**
    * FileObserver will catch any throwable and ignore it, not good as we won't
    * be notified of any coding errors. Instead we catch the exception and send
@@ -50,6 +55,16 @@ final class EventObserver extends FileObserver {
     this.listeners = new CopyOnWriteArraySet<>();
     this.paths = newHashSet();
     addPath(path);
+  }
+
+  @Override public void startWatching() {
+    super.startWatching();
+    logger.debug("Start %s", this);
+  }
+
+  @Override public void stopWatching() {
+    super.stopWatching();
+    logger.debug("Stop %s", this);
   }
 
   public void addListener(EventListener listener) {
@@ -179,6 +194,9 @@ final class EventObserver extends FileObserver {
     if (0 != (event & CLOSE_WRITE)) return "CLOSE_WRITE";
     if (0 != (event & DELETE_SELF)) return "DELETE_SELF";
     if (0 != (event & CLOSE_NOWRITE)) return "CLOSE_NOWRITE";
+    if (0 != (event & IN_IGNORED)) return "IN_IGNORED";
+    if (0 != (event & IN_Q_OVERFLOW)) return "IN_Q_OVERFLOW";
+    if (0 != (event & IN_UNMOUNT)) return "IN_UNMOUNT";
     return "UNKNOWN";
   }
 
