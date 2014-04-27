@@ -25,6 +25,7 @@ final class EventObserver extends FileObserver {
 
   private static final Logger logger = Logger.get(EventObserver.class);
 
+  // TODO utilise IN_IGNORED for tracking the cleaning up of the observers
   // Extra inotify constants not defined in FileObserver
   private static final int IN_UNMOUNT = 0x00002000;
   private static final int IN_Q_OVERFLOW = 0x00004000;
@@ -201,7 +202,7 @@ final class EventObserver extends FileObserver {
   }
 
   private void log(int event, String child) {
-    logger.debug("%s, parent=%s, path=%s", getEventName(event), paths, child);
+    logger.debug("%s, parent=%s, path=%s", getEventName(event), path, child);
   }
 
   @Override public String toString() {

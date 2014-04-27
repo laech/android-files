@@ -2,6 +2,10 @@ package l.files.fse;
 
 import l.files.io.Path;
 
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchEvent.Kind.DELETE;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+
 /**
  * Tests file system operations started with deleting files/directories.
  *
@@ -10,29 +14,27 @@ import l.files.io.Path;
 public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest {
 
   public void testDeleteSelfThenCreateSelf() {
-    tester()
-        .awaitDeleteRoot()
-        .awaitCreateRoot()
-        .awaitCreateDir("a");
+    awaitDeleteRoot();
+    tmp().createRoot();
+    await(event(CREATE, "a"), newCreate("a", DIR));
   }
 
   public void testDeleteSelfMoveDirWithSameNameIn() {
-    tester()
-        .awaitDeleteRoot()
-        .awaitMoveToRoot(helper().createDir("a"))
-        .awaitCreateDir("b");
+    awaitDeleteRoot();
+    newMove(helper().createDir("a"), tmpDir()).run();
+    await(event(CREATE, "b"), newCreate("b", DIR));
   }
 
   /**
    * When the monitored directory itself is deleted, stopping monitoring on it.
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
-    tester().monitor();
+    listen(tmpDir());
     Path path = Path.from(tmp().get());
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 
-    tester().awaitDeleteRoot();
+    awaitDeleteRoot();
     assertFalse(service().isMonitored(path));
     assertFalse(service().hasObserver(path));
   }
@@ -43,13 +45,18 @@ public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest
    */
   public void testDeleteSelfNoLongerMonitorChildren() {
     tmp().createDir("a");
-    tester().monitor().monitor("a");
+    listen(tmpDir());
+    listen("a");
     Path path = Path.from(tmp().get("a"));
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 
-    tester().awaitDeleteRoot();
+    awaitDeleteRoot();
     assertFalse(service().isMonitored(path));
     assertFalse(service().hasObserver(path));
+  }
+
+  private void awaitDeleteRoot() {
+    await(event(DELETE, tmpDir()), newDelete(tmpDir()));
   }
 }

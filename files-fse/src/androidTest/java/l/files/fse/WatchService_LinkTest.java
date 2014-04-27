@@ -5,14 +5,17 @@ import android.annotation.SuppressLint;
 import java.io.File;
 
 import static java.lang.System.nanoTime;
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
 import static l.files.os.Stat.stat;
 import static l.files.os.Unistd.symlink;
 
 public class WatchService_LinkTest extends WatchServiceBaseTest {
 
   /**
-   * These paths all mount points of external storage, different paths, but all
-   * point to the same inode.
+   * These paths may all be mount points of external storage, different paths,
+   * but all point to the same inode.
    */
   @SuppressLint("SdCardPath")
   private static final File[] MOUNT_POINTS = {
@@ -31,26 +34,20 @@ public class WatchService_LinkTest extends WatchServiceBaseTest {
     File b = MOUNT_POINTS[1];
     assertEquals(stat(a.getPath()).ino, stat(b.getPath()).ino);
 
-    String[] names = {
-        "1-" + nanoTime(),
-        "2-" + nanoTime(),
-        "3-" + nanoTime(),
-        "4-" + nanoTime(),
+    File[] files = {
+        new File(a, "1-" + nanoTime()),
+        new File(b, "2-" + nanoTime()),
+        new File(a, "3-" + nanoTime()),
+        new File(b, "4-" + nanoTime()),
     };
 
     try {
-
-      tester()
-          .monitor(a)
-          .monitor(b)
-          .awaitCreateFile(names[0], a)
-          .awaitCreateFile(names[1], b)
-          .awaitCreateFile(names[2], a)
-          .awaitCreateFile(names[3], b);
-
+      for (File file : files) {
+        await(event(CREATE, file), newCreate(file, FILE), listen(file.getParentFile()));
+      }
     } finally {
-      for (String name : names) {
-        assertTrue(new File(a, name).delete());
+      for (File file : files) {
+        assertTrue(file.delete());
       }
     }
   }
@@ -64,10 +61,10 @@ public class WatchService_LinkTest extends WatchServiceBaseTest {
     assertTrue(tmp().get("a").exists());
     assertTrue(helper().get("test/a").exists());
 
-    tester().awaitCreateFile("b");
+    await(event(CREATE, "b"), newCreate("b", FILE));
 
     helper().createFile("test/c");
     assertTrue(tmp().get("c").exists());
-    tester().awaitCreateDir("d");
+    await(event(CREATE, "d"), newCreate("d", DIR));
   }
 }

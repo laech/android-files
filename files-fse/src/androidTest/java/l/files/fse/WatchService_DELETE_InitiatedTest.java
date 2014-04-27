@@ -1,5 +1,11 @@
 package l.files.fse;
 
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchEvent.Kind.DELETE;
+import static l.files.fse.WatchEvent.Kind.MODIFY;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
+
 /**
  * Tests file system operations started with deleting files/directories.
  *
@@ -7,65 +13,60 @@ package l.files.fse;
  */
 public class WatchService_DELETE_InitiatedTest extends WatchServiceBaseTest {
 
-  public void testDeleteFileNonEmptyDir() {
-    tmp().createFile("a");
-    tmp().createFile("b");
-    tmp().createDir("c");
-    tester().awaitDelete("a");
+  public void testDeleteItemBecomeEmptyDir_file() {
+    testDeleteItemBecomeEmptyDir(FILE);
   }
 
-  public void testDeleteFileEmptyDir() {
-    tmp().createFile("a");
-    tester().awaitDelete("a");
+  public void testDeleteItemBecomeEmptyDir_dir() {
+    testDeleteItemBecomeEmptyDir(DIR);
   }
 
-  public void testDeleteDirNonEmptyDir() {
-    tmp().createDir("a");
+  private void testDeleteItemBecomeEmptyDir(FileType type) {
+    type.create(tmp().get("a"));
+    await(event(DELETE, "a"), newDelete("a"));
+  }
+
+  public void testDeleteItemBecomeNonEmptyDir_file() {
+    testDeleteItemBecomeNonEmptyDir(FILE);
+  }
+
+  public void testDeleteItemBecomeNonEmptyDir_dir() {
+    testDeleteItemBecomeNonEmptyDir(DIR);
+  }
+
+  public void testDeleteItemBecomeNonEmptyDir(FileType type) {
+    type.create(tmp().get("a"));
     tmp().createDir("b");
-    tester().awaitDelete("a");
+    tmp().createFile("c");
+    await(event(DELETE, "a"), newDelete("a"));
   }
 
-  public void testDeleteDirEmptyDir() {
-    tmp().createDir("a");
-    tester().awaitDelete("a");
+  public void testDeleteItemFromExistingDirEmptyDir_file() {
+    testDeleteItemFromExistingDirEmptyDir(FILE);
   }
 
-  /**
-   * Existing directory should be monitored after query for file deletions as
-   * that will change its last modified date.
-   */
-  public void testDeleteFileFromExistingDirEmptyDir() {
-    tmp().createFile("a/b");
-    tester().awaitDelete("a/b");
+  public void testDeleteItemFromExistingDirEmptyDir_dir() {
+    testDeleteItemFromExistingDirEmptyDir(DIR);
   }
 
-  /**
-   * Existing directory should be monitored after query for file deletions as
-   * that will change its last modified date.
-   */
-  public void testDeleteFileFromExistingDirNonEmptyDir() {
-    tmp().createFile("a/b");
+  private void testDeleteItemFromExistingDirEmptyDir(FileType type) {
+    type.create(tmp().get("a/b"));
+    await(event(MODIFY, "a"), newDelete("a/b"));
+  }
+
+  public void testDeleteItemFromExistingDirNonEmptyDir_file() {
+    testDeleteItemFromExistingDirNonEmptyDir(FILE);
+  }
+
+  public void testDeleteItemFromExistingDirNonEmptyDir_dir() {
+    testDeleteItemFromExistingDirNonEmptyDir(DIR);
+  }
+
+  private void testDeleteItemFromExistingDirNonEmptyDir(FileType type) {
+    type.create(tmp().get("a/b"));
     tmp().createFile("a/c");
-    tester().awaitDelete("a/b");
-  }
-
-  /**
-   * Existing directory should be monitored after query for file deletions as
-   * that will change its last modified date.
-   */
-  public void testDeleteDirFromExistingDirEmptyDir() {
-    tmp().createDir("a/b");
-    tester().awaitDelete("a/b");
-  }
-
-  /**
-   * Existing directory should be monitored after query for file deletions as
-   * that will change its last modified date.
-   */
-  public void testDeleteDirFromExistingDirNonEmptyDir() {
-    tmp().createDir("a/b");
-    tmp().createDir("a/c");
-    tester().awaitDelete("a/b");
+    tmp().createDir("a/d");
+    await(event(MODIFY, "a"), newDelete("a/b"));
   }
 
   /**
@@ -75,13 +76,15 @@ public class WatchService_DELETE_InitiatedTest extends WatchServiceBaseTest {
    * should be of no problem.
    */
   public void testDeleteMonitoredParentAndMonitoredChildRecreateChild() {
-    tmp().createDir("a/b/c");
-    tester()
-        .awaitCreateFile("a/b/c/d", "a/b/c")
-        .awaitDeleteRoot();
+    String parent = "a/b/c";
+    String child = "a/b/c/d";
+    tmp().createDir(parent);
 
-    tmp().createDir("a/b/c");
-    tester().awaitCreateFile("a/b/c/d", "a/b/c");
+    await(event(CREATE, child), newCreate(child, FILE), listen(parent));
+    await(event(DELETE, tmpDir()), newDelete(tmpDir()));
+
+    tmp().createDir(parent);
+    await(event(CREATE, child), newCreate(child, FILE), listen(parent));
   }
 
   /**
@@ -90,12 +93,11 @@ public class WatchService_DELETE_InitiatedTest extends WatchServiceBaseTest {
    */
   public void testDeleteDirThenCreateDirWithSameName() {
     tmp().createDir("a");
-    tester()
-        .awaitDelete("a")
-        .awaitCreateDir("a")
-        .awaitDelete("a")
-        .awaitCreateDir("a")
-        .awaitCreateFile("a/b");
+    for (int i = 0; i < 2; i++) {
+      await(event(DELETE, "a"), newDelete("a"));
+      await(event(CREATE, "a"), newCreate("a", DIR));
+      await(event(MODIFY, "a"), newCreate("a/b", FILE));
+    }
   }
 
   /**
@@ -104,11 +106,10 @@ public class WatchService_DELETE_InitiatedTest extends WatchServiceBaseTest {
    */
   public void testDeleteDirThenMoveDirInWithSameName() {
     tmp().createDir("a");
-    tester()
-        .awaitDelete("a")
-        .awaitMoveTo("a", helper().createDir("a"))
-        .awaitDelete("a")
-        .awaitMoveTo("a", helper().createDir("b"))
-        .awaitCreateFile("a/b");
+    await(event(DELETE, "a"), newDelete("a"));
+    await(event(CREATE, "a"), newMoveTo("a", helper().createDir("a")));
+    await(event(DELETE, "a"), newDelete("a"));
+    await(event(CREATE, "a"), newMoveTo("a", helper().createDir("b")));
+    await(event(MODIFY, "a"), newCreate("a/b", FILE));
   }
 }

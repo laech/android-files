@@ -1,11 +1,10 @@
 package l.files.fse;
 
-import static l.files.fse.WatchServiceTester.FileType;
-import static l.files.fse.WatchServiceTester.FileType.DIR;
-import static l.files.fse.WatchServiceTester.FileType.FILE;
-import static l.files.fse.WatchServiceTester.PermissionType;
-import static l.files.fse.WatchServiceTester.PermissionType.READ;
-import static l.files.fse.WatchServiceTester.PermissionType.WRITE;
+import static l.files.fse.WatchEvent.Kind.MODIFY;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
+import static l.files.fse.WatchServiceBaseTest.Permission.READ;
+import static l.files.fse.WatchServiceBaseTest.Permission.WRITE;
 
 /**
  * Tests file system operations started with change files/directories
@@ -15,34 +14,40 @@ import static l.files.fse.WatchServiceTester.PermissionType.WRITE;
  */
 public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
 
-  public void testSetFileLastModified() {
-    tester().awaitSetFileLastModified("file", 1);
+  public void testLastModifiedDateChange_file() {
+    testLastModifiedDateChange(FILE);
   }
 
-  public void testSetDirLastModified() {
-    tester().awaitSetDirLastModified("dir", 2);
+  public void testLastModifiedDateChange_dir() {
+    testLastModifiedDateChange(DIR);
   }
 
-  public void testSetFileReadable() {
-    testSetAttr("fr", FILE, READ);
+  private void testLastModifiedDateChange(FileType type) {
+    type.create(tmp().get("a"));
+    await(event(MODIFY, "a"), newLastModified("a", 2000));
   }
 
-  public void testSetDirReadable() {
-    testSetAttr("dr", DIR, READ);
+  public void testFileReadabilityChange() {
+    testAttrChange("fr", FILE, READ);
   }
 
-  public void testSetFileWritable() {
-    testSetAttr("fw", FILE, WRITE);
+  public void testDirReadabilityChange() {
+    testAttrChange("dr", DIR, READ);
   }
 
-  public void testSetDirWritable() {
-    testSetAttr("dw", DIR, WRITE);
+  public void testFileWritabilityChange() {
+    testAttrChange("fw", FILE, WRITE);
   }
 
-  private void testSetAttr(String path, FileType type, PermissionType perm) {
-    type.create(tmp().get(path));
-    tester()
-        .awaitSetPermission(path, perm, false)
-        .awaitSetPermission(path, perm, true);
+  public void testDirWritabilityChange() {
+    testAttrChange("dw", DIR, WRITE);
+  }
+
+  private void testAttrChange(String name, FileType type, Permission perm) {
+    type.create(tmp().get(name));
+
+    WatchEvent event = event(MODIFY, name);
+    Runnable change = newPermission(name, perm, !perm.get(tmp().get(name)));
+    await(event, change);
   }
 }

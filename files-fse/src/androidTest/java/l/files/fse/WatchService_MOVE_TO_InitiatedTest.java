@@ -1,5 +1,10 @@
 package l.files.fse;
 
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchEvent.Kind.MODIFY;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
+
 /**
  * Tests file system operations started with moving files/directories to the
  * monitored directory.
@@ -14,9 +19,8 @@ public class WatchService_MOVE_TO_InitiatedTest extends WatchServiceBaseTest {
    * modified date.
    */
   public void testMoveDirInThenAddFileIntoIt() {
-    tester()
-        .awaitMoveTo("a", helper().createDir("a"))
-        .awaitCreateFile("a/b");
+    await(event(CREATE, "a"), newMoveTo("a", helper().createDir("a")));
+    await(event(MODIFY, "a"), newCreate("a/b", DIR));
   }
 
   /**
@@ -25,10 +29,9 @@ public class WatchService_MOVE_TO_InitiatedTest extends WatchServiceBaseTest {
    * modified date.
    */
   public void testMoveDirInThenDeleteFileFromIt() {
-    tester()
-        .awaitMoveTo("a", helper().createDir("a"))
-        .awaitCreateFile("a/b")
-        .awaitDelete("a/b");
+    helper().createFile("a/b");
+    await(event(CREATE, "a"), newMoveTo("a", helper().get("a")));
+    await(event(MODIFY, "a"), newDelete("a/b"));
   }
 
   /**
@@ -37,9 +40,8 @@ public class WatchService_MOVE_TO_InitiatedTest extends WatchServiceBaseTest {
    * modified date.
    */
   public void testMoveDirInThenMoveFileIntoIt() {
-    tester()
-        .awaitMoveTo("a", helper().createDir("a"))
-        .awaitMoveTo("a/b", helper().createFile("b"));
+    await(event(CREATE, "a"), newMoveTo("a", helper().createDir("a")));
+    await(event(MODIFY, "a"), newMoveTo("a/b", helper().createFile("b")));
   }
 
   /**
@@ -48,13 +50,12 @@ public class WatchService_MOVE_TO_InitiatedTest extends WatchServiceBaseTest {
    * modified date.
    */
   public void testMoveDirInThenMoveFileOutOfIt() {
-    tester()
-        .awaitMoveTo("a", helper().createDir("a"))
-        .awaitCreateFile("a/b")
-        .awaitMoveFrom("a/b", helper().get("b"));
+    await(event(CREATE, "a"), newMoveTo("a", helper().createDir("a")));
+    await(event(MODIFY, "a"), newCreate("a/b", FILE));
+    await(event(MODIFY, "a"), newMoveFrom("a/b", helper().get("b")));
   }
 
   public void testMoveFileIn() {
-    tester().awaitMoveTo("a", helper().createFile("a"));
+    await(event(CREATE, "a"), newMoveTo("a", helper().createFile("a")));
   }
 }

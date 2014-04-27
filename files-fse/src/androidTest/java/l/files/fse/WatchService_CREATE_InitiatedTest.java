@@ -1,5 +1,11 @@
 package l.files.fse;
 
+import static l.files.fse.WatchEvent.Kind.CREATE;
+import static l.files.fse.WatchEvent.Kind.DELETE;
+import static l.files.fse.WatchEvent.Kind.MODIFY;
+import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
+import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
+
 /**
  * Tests file system operations started with creating files/directories.
  *
@@ -7,97 +13,93 @@ package l.files.fse;
  */
 public class WatchService_CREATE_InitiatedTest extends WatchServiceBaseTest {
 
-  public void testCreateFileToEmptyDir() {
-    tester().awaitCreateFile("a");
+  public void testCreateInEmptyDir_file() {
+    testCreateInEmptyDir("a", FILE);
   }
 
-  public void testCreateDirToEmptyDir() {
-    tester().awaitCreateDir("a");
+  public void testCreateInEmptyDir_dir() {
+    testCreateInEmptyDir("a", DIR);
   }
 
-  public void testCreateFileToNonEmptyDir() {
+  private void testCreateInEmptyDir(String name, FileType type) {
+    await(event(CREATE, name), newCreate(name, type));
+  }
+
+  public void testCreateInNonEmptyDir_file() {
+    testCreateInNonEmptyDir(FILE);
+  }
+
+  public void testCreateInNonEmptyDir_dir() {
+    testCreateInNonEmptyDir(DIR);
+  }
+
+  private void testCreateInNonEmptyDir(FileType type) {
     tmp().createFile("a");
     tmp().createDir("b");
-    tester().awaitCreateFile("c");
+    await(event(CREATE, "c"), newCreate("c", type));
   }
 
-  public void testCreateDirToNonEmptyDir() {
-    tmp().createFile("a");
-    tmp().createDir("b");
-    tester().awaitCreateDir("c");
+  public void testCreateDirThenCreateItemIntoIt_file() {
+    testCreateDirThenCreateItemIntoIt(FILE);
   }
 
-  /**
-   * Directory added should be monitored for file additions to that directory,
-   * as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenCreateFileIntoIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateFile("a/b");
+  public void testCreateDirThenCreateItemIntoIt_dir() {
+    testCreateDirThenCreateItemIntoIt(DIR);
   }
 
-  /**
-   * Directory added should be monitored for directory additions to that
-   * directory, as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenCreateDirIntoIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateDir("a/b");
+  private void testCreateDirThenCreateItemIntoIt(FileType type) {
+    await(event(CREATE, "a"), newCreate("a", DIR));
+    await(event(MODIFY, "a"), newCreate("a/b", type));
   }
 
-  /**
-   * Directory added should be monitored for file deletions from that directory,
-   * as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenDeleteFileFromIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateFile("a/b")
-        .awaitDelete("a/b");
+  public void testCreateDirThenDeleteItemFromIt_file() {
+    testCreateDirThenDeleteItemFromIt(FILE);
   }
 
-  /**
-   * Directory added should be monitored for directory deletions from that
-   * directory, as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenDeleteDirFromIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateDir("a/b")
-        .awaitDelete("a/b");
+  public void testCreateDirThenDeleteItemFromIt_dir() {
+    testCreateDirThenDeleteItemFromIt(DIR);
   }
 
-  /**
-   * Directory added should be monitored for files additions into that
-   * directory, as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenMoveFileOutOfIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateFile("a/b")
-        .awaitMoveFrom("a/b", helper().get("b"));
+  private void testCreateDirThenDeleteItemFromIt(FileType type) {
+    await(event(CREATE, "a"), newCreate("a", DIR));
+    await(event(MODIFY, "a"), newCreate("a/b", type));
+    await(event(MODIFY, "a"), newDelete("a/b"));
   }
 
-  /**
-   * New directory added should be monitored for files moving into that
-   * directory, as that will change the new directory's last modified date.
-   */
-  public void testCreateDirThenMoveFileIntoIt() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitMoveTo("a/b", helper().createDir("b"));
+  public void testCreateDirThenMoveItemOutOfIt_file() {
+    testCreateDirThenMoveItemOutOfIt(FILE);
+  }
+
+  public void testCreateDirThenMoveItemOutOfIt_dir() {
+    testCreateDirThenMoveItemOutOfIt(DIR);
+  }
+
+  public void testCreateDirThenMoveItemOutOfIt(FileType type) {
+    await(event(CREATE, "a"), newCreate("a", DIR));
+    await(event(MODIFY, "a"), newCreate("a/b", type));
+    await(event(MODIFY, "a"), newMoveFrom("a/b", helper().get("b")));
+  }
+
+  public void testCreateDirThenMoveFileIntoIt_file() {
+    testCreateDirThenMoveItemIntoIt(FILE);
+  }
+
+  public void testCreateDirThenMoveFileIntoIt_dir() {
+    testCreateDirThenMoveItemIntoIt(DIR);
+  }
+
+  public void testCreateDirThenMoveItemIntoIt(FileType type) {
+    await(event(CREATE, "a"), newCreate("a", DIR));
+    await(event(MODIFY, "a"), newMoveTo("a/b", type.create(helper().get("b"))));
   }
 
   public void testMultipleOperations() {
-    tester()
-        .awaitCreateDir("a")
-        .awaitCreateDir("b")
-        .awaitCreateFile("a/c")
-        .awaitMoveTo("c", helper().createDir("c"))
-        .awaitMoveFrom("c", helper().get("d"))
-        .awaitDelete("b")
-        .awaitCreateFile("e");
+    await(event(CREATE, "a"), newCreate("a", DIR));
+    await(event(CREATE, "b"), newCreate("b", DIR));
+    await(event(MODIFY, "a"), newCreate("a/c", FILE));
+    await(event(CREATE, "c"), newMoveTo("c", helper().createDir("c")));
+    await(event(DELETE, "c"), newMoveFrom("c", helper().get("d")));
+    await(event(DELETE, "b"), newDelete("b"));
+    await(event(CREATE, "e"), newCreate("e", FILE));
   }
 }
