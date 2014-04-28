@@ -1,9 +1,25 @@
 #include <jni.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-void throw_os_exception(JNIEnv *env, const char *msg) {
-  jclass c = (*env)->FindClass(env, "l/files/os/OsException");
-  if (NULL != c) {
-    (*env)->ThrowNew(env, c, msg);
+void throw_errno_exception(JNIEnv *env) {
+  jclass clazz = (*env)->FindClass(env, "l/files/os/ErrnoException");
+  if (NULL == clazz) {
+    return;
   }
+
+  jmethodID constructor = (*env)->GetMethodID(env, clazz, "<init>", "(ILjava/lang/String;)V");
+  if (NULL == constructor) {
+    return;
+  }
+
+  jint err = errno;
+  jstring msg = (*env)->NewStringUTF(env, strerror(errno));
+  jobject exception = (*env)->NewObject(env, clazz, constructor, err, msg);
+  if (NULL == exception) {
+    return;
+  }
+
+  (*env)->Throw(env, exception);
 }

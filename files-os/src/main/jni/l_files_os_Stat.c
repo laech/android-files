@@ -16,7 +16,7 @@ jobject do_stat(JNIEnv *env, jstring jpath, jboolean is_lstat) {
       : TEMP_FAILURE_RETRY(stat(path, &sb));
   if (-1 == rc) {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
-    throw_os_exception(env, strerror(errno));
+    throw_errno_exception(env);
     return NULL;
   } else {
     (*env)->ReleaseStringUTFChars(env, jpath, path);

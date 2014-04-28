@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.io.Path;
 import l.files.logging.Logger;
-import l.files.os.OsException;
+import l.files.os.ErrnoException;
 import l.files.os.Stat;
 
 import static android.os.FileObserver.ATTRIB;
@@ -189,7 +189,7 @@ final class WatchServiceImpl extends WatchService
     Node node;
     try {
       node = Node.from(stat(path.toString()));
-    } catch (OsException e) {
+    } catch (ErrnoException e) {
       throw new WatchException("Failed to stat " + path, e);
     }
 
@@ -236,7 +236,7 @@ final class WatchServiceImpl extends WatchService
       Stat stat;
       try {
         stat = stat(path.toString());
-      } catch (OsException e) {
+      } catch (ErrnoException e) {
         logger.warn(e, "Failed to stat %s", name);
         continue;
       }
@@ -306,7 +306,7 @@ final class WatchServiceImpl extends WatchService
     }
   }
 
-  private Stat stat(String path) throws OsException {
+  private Stat stat(String path) throws ErrnoException {
     // Use stat() instead of lstat() as stat()
     // lstat() returns the inode of the link
     // stat() returns the inode of the referenced file/directory
@@ -342,7 +342,7 @@ final class WatchServiceImpl extends WatchService
     if (path.toFile().isDirectory() && isMonitored(path.parent())) {
       try {
         startObserver(path, Node.from(stat(path.toString())));
-      } catch (OsException e) {
+      } catch (ErrnoException e) {
         // Path no longer exists, permission etc, ignore and continue
         logger.warn(e, "Failed to stat %s", path);
       }

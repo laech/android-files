@@ -21,7 +21,7 @@ jboolean Java_l_files_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath,
   int rc = TEMP_FAILURE_RETRY(access(path, mode));
   if (rc == -1) {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
-    throw_os_exception(env, strerror(errno));
+    throw_errno_exception(env);
   } else {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
   }
@@ -42,7 +42,7 @@ jstring Java_l_files_os_Unistd_readlink(JNIEnv *env, jclass clazz, jstring jpath
     if (count == -1) {
       (*env)->ReleaseStringUTFChars(env, jpath, path);
       free(buf);
-      throw_os_exception(env, strerror(errno));
+      throw_errno_exception(env);
       return NULL;
 
     } else if (count < bufsize) {

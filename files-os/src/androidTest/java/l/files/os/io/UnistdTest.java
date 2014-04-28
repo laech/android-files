@@ -3,7 +3,7 @@ package l.files.os.io;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.os.OsException;
+import l.files.os.ErrnoException;
 import l.files.os.Unistd;
 
 import static l.files.os.Unistd.F_OK;
@@ -107,7 +107,7 @@ public final class UnistdTest extends FileBaseTest {
     try {
       Unistd.access(file.getPath(), mode);
       fail();
-    } catch (OsException e) {
+    } catch (ErrnoException e) {
       // Pass
     }
   }

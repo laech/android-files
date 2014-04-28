@@ -16,15 +16,15 @@ public final class Unistd extends Native {
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/access.html">access()</a>
    */
-  public static native boolean access(String path, int mode) throws OsException;
+  public static native boolean access(String path, int mode) throws ErrnoException;
 
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/symlink.html">symlink()</a>
    */
-  public static native void symlink(String srcPath, String dstPath) throws OsException;
+  public static native void symlink(String srcPath, String dstPath) throws ErrnoException;
 
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/readlink.html">readlink()</a>
    */
-  public static native String readlink(String link) throws OsException;
+  public static native String readlink(String link) throws ErrnoException;
 }

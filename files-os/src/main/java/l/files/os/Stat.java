@@ -170,12 +170,12 @@ public final class Stat extends Native {
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/stat.html">stat()</a>
    */
-  public static native Stat stat(String path) throws OsException;
+  public static native Stat stat(String path) throws ErrnoException;
 
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/lstat.html">lstat()</a>
    */
-  public static native Stat lstat(String path) throws OsException;
+  public static native Stat lstat(String path) throws ErrnoException;
 
   @Override public int hashCode() {
     return reflectionHashCode(this);

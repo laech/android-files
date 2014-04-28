@@ -2,7 +2,7 @@ package l.files.fse;
 
 import l.files.io.Path;
 import l.files.logging.Logger;
-import l.files.os.OsException;
+import l.files.os.ErrnoException;
 import l.files.os.Stat;
 
 import static android.os.FileObserver.DELETE_SELF;
@@ -76,7 +76,7 @@ final class StopSelfListener implements EventListener {
         stop();
       }
 
-    } catch (OsException e) {
+    } catch (ErrnoException e) {
       stop();
       logger.info(e, "Stopping observer on exception %s", observer);
     }
