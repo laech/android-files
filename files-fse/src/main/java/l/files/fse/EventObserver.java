@@ -25,11 +25,10 @@ final class EventObserver extends FileObserver {
 
   private static final Logger logger = Logger.get(EventObserver.class);
 
-  // TODO utilise IN_IGNORED for tracking the cleaning up of the observers
   // Extra inotify constants not defined in FileObserver
-  private static final int IN_UNMOUNT = 0x00002000;
-  private static final int IN_Q_OVERFLOW = 0x00004000;
-  private static final int IN_IGNORED = 0x00008000;
+  public static final int IN_UNMOUNT = 0x00002000;
+  public static final int IN_Q_OVERFLOW = 0x00004000;
+  public static final int IN_IGNORED = 0x00008000;
 
   /**
    * FileObserver will catch any throwable and ignore it, not good as we won't

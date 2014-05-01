@@ -5,9 +5,9 @@ import l.files.logging.Logger;
 import l.files.os.ErrnoException;
 import l.files.os.Stat;
 
-import static android.os.FileObserver.DELETE_SELF;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.fse.EventObserver.IN_IGNORED;
 import static l.files.os.Stat.stat;
 
 /**
@@ -38,26 +38,8 @@ final class StopSelfListener implements EventListener {
   }
 
   @Override public void onEvent(int event, String path) {
-
-    if (isSelfDeleted(event)) {
-      stop();
-
-    } else if (isSelfMoved(event)) {
-      checkNode();
-    }
-  }
-
-  private boolean isSelfMoved(int event) {
-    return 0 != (event & MOVE_SELF);
-  }
-
-  private boolean isSelfDeleted(int event) {
-    return 0 != (event & DELETE_SELF);
-  }
-
-  private void stop() {
-    observer.stopWatching();
-    callback.onObserverStopped(observer);
+    if (0 != (event & MOVE_SELF)) { checkNode(); }
+    if (0 != (event & IN_IGNORED)) { callback.onObserverStopped(observer); }
   }
 
   /*
@@ -73,11 +55,11 @@ final class StopSelfListener implements EventListener {
 
       Stat stat = stat(this.path.toString());
       if (!Node.from(stat).equals(node)) {
-        stop();
+        observer.stopWatching();
       }
 
     } catch (ErrnoException e) {
-      stop();
+      observer.stopWatching();
       logger.info(e, "Stopping observer on exception %s", observer);
     }
   }
