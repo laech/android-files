@@ -8,7 +8,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -107,14 +106,12 @@ final class PathObserver extends FileObserver {
   public List<Path> removePaths(Predicate<Path> pred) {
     synchronized (this) {
       List<Path> result = newArrayListWithCapacity(paths.size());
-      Iterator<Path> it = paths.iterator();
-      while (it.hasNext()) {
-        Path path = it.next();
+      for (Path path : paths) {
         if (pred.apply(path)) {
-          it.remove();
           result.add(path);
         }
       }
+      paths.removeAll(result);
       return result;
     }
   }
@@ -227,10 +224,12 @@ final class PathObserver extends FileObserver {
   }
 
   @Override public String toString() {
-    return Objects.toStringHelper(this)
-        .add("path", path)
-        .add("paths", paths)
-        .toString();
+    synchronized (this) {
+      return Objects.toStringHelper(this)
+          .add("path", path)
+          .add("paths", paths)
+          .toString();
+    }
   }
 
   static interface Listener {
