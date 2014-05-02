@@ -11,19 +11,21 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.io.Path;
 import l.files.logging.Logger;
+import l.files.os.ErrnoException;
+import l.files.os.Stat;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
+import static l.files.os.Stat.stat;
 
-final class EventObserver extends FileObserver {
+final class PathObserver extends FileObserver {
 
-  private static final Logger logger = Logger.get(EventObserver.class);
+  private static final Logger logger = Logger.get(PathObserver.class);
 
   // Extra inotify constants not defined in FileObserver
   public static final int IN_UNMOUNT = 0x00002000;
@@ -45,14 +47,14 @@ final class EventObserver extends FileObserver {
 
   private final Path path;
   private final Node node;
-  private final Set<EventListener> listeners;
+  private final Listener listener;
   private final Set<Path> paths;
 
-  public EventObserver(Path path, Node node, int mask) {
+  public PathObserver(Path path, Node node, int mask, Listener listener) {
     super(path.toString(), mask);
     this.path = path;
     this.node = node;
-    this.listeners = new CopyOnWriteArraySet<>();
+    this.listener = listener;
     this.paths = newHashSet();
     addPath(path);
   }
@@ -65,10 +67,6 @@ final class EventObserver extends FileObserver {
   @Override public void stopWatching() {
     super.stopWatching();
     logger.debug("Stop %s", this);
-  }
-
-  public void addListener(EventListener listener) {
-    this.listeners.add(listener);
   }
 
   public Collection<Path> copyPaths() {
@@ -163,22 +161,46 @@ final class EventObserver extends FileObserver {
 
   @Override public void onEvent(int event, final String path) {
     try {
+
+      if (0 != (event & MOVE_SELF)) {
+        checkNode();
+      }
       forward(event, path);
+
     } catch (Throwable e) {
       rethrow(e);
     }
   }
 
-  private void forward(int event, String path) {
-    log(event, path);
-    for (EventListener listener : listeners) {
-      listener.onEvent(event, path);
-    }
+  private void forward(int event, String child) {
+    log(event, child);
+    listener.onEvent(this, event, child);
   }
 
   private void rethrow(Throwable e) {
     Message.obtain(rethrow, 0, e).sendToTarget();
     stopWatching();
+  }
+
+  /*
+   * Sometimes when a directory is moved from else where, a MOVE_TO is
+   * notified on the monitored parent, but *sometimes* a MOVE_SELF is notified
+   * after monitoring on the newly added file starts, so this is a temporary
+   * fix for that. This directory could also exists if the original is moved
+   * somewhere else and a new one is quickly added in place, then this code
+   * will be wrong.
+   */
+  private void checkNode() {
+    try {
+
+      Stat stat = stat(this.path.toString());
+      if (!Node.from(stat).equals(node)) {
+        stopWatching();
+      }
+
+    } catch (ErrnoException e) {
+      stopWatching();
+    }
   }
 
   static String getEventName(int event) {
@@ -209,5 +231,9 @@ final class EventObserver extends FileObserver {
         .add("path", path)
         .add("paths", paths)
         .toString();
+  }
+
+  static interface Listener {
+    void onEvent(PathObserver observer, int event, String child);
   }
 }

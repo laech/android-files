@@ -3,7 +3,10 @@ package l.files.fse;
 import android.annotation.SuppressLint;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.nanoTime;
 import static l.files.fse.WatchEvent.Kind.CREATE;
 import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
@@ -30,8 +33,9 @@ public class WatchService_LinkTest extends WatchServiceBaseTest {
    * instead of one per path, because inotify operates on inodes, not paths.
    */
   public void testMountPointsOfSameInodes() throws Exception {
-    File a = MOUNT_POINTS[0];
-    File b = MOUNT_POINTS[1];
+    List<File> points = findSameMountPoints();
+    File a = points.get(0);
+    File b = points.get(1);
     assertEquals(stat(a.getPath()).ino, stat(b.getPath()).ino);
 
     File[] files = {
@@ -50,6 +54,19 @@ public class WatchService_LinkTest extends WatchServiceBaseTest {
         assertTrue(file.delete());
       }
     }
+  }
+
+  private List<File> findSameMountPoints() {
+    List<File> points = newArrayList(MOUNT_POINTS);
+    for (Iterator<File> it = points.iterator(); it.hasNext(); ) {
+      if (!it.next().exists()) {
+        it.remove();
+      }
+    }
+    if (points.size() < 2) {
+      fail("Not enough mount points with same inode for testing.");
+    }
+    return points;
   }
 
   public void testSymlinksPointingToSameDir() throws Exception {

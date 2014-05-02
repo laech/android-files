@@ -22,6 +22,7 @@ import static android.os.FileObserver.CLOSE_WRITE;
 import static android.os.FileObserver.CREATE;
 import static android.os.FileObserver.DELETE;
 import static android.os.FileObserver.DELETE_SELF;
+import static android.os.FileObserver.MODIFY;
 import static android.os.FileObserver.MOVED_FROM;
 import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
@@ -30,10 +31,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static l.files.fse.PathObserver.IN_IGNORED;
+import static l.files.fse.WatchEvent.Kind;
 import static l.files.os.Stat.S_ISDIR;
 
-final class WatchServiceImpl extends WatchService
-    implements StopSelfListener.Callback, WatchEvent.Listener {
+final class WatchServiceImpl extends WatchService {
 
   // TODO use different lock for different paths?
   // TODO should listeners be removed when a directory is deleted?
@@ -72,7 +74,7 @@ final class WatchServiceImpl extends WatchService
    * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
    * /storage/sdcard0, they are all mount points of the same device).
    */
-  private final List<EventObserver> observers = newArrayList();
+  private final List<PathObserver> observers = newArrayList();
 
   private final SetMultimap<Path, WatchEvent.Listener> listeners =
       synchronizedSetMultimap(newSetMultimap(
@@ -83,6 +85,98 @@ final class WatchServiceImpl extends WatchService
             }
           }
       ));
+
+  private final PathObserver.Listener processor = new PathObserver.Listener() {
+
+    @Override
+    public void onEvent(PathObserver observer, int event, String child) {
+
+      for (Path path : observer.copyPaths()) { // TODO
+        handleEvent(path, event, child);
+      }
+
+      if (isObserverStopped(event)) {
+        onObserverStopped(observer);
+      }
+    }
+
+    private void handleEvent(Path path, int event, String child) {
+
+      if (isChildAdded(event)) {
+        Path childPath = path.child(child);
+        onCreate(childPath);
+        send(Kind.CREATE, childPath);
+
+      } else if (isChildModified(event, child)) {
+        Path childPath = path.child(child);
+        send(Kind.MODIFY, childPath);
+
+      } else if (isChildDeleted(event)) {
+        Path childPath = path.child(child);
+        onDelete(childPath);
+        send(Kind.DELETE, childPath);
+      }
+
+      if (isSelfModified(event, child)) {
+        send(Kind.MODIFY, path);
+
+      } else if (isSelfDeleted(event)) {
+        onDelete(path);
+        send(Kind.DELETE, path);
+      }
+    }
+
+    private void send(Kind kind, Path path) {
+      WatchEvent event = WatchEvent.create(kind, path);
+      for (WatchEvent.Listener listener : listeners.get(path)) {
+        listener.onEvent(event);
+      }
+      Path parent = path.parent();
+      if (parent != null) {
+        for (WatchEvent.Listener listener : listeners.get(parent)) {
+          listener.onEvent(event);
+        }
+      }
+      logger.debug("%s", event);
+    }
+
+    private boolean isObserverStopped(int event) {
+      return 0 != (event & IN_IGNORED);
+    }
+
+    private boolean isSelfModified(int mask, String child) {
+      return (0 != (mask & ATTRIB) && child == null)
+          || (0 != (mask & CREATE))
+          || (0 != (mask & MOVED_TO))
+          || (0 != (mask & MOVED_FROM))
+          || (0 != (mask & DELETE));
+    }
+
+    private boolean isSelfDeleted(int mask) {
+      return (0 != (mask & DELETE_SELF))
+          || (0 != (mask & MOVE_SELF));
+    }
+
+    private boolean isChildAdded(int mask) {
+      return (0 != (mask & CREATE))
+          || (0 != (mask & MOVED_TO));
+    }
+
+    private boolean isChildModified(int mask, String child) {
+      //noinspection SimplifiableIfStatement
+      if (child == null) {
+        return false;
+      }
+      return (0 != (mask & ATTRIB))
+          || (0 != (mask & MODIFY))
+          || (0 != (mask & CLOSE_WRITE));
+    }
+
+    private boolean isChildDeleted(int event) {
+      return (0 != (event & MOVED_FROM))
+          || (0 != (event & DELETE));
+    }
+  };
 
   @Override public void register(Path path, WatchEvent.Listener listener) {
     synchronized (this) {
@@ -120,7 +214,7 @@ final class WatchServiceImpl extends WatchService
 
   @Override boolean hasObserver(Path path) {
     synchronized (this) {
-      for (EventObserver observer : observers) {
+      for (PathObserver observer : observers) {
         if (observer.hasPath(path)) {
           return true;
         }
@@ -139,7 +233,7 @@ final class WatchServiceImpl extends WatchService
    * appropriately in listener methods.
    */
   private void checkNode(Path path, Node node) {
-    for (EventObserver observer : observers) {
+    for (PathObserver observer : observers) {
       if (observer.hasPath(path)) {
         if (!observer.getNode().equals(node)) {
           observer.stopWatching();
@@ -155,8 +249,8 @@ final class WatchServiceImpl extends WatchService
    * any paths that no longer exists - these paths have been deleted/moved but
    * file system notifications are not arrived yet.
    */
-  private EventObserver checkObserver(Node node) {
-    EventObserver observer = findObserver(node);
+  private PathObserver checkObserver(Node node) {
+    PathObserver observer = findObserver(node);
     if (observer == null) {
       return null;
     }
@@ -176,8 +270,8 @@ final class WatchServiceImpl extends WatchService
     return observer;
   }
 
-  private EventObserver findObserver(Node node) {
-    for (EventObserver observer : observers) {
+  private PathObserver findObserver(Node node) {
+    for (PathObserver observer : observers) {
       if (observer.getNode().equals(node)) {
         return observer;
       }
@@ -211,9 +305,9 @@ final class WatchServiceImpl extends WatchService
 
       listeners.removeAll(parent);
 
-      Iterator<EventObserver> it = observers.iterator();
+      Iterator<PathObserver> it = observers.iterator();
       while (it.hasNext()) {
-        EventObserver observer = it.next();
+        PathObserver observer = it.next();
         observer.removePath(parent);
         for (Path path : observer.copyPaths()) {
           if (parent.equals(path.parent()) && !monitored.contains(path)) {
@@ -249,22 +343,17 @@ final class WatchServiceImpl extends WatchService
   private void startObserver(Path path, Node node) {
     synchronized (this) {
       checkNode(path, node);
-      EventObserver observer = checkObserver(node);
+      PathObserver observer = checkObserver(node);
       if (observer == null) {
-        observer = new EventObserver(path, node, MODIFICATION_MASK);
-        observer.addListener(new StopSelfListener(observer, this, node, path));
+        observer = new PathObserver(path, node, MODIFICATION_MASK, processor);
         observer.startWatching();
         observers.add(observer);
       }
       observer.addPath(path);
-      observer.addListener(new UpdateChildrenListener(path, this));
-      if (path.parent() != null) {
-        observer.addListener(new UpdateSelfListener(path, this));
-      }
     }
   }
 
-  @Override public void onObserverStopped(EventObserver observer) {
+  private void onObserverStopped(PathObserver observer) {
     logger.debug("Stopped observer %s", observer);
     removeSubtree(observer);
   }
@@ -274,7 +363,7 @@ final class WatchServiceImpl extends WatchService
    * call this to stop observers that are monitoring on child paths, as they are
    * now no longer valid after the parent path being deleted/moved.
    */
-  private void removeSubtree(EventObserver observer) {
+  private void removeSubtree(PathObserver observer) {
     synchronized (this) {
       List<Path> removed = observer.removePaths();
       monitored.removeAll(removed);
@@ -297,9 +386,9 @@ final class WatchServiceImpl extends WatchService
   }
 
   private void removeChildObservers(Path parent) {
-    Iterator<EventObserver> it = observers.iterator();
+    Iterator<PathObserver> it = observers.iterator();
     while (it.hasNext()) {
-      EventObserver observer = it.next();
+      PathObserver observer = it.next();
       List<Path> removed = observer.removeChildPaths(parent);
       monitored.removeAll(removed);
       stopAndRemoveIfNoPath(observer, it);
@@ -311,31 +400,6 @@ final class WatchServiceImpl extends WatchService
     // lstat() returns the inode of the link
     // stat() returns the inode of the referenced file/directory
     return Stat.stat(path);
-  }
-
-  @Override public void onEvent(WatchEvent event) {
-    logger.debug("%s", event);
-
-    switch (event.kind()) {
-      case CREATE:
-        onCreate(event.path());
-        break;
-      case DELETE:
-        onDelete(event.path());
-        break;
-    }
-
-    Path path = event.path();
-    for (WatchEvent.Listener listener : listeners.get(path)) {
-      listener.onEvent(event);
-    }
-
-    Path parent = path.parent();
-    if (parent != null) {
-      for (WatchEvent.Listener listener : listeners.get(parent)) {
-        listener.onEvent(event);
-      }
-    }
   }
 
   private void onCreate(Path path) {
@@ -361,9 +425,9 @@ final class WatchServiceImpl extends WatchService
     monitored.remove(path);
     removeChildMonitors(path);
     removeChildObservers(path);
-    Iterator<EventObserver> it = observers.iterator();
+    Iterator<PathObserver> it = observers.iterator();
     while (it.hasNext()) {
-      EventObserver observer = it.next();
+      PathObserver observer = it.next();
       if (observer.removePath(path)) {
         stopAndRemoveIfNoPath(observer, it);
         break;
@@ -372,7 +436,7 @@ final class WatchServiceImpl extends WatchService
   }
 
   private boolean stopAndRemoveIfNoPath(
-      EventObserver observer, Collection<? extends EventObserver> observers) {
+      PathObserver observer, Collection<? extends PathObserver> observers) {
 
     if (observer.getPathCount() == 0) {
       observer.stopWatching();
@@ -383,7 +447,7 @@ final class WatchServiceImpl extends WatchService
   }
 
   private boolean stopAndRemoveIfNoPath(
-      EventObserver observer, Iterator<EventObserver> it) {
+      PathObserver observer, Iterator<PathObserver> it) {
 
     if (observer.getPathCount() == 0) {
       observer.stopWatching();
