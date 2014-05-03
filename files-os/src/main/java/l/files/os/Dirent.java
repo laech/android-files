@@ -40,14 +40,14 @@ public abstract class Dirent extends Native {
   public static native long opendir(String dir) throws ErrnoException;
 
   /**
-   * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/closedir.html>closedir()</a>
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/closedir.html">closedir()</a>
    */
   public static native void closedir(long dir) throws ErrnoException;
 
   /**
    * Note: this will also return the "." and  ".." directories.
    *
-   * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/readdir.html>readdir()</a>
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/readdir.html">readdir()</a>
    */
   public static native Dirent readdir(long dir) throws ErrnoException;
 }
