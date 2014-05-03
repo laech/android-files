@@ -167,6 +167,12 @@ public final class Stat extends Native {
     this.blocks = blocks;
   }
 
+  static {
+    init();
+  }
+
+  public static native void init();
+
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/stat.html">stat()</a>
    */

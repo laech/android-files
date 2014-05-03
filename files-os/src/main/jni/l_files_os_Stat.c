@@ -5,7 +5,13 @@
 #include <string.h>
 #include "util.h"
 
-jobject do_stat(JNIEnv *env, jstring jpath, jboolean is_lstat) {
+static jmethodID stat_ctor;
+
+void Java_l_files_os_Stat_init(JNIEnv *env, jclass clazz) {
+  stat_ctor = (*env)->GetMethodID(env, clazz, "<init>", "(JJIJIIJJJJJJJ)V");
+}
+
+jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   if (NULL == path) {
     return NULL;
@@ -22,9 +28,7 @@ jobject do_stat(JNIEnv *env, jstring jpath, jboolean is_lstat) {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
   }
 
-  jclass clazz = (*env)->FindClass(env, "l/files/os/Stat");
-  jmethodID ctor = (*env)->GetMethodID(env, clazz, "<init>", "(JJIJIIJJJJJJJ)V");
-  return (*env)->NewObject(env, clazz, ctor,
+  return (*env)->NewObject(env, clazz, stat_ctor,
       (jlong) sb.st_dev,
       (jlong) sb.st_ino,
       (jint)  sb.st_mode,
@@ -41,9 +45,9 @@ jobject do_stat(JNIEnv *env, jstring jpath, jboolean is_lstat) {
 }
 
 jobject Java_l_files_os_Stat_stat(JNIEnv* env, jclass clazz, jstring jpath) {
-  return do_stat(env, jpath, JNI_FALSE);
+  return do_stat(env, clazz, jpath, JNI_FALSE);
 }
 
 jobject Java_l_files_os_Stat_lstat(JNIEnv* env, jclass clazz, jstring jpath) {
-  return do_stat(env, jpath, JNI_TRUE);
+  return do_stat(env, clazz, jpath, JNI_TRUE);
 }
