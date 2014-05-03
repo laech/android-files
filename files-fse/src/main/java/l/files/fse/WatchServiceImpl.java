@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.io.Path;
 import l.files.logging.Logger;
+import l.files.os.Dirent;
 import l.files.os.ErrnoException;
 import l.files.os.Stat;
 
@@ -33,7 +34,9 @@ import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.fse.PathObserver.IN_IGNORED;
 import static l.files.fse.WatchEvent.Kind;
-import static l.files.os.Stat.S_ISDIR;
+import static l.files.os.Dirent.closedir;
+import static l.files.os.Dirent.opendir;
+import static l.files.os.Dirent.readdir;
 
 final class WatchServiceImpl extends WatchService {
 
@@ -294,7 +297,12 @@ final class WatchServiceImpl extends WatchService {
       }
       startObserver(path, node);
     }
-    startObserversForSubDirs(path);
+
+    try {
+      startObserversForSubDirs(path);
+    } catch (ErrnoException e) {
+      throw new WatchException("Failed to read content of " + path, e);
+    }
   }
 
   private void unmonitor(Path parent) {
@@ -319,24 +327,37 @@ final class WatchServiceImpl extends WatchService {
     }
   }
 
-  private void startObserversForSubDirs(Path parent) {
-    String[] names = parent.toFile().list();
-    if (names == null) {
-      return;
-    }
+  private void startObserversForSubDirs(Path parent) throws ErrnoException {
 
-    for (String name : names) {
-      Path path = parent.child(name);
-      Stat stat;
-      try {
-        stat = stat(path.toString());
-      } catch (ErrnoException e) {
-        logger.warn(e, "Failed to stat %s", name);
-        continue;
+    /*
+     * Using readdir() on the directory and check the child's type will be
+     * faster than using File.isDirectory (because this uses a stat()),
+     * especially if the directory is large.
+     */
+
+    long dir = opendir(parent.toString());
+    try {
+
+      while (true) {
+        try {
+          Dirent entry = readdir(dir);
+          if (entry == null) {
+            break;
+          }
+          if (!entry.name().equals(".") &&
+              !entry.name().equals("..") &&
+              entry.type() == Dirent.DT_DIR) {
+            Path path = parent.child(entry.name());
+            startObserver(path, Node.from(stat(path.toString())));
+          }
+        } catch (ErrnoException e) {
+          // Ignore this entry and carry on
+          logger.warn(e);
+        }
       }
-      if (S_ISDIR(stat.mode)) {
-        startObserver(path, Node.from(stat));
-      }
+
+    } finally {
+      closedir(dir);
     }
   }
 
