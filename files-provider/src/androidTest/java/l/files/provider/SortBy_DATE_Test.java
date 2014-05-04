@@ -4,14 +4,14 @@ import java.io.File;
 
 public final class SortBy_DATE_Test extends SortByBaseTest {
 
-  public void testSortByDateDesc() {
+  public void testSortByDateDesc() throws Exception {
     testSortMatches(SortBy.DATE,
-        createDirLastModified("b", 3),
-        createFileLastModified("a", 2),
-        createDirLastModified("c", 1));
+        createDirLastModified("b", 3000),
+        createFileLastModified("a", 2000),
+        createDirLastModified("c", 1000));
   }
 
-  public void testSortByNameIfDatesEqual() {
+  public void testSortByNameIfDatesEqual() throws Exception {
     testSortMatches(SortBy.DATE,
         createFileLastModified("a", 1),
         createDirLastModified("b", 1),
@@ -19,18 +19,15 @@ public final class SortBy_DATE_Test extends SortByBaseTest {
   }
 
   private File createFileLastModified(String name, long modified) {
-    return mockLastModified(tmp().createFile(name), modified);
+    return setLastModified(tmp().createFile(name), modified);
   }
 
   private File createDirLastModified(String name, long modified) {
-    return mockLastModified(tmp().createDir(name), modified);
+    return setLastModified(tmp().createDir(name), modified);
   }
 
-  private File mockLastModified(File file, final long modified) {
-    return new File(file.getPath()) {
-      @Override public long lastModified() {
-        return modified;
-      }
-    };
+  private File setLastModified(File file, final long modified) {
+    assertTrue(file.setLastModified(modified));
+    return file;
   }
 }

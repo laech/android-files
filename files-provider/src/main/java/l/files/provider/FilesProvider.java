@@ -22,7 +22,9 @@ import java.util.Set;
 
 import l.files.analytics.Analytics;
 import l.files.fse.WatchService;
+import l.files.io.Path;
 import l.files.logging.Logger;
+import l.files.os.ErrnoException;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
@@ -30,6 +32,7 @@ import l.files.service.MoveService;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.reverse;
 import static l.files.common.io.Files.normalize;
@@ -171,13 +174,12 @@ public final class FilesProvider extends ContentProvider
     }
     reverse(files);
     File[] fileArray = files.toArray(new File[files.size()]);
-    return newFileCursor(uri, projection, FileData.from(fileArray));
+    return newFileCursor(uri, projection, fileArray);
   }
 
   private Cursor queryFile(Uri uri, String[] projection) {
     File file = new File(URI.create(getFileLocation(uri)));
-    File[] files = file.exists() ? new File[]{file} : new File[0];
-    return new FileCursor(FileData.from(files), projection);
+    return newFileCursor(uri, projection, file);
   }
 
   private Cursor querySuggestion(Uri uri, String[] projection) {
@@ -187,17 +189,17 @@ public final class FilesProvider extends ContentProvider
     for (int i = 2; file.exists(); i++) {
       file = new File(parent, name + " " + i);
     }
-    return newFileCursor(uri, projection, FileData.from(file));
+    return newFileCursor(uri, projection, file);
   }
 
   private Cursor queryBookmark(Uri uri, String[] projection) {
     File[] bookmarks = getBookmark(getPreference(), getBookmarkLocation(uri));
-    return newFileCursor(uri, projection, FileData.from(bookmarks));
+    return newFileCursor(uri, projection, bookmarks);
   }
 
   private Cursor queryBookmarks(Uri uri, String[] projection) {
     File[] bookmarks = getBookmarks(getPreference());
-    return newFileCursor(uri, projection, FileData.from(bookmarks));
+    return newFileCursor(uri, projection, bookmarks);
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
@@ -300,6 +302,18 @@ public final class FilesProvider extends ContentProvider
       String count = Integer.toString(getBookmarksCount(pref));
       Analytics.onPreferenceChanged(getContext(), key, count);
     }
+  }
+
+  private Cursor newFileCursor(Uri uri, String[] projection, File... files) {
+    List<FileData> stats = newArrayListWithCapacity(files.length);
+    for (File file : files) {
+      try {
+        stats.add(FileData.stat(Path.from(file)));
+      } catch (ErrnoException e) {
+        logger.warn(e);
+      }
+    }
+    return newFileCursor(uri, projection, stats.toArray(new FileData[stats.size()]));
   }
 
   private Cursor newFileCursor(Uri uri, String[] projection, FileData... files) {

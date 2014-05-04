@@ -7,26 +7,26 @@ import static org.apache.commons.io.FileUtils.write;
 
 public final class SortBy_SIZE_Test extends SortByBaseTest {
 
-  public void testSortsFilesBySize() {
+  public void testSortsFilesBySize() throws Exception {
     File smaller = createFile("a", "short content");
     File larger = createFile("b", "longer content...........");
     testSortMatches(SortBy.SIZE, larger, smaller);
   }
 
-  public void testSortsFilesByNameIfSizesEqual() {
+  public void testSortsFilesByNameIfSizesEqual() throws Exception {
     File a = createFile("a", "content a");
     File b = createFile("b", "content b");
     testSortMatches(SortBy.SIZE, a, b);
   }
 
-  public void testSortsDirLast() {
+  public void testSortsDirLast() throws Exception {
     File f1 = tmp().createFile("a");
     File d1 = tmp().createDir("b");
     File f2 = tmp().createFile("c");
     testSortMatches(SortBy.SIZE, f1, f2, d1);
   }
 
-  public void testSortsDirByName() {
+  public void testSortsDirByName() throws Exception {
     File b = tmp().createDir("b");
     File a = tmp().createDir("a");
     testSortMatches(SortBy.SIZE, a, b);
