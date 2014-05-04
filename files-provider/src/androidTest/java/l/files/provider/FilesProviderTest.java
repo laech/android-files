@@ -2,12 +2,15 @@ package l.files.provider;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 
@@ -15,6 +18,7 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.sort;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getSize;
@@ -30,7 +34,7 @@ import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMO
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
 
-public final class FilesProviderQueryTest extends FileBaseTest {
+public final class FilesProviderTest extends FileBaseTest {
 
   public void testQueryFile() {
     tmp().createFile("a");
@@ -107,6 +111,58 @@ public final class FilesProviderQueryTest extends FileBaseTest {
     verify(tmp().get(), SORT_BY_SIZE, SIZE_REVERSE);
   }
 
+  public void testNotifiesOnFileAddition() throws Exception {
+    testNotifies(new Runnable() {
+      @Override public void run() {
+        tmp().createFile("a");
+      }
+    });
+  }
+
+  public void testNotifiesOnFileDeletion() throws Exception {
+    final File file = tmp().createFile("a");
+    testNotifies(new Runnable() {
+      @Override public void run() {
+        assertTrue(file.delete());
+      }
+    });
+  }
+
+  public void testNotifiesOnFileModification() throws Exception {
+    final File file = tmp().createFile("a");
+    testNotifies(new Runnable() {
+      @Override public void run() {
+        try {
+          write("x", file, UTF_8);
+        } catch (IOException e) {
+          throw new AssertionError(e);
+        }
+      }
+    });
+  }
+
+  private void testNotifies(Runnable code) throws InterruptedException {
+    Cursor cursor = query();
+    try {
+
+      final CountDownLatch latch = new CountDownLatch(1);
+      cursor.registerContentObserver(new ContentObserver(null) {
+        @Override public void onChange(boolean selfChange) {
+          super.onChange(selfChange);
+          latch.countDown();
+        }
+      });
+
+      code.run();
+
+      assertTrue(latch.await(1, SECONDS));
+      verify();
+
+    } finally {
+      cursor.close();
+    }
+  }
+
   private void verify() {
     verify(tmp().get());
   }
@@ -178,6 +234,10 @@ public final class FilesProviderQueryTest extends FileBaseTest {
       names.add(getFileLocation(file));
     }
     return names;
+  }
+
+  private Cursor query() {
+    return query(tmp().get(), true, SORT_BY_NAME);
   }
 
   private Cursor query(File dir, boolean showHidden, String order) {
