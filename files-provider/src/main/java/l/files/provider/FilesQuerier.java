@@ -5,39 +5,35 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import l.files.fse.FileEventListener;
-import l.files.fse.FileEventService;
-import l.files.fse.PathStat;
+import l.files.fse.WatchEvent;
+import l.files.fse.WatchService;
+import l.files.io.Path;
 import l.files.logging.Logger;
-import l.files.os.OsException;
+import l.files.os.ErrnoException;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static java.lang.Boolean.parseBoolean;
-import static l.files.os.Stat.stat;
+import static l.files.provider.FileData.NOT_HIDDEN;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesQuerier extends CacheLoader<String, Map<String, FileData>>
-    implements FileEventListener, RemovalListener<String, Map<String, FileData>> {
+final class FilesQuerier implements WatchEvent.Listener, RemovalListener<Path, FilesQuerier.ValueMap> {
 
   private static final Logger logger = Logger.get(FilesQuerier.class);
 
@@ -53,69 +49,68 @@ final class FilesQuerier extends CacheLoader<String, Map<String, FileData>>
   };
 
   private final Context context;
-  private final FileEventService service;
+  private final WatchService service;
 
-  private final LoadingCache<String, Map<String, FileData>> cache =
+  private final Cache<Path, ValueMap> cache =
       CacheBuilder.newBuilder()
           .weakValues()
           .removalListener(this)
-          .build(this);
+          .build();
 
-  FilesQuerier(Context context, FileEventService service) {
+  FilesQuerier(Context context, WatchService service) {
     this.context = context;
     this.service = service;
-    this.service.register(this); // TODO
   }
 
-  public Cursor query(
-      Uri uri, String[] projection, String order, CancellationSignal signal) {
+  public Cursor query(Uri uri, String[] projection, String order, CancellationSignal signal) {
 
     if (projection == null) {
       projection = DEFAULT_PROJECTION;
     }
-    boolean showHidden = getShowHidden(uri);
 
-    Map<String, FileData> map = getCache(uri);
-    FileData[] data = showHidden ? array(map) : filterHidden(map);
-    sort(order, data);
+    ValueMap map = getCache(uri);
+    FileData[] data = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
+    sort(data, order);
     return cursor(uri, projection, data, map);
   }
 
-  @Override public void onFileAdded(int event, String parent, String child) {
-    addOrUpdate(parent, child);
+  private ValueMap getCache(Uri uri) {
+    File file = new File(URI.create(getFileLocation(uri)));
+    Path path = Path.from(file);
+    boolean create = false;
+    ValueMap values;
+    synchronized (this) {
+      values = cache.getIfPresent(path);
+      if (values == null) {
+        create = true;
+        values = new ValueMap();
+        // Put the new map in the cache first, register the event listener,
+        // then process the children, this allows the processing of children and
+        // receiving of event happen at the same time to use the map.
+        cache.put(path, values);
+      }
+    }
+    if (create) {
+      loadInto(values, path);
+    }
+    return values;
   }
 
-  @Override public void onFileChanged(int event, String parent, String child) {
-    addOrUpdate(parent, child);
-  }
+  private void loadInto(ValueMap map, Path path) {
+    service.unregister(path, FilesQuerier.this);
+    service.register(path, FilesQuerier.this);
 
-  @Override public void onFileRemoved(int event, String parent, String child) {
-    remove(parent, child);
-  }
-
-  @Override public void onRemoval(
-      @SuppressWarnings("NullableProblems")
-      RemovalNotification<String, Map<String, FileData>> notification) {
-    logger.debug("Removal cache %s", notification.getKey());
-    service.unmonitor(new File(notification.getKey()));
-  }
-
-  @Override public Map<String, FileData> load(
-      @SuppressWarnings("NullableProblems") String key) throws Exception {
-    logger.debug("Load cache %s", key);
-    return loadCache(new File(key));
-  }
-
-  private boolean getShowHidden(Uri uri) {
-    return parseBoolean(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
-  }
-
-  private Map<String, FileData> getCache(Uri uri) {
-    File parent = new File(URI.create(getFileLocation(uri)));
-    try {
-      return cache.get(parent.getPath());
-    } catch (ExecutionException e) {
-      throw new AssertionError(e);
+    String[] names = path.toFile().list();
+    if (names == null) {
+      return;
+    }
+    for (String name : names) {
+      try {
+        Path child = path.child(name);
+        map.put(child, FileData.stat(child));
+      } catch (ErrnoException e) {
+        logger.warn(e);
+      }
     }
   }
 
@@ -125,75 +120,94 @@ final class FilesQuerier extends CacheLoader<String, Map<String, FileData>>
     return cursor;
   }
 
-  private void sort(String sortOrder, FileData[] data) {
+  private void sort(FileData[] data, String sortOrder) {
     if (sortOrder != null) {
       Arrays.sort(data, SortBy.valueOf(sortOrder));
     }
   }
 
-  private FileData[] array(Map<String, FileData> map) {
-    return map.values().toArray(new FileData[map.size()]);
-  }
-
-  private FileData[] filterHidden(Map<String, FileData> cache) {
-    List<FileData> list = newArrayListWithCapacity(cache.size());
-    for (FileData node : cache.values()) {
-      if (node.hidden == 0) {
-        list.add(node);
-      }
+  @Override public void onEvent(WatchEvent event) {
+    // TODO batch
+    switch (event.kind()) {
+      case CREATE:
+      case MODIFY:
+        addOrUpdate(event.path());
+        break;
+      case DELETE:
+        remove(event.path());
+        break;
     }
-    return list.toArray(new FileData[list.size()]);
   }
 
-  private void addOrUpdate(String parent, String child) {
-    Map<String, FileData> data = cache.getIfPresent(parent);
+  private void addOrUpdate(Path path) {
+    Path parent = path.parent();
+    ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
-      service.unmonitor(new File(parent));
+      service.unregister(parent, this);
       return;
     }
 
     try {
-
-      String path = parent + "/" + child;
-      FileData file = FileData.from(stat(path), path, child);
-      data.put(child, file);
+      data.put(path, FileData.stat(path));
       notifyContentChanged(parent);
-
-    } catch (OsException e) {
-      remove(parent, child);
+    } catch (ErrnoException e) {
+      remove(path);
     }
   }
 
-  private void remove(String parent, String child) {
-    Map<String, FileData> data = cache.getIfPresent(parent);
+  private void remove(Path path) {
+    Path parent = path.parent();
+    ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
-      service.unmonitor(new File(parent));
-      return;
-    }
-    if (data.remove(child) != null) {
+      service.unregister(parent, this);
+    } else if (data.remove(path) != null) {
       notifyContentChanged(parent);
     }
   }
 
-  private void notifyContentChanged(String parent) {
-    String location = getFileLocation(new File(parent));
+  private void notifyContentChanged(Path path) {
+    String location = getFileLocation(path.toFile());
     Uri uri = buildFileUri(context, location);
     context.getContentResolver().notifyChange(uri, null);
   }
 
-  private Map<String, FileData> loadCache(File file) {
-    service.unmonitor(file);
-    List<PathStat> stats = service.monitor2(file).get();
-    return cacheMap(stats);
+  @Override
+  public void onRemoval(RemovalNotification<Path, ValueMap> notification) {
+    Path path = notification.getKey();
+    service.unregister(path, this);
   }
 
-  private Map<String, FileData> cacheMap(Collection<PathStat> stats) {
-    Map<String, FileData> m = newHashMapWithExpectedSize(stats.size());
-    for (PathStat stat : stats) {
-      String path = stat.path();
-      String name = FilenameUtils.getName(path);
-      m.put(name, FileData.from(stat.stat(), path, name));
+  private boolean showHidden(Uri uri) {
+    return parseBoolean(uri.getQueryParameter(PARAM_SHOW_HIDDEN));
+  }
+
+  static final class ValueMap {
+    private final ConcurrentMap<Path, FileData> map;
+
+    ValueMap() {
+      map = new ConcurrentHashMap<>();
     }
-    return m;
+
+    FileData put(Path key, FileData value) {
+      return map.put(key, value);
+    }
+
+    FileData remove(Path key) {
+      return map.remove(key);
+    }
+
+    FileData[] values() {
+      return values(Predicates.<FileData>alwaysTrue());
+    }
+
+    FileData[] values(Predicate<FileData> filter) {
+      List<FileData> list = newArrayListWithCapacity(map.size());
+      for (FileData data : map.values()) {
+        if (filter.apply(data)) {
+          list.add(data);
+        }
+      }
+      return list.toArray(new FileData[list.size()]);
+    }
   }
 }

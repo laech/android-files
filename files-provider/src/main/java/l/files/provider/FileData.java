@@ -2,12 +2,16 @@ package l.files.provider;
 
 import android.webkit.MimeTypeMap;
 
+import com.google.common.base.Predicate;
+
 import java.io.File;
 
-import l.files.os.OsException;
+import l.files.io.Path;
+import l.files.os.ErrnoException;
 import l.files.os.Stat;
 import l.files.os.Unistd;
 
+import static com.google.common.base.Predicates.not;
 import static java.util.Locale.ENGLISH;
 import static l.files.common.database.DataTypes.booleanToInt;
 import static l.files.common.database.DataTypes.intToBoolean;
@@ -20,6 +24,14 @@ import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToStrin
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 final class FileData {
+
+  static final Predicate<FileData> HIDDEN = new Predicate<FileData>() {
+    @Override public boolean apply(FileData input) {
+      return intToBoolean(input.hidden);
+    }
+  };
+
+  static final Predicate<FileData> NOT_HIDDEN = not(HIDDEN);
 
   final long lastModified;
   final long length;
@@ -69,7 +81,7 @@ final class FileData {
   private int access(String path, int mode) {
     try {
       return booleanToInt(Unistd.access(path, mode));
-    } catch (OsException e) {
+    } catch (ErrnoException e) {
       return booleanToInt(false);
     }
   }
@@ -92,12 +104,19 @@ final class FileData {
     return mime == null ? "application/octet-stream" : mime;
   }
 
+  @Deprecated
   public static FileData from(File file) {
     return new FileData(file);
   }
 
+  @Deprecated
   public static FileData from(Stat stat, String path, String name) {
     return new FileData(stat, path, name);
+  }
+
+  public static FileData stat(Path path) throws ErrnoException {
+    Stat stat = Stat.stat(path.toString());
+    return new FileData(stat, path.toString(), path.name());
   }
 
   /**
@@ -106,6 +125,7 @@ final class FileData {
    * Only use this for small number of files, as reading properties from files
    * are expensive and slow.
    */
+  @Deprecated
   public static FileData[] from(File[] files) {
     FileData[] data = new FileData[files.length];
     for (int i = 0; i < files.length; i++) {

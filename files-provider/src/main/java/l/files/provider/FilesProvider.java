@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.analytics.Analytics;
-import l.files.fse.FileEventService;
+import l.files.fse.WatchService;
 import l.files.logging.Logger;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
@@ -84,7 +84,7 @@ public final class FilesProvider extends ContentProvider
 
   @Override public boolean onCreate() {
     matcher = newMatcher(getContext());
-    helper = new FilesQuerier(getContext(), FileEventService.get());
+    helper = new FilesQuerier(getContext(), WatchService.get());
     getPreference().registerOnSharedPreferenceChangeListener(this);
     return true;
   }

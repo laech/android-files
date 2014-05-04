@@ -35,7 +35,7 @@ android {
 
 dependencies {
   compile project(':files-common')
-  compile project(':files-analytics')
+  compile project(':files-analytics') // TODO analytics should be UI only
   compile project(':files-service')
   compile project(':files-fse')
   compile project(':files-os')
