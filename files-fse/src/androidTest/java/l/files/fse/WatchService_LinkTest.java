@@ -11,8 +11,8 @@ import static java.lang.System.nanoTime;
 import static l.files.fse.WatchEvent.Kind.CREATE;
 import static l.files.fse.WatchServiceBaseTest.FileType.DIR;
 import static l.files.fse.WatchServiceBaseTest.FileType.FILE;
-import static l.files.os.Stat.stat;
-import static l.files.os.Unistd.symlink;
+import static l.files.io.os.Stat.stat;
+import static l.files.io.os.Unistd.symlink;
 
 public class WatchService_LinkTest extends WatchServiceBaseTest {
 

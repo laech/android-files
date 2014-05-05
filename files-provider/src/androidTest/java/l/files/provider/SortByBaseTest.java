@@ -6,7 +6,7 @@ import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.io.file.Path;
-import l.files.os.ErrnoException;
+import l.files.io.os.ErrnoException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;

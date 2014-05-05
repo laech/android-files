@@ -2,7 +2,7 @@ package l.files.fse;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.os.Stat;
+import l.files.io.os.Stat;
 
 /**
  * inode numbers are not unique across devices, this class exists to facilitate

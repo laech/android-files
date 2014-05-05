@@ -7,9 +7,9 @@ import com.google.common.base.Predicate;
 import java.io.File;
 
 import l.files.io.file.Path;
-import l.files.os.ErrnoException;
-import l.files.os.Stat;
-import l.files.os.Unistd;
+import l.files.io.os.ErrnoException;
+import l.files.io.os.Stat;
+import l.files.io.os.Unistd;
 
 import static com.google.common.base.Predicates.not;
 import static java.util.Locale.ENGLISH;

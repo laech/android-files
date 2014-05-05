@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package l.files.os;
+package l.files.io.os;
 
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;

@@ -38,7 +38,7 @@ dependencies {
   compile project(':files-analytics') // TODO analytics should be UI only
   compile project(':files-service')
   compile project(':files-fse')
-  compile project(':files-os')
+  compile project(':files-io-os')
   compile project.libs.commons_io
   compile project.libs.commons_lang
   compile project.libs.guava

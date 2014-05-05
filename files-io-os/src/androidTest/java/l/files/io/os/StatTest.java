@@ -1,4 +1,4 @@
-package l.files.os.io;
+package l.files.io.os;
 
 import com.google.common.base.Function;
 
@@ -6,14 +6,12 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.os.ErrnoException;
-import l.files.os.Stat;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.os.ErrnoException.ENOENT;
+import static l.files.io.os.ErrnoException.ENOENT;
 
 public final class StatTest extends FileBaseTest {
 

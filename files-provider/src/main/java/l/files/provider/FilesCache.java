@@ -21,7 +21,7 @@ import l.files.fse.WatchEvent;
 import l.files.fse.WatchService;
 import l.files.io.file.Path;
 import l.files.logging.Logger;
-import l.files.os.ErrnoException;
+import l.files.io.os.ErrnoException;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;

@@ -13,14 +13,14 @@ import java.util.Set;
 
 import l.files.io.file.Path;
 import l.files.logging.Logger;
-import l.files.os.ErrnoException;
-import l.files.os.Stat;
+import l.files.io.os.ErrnoException;
+import l.files.io.os.Stat;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.os.Stat.stat;
+import static l.files.io.os.Stat.stat;
 
 final class PathObserver extends FileObserver {
 

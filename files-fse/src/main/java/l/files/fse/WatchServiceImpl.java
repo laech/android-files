@@ -14,9 +14,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.io.file.Path;
 import l.files.logging.Logger;
-import l.files.os.Dirent;
-import l.files.os.ErrnoException;
-import l.files.os.Stat;
+import l.files.io.os.Dirent;
+import l.files.io.os.ErrnoException;
+import l.files.io.os.Stat;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CLOSE_WRITE;
@@ -34,9 +34,9 @@ import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.fse.PathObserver.IN_IGNORED;
 import static l.files.fse.WatchEvent.Kind;
-import static l.files.os.Dirent.closedir;
-import static l.files.os.Dirent.opendir;
-import static l.files.os.Dirent.readdir;
+import static l.files.io.os.Dirent.closedir;
+import static l.files.io.os.Dirent.opendir;
+import static l.files.io.os.Dirent.readdir;
 
 final class WatchServiceImpl extends WatchService {
 

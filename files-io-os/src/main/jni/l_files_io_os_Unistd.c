@@ -4,7 +4,7 @@
 #include <string.h>
 #include "util.h"
 
-jboolean Java_l_files_os_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsrc, jstring jdst) {
+jboolean Java_l_files_io_os_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsrc, jstring jdst) {
   const char *src = (*env)->GetStringUTFChars(env, jsrc, NULL);
   const char *dst = (*env)->GetStringUTFChars(env, jdst, NULL);
   int result = TEMP_FAILURE_RETRY(symlink(src, dst));
@@ -13,7 +13,7 @@ jboolean Java_l_files_os_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsrc,
   return (-1 == result) ? JNI_FALSE : JNI_TRUE;
 }
 
-jboolean Java_l_files_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
+jboolean Java_l_files_io_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   if (NULL == path) {
     return JNI_FALSE;
@@ -28,7 +28,7 @@ jboolean Java_l_files_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath,
   return (rc == 0);
 }
 
-jstring Java_l_files_os_Unistd_readlink(JNIEnv *env, jclass clazz, jstring jpath) {
+jstring Java_l_files_io_os_Unistd_readlink(JNIEnv *env, jclass clazz, jstring jpath) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
 
   char *buf;

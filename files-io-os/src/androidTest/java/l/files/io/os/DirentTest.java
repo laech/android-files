@@ -1,19 +1,17 @@
-package l.files.os.io;
+package l.files.io.os;
 
 import java.io.File;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.os.Dirent;
-import l.files.os.ErrnoException;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.os.Dirent.DT_DIR;
-import static l.files.os.Dirent.DT_REG;
-import static l.files.os.Dirent.closedir;
-import static l.files.os.Dirent.opendir;
-import static l.files.os.Dirent.readdir;
-import static l.files.os.Stat.stat;
+import static l.files.io.os.Dirent.DT_DIR;
+import static l.files.io.os.Dirent.DT_REG;
+import static l.files.io.os.Dirent.closedir;
+import static l.files.io.os.Dirent.opendir;
+import static l.files.io.os.Dirent.readdir;
+import static l.files.io.os.Stat.stat;
 
 public final class DirentTest extends FileBaseTest {
 

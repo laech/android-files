@@ -2,7 +2,7 @@ package l.files.fse;
 
 import junit.framework.TestCase;
 
-import l.files.os.Stat;
+import l.files.io.os.Stat;
 
 public final class NodeTest extends TestCase {
 

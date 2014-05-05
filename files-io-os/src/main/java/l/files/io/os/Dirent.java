@@ -1,4 +1,4 @@
-package l.files.os;
+package l.files.io.os;
 
 import com.google.auto.value.AutoValue;
 

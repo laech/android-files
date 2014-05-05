@@ -1,17 +1,15 @@
-package l.files.os.io;
+package l.files.io.os;
 
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.os.ErrnoException;
-import l.files.os.Unistd;
 
-import static l.files.os.Unistd.F_OK;
-import static l.files.os.Unistd.R_OK;
-import static l.files.os.Unistd.W_OK;
-import static l.files.os.Unistd.X_OK;
-import static l.files.os.Unistd.readlink;
-import static l.files.os.Unistd.symlink;
+import static l.files.io.os.Unistd.F_OK;
+import static l.files.io.os.Unistd.R_OK;
+import static l.files.io.os.Unistd.W_OK;
+import static l.files.io.os.Unistd.X_OK;
+import static l.files.io.os.Unistd.readlink;
+import static l.files.io.os.Unistd.symlink;
 
 public final class UnistdTest extends FileBaseTest {
 

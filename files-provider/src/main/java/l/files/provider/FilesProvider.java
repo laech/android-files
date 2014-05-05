@@ -23,7 +23,7 @@ import java.util.Set;
 import l.files.fse.WatchService;
 import l.files.io.file.Path;
 import l.files.logging.Logger;
-import l.files.os.ErrnoException;
+import l.files.io.os.ErrnoException;
 import l.files.service.CopyService;
 import l.files.service.DeleteService;
 import l.files.service.MoveService;
