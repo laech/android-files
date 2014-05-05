@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import l.files.fse.WatchEvent;
-import l.files.fse.WatchService;
+import l.files.io.file.event.WatchEvent;
+import l.files.io.file.event.WatchService;
 import l.files.io.file.Path;
 import l.files.io.os.ErrnoException;
 import l.files.logging.Logger;

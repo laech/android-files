@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fse.WatchService;
+import l.files.io.file.event.WatchService;
 import l.files.io.file.Path;
 import l.files.logging.Logger;
 import l.files.io.os.ErrnoException;

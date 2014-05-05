@@ -36,7 +36,7 @@ android {
 dependencies {
   compile project(':files-common')
   compile project(':files-service')
-  compile project(':files-fse')
+  compile project(':files-io-file-event')
   compile project(':files-io-os')
   compile project.libs.commons_io
   compile project.libs.commons_lang
