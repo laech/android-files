@@ -33,7 +33,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.reverse;
-import static l.files.common.io.Files.normalize;
+import static l.files.io.Files.normalize;
 import static l.files.provider.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;

@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import static l.files.common.io.Files.toAbsolutePaths;
-import static l.files.common.io.Files.toFilesSet;
+import static l.files.io.Files.toAbsolutePaths;
+import static l.files.io.Files.toFilesSet;
 import static l.files.service.PasteType.CUT;
 
 public final class MoveService extends ProgressService {

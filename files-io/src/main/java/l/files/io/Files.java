@@ -1,4 +1,4 @@
-package l.files.common.io;
+package l.files.io;
 
 import com.google.common.collect.ImmutableSet;
 

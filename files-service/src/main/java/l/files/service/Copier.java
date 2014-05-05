@@ -13,7 +13,7 @@ import java.util.Queue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.singletonList;
-import static l.files.common.io.Files.replace;
+import static l.files.io.Files.replace;
 import static l.files.service.BuildConfig.DEBUG;
 import static l.files.service.Util.listDirectoryChildren;
 import static org.apache.commons.io.FileUtils.isSymlink;

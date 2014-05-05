@@ -28,8 +28,8 @@ android {
 }
 
 dependencies {
-  compile project(':files-common')
-  compile project(':files-analytics')
+  compile project(':files-io')
+  compile project(':files-analytics') // TODO should use analytics on UI only
   compile project.libs.guava
 
   androidTestCompile project(':files-common-testing')
