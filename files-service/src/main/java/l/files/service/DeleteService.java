@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.io.Files.toAbsolutePaths;
-import static l.files.io.Files.toFiles;
+import static l.files.io.file.Files.toAbsolutePaths;
+import static l.files.io.file.Files.toFiles;
 import static l.files.service.Util.showErrorMessage;
 
 public final class DeleteService extends ProgressService {

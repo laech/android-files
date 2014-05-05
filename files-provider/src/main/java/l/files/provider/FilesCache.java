@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import l.files.fse.WatchEvent;
 import l.files.fse.WatchService;
-import l.files.io.Path;
+import l.files.io.file.Path;
 import l.files.logging.Logger;
 import l.files.os.ErrnoException;
 

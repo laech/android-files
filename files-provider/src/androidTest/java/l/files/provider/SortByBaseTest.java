@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.Path;
+import l.files.io.file.Path;
 import l.files.os.ErrnoException;
 
 import static com.google.common.collect.Lists.newArrayList;

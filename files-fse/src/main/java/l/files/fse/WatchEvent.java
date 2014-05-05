@@ -2,7 +2,7 @@ package l.files.fse;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.io.Path;
+import l.files.io.file.Path;
 
 @AutoValue
 public abstract class WatchEvent {

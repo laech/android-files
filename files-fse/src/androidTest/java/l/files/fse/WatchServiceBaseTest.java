@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
-import l.files.io.Path;
+import l.files.io.file.Path;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;

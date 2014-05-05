@@ -2,7 +2,7 @@ package l.files.fse;
 
 import java.io.File;
 
-import l.files.io.Path;
+import l.files.io.file.Path;
 
 import static l.files.fse.WatchEvent.Kind.CREATE;
 import static l.files.fse.WatchEvent.Kind.DELETE;

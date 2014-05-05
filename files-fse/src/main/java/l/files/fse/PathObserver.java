@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import l.files.io.Path;
+import l.files.io.file.Path;
 import l.files.logging.Logger;
 import l.files.os.ErrnoException;
 import l.files.os.Stat;

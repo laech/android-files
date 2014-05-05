@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.Files.getNonExistentDestinationFile;
-import static l.files.io.Files.isAncestorOrSelf;
+import static l.files.io.file.Files.getNonExistentDestinationFile;
+import static l.files.io.file.Files.isAncestorOrSelf;
 
 abstract class Paster<T> implements Callable<T> {
 

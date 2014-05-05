@@ -6,7 +6,7 @@ import com.google.common.base.Predicate;
 
 import java.io.File;
 
-import l.files.io.Path;
+import l.files.io.file.Path;
 import l.files.os.ErrnoException;
 import l.files.os.Stat;
 import l.files.os.Unistd;

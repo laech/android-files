@@ -38,7 +38,7 @@ android {
 dependencies {
   compile project(':files-logging')
   compile project(':files-os')
-  compile project(':files-io')
+  compile project(':files-io-file')
   compile project.libs.guava
   compile project.libs.commons_io
   compile project.libs.auto_value

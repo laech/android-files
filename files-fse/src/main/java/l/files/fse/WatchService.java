@@ -1,6 +1,6 @@
 package l.files.fse;
 
-import l.files.io.Path;
+import l.files.io.file.Path;
 
 /**
  * Service designed for monitoring file changes within a directory.
