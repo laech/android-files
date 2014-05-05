@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentMap;
 import l.files.fse.WatchEvent;
 import l.files.fse.WatchService;
 import l.files.io.file.Path;
-import l.files.logging.Logger;
 import l.files.io.os.ErrnoException;
+import l.files.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;
@@ -30,12 +30,20 @@ import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, FilesCache.ValueMap> {
+final class FilesCache implements
+    WatchEvent.Listener,
+    EventBatch.Processor,
+    RemovalListener<Path, FilesCache.ValueMap> {
 
   private static final Logger logger = Logger.get(FilesCache.class);
 
   private final Context context;
   private final WatchService service;
+
+  // TODO One optimization may be to use a batch per directory
+  // and a discrete executor for each, so that updates for a directory is not
+  // blocking another directory
+  private final EventBatch batch;
 
   private final Cache<Path, ValueMap> cache =
       CacheBuilder.newBuilder()
@@ -46,6 +54,7 @@ final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, Fil
   FilesCache(Context context, WatchService service) {
     this.context = context;
     this.service = service;
+    this.batch = new EventBatch(context.getContentResolver(), this);
   }
 
   public FileData[] get(Uri uri, CancellationSignal signal) {
@@ -94,7 +103,13 @@ final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, Fil
   }
 
   @Override public void onEvent(WatchEvent event) {
-    // TODO batch
+    Path parent = event.path().parent();
+    String location = getFileLocation(parent.toFile());
+    Uri uri = buildFileUri(context, location);
+    batch.batch(event, uri);
+  }
+
+  @Override public void process(WatchEvent event) {
     switch (event.kind()) {
       case CREATE:
       case MODIFY:
@@ -116,7 +131,6 @@ final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, Fil
 
     try {
       data.put(path, FileData.stat(path));
-      notifyContentChanged(parent);
     } catch (ErrnoException e) {
       remove(path);
     }
@@ -127,15 +141,9 @@ final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, Fil
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
-    } else if (data.remove(path) != null) {
-      notifyContentChanged(parent);
+    } else {
+      data.remove(path);
     }
-  }
-
-  private void notifyContentChanged(Path path) {
-    String location = getFileLocation(path.toFile());
-    Uri uri = buildFileUri(context, location);
-    context.getContentResolver().notifyChange(uri, null);
   }
 
   @Override

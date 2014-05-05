@@ -156,6 +156,16 @@ public final class FilesProviderTest extends FileBaseTest {
     });
   }
 
+  public void testNotifiesOnFileAdditionDeletion() throws Exception {
+    testNotifies(new Runnable() {
+      @Override public void run() {
+        File dir = tmp().createDir("a");
+        assertTrue(dir.delete());
+        assertTrue(dir.mkdirs());
+      }
+    });
+  }
+
   private void testNotifies(Runnable code) throws InterruptedException {
     Cursor cursor = queryChildren();
     try {
