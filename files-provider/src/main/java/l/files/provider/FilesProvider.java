@@ -3,7 +3,6 @@ package l.files.provider;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.SharedPreferences;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
@@ -17,10 +16,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import l.files.analytics.Analytics;
 import l.files.fse.WatchService;
 import l.files.io.Path;
 import l.files.logging.Logger;
@@ -30,16 +29,11 @@ import l.files.service.DeleteService;
 import l.files.service.MoveService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.reverse;
 import static l.files.common.io.Files.normalize;
-import static l.files.provider.Bookmarks.getBookmark;
-import static l.files.provider.Bookmarks.getBookmarks;
-import static l.files.provider.Bookmarks.getBookmarksCount;
-import static l.files.provider.Bookmarks.isBookmarksKey;
 import static l.files.provider.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
@@ -48,26 +42,23 @@ import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.EXTRA_RESULT;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
-import static l.files.provider.FilesContract.MATCH_BOOKMARKS;
-import static l.files.provider.FilesContract.MATCH_BOOKMARKS_LOCATION;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_HIERARCHY;
+import static l.files.provider.FilesContract.MATCH_SELECTION;
 import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
 import static l.files.provider.FilesContract.METHOD_CUT;
 import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
-import static l.files.provider.FilesContract.buildBookmarksUri;
-import static l.files.provider.FilesContract.getBookmarkLocation;
+import static l.files.provider.FilesContract.PARAM_SELECTION;
 import static l.files.provider.FilesContract.getFileLocation;
 import static l.files.provider.FilesContract.getHierarchyFileLocation;
 import static l.files.provider.FilesContract.getSuggestionBasename;
 import static l.files.provider.FilesContract.getSuggestionParentUri;
 import static l.files.provider.FilesContract.newMatcher;
 
-public final class FilesProvider extends ContentProvider
-    implements SharedPreferences.OnSharedPreferenceChangeListener {
+public final class FilesProvider extends ContentProvider {
 
   private static final Logger logger = Logger.get(FilesProvider.class);
 
@@ -83,12 +74,11 @@ public final class FilesProvider extends ContentProvider
   };
 
   private UriMatcher matcher;
-  private FilesQuerier helper;
+  private FilesCache helper;
 
   @Override public boolean onCreate() {
     matcher = newMatcher(getContext());
-    helper = new FilesQuerier(getContext(), WatchService.get());
-    getPreference().registerOnSharedPreferenceChangeListener(this);
+    helper = new FilesCache(getContext(), WatchService.get());
     return true;
   }
 
@@ -149,23 +139,21 @@ public final class FilesProvider extends ContentProvider
 
     switch (matcher.match(uri)) {
       case MATCH_SUGGESTION:
-        return querySuggestion(uri, projection);
-      case MATCH_BOOKMARKS:
-        return queryBookmarks(uri, projection);
-      case MATCH_BOOKMARKS_LOCATION:
-        return queryBookmark(uri, projection);
+        return querySuggestion(uri, projection, sortOrder);
       case MATCH_FILES_LOCATION:
-        return queryFile(uri, projection);
+        return queryFile(uri, projection, sortOrder);
       case MATCH_FILES_LOCATION_CHILDREN:
         return queryFiles(uri, projection, sortOrder);
       case MATCH_HIERARCHY:
-        return queryHierarchy(uri, projection);
+        return queryHierarchy(uri, projection, sortOrder);
+      case MATCH_SELECTION:
+        return querySelection(uri, projection, sortOrder);
       default:
         throw new UnsupportedOperationException("Unsupported Uri: " + uri);
     }
   }
 
-  private Cursor queryHierarchy(Uri uri, String[] projection) {
+  private Cursor queryHierarchy(Uri uri, String[] projection, String sortOrder) {
     File file = normalize(new File(URI.create(getHierarchyFileLocation(uri))));
     List<File> files = newArrayList();
     while (file != null) {
@@ -174,36 +162,37 @@ public final class FilesProvider extends ContentProvider
     }
     reverse(files);
     File[] fileArray = files.toArray(new File[files.size()]);
-    return newFileCursor(uri, projection, fileArray);
+    return newFileCursor(uri, projection, sortOrder, fileArray);
   }
 
-  private Cursor queryFile(Uri uri, String[] projection) {
+  private Cursor queryFile(Uri uri, String[] projection, String sortOrder) {
     File file = new File(URI.create(getFileLocation(uri)));
-    return newFileCursor(uri, projection, file);
+    return newFileCursor(uri, projection, sortOrder, file);
   }
 
-  private Cursor querySuggestion(Uri uri, String[] projection) {
+  private Cursor querySuggestion(Uri uri, String[] projection, String sortOrder) {
     File parent = new File(URI.create(getSuggestionParentUri(uri)));
     String name = getSuggestionBasename(uri);
     File file = new File(parent, name);
     for (int i = 2; file.exists(); i++) {
       file = new File(parent, name + " " + i);
     }
-    return newFileCursor(uri, projection, file);
-  }
-
-  private Cursor queryBookmark(Uri uri, String[] projection) {
-    File[] bookmarks = getBookmark(getPreference(), getBookmarkLocation(uri));
-    return newFileCursor(uri, projection, bookmarks);
-  }
-
-  private Cursor queryBookmarks(Uri uri, String[] projection) {
-    File[] bookmarks = getBookmarks(getPreference());
-    return newFileCursor(uri, projection, bookmarks);
+    return newFileCursor(uri, projection, sortOrder, file);
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
-    return helper.query(uri, projection, sortOrder, null);
+    FileData[] data = helper.get(uri, null);
+    return newFileCursor(uri, projection, sortOrder, data);
+  }
+
+  private Cursor querySelection(Uri uri, String[] projection, String sortOrder) {
+    List<String> selection = uri.getQueryParameters(PARAM_SELECTION);
+    File[] files = new File[selection.size()];
+    for (int i = 0; i < files.length; i++) {
+      files[i] = new File(URI.create(selection.get(i)));
+    }
+
+    return newFileCursor(uri, projection, sortOrder, files);
   }
 
   @Override public Bundle call(String method, String arg, Bundle extras) {
@@ -258,17 +247,10 @@ public final class FilesProvider extends ContentProvider
 
   @Override public Uri insert(Uri uri, ContentValues values) {
     switch (matcher.match(uri)) {
-      case MATCH_BOOKMARKS_LOCATION:
-        return insertBookmark(uri);
       case MATCH_FILES_LOCATION:
         return insertDirectory(uri);
     }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
-  }
-
-  private Uri insertBookmark(Uri uri) {
-    Bookmarks.add(getPreference(), getBookmarkLocation(uri));
-    return uri;
   }
 
   private Uri insertDirectory(Uri uri) {
@@ -278,16 +260,7 @@ public final class FilesProvider extends ContentProvider
 
   @Override
   public int delete(Uri uri, String selection, String[] selectionArgs) {
-    switch (matcher.match(uri)) {
-      case MATCH_BOOKMARKS_LOCATION:
-        return deleteBookmark(uri);
-    }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
-  }
-
-  private int deleteBookmark(Uri uri) {
-    Bookmarks.remove(getPreference(), getBookmarkLocation(uri));
-    return 1;
   }
 
   @Override public int update(
@@ -295,16 +268,13 @@ public final class FilesProvider extends ContentProvider
     throw new UnsupportedOperationException("Update not supported");
   }
 
-  @Override
-  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (isBookmarksKey(key)) {
-      getContentResolver().notifyChange(buildBookmarksUri(getContext()), null);
-      String count = Integer.toString(getBookmarksCount(pref));
-      Analytics.onPreferenceChanged(getContext(), key, count);
+  private void sort(FileData[] data, String sortOrder) {
+    if (sortOrder != null) {
+      Arrays.sort(data, SortBy.valueOf(sortOrder));
     }
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, File... files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, File... files) {
     List<FileData> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
@@ -313,10 +283,11 @@ public final class FilesProvider extends ContentProvider
         logger.warn(e);
       }
     }
-    return newFileCursor(uri, projection, stats.toArray(new FileData[stats.size()]));
+    return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileData[stats.size()]));
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, FileData... files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileData... files) {
+    sort(files, sortOrder);
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);
     return c;
@@ -324,10 +295,6 @@ public final class FilesProvider extends ContentProvider
 
   private ContentResolver getContentResolver() {
     return getContext().getContentResolver();
-  }
-
-  private SharedPreferences getPreference() {
-    return getDefaultSharedPreferences(getContext());
   }
 
   private static class TikaHolder {

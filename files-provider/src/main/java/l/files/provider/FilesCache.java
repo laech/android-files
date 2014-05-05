@@ -1,7 +1,6 @@
 package l.files.provider;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 
@@ -14,7 +13,6 @@ import com.google.common.cache.RemovalNotification;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,25 +26,13 @@ import l.files.os.ErrnoException;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;
 import static l.files.provider.FileData.NOT_HIDDEN;
-import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileLocation;
 
-final class FilesQuerier implements WatchEvent.Listener, RemovalListener<Path, FilesQuerier.ValueMap> {
+final class FilesCache implements WatchEvent.Listener, RemovalListener<Path, FilesCache.ValueMap> {
 
-  private static final Logger logger = Logger.get(FilesQuerier.class);
-
-  private static final String[] DEFAULT_PROJECTION = {
-      FileInfo.LOCATION,
-      FileInfo.NAME,
-      FileInfo.SIZE,
-      FileInfo.READABLE,
-      FileInfo.WRITABLE,
-      FileInfo.MIME,
-      FileInfo.MODIFIED,
-      FileInfo.HIDDEN,
-  };
+  private static final Logger logger = Logger.get(FilesCache.class);
 
   private final Context context;
   private final WatchService service;
@@ -57,21 +43,14 @@ final class FilesQuerier implements WatchEvent.Listener, RemovalListener<Path, F
           .removalListener(this)
           .build();
 
-  FilesQuerier(Context context, WatchService service) {
+  FilesCache(Context context, WatchService service) {
     this.context = context;
     this.service = service;
   }
 
-  public Cursor query(Uri uri, String[] projection, String order, CancellationSignal signal) {
-
-    if (projection == null) {
-      projection = DEFAULT_PROJECTION;
-    }
-
+  public FileData[] get(Uri uri, CancellationSignal signal) {
     ValueMap map = getCache(uri);
-    FileData[] data = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
-    sort(data, order);
-    return cursor(uri, projection, data, map);
+    return showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
   }
 
   private ValueMap getCache(Uri uri) {
@@ -97,8 +76,8 @@ final class FilesQuerier implements WatchEvent.Listener, RemovalListener<Path, F
   }
 
   private void loadInto(ValueMap map, Path path) {
-    service.unregister(path, FilesQuerier.this);
-    service.register(path, FilesQuerier.this);
+    service.unregister(path, this);
+    service.register(path, this);
 
     String[] names = path.toFile().list();
     if (names == null) {
@@ -111,18 +90,6 @@ final class FilesQuerier implements WatchEvent.Listener, RemovalListener<Path, F
       } catch (ErrnoException e) {
         logger.warn(e);
       }
-    }
-  }
-
-  private Cursor cursor(Uri uri, String[] projection, FileData[] data, Object ref) {
-    FileCursor cursor = new FileCursor(data, projection, ref);
-    cursor.setNotificationUri(context.getContentResolver(), uri);
-    return cursor;
-  }
-
-  private void sort(FileData[] data, String sortOrder) {
-    if (sortOrder != null) {
-      Arrays.sort(data, SortBy.valueOf(sortOrder));
     }
   }
 

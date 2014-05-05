@@ -29,6 +29,7 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
+import static l.files.provider.FilesContract.buildSelectionUri;
 import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
@@ -90,6 +91,20 @@ public final class FilesProviderTest extends FileBaseTest {
     verify("d");
   }
 
+  public void testQuerySelection() {
+    File[] files = {
+        new File("/"),
+        tmp().get(),
+        tmp().createFile("a")
+    };
+    Cursor cursor = querySelection(files);
+    try {
+      verify(cursor, files);
+    } finally {
+      cursor.close();
+    }
+  }
+
   public void testQuerySortByName() {
     tmp().createFile("z");
     tmp().createDir("x");
@@ -142,7 +157,7 @@ public final class FilesProviderTest extends FileBaseTest {
   }
 
   private void testNotifies(Runnable code) throws InterruptedException {
-    Cursor cursor = query();
+    Cursor cursor = queryChildren();
     try {
 
       final CountDownLatch latch = new CountDownLatch(1);
@@ -189,10 +204,10 @@ public final class FilesProviderTest extends FileBaseTest {
       Comparator<File> comparator,
       boolean showHidden,
       File... files) {
-    Cursor cursor = query(dir, showHidden, order);
+    Cursor cursor = queryChildren(dir, showHidden, order);
     try {
       sort(files, comparator);
-      verify(cursor, files, dir);
+      verify(cursor, files);
     } finally {
       cursor.close();
     }
@@ -202,10 +217,10 @@ public final class FilesProviderTest extends FileBaseTest {
     verify(dir, SORT_BY_NAME, NAME_COMPARATOR, true, dir.listFiles());
   }
 
-  private static void verify(Cursor cursor, File[] files, File parent) {
+  private static void verify(Cursor cursor, File[] files) {
     List<String> expected = getLocations(files);
     List<String> actual = getLocations(cursor);
-    assertEquals("Children mismatch for dir: " + parent, expected, actual);
+    assertEquals(expected, actual);
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
@@ -236,14 +251,25 @@ public final class FilesProviderTest extends FileBaseTest {
     return names;
   }
 
-  private Cursor query() {
-    return query(tmp().get(), true, SORT_BY_NAME);
+  private Cursor queryChildren() {
+    return queryChildren(tmp().get(), true, SORT_BY_NAME);
   }
 
-  private Cursor query(File dir, boolean showHidden, String order) {
+  private Cursor queryChildren(File dir, boolean showHidden, String order) {
     Context context = getContext();
     Uri uri = buildFileChildrenUri(context, getFileLocation(dir), showHidden);
     ContentResolver resolver = context.getContentResolver();
     return resolver.query(uri, null, null, null, order);
+  }
+
+  private Cursor querySelection(File... files) {
+    String[] locations = new String[files.length];
+    for (int i = 0; i < locations.length; i++) {
+      locations[i] = getFileLocation(files[i]);
+    }
+    Context context = getContext();
+    ContentResolver resolver = context.getContentResolver();
+    Uri uri = buildSelectionUri(context, locations);
+    return resolver.query(uri, null, null, null, null);
   }
 }

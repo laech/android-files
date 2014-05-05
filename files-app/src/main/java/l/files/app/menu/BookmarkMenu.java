@@ -22,9 +22,9 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
 import static l.files.provider.FilesContract.FileInfo;
-import static l.files.provider.FilesContract.bookmark;
-import static l.files.provider.FilesContract.buildBookmarkUri;
-import static l.files.provider.FilesContract.unbookmark;
+import static l.files.provider.bookmarks.BookmarksContract.bookmark;
+import static l.files.provider.bookmarks.BookmarksContract.buildBookmarkUri;
+import static l.files.provider.bookmarks.BookmarksContract.unbookmark;
 
 /**
  * Menu to bookmark/unbookmark a directory at the given {@link

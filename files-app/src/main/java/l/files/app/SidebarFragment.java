@@ -15,7 +15,7 @@ import l.files.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.app.Animations.animatePreDataSetChange;
-import static l.files.provider.FilesContract.buildBookmarksUri;
+import static l.files.provider.bookmarks.BookmarksContract.buildBookmarksUri;
 
 public final class SidebarFragment extends BaseFileListFragment
     implements LoaderCallbacks<Cursor> {

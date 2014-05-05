@@ -24,22 +24,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
 
-  // TODO separate bookmarks to another lib
-
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
-  static final String PATH_BOOKMARKS = "bookmarks";
   static final String PATH_SUGGESTION = "suggestion";
   static final String PATH_HIERARCHY = "hierarchy";
+  static final String PATH_SELECTION = "selection";
 
   static final String PARAM_SHOW_HIDDEN = "show-hidden";
+  static final String PARAM_SELECTION = "selection";
 
   static final int MATCH_FILES_LOCATION = 100;
   static final int MATCH_FILES_LOCATION_CHILDREN = 101;
-  static final int MATCH_BOOKMARKS = 200;
-  static final int MATCH_BOOKMARKS_LOCATION = 201;
   static final int MATCH_SUGGESTION = 300;
   static final int MATCH_HIERARCHY = 400;
+  static final int MATCH_SELECTION = 500;
 
   static final String METHOD_CUT = "cut";
   static final String METHOD_COPY = "copy";
@@ -58,12 +56,11 @@ public final class FilesContract {
   static UriMatcher newMatcher(Context context) {
     String authority = getAuthorityString(context);
     UriMatcher matcher = new UriMatcher(NO_MATCH);
-    matcher.addURI(authority, PATH_BOOKMARKS, MATCH_BOOKMARKS);
-    matcher.addURI(authority, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_LOCATION);
     matcher.addURI(authority, PATH_FILES + "/*", MATCH_FILES_LOCATION);
     matcher.addURI(authority, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_LOCATION_CHILDREN);
     matcher.addURI(authority, PATH_SUGGESTION + "/*/*", MATCH_SUGGESTION);
     matcher.addURI(authority, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
+    matcher.addURI(authority, PATH_SELECTION, MATCH_SELECTION);
     return matcher;
   }
 
@@ -150,44 +147,6 @@ public final class FilesContract {
     return segments;
   }
 
-  /**
-   * Creates a Uri for querying the list of all bookmarks.
-   */
-  public static Uri buildBookmarksUri(Context context) {
-    return bookmarksUriBuilder(context).build();
-  }
-
-  /**
-   * Creates a single bookmark URI to be queried, if the file is currently
-   * bookmarked, the resulting cursor will contain exactly one row, otherwise
-   * the cursor will be empty.
-   *
-   * @param fileLocation the {@link FileInfo#LOCATION} of the file
-   */
-  public static Uri buildBookmarkUri(Context context, String fileLocation) {
-    checkNotNull(fileLocation, "fileLocation");
-    return bookmarksUriBuilder(context).appendPath(fileLocation).build();
-  }
-
-  private static Uri.Builder bookmarksUriBuilder(Context context) {
-    return getAuthority(context).buildUpon().appendPath(PATH_BOOKMARKS);
-  }
-
-  /**
-   * Gets the {@link FileInfo#LOCATION} from the given content URI built with
-   * {@link #buildBookmarkUri(Context, String)}.
-   */
-  public static String getBookmarkLocation(Uri bookmarkUri) {
-    return checkBookmarkUri(bookmarkUri).get(1);
-  }
-
-  private static List<String> checkBookmarkUri(Uri uri) {
-    List<String> segments = uri.getPathSegments();
-    checkArgument(segments.size() == 2, segments.size());
-    checkArgument(segments.get(0).equals(PATH_BOOKMARKS), segments.get(0));
-    return segments;
-  }
-
   static Uri buildFilesUri(Context context) {
     return filesUriBuilder(context).build();
   }
@@ -236,6 +195,21 @@ public final class FilesContract {
   }
 
   /**
+   * Creates a URI for querying the given files.
+   */
+  public static Uri buildSelectionUri(Context context, String... locations) {
+    Uri.Builder builder = selectionUriBuilder(context);
+    for (String location : locations) {
+      builder.appendQueryParameter(PARAM_SELECTION, location);
+    }
+    return builder.build();
+  }
+
+  private static Uri.Builder selectionUriBuilder(Context context) {
+    return getAuthority(context).buildUpon().appendPath(PATH_SELECTION);
+  }
+
+  /**
    * Gets the {@link FileInfo#LOCATION} of the given file.
    */
   public static String getFileLocation(File file) {
@@ -263,26 +237,6 @@ public final class FilesContract {
     checkArgument(segments.size() >= 2, segments.size());
     checkArgument(segments.get(0).equals(PATH_FILES), segments.get(0));
     return segments;
-  }
-
-  /**
-   * Bookmarks the given {@link FileInfo#LOCATION}. Do not call this on the UI
-   * thread.
-   */
-  public static void bookmark(Context context, String fileLocation) {
-    ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileLocation);
-    context.getContentResolver().insert(uri, null);
-  }
-
-  /**
-   * Unbookmarks the given {@link FileInfo#LOCATION}.Do not call this on the UI
-   * thread.
-   */
-  public static void unbookmark(Context context, String fileLocation) {
-    ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileLocation);
-    context.getContentResolver().delete(uri, null, null);
   }
 
   /**
