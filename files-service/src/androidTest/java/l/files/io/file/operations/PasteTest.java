@@ -11,7 +11,7 @@ import static java.util.Collections.singleton;
 import static l.files.io.file.operations.Cancellables.CANCELLED;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 
-public abstract class PasterTest extends FileBaseTest {
+public abstract class PasteTest extends FileBaseTest {
 
   /**
    * When pasting emptying directories, they should be created on the
@@ -88,6 +88,6 @@ public abstract class PasterTest extends FileBaseTest {
     }
   }
 
-  protected abstract Paster<?> create(
+  protected abstract Paste<?> create(
       Cancellable cancellable, Iterable<File> sources, File destination);
 }

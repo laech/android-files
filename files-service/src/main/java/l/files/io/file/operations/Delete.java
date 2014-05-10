@@ -8,14 +8,14 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 
-public final class Deleter extends Traverser<Void> {
+public final class Delete extends Traverser<Void> {
 
   private final List<File> directories;
   private final Listener listener;
   private final int total;
   private int remaining;
 
-  public Deleter(
+  public Delete(
       Cancellable cancellable,
       Iterable<File> files,
       Listener listener,

@@ -19,7 +19,7 @@ import static l.files.service.BuildConfig.DEBUG;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-public final class Copier extends Paster<Void> {
+public final class Copy extends Paste<Void> {
 
   /*
    * Setting last modified time currently fails, see:
@@ -30,7 +30,7 @@ public final class Copier extends Paster<Void> {
    * https://code.google.com/p/android/issues/detail?id=25460
    */
 
-  private static final String TAG = Copier.class.getSimpleName();
+  private static final String TAG = Copy.class.getSimpleName();
 
   /*
    * Higher the buffer, faster the copy, but will affect the overall system
@@ -46,7 +46,7 @@ public final class Copier extends Paster<Void> {
   private int remaining;
   private long bytesCopied;
 
-  public Copier(
+  public Copy(
       Cancellable cancellable,
       Iterable<File> sources,
       File destination,

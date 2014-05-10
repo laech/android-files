@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import l.files.io.file.operations.Copier;
-import l.files.io.file.operations.Counter;
+import l.files.io.file.operations.Copy;
+import l.files.io.file.operations.Count;
 
 import static l.files.io.file.Files.toAbsolutePaths;
 import static l.files.io.file.Files.toFilesSet;
@@ -48,8 +48,8 @@ public final class CopyService extends ProgressService {
 
     @Override protected IOException doTask() {
       try {
-        Counter.Result result = new Counter(this, src, this).call();
-        new Copier(this, src, dst, this, result.count, result.length).call();
+        Count.Result result = new Count(this, src, this).call();
+        new Copy(this, src, dst, this, result.count, result.length).call();
       } catch (IOException e) {
         return e;
       }

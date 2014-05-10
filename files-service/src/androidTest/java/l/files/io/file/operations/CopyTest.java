@@ -9,9 +9,9 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
-import static l.files.io.file.operations.Copier.Listener;
+import static l.files.io.file.operations.Copy.Listener;
 
-public final class CopierTest extends PasterTest {
+public final class CopyTest extends PasteTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
     @Override
@@ -45,21 +45,21 @@ public final class CopierTest extends PasterTest {
     create(NO_CANCEL, asList(src), dstDir).call();
   }
 
-  @Override protected Copier create(
+  @Override protected Copy create(
       Cancellable cancellable,
       Iterable<File> sources,
       File destination) {
     return create(cancellable, sources, destination, NULL_LISTENER, 0, 0);
   }
 
-  private Copier create(
+  private Copy create(
       Cancellable cancellable,
       Iterable<File> sources,
       File destination,
       Listener listener,
       int remaining,
       long length) {
-    return new Copier(
+    return new Copy(
         cancellable, sources, destination, listener, remaining, length);
   }
 }

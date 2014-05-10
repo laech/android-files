@@ -7,9 +7,9 @@ import l.files.common.testing.FileBaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
-import static l.files.io.file.operations.Deleter.Listener;
+import static l.files.io.file.operations.Delete.Listener;
 
-public final class DeleterTest extends FileBaseTest {
+public final class DeleteTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
     @Override public void onFileDeleted(int total, int remaining) {}
@@ -46,18 +46,18 @@ public final class DeleterTest extends FileBaseTest {
     create(NO_CANCEL, asList(file), NULL_LISTENER).call();
   }
 
-  private Deleter create(
+  private Delete create(
       Cancellable cancellable,
       Iterable<File> files,
       Listener listener) {
     return create(cancellable, files, listener, 0);
   }
 
-  private Deleter create(
+  private Delete create(
       Cancellable cancellable,
       Iterable<File> files,
       Listener listener,
       int remaining) {
-    return new Deleter(cancellable, files, listener, remaining);
+    return new Delete(cancellable, files, listener, remaining);
   }
 }

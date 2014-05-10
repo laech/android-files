@@ -8,14 +8,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Counts the number of files and their sizes recursively. Directories
  * themselves are excluded but their files will be included.
  */
-public final class Counter extends Traverser<Counter.Result> {
+public final class Count extends Traverser<Count.Result> {
 
   private final Listener listener;
 
   private int count;
   private long length;
 
-  public Counter(Cancellable cancellable, Iterable<File> files, Listener listener) {
+  public Count(Cancellable cancellable, Iterable<File> files, Listener listener) {
     super(cancellable, files);
     this.listener = checkNotNull(listener, "listener");
   }

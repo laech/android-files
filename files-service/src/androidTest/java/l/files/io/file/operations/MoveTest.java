@@ -9,7 +9,7 @@ import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 
-public final class MoverTest extends PasterTest {
+public final class MoveTest extends PasteTest {
 
   public void testMovesFile() throws Exception {
     File srcFile = tmp().createFile("a.txt");
@@ -37,10 +37,10 @@ public final class MoverTest extends PasterTest {
   }
 
   @Override
-  protected Mover create(
+  protected Move create(
       Cancellable cancellable,
       Iterable<File> sources,
       File destination) {
-    return new Mover(cancellable, sources, destination);
+    return new Move(cancellable, sources, destination);
   }
 }

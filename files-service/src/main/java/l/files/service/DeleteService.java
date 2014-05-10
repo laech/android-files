@@ -9,8 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import l.files.io.file.operations.Counter;
-import l.files.io.file.operations.Deleter;
+import l.files.io.file.operations.Count;
+import l.files.io.file.operations.Delete;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.io.file.Files.toAbsolutePaths;
@@ -35,7 +35,7 @@ public final class DeleteService extends ProgressService {
   }
 
   private final class DeleteTask extends Task<Object, Progress, IOException>
-      implements Counter.Listener, Deleter.Listener {
+      implements Count.Listener, Delete.Listener {
 
     private final Set<File> files;
 
@@ -64,8 +64,8 @@ public final class DeleteService extends ProgressService {
     @Override protected IOException doTask() {
       try {
 
-        Counter.Result count = new Counter(this, files, this).call();
-        new Deleter(this, files, this, count.count).call();
+        Count.Result count = new Count(this, files, this).call();
+        new Delete(this, files, this, count.count).call();
 
       } catch (IOException e) {
         return e;

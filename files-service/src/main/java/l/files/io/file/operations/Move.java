@@ -9,11 +9,11 @@ import static com.google.common.collect.Sets.newHashSet;
  * Attempt to move files to their new destination, returns the ones that failed
  * to move.
  */
-public final class Mover extends Paster<Set<File>> {
+public final class Move extends Paste<Set<File>> {
 
   private final Set<File> failures;
 
-  public Mover(Cancellable listener, Iterable<File> sources, File destination) {
+  public Move(Cancellable listener, Iterable<File> sources, File destination) {
     super(listener, sources, destination);
     this.failures = newHashSet();
   }

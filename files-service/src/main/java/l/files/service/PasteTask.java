@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-import l.files.io.file.operations.Copier;
-import l.files.io.file.operations.Counter;
+import l.files.io.file.operations.Copy;
+import l.files.io.file.operations.Count;
 
 import static android.os.SystemClock.elapsedRealtime;
 import static l.files.service.PasteType.COPY;
@@ -17,7 +17,7 @@ import static l.files.service.Util.showErrorMessage;
 
 abstract class PasteTask
     extends ProgressService.Task<Object, Progress, IOException>
-    implements Counter.Listener, Copier.Listener {
+    implements Count.Listener, Copy.Listener {
 
   private static final Map<PasteType, Integer> ICONS = ImmutableMap.of(
       CUT, R.drawable.ic_stat_notify_cut,

@@ -7,10 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import l.files.io.file.operations.Copier;
-import l.files.io.file.operations.Counter;
-import l.files.io.file.operations.Deleter;
-import l.files.io.file.operations.Mover;
+import l.files.io.file.operations.Copy;
+import l.files.io.file.operations.Count;
+import l.files.io.file.operations.Delete;
+import l.files.io.file.operations.Move;
 
 import static l.files.io.file.Files.toAbsolutePaths;
 import static l.files.io.file.Files.toFilesSet;
@@ -40,7 +40,7 @@ public final class MoveService extends ProgressService {
   }
 
 
-  private final class CutTask extends PasteTask implements Deleter.Listener {
+  private final class CutTask extends PasteTask implements Delete.Listener {
 
     CutTask(int id, Set<File> src, File dst) {
       super(id, MoveService.this, CUT, src, dst);
@@ -48,11 +48,11 @@ public final class MoveService extends ProgressService {
 
     @Override protected IOException doTask() {
       try {
-        Set<File> files = new Mover(this, src, dst).call();
+        Set<File> files = new Move(this, src, dst).call();
         if (!files.isEmpty()) {
-          Counter.Result result = new Counter(this, files, this).call();
-          new Copier(this, files, dst, this, result.count, result.length).call();
-          new Deleter(this, files, this, result.count).call();
+          Count.Result result = new Count(this, files, this).call();
+          new Copy(this, files, dst, this, result.count, result.length).call();
+          new Delete(this, files, this, result.count).call();
         }
       } catch (IOException e) {
         return e;

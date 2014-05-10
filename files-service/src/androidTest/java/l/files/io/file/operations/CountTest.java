@@ -9,10 +9,10 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
-import static l.files.io.file.operations.Counter.Listener;
-import static l.files.io.file.operations.Counter.Result;
+import static l.files.io.file.operations.Count.Listener;
+import static l.files.io.file.operations.Count.Result;
 
-public final class CounterTest extends FileBaseTest {
+public final class CountTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
     @Override public void onFileCounted(int count, long length) {}
@@ -32,6 +32,6 @@ public final class CounterTest extends FileBaseTest {
   }
 
   private Result count(File file) throws IOException {
-    return new Counter(NO_CANCEL, asList(file), NULL_LISTENER).call();
+    return new Count(NO_CANCEL, asList(file), NULL_LISTENER).call();
   }
 }
