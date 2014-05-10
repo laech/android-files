@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
+import l.files.io.file.operations.Copier;
+import l.files.io.file.operations.Counter;
+
 import static android.os.SystemClock.elapsedRealtime;
 import static l.files.service.PasteType.COPY;
 import static l.files.service.PasteType.CUT;

@@ -3,15 +3,14 @@ package l.files.service;
 import android.content.Context;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import l.files.analytics.Analytics;
+import l.files.io.file.operations.NoReadException;
+import l.files.io.file.operations.NoWriteException;
 
 import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.makeText;
-import static java.util.Arrays.asList;
 
 final class Util {
 
@@ -44,14 +43,6 @@ final class Util {
 
   private static String getUnknownErrorMessage(Context context) {
     return context.getString(R.string.unknown_operation_error);
-  }
-
-  public static List<File> listDirectoryChildren(File dir) throws NoReadException {
-    File[] children = dir.listFiles();
-    if (children == null) {
-      throw new NoReadException(dir);
-    }
-    return asList(children);
   }
 
   private Util() {}

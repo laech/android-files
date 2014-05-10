@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -10,14 +10,14 @@ import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static l.files.service.Util.listDirectoryChildren;
+import static l.files.io.file.operations.Operations.listDirectoryChildren;
 import static org.apache.commons.io.FileUtils.isSymlink;
 
 /**
  * Traverses a set of root files in a breath first manner. Ignores any
  * symlinks.
  */
-abstract class Traverser<V> implements Callable<V> {
+public abstract class Traverser<V> implements Callable<V> {
 
   private final Set<File> roots;
   private final Cancellable listener;

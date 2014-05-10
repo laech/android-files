@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,8 +7,8 @@ import l.files.common.testing.BaseTest;
 import l.files.common.testing.TempDir;
 
 import static java.util.Arrays.asList;
-import static l.files.service.Cancellables.NO_CANCEL;
-import static l.files.service.Deleter.Listener;
+import static l.files.io.file.operations.Cancellables.NO_CANCEL;
+import static l.files.io.file.operations.Deleter.Listener;
 
 public final class DeleterTest extends BaseTest {
 

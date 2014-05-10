@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import android.util.Log;
 
@@ -14,12 +14,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.singletonList;
 import static l.files.io.file.Files.replace;
+import static l.files.io.file.operations.Operations.listDirectoryChildren;
 import static l.files.service.BuildConfig.DEBUG;
-import static l.files.service.Util.listDirectoryChildren;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-final class Copier extends Paster<Void> {
+public final class Copier extends Paster<Void> {
 
   /*
    * Setting last modified time currently fails, see:
@@ -46,7 +46,7 @@ final class Copier extends Paster<Void> {
   private int remaining;
   private long bytesCopied;
 
-  Copier(
+  public Copier(
       Cancellable cancellable,
       Iterable<File> sources,
       File destination,
@@ -166,7 +166,7 @@ final class Copier extends Paster<Void> {
     listener.onCopied(remaining, bytesCopied, bytesTotal);
   }
 
-  static interface Listener {
+  public static interface Listener {
     void onCopied(int remaining, long bytesCopied, long bytesTotal);
   }
 }

@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import java.io.File;
  */
 public class NoReadException extends FileException {
 
-  NoReadException(File file) {
+  public NoReadException(File file) {
     super(file);
   }
 }

@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,14 +8,14 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 
-final class Deleter extends Traverser<Void> {
+public final class Deleter extends Traverser<Void> {
 
   private final List<File> directories;
   private final Listener listener;
   private final int total;
   private int remaining;
 
-  Deleter(
+  public Deleter(
       Cancellable cancellable,
       Iterable<File> files,
       Listener listener,
@@ -54,7 +54,7 @@ final class Deleter extends Traverser<Void> {
     }
   }
 
-  static interface Listener {
+  public static interface Listener {
     void onFileDeleted(int total, int remaining);
   }
 }

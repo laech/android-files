@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +9,9 @@ import l.files.common.testing.TempDir;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
-import static l.files.service.Cancellables.NO_CANCEL;
-import static l.files.service.Counter.Listener;
-import static l.files.service.Counter.Result;
+import static l.files.io.file.operations.Cancellables.NO_CANCEL;
+import static l.files.io.file.operations.Counter.Listener;
+import static l.files.io.file.operations.Counter.Result;
 
 public final class CounterTest extends BaseTest {
 

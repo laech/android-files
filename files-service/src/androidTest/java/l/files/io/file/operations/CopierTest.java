@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import com.google.common.io.Files;
 
@@ -8,8 +8,8 @@ import java.io.IOException;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
-import static l.files.service.Cancellables.NO_CANCEL;
-import static l.files.service.Copier.Listener;
+import static l.files.io.file.operations.Cancellables.NO_CANCEL;
+import static l.files.io.file.operations.Copier.Listener;
 
 public final class CopierTest extends PasterTest {
 

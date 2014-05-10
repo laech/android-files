@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -11,13 +11,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Files.getNonExistentDestinationFile;
 import static l.files.io.file.Files.isAncestorOrSelf;
 
-abstract class Paster<T> implements Callable<T> {
+public abstract class Paster<T> implements Callable<T> {
 
   private final Cancellable cancellable;
   private final Set<File> sources;
   private final File destination;
 
-  Paster(Cancellable cancellable, Iterable<File> sources, File destination) {
+  public Paster(Cancellable cancellable, Iterable<File> sources, File destination) {
     this.cancellable = checkNotNull(cancellable, "cancellable");
     this.destination = checkNotNull(destination, "destination");
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));

@@ -1,4 +1,4 @@
-package l.files.service;
+package l.files.io.file.operations;
 
 import java.io.File;
 import java.util.List;
@@ -9,8 +9,8 @@ import l.files.common.testing.TempDir;
 import static android.test.MoreAsserts.assertEmpty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.service.Cancellables.CANCELLED;
-import static l.files.service.Cancellables.NO_CANCEL;
+import static l.files.io.file.operations.Cancellables.CANCELLED;
+import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 
 public abstract class PasterTest extends BaseTest {
 

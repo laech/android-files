@@ -14,6 +14,8 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.SparseArray;
 
+import l.files.io.file.operations.Cancellable;
+
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
 import static l.files.common.app.SystemServices.getNotificationManager;

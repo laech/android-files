@@ -7,6 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import l.files.io.file.operations.Copier;
+import l.files.io.file.operations.Counter;
+import l.files.io.file.operations.Deleter;
+import l.files.io.file.operations.Mover;
+
 import static l.files.io.file.Files.toAbsolutePaths;
 import static l.files.io.file.Files.toFilesSet;
 import static l.files.service.PasteType.CUT;
