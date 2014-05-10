@@ -3,33 +3,20 @@ package l.files.io.file.operations;
 import java.io.File;
 import java.io.IOException;
 
-import l.files.common.testing.BaseTest;
-import l.files.common.testing.TempDir;
+import l.files.common.testing.FileBaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 import static l.files.io.file.operations.Deleter.Listener;
 
-public final class DeleterTest extends BaseTest {
+public final class DeleterTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
     @Override public void onFileDeleted(int total, int remaining) {}
   };
 
-  private TempDir tempDir;
-
-  @Override protected void setUp() throws Exception {
-    super.setUp();
-    tempDir = TempDir.create();
-  }
-
-  @Override protected void tearDown() throws Exception {
-    tempDir.delete();
-    super.tearDown();
-  }
-
   public void testDeletesFile() throws Exception {
-    File file = tempDir.newFile("a");
+    File file = tmp().createFile("a");
     assertTrue(file.exists());
 
     delete(file);
@@ -37,8 +24,8 @@ public final class DeleterTest extends BaseTest {
   }
 
   public void testDeletesNonEmptyDirectory() throws Exception {
-    File dir = tempDir.newDirectory("a");
-    File file = tempDir.newFile("a/child.txt");
+    File dir = tmp().createDir("a");
+    File file = tmp().createFile("a/child.txt");
     assertTrue(dir.exists());
     assertTrue(file.exists());
 
@@ -48,7 +35,7 @@ public final class DeleterTest extends BaseTest {
   }
 
   public void testDeletesEmptyDirectory() throws Exception {
-    File dir = tempDir.newDirectory();
+    File dir = tmp().createDir("a");
     assertTrue(dir.exists());
 
     delete(dir);

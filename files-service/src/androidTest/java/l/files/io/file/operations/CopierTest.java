@@ -19,8 +19,8 @@ public final class CopierTest extends PasterTest {
   };
 
   public void testCopiesDirectory() throws Exception {
-    File srcDir = tempDir.newDirectory("a");
-    File dstDir = tempDir.newDirectory("dst");
+    File srcDir = tmp().createDir("a");
+    File dstDir = tmp().createDir("dst");
     File srcFile = new File(srcDir, "test.txt");
     File dstFile = new File(dstDir, "a/test.txt");
     write("Testing", srcFile, UTF_8);
@@ -31,8 +31,8 @@ public final class CopierTest extends PasterTest {
   }
 
   public void testCopiesFile() throws Exception {
-    File srcFile = tempDir.newFile("test.txt");
-    File dstDir = tempDir.newDirectory("dst");
+    File srcFile = tmp().createFile("test.txt");
+    File dstDir = tmp().createDir("dst");
     File dstFile = new File(dstDir, "test.txt");
     write("Testing", srcFile, UTF_8);
 

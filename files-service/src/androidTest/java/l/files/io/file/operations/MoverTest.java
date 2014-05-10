@@ -12,8 +12,8 @@ import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 public final class MoverTest extends PasterTest {
 
   public void testMovesFile() throws Exception {
-    File srcFile = tempDir.newFile("a.txt");
-    File dstDir = tempDir.newDirectory("dst");
+    File srcFile = tmp().createFile("a.txt");
+    File dstDir = tmp().createDir("dst");
     File dstFile = new File(dstDir, "a.txt");
     write("Test", srcFile, UTF_8);
 
@@ -24,8 +24,8 @@ public final class MoverTest extends PasterTest {
   }
 
   public void testMovesDirectory() throws Exception {
-    File srcDir = tempDir.newDirectory("a");
-    File dstDir = tempDir.newDirectory("dst");
+    File srcDir = tmp().createDir("a");
+    File dstDir = tmp().createDir("dst");
     File srcFile = new File(srcDir, "test.txt");
     File dstFile = new File(dstDir, "a/test.txt");
     write("Test", srcFile, UTF_8);

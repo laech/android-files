@@ -84,6 +84,7 @@ public final class TempDir {
     return new File(get(), path);
   }
 
+  @Deprecated
   public List<File> newFiles(String... names) {
     List<File> files = new ArrayList<>(names.length);
     for (String name : names) {
@@ -92,6 +93,7 @@ public final class TempDir {
     return files;
   }
 
+  @Deprecated
   public File newFile() {
     return newFile(String.valueOf(nanoTime()));
   }
@@ -129,6 +131,7 @@ public final class TempDir {
     }
   }
 
+  @Deprecated
   public File newDirectory() {
     return newDirectory(String.valueOf(nanoTime()));
   }
