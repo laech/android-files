@@ -10,12 +10,12 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.Queue;
 
+import l.files.io.file.Files;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.singletonList;
-import static l.files.io.file.Files.replace;
 import static l.files.io.file.operations.Operations.listDirectoryChildren;
-import static l.files.service.BuildConfig.DEBUG;
 import static org.apache.commons.io.FileUtils.isSymlink;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -75,7 +75,7 @@ public final class Copy extends Paste<Void> {
         continue;
       }
 
-      File dst = replace(file, from, to);
+      File dst = Files.replace(file, from, to);
       if (file.isDirectory()) {
         queue.addAll(listDirectoryChildren(file));
         createDirectory(dst);
@@ -121,7 +121,7 @@ public final class Copy extends Paste<Void> {
         pos = onCopy(input, output, size, pos);
       }
     } catch (ClosedByInterruptException e) {
-      if (!dstFile.delete() && DEBUG) {
+      if (!dstFile.delete() && BuildConfig.DEBUG) {
         Log.d(TAG, "Failed to delete file on cancel: " + dstFile);
       }
     } finally {
@@ -147,7 +147,7 @@ public final class Copy extends Paste<Void> {
   private void onCopyFinished(File srcFile, File dstFile) throws IOException {
     if (srcFile.length() != dstFile.length()) {
       if (isCancelled()) {
-        if (!dstFile.delete() && DEBUG) {
+        if (!dstFile.delete() && BuildConfig.DEBUG) {
           Log.d(TAG, "Failed to delete file on cancel: " + dstFile);
         }
         return;
@@ -157,7 +157,7 @@ public final class Copy extends Paste<Void> {
       }
     }
     if (!dstFile.setLastModified(srcFile.lastModified())) {
-      if (DEBUG) {
+      if (BuildConfig.DEBUG) {
         Log.d(TAG, "Failed to set last modified date on " + dstFile);
       }
     }

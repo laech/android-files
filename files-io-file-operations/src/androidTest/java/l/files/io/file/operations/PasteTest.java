@@ -1,5 +1,7 @@
 package l.files.io.file.operations;
 
+import junit.framework.Assert;
+
 import java.io.File;
 import java.util.List;
 
@@ -21,7 +23,7 @@ public abstract class PasteTest extends FileBaseTest {
     File src = tmp().createDir("empty");
     File dstDir = tmp().createDir("dst");
     create(NO_CANCEL, asList(src), dstDir).call();
-    assertTrue(new File(dstDir, src.getName()).exists());
+    Assert.assertTrue(new File(dstDir, src.getName()).exists());
   }
 
   /**
@@ -38,10 +40,10 @@ public abstract class PasteTest extends FileBaseTest {
     tmp().createFile("1/b.mp4");
     File dstDir = new File(tmp().get(), "1");
     create(NO_CANCEL, sources, dstDir).call();
-    assertTrue(new File(tmp().get(), "1/a.txt").exists());
-    assertTrue(new File(tmp().get(), "1/b.mp4").exists());
-    assertTrue(new File(tmp().get(), "1/a 2.txt").exists());
-    assertTrue(new File(tmp().get(), "1/b 2.mp4").exists());
+    Assert.assertTrue(new File(tmp().get(), "1/a.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "1/b.mp4").exists());
+    Assert.assertTrue(new File(tmp().get(), "1/a 2.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "1/b 2.mp4").exists());
   }
 
   /**
@@ -57,10 +59,10 @@ public abstract class PasteTest extends FileBaseTest {
     List<File> sources = asList(new File(tmp().get(), "a"));
     File dstDir = new File(tmp().get(), "b");
     create(NO_CANCEL, sources, dstDir).call();
-    assertTrue(new File(tmp().get(), "b/a/1.txt").exists());
-    assertTrue(new File(tmp().get(), "b/a 2/1.txt").exists());
-    assertTrue(new File(tmp().get(), "b/a 2/b/2.txt").exists());
-    assertTrue(new File(tmp().get(), "b/a 2/b/3.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "b/a/1.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "b/a 2/1.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "b/a 2/b/2.txt").exists());
+    Assert.assertTrue(new File(tmp().get(), "b/a 2/b/3.txt").exists());
   }
 
   public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
@@ -82,7 +84,7 @@ public abstract class PasteTest extends FileBaseTest {
     File child = tmp().createDir("parent/child");
     try {
       create(NO_CANCEL, singleton(parent), child).call();
-      fail();
+      Assert.fail();
     } catch (CannotPasteIntoSelfException pass) {
       // Pass
     }

@@ -1,5 +1,7 @@
 package l.files.io.file.operations;
 
+import junit.framework.Assert;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -17,29 +19,29 @@ public final class DeleteTest extends FileBaseTest {
 
   public void testDeletesFile() throws Exception {
     File file = tmp().createFile("a");
-    assertTrue(file.exists());
+    Assert.assertTrue(file.exists());
 
     delete(file);
-    assertFalse(file.exists());
+    Assert.assertFalse(file.exists());
   }
 
   public void testDeletesNonEmptyDirectory() throws Exception {
     File dir = tmp().createDir("a");
     File file = tmp().createFile("a/child.txt");
-    assertTrue(dir.exists());
-    assertTrue(file.exists());
+    Assert.assertTrue(dir.exists());
+    Assert.assertTrue(file.exists());
 
     delete(dir);
-    assertFalse(file.exists());
-    assertFalse(dir.exists());
+    Assert.assertFalse(file.exists());
+    Assert.assertFalse(dir.exists());
   }
 
   public void testDeletesEmptyDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertTrue(dir.exists());
+    Assert.assertTrue(dir.exists());
 
     delete(dir);
-    assertFalse(dir.exists());
+    Assert.assertFalse(dir.exists());
   }
 
   private void delete(File file) throws IOException {

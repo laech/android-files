@@ -4,9 +4,11 @@ buildscript {
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:0.9.+'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
   }
 }
 apply plugin: 'android-library'
+apply plugin: 'android-apt'
 
 repositories {
   mavenCentral()
@@ -14,11 +16,13 @@ repositories {
 
 android {
   compileSdkVersion 19
-  buildToolsVersion "19.0.3"
+  buildToolsVersion '19.0.3'
 
   defaultConfig {
     minSdkVersion 14
     targetSdkVersion 19
+    versionCode 1
+    versionName '1.0'
   }
 
   compileOptions {
@@ -33,8 +37,6 @@ android {
 
 dependencies {
   compile project(':files-io-file')
-  compile project(':files-io-file-operations')
-  compile project(':files-analytics') // TODO should use analytics on UI only
   compile project.libs.guava
 
   androidTestCompile project(':files-common-testing')

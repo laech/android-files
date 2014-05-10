@@ -2,6 +2,8 @@ package l.files.io.file.operations;
 
 import com.google.common.io.Files;
 
+import junit.framework.Assert;
+
 import java.io.File;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -19,7 +21,7 @@ public final class MoveTest extends PasteTest {
 
     create(NO_CANCEL, asList(srcFile), dstDir).call();
 
-    assertFalse(srcFile.exists());
+    Assert.assertFalse(srcFile.exists());
     assertEquals("Test", Files.toString(dstFile, UTF_8));
   }
 
@@ -32,7 +34,7 @@ public final class MoveTest extends PasteTest {
 
     create(NO_CANCEL, asList(srcDir), dstDir).call();
 
-    assertFalse(srcDir.exists());
+    Assert.assertFalse(srcDir.exists());
     assertEquals("Test", Files.toString(dstFile, UTF_8));
   }
 

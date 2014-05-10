@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import l.files.io.file.Files;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.file.Files.getNonExistentDestinationFile;
-import static l.files.io.file.Files.isAncestorOrSelf;
 
 public abstract class Paste<T> implements Callable<T> {
 
@@ -37,11 +37,11 @@ public abstract class Paste<T> implements Callable<T> {
       if (!destination.canWrite()) {
         throw new NoWriteException(destination);
       }
-      if (isAncestorOrSelf(destination, from)) {
+      if (Files.isAncestorOrSelf(destination, from)) {
         throw new CannotPasteIntoSelfException("Cannot paste directory "
             + from + " into its own sub directory " + destination);
       }
-      File to = getNonExistentDestinationFile(from, destination);
+      File to = Files.getNonExistentDestinationFile(from, destination);
       paste(from, to);
     }
 
