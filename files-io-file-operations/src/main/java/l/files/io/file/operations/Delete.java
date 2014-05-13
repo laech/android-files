@@ -10,6 +10,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 
 public final class Delete extends Traverser<Void> {
 
+  // TODO handle delete of symlink, File.delete will remove the file referenced
+  // by the link instead of deleting the link itself!
+
   private final List<File> directories;
   private final Listener listener;
   private final int total;
