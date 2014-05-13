@@ -37,6 +37,8 @@ import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
 
 public final class FilesProviderTest extends FileBaseTest {
 
+  // TODO test query symlink should return details about the link, not the reference
+
   public void testQueryFile() {
     tmp().createFile("a");
     verify();
