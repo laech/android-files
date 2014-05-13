@@ -1,6 +1,8 @@
 package l.files.io.os;
 
-public final class ErrnoException extends Exception {
+import java.io.IOException;
+
+public final class ErrnoException extends IOException {
 
   public static final int EPERM = 1;
   public static final int ENOENT = 2;

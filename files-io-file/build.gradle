@@ -36,6 +36,7 @@ android {
 }
 
 dependencies {
+  compile project(':files-io-os')
   compile project.libs.auto_value
   compile project.libs.commons_io
 
