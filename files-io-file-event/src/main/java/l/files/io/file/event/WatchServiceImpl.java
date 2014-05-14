@@ -5,6 +5,7 @@ import android.os.FileObserver;
 import com.google.common.base.Supplier;
 import com.google.common.collect.SetMultimap;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,11 +13,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.io.file.DirectoryIteratorException;
+import l.files.io.file.DirectoryStream;
 import l.files.io.file.Path;
-import l.files.logging.Logger;
-import l.files.io.os.Dirent;
 import l.files.io.os.ErrnoException;
 import l.files.io.os.Stat;
+import l.files.io.os.Unistd;
+import l.files.logging.Logger;
 
 import static android.os.FileObserver.ATTRIB;
 import static android.os.FileObserver.CLOSE_WRITE;
@@ -32,11 +35,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
 import static l.files.io.file.event.PathObserver.IN_IGNORED;
 import static l.files.io.file.event.WatchEvent.Kind;
-import static l.files.io.os.Dirent.closedir;
-import static l.files.io.os.Dirent.opendir;
-import static l.files.io.os.Dirent.readdir;
+import static l.files.io.os.Stat.S_ISDIR;
 
 final class WatchServiceImpl extends WatchService {
 
@@ -300,7 +302,7 @@ final class WatchServiceImpl extends WatchService {
 
     try {
       startObserversForSubDirs(path);
-    } catch (ErrnoException e) {
+    } catch (IOException e) {
       throw new WatchException("Failed to read content of " + path, e);
     }
   }
@@ -327,7 +329,7 @@ final class WatchServiceImpl extends WatchService {
     }
   }
 
-  private void startObserversForSubDirs(Path parent) throws ErrnoException {
+  private void startObserversForSubDirs(Path parent) throws IOException {
 
     /*
      * Using readdir() on the directory and check the child's type will be
@@ -335,29 +337,20 @@ final class WatchServiceImpl extends WatchService {
      * especially if the directory is large.
      */
 
-    long dir = opendir(parent.toString());
+    DirectoryStream stream = DirectoryStream.open(parent.toString());
     try {
 
-      while (true) {
-        try {
-          Dirent entry = readdir(dir);
-          if (entry == null) {
-            break;
-          }
-          if (!entry.name().equals(".") &&
-              !entry.name().equals("..") &&
-              entry.type() == Dirent.DT_DIR) {
-            Path path = parent.child(entry.name());
-            startObserver(path, Node.from(stat(path.toString())));
-          }
-        } catch (ErrnoException e) {
-          // Ignore this entry and carry on
-          logger.warn(e);
+      for (DirectoryStream.Entry entry : stream) {
+        if (entry.type() == TYPE_DIR) {
+          Path path = parent.child(entry.name());
+          startObserver(path, Node.from(stat(path.toString())));
         }
       }
 
+    } catch (DirectoryIteratorException e) {
+      throw new IOException(e);
     } finally {
-      closedir(dir);
+      stream.close();
     }
   }
 
@@ -424,18 +417,27 @@ final class WatchServiceImpl extends WatchService {
   }
 
   private void onCreate(Path path) {
-    if (path.toFile().isDirectory() && isMonitored(path.parent())) {
-      try {
-        startObserver(path, Node.from(stat(path.toString())));
-      } catch (ErrnoException e) {
-        // Path no longer exists, permission etc, ignore and continue
-        logger.warn(e, "Failed to stat %s", path);
+    // TODO use higher level API
+    try {
+      Stat stat = stat(path.toString());
+      if (S_ISDIR(stat.mode) && isMonitored(path.parent())) {
+        startObserver(path, Node.from(stat));
       }
+    } catch (ErrnoException e) {
+      // Path no longer exists, permission etc, ignore and continue
+      logger.warn(e, "Failed to stat %s", path);
     }
   }
 
   private void onDelete(Path path) {
-    if (!path.toFile().exists()) {
+    // TODO use higher level API
+    boolean exists;
+    try {
+      exists = Unistd.access(path.toString(), Unistd.F_OK);
+    } catch (ErrnoException e) {
+      exists = false;
+    }
+    if (!exists) {
       synchronized (this) {
         removePath(path);
       }

@@ -46,6 +46,7 @@ public abstract class Path {
     return from(new File(path));
   }
 
+  @Deprecated
   public File toFile() {
     return new File(path());
   }
