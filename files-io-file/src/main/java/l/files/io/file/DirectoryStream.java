@@ -14,6 +14,16 @@ import static l.files.io.os.Dirent.closedir;
 import static l.files.io.os.Dirent.opendir;
 import static l.files.io.os.Dirent.readdir;
 
+/**
+ * A stream to iterate through the children of a directory.
+ * <p/>
+ * {@link #iterator()} can only called once. Each call to the returned iterator
+ * {@link Iterator#hasNext() hasNext()} and {@link Iterator#next() next()} will
+ * throw an {@link DirectoryIteratorException} if an error was encountered while
+ * reading the next child.
+ * <p/>
+ * An instance must be closed when no longer needed.
+ */
 public final class DirectoryStream
     implements Iterable<DirectoryStream.Entry>, Closeable {
 
