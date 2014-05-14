@@ -15,10 +15,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.io.file.DirectoryIteratorException;
 import l.files.io.file.DirectoryStream;
+import l.files.io.file.FileInfo;
 import l.files.io.file.Path;
-import l.files.io.os.ErrnoException;
-import l.files.io.os.Stat;
-import l.files.io.os.Unistd;
 import l.files.logging.Logger;
 
 import static android.os.FileObserver.ATTRIB;
@@ -38,7 +36,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
 import static l.files.io.file.event.PathObserver.IN_IGNORED;
 import static l.files.io.file.event.WatchEvent.Kind;
-import static l.files.io.os.Stat.S_ISDIR;
 
 final class WatchServiceImpl extends WatchService {
 
@@ -287,8 +284,8 @@ final class WatchServiceImpl extends WatchService {
   private void monitor(Path path) {
     Node node;
     try {
-      node = Node.from(stat(path.toString()));
-    } catch (ErrnoException e) {
+      node = Node.from(FileInfo.get(path.toString()));
+    } catch (IOException e) {
       throw new WatchException("Failed to stat " + path, e);
     }
 
@@ -343,7 +340,11 @@ final class WatchServiceImpl extends WatchService {
       for (DirectoryStream.Entry entry : stream) {
         if (entry.type() == TYPE_DIR) {
           Path path = parent.child(entry.name());
-          startObserver(path, Node.from(stat(path.toString())));
+          try {
+            startObserver(path, Node.from(FileInfo.get(path.toString())));
+          } catch (IOException e) {
+            // File no longer exits or inaccessible, ignore;
+          }
         }
       }
 
@@ -409,35 +410,26 @@ final class WatchServiceImpl extends WatchService {
     }
   }
 
-  private Stat stat(String path) throws ErrnoException {
-    // Use stat() instead of lstat() as stat()
-    // lstat() returns the inode of the link
-    // stat() returns the inode of the referenced file/directory
-    return Stat.stat(path);
-  }
-
   private void onCreate(Path path) {
-    // TODO use higher level API
     try {
-      Stat stat = stat(path.toString());
-      if (S_ISDIR(stat.mode) && isMonitored(path.parent())) {
-        startObserver(path, Node.from(stat));
+      FileInfo file = FileInfo.get(path.toString());
+      if (file.isDirectory() && isMonitored(path.parent())) {
+        startObserver(path, Node.from(file));
       }
-    } catch (ErrnoException e) {
+    } catch (IOException e) {
       // Path no longer exists, permission etc, ignore and continue
       logger.warn(e, "Failed to stat %s", path);
     }
   }
 
   private void onDelete(Path path) {
-    // TODO use higher level API
-    boolean exists;
+    boolean accessible;
     try {
-      exists = Unistd.access(path.toString(), Unistd.F_OK);
-    } catch (ErrnoException e) {
-      exists = false;
+      accessible = FileInfo.exists(path.toString());
+    } catch (IOException e) {
+      accessible = false;
     }
-    if (!exists) {
+    if (!accessible) {
       synchronized (this) {
         removePath(path);
       }

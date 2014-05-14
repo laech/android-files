@@ -2,7 +2,7 @@ package l.files.io.file.event;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.io.os.Stat;
+import l.files.io.file.FileInfo;
 
 /**
  * inode numbers are not unique across devices, this class exists to facilitate
@@ -12,8 +12,8 @@ import l.files.io.os.Stat;
 abstract class Node {
   Node() {}
 
-  public static Node from(Stat stat) {
-    return new AutoValue_Node(stat.dev, stat.ino);
+  public static Node from(FileInfo file) {
+    return new AutoValue_Node(file.dev(), file.ino());
   }
 
   public abstract long dev();

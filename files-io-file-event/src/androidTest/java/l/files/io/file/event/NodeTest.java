@@ -1,17 +1,15 @@
 package l.files.io.file.event;
 
-import junit.framework.TestCase;
+import l.files.common.testing.FileBaseTest;
+import l.files.io.file.FileInfo;
 
-import l.files.io.os.Stat;
+public final class NodeTest extends FileBaseTest {
 
-public final class NodeTest extends TestCase {
-
-  public void testCreation() {
-    long dev = 1;
-    long ino = 2;
-    Stat stat = new Stat(dev, ino, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    Node node = Node.from(stat);
-    assertEquals(dev, node.dev());
-    assertEquals(ino, node.ino());
+  public void testCreation() throws Exception {
+    String path = tmp().get().getPath();
+    FileInfo file = FileInfo.get(path);
+    Node node = Node.from(file);
+    assertEquals(file.dev(), node.dev());
+    assertEquals(file.ino(), node.ino());
   }
 }

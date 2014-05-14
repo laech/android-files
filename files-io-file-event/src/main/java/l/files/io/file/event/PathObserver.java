@@ -7,20 +7,19 @@ import android.os.Message;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import l.files.io.file.FileInfo;
 import l.files.io.file.Path;
 import l.files.logging.Logger;
-import l.files.io.os.ErrnoException;
-import l.files.io.os.Stat;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.io.os.Stat.stat;
 
 final class PathObserver extends FileObserver {
 
@@ -190,12 +189,12 @@ final class PathObserver extends FileObserver {
   private void checkNode() {
     try {
 
-      Stat stat = stat(this.path.toString());
-      if (!Node.from(stat).equals(node)) {
+      FileInfo file = FileInfo.get(this.path.toString());
+      if (!Node.from(file).equals(node)) {
         stopWatching();
       }
 
-    } catch (ErrnoException e) {
+    } catch (IOException e) {
       stopWatching();
     }
   }
