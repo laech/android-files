@@ -1,6 +1,12 @@
 package l.files.io.os;
 
+import android.util.SparseArray;
+
 import java.io.IOException;
+import java.lang.reflect.Field;
+
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
 
 public final class ErrnoException extends IOException {
 
@@ -136,14 +142,36 @@ public final class ErrnoException extends IOException {
   public static final int EOWNERDEAD = 130;
   public static final int ENOTRECOVERABLE = 131;
 
+  private static final SparseArray<String> ERROR_NAMES_BY_VALUE;
+
+  static {
+    ERROR_NAMES_BY_VALUE = mapErrorNamesByValue();
+  }
+
   private final int errno;
 
   public ErrnoException(int errno, String msg) {
-    super(msg);
+    super(ERROR_NAMES_BY_VALUE.get(errno) + ": " + msg);
     this.errno = errno;
   }
 
   public int errno() {
     return errno;
+  }
+
+  private static SparseArray<String> mapErrorNamesByValue() {
+    Field[] fields = ErrnoException.class.getFields();
+    SparseArray<String> errors = new SparseArray<>(fields.length);
+    for (Field field : fields) {
+      int modifiers = field.getModifiers();
+      if (isPublic(modifiers) && isStatic(modifiers) && field.getType() == int.class) {
+        try {
+          errors.put(field.getInt(null), field.getName());
+        } catch (IllegalAccessException e) {
+          throw new AssertionError(e);
+        }
+      }
+    }
+    return errors;
   }
 }
