@@ -34,6 +34,9 @@ public final class DirectoryStream
     this.dir = dir;
   }
 
+  /**
+   * @throws IOException includes path is not accessible or doesn't exist
+   */
   public static DirectoryStream open(String path) throws IOException {
     long dir = opendir(path);
     return new DirectoryStream(dir);
