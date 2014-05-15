@@ -60,11 +60,11 @@ public abstract class FileInfo {
   }
 
   /**
-   * @param link path of the link itself
    * @param target path of the target file being linked to
+   * @param link path of the link itself
    */
-  public static void symlink(String link, String target) throws IOException {
-    Unistd.symlink(link, target);
+  public static void symlink(String target, String link) throws IOException {
+    Unistd.symlink(target, link);
   }
 
   /**
