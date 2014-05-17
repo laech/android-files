@@ -49,7 +49,7 @@ public final class Delete implements FileOperation {
       throw new CancellationException();
     }
     File file = new File(info.path());
-    if (!file.delete() && file.exists()) {
+    if (!file.delete() && file.exists()) { // TODO use something throw exception
       throw new NoWriteException(file);
     }
   }
