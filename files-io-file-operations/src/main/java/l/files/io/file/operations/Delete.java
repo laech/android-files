@@ -1,63 +1,68 @@
 package l.files.io.file.operations;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+
+import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.Thread.currentThread;
+import static java.util.Collections.unmodifiableList;
+import static l.files.io.file.operations.FileTraverser.postOrderTraversal;
 
-public final class Delete extends Traverser<Void> {
+public final class Delete implements FileOperation {
 
-  // TODO handle delete of symlink, File.delete will remove the file referenced
-  // by the link instead of deleting the link itself!
-
-  private final List<File> directories;
   private final Listener listener;
-  private final int total;
-  private int remaining;
+  private final Iterable<String> paths;
 
-  public Delete(
-      Cancellable cancellable,
-      Iterable<File> files,
-      Listener listener,
-      int remaining) {
-    super(cancellable, files);
+  public Delete(Listener listener, Iterable<String> paths) {
     this.listener = checkNotNull(listener, "listener");
-    this.total = remaining;
-    this.remaining = remaining;
-    this.directories = newLinkedList();
+    this.paths = ImmutableList.copyOf(paths);
   }
 
-  @Override protected void onFile(File file) throws IOException {
-    super.onFile(file);
-    if (file.delete() || !file.exists()) {
-      remaining--;
-      listener.onFileDeleted(total, remaining);
-    } else {
-      throw new NoWriteException(file.getParentFile());
+  @Override public List<Failure> call() {
+    List<Failure> failures = new ArrayList<>(0);
+    for (String path : paths) {
+      delete(path, failures);
+    }
+    return unmodifiableList(failures);
+  }
+
+  private void delete(String path, List<Failure> failures) {
+    Iterable<FileInfo> infos;
+    try {
+      infos = postOrderTraversal(path);
+    } catch (IOException e) {
+      failures.add(Failure.create(path, e));
+      return;
+    }
+
+    for (FileInfo info : infos) {
+      try {
+        delete(info);
+        listener.onDelete(info.path());
+      } catch (IOException e) {
+        failures.add(Failure.create(info.path(), e));
+      }
     }
   }
 
-  @Override protected void onDirectory(File dir) throws IOException {
-    super.onDirectory(dir);
-    directories.add(0, dir);
-  }
-
-  @Override protected void onFinish() throws IOException {
-    super.onFinish();
-    Iterator<File> it = directories.iterator();
-    while (it.hasNext()) {
-      File directory = it.next();
-      if (!directory.delete() && directory.exists()) {
-        throw new NoWriteException(directory.getParentFile());
-      }
-      it.remove();
+  private void delete(FileInfo info) throws IOException {
+    if (currentThread().isInterrupted()) {
+      throw new CancellationException();
+    }
+    File file = new File(info.path());
+    if (!file.delete() && file.exists()) {
+      throw new NoWriteException(file);
     }
   }
 
   public static interface Listener {
-    void onFileDeleted(int total, int remaining);
+    void onDelete(String path);
   }
 }

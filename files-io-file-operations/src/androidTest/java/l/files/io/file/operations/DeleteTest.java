@@ -1,65 +1,64 @@
 package l.files.io.file.operations;
 
-import junit.framework.Assert;
-
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
 
 import static java.util.Arrays.asList;
-import static l.files.io.file.operations.Cancellables.NO_CANCEL;
+import static l.files.io.file.FileInfo.symlink;
 import static l.files.io.file.operations.Delete.Listener;
+import static l.files.io.file.operations.FileOperation.Failure;
 
 public final class DeleteTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
-    @Override public void onFileDeleted(int total, int remaining) {}
+    @Override public void onDelete(String path) {}
   };
 
   public void testDeletesFile() throws Exception {
     File file = tmp().createFile("a");
-    Assert.assertTrue(file.exists());
-
     delete(file);
-    Assert.assertFalse(file.exists());
+    assertFalse(file.exists());
   }
 
   public void testDeletesNonEmptyDirectory() throws Exception {
     File dir = tmp().createDir("a");
     File file = tmp().createFile("a/child.txt");
-    Assert.assertTrue(dir.exists());
-    Assert.assertTrue(file.exists());
-
     delete(dir);
-    Assert.assertFalse(file.exists());
-    Assert.assertFalse(dir.exists());
+    assertFalse(file.exists());
+    assertFalse(dir.exists());
   }
 
   public void testDeletesEmptyDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    Assert.assertTrue(dir.exists());
-
     delete(dir);
-    Assert.assertFalse(dir.exists());
+    assertFalse(dir.exists());
   }
 
-  private void delete(File file) throws IOException {
-    create(NO_CANCEL, asList(file), NULL_LISTENER).call();
+  public void testDeletesSymbolicLinkButNotLinkedFile() throws Exception {
+    File a = tmp().createFile("a");
+    File b = tmp().get("b");
+    symlink(a.getPath(), b.getPath());
+    delete(b);
+    assertFalse(b.exists());
+    assertTrue(a.exists());
   }
 
-  private Delete create(
-      Cancellable cancellable,
-      Iterable<File> files,
-      Listener listener) {
-    return create(cancellable, files, listener, 0);
+  public void testReturnsFailures() throws Exception {
+    File a = tmp().createFile("a");
+    assertTrue(tmp().get().setWritable(false));
+
+    List<Failure> failures = delete(a);
+    assertEquals(a.getPath(), failures.get(0).path());
+    assertEquals(1, failures.size());
   }
 
-  private Delete create(
-      Cancellable cancellable,
-      Iterable<File> files,
-      Listener listener,
-      int remaining) {
-    return new Delete(cancellable, files, listener, remaining);
+  private List<Failure> delete(File file) throws Exception {
+    return create(NULL_LISTENER, asList(file.getPath())).call();
+  }
+
+  private Delete create(Listener listener, Iterable<String> paths) {
+    return new Delete(listener, paths);
   }
 }
