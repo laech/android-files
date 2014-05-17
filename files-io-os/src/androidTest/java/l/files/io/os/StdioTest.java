@@ -4,9 +4,32 @@ import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
 
+import static l.files.io.os.Stdio.remove;
 import static l.files.io.os.Stdio.rename;
 
 public final class StdioTest extends FileBaseTest {
+
+  public void testRemoveFile() throws Exception {
+    File file = tmp().createFile("a");
+    remove(file.getPath());
+    assertFalse(file.exists());
+  }
+
+  public void testRemoveEmptyDir() throws Exception {
+    File dir = tmp().createDir("a");
+    remove(dir.getPath());
+    assertFalse(dir.exists());
+  }
+
+  public void testRemoveNonEmptyDir() throws Exception {
+    File file = tmp().createFile("a/b");
+    try {
+      remove(file.getParent());
+      fail();
+    } catch (ErrnoException e) {
+      // Pass
+    }
+  }
 
   public void testRename() throws Exception {
     File a = tmp().createFile("a");

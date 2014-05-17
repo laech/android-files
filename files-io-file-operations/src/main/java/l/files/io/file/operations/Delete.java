@@ -2,7 +2,6 @@ package l.files.io.file.operations;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,7 @@ import l.files.io.file.FileInfo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.unmodifiableList;
+import static l.files.io.file.Files.remove;
 import static l.files.io.file.operations.FileTraverser.postOrderTraversal;
 
 public final class Delete implements FileOperation {
@@ -48,10 +48,7 @@ public final class Delete implements FileOperation {
     if (currentThread().isInterrupted()) {
       throw new CancellationException();
     }
-    File file = new File(info.path());
-    if (!file.delete() && file.exists()) { // TODO use something throw exception
-      throw new NoWriteException(file);
-    }
+    remove(info.path());
   }
 
   public static interface Listener {

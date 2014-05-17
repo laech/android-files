@@ -35,6 +35,10 @@ public final class Files {
     Stdio.rename(oldPath, newPath);
   }
 
+  public static void remove(String path) throws IOException {
+    Stdio.remove(path);
+  }
+
   /**
    * @param target path of the target file being linked to
    * @param link path of the link itself

@@ -13,3 +13,12 @@ void Java_l_files_io_os_Stdio_rename(JNIEnv *env, jclass clazz, jstring jold, js
     throw_errno_exception(env);
   }
 }
+
+void Java_l_files_io_os_Stdio_remove(JNIEnv *env, jclass clazz, jstring jpath) {
+  const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+  int result = TEMP_FAILURE_RETRY(remove(path));
+  (*env)->ReleaseStringUTFChars(env, jpath, path);
+  if (-1 == result) {
+    throw_errno_exception(env);
+  }
+}

@@ -10,4 +10,9 @@ public final class Stdio extends Native {
    * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/rename.html">rename()</a>
    */
   public static native void rename(String oldPath, String newPath) throws ErrnoException;
+
+  /**
+   * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/remove.html">remove()</a>
+   */
+  public static native void remove(String path) throws ErrnoException;
 }
