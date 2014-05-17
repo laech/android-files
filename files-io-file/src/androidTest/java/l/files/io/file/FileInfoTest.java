@@ -3,16 +3,10 @@ package l.files.io.file;
 import l.files.common.testing.FileBaseTest;
 import l.files.io.os.Stat;
 
-import static l.files.io.file.FileInfo.exists;
 import static l.files.io.os.Stat.lstat;
 import static l.files.io.os.Unistd.symlink;
 
 public final class FileInfoTest extends FileBaseTest {
-
-  public void testExistence() throws Exception {
-    assertFalse(exists("/abc/def/123"));
-    assertTrue(exists("/"));
-  }
 
   public void testGetsSymbolicLinkInfo() throws Exception {
     String a = tmp().createDir("a").getPath();

@@ -4,48 +4,53 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CancellationException;
 
 import l.files.io.file.Files;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Thread.currentThread;
+import static java.util.Collections.unmodifiableList;
+import static l.files.io.file.Files.isAncestorOrSelf;
 
-public abstract class Paste<T> implements Callable<T> {
+public abstract class Paste implements FileOperation {
 
-  private final Cancellable cancellable;
-  private final Set<File> sources;
-  private final File destination;
+  private final Iterable<String> sources;
+  private final String destination;
 
-  public Paste(Cancellable cancellable, Iterable<File> sources, File destination) {
-    this.cancellable = checkNotNull(cancellable, "cancellable");
-    this.destination = checkNotNull(destination, "destination");
+  public Paste(Iterable<String> sources, String dstDir) {
+    this.destination = checkNotNull(dstDir, "dstDir");
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
   }
 
-  @Override public final T call() throws IOException {
-    for (File from : sources) {
+  @Override public final List<Failure> call() {
+    List<Failure> failures = new ArrayList<>(0);
+    for (String from : sources) {
       if (isCancelled()) {
-        return null;
+        throw new CancellationException();
       }
-      // if (!from.exists()) {
-      // TODO Continue or not exists exception?
-      // }
-      if (!from.canRead()) {
-        throw new NoReadException(from);
-      }
-      if (!destination.canWrite()) {
-        throw new NoWriteException(destination);
-      }
-      if (Files.isAncestorOrSelf(destination, from)) {
-        throw new CannotPasteIntoSelfException("Cannot paste directory "
-            + from + " into its own sub directory " + destination);
-      }
-      File to = Files.getNonExistentDestinationFile(from, destination);
-      paste(from, to);
-    }
 
-    return getResult();
+      File destinationFile = new File(destination);
+      File fromFile = new File(from);
+      try {
+        if (isAncestorOrSelf(destinationFile, fromFile)) {
+          throw new CannotPasteIntoSelfException(
+              "Cannot paste directory " + from +
+                  " into its own sub directory " + destination
+          );
+        }
+      } catch (IOException e) {
+        failures.add(Failure.create(from, e));
+        continue;
+      }
+
+      File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
+      paste(from, to.getPath(), failures);
+    }
+    return unmodifiableList(failures);
   }
 
   /**
@@ -53,14 +58,9 @@ public abstract class Paste<T> implements Callable<T> {
    * content into {@code to}. If {@code from} is a directory, paste its content
    * into {@code to}.
    */
-  protected abstract void paste(File from, File to) throws IOException;
-
-  /**
-   * Returns the result of executing {@link #call()}.
-   */
-  protected T getResult() {return null;}
+  protected abstract void paste(String from, String to, Collection<Failure> failures);
 
   protected final boolean isCancelled() {
-    return cancellable.isCancelled();
+    return currentThread().isInterrupted();
   }
 }

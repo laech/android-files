@@ -7,7 +7,7 @@ import l.files.common.testing.FileBaseTest;
 import l.files.io.file.FileInfo;
 
 import static java.util.Arrays.asList;
-import static l.files.io.file.FileInfo.symlink;
+import static l.files.io.file.Files.symlink;
 import static l.files.io.file.operations.Delete.Listener;
 import static l.files.io.file.operations.FileOperation.Failure;
 

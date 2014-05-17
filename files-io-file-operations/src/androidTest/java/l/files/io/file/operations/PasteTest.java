@@ -1,17 +1,15 @@
 package l.files.io.file.operations;
 
-import junit.framework.Assert;
-
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 import l.files.common.testing.FileBaseTest;
 
 import static android.test.MoreAsserts.assertEmpty;
+import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.io.file.operations.Cancellables.CANCELLED;
-import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 
 public abstract class PasteTest extends FileBaseTest {
 
@@ -20,10 +18,10 @@ public abstract class PasteTest extends FileBaseTest {
    * destination, even if they are empty.
    */
   public void testPastesEmptyDirectories() throws Exception {
-    File src = tmp().createDir("empty");
-    File dstDir = tmp().createDir("dst");
-    create(NO_CANCEL, asList(src), dstDir).call();
-    Assert.assertTrue(new File(dstDir, src.getName()).exists());
+    String src = tmp().createDir("empty").getPath();
+    String dstDir = tmp().createDir("dst").getPath();
+    create(asList(src), dstDir).call();
+    assertTrue(tmp().get("dst/empty").exists());
   }
 
   /**
@@ -32,18 +30,20 @@ public abstract class PasteTest extends FileBaseTest {
    * pasted with new names.
    */
   public void testDoesNotOverrideExistingFile() throws Exception {
-    List<File> sources = asList(
-        tmp().createFile("a.txt"),
-        tmp().createFile("b.mp4")
+    List<String> sources = asList(
+        tmp().createFile("a.txt").getPath(),
+        tmp().createFile("b.mp4").getPath()
     );
     tmp().createFile("1/a.txt");
     tmp().createFile("1/b.mp4");
-    File dstDir = new File(tmp().get(), "1");
-    create(NO_CANCEL, sources, dstDir).call();
-    Assert.assertTrue(new File(tmp().get(), "1/a.txt").exists());
-    Assert.assertTrue(new File(tmp().get(), "1/b.mp4").exists());
-    Assert.assertTrue(new File(tmp().get(), "1/a 2.txt").exists());
-    Assert.assertTrue(new File(tmp().get(), "1/b 2.mp4").exists());
+    String dstDir = new File(tmp().get(), "1").getPath();
+
+    create(sources, dstDir).call();
+
+    assertTrue(tmp().get("1/a.txt").exists());
+    assertTrue(tmp().get("1/b.mp4").exists());
+    assertTrue(tmp().get("1/a 2.txt").exists());
+    assertTrue(tmp().get("1/b 2.mp4").exists());
   }
 
   /**
@@ -56,40 +56,60 @@ public abstract class PasteTest extends FileBaseTest {
     tmp().createFile("a/b/2.txt");
     tmp().createFile("a/b/3.txt");
     tmp().createFile("b/a/1.txt");
-    List<File> sources = asList(new File(tmp().get(), "a"));
-    File dstDir = new File(tmp().get(), "b");
-    create(NO_CANCEL, sources, dstDir).call();
-    Assert.assertTrue(new File(tmp().get(), "b/a/1.txt").exists());
-    Assert.assertTrue(new File(tmp().get(), "b/a 2/1.txt").exists());
-    Assert.assertTrue(new File(tmp().get(), "b/a 2/b/2.txt").exists());
-    Assert.assertTrue(new File(tmp().get(), "b/a 2/b/3.txt").exists());
+    List<String> sources = asList(tmp().get("a").getPath());
+    String dstDir = tmp().get("b").getPath();
+
+    create(sources, dstDir).call();
+
+    assertTrue(tmp().get("b/a/1.txt").exists());
+    assertTrue(tmp().get("b/a 2/1.txt").exists());
+    assertTrue(tmp().get("b/a 2/b/2.txt").exists());
+    assertTrue(tmp().get("b/a 2/b/3.txt").exists());
   }
 
   public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
-    List<File> sources = asList(
-        tmp().createFile("a/1.txt"),
-        tmp().createFile("a/2.txt")
+    final List<String> sources = asList(
+        tmp().createFile("a/1.txt").getPath(),
+        tmp().createFile("a/2.txt").getPath()
     );
-    File destination = tmp().createDir("b");
-    create(CANCELLED, sources, destination).call();
-    assertEmpty(asList(destination.list()));
+    final File dstDir = tmp().createDir("b");
+
+    Thread thread = new Thread(new Runnable() {
+      @Override public void run() {
+        currentThread().interrupt();
+        try {
+          create(sources, dstDir.getPath()).call();
+          fail();
+        } catch (CancellationException e) {
+          // Pass
+        }
+      }
+    });
+    thread.start();
+    thread.join();
+    assertEmpty(asList(dstDir.list()));
   }
 
-  /**
-   * Copying a parent directory into its own sub directory is forbidden as it
-   * will result in an infinite loop.
-   */
   public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {
-    File parent = tmp().createDir("parent");
-    File child = tmp().createDir("parent/child");
+    String parent = tmp().createDir("parent").getPath();
+    String child = tmp().createDir("parent/child").getPath();
     try {
-      create(NO_CANCEL, singleton(parent), child).call();
-      Assert.fail();
+      create(singleton(parent), child).call();
+      fail();
     } catch (CannotPasteIntoSelfException pass) {
       // Pass
     }
   }
 
-  protected abstract Paste<?> create(
-      Cancellable cancellable, Iterable<File> sources, File destination);
+  public void testErrorOnPastingIntoSelf() throws Exception {
+    String dir = tmp().createDir("parent").getPath();
+    try {
+      create(singleton(dir), dir).call();
+      fail();
+    } catch (CannotPasteIntoSelfException pass) {
+      // Pass
+    }
+  }
+
+  protected abstract Paste create(Iterable<String> sources, String dstDir);
 }

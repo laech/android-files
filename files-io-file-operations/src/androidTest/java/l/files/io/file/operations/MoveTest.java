@@ -2,16 +2,27 @@ package l.files.io.file.operations;
 
 import com.google.common.io.Files;
 
-import junit.framework.Assert;
-
 import java.io.File;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
-import static l.files.io.file.operations.Cancellables.NO_CANCEL;
+import static l.files.io.file.Files.readlink;
+import static l.files.io.file.Files.symlink;
 
 public final class MoveTest extends PasteTest {
+
+  public void testMovesSymlink() throws Exception {
+    File target = tmp().createFile("target");
+    File link = tmp().get("link");
+    symlink(target.getPath(), link.getPath());
+
+    move(link, tmp().createDir("moved"));
+
+    String expected = target.getPath();
+    String actual = readlink(tmp().get("moved/link").getPath());
+    assertEquals(expected, actual);
+  }
 
   public void testMovesFile() throws Exception {
     File srcFile = tmp().createFile("a.txt");
@@ -19,9 +30,9 @@ public final class MoveTest extends PasteTest {
     File dstFile = new File(dstDir, "a.txt");
     write("Test", srcFile, UTF_8);
 
-    create(NO_CANCEL, asList(srcFile), dstDir).call();
+    move(srcFile, dstDir);
 
-    Assert.assertFalse(srcFile.exists());
+    assertFalse(srcFile.exists());
     assertEquals("Test", Files.toString(dstFile, UTF_8));
   }
 
@@ -32,17 +43,17 @@ public final class MoveTest extends PasteTest {
     File dstFile = new File(dstDir, "a/test.txt");
     write("Test", srcFile, UTF_8);
 
-    create(NO_CANCEL, asList(srcDir), dstDir).call();
+    move(srcDir, dstDir);
 
-    Assert.assertFalse(srcDir.exists());
+    assertFalse(srcDir.exists());
     assertEquals("Test", Files.toString(dstFile, UTF_8));
   }
 
-  @Override
-  protected Move create(
-      Cancellable cancellable,
-      Iterable<File> sources,
-      File destination) {
-    return new Move(cancellable, sources, destination);
+  @Override protected Move create(Iterable<String> sources, String dstDir) {
+    return new Move(sources, dstDir);
+  }
+
+  private void move(File src, File dst) {
+    create(asList(src.getPath()), dst.getPath()).call();
   }
 }

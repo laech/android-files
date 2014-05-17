@@ -11,10 +11,17 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import l.files.io.os.ErrnoException;
+import l.files.io.os.Stdio;
+import l.files.io.os.Unistd;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Integer.parseInt;
+import static l.files.io.os.ErrnoException.ENOENT;
+import static l.files.io.os.Unistd.F_OK;
+import static l.files.io.os.Unistd.access;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -23,6 +30,36 @@ public final class Files {
   private static final Pattern NAME_WITH_NUMBER_SUFFIX = Pattern.compile("(.*?\\s+)(\\d+)");
 
   private Files() {}
+
+  public static void rename(String oldPath, String newPath) throws IOException {
+    Stdio.rename(oldPath, newPath);
+  }
+
+  /**
+   * @param target path of the target file being linked to
+   * @param link path of the link itself
+   */
+  public static void symlink(String target, String link) throws IOException {
+    Unistd.symlink(target, link);
+  }
+
+  public static boolean exists(String path) throws IOException {
+    try {
+      return access(path, F_OK);
+    } catch (ErrnoException e) {
+      if (e.errno() == ENOENT) {
+        return false;
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Reads the actual path pointed to by the given symbolic link.
+   */
+  public static String readlink(String link) throws IOException {
+    return Unistd.readlink(link);
+  }
 
   /**
    * Returns a normalized path version of the given file.

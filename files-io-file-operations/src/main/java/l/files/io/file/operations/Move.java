@@ -1,30 +1,22 @@
 package l.files.io.file.operations;
 
-import java.io.File;
-import java.util.Set;
+import java.io.IOException;
+import java.util.Collection;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static l.files.io.file.Files.rename;
 
-/**
- * Attempt to move files to their new destination, returns the ones that failed
- * to move.
- */
-public final class Move extends Paste<Set<File>> {
+public final class Move extends Paste {
 
-  private final Set<File> failures;
-
-  public Move(Cancellable listener, Iterable<File> sources, File destination) {
-    super(listener, sources, destination);
-    this.failures = newHashSet();
+  public Move(Iterable<String> sources, String dstDir) {
+    super(sources, dstDir);
   }
 
-  @Override protected Set<File> getResult() {
-    return failures;
-  }
-
-  @Override protected void paste(File from, File to) {
-    if (!from.renameTo(to)) {
-      failures.add(from);
+  @Override
+  protected void paste(String from, String to, Collection<Failure> failures) {
+    try {
+      rename(from, to);
+    } catch (IOException e) {
+      failures.add(Failure.create(from, e));
     }
   }
 }

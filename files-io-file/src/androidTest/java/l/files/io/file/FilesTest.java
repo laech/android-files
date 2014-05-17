@@ -7,12 +7,18 @@ import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
 
+import static l.files.io.file.Files.exists;
 import static l.files.io.file.Files.getNonExistentDestinationFile;
 import static l.files.io.file.Files.hierarchy;
 import static l.files.io.file.Files.isAncestorOrSelf;
 import static l.files.io.file.Files.replace;
 
 public final class FilesTest extends FileBaseTest {
+
+  public void testExistence() throws Exception {
+    assertFalse(exists("/abc/def/123"));
+    assertTrue(exists("/"));
+  }
 
   public void testHierarchy() throws Exception {
     Set<File> expected = ImmutableSet.of(

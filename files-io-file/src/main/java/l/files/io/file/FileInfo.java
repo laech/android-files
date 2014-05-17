@@ -4,11 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
 
-import l.files.io.os.ErrnoException;
 import l.files.io.os.Stat;
-import l.files.io.os.Unistd;
 
-import static l.files.io.os.ErrnoException.ENOENT;
 import static l.files.io.os.Stat.S_ISBLK;
 import static l.files.io.os.Stat.S_ISCHR;
 import static l.files.io.os.Stat.S_ISDIR;
@@ -16,8 +13,6 @@ import static l.files.io.os.Stat.S_ISFIFO;
 import static l.files.io.os.Stat.S_ISLNK;
 import static l.files.io.os.Stat.S_ISREG;
 import static l.files.io.os.Stat.S_ISSOCK;
-import static l.files.io.os.Unistd.F_OK;
-import static l.files.io.os.Unistd.access;
 import static org.apache.commons.io.FilenameUtils.concat;
 
 /**
@@ -46,25 +41,6 @@ public abstract class FileInfo {
   public static FileInfo get(String path) throws IOException {
     Stat stat = Stat.lstat(path);
     return new AutoValue_FileInfo(path, stat);
-  }
-
-  public static boolean exists(String path) throws IOException {
-    try {
-      return access(path, F_OK);
-    } catch (ErrnoException e) {
-      if (e.errno() == ENOENT) {
-        return false;
-      }
-      throw e;
-    }
-  }
-
-  /**
-   * @param target path of the target file being linked to
-   * @param link path of the link itself
-   */
-  public static void symlink(String target, String link) throws IOException {
-    Unistd.symlink(target, link);
   }
 
   /**
