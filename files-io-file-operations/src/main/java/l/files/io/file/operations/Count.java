@@ -1,6 +1,6 @@
 package l.files.io.file.operations;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -19,7 +19,7 @@ public final class Count implements FileOperation {
 
   public Count(Listener listener, Iterable<String> paths) {
     this.listener = checkNotNull(listener, "listener");
-    this.paths = ImmutableList.copyOf(paths);
+    this.paths = ImmutableSet.copyOf(paths);
   }
 
   @Override public List<Failure> call() {

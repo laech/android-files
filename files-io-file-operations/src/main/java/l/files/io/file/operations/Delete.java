@@ -1,6 +1,6 @@
 package l.files.io.file.operations;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public final class Delete implements FileOperation {
 
   public Delete(Listener listener, Iterable<String> paths) {
     this.listener = checkNotNull(listener, "listener");
-    this.paths = ImmutableList.copyOf(paths);
+    this.paths = ImmutableSet.copyOf(paths);
   }
 
   @Override public List<Failure> call() {
