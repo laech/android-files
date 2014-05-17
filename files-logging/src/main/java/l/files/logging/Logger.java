@@ -10,8 +10,6 @@ import static java.lang.String.format;
 
 public final class Logger {
 
-  private static volatile String prefix = "";
-
   private final String tag;
 
   private Logger(String tag) {
@@ -20,14 +18,6 @@ public final class Logger {
 
   public static Logger get(Class<?> target) {
     return new Logger(target.getSimpleName());
-  }
-
-  /**
-   * Set a prefix for all the message tags. Don't forget to set to null to clear
-   * when prefix is no longer needed.
-   */
-  public static void setPrefix(String prefix) {
-    Logger.prefix = prefix == null ? "" : prefix + " ";
   }
 
   public void debug(String message) {
@@ -48,19 +38,25 @@ public final class Logger {
 
   public void debug(String format, Object arg1, Object arg2, Object arg3, Object arg4) {
     if (isLoggable(tag, DEBUG)) {
-      Log.d(prefix + tag, format(format, arg1, arg2, arg3, arg4));
+      Log.d(tag, format(format, arg1, arg2, arg3, arg4));
+    }
+  }
+
+  public void warn(String format, Object arg) {
+    if (isLoggable(tag, WARN)) {
+      Log.w(tag, format(format, arg));
     }
   }
 
   public void warn(Throwable err, String format, Object arg) {
     if (isLoggable(tag, WARN)) {
-      Log.w(prefix + tag, format(format, arg), err);
+      Log.w(tag, format(format, arg), err);
     }
   }
 
   public void warn(Throwable err) {
     if (isLoggable(tag, WARN)) {
-      Log.w(prefix + tag, err);
+      Log.w(tag, err);
     }
   }
 
