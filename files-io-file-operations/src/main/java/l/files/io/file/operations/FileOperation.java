@@ -11,8 +11,10 @@ public interface FileOperation extends Callable<List<FileOperation.Failure>> {
 
   /**
    * Executes this operation and returns the failures.
+   *
+   * @throws CancellationException if this operation was interrupted
    */
-  @Override List<Failure> call() throws CancellationException;
+  @Override List<Failure> call();
 
   @AutoValue
   public static abstract class Failure {

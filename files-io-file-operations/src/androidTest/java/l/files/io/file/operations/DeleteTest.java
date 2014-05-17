@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.io.file.FileInfo;
 
 import static java.util.Arrays.asList;
 import static l.files.io.file.FileInfo.symlink;
@@ -13,7 +14,7 @@ import static l.files.io.file.operations.FileOperation.Failure;
 public final class DeleteTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
-    @Override public void onDelete(String path) {}
+    @Override public void onDelete(FileInfo file) {}
   };
 
   public void testDeletesFile() throws Exception {

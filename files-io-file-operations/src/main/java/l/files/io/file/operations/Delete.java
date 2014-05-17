@@ -34,18 +34,10 @@ public final class Delete implements FileOperation {
   }
 
   private void delete(String path, List<Failure> failures) {
-    Iterable<FileInfo> infos;
-    try {
-      infos = postOrderTraversal(path);
-    } catch (IOException e) {
-      failures.add(Failure.create(path, e));
-      return;
-    }
-
-    for (FileInfo info : infos) {
+    for (FileInfo info : postOrderTraversal(path)) {
       try {
         delete(info);
-        listener.onDelete(info.path());
+        listener.onDelete(info);
       } catch (IOException e) {
         failures.add(Failure.create(info.path(), e));
       }
@@ -63,6 +55,6 @@ public final class Delete implements FileOperation {
   }
 
   public static interface Listener {
-    void onDelete(String path);
+    void onDelete(FileInfo file);
   }
 }

@@ -1,46 +1,44 @@
 package l.files.io.file.operations;
 
-import java.io.File;
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
+import java.util.concurrent.CancellationException;
+
+import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Thread.currentThread;
+import static java.util.Collections.emptyList;
+import static l.files.io.file.operations.FileTraverser.breadthFirstTraversal;
 
-/**
- * Counts the number of files and their sizes recursively. Directories
- * themselves are excluded but their files will be included.
- */
-public final class Count extends Traverser<Count.Result> {
+public final class Count implements FileOperation {
 
   private final Listener listener;
+  private final Iterable<String> paths;
 
-  private int count;
-  private long length;
-
-  public Count(Cancellable cancellable, Iterable<File> files, Listener listener) {
-    super(cancellable, files);
+  public Count(Listener listener, Iterable<String> paths) {
     this.listener = checkNotNull(listener, "listener");
+    this.paths = ImmutableList.copyOf(paths);
   }
 
-  @Override protected void onFile(File file) {
-    count++;
-    length += file.length();
-    listener.onFileCounted(count, length);
+  @Override public List<Failure> call() {
+    for (String path : paths) {
+      count(path);
+    }
+    return emptyList();
   }
 
-  @Override protected Result getResult() {
-    return new Result(count, length);
-  }
-
-  public static final class Result {
-    public final int count;
-    public final long length;
-
-    Result(int count, long length) {
-      this.count = count;
-      this.length = length;
+  private void count(String path) {
+    for (FileInfo file : breadthFirstTraversal(path)) {
+      if (currentThread().isInterrupted()) {
+        throw new CancellationException();
+      }
+      listener.onCounted(file);
     }
   }
 
   public static interface Listener {
-    void onFileCounted(int count, long length);
+    void onCounted(FileInfo file);
   }
 }

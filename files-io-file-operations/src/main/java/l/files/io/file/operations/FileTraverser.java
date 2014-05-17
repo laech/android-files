@@ -19,16 +19,28 @@ final class FileTraverser extends TreeTraverser<FileInfo> {
 
   private static final FileTraverser instance = new FileTraverser();
 
-  public static Iterable<FileInfo> preOrderIterator(String path) throws IOException {
-    return instance.preOrderTraversal(FileInfo.get(path));
+  public static Iterable<FileInfo> preOrderIterator(String path) {
+    try {
+      return instance.preOrderTraversal(FileInfo.get(path));
+    } catch (IOException e) {
+      return emptyList();
+    }
   }
 
-  public static Iterable<FileInfo> postOrderTraversal(String path) throws IOException {
-    return instance.postOrderTraversal(FileInfo.get(path));
+  public static Iterable<FileInfo> postOrderTraversal(String path) {
+    try {
+      return instance.postOrderTraversal(FileInfo.get(path));
+    } catch (IOException e) {
+      return emptyList();
+    }
   }
 
-  public static Iterable<FileInfo> breadthFirstTraversal(String path) throws IOException {
-    return instance.breadthFirstTraversal(FileInfo.get(path));
+  public static Iterable<FileInfo> breadthFirstTraversal(String path) {
+    try {
+      return instance.breadthFirstTraversal(FileInfo.get(path));
+    } catch (IOException e) {
+      return emptyList();
+    }
   }
 
   @Override public Iterable<FileInfo> children(FileInfo parent) {

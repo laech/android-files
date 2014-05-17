@@ -1,37 +1,54 @@
 package l.files.io.file.operations;
 
+import com.google.common.base.Function;
+
+import org.mockito.ArgumentCaptor;
+
 import java.io.File;
-import java.io.IOException;
+import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.io.file.FileInfo;
 
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.Files.write;
+import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static l.files.io.file.operations.Cancellables.NO_CANCEL;
 import static l.files.io.file.operations.Count.Listener;
-import static l.files.io.file.operations.Count.Result;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public final class CountTest extends FileBaseTest {
 
-  private static final Listener NULL_LISTENER = new Listener() {
-    @Override public void onFileCounted(int count, long length) {}
-  };
-
   public void testCount() throws Exception {
-    File a = tmp().createFile("1/a.txt");
-    File b = tmp().createFile("2/b.txt");
-    File c = tmp().createFile("3/4/c.txt");
-    write("Test", a, UTF_8);
-    write("Testing", b, UTF_8);
-    write("Testing again", c, UTF_8);
+    tmp().createFile("1/a.txt");
+    tmp().createFile("3/4/c.txt");
 
-    Result result = count(tmp().get());
-    assertEquals(3, result.count);
-    assertEquals(a.length() + b.length() + c.length(), result.length);
+    Listener listener = mock(Listener.class);
+    ArgumentCaptor<FileInfo> captor = ArgumentCaptor.forClass(FileInfo.class);
+
+    count(listener, tmp().get());
+    verify(listener, atLeastOnce()).onCounted(captor.capture());
+
+    Set<String> expected = newHashSet(
+        tmp().get().getPath(),
+        tmp().get("1").getPath(),
+        tmp().get("1/a.txt").getPath(),
+        tmp().get("3").getPath(),
+        tmp().get("3/4").getPath(),
+        tmp().get("3/4/c.txt").getPath());
+
+    Set<String> actual = newHashSet(transform(captor.getAllValues(),
+        new Function<FileInfo, String>() {
+          @Override public String apply(FileInfo input) {
+            return input.path();
+          }
+        }
+    ));
+    assertEquals(expected, actual);
   }
 
-  private Result count(File file) throws IOException {
-    return new Count(NO_CANCEL, asList(file), NULL_LISTENER).call();
+  private void count(Listener listener, File file) {
+    new Count(listener, asList(file.getPath())).call();
   }
 }
