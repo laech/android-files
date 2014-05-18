@@ -23,22 +23,6 @@ final class FileTraverser extends TreeTraverser<FileInfo> {
     return instance;
   }
 
-  public static Iterable<FileInfo> postOrderTraversal(String path) {
-    try {
-      return instance.postOrderTraversal(FileInfo.get(path));
-    } catch (IOException e) {
-      return emptyList();
-    }
-  }
-
-  public static Iterable<FileInfo> breadthFirstTraversal(String path) {
-    try {
-      return instance.breadthFirstTraversal(FileInfo.get(path));
-    } catch (IOException e) {
-      return emptyList();
-    }
-  }
-
   @Override public Iterable<FileInfo> children(FileInfo parent) {
     DirectoryStream stream;
     try {

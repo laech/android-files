@@ -2,6 +2,7 @@ package l.files.io.file.operations;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
@@ -10,7 +11,6 @@ import l.files.io.file.FileInfo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
-import static l.files.io.file.operations.FileTraverser.breadthFirstTraversal;
 
 public final class Count implements FileOperation {
 
@@ -30,7 +30,15 @@ public final class Count implements FileOperation {
   }
 
   private void count(String path) {
-    for (FileInfo file : breadthFirstTraversal(path)) {
+    FileInfo root;
+    try {
+      root = FileInfo.get(path);
+    } catch (IOException e) {
+      // No accessible or no longer exists, do not count
+      return;
+    }
+
+    for (FileInfo file : FileTraverser.get().breadthFirstTraversal(root)) {
       if (currentThread().isInterrupted()) {
         throw new CancellationException();
       }

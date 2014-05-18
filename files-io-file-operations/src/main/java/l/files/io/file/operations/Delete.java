@@ -13,7 +13,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.unmodifiableList;
 import static l.files.io.file.Files.remove;
-import static l.files.io.file.operations.FileTraverser.postOrderTraversal;
 
 public final class Delete implements FileOperation {
 
@@ -34,7 +33,15 @@ public final class Delete implements FileOperation {
   }
 
   private void delete(String path, List<Failure> failures) {
-    for (FileInfo info : postOrderTraversal(path)) {
+    FileInfo root;
+    try {
+      root = FileInfo.get(path);
+    } catch (IOException e) {
+      failures.add(Failure.create(path, e));
+      return;
+    }
+
+    for (FileInfo info : FileTraverser.get().postOrderTraversal(root)) {
       try {
         delete(info);
         listener.onDelete(info);
