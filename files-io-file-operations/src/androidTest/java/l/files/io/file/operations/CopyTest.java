@@ -1,18 +1,25 @@
 package l.files.io.file.operations;
 
+import com.google.common.base.Function;
 import com.google.common.io.Files;
+
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
 import static l.files.io.file.operations.Copy.Listener;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -23,15 +30,40 @@ public final class CopyTest extends PasteTest {
   };
 
   public void testNotifiesListener() throws Exception {
-    File src = tmp().createFile("file");
+    File srcDir = tmp().createDir("a");
+    tmp().createFile("a/file");
     File dstDir = tmp().createDir("dir");
 
     Listener listener = mock(Listener.class);
-    create(listener, asList(src.getPath()), dstDir.getPath()).call();
+    ArgumentCaptor<FileInfo> srcCaptor = ArgumentCaptor.forClass(FileInfo.class);
+    ArgumentCaptor<FileInfo> dstCaptor = ArgumentCaptor.forClass(FileInfo.class);
 
-    verify(listener).onCopy(
-        FileInfo.get(src.getPath()),
-        FileInfo.get(dstDir.getPath(), src.getName()));
+    create(listener, asList(srcDir.getPath()), dstDir.getPath()).call();
+    verify(listener, atLeastOnce()).onCopy(srcCaptor.capture(), dstCaptor.capture());
+
+    Set<String> srcExpected = newHashSet(
+        tmp().get("a").getPath(),
+        tmp().get("a/file").getPath()
+    );
+    Set<String> dstExpected = newHashSet(
+        tmp().get("dir/a").getPath(),
+        tmp().get("dir/a/file").getPath()
+    );
+    Set<String> srcActual = getPaths(srcCaptor);
+    Set<String> dstActual = getPaths(dstCaptor);
+
+    assertEquals(srcExpected, srcActual);
+    assertEquals(dstExpected, dstActual);
+  }
+
+  private Set<String> getPaths(ArgumentCaptor<FileInfo> captor) {
+    return newHashSet(transform(captor.getAllValues(),
+        new Function<FileInfo, String>() {
+          @Override public String apply(FileInfo input) {
+            return input.path();
+          }
+        }
+    ));
   }
 
   public void testCopiesSymlink() throws Exception {

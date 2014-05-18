@@ -16,7 +16,6 @@ import l.files.logging.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
-import static l.files.io.file.operations.FileTraverser.preOrderIterator;
 import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -51,7 +50,15 @@ public final class Copy extends Paste {
 
   @Override
   protected void paste(String from, String to, Collection<Failure> failures) {
-    for (FileInfo file : preOrderIterator(from)) {
+    FileInfo root;
+    try {
+      root = FileInfo.get(from);
+    } catch (IOException e) {
+      failures.add(Failure.create(from, e));
+      return;
+    }
+
+    for (FileInfo file : FileTraverser.get().preOrderTraversal(root)) {
       checkCancelled();
 
       File dst = Files.replace(new File(file.path()), new File(from), new File(to));
@@ -62,6 +69,7 @@ public final class Copy extends Paste {
       } else {
         copyFile(file, dst.getPath(), failures);
       }
+      notifyListener(file, dst.getPath());
     }
   }
 
@@ -100,9 +108,6 @@ public final class Copy extends Paste {
       while (pos < size) {
         long count = (size - pos) > BUFFER_SIZE ? BUFFER_SIZE : size - pos;
         pos += output.transferFrom(input, pos, count);
-        notifyListener(src, dst);
-      }
-      if (size == 0) {
         notifyListener(src, dst);
       }
 

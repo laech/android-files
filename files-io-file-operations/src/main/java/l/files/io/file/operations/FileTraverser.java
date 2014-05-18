@@ -19,12 +19,8 @@ final class FileTraverser extends TreeTraverser<FileInfo> {
 
   private static final FileTraverser instance = new FileTraverser();
 
-  public static Iterable<FileInfo> preOrderIterator(String path) {
-    try {
-      return instance.preOrderTraversal(FileInfo.get(path));
-    } catch (IOException e) {
-      return emptyList();
-    }
+  public static FileTraverser get() {
+    return instance;
   }
 
   public static Iterable<FileInfo> postOrderTraversal(String path) {

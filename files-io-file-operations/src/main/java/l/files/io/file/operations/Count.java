@@ -14,8 +14,6 @@ import static l.files.io.file.operations.FileTraverser.breadthFirstTraversal;
 
 public final class Count implements FileOperation {
 
-  // TODO count files only
-
   private final Listener listener;
   private final Iterable<String> paths;
 
