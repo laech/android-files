@@ -3,25 +3,37 @@ package l.files.io.file.operations;
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 
-public interface FileOperation extends Callable<List<FileOperation.Failure>> {
+/**
+ * Operation on a or a set of files. Failures that occur during the operation
+ * will not stop the process, instead the failures will be recorded and then a
+ * {@link FileException} will be thrown at the end of processing.
+ *
+ * @see FileException
+ * @see FileException#failures()
+ */
+public interface FileOperation extends Runnable {
 
   /**
-   * Executes this operation and returns the failures.
-   *
    * @throws CancellationException if this operation was interrupted
+   * @throws FileException if any file failed to be operated on
    */
-  @Override List<Failure> call();
+  @Override void run();
 
   @AutoValue
   public static abstract class Failure {
     Failure() {}
 
+    /**
+     * The path of the failed file.
+     */
     public abstract String path();
-    public abstract IOException exception();
+
+    /**
+     * The cause of the failure.
+     */
+    public abstract IOException cause();
 
     public static Failure create(String path, IOException exception) {
       return new AutoValue_FileOperation_Failure(path, exception);

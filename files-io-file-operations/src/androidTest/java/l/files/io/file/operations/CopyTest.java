@@ -38,7 +38,7 @@ public final class CopyTest extends PasteTest {
     ArgumentCaptor<FileInfo> srcCaptor = ArgumentCaptor.forClass(FileInfo.class);
     ArgumentCaptor<FileInfo> dstCaptor = ArgumentCaptor.forClass(FileInfo.class);
 
-    create(listener, asList(srcDir.getPath()), dstDir.getPath()).call();
+    create(listener, asList(srcDir.getPath()), dstDir.getPath()).run();
     verify(listener, atLeastOnce()).onCopy(srcCaptor.capture(), dstCaptor.capture());
 
     Set<String> srcExpected = newHashSet(
@@ -108,7 +108,7 @@ public final class CopyTest extends PasteTest {
   }
 
   private void copy(File src, File dstDir) throws IOException {
-    create(asList(src.getPath()), dstDir.getPath()).call();
+    create(asList(src.getPath()), dstDir.getPath()).run();
   }
 
   @Override protected Copy create(Iterable<String> sources, String dstDir) {

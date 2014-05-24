@@ -54,6 +54,6 @@ public final class MoveTest extends PasteTest {
   }
 
   private void move(File src, File dst) {
-    create(asList(src.getPath()), dst.getPath()).call();
+    create(asList(src.getPath()), dst.getPath()).run();
   }
 }

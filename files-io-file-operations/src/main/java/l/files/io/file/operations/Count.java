@@ -3,14 +3,12 @@ package l.files.io.file.operations;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 
 import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.emptyList;
 
 public final class Count implements FileOperation {
 
@@ -22,11 +20,10 @@ public final class Count implements FileOperation {
     this.paths = ImmutableSet.copyOf(paths);
   }
 
-  @Override public List<Failure> call() {
+  @Override public void run() {
     for (String path : paths) {
       count(path);
     }
-    return emptyList();
   }
 
   private void count(String path) {
@@ -42,11 +39,11 @@ public final class Count implements FileOperation {
       if (currentThread().isInterrupted()) {
         throw new CancellationException();
       }
-      listener.onCounted(file);
+      listener.onCount(file);
     }
   }
 
   public static interface Listener {
-    void onCounted(FileInfo file);
+    void onCount(FileInfo file);
   }
 }

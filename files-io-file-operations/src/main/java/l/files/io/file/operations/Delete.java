@@ -11,8 +11,8 @@ import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.unmodifiableList;
 import static l.files.io.file.Files.remove;
+import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 
 public final class Delete implements FileOperation {
 
@@ -24,12 +24,12 @@ public final class Delete implements FileOperation {
     this.paths = ImmutableSet.copyOf(paths);
   }
 
-  @Override public List<Failure> call() {
+  @Override public void run() {
     List<Failure> failures = new ArrayList<>(0);
     for (String path : paths) {
       delete(path, failures);
     }
-    return unmodifiableList(failures);
+    throwIfNotEmpty(failures);
   }
 
   private void delete(String path, List<Failure> failures) {

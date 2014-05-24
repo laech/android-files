@@ -13,8 +13,8 @@ import l.files.io.file.Files;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.unmodifiableList;
 import static l.files.io.file.Files.isAncestorOrSelf;
+import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 
 public abstract class Paste implements FileOperation {
 
@@ -26,7 +26,7 @@ public abstract class Paste implements FileOperation {
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
   }
 
-  @Override public final List<Failure> call() {
+  @Override public final void run() {
     List<Failure> failures = new ArrayList<>(0);
     for (String from : sources) {
       if (isCancelled()) {
@@ -50,7 +50,8 @@ public abstract class Paste implements FileOperation {
       File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
       paste(from, to.getPath(), failures);
     }
-    return unmodifiableList(failures);
+
+    throwIfNotEmpty(failures);
   }
 
   /**
@@ -58,7 +59,8 @@ public abstract class Paste implements FileOperation {
    * content into {@code to}. If {@code from} is a directory, paste its content
    * into {@code to}.
    */
-  protected abstract void paste(String from, String to, Collection<Failure> failures);
+  protected abstract void paste(
+      String from, String to, Collection<Failure> failures);
 
   protected final boolean isCancelled() {
     return currentThread().isInterrupted();

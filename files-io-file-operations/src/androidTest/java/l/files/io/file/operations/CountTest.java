@@ -28,7 +28,7 @@ public final class CountTest extends FileBaseTest {
     ArgumentCaptor<FileInfo> captor = ArgumentCaptor.forClass(FileInfo.class);
 
     count(listener, tmp().get());
-    verify(listener, atLeastOnce()).onCounted(captor.capture());
+    verify(listener, atLeastOnce()).onCount(captor.capture());
 
     Set<String> expected = newHashSet(
         tmp().get().getPath(),
@@ -49,6 +49,6 @@ public final class CountTest extends FileBaseTest {
   }
 
   private void count(Listener listener, File file) {
-    new Count(listener, asList(file.getPath())).call();
+    new Count(listener, asList(file.getPath())).run();
   }
 }
