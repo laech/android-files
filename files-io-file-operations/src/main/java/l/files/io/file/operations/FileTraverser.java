@@ -24,6 +24,10 @@ final class FileTraverser extends TreeTraverser<FileInfo> {
   }
 
   @Override public Iterable<FileInfo> children(FileInfo parent) {
+    if (!parent.isDirectory()) {
+      return emptyList();
+    }
+
     DirectoryStream stream;
     try {
       stream = DirectoryStream.open(parent.path());
