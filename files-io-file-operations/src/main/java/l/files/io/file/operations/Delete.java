@@ -5,16 +5,15 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 
 import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Thread.currentThread;
 import static l.files.io.file.Files.remove;
 import static l.files.io.file.operations.FileException.throwIfNotEmpty;
+import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
-public final class Delete implements FileOperation {
+public final class Delete implements FileOperation<Void> {
 
   private final Listener listener;
   private final Iterable<String> paths;
@@ -24,15 +23,17 @@ public final class Delete implements FileOperation {
     this.paths = ImmutableSet.copyOf(paths);
   }
 
-  @Override public void run() {
+  @Override public Void call() throws InterruptedException {
     List<Failure> failures = new ArrayList<>(0);
     for (String path : paths) {
       delete(path, failures);
     }
     throwIfNotEmpty(failures);
+    return null;
   }
 
-  private void delete(String path, List<Failure> failures) {
+  private void delete(String path, List<Failure> failures)
+      throws InterruptedException {
     FileInfo root;
     try {
       root = FileInfo.get(path);
@@ -51,10 +52,8 @@ public final class Delete implements FileOperation {
     }
   }
 
-  private void delete(FileInfo info) throws IOException {
-    if (currentThread().isInterrupted()) {
-      throw new CancellationException();
-    }
+  private void delete(FileInfo info) throws IOException, InterruptedException {
+    checkInterrupt();
     remove(info.path());
   }
 

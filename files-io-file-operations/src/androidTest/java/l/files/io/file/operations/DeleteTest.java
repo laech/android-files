@@ -35,7 +35,7 @@ public final class DeleteTest extends FileBaseTest {
         FileInfo.get(tmp().get("a/b").getPath())
     );
 
-    create(listener, asList(src.getPath())).run();
+    create(listener, asList(src.getPath())).call();
     verify(listener, atLeastOnce()).onDelete(captor.capture());
 
     Set<FileInfo> actual = newHashSet(captor.getAllValues());
@@ -87,7 +87,7 @@ public final class DeleteTest extends FileBaseTest {
   }
 
   private void delete(File file) throws Exception {
-    create(NULL_LISTENER, asList(file.getPath())).run();
+    create(NULL_LISTENER, asList(file.getPath())).call();
   }
 
   private Delete create(Listener listener, Iterable<String> paths) {

@@ -3,14 +3,13 @@ package l.files.io.file.operations;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.IOException;
-import java.util.concurrent.CancellationException;
 
 import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Thread.currentThread;
+import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
-public final class Count implements FileOperation {
+public final class Count implements FileOperation<Void> {
 
   private final Listener listener;
   private final Iterable<String> paths;
@@ -20,13 +19,14 @@ public final class Count implements FileOperation {
     this.paths = ImmutableSet.copyOf(paths);
   }
 
-  @Override public void run() {
+  @Override public Void call() throws InterruptedException {
     for (String path : paths) {
       count(path);
     }
+    return null;
   }
 
-  private void count(String path) {
+  private void count(String path) throws InterruptedException {
     FileInfo root;
     try {
       root = FileInfo.get(path);
@@ -36,9 +36,7 @@ public final class Count implements FileOperation {
     }
 
     for (FileInfo file : FileTraverser.get().breadthFirstTraversal(root)) {
-      if (currentThread().isInterrupted()) {
-        throw new CancellationException();
-      }
+      checkInterrupt();
       listener.onCount(file);
     }
   }

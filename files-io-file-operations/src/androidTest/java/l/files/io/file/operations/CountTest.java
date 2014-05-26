@@ -48,7 +48,7 @@ public final class CountTest extends FileBaseTest {
     assertEquals(expected, actual);
   }
 
-  private void count(Listener listener, File file) {
-    new Count(listener, asList(file.getPath())).run();
+  private void count(Listener listener, File file) throws InterruptedException {
+    new Count(listener, asList(file.getPath())).call();
   }
 }

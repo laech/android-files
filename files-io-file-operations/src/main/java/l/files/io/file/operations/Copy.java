@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
-import java.util.concurrent.CancellationException;
 
 import l.files.io.file.FileInfo;
 import l.files.io.file.Files;
@@ -16,6 +15,7 @@ import l.files.logging.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
+import static l.files.io.file.operations.FileOperations.checkInterrupt;
 import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -49,7 +49,9 @@ public final class Copy extends Paste {
   }
 
   @Override
-  protected void paste(String from, String to, Collection<Failure> failures) {
+  protected void paste(String from, String to, Collection<Failure> failures)
+      throws InterruptedException {
+
     FileInfo root;
     try {
       root = FileInfo.get(from);
@@ -59,7 +61,7 @@ public final class Copy extends Paste {
     }
 
     for (FileInfo file : FileTraverser.get().preOrderTraversal(root)) {
-      checkCancelled();
+      checkInterrupt();
 
       File dst = Files.replace(new File(file.path()), new File(from), new File(to));
       if (file.isSymbolicLink()) {
@@ -83,7 +85,8 @@ public final class Copy extends Paste {
     }
   }
 
-  private void createDirectory(FileInfo src, File dst, Collection<Failure> failures) {
+  private void createDirectory(
+      FileInfo src, File dst, Collection<Failure> failures) {
     try {
       forceMkdir(dst);
       setLastModifiedDate(src, dst.getPath());
@@ -92,8 +95,9 @@ public final class Copy extends Paste {
     }
   }
 
-  private void copyFile(FileInfo src, String dst, Collection<Failure> failures) {
-    checkCancelled();
+  private void copyFile(FileInfo src, String dst, Collection<Failure> failures)
+      throws InterruptedException {
+    checkInterrupt();
 
     FileInputStream fis = null;
     FileOutputStream fos = null;
@@ -116,7 +120,7 @@ public final class Copy extends Paste {
         logger.warn(e, "Failed to delete file on exception %s", dst);
       }
       if (e instanceof ClosedByInterruptException) {
-        throw new CancellationException();
+        throw new InterruptedException();
       } else {
         failures.add(Failure.create(src.path(), e));
       }
@@ -142,12 +146,6 @@ public final class Copy extends Paste {
       listener.onCopy(src, FileInfo.get(dst));
     } catch (IOException e) {
       logger.warn(e);
-    }
-  }
-
-  private void checkCancelled() {
-    if (isCancelled()) {
-      throw new CancellationException();
     }
   }
 

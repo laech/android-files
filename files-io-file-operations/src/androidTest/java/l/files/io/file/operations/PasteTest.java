@@ -2,7 +2,6 @@ package l.files.io.file.operations;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 
 import l.files.common.testing.FileBaseTest;
 
@@ -20,7 +19,7 @@ public abstract class PasteTest extends FileBaseTest {
   public void testPastesEmptyDirectories() throws Exception {
     String src = tmp().createDir("empty").getPath();
     String dstDir = tmp().createDir("dst").getPath();
-    create(asList(src), dstDir).run();
+    create(asList(src), dstDir).call();
     assertTrue(tmp().get("dst/empty").exists());
   }
 
@@ -38,7 +37,7 @@ public abstract class PasteTest extends FileBaseTest {
     tmp().createFile("1/b.mp4");
     String dstDir = new File(tmp().get(), "1").getPath();
 
-    create(sources, dstDir).run();
+    create(sources, dstDir).call();
 
     assertTrue(tmp().get("1/a.txt").exists());
     assertTrue(tmp().get("1/b.mp4").exists());
@@ -59,7 +58,7 @@ public abstract class PasteTest extends FileBaseTest {
     List<String> sources = asList(tmp().get("a").getPath());
     String dstDir = tmp().get("b").getPath();
 
-    create(sources, dstDir).run();
+    create(sources, dstDir).call();
 
     assertTrue(tmp().get("b/a/1.txt").exists());
     assertTrue(tmp().get("b/a 2/1.txt").exists());
@@ -78,9 +77,9 @@ public abstract class PasteTest extends FileBaseTest {
       @Override public void run() {
         currentThread().interrupt();
         try {
-          create(sources, dstDir.getPath()).run();
+          create(sources, dstDir.getPath()).call();
           fail();
-        } catch (CancellationException e) {
+        } catch (InterruptedException e) {
           // Pass
         }
       }
@@ -94,7 +93,7 @@ public abstract class PasteTest extends FileBaseTest {
     String parent = tmp().createDir("parent").getPath();
     String child = tmp().createDir("parent/child").getPath();
     try {
-      create(singleton(parent), child).run();
+      create(singleton(parent), child).call();
       fail();
     } catch (CannotPasteIntoSelfException pass) {
       // Pass
@@ -104,7 +103,7 @@ public abstract class PasteTest extends FileBaseTest {
   public void testErrorOnPastingIntoSelf() throws Exception {
     String dir = tmp().createDir("parent").getPath();
     try {
-      create(singleton(dir), dir).run();
+      create(singleton(dir), dir).call();
       fail();
     } catch (CannotPasteIntoSelfException pass) {
       // Pass

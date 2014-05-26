@@ -7,16 +7,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CancellationException;
 
 import l.files.io.file.Files;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Thread.currentThread;
 import static l.files.io.file.Files.isAncestorOrSelf;
 import static l.files.io.file.operations.FileException.throwIfNotEmpty;
+import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
-public abstract class Paste implements FileOperation {
+public abstract class Paste implements FileOperation<Void> {
 
   private final Iterable<String> sources;
   private final String destination;
@@ -26,12 +25,10 @@ public abstract class Paste implements FileOperation {
     this.sources = ImmutableSet.copyOf(checkNotNull(sources, "sources"));
   }
 
-  @Override public final void run() {
+  @Override public final Void call() throws InterruptedException {
     List<Failure> failures = new ArrayList<>(0);
     for (String from : sources) {
-      if (isCancelled()) {
-        throw new CancellationException();
-      }
+      checkInterrupt();
 
       File destinationFile = new File(destination);
       File fromFile = new File(from);
@@ -52,6 +49,7 @@ public abstract class Paste implements FileOperation {
     }
 
     throwIfNotEmpty(failures);
+    return null;
   }
 
   /**
@@ -60,9 +58,6 @@ public abstract class Paste implements FileOperation {
    * into {@code to}.
    */
   protected abstract void paste(
-      String from, String to, Collection<Failure> failures);
-
-  protected final boolean isCancelled() {
-    return currentThread().isInterrupted();
-  }
+      String from, String to, Collection<Failure> failures)
+      throws InterruptedException;
 }

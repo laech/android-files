@@ -53,7 +53,7 @@ public final class MoveTest extends PasteTest {
     return new Move(sources, dstDir);
   }
 
-  private void move(File src, File dst) {
-    create(asList(src.getPath()), dst.getPath()).run();
+  private void move(File src, File dst) throws InterruptedException {
+    create(asList(src.getPath()), dst.getPath()).call();
   }
 }
