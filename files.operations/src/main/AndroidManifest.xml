@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="l.files.operations">
+
+  <application>
+    <service
+        android:name=".OperationService"
+        android:exported="false" />
+  </application>
+
+</manifest>

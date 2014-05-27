@@ -31,4 +31,5 @@ android {
 
 dependencies {
   compile project.libs.mockito
+  compile project.libs.hamcrest
 }
