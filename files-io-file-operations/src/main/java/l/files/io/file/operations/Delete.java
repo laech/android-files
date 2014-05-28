@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.io.file.FileInfo;
+import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Files.remove;
@@ -14,6 +15,8 @@ import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public final class Delete implements FileOperation<Void> {
+
+  private static final Logger logger = Logger.get(Delete.class);
 
   private final Listener listener;
   private final Iterable<String> paths;
@@ -39,6 +42,7 @@ public final class Delete implements FileOperation<Void> {
       root = FileInfo.get(path);
     } catch (IOException e) {
       failures.add(Failure.create(path, e));
+      logger.warn(e);
       return;
     }
 
@@ -48,6 +52,7 @@ public final class Delete implements FileOperation<Void> {
         listener.onDelete(info);
       } catch (IOException e) {
         failures.add(Failure.create(info.path(), e));
+        logger.warn(e);
       }
     }
   }

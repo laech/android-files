@@ -20,13 +20,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import l.files.io.file.event.WatchService;
 import l.files.io.file.Path;
-import l.files.logging.Logger;
+import l.files.io.file.event.WatchService;
 import l.files.io.os.ErrnoException;
-import l.files.service.CopyService;
-import l.files.service.DeleteService;
-import l.files.service.MoveService;
+import l.files.logging.Logger;
+import l.files.operations.OperationService;
 
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.collect.Lists.newArrayList;
@@ -212,14 +210,14 @@ public final class FilesProvider extends ContentProvider {
   private Bundle callCut(Bundle extras) {
     Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_LOCATIONS));
     File destination = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION)));
-    MoveService.start(getContext(), files, destination);
+//    MoveService.start(getContext(), files, destination);
     return Bundle.EMPTY;
   }
 
   private Bundle callCopy(Bundle extras) {
     Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_LOCATIONS));
     File destination = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION)));
-    CopyService.start(getContext(), files, destination);
+//    CopyService.start(getContext(), files, destination);
     return Bundle.EMPTY;
   }
 
@@ -232,9 +230,17 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Bundle callDelete(Bundle extras) {
-    Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_LOCATIONS));
-    DeleteService.delete(getContext(), files);
+    String[] paths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
+    OperationService.delete(getContext(), paths);
     return Bundle.EMPTY;
+  }
+
+  private String[] toFilePaths(String[] fileLocations) {
+    Set<String> paths = newHashSetWithExpectedSize(fileLocations.length);
+    for (String location : fileLocations) {
+      paths.add(new File(URI.create(location)).getPath());
+    }
+    return paths.toArray(new String[paths.size()]);
   }
 
   private Set<File> toFilesSet(String[] fileLocations) {

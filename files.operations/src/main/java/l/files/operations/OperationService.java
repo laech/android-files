@@ -11,6 +11,7 @@ import android.os.IBinder;
 import com.squareup.otto.Subscribe;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -18,7 +19,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Arrays.asList;
+import l.files.logging.Logger;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.Progress.State.FINISHED;
 
@@ -29,6 +32,8 @@ import static l.files.operations.Progress.State.FINISHED;
  * avoid listeners from being flooded by messages.
  */
 public final class OperationService extends Service {
+
+  private static final Logger logger = Logger.get(OperationService.class);
 
   private static final String ACTION_CANCEL = "l.files.operations.CANCEL";
   private static final String EXTRA_TASK_ID = "task_id";
@@ -58,7 +63,7 @@ public final class OperationService extends Service {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(ACTION_DELETE)
-            .putExtra(EXTRA_PATHS, paths)
+            .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
     );
   }
 
@@ -107,8 +112,9 @@ public final class OperationService extends Service {
   private AsyncTask<?, ?, ?> newTask(Intent intent, int startId) {
     switch (intent.getAction()) {
       case ACTION_DELETE: {
-        String[] paths = intent.getStringArrayExtra(EXTRA_PATHS);
-        return new DeleteTask(startId, asList(paths));
+        List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
+        logger.debug("delete %s", paths);
+        return new DeleteTask(startId, paths);
       }
       default:
         throw new IllegalArgumentException(intent.getAction());

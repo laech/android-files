@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import l.files.io.file.Files;
+import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Files.isAncestorOrSelf;
@@ -16,6 +17,8 @@ import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public abstract class Paste implements FileOperation<Void> {
+
+  private static final Logger logger = Logger.get(Paste.class);
 
   private final Iterable<String> sources;
   private final String destination;
@@ -41,6 +44,7 @@ public abstract class Paste implements FileOperation<Void> {
         }
       } catch (IOException e) {
         failures.add(Failure.create(from, e));
+        logger.warn(e);
         continue;
       }
 
