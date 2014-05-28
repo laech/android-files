@@ -16,16 +16,22 @@ import static l.files.io.os.Dirent.readdir;
 
 /**
  * A stream to iterate through the children of a directory.
- * <p/>
- * {@link #iterator()} can only called once. Each call to the returned iterator
- * {@link Iterator#hasNext() hasNext()} and {@link Iterator#next() next()} will
- * throw an {@link DirectoryIteratorException} if an error was encountered while
- * reading the next child.
- * <p/>
- * An instance must be closed when no longer needed.
+ *
+ * <p>{@link #iterator()} can only called once. Each call to the returned
+ * iterator {@link Iterator#hasNext() hasNext()} and {@link Iterator#next()
+ * next()} will throw an {@link DirectoryIteratorException} if an error was
+ * encountered while reading the next child.
+ *
+ * <p>An instance must be closed when no longer needed.
  */
 public final class DirectoryStream
     implements Iterable<DirectoryStream.Entry>, Closeable {
+
+  /*
+   * Design note: this basically uses <dirent.h> to read directory entries,
+   * returning simple DirectoryStream.Entry without using stat/lstat will yield
+   * much better performance when directory is large.
+   */
 
   private final long dir;
   private boolean iterated;
@@ -126,7 +132,9 @@ public final class DirectoryStream
     Entry() {}
 
     public abstract long ino();
+
     public abstract String name();
+
     public abstract int type();
 
     static Entry create(Dirent entry) {
