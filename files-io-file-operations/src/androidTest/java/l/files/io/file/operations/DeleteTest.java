@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.file.FileInfo;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.verify;
 public final class DeleteTest extends FileBaseTest {
 
   private static final Listener NULL_LISTENER = new Listener() {
-    @Override public void onDelete(FileInfo file) {}
+    @Override public void onDelete(String path) {}
   };
 
   public void testNotifiesListener() throws Exception {
@@ -29,16 +28,16 @@ public final class DeleteTest extends FileBaseTest {
     tmp().createFile("a/b");
 
     Listener listener = mock(Listener.class);
-    ArgumentCaptor<FileInfo> captor = ArgumentCaptor.forClass(FileInfo.class);
-    Set<FileInfo> expected = newHashSet(
-        FileInfo.get(tmp().get("a").getPath()),
-        FileInfo.get(tmp().get("a/b").getPath())
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    Set<String> expected = newHashSet(
+        tmp().get("a").getPath(),
+        tmp().get("a/b").getPath()
     );
 
     create(listener, asList(src.getPath())).call();
     verify(listener, atLeastOnce()).onDelete(captor.capture());
 
-    Set<FileInfo> actual = newHashSet(captor.getAllValues());
+    Set<String> actual = newHashSet(captor.getAllValues());
     assertEquals(expected, actual);
   }
 

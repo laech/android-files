@@ -1,16 +1,12 @@
 package l.files.io.file.operations;
 
-import com.google.common.base.Function;
-
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.file.FileInfo;
 
-import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.Count.Listener;
@@ -25,7 +21,7 @@ public final class CountTest extends FileBaseTest {
     tmp().createFile("3/4/c.txt");
 
     Listener listener = mock(Listener.class);
-    ArgumentCaptor<FileInfo> captor = ArgumentCaptor.forClass(FileInfo.class);
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
     count(listener, tmp().get());
     verify(listener, atLeastOnce()).onCount(captor.capture());
@@ -38,13 +34,7 @@ public final class CountTest extends FileBaseTest {
         tmp().get("3/4").getPath(),
         tmp().get("3/4/c.txt").getPath());
 
-    Set<String> actual = newHashSet(transform(captor.getAllValues(),
-        new Function<FileInfo, String>() {
-          @Override public String apply(FileInfo input) {
-            return input.path();
-          }
-        }
-    ));
+    Set<String> actual = newHashSet(captor.getAllValues());
     assertEquals(expected, actual);
   }
 

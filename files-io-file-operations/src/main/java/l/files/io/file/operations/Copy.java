@@ -8,6 +8,7 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
 
+import l.files.io.file.DirectoryTreeTraverser;
 import l.files.io.file.FileInfo;
 import l.files.io.file.Files;
 import l.files.logging.Logger;
@@ -52,18 +53,22 @@ public final class Copy extends Paste {
   protected void paste(String from, String to, Collection<Failure> failures)
       throws InterruptedException {
 
-    FileInfo root;
-    try {
-      root = FileInfo.get(from);
-    } catch (IOException e) {
-      failures.add(Failure.create(from, e));
-      return;
-    }
+    File oldRoot = new File(from);
+    File newRoot = new File(to);
 
-    for (FileInfo file : FileTraverser.get().preOrderTraversal(root)) {
+    for (String path : DirectoryTreeTraverser.get().preOrderTraversal(from)) {
       checkInterrupt();
 
-      File dst = Files.replace(new File(file.path()), new File(from), new File(to));
+      FileInfo file;
+      try {
+        file = FileInfo.get(path);
+      } catch (IOException e) {
+        logger.error(e);
+        failures.add(Failure.create(path, e));
+        continue;
+      }
+
+      File dst = Files.replace(new File(path), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
         copyLink(file, dst.getPath(), failures);
       } else if (file.isDirectory()) {

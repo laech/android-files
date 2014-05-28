@@ -3,7 +3,6 @@ package l.files.operations;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.io.file.FileInfo;
 import l.files.io.file.operations.Count;
 import l.files.io.file.operations.Delete;
 
@@ -40,14 +39,14 @@ final class DeleteTask extends Task
     new Delete(this, paths).call();
   }
 
-  @Override public void onCount(FileInfo file) {
+  @Override public void onCount(String path) {
     totalItemCount++;
     if (setAndGetUpdateProgress()) {
       publishProgress(newProgress(PREPARING));
     }
   }
 
-  @Override public void onDelete(FileInfo file) {
+  @Override public void onDelete(String path) {
     deletedItemCount++;
     if (setAndGetUpdateProgress()) {
       publishProgress(newProgress(PROCESSING));

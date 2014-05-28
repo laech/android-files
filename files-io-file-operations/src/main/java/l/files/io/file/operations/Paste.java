@@ -29,6 +29,9 @@ public abstract class Paste implements FileOperation<Void> {
   }
 
   @Override public final Void call() throws InterruptedException {
+
+    // TODO clean up the "File" usage
+
     List<Failure> failures = new ArrayList<>(0);
     for (String from : sources) {
       checkInterrupt();

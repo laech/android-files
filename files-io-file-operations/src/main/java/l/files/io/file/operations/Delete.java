@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.io.file.FileInfo;
+import l.files.io.file.DirectoryTreeTraverser;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -37,32 +37,24 @@ public final class Delete implements FileOperation<Void> {
 
   private void delete(String path, List<Failure> failures)
       throws InterruptedException {
-    FileInfo root;
-    try {
-      root = FileInfo.get(path);
-    } catch (IOException e) {
-      failures.add(Failure.create(path, e));
-      logger.warn(e);
-      return;
-    }
 
-    for (FileInfo info : FileTraverser.get().postOrderTraversal(root)) {
+    for (String entry : DirectoryTreeTraverser.get().postOrderTraversal(path)) {
       try {
-        delete(info);
-        listener.onDelete(info);
+        delete(entry);
+        listener.onDelete(entry);
       } catch (IOException e) {
-        failures.add(Failure.create(info.path(), e));
+        failures.add(Failure.create(entry, e));
         logger.warn(e);
       }
     }
   }
 
-  private void delete(FileInfo info) throws IOException, InterruptedException {
+  private void delete(String path) throws IOException, InterruptedException {
     checkInterrupt();
-    remove(info.path());
+    remove(path);
   }
 
   public static interface Listener {
-    void onDelete(FileInfo file);
+    void onDelete(String path);
   }
 }

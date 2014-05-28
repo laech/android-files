@@ -2,17 +2,12 @@ package l.files.io.file.operations;
 
 import com.google.common.collect.ImmutableSet;
 
-import java.io.IOException;
-
-import l.files.io.file.FileInfo;
-import l.files.logging.Logger;
+import l.files.io.file.DirectoryTreeTraverser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public final class Count implements FileOperation<Void> {
-
-  private static final Logger logger = Logger.get(Count.class);
 
   private final Listener listener;
   private final Iterable<String> paths;
@@ -30,22 +25,13 @@ public final class Count implements FileOperation<Void> {
   }
 
   private void count(String path) throws InterruptedException {
-    FileInfo root;
-    try {
-      root = FileInfo.get(path);
-    } catch (IOException e) {
-      // No accessible or no longer exists, do not count
-      logger.warn(e);
-      return;
-    }
-
-    for (FileInfo file : FileTraverser.get().breadthFirstTraversal(root)) {
+    for (String entry : DirectoryTreeTraverser.get().breadthFirstTraversal(path)) {
       checkInterrupt();
-      listener.onCount(file);
+      listener.onCount(entry);
     }
   }
 
   public static interface Listener {
-    void onCount(FileInfo file);
+    void onCount(String path);
   }
 }
