@@ -11,16 +11,12 @@ import android.os.IBinder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import l.files.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.operations.Progress.STATUS_FINISHED;
 import static l.files.operations.Progress.getTaskId;
 import static l.files.operations.Progress.getTaskStatus;
@@ -41,17 +37,7 @@ public final class OperationService extends Service {
   private static final String ACTION_DELETE = "l.files.operations.DELETE";
   private static final String EXTRA_PATHS = "paths";
 
-  private static final Executor executor = createExecutor();
-
-  private static ThreadPoolExecutor createExecutor() {
-    int corePoolSize = 1;
-    int maxPoolSize = 5;
-    int keepAliveTimeSeconds = 1;
-    TimeUnit unit = SECONDS;
-    BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-    return new ThreadPoolExecutor(corePoolSize, maxPoolSize,
-        keepAliveTimeSeconds, unit, workQueue);
-  }
+  private static final Executor executor = newFixedThreadPool(5);
 
   private Map<Integer, AsyncTask<?, ?, ?>> tasks;
   private CancellationReceiver cancellationReceiver;
