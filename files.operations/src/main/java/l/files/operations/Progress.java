@@ -84,7 +84,7 @@ public class Progress {
    * Retrieves additional information from a file delete intent.
    */
   public static final class Delete extends Progress {
-    static final String ACTION =
+    public static final String ACTION =
         "l.files.operations.intent.action.DELETE_PROGRESS";
 
     private Delete() {}

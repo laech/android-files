@@ -3,10 +3,10 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.9.+'
+    classpath 'com.android.tools.build:gradle:0.10.+'
   }
 }
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 repositories {
   mavenCentral()
@@ -14,11 +14,13 @@ repositories {
 
 android {
   compileSdkVersion 19
-  buildToolsVersion "19.0.3"
+  buildToolsVersion "19.1"
 
   defaultConfig {
-    minSdkVersion 16
+    minSdkVersion 14
     targetSdkVersion 19
+    versionCode 1
+    versionName "1.0"
   }
 
   compileOptions {
@@ -37,14 +39,4 @@ android {
 
 dependencies {
   compile project(':files.operations')
-  compile project(':files.operations.ui')
-  compile project(':files-analytics')
-  compile project(':files-common')
-  compile project(':files-provider')
-  compile project(':files-provider-bookmarks')
-  compile project.libs.joda_time
-  compile project.libs.otto
-  compile project.libs.google_play_services
-
-  androidTestCompile project.libs.mockito
 }

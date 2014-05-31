@@ -17,6 +17,7 @@
       android:name="l.files.operations.permission.RECEIVE_PROGRESS"
       android:protectionLevel="signature"/>
 
+  <uses-permission android:name="l.files.operations.permission.SEND_CANCELLATION"/>
   <uses-permission android:name="l.files.operations.permission.SEND_PROGRESS"/>
   <uses-permission android:name="l.files.operations.permission.RECEIVE_PROGRESS"/>
 

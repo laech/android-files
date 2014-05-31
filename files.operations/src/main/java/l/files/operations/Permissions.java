@@ -14,11 +14,5 @@ public final class Permissions {
   public static final String SEND_PROGRESS =
       "l.files.operations.permission.SEND_PROGRESS";
 
-  /**
-   * Permission required to send cancellation to this module.
-   */
-  public static final String SEND_CANCELLATION =
-      "l.files.operations.permission.SEND_CANCELLATION";
-
   private Permissions() {}
 }

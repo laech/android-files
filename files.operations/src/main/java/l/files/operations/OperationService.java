@@ -72,6 +72,7 @@ public final class OperationService extends Service {
    * Creates an intent to be broadcast for cancelling a running task.
    */
   public static Intent newCancelIntent(int taskId) {
+    // Don't set class name as that causes pending intent to not work
     return new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
   }
 
@@ -97,8 +98,7 @@ public final class OperationService extends Service {
 
   private void registerCancellationReceiver() {
     IntentFilter filter = new IntentFilter(ACTION_CANCEL);
-    registerReceiver(
-        cancellationReceiver, filter, Permissions.SEND_CANCELLATION, null);
+    registerReceiver(cancellationReceiver, filter);
   }
 
   @Override public void onDestroy() {
