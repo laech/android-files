@@ -3,12 +3,10 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.9.+'
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
+    classpath 'com.android.tools.build:gradle:0.10.+'
   }
 }
 apply plugin: 'android-library'
-apply plugin: 'android-apt'
 
 repositories {
   mavenCentral()
@@ -16,7 +14,7 @@ repositories {
 
 android {
   compileSdkVersion 19
-  buildToolsVersion "19.0.3"
+  buildToolsVersion "19.1"
 
   defaultConfig {
     minSdkVersion 14
@@ -41,8 +39,7 @@ android {
 
 dependencies {
   compile project(':files-io-file-operations')
-  compile project.libs.auto_value
-  compile project.libs.otto
+  compile project.libs.guava
 
   androidTestCompile project(':files-common-testing')
 }

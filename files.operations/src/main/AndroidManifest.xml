@@ -1,10 +1,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="l.files.operations">
+          package="l.files.operations">
+
+  <!--
+    Senders of file operation progress broadcasts from this module will have
+    this permission.
+  -->
+  <permission
+      android:name="l.files.operations.permission.SEND_PROGRESS"
+      android:protectionLevel="signature"/>
+
+  <!--
+    Modules that wishes to receive file operations progress broadcast need to
+    acquire this permission.
+  -->
+  <permission
+      android:name="l.files.operations.permission.RECEIVE_PROGRESS"
+      android:protectionLevel="signature"/>
+
+  <uses-permission android:name="l.files.operations.permission.SEND_PROGRESS"/>
+  <uses-permission android:name="l.files.operations.permission.RECEIVE_PROGRESS"/>
 
   <application>
     <service
         android:name=".OperationService"
-        android:exported="false" />
+        android:exported="false"/>
   </application>
 
 </manifest>

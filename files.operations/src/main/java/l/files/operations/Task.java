@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,21 +11,23 @@ import java.util.List;
 
 import l.files.io.file.operations.FileException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.currentTimeMillis;
 import static l.files.io.file.operations.FileOperation.Failure;
-import static l.files.operations.Progress.State;
 
-abstract class Task extends AsyncTask<Object, Object, List<Failure>> {
+abstract class Task extends AsyncTask<Object, Intent, List<Failure>> {
 
   private static final Handler handler = new Handler(Looper.getMainLooper());
 
   private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
+  private final Context context;
   private final int id;
   private volatile long startTime;
   private long lastProgressTime;
 
-  protected Task(int id) {
+  protected Task(Context context, int id) {
+    this.context = checkNotNull(context, "context");
     this.id = id;
   }
 
@@ -53,21 +57,21 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> {
   }
 
   /**
-   * Gets the message to post while the task is {@link State#PENDING}.
+   * Gets the message to post while the task is {@link Progress#STATUS_PENDING}.
    */
-  protected abstract Object getPendingMessage();
+  protected abstract Intent getPendingMessage();
 
   /**
-   * Gets the message to post when the task is {@link State#FINISHED}.
+   * Gets the message to post when the task is {@link Progress#STATUS_FINISHED}.
    *
    * @param result the result of execution, empty if none
    */
-  protected abstract Object getFinishedMessage(List<Failure> result);
+  protected abstract Intent getFinishedMessage(List<Failure> result);
 
   @Override protected final void onPreExecute() {
     startTime = System.currentTimeMillis();
     if (!isCancelled()) {
-      post(getPendingMessage());
+      send(getPendingMessage());
     }
   }
 
@@ -91,11 +95,11 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> {
 
   protected abstract void doTask() throws InterruptedException;
 
-  @Override protected final void onProgressUpdate(Object... values) {
+  @Override protected final void onProgressUpdate(Intent... values) {
     super.onProgressUpdate(values);
     if (!isCancelled()) {
-      for (Object value : values) {
-        post(value);
+      for (Intent value : values) {
+        send(value);
       }
     }
   }
@@ -110,13 +114,13 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> {
 
   private void onDone(List<Failure> result) {
     if (result == null) {
-      post(getFinishedMessage(Collections.<Failure>emptyList()));
+      send(getFinishedMessage(Collections.<Failure>emptyList()));
     } else {
-      post(getFinishedMessage(result));
+      send(getFinishedMessage(result));
     }
   }
 
-  private void post(Object value) {
-    EventBus.get().post(value);
+  private void send(Intent value) {
+    context.sendBroadcast(value, Permissions.RECEIVE_PROGRESS);
   }
 }
