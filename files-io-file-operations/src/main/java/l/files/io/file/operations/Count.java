@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import l.files.io.file.DirectoryTreeTraverser;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public final class Count implements FileOperation<Void> {
@@ -25,9 +26,10 @@ public final class Count implements FileOperation<Void> {
   }
 
   private void count(String path) throws InterruptedException {
-    for (String entry : DirectoryTreeTraverser.get().breadthFirstTraversal(path)) {
+    Entry root = Entry.create(path);
+    for (Entry entry : DirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
       checkInterrupt();
-      listener.onCount(entry);
+      listener.onCount(entry.path());
     }
   }
 

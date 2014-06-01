@@ -10,6 +10,7 @@ import l.files.io.file.DirectoryTreeTraverser;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.Files.remove;
 import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
@@ -37,13 +38,13 @@ public final class Delete implements FileOperation<Void> {
 
   private void delete(String path, List<Failure> failures)
       throws InterruptedException {
-
-    for (String entry : DirectoryTreeTraverser.get().postOrderTraversal(path)) {
+    Entry root = Entry.create(path);
+    for (Entry entry : DirectoryTreeTraverser.get().postOrderTraversal(root)) {
       try {
-        delete(entry);
-        listener.onDelete(entry);
+        delete(entry.path());
+        listener.onDelete(entry.path());
       } catch (IOException e) {
-        failures.add(Failure.create(entry, e));
+        failures.add(Failure.create(entry.path(), e));
         logger.warn(e);
       }
     }

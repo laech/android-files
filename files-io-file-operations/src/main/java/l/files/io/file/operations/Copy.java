@@ -14,6 +14,7 @@ import l.files.io.file.Files;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
@@ -55,20 +56,21 @@ public final class Copy extends Paste {
 
     File oldRoot = new File(from);
     File newRoot = new File(to);
+    Entry root = Entry.create(from);
 
-    for (String path : DirectoryTreeTraverser.get().preOrderTraversal(from)) {
+    for (Entry entry : DirectoryTreeTraverser.get().preOrderTraversal(root)) {
       checkInterrupt();
 
       FileInfo file;
       try {
-        file = FileInfo.get(path);
+        file = FileInfo.get(entry.path());
       } catch (IOException e) {
         logger.error(e);
-        failures.add(Failure.create(path, e));
+        failures.add(Failure.create(entry.path(), e));
         continue;
       }
 
-      File dst = Files.replace(new File(path), oldRoot, newRoot);
+      File dst = Files.replace(new File(entry.path()), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
         copyLink(file, dst.getPath(), failures);
       } else if (file.isDirectory()) {

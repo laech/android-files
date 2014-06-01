@@ -5,6 +5,7 @@ import java.util.Set;
 import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -14,14 +15,15 @@ public final class DirectoryTreeTraverserTest extends FileBaseTest {
     tmp().createFile("a/b");
     tmp().createFile("a/c");
 
-    Set<String> expected = newHashSet(
-        tmp().get().getPath(),
-        tmp().get("a").getPath(),
-        tmp().get("a/b").getPath(),
-        tmp().get("a/c").getPath()
+    Set<Entry> expected = newHashSet(
+        Entry.create(tmp().get().getPath()),
+        Entry.create(tmp().get("a").getPath()),
+        Entry.create(tmp().get("a/b").getPath()),
+        Entry.create(tmp().get("a/c").getPath())
     );
-    Set<String> actual = newHashSet(
-        DirectoryTreeTraverser.get().breadthFirstTraversal(tmp().get().getPath())
+    Set<Entry> actual = newHashSet(
+        DirectoryTreeTraverser.get()
+            .breadthFirstTraversal(Entry.create(tmp().get().getPath()))
     );
 
     assertThat(actual, is(expected));
