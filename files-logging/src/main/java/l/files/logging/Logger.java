@@ -2,11 +2,8 @@ package l.files.logging;
 
 import android.util.Log;
 
-import java.io.IOException;
-
 import static android.util.Log.DEBUG;
 import static android.util.Log.ERROR;
-import static android.util.Log.INFO;
 import static android.util.Log.WARN;
 import static android.util.Log.isLoggable;
 import static java.lang.String.format;
@@ -60,12 +57,6 @@ public final class Logger {
   public void warn(Throwable err) {
     if (isLoggable(tag, WARN)) {
       Log.w(tag, err);
-    }
-  }
-
-  public void info(Throwable err, String format, Object arg) {
-    if (isLoggable(tag, INFO)) {
-      Log.i(tag, format(format, arg), err);
     }
   }
 
