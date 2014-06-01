@@ -11,6 +11,7 @@ import android.util.LruCache;
 import com.squareup.otto.Bus;
 
 import l.files.common.event.Events;
+import l.files.operations.ui.OperationsUi;
 
 import static l.files.BuildConfig.DEBUG;
 import static l.files.app.Preferences.newAnalyticsListener;
@@ -44,6 +45,8 @@ public final class FilesApp extends Application {
     bitmapCache = createBitmapCache();
 
     Preferences.register(this, newAnalyticsListener(this));
+
+    OperationsUi.init(this);
 
     if (DEBUG) {
       StrictMode.enableDefaults();

@@ -1,15 +1,3 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="l.files.operations.ui">
-
-  <application>
-    <receiver
-        android:name=".notification.NotificationReceiver"
-        android:permission="l.files.operations.permission.SEND_PROGRESS"
-        android:exported="false">
-      <intent-filter>
-        <action android:name="l.files.operations.intent.action.DELETE_PROGRESS"/>
-      </intent-filter>
-    </receiver>
-  </application>
-
+<manifest package="l.files.operations.ui">
+  <application/>
 </manifest>

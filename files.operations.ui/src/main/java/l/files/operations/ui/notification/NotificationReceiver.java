@@ -2,22 +2,21 @@ package l.files.operations.ui.notification;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import l.files.operations.OperationService;
 import l.files.operations.Progress;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.app.PendingIntent.getBroadcast;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static l.files.operations.OperationService.newCancelIntent;
 import static l.files.operations.Progress.STATUS_FINISHED;
 import static l.files.operations.Progress.getTaskId;
 import static l.files.operations.Progress.getTaskStartTime;
@@ -29,6 +28,12 @@ import static l.files.operations.Progress.getTaskStatus;
 public final class NotificationReceiver extends BroadcastReceiver {
 
   private static Map<String, NotificationViewer> viewers;
+
+  public static void register(LocalBroadcastManager manager) {
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(Progress.Delete.ACTION);
+    manager.registerReceiver(new NotificationReceiver(), filter);
+  }
 
   @Override public void onReceive(Context context, Intent intent) {
     if (viewers == null) {
@@ -75,12 +80,7 @@ public final class NotificationReceiver extends BroadcastReceiver {
         .addAction(
             android.R.drawable.ic_menu_close_clear_cancel,
             context.getString(android.R.string.cancel),
-            newCancellationPendingIntent(context, getTaskId(intent)))
+            newCancelIntent(context, getTaskId(intent)))
         .build();
-  }
-
-  private PendingIntent newCancellationPendingIntent(Context context, int id) {
-    Intent intent = OperationService.newCancelIntent(id);
-    return getBroadcast(context, id, intent, FLAG_UPDATE_CURRENT);
   }
 }

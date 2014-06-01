@@ -2,6 +2,7 @@ package l.files.operations;
 
 import android.content.Intent;
 import android.os.SystemClock;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.common.collect.ImmutableList;
 
@@ -12,6 +13,8 @@ import static l.files.io.file.operations.FileOperation.Failure;
 
 /**
  * Helper to retrieve common information from a file operation intent.
+ *
+ * @see LocalBroadcastManager
  */
 public class Progress {
 
@@ -98,6 +101,9 @@ public class Progress {
    * Retrieves additional information from a file delete intent.
    */
   public static final class Delete extends Progress {
+    /**
+     * The intent action to register for listening to file deletions.
+     */
     public static final String ACTION =
         "l.files.operations.intent.action.DELETE_PROGRESS";
 

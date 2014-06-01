@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -130,6 +131,6 @@ abstract class Task extends AsyncTask<Object, Intent, List<Failure>> {
   }
 
   private void send(Intent value) {
-    context.sendBroadcast(value, Permissions.RECEIVE_PROGRESS);
+    LocalBroadcastManager.getInstance(context).sendBroadcast(value);
   }
 }

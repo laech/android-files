@@ -1,5 +1,6 @@
 package l.files.operations;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.concurrent.Executor;
 
 import l.files.logging.Logger;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static android.app.PendingIntent.getBroadcast;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -63,9 +67,10 @@ public final class OperationService extends Service {
   /**
    * Creates an intent to be broadcast for cancelling a running task.
    */
-  public static Intent newCancelIntent(int taskId) {
+  public static PendingIntent newCancelIntent(Context context, int taskId) {
     // Don't set class name as that causes pending intent to not work
-    return new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
+    Intent intent = new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
+    return getBroadcast(context, taskId, intent, FLAG_UPDATE_CURRENT);
   }
 
   @Override public IBinder onBind(Intent intent) {
@@ -84,8 +89,8 @@ public final class OperationService extends Service {
   private void registerTaskCleanupReceiver() {
     IntentFilter filter = new IntentFilter();
     filter.addAction(Progress.Delete.ACTION);
-    registerReceiver(
-        taskCleanupReceiver, filter, Permissions.SEND_PROGRESS, null);
+    LocalBroadcastManager.getInstance(this)
+        .registerReceiver(taskCleanupReceiver, filter);
   }
 
   private void registerCancellationReceiver() {
@@ -97,7 +102,8 @@ public final class OperationService extends Service {
     super.onDestroy();
     stopForeground(true);
     unregisterReceiver(cancellationReceiver);
-    unregisterReceiver(taskCleanupReceiver);
+    LocalBroadcastManager.getInstance(this).
+        unregisterReceiver(taskCleanupReceiver);
   }
 
   @Override

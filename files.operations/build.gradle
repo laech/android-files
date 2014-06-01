@@ -39,6 +39,7 @@ android {
 
 dependencies {
   compile project(':files-io-file-operations')
+  compile project.libs.android_support
   compile project.libs.guava
 
   androidTestCompile project(':files-common-testing')
