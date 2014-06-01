@@ -44,8 +44,12 @@ public final class DirectoryStream
    * @throws IOException includes path is not accessible or doesn't exist
    */
   public static DirectoryStream open(String path) throws IOException {
-    long dir = opendir(path);
-    return new DirectoryStream(dir);
+    try {
+      long dir = opendir(path);
+      return new DirectoryStream(dir);
+    } catch (ErrnoException e) {
+      throw new IOException("Failed to open " + path, e);
+    }
   }
 
   @Override public void close() throws IOException {

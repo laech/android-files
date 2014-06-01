@@ -32,11 +32,20 @@ public final class Files {
   private Files() {}
 
   public static void rename(String oldPath, String newPath) throws IOException {
-    Stdio.rename(oldPath, newPath);
+    try {
+      Stdio.rename(oldPath, newPath);
+    } catch (ErrnoException e) {
+      throw new IOException(
+          "Failed to rename " + oldPath + " to " + newPath, e);
+    }
   }
 
   public static void remove(String path) throws IOException {
-    Stdio.remove(path);
+    try {
+      Stdio.remove(path);
+    } catch (ErrnoException e) {
+      throw new IOException("Failed to remove " + path, e);
+    }
   }
 
   /**
@@ -44,7 +53,12 @@ public final class Files {
    * @param link path of the link itself
    */
   public static void symlink(String target, String link) throws IOException {
-    Unistd.symlink(target, link);
+    try {
+      Unistd.symlink(target, link);
+    } catch (ErrnoException e) {
+      throw new IOException(
+          "Failed to link target=" + target + ", link=" + link, e);
+    }
   }
 
   public static boolean exists(String path) throws IOException {
@@ -54,7 +68,7 @@ public final class Files {
       if (e.errno() == ENOENT) {
         return false;
       }
-      throw e;
+      throw new IOException("Failed to check file existence " + path, e);
     }
   }
 
@@ -62,7 +76,11 @@ public final class Files {
    * Reads the actual path pointed to by the given symbolic link.
    */
   public static String readlink(String link) throws IOException {
-    return Unistd.readlink(link);
+    try {
+      return Unistd.readlink(link);
+    } catch (ErrnoException e) {
+      throw new IOException("Failed to readlink " + link, e);
+    }
   }
 
   /**
