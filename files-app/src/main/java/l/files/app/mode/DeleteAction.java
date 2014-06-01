@@ -35,15 +35,17 @@ import static l.files.provider.FileCursors.getLocation;
 public final class DeleteAction extends MultiChoiceModeAction {
 
   private final AbsListView list;
+  private final String dirLocation;
 
-  private DeleteAction(AbsListView list) {
+  private DeleteAction(AbsListView list, String dirLocation) {
     super(R.id.delete);
+    this.dirLocation = checkNotNull(dirLocation, "dirLocation");
     this.list = checkNotNull(list, "list");
   }
 
-  public static MultiChoiceModeListener create(AbsListView list) {
+  public static MultiChoiceModeListener create(AbsListView list, String location) {
     Context context = list.getContext();
-    MultiChoiceModeListener action = new DeleteAction(list);
+    MultiChoiceModeListener action = new DeleteAction(list, location);
     return new AnalyticsAction(context, action, "delete");
   }
 
@@ -82,7 +84,7 @@ public final class DeleteAction extends MultiChoiceModeAction {
   private void requestDelete(final List<String> fileLocations) {
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        FilesContract.delete(list.getContext(), fileLocations);
+        FilesContract.delete(list.getContext(), dirLocation, fileLocations);
       }
     });
   }

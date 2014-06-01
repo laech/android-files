@@ -56,7 +56,8 @@ public final class NotificationReceiver extends BroadcastReceiver {
 
   private Notification newNotification(Context context, Intent intent) {
     NotificationViewer viewer = viewers.get(intent.getAction());
-    int percentage = (int) (viewer.getProgress(intent) * 100);
+    int progressMax = 10000;
+    int percentage = (int) (viewer.getProgress(intent) * progressMax);
     boolean indeterminate = percentage == 0;
     return new Notification.Builder(context)
         .setContentTitle(viewer.getContentTitle(intent))
@@ -69,7 +70,7 @@ public final class NotificationReceiver extends BroadcastReceiver {
         .setWhen(getTaskStartTime(intent))
         .setOnlyAlertOnce(true)
         .setOngoing(true)
-        .setProgress(100, percentage, indeterminate)
+        .setProgress(progressMax, percentage, indeterminate)
         .setContentInfo(viewer.getContentInfo(intent))
         .addAction(
             android.R.drawable.ic_menu_close_clear_cancel,

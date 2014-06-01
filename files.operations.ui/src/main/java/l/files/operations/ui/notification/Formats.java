@@ -1,5 +1,7 @@
 package l.files.operations.ui.notification;
 
+import com.google.common.base.Optional;
+
 import static android.text.format.DateUtils.formatElapsedTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -15,13 +17,13 @@ final class Formats {
    * @param now current time in milliseconds
    * @param total the total number of work
    * @param processed the number of work done
-   * @throws IllegalArgumentException if {@code processed} is <= 0
+   * @return the formatted string, or absent if unable to determine
    */
-  public static String formatTimeRemaining(
+  public static Optional<String> formatTimeRemaining(
       long startTime, long now, long total, long processed) {
 
     if (processed <= 0) {
-      throw new IllegalArgumentException("processed=" + processed);
+      return Optional.absent();
     }
 
     long timeToProcessOne = (long) ((now - startTime) / (float) processed);
@@ -30,6 +32,6 @@ final class Formats {
     if (formatted.charAt(0) == '0') {
       formatted = formatted.substring(1);
     }
-    return formatted;
+    return Optional.of(formatted);
   }
 }

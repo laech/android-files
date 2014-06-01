@@ -143,7 +143,7 @@ public final class FilesFragment extends BaseFileListFragment
         SelectAllAction.create(list),
         CutAction.create(list),
         CopyAction.create(list),
-        DeleteAction.create(list),
+        DeleteAction.create(list, directoryLocation),
         RenameAction.create(list, fragmentManager, directoryLocation)
     ));
   }

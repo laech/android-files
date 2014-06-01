@@ -3,6 +3,8 @@ package l.files.operations.ui.notification;
 import android.content.Intent;
 import android.content.res.Resources;
 
+import com.google.common.base.Optional;
+
 import l.files.operations.ui.R;
 
 import static android.os.SystemClock.elapsedRealtime;
@@ -57,7 +59,7 @@ final class DeleteViewer implements NotificationViewer {
   }
 
   private String getTitleForStatusProcessing(Intent intent) {
-    int count = getTotalItemCount(intent);
+    int count = getTotalItemCount(intent) - getDeletedItemCount(intent);
     return res.getQuantityString(deleting_x_items, count, count);
   }
 
@@ -74,10 +76,14 @@ final class DeleteViewer implements NotificationViewer {
   }
 
   private String getTimeRemaining(Intent intent) {
-    return res.getString(R.string.x_countdown, formatTimeRemaining(
+    Optional<String> formatted = formatTimeRemaining(
         getElapsedTimeOnStart(intent),
         elapsedRealtime(),
         getTotalItemCount(intent),
-        getDeletedItemCount(intent)));
+        getDeletedItemCount(intent));
+    if (formatted.isPresent()) {
+      return res.getString(R.string.x_countdown, formatted.get());
+    }
+    return null;
   }
 }
