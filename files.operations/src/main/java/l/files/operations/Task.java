@@ -11,6 +11,7 @@ import java.util.List;
 
 import l.files.io.file.operations.FileException;
 
+import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.currentTimeMillis;
 import static l.files.io.file.operations.FileOperation.Failure;
@@ -23,7 +24,10 @@ abstract class Task extends AsyncTask<Object, Intent, List<Failure>> {
 
   private final Context context;
   private final int id;
+
+  private volatile long elapsedTimeOnStart;
   private volatile long startTime;
+
   private long lastProgressTime;
 
   protected Task(Context context, int id) {
@@ -56,6 +60,10 @@ abstract class Task extends AsyncTask<Object, Intent, List<Failure>> {
     return startTime;
   }
 
+  protected final long elapsedTimeOnStart() {
+    return elapsedTimeOnStart;
+  }
+
   /**
    * Gets the message to post while the task is {@link Progress#STATUS_PENDING}.
    */
@@ -69,7 +77,8 @@ abstract class Task extends AsyncTask<Object, Intent, List<Failure>> {
   protected abstract Intent getFinishedMessage(List<Failure> result);
 
   @Override protected final void onPreExecute() {
-    startTime = System.currentTimeMillis();
+    startTime = currentTimeMillis();
+    elapsedTimeOnStart = elapsedRealtime();
     if (!isCancelled()) {
       send(getPendingMessage());
     }

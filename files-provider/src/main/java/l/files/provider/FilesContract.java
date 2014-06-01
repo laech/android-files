@@ -44,6 +44,7 @@ public final class FilesContract {
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
   static final String EXTRA_FILE_LOCATION = "file_uri";
+  static final String EXTRA_ROOT_LOCATION = "root_uri";
   static final String EXTRA_FILE_LOCATIONS = "file_uris";
   static final String EXTRA_NEW_NAME = "new_name";
   static final String EXTRA_DESTINATION_LOCATION = "destination";
@@ -274,11 +275,16 @@ public final class FilesContract {
   /**
    * Deletes the files identified by the given {@link FileInfo#LOCATION}s. Do
    * not call this on the UI thread.
+   *
+   * @param rootLocation the common parent of the files to be deleted
+   * @param fileLocations the files to be deleted
    */
-  public static void delete(Context context, Collection<String> fileLocations) {
+  public static void delete(
+      Context context, String rootLocation, Collection<String> fileLocations) {
     ensureNonMainThread();
     String[] array = fileLocations.toArray(new String[fileLocations.size()]);
-    Bundle args = new Bundle(1);
+    Bundle args = new Bundle(2);
+    args.putString(EXTRA_ROOT_LOCATION, checkNotNull(rootLocation));
     args.putStringArray(EXTRA_FILE_LOCATIONS, array);
     Uri uri = buildFilesUri(context);
     context.getContentResolver().call(uri, METHOD_DELETE, null, args);

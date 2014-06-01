@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="pending">Pending</string>
+  <string name="from_x">From: %s</string>
 
   <string name="preparing_to_delete">Preparing to delete</string>
   <plurals name="preparing_delete_x_items">

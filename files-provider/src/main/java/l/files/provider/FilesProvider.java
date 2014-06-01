@@ -38,6 +38,7 @@ import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.EXTRA_RESULT;
+import static l.files.provider.FilesContract.EXTRA_ROOT_LOCATION;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
@@ -230,17 +231,22 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Bundle callDelete(Bundle extras) {
+    String rootPath = toFilePath(extras.getString(EXTRA_ROOT_LOCATION));
     String[] paths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
-    OperationService.delete(getContext(), paths);
+    OperationService.delete(getContext(), rootPath, paths);
     return Bundle.EMPTY;
   }
 
   private String[] toFilePaths(String[] fileLocations) {
     Set<String> paths = newHashSetWithExpectedSize(fileLocations.length);
     for (String location : fileLocations) {
-      paths.add(new File(URI.create(location)).getPath());
+      paths.add(toFilePath(location));
     }
     return paths.toArray(new String[paths.size()]);
+  }
+
+  private String toFilePath(String location) {
+    return new File(URI.create(location)).getPath();
   }
 
   private Set<File> toFilesSet(String[] fileLocations) {
