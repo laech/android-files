@@ -29,7 +29,7 @@ final class Formats {
     long timeToProcessOne = (long) ((now - startTime) / (float) processed);
     long timeRemaining = (total - processed) * timeToProcessOne;
     String formatted = formatElapsedTime(MILLISECONDS.toSeconds(timeRemaining));
-    if (formatted.charAt(0) == '0') {
+    if (formatted.charAt(0) == '0' && formatted.charAt(1) != ':') {
       formatted = formatted.substring(1);
     }
     return Optional.of(formatted);
