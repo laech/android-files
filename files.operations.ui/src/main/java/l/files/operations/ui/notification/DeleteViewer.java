@@ -14,7 +14,7 @@ import static l.files.operations.Progress.Delete.getTotalItemCount;
 import static l.files.operations.Progress.STATUS_PENDING;
 import static l.files.operations.Progress.STATUS_PREPARING;
 import static l.files.operations.Progress.STATUS_PROCESSING;
-import static l.files.operations.Progress.getElapsedTimeOnStart;
+import static l.files.operations.Progress.getElapsedTimeOnProcessStart;
 import static l.files.operations.Progress.getRootPath;
 import static l.files.operations.Progress.getTaskStatus;
 import static l.files.operations.ui.R.drawable;
@@ -77,7 +77,7 @@ final class DeleteViewer implements NotificationViewer {
 
   private String getTimeRemaining(Intent intent) {
     Optional<String> formatted = formatTimeRemaining(
-        getElapsedTimeOnStart(intent),
+        getElapsedTimeOnProcessStart(intent),
         elapsedRealtime(),
         getTotalItemCount(intent),
         getDeletedItemCount(intent));

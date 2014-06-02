@@ -64,9 +64,10 @@ public class Progress {
   }
 
   /**
-   * The value of {@link SystemClock#elapsedRealtime()} on start of the task.
+   * The value of {@link SystemClock#elapsedRealtime()} when the task transits
+   * to {@link #STATUS_PROCESSING}.
    */
-  public static long getElapsedTimeOnStart(Intent intent) {
+  public static long getElapsedTimeOnProcessStart(Intent intent) {
     return intent.getLongExtra(ELAPSED_TIME_ON_START, -1);
   }
 
