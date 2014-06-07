@@ -1,75 +1,62 @@
 package l.files.operations;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.google.common.collect.ImmutableList;
-
-import java.util.Collections;
-import java.util.List;
 
 import l.files.io.file.operations.Count;
 import l.files.io.file.operations.Delete;
+import l.files.operations.info.DeleteTaskInfo;
 
-import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.file.operations.FileOperation.Failure;
-import static l.files.operations.Progress.STATUS_FINISHED;
-import static l.files.operations.Progress.STATUS_PENDING;
-import static l.files.operations.Progress.STATUS_PREPARING;
-import static l.files.operations.Progress.STATUS_PROCESSING;
 
 final class DeleteTask extends Task
-    implements Count.Listener, Delete.Listener {
+        implements DeleteTaskInfo, Count.Listener, Delete.Listener {
 
-  private final String rootPath;
-  private final Iterable<String> paths;
+    private final String sourceRootPath;
+    private final Iterable<String> paths;
 
-  private volatile long elapsedTimeOnProcessStart = -1;
+    private volatile int totalItemCount;
+    private volatile int deletedItemCount;
 
-  private int totalItemCount;
-  private int deletedItemCount;
-
-  DeleteTask(Context context, int id, String rootPath, Iterable<String> paths) {
-    super(context, id);
-    this.paths = ImmutableList.copyOf(paths);
-    this.rootPath = checkNotNull(rootPath, "rootPath");
-  }
-
-  @Override protected Intent getPendingMessage() {
-    return newProgress(STATUS_PENDING);
-  }
-
-  @Override protected Intent getFinishedMessage(List<Failure> result) {
-    return newProgress(STATUS_FINISHED, result);
-  }
-
-  @Override protected void doTask() throws InterruptedException {
-    new Count(this, paths).call();
-    elapsedTimeOnProcessStart = elapsedRealtime();
-    new Delete(this, paths).call();
-  }
-
-  @Override public void onCount(String path) {
-    totalItemCount++;
-    if (setAndGetUpdateProgress()) {
-      publishProgress(newProgress(STATUS_PREPARING));
+    DeleteTask(int id, String sourceRootPath, Iterable<String> paths) {
+        super(id);
+        this.paths = ImmutableList.copyOf(paths);
+        this.sourceRootPath = checkNotNull(sourceRootPath);
     }
-  }
 
-  @Override public void onDelete(String path) {
-    deletedItemCount++;
-    if (setAndGetUpdateProgress()) {
-      publishProgress(newProgress(STATUS_PROCESSING));
+    @Override
+    protected void doTask() throws InterruptedException {
+        new Count(this, paths).call();
+        new Delete(this, paths).call();
     }
-  }
 
-  private Intent newProgress(int status) {
-    return newProgress(status, Collections.<Failure>emptyList());
-  }
+    @Override
+    public void onCount(String path) {
+        totalItemCount++;
+        if (setAndGetUpdateProgress()) {
+            notifyProgress();
+        }
+    }
 
-  private Intent newProgress(int status, List<Failure> failures) {
-    return Progress.Delete.create(id(), startTime(), elapsedTimeOnProcessStart,
-        status, failures, rootPath, totalItemCount, deletedItemCount);
-  }
+    @Override
+    public void onDelete(String path) {
+        deletedItemCount++;
+        if (setAndGetUpdateProgress()) {
+            notifyProgress();
+        }
+    }
+
+    @Override
+    public int getTotalItemCount() {
+        return totalItemCount;
+    }
+
+    @Override
+    public int getDeletedItemCount() {
+        return deletedItemCount;
+    }
+
+    @Override
+    public String getSourceRootPath() {
+        return sourceRootPath;
+    }
 }
