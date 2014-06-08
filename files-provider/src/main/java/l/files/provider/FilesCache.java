@@ -12,6 +12,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +21,6 @@ import java.util.concurrent.ConcurrentMap;
 import l.files.io.file.event.WatchEvent;
 import l.files.io.file.event.WatchService;
 import l.files.io.file.Path;
-import l.files.io.os.ErrnoException;
 import l.files.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -96,7 +96,7 @@ final class FilesCache implements
       try {
         Path child = path.child(name);
         map.put(child, FileData.stat(child));
-      } catch (ErrnoException e) {
+      } catch (IOException e) {
         logger.warn(e);
       }
     }
@@ -131,7 +131,8 @@ final class FilesCache implements
 
     try {
       data.put(path, FileData.stat(path));
-    } catch (ErrnoException e) {
+    } catch (IOException e) {
+      logger.warn(e);
       remove(path);
     }
   }

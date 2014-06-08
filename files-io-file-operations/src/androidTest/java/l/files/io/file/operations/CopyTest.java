@@ -60,7 +60,7 @@ public final class CopyTest extends PasteTest {
     return newHashSet(transform(captor.getAllValues(),
         new Function<FileInfo, String>() {
           @Override public String apply(FileInfo input) {
-            return input.path();
+            return input.getPath();
           }
         }
     ));

@@ -84,11 +84,11 @@ public final class Copy extends Paste {
 
   private void copyLink(FileInfo src, String dst, Collection<Failure> failures) {
     try {
-      String target = readlink(src.path());
+      String target = readlink(src.getPath());
       symlink(target, dst);
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      failures.add(Failure.create(src.path(), e));
+      failures.add(Failure.create(src.getPath(), e));
     }
   }
 
@@ -98,7 +98,7 @@ public final class Copy extends Paste {
       forceMkdir(dst);
       setLastModifiedDate(src, dst.getPath());
     } catch (IOException e) {
-      failures.add(Failure.create(src.path(), e));
+      failures.add(Failure.create(src.getPath(), e));
     }
   }
 
@@ -110,7 +110,7 @@ public final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(src.path());
+      fis = new FileInputStream(src.getPath());
       fos = new FileOutputStream(dst);
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
@@ -129,7 +129,7 @@ public final class Copy extends Paste {
       if (e instanceof ClosedByInterruptException) {
         throw new InterruptedException();
       } else {
-        failures.add(Failure.create(src.path(), e));
+        failures.add(Failure.create(src.getPath(), e));
       }
 
     } finally {
@@ -142,7 +142,7 @@ public final class Copy extends Paste {
 
   private void setLastModifiedDate(FileInfo src, String dst) {
     File dstFile = new File(dst);
-    File srcFile = new File(src.path());
+    File srcFile = new File(src.getPath());
     if (!dstFile.setLastModified(srcFile.lastModified())) {
       logger.warn("Failed to set last modified date on %s", dst);
     }

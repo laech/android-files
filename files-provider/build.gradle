@@ -4,7 +4,6 @@ dependencies {
   compile project(':files-common')
   compile project(':files.operations')
   compile project(':files-io-file-event')
-  compile project(':files-io-os') // Remove
   compile libs.commons_io
   compile libs.commons_lang
   compile libs.guava

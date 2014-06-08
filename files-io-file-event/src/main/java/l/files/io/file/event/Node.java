@@ -13,7 +13,7 @@ abstract class Node {
   Node() {}
 
   public static Node from(FileInfo file) {
-    return new AutoValue_Node(file.dev(), file.ino());
+    return new AutoValue_Node(file.getDeviceId(), file.getInodeNumber());
   }
 
   public abstract long dev();

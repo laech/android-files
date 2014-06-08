@@ -14,12 +14,12 @@ public final class FileInfoTest extends FileBaseTest {
     symlink(a, b);
 
     Stat expected = lstat(b);
-    Stat actual = FileInfo.get(b).stat();
+    Stat actual = FileInfo.get(b).getStat();
     assertEquals(expected, actual);
   }
 
   public void testGetsLastModifiedTime() throws Exception {
     FileInfo file = FileInfo.get(tmp().get().getPath());
-    assertEquals(tmp().get().lastModified(), file.lastModified());
+    assertEquals(tmp().get().lastModified(), file.getLastModified());
   }
 }

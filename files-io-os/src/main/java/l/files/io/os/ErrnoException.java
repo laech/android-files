@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-public final class ErrnoException extends IOException {
+public final class ErrnoException extends IOException { // TODO not extend IOException
 
   public static final int EPERM = 1;
   public static final int ENOENT = 2;

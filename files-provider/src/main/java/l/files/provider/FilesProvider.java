@@ -22,7 +22,6 @@ import java.util.Set;
 
 import l.files.io.file.Path;
 import l.files.io.file.event.WatchService;
-import l.files.io.os.ErrnoException;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
 
@@ -291,7 +290,7 @@ public final class FilesProvider extends ContentProvider {
     for (File file : files) {
       try {
         stats.add(FileData.stat(Path.from(file)));
-      } catch (ErrnoException e) {
+      } catch (IOException e) {
         logger.warn(e);
       }
     }
