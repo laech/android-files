@@ -14,7 +14,7 @@ public final class FilesContractTest extends FileBaseTest {
     File file = tmp().createFile("a");
     String location = getFileLocation(file);
 
-    FilesContract.delete(getContext(), asList(location));
+    FilesContract.delete(getContext(), "", asList(location));
 
     waitForFileToNotExist(file);
   }
