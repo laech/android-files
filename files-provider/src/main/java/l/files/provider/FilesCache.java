@@ -95,7 +95,7 @@ final class FilesCache implements
     for (String name : names) {
       try {
         Path child = path.child(name);
-        map.put(child, FileData.stat(child));
+        map.put(child, FileData.get(child));
       } catch (IOException e) {
         logger.warn(e);
       }
@@ -130,7 +130,7 @@ final class FilesCache implements
     }
 
     try {
-      data.put(path, FileData.stat(path));
+      data.put(path, FileData.get(path));
     } catch (IOException e) {
       logger.warn(e);
       remove(path);

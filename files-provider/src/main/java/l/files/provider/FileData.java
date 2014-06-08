@@ -56,7 +56,7 @@ final class FileData {
         this.hidden = booleanToInt(name.startsWith("."));
     }
 
-    public static FileData stat(Path path) throws IOException {
+    public static FileData get(Path path) throws IOException {
         return new FileData(FileInfo.get(path.toString()));
     }
 

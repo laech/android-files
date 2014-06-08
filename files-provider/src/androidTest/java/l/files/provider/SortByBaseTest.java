@@ -1,12 +1,12 @@
 package l.files.provider;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.io.file.Path;
-import l.files.io.os.ErrnoException;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
@@ -23,10 +23,10 @@ abstract class SortByBaseTest extends FileBaseTest {
     assertEquals(expected, actual);
   }
 
-  private List<FileData> mapData(File... files) throws ErrnoException {
+  private List<FileData> mapData(File... files) throws IOException {
     List<FileData> expected = new ArrayList<>(files.length);
     for (File file : files) {
-      expected.add(FileData.stat(Path.from(file)));
+      expected.add(FileData.get(Path.from(file)));
     }
     return expected;
   }

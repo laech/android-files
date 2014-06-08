@@ -289,7 +289,7 @@ public final class FilesProvider extends ContentProvider {
     List<FileData> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
-        stats.add(FileData.stat(Path.from(file)));
+        stats.add(FileData.get(Path.from(file)));
       } catch (IOException e) {
         logger.warn(e);
       }
