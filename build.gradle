@@ -28,6 +28,10 @@ subprojects {
                 targetCompatibility JavaVersion.VERSION_1_7
             }
 
+            lintOptions {
+                abortOnError false
+            }
+
             // Remove files from third party jars that causes 'duplicate files' build issues
             packagingOptions {
                 exclude 'META-INF/services/javax.annotation.processing.Processor'
@@ -41,7 +45,7 @@ subprojects {
     def androidApp = com.android.build.gradle.AppPlugin
     def androidLib = com.android.build.gradle.LibraryPlugin
 
-    if (!plugins.withType(androidApp).empty || !plugins.withType(androidLib).empty) {
+    if (plugins.hasPlugin('android') || plugins.hasPlugin('android-library')) {
         apply plugin: 'android-apt'
     }
 
