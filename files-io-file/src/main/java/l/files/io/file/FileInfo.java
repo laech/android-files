@@ -56,7 +56,7 @@ public abstract class FileInfo {
             Stat stat = Stat.lstat(path);
             return new AutoValue_FileInfo(path, stat);
         } catch (ErrnoException e) {
-            throw new IOException("Failed to get file info", e);
+            throw new IOException("Failed to get file info: " + path, e);
         }
     }
 
