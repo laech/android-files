@@ -1,47 +1,18 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:0.11.+'
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
-  }
-}
 apply plugin: 'android-library'
-apply plugin: 'android-apt'
-
-repositories {
-  mavenCentral()
-}
 
 android {
-  compileSdkVersion 19
-  buildToolsVersion "19.1"
-
   defaultConfig {
-    minSdkVersion 14
-    targetSdkVersion 19
-
     ndk {
       moduleName 'os'
       ldLibs 'log'
     }
   }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-
-  packagingOptions {
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-  }
 }
 
 dependencies {
-  compile project.libs.commons_lang
-  compile project.libs.auto_value
+  compile libs.commons_lang
+  compile libs.auto_value
 
   androidTestCompile project(':files-common-testing')
-  androidTestCompile project.libs.guava
+  androidTestCompile libs.guava
 }

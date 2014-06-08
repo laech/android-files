@@ -1,39 +1,4 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:0.11.+'
-  }
-}
 apply plugin: 'android'
-
-repositories {
-  mavenCentral()
-}
-
-android {
-  compileSdkVersion 19
-  buildToolsVersion "19.1"
-
-  defaultConfig {
-    minSdkVersion 16
-    targetSdkVersion 19
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-
-  // Remove files from third party jars that causes 'duplicate files' build issues
-  packagingOptions {
-    exclude 'META-INF/services/javax.annotation.processing.Processor'
-    exclude 'META-INF/LICENSE.txt'
-    exclude 'META-INF/NOTICE.txt'
-    exclude 'LICENSE.txt'
-  }
-}
 
 dependencies {
   compile project(':files.operations')
@@ -42,9 +7,9 @@ dependencies {
   compile project(':files-common')
   compile project(':files-provider')
   compile project(':files-provider-bookmarks')
-  compile project.libs.joda_time
-  compile project.libs.otto
-  compile project.libs.google_play_services
+  compile libs.joda_time
+  compile libs.otto
+  compile libs.google_play_services
 
-  androidTestCompile project.libs.mockito
+  androidTestCompile libs.mockito
 }
