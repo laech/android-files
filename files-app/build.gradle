@@ -2,7 +2,7 @@ apply plugin: 'android'
 
 dependencies {
   compile project(':files.operations')
-  compile project(':files.operations.ui')
+  compile project(':operations-ui')
   compile project(':files-analytics')
   compile project(':files-common')
   compile project(':files-provider')
