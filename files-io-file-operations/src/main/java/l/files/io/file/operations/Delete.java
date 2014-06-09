@@ -17,45 +17,46 @@ import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public final class Delete implements FileOperation<Void> {
 
-  private static final Logger logger = Logger.get(Delete.class);
+    private static final Logger logger = Logger.get(Delete.class);
 
-  private final Listener listener;
-  private final Iterable<String> paths;
+    private final Listener listener;
+    private final Iterable<String> paths;
 
-  public Delete(Listener listener, Iterable<String> paths) {
-    this.listener = checkNotNull(listener, "listener");
-    this.paths = ImmutableSet.copyOf(paths);
-  }
-
-  @Override public Void call() throws InterruptedException {
-    List<Failure> failures = new ArrayList<>(0);
-    for (String path : paths) {
-      delete(path, failures);
+    public Delete(Listener listener, Iterable<String> paths) {
+        this.listener = checkNotNull(listener, "listener");
+        this.paths = ImmutableSet.copyOf(paths);
     }
-    throwIfNotEmpty(failures);
-    return null;
-  }
 
-  private void delete(String path, List<Failure> failures)
-      throws InterruptedException {
-    Entry root = Entry.create(path);
-    for (Entry entry : DirectoryTreeTraverser.get().postOrderTraversal(root)) {
-      try {
-        delete(entry.path());
-        listener.onDelete(entry.path());
-      } catch (IOException e) {
-        failures.add(Failure.create(entry.path(), e));
-        logger.warn(e);
-      }
+    @Override
+    public Void call() throws InterruptedException {
+        List<Failure> failures = new ArrayList<>(0);
+        for (String path : paths) {
+            delete(path, failures);
+        }
+        throwIfNotEmpty(failures);
+        return null;
     }
-  }
 
-  private void delete(String path) throws IOException, InterruptedException {
-    checkInterrupt();
-    remove(path);
-  }
+    private void delete(String path, List<Failure> failures)
+            throws InterruptedException {
+        Entry root = Entry.create(path);
+        for (Entry entry : DirectoryTreeTraverser.get().postOrderTraversal(root)) {
+            try {
+                delete(entry.path());
+                listener.onDelete(entry.path());
+            } catch (IOException e) {
+                failures.add(Failure.create(entry.path(), e));
+                logger.warn(e);
+            }
+        }
+    }
 
-  public static interface Listener {
-    void onDelete(String path);
-  }
+    private void delete(String path) throws IOException, InterruptedException {
+        checkInterrupt();
+        remove(path);
+    }
+
+    public static interface Listener {
+        void onDelete(String path);
+    }
 }

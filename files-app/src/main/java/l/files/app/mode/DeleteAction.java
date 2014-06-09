@@ -34,63 +34,63 @@ import static l.files.provider.FileCursors.getLocation;
  */
 public final class DeleteAction extends MultiChoiceModeAction {
 
-  private final AbsListView list;
-  private final String dirLocation;
+    private final AbsListView list;
 
-  private DeleteAction(AbsListView list, String dirLocation) {
-    super(R.id.delete);
-    this.dirLocation = checkNotNull(dirLocation, "dirLocation");
-    this.list = checkNotNull(list, "list");
-  }
-
-  public static MultiChoiceModeListener create(AbsListView list, String location) {
-    Context context = list.getContext();
-    MultiChoiceModeListener action = new DeleteAction(list, location);
-    return new AnalyticsAction(context, action, "delete");
-  }
-
-  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    menu.add(NONE, id(), NONE, R.string.delete)
-        .setIcon(R.drawable.ic_action_discard)
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
-    return true;
-  }
-
-  @Override
-  protected void onItemSelected(final ActionMode mode, MenuItem item) {
-    final List<String> fileLocations = getCheckedFileLocations();
-    new AlertDialog.Builder(list.getContext())
-        .setMessage(getConfirmMessage(fileLocations.size()))
-        .setNegativeButton(android.R.string.cancel, null)
-        .setPositiveButton(R.string.delete, new OnClickListener() {
-          @Override public void onClick(DialogInterface dialog, int which) {
-            requestDelete(fileLocations);
-            mode.finish();
-          }
-        })
-        .show();
-  }
-
-  private List<String> getCheckedFileLocations() {
-    List<Integer> positions = getCheckedItemPositions(list);
-    List<String> fileLocations = newArrayListWithCapacity(positions.size());
-    for (int position : positions) {
-      Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      fileLocations.add(getLocation(cursor));
+    private DeleteAction(AbsListView list) {
+        super(R.id.delete);
+        this.list = checkNotNull(list, "list");
     }
-    return fileLocations;
-  }
 
-  private void requestDelete(final List<String> fileLocations) {
-    AsyncTask.execute(new Runnable() {
-      @Override public void run() {
-        FilesContract.delete(list.getContext(), dirLocation, fileLocations);
-      }
-    });
-  }
+    public static MultiChoiceModeListener create(AbsListView list) {
+        Context context = list.getContext();
+        MultiChoiceModeListener action = new DeleteAction(list);
+        return new AnalyticsAction(context, action, "delete");
+    }
 
-  private String getConfirmMessage(int size) {
-    return list.getResources().getQuantityString(
-        R.plurals.confirm_delete_question, size, size);
-  }
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        menu.add(NONE, id(), NONE, R.string.delete)
+                .setIcon(R.drawable.ic_action_discard)
+                .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
+        return true;
+    }
+
+    @Override
+    protected void onItemSelected(final ActionMode mode, MenuItem item) {
+        final List<String> fileLocations = getCheckedFileLocations();
+        new AlertDialog.Builder(list.getContext())
+                .setMessage(getConfirmMessage(fileLocations.size()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.delete, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestDelete(fileLocations);
+                        mode.finish();
+                    }
+                })
+                .show();
+    }
+
+    private List<String> getCheckedFileLocations() {
+        List<Integer> positions = getCheckedItemPositions(list);
+        List<String> fileLocations = newArrayListWithCapacity(positions.size());
+        for (int position : positions) {
+            Cursor cursor = (Cursor) list.getItemAtPosition(position);
+            fileLocations.add(getLocation(cursor));
+        }
+        return fileLocations;
+    }
+
+    private void requestDelete(final List<String> fileLocations) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                FilesContract.delete(list.getContext(), fileLocations);
+            }
+        });
+    }
+
+    private String getConfirmMessage(int size) {
+        return list.getResources().getQuantityString(R.plurals.confirm_delete_question, size, size);
+    }
 }

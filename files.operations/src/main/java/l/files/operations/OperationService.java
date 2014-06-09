@@ -21,7 +21,6 @@ import l.files.operations.info.TaskInfo;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
@@ -40,24 +39,16 @@ public final class OperationService extends Service {
 
     private static final String ACTION_DELETE = "l.files.operations.DELETE";
     private static final String EXTRA_PATHS = "paths";
-    private static final String EXTRA_ROOT_PATH = "root_path";
 
     private static final Executor executor = newFixedThreadPool(5);
 
     private Map<Integer, AsyncTask<?, ?, ?>> tasks;
     private CancellationReceiver cancellationReceiver;
 
-    /**
-     * Starts this service to delete the given files.
-     *
-     * @param rootPath the common root path of all the paths to delete
-     * @param paths    the paths to be deleted
-     */
-    public static void delete(Context context, String rootPath, String... paths) {
+    public static void delete(Context context, String... paths) {
         context.startService(
                 new Intent(context, OperationService.class)
                         .setAction(ACTION_DELETE)
-                        .putExtra(EXTRA_ROOT_PATH, checkNotNull(rootPath, "rootPath"))
                         .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
         );
     }
@@ -125,10 +116,9 @@ public final class OperationService extends Service {
     private AsyncTask<?, ?, ?> newTask(Intent intent, int startId) {
         switch (intent.getAction()) {
             case ACTION_DELETE: {
-                String rootPath = intent.getStringExtra(EXTRA_ROOT_PATH);
                 List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
                 logger.debug("delete %s", paths);
-                return new DeleteTask(startId, rootPath, paths);
+                return new DeleteTask(startId, paths);
             }
             default:
                 throw new IllegalArgumentException(intent.getAction());

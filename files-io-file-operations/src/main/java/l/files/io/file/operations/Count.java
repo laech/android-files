@@ -10,30 +10,31 @@ import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
 public final class Count implements FileOperation<Void> {
 
-  private final Listener listener;
-  private final Iterable<String> paths;
+    private final Listener listener;
+    private final Iterable<String> paths;
 
-  public Count(Listener listener, Iterable<String> paths) {
-    this.listener = checkNotNull(listener, "listener");
-    this.paths = ImmutableSet.copyOf(paths);
-  }
-
-  @Override public Void call() throws InterruptedException {
-    for (String path : paths) {
-      count(path);
+    public Count(Listener listener, Iterable<String> paths) {
+        this.listener = checkNotNull(listener, "listener");
+        this.paths = ImmutableSet.copyOf(paths);
     }
-    return null;
-  }
 
-  private void count(String path) throws InterruptedException {
-    Entry root = Entry.create(path);
-    for (Entry entry : DirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
-      checkInterrupt();
-      listener.onCount(entry.path());
+    @Override
+    public Void call() throws InterruptedException {
+        for (String path : paths) {
+            count(path);
+        }
+        return null;
     }
-  }
 
-  public static interface Listener {
-    void onCount(String path);
-  }
+    private void count(String path) throws InterruptedException {
+        Entry root = Entry.create(path);
+        for (Entry entry : DirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
+            checkInterrupt();
+            listener.onCount(entry.path());
+        }
+    }
+
+    public static interface Listener {
+        void onCount(String path);
+    }
 }
