@@ -1,15 +1,15 @@
 apply plugin: 'android'
 
 dependencies {
-  compile project(':files.operations')
-  compile project(':operations-ui')
-  compile project(':files-analytics')
-  compile project(':files-common')
-  compile project(':files-provider')
-  compile project(':files-provider-bookmarks')
-  compile libs.joda_time
-  compile libs.otto
-  compile libs.google_play_services
+    compile project(':operations')
+    compile project(':operations-ui')
+    compile project(':files-analytics')
+    compile project(':files-common')
+    compile project(':files-provider')
+    compile project(':files-provider-bookmarks')
+    compile libs.joda_time
+    compile libs.otto
+    compile libs.google_play_services
 
-  androidTestCompile libs.mockito
+    androidTestCompile libs.mockito
 }
