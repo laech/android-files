@@ -45,7 +45,10 @@ subprojects {
     def androidApp = com.android.build.gradle.AppPlugin
     def androidLib = com.android.build.gradle.LibraryPlugin
 
-    if (plugins.hasPlugin('android') || plugins.hasPlugin('android-library')) {
+    if (plugins.hasPlugin('android')
+            || plugins.hasPlugin('android-library')
+            || plugins.hasPlugin('com.android.application')
+            || plugins.hasPlugin('com.android.library')) {
         apply plugin: 'android-apt'
     }
 

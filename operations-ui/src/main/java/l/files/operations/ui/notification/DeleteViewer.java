@@ -7,21 +7,22 @@ import com.google.common.base.Optional;
 import l.files.operations.info.DeleteTaskInfo;
 import l.files.operations.ui.R;
 
-import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.operations.ui.R.drawable;
 import static l.files.operations.ui.R.plurals.deleting_x_items;
 import static l.files.operations.ui.R.plurals.preparing_delete_x_items;
 import static l.files.operations.ui.R.string.from_x;
-import static l.files.operations.ui.R.string.preparing_to_delete;
+import static l.files.operations.ui.R.string.pending;
 import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
 
 final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
 
     private final Resources res;
+    private final Clock clock;
 
-    DeleteViewer(Resources res) {
+    DeleteViewer(Resources res, Clock clock) {
         this.res = checkNotNull(res, "res");
+        this.clock = checkNotNull(clock, "clock");
     }
 
     @Override
@@ -46,7 +47,7 @@ final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
     }
 
     private String getTitleForStatusPending() {
-        return res.getString(preparing_to_delete);
+        return res.getString(pending);
     }
 
     private String getTitleForStatusPreparing(DeleteTaskInfo value) {
@@ -77,7 +78,7 @@ final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
     private String getTimeRemaining(DeleteTaskInfo value) {
         Optional<String> formatted = formatTimeRemaining(
                 value.getTaskElapsedStartTime(),
-                elapsedRealtime(),
+                clock.getElapsedRealTime(),
                 value.getTotalItemCount(),
                 value.getDeletedItemCount());
         if (formatted.isPresent()) {

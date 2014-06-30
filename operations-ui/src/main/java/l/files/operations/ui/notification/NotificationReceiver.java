@@ -23,7 +23,7 @@ public final class NotificationReceiver {
 
     NotificationReceiver(Context context) {
         this.context = context;
-        this.deleteViewer = new DeleteViewer(context.getResources());
+        this.deleteViewer = new DeleteViewer(context.getResources(), Clock.SYSTEM);
     }
 
     public static void register(Context context, EventBus bus) {

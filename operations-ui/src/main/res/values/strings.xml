@@ -3,7 +3,6 @@
   <string name="pending">Pending</string>
   <string name="from_x">From: %s</string>
 
-  <string name="preparing_to_delete">Preparing to delete</string>
   <plurals name="preparing_delete_x_items">
     <item quantity="one">Preparing to delete %,d item</item>
     <item quantity="other">Preparing to delete %,d items</item>
