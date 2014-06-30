@@ -13,7 +13,6 @@ import l.files.io.file.FileInfo;
 import l.files.io.file.Files;
 import l.files.logging.Logger;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
@@ -43,11 +42,25 @@ public final class Copy extends Paste {
      */
     private static final long BUFFER_SIZE = 1024 * 4;
 
-    private final Listener listener;
+    private volatile long copiedByteCount;
+    private volatile int copiedItemCount;
 
-    public Copy(Listener listener, Iterable<String> sources, String dstDir) {
+    public Copy(Iterable<String> sources, String dstDir) {
         super(sources, dstDir);
-        this.listener = checkNotNull(listener, "listener");
+    }
+
+    /**
+     * Gets the number of bytes processed so far.
+     */
+    public long getCopiedByteCount() {
+        return copiedByteCount;
+    }
+
+    /**
+     * Gets the number of items processed so far.
+     */
+    public int getCopiedItemCount() {
+        return copiedItemCount;
     }
 
     @Override
@@ -78,7 +91,6 @@ public final class Copy extends Paste {
             } else {
                 copyFile(file, dst.getPath(), failures);
             }
-            notifyListener(file.getPath(), dst.getPath());
         }
     }
 
@@ -87,6 +99,8 @@ public final class Copy extends Paste {
             String target = readlink(src.getPath());
             symlink(target, dst);
             setLastModifiedDate(src, dst);
+            copiedByteCount += src.getSize();
+            copiedItemCount++;
         } catch (IOException e) {
             failures.add(Failure.create(src.getPath(), e));
         }
@@ -97,6 +111,8 @@ public final class Copy extends Paste {
         try {
             forceMkdir(dst);
             setLastModifiedDate(src, dst.getPath());
+            copiedByteCount += src.getSize();
+            copiedItemCount++;
         } catch (IOException e) {
             failures.add(Failure.create(src.getPath(), e));
         }
@@ -118,8 +134,9 @@ public final class Copy extends Paste {
             long pos = 0;
             while (pos < size) {
                 long count = (size - pos) > BUFFER_SIZE ? BUFFER_SIZE : size - pos;
-                pos += output.transferFrom(input, pos, count);
-                notifyListener(src.getPath(), dst);
+                long transferred = output.transferFrom(input, pos, count);
+                pos += transferred;
+                copiedByteCount += transferred;
             }
 
         } catch (IOException e) {
@@ -138,6 +155,7 @@ public final class Copy extends Paste {
         }
 
         setLastModifiedDate(src, dst);
+        copiedItemCount++;
     }
 
     private void setLastModifiedDate(FileInfo src, String dst) {
@@ -146,13 +164,5 @@ public final class Copy extends Paste {
         if (!dstFile.setLastModified(srcFile.lastModified())) {
             logger.warn("Failed to set last modified date on %s", dst);
         }
-    }
-
-    private void notifyListener(String src, String dst) {
-        listener.onCopy(src, dst);
-    }
-
-    public static interface Listener {
-        void onCopy(String src, String dst);
     }
 }

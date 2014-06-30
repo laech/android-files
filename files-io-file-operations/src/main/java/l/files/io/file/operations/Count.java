@@ -1,40 +1,41 @@
 package l.files.io.file.operations;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.List;
 
 import l.files.io.file.DirectoryTreeTraverser;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
-public final class Count implements FileOperation<Void> {
+public class Count extends AbstractOperation {
 
-    private final Listener listener;
-    private final Iterable<String> paths;
+    private volatile int count;
 
-    public Count(Listener listener, Iterable<String> paths) {
-        this.listener = checkNotNull(listener, "listener");
-        this.paths = ImmutableSet.copyOf(paths);
+    public Count(Iterable<String> paths) {
+        super(paths);
+    }
+
+    /**
+     * Gets the number of items counted so far.
+     */
+    public int getCount() {
+        return count;
     }
 
     @Override
-    public Void call() throws InterruptedException {
-        for (String path : paths) {
-            count(path);
-        }
-        return null;
+    protected void process(String path, List<Failure> failures) throws InterruptedException {
+        count(path);
     }
 
     private void count(String path) throws InterruptedException {
         Entry root = Entry.create(path);
         for (Entry entry : DirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
             checkInterrupt();
-            listener.onCount(entry.path());
+            count++;
+            onCount(entry.path());
         }
     }
 
-    public static interface Listener {
-        void onCount(String path);
+    protected void onCount(String path) {
     }
 }

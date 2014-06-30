@@ -15,28 +15,35 @@ import java.util.concurrent.Callable;
  */
 public interface FileOperation<V> extends Callable<V> {
 
-  /**
-   * @throws InterruptedException if the thread was interrupted
-   * @throws FileException if any file failed to be operated on
-   */
-  @Override V call() throws InterruptedException, FileException;
-
-  @AutoValue
-  public static abstract class Failure {
-    Failure() {}
+    /**
+     * @throws InterruptedException if the thread was interrupted
+     * @throws FileException        if any file failed to be operated on
+     */
+    @Override
+    V call() throws InterruptedException;
 
     /**
-     * The path of the failed file.
+     * Returns true if this task is finished (due to normal or abnormal termination).
      */
-    public abstract String path();
+    boolean isDone();
 
-    /**
-     * The cause of the failure.
-     */
-    public abstract IOException cause();
+    @AutoValue
+    public static abstract class Failure {
+        Failure() {
+        }
 
-    public static Failure create(String path, IOException exception) {
-      return new AutoValue_FileOperation_Failure(path, exception);
+        /**
+         * The path of the failed file.
+         */
+        public abstract String path();
+
+        /**
+         * The cause of the failure.
+         */
+        public abstract IOException cause();
+
+        public static Failure create(String path, IOException exception) {
+            return new AutoValue_FileOperation_Failure(path, exception);
+        }
     }
-  }
 }

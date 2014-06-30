@@ -2,8 +2,6 @@ package l.files.io.file.operations;
 
 import com.google.common.io.Files;
 
-import org.mockito.ArgumentCaptor;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -13,44 +11,34 @@ import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
-import static l.files.io.file.operations.Copy.Listener;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public final class CopyTest extends PasteTest {
 
-    private static final Listener NULL_LISTENER = new Listener() {
-        @Override
-        public void onCopy(String src, String dst) {
-        }
-    };
-
-    public void testNotifiesListener() throws Exception {
+    public void testCopySummary() throws Exception {
+        File dstDir = tmp().createDir("dir");
         File srcDir = tmp().createDir("a");
         tmp().createFile("a/file");
-        File dstDir = tmp().createDir("dir");
 
-        Listener listener = mock(Listener.class);
-        ArgumentCaptor<String> srcCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> dstCaptor = ArgumentCaptor.forClass(String.class);
+        Copy copy = create(asList(srcDir.getPath()), dstDir.getPath());
+        copy.call();
 
-        create(listener, asList(srcDir.getPath()), dstDir.getPath()).call();
-        verify(listener, atLeastOnce()).onCopy(srcCaptor.capture(), dstCaptor.capture());
-
-        List<String> srcExpected = asList(
-                tmp().get("a").getPath(),
-                tmp().get("a/file").getPath()
+        List<File> files = asList(
+                tmp().get("a"),
+                tmp().get("a/file")
         );
-        List<String> dstExpected = asList(
-                tmp().get("dir/a").getPath(),
-                tmp().get("dir/a/file").getPath()
-        );
-        List<String> srcActual = srcCaptor.getAllValues();
-        List<String> dstActual = dstCaptor.getAllValues();
 
-        assertEquals(srcExpected, srcActual);
-        assertEquals(dstExpected, dstActual);
+        assertThat(copy.getCopiedByteCount(), is(getSize(files)));
+        assertThat(copy.getCopiedItemCount(), is(files.size()));
+    }
+
+    public long getSize(Iterable<File> files) {
+        long size = 0;
+        for (File file : files) {
+            size += file.length();
+        }
+        return size;
     }
 
     public void testCopiesSymlink() throws Exception {
@@ -94,17 +82,12 @@ public final class CopyTest extends PasteTest {
         assertEquals("Testing", Files.toString(dstFile, UTF_8));
     }
 
-    private void copy(File src, File dstDir)
-            throws IOException, InterruptedException {
+    private void copy(File src, File dstDir) throws IOException, InterruptedException {
         create(asList(src.getPath()), dstDir.getPath()).call();
     }
 
     @Override
     protected Copy create(Iterable<String> sources, String dstDir) {
-        return create(NULL_LISTENER, sources, dstDir);
-    }
-
-    private Copy create(Listener listener, Iterable<String> sources, String dstDir) {
-        return new Copy(listener, sources, dstDir);
+        return new Copy(sources, dstDir);
     }
 }

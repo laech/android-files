@@ -1,68 +1,38 @@
 package l.files.operations;
 
-import com.google.common.collect.ImmutableList;
-
-import java.io.File;
-
 import l.files.io.file.operations.Count;
 import l.files.io.file.operations.Delete;
 import l.files.operations.info.DeleteTaskInfo;
 
-import static java.util.Collections.singleton;
+final class DeleteTask extends Task implements DeleteTaskInfo {
 
-final class DeleteTask extends Task
-        implements DeleteTaskInfo, Count.Listener, Delete.Listener {
-
-    private final Iterable<String> paths;
-    private volatile String sourceRootPath;
-    private volatile int totalItemCount;
-    private volatile int deletedItemCount;
+    private final Count count;
+    private final Delete delete;
 
     DeleteTask(int id, Iterable<String> paths) {
         super(id);
-        this.paths = ImmutableList.copyOf(paths);
+        this.count = new Count(paths);
+        this.delete = new Delete(paths);
     }
 
     @Override
     protected void doTask() throws InterruptedException {
-        for (String path : paths) {
-            sourceRootPath = new File(path).getParent();
-            new Count(this, singleton(path)).call();
-        }
-        for (String path : paths) {
-            sourceRootPath = new File(path).getParent();
-            new Delete(this, singleton(path)).call();
-        }
-    }
-
-    @Override
-    public void onCount(String path) {
-        totalItemCount++;
-        if (setAndGetUpdateProgress()) {
-            notifyProgress();
-        }
-    }
-
-    @Override
-    public void onDelete(String path) {
-        deletedItemCount++;
-        if (setAndGetUpdateProgress()) {
-            notifyProgress();
-        }
+        count.call();
+        delete.call();
     }
 
     @Override
     public int getTotalItemCount() {
-        return totalItemCount;
+        return count.getCount();
     }
 
     @Override
     public int getDeletedItemCount() {
-        return deletedItemCount;
+        return delete.getDeletedItemCount();
     }
 
     @Override
     public String getSourceRootPath() {
-        return sourceRootPath;
+        return (count.isDone() ? delete : count).getCurrentPath();
     }
 }

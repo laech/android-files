@@ -19,32 +19,23 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
     private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
+    private final Runnable update = new Runnable() {
+        @Override
+        public void run() {
+            notifyProgress();
+            if (getStatus() != Status.FINISHED) {
+                handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
+            }
+        }
+    };
+
     private final int id;
     private volatile long startTime;
     private volatile long elapsedStartTime;
     private volatile TaskStatus status;
 
-    private long lastProgressTime;
-
     protected Task(int id) {
         this.id = id;
-    }
-
-    /**
-     * This should be checked before publishing a progress update to check if it
-     * has been long enough since publishing the previous progress message, if so,
-     * this records the current time and return true to allow the next message to
-     * be sent, otherwise returns false - no message should be sent.
-     */
-    protected final boolean setAndGetUpdateProgress() {
-        long time = currentTimeMillis();
-        synchronized (this) {
-            if (time - lastProgressTime >= PROGRESS_UPDATE_DELAY_MILLIS) {
-                lastProgressTime = time;
-                return true;
-            }
-            return false;
-        }
     }
 
     @Override
@@ -59,6 +50,7 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
     @Override
     protected final List<Failure> doInBackground(Object... params) {
+        handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
         try {
             status = TaskStatus.RUNNING;
             doTask();
@@ -93,6 +85,7 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     private void onDone(List<Failure> result) {
         // TODO handle result
         status = TaskStatus.FINISHED;
+        handler.removeCallbacks(update);
         notifyProgress();
     }
 
