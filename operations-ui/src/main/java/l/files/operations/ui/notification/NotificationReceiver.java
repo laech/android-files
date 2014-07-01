@@ -10,6 +10,7 @@ import com.google.common.eventbus.Subscribe;
 import l.files.operations.info.DeleteTaskInfo;
 import l.files.operations.info.TaskInfo;
 
+import static android.app.Notification.PRIORITY_LOW;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static l.files.operations.OperationService.newCancelIntent;
 
@@ -23,7 +24,7 @@ public final class NotificationReceiver {
 
     NotificationReceiver(Context context) {
         this.context = context;
-        this.deleteViewer = new DeleteViewer(context.getResources(), Clock.SYSTEM);
+        this.deleteViewer = new DeleteViewer(context, Clock.SYSTEM);
     }
 
     public static void register(Context context, EventBus bus) {
@@ -56,6 +57,7 @@ public final class NotificationReceiver {
         int percentage = (int) (viewer.getProgress(value) * progressMax);
         boolean indeterminate = percentage == 0;
         return new Notification.Builder(context)
+                .setPriority(PRIORITY_LOW)
                 .setContentTitle(viewer.getContentTitle(value))
                 .setContentText(viewer.getContentText(value))
                 .setSmallIcon(viewer.getSmallIcon())

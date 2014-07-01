@@ -11,12 +11,22 @@ public interface DeleteTaskInfo extends TaskInfo {
     int getTotalItemCount();
 
     /**
+     * The total number of bytes.
+     */
+    long getTotalByteCount();
+
+    /**
      * The number of items deleted so far.
      */
     int getDeletedItemCount();
 
     /**
-     * The root directory where files are being deleted from.
+     * The total number of bytes deleted.
      */
-    String getSourceRootPath();
+    long getDeletedByteCount();
+
+    /**
+     * The name of the directory where files are being deleted from.
+     */
+    String getDirName();
 }

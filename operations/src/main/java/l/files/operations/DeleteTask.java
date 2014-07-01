@@ -1,17 +1,19 @@
 package l.files.operations;
 
-import l.files.io.file.operations.Count;
+import java.io.File;
+
 import l.files.io.file.operations.Delete;
+import l.files.io.file.operations.Size;
 import l.files.operations.info.DeleteTaskInfo;
 
 final class DeleteTask extends Task implements DeleteTaskInfo {
 
-    private final Count count;
+    private final Size count;
     private final Delete delete;
 
     DeleteTask(int id, Iterable<String> paths) {
         super(id);
-        this.count = new Count(paths);
+        this.count = new Size(paths);
         this.delete = new Delete(paths);
     }
 
@@ -27,12 +29,23 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
     }
 
     @Override
+    public long getTotalByteCount() {
+        return count.getSize();
+    }
+
+    @Override
     public int getDeletedItemCount() {
         return delete.getDeletedItemCount();
     }
 
     @Override
-    public String getSourceRootPath() {
-        return (count.isDone() ? delete : count).getCurrentPath();
+    public long getDeletedByteCount() {
+        return delete.getDeletedByteCount();
+    }
+
+    @Override
+    public String getDirName() {
+        String path = (count.isDone() ? delete : count).getCurrentPath();
+        return new File(path).getParentFile().getName();
     }
 }

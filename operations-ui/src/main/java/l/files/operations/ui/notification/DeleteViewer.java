@@ -1,5 +1,6 @@
 package l.files.operations.ui.notification;
 
+import android.content.Context;
 import android.content.res.Resources;
 
 import com.google.common.base.Optional;
@@ -7,21 +8,25 @@ import com.google.common.base.Optional;
 import l.files.operations.info.DeleteTaskInfo;
 import l.files.operations.ui.R;
 
+import static android.text.format.Formatter.formatFileSize;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.operations.info.TaskInfo.TaskStatus.PENDING;
 import static l.files.operations.ui.R.drawable;
-import static l.files.operations.ui.R.plurals.deleting_x_items;
-import static l.files.operations.ui.R.plurals.preparing_delete_x_items;
-import static l.files.operations.ui.R.string.from_x;
+import static l.files.operations.ui.R.plurals.deleting_x_items_from_x;
+import static l.files.operations.ui.R.plurals.preparing_delete_x_items_from_x;
 import static l.files.operations.ui.R.string.pending;
+import static l.files.operations.ui.R.string.remain_count_x_size_x;
 import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
 
 final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
 
+    private final Context context;
     private final Resources res;
     private final Clock clock;
 
-    DeleteViewer(Resources res, Clock clock) {
-        this.res = checkNotNull(res, "res");
+    DeleteViewer(Context context, Clock clock) {
+        this.context = checkNotNull(context, "context");
+        this.res = context.getResources();
         this.clock = checkNotNull(clock, "clock");
     }
 
@@ -52,12 +57,12 @@ final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
 
     private String getTitleForStatusPreparing(DeleteTaskInfo value) {
         int count = value.getTotalItemCount();
-        return res.getQuantityString(preparing_delete_x_items, count, count);
+        return res.getQuantityString(preparing_delete_x_items_from_x, count, count, value.getDirName());
     }
 
     private String getTitleForStatusProcessing(DeleteTaskInfo value) {
-        int count = value.getTotalItemCount() - value.getDeletedItemCount();
-        return res.getQuantityString(deleting_x_items, count, count);
+        int count = value.getTotalItemCount();
+        return res.getQuantityString(deleting_x_items_from_x, count, count, value.getDirName());
     }
 
     @Override
@@ -67,7 +72,12 @@ final class DeleteViewer implements NotificationViewer<DeleteTaskInfo> {
 
     @Override
     public String getContentText(DeleteTaskInfo value) {
-        return res.getString(from_x, value.getSourceRootPath());
+        if (value.getTaskStatus() == PENDING) {
+            return null;
+        }
+        int count = value.getTotalItemCount() - value.getDeletedItemCount();
+        long size = value.getTotalByteCount() - value.getDeletedByteCount();
+        return res.getString(remain_count_x_size_x, count, formatFileSize(context, size));
     }
 
     @Override
