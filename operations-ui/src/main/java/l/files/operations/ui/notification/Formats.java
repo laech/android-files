@@ -26,9 +26,9 @@ final class Formats {
       return Optional.absent();
     }
 
-    long timeToProcessOne = (long) ((now - startTime) / (float) processed);
-    long timeRemaining = (total - processed) * timeToProcessOne;
-    String formatted = formatElapsedTime(MILLISECONDS.toSeconds(timeRemaining));
+    float timeToProcessOne = (now - startTime) / (float) processed;
+    float timeRemaining = (total - processed) * timeToProcessOne;
+    String formatted = formatElapsedTime(MILLISECONDS.toSeconds((long) timeRemaining));
     if (formatted.charAt(0) == '0' && formatted.charAt(1) != ':') {
       formatted = formatted.substring(1);
     }
