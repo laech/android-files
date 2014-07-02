@@ -36,7 +36,7 @@ public final class OperationServiceTest extends FileBaseTest {
             @Subscribe
             public void on(DeleteTaskInfo value) {
                 if (value.getTaskStatus() == FINISHED) {
-                    assertEquals(value.getTotalItemCount(), value.getDeletedItemCount());
+                    assertEquals(value.getTotalItemCount(), value.getProcessedItemCount());
                     latch.countDown();
                 }
             }

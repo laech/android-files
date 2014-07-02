@@ -34,17 +34,17 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
     }
 
     @Override
-    public int getDeletedItemCount() {
+    public int getProcessedItemCount() {
         return delete.getDeletedItemCount();
     }
 
     @Override
-    public long getDeletedByteCount() {
+    public long getProcessedByteCount() {
         return delete.getDeletedByteCount();
     }
 
     @Override
-    public String getDirName() {
+    public String getSourceDirName() {
         String path = (count.isDone() ? delete : count).getCurrentPath();
         return new File(path).getParentFile().getName();
     }
