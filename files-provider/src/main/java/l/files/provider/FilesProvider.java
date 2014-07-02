@@ -29,6 +29,7 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static l.files.io.file.Files.normalize;
 import static l.files.provider.BuildConfig.DEBUG;
@@ -218,9 +219,9 @@ public final class FilesProvider extends ContentProvider {
     }
 
     private Bundle callCopy(Bundle extras) {
-        Set<File> files = toFilesSet(extras.getStringArray(EXTRA_FILE_LOCATIONS));
-        File destination = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION)));
-//    CopyService.start(getContext(), files, destination);
+        String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
+        String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION))).getPath();
+        OperationService.copy(getContext(), asList(srcPaths), dstPath);
         return Bundle.EMPTY;
     }
 

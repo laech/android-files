@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import l.files.logging.Logger;
 import l.files.operations.info.TaskInfo;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -32,13 +31,13 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  */
 public final class OperationService extends Service {
 
-    private static final Logger logger = Logger.get(OperationService.class);
-
     private static final String ACTION_CANCEL = "l.files.operations.CANCEL";
     private static final String EXTRA_TASK_ID = "task_id";
 
     private static final String ACTION_DELETE = "l.files.operations.DELETE";
+    private static final String ACTION_COPY = "l.files.operations.COPY";
     private static final String EXTRA_PATHS = "paths";
+    private static final String EXTRA_DST_PATH = "dstPath";
 
     private static final Executor executor = newFixedThreadPool(5);
 
@@ -50,6 +49,15 @@ public final class OperationService extends Service {
                 new Intent(context, OperationService.class)
                         .setAction(ACTION_DELETE)
                         .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
+        );
+    }
+
+    public static void copy(Context context, Iterable<String> srcPaths, String dstPath) {
+        context.startService(
+                new Intent(context, OperationService.class)
+                        .setAction(ACTION_COPY)
+                        .putExtra(EXTRA_DST_PATH, dstPath)
+                        .putStringArrayListExtra(EXTRA_PATHS, newArrayList(srcPaths))
         );
     }
 
@@ -116,13 +124,25 @@ public final class OperationService extends Service {
     private AsyncTask<?, ?, ?> newTask(Intent intent, int startId) {
         switch (intent.getAction()) {
             case ACTION_DELETE: {
-                List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
-                logger.debug("delete %s", paths);
-                return new DeleteTask(startId, paths);
+                return newDelete(intent, startId);
+            }
+            case ACTION_COPY: {
+                return newCopy(intent, startId);
             }
             default:
                 throw new IllegalArgumentException(intent.getAction());
         }
+    }
+
+    private AsyncTask<?, ?, ?> newDelete(Intent intent, int startId) {
+        List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
+        return new DeleteTask(startId, paths);
+    }
+
+    private AsyncTask<?, ?, ?> newCopy(Intent intent, int startId) {
+        List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
+        String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
+        return new CopyTask(startId, srcPaths, dstPath);
     }
 
     private final class CancellationReceiver extends BroadcastReceiver {

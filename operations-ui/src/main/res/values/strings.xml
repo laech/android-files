@@ -12,11 +12,9 @@
         <item quantity="other">Deleting %1$,d items from %2$s</item>
     </plurals>
 
-    <string name="preparing_to_copy_to_x">Preparing to copy to \"%s\"</string>
-    <string name="preparing_to_move_to_x">Preparing to move to \"%s\"</string>
-    <plurals name="preparing_to_copy_x_items">
-        <item quantity="one">Preparing to copy %,d item</item>
-        <item quantity="other">Preparing to copy %,d items</item>
+    <plurals name="preparing_to_copy_x_items_to_x">
+        <item quantity="one">Preparing to copy %1$,d item to %2$s</item>
+        <item quantity="other">Preparing to copy %1$,d items to %2$s</item>
     </plurals>
     <plurals name="preparing_to_move_x_items">
         <item quantity="zero">Preparing to move</item>
@@ -25,8 +23,8 @@
     </plurals>
 
     <plurals name="copying_x_items_to_x">
-        <item quantity="one">Copying %1$,d item to \"%2$s\"</item>
-        <item quantity="other">Copying %1$,d items to \"%2$s\"</item>
+        <item quantity="one">Copying %1$,d item to %2$s</item>
+        <item quantity="other">Copying %1$,d items to %2$s</item>
     </plurals>
     <plurals name="moving_x_items_to_x">
         <item quantity="one">Moving %1$,d item to \"%2$s\"</item>

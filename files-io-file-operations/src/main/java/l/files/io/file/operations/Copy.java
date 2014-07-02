@@ -98,9 +98,9 @@ public final class Copy extends Paste {
         try {
             String target = readlink(src.getPath());
             symlink(target, dst);
-            setLastModifiedDate(src, dst);
             copiedByteCount += src.getSize();
             copiedItemCount++;
+            setLastModifiedDate(src, dst);
         } catch (IOException e) {
             failures.add(Failure.create(src.getPath(), e));
         }
@@ -110,9 +110,9 @@ public final class Copy extends Paste {
             FileInfo src, File dst, Collection<Failure> failures) {
         try {
             forceMkdir(dst);
-            setLastModifiedDate(src, dst.getPath());
             copiedByteCount += src.getSize();
             copiedItemCount++;
+            setLastModifiedDate(src, dst.getPath());
         } catch (IOException e) {
             failures.add(Failure.create(src.getPath(), e));
         }
@@ -138,6 +138,7 @@ public final class Copy extends Paste {
                 pos += transferred;
                 copiedByteCount += transferred;
             }
+            copiedItemCount++;
 
         } catch (IOException e) {
             if (!new File(dst).delete()) {
@@ -155,7 +156,6 @@ public final class Copy extends Paste {
         }
 
         setLastModifiedDate(src, dst);
-        copiedItemCount++;
     }
 
     private void setLastModifiedDate(FileInfo src, String dst) {

@@ -7,6 +7,9 @@ import android.content.Context;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import java.util.Map;
+
+import l.files.operations.info.CopyTaskInfo;
 import l.files.operations.info.DeleteTaskInfo;
 import l.files.operations.info.TaskInfo;
 
@@ -21,10 +24,12 @@ public final class NotificationReceiver {
 
     private final Context context;
     private final NotificationViewer<DeleteTaskInfo> deleteViewer;
+    private final NotificationViewer<CopyTaskInfo> copyViewer;
 
     NotificationReceiver(Context context) {
         this.context = context;
         this.deleteViewer = new DeleteViewer(context, Clock.SYSTEM);
+        this.copyViewer = new CopyViewer(context, Clock.SYSTEM);
     }
 
     public static void register(Context context, EventBus bus) {
@@ -34,6 +39,11 @@ public final class NotificationReceiver {
     @Subscribe
     public void on(DeleteTaskInfo value) {
         notify(deleteViewer, value);
+    }
+
+    @Subscribe
+    public void on(CopyTaskInfo value) {
+        notify(copyViewer, value);
     }
 
     private <T extends TaskInfo> void notify(NotificationViewer<T> viewer, T value) {
