@@ -9,19 +9,28 @@ import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public final class MoveTest extends PasteTest {
+
+  public void testMovedCountInitialZero() {
+    Move move = create(tmp().createFile("a"), tmp().createDir("b"));
+    assertThat(move.getMovedItemCount(), is(0));
+  }
 
   public void testMovesSymlink() throws Exception {
     File target = tmp().createFile("target");
     File link = tmp().get("link");
     symlink(target.getPath(), link.getPath());
 
-    move(link, tmp().createDir("moved"));
+    Move move = create(link, tmp().createDir("moved"));
+    move.call();
 
     String expected = target.getPath();
     String actual = readlink(tmp().get("moved/link").getPath());
-    assertEquals(expected, actual);
+    assertThat(actual, is(expected));
+    assertThat(move.getMovedItemCount(), is(1));
   }
 
   public void testMovesFile() throws Exception {
@@ -30,10 +39,12 @@ public final class MoveTest extends PasteTest {
     File dstFile = new File(dstDir, "a.txt");
     write("Test", srcFile, UTF_8);
 
-    move(srcFile, dstDir);
+    Move move = create(srcFile, dstDir);
+    move.call();
 
     assertFalse(srcFile.exists());
-    assertEquals("Test", Files.toString(dstFile, UTF_8));
+    assertThat(Files.toString(dstFile, UTF_8), is("Test"));
+    assertThat(move.getMovedItemCount(), is(1));
   }
 
   public void testMovesDirectory() throws Exception {
@@ -43,17 +54,19 @@ public final class MoveTest extends PasteTest {
     File dstFile = new File(dstDir, "a/test.txt");
     write("Test", srcFile, UTF_8);
 
-    move(srcDir, dstDir);
+    Move move = create(srcDir, dstDir);
+    move.call();
 
     assertFalse(srcDir.exists());
-    assertEquals("Test", Files.toString(dstFile, UTF_8));
+    assertThat(Files.toString(dstFile, UTF_8), is("Test"));
+    assertThat(move.getMovedItemCount(), is(1));
   }
 
   @Override protected Move create(Iterable<String> sources, String dstDir) {
     return new Move(sources, dstDir);
   }
 
-  private void move(File src, File dst) throws InterruptedException {
-    create(asList(src.getPath()), dst.getPath()).call();
+  private Move create(File src, File dst) {
+    return create(asList(src.getPath()), dst.getPath());
   }
 }
