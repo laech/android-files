@@ -11,140 +11,175 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.operations.info.CopyTaskInfo;
 import l.files.operations.info.DeleteTaskInfo;
+import l.files.operations.info.MoveTaskInfo;
+import l.files.operations.info.ProgressInfo;
 import l.files.operations.info.TaskInfo;
 
 import static com.google.common.collect.Collections2.transform;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.operations.OperationService.copy;
+import static l.files.operations.OperationService.delete;
+import static l.files.operations.OperationService.move;
 import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 public final class OperationServiceTest extends FileBaseTest {
 
-    public void testDeletesFiles() throws Exception {
-        File file1 = tmp().createFile("a");
-        File file2 = tmp().createFile("b/c");
+  public void testMovesFile() throws Exception {
+    File src = tmp().createFile("a");
+    File dst = tmp().createDir("dst");
+    CountDownListener listener = register(new CountDownListener(MoveTaskInfo.class));
+    try {
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        Object listener = new Object() {
-            @Subscribe
-            public void on(DeleteTaskInfo value) {
-                if (value.getTaskStatus() == FINISHED) {
-                    assertEquals(value.getTotalItemCount(), value.getProcessedItemCount());
-                    latch.countDown();
-                }
-            }
-        };
+      move(getContext(), asList(src.getPath()), dst.getPath());
+      listener.await();
+      assertThat(src.exists(), is(false));
+      assertThat(new File(dst, src.getName()).exists(), is(true));
 
-        register(listener);
-        try {
+    } finally {
+      unregister(listener);
+    }
+  }
 
-            OperationService.delete(getContext(), file1.getPath(), file2.getPath());
-            assertThat(latch.await(1, SECONDS), is(true));
-            assertThat(file1.exists(), is(false));
-            assertThat(file2.exists(), is(false));
+  public void testCopiesFile() throws Exception {
+    File src = tmp().createFile("a");
+    File dst = tmp().createDir("dst");
+    CountDownListener listener = register(new CountDownListener(CopyTaskInfo.class));
+    try {
 
-        } finally {
-            unregister(listener);
+      copy(getContext(), asList(src.getPath()), dst.getPath());
+      listener.await();
+      assertThat(src.exists(), is(true));
+      assertThat(new File(dst, src.getName()).exists(), is(true));
+
+    } finally {
+      unregister(listener);
+    }
+  }
+
+  public void testDeletesFiles() throws Exception {
+    File a = tmp().createFile("a");
+    File b = tmp().createFile("b/c");
+    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class));
+    try {
+
+      delete(getContext(), a.getPath(), b.getPath());
+      listener.await();
+      assertThat(a.exists(), is(false));
+      assertThat(b.exists(), is(false));
+
+    } finally {
+      unregister(listener);
+    }
+  }
+
+  public void testTaskIdIsUnique() throws Exception {
+    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class, 2));
+    try {
+
+      delete(getContext(), tmp().createFile("a").getPath());
+      delete(getContext(), tmp().createFile("2").getPath());
+      listener.await();
+      assertThat(listener.getValues().size(), greaterThan(1));
+      assertThat(getTaskIds(listener.getValues()), hasSize(2));
+
+    } finally {
+      unregister(listener);
+    }
+  }
+
+  private Set<Integer> getTaskIds(List<? extends TaskInfo> values) {
+    return new HashSet<>(transform(values, new Function<TaskInfo, Integer>() {
+          @Override public Integer apply(TaskInfo task) {
+            return task.getTaskId();
+          }
         }
+    ));
+  }
+
+  public void testTaskStartTimeIsCorrect() throws Exception {
+    String path1 = tmp().createFile("a").getPath();
+    String path2 = tmp().createFile("b").getPath();
+    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class));
+    try {
+
+      long start = currentTimeMillis();
+      {
+        delete(getContext(), path1, path2);
+        listener.await();
+      }
+      long end = currentTimeMillis();
+
+      Set<Long> times = getTaskStartTimes(listener.getValues());
+      assertThat(times.size(), is(1));
+      assertThat(times.iterator().next(), greaterThanOrEqualTo(start));
+      assertThat(times.iterator().next(), lessThanOrEqualTo(end));
+
+    } finally {
+      unregister(listener);
     }
+  }
 
-    public void testTaskIdIsUnique() throws Exception {
-        final List<TaskInfo> values = new ArrayList<>();
-        final CountDownLatch latch = new CountDownLatch(2);
-        Object receiver = new Object() {
-            @Subscribe
-            public void on(DeleteTaskInfo value) {
-                values.add(value);
-                if (value.getTaskStatus() == FINISHED) {
-                    latch.countDown();
-                }
-            }
-        };
-
-        register(receiver);
-        try {
-
-            OperationService.delete(getContext(), tmp().createFile("a").getPath());
-            OperationService.delete(getContext(), tmp().createFile("2").getPath());
-            assertThat(latch.await(1, SECONDS), is(true));
-            assertThat(values.size(), greaterThan(1));
-            assertThat(getTaskIds(values), hasSize(2));
-
-        } finally {
-            unregister(receiver);
+  private Set<Long> getTaskStartTimes(List<? extends TaskInfo> values) {
+    return new HashSet<>(transform(values, new Function<TaskInfo, Long>() {
+          @Override public Long apply(TaskInfo value) {
+            return value.getTaskStartTime();
+          }
         }
+    ));
+  }
+
+  private <T> T register(T listener) {
+    Events.get().register(listener);
+    return listener;
+  }
+
+  private void unregister(Object listener) {
+    Events.get().unregister(listener);
+  }
+
+  private static class CountDownListener {
+    private final CountDownLatch latch;
+    private final Class<ProgressInfo> clazz;
+    private final List<ProgressInfo> values;
+
+    private CountDownListener(Class<? extends ProgressInfo> clazz) {
+      this(clazz, 1);
     }
 
-    private Set<Integer> getTaskIds(List<? extends TaskInfo> values) {
-        return new HashSet<>(transform(values,
-                new Function<TaskInfo, Integer>() {
-                    @Override
-                    public Integer apply(TaskInfo task) {
-                        return task.getTaskId();
-                    }
-                }
-        ));
+    @SuppressWarnings("unchecked")
+    private CountDownListener(Class<? extends ProgressInfo> clazz, int countDowns) {
+      this.latch = new CountDownLatch(countDowns);
+      this.values = new ArrayList<>(countDowns);
+      this.clazz = (Class<ProgressInfo>) clazz;
     }
 
-    public void testTaskStartTimeIsCorrect() throws Exception {
-        String path1 = tmp().createFile("a").getPath();
-        String path2 = tmp().createFile("b").getPath();
-
-        final List<TaskInfo> values = new ArrayList<>();
-        final CountDownLatch latch = new CountDownLatch(1);
-        Object listener = new Object() {
-            @Subscribe
-            public void on(DeleteTaskInfo value) {
-                values.add(value);
-                if (value.getTaskStatus() == FINISHED) {
-                    latch.countDown();
-                }
-            }
-        };
-
-        register(listener);
-        try {
-
-            long start = currentTimeMillis();
-            {
-                OperationService.delete(getContext(), path1, path2);
-                assertThat(latch.await(1, SECONDS), is(true));
-            }
-            long end = currentTimeMillis();
-
-            Set<Long> times = getTaskStartTimes(values);
-            assertThat(times.size(), is(1));
-            assertThat(times.iterator().next(), greaterThanOrEqualTo(start));
-            assertThat(times.iterator().next(), lessThanOrEqualTo(end));
-
-        } finally {
-            unregister(listener);
-        }
+    @Subscribe public void on(ProgressInfo value) {
+      values.add(value);
+      assertThat(value, instanceOf(clazz));
+      if (value.getTaskStatus() == FINISHED) {
+        assertEquals(value.getTotalItemCount(), value.getProcessedItemCount());
+        assertEquals(value.getTotalByteCount(), value.getProcessedByteCount());
+        latch.countDown();
+      }
     }
 
-    private Set<Long> getTaskStartTimes(List<TaskInfo> values) {
-        return new HashSet<>(transform(values,
-                new Function<TaskInfo, Long>() {
-                    @Override
-                    public Long apply(TaskInfo value) {
-                        return value.getTaskStartTime();
-                    }
-                }
-        ));
+    public void await() throws InterruptedException {
+      assertTrue(latch.await(1, SECONDS));
     }
 
-    private void register(Object listener) {
-        Events.get().register(listener);
+    public List<ProgressInfo> getValues() {
+      return values;
     }
-
-    private void unregister(Object listener) {
-        Events.get().unregister(listener);
-    }
+  }
 }

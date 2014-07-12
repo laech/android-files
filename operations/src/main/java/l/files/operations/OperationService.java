@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.google.common.eventbus.Subscribe;
@@ -22,6 +21,9 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static l.files.operations.OperationService.FileAction.COPY;
+import static l.files.operations.OperationService.FileAction.DELETE;
+import static l.files.operations.OperationService.FileAction.MOVE;
 
 /**
  * Base class for services that perform operations on files.
@@ -31,128 +33,153 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
  */
 public final class OperationService extends Service {
 
-    private static final String ACTION_CANCEL = "l.files.operations.CANCEL";
-    private static final String EXTRA_TASK_ID = "task_id";
+  private static final String ACTION_CANCEL = "l.files.operations.CANCEL";
+  private static final String EXTRA_TASK_ID = "task_id";
+  private static final String EXTRA_PATHS = "paths";
+  private static final String EXTRA_DST_PATH = "dstPath";
 
-    private static final String ACTION_DELETE = "l.files.operations.DELETE";
-    private static final String ACTION_COPY = "l.files.operations.COPY";
-    private static final String EXTRA_PATHS = "paths";
-    private static final String EXTRA_DST_PATH = "dstPath";
+  private static final Executor executor = newFixedThreadPool(5);
 
-    private static final Executor executor = newFixedThreadPool(5);
+  private Map<Integer, Task> tasks;
+  private CancellationReceiver cancellationReceiver;
 
-    private Map<Integer, AsyncTask<?, ?, ?>> tasks;
-    private CancellationReceiver cancellationReceiver;
+  public static void delete(Context context, String... paths) {
+    context.startService(
+        new Intent(context, OperationService.class)
+            .setAction(DELETE.action())
+            .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
+    );
+  }
 
-    public static void delete(Context context, String... paths) {
-        context.startService(
-                new Intent(context, OperationService.class)
-                        .setAction(ACTION_DELETE)
-                        .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
-        );
+  public static void copy(Context context, Iterable<String> srcPaths, String dstPath) {
+    paste(COPY.action(), context, srcPaths, dstPath);
+  }
+
+  public static void move(Context context, Iterable<String> srcPaths, String dstPath) {
+    paste(MOVE.action(), context, srcPaths, dstPath);
+  }
+
+  public static void paste(String action, Context context, Iterable<String> srcPaths, String dstPath) {
+    context.startService(
+        new Intent(context, OperationService.class)
+            .setAction(action)
+            .putExtra(EXTRA_DST_PATH, dstPath)
+            .putStringArrayListExtra(EXTRA_PATHS, newArrayList(srcPaths))
+    );
+  }
+
+  /**
+   * Creates an intent to be broadcast for cancelling a running task.
+   */
+  public static PendingIntent newCancelIntent(Context context, int taskId) {
+    // Don't set class name as that causes pending intent to not work
+    Intent intent = new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
+    return getBroadcast(context, taskId, intent, FLAG_UPDATE_CURRENT);
+  }
+
+  @Override public IBinder onBind(Intent intent) {
+    return null;
+  }
+
+  @Override public void onCreate() {
+    super.onCreate();
+    tasks = new HashMap<>();
+    cancellationReceiver = new CancellationReceiver();
+    registerCancellationReceiver();
+    Events.get().register(this);
+  }
+
+  @Subscribe public void on(TaskInfo task) {
+    if (task.getTaskStatus() == TaskInfo.TaskStatus.FINISHED) {
+      tasks.remove(task.getTaskId());
+      if (tasks.isEmpty()) {
+        stopSelf();
+      }
     }
+  }
 
-    public static void copy(Context context, Iterable<String> srcPaths, String dstPath) {
-        context.startService(
-                new Intent(context, OperationService.class)
-                        .setAction(ACTION_COPY)
-                        .putExtra(EXTRA_DST_PATH, dstPath)
-                        .putStringArrayListExtra(EXTRA_PATHS, newArrayList(srcPaths))
-        );
+  private void registerCancellationReceiver() {
+    IntentFilter filter = new IntentFilter(ACTION_CANCEL);
+    registerReceiver(cancellationReceiver, filter);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    stopForeground(true);
+    unregisterReceiver(cancellationReceiver);
+    Events.get().unregister(this);
+  }
+
+  @Override public int onStartCommand(Intent intent, int flags, final int startId) {
+    if (intent != null) {
+      Intent data = new Intent(intent);
+      data.putExtra(EXTRA_TASK_ID, startId);
+
+      Task task = newTask(data, startId);
+      tasks.put(startId, task);
+      task.executeOnExecutor(executor);
     }
+    return START_STICKY;
+  }
 
-    /**
-     * Creates an intent to be broadcast for cancelling a running task.
-     */
-    public static PendingIntent newCancelIntent(Context context, int taskId) {
-        // Don't set class name as that causes pending intent to not work
-        Intent intent = new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
-        return getBroadcast(context, taskId, intent, FLAG_UPDATE_CURRENT);
+  private Task newTask(Intent intent, int startId) {
+    return FileAction.fromIntent(intent.getAction()).newTask(intent, startId);
+  }
+
+  private final class CancellationReceiver extends BroadcastReceiver {
+    @Override public void onReceive(Context context, Intent intent) {
+      int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+      Task task = tasks.get(startId);
+      if (task != null) {
+        task.cancel(true);
+      }
     }
+  }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
+  static enum FileAction {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        tasks = new HashMap<>();
-        cancellationReceiver = new CancellationReceiver();
-        registerCancellationReceiver();
-        Events.get().register(this);
-    }
-
-    @Subscribe
-    public void on(TaskInfo task) {
-        if (task.getTaskStatus() == TaskInfo.TaskStatus.FINISHED) {
-            tasks.remove(task.getTaskId());
-            if (tasks.isEmpty()) {
-                stopSelf();
-            }
-        }
-    }
-
-    private void registerCancellationReceiver() {
-        IntentFilter filter = new IntentFilter(ACTION_CANCEL);
-        registerReceiver(cancellationReceiver, filter);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopForeground(true);
-        unregisterReceiver(cancellationReceiver);
-        Events.get().unregister(this);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, final int startId) {
-        if (intent != null) {
-            Intent data = new Intent(intent);
-            data.putExtra(EXTRA_TASK_ID, startId);
-
-            @SuppressWarnings("unchecked")
-            AsyncTask<Object, ?, ?> task = (AsyncTask<Object, ?, ?>) newTask(data, startId);
-            tasks.put(startId, task);
-            task.executeOnExecutor(executor);
-        }
-        return START_STICKY;
-    }
-
-    private AsyncTask<?, ?, ?> newTask(Intent intent, int startId) {
-        switch (intent.getAction()) {
-            case ACTION_DELETE: {
-                return newDelete(intent, startId);
-            }
-            case ACTION_COPY: {
-                return newCopy(intent, startId);
-            }
-            default:
-                throw new IllegalArgumentException(intent.getAction());
-        }
-    }
-
-    private AsyncTask<?, ?, ?> newDelete(Intent intent, int startId) {
+    DELETE("l.files.operations.DELETE") {
+      @Override Task newTask(Intent intent, int startId) {
         List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
         return new DeleteTask(startId, paths);
-    }
+      }
+    },
 
-    private AsyncTask<?, ?, ?> newCopy(Intent intent, int startId) {
+    COPY("l.files.operations.COPY") {
+      @Override Task newTask(Intent intent, int startId) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
         return new CopyTask(startId, srcPaths, dstPath);
+      }
+    },
+
+    MOVE("l.files.operations.MOVE") {
+      @Override Task newTask(Intent intent, int startId) {
+        List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
+        String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
+        return new MoveTask(startId, srcPaths, dstPath);
+      }
+    };
+
+    private final String action;
+
+    FileAction(String action) {
+      this.action = action;
     }
 
-    private final class CancellationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-            AsyncTask<?, ?, ?> task = tasks.get(startId);
-            if (task != null) {
-                task.cancel(true);
-            }
-        }
+    public String action() {
+      return action;
     }
+
+    public static FileAction fromIntent(String action) {
+      for (FileAction value : values()) {
+        if (value.action.equals(action)) {
+          return value;
+        }
+      }
+      throw new IllegalArgumentException("Unknown action: " + action);
+    }
+
+    abstract Task newTask(Intent intent, int startId);
+  }
 }
