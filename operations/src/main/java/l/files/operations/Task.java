@@ -31,7 +31,7 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
     private final int id;
     private volatile long startTime;
-    private volatile long elapsedStartTime;
+    private volatile long elapsedRealtimeOnRun;
     private volatile TaskStatus status;
 
     protected Task(int id) {
@@ -42,7 +42,6 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     protected final void onPreExecute() {
         status = TaskStatus.PENDING;
         startTime = currentTimeMillis();
-        elapsedStartTime = elapsedRealtime();
         if (!isCancelled()) {
             notifyProgress();
         }
@@ -50,7 +49,8 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
     @Override
     protected final List<Failure> doInBackground(Object... params) {
-        handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
+      elapsedRealtimeOnRun = elapsedRealtime();
+      handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
         try {
             status = TaskStatus.RUNNING;
             doTask();
@@ -104,8 +104,8 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     }
 
     @Override
-    public long getTaskElapsedStartTime() {
-        return elapsedStartTime;
+    public long getElapsedRealtimeOnRun() {
+        return elapsedRealtimeOnRun;
     }
 
     @Override

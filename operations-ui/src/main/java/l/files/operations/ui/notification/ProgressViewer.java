@@ -73,7 +73,7 @@ abstract class ProgressViewer<T extends ProgressInfo> implements NotificationVie
 
   private String getTimeRemaining(T value) {
     Optional<String> formatted = formatTimeRemaining(
-        value.getTaskElapsedStartTime(),
+        value.getElapsedRealtimeOnRun(),
         clock.getElapsedRealTime(),
         getWorkTotal(value),
         getWorkDone(value));

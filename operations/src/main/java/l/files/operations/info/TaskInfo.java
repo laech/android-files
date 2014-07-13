@@ -22,9 +22,9 @@ public interface TaskInfo {
 
     /**
      * Gets the value of {@link android.os.SystemClock#elapsedRealtime()}
-     * on start of this task.
+     * when this task starts {@link TaskStatus#RUNNING}.
      */
-    long getTaskElapsedStartTime();
+    long getElapsedRealtimeOnRun();
 
     TaskStatus getTaskStatus();
 

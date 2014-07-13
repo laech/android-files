@@ -163,7 +163,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
   }
 
   public void testGetContentInfo_showTimeRemaining() throws Exception {
-    given(info.getTaskElapsedStartTime()).willReturn(0L);
+    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 10000);
     mockWorkDone(info, 10);
@@ -174,7 +174,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
   }
 
   public void testGetContentInfo_noWorkDoneYet_showNothing() throws Exception {
-    given(info.getTaskElapsedStartTime()).willReturn(0L);
+    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 0);
     mockWorkDone(info, 0);
@@ -183,7 +183,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
 
   public void testGetContentInfo_cleanUp_showEmpty() throws Exception {
     given(info.isCleanup()).willReturn(true);
-    given(info.getTaskElapsedStartTime()).willReturn(0L);
+    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 10000);
     mockWorkDone(info, 10);
