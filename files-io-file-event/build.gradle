@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
   compile project(':logging')
   compile project(':io-os')
-  compile project(':files-io-file')
+  compile project(':io-file')
   compile libs.guava
   compile libs.commons_io
   compile libs.auto_value

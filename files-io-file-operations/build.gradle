@@ -2,6 +2,6 @@ apply plugin: 'com.android.library'
 
 dependencies {
   compile project(':logging')
-  compile project(':files-io-file')
+  compile project(':io-file')
   compile libs.guava
 }
