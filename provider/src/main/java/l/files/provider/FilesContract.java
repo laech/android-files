@@ -11,11 +11,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
-import l.files.common.event.Events;
-import l.files.provider.event.LoadFinished;
-import l.files.provider.event.LoadProgress;
-import l.files.provider.event.LoadStarted;
-
 import static android.content.UriMatcher.NO_MATCH;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
@@ -174,10 +169,6 @@ public final class FilesContract {
 
   /**
    * Creates a URI for querying the children of the given directory.
-   * <p/>
-   * The progress can also be monitor by registering to {@link Events#bus()} for
-   * the following events: {@link LoadStarted}, {@link LoadProgress}, {@link
-   * LoadFinished}.
    */
   public static Uri buildFileChildrenUri(Context context, String directoryLocation, boolean showHidden) {
     checkNotNull(directoryLocation, "directoryLocation");
