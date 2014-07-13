@@ -1,9 +1,7 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
   compile project(':files-io-file-operations')
   compile libs.otto
   compile libs.guava
-
-  androidTestCompile project(':files-common-testing')
 }

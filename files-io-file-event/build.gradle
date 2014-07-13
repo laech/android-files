@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
   compile project(':files-logging')
@@ -7,6 +7,4 @@ dependencies {
   compile libs.guava
   compile libs.commons_io
   compile libs.auto_value
-
-  androidTestCompile project(':files-common-testing')
 }

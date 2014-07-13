@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
   compile libs.android_support
@@ -7,5 +7,5 @@ dependencies {
   compile libs.commons_lang
   compile libs.otto
 
-  androidTestCompile project(':files-common-testing')
+  androidTestCompile project(':testlib')
 }

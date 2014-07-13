@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 dependencies {
     compile project(':files-common')
@@ -8,6 +8,4 @@ dependencies {
     compile libs.commons_lang
     compile libs.guava
     compile libs.tika
-
-    androidTestCompile project(':files-common-testing')
 }

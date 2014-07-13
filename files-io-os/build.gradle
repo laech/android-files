@@ -1,4 +1,4 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
   defaultConfig {
@@ -13,6 +13,6 @@ dependencies {
   compile libs.commons_lang
   compile libs.auto_value
 
-  androidTestCompile project(':files-common-testing')
+  androidTestCompile project(':testlib')
   androidTestCompile libs.guava
 }
