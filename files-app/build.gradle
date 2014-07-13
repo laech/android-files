@@ -5,7 +5,7 @@ dependencies {
     compile project(':operations-ui')
     compile project(':files-analytics')
     compile project(':files-common')
-    compile project(':files-provider')
+    compile project(':provider')
     compile project(':provider-bookmarks')
     compile libs.joda_time
     compile libs.otto
