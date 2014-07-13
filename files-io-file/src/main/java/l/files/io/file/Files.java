@@ -1,11 +1,8 @@
 package l.files.io.file;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,7 +47,7 @@ public final class Files {
 
   /**
    * @param target path of the target file being linked to
-   * @param link path of the link itself
+   * @param link   path of the link itself
    */
   public static void symlink(String target, String link) throws IOException {
     try {
@@ -195,35 +192,6 @@ public final class Files {
     } else {
       return base + " 2";
     }
-  }
-
-  public static File[] toFiles(Collection<String> paths) {
-    return toFiles(paths.toArray(new String[paths.size()]));
-  }
-
-  public static File[] toFiles(String... absolutePaths) {
-    File[] files = new File[absolutePaths.length];
-    for (int i = 0; i < files.length; ++i) {
-      files[i] = new File(absolutePaths[i]);
-    }
-    return files;
-  }
-
-  public static Set<File> toFilesSet(String... absolutePaths) {
-    return ImmutableSet.copyOf(toFiles(absolutePaths));
-  }
-
-  // TODO replace
-  public static String[] toAbsolutePaths(Collection<File> files) {
-    return toAbsolutePaths(files.toArray(new File[files.size()]));
-  }
-
-  public static String[] toAbsolutePaths(File... files) {
-    String[] paths = new String[files.length];
-    for (int i = 0; i < paths.length; ++i) {
-      paths[i] = files[i].getAbsolutePath();
-    }
-    return paths;
   }
 
   /**
