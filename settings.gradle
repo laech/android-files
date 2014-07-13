@@ -1,1 +1,1 @@
-include ':files-app', ':files-common', ':files-analytics', ':testlib', ':provider', ':logging', ':files-io-file-operations', 'provider-bookmarks', 'files-io-file', 'files-io-os', 'files-io-file-event', 'operations', 'operations-ui'
+include ':files-app', ':files-common', ':files-analytics', ':testlib', ':provider', ':logging', ':files-io-file-operations', 'provider-bookmarks', 'files-io-file', 'io-os', 'files-io-file-event', 'operations', 'operations-ui'
