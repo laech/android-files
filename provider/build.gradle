@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     compile project(':files-common')
     compile project(':operations')
-    compile project(':files-io-file-event')
+    compile project(':io-event')
     compile libs.commons_io
     compile libs.commons_lang
     compile libs.guava
