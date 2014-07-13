@@ -98,7 +98,7 @@ public final class PathBarFragment extends Fragment
   @Override public void onLoaderReset(Loader<Cursor> loader) {}
 
   @Override public void onClick(View v) {
-    FilesApp.getBus(this).post(new OpenFileRequest(
+    FilesApp.getBus(this).post(OpenFileRequest.create(
         (String) v.getTag(R.id.file_id),
         (String) v.getTag(R.id.file_name),
         (boolean) v.getTag(R.id.is_readable),
