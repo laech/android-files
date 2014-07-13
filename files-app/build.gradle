@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':operations')
@@ -6,10 +6,8 @@ dependencies {
     compile project(':files-analytics')
     compile project(':files-common')
     compile project(':files-provider')
-    compile project(':files-provider-bookmarks')
+    compile project(':provider-bookmarks')
     compile libs.joda_time
     compile libs.otto
     compile libs.google_play_services
-
-    androidTestCompile libs.mockito
 }
