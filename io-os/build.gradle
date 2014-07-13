@@ -12,7 +12,7 @@ android {
 dependencies {
   compile libs.commons_lang
   compile libs.auto_value
+  compile libs.guava
 
   androidTestCompile project(':testlib')
-  androidTestCompile libs.guava
 }

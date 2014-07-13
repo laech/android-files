@@ -5,4 +5,5 @@ dependencies {
   compile project(':logging')
   compile libs.auto_value
   compile libs.commons_io
+  compile libs.guava
 }
