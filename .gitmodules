@@ -1,0 +1,3 @@
+[submodule "melody"]
+	path = melody
+	url = git@bitbucket.org:lae/melody.git

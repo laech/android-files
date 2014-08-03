@@ -1,5 +1,7 @@
 package l.files.operations.ui.notification;
 
+import com.google.common.base.Optional;
+
 /**
  * Provides notification information from a file operation broadcast value.
  */
@@ -13,17 +15,17 @@ interface NotificationViewer<T> {
     /**
      * @see android.app.Notification.Builder#setContentTitle(CharSequence)
      */
-    String getContentTitle(T value);
+    Optional<String> getContentTitle(T value);
 
     /**
      * @see android.app.Notification.Builder#setContentText(CharSequence)
      */
-    String getContentText(T value);
+    Optional<String> getContentText(T value);
 
     /**
      * @see android.app.Notification.Builder#setContentInfo(CharSequence)
      */
-    String getContentInfo(T value);
+    Optional<String> getContentInfo(T value);
 
     /**
      * Gets the current progress (between 0 and 1 where 0 is nothing is done).

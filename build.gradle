@@ -1,70 +1,93 @@
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
-    }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:0.12.+'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
+  }
+}
+
+project(':melody-base') {
+  apply from: '../build.gradle'
+}
+
+project(':melody-jdk') {
+  apply from: '../build.gradle'
+}
+
+project(':melody-guava') {
+  apply from: '../build.gradle'
+}
+
+project(':melody-testing') {
+  apply from: '../build.gradle'
 }
 
 subprojects {
-    repositories {
-        mavenCentral()
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+
+  def androidConfig = {
+    android {
+      compileSdkVersion 19
+      buildToolsVersion "20"
+
+      defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 19
+      }
+
+      compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+      }
+
+      lintOptions {
+        abortOnError false
+      }
+
+      // Remove files from third party jars that causes 'duplicate files' build issues
+      packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'LICENSE.txt'
+      }
     }
 
-    def androidConfig = {
-        android {
-            compileSdkVersion 19
-            buildToolsVersion "20"
-
-            defaultConfig {
-                minSdkVersion 14
-                targetSdkVersion 19
-            }
-
-            compileOptions {
-                sourceCompatibility JavaVersion.VERSION_1_7
-                targetCompatibility JavaVersion.VERSION_1_7
-            }
-
-            lintOptions {
-                abortOnError false
-            }
-
-            // Remove files from third party jars that causes 'duplicate files' build issues
-            packagingOptions {
-                exclude 'META-INF/services/javax.annotation.processing.Processor'
-                exclude 'META-INF/LICENSE.txt'
-                exclude 'META-INF/NOTICE.txt'
-                exclude 'LICENSE.txt'
-            }
-        }
+    dependencies {
+      androidTestCompile project(':testlib')
+      androidTestCompile project(':melody-jdk')
+      androidTestCompile project(':melody-guava')
     }
+  }
 
-    def androidApp = com.android.build.gradle.AppPlugin
-    def androidLib = com.android.build.gradle.LibraryPlugin
+  def androidApp = com.android.build.gradle.AppPlugin
+  def androidLib = com.android.build.gradle.LibraryPlugin
 
-    if (plugins.hasPlugin('android')
-            || plugins.hasPlugin('android-library')
-            || plugins.hasPlugin('com.android.application')
-            || plugins.hasPlugin('com.android.library')) {
-        apply plugin: 'android-apt'
-    }
+  if (plugins.hasPlugin('android')
+      || plugins.hasPlugin('android-library')
+      || plugins.hasPlugin('com.android.application')
+      || plugins.hasPlugin('com.android.library')) {
+    apply plugin: 'android-apt'
+  }
 
-    plugins.withType(androidLib, androidConfig)
-    plugins.withType(androidApp, androidConfig)
+  plugins.withType(androidLib, androidConfig)
+  plugins.withType(androidApp, androidConfig)
 }
 
 ext.libs = [:]
 
 libs.auto_value = [
-        'javax.annotation:javax.annotation-api:1.2',
-        'com.google.auto.value:auto-value:1.0-rc1'
+    'javax.annotation:javax.annotation-api:1.2',
+    'com.google.auto.value:auto-value:1.0-rc1'
 ]
 libs.android_support = [
-        'com.android.support:support-v4:19.+',
-        'com.android.support:support-v13:19.+'
+    'com.android.support:support-v4:19.+',
+    'com.android.support:support-v13:19.+'
 ]
 libs.tika = 'org.apache.tika:tika-core:1.4'
 libs.otto = 'com.squareup:otto:1.3.+'
@@ -76,8 +99,8 @@ libs.commons_lang = 'org.apache.commons:commons-lang3:3.1'
 libs.google_play_services = 'com.google.android.gms:play-services:5.+'
 
 libs.mockito = [
-        'org.mockito:mockito-core:1.9.+',
-        'com.google.dexmaker:dexmaker:1.0',
-        'com.google.dexmaker:dexmaker-mockito:1.0'
+    'org.mockito:mockito-core:1.9.+',
+    'com.google.dexmaker:dexmaker:1.0',
+    'com.google.dexmaker:dexmaker-mockito:1.0'
 ]
 libs.hamcrest = 'org.hamcrest:hamcrest-library:1.3'

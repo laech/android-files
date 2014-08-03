@@ -70,8 +70,8 @@ public final class NotificationReceiver {
     boolean indeterminate = percentage <= 0;
     return new Notification.Builder(context)
         .setPriority(PRIORITY_LOW)
-        .setContentTitle(viewer.getContentTitle(value))
-        .setContentText(viewer.getContentText(value))
+        .setContentTitle(viewer.getContentTitle(value).orNull())
+        .setContentText(viewer.getContentText(value).orNull())
         .setSmallIcon(viewer.getSmallIcon())
                 /*
                  * Set when to a fixed value to prevent flickering on update when there
@@ -81,7 +81,7 @@ public final class NotificationReceiver {
         .setOnlyAlertOnce(true)
         .setOngoing(true)
         .setProgress(progressMax, percentage, indeterminate)
-        .setContentInfo(viewer.getContentInfo(value))
+        .setContentInfo(viewer.getContentInfo(value).orNull())
         .addAction(
             android.R.drawable.ic_menu_close_clear_cancel,
             context.getString(android.R.string.cancel),

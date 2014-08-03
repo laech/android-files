@@ -26,61 +26,61 @@ abstract class ProgressViewer<T extends ProgressInfo> implements NotificationVie
     this.clock = checkNotNull(clock, "clock");
   }
 
-  @Override public final String getContentTitle(T value) {
+  @Override public final Optional<String> getContentTitle(T value) {
     if (value.isCleanup()) {
-      return context.getString(R.string.cleaning_up);
+      return Optional.of(context.getString(R.string.cleaning_up));
     }
     switch (value.getTaskStatus()) {
       case PENDING:
-        return context.getString(R.string.pending);
+        return Optional.of(context.getString(R.string.pending));
       case RUNNING:
         int template = getWorkDone(value) > 0 ? getTitleRunning() : getTitlePreparing();
-        return context.getResources().getQuantityString(template,
+        return Optional.of(context.getResources().getQuantityString(template,
             value.getTotalItemCount(),
             value.getTotalItemCount(),
-            getTargetName(value));
+            getTargetName(value)));
       default:
-        return null;
+        return Optional.absent();
     }
   }
 
-  @Override public final String getContentText(T value) {
+  @Override public final Optional<String> getContentText(T value) {
     if (value.isCleanup()) {
-      return null;
+      return Optional.absent();
     }
     return getItemsRemaining(value);
   }
 
-  private String getItemsRemaining(T value) {
+  private Optional<String> getItemsRemaining(T value) {
     if (value.getTaskStatus() == PENDING) {
-      return null;
+      return Optional.absent();
     }
     int count = value.getTotalItemCount() - value.getProcessedItemCount();
     long size = value.getTotalByteCount() - value.getProcessedByteCount();
     if (count == 0 || size == 0) {
-      return null;
+      return Optional.absent();
     }
-    return context.getString(R.string.remain_count_x_size_x,
-        count, formatFileSize(context, size));
+    return Optional.of(context.getString(R.string.remain_count_x_size_x,
+        count, formatFileSize(context, size)));
   }
 
-  @Override public final String getContentInfo(T value) {
+  @Override public final Optional<String> getContentInfo(T value) {
     if (value.isCleanup()) {
-      return null;
+      return Optional.absent();
     }
     return getTimeRemaining(value);
   }
 
-  private String getTimeRemaining(T value) {
+  private Optional<String> getTimeRemaining(T value) {
     Optional<String> formatted = formatTimeRemaining(
         value.getElapsedRealtimeOnRun(),
         clock.getElapsedRealTime(),
         getWorkTotal(value),
         getWorkDone(value));
     if (formatted.isPresent()) {
-      return context.getString(R.string.x_countdown, formatted.get());
+      return Optional.of(context.getString(R.string.x_countdown, formatted.get()));
     }
-    return null;
+    return Optional.absent();
   }
 
   @Override public final float getProgress(T value) {

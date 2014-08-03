@@ -1,1 +1,22 @@
-include ':files-app', ':files-common', ':files-analytics', ':testlib', ':provider', ':logging', ':io-operations', ':provider-bookmarks', ':io-file', ':io-os', ':io-event', ':operations', ':operations-ui'
+include ':files-app'
+include 'files-common'
+include 'files-analytics'
+include 'provider'
+include 'logging'
+include 'io-operations'
+include 'provider-bookmarks'
+include 'io-file'
+include 'io-os'
+include 'io-event'
+include 'operations'
+include 'operations-ui'
+include 'testlib'
+
+include 'melody-base'
+include 'melody-jdk'
+include 'melody-guava'
+include 'melody-testing'
+project(':melody-base').projectDir = new File("melody/melody-base")
+project(':melody-jdk').projectDir = new File("melody/melody-jdk")
+project(':melody-guava').projectDir = new File("melody/melody-guava")
+project(':melody-testing').projectDir = new File("melody/melody-testing")
