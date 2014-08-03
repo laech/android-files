@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import l.files.io.os.ErrnoException;
 import l.files.io.os.Stdio;
 import l.files.io.os.Unistd;
 
@@ -16,8 +15,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Integer.parseInt;
-import static l.files.io.os.ErrnoException.ENOENT;
 import static l.files.io.os.Unistd.F_OK;
+import static l.files.io.os.Unistd.R_OK;
+import static l.files.io.os.Unistd.W_OK;
 import static l.files.io.os.Unistd.access;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -29,20 +29,11 @@ public final class Files {
   private Files() {}
 
   public static void rename(String oldPath, String newPath) throws IOException {
-    try {
-      Stdio.rename(oldPath, newPath);
-    } catch (ErrnoException e) {
-      throw new IOException(
-          "Failed to rename " + oldPath + " to " + newPath, e);
-    }
+    Stdio.rename(oldPath, newPath);
   }
 
   public static void remove(String path) throws IOException {
-    try {
-      Stdio.remove(path);
-    } catch (ErrnoException e) {
-      throw new IOException("Failed to remove " + path, e);
-    }
+    Stdio.remove(path);
   }
 
   /**
@@ -50,34 +41,41 @@ public final class Files {
    * @param link   path of the link itself
    */
   public static void symlink(String target, String link) throws IOException {
-    try {
-      Unistd.symlink(target, link);
-    } catch (ErrnoException e) {
-      throw new IOException(
-          "Failed to link target=" + target + ", link=" + link, e);
-    }
+    Unistd.symlink(target, link);
   }
 
-  public static boolean exists(String path) throws IOException {
-    try {
-      return access(path, F_OK);
-    } catch (ErrnoException e) {
-      if (e.errno() == ENOENT) {
-        return false;
-      }
-      throw new IOException("Failed to check file existence " + path, e);
-    }
+  /**
+   * Checks the given path exists.
+   *
+   * @throws IOException if the path does not exist
+   */
+  public static void checkExist(String path) throws IOException {
+    access(path, F_OK);
+  }
+
+  /**
+   * Checks the given path is readable.
+   *
+   * @throws IOException if the path is not readable
+   */
+  public static void checkReadable(String path) throws IOException {
+    access(path, R_OK);
+  }
+
+  /**
+   * Checks the given path is writable.
+   *
+   * @throws IOException if the path is not writable
+   */
+  public static void checkWritable(String path) throws IOException {
+    access(path, W_OK);
   }
 
   /**
    * Reads the actual path pointed to by the given symbolic link.
    */
   public static String readlink(String link) throws IOException {
-    try {
-      return Unistd.readlink(link);
-    } catch (ErrnoException e) {
-      throw new IOException("Failed to readlink " + link, e);
-    }
+    return Unistd.readlink(link);
   }
 
   /**

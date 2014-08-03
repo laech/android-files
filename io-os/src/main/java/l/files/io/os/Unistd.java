@@ -16,7 +16,7 @@ public final class Unistd extends Native {
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/access.html">access()</a>
    */
-  public static native boolean access(String path, int mode) throws ErrnoException;
+  public static native void access(String path, int mode) throws ErrnoException;
 
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/symlink.html">symlink()</a>

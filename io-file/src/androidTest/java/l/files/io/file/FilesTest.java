@@ -3,21 +3,83 @@ package l.files.io.file;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
 
-import static l.files.io.file.Files.exists;
+import static l.files.io.file.Files.checkExist;
+import static l.files.io.file.Files.checkReadable;
+import static l.files.io.file.Files.checkWritable;
 import static l.files.io.file.Files.getNonExistentDestinationFile;
 import static l.files.io.file.Files.hierarchy;
 import static l.files.io.file.Files.isAncestorOrSelf;
 import static l.files.io.file.Files.replace;
+import static melody.Assertions.test;
+import static melody.assertions.java.lang.Objects.equalTo;
 
 public final class FilesTest extends FileBaseTest {
 
-  public void testExistence() throws Exception {
-    assertFalse(exists("/abc/def/123"));
-    assertTrue(exists("/"));
+  public void testCheckReadableForReadablePath() throws Exception {
+    checkReadable(tmp().get().getPath());
+  }
+
+  public void testCheckReadableForNonReadablePath() throws Exception {
+    File file = tmp().createFile("abc");
+    test(file.setReadable(false), equalTo(true));
+    try {
+      checkReadable(file.getPath());
+      fail();
+    } catch (IOException e) {
+      // Pass
+    }
+
+  }
+
+  public void testCheckReadableForNonExistentPath() throws Exception {
+    try {
+      checkReadable("abc");
+      fail();
+    } catch (IOException e) {
+      // Pass
+    }
+  }
+
+  public void testCheckWritableForWritablePath() throws Exception {
+    checkWritable(tmp().get().getPath());
+  }
+
+  public void testCheckWritableForNonExistentPath() throws Exception {
+    try {
+      checkWritable("abc");
+      fail();
+    } catch (IOException e) {
+      // Pass
+    }
+  }
+
+  public void testCheckWritableForNonWritablePath() throws Exception {
+    File file = tmp().createFile("a");
+    test(file.setWritable(false), equalTo(true));
+    try {
+      checkWritable(file.getPath());
+      fail();
+    } catch (IOException e) {
+      // Pass
+    }
+  }
+
+  public void testCheckExistForExistingPath() throws Exception {
+    checkExist(tmp().createDir("a").getPath());
+  }
+
+  public void testCheckExistForNonExistingPath() throws Exception {
+    try {
+      checkExist("abc");
+      fail();
+    } catch (IOException e) {
+      // Pass
+    }
   }
 
   public void testHierarchy() throws Exception {

@@ -34,7 +34,7 @@ import static com.google.common.collect.Multimaps.newSetMultimap;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
-import static l.files.io.file.Files.exists;
+import static l.files.io.file.Files.checkExist;
 import static l.files.io.file.event.PathObserver.IN_IGNORED;
 import static l.files.io.file.event.WatchEvent.Kind;
 
@@ -424,9 +424,9 @@ final class WatchServiceImpl extends WatchService {
   }
 
   private void onDelete(Path path) {
-    boolean accessible;
+    boolean accessible = true;
     try {
-      accessible = exists(path.toString());
+      checkExist(path.toString());
     } catch (IOException e) {
       accessible = false;
     }

@@ -13,10 +13,10 @@ jboolean Java_l_files_io_os_Unistd_symlink(JNIEnv *env, jclass clazz, jstring js
   return (-1 == result) ? JNI_FALSE : JNI_TRUE;
 }
 
-jboolean Java_l_files_io_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
+void Java_l_files_io_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   if (NULL == path) {
-    return JNI_FALSE;
+    return; // TODO error handling
   }
   int rc = TEMP_FAILURE_RETRY(access(path, mode));
   if (rc == -1) {
@@ -25,7 +25,6 @@ jboolean Java_l_files_io_os_Unistd_access(JNIEnv *env, jclass clazz, jstring jpa
   } else {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
   }
-  return (rc == 0);
 }
 
 jstring Java_l_files_io_os_Unistd_readlink(JNIEnv *env, jclass clazz, jstring jpath) {
