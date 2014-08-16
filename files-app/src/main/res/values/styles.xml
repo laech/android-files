@@ -53,6 +53,8 @@
     <item name="android:scrollbarStyle">outsideOverlay</item>
     <item name="android:fastScrollEnabled">true</item>
     <item name="android:divider">@null</item>
+    <item name="android:paddingLeft">@dimen/files_list_padding_side</item>
+    <item name="android:paddingRight">@dimen/files_list_padding_side</item>
   </style>
 
   <style name="Widget.ProgressBarBelowActionBar" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
