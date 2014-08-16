@@ -11,12 +11,3 @@ include 'io-event'
 include 'operations'
 include 'operations-ui'
 include 'testlib'
-
-include 'melody-base'
-include 'melody-jdk'
-include 'melody-guava'
-include 'melody-testing'
-project(':melody-base').projectDir = new File("melody/melody-base")
-project(':melody-jdk').projectDir = new File("melody/melody-jdk")
-project(':melody-guava').projectDir = new File("melody/melody-guava")
-project(':melody-testing').projectDir = new File("melody/melody-testing")

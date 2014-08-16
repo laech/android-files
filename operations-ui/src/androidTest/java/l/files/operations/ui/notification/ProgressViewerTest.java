@@ -13,10 +13,6 @@ import static android.text.format.Formatter.formatFileSize;
 import static l.files.operations.info.TaskInfo.TaskStatus.PENDING;
 import static l.files.operations.info.TaskInfo.TaskStatus.RUNNING;
 import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
-import static melody.Assertions.test;
-import static melody.assertions.com.google.common.base.Optionals.isAbsent;
-import static melody.assertions.com.google.common.base.Optionals.isPresent;
-import static melody.assertions.java.lang.Objects.equalTo;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -80,12 +76,12 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
   }
 
   public void testGetSmallIcon() throws Exception {
-    test(viewer.getSmallIcon(), equalTo(getSmallIcon()));
+    assertEquals(getSmallIcon(), viewer.getSmallIcon());
   }
 
   public void testGetContentTitle_PENDING() throws Exception {
     given(info.getTaskStatus()).willReturn(PENDING);
-    test(viewer.getContentTitle(info), isPresent(res.getString(R.string.pending)));
+    assertEquals(res.getString(R.string.pending), viewer.getContentTitle(info).get());
   }
 
   public void testGetContentTitle_RUNNING_preparing() throws Exception {
@@ -93,8 +89,8 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(info.getTotalItemCount()).willReturn(1);
     mockWorkDone(info, 0);
     mockTargetName(info, "hello");
-    test(viewer.getContentTitle(info),
-        isPresent(res.getQuantityString(getTitlePreparing(), 1, 1, "hello")));
+    assertEquals(res.getQuantityString(getTitlePreparing(), 1, 1, "hello"),
+        viewer.getContentTitle(info).get());
   }
 
   public void testGetContentTitle_RUNNING_copying() throws Exception {
@@ -102,31 +98,31 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(info.getTotalItemCount()).willReturn(100);
     mockWorkDone(info, 1);
     mockTargetName(info, "hello");
-    test(viewer.getContentTitle(info),
-        isPresent(res.getQuantityString(getTitleRunning(), 100, 100, "hello")));
+    assertEquals(res.getQuantityString(getTitleRunning(), 100, 100, "hello"),
+        viewer.getContentTitle(info).get());
   }
 
   public void testGetContentTitle_cleanup() throws Exception {
     given(info.isCleanup()).willReturn(true);
-    test(viewer.getContentTitle(info), isPresent(res.getString(R.string.cleaning_up)));
+    assertEquals(res.getString(R.string.cleaning_up), viewer.getContentTitle(info).get());
   }
 
   public void testGetProgress() throws Exception {
     mockWorkTotal(info, 100);
     mockWorkDone(info, 1);
-    test(viewer.getProgress(info), equalTo(1 / (float) 100));
+    assertEquals(1 / (float) 100, viewer.getProgress(info));
   }
 
   public void testGetProgress_cleanup() throws Exception {
     given(info.isCleanup()).willReturn(true);
     mockWorkTotal(info, 100);
     mockWorkDone(info, 1);
-    test(viewer.getProgress(info), equalTo(-1F));
+    assertEquals(-1F, viewer.getProgress(info));
   }
 
   public void testGetContentText_PENDING_showNothing() throws Exception {
     given(info.getTaskStatus()).willReturn(PENDING);
-    test(viewer.getContentText(info), equalTo(null));
+    assertFalse(viewer.getContentText(info).isPresent());
   }
 
   public void testGetContentText_RUNNING_showRemaining() throws Exception {
@@ -135,10 +131,9 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(info.getTotalByteCount()).willReturn(20L);
     given(info.getProcessedItemCount()).willReturn(1);
     given(info.getTotalItemCount()).willReturn(10);
-    test(viewer.getContentText(info),
-        isPresent(res.getString(R.string.remain_count_x_size_x,
-            10 - 1, formatFileSize(getContext(), 20 - 2)))
-    );
+    assertEquals(res.getString(
+            R.string.remain_count_x_size_x, 10 - 1, formatFileSize(getContext(), 20 - 2)),
+        viewer.getContentText(info).get());
   }
 
   public void testGetContentText_noWorkDoneYet_showNothing() throws Exception {
@@ -147,7 +142,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(info.getTotalItemCount()).willReturn(0);
     given(info.getProcessedByteCount()).willReturn(0L);
     given(info.getProcessedItemCount()).willReturn(0);
-    test(viewer.getContentText(info), isAbsent());
+    assertFalse(viewer.getContentText(info).isPresent());
   }
 
   public void testGetContentText_cleanUp_showNothing() throws Exception {
@@ -157,7 +152,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(info.getTotalItemCount()).willReturn(10);
     given(info.getProcessedItemCount()).willReturn(1);
     given(info.getProcessedByteCount()).willReturn(2L);
-    test(viewer.getContentText(info), isAbsent());
+    assertFalse(viewer.getContentText(info).isPresent());
   }
 
   public void testGetContentInfo_showTimeRemaining() throws Exception {
@@ -165,10 +160,9 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 10000);
     mockWorkDone(info, 10);
-    test(viewer.getContentInfo(info),
-        isPresent(res.getString(R.string.x_countdown,
-            formatTimeRemaining(0, 1000, 10000, 10).get()))
-    );
+    assertEquals(res.getString(R.string.x_countdown,
+            formatTimeRemaining(0, 1000, 10000, 10).get()),
+        viewer.getContentInfo(info).get());
   }
 
   public void testGetContentInfo_noWorkDoneYet_showNothing() throws Exception {
@@ -176,7 +170,7 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 0);
     mockWorkDone(info, 0);
-    test(viewer.getContentInfo(info), isAbsent());
+    assertFalse(viewer.getContentInfo(info).isPresent());
   }
 
   public void testGetContentInfo_cleanUp_showEmpty() throws Exception {
@@ -185,6 +179,6 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
     given(clock.getElapsedRealTime()).willReturn(1000L);
     mockWorkTotal(info, 10000);
     mockWorkDone(info, 10);
-    test(viewer.getContentInfo(info), isAbsent());
+    assertFalse(viewer.getContentInfo(info).isPresent());
   }
 }

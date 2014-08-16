@@ -15,8 +15,6 @@ import static l.files.io.file.Files.getNonExistentDestinationFile;
 import static l.files.io.file.Files.hierarchy;
 import static l.files.io.file.Files.isAncestorOrSelf;
 import static l.files.io.file.Files.replace;
-import static melody.Assertions.test;
-import static melody.assertions.java.lang.Objects.equalTo;
 
 public final class FilesTest extends FileBaseTest {
 
@@ -26,7 +24,7 @@ public final class FilesTest extends FileBaseTest {
 
   public void testCheckReadableForNonReadablePath() throws Exception {
     File file = tmp().createFile("abc");
-    test(file.setReadable(false), equalTo(true));
+    assertTrue(file.setReadable(false));
     try {
       checkReadable(file.getPath());
       fail();
@@ -60,7 +58,7 @@ public final class FilesTest extends FileBaseTest {
 
   public void testCheckWritableForNonWritablePath() throws Exception {
     File file = tmp().createFile("a");
-    test(file.setWritable(false), equalTo(true));
+    assertTrue(file.setWritable(false));
     try {
       checkWritable(file.getPath());
       fail();

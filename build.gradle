@@ -8,22 +8,6 @@ buildscript {
   }
 }
 
-project(':melody-base') {
-  apply from: '../build.gradle'
-}
-
-project(':melody-jdk') {
-  apply from: '../build.gradle'
-}
-
-project(':melody-guava') {
-  apply from: '../build.gradle'
-}
-
-project(':melody-testing') {
-  apply from: '../build.gradle'
-}
-
 subprojects {
   repositories {
     mavenCentral()
@@ -60,8 +44,6 @@ subprojects {
 
     dependencies {
       androidTestCompile project(':testlib')
-      androidTestCompile project(':melody-jdk')
-      androidTestCompile project(':melody-guava')
     }
   }
 
