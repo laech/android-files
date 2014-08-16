@@ -96,7 +96,7 @@ public final class UnistdTest extends FileBaseTest {
   public void testAccessTrue(int mode, Consumer<File> fn) throws Exception {
     File file = tmp().createFile("a");
     fn.apply(file);
-    assertTrue(Unistd.access(file.getPath(), mode));
+    Unistd.access(file.getPath(), mode);
   }
 
   public void testAccessFalse(int mode, Consumer<File> fn) throws Exception {
