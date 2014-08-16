@@ -11,105 +11,101 @@ import l.files.operations.info.TaskInfo;
 
 import static android.os.SystemClock.elapsedRealtime;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.emptyList;
 import static l.files.io.file.operations.FileOperation.Failure;
 
 abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements TaskInfo {
 
-    private static final Handler handler = new Handler(Looper.getMainLooper());
+  private static final Handler handler = new Handler(Looper.getMainLooper());
 
-    private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
+  private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
-    private final Runnable update = new Runnable() {
-        @Override
-        public void run() {
-            notifyProgress();
-            if (getStatus() != Status.FINISHED) {
-                handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
-            }
+  private final Runnable update = new Runnable() {
+    @Override public void run() {
+      notifyProgress();
+      if (getStatus() != Status.FINISHED) {
+        handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
+      }
+    }
+  };
+
+  private final int id;
+  private volatile long startTime;
+  private volatile long elapsedRealtimeOnRun;
+  private volatile TaskStatus status;
+  private volatile List<Failure> failures = emptyList();
+
+  protected Task(int id) {
+    this.id = id;
+  }
+
+  @Override protected final void onPreExecute() {
+    status = TaskStatus.PENDING;
+    startTime = currentTimeMillis();
+    if (!isCancelled()) {
+      notifyProgress();
+    }
+  }
+
+  @Override protected final List<Failure> doInBackground(Object... params) {
+    elapsedRealtimeOnRun = elapsedRealtime();
+    handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
+    try {
+      status = TaskStatus.RUNNING;
+      doTask();
+    } catch (InterruptedException e) {
+      // Cancelled, let it finish
+    } catch (FileException e) {
+      return e.failures();
+    } catch (RuntimeException e) {
+      handler.post(new Runnable() {
+        @Override public void run() {
+          onDone(null);
         }
-    };
-
-    private final int id;
-    private volatile long startTime;
-    private volatile long elapsedRealtimeOnRun;
-    private volatile TaskStatus status;
-
-    protected Task(int id) {
-        this.id = id;
+      });
+      throw e;
     }
+    return null;
+  }
 
-    @Override
-    protected final void onPreExecute() {
-        status = TaskStatus.PENDING;
-        startTime = currentTimeMillis();
-        if (!isCancelled()) {
-            notifyProgress();
-        }
-    }
+  protected abstract void doTask() throws InterruptedException;
 
-    @Override
-    protected final List<Failure> doInBackground(Object... params) {
-      elapsedRealtimeOnRun = elapsedRealtime();
-      handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
-        try {
-            status = TaskStatus.RUNNING;
-            doTask();
-        } catch (InterruptedException e) {
-            // Cancelled, let it finish
-        } catch (FileException e) {
-            return e.failures();
-        } catch (RuntimeException e) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onDone(null);
-                }
-            });
-            throw e;
-        }
-        return null;
-    }
+  @Override protected final void onPostExecute(List<Failure> result) {
+    onDone(result);
+  }
 
-    protected abstract void doTask() throws InterruptedException;
+  @Override protected final void onCancelled(List<Failure> result) {
+    onDone(result);
+  }
 
-    @Override
-    protected final void onPostExecute(List<Failure> result) {
-        onDone(result);
-    }
+  private void onDone(List<Failure> result) {
+    failures = result;
+    status = TaskStatus.FINISHED;
+    handler.removeCallbacks(update);
+    notifyProgress();
+  }
 
-    @Override
-    protected final void onCancelled(List<Failure> result) {
-        onDone(result);
-    }
+  protected final void notifyProgress() {
+    Events.get().post(this);
+  }
 
-    private void onDone(List<Failure> result) {
-        // TODO handle result
-        status = TaskStatus.FINISHED;
-        handler.removeCallbacks(update);
-        notifyProgress();
-    }
+  @Override public int getTaskId() {
+    return id;
+  }
 
-    protected final void notifyProgress() {
-        Events.get().post(this);
-    }
+  @Override public long getTaskStartTime() {
+    return startTime;
+  }
 
-    @Override
-    public int getTaskId() {
-        return id;
-    }
+  @Override public long getElapsedRealtimeOnRun() {
+    return elapsedRealtimeOnRun;
+  }
 
-    @Override
-    public long getTaskStartTime() {
-        return startTime;
-    }
+  @Override public TaskStatus getTaskStatus() {
+    return status;
+  }
 
-    @Override
-    public long getElapsedRealtimeOnRun() {
-        return elapsedRealtimeOnRun;
-    }
-
-    @Override
-    public TaskStatus getTaskStatus() {
-        return status;
-    }
+  @Override public List<Failure> getFailures() {
+    return failures;
+  }
 }
