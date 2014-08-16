@@ -25,15 +25,17 @@ import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
 import static l.files.operations.info.TaskInfo.TaskStatus.RUNNING;
 import static l.files.operations.ui.FailuresActivity.getFailures;
 import static l.files.operations.ui.FailuresActivity.getTitle;
+import static l.files.operations.ui.notification.NotificationReceiver.getFailureIntent;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-public final class FailureReceiverTest extends BaseTest {
+public final class NotificationReceiverTest extends BaseTest {
 
   private EventBus bus;
   private NotificationManager manager;
@@ -42,16 +44,38 @@ public final class FailureReceiverTest extends BaseTest {
     super.setUp();
     bus = new EventBus();
     manager = mock(NotificationManager.class);
-    FailureReceiver.register(bus, getContext(), manager);
+    NotificationReceiver.register(bus, getContext(), manager);
   }
 
   public void testReceiverMethodIsAnnotated() throws Exception {
-    assertNotNull(FailureReceiver.class.getMethod("on", CopyTaskInfo.class)
+    assertNotNull(NotificationReceiver.class.getMethod("on", CopyTaskInfo.class)
         .getAnnotation(Subscribe.class));
-    assertNotNull(FailureReceiver.class.getMethod("on", MoveTaskInfo.class)
+    assertNotNull(NotificationReceiver.class.getMethod("on", MoveTaskInfo.class)
         .getAnnotation(Subscribe.class));
-    assertNotNull(FailureReceiver.class.getMethod("on", DeleteTaskInfo.class)
+    assertNotNull(NotificationReceiver.class.getMethod("on", DeleteTaskInfo.class)
         .getAnnotation(Subscribe.class));
+  }
+
+  public void testCancelNotificationOnSuccess() {
+    CopyTaskInfo task = mock(CopyTaskInfo.class);
+    given(task.getTaskId()).willReturn(101);
+    given(task.getTaskStatus()).willReturn(FINISHED);
+    given(task.getFailures()).willReturn(Collections.<Failure>emptyList());
+
+    bus.post(task);
+    verify(manager).cancel(task.getTaskId());
+    verifyNoMoreInteractions(manager);
+  }
+
+  public void testNotifyOnProgress() {
+    CopyTaskInfo task = mock(CopyTaskInfo.class);
+    given(task.getTaskId()).willReturn(101);
+    given(task.getTaskStatus()).willReturn(RUNNING);
+    given(task.getFailures()).willReturn(Collections.<Failure>emptyList());
+
+    bus.post(task);
+    verify(manager).notify(eq(task.getTaskId()), notNull(Notification.class));
+    verifyNoMoreInteractions(manager);
   }
 
   public void testNotifyOnFailure() throws Exception {
@@ -79,7 +103,7 @@ public final class FailureReceiverTest extends BaseTest {
         Failure.create("2", new IOException("test2"))
     ));
 
-    Intent intent = FailureReceiver.getFailureIntent(getContext(), task, R.plurals.fail_to_copy).get();
+    Intent intent = getFailureIntent(getContext(), task, R.plurals.fail_to_copy).get();
     Collection<FailureMessage> actual = getFailures(intent);
     Collection<FailureMessage> expected = asList(
         FailureMessage.create("1", "test1"),
@@ -96,7 +120,7 @@ public final class FailureReceiverTest extends BaseTest {
     MoveTaskInfo move = newTaskWithFailure(MoveTaskInfo.class);
     DeleteTaskInfo delete = newTaskWithFailure(DeleteTaskInfo.class);
 
-    FailureReceiver receiver = mock(FailureReceiver.class);
+    NotificationReceiver receiver = mock(NotificationReceiver.class);
     doCallRealMethod().when(receiver).on(copy);
     doCallRealMethod().when(receiver).on(move);
     doCallRealMethod().when(receiver).on(delete);
@@ -105,9 +129,9 @@ public final class FailureReceiverTest extends BaseTest {
     receiver.on(move);
     receiver.on(delete);
 
-    verify(receiver).on(copy, R.plurals.fail_to_copy);
-    verify(receiver).on(move, R.plurals.fail_to_move);
-    verify(receiver).on(delete, R.plurals.fail_to_delete);
+    verify(receiver).onFailure(copy, R.plurals.fail_to_copy);
+    verify(receiver).onFailure(move, R.plurals.fail_to_move);
+    verify(receiver).onFailure(delete, R.plurals.fail_to_delete);
   }
 
   public TaskInfo newTaskWithFailure() {

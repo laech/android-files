@@ -10,6 +10,7 @@ import l.files.io.file.operations.FileException;
 import l.files.operations.info.TaskInfo;
 
 import static android.os.SystemClock.elapsedRealtime;
+import static com.google.common.base.Objects.toStringHelper;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyList;
 import static l.files.io.file.operations.FileOperation.Failure;
@@ -107,5 +108,9 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
   @Override public List<Failure> getFailures() {
     return failures;
+  }
+
+  @Override public String toString() {
+    return toStringHelper(this).addValue(getStatus()).toString();
   }
 }
