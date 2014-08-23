@@ -151,7 +151,7 @@ public final class ErrnoException extends IOException {
   private final int errno;
 
   public ErrnoException(int errno, String msg) {
-    super(ERROR_NAMES_BY_VALUE.get(errno) + ": " + msg);
+    super(msg);
     this.errno = errno;
   }
 
