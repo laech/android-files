@@ -1,5 +1,7 @@
 package l.files.io.file.event;
 
+import java.io.IOException;
+
 import l.files.io.file.Path;
 
 /**
@@ -36,10 +38,8 @@ public abstract class WatchService {
   /**
    * Starts monitoring on the given file path, file systems event on the given
    * path will be sent to the given registered listeners.
-   *
-   * @throws WatchException if failed to monitor the given file
    */
-  public abstract void register(Path path, WatchEvent.Listener listener);
+  public abstract void register(Path path, WatchEvent.Listener listener) throws IOException;
 
   /**
    * Stops monitoring on the given file path.

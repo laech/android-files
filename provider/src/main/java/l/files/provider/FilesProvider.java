@@ -58,6 +58,8 @@ import static l.files.provider.FilesContract.newMatcher;
 
 public final class FilesProvider extends ContentProvider {
 
+  // TODO remove java.io.File usage
+
   private static final Logger logger = Logger.get(FilesProvider.class);
 
   private static final String[] DEFAULT_COLUMNS = {
@@ -85,6 +87,7 @@ public final class FilesProvider extends ContentProvider {
       case MATCH_FILES_LOCATION:
         String location = getFileLocation(uri);
         File file = new File(URI.create(location));
+        // TODO don't do anything special for directories, detect and return "application/x-directory"
         if (file.isDirectory()) {
           return MIME_DIR;
         }

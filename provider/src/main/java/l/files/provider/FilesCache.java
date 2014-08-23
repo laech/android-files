@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import l.files.io.file.Path;
 import l.files.io.file.event.WatchEvent;
 import l.files.io.file.event.WatchService;
-import l.files.io.file.Path;
 import l.files.logging.Logger;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -86,7 +86,13 @@ final class FilesCache implements
 
   private void loadInto(ValueMap map, Path path) {
     service.unregister(path, this);
-    service.register(path, this);
+    try {
+      service.register(path, this);
+    } catch (IOException e) {
+      // No longer exist etc
+      logger.warn(e);
+      return;
+    }
 
     String[] names = path.toFile().list();
     if (names == null) {

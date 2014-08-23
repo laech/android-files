@@ -138,7 +138,7 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-    if (getActivity() != null) {
+    if (getActivity() != null && !getActivity().isFinishing()) {
       if (getListAdapter().getCursor() != null && isResumed()) {
         animatePreDataSetChange(getListView());
       }

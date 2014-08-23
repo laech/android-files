@@ -264,6 +264,10 @@ public final class FilesActivity extends AnalyticsActivity
     return super.onWindowStartingActionMode(callback);
   }
 
+  public ActionBarDrawerToggle getActionBarDrawerToggle() {
+    return actionBarDrawerToggle;
+  }
+
   public ActionMode getCurrentActionMode() {
     return currentActionMode;
   }

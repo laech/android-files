@@ -181,7 +181,7 @@ final class WatchServiceImpl extends WatchService {
     }
   };
 
-  @Override public void register(Path path, WatchEvent.Listener listener) {
+  @Override public void register(Path path, WatchEvent.Listener listener) throws IOException {
     synchronized (this) {
       if (listeners.put(path, listener)) {
         monitor(path);
@@ -282,13 +282,8 @@ final class WatchServiceImpl extends WatchService {
     return null;
   }
 
-  private void monitor(Path path) {
-    Node node;
-    try {
-      node = Node.from(FileInfo.get(path.toString()));
-    } catch (IOException e) {
-      throw new WatchException("Failed to stat " + path, e);
-    }
+  private void monitor(Path path) throws IOException {
+    Node node = Node.from(FileInfo.get(path.toString()));
 
     synchronized (this) {
       checkNode(path, node);
@@ -298,11 +293,7 @@ final class WatchServiceImpl extends WatchService {
       startObserver(path, node);
     }
 
-    try {
-      startObserversForSubDirs(path);
-    } catch (IOException e) {
-      throw new WatchException("Failed to read content of " + path, e);
-    }
+    startObserversForSubDirs(path);
   }
 
   private void unmonitor(Path parent) {
