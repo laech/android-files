@@ -10,6 +10,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
 
+import java.io.IOException;
+
 import l.files.R;
 import l.files.app.CloseActionModeRequest;
 import l.files.app.FileCreationFragment;
@@ -97,16 +99,22 @@ public final class RenameFragment extends FileCreationFragment {
 
   @Override public void onClick(DialogInterface dialog, int which) {
     final Context context = getActivity();
-    new AsyncTask<Void, Void, Boolean>() {
+    new AsyncTask<Void, Void, IOException>() {
 
-      @Override protected Boolean doInBackground(Void... params) {
-        return FilesContract.rename(context, getFileLocation(), getFilename());
+      @Override protected IOException doInBackground(Void... params) {
+        try {
+          FilesContract.rename(context, getFileLocation(), getFilename());
+          return null;
+        } catch (IOException e) {
+          return e;
+        }
       }
 
-      @Override protected void onPostExecute(Boolean success) {
-        super.onPostExecute(success);
-        if (!success) {
-          makeText(context, R.string.failed_to_rename_file, LENGTH_SHORT).show();
+      @Override protected void onPostExecute(IOException e) {
+        super.onPostExecute(e);
+        if (e != null) {
+          String message = context.getString(R.string.failed_to_rename_file_x, e.getMessage());
+          makeText(context, message, LENGTH_SHORT).show();
         }
       }
     }.execute();

@@ -32,12 +32,13 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static l.files.io.file.Files.normalize;
+import static l.files.io.file.Files.rename;
 import static l.files.provider.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
+import static l.files.provider.FilesContract.EXTRA_ERROR;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
-import static l.files.provider.FilesContract.EXTRA_RESULT;
 import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
@@ -225,10 +226,15 @@ public final class FilesProvider extends ContentProvider {
 
   private Bundle callRename(Bundle extras) {
     File from = new File(URI.create(extras.getString(EXTRA_FILE_LOCATION)));
-    File to = new File(from.getParent(), extras.getString(EXTRA_NEW_NAME));
-    Bundle out = new Bundle(1);
-    out.putBoolean(EXTRA_RESULT, from.renameTo(to));
-    return out;
+    File to = new File(from.getParentFile(), extras.getString(EXTRA_NEW_NAME));
+    try {
+      rename(from.getPath(), to.getPath());
+      return Bundle.EMPTY;
+    } catch (IOException e) {
+      Bundle result = new Bundle(1);
+      result.putSerializable(EXTRA_ERROR, e);
+      return result;
+    }
   }
 
   private Bundle callDelete(Bundle extras) {

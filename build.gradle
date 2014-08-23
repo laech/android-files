@@ -39,11 +39,15 @@ subprojects {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
         exclude 'LICENSE.txt'
+        exclude 'LICENSE'
+        exclude 'NOTICE'
+        exclude 'asm-license.txt'
       }
     }
 
     dependencies {
       androidTestCompile project(':testlib')
+      androidTestCompile libs.assertj
     }
   }
 
@@ -86,3 +90,4 @@ libs.mockito = [
     'com.google.dexmaker:dexmaker-mockito:1.0'
 ]
 libs.hamcrest = 'org.hamcrest:hamcrest-library:1.3'
+libs.assertj = 'org.assertj:assertj-core:1.6.1'

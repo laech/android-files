@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
+
+  // TODO use URI/Uri instead of string for paths?
 
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
@@ -42,7 +45,7 @@ public final class FilesContract {
   static final String EXTRA_FILE_LOCATIONS = "file_uris";
   static final String EXTRA_NEW_NAME = "new_name";
   static final String EXTRA_DESTINATION_LOCATION = "destination";
-  static final String EXTRA_RESULT = "result";
+  static final String EXTRA_ERROR = "error";
 
   private static volatile Uri authority;
 
@@ -242,20 +245,24 @@ public final class FilesContract {
   }
 
   /**
-   * Renames a file.
+   * Renames a file with a new name in the same directory.
    *
-   * @return true if the file is successfully renamed, false otherwise
+   * @throws IOException           if any error occurs
+   * @throws IllegalStateException if called from main thread
    */
-  public static boolean rename(Context context, String fileLocation, String newName) {
-
+  public static void rename(
+      Context context, String oldFileLocation, String newName) throws IOException {
     ensureNonMainThread();
     Bundle args = new Bundle(2);
-    args.putString(EXTRA_FILE_LOCATION, fileLocation);
+    args.putString(EXTRA_FILE_LOCATION, oldFileLocation);
     args.putString(EXTRA_NEW_NAME, newName);
-    Uri uri = buildFileUri(context, fileLocation);
+    Uri uri = buildFileUri(context, oldFileLocation);
     ContentResolver resolver = context.getContentResolver();
     Bundle result = resolver.call(uri, METHOD_RENAME, null, args);
-    return result.getBoolean(EXTRA_RESULT);
+    IOException e = (IOException) result.getSerializable(EXTRA_ERROR);
+    if (e != null) {
+      throw e;
+    }
   }
 
   /**
