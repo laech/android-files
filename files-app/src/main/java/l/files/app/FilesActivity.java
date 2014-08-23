@@ -18,8 +18,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -37,11 +35,13 @@ import l.files.app.menu.NewTabMenu;
 import l.files.app.menu.SendFeedbackMenu;
 import l.files.app.menu.ShowPathBarMenu;
 import l.files.common.app.OptionsMenus;
+import l.files.common.widget.DrawerListeners;
 
 import static android.app.ActionBar.LayoutParams;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
+import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.google.android.gms.common.GooglePlayServicesUtil.getErrorDialog;
@@ -191,7 +191,7 @@ public final class FilesActivity extends AnalyticsActivity
 
   private void setDrawer() {
     drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
-    drawerLayout.setDrawerListener(drawerListener);
+    drawerLayout.setDrawerListener(DrawerListeners.compose(actionBarDrawerToggle, drawerListener));
   }
 
   private void setActionBar() {
@@ -472,24 +472,12 @@ public final class FilesActivity extends AnalyticsActivity
     }
   }
 
-  class DrawerListener implements DrawerLayout.DrawerListener {
+  private static class DrawerListener extends SimpleDrawerListener {
 
     Runnable mRunOnClosed;
 
-    @Override public void onDrawerSlide(View drawerView, float slideOffset) {
-      actionBarDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-    }
-
-    @Override public void onDrawerOpened(View drawerView) {
-      actionBarDrawerToggle.onDrawerOpened(drawerView);
-    }
-
-    @Override public void onDrawerStateChanged(int newState) {
-      actionBarDrawerToggle.onDrawerStateChanged(newState);
-    }
-
     @Override public void onDrawerClosed(View drawerView) {
-      actionBarDrawerToggle.onDrawerClosed(drawerView);
+      super.onDrawerClosed(drawerView);
       if (mRunOnClosed != null) {
         mRunOnClosed.run();
         mRunOnClosed = null;
