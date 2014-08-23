@@ -1,5 +1,7 @@
 package l.files.io.file.event;
 
+import java.io.IOException;
+
 import l.files.io.file.Path;
 
 import static l.files.io.file.event.WatchEvent.Kind.CREATE;
@@ -8,7 +10,7 @@ import static org.mockito.Mockito.mock;
 
 public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
 
-  public void testUnmonitorRootDirChildren() {
+  public void testUnmonitorRootDirChildren() throws IOException {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
     service().register(Path.from("/"), listener);
     assertTrue(service().toString(), service().hasObserver(Path.from("/dev")));
