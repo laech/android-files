@@ -69,7 +69,7 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     return null;
   }
 
-  protected abstract void doTask() throws InterruptedException;
+  protected abstract void doTask() throws FileException, InterruptedException;
 
   @Override protected final void onPostExecute(List<Failure> result) {
     onDone(result);

@@ -3,6 +3,7 @@ package l.files.operations;
 import java.io.File;
 
 import l.files.io.file.operations.Copy;
+import l.files.io.file.operations.FileException;
 import l.files.io.file.operations.Size;
 import l.files.operations.info.CopyTaskInfo;
 
@@ -19,9 +20,9 @@ final class CopyTask extends Task implements CopyTaskInfo {
     this.dstName = new File(dstPath).getName();
   }
 
-  @Override protected void doTask() throws InterruptedException {
-    size.call();
-    copy.call();
+  @Override protected void doTask() throws FileException, InterruptedException {
+    size.execute();
+    copy.execute();
   }
 
   @Override public String getDestinationName() {

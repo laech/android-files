@@ -35,9 +35,9 @@ final class MoveTask extends Task implements MoveTaskInfo {
     this.move = new Move(this.sources, dstPath);
   }
 
-  @Override protected void doTask() throws InterruptedException {
+  @Override protected void doTask() throws FileException, InterruptedException {
     try {
-      move.call();
+      move.execute();
     } catch (FileException e) {
       copyThenDelete(e.failures());
     } finally {
@@ -45,7 +45,7 @@ final class MoveTask extends Task implements MoveTaskInfo {
     }
   }
 
-  private void copyThenDelete(List<Failure> failures) throws InterruptedException {
+  private void copyThenDelete(List<Failure> failures) throws FileException, InterruptedException {
     List<String> paths = transform(failures, new Function<Failure, String>() {
       @Override public String apply(Failure input) {
         return input.path();
@@ -53,12 +53,12 @@ final class MoveTask extends Task implements MoveTaskInfo {
     });
 
     count = new Size(paths);
-    count.call();
+    count.execute();
     copy = new Copy(paths, dstPath);
-    copy.call();
+    copy.execute();
 
     cleanup = true;
-    new Delete(paths).call();
+    new Delete(paths).execute();
   }
 
   @Override public String getDestinationName() {

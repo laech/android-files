@@ -13,14 +13,13 @@ import java.util.concurrent.Callable;
  * @see FileException
  * @see FileException#failures()
  */
-public interface FileOperation<V> extends Callable<V> {
+public interface FileOperation {
 
     /**
      * @throws InterruptedException if the thread was interrupted
      * @throws FileException        if any file failed to be operated on
      */
-    @Override
-    V call() throws InterruptedException;
+    void execute() throws FileException, InterruptedException;
 
     /**
      * Returns true if this task is finished (due to normal or abnormal termination).

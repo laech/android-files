@@ -17,7 +17,7 @@ public final class SizeTest extends FileBaseTest {
         File d = tmp().createDir("d");
 
         Size size = new Size(asList(a.getPath(), b.getPath(), c.getPath(), d.getPath()));
-        size.call();
+        size.execute();
 
         assertThat(size.getSize(), is(a.length() + b.length() + c.length() + d.length()));
     }

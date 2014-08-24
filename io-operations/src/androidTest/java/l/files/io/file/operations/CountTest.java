@@ -25,7 +25,7 @@ public final class CountTest extends FileBaseTest {
                 tmp().get("3/4/c.txt"));
 
         Count counter = new Count(asList(tmp().get().getPath()));
-        counter.call();
+        counter.execute();
 
         assertThat(counter.getCount(), is(expected.size()));
     }

@@ -23,7 +23,7 @@ public final class DeleteTest extends FileBaseTest {
         );
 
         Delete delete = create(asList(src.getPath()));
-        delete.call();
+        delete.execute();
 
         assertEquals(delete.getDeletedItemCount(), expected.size());
     }
@@ -73,7 +73,7 @@ public final class DeleteTest extends FileBaseTest {
     }
 
     private void delete(File file) throws Exception {
-        create(asList(file.getPath())).call();
+        create(asList(file.getPath())).execute();
     }
 
     private Delete create(Iterable<String> paths) {

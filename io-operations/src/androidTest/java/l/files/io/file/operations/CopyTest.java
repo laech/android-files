@@ -22,7 +22,7 @@ public final class CopyTest extends PasteTest {
         tmp().createFile("a/file");
 
         Copy copy = create(asList(srcDir.getPath()), dstDir.getPath());
-        copy.call();
+        copy.execute();
 
         List<File> files = asList(
                 tmp().get("a"),
@@ -83,7 +83,7 @@ public final class CopyTest extends PasteTest {
     }
 
     private void copy(File src, File dstDir) throws IOException, InterruptedException {
-        create(asList(src.getPath()), dstDir.getPath()).call();
+        create(asList(src.getPath()), dstDir.getPath()).execute();
     }
 
     @Override

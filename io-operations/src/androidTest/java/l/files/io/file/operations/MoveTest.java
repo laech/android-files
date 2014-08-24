@@ -25,7 +25,7 @@ public final class MoveTest extends PasteTest {
     symlink(target.getPath(), link.getPath());
 
     Move move = create(link, tmp().createDir("moved"));
-    move.call();
+    move.execute();
 
     String expected = target.getPath();
     String actual = readlink(tmp().get("moved/link").getPath());
@@ -40,7 +40,7 @@ public final class MoveTest extends PasteTest {
     write("Test", srcFile, UTF_8);
 
     Move move = create(srcFile, dstDir);
-    move.call();
+    move.execute();
 
     assertFalse(srcFile.exists());
     assertThat(Files.toString(dstFile, UTF_8), is("Test"));
@@ -55,7 +55,7 @@ public final class MoveTest extends PasteTest {
     write("Test", srcFile, UTF_8);
 
     Move move = create(srcDir, dstDir);
-    move.call();
+    move.execute();
 
     assertFalse(srcDir.exists());
     assertThat(Files.toString(dstFile, UTF_8), is("Test"));

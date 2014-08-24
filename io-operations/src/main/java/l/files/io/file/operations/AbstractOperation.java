@@ -8,7 +8,7 @@ import java.util.List;
 import static l.files.io.file.operations.FileException.throwIfNotEmpty;
 import static l.files.io.file.operations.FileOperations.checkInterrupt;
 
-public abstract class AbstractOperation implements FileOperation<Void> {
+public abstract class AbstractOperation implements FileOperation {
 
     private final Iterable<String> paths;
     private volatile String currentPath;
@@ -26,7 +26,7 @@ public abstract class AbstractOperation implements FileOperation<Void> {
     }
 
     @Override
-    public Void call() throws InterruptedException {
+    public void execute() throws FileException, InterruptedException {
         List<Failure> failures = new ArrayList<>(0);
         try {
 
@@ -38,7 +38,6 @@ public abstract class AbstractOperation implements FileOperation<Void> {
             done = true;
         }
 
-        return null;
     }
 
     public void doCall(List<Failure> failures) throws InterruptedException {

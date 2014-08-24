@@ -4,6 +4,7 @@ import android.os.Build;
 
 import com.google.common.collect.ImmutableList;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -12,7 +13,7 @@ import static l.files.io.file.operations.FileOperation.Failure;
 /**
  * Indicates one or more failures occurred during a {@link FileOperation}.
  */
-public final class FileException extends RuntimeException {
+public final class FileException extends IOException {
 
     private final List<Failure> failures;
 
@@ -29,7 +30,7 @@ public final class FileException extends RuntimeException {
         }
     }
 
-    public static void throwIfNotEmpty(List<Failure> failures) {
+    public static void throwIfNotEmpty(List<Failure> failures) throws FileException {
         if (!failures.isEmpty()) {
             throw new FileException(failures);
         }

@@ -3,6 +3,7 @@ package l.files.operations;
 import java.io.File;
 
 import l.files.io.file.operations.Delete;
+import l.files.io.file.operations.FileException;
 import l.files.io.file.operations.Size;
 import l.files.operations.info.DeleteTaskInfo;
 
@@ -17,9 +18,9 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
     this.delete = new Delete(paths);
   }
 
-  @Override protected void doTask() throws InterruptedException {
-    count.call();
-    delete.call();
+  @Override protected void doTask() throws FileException, InterruptedException {
+    count.execute();
+    delete.execute();
   }
 
   @Override public int getTotalItemCount() {
