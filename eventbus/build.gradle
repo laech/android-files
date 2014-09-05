@@ -1,0 +1,8 @@
+apply plugin: 'java'
+
+dependencies {
+  compile libs.eventbus
+  compile libs.auto_service
+  testCompile libs.junit
+  testCompile libs.compile_testing
+}

@@ -1,4 +1,5 @@
 include ':files-app'
+include ':eventbus'
 include 'files-common'
 include 'files-analytics'
 include 'provider'
