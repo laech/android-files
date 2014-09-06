@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import android.os.Handler;
+
 import java.io.File;
 
 import de.greenrobot.event.EventBus;
@@ -14,8 +16,9 @@ final class CopyTask extends Task implements CopyTaskInfo {
   private final Size size;
   private final Copy copy;
 
-  CopyTask(int id, EventBus bus, Iterable<String> sources, String dstPath) {
-    super(id, bus);
+  CopyTask(int id, EventBus bus, Handler handler,
+           Iterable<String> sources, String dstPath) {
+    super(id, bus, handler);
     this.size = new Size(sources);
     this.copy = new Copy(sources, dstPath);
     this.dstName = new File(dstPath).getName();

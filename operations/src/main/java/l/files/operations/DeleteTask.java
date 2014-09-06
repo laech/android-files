@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import android.os.Handler;
+
 import java.io.File;
 
 import de.greenrobot.event.EventBus;
@@ -13,8 +15,8 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
   private final Size count;
   private final Delete delete;
 
-  DeleteTask(int id, EventBus bus, Iterable<String> paths) {
-    super(id, bus);
+  DeleteTask(int id, EventBus bus, Handler handler, Iterable<String> paths) {
+    super(id, bus, handler);
     this.count = new Size(paths);
     this.delete = new Delete(paths);
   }

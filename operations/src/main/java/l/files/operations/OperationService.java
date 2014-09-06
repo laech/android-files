@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
 import android.os.IBinder;
 
 import java.util.HashMap;
@@ -42,6 +43,7 @@ public final class OperationService extends Service {
   private static final Executor executor = newFixedThreadPool(5);
 
   private EventBus bus;
+  private Handler handler;
   private Map<Integer, Task> tasks;
   private CancellationReceiver cancellationReceiver;
 
@@ -87,6 +89,7 @@ public final class OperationService extends Service {
     super.onCreate();
     bus = Events.get();
     tasks = new HashMap<>();
+    handler = new Handler();
     cancellationReceiver = new CancellationReceiver();
     registerCancellationReceiver();
     bus.register(this);
@@ -120,15 +123,17 @@ public final class OperationService extends Service {
       Intent data = new Intent(intent);
       data.putExtra(EXTRA_TASK_ID, startId);
 
-      Task task = newTask(data, startId);
+      Task task = newTask(data, startId, bus, handler);
       tasks.put(startId, task);
       task.executeOnExecutor(executor);
     }
     return START_STICKY;
   }
 
-  private Task newTask(Intent intent, int startId) {
-    return FileAction.fromIntent(intent.getAction()).newTask(intent, startId, bus);
+  private Task newTask(
+      Intent intent, int startId, EventBus bus, Handler handler) {
+    return FileAction.fromIntent(intent.getAction())
+        .newTask(intent, startId, bus, handler);
   }
 
   private final class CancellationReceiver extends BroadcastReceiver {
@@ -144,25 +149,28 @@ public final class OperationService extends Service {
   static enum FileAction {
 
     DELETE("l.files.operations.DELETE") {
-      @Override Task newTask(Intent intent, int startId, EventBus bus) {
+      @Override
+      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
-        return new DeleteTask(startId, bus, paths);
+        return new DeleteTask(startId, bus, handler, paths);
       }
     },
 
     COPY("l.files.operations.COPY") {
-      @Override Task newTask(Intent intent, int startId, EventBus bus) {
+      @Override
+      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new CopyTask(startId, bus, srcPaths, dstPath);
+        return new CopyTask(startId, bus, handler, srcPaths, dstPath);
       }
     },
 
     MOVE("l.files.operations.MOVE") {
-      @Override Task newTask(Intent intent, int startId, EventBus bus) {
+      @Override
+      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new MoveTask(startId, bus, srcPaths, dstPath);
+        return new MoveTask(startId, bus, handler, srcPaths, dstPath);
       }
     };
 
@@ -185,6 +193,7 @@ public final class OperationService extends Service {
       throw new IllegalArgumentException("Unknown action: " + action);
     }
 
-    abstract Task newTask(Intent intent, int startId, EventBus bus);
+    abstract Task newTask(
+        Intent intent, int startId, EventBus bus, Handler handler);
   }
 }

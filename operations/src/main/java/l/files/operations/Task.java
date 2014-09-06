@@ -2,7 +2,6 @@ package l.files.operations;
 
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Looper;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +19,6 @@ import static l.files.io.file.operations.FileOperation.Failure;
 
 abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements TaskInfo {
 
-  private static final Handler handler = new Handler(Looper.getMainLooper());
-
   private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
   private final Runnable update = new Runnable() {
@@ -35,14 +32,17 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
 
   private final int id;
   private final EventBus bus;
+  private final Handler handler;
+
   private volatile long startTime;
   private volatile long elapsedRealtimeOnRun;
   private volatile TaskStatus status;
   private volatile List<Failure> failures = emptyList();
 
-  protected Task(int id, EventBus bus) {
+  protected Task(int id, EventBus bus, Handler handler) {
     this.id = id;
     this.bus = checkNotNull(bus, "bus");
+    this.handler = checkNotNull(handler, "handler");
   }
 
   @Override protected final void onPreExecute() {
@@ -64,11 +64,8 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     } catch (FileException e) {
       return e.failures();
     } catch (RuntimeException e) {
-      handler.post(new Runnable() {
-        @Override public void run() {
-          onDone(Collections.<Failure>emptyList());
-        }
-      });
+      // This allows the notification to be removed, then crash the app
+      onDone(Collections.<Failure>emptyList());
       throw e;
     }
     return emptyList();

@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import android.os.Handler;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 
@@ -29,8 +31,9 @@ final class MoveTask extends Task implements MoveTaskInfo {
   private volatile Copy copy;
   private volatile boolean cleanup;
 
-  MoveTask(int id, EventBus bus, Iterable<String> sources, String dstPath) {
-    super(id, bus);
+  MoveTask(int id, EventBus bus, Handler handler,
+           Iterable<String> sources, String dstPath) {
+    super(id, bus, handler);
     this.sources = ImmutableSet.copyOf(sources);
     this.dstPath = checkNotNull(dstPath, "dstPath");
     this.move = new Move(this.sources, dstPath);
