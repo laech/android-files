@@ -8,18 +8,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 
-import com.google.common.eventbus.Subscribe;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import l.files.eventbus.Subscribe;
 import l.files.operations.info.TaskInfo;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
 import static com.google.common.collect.Lists.newArrayList;
+import static de.greenrobot.event.ThreadMode.MainThread;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.operations.OperationService.FileAction.COPY;
 import static l.files.operations.OperationService.FileAction.DELETE;
@@ -89,7 +89,8 @@ public final class OperationService extends Service {
     Events.get().register(this);
   }
 
-  @Subscribe public void on(TaskInfo task) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(TaskInfo task) {
     if (task.getTaskStatus() == TaskInfo.TaskStatus.FINISHED) {
       tasks.remove(task.getTaskId());
       if (tasks.isEmpty()) {
@@ -110,7 +111,8 @@ public final class OperationService extends Service {
     Events.get().unregister(this);
   }
 
-  @Override public int onStartCommand(Intent intent, int flags, final int startId) {
+  @Override
+  public int onStartCommand(Intent intent, int flags, final int startId) {
     if (intent != null) {
       Intent data = new Intent(intent);
       data.putExtra(EXTRA_TASK_ID, startId);

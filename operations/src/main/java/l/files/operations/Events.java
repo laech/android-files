@@ -1,39 +1,53 @@
 package l.files.operations;
 
 import android.os.Handler;
+import android.os.Looper;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.SubscriberExceptionEvent;
+import l.files.eventbus.Subscribe;
 
-import java.util.concurrent.Executor;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import static android.os.Looper.getMainLooper;
-import static android.os.Looper.myLooper;
-
+// TODO replace this with dependency injection
 public final class Events {
 
-    private static final Handler handler = new Handler(getMainLooper());
+  private static final EventBus bus = EventBus.getDefault();
 
-    private static final EventBus bus = new AsyncEventBus(new Executor() {
-        @Override
-        public void execute(Runnable command) {
-            if (getMainLooper() == myLooper()) {
-                command.run();
-            } else {
-                handler.post(command);
-            }
+  static {
+    bus.register(new Crasher(new Handler(Looper.getMainLooper())));
+  }
+
+  Events() {
+  }
+
+  /**
+   * Gets the event bus this module uses to post events,
+   * all events will be delivered on the main thread.
+   * Register/unregister can be called on any thread.
+   */
+  public static EventBus get() {
+    return bus;
+  }
+
+  /**
+   * Make any {@link SubscriberExceptionEvent} visible by crashing the app.
+   */
+  static final class Crasher {
+
+    private final Handler handler;
+
+    Crasher(Handler handler) {
+      this.handler = checkNotNull(handler, "handler");
+    }
+
+    @Subscribe
+    public void onEvent(final SubscriberExceptionEvent e) {
+      handler.post(new Runnable() {
+        @Override public void run() {
+          throw new RuntimeException(e.throwable);
         }
-    });
-
-    Events() {
+      });
     }
-
-    /**
-     * Gets the event bus this module uses to post events,
-     * all events will be delivered on the main thread.
-     * Register/unregister can be called on any thread.
-     */
-    public static EventBus get() {
-        return bus;
-    }
+  }
 }

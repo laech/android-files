@@ -2,6 +2,6 @@ apply plugin: 'com.android.library'
 
 dependencies {
   compile project(':io-operations')
-  compile libs.otto
+  compile project(':eventbus')
   compile libs.guava
 }

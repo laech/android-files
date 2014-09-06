@@ -4,13 +4,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
 import l.files.operations.info.CopyTaskInfo;
 import l.files.operations.info.DeleteTaskInfo;
@@ -42,18 +40,27 @@ public final class NotificationReceiverTest extends BaseTest {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    bus = new EventBus();
     manager = mock(NotificationManager.class);
-    NotificationReceiver.register(bus, getContext(), manager);
+    bus = new EventBus();
+    bus.register(new NotificationReceiver(getContext(), manager));
   }
 
-  public void testReceiverMethodIsAnnotated() throws Exception {
-    assertNotNull(NotificationReceiver.class.getMethod("on", CopyTaskInfo.class)
-        .getAnnotation(Subscribe.class));
-    assertNotNull(NotificationReceiver.class.getMethod("on", MoveTaskInfo.class)
-        .getAnnotation(Subscribe.class));
-    assertNotNull(NotificationReceiver.class.getMethod("on", DeleteTaskInfo.class)
-        .getAnnotation(Subscribe.class));
+  public void testCopyTaskInfoReceiverMethodIsAnnotated() throws Exception {
+    testReceiverMethodIsAnnotated(CopyTaskInfo.class);
+  }
+
+  public void testMoveTaskInfoReceiverMethodIsAnnotated() throws Exception {
+    testReceiverMethodIsAnnotated(MoveTaskInfo.class);
+  }
+
+  public void testDeleteTaskInfoReceiverMethodIsAnnotated() throws Exception {
+    testReceiverMethodIsAnnotated(DeleteTaskInfo.class);
+  }
+
+  private void testReceiverMethodIsAnnotated(Class<?> parameterType)
+      throws NoSuchMethodException {
+    assertNotNull(NotificationReceiver.class
+        .getMethod("onEventMainThread", parameterType));
   }
 
   public void testCancelNotificationOnSuccess() {
@@ -121,13 +128,13 @@ public final class NotificationReceiverTest extends BaseTest {
     DeleteTaskInfo delete = newTaskWithFailure(DeleteTaskInfo.class);
 
     NotificationReceiver receiver = mock(NotificationReceiver.class);
-    doCallRealMethod().when(receiver).on(copy);
-    doCallRealMethod().when(receiver).on(move);
-    doCallRealMethod().when(receiver).on(delete);
+    doCallRealMethod().when(receiver).onEventMainThread(copy);
+    doCallRealMethod().when(receiver).onEventMainThread(move);
+    doCallRealMethod().when(receiver).onEventMainThread(delete);
 
-    receiver.on(copy);
-    receiver.on(move);
-    receiver.on(delete);
+    receiver.onEventMainThread(copy);
+    receiver.onEventMainThread(move);
+    receiver.onEventMainThread(delete);
 
     verify(receiver).onFailure(copy, R.plurals.fail_to_copy);
     verify(receiver).onFailure(move, R.plurals.fail_to_move);

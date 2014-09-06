@@ -46,7 +46,7 @@ public final class FilesApp extends Application {
 
     Preferences.register(this, newAnalyticsListener(this));
 
-    OperationsUi.init(this);
+    new OperationsUi().init(this);
 
     if (DEBUG) {
       StrictMode.enableDefaults();

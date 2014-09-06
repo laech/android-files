@@ -1,7 +1,6 @@
 package l.files.operations;
 
 import com.google.common.base.Function;
-import com.google.common.eventbus.Subscribe;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.eventbus.Subscribe;
 import l.files.operations.info.CopyTaskInfo;
 import l.files.operations.info.DeleteTaskInfo;
 import l.files.operations.info.MoveTaskInfo;
@@ -25,13 +25,7 @@ import static l.files.operations.OperationService.copy;
 import static l.files.operations.OperationService.delete;
 import static l.files.operations.OperationService.move;
 import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class OperationServiceTest extends FileBaseTest {
 
@@ -43,8 +37,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       move(getContext(), asList(src.getPath()), dst.getPath());
       listener.await();
-      assertThat(src.exists(), is(false));
-      assertThat(new File(dst, src.getName()).exists(), is(true));
+      assertThat(src).doesNotExist();
+      assertThat(new File(dst, src.getName())).exists();
 
     } finally {
       unregister(listener);
@@ -59,8 +53,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       copy(getContext(), asList(src.getPath()), dst.getPath());
       listener.await();
-      assertThat(src.exists(), is(true));
-      assertThat(new File(dst, src.getName()).exists(), is(true));
+      assertThat(src).exists();
+      assertThat(new File(dst, src.getName())).exists();
 
     } finally {
       unregister(listener);
@@ -75,8 +69,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       delete(getContext(), a.getPath(), b.getPath());
       listener.await();
-      assertThat(a.exists(), is(false));
-      assertThat(b.exists(), is(false));
+      assertThat(a).doesNotExist();
+      assertThat(b).doesNotExist();
 
     } finally {
       unregister(listener);
@@ -90,8 +84,8 @@ public final class OperationServiceTest extends FileBaseTest {
       delete(getContext(), tmp().createFile("a").getPath());
       delete(getContext(), tmp().createFile("2").getPath());
       listener.await();
-      assertThat(listener.getValues().size(), greaterThan(1));
-      assertThat(getTaskIds(listener.getValues()), hasSize(2));
+      assertThat(listener.getValues().size()).isGreaterThan(1);
+      assertThat(getTaskIds(listener.getValues())).hasSize(2);
 
     } finally {
       unregister(listener);
@@ -121,9 +115,9 @@ public final class OperationServiceTest extends FileBaseTest {
       long end = currentTimeMillis();
 
       Set<Long> times = getTaskStartTimes(listener.getValues());
-      assertThat(times.size(), is(1));
-      assertThat(times.iterator().next(), greaterThanOrEqualTo(start));
-      assertThat(times.iterator().next(), lessThanOrEqualTo(end));
+      assertThat(times).hasSize(1);
+      assertThat(times.iterator().next()).isGreaterThanOrEqualTo(start);
+      assertThat(times.iterator().next()).isLessThanOrEqualTo(end);
 
     } finally {
       unregister(listener);
@@ -164,9 +158,9 @@ public final class OperationServiceTest extends FileBaseTest {
       this.clazz = (Class<ProgressInfo>) clazz;
     }
 
-    @Subscribe public void on(ProgressInfo value) {
+    @Subscribe public void onEvent(ProgressInfo value) {
       values.add(value);
-      assertThat(value, instanceOf(clazz));
+      assertThat(value).isInstanceOf(clazz);
       if (value.getTaskStatus() == FINISHED) {
         assertEquals(value.getTotalItemCount(), value.getProcessedItemCount());
         assertEquals(value.getTotalByteCount(), value.getProcessedByteCount());

@@ -8,12 +8,11 @@ import android.content.Intent;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import l.files.eventbus.Subscribe;
 import l.files.io.file.operations.FileOperation;
 import l.files.operations.info.CopyTaskInfo;
 import l.files.operations.info.DeleteTaskInfo;
@@ -27,6 +26,8 @@ import static android.app.Notification.PRIORITY_LOW;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getActivity;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static de.greenrobot.event.ThreadMode.MainThread;
 import static l.files.operations.OperationService.newCancelIntent;
 import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
 import static l.files.operations.ui.FailuresActivity.getTitle;
@@ -42,31 +43,30 @@ public class NotificationReceiver {
   private final NotificationViewer<CopyTaskInfo> copyViewer;
   private final NotificationViewer<MoveTaskInfo> moveViewer;
 
+  public NotificationReceiver(Context context) {
+    this(context, (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE));
+  }
+
   NotificationReceiver(Context context, NotificationManager manager) {
-    this.context = context;
-    this.manager = manager;
+    this.context = checkNotNull(context, "context");
+    this.manager = checkNotNull(manager, "manager");
     this.deleteViewer = new DeleteViewer(context, Clock.SYSTEM);
     this.copyViewer = new CopyViewer(context, Clock.SYSTEM);
     this.moveViewer = new MoveViewer(context, Clock.SYSTEM);
   }
 
-  public static void register(EventBus bus, Context context) {
-    register(bus, context, (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE));
-  }
-
-  public static void register(EventBus bus, Context context, NotificationManager manager) {
-    bus.register(new NotificationReceiver(context, manager));
-  }
-
-  @Subscribe public void on(DeleteTaskInfo value) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(DeleteTaskInfo value) {
     notify(deleteViewer, value, R.plurals.fail_to_delete);
   }
 
-  @Subscribe public void on(CopyTaskInfo value) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(CopyTaskInfo value) {
     notify(copyViewer, value, R.plurals.fail_to_copy);
   }
 
-  @Subscribe public void on(MoveTaskInfo value) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(MoveTaskInfo value) {
     notify(moveViewer, value, R.plurals.fail_to_move);
   }
 

@@ -2,5 +2,4 @@ apply plugin: 'com.android.library'
 
 dependencies {
   compile libs.mockito
-  compile libs.hamcrest
 }
