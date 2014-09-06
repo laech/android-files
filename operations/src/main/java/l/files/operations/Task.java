@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.Collections;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -65,12 +66,12 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     } catch (RuntimeException e) {
       handler.post(new Runnable() {
         @Override public void run() {
-          onDone(null);
+          onDone(Collections.<Failure>emptyList());
         }
       });
       throw e;
     }
-    return null;
+    return emptyList();
   }
 
   protected abstract void doTask() throws FileException, InterruptedException;
