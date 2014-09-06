@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import l.files.io.file.operations.Copy;
 import l.files.io.file.operations.Delete;
 import l.files.io.file.operations.FileException;
@@ -28,8 +29,8 @@ final class MoveTask extends Task implements MoveTaskInfo {
   private volatile Copy copy;
   private volatile boolean cleanup;
 
-  MoveTask(int id, Iterable<String> sources, String dstPath) {
-    super(id);
+  MoveTask(int id, EventBus bus, Iterable<String> sources, String dstPath) {
+    super(id, bus);
     this.sources = ImmutableSet.copyOf(sources);
     this.dstPath = checkNotNull(dstPath, "dstPath");
     this.move = new Move(this.sources, dstPath);

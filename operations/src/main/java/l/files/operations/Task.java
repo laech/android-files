@@ -6,11 +6,13 @@ import android.os.Looper;
 
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import l.files.io.file.operations.FileException;
 import l.files.operations.info.TaskInfo;
 
 import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Objects.toStringHelper;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyList;
 import static l.files.io.file.operations.FileOperation.Failure;
@@ -31,13 +33,15 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
   };
 
   private final int id;
+  private final EventBus bus;
   private volatile long startTime;
   private volatile long elapsedRealtimeOnRun;
   private volatile TaskStatus status;
   private volatile List<Failure> failures = emptyList();
 
-  protected Task(int id) {
+  protected Task(int id, EventBus bus) {
     this.id = id;
+    this.bus = checkNotNull(bus, "bus");
   }
 
   @Override protected final void onPreExecute() {
@@ -87,7 +91,7 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
   }
 
   protected final void notifyProgress() {
-    Events.get().post(this);
+    bus.post(this);
   }
 
   @Override public int getTaskId() {

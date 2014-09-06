@@ -2,6 +2,7 @@ package l.files.operations;
 
 import java.io.File;
 
+import de.greenrobot.event.EventBus;
 import l.files.io.file.operations.Delete;
 import l.files.io.file.operations.FileException;
 import l.files.io.file.operations.Size;
@@ -12,8 +13,8 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
   private final Size count;
   private final Delete delete;
 
-  DeleteTask(int id, Iterable<String> paths) {
-    super(id);
+  DeleteTask(int id, EventBus bus, Iterable<String> paths) {
+    super(id, bus);
     this.count = new Size(paths);
     this.delete = new Delete(paths);
   }

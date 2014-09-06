@@ -2,6 +2,7 @@ package l.files.operations;
 
 import java.io.File;
 
+import de.greenrobot.event.EventBus;
 import l.files.io.file.operations.Copy;
 import l.files.io.file.operations.FileException;
 import l.files.io.file.operations.Size;
@@ -13,8 +14,8 @@ final class CopyTask extends Task implements CopyTaskInfo {
   private final Size size;
   private final Copy copy;
 
-  CopyTask(int id, Iterable<String> sources, String dstPath) {
-    super(id);
+  CopyTask(int id, EventBus bus, Iterable<String> sources, String dstPath) {
+    super(id, bus);
     this.size = new Size(sources);
     this.copy = new Copy(sources, dstPath);
     this.dstName = new File(dstPath).getName();
