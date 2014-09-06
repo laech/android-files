@@ -1,11 +1,15 @@
 package l.files.io.file;
 
+import android.webkit.MimeTypeMap;
+
 import com.google.auto.value.AutoValue;
 
 import java.io.File;
 import java.io.IOException;
 
+import l.files.io.os.ErrnoException;
 import l.files.io.os.Stat;
+import l.files.io.os.Unistd;
 
 import static l.files.io.os.Stat.S_ISBLK;
 import static l.files.io.os.Stat.S_ISCHR;
@@ -14,7 +18,10 @@ import static l.files.io.os.Stat.S_ISFIFO;
 import static l.files.io.os.Stat.S_ISLNK;
 import static l.files.io.os.Stat.S_ISREG;
 import static l.files.io.os.Stat.S_ISSOCK;
+import static l.files.io.os.Unistd.R_OK;
+import static l.files.io.os.Unistd.W_OK;
 import static org.apache.commons.io.FilenameUtils.concat;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 /**
  * Information regarding a file at a point in time.
@@ -25,13 +32,19 @@ import static org.apache.commons.io.FilenameUtils.concat;
  * methods such as {@link File#lastModified()} will always return the
  * latest value by querying the underlying file.
  * <p/>
- * {@link FileInfo} represents a snapshot of the file information at
- * the time an instance is created, therefore if the underlying file changes
- * after an instance of this class is created, the change won't be reflected
- * by the existing instance.
+ * {@link FileInfo} is mostly a snapshot of the file information, therefore if
+ * the underlying file changes after an instance of this class is created, the
+ * change won't be reflected by the existing instance.
  */
 @AutoValue
 public abstract class FileInfo {
+
+  private String uri;
+  private String name;
+  private String mime;
+  private Boolean readable;
+  private Boolean writable;
+
   FileInfo() {}
 
   public abstract String getPath();
@@ -52,6 +65,58 @@ public abstract class FileInfo {
   public static FileInfo get(String path) throws IOException {
     Stat stat = Stat.lstat(path);
     return new AutoValue_FileInfo(path, stat);
+  }
+
+  public String getName() {
+    if (name == null) {
+      name = new File(getPath()).getName();
+    }
+    return name;
+  }
+
+  /**
+   * Gets the media type of this file based on its file extension.
+   */
+  public String getMediaType() {
+    if (mime == null) {
+      if (isDirectory()) {
+        mime = "application/x-directory";
+      } else {
+        mime = MimeTypeMap.getSingleton()
+            .getMimeTypeFromExtension(getExtension(getName()));
+      }
+    }
+    return mime;
+  }
+
+  public String getUri() {
+    if (uri == null) {
+      uri = new File(getPath()).toURI().toString();
+    }
+    return uri;
+  }
+
+  public boolean isReadable() {
+    if (readable == null) {
+      readable = access(R_OK);
+    }
+    return readable;
+  }
+
+  public boolean isWritable() {
+    if (writable == null) {
+      writable = access(W_OK);
+    }
+    return writable;
+  }
+
+  private boolean access(int mode) {
+    try {
+      Unistd.access(getPath(), mode);
+      return true;
+    } catch (ErrnoException e) {
+      return false;
+    }
   }
 
   /**
