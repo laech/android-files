@@ -2,7 +2,6 @@ package l.files.operations;
 
 import android.os.Handler;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import de.greenrobot.event.EventBus;
@@ -11,7 +10,6 @@ import l.files.eventbus.Subscribe;
 import l.files.operations.info.TaskInfo;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.io.file.operations.FileOperation.Failure;
 import static l.files.operations.info.TaskInfo.TaskStatus;
 import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
 import static l.files.operations.info.TaskInfo.TaskStatus.PENDING;
@@ -29,8 +27,9 @@ public class TaskTest extends BaseTest {
   }
 
   public void testDoInBackgroundReturnsEmptyFailuresOnSuccess() {
-    List<Failure> failures = create(0, bus, handler).doInBackground();
-    assertThat(failures).isNotNull().isEmpty();
+    Task task = create(0, bus, handler);
+    task.run();
+    assertThat(task.getFailures()).isNotNull().isEmpty();
   }
 
   public void testEmptyFailuresOnError() throws Exception {
@@ -41,7 +40,7 @@ public class TaskTest extends BaseTest {
       }
     };
     try {
-      task.doInBackground();
+      task.run();
     } catch (TestException e) {
       // Ignored
     }
@@ -53,11 +52,13 @@ public class TaskTest extends BaseTest {
     final TaskStatus[] status = {null};
     bus.register(new Object() {
       @Subscribe public void onEvent(TaskInfo info) {
-        status[0] = info.getTaskStatus();
+        if (status[0] == null) {
+          status[0] = info.getTaskStatus();
+        }
         latch.countDown();
       }
     });
-    create(0, bus, handler).execute();
+    create(0, bus, handler).run();
     latch.await(1, SECONDS);
     assertThat(status).containsExactly(PENDING);
   }
@@ -73,7 +74,7 @@ public class TaskTest extends BaseTest {
         }
       }
     });
-    create(0, bus, handler).execute();
+    create(0, bus, handler).run();
     latch.await(1, SECONDS);
     assertThat(status).containsExactly(FINISHED);
   }

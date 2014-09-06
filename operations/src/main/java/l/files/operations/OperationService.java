@@ -12,7 +12,8 @@ import android.os.IBinder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import de.greenrobot.event.EventBus;
 import l.files.eventbus.Subscribe;
@@ -40,11 +41,11 @@ public final class OperationService extends Service {
   private static final String EXTRA_PATHS = "paths";
   private static final String EXTRA_DST_PATH = "dstPath";
 
-  private static final Executor executor = newFixedThreadPool(5);
+  private static final ExecutorService executor = newFixedThreadPool(5);
 
   private EventBus bus;
   private Handler handler;
-  private Map<Integer, Task> tasks;
+  private Map<Integer, Future<?>> tasks;
   private CancellationReceiver cancellationReceiver;
 
   public static void delete(Context context, String... paths) {
@@ -124,8 +125,7 @@ public final class OperationService extends Service {
       data.putExtra(EXTRA_TASK_ID, startId);
 
       Task task = newTask(data, startId, bus, handler);
-      tasks.put(startId, task);
-      task.executeOnExecutor(executor);
+      tasks.put(startId, executor.submit(task));
     }
     return START_STICKY;
   }
@@ -139,7 +139,7 @@ public final class OperationService extends Service {
   private final class CancellationReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
       int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-      Task task = tasks.get(startId);
+      Future<?> task = tasks.get(startId);
       if (task != null) {
         task.cancel(true);
       }

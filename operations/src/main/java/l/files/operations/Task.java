@@ -1,9 +1,7 @@
 package l.files.operations;
 
-import android.os.AsyncTask;
 import android.os.Handler;
 
-import java.util.Collections;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -14,17 +12,19 @@ import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
 import static l.files.io.file.operations.FileOperation.Failure;
+import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
 
-abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements TaskInfo {
+abstract class Task implements TaskInfo, Runnable {
 
   private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
   private final Runnable update = new Runnable() {
     @Override public void run() {
       notifyProgress();
-      if (getStatus() != Status.FINISHED) {
+      if (getTaskStatus() != FINISHED) {
         handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
       }
     }
@@ -45,48 +45,43 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
     this.handler = checkNotNull(handler, "handler");
   }
 
-  @Override protected final void onPreExecute() {
+  @Override public void run() {
+    onPending();
+    try {
+      onRunning();
+    } finally {
+      onFinished();
+    }
+  }
+
+  private void onPending() {
     status = TaskStatus.PENDING;
     startTime = currentTimeMillis();
-    if (!isCancelled()) {
+    if (!currentThread().isInterrupted()) {
       notifyProgress();
     }
   }
 
-  @Override protected final List<Failure> doInBackground(Object... params) {
+  private void onRunning() {
+    status = TaskStatus.RUNNING;
     elapsedRealtimeOnRun = elapsedRealtime();
     handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
     try {
-      status = TaskStatus.RUNNING;
       doTask();
     } catch (InterruptedException e) {
       // Cancelled, let it finish
     } catch (FileException e) {
-      return e.failures();
-    } catch (RuntimeException e) {
-      // This allows the notification to be removed, then crash the app
-      onDone(Collections.<Failure>emptyList());
-      throw e;
+      failures = e.failures();
     }
-    return emptyList();
   }
 
-  protected abstract void doTask() throws FileException, InterruptedException;
-
-  @Override protected final void onPostExecute(List<Failure> result) {
-    onDone(result);
-  }
-
-  @Override protected final void onCancelled(List<Failure> result) {
-    onDone(result);
-  }
-
-  private void onDone(List<Failure> result) {
-    failures = result;
+  private void onFinished() {
     status = TaskStatus.FINISHED;
     handler.removeCallbacks(update);
     notifyProgress();
   }
+
+  protected abstract void doTask() throws FileException, InterruptedException;
 
   protected final void notifyProgress() {
     bus.post(this);
@@ -113,6 +108,6 @@ abstract class Task extends AsyncTask<Object, Object, List<Failure>> implements 
   }
 
   @Override public String toString() {
-    return toStringHelper(this).addValue(getStatus()).toString();
+    return toStringHelper(this).addValue(getTaskStatus()).toString();
   }
 }
