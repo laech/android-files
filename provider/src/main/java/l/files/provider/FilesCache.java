@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import l.files.io.file.FileInfo;
 import l.files.io.file.Path;
-import l.files.io.file.event.WatchEvent;
-import l.files.io.file.event.WatchService;
+import l.files.io.file.WatchEvent;
+import l.files.io.file.WatchService;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Predicates.not;

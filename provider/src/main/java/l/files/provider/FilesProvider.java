@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.io.file.FileInfo;
-import l.files.io.file.event.WatchService;
+import l.files.io.file.WatchService;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
 
