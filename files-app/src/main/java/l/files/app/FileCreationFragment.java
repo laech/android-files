@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,20 +19,20 @@ import l.files.R;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static android.content.DialogInterface.OnClickListener;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FilesContract.buildFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
-    implements OnClickListener, LoaderCallbacks<Cursor> {
+    implements DialogInterface.OnClickListener {
 
   public static final String ARG_PARENT_LOCATION = "parent_location";
 
   private static final int LOADER_CHECKER =
       identityHashCode(FileCreationFragment.class);
 
+  private LoaderCallbacks<Cursor> checkerCallback = new CheckerCallback();
   private EditText editText;
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -83,40 +84,9 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
   private void restartChecker() {
-    getLoaderManager().restartLoader(LOADER_CHECKER, null, this);
+    getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
   }
 
-  @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    if (id == LOADER_CHECKER) {
-      return newChecker();
-    }
-    return null;
-  }
-
-  private Loader<Cursor> newChecker() {
-    Activity context = getActivity();
-    Uri uri = buildFileUri(context, getParentLocation(), getFilename());
-    return new CursorLoader(context, uri, null, null, null, null);
-  }
-
-  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-    if (loader.getId() == LOADER_CHECKER) {
-      onCheckFinished(cursor);
-    }
-  }
-
-  private void onCheckFinished(Cursor cursor) {
-    Button ok = getOkButton();
-    if (cursor.getCount() > 0) {
-      cursor.moveToFirst();
-      String newFileLocation = getLocation(cursor);
-      editText.setError(getError(newFileLocation));
-      ok.setEnabled(false);
-    } else {
-      editText.setError(null);
-      ok.setEnabled(true);
-    }
-  }
 
   protected String getParentLocation() {
     return getArguments().getString(ARG_PARENT_LOCATION);
@@ -134,7 +104,43 @@ public abstract class FileCreationFragment extends DialogFragment
     return getDialog().getButton(BUTTON_POSITIVE);
   }
 
-  @Override public void onLoaderReset(Loader<Cursor> loader) {}
+
+  class CheckerCallback implements LoaderCallbacks<Cursor> {
+
+    @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+      if (id == LOADER_CHECKER) {
+        return newChecker();
+      }
+      return null;
+    }
+
+    private Loader<Cursor> newChecker() {
+      Activity context = getActivity();
+      Uri uri = buildFileUri(context, getParentLocation(), getFilename());
+      return new CursorLoader(context, uri, null, null, null, null);
+    }
+
+    @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+      if (loader.getId() == LOADER_CHECKER) {
+        onCheckFinished(cursor);
+      }
+    }
+
+    @Override public void onLoaderReset(Loader<Cursor> loader) {}
+
+    private void onCheckFinished(Cursor cursor) {
+      Button ok = getOkButton();
+      if (cursor.getCount() > 0) {
+        cursor.moveToFirst();
+        String newFileLocation = getLocation(cursor);
+        editText.setError(getError(newFileLocation));
+        ok.setEnabled(false);
+      } else {
+        editText.setError(null);
+        ok.setEnabled(true);
+      }
+    }
+  }
 
   class FileTextWatcher implements TextWatcher {
 

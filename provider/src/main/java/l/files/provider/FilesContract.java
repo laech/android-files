@@ -24,7 +24,6 @@ public final class FilesContract {
 
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
-  static final String PATH_SUGGESTION = "suggestion";
   static final String PATH_HIERARCHY = "hierarchy";
   static final String PATH_SELECTION = "selection";
 
@@ -33,7 +32,6 @@ public final class FilesContract {
 
   static final int MATCH_FILES_LOCATION = 100;
   static final int MATCH_FILES_LOCATION_CHILDREN = 101;
-  static final int MATCH_SUGGESTION = 300;
   static final int MATCH_HIERARCHY = 400;
   static final int MATCH_SELECTION = 500;
 
@@ -41,6 +39,7 @@ public final class FilesContract {
   static final String METHOD_COPY = "copy";
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
+  static final String METHOD_SUGGESTION = "suggestion";
   static final String EXTRA_FILE_LOCATION = "file_uri";
   static final String EXTRA_FILE_LOCATIONS = "file_uris";
   static final String EXTRA_NEW_NAME = "new_name";
@@ -57,7 +56,6 @@ public final class FilesContract {
     UriMatcher matcher = new UriMatcher(NO_MATCH);
     matcher.addURI(authority, PATH_FILES + "/*", MATCH_FILES_LOCATION);
     matcher.addURI(authority, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_LOCATION_CHILDREN);
-    matcher.addURI(authority, PATH_SUGGESTION + "/*/*", MATCH_SUGGESTION);
     matcher.addURI(authority, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
     matcher.addURI(authority, PATH_SELECTION, MATCH_SELECTION);
     return matcher;
@@ -100,49 +98,6 @@ public final class FilesContract {
     checkArgument(segments.size() == 2, segments.size());
     checkArgument(segments.get(0).equals(PATH_HIERARCHY), segments.get(0));
     return segments.get(1);
-  }
-
-  /**
-   * A suggestion content URI can be queried, the return cursor will contain a
-   * single directory that does not exist, suitable for creating a new directory
-   * under that name.
-   *
-   * @param parentLocation the parent directory's {@link FileInfo#LOCATION}
-   * @param basename       the basename for the return directory's name, if there is
-   *                       already a file with the same name, a number will be appended
-   */
-  public static Uri buildSuggestionUri(Context context, String parentLocation, String basename) {
-    checkNotNull(parentLocation, "parentLocation");
-    checkNotNull(basename, "basename");
-    return getAuthority(context)
-        .buildUpon()
-        .appendPath(PATH_SUGGESTION)
-        .appendPath(parentLocation)
-        .appendPath(basename)
-        .build();
-  }
-
-  /**
-   * Gets the {@link FileInfo#LOCATION} from the given content URI built with
-   * {@link #buildSuggestionUri(Context, String, String)}
-   */
-  public static String getSuggestionParentUri(Uri suggestionUri) {
-    return checkSuggestionUri(suggestionUri).get(1);
-  }
-
-  /**
-   * Gets the basename from the given content URI built with {@link
-   * #buildSuggestionUri(Context, String, String)}
-   */
-  public static String getSuggestionBasename(Uri uri) {
-    return checkSuggestionUri(uri).get(2);
-  }
-
-  private static List<String> checkSuggestionUri(Uri uri) {
-    List<String> segments = uri.getPathSegments();
-    checkArgument(segments.size() == 3, segments.size());
-    checkArgument(segments.get(0).equals(PATH_SUGGESTION), segments.get(0));
-    return segments;
   }
 
   static Uri buildFilesUri(Context context) {
@@ -242,6 +197,28 @@ public final class FilesContract {
     ensureNonMainThread();
     Uri uri = buildFileUri(context, parentLocation, name);
     return context.getContentResolver().insert(uri, null) != null;
+  }
+
+
+  /**
+   * Gets a name that does not exist at the given directory {@code location}.
+   *
+   * @param location the parent directory's {@link FileInfo#LOCATION}
+   * @param baseName the basename for the return directory's name, if there is
+   *                 already a file with the same name, a number will be
+   *                 appended
+   * @throws IllegalStateException if called from main thread
+   */
+  public static String getNameSuggestion(
+      Context context, String location, String baseName) {
+    ensureNonMainThread();
+    Bundle args = new Bundle(2);
+    args.putString(EXTRA_FILE_LOCATION, location);
+    args.putString(EXTRA_NEW_NAME, baseName);
+    Uri uri = buildFilesUri(context);
+    ContentResolver resolver = context.getContentResolver();
+    Bundle result = resolver.call(uri, METHOD_SUGGESTION, null, args);
+    return result.getString(EXTRA_NEW_NAME);
   }
 
   /**

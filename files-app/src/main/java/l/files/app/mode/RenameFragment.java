@@ -17,6 +17,7 @@ import l.files.app.CloseActionModeRequest;
 import l.files.app.FileCreationFragment;
 import l.files.provider.FilesContract;
 
+import static android.app.LoaderManager.LoaderCallbacks;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
@@ -34,6 +35,8 @@ public final class RenameFragment extends FileCreationFragment {
 
   private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
+  private LoaderCallbacks<Cursor> fileCallback = new FileCallback();
+
   static RenameFragment create(String parentLocation, String fileLocation) {
     Bundle args = new Bundle(2);
     args.putString(ARG_PARENT_LOCATION, parentLocation);
@@ -46,7 +49,7 @@ public final class RenameFragment extends FileCreationFragment {
   @Override public void onStart() {
     super.onStart();
     if (getFilename().isEmpty()) {
-      getLoaderManager().restartLoader(LOADER_FILE, null, this);
+      getLoaderManager().restartLoader(LOADER_FILE, null, fileCallback);
     }
   }
 
@@ -59,42 +62,6 @@ public final class RenameFragment extends FileCreationFragment {
 
   @Override protected int getTitleResourceId() {
     return R.string.rename;
-  }
-
-  @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    if (id == LOADER_FILE) {
-      return onCreateFileLoader();
-    } else {
-      return super.onCreateLoader(id, bundle);
-    }
-  }
-
-  private Loader<Cursor> onCreateFileLoader() {
-    Activity context = getActivity();
-    return new CursorLoader(context, buildFileUri(context, getFileLocation()),
-        null, null, null, null);
-  }
-
-  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cr) {
-    if (loader.getId() == LOADER_FILE) {
-      onFileLoaded(cr);
-    } else {
-      super.onLoadFinished(loader, cr);
-    }
-  }
-
-  private void onFileLoaded(Cursor cursor) {
-    if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
-      return;
-    }
-    String name = getName(cursor);
-    EditText field = getFilenameField();
-    field.setText(name);
-    if (isDirectory(cursor)) {
-      field.selectAll();
-    } else {
-      field.setSelection(0, getBaseName(name).length());
-    }
   }
 
   @Override public void onClick(DialogInterface dialog, int which) {
@@ -123,5 +90,38 @@ public final class RenameFragment extends FileCreationFragment {
 
   private String getFileLocation() {
     return getArguments().getString(ARG_FILE_LOCATION);
+  }
+
+  class FileCallback implements LoaderCallbacks<Cursor> {
+
+    @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+      return onCreateFileLoader();
+    }
+
+    private Loader<Cursor> onCreateFileLoader() {
+      Activity context = getActivity();
+      return new CursorLoader(context, buildFileUri(context, getFileLocation()),
+          null, null, null, null);
+    }
+
+    @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cr) {
+      onFileLoaded(cr);
+    }
+
+    @Override public void onLoaderReset(Loader<Cursor> loader) {}
+
+    private void onFileLoaded(Cursor cursor) {
+      if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
+        return;
+      }
+      String name = getName(cursor);
+      EditText field = getFilenameField();
+      field.setText(name);
+      if (isDirectory(cursor)) {
+        field.selectAll();
+      } else {
+        field.setSelection(0, getBaseName(name).length());
+      }
+    }
   }
 }

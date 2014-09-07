@@ -44,16 +44,14 @@ import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_HIERARCHY;
 import static l.files.provider.FilesContract.MATCH_SELECTION;
-import static l.files.provider.FilesContract.MATCH_SUGGESTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
 import static l.files.provider.FilesContract.METHOD_CUT;
 import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
+import static l.files.provider.FilesContract.METHOD_SUGGESTION;
 import static l.files.provider.FilesContract.PARAM_SELECTION;
 import static l.files.provider.FilesContract.getFileLocation;
 import static l.files.provider.FilesContract.getHierarchyFileLocation;
-import static l.files.provider.FilesContract.getSuggestionBasename;
-import static l.files.provider.FilesContract.getSuggestionParentUri;
 import static l.files.provider.FilesContract.newMatcher;
 
 public final class FilesProvider extends ContentProvider {
@@ -117,7 +115,8 @@ public final class FilesProvider extends ContentProvider {
     return mime;
   }
 
-  @Override public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+  @Override
+  public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
     switch (matcher.match(uri)) {
       case MATCH_FILES_LOCATION:
         File file = new File(URI.create(getFileLocation(uri)));
@@ -138,8 +137,6 @@ public final class FilesProvider extends ContentProvider {
     }
 
     switch (matcher.match(uri)) {
-      case MATCH_SUGGESTION:
-        return querySuggestion(uri, projection, sortOrder);
       case MATCH_FILES_LOCATION:
         return queryFile(uri, projection, sortOrder);
       case MATCH_FILES_LOCATION_CHILDREN:
@@ -170,16 +167,6 @@ public final class FilesProvider extends ContentProvider {
     return newFileCursor(uri, projection, sortOrder, file);
   }
 
-  private Cursor querySuggestion(Uri uri, String[] projection, String sortOrder) {
-    File parent = new File(URI.create(getSuggestionParentUri(uri)));
-    String name = getSuggestionBasename(uri);
-    File file = new File(parent, name);
-    for (int i = 2; file.exists(); i++) {
-      file = new File(parent, name + " " + i);
-    }
-    return newFileCursor(uri, projection, sortOrder, file);
-  }
-
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
     FileInfo[] data = helper.get(uri, null);
     return newFileCursor(uri, projection, sortOrder, data);
@@ -205,6 +192,8 @@ public final class FilesProvider extends ContentProvider {
         return callCopy(extras);
       case METHOD_CUT:
         return callCut(extras);
+      case METHOD_SUGGESTION:
+        return callSuggestion(extras);
     }
     return super.call(method, arg, extras);
   }
@@ -242,6 +231,18 @@ public final class FilesProvider extends ContentProvider {
     return Bundle.EMPTY;
   }
 
+  private Bundle callSuggestion(Bundle extras) {
+    File parent = new File(URI.create(extras.getString(EXTRA_FILE_LOCATION)));
+    String name = extras.getString(EXTRA_NEW_NAME);
+    File file = new File(parent, name);
+    for (int i = 2; file.exists(); i++) {
+      file = new File(parent, name + " " + i);
+    }
+    Bundle result = new Bundle(1);
+    result.putString(EXTRA_NEW_NAME, file.getName());
+    return result;
+  }
+
   private String[] toFilePaths(String[] fileLocations) {
     Set<String> paths = newHashSetWithExpectedSize(fileLocations.length);
     for (String location : fileLocations) {
@@ -267,7 +268,8 @@ public final class FilesProvider extends ContentProvider {
     return (file.mkdirs() || file.isDirectory()) ? uri : null;
   }
 
-  @Override public int delete(Uri uri, String selection, String[] selectionArgs) {
+  @Override
+  public int delete(Uri uri, String selection, String[] selectionArgs) {
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
   }
 

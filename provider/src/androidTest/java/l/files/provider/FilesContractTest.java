@@ -11,6 +11,7 @@ import static l.files.common.testing.Tests.timeout;
 import static l.files.provider.FilesContract.copy;
 import static l.files.provider.FilesContract.delete;
 import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesContract.getNameSuggestion;
 import static l.files.provider.FilesContract.move;
 import static l.files.provider.FilesContract.rename;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,5 +71,12 @@ public final class FilesContractTest extends FileBaseTest {
     String dstLocation = getFileLocation(tmp().createDir("1"));
     copy(getContext(), asList(srcLocation), dstLocation);
     assertThat(tmp().get("a/b")).exists();
+  }
+
+  public void testGetNameSuggestion() throws Exception {
+    File file = tmp().createFile("a");
+    String location = getFileLocation(tmp().get());
+    String name = getNameSuggestion(getContext(), location, file.getName());
+    assertThat(name).isEqualTo("a 2");
   }
 }

@@ -6,6 +6,10 @@ import l.files.R;
 import l.files.features.object.UiRename;
 import l.files.test.BaseFilesActivityTest;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.Tests.timeout;
+import static org.assertj.core.api.Assertions.assertThat;
+
 public final class RenameTest extends BaseFilesActivityTest {
 
   public void testRenamesFile() throws Throwable {
@@ -15,11 +19,11 @@ public final class RenameTest extends BaseFilesActivityTest {
 
     rename(from).setFilename(to.getName()).ok();
 
-    runTestOnUiThread(new Runnable() {
+    timeout(1, SECONDS, new Runnable() {
       @Override
       public void run() {
-        assertFalse(from.exists());
-        assertTrue(to.exists());
+        assertThat(from).doesNotExist();
+        assertThat(to).exists();
       }
     });
   }

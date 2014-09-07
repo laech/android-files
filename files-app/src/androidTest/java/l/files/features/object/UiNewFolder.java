@@ -57,10 +57,10 @@ public class UiNewFolder {
     return dialog().getButton(BUTTON_POSITIVE);
   }
 
-  public UiNewFolder assertFilename(final CharSequence name) {
+  public UiNewFolder assertFilename(final String name) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        assertEquals(name, filename().getText());
+        assertEquals(name, filename().getText().toString());
       }
     });
     return this;
