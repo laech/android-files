@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import l.files.io.file.Path;
+import l.files.io.file.FileInfo;
 import l.files.io.file.event.WatchService;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
@@ -39,7 +39,6 @@ import static l.files.provider.FilesContract.EXTRA_ERROR;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
 import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
-import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
 import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
@@ -64,14 +63,14 @@ public final class FilesProvider extends ContentProvider {
   private static final Logger logger = Logger.get(FilesProvider.class);
 
   private static final String[] DEFAULT_COLUMNS = {
-      FileInfo.LOCATION,
-      FileInfo.NAME,
-      FileInfo.SIZE,
-      FileInfo.READABLE,
-      FileInfo.WRITABLE,
-      FileInfo.MIME,
-      FileInfo.MODIFIED,
-      FileInfo.HIDDEN,
+      FilesContract.FileInfo.LOCATION,
+      FilesContract.FileInfo.NAME,
+      FilesContract.FileInfo.SIZE,
+      FilesContract.FileInfo.READABLE,
+      FilesContract.FileInfo.WRITABLE,
+      FilesContract.FileInfo.MIME,
+      FilesContract.FileInfo.MODIFIED,
+      FilesContract.FileInfo.HIDDEN,
   };
 
   private UriMatcher matcher;
@@ -182,7 +181,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
-    FileData[] data = helper.get(uri, null);
+    FileInfo[] data = helper.get(uri, null);
     return newFileCursor(uri, projection, sortOrder, data);
   }
 
@@ -277,25 +276,25 @@ public final class FilesProvider extends ContentProvider {
     throw new UnsupportedOperationException("Update not supported");
   }
 
-  private void sort(FileData[] data, String sortOrder) {
+  private void sort(FileInfo[] data, String sortOrder) {
     if (sortOrder != null) {
       Arrays.sort(data, SortBy.valueOf(sortOrder));
     }
   }
 
   private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, File... files) {
-    List<FileData> stats = newArrayListWithCapacity(files.length);
+    List<FileInfo> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
-        stats.add(FileData.get(Path.from(file)));
+        stats.add(FileInfo.get(file.getPath()));
       } catch (IOException e) {
         logger.warn(e);
       }
     }
-    return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileData[stats.size()]));
+    return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileInfo[stats.size()]));
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileData... files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileInfo... files) {
     sort(files, sortOrder);
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);

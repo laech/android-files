@@ -1,5 +1,6 @@
 package l.files.io.file;
 
+import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
 import com.google.auto.value.AutoValue;
@@ -91,7 +92,7 @@ public abstract class FileInfo {
 
   public String getUri() {
     if (uri == null) {
-      uri = new File(getPath()).toURI().toString();
+      uri = Uri.fromFile(new File(getPath())).toString();
     }
     return uri;
   }
@@ -117,6 +118,10 @@ public abstract class FileInfo {
     } catch (ErrnoException e) {
       return false;
     }
+  }
+
+  public boolean isHidden() {
+    return getName().startsWith(".");
   }
 
   /**

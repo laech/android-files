@@ -18,14 +18,15 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import l.files.io.file.FileInfo;
 import l.files.io.file.Path;
 import l.files.io.file.event.WatchEvent;
 import l.files.io.file.event.WatchService;
 import l.files.logging.Logger;
 
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;
-import static l.files.provider.FileData.NOT_HIDDEN;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileLocation;
@@ -36,6 +37,17 @@ final class FilesCache implements
     RemovalListener<Path, FilesCache.ValueMap> {
 
   private static final Logger logger = Logger.get(FilesCache.class);
+
+
+  static final Predicate<FileInfo> HIDDEN = new Predicate<FileInfo>() {
+    @Override
+    public boolean apply(FileInfo input) {
+      return input.isHidden();
+    }
+  };
+
+  static final Predicate<FileInfo> NOT_HIDDEN = not(HIDDEN);
+
 
   private final Context context;
   private final WatchService service;
@@ -57,7 +69,7 @@ final class FilesCache implements
     this.batch = new EventBatch(context.getContentResolver(), this);
   }
 
-  public FileData[] get(Uri uri, CancellationSignal signal) {
+  public FileInfo[] get(Uri uri, CancellationSignal signal) {
     ValueMap map = getCache(uri);
     return showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
   }
@@ -79,6 +91,7 @@ final class FilesCache implements
       }
     }
     if (create) {
+      logger.debug("Cache load: %s", path);
       loadInto(values, path);
     }
     return values;
@@ -101,7 +114,7 @@ final class FilesCache implements
     for (String name : names) {
       try {
         Path child = path.child(name);
-        map.put(child, FileData.get(child));
+        map.put(child, FileInfo.get(child.toString()));
       } catch (IOException e) {
         logger.warn(e);
       }
@@ -136,7 +149,7 @@ final class FilesCache implements
     }
 
     try {
-      data.put(path, FileData.get(path));
+      data.put(path, FileInfo.get(path.toString()));
     } catch (IOException e) {
       logger.warn(e);
       remove(path);
@@ -157,6 +170,7 @@ final class FilesCache implements
   public void onRemoval(RemovalNotification<Path, ValueMap> notification) {
     Path path = notification.getKey();
     service.unregister(path, this);
+    logger.debug("Cache remove: %s", path);
   }
 
   private boolean showHidden(Uri uri) {
@@ -164,32 +178,32 @@ final class FilesCache implements
   }
 
   static final class ValueMap {
-    private final ConcurrentMap<Path, FileData> map;
+    private final ConcurrentMap<Path, FileInfo> map;
 
     ValueMap() {
       map = new ConcurrentHashMap<>();
     }
 
-    FileData put(Path key, FileData value) {
+    FileInfo put(Path key, FileInfo value) {
       return map.put(key, value);
     }
 
-    FileData remove(Path key) {
+    FileInfo remove(Path key) {
       return map.remove(key);
     }
 
-    FileData[] values() {
-      return values(Predicates.<FileData>alwaysTrue());
+    FileInfo[] values() {
+      return values(Predicates.<FileInfo>alwaysTrue());
     }
 
-    FileData[] values(Predicate<FileData> filter) {
-      List<FileData> list = newArrayListWithCapacity(map.size());
-      for (FileData data : map.values()) {
+    FileInfo[] values(Predicate<FileInfo> filter) {
+      List<FileInfo> list = newArrayListWithCapacity(map.size());
+      for (FileInfo data : map.values()) {
         if (filter.apply(data)) {
           list.add(data);
         }
       }
-      return list.toArray(new FileData[list.size()]);
+      return list.toArray(new FileInfo[list.size()]);
     }
   }
 }

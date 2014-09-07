@@ -1,32 +1,28 @@
 package l.files.provider;
 
 import l.files.common.database.BaseCursor;
+import l.files.io.file.FileInfo;
 
-import static l.files.provider.FilesContract.FileInfo.SIZE;
+import static l.files.common.database.DataTypes.booleanToInt;
 import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
+import static l.files.provider.FilesContract.FileInfo.SIZE;
 import static l.files.provider.FilesContract.FileInfo.WRITABLE;
 
 final class FileCursor extends BaseCursor {
 
-  private final FileData[] files;
+  private final FileInfo[] files;
   private final String[] columns;
-  private final Object tag; // TODO
 
-  FileCursor(FileData[] files, String[] columns) {
-    this(files, columns, null);
-  }
-
-  FileCursor(FileData[] files, String[] columns, Object tag) {
+  public FileCursor(FileInfo[] files, String[] columns) {
     this.files = files;
     this.columns = columns;
-    this.tag = tag;
   }
 
-  private FileData getCurrentFile() {
+  private FileInfo getCurrentFile() {
     checkPosition();
     return files[getPosition()];
   }
@@ -40,27 +36,27 @@ final class FileCursor extends BaseCursor {
   }
 
   @Override public String getString(int column) {
-    FileData file = getCurrentFile();
+    FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (LOCATION.equals(col)) return file.location;
-    if (NAME.equals(col)) return file.name;
-    if (MIME.equals(col)) return file.mime;
+    if (LOCATION.equals(col)) return file.getUri();
+    if (NAME.equals(col)) return file.getName();
+    if (MIME.equals(col)) return file.getMediaType();
     throw new IllegalArgumentException();
   }
 
   @Override public int getInt(int column) {
-    FileData file = getCurrentFile();
+    FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (READABLE.equals(col)) return file.canRead;
-    if (WRITABLE.equals(col)) return file.canWrite;
+    if (READABLE.equals(col)) return booleanToInt(file.isReadable());
+    if (WRITABLE.equals(col)) return booleanToInt(file.isWritable());
     throw new IllegalArgumentException();
   }
 
   @Override public long getLong(int column) {
-    FileData file = getCurrentFile();
+    FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (SIZE.equals(col)) return file.length;
-    if (MODIFIED.equals(col)) return file.lastModified;
+    if (SIZE.equals(col)) return file.getSize();
+    if (MODIFIED.equals(col)) return file.getLastModified();
     throw new IllegalArgumentException();
   }
 

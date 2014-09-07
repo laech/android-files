@@ -89,6 +89,11 @@ public final class FileInfoTest extends FileBaseTest {
     assertThat(info(file).getSize()).isEqualTo(file.length());
   }
 
+  public void testIsHidden() throws Exception {
+    assertThat(info(tmp().createFile(".a")).isHidden()).isTrue();
+    assertThat(info(tmp().createFile("a")).isHidden()).isFalse();
+  }
+
   private FileInfo info(File f) throws IOException {
     return FileInfo.get(f.getPath());
   }
