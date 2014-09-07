@@ -1,9 +1,9 @@
-package l.files.io.os;
+package l.files.io.file;
 
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/stdio.h.html">stdio.h</a>
  */
-public final class Stdio extends Native {
+final class Stdio extends Native {
   private Stdio() {}
 
   /**

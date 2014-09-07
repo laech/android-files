@@ -13,8 +13,8 @@ import static l.files.io.file.DirectoryStream.Entry;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_LNK;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_REG;
-import static l.files.io.os.Stat.lstat;
-import static l.files.io.os.Unistd.symlink;
+import static l.files.io.file.Stat.lstat;
+import static l.files.io.file.Unistd.symlink;
 
 public final class DirectoryStreamTest extends FileBaseTest {
 

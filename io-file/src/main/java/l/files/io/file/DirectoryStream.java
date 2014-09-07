@@ -7,12 +7,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.io.os.Dirent;
-import l.files.io.os.ErrnoException;
-
-import static l.files.io.os.Dirent.closedir;
-import static l.files.io.os.Dirent.opendir;
-import static l.files.io.os.Dirent.readdir;
+import static l.files.io.file.Dirent.closedir;
+import static l.files.io.file.Dirent.opendir;
+import static l.files.io.file.Dirent.readdir;
 
 /**
  * A stream to iterate through the children of a directory.

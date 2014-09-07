@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package l.files.io.os;
+package l.files.io.file;
 
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
@@ -25,7 +25,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
  * @see <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">stat.h</a>
  */
 @SuppressWarnings("OctalInteger")
-public final class Stat extends Native {
+final class Stat extends Native {
 
   /* See /usr/include/linux/stat.h for meaning of these constants. */
 

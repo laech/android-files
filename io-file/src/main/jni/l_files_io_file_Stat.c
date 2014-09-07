@@ -7,7 +7,7 @@
 
 static jmethodID stat_ctor;
 
-void Java_l_files_io_os_Stat_init(JNIEnv *env, jclass clazz) {
+void Java_l_files_io_file_Stat_init(JNIEnv *env, jclass clazz) {
   stat_ctor = (*env)->GetMethodID(env, clazz, "<init>", "(JJIJIIJJJJJJJ)V");
 }
 
@@ -44,10 +44,10 @@ jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
       (jlong) sb.st_blocks);
 }
 
-jobject Java_l_files_io_os_Stat_stat(JNIEnv* env, jclass clazz, jstring jpath) {
+jobject Java_l_files_io_file_Stat_stat(JNIEnv* env, jclass clazz, jstring jpath) {
   return do_stat(env, clazz, jpath, JNI_FALSE);
 }
 
-jobject Java_l_files_io_os_Stat_lstat(JNIEnv* env, jclass clazz, jstring jpath) {
+jobject Java_l_files_io_file_Stat_lstat(JNIEnv* env, jclass clazz, jstring jpath) {
   return do_stat(env, clazz, jpath, JNI_TRUE);
 }

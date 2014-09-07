@@ -1,11 +1,11 @@
-package l.files.io.os;
+package l.files.io.file;
 
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
 
-import static l.files.io.os.Stdio.remove;
-import static l.files.io.os.Stdio.rename;
+import static l.files.io.file.Stdio.remove;
+import static l.files.io.file.Stdio.rename;
 
 public final class StdioTest extends FileBaseTest {
 

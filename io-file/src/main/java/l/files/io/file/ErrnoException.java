@@ -1,4 +1,4 @@
-package l.files.io.os;
+package l.files.io.file;
 
 import android.util.SparseArray;
 
@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
-public final class ErrnoException extends IOException {
+final class ErrnoException extends IOException {
 
   public static final int EPERM = 1;
   public static final int ENOENT = 2;

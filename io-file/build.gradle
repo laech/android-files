@@ -1,9 +1,18 @@
 apply plugin: 'com.android.library'
 
+android {
+  defaultConfig {
+    ndk {
+      moduleName 'io'
+      ldLibs 'log'
+    }
+  }
+}
+
 dependencies {
-  compile project(':io-os')
   compile project(':logging')
   compile libs.auto_value
   compile libs.commons_io
+  compile libs.commons_lang
   compile libs.guava
 }

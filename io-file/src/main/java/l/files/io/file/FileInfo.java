@@ -8,19 +8,15 @@ import com.google.auto.value.AutoValue;
 import java.io.File;
 import java.io.IOException;
 
-import l.files.io.os.ErrnoException;
-import l.files.io.os.Stat;
-import l.files.io.os.Unistd;
-
-import static l.files.io.os.Stat.S_ISBLK;
-import static l.files.io.os.Stat.S_ISCHR;
-import static l.files.io.os.Stat.S_ISDIR;
-import static l.files.io.os.Stat.S_ISFIFO;
-import static l.files.io.os.Stat.S_ISLNK;
-import static l.files.io.os.Stat.S_ISREG;
-import static l.files.io.os.Stat.S_ISSOCK;
-import static l.files.io.os.Unistd.R_OK;
-import static l.files.io.os.Unistd.W_OK;
+import static l.files.io.file.Stat.S_ISBLK;
+import static l.files.io.file.Stat.S_ISCHR;
+import static l.files.io.file.Stat.S_ISDIR;
+import static l.files.io.file.Stat.S_ISFIFO;
+import static l.files.io.file.Stat.S_ISLNK;
+import static l.files.io.file.Stat.S_ISREG;
+import static l.files.io.file.Stat.S_ISSOCK;
+import static l.files.io.file.Unistd.R_OK;
+import static l.files.io.file.Unistd.W_OK;
 import static org.apache.commons.io.FilenameUtils.concat;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 

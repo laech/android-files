@@ -1,4 +1,4 @@
-package l.files.io.os;
+package l.files.io.file;
 
 import com.google.auto.value.AutoValue;
 
@@ -6,7 +6,7 @@ import com.google.auto.value.AutoValue;
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html">dirent.h</a>
  */
 @AutoValue
-public abstract class Dirent extends Native {
+abstract class Dirent extends Native {
 
   public static final int DT_UNKNOWN = 0;
   public static final int DT_FIFO = 1;

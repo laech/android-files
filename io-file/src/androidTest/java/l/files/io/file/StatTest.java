@@ -1,4 +1,4 @@
-package l.files.io.os;
+package l.files.io.file;
 
 import com.google.common.base.Function;
 
@@ -10,7 +10,7 @@ import l.files.common.testing.FileBaseTest;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.System.currentTimeMillis;
-import static l.files.io.os.ErrnoException.ENOENT;
+import static l.files.io.file.ErrnoException.ENOENT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class StatTest extends FileBaseTest {

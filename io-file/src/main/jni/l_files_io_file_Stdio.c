@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "util.h"
 
-void Java_l_files_io_os_Stdio_rename(JNIEnv *env, jclass clazz, jstring jold, jstring jnew) {
+void Java_l_files_io_file_Stdio_rename(JNIEnv *env, jclass clazz, jstring jold, jstring jnew) {
   const char *old = (*env)->GetStringUTFChars(env, jold, NULL);
   const char *new = (*env)->GetStringUTFChars(env, jnew, NULL);
   int result = TEMP_FAILURE_RETRY(rename(old, new));
@@ -14,7 +14,7 @@ void Java_l_files_io_os_Stdio_rename(JNIEnv *env, jclass clazz, jstring jold, js
   }
 }
 
-void Java_l_files_io_os_Stdio_remove(JNIEnv *env, jclass clazz, jstring jpath) {
+void Java_l_files_io_file_Stdio_remove(JNIEnv *env, jclass clazz, jstring jpath) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   int result = TEMP_FAILURE_RETRY(remove(path));
   (*env)->ReleaseStringUTFChars(env, jpath, path);

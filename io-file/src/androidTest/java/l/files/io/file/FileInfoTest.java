@@ -7,8 +7,8 @@ import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
-import static l.files.io.os.Stat.lstat;
-import static l.files.io.os.Unistd.symlink;
+import static l.files.io.file.Stat.lstat;
+import static l.files.io.file.Unistd.symlink;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class FileInfoTest extends FileBaseTest {

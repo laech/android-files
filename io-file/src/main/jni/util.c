@@ -4,7 +4,7 @@
 #include <errno.h>
 
 void throw_errno_exception(JNIEnv *env) {
-  jclass clazz = (*env)->FindClass(env, "l/files/io/os/ErrnoException");
+  jclass clazz = (*env)->FindClass(env, "l/files/io/file/ErrnoException");
   if (NULL == clazz) {
     return;
   }

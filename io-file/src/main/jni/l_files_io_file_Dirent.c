@@ -5,12 +5,12 @@
 
 static jmethodID dirent_create;
 
-void Java_l_files_io_os_Dirent_init(JNIEnv *env, jclass clazz) {
+void Java_l_files_io_file_Dirent_init(JNIEnv *env, jclass clazz) {
   dirent_create = (*env)->GetStaticMethodID(env, clazz, "create",
-      "(JILjava/lang/String;)Ll/files/io/os/Dirent;");
+      "(JILjava/lang/String;)Ll/files/io/file/Dirent;");
 }
 
-jlong Java_l_files_io_os_Dirent_opendir(JNIEnv *env, jclass clazz, jstring jpath) {
+jlong Java_l_files_io_file_Dirent_opendir(JNIEnv *env, jclass clazz, jstring jpath) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   DIR *dir = opendir(path);
   (*env)->ReleaseStringUTFChars(env, jpath, path);
@@ -23,14 +23,14 @@ jlong Java_l_files_io_os_Dirent_opendir(JNIEnv *env, jclass clazz, jstring jpath
   }
 }
 
-void Java_l_files_io_os_Dirent_closedir(JNIEnv *env, jclass clazz, jlong jdir) {
+void Java_l_files_io_file_Dirent_closedir(JNIEnv *env, jclass clazz, jlong jdir) {
   DIR *dir = (DIR*)(intptr_t)jdir;
   if (0 != closedir(dir)) {
     throw_errno_exception(env);
   }
 }
 
-jobject Java_l_files_io_os_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jdir) {
+jobject Java_l_files_io_file_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jdir) {
   DIR *dir = (DIR*)(intptr_t)jdir;
   errno = 0;
   struct dirent *entry = readdir(dir);

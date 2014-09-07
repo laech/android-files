@@ -1,9 +1,9 @@
-package l.files.io.os;
+package l.files.io.file;
 
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html">unistd.h</a>
  */
-public final class Unistd extends Native {
+final class Unistd extends Native {
 
   /* Macros for access() */
   public static final int R_OK = 4;  /* Read */

@@ -1,4 +1,4 @@
-package l.files.io.os;
+package l.files.io.file;
 
 import java.io.File;
 import java.util.Set;
@@ -6,12 +6,12 @@ import java.util.Set;
 import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.io.os.Dirent.DT_DIR;
-import static l.files.io.os.Dirent.DT_REG;
-import static l.files.io.os.Dirent.closedir;
-import static l.files.io.os.Dirent.opendir;
-import static l.files.io.os.Dirent.readdir;
-import static l.files.io.os.Stat.stat;
+import static l.files.io.file.Dirent.DT_DIR;
+import static l.files.io.file.Dirent.DT_REG;
+import static l.files.io.file.Dirent.closedir;
+import static l.files.io.file.Dirent.opendir;
+import static l.files.io.file.Dirent.readdir;
+import static l.files.io.file.Stat.stat;
 
 public final class DirentTest extends FileBaseTest {
 
