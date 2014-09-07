@@ -10,8 +10,8 @@ import l.files.common.testing.FileBaseTest;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.io.os.ErrnoException.ENOENT;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class StatTest extends FileBaseTest {
 
@@ -49,23 +49,23 @@ public final class StatTest extends FileBaseTest {
   }
 
   private void testStatFile(Function<File, Stat> fn) throws IOException {
-    long start = MILLISECONDS.toSeconds(currentTimeMillis());
+    long start = currentTimeMillis() / 1000;
     File file = tmp().createFile("test");
     write("hello", file, UTF_8);
-    long end = MILLISECONDS.toSeconds(currentTimeMillis());
+    long end = currentTimeMillis() / 1000;
 
     Stat stat = fn.apply(file);
 
     assertNotNull(stat);
-    assertEquals(file.length(), stat.size);
-    assertEquals(1, stat.nlink);
-    assertTrue(stat.atime >= start);
-    assertTrue(stat.ctime >= start);
-    assertTrue(stat.mtime >= start);
-    assertTrue(stat.atime >= end);
-    assertTrue(stat.ctime >= end);
-    assertTrue(stat.mtime >= end);
-    assertTrue(stat.ino > 0);
+    assertThat(stat.size).isEqualTo(file.length());
+    assertThat(stat.nlink).isEqualTo(1);
+    assertThat(stat.atime).isGreaterThanOrEqualTo(start);
+    assertThat(stat.ctime).isGreaterThanOrEqualTo(start);
+    assertThat(stat.mtime).isGreaterThanOrEqualTo(start);
+    assertThat(stat.atime).isGreaterThanOrEqualTo(end);
+    assertThat(stat.ctime).isGreaterThanOrEqualTo(end);
+    assertThat(stat.mtime).isGreaterThanOrEqualTo(end);
+    assertThat(stat.ino).isGreaterThan(0);
 
     // TODO more tests when there are more supporting test functions
   }

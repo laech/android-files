@@ -9,14 +9,12 @@ import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 public final class MoveTest extends PasteTest {
 
   public void testMovedCountInitialZero() {
     Move move = create(tmp().createFile("a"), tmp().createDir("b"));
-    assertThat(move.getMovedItemCount(), is(0));
+    assertEquals(move.getMovedItemCount(), 0);
   }
 
   public void testMovesSymlink() throws Exception {
@@ -29,8 +27,8 @@ public final class MoveTest extends PasteTest {
 
     String expected = target.getPath();
     String actual = readlink(tmp().get("moved/link").getPath());
-    assertThat(actual, is(expected));
-    assertThat(move.getMovedItemCount(), is(1));
+    assertEquals(actual, expected);
+    assertEquals(move.getMovedItemCount(), 1);
   }
 
   public void testMovesFile() throws Exception {
@@ -43,8 +41,8 @@ public final class MoveTest extends PasteTest {
     move.execute();
 
     assertFalse(srcFile.exists());
-    assertThat(Files.toString(dstFile, UTF_8), is("Test"));
-    assertThat(move.getMovedItemCount(), is(1));
+    assertEquals(Files.toString(dstFile, UTF_8), "Test");
+    assertEquals(move.getMovedItemCount(), 1);
   }
 
   public void testMovesDirectory() throws Exception {
@@ -58,8 +56,8 @@ public final class MoveTest extends PasteTest {
     move.execute();
 
     assertFalse(srcDir.exists());
-    assertThat(Files.toString(dstFile, UTF_8), is("Test"));
-    assertThat(move.getMovedItemCount(), is(1));
+    assertEquals(Files.toString(dstFile, UTF_8), "Test");
+    assertEquals(move.getMovedItemCount(), 1);
   }
 
   @Override protected Move create(Iterable<String> sources, String dstDir) {

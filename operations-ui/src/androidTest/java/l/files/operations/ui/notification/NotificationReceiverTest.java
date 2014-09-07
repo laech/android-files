@@ -29,6 +29,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -70,7 +71,7 @@ public final class NotificationReceiverTest extends BaseTest {
     given(task.getFailures()).willReturn(Collections.<Failure>emptyList());
 
     bus.post(task);
-    verify(manager).cancel(task.getTaskId());
+    verify(manager, timeout(1000)).cancel(task.getTaskId());
     verifyNoMoreInteractions(manager);
   }
 
@@ -81,14 +82,16 @@ public final class NotificationReceiverTest extends BaseTest {
     given(task.getFailures()).willReturn(Collections.<Failure>emptyList());
 
     bus.post(task);
-    verify(manager).notify(eq(task.getTaskId()), notNull(Notification.class));
+    verify(manager, timeout(1000))
+        .notify(eq(task.getTaskId()), notNull(Notification.class));
     verifyNoMoreInteractions(manager);
   }
 
   public void testNotifyOnFailure() throws Exception {
     TaskInfo task = newTaskWithFailure();
     bus.post(task);
-    verify(manager).notify(eq(task.getTaskId()), notNull(Notification.class));
+    verify(manager, timeout(1000))
+        .notify(eq(task.getTaskId()), notNull(Notification.class));
   }
 
   public void testNoNotifyIfTaskIsNotFinished() throws Exception {

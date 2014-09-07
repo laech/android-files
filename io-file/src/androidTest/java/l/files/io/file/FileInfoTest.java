@@ -80,7 +80,8 @@ public final class FileInfoTest extends FileBaseTest {
 
   public void testUri() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).getUri()).isEqualTo(file.toURI().toString());
+    assertThat(info(file).getUri())
+        .isEqualTo("file://" + file.getAbsolutePath());
   }
 
   public void testSize() throws Exception {

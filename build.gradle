@@ -3,7 +3,6 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.8.11'
     classpath 'com.android.tools.build:gradle:0.12.+'
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
   }
@@ -23,10 +22,6 @@ subprojects {
       defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
-      }
-
-      sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
       }
 
       compileOptions {
@@ -51,7 +46,6 @@ subprojects {
     }
 
     dependencies {
-      compile 'org.jetbrains.kotlin:kotlin-stdlib:0.8.11'
       androidTestCompile project(':testlib')
       androidTestCompile libs.assertj
     }
