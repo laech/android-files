@@ -17,7 +17,6 @@ import java.util.concurrent.Future;
 
 import de.greenrobot.event.EventBus;
 import l.files.eventbus.Subscribe;
-import l.files.operations.info.TaskInfo;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getBroadcast;
@@ -64,7 +63,7 @@ public final class OperationService extends Service {
     paste(MOVE.action(), context, srcPaths, dstPath);
   }
 
-  public static void paste(String action, Context context, Iterable<String> srcPaths, String dstPath) {
+  private static void paste(String action, Context context, Iterable<String> srcPaths, String dstPath) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(action)

@@ -10,17 +10,17 @@ import java.util.Collections;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
-import l.files.operations.info.CopyTaskInfo;
-import l.files.operations.info.DeleteTaskInfo;
-import l.files.operations.info.MoveTaskInfo;
-import l.files.operations.info.TaskInfo;
+import l.files.operations.CopyTaskInfo;
+import l.files.operations.DeleteTaskInfo;
+import l.files.operations.MoveTaskInfo;
+import l.files.operations.TaskInfo;
 import l.files.operations.ui.FailureMessage;
 import l.files.operations.ui.R;
 
 import static java.util.Arrays.asList;
 import static l.files.io.file.operations.FileOperation.Failure;
-import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
-import static l.files.operations.info.TaskInfo.TaskStatus.RUNNING;
+import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskInfo.TaskStatus.RUNNING;
 import static l.files.operations.ui.FailuresActivity.getFailures;
 import static l.files.operations.ui.FailuresActivity.getTitle;
 import static l.files.operations.ui.notification.NotificationReceiver.getFailureIntent;

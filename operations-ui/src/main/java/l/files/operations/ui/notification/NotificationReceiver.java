@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import l.files.eventbus.Subscribe;
-import l.files.io.file.operations.FileOperation;
-import l.files.operations.info.CopyTaskInfo;
-import l.files.operations.info.DeleteTaskInfo;
-import l.files.operations.info.MoveTaskInfo;
-import l.files.operations.info.TaskInfo;
+import l.files.operations.CopyTaskInfo;
+import l.files.operations.DeleteTaskInfo;
+import l.files.operations.Failure;
+import l.files.operations.MoveTaskInfo;
+import l.files.operations.TaskInfo;
 import l.files.operations.ui.FailureMessage;
 import l.files.operations.ui.FailuresActivity;
 import l.files.operations.ui.R;
@@ -29,7 +29,7 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static de.greenrobot.event.ThreadMode.MainThread;
 import static l.files.operations.OperationService.newCancelIntent;
-import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
 import static l.files.operations.ui.FailuresActivity.getTitle;
 
 /**
@@ -132,13 +132,13 @@ public class NotificationReceiver {
       return Optional.absent();
     }
 
-    Collection<FileOperation.Failure> failures = value.getFailures();
+    Collection<Failure> failures = value.getFailures();
     if (failures.isEmpty()) {
       return Optional.absent();
     }
 
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
-    for (FileOperation.Failure failure : failures) {
+    for (Failure failure : failures) {
       messages.add(FailureMessage.create(failure.path(), failure.cause().getMessage()));
     }
     String title = context.getResources().getQuantityString(pluralTitleId, value.getFailures().size());

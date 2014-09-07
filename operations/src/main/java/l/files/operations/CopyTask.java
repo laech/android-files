@@ -5,10 +5,6 @@ import android.os.Handler;
 import java.io.File;
 
 import de.greenrobot.event.EventBus;
-import l.files.io.file.operations.Copy;
-import l.files.io.file.operations.FileException;
-import l.files.io.file.operations.Size;
-import l.files.operations.info.CopyTaskInfo;
 
 final class CopyTask extends Task implements CopyTaskInfo {
 

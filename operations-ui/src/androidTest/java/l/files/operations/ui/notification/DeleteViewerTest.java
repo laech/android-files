@@ -2,7 +2,7 @@ package l.files.operations.ui.notification;
 
 import android.content.Context;
 
-import l.files.operations.info.DeleteTaskInfo;
+import l.files.operations.DeleteTaskInfo;
 import l.files.operations.ui.R;
 
 import static org.mockito.BDDMockito.given;

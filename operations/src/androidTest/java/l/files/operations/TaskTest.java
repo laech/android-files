@@ -7,12 +7,11 @@ import java.util.concurrent.CountDownLatch;
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
 import l.files.eventbus.Subscribe;
-import l.files.operations.info.TaskInfo;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.operations.info.TaskInfo.TaskStatus;
-import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
-import static l.files.operations.info.TaskInfo.TaskStatus.PENDING;
+import static l.files.operations.TaskInfo.TaskStatus;
+import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskInfo.TaskStatus.PENDING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TaskTest extends BaseTest {

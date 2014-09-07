@@ -2,7 +2,7 @@ package l.files.operations.ui.notification;
 
 import android.content.Context;
 
-import l.files.operations.info.MoveTaskInfo;
+import l.files.operations.MoveTaskInfo;
 import l.files.operations.ui.R;
 
 final class MoveViewer extends ProgressViewer<MoveTaskInfo> {

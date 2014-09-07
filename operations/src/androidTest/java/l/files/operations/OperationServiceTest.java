@@ -11,11 +11,6 @@ import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
-import l.files.operations.info.CopyTaskInfo;
-import l.files.operations.info.DeleteTaskInfo;
-import l.files.operations.info.MoveTaskInfo;
-import l.files.operations.info.ProgressInfo;
-import l.files.operations.info.TaskInfo;
 
 import static com.google.common.collect.Collections2.transform;
 import static java.lang.System.currentTimeMillis;
@@ -24,7 +19,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.OperationService.copy;
 import static l.files.operations.OperationService.delete;
 import static l.files.operations.OperationService.move;
-import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class OperationServiceTest extends FileBaseTest {

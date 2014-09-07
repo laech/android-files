@@ -5,8 +5,6 @@ import android.os.Handler;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import l.files.io.file.operations.FileException;
-import l.files.operations.info.TaskInfo;
 
 import static android.os.SystemClock.elapsedRealtime;
 import static com.google.common.base.Objects.toStringHelper;
@@ -14,8 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
-import static l.files.io.file.operations.FileOperation.Failure;
-import static l.files.operations.info.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
 
 abstract class Task implements TaskInfo, Runnable {
 
@@ -83,7 +80,7 @@ abstract class Task implements TaskInfo, Runnable {
 
   protected abstract void doTask() throws FileException, InterruptedException;
 
-  protected final void notifyProgress() {
+  final void notifyProgress() {
     bus.post(this);
   }
 

@@ -4,12 +4,12 @@ import android.content.Context;
 
 import com.google.common.base.Optional;
 
-import l.files.operations.info.ProgressInfo;
+import l.files.operations.ProgressInfo;
 import l.files.operations.ui.R;
 
 import static android.text.format.Formatter.formatFileSize;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.operations.info.TaskInfo.TaskStatus.PENDING;
+import static l.files.operations.TaskInfo.TaskStatus.PENDING;
 import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
 
 /**

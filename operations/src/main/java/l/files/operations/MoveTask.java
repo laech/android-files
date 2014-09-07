@@ -10,16 +10,9 @@ import java.util.Collection;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import l.files.io.file.operations.Copy;
-import l.files.io.file.operations.Delete;
-import l.files.io.file.operations.FileException;
-import l.files.io.file.operations.Move;
-import l.files.io.file.operations.Size;
-import l.files.operations.info.MoveTaskInfo;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.transform;
-import static l.files.io.file.operations.FileOperation.Failure;
 
 final class MoveTask extends Task implements MoveTaskInfo {
 
@@ -49,7 +42,8 @@ final class MoveTask extends Task implements MoveTaskInfo {
     }
   }
 
-  private void copyThenDelete(List<Failure> failures) throws FileException, InterruptedException {
+  private void copyThenDelete(List<Failure> failures)
+      throws FileException, InterruptedException {
     List<String> paths = transform(failures, new Function<Failure, String>() {
       @Override public String apply(Failure input) {
         return input.path();
