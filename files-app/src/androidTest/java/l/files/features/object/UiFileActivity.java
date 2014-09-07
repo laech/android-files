@@ -75,7 +75,7 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity paste() {
-    await(new Runnable() {
+    await(instrument, new Runnable() {
       @Override public void run() {
         assertTrue(instrument.invokeMenuActionSync(
             activity, android.R.id.paste, 0));

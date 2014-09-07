@@ -1,6 +1,7 @@
 package l.files.features;
 
 import java.io.File;
+import java.util.Arrays;
 
 import l.files.test.BaseFilesActivityTest;
 
@@ -22,8 +23,10 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         .selectItem(d)
         .paste();
 
-    assertTrue(waitFor(new File(dir().get(), "d/a"), 5));
-    assertTrue(waitFor(new File(dir().get(), "d/b"), 5));
-    assertTrue(waitFor(new File(dir().get(), "d/c"), 5));
+    String msg = Arrays.toString(dir().get().list()) +
+        ":" + Arrays.toString(d.list());
+    assertTrue(msg, waitFor(new File(dir().get(), "d/a"), 5));
+    assertTrue(msg, waitFor(new File(dir().get(), "d/b"), 5));
+    assertTrue(msg, waitFor(new File(dir().get(), "d/c"), 5));
   }
 }
