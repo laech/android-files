@@ -12,9 +12,9 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
 
-abstract class SortByBaseTest extends FileBaseTest {
+abstract class FileSortTest extends FileBaseTest {
 
-  protected final void testSortMatches(SortBy sort, File... expectedOrder)
+  protected final void testSortMatches(FileSort sort, File... expectedOrder)
       throws Exception {
     List<FileInfo> expected = mapData(expectedOrder);
     List<FileInfo> actual = newArrayList(expected);

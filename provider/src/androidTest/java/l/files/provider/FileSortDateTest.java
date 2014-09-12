@@ -2,17 +2,17 @@ package l.files.provider;
 
 import java.io.File;
 
-public final class SortBy_DATE_Test extends SortByBaseTest {
+public final class FileSortDateTest extends FileSortTest {
 
   public void testSortByDateDesc() throws Exception {
-    testSortMatches(SortBy.DATE,
+    testSortMatches(FileSort.Date.get(),
         createDirLastModified("b", 3000),
         createFileLastModified("a", 2000),
         createDirLastModified("c", 1000));
   }
 
   public void testSortByNameIfDatesEqual() throws Exception {
-    testSortMatches(SortBy.DATE,
+    testSortMatches(FileSort.Date.get(),
         createFileLastModified("a", 1),
         createDirLastModified("b", 1),
         createFileLastModified("c", 1));
