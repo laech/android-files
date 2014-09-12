@@ -45,9 +45,15 @@ subprojects {
       }
     }
 
+    configurations {
+      androidTestCompile.exclude module: 'hamcrest-core'
+      androidTestCompile.exclude module: 'hamcrest-library'
+    }
+
     dependencies {
       androidTestCompile project(':testlib')
       androidTestCompile libs.assertj
+      androidTestCompile libs.truth
     }
   }
 
@@ -92,5 +98,6 @@ libs.mockito = [
     'com.google.dexmaker:dexmaker-mockito:1.0'
 ]
 libs.assertj = 'org.assertj:assertj-core:1.6.1'
+libs.truth = 'com.google.truth:truth:0.23'
 libs.junit = 'junit:junit:4.11'
 libs.compile_testing = 'com.google.testing.compile:compile-testing:0.5'
