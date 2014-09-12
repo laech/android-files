@@ -1,4 +1,4 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import android.os.SystemClock;
 

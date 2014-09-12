@@ -1,11 +1,11 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import junit.framework.TestCase;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
+import static l.files.operations.ui.Formats.formatTimeRemaining;
 
 public final class FormatsTest extends TestCase {
 

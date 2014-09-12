@@ -1,4 +1,4 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -15,15 +15,13 @@ import l.files.operations.DeleteTaskInfo;
 import l.files.operations.Failure;
 import l.files.operations.MoveTaskInfo;
 import l.files.operations.TaskInfo;
-import l.files.operations.ui.FailureMessage;
-import l.files.operations.ui.R;
 
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
 import static l.files.operations.TaskInfo.TaskStatus.RUNNING;
 import static l.files.operations.ui.FailuresActivity.getFailures;
 import static l.files.operations.ui.FailuresActivity.getTitle;
-import static l.files.operations.ui.notification.NotificationReceiver.getFailureIntent;
+import static l.files.operations.ui.NotificationReceiver.getFailureIntent;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;

@@ -1,4 +1,4 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -7,12 +7,11 @@ import java.lang.reflect.ParameterizedType;
 
 import l.files.common.testing.BaseTest;
 import l.files.operations.ProgressInfo;
-import l.files.operations.ui.R;
 
 import static android.text.format.Formatter.formatFileSize;
 import static l.files.operations.TaskInfo.TaskStatus.PENDING;
 import static l.files.operations.TaskInfo.TaskStatus.RUNNING;
-import static l.files.operations.ui.notification.Formats.formatTimeRemaining;
+import static l.files.operations.ui.Formats.formatTimeRemaining;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 

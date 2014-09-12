@@ -1,9 +1,8 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import android.content.Context;
 
 import l.files.operations.CopyTaskInfo;
-import l.files.operations.ui.R;
 
 final class CopyViewer extends ProgressViewer<CopyTaskInfo> {
 

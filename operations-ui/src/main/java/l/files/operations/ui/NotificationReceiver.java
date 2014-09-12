@@ -1,4 +1,4 @@
-package l.files.operations.ui.notification;
+package l.files.operations.ui;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,9 +18,6 @@ import l.files.operations.DeleteTaskInfo;
 import l.files.operations.Failure;
 import l.files.operations.MoveTaskInfo;
 import l.files.operations.TaskInfo;
-import l.files.operations.ui.FailureMessage;
-import l.files.operations.ui.FailuresActivity;
-import l.files.operations.ui.R;
 
 import static android.app.Notification.PRIORITY_LOW;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -35,7 +32,7 @@ import static l.files.operations.ui.FailuresActivity.getTitle;
 /**
  * Handle file operation notification updates.
  */
-public class NotificationReceiver {
+class NotificationReceiver {
 
   private final Context context;
   private final NotificationManager manager;

@@ -9,7 +9,7 @@ import com.google.auto.value.AutoValue;
  * Indicates a file operation has failed.
  */
 @AutoValue
-public abstract class FailureMessage implements Parcelable {
+abstract class FailureMessage implements Parcelable {
 
   public static final Creator<FailureMessage> CREATOR = new Creator<FailureMessage>() {
     @Override public FailureMessage createFromParcel(Parcel source) {
