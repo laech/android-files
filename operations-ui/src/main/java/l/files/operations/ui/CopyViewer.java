@@ -2,42 +2,33 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.operations.CopyTaskInfo;
+import l.files.operations.Clock;
+import l.files.operations.Progress;
+import l.files.operations.TaskState;
 
-final class CopyViewer extends ProgressViewer<CopyTaskInfo> {
+final class CopyViewer extends ProgressViewer {
 
-    CopyViewer(Context context, Clock clock) {
-        super(context, clock);
-    }
+  CopyViewer(Context context, Clock clock) {
+    super(context, clock);
+  }
 
-    @Override
-    protected long getWorkTotal(CopyTaskInfo value) {
-        return value.getTotalByteCount();
-    }
+  @Override protected Progress getWork(TaskState.Running state) {
+    return state.bytes();
+  }
 
-    @Override
-    protected long getWorkDone(CopyTaskInfo value) {
-        return value.getProcessedByteCount();
-    }
+  @Override protected int getTitlePreparing() {
+    return R.plurals.preparing_to_copy_x_items_to_x;
+  }
 
-    @Override
-    protected String getTargetName(CopyTaskInfo value) {
-        return value.getDestinationName();
-    }
+  @Override protected int getTitleRunning() {
+    return R.plurals.copying_x_items_to_x;
+  }
 
-    @Override
-    protected int getTitlePreparing() {
-        return R.plurals.preparing_to_copy_x_items_to_x;
-    }
+  @Override protected int getTitleFailed() {
+    return R.plurals.fail_to_copy;
+  }
 
-    @Override
-    protected int getTitleRunning() {
-        return R.plurals.copying_x_items_to_x;
-    }
-
-    @Override
-    public int getSmallIcon() {
-        return R.drawable.ic_stat_notify_copy;
-    }
-
+  @Override public int getSmallIcon() {
+    return R.drawable.ic_stat_notify_copy;
+  }
 }

@@ -2,17 +2,19 @@ package l.files.operations;
 
 import android.os.Handler;
 
-import java.io.File;
-
 import de.greenrobot.event.EventBus;
 
-final class DeleteTask extends Task implements DeleteTaskInfo {
+import static l.files.operations.TaskKind.DELETE;
+
+final class DeleteTask extends Task {
 
   private final Size count;
   private final Delete delete;
 
-  DeleteTask(int id, EventBus bus, Handler handler, Iterable<String> paths) {
-    super(id, bus, handler);
+  DeleteTask(int id, Clock clock, EventBus bus, Handler handler,
+             Iterable<String> paths) {
+    super(TaskId.create(id, DELETE), Target.fromPaths(paths),
+        clock, bus, handler);
     this.count = new Size(paths);
     this.delete = new Delete(paths);
   }
@@ -22,28 +24,11 @@ final class DeleteTask extends Task implements DeleteTaskInfo {
     delete.execute();
   }
 
-  @Override public int getTotalItemCount() {
-    return count.getCount();
+  @Override protected TaskState.Running running(TaskState.Running state) {
+    return state.running(
+        Progress.normalize(count.getCount(), delete.getDeletedItemCount()),
+        Progress.normalize(count.getSize(), delete.getDeletedByteCount())
+    );
   }
 
-  @Override public long getTotalByteCount() {
-    return count.getSize();
-  }
-
-  @Override public int getProcessedItemCount() {
-    return delete.getDeletedItemCount();
-  }
-
-  @Override public long getProcessedByteCount() {
-    return delete.getDeletedByteCount();
-  }
-
-  @Override public String getSourceDirName() {
-    String path = (count.isDone() ? delete : count).getCurrentPath();
-    return new File(path).getParentFile().getName();
-  }
-
-  @Override public boolean isCleanup() {
-    return false;
-  }
 }

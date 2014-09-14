@@ -3,33 +3,27 @@ package l.files.operations;
 import android.os.Handler;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.transform;
+import static l.files.operations.TaskKind.MOVE;
 
-final class MoveTask extends Task implements MoveTaskInfo {
-
-  private final Collection<String> sources;
-  private final String dstPath;
+final class MoveTask extends Task {
 
   private final Move move;
-  private volatile Size count;
-  private volatile Copy copy;
-  private volatile boolean cleanup;
+  private final Size count;
+  private final Copy copy;
 
-  MoveTask(int id, EventBus bus, Handler handler,
+  MoveTask(int id, Clock clock, EventBus bus, Handler handler,
            Iterable<String> sources, String dstPath) {
-    super(id, bus, handler);
-    this.sources = ImmutableSet.copyOf(sources);
-    this.dstPath = checkNotNull(dstPath, "dstPath");
-    this.move = new Move(this.sources, dstPath);
+    super(TaskId.create(id, MOVE), Target.fromPaths(sources, dstPath),
+        clock, bus, handler);
+    this.move = new Move(sources, dstPath);
+    this.count = new Size(sources);
+    this.copy = new Copy(sources, dstPath);
   }
 
   @Override protected void doTask() throws FileException, InterruptedException {
@@ -37,8 +31,6 @@ final class MoveTask extends Task implements MoveTaskInfo {
       move.execute();
     } catch (FileException e) {
       copyThenDelete(e.failures());
-    } finally {
-      cleanup = false;
     }
   }
 
@@ -50,36 +42,15 @@ final class MoveTask extends Task implements MoveTaskInfo {
       }
     });
 
-    count = new Size(paths);
     count.execute();
-    copy = new Copy(paths, dstPath);
     copy.execute();
-
-    cleanup = true;
     new Delete(paths).execute();
   }
 
-  @Override public String getDestinationName() {
-    return new File(dstPath).getName();
-  }
-
-  @Override public boolean isCleanup() {
-    return cleanup;
-  }
-
-  @Override public int getTotalItemCount() {
-    return count != null ? count.getCount() : sources.size();
-  }
-
-  @Override public long getTotalByteCount() {
-    return count != null ? count.getSize() : 0;
-  }
-
-  @Override public int getProcessedItemCount() {
-    return copy != null ? copy.getCopiedItemCount() : move.getMovedItemCount();
-  }
-
-  @Override public long getProcessedByteCount() {
-    return copy != null ? copy.getCopiedByteCount() : 0;
+  @Override protected TaskState.Running running(TaskState.Running state) {
+    return state.running(
+        Progress.normalize(count.getCount(), copy.getCopiedItemCount()),
+        Progress.normalize(count.getSize(), copy.getCopiedByteCount())
+    );
   }
 }

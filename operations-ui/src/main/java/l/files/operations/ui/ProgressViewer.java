@@ -3,19 +3,21 @@ package l.files.operations.ui;
 import android.content.Context;
 
 import com.google.common.base.Optional;
+import com.google.common.primitives.Ints;
 
-import l.files.operations.ProgressInfo;
+import l.files.operations.Clock;
+import l.files.operations.Progress;
+import l.files.operations.TaskState;
 
 import static android.text.format.Formatter.formatFileSize;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.operations.TaskInfo.TaskStatus.PENDING;
 import static l.files.operations.ui.Formats.formatTimeRemaining;
 
 /**
- * Base viewer for decorating subclasses of {@link ProgressInfo}
+ * Base viewer for decorating subclasses of {@link TaskState}
  * to ensure notifications are displayed in a consistent way.
  */
-abstract class ProgressViewer<T extends ProgressInfo> implements NotificationViewer<T> {
+abstract class ProgressViewer implements TaskStateViewer {
 
   private final Context context;
   private final Clock clock;
@@ -25,100 +27,78 @@ abstract class ProgressViewer<T extends ProgressInfo> implements NotificationVie
     this.clock = checkNotNull(clock, "clock");
   }
 
-  @Override public final Optional<String> getContentTitle(T value) {
-    if (value.isCleanup()) {
-      return Optional.of(context.getString(R.string.cleaning_up));
-    }
-    switch (value.getTaskStatus()) {
-      case PENDING:
-        return Optional.of(context.getString(R.string.pending));
-      case RUNNING:
-        int template = getWorkDone(value) > 0 ? getTitleRunning() : getTitlePreparing();
-        return Optional.of(context.getResources().getQuantityString(template,
-            value.getTotalItemCount(),
-            value.getTotalItemCount(),
-            getTargetName(value)));
-      default:
-        return Optional.absent();
-    }
+  @Override public final String getContentTitle(TaskState.Pending state) {
+    return context.getString(R.string.pending);
   }
 
-  @Override public final Optional<String> getContentText(T value) {
-    if (value.isCleanup()) {
-      return Optional.absent();
+  @Override public final String getContentTitle(TaskState.Running state) {
+    if (state.items().isDone() || state.bytes().isDone()) {
+      return context.getString(R.string.cleaning_up);
     }
-    return getItemsRemaining(value);
+    int total = Ints.saturatedCast(state.items().total());
+    int template = getWork(state).processed() > 0
+        ? getTitleRunning() : getTitlePreparing();
+    return context.getResources().getQuantityString(template, total, total,
+        state.target().destination());
   }
 
-  private Optional<String> getItemsRemaining(T value) {
-    if (value.getTaskStatus() == PENDING) {
-      return Optional.absent();
-    }
-    int count = value.getTotalItemCount() - value.getProcessedItemCount();
-    long size = value.getTotalByteCount() - value.getProcessedByteCount();
+  @Override public String getContentTitle(TaskState.Failed state) {
+    return context.getResources()
+        .getQuantityString(getTitleFailed(), state.failures().size());
+  }
+
+  @Override public final String getContentText(TaskState.Running state) {
+    return getItemsRemaining(state);
+  }
+
+  private String getItemsRemaining(TaskState.Running state) {
+    long count = state.items().left();
+    long size = state.bytes().left();
     if (count == 0 || size == 0) {
-      return Optional.absent();
+      return "";
     }
-    return Optional.of(context.getString(R.string.remain_count_x_size_x,
-        count, formatFileSize(context, size)));
+    return context.getString(R.string.remain_count_x_size_x, count,
+        formatFileSize(context, size));
   }
 
-  @Override public final Optional<String> getContentInfo(T value) {
-    if (value.isCleanup()) {
-      return Optional.absent();
-    }
-    return getTimeRemaining(value);
+  @Override public final String getContentInfo(TaskState.Running state) {
+    return getTimeRemaining(state);
   }
 
-  private Optional<String> getTimeRemaining(T value) {
+  private String getTimeRemaining(TaskState.Running state) {
     Optional<String> formatted = formatTimeRemaining(
-        value.getElapsedRealtimeOnRun(),
-        clock.getElapsedRealTime(),
-        getWorkTotal(value),
-        getWorkDone(value));
+        state.time().tick(),
+        clock.tick(),
+        getWork(state).total(),
+        getWork(state).processed());
     if (formatted.isPresent()) {
-      return Optional.of(context.getString(R.string.x_countdown, formatted.get()));
+      return context.getString(R.string.x_countdown, formatted.get());
     }
-    return Optional.absent();
+    return "";
   }
 
-  @Override public final float getProgress(T value) {
-    if (value.isCleanup()) {
-      return -1;
-    }
-    return getWorkDone(value) / (float) getWorkTotal(value);
+  @Override public final float getProgress(TaskState.Running value) {
+    return getWork(value).processedPercentage();
   }
 
-  /**
-   * Gets the number of work unit in total.
-   * The returned value will be used in calculate the progress.
-   */
-  protected abstract long getWorkTotal(T value);
+  protected abstract Progress getWork(TaskState.Running state);
 
   /**
-   * Gets the number of work unit done so far.
-   * The returned value will be used to calculate the progress.
-   */
-  protected abstract long getWorkDone(T value);
-
-  /**
-   * Gets the target name to be placed into the title templates.
-   *
-   * @see #getTitlePreparing()
-   * @see #getTitleRunning()
-   */
-  protected abstract String getTargetName(T value);
-
-  /**
-   * Same template requirement as {@link #getTitleRunning()} but for the preparing state.
+   * Same template requirement as {@link #getTitleRunning()} but for the
+   * preparing state.
    */
   protected abstract int getTitlePreparing();
 
   /**
    * Gets the title template to display when the task is in the running state.
-   * The returned template must be a {@link R.plurals} template and have two place holders,
-   * the first one is for the number of items being processed, the other one is for
-   * {@link #getTargetName(ProgressInfo)}.
+   * The returned template must be a {@link R.plurals} template and have two
+   * place holders, the first one is for the number of items being processed,
+   * the other one is for {@link TaskState#target()}'s destination.
    */
   protected abstract int getTitleRunning();
+
+  /**
+   * Gets the plural title resource ID to use when the task fails.
+   */
+  protected abstract int getTitleFailed();
 }

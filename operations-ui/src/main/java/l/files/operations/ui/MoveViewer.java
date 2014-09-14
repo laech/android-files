@@ -2,24 +2,18 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.operations.MoveTaskInfo;
+import l.files.operations.Clock;
+import l.files.operations.Progress;
+import l.files.operations.TaskState;
 
-final class MoveViewer extends ProgressViewer<MoveTaskInfo> {
+final class MoveViewer extends ProgressViewer {
 
   MoveViewer(Context context, Clock system) {
     super(context, system);
   }
 
-  @Override protected long getWorkTotal(MoveTaskInfo value) {
-    return value.getTotalByteCount();
-  }
-
-  @Override protected long getWorkDone(MoveTaskInfo value) {
-    return value.getProcessedByteCount();
-  }
-
-  @Override protected String getTargetName(MoveTaskInfo value) {
-    return value.getDestinationName();
+  @Override protected Progress getWork(TaskState.Running state) {
+    return state.bytes();
   }
 
   @Override protected int getTitlePreparing() {
@@ -30,7 +24,12 @@ final class MoveViewer extends ProgressViewer<MoveTaskInfo> {
     return R.plurals.moving_x_items_to_x;
   }
 
+  @Override protected int getTitleFailed() {
+    return R.plurals.fail_to_move;
+  }
+
   @Override public int getSmallIcon() {
     return R.drawable.ic_stat_notify_cut;
   }
+
 }

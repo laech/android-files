@@ -1,4 +1,5 @@
 include ':eventbus'
+include ':eventbus-annotation'
 include ':files-analytics'
 include ':files-app'
 include ':files-common'

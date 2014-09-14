@@ -27,8 +27,8 @@
     <item quantity="other">Copying %1$,d items to %2$s</item>
   </plurals>
   <plurals name="moving_x_items_to_x">
-    <item quantity="one">Moving %1$,d item to \"%2$s\"</item>
-    <item quantity="other">Moving %1$,d items to \"%2$s\"</item>
+    <item quantity="one">Moving %1$,d item to %2$s</item>
+    <item quantity="other">Moving %1$,d items to %2$s</item>
   </plurals>
 
   <string name="cleaning_up">Cleaning up</string>

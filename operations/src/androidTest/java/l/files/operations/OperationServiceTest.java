@@ -13,13 +13,17 @@ import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
 
 import static com.google.common.collect.Collections2.transform;
+import static com.google.common.truth.Truth.ASSERT;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.util.concurrent.CountDownSubject.countDown;
 import static l.files.operations.OperationService.copy;
 import static l.files.operations.OperationService.delete;
 import static l.files.operations.OperationService.move;
-import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
+import static l.files.operations.TaskKind.COPY;
+import static l.files.operations.TaskKind.DELETE;
+import static l.files.operations.TaskKind.MOVE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class OperationServiceTest extends FileBaseTest {
@@ -27,7 +31,7 @@ public final class OperationServiceTest extends FileBaseTest {
   public void testMovesFile() throws Exception {
     File src = tmp().createFile("a");
     File dst = tmp().createDir("dst");
-    CountDownListener listener = register(new CountDownListener(MoveTaskInfo.class));
+    CountDownListener listener = register(new CountDownListener(MOVE));
     try {
 
       move(getContext(), asList(src.getPath()), dst.getPath());
@@ -43,7 +47,7 @@ public final class OperationServiceTest extends FileBaseTest {
   public void testCopiesFile() throws Exception {
     File src = tmp().createFile("a");
     File dst = tmp().createDir("dst");
-    CountDownListener listener = register(new CountDownListener(CopyTaskInfo.class));
+    CountDownListener listener = register(new CountDownListener(COPY));
     try {
 
       copy(getContext(), asList(src.getPath()), dst.getPath());
@@ -59,7 +63,7 @@ public final class OperationServiceTest extends FileBaseTest {
   public void testDeletesFiles() throws Exception {
     File a = tmp().createFile("a");
     File b = tmp().createFile("b/c");
-    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class));
+    CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 
       delete(getContext(), a.getPath(), b.getPath());
@@ -73,7 +77,7 @@ public final class OperationServiceTest extends FileBaseTest {
   }
 
   public void testTaskIdIsUnique() throws Exception {
-    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class, 2));
+    CountDownListener listener = register(new CountDownListener(DELETE, 2));
     try {
 
       delete(getContext(), tmp().createFile("a").getPath());
@@ -87,10 +91,10 @@ public final class OperationServiceTest extends FileBaseTest {
     }
   }
 
-  private Set<Integer> getTaskIds(List<? extends TaskInfo> values) {
-    return new HashSet<>(transform(values, new Function<TaskInfo, Integer>() {
-          @Override public Integer apply(TaskInfo task) {
-            return task.getTaskId();
+  private Set<Integer> getTaskIds(List<? extends TaskState> values) {
+    return new HashSet<>(transform(values, new Function<TaskState, Integer>() {
+          @Override public Integer apply(TaskState state) {
+            return state.task().id();
           }
         }
     ));
@@ -99,7 +103,7 @@ public final class OperationServiceTest extends FileBaseTest {
   public void testTaskStartTimeIsCorrect() throws Exception {
     String path1 = tmp().createFile("a").getPath();
     String path2 = tmp().createFile("b").getPath();
-    CountDownListener listener = register(new CountDownListener(DeleteTaskInfo.class));
+    CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 
       long start = currentTimeMillis();
@@ -110,7 +114,6 @@ public final class OperationServiceTest extends FileBaseTest {
       long end = currentTimeMillis();
 
       Set<Long> times = getTaskStartTimes(listener.getValues());
-      assertThat(times).hasSize(1);
       assertThat(times.iterator().next()).isGreaterThanOrEqualTo(start);
       assertThat(times.iterator().next()).isLessThanOrEqualTo(end);
 
@@ -119,10 +122,10 @@ public final class OperationServiceTest extends FileBaseTest {
     }
   }
 
-  private Set<Long> getTaskStartTimes(List<? extends TaskInfo> values) {
-    return new HashSet<>(transform(values, new Function<TaskInfo, Long>() {
-          @Override public Long apply(TaskInfo value) {
-            return value.getTaskStartTime();
+  private Set<Long> getTaskStartTimes(List<? extends TaskState> values) {
+    return new HashSet<>(transform(values, new Function<TaskState, Long>() {
+          @Override public Long apply(TaskState value) {
+            return value.time().time();
           }
         }
     ));
@@ -139,35 +142,32 @@ public final class OperationServiceTest extends FileBaseTest {
 
   private static class CountDownListener {
     private final CountDownLatch latch;
-    private final Class<ProgressInfo> clazz;
-    private final List<ProgressInfo> values;
+    private final TaskKind kind;
+    private final List<TaskState> values;
 
-    private CountDownListener(Class<? extends ProgressInfo> clazz) {
-      this(clazz, 1);
+    private CountDownListener(TaskKind kind) {
+      this(kind, 1);
     }
 
-    @SuppressWarnings("unchecked")
-    private CountDownListener(Class<? extends ProgressInfo> clazz, int countDowns) {
+    private CountDownListener(TaskKind kind, int countDowns) {
       this.latch = new CountDownLatch(countDowns);
       this.values = new ArrayList<>(countDowns);
-      this.clazz = (Class<ProgressInfo>) clazz;
+      this.kind = kind;
     }
 
-    @Subscribe public void onEvent(ProgressInfo value) {
-      values.add(value);
-      assertThat(value).isInstanceOf(clazz);
-      if (value.getTaskStatus() == FINISHED) {
-        assertEquals(value.getTotalItemCount(), value.getProcessedItemCount());
-        assertEquals(value.getTotalByteCount(), value.getProcessedByteCount());
+    @Subscribe public void onEvent(TaskState state) {
+      values.add(state);
+      ASSERT.that(state.task().kind()).is(kind);
+      if (state.isFinished()) {
         latch.countDown();
       }
     }
 
     public void await() throws InterruptedException {
-      assertTrue(latch.await(1, SECONDS));
+      ASSERT.about(countDown()).that(latch).await(1, SECONDS);
     }
 
-    public List<ProgressInfo> getValues() {
+    public List<TaskState> getValues() {
       return values;
     }
   }

@@ -3,14 +3,21 @@ package l.files.operations.ui;
 import android.content.Context;
 import android.content.res.Resources;
 
-import java.lang.reflect.ParameterizedType;
+import java.io.IOException;
 
 import l.files.common.testing.BaseTest;
-import l.files.operations.ProgressInfo;
+import l.files.operations.Clock;
+import l.files.operations.Failure;
+import l.files.operations.Progress;
+import l.files.operations.Target;
+import l.files.operations.TaskId;
+import l.files.operations.TaskState;
+import l.files.operations.Time;
 
 import static android.text.format.Formatter.formatFileSize;
-import static l.files.operations.TaskInfo.TaskStatus.PENDING;
-import static l.files.operations.TaskInfo.TaskStatus.RUNNING;
+import static com.google.common.truth.Truth.ASSERT;
+import static java.util.Arrays.asList;
+import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.ui.Formats.formatTimeRemaining;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -18,32 +25,25 @@ import static org.mockito.Mockito.mock;
 /**
  * Base test class for subclasses of {@link ProgressViewer}.
  */
-public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTest {
+public abstract class ProgressViewerTest extends BaseTest {
 
-  private T info;
   private Clock clock;
   private Resources res;
-  private ProgressViewer<T> viewer;
+  private ProgressViewer viewer;
+  private TaskState.Pending pending;
+  private TaskState.Running running;
 
   /**
    * Creates an instance of {@link ProgressViewer} to be tested.
    */
-  protected abstract ProgressViewer<T> create(Context context, Clock clock);
+  protected abstract ProgressViewer create(Context context, Clock clock);
 
   /**
-   * Mocks {@link ProgressViewer#getWorkTotal(ProgressInfo)} to return the given value.
+   * Sets {@link ProgressViewer#getProgress(TaskState.Running)} to return the
+   * given value.
    */
-  protected abstract void mockWorkTotal(T mock, int value);
-
-  /**
-   * Mocks {@link ProgressViewer#getWorkDone(ProgressInfo)} to return the given value.
-   */
-  protected abstract void mockWorkDone(T mock, int value);
-
-  /**
-   * Mocks {@link ProgressViewer#getTargetName(ProgressInfo)} to return the given value.
-   */
-  protected abstract void mockTargetName(T mock, String value);
+  protected abstract TaskState.Running setProgress(
+      TaskState.Running state, Progress progress);
 
   /**
    * Returns the expected value for {@link ProgressViewer#getTitlePreparing()}.
@@ -56,6 +56,11 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
   protected abstract int getTitleRunning();
 
   /**
+   * Returns the expected value for {@link ProgressViewer#getTitleFailed()}.
+   */
+  protected abstract int getTitleFailed();
+
+  /**
    * Returns the expected value for {@link ProgressViewer#getSmallIcon()}.
    */
   protected abstract int getSmallIcon();
@@ -63,121 +68,105 @@ public abstract class ProgressViewerTest<T extends ProgressInfo> extends BaseTes
   @Override protected void setUp() throws Exception {
     super.setUp();
     res = getContext().getResources();
-    info = mock(getInfoClass());
     clock = mock(Clock.class);
     viewer = create(getContext(), clock);
-  }
-
-  @SuppressWarnings("unchecked")
-  private Class<T> getInfoClass() {
-    ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
-    return (Class<T>) superclass.getActualTypeArguments()[0];
+    pending = TaskState.pending(
+        TaskId.create(1, COPY),
+        Target.create("src", "dst"),
+        Time.create(1, 1)
+    );
+    running = pending.running(
+        Time.create(2, 2),
+        Progress.create(1, 0),
+        Progress.create(1, 0)
+    );
   }
 
   public void testGetSmallIcon() throws Exception {
     assertEquals(getSmallIcon(), viewer.getSmallIcon());
   }
 
-  public void testGetContentTitle_PENDING() throws Exception {
-    given(info.getTaskStatus()).willReturn(PENDING);
-    assertEquals(res.getString(R.string.pending), viewer.getContentTitle(info).get());
+  public void testGetContentTitle_Pending() throws Exception {
+    ASSERT.that(viewer.getContentTitle(pending))
+        .is(res.getString(R.string.pending));
   }
 
-  public void testGetContentTitle_RUNNING_preparing() throws Exception {
-    given(info.getTaskStatus()).willReturn(RUNNING);
-    given(info.getTotalItemCount()).willReturn(1);
-    mockWorkDone(info, 0);
-    mockTargetName(info, "hello");
-    assertEquals(res.getQuantityString(getTitlePreparing(), 1, 1, "hello"),
-        viewer.getContentTitle(info).get());
+  public void testGetContentTitle_Failed() throws Exception {
+    TaskState.Failed state = running.failed(Time.create(2, 2), asList(
+        Failure.create("a", new IOException("1")),
+        Failure.create("b", new IOException("2"))
+    ));
+    ASSERT.that(viewer.getContentTitle(state))
+        .is(res.getQuantityString(getTitleFailed(), 2));
   }
 
-  public void testGetContentTitle_RUNNING_copying() throws Exception {
-    given(info.getTaskStatus()).willReturn(RUNNING);
-    given(info.getTotalItemCount()).willReturn(100);
-    mockWorkDone(info, 1);
-    mockTargetName(info, "hello");
-    assertEquals(res.getQuantityString(getTitleRunning(), 100, 100, "hello"),
-        viewer.getContentTitle(info).get());
+  public void testGetContentTitle_Running_preparing() throws Exception {
+    TaskState.Running state = setProgress(running, Progress.create(1, 0));
+    state = state.running(
+        Progress.create(100, 0),
+        state.bytes()
+    );
+    ASSERT.that(viewer.getContentTitle(state)).is(res.getQuantityString(
+        getTitlePreparing(), 100, 100, state.target().destination()));
+  }
+
+  public void testGetContentTitle_Running_working() throws Exception {
+    TaskState.Running state = setProgress(running, Progress.create(2, 1));
+    state = state.running(
+        Progress.create(100, 1),
+        state.bytes()
+    );
+
+    ASSERT.that(viewer.getContentTitle(state)).is(res.getQuantityString(
+        getTitleRunning(), 100, 100, state.target().destination()));
   }
 
   public void testGetContentTitle_cleanup() throws Exception {
-    given(info.isCleanup()).willReturn(true);
-    assertEquals(res.getString(R.string.cleaning_up), viewer.getContentTitle(info).get());
+    TaskState.Running state = running.running(
+        Progress.create(1, 1),
+        Progress.create(1, 1)
+    );
+    ASSERT.that(viewer.getContentTitle(state))
+        .is(res.getString(R.string.cleaning_up));
   }
 
   public void testGetProgress() throws Exception {
-    mockWorkTotal(info, 100);
-    mockWorkDone(info, 1);
-    assertEquals(1 / (float) 100, viewer.getProgress(info));
-  }
-
-  public void testGetProgress_cleanup() throws Exception {
-    given(info.isCleanup()).willReturn(true);
-    mockWorkTotal(info, 100);
-    mockWorkDone(info, 1);
-    assertEquals(-1F, viewer.getProgress(info));
-  }
-
-  public void testGetContentText_PENDING_showNothing() throws Exception {
-    given(info.getTaskStatus()).willReturn(PENDING);
-    assertFalse(viewer.getContentText(info).isPresent());
+    TaskState.Running state = setProgress(running, Progress.create(100, 1));
+    ASSERT.that(viewer.getProgress(state)).is(1 / (float) 100);
   }
 
   public void testGetContentText_RUNNING_showRemaining() throws Exception {
-    given(info.getTaskStatus()).willReturn(RUNNING);
-    given(info.getProcessedByteCount()).willReturn(2L);
-    given(info.getTotalByteCount()).willReturn(20L);
-    given(info.getProcessedItemCount()).willReturn(1);
-    given(info.getTotalItemCount()).willReturn(10);
-    assertEquals(res.getString(
-            R.string.remain_count_x_size_x, 10 - 1, formatFileSize(getContext(), 20 - 2)),
-        viewer.getContentText(info).get());
+    TaskState.Running state = running.running(
+        Progress.create(10, 1),
+        Progress.create(20, 2)
+    );
+    ASSERT.that(viewer.getContentText(state))
+        .is(res.getString(R.string.remain_count_x_size_x,
+            10 - 1, formatFileSize(getContext(), 20 - 2)));
   }
 
   public void testGetContentText_noWorkDoneYet_showNothing() throws Exception {
-    given(info.getTaskStatus()).willReturn(RUNNING);
-    given(info.getTotalByteCount()).willReturn(0L);
-    given(info.getTotalItemCount()).willReturn(0);
-    given(info.getProcessedByteCount()).willReturn(0L);
-    given(info.getProcessedItemCount()).willReturn(0);
-    assertFalse(viewer.getContentText(info).isPresent());
-  }
-
-  public void testGetContentText_cleanUp_showNothing() throws Exception {
-    given(info.isCleanup()).willReturn(true);
-    given(info.getTaskStatus()).willReturn(RUNNING);
-    given(info.getTotalByteCount()).willReturn(20L);
-    given(info.getTotalItemCount()).willReturn(10);
-    given(info.getProcessedItemCount()).willReturn(1);
-    given(info.getProcessedByteCount()).willReturn(2L);
-    assertFalse(viewer.getContentText(info).isPresent());
+    TaskState.Running state = running.running(
+        Progress.none(),
+        Progress.none()
+    );
+    ASSERT.that(viewer.getContentText(state)).is("");
   }
 
   public void testGetContentInfo_showTimeRemaining() throws Exception {
-    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
-    given(clock.getElapsedRealTime()).willReturn(1000L);
-    mockWorkTotal(info, 10000);
-    mockWorkDone(info, 10);
-    assertEquals(res.getString(R.string.x_countdown,
-            formatTimeRemaining(0, 1000, 10000, 10).get()),
-        viewer.getContentInfo(info).get());
+    TaskState.Running state = pending.running(Time.create(0, 0));
+    state = setProgress(state, Progress.create(10000, 10));
+    given(clock.tick()).willReturn(1000L);
+    ASSERT.that(viewer.getContentInfo(state)).is(
+        res.getString(R.string.x_countdown,
+            formatTimeRemaining(0, 1000, 10000, 10).get()));
   }
 
   public void testGetContentInfo_noWorkDoneYet_showNothing() throws Exception {
-    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
-    given(clock.getElapsedRealTime()).willReturn(1000L);
-    mockWorkTotal(info, 0);
-    mockWorkDone(info, 0);
-    assertFalse(viewer.getContentInfo(info).isPresent());
+    TaskState.Running state = pending.running(Time.create(0, 0));
+    state = setProgress(state, Progress.create(1, 0));
+    given(clock.tick()).willReturn(1000L);
+    ASSERT.that(viewer.getContentInfo(state)).is("");
   }
 
-  public void testGetContentInfo_cleanUp_showEmpty() throws Exception {
-    given(info.isCleanup()).willReturn(true);
-    given(info.getElapsedRealtimeOnRun()).willReturn(0L);
-    given(clock.getElapsedRealTime()).willReturn(1000L);
-    mockWorkTotal(info, 10000);
-    mockWorkDone(info, 10);
-    assertFalse(viewer.getContentInfo(info).isPresent());
-  }
 }

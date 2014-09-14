@@ -2,44 +2,34 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.operations.CopyTaskInfo;
+import l.files.operations.Clock;
+import l.files.operations.Progress;
+import l.files.operations.TaskState;
 
-import static org.mockito.BDDMockito.given;
+public final class CopyViewerTest extends ProgressViewerTest {
 
-public final class CopyViewerTest extends ProgressViewerTest<CopyTaskInfo> {
+  @Override protected CopyViewer create(Context context, Clock clock) {
+    return new CopyViewer(context, clock);
+  }
 
-    @Override
-    protected CopyViewer create(Context context, Clock clock) {
-        return new CopyViewer(context, clock);
-    }
+  @Override protected TaskState.Running setProgress(
+      TaskState.Running state, Progress progress) {
+    return state.running(state.items(), progress);
+  }
 
-    @Override
-    protected void mockWorkTotal(CopyTaskInfo mock, int value) {
-        given(mock.getTotalByteCount()).willReturn((long) value);
-    }
+  @Override protected int getTitlePreparing() {
+    return R.plurals.preparing_to_copy_x_items_to_x;
+  }
 
-    @Override
-    protected void mockWorkDone(CopyTaskInfo mock, int value) {
-        given(mock.getProcessedByteCount()).willReturn((long) value);
-    }
+  @Override protected int getTitleRunning() {
+    return R.plurals.copying_x_items_to_x;
+  }
 
-    @Override
-    protected void mockTargetName(CopyTaskInfo mock, String value) {
-        given(mock.getDestinationName()).willReturn(value);
-    }
+  @Override protected int getTitleFailed() {
+    return R.plurals.fail_to_copy;
+  }
 
-    @Override
-    protected int getTitlePreparing() {
-        return R.plurals.preparing_to_copy_x_items_to_x;
-    }
-
-    @Override
-    protected int getTitleRunning() {
-        return R.plurals.copying_x_items_to_x;
-    }
-
-    @Override
-    protected int getSmallIcon() {
-        return R.drawable.ic_stat_notify_copy;
-    }
+  @Override protected int getSmallIcon() {
+    return R.drawable.ic_stat_notify_copy;
+  }
 }

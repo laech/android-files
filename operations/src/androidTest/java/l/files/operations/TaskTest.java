@@ -2,17 +2,24 @@ package l.files.operations;
 
 import android.os.Handler;
 
-import java.util.concurrent.CountDownLatch;
+import org.mockito.ArgumentCaptor;
+
+import java.io.IOException;
+import java.util.concurrent.Future;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
+import l.files.eventbus.Events;
 import l.files.eventbus.Subscribe;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.operations.TaskInfo.TaskStatus;
-import static l.files.operations.TaskInfo.TaskStatus.FINISHED;
-import static l.files.operations.TaskInfo.TaskStatus.PENDING;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService;
+import static java.util.Arrays.asList;
+import static l.files.operations.TaskKind.COPY;
+import static l.files.operations.TaskKind.MOVE;
+import static l.files.operations.testing.TaskStateSubject.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 public class TaskTest extends BaseTest {
 
@@ -21,67 +28,92 @@ public class TaskTest extends BaseTest {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    bus = new EventBus();
+    bus = Events.failFast(new EventBus());
     handler = new Handler();
   }
 
-  public void testDoInBackgroundReturnsEmptyFailuresOnSuccess() {
-    Task task = create(0, bus, handler);
-    task.run();
-    assertThat(task.getFailures()).isNotNull().isEmpty();
+  public void testNotifiesOnCancel() throws Exception {
+    ArgumentCaptor<TaskState> captor = capturedExecute(new Command() {
+      @Override public void execute() throws InterruptedException {
+        throw new InterruptedException("Test");
+      }
+    });
+    assertThat(captor.getValue()).isSuccess();
   }
 
-  public void testEmptyFailuresOnError() throws Exception {
-    class TestException extends RuntimeException {}
-    Task task = new Task(0, bus, handler) {
-      @Override protected void doTask() {
-        throw new TestException();
+  public void testNotifiesOnFailure() throws Throwable {
+    ArgumentCaptor<TaskState> captor = capturedExecute(new Command() {
+      @Override public void execute() throws FileException {
+        throw new FileException(asList(
+            Failure.create("a", new IOException("Test"))));
       }
-    };
-    try {
-      task.run();
-    } catch (TestException e) {
-      // Ignored
-    }
-    assertThat(task.getFailures()).isNotNull().isEmpty();
+    });
+    assertThat(captor.getValue()).isFailure();
   }
 
   public void testNotifiesOnStart() throws Exception {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final TaskStatus[] status = {null};
-    bus.register(new Object() {
-      @Subscribe public void onEvent(TaskInfo info) {
-        if (status[0] == null) {
-          status[0] = info.getTaskStatus();
-        }
-        latch.countDown();
-      }
-    });
-    create(0, bus, handler).run();
-    latch.await(1, SECONDS);
-    assertThat(status).containsExactly(PENDING);
+    ArgumentCaptor<TaskState> captor = capturedExecute();
+    assertThat(captor.getAllValues().get(0)).isPending();
   }
 
-  public void testNotifiesOnEnd() throws Exception {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final TaskStatus[] status = {null};
-    bus.register(new Object() {
-      @Subscribe public void onEvent(TaskInfo info) {
-        if (info.getTaskStatus() == FINISHED) {
-          status[0] = info.getTaskStatus();
-          latch.countDown();
-        }
-      }
-    });
-    create(0, bus, handler).run();
-    latch.await(1, SECONDS);
-    assertThat(status).containsExactly(FINISHED);
+  public void testNotifiesOnSuccess() throws Exception {
+    ArgumentCaptor<TaskState> captor = capturedExecute();
+    assertThat(captor.getValue()).isSuccess();
   }
 
-  protected Task create(int id, EventBus bus, Handler handler) {
-    return new Task(id, bus, handler) {
+  private ArgumentCaptor<TaskState> capturedExecute() {
+    return capturedExecute(new Command() {
+      @Override public void execute() {}
+    });
+  }
+
+  private ArgumentCaptor<TaskState> capturedExecute(final Command command) {
+    Listener listener = mock(Listener.class);
+    bus.register(listener);
+    new TestTask(bus, handler) {
+      @Override
+      protected void doTask() throws FileException, InterruptedException {
+        command.execute();
+      }
+    }.execute();
+    ArgumentCaptor<TaskState> captor = listener.captor();
+    verify(listener, timeout(1000).atLeast(1)).onEvent(captor.capture());
+    return captor;
+  }
+
+  protected Task create(int id, Clock clock, EventBus bus, Handler handler) {
+    return new Task(TaskId.create(id, MOVE), Target.none(), clock, bus, handler) {
       @Override protected void doTask() {}
+
+      @Override protected TaskState.Running running(TaskState.Running state) {
+        return state;
+      }
     };
   }
 
+  private static abstract class TestTask extends Task {
+    TestTask(EventBus bus, Handler handler) {
+      super(TaskId.create(0, COPY), Target.none(), Clock.system(), bus, handler);
+    }
+
+    @Override protected TaskState.Running running(TaskState.Running state) {
+      return state;
+    }
+
+    Future<?> execute() {
+      return execute(newDirectExecutorService());
+    }
+  }
+
+  private static interface Command {
+    void execute() throws InterruptedException, FileException;
+  }
+
+  public static abstract class Listener {
+    @Subscribe public abstract void onEvent(TaskState state);
+
+    final ArgumentCaptor<TaskState> captor() {
+      return ArgumentCaptor.forClass(TaskState.class);
+    }
+  }
 }

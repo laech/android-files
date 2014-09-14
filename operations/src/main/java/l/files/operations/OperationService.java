@@ -96,9 +96,9 @@ public final class OperationService extends Service {
   }
 
   @Subscribe(MainThread)
-  public void onEventMainThread(TaskInfo task) {
-    if (task.getTaskStatus() == TaskInfo.TaskStatus.FINISHED) {
-      tasks.remove(task.getTaskId());
+  public void onEventMainThread(TaskState state) {
+    if (state.isFinished()) {
+      tasks.remove(state.task().id());
       if (tasks.isEmpty()) {
         stopSelf();
       }
@@ -124,7 +124,7 @@ public final class OperationService extends Service {
       data.putExtra(EXTRA_TASK_ID, startId);
 
       Task task = newTask(data, startId, bus, handler);
-      tasks.put(startId, executor.submit(task));
+      tasks.put(startId, task.execute(executor));
     }
     return START_STICKY;
   }
@@ -151,7 +151,7 @@ public final class OperationService extends Service {
       @Override
       Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
-        return new DeleteTask(startId, bus, handler, paths);
+        return new DeleteTask(startId, Clock.system(), bus, handler, paths);
       }
     },
 
@@ -160,7 +160,7 @@ public final class OperationService extends Service {
       Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new CopyTask(startId, bus, handler, srcPaths, dstPath);
+        return new CopyTask(startId, Clock.system(), bus, handler, srcPaths, dstPath);
       }
     },
 
@@ -169,7 +169,7 @@ public final class OperationService extends Service {
       Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new MoveTask(startId, bus, handler, srcPaths, dstPath);
+        return new MoveTask(startId, Clock.system(), bus, handler, srcPaths, dstPath);
       }
     };
 
