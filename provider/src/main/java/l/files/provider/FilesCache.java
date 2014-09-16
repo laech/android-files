@@ -151,7 +151,7 @@ final class FilesCache implements
     try {
       data.put(path, FileInfo.get(path.toString()));
     } catch (IOException e) {
-      logger.warn(e);
+      logger.warn(e, "Failed to get info %s", path);
       remove(path);
     }
   }

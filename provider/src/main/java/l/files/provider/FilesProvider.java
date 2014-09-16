@@ -290,7 +290,7 @@ public final class FilesProvider extends ContentProvider {
       try {
         stats.add(FileInfo.get(file.getPath()));
       } catch (IOException e) {
-        logger.warn(e);
+        logger.warn(e, "Failed to get info %s", file);
       }
     }
     return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileInfo[stats.size()]));
