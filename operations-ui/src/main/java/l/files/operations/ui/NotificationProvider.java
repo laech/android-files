@@ -61,13 +61,17 @@ final class NotificationProvider {
   }
 
   @Subscribe public void onEvent(TaskState.Failed state) {
-    if (state.failures().isEmpty()) {
-      // Failure caused by some other errors, let other process handle that
-      // error, remove the notification
-      manager.cancel(state.task().id());
-    } else {
-      manager.notify(state.task().id(), newFailureNotification(state));
+    manager.cancel(state.task().id());
+    if (!state.failures().isEmpty()) {
+      // This is the last notification we will display for this task, and it
+      // needs to stay until the user dismissed it, can't use the task ID as
+      // the notification as when the service finishes, it will bring down the
+      // startForeground notification with it.
+      int id = Integer.MAX_VALUE - state.task().id();
+      manager.notify(id, newFailureNotification(state));
     }
+    // If no file failures in collection, then failure is caused by some other
+    // errors, let other process handle that error, remove the notification
   }
 
   @Subscribe public void onEvent(TaskState.Success state) {

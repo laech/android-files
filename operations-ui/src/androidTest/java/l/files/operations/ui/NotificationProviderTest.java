@@ -69,8 +69,9 @@ public final class NotificationProviderTest extends BaseTest {
   public void testNotifyOnFailure() throws Exception {
     bus.post(base.running(Time.create(1, 1)).failed(Time.create(2, 2),
         asList(Failure.create("p", new IOException("test")))));
-    verify(manager, timeout(1000))
-        .notify(eq(base.task().id()), notNull(Notification.class));
+    // See comment in class under test for this ID
+    int id = Integer.MAX_VALUE - base.task().id();
+    verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
   }
 
   public void testRemoveNotificationOnUnknownError() throws Exception {

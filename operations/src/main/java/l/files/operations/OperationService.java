@@ -125,8 +125,14 @@ public final class OperationService extends Service {
     Intent data = new Intent(intent);
     data.putExtra(EXTRA_TASK_ID, startId);
 
+    // A dummy notification so that the service can use startForeground, making
+    // it less likely to be destroy, the notification will be replaced with ones
+    // from operations-ui
     startForeground(startId, new Notification.Builder(this)
-        .setSmallIcon(R.drawable.ic_launcher).build());
+        .setSmallIcon(R.drawable.ic_launcher)
+        .setAutoCancel(true)
+        .build());
+
     Task task = newTask(data, startId, bus, handler);
     tasks.put(startId, task.execute(executor));
   }
