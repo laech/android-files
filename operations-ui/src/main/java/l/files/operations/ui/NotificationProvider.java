@@ -61,7 +61,13 @@ final class NotificationProvider {
   }
 
   @Subscribe public void onEvent(TaskState.Failed state) {
-    manager.notify(state.task().id(), newFailureNotification(state));
+    if (state.failures().isEmpty()) {
+      // Failure caused by some other errors, let other process handle that
+      // error, remove the notification
+      manager.cancel(state.task().id());
+    } else {
+      manager.notify(state.task().id(), newFailureNotification(state));
+    }
   }
 
   @Subscribe public void onEvent(TaskState.Success state) {

@@ -1,19 +1,14 @@
 package l.files.operations;
 
-import android.content.Intent;
-
 import com.google.common.base.Function;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 
-import de.greenrobot.event.EventBus;
 import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
 
@@ -23,8 +18,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.util.concurrent.CountDownSubject.countDown;
-import static l.files.operations.OperationService.CancellationReceiver;
-import static l.files.operations.OperationService.EXTRA_TASK_ID;
 import static l.files.operations.OperationService.copy;
 import static l.files.operations.OperationService.delete;
 import static l.files.operations.OperationService.move;
@@ -34,22 +27,6 @@ import static l.files.operations.TaskKind.MOVE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class OperationServiceTest extends FileBaseTest {
-
-  public void testTaskNotFoundOnCancel() throws Exception {
-    final TaskNotFound[] event = {null};
-    final Object listener = new Object() {
-      @Subscribe public void onEvent(TaskNotFound e) {
-        event[0] = e;
-      }
-    };
-    EventBus bus = new EventBus();
-    bus.register(listener);
-    CancellationReceiver receiver = new CancellationReceiver(
-        bus, Collections.<Integer, Future<?>>emptyMap());
-    receiver.onReceive(getContext(), new Intent().putExtra(EXTRA_TASK_ID, 101));
-    ASSERT.that(event[0]).isNotNull();
-    ASSERT.that(event[0].id()).is(101);
-  }
 
   public void testMovesFile() throws Exception {
     File src = tmp().createFile("a");

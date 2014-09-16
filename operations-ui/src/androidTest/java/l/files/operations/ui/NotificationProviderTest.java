@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
@@ -70,6 +71,12 @@ public final class NotificationProviderTest extends BaseTest {
         asList(Failure.create("p", new IOException("test")))));
     verify(manager, timeout(1000))
         .notify(eq(base.task().id()), notNull(Notification.class));
+  }
+
+  public void testRemoveNotificationOnUnknownError() throws Exception {
+    bus.post(base.running(Time.create(1, 1)).failed(Time.create(2, 2),
+        Collections.<Failure>emptyList()));
+    verify(manager, timeout(1000)).cancel(base.task().id());
   }
 
   public void testCreateFailureIntentWithCorrectFailureData() throws Exception {

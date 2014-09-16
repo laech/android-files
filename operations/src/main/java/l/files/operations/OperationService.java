@@ -1,11 +1,10 @@
 package l.files.operations;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 
@@ -19,7 +18,7 @@ import de.greenrobot.event.EventBus;
 import l.files.eventbus.Subscribe;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.app.PendingIntent.getBroadcast;
+import static android.app.PendingIntent.getService;
 import static com.google.common.collect.Lists.newArrayList;
 import static de.greenrobot.event.ThreadMode.MainThread;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -42,10 +41,9 @@ public final class OperationService extends Service {
 
   private static final ExecutorService executor = newFixedThreadPool(5);
 
-  private EventBus bus;
+  EventBus bus;
   private Handler handler;
   private Map<Integer, Future<?>> tasks;
-  private CancellationReceiver cancellationReceiver;
 
   public static void delete(Context context, String... paths) {
     context.startService(
@@ -55,15 +53,18 @@ public final class OperationService extends Service {
     );
   }
 
-  public static void copy(Context context, Iterable<String> srcPaths, String dstPath) {
+  public static void copy(
+      Context context, Iterable<String> srcPaths, String dstPath) {
     paste(COPY.action(), context, srcPaths, dstPath);
   }
 
-  public static void move(Context context, Iterable<String> srcPaths, String dstPath) {
+  public static void move(
+      Context context, Iterable<String> srcPaths, String dstPath) {
     paste(MOVE.action(), context, srcPaths, dstPath);
   }
 
-  private static void paste(String action, Context context, Iterable<String> srcPaths, String dstPath) {
+  private static void paste(String action, Context context,
+                            Iterable<String> srcPaths, String dstPath) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(action)
@@ -78,7 +79,7 @@ public final class OperationService extends Service {
   public static PendingIntent newCancelIntent(Context context, int taskId) {
     // Don't set class name as that causes pending intent to not work
     Intent intent = new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
-    return getBroadcast(context, taskId, intent, FLAG_UPDATE_CURRENT);
+    return getService(context, taskId, intent, FLAG_UPDATE_CURRENT);
   }
 
   @Override public IBinder onBind(Intent intent) {
@@ -90,8 +91,6 @@ public final class OperationService extends Service {
     bus = Events.get();
     tasks = new HashMap<>();
     handler = new Handler();
-    cancellationReceiver = new CancellationReceiver(bus, tasks);
-    registerCancellationReceiver();
     bus.register(this);
   }
 
@@ -105,53 +104,49 @@ public final class OperationService extends Service {
     }
   }
 
-  private void registerCancellationReceiver() {
-    IntentFilter filter = new IntentFilter(ACTION_CANCEL);
-    registerReceiver(cancellationReceiver, filter);
-  }
-
   @Override public void onDestroy() {
     super.onDestroy();
     stopForeground(true);
-    unregisterReceiver(cancellationReceiver);
     bus.unregister(this);
   }
 
-  @Override
-  public int onStartCommand(Intent intent, int flags, final int startId) {
+  @Override public int onStartCommand(Intent intent, int flags, int startId) {
     if (intent != null) {
-      Intent data = new Intent(intent);
-      data.putExtra(EXTRA_TASK_ID, startId);
-
-      Task task = newTask(data, startId, bus, handler);
-      tasks.put(startId, task.execute(executor));
+      if (ACTION_CANCEL.equals(intent.getAction())) {
+        cancelTask(intent);
+      } else {
+        executeTask(intent, startId);
+      }
     }
     return START_STICKY;
   }
 
-  private Task newTask(
-      Intent intent, int startId, EventBus bus, Handler handler) {
-    return FileAction.fromIntent(intent.getAction())
-        .newTask(intent, startId, bus, handler);
+  private void executeTask(Intent intent, int startId) {
+    Intent data = new Intent(intent);
+    data.putExtra(EXTRA_TASK_ID, startId);
+
+    startForeground(startId, new Notification.Builder(this)
+        .setSmallIcon(R.drawable.ic_launcher).build());
+    Task task = newTask(data, startId, bus, handler);
+    tasks.put(startId, task.execute(executor));
   }
 
-  static final class CancellationReceiver extends BroadcastReceiver {
-    private final EventBus bus;
-    private final Map<Integer, Future<?>> tasks;
+  private Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+    return FileAction
+        .fromIntent(intent.getAction())
+        .newTask(intent, id, bus, handler);
+  }
 
-    CancellationReceiver(EventBus bus, Map<Integer, Future<?>> tasks) {
-      this.bus = bus;
-      this.tasks = tasks;
+  void cancelTask(Intent intent) {
+    int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+    Future<?> task = tasks.remove(startId);
+    if (task != null) {
+      task.cancel(true);
+    } else {
+      bus.post(TaskNotFound.create(startId));
     }
-
-    @Override public void onReceive(Context context, Intent intent) {
-      int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-      Future<?> task = tasks.get(startId);
-      if (task != null) {
-        task.cancel(true);
-      } else {
-        bus.post(TaskNotFound.create(startId));
-      }
+    if (tasks.isEmpty()) {
+      stopSelf();
     }
   }
 
@@ -159,27 +154,27 @@ public final class OperationService extends Service {
 
     DELETE("l.files.operations.DELETE") {
       @Override
-      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
         List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
-        return new DeleteTask(startId, Clock.system(), bus, handler, paths);
+        return new DeleteTask(id, Clock.system(), bus, handler, paths);
       }
     },
 
     COPY("l.files.operations.COPY") {
       @Override
-      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new CopyTask(startId, Clock.system(), bus, handler, srcPaths, dstPath);
+        return new CopyTask(id, Clock.system(), bus, handler, srcPaths, dstPath);
       }
     },
 
     MOVE("l.files.operations.MOVE") {
       @Override
-      Task newTask(Intent intent, int startId, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
         List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
         String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new MoveTask(startId, Clock.system(), bus, handler, srcPaths, dstPath);
+        return new MoveTask(id, Clock.system(), bus, handler, srcPaths, dstPath);
       }
     };
 
@@ -202,7 +197,6 @@ public final class OperationService extends Service {
       throw new IllegalArgumentException("Unknown action: " + action);
     }
 
-    abstract Task newTask(
-        Intent intent, int startId, EventBus bus, Handler handler);
+    abstract Task newTask(Intent intent, int id, EventBus bus, Handler handler);
   }
 }
