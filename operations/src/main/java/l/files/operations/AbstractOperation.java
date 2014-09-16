@@ -2,60 +2,63 @@ package l.files.operations;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static l.files.operations.FileException.throwIfNotEmpty;
-import static l.files.operations.FileOperations.checkInterrupt;
-
 abstract class AbstractOperation implements FileOperation {
 
-    private final Iterable<String> paths;
-    private volatile String currentPath;
-    private volatile boolean done;
+  /**
+   * The amount of errors to catch before stopping. Don't want to hold an
+   * endless amount of errors (resulting in OutOfMemoryError). And there is not
+   * much point of continuing if number of errors reached this amount.
+   */
+  private static final int ERROR_LIMIT = 100;
 
-    AbstractOperation(Iterable<String> paths) {
-        this.paths = ImmutableSet.copyOf(paths);
+  private final Iterable<String> paths;
+
+  AbstractOperation(Iterable<String> paths) {
+    this.paths = ImmutableSet.copyOf(paths);
+  }
+
+  void checkInterrupt() throws InterruptedException {
+    if (Thread.interrupted()) {
+      throw new InterruptedException();
+    }
+  }
+
+  @Override
+  public void execute() throws InterruptedException {
+    FailureRecorder listener = new FailureRecorder(ERROR_LIMIT);
+    for (String path : paths) {
+      checkInterrupt();
+      process(path, listener);
+    }
+    listener.throwIfNotEmpty();
+  }
+
+  abstract void process(String path, FailureRecorder listener)
+      throws InterruptedException;
+
+  static final class FailureRecorder {
+    private final List<Failure> failures;
+    private final int limit;
+
+    FailureRecorder(int limit) {
+      this.limit = limit;
+      this.failures = new ArrayList<>();
     }
 
-    /**
-     * Gets the current path (one of the paths used to construct this instance) being processed.
-     */
-    public String getCurrentPath() {
-        return currentPath;
+    public void onFailure(String path, IOException failure)
+        throws FileException {
+      if (failures.size() > limit) {
+        throw new FileException(failures);
+      }
+      failures.add(Failure.create(path, failure));
     }
 
-    @Override
-    public void execute() throws FileException, InterruptedException {
-        List<Failure> failures = new ArrayList<>(0);
-        try {
-
-            doCall(failures);
-            throwIfNotEmpty(failures);
-
-        } finally {
-            currentPath = null;
-            done = true;
-        }
-
+    void throwIfNotEmpty() {
+      FileException.throwIfNotEmpty(failures);
     }
-
-    private void doCall(List<Failure> failures) throws InterruptedException {
-        for (String path : paths) {
-            checkInterrupt();
-            currentPath = path;
-            process(path, failures);
-        }
-    }
-
-    /**
-     * Process the given path and its children, collects any failures.
-     */
-    protected abstract void process(String path, List<Failure> failures)
-            throws InterruptedException;
-
-    @Override
-    public boolean isDone() {
-        return done;
-    }
+  }
 }

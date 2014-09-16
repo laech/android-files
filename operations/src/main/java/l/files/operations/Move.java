@@ -1,7 +1,6 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import static l.files.io.file.Files.rename;
 
@@ -20,12 +19,12 @@ final class Move extends Paste {
     return movedItemCount;
   }
 
-  @Override protected void paste(String from, String to, Collection<Failure> failures) {
+  @Override void paste(String from, String to, FailureRecorder listener) {
     try {
       rename(from, to);
       movedItemCount++;
     } catch (IOException e) {
-      failures.add(Failure.create(from, e));
+      listener.onFailure(from, e);
     }
   }
 }

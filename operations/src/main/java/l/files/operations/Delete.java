@@ -1,19 +1,14 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.List;
 
 import l.files.io.file.DirectoryTreeTraverser;
 import l.files.io.file.FileInfo;
-import l.files.logging.Logger;
 
 import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.Files.remove;
-import static l.files.operations.FileOperations.checkInterrupt;
 
 public final class Delete extends AbstractOperation {
-
-  private static final Logger logger = Logger.get(Delete.class);
 
   private volatile int deletedItemCount;
   private volatile long deletedByteCount;
@@ -36,13 +31,12 @@ public final class Delete extends AbstractOperation {
     return deletedByteCount;
   }
 
-  @Override
-  protected void process(String path, List<Failure> failures)
+  @Override void process(String path, FailureRecorder listener)
       throws InterruptedException {
-    deleteTree(path, failures);
+    deleteTree(path, listener);
   }
 
-  private void deleteTree(String path, List<Failure> failures)
+  private void deleteTree(String path, FailureRecorder listener)
       throws InterruptedException {
     Entry root = Entry.create(path);
     for (Entry entry : DirectoryTreeTraverser.get().postOrderTraversal(root)) {
@@ -50,8 +44,7 @@ public final class Delete extends AbstractOperation {
       try {
         delete(entry.path());
       } catch (IOException e) {
-        failures.add(Failure.create(entry.path(), e));
-        logger.warn(e);
+        listener.onFailure(entry.path(), e);
       }
     }
   }

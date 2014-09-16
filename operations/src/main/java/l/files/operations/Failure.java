@@ -6,7 +6,7 @@ import java.io.IOException;
 
 @AutoValue
 public abstract class Failure {
-  public Failure() {}
+  Failure() {}
 
   /**
    * The path of the failed file.

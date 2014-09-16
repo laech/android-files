@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
-import java.util.Collection;
 
 import l.files.io.file.DirectoryTreeTraverser;
 import l.files.io.file.FileInfo;
@@ -16,7 +15,6 @@ import l.files.logging.Logger;
 import static l.files.io.file.DirectoryTreeTraverser.Entry;
 import static l.files.io.file.Files.readlink;
 import static l.files.io.file.Files.symlink;
-import static l.files.operations.FileOperations.checkInterrupt;
 import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -54,8 +52,7 @@ final class Copy extends Paste {
     return copiedItemCount;
   }
 
-  @Override
-  protected void paste(String from, String to, Collection<Failure> failures)
+  @Override void paste(String from, String to, FailureRecorder listener)
       throws InterruptedException {
 
     File oldRoot = new File(from);
@@ -69,23 +66,22 @@ final class Copy extends Paste {
       try {
         file = FileInfo.get(entry.path());
       } catch (IOException e) {
-        logger.error(e);
-        failures.add(Failure.create(entry.path(), e));
+        listener.onFailure(entry.path(), e);
         continue;
       }
 
       File dst = Files.replace(new File(entry.path()), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
-        copyLink(file, dst.getPath(), failures);
+        copyLink(file, dst.getPath(), listener);
       } else if (file.isDirectory()) {
-        createDirectory(file, dst, failures);
+        createDirectory(file, dst, listener);
       } else {
-        copyFile(file, dst.getPath(), failures);
+        copyFile(file, dst.getPath(), listener);
       }
     }
   }
 
-  private void copyLink(FileInfo src, String dst, Collection<Failure> failures) {
+  private void copyLink(FileInfo src, String dst, FailureRecorder listener) {
     try {
       String target = readlink(src.getPath());
       symlink(target, dst);
@@ -93,23 +89,23 @@ final class Copy extends Paste {
       copiedItemCount++;
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      failures.add(Failure.create(src.getPath(), e));
+      listener.onFailure(src.getPath(), e);
     }
   }
 
   private void createDirectory(
-      FileInfo src, File dst, Collection<Failure> failures) {
+      FileInfo src, File dst, FailureRecorder listener) {
     try {
       forceMkdir(dst);
       copiedByteCount += src.getSize();
       copiedItemCount++;
       setLastModifiedDate(src, dst.getPath());
     } catch (IOException e) {
-      failures.add(Failure.create(src.getPath(), e));
+      listener.onFailure(src.getPath(), e);
     }
   }
 
-  private void copyFile(FileInfo src, String dst, Collection<Failure> failures)
+  private void copyFile(FileInfo src, String dst, FailureRecorder listener)
       throws InterruptedException {
     checkInterrupt();
 
@@ -138,7 +134,7 @@ final class Copy extends Paste {
       if (e instanceof ClosedByInterruptException) {
         throw new InterruptedException();
       } else {
-        failures.add(Failure.create(src.getPath(), e));
+        listener.onFailure(src.getPath(), e);
       }
 
     } finally {
