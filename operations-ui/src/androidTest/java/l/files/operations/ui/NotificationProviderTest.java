@@ -14,6 +14,7 @@ import l.files.operations.Clock;
 import l.files.operations.Failure;
 import l.files.operations.Target;
 import l.files.operations.TaskId;
+import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
 
@@ -46,17 +47,9 @@ public final class NotificationProviderTest extends BaseTest {
     bus.register(provider);
   }
 
-  public void testEventReceiverMethodsAreAnnotated() throws Exception {
-    testReceiverMethodIsAnnotated(TaskState.Pending.class);
-    testReceiverMethodIsAnnotated(TaskState.Running.class);
-    testReceiverMethodIsAnnotated(TaskState.Success.class);
-    testReceiverMethodIsAnnotated(TaskState.Failed.class);
-  }
-
-  private void testReceiverMethodIsAnnotated(Class<?> parameterType)
-      throws NoSuchMethodException {
-    ASSERT.that(NotificationProvider.class
-        .getMethod("onEventMainThread", parameterType)).isNotNull();
+  public void testCancelTaskNotFound() throws Exception {
+    bus.post(TaskNotFound.create(1011));
+    verify(manager).cancel(1011);
   }
 
   public void testCancelNotificationOnSuccess() {

@@ -16,6 +16,7 @@ import java.util.Map;
 import l.files.eventbus.Subscribe;
 import l.files.operations.Clock;
 import l.files.operations.TaskKind;
+import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 
 import static android.app.Notification.PRIORITY_LOW;
@@ -23,7 +24,6 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getActivity;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static de.greenrobot.event.ThreadMode.MainThread;
 import static l.files.operations.OperationService.newCancelIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
@@ -52,24 +52,24 @@ final class NotificationProvider {
     );
   }
 
-  @Subscribe(MainThread)
-  public void onEventMainThread(TaskState.Pending state) {
+  @Subscribe public void onEvent(TaskState.Pending state) {
     manager.notify(state.task().id(), newIndeterminateNotification(state));
   }
 
-  @Subscribe(MainThread)
-  public void onEventMainThread(TaskState.Running state) {
+  @Subscribe public void onEvent(TaskState.Running state) {
     manager.notify(state.task().id(), newProgressNotification(state));
   }
 
-  @Subscribe(MainThread)
-  public void onEventMainThread(TaskState.Failed state) {
+  @Subscribe public void onEvent(TaskState.Failed state) {
     manager.notify(state.task().id(), newFailureNotification(state));
   }
 
-  @Subscribe(MainThread)
-  public void onEventMainThread(TaskState.Success state) {
+  @Subscribe public void onEvent(TaskState.Success state) {
     manager.cancel(state.task().id());
+  }
+
+  @Subscribe public void onEvent(TaskNotFound event) {
+    manager.cancel(event.id());
   }
 
   private TaskStateViewer getViewer(TaskState state) {
@@ -128,7 +128,8 @@ final class NotificationProvider {
 
   private Notification newFailureNotification(TaskState.Failed state) {
     Intent intent = getFailureIntent(state);
-    PendingIntent pending = getActivity(context, state.task().id(), intent, FLAG_UPDATE_CURRENT);
+    PendingIntent pending = getActivity(context, state.task().id(), intent,
+        FLAG_UPDATE_CURRENT);
     return new Notification.Builder(context)
         .setSmallIcon(android.R.drawable.stat_notify_error)
         .setContentTitle(getTitle(intent))
@@ -142,7 +143,8 @@ final class NotificationProvider {
     Collection<l.files.operations.Failure> failures = state.failures();
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
-      messages.add(FailureMessage.create(failure.path(), failure.cause().getMessage()));
+      messages.add(FailureMessage.create(
+          failure.path(), failure.cause().getMessage()));
     }
     String title = viewer.getContentTitle(state);
     return FailuresActivity.newIntent(context, title, messages);

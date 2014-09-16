@@ -35,10 +35,10 @@ import static l.files.operations.OperationService.FileAction.MOVE;
  */
 public final class OperationService extends Service {
 
-  private static final String ACTION_CANCEL = "l.files.operations.CANCEL";
-  private static final String EXTRA_TASK_ID = "task_id";
-  private static final String EXTRA_PATHS = "paths";
-  private static final String EXTRA_DST_PATH = "dstPath";
+  static final String ACTION_CANCEL = "l.files.operations.CANCEL";
+  static final String EXTRA_TASK_ID = "task_id";
+  static final String EXTRA_PATHS = "paths";
+  static final String EXTRA_DST_PATH = "dstPath";
 
   private static final ExecutorService executor = newFixedThreadPool(5);
 
@@ -90,7 +90,7 @@ public final class OperationService extends Service {
     bus = Events.get();
     tasks = new HashMap<>();
     handler = new Handler();
-    cancellationReceiver = new CancellationReceiver();
+    cancellationReceiver = new CancellationReceiver(bus, tasks);
     registerCancellationReceiver();
     bus.register(this);
   }
@@ -135,12 +135,22 @@ public final class OperationService extends Service {
         .newTask(intent, startId, bus, handler);
   }
 
-  private final class CancellationReceiver extends BroadcastReceiver {
+  static final class CancellationReceiver extends BroadcastReceiver {
+    private final EventBus bus;
+    private final Map<Integer, Future<?>> tasks;
+
+    CancellationReceiver(EventBus bus, Map<Integer, Future<?>> tasks) {
+      this.bus = bus;
+      this.tasks = tasks;
+    }
+
     @Override public void onReceive(Context context, Intent intent) {
       int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
       Future<?> task = tasks.get(startId);
       if (task != null) {
         task.cancel(true);
+      } else {
+        bus.post(TaskNotFound.create(startId));
       }
     }
   }
