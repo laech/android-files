@@ -78,6 +78,25 @@ public final class FileInfoTest extends FileBaseTest {
     assertThat(info(file).mime()).isEqualTo("text/plain");
   }
 
+  public void testMediaTypeForSymlinkFile() throws Exception {
+    File file = tmp().createFile("a.mp3");
+    File link = tmp().get("b.txt");
+    symlink(file.getPath(), link.getPath());
+    assertThat(info(link).mime()).isEqualTo("text/plain");
+  }
+
+  public void testMediaTypeForSymlinkDirectory() throws Exception {
+    File dir = tmp().createDir("a");
+    File link = tmp().get("b");
+    symlink(dir.getPath(), link.getPath());
+    assertThat(info(link).mime()).isEqualTo("application/x-directory");
+  }
+
+  public void testDefaultMediaTypeIfUnknown() throws Exception {
+    File file = tmp().createFile("a");
+    assertThat(info(file).mime()).isEqualTo("application/octet-stream");
+  }
+
   public void testUri() throws Exception {
     File file = tmp().createFile("a");
     assertThat(info(file).uri())

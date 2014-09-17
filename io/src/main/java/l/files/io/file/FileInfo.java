@@ -72,15 +72,25 @@ public abstract class FileInfo {
   }
 
   /**
-   * Gets the media type of this file based on its file extension.
+   * Gets the media type of this file based on its file extension or type.
    */
   public String mime() {
     if (mime == null) {
-      if (isDirectory()) {
+      boolean dir;
+      if (isSymbolicLink()) {
+        // java.io.File will us about the actual file being linked to
+        dir = new File(path()).isDirectory();
+      } else {
+        dir = isDirectory();
+      }
+      if (dir) {
         mime = "application/x-directory";
       } else {
         mime = MimeTypeMap.getSingleton()
             .getMimeTypeFromExtension(getExtension(name()));
+      }
+      if (mime == null) {
+        mime = "application/octet-stream";
       }
     }
     return mime;
