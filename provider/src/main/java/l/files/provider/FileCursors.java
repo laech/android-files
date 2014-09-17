@@ -13,6 +13,7 @@ import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
 import static l.files.provider.FilesContract.FileInfo.SIZE;
+import static l.files.provider.FilesContract.FileInfo.TYPE;
 import static l.files.provider.FilesContract.FileInfo.WRITABLE;
 
 public final class FileCursors {
@@ -56,5 +57,9 @@ public final class FileCursors {
 
   public static boolean isDirectory(Cursor cursor) {
     return MIME_DIR.equals(getMediaType(cursor));
+  }
+
+  public static String getType(Cursor cursor) {
+    return getString(cursor, TYPE);
   }
 }

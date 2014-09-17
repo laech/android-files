@@ -13,20 +13,29 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.io.file.FileInfo;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.io.Files.write;
+import static com.google.common.truth.Truth.ASSERT;
 import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.io.file.Files.symlink;
+import static l.files.provider.FileCursors.getId;
 import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getSize;
+import static l.files.provider.FileCursors.getType;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FileCursors.isWritable;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
+import static l.files.provider.FilesContract.FileInfo.TYPE_DIRECTORY;
+import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
+import static l.files.provider.FilesContract.FileInfo.TYPE_SYMLINK;
+import static l.files.provider.FilesContract.FileInfo.TYPE_UNKNOWN;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 import static l.files.provider.FilesContract.buildSelectionUri;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
@@ -35,19 +44,24 @@ import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
 
 public final class FilesProviderTest extends FileBaseTest {
 
-  // TODO test query symlink should return details about the link, not the reference
+  public void testQuerySymlink() throws Exception {
+    File a = tmp().createFile("a");
+    File b = tmp().get("b");
+    symlink(a.getPath(), b.getPath());
+    verify();
+  }
 
-  public void testQueryFile() {
+  public void testQueryFile() throws Exception {
     tmp().createFile("a");
     verify();
   }
 
-  public void testQueryDir() {
+  public void testQueryDir() throws Exception {
     tmp().createDir("b");
     verify();
   }
 
-  public void testQueryMultiple() {
+  public void testQueryMultiple() throws Exception {
     tmp().createFile("a");
     tmp().createDir("b");
     tmp().createFile("c");
@@ -55,7 +69,7 @@ public final class FilesProviderTest extends FileBaseTest {
     verify();
   }
 
-  public void testQueryHiddenFiles() {
+  public void testQueryHiddenFiles() throws Exception {
     tmp().createFile("a");
     tmp().createFile(".b");
     tmp().createDir(".c");
@@ -63,7 +77,7 @@ public final class FilesProviderTest extends FileBaseTest {
     verify(false, "a", "d");
   }
 
-  public void testQueryMultipleDirs() {
+  public void testQueryMultipleDirs() throws Exception {
     tmp().createDir("a");
     tmp().createFile("b");
     tmp().createDir("c/a");
@@ -77,7 +91,7 @@ public final class FilesProviderTest extends FileBaseTest {
     verify("d");
   }
 
-  public void testQueryExistingContent() {
+  public void testQueryExistingContent() throws Exception {
     tmp().createFile("a");
     tmp().createFile("b");
     tmp().createFile("c/a");
@@ -91,7 +105,7 @@ public final class FilesProviderTest extends FileBaseTest {
     verify("d");
   }
 
-  public void testQuerySelection() {
+  public void testQuerySelection() throws Exception {
     File[] files = {
         new File("/"),
         tmp().get(),
@@ -105,14 +119,14 @@ public final class FilesProviderTest extends FileBaseTest {
     }
   }
 
-  public void testQuerySortByName() {
+  public void testQuerySortByName() throws Exception {
     tmp().createFile("z");
     tmp().createDir("x");
     tmp().createFile("y");
     verify(tmp().get(), SORT_BY_NAME, NAME_COMPARATOR);
   }
 
-  public void testQuerySortByDate() {
+  public void testQuerySortByDate() throws Exception {
     assertTrue(tmp().createFile("z").setLastModified(1000));
     assertTrue(tmp().createDir("x").setLastModified(2000));
     assertTrue(tmp().createFile("y").setLastModified(3000));
@@ -166,7 +180,8 @@ public final class FilesProviderTest extends FileBaseTest {
     });
   }
 
-  private void testNotifies(Runnable code) throws InterruptedException {
+  private void testNotifies(Runnable code)
+      throws InterruptedException, IOException {
     Cursor cursor = queryChildren();
     try {
 
@@ -188,15 +203,15 @@ public final class FilesProviderTest extends FileBaseTest {
     }
   }
 
-  private void verify() {
+  private void verify() throws IOException {
     verify(tmp().get());
   }
 
-  private void verify(String path) {
+  private void verify(String path) throws IOException {
     verify(tmp().get(path));
   }
 
-  private void verify(boolean showHidden, String... paths) {
+  private void verify(boolean showHidden, String... paths) throws IOException {
     File[] files = new File[paths.length];
     for (int i = 0; i < files.length; i++) {
       files[i] = tmp().get(paths[i]);
@@ -204,7 +219,8 @@ public final class FilesProviderTest extends FileBaseTest {
     verify(tmp().get(), SORT_BY_NAME, NAME_COMPARATOR, showHidden, files);
   }
 
-  private void verify(File dir, String order, Comparator<File> comparator) {
+  private void verify(File dir, String order, Comparator<File> comparator)
+      throws IOException {
     verify(dir, order, comparator, true, dir.listFiles());
   }
 
@@ -213,7 +229,7 @@ public final class FilesProviderTest extends FileBaseTest {
       String order,
       Comparator<File> comparator,
       boolean showHidden,
-      File... files) {
+      File... files) throws IOException {
     Cursor cursor = queryChildren(dir, showHidden, order);
     try {
       sort(files, comparator);
@@ -223,24 +239,35 @@ public final class FilesProviderTest extends FileBaseTest {
     }
   }
 
-  private void verify(File dir) {
+  private void verify(File dir) throws IOException {
     verify(dir, SORT_BY_NAME, NAME_COMPARATOR, true, dir.listFiles());
   }
 
-  private static void verify(Cursor cursor, File[] files) {
+  private static void verify(Cursor cursor, File[] files) throws IOException {
     List<String> expected = getIds(files);
     List<String> actual = getIds(cursor);
-    assertEquals(expected, actual);
+    ASSERT.that(actual).is(expected);
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
-      assertEquals(file.getName(), FileCursors.getName(cursor));
-      assertEquals(FilesContract.getFileId(file), FileCursors.getId(cursor));
-      assertEquals(file.lastModified(), getLastModified(cursor));
-      assertEquals(file.length(), getSize(cursor));
-      assertEquals(file.isDirectory(), isDirectory(cursor));
-      assertEquals(file.canRead(), isReadable(cursor));
-      assertEquals(file.canWrite(), isWritable(cursor));
+      FileInfo info = FileInfo.get(file.getPath());
+      ASSERT.that(FileCursors.getName(cursor)).is(info.getName());
+      ASSERT.that(getId(cursor)).is(FilesContract.getFileId(file));
+      ASSERT.that(getLastModified(cursor)).is(info.getLastModified());
+      ASSERT.that(getSize(cursor)).is(info.getSize());
+      ASSERT.that(isDirectory(cursor)).is(info.isDirectory());
+      ASSERT.that(isReadable(cursor)).is(info.isReadable());
+      ASSERT.that(isWritable(cursor)).is(info.isWritable());
+
+      if (info.isRegularFile()) {
+        ASSERT.that(getType(cursor)).is(TYPE_REGULAR_FILE);
+      } else if (info.isSymbolicLink()) {
+        ASSERT.that(getType(cursor)).is(TYPE_SYMLINK);
+      } else if (info.isDirectory()) {
+        ASSERT.that(getType(cursor)).is(TYPE_DIRECTORY);
+      } else {
+        ASSERT.that(getType(cursor)).is(TYPE_UNKNOWN);
+      }
     }
   }
 
@@ -248,7 +275,7 @@ public final class FilesProviderTest extends FileBaseTest {
     List<String> names = newArrayListWithCapacity(cursor.getCount());
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
-      names.add(FileCursors.getId(cursor));
+      names.add(getId(cursor));
     }
     return names;
   }

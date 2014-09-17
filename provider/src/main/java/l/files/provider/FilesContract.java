@@ -385,6 +385,13 @@ public final class FilesContract {
      */
     public static final String HIDDEN = "hidden";
 
+    public static final String TYPE = "type";
+
+    public static final String TYPE_DIRECTORY = "directory";
+    public static final String TYPE_SYMLINK = "symlink";
+    public static final String TYPE_REGULAR_FILE = "regular-file";
+    public static final String TYPE_UNKNOWN = "unknown";
+
     /**
      * Media type of a directory.
      *

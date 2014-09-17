@@ -67,6 +67,7 @@ public final class FilesProvider extends ContentProvider {
       FilesContract.FileInfo.MIME,
       FilesContract.FileInfo.MODIFIED,
       FilesContract.FileInfo.HIDDEN,
+      FilesContract.FileInfo.TYPE,
   };
 
   private UriMatcher matcher;

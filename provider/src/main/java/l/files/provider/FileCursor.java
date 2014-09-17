@@ -4,12 +4,17 @@ import l.files.common.database.BaseCursor;
 import l.files.io.file.FileInfo;
 
 import static l.files.common.database.DataTypes.booleanToInt;
-import static l.files.provider.FilesContract.FileInfo.LOCATION;
+import static l.files.provider.FilesContract.FileInfo.ID;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
 import static l.files.provider.FilesContract.FileInfo.SIZE;
+import static l.files.provider.FilesContract.FileInfo.TYPE;
+import static l.files.provider.FilesContract.FileInfo.TYPE_DIRECTORY;
+import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
+import static l.files.provider.FilesContract.FileInfo.TYPE_SYMLINK;
+import static l.files.provider.FilesContract.FileInfo.TYPE_UNKNOWN;
 import static l.files.provider.FilesContract.FileInfo.WRITABLE;
 
 final class FileCursor extends BaseCursor {
@@ -38,10 +43,18 @@ final class FileCursor extends BaseCursor {
   @Override public String getString(int column) {
     FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (LOCATION.equals(col)) return file.getUri();
+    if (ID.equals(col)) return file.getUri();
     if (NAME.equals(col)) return file.getName();
     if (MIME.equals(col)) return file.getMediaType();
+    if (TYPE.equals(col)) return getType(file);
     throw new IllegalArgumentException();
+  }
+
+  private String getType(FileInfo file) {
+    if (file.isDirectory()) return TYPE_DIRECTORY;
+    if (file.isSymbolicLink()) return TYPE_SYMLINK;
+    if (file.isRegularFile()) return TYPE_REGULAR_FILE;
+    return TYPE_UNKNOWN;
   }
 
   @Override public int getInt(int column) {
