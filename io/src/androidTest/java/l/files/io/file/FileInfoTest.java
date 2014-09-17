@@ -19,7 +19,7 @@ public final class FileInfoTest extends FileBaseTest {
     symlink(file.getPath(), link.getPath());
     assertThat(info(file).isSymbolicLink()).isFalse();
     assertThat(info(link).isSymbolicLink()).isTrue();
-    assertThat(info(link).getStat()).isEqualTo(lstat(link.getPath()));
+    assertThat(info(link).stat()).isEqualTo(lstat(link.getPath()));
   }
 
   public void testIsDirectory() throws Exception {
@@ -34,17 +34,17 @@ public final class FileInfoTest extends FileBaseTest {
 
   public void testInodeNumber() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).getInodeNumber()).isEqualTo(lstat(f.getPath()).ino);
+    assertThat(info(f).inode()).isEqualTo(lstat(f.getPath()).ino);
   }
 
   public void testDeviceId() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).getDeviceId()).isEqualTo(lstat(f.getPath()).dev);
+    assertThat(info(f).device()).isEqualTo(lstat(f.getPath()).dev);
   }
 
   public void testLastModifiedTime() throws Exception {
     FileInfo file = info(tmp().get());
-    assertEquals(tmp().get().lastModified(), file.getLastModified());
+    assertEquals(tmp().get().lastModified(), file.modified());
   }
 
   public void testReadable() throws Exception {
@@ -65,29 +65,29 @@ public final class FileInfoTest extends FileBaseTest {
 
   public void testName() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).getName()).isEqualTo(file.getName());
+    assertThat(info(file).name()).isEqualTo(file.getName());
   }
 
   public void testMediaTypeForDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertThat(info(dir).getMediaType()).isEqualTo("application/x-directory");
+    assertThat(info(dir).mime()).isEqualTo("application/x-directory");
   }
 
   public void testMediaTypeForFile() throws Exception {
     File file = tmp().createFile("a.txt");
-    assertThat(info(file).getMediaType()).isEqualTo("text/plain");
+    assertThat(info(file).mime()).isEqualTo("text/plain");
   }
 
   public void testUri() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).getUri())
+    assertThat(info(file).uri())
         .isEqualTo("file://" + file.getAbsolutePath());
   }
 
   public void testSize() throws Exception {
     File file = tmp().createFile("a");
     write("hello world", file, UTF_8);
-    assertThat(info(file).getSize()).isEqualTo(file.length());
+    assertThat(info(file).size()).isEqualTo(file.length());
   }
 
   public void testIsHidden() throws Exception {
@@ -96,7 +96,7 @@ public final class FileInfoTest extends FileBaseTest {
   }
 
   private FileInfo info(File f) throws IOException {
-    return FileInfo.get(f.getPath());
+    return FileInfo.read(f.getPath());
   }
 
 }

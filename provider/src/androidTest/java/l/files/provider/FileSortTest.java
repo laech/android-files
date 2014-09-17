@@ -26,7 +26,7 @@ abstract class FileSortTest extends FileBaseTest {
   private List<FileInfo> mapData(File... files) throws IOException {
     List<FileInfo> expected = new ArrayList<>(files.length);
     for (File file : files) {
-      expected.add(FileInfo.get(file.getPath()));
+      expected.add(FileInfo.read(file.getPath()));
     }
     return expected;
   }

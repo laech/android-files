@@ -114,7 +114,7 @@ final class FilesCache implements
     for (String name : names) {
       try {
         Path child = path.child(name);
-        map.put(child, FileInfo.get(child.toString()));
+        map.put(child, FileInfo.read(child.toString()));
       } catch (IOException e) {
         logger.warn(e);
       }
@@ -149,9 +149,9 @@ final class FilesCache implements
     }
 
     try {
-      data.put(path, FileInfo.get(path.toString()));
+      data.put(path, FileInfo.read(path.toString()));
     } catch (IOException e) {
-      logger.warn(e, "Failed to get info %s", path);
+      logger.warn(e, "Failed to read info %s", path);
       remove(path);
     }
   }

@@ -25,7 +25,7 @@ final class Size extends Count {
   @Override protected void onCount(String path) {
     super.onCount(path);
     try {
-      size += FileInfo.get(path).getSize();
+      size += FileInfo.read(path).size();
     } catch (IOException e) {
       logger.warn(e);
     }

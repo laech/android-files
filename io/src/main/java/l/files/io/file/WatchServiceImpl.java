@@ -279,7 +279,7 @@ final class WatchServiceImpl extends WatchService {
   }
 
   private void monitor(Path path) throws IOException {
-    Node node = Node.from(FileInfo.get(path.toString()));
+    Node node = Node.from(FileInfo.read(path.toString()));
 
     synchronized (this) {
       checkNode(path, node);
@@ -329,7 +329,7 @@ final class WatchServiceImpl extends WatchService {
         if (entry.type() == TYPE_DIR) {
           Path path = parent.child(entry.name());
           try {
-            startObserver(path, Node.from(FileInfo.get(path.toString())));
+            startObserver(path, Node.from(FileInfo.read(path.toString())));
           } catch (IOException e) {
             // File no longer exits or inaccessible, ignore;
           }
@@ -400,7 +400,7 @@ final class WatchServiceImpl extends WatchService {
 
   private void onCreate(Path path) {
     try {
-      FileInfo file = FileInfo.get(path.toString());
+      FileInfo file = FileInfo.read(path.toString());
       if (file.isDirectory() && isMonitored(path.parent())) {
         startObserver(path, Node.from(file));
       }

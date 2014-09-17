@@ -287,9 +287,9 @@ public final class FilesProvider extends ContentProvider {
     List<FileInfo> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
-        stats.add(FileInfo.get(file.getPath()));
+        stats.add(FileInfo.read(file.getPath()));
       } catch (IOException e) {
-        logger.warn(e, "Failed to get info %s", file);
+        logger.warn(e, "Failed to read info %s", file);
       }
     }
     return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileInfo[stats.size()]));

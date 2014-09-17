@@ -50,7 +50,7 @@ public final class Delete extends AbstractOperation {
   }
 
   private void delete(String path) throws IOException {
-    long size = FileInfo.get(path).getSize();
+    long size = FileInfo.read(path).size();
     remove(path);
     deletedByteCount += size;
     deletedItemCount++;

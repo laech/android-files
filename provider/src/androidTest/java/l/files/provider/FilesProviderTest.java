@@ -250,11 +250,11 @@ public final class FilesProviderTest extends FileBaseTest {
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
-      FileInfo info = FileInfo.get(file.getPath());
-      ASSERT.that(FileCursors.getName(cursor)).is(info.getName());
+      FileInfo info = FileInfo.read(file.getPath());
+      ASSERT.that(FileCursors.getName(cursor)).is(info.name());
       ASSERT.that(getId(cursor)).is(FilesContract.getFileId(file));
-      ASSERT.that(getLastModified(cursor)).is(info.getLastModified());
-      ASSERT.that(getSize(cursor)).is(info.getSize());
+      ASSERT.that(getLastModified(cursor)).is(info.modified());
+      ASSERT.that(getSize(cursor)).is(info.size());
       ASSERT.that(isDirectory(cursor)).is(info.isDirectory());
       ASSERT.that(isReadable(cursor)).is(info.isReadable());
       ASSERT.that(isWritable(cursor)).is(info.isWritable());

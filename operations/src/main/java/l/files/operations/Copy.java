@@ -64,7 +64,7 @@ final class Copy extends Paste {
 
       FileInfo file;
       try {
-        file = FileInfo.get(entry.path());
+        file = FileInfo.read(entry.path());
       } catch (IOException e) {
         listener.onFailure(entry.path(), e);
         continue;
@@ -83,13 +83,13 @@ final class Copy extends Paste {
 
   private void copyLink(FileInfo src, String dst, FailureRecorder listener) {
     try {
-      String target = readlink(src.getPath());
+      String target = readlink(src.path());
       symlink(target, dst);
-      copiedByteCount += src.getSize();
+      copiedByteCount += src.size();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      listener.onFailure(src.getPath(), e);
+      listener.onFailure(src.path(), e);
     }
   }
 
@@ -97,11 +97,11 @@ final class Copy extends Paste {
       FileInfo src, File dst, FailureRecorder listener) {
     try {
       forceMkdir(dst);
-      copiedByteCount += src.getSize();
+      copiedByteCount += src.size();
       copiedItemCount++;
       setLastModifiedDate(src, dst.getPath());
     } catch (IOException e) {
-      listener.onFailure(src.getPath(), e);
+      listener.onFailure(src.path(), e);
     }
   }
 
@@ -113,7 +113,7 @@ final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(src.getPath());
+      fis = new FileInputStream(src.path());
       fos = new FileOutputStream(dst);
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
@@ -134,7 +134,7 @@ final class Copy extends Paste {
       if (e instanceof ClosedByInterruptException) {
         throw new InterruptedException();
       } else {
-        listener.onFailure(src.getPath(), e);
+        listener.onFailure(src.path(), e);
       }
 
     } finally {
@@ -147,7 +147,7 @@ final class Copy extends Paste {
 
   private void setLastModifiedDate(FileInfo src, String dst) {
     File dstFile = new File(dst);
-    File srcFile = new File(src.getPath());
+    File srcFile = new File(src.path());
     //noinspection StatementWithEmptyBody
     if (!dstFile.setLastModified(srcFile.lastModified())) {
       /*

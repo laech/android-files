@@ -44,29 +44,29 @@ public abstract class FileInfo {
 
   FileInfo() {}
 
-  public abstract String getPath();
+  public abstract String path();
 
-  abstract Stat getStat();
+  abstract Stat stat();
 
   /**
    * @throws IOException includes path is not accessible or doesn't exist
    */
-  public static FileInfo get(String parent, String child) throws IOException {
+  public static FileInfo read(String parent, String child) throws IOException {
     String path = concat(parent, child);
-    return get(path);
+    return read(path);
   }
 
   /**
    * @throws IOException includes path is not accessible or doesn't exist
    */
-  public static FileInfo get(String path) throws IOException {
+  public static FileInfo read(String path) throws IOException {
     Stat stat = Stat.lstat(path);
     return new AutoValue_FileInfo(path, stat);
   }
 
-  public String getName() {
+  public String name() {
     if (name == null) {
-      name = new File(getPath()).getName();
+      name = new File(path()).getName();
     }
     return name;
   }
@@ -74,21 +74,21 @@ public abstract class FileInfo {
   /**
    * Gets the media type of this file based on its file extension.
    */
-  public String getMediaType() {
+  public String mime() {
     if (mime == null) {
       if (isDirectory()) {
         mime = "application/x-directory";
       } else {
         mime = MimeTypeMap.getSingleton()
-            .getMimeTypeFromExtension(getExtension(getName()));
+            .getMimeTypeFromExtension(getExtension(name()));
       }
     }
     return mime;
   }
 
-  public String getUri() {
+  public String uri() {
     if (uri == null) {
-      uri = Uri.fromFile(new File(getPath())).toString();
+      uri = Uri.fromFile(new File(path())).toString();
     }
     return uri;
   }
@@ -109,7 +109,7 @@ public abstract class FileInfo {
 
   private boolean access(int mode) {
     try {
-      Unistd.access(getPath(), mode);
+      Unistd.access(path(), mode);
       return true;
     } catch (ErrnoException e) {
       return false;
@@ -117,66 +117,66 @@ public abstract class FileInfo {
   }
 
   public boolean isHidden() {
-    return getName().startsWith(".");
+    return name().startsWith(".");
   }
 
   /**
    * Gets the ID of the device containing this file.
    */
-  public long getDeviceId() {
-    return getStat().dev;
+  public long device() {
+    return stat().dev;
   }
 
   /**
    * File serial number (inode) of this file.
    */
-  public long getInodeNumber() {
-    return getStat().ino;
+  public long inode() {
+    return stat().ino;
   }
 
   /**
    * Size of this file in bytes.
    */
-  public long getSize() {
-    return getStat().size;
+  public long size() {
+    return stat().size;
   }
 
   /**
    * Last modified time of this file in milliseconds.
    */
-  public long getLastModified() {
-    return getStat().mtime * 1000L;
+  public long modified() {
+    return stat().mtime * 1000L;
   }
 
   public boolean isSocket() {
-    return S_ISSOCK(getStat().mode);
+    return S_ISSOCK(stat().mode);
   }
 
   public boolean isSymbolicLink() {
-    return S_ISLNK(getStat().mode);
+    return S_ISLNK(stat().mode);
   }
 
   public boolean isRegularFile() {
-    return S_ISREG(getStat().mode);
+    return S_ISREG(stat().mode);
   }
 
   public boolean isBlockDevice() {
-    return S_ISBLK(getStat().mode);
+    return S_ISBLK(stat().mode);
   }
 
   public boolean isDirectory() {
-    return S_ISDIR(getStat().mode);
+    return S_ISDIR(stat().mode);
   }
 
   public boolean isCharacterDevice() {
-    return S_ISCHR(getStat().mode);
+    return S_ISCHR(stat().mode);
   }
 
   public boolean isFifo() {
-    return S_ISFIFO(getStat().mode);
+    return S_ISFIFO(stat().mode);
   }
 
   public File toFile() {
-    return new File(getPath());
+    return new File(path());
   }
 }

@@ -43,9 +43,9 @@ final class FileCursor extends BaseCursor {
   @Override public String getString(int column) {
     FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (ID.equals(col)) return file.getUri();
-    if (NAME.equals(col)) return file.getName();
-    if (MIME.equals(col)) return file.getMediaType();
+    if (ID.equals(col)) return file.uri();
+    if (NAME.equals(col)) return file.name();
+    if (MIME.equals(col)) return file.mime();
     if (TYPE.equals(col)) return getType(file);
     throw new IllegalArgumentException();
   }
@@ -68,8 +68,8 @@ final class FileCursor extends BaseCursor {
   @Override public long getLong(int column) {
     FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (SIZE.equals(col)) return file.getSize();
-    if (MODIFIED.equals(col)) return file.getLastModified();
+    if (SIZE.equals(col)) return file.size();
+    if (MODIFIED.equals(col)) return file.modified();
     throw new IllegalArgumentException();
   }
 

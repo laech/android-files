@@ -28,7 +28,7 @@ abstract class FileSort implements Comparator<FileInfo> {
     }
 
     @Override public int compare(FileInfo a, FileInfo b) {
-      return collator.compare(a.getName(), b.getName());
+      return collator.compare(a.name(), b.name());
     }
   }
 
@@ -45,7 +45,7 @@ abstract class FileSort implements Comparator<FileInfo> {
     }
 
     @Override public int compare(FileInfo a, FileInfo b) {
-      int compare = Longs.compare(b.getLastModified(), a.getLastModified());
+      int compare = Longs.compare(b.modified(), a.modified());
       if (compare == 0) {
         return Name.get().compare(a, b);
       }
@@ -75,7 +75,7 @@ abstract class FileSort implements Comparator<FileInfo> {
       if (b.isDirectory()) {
         return -1;
       }
-      int compare = Longs.compare(b.getSize(), a.getSize());
+      int compare = Longs.compare(b.size(), a.size());
       if (compare == 0) {
         return Name.get().compare(a, b);
       }
