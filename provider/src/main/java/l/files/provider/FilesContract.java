@@ -8,7 +8,6 @@ import android.os.Bundle;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -159,15 +158,18 @@ public final class FilesContract {
   }
 
   public static String getFileId(File file) {
-    /* TODO test this
-     * Don't use File.toURI as it will append a "/" to the end of the URI
+    /*
+     * Don't return File.toURI as it will append a "/" to the end of the URI
      * depending on whether or not the file is a directory, that means two calls
      * to the method before and after the directory is deleted will create two
-     * URIs that are not equal. This will cause problems else where such as when
-     * you try to remove a record from the database after a directory is
-     * deleted. File.getAbsolutePath doesn't not have this problem and is safe.
+     * URIs that are not equal. URI.create(File) also changes between
+     * "file:/a/b/c.txt" and "file:///a/b/c.txt"
      */
-    return URI.create(Uri.fromFile(file).toString()).normalize().toString();
+    String path = file.toURI().normalize().getPath();
+    if (path.length() > 1 && path.endsWith("/")) {
+      path = path.substring(0, path.length() - 1);
+    }
+    return "file://" + path;
   }
 
   /**
