@@ -6,7 +6,7 @@ import static l.files.common.database.Cursors.getInt;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
 import static l.files.common.database.DataTypes.intToBoolean;
-import static l.files.provider.FilesContract.FileInfo.LOCATION;
+import static l.files.provider.FilesContract.FileInfo.ID;
 import static l.files.provider.FilesContract.FileInfo.MIME;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
@@ -18,8 +18,16 @@ import static l.files.provider.FilesContract.FileInfo.WRITABLE;
 public final class FileCursors {
   private FileCursors() {}
 
+  /**
+   * @deprecated use {@link #getId(Cursor)} instead
+   */
+  @Deprecated
   public static String getLocation(Cursor cursor) {
-    return getString(cursor, LOCATION);
+    return getId(cursor);
+  }
+
+  public static String getId(Cursor cursor) {
+    return getString(cursor, ID);
   }
 
   public static String getMediaType(Cursor cursor) {

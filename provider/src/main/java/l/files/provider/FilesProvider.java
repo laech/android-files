@@ -34,14 +34,14 @@ import static java.util.Collections.reverse;
 import static l.files.io.file.Files.normalize;
 import static l.files.io.file.Files.rename;
 import static l.files.provider.BuildConfig.DEBUG;
-import static l.files.provider.FilesContract.EXTRA_DESTINATION_LOCATION;
+import static l.files.provider.FilesContract.EXTRA_DESTINATION_ID;
 import static l.files.provider.FilesContract.EXTRA_ERROR;
-import static l.files.provider.FilesContract.EXTRA_FILE_LOCATION;
-import static l.files.provider.FilesContract.EXTRA_FILE_LOCATIONS;
+import static l.files.provider.FilesContract.EXTRA_FILE_ID;
+import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
-import static l.files.provider.FilesContract.MATCH_FILES_LOCATION;
-import static l.files.provider.FilesContract.MATCH_FILES_LOCATION_CHILDREN;
+import static l.files.provider.FilesContract.MATCH_FILES_ID;
+import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
 import static l.files.provider.FilesContract.MATCH_HIERARCHY;
 import static l.files.provider.FilesContract.MATCH_SELECTION;
 import static l.files.provider.FilesContract.METHOD_COPY;
@@ -50,18 +50,16 @@ import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.METHOD_SUGGESTION;
 import static l.files.provider.FilesContract.PARAM_SELECTION;
-import static l.files.provider.FilesContract.getFileLocation;
-import static l.files.provider.FilesContract.getHierarchyFileLocation;
+import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getHierarchyFileId;
 import static l.files.provider.FilesContract.newMatcher;
 
 public final class FilesProvider extends ContentProvider {
 
-  // TODO remove java.io.File usage
-
   private static final Logger logger = Logger.get(FilesProvider.class);
 
   private static final String[] DEFAULT_COLUMNS = {
-      FilesContract.FileInfo.LOCATION,
+      FilesContract.FileInfo.ID,
       FilesContract.FileInfo.NAME,
       FilesContract.FileInfo.SIZE,
       FilesContract.FileInfo.READABLE,
@@ -82,8 +80,8 @@ public final class FilesProvider extends ContentProvider {
 
   @Override public String getType(Uri uri) {
     switch (matcher.match(uri)) {
-      case MATCH_FILES_LOCATION:
-        String location = getFileLocation(uri);
+      case MATCH_FILES_ID:
+        String location = getFileId(uri);
         File file = new File(URI.create(location));
         // TODO don't do anything special for directories, detect and return "application/x-directory"
         if (file.isDirectory()) {
@@ -118,8 +116,8 @@ public final class FilesProvider extends ContentProvider {
   @Override
   public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
     switch (matcher.match(uri)) {
-      case MATCH_FILES_LOCATION:
-        File file = new File(URI.create(getFileLocation(uri)));
+      case MATCH_FILES_ID:
+        File file = new File(URI.create(getFileId(uri)));
         return ParcelFileDescriptor.open(file, MODE_READ_ONLY);
     }
     return super.openFile(uri, mode);
@@ -137,9 +135,9 @@ public final class FilesProvider extends ContentProvider {
     }
 
     switch (matcher.match(uri)) {
-      case MATCH_FILES_LOCATION:
+      case MATCH_FILES_ID:
         return queryFile(uri, projection, sortOrder);
-      case MATCH_FILES_LOCATION_CHILDREN:
+      case MATCH_FILES_ID_CHILDREN:
         return queryFiles(uri, projection, sortOrder);
       case MATCH_HIERARCHY:
         return queryHierarchy(uri, projection, sortOrder);
@@ -151,7 +149,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryHierarchy(Uri uri, String[] projection, String sortOrder) {
-    File file = normalize(new File(URI.create(getHierarchyFileLocation(uri))));
+    File file = normalize(new File(URI.create(getHierarchyFileId(uri))));
     List<File> files = newArrayList();
     while (file != null) {
       files.add(file);
@@ -163,7 +161,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryFile(Uri uri, String[] projection, String sortOrder) {
-    File file = new File(URI.create(getFileLocation(uri)));
+    File file = new File(URI.create(getFileId(uri)));
     return newFileCursor(uri, projection, sortOrder, file);
   }
 
@@ -199,21 +197,21 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Bundle callCut(Bundle extras) {
-    String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
-    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION))).getPath();
+    String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_IDS));
+    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_ID))).getPath();
     OperationService.move(getContext(), asList(srcPaths), dstPath);
     return Bundle.EMPTY;
   }
 
   private Bundle callCopy(Bundle extras) {
-    String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
-    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_LOCATION))).getPath();
+    String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_IDS));
+    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_ID))).getPath();
     OperationService.copy(getContext(), asList(srcPaths), dstPath);
     return Bundle.EMPTY;
   }
 
   private Bundle callRename(Bundle extras) {
-    File from = new File(URI.create(extras.getString(EXTRA_FILE_LOCATION)));
+    File from = new File(URI.create(extras.getString(EXTRA_FILE_ID)));
     File to = new File(from.getParentFile(), extras.getString(EXTRA_NEW_NAME));
     try {
       rename(from.getPath(), to.getPath());
@@ -226,13 +224,13 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Bundle callDelete(Bundle extras) {
-    String[] paths = toFilePaths(extras.getStringArray(EXTRA_FILE_LOCATIONS));
+    String[] paths = toFilePaths(extras.getStringArray(EXTRA_FILE_IDS));
     OperationService.delete(getContext(), paths);
     return Bundle.EMPTY;
   }
 
   private Bundle callSuggestion(Bundle extras) {
-    File parent = new File(URI.create(extras.getString(EXTRA_FILE_LOCATION)));
+    File parent = new File(URI.create(extras.getString(EXTRA_FILE_ID)));
     String name = extras.getString(EXTRA_NEW_NAME);
     File file = new File(parent, name);
     for (int i = 2; file.exists(); i++) {
@@ -257,14 +255,14 @@ public final class FilesProvider extends ContentProvider {
 
   @Override public Uri insert(Uri uri, ContentValues values) {
     switch (matcher.match(uri)) {
-      case MATCH_FILES_LOCATION:
+      case MATCH_FILES_ID:
         return insertDirectory(uri);
     }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);
   }
 
   private Uri insertDirectory(Uri uri) {
-    File file = new File(URI.create(getFileLocation(uri)));
+    File file = new File(URI.create(getFileId(uri)));
     return (file.mkdirs() || file.isDirectory()) ? uri : null;
   }
 

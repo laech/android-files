@@ -20,8 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class FilesContract {
 
-  // TODO use URI/Uri instead of string for paths?
-
   static final String PATH_FILES = "files";
   static final String PATH_CHILDREN = "children";
   static final String PATH_HIERARCHY = "hierarchy";
@@ -30,8 +28,8 @@ public final class FilesContract {
   static final String PARAM_SHOW_HIDDEN = "show-hidden";
   static final String PARAM_SELECTION = "selection";
 
-  static final int MATCH_FILES_LOCATION = 100;
-  static final int MATCH_FILES_LOCATION_CHILDREN = 101;
+  static final int MATCH_FILES_ID = 100;
+  static final int MATCH_FILES_ID_CHILDREN = 101;
   static final int MATCH_HIERARCHY = 400;
   static final int MATCH_SELECTION = 500;
 
@@ -40,10 +38,10 @@ public final class FilesContract {
   static final String METHOD_DELETE = "delete";
   static final String METHOD_RENAME = "rename";
   static final String METHOD_SUGGESTION = "suggestion";
-  static final String EXTRA_FILE_LOCATION = "file_uri";
-  static final String EXTRA_FILE_LOCATIONS = "file_uris";
+  static final String EXTRA_FILE_ID = "file";
+  static final String EXTRA_FILE_IDS = "files";
   static final String EXTRA_NEW_NAME = "new_name";
-  static final String EXTRA_DESTINATION_LOCATION = "destination";
+  static final String EXTRA_DESTINATION_ID = "destination";
   static final String EXTRA_ERROR = "error";
 
   private static volatile Uri authority;
@@ -54,8 +52,8 @@ public final class FilesContract {
   static UriMatcher newMatcher(Context context) {
     String authority = getAuthorityString(context);
     UriMatcher matcher = new UriMatcher(NO_MATCH);
-    matcher.addURI(authority, PATH_FILES + "/*", MATCH_FILES_LOCATION);
-    matcher.addURI(authority, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_LOCATION_CHILDREN);
+    matcher.addURI(authority, PATH_FILES + "/*", MATCH_FILES_ID);
+    matcher.addURI(authority, PATH_FILES + "/*/" + PATH_CHILDREN, MATCH_FILES_ID_CHILDREN);
     matcher.addURI(authority, PATH_HIERARCHY + "/*", MATCH_HIERARCHY);
     matcher.addURI(authority, PATH_SELECTION, MATCH_SELECTION);
     return matcher;
@@ -77,23 +75,21 @@ public final class FilesContract {
    * contain the file itself and all the ancestor files of the hierarchy. The
    * first item in the cursor will be the root ancestor, the last item will be
    * the file given there.
-   *
-   * @param fileLocation the {@link FileInfo#LOCATION} of the file
    */
-  public static Uri buildHierarchyUri(Context context, String fileLocation) {
-    checkNotNull(fileLocation, "fileLocation");
+  public static Uri buildHierarchyUri(Context context, String id) {
+    checkNotNull(id, "id");
     return getAuthority(context)
         .buildUpon()
         .appendPath(PATH_HIERARCHY)
-        .appendPath(fileLocation)
+        .appendPath(id)
         .build();
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} from the given content URI built with
+   * Gets the ID from the given content URI built with
    * {@link #buildHierarchyUri(Context, String)}
    */
-  public static String getHierarchyFileLocation(Uri hierarchyUri) {
+  public static String getHierarchyFileId(Uri hierarchyUri) {
     List<String> segments = hierarchyUri.getPathSegments();
     checkArgument(segments.size() == 2, segments.size());
     checkArgument(segments.get(0).equals(PATH_HIERARCHY), segments.get(0));
@@ -108,30 +104,28 @@ public final class FilesContract {
    * Creates a single file content URI to be queried, if the file exists, the
    * resulting cursor will contain exactly one row, otherwise the cursor will be
    * empty.
-   *
-   * @param fileLocation the {@link FileInfo#LOCATION} of the file
    */
-  public static Uri buildFileUri(Context context, String fileLocation) {
-    checkNotNull(fileLocation, "fileLocation");
-    return filesUriBuilder(context).appendPath(fileLocation).build();
+  public static Uri buildFileUri(Context context, String id) {
+    checkNotNull(id, "id");
+    return filesUriBuilder(context).appendPath(id).build();
   }
 
   /**
-   * Creates a URI based on a parent file's {@link FileInfo#LOCATION} and the
+   * Creates a URI based on a parent file's ID and the
    * name of a file under that parent.
    */
-  public static Uri buildFileUri(Context context, String parentLocation, String filename) {
-    Uri uri = Uri.parse(parentLocation).buildUpon().appendPath(filename).build();
+  public static Uri buildFileUri(Context context, String parentId, String name) {
+    Uri uri = Uri.parse(parentId).buildUpon().appendPath(name).build();
     return buildFileUri(context, uri.toString());
   }
 
   /**
    * Creates a URI for querying the children of the given directory.
    */
-  public static Uri buildFileChildrenUri(Context context, String directoryLocation, boolean showHidden) {
-    checkNotNull(directoryLocation, "directoryLocation");
+  public static Uri buildFileChildrenUri(Context context, String dirId, boolean showHidden) {
+    checkNotNull(dirId, "dirId");
     return filesUriBuilder(context)
-        .appendPath(directoryLocation)
+        .appendPath(dirId)
         .appendPath(PATH_CHILDREN)
         .appendQueryParameter(PARAM_SHOW_HIDDEN, Boolean.toString(showHidden))
         .build();
@@ -144,10 +138,10 @@ public final class FilesContract {
   /**
    * Creates a URI for querying the given files.
    */
-  public static Uri buildSelectionUri(Context context, String... locations) {
+  public static Uri buildSelectionUri(Context context, String... ids) {
     Uri.Builder builder = selectionUriBuilder(context);
-    for (String location : locations) {
-      builder.appendQueryParameter(PARAM_SELECTION, location);
+    for (String id : ids) {
+      builder.appendQueryParameter(PARAM_SELECTION, id);
     }
     return builder.build();
   }
@@ -157,9 +151,14 @@ public final class FilesContract {
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} of the given file.
+   * @deprecated use {@link #getFileId(File)} instead
    */
+  @Deprecated
   public static String getFileLocation(File file) {
+    return getFileId(file);
+  }
+
+  public static String getFileId(File file) {
     /* TODO test this
      * Don't use File.toURI as it will append a "/" to the end of the URI
      * depending on whether or not the file is a directory, that means two calls
@@ -172,10 +171,21 @@ public final class FilesContract {
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} from the given URI built with {@link
+   * Gets the {@link FileInfo#ID} from the given URI built with {@link
    * #buildFileUri(Context, String)}.
+   *
+   * @deprecated use {@link #getFileId(Uri)} instead
    */
+  @Deprecated
   public static String getFileLocation(Uri uri) {
+    return getFileId(uri);
+  }
+
+  /**
+   * Gets the file ID from the given URI built with
+   * {@link #buildFileUri(Context, String)}.
+   */
+  public static String getFileId(Uri uri) {
     return checkFilesUri(uri).get(1);
   }
 
@@ -187,33 +197,34 @@ public final class FilesContract {
   }
 
   /**
-   * Creates a new directory. Do not call this on the UI thread.
+   * Creates a new directory.
    *
-   * @param parentLocation the {@link FileInfo#LOCATION} of the parent
-   * @param name           the name of the new directory
+   * @param parentId the ID of the parent
+   * @param name     the name of the new directory
    * @return true if directory created successfully, false otherwise
+   * @throws IllegalStateException if called from main thread
    */
-  public static boolean createDirectory(Context context, String parentLocation, String name) {
+  public static boolean createDirectory(Context context, String parentId, String name) {
     ensureNonMainThread();
-    Uri uri = buildFileUri(context, parentLocation, name);
+    Uri uri = buildFileUri(context, parentId, name);
     return context.getContentResolver().insert(uri, null) != null;
   }
 
 
   /**
-   * Gets a name that does not exist at the given directory {@code location}.
+   * Gets a name that does not exist at the given directory ID.
    *
-   * @param location the parent directory's {@link FileInfo#LOCATION}
+   * @param parentId the parent directory's ID
    * @param baseName the basename for the return directory's name, if there is
    *                 already a file with the same name, a number will be
    *                 appended
    * @throws IllegalStateException if called from main thread
    */
   public static String getNameSuggestion(
-      Context context, String location, String baseName) {
+      Context context, String parentId, String baseName) {
     ensureNonMainThread();
     Bundle args = new Bundle(2);
-    args.putString(EXTRA_FILE_LOCATION, location);
+    args.putString(EXTRA_FILE_ID, parentId);
     args.putString(EXTRA_NEW_NAME, baseName);
     Uri uri = buildFilesUri(context);
     ContentResolver resolver = context.getContentResolver();
@@ -228,12 +239,12 @@ public final class FilesContract {
    * @throws IllegalStateException if called from main thread
    */
   public static void rename(
-      Context context, String oldFileLocation, String newName) throws IOException {
+      Context context, String id, String newName) throws IOException {
     ensureNonMainThread();
     Bundle args = new Bundle(2);
-    args.putString(EXTRA_FILE_LOCATION, oldFileLocation);
+    args.putString(EXTRA_FILE_ID, id);
     args.putString(EXTRA_NEW_NAME, newName);
-    Uri uri = buildFileUri(context, oldFileLocation);
+    Uri uri = buildFileUri(context, id);
     ContentResolver resolver = context.getContentResolver();
     Bundle result = resolver.call(uri, METHOD_RENAME, null, args);
     IOException e = (IOException) result.getSerializable(EXTRA_ERROR);
@@ -243,24 +254,27 @@ public final class FilesContract {
   }
 
   /**
-   * Deletes the files identified by the given {@link FileInfo#LOCATION}s. Do
-   * not call this on the UI thread.
+   * Deletes the files identified by the given IDs.
+   *
+   * @throws IllegalStateException if called from main thread
    */
-  public static void delete(Context context, Collection<String> fileLocations) {
+  public static void delete(Context context, Collection<String> ids) {
     ensureNonMainThread();
-    String[] array = fileLocations.toArray(new String[fileLocations.size()]);
+    String[] array = ids.toArray(new String[ids.size()]);
     Bundle args = new Bundle(1);
-    args.putStringArray(EXTRA_FILE_LOCATIONS, array);
+    args.putStringArray(EXTRA_FILE_IDS, array);
     Uri uri = buildFilesUri(context);
     context.getContentResolver().call(uri, METHOD_DELETE, null, args);
   }
 
   /**
-   * Copies the files identified by the given {@link FileInfo#LOCATION}s to the
-   * destination {@link FileInfo#LOCATION}. Do not call this on the UI thread.
+   * Copies the files identified by the given IDs to the
+   * destination directory. Do not call this on the UI thread.
+   *
+   * @throws IllegalStateException if called from main thread
    */
-  public static void copy(Context context, Collection<String> locations, String dstLocation) {
-    paste(context, locations, dstLocation, METHOD_COPY);
+  public static void copy(Context context, Collection<String> srcIds, String dstId) {
+    paste(context, srcIds, dstId, METHOD_COPY);
   }
 
   @Deprecated
@@ -269,25 +283,22 @@ public final class FilesContract {
   }
 
   /**
-   * Moves the files identified by the given {@link FileInfo#LOCATION}s to the
-   * destination {@link FileInfo#LOCATION}. Do not call this on the UI thread.
+   * Moves the files identified by the given IDs to the
+   * destination directory. Do not call this on the UI thread.
    */
-  public static void move(Context context, Collection<String> fileLocations, String dstLocation) {
-    paste(context, fileLocations, dstLocation, METHOD_CUT);
+  public static void move(Context context, Collection<String> srcIds, String dstId) {
+    paste(context, srcIds, dstId, METHOD_CUT);
   }
 
   private static void paste(
-      Context context,
-      Collection<String> fileLocations,
-      String dstLocation,
-      String method) {
+      Context context, Collection<String> srcIds, String dstId, String method) {
 
     ensureNonMainThread();
-    String[] array = fileLocations.toArray(new String[fileLocations.size()]);
+    String[] array = srcIds.toArray(new String[srcIds.size()]);
     Bundle args = new Bundle(2);
-    args.putStringArray(EXTRA_FILE_LOCATIONS, array);
-    args.putString(EXTRA_DESTINATION_LOCATION, dstLocation);
-    Uri uri = buildFileUri(context, dstLocation);
+    args.putStringArray(EXTRA_FILE_IDS, array);
+    args.putString(EXTRA_DESTINATION_ID, dstId);
+    Uri uri = buildFileUri(context, dstId);
     context.getContentResolver().call(uri, method, null, args);
   }
 
@@ -303,13 +314,21 @@ public final class FilesContract {
   public final static class FileInfo {
 
     /**
+     * Type: STRING
+     */
+    public static final String ID = "id";
+
+    /**
      * The location of a file, this is actually the file system URI of the file,
      * but named location instead of URI to avoid confusion with Android's
      * content URI.
      * <p/>
      * Type: STRING
+     *
+     * @deprecated use {@link #ID} instead
      */
-    public static final String LOCATION = "location";
+    @Deprecated
+    public static final String LOCATION = ID;
 
     /**
      * Concrete MIME type of a file. For example, "image/png" or

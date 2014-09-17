@@ -20,7 +20,6 @@ import static com.google.common.io.Files.write;
 import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.provider.FileCursors.getLastModified;
-import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
@@ -30,7 +29,6 @@ import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
 import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 import static l.files.provider.FilesContract.buildSelectionUri;
-import static l.files.provider.FilesContract.getFileLocation;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
@@ -230,14 +228,14 @@ public final class FilesProviderTest extends FileBaseTest {
   }
 
   private static void verify(Cursor cursor, File[] files) {
-    List<String> expected = getLocations(files);
-    List<String> actual = getLocations(cursor);
+    List<String> expected = getIds(files);
+    List<String> actual = getIds(cursor);
     assertEquals(expected, actual);
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
       assertEquals(file.getName(), FileCursors.getName(cursor));
-      assertEquals(getFileLocation(file), getLocation(cursor));
+      assertEquals(FilesContract.getFileId(file), FileCursors.getId(cursor));
       assertEquals(file.lastModified(), getLastModified(cursor));
       assertEquals(file.length(), getSize(cursor));
       assertEquals(file.isDirectory(), isDirectory(cursor));
@@ -246,19 +244,19 @@ public final class FilesProviderTest extends FileBaseTest {
     }
   }
 
-  private static List<String> getLocations(Cursor cursor) {
+  private static List<String> getIds(Cursor cursor) {
     List<String> names = newArrayListWithCapacity(cursor.getCount());
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
-      names.add(getLocation(cursor));
+      names.add(FileCursors.getId(cursor));
     }
     return names;
   }
 
-  private static List<String> getLocations(File[] files) {
+  private static List<String> getIds(File[] files) {
     List<String> names = newArrayListWithCapacity(files.length);
     for (File file : files) {
-      names.add(getFileLocation(file));
+      names.add(FilesContract.getFileId(file));
     }
     return names;
   }
@@ -269,19 +267,19 @@ public final class FilesProviderTest extends FileBaseTest {
 
   private Cursor queryChildren(File dir, boolean showHidden, String order) {
     Context context = getContext();
-    Uri uri = buildFileChildrenUri(context, getFileLocation(dir), showHidden);
+    Uri uri = buildFileChildrenUri(context, FilesContract.getFileId(dir), showHidden);
     ContentResolver resolver = context.getContentResolver();
     return resolver.query(uri, null, null, null, order);
   }
 
   private Cursor querySelection(File... files) {
-    String[] locations = new String[files.length];
-    for (int i = 0; i < locations.length; i++) {
-      locations[i] = getFileLocation(files[i]);
+    String[] ids = new String[files.length];
+    for (int i = 0; i < ids.length; i++) {
+      ids[i] = FilesContract.getFileId(files[i]);
     }
     Context context = getContext();
     ContentResolver resolver = context.getContentResolver();
-    Uri uri = buildSelectionUri(context, locations);
+    Uri uri = buildSelectionUri(context, ids);
     return resolver.query(uri, null, null, null, null);
   }
 }
