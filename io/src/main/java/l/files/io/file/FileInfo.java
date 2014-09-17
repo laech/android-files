@@ -8,6 +8,7 @@ import com.google.auto.value.AutoValue;
 import java.io.File;
 import java.io.IOException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.io.file.Stat.S_ISBLK;
 import static l.files.io.file.Stat.S_ISCHR;
 import static l.files.io.file.Stat.S_ISDIR;
@@ -52,6 +53,8 @@ public abstract class FileInfo {
    * @throws IOException includes path is not accessible or doesn't exist
    */
   public static FileInfo read(String parent, String child) throws IOException {
+    checkNotNull(parent, "parent");
+    checkNotNull(child, "child");
     String path = concat(parent, child);
     return read(path);
   }
@@ -60,6 +63,7 @@ public abstract class FileInfo {
    * @throws IOException includes path is not accessible or doesn't exist
    */
   public static FileInfo read(String path) throws IOException {
+    checkNotNull(path, "path");
     Stat stat = Stat.lstat(path);
     return new AutoValue_FileInfo(path, stat);
   }
