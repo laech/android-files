@@ -34,6 +34,7 @@ import static l.files.provider.FileCursors.getLastModified;
 import static l.files.provider.FileCursors.getLocation;
 import static l.files.provider.FileCursors.getMediaType;
 import static l.files.provider.FileCursors.getSize;
+import static l.files.provider.FileCursors.getType;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
 import static l.files.provider.FilesContract.FileInfo;
@@ -41,6 +42,7 @@ import static l.files.provider.FilesContract.FileInfo.LOCATION;
 import static l.files.provider.FilesContract.FileInfo.MODIFIED;
 import static l.files.provider.FilesContract.FileInfo.NAME;
 import static l.files.provider.FilesContract.FileInfo.READABLE;
+import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
 
 public final class Decorations {
   private Decorations() {}
@@ -223,13 +225,13 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to indicate whether a {@link FileInfo} is a file instead
-   * of an directory.
+   * Returns a function to indicate whether a {@link FileInfo} is a regular
+   * file.
    */
   public static Decoration<Boolean> isFile() {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
-        return !isDirectory(getCursor(adapter, position));
+        return getType(getCursor(adapter, position)).equals(TYPE_REGULAR_FILE);
       }
     };
   }
@@ -271,6 +273,20 @@ public final class Decorations {
     return new Decoration<Uri>() {
       @Override public Uri get(int position, Adapter adapter) {
         return Uri.parse(decoration.get(position, adapter));
+      }
+    };
+  }
+
+  @SafeVarargs public static Decoration<Boolean> all(
+      final Decoration<Boolean>... decorations) {
+    return new Decoration<Boolean>() {
+      @Override public Boolean get(int position, Adapter adapter) {
+        for (Decoration<Boolean> decoration : decorations) {
+          if (!decoration.get(position, adapter)) {
+            return false;
+          }
+        }
+        return true;
       }
     };
   }
