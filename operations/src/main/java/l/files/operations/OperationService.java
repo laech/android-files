@@ -111,14 +111,15 @@ public final class OperationService extends Service {
   }
 
   @Override public int onStartCommand(Intent intent, int flags, int startId) {
-    if (intent != null) {
-      if (ACTION_CANCEL.equals(intent.getAction())) {
-        cancelTask(intent);
-      } else {
-        executeTask(intent, startId);
-      }
+    if (ACTION_CANCEL.equals(intent.getAction())) {
+      cancelTask(intent);
+    } else {
+      executeTask(intent, startId);
     }
-    return START_STICKY;
+    // Return START_NOT_STICKY because this service shouldn't be automatically
+    // restarted, after the process died, especially if the cause of the crash
+    // was programming error
+    return START_NOT_STICKY;
   }
 
   private void executeTask(Intent intent, int startId) {
@@ -130,7 +131,6 @@ public final class OperationService extends Service {
     // from operations-ui
     startForeground(startId, new Notification.Builder(this)
         .setSmallIcon(R.drawable.ic_launcher)
-        .setAutoCancel(true)
         .build());
 
     Task task = newTask(data, startId, bus, handler);
