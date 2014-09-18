@@ -13,7 +13,7 @@ abstract class AbstractOperation implements FileOperation {
    * endless amount of errors (resulting in OutOfMemoryError). And there is not
    * much point of continuing if number of errors reached this amount.
    */
-  private static final int ERROR_LIMIT = 100;
+  private static final int ERROR_LIMIT = 20;
 
   private final Iterable<String> paths;
 
