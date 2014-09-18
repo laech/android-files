@@ -6,6 +6,7 @@ import android.os.Message;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
+import com.google.common.base.Throwables;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -37,7 +38,7 @@ final class PathObserver extends FileObserver {
   private static final Handler rethrow = new Handler(getMainLooper()) {
     @Override public void handleMessage(Message msg) {
       super.handleMessage(msg);
-      throw (RuntimeException) msg.obj;
+      throw Throwables.propagate((Throwable) msg.obj);
     }
   };
 
