@@ -1,5 +1,8 @@
 package l.files.operations;
 
+import android.content.ComponentName;
+import android.content.Intent;
+
 import com.google.common.base.Function;
 
 import java.io.File;
@@ -9,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import de.greenrobot.event.EventBus;
 import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
 
@@ -18,15 +22,36 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.util.concurrent.CountDownSubject.countDown;
+import static l.files.operations.OperationService.ACTION_CANCEL;
+import static l.files.operations.OperationService.EXTRA_TASK_ID;
 import static l.files.operations.OperationService.copy;
 import static l.files.operations.OperationService.delete;
 import static l.files.operations.OperationService.move;
+import static l.files.operations.OperationService.newCancelIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public final class OperationServiceTest extends FileBaseTest {
+
+  public void testCancelIntent() throws Exception {
+    Intent intent = newCancelIntent(getContext(), 101);
+    ASSERT.that(intent.getAction()).is(ACTION_CANCEL);
+    ASSERT.that(intent.getIntExtra(EXTRA_TASK_ID, -1)).is(101);
+    ASSERT.that(intent.getComponent())
+        .is(new ComponentName(getContext(), OperationService.class));
+  }
+
+  public void testCancelTaskNotFound() throws Exception {
+    OperationService service = new OperationService();
+    service.onCreate();
+    service.bus = mock(EventBus.class);
+    service.onStartCommand(newCancelIntent(getContext(), 1011), 0, 0);
+    verify(service.bus).post(TaskNotFound.create(1011));
+  }
 
   public void testMovesFile() throws Exception {
     File src = tmp().createFile("a");

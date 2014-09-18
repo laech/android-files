@@ -73,13 +73,14 @@ public final class OperationService extends Service {
     );
   }
 
-  /**
-   * Creates an intent to be broadcast for cancelling a running task.
-   */
-  public static PendingIntent newCancelIntent(Context context, int taskId) {
-    // Don't set class name as that causes pending intent to not work
-    Intent intent = new Intent(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, taskId);
-    return getService(context, taskId, intent, FLAG_UPDATE_CURRENT);
+  public static PendingIntent newCancelPendingIntent(Context context, int id) {
+    Intent intent = newCancelIntent(context, id);
+    return getService(context, id, intent, FLAG_UPDATE_CURRENT);
+  }
+
+  static Intent newCancelIntent(Context context, int id) {
+    return new Intent(context, OperationService.class)
+        .setAction(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, id);
   }
 
   @Override public IBinder onBind(Intent intent) {

@@ -24,7 +24,7 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getActivity;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.operations.OperationService.newCancelIntent;
+import static l.files.operations.OperationService.newCancelPendingIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
@@ -133,7 +133,7 @@ final class NotificationProvider {
         .addAction(
             android.R.drawable.ic_menu_close_clear_cancel,
             context.getString(android.R.string.cancel),
-            newCancelIntent(context, state.task().id()));
+            newCancelPendingIntent(context, state.task().id()));
   }
 
   private Notification newFailureNotification(TaskState.Failed state) {
