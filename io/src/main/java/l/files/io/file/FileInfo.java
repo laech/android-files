@@ -138,56 +138,56 @@ public abstract class FileInfo {
    * Gets the ID of the device containing this file.
    */
   public long device() {
-    return stat().dev;
+    return stat().dev();
   }
 
   /**
    * File serial number (inode) of this file.
    */
   public long inode() {
-    return stat().ino;
+    return stat().ino();
   }
 
   /**
    * Size of this file in bytes.
    */
   public long size() {
-    return stat().size;
+    return stat().size();
   }
 
   /**
    * Last modified time of this file in milliseconds.
    */
   public long modified() {
-    return stat().mtime * 1000L;
+    return stat().mtime() * 1000L;
   }
 
   public boolean isSocket() {
-    return S_ISSOCK(stat().mode);
+    return S_ISSOCK(stat().mode());
   }
 
   public boolean isSymbolicLink() {
-    return S_ISLNK(stat().mode);
+    return S_ISLNK(stat().mode());
   }
 
   public boolean isRegularFile() {
-    return S_ISREG(stat().mode);
+    return S_ISREG(stat().mode());
   }
 
   public boolean isBlockDevice() {
-    return S_ISBLK(stat().mode);
+    return S_ISBLK(stat().mode());
   }
 
   public boolean isDirectory() {
-    return S_ISDIR(stat().mode);
+    return S_ISDIR(stat().mode());
   }
 
   public boolean isCharacterDevice() {
-    return S_ISCHR(stat().mode);
+    return S_ISCHR(stat().mode());
   }
 
   public boolean isFifo() {
-    return S_ISFIFO(stat().mode);
+    return S_ISFIFO(stat().mode());
   }
 
   public File toFile() {

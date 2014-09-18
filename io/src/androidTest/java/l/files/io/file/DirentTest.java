@@ -60,6 +60,6 @@ public final class DirentTest extends FileBaseTest {
   }
 
   private long ino(File file) throws ErrnoException {
-    return stat(file.getPath()).ino;
+    return stat(file.getPath()).ino();
   }
 }

@@ -16,16 +16,14 @@
 
 package l.files.io.file;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
-import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
-import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+import com.google.auto.value.AutoValue;
 
 /**
  * @see <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">stat.h</a>
  */
+@AutoValue
 @SuppressWarnings("OctalInteger")
-final class Stat extends Native {
+abstract class Stat extends Native {
 
   /* See /usr/include/linux/stat.h for meaning of these constants. */
 
@@ -67,37 +65,37 @@ final class Stat extends Native {
   /**
    * Device ID of device containing file.
    */
-  public final long dev; /*dev_t*/
+  public abstract long dev(); /*dev_t*/
 
   /**
    * File serial number (inode).
    */
-  public final long ino; /*ino_t*/
+  public abstract long ino(); /*ino_t*/
 
   /**
    * Mode (permissions) of file.
    */
-  public final int mode; /*mode_t*/
+  public abstract int mode(); /*mode_t*/
 
   /**
    * Number of hard links to the file.
    */
-  public final long nlink; /*nlink_t*/
+  public abstract long nlink(); /*nlink_t*/
 
   /**
    * User ID of file.
    */
-  public final int uid; /*uid_t*/
+  public abstract int uid(); /*uid_t*/
 
   /**
    * Group ID of file.
    */
-  public final int gid; /*gid_t*/
+  public abstract int gid(); /*gid_t*/
 
   /**
    * Device ID (if file is character or block special).
    */
-  public final long rdev; /*dev_t*/
+  public abstract long rdev(); /*dev_t*/
 
   /**
    * For regular files, the file size in bytes.
@@ -110,35 +108,37 @@ final class Stat extends Native {
    * <p/>
    * For other file types, the use of this field is unspecified.
    */
-  public final long size; /*off_t*/
+  public abstract long size(); /*off_t*/
 
   /**
    * Time of last access in seconds.
    */
-  public final long atime; /*time_t*/
+  public abstract long atime(); /*time_t*/
 
   /**
    * Time of last data modification in seconds.
    */
-  public final long mtime; /*time_t*/
+  public abstract long mtime(); /*time_t*/
 
   /**
    * Time of last status change in seconds.
    */
-  public final long ctime; /*time_t*/
+  public abstract long ctime(); /*time_t*/
 
   /**
    * A file system-specific preferred I/O block size for this object. For some
    * file system types, this may vary from file to file.
    */
-  public final long blksize; /*blksize_t*/
+  public abstract long blksize(); /*blksize_t*/
 
   /**
    * Number of blocks allocated for this object.
    */
-  public final long blocks; /*blkcnt_t*/
+  public abstract long blocks(); /*blkcnt_t*/
 
-  public Stat(
+  Stat() {}
+
+  public static Stat create(
       long dev,
       long ino,
       int mode,
@@ -152,19 +152,20 @@ final class Stat extends Native {
       long ctime,
       long blksize,
       long blocks) {
-    this.dev = dev;
-    this.ino = ino;
-    this.mode = mode;
-    this.nlink = nlink;
-    this.uid = uid;
-    this.gid = gid;
-    this.rdev = rdev;
-    this.size = size;
-    this.atime = atime;
-    this.mtime = mtime;
-    this.ctime = ctime;
-    this.blksize = blksize;
-    this.blocks = blocks;
+    return new AutoValue_Stat(
+        dev,
+        ino,
+        mode,
+        nlink,
+        uid,
+        gid,
+        rdev,
+        size,
+        atime,
+        mtime,
+        ctime,
+        blksize,
+        blocks);
   }
 
   static {
@@ -183,15 +184,4 @@ final class Stat extends Native {
    */
   public static native Stat lstat(String path) throws ErrnoException;
 
-  @Override public int hashCode() {
-    return reflectionHashCode(this);
-  }
-
-  @Override public boolean equals(Object o) {
-    return reflectionEquals(this, o);
-  }
-
-  @Override public String toString() {
-    return reflectionToString(this, SHORT_PREFIX_STYLE);
-  }
 }

@@ -28,9 +28,9 @@ public final class DirectoryStreamTest extends FileBaseTest {
     try {
 
       List<Entry> expected = asList(
-          Entry.create(lstat(f1.getPath()).ino, f1.getName(), TYPE_REG),
-          Entry.create(lstat(f2.getPath()).ino, f2.getName(), TYPE_DIR),
-          Entry.create(lstat(f3.getPath()).ino, f3.getName(), TYPE_LNK)
+          Entry.create(lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
+          Entry.create(lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
+          Entry.create(lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
       );
       List<Entry> actual = newArrayList(stream);
       assertEquals(expected, actual);

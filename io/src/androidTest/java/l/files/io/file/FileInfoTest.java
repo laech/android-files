@@ -34,12 +34,12 @@ public final class FileInfoTest extends FileBaseTest {
 
   public void testInodeNumber() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).inode()).isEqualTo(lstat(f.getPath()).ino);
+    assertThat(info(f).inode()).isEqualTo(lstat(f.getPath()).ino());
   }
 
   public void testDeviceId() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).device()).isEqualTo(lstat(f.getPath()).dev);
+    assertThat(info(f).device()).isEqualTo(lstat(f.getPath()).dev());
   }
 
   public void testLastModifiedTime() throws Exception {

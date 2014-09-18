@@ -57,15 +57,15 @@ public final class StatTest extends FileBaseTest {
     Stat stat = fn.apply(file);
 
     assertNotNull(stat);
-    assertThat(stat.size).isEqualTo(file.length());
-    assertThat(stat.nlink).isEqualTo(1);
-    assertThat(stat.atime).isGreaterThanOrEqualTo(start);
-    assertThat(stat.ctime).isGreaterThanOrEqualTo(start);
-    assertThat(stat.mtime).isGreaterThanOrEqualTo(start);
-    assertThat(stat.atime).isGreaterThanOrEqualTo(end);
-    assertThat(stat.ctime).isGreaterThanOrEqualTo(end);
-    assertThat(stat.mtime).isGreaterThanOrEqualTo(end);
-    assertThat(stat.ino).isGreaterThan(0);
+    assertThat(stat.size()).isEqualTo(file.length());
+    assertThat(stat.nlink()).isEqualTo(1);
+    assertThat(stat.atime()).isGreaterThanOrEqualTo(start);
+    assertThat(stat.ctime()).isGreaterThanOrEqualTo(start);
+    assertThat(stat.mtime()).isGreaterThanOrEqualTo(start);
+    assertThat(stat.atime()).isGreaterThanOrEqualTo(end);
+    assertThat(stat.ctime()).isGreaterThanOrEqualTo(end);
+    assertThat(stat.mtime()).isGreaterThanOrEqualTo(end);
+    assertThat(stat.ino()).isGreaterThan(0);
 
     // TODO more tests when there are more supporting test functions
   }
