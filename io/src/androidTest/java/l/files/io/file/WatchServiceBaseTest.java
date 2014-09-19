@@ -11,14 +11,11 @@ import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
-import l.files.io.file.Path;
-import l.files.io.file.WatchEvent;
-import l.files.io.file.WatchService;
-import l.files.io.file.WatchServiceImpl;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.io.file.WatchService.IGNORED;
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -48,7 +45,7 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
   }
 
   protected WatchService createService() {
-    return new WatchServiceImpl();
+    return new WatchServiceImpl(IGNORED);
   }
 
   protected boolean stopServiceOnTearDown() {

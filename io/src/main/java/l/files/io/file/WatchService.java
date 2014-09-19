@@ -1,5 +1,7 @@
 package l.files.io.file;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.IOException;
 
 /**
@@ -27,7 +29,18 @@ public abstract class WatchService {
 
   WatchService() {}
 
-  private static final WatchService INSTANCE = new WatchServiceImpl();
+  /**
+   * System directories such as /dev, /proc contain special files (aren't really
+   * files), they generate tons of file system events (MODIFY, CLOSE_WRITE...)
+   * and they don't change. WatchService should not allow them and their sub
+   * paths to be watched.
+   */
+  static final ImmutableSet<Path> IGNORED = ImmutableSet.of(
+      Path.from("/proc"),
+      Path.from("/dev")
+  );
+
+  private static final WatchService INSTANCE = new WatchServiceImpl(IGNORED);
 
   public static WatchService get() {
     return INSTANCE;
@@ -43,6 +56,11 @@ public abstract class WatchService {
    * Stops monitoring on the given file path.
    */
   public abstract void unregister(Path path, WatchEvent.Listener listener);
+
+  /**
+   * Returns true if the path can be watched, false otherwise.
+   */
+  public abstract boolean isIgnored(Path path);
 
   /**
    * Checks whether the given file is currently being monitored.

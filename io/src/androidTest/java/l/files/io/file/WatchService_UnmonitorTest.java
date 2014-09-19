@@ -1,5 +1,6 @@
 package l.files.io.file;
 
+import java.io.File;
 import java.io.IOException;
 
 import static l.files.io.file.WatchEvent.Kind.CREATE;
@@ -10,15 +11,15 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
   public void testUnmonitorRootDirChildren() throws IOException {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
     service().register(Path.from("/"), listener);
-    assertTrue(service().toString(), service().hasObserver(Path.from("/dev")));
+    assertTrue(service().toString(), service().hasObserver(Path.from("/mnt")));
     assertTrue(service().toString(), service().hasObserver(Path.from("/data")));
 
     service().unregister(Path.from("/"), listener);
-    assertFalse(service().toString(), service().hasObserver(Path.from("/dev")));
+    assertFalse(service().toString(), service().hasObserver(Path.from("/mnt")));
     assertFalse(service().toString(), service().hasObserver(Path.from("/data")));
   }
 
-  public void testUnmonitorSelf() {
+  public void testUnmoniDonttorSelf() {
     Path dir = Path.from(tmp().get());
 
     WatchEvent.Listener listener = listen(tmpDir());
@@ -51,7 +52,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     Path dir = Path.from(tmp().createDir("a"));
 
     WatchEvent.Listener listener = listen(tmpDir());
-    listen(dir.toFile());
+    listen(new File(dir.toString()));
     assertTrue(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 
@@ -64,7 +65,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     Path dir = Path.from(tmp().createDir("a/b"));
 
     WatchEvent.Listener listener = listen(tmpDir());
-    listen(dir.parent().toFile());
+    listen(new File(dir.parent().toString()));
     assertFalse(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 
