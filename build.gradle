@@ -3,8 +3,8 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.12.+'
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
+    classpath 'com.android.tools.build:gradle:0.13.0'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
   }
 }
 
@@ -21,7 +21,7 @@ subprojects {
 
       defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 20
       }
 
       compileOptions {
@@ -51,6 +51,7 @@ subprojects {
     }
 
     dependencies {
+      compile libs.auto_value
       androidTestCompile project(':testlib')
       androidTestCompile libs.assertj
       androidTestCompile libs.truth
@@ -59,13 +60,6 @@ subprojects {
 
   def androidApp = com.android.build.gradle.AppPlugin
   def androidLib = com.android.build.gradle.LibraryPlugin
-
-  if (plugins.hasPlugin('android')
-      || plugins.hasPlugin('android-library')
-      || plugins.hasPlugin('com.android.application')
-      || plugins.hasPlugin('com.android.library')) {
-    apply plugin: 'android-apt'
-  }
 
   plugins.withType(androidLib, androidConfig)
   plugins.withType(androidApp, androidConfig)
