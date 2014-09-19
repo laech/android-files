@@ -29,6 +29,7 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static l.files.io.file.Files.normalize;
@@ -84,15 +85,13 @@ public final class FilesProvider extends ContentProvider {
       case MATCH_FILES_ID:
         String location = getFileId(uri);
         File file = new File(URI.create(location));
-        // TODO don't do anything special for directories, detect and return "application/x-directory"
         if (file.isDirectory()) {
           return MIME_DIR;
         }
         try {
           return detectMime(file);
         } catch (IOException e) {
-          logger.warn(e);
-          return null;
+          return OCTET_STREAM.toString();
         }
     }
     throw new UnsupportedOperationException("Unsupported Uri: " + uri);

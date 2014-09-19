@@ -37,12 +37,44 @@ import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
 import static l.files.provider.FilesContract.FileInfo.TYPE_SYMLINK;
 import static l.files.provider.FilesContract.FileInfo.TYPE_UNKNOWN;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
+import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.buildSelectionUri;
+import static l.files.provider.FilesContract.getFileId;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class FilesProviderTest extends FileBaseTest {
+
+  public void testDetectsMediaTypeForFile() throws Exception {
+    File file = tmp().createFile("a.mp3");
+    write("hello world", file, UTF_8);
+    ASSERT.that(getMediaType(file)).is("text/plain");
+  }
+
+  public void testDetectsMediaTypeForDirectory() throws Exception {
+    File dir = tmp().createDir("a.mp3");
+    ASSERT.that(getMediaType(dir)).is("application/x-directory");
+  }
+
+  public void testReturnUnknownMediaTypeForUnreadableFile() throws Exception {
+    File file = tmp().createFile("a.txt");
+    write("hello world", file, UTF_8);
+    ASSERT.that(file.setReadable(false)).isTrue();
+    ASSERT.that(getMediaType(file)).is("application/octet-stream");
+  }
+
+  public void testReturnUnknownMediaTypeForSystemFile() throws Exception {
+    File file = new File("/proc/1/maps");
+    assertThat(file).exists();
+    ASSERT.that(getMediaType(file)).is("application/octet-stream");
+  }
+
+  private String getMediaType(File file) {
+    Uri uri = buildFileUri(getContext(), getFileId(file));
+    return getContext().getContentResolver().getType(uri);
+  }
 
   public void testQuerySymlink() throws Exception {
     File a = tmp().createFile("a");
