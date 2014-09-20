@@ -30,12 +30,13 @@ public abstract class WatchService {
   WatchService() {}
 
   /**
-   * System directories such as /dev, /proc contain special files (aren't really
-   * files), they generate tons of file system events (MODIFY, CLOSE_WRITE...)
+   * System directories such as /dev, /proc contain special files (some aren't
+   * really files), they generate tons of file system events (MODIFY etc)
    * and they don't change. WatchService should not allow them and their sub
    * paths to be watched.
    */
   static final ImmutableSet<Path> IGNORED = ImmutableSet.of(
+      Path.from("/sys"),
       Path.from("/proc"),
       Path.from("/dev")
   );
