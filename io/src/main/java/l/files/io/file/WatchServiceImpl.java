@@ -135,7 +135,7 @@ final class WatchServiceImpl extends WatchService implements Closeable {
           listener.onEvent(event);
         }
       }
-      logger.debug("%s", event);
+      logger.verbose(event);
     }
 
     private boolean isObserverStopped(int event) {

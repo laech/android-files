@@ -4,7 +4,6 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 
@@ -16,6 +15,7 @@ import java.util.Set;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
+import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
@@ -218,12 +218,12 @@ final class PathObserver extends FileObserver {
   }
 
   private void log(int event, String child) {
-    logger.debug("%s, parent=%s, path=%s", getEventName(event), path, child);
+    logger.verbose("%s, parent=%s, path=%s", getEventName(event), path, child);
   }
 
   @Override public String toString() {
     synchronized (this) {
-      return Objects.toStringHelper(this)
+      return toStringHelper(this)
           .add("path", path)
           .add("paths", paths)
           .toString();

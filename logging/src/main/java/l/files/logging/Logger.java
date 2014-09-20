@@ -4,6 +4,7 @@ import android.util.Log;
 
 import static android.util.Log.DEBUG;
 import static android.util.Log.ERROR;
+import static android.util.Log.VERBOSE;
 import static android.util.Log.WARN;
 import static android.util.Log.isLoggable;
 import static java.lang.String.format;
@@ -18,6 +19,18 @@ public final class Logger {
 
   public static Logger get(Class<?> target) {
     return new Logger(target.getSimpleName());
+  }
+
+  public void verbose(Object msg) {
+    if (isLoggable(tag, VERBOSE)) {
+      Log.v(tag, String.valueOf(msg));
+    }
+  }
+
+  public void verbose(String format, Object arg1, Object arg2, Object arg3) {
+    if (isLoggable(tag, VERBOSE)) {
+      Log.v(tag, format(format, arg1, arg2, arg3));
+    }
   }
 
   public void debug(String message) {
