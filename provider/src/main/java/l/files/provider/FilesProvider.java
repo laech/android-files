@@ -40,6 +40,7 @@ import static l.files.provider.FilesContract.EXTRA_ERROR;
 import static l.files.provider.FilesContract.EXTRA_FILE_ID;
 import static l.files.provider.FilesContract.EXTRA_FILE_IDS;
 import static l.files.provider.FilesContract.EXTRA_NEW_NAME;
+import static l.files.provider.FilesContract.FileInfo.COLUMNS;
 import static l.files.provider.FilesContract.FileInfo.MIME_DIR;
 import static l.files.provider.FilesContract.MATCH_FILES_ID;
 import static l.files.provider.FilesContract.MATCH_FILES_ID_CHILDREN;
@@ -58,18 +59,6 @@ import static l.files.provider.FilesContract.newMatcher;
 public final class FilesProvider extends ContentProvider {
 
   private static final Logger logger = Logger.get(FilesProvider.class);
-
-  private static final String[] DEFAULT_COLUMNS = {
-      FilesContract.FileInfo.ID,
-      FilesContract.FileInfo.NAME,
-      FilesContract.FileInfo.SIZE,
-      FilesContract.FileInfo.READABLE,
-      FilesContract.FileInfo.WRITABLE,
-      FilesContract.FileInfo.MIME,
-      FilesContract.FileInfo.MODIFIED,
-      FilesContract.FileInfo.HIDDEN,
-      FilesContract.FileInfo.TYPE,
-  };
 
   private UriMatcher matcher;
   private FilesCache helper;
@@ -131,7 +120,7 @@ public final class FilesProvider extends ContentProvider {
       String sortOrder) {
 
     if (projection == null) {
-      projection = DEFAULT_COLUMNS;
+      projection = COLUMNS;
     }
 
     switch (matcher.match(uri)) {
@@ -166,8 +155,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryFiles(Uri uri, String[] projection, String sortOrder) {
-    FileInfo[] data = helper.get(uri, null);
-    return newFileCursor(uri, projection, sortOrder, data);
+    return helper.get(uri, projection, sortOrder, null);
   }
 
   private Cursor querySelection(Uri uri, String[] projection, String sortOrder) {

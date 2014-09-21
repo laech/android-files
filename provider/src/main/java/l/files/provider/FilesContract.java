@@ -104,6 +104,15 @@ public final class FilesContract {
    * resulting cursor will contain exactly one row, otherwise the cursor will be
    * empty.
    */
+  public static Uri buildFileUri(Context context, File f) {
+    return buildFileUri(context, getFileId(f));
+  }
+
+  /**
+   * Creates a single file content URI to be queried, if the file exists, the
+   * resulting cursor will contain exactly one row, otherwise the cursor will be
+   * empty.
+   */
   public static Uri buildFileUri(Context context, String id) {
     checkNotNull(id, "id");
     return filesUriBuilder(context).appendPath(id).build();
@@ -121,13 +130,28 @@ public final class FilesContract {
   /**
    * Creates a URI for querying the children of the given directory.
    */
-  public static Uri buildFileChildrenUri(Context context, String dirId, boolean showHidden) {
+  public static Uri buildFilesUri(Context context, File dir, boolean showHidden) {
+    return buildFilesUri(context, getFileId(dir), showHidden);
+  }
+
+  /**
+   * Creates a URI for querying the children of the given directory.
+   */
+  public static Uri buildFilesUri(Context context, String dirId, boolean showHidden) {
     checkNotNull(dirId, "dirId");
     return filesUriBuilder(context)
         .appendPath(dirId)
         .appendPath(PATH_CHILDREN)
         .appendQueryParameter(PARAM_SHOW_HIDDEN, Boolean.toString(showHidden))
         .build();
+  }
+
+  /**
+   * @deprecated use {@link #buildFilesUri(Context, String, boolean)} instead
+   */
+  @Deprecated
+  public static Uri buildFileChildrenUri(Context context, String dirId, boolean showHidden) {
+    return buildFilesUri(context, dirId, showHidden);
   }
 
   private static Uri.Builder filesUriBuilder(Context context) {
@@ -414,6 +438,18 @@ public final class FilesContract {
      * not be calculated, as such their will appear at the end of the list.
      */
     public static final String SORT_BY_SIZE = SortBy.SIZE.name();
+
+    static final String[] COLUMNS = {
+        ID,
+        NAME,
+        SIZE,
+        READABLE,
+        WRITABLE,
+        MIME,
+        MODIFIED,
+        HIDDEN,
+        TYPE,
+    };
 
     FileInfo() {
     }

@@ -1,9 +1,14 @@
 package l.files.provider;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.net.Uri;
 import android.os.CancellationSignal;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.cache.Cache;
@@ -14,9 +19,10 @@ import com.google.common.cache.RemovalNotification;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 import l.files.io.file.FileInfo;
 import l.files.io.file.Path;
@@ -24,12 +30,13 @@ import l.files.io.file.WatchEvent;
 import l.files.io.file.WatchService;
 import l.files.logging.Logger;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
 import static l.files.provider.FilesContract.buildFileUri;
-import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesContract.getFileId;
 
 final class FilesCache implements
     WatchEvent.Listener,
@@ -50,12 +57,10 @@ final class FilesCache implements
 
 
   private final Context context;
+  private final ContentResolver resolver;
   private final WatchService service;
 
-  // TODO One optimization may be to use a batch per directory
-  // and a discrete executor for each, so that updates for a directory is not
-  // blocking another directory
-  private final EventBatch batch;
+  private final Map<Path, EventBatch> batches;
 
   private final Cache<Path, ValueMap> cache =
       CacheBuilder.newBuilder()
@@ -64,19 +69,51 @@ final class FilesCache implements
           .build();
 
   FilesCache(Context context, WatchService service) {
-    this.context = context;
-    this.service = service;
-    this.batch = new EventBatch(context.getContentResolver(), this);
+    this(context, service, context.getContentResolver());
   }
 
-  public FileInfo[] get(Uri uri, CancellationSignal signal) {
-    ValueMap map = getCache(uri);
-    return showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
+  FilesCache(Context context, WatchService service, ContentResolver resolver) {
+    this.context = checkNotNull(context, "context");
+    this.resolver = checkNotNull(resolver, "resolver");
+    this.service = checkNotNull(service, "service");
+    this.batches = new HashMap<>();
+  }
+
+  // TODO implement CancellationSignal
+  public Cursor get(Uri uri, String[] columns, String sortOrder, CancellationSignal signal) {
+    final ValueMap map = getCache(uri);
+    final FileInfo[] files = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
+    return new CursorWrapper(newFileCursor(uri, columns, sortOrder, files)) {
+      // Hold a reference to keep the cache alive as long as the cursor is used
+      @SuppressWarnings("UnusedDeclaration")
+      private final Object cache = map;
+    };
+  }
+
+  @VisibleForTesting Object getFromCache(Path path) {
+    return cache.getIfPresent(path);
+  }
+
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileInfo[] files) {
+    sort(files, sortOrder);
+    Cursor c = new FileCursor(files, projection);
+    c.setNotificationUri(resolver, uri);
+    return c;
+  }
+
+  private void sort(FileInfo[] data, String sortOrder) {
+    if (sortOrder != null) {
+      Arrays.sort(data, SortBy.valueOf(sortOrder));
+    }
   }
 
   private ValueMap getCache(Uri uri) {
-    File file = new File(URI.create(getFileLocation(uri)));
+    File file = new File(URI.create(getFileId(uri)));
     Path path = Path.from(file);
+    if (!service.isWatchable(path)) {
+      return loadInto(new ValueMap(), path);
+    }
+
     boolean create = false;
     ValueMap values;
     synchronized (this) {
@@ -90,79 +127,89 @@ final class FilesCache implements
         cache.put(path, values);
       }
     }
+
     if (create) {
       logger.debug("Cache load: %s", path);
-      loadInto(values, path);
+      service.unregister(path, this);
+      try {
+        service.register(path, this);
+        loadInto(values, path);
+      } catch (IOException e) {
+        logger.debug(e, "Failed to read %s", path);
+      }
     }
     return values;
   }
 
-  private void loadInto(ValueMap map, Path path) {
-    service.unregister(path, this);
-    try {
-      service.register(path, this);
-    } catch (IOException e) {
-      // No longer exist etc
-      logger.warn(e);
-      return;
-    }
-
+  private ValueMap loadInto(ValueMap map, Path path) {
     String[] names = path.toFile().list();
     if (names == null) {
-      return;
+      return map;
     }
     for (String name : names) {
       try {
         Path child = path.child(name);
         map.put(child, FileInfo.read(child.toString()));
       } catch (IOException e) {
-        logger.warn(e);
+        logger.debug(e, "Failed to read %s", path);
       }
     }
+    return map;
   }
 
   @Override public void onEvent(WatchEvent event) {
     Path parent = event.path().parent();
-    String location = getFileLocation(parent.toFile());
+    String location = getFileId(parent.toFile());
     Uri uri = buildFileUri(context, location);
-    batch.batch(event, uri);
+    EventBatch batch;
+    synchronized (this) {
+      batch = batches.get(parent);
+      if (batch == null) {
+        batch = new EventBatch(resolver, uri, this);
+        batches.put(parent, batch);
+      }
+    }
+    batch.batch(event);
   }
 
-  @Override public void process(WatchEvent event) {
+  @Override public boolean process(WatchEvent event) {
     switch (event.kind()) {
       case CREATE:
       case MODIFY:
-        addOrUpdate(event.path());
-        break;
+        return addOrUpdate(event.path());
       case DELETE:
-        remove(event.path());
-        break;
+        return remove(event.path());
+      default:
+        throw new AssertionError(event);
     }
   }
 
-  private void addOrUpdate(Path path) {
+  private boolean addOrUpdate(Path path) {
     Path parent = path.parent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
-      return;
+      return false;
     }
 
     try {
-      data.put(path, FileInfo.read(path.toString()));
+      FileInfo newInfo = FileInfo.read(path.toString());
+      FileInfo oldInfo = data.put(path, newInfo);
+      return !Objects.equal(newInfo, oldInfo);
     } catch (IOException e) {
-      logger.warn(e, "Failed to read info %s", path);
-      remove(path);
+      logger.debug(e, "Failed to read %s", path);
+      return remove(path);
     }
   }
 
-  private void remove(Path path) {
+  private boolean remove(Path path) {
     Path parent = path.parent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
+      return false;
     } else {
-      data.remove(path);
+      return data.remove(path) != null;
     }
   }
 
@@ -178,17 +225,17 @@ final class FilesCache implements
   }
 
   static final class ValueMap {
-    private final ConcurrentMap<Path, FileInfo> map;
+    private final Map<Path, FileInfo> map;
 
     ValueMap() {
-      map = new ConcurrentHashMap<>();
+      map = new HashMap<>();
     }
 
-    FileInfo put(Path key, FileInfo value) {
+    synchronized FileInfo put(Path key, FileInfo value) {
       return map.put(key, value);
     }
 
-    FileInfo remove(Path key) {
+    synchronized FileInfo remove(Path key) {
       return map.remove(key);
     }
 
@@ -196,7 +243,7 @@ final class FilesCache implements
       return values(Predicates.<FileInfo>alwaysTrue());
     }
 
-    FileInfo[] values(Predicate<FileInfo> filter) {
+    synchronized FileInfo[] values(Predicate<FileInfo> filter) {
       List<FileInfo> list = newArrayListWithCapacity(map.size());
       for (FileInfo data : map.values()) {
         if (filter.apply(data)) {

@@ -6,26 +6,27 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import l.files.io.file.WatchEvent;
+import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 final class EventBatch implements Runnable {
 
+  private static final Logger logger = Logger.get(EventBatch.class);
+
   private static final int BATCH_DELAY_MILLIS = 200;
 
-  private final Executor executor =
-      new ThreadPoolExecutor(0, 1, 1L, SECONDS, new LinkedBlockingQueue<Runnable>());
+  private static final Executor executor = new ThreadPoolExecutor(
+      0, 1, 1L, SECONDS, new LinkedBlockingQueue<Runnable>());
 
   private final Handler handler = new Handler(Looper.getMainLooper()) {
     @Override public void handleMessage(Message msg) {
@@ -49,55 +50,48 @@ final class EventBatch implements Runnable {
    * is added. Hence this is declared as a LinkedHashSet as the order is
    * important.
    */
-  private LinkedHashSet<WatchEvent> events;
-  private Set<Uri> notifications;
-
-  private final Processor processor;
+  private final LinkedHashSet<WatchEvent> events;
   private final ContentResolver resolver;
+  private final Uri notificationUri;
+  private final Processor processor;
 
-  EventBatch(ContentResolver resolver, Processor processor) {
+  EventBatch(ContentResolver resolver, Uri notificationUri, Processor processor) {
     this.resolver = checkNotNull(resolver, "resolver");
+    this.notificationUri = checkNotNull(notificationUri, "notificationUri");
     this.processor = checkNotNull(processor, "processor");
-    init();
+    this.events = new LinkedHashSet<>();
   }
 
-  private void init() {
-    synchronized (this) {
-      this.events = newLinkedHashSet();
-      this.notifications = newHashSet();
-    }
-  }
-
-  public void batch(WatchEvent event, Uri notificationUri) {
+  public void batch(WatchEvent event) {
     synchronized (this) {
       events.remove(event);
       events.add(event);
-      notifications.add(notificationUri);
     }
-    // TODO this has the potential to never execute if events are flooding in non stop
     handler.removeMessages(0);
     handler.sendEmptyMessageDelayed(0, BATCH_DELAY_MILLIS);
   }
 
   @Override public void run() {
     Collection<WatchEvent> events;
-    Collection<Uri> notifications;
     synchronized (EventBatch.this) {
-      events = EventBatch.this.events;
-      notifications = EventBatch.this.notifications;
-      init();
+      events = new ArrayList<>(EventBatch.this.events);
+      this.events.clear();
     }
 
+    boolean changed = false;
     for (WatchEvent event : events) {
-      processor.process(event);
+      changed |= processor.process(event);
     }
-
-    for (Uri uri : notifications) {
-      resolver.notifyChange(uri, null);
+    if (changed) {
+      resolver.notifyChange(notificationUri, null);
+      logger.debug("Notifying %s", notificationUri);
     }
   }
 
   static interface Processor {
-    void process(WatchEvent event);
+    /**
+     * Returns true if notification should be sent for the given event.
+     */
+    boolean process(WatchEvent event);
   }
 }

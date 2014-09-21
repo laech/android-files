@@ -33,6 +33,12 @@ public final class Logger {
     }
   }
 
+  public void debug(Throwable e, String format, Object arg) {
+    if (isLoggable(tag, DEBUG)) {
+      Log.d(tag, format(format, arg), e);
+    }
+  }
+
   public void debug(String message) {
     debug(message, null);
   }
