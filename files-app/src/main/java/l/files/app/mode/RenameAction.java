@@ -10,6 +10,7 @@ import android.widget.AbsListView;
 import l.files.R;
 import l.files.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
+import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
@@ -18,11 +19,10 @@ import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.common.widget.ListViews.getCheckedItemPosition;
 import static l.files.provider.FileCursors.getLocation;
-import static l.files.provider.FilesContract.FileInfo;
 
 /**
  * Lets the user rename a selected file in the list view, to be renamed to the
- * directory identified by the given {@link FileInfo#LOCATION}.
+ * directory identified by the given {@link FilesContract.Files#LOCATION}.
  */
 public final class RenameAction extends MultiChoiceModeAction {
 

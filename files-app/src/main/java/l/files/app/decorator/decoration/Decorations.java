@@ -19,6 +19,7 @@ import java.util.Date;
 
 import l.files.app.IconFonts;
 import l.files.app.category.Categorizer;
+import l.files.provider.FilesContract;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -37,12 +38,11 @@ import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.getType;
 import static l.files.provider.FileCursors.isDirectory;
 import static l.files.provider.FileCursors.isReadable;
-import static l.files.provider.FilesContract.FileInfo;
-import static l.files.provider.FilesContract.FileInfo.LOCATION;
-import static l.files.provider.FilesContract.FileInfo.MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.NAME;
-import static l.files.provider.FilesContract.FileInfo.READABLE;
-import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
+import static l.files.provider.FilesContract.Files.LOCATION;
+import static l.files.provider.FilesContract.Files.MODIFIED;
+import static l.files.provider.FilesContract.Files.NAME;
+import static l.files.provider.FilesContract.Files.READABLE;
+import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
 
 public final class Decorations {
   private Decorations() {}
@@ -142,21 +142,21 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to {@link FileInfo#LOCATION}.
+   * Returns a function to {@link FilesContract.Files#LOCATION}.
    */
   public static Decoration<String> fileLocation() {
     return cursorString(LOCATION);
   }
 
   /**
-   * Returns a function to get the name for each {@link FileInfo}.
+   * Returns a function to get the name for each {@link FilesContract.Files}.
    */
   public static Decoration<String> fileName() {
     return cursorString(NAME);
   }
 
   /**
-   * Returns a function to get the readability of each {@link FileInfo}.
+   * Returns a function to get the readability of each {@link FilesContract.Files}.
    */
   public static Decoration<Boolean> fileReadable() {
     return cursorBoolean(READABLE);
@@ -164,14 +164,14 @@ public final class Decorations {
 
   /**
    * Returns a function to get the formatted last modified date of each {@link
-   * FileInfo}.
+   * FilesContract.Files}.
    */
   public static Decoration<String> fileDate(final Context context) {
     return cursorDateFormat(MODIFIED, context);
   }
 
   /**
-   * Returns a function to get the icon font for each {@link FileInfo}.
+   * Returns a function to get the icon font for each {@link FilesContract.Files}.
    */
   public static Decoration<Typeface> fileIcon(final AssetManager assets) {
     return new Decoration<Typeface>() {
@@ -187,7 +187,7 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to format the file size for each {@link FileInfo}.
+   * Returns a function to format the file size for each {@link FilesContract.Files}.
    */
   public static Decoration<String> fileSize(final Context context) {
     return new Decoration<String>() {
@@ -203,7 +203,7 @@ public final class Decorations {
   }
 
   /**
-   * Returns true if the {@link FileInfo#MODIFIED} is valid.
+   * Returns true if the {@link FilesContract.Files#MODIFIED} is valid.
    */
   public static Decoration<Boolean> fileHasDate() {
     return new Decoration<Boolean>() {
@@ -214,7 +214,7 @@ public final class Decorations {
   }
 
   /**
-   * Returns true if {@link FileInfo#READABLE} is true.
+   * Returns true if {@link FilesContract.Files#READABLE} is true.
    */
   public static Decoration<Boolean> fileIsReadable() {
     return new Decoration<Boolean>() {
@@ -225,7 +225,7 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to indicate whether a {@link FileInfo} is a regular
+   * Returns a function to indicate whether a {@link FilesContract.Files} is a regular
    * file.
    */
   public static Decoration<Boolean> isFile() {

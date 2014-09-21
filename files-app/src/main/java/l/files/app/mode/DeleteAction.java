@@ -30,7 +30,7 @@ import static l.files.provider.FileCursors.getLocation;
 /**
  * Deletes selected files from the list view cursor.
  *
- * @see FilesContract.FileInfo
+ * @see FilesContract.Files
  */
 public final class DeleteAction extends MultiChoiceModeAction {
 

@@ -13,10 +13,10 @@ import l.files.R;
 import l.files.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
+import l.files.provider.FilesContract;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
-import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileUri;
 
 public final class FilesPagerFragment extends Fragment {
@@ -25,7 +25,7 @@ public final class FilesPagerFragment extends Fragment {
   private static final String ARG_INITIAL_DIRECTORY_NAME = "initial_directory_name";
 
   /**
-   * @param initialDirectoryLocation the {@link FileInfo#LOCATION} of the
+   * @param initialDirectoryLocation the {@link FilesContract.Files#LOCATION} of the
    * initial directory to show
    * @param initialDirectoryName the name of the initial directory to show
    */
@@ -83,7 +83,7 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} of the directory that is currently
+   * Gets the {@link FilesContract.Files#LOCATION} of the directory that is currently
    * showing.
    */
   public String getCurrentDirectoryLocation() {
@@ -103,7 +103,7 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} of the initial showing directory of this
+   * Gets the {@link FilesContract.Files#LOCATION} of the initial showing directory of this
    * fragment.
    */
   private String getInitialDirectoryLocation() {

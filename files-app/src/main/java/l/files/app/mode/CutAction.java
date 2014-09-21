@@ -26,7 +26,7 @@ import static l.files.common.app.SystemServices.getClipboardManager;
 /**
  * Cuts the selected files from the list view cursor.
  *
- * @see FilesContract.FileInfo
+ * @see FilesContract.Files
  */
 public final class CutAction extends MultiChoiceModeAction {
 

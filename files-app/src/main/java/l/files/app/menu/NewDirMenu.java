@@ -9,15 +9,15 @@ import l.files.R;
 import l.files.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
+import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.provider.FilesContract.FileInfo;
 
 /**
  * Menu to allow user to create a new directory under a parent directory
- * identified by the given {@link FileInfo#LOCATION}.
+ * identified by the given {@link FilesContract.Files#LOCATION}.
  */
 public final class NewDirMenu extends OptionsMenuAction {
 

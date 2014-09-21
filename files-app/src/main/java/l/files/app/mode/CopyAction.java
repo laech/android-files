@@ -26,7 +26,7 @@ import static l.files.common.app.SystemServices.getClipboardManager;
 /**
  * Action to copy the selected files from a list view cursor.
  *
- * @see FilesContract.FileInfo
+ * @see FilesContract.Files
  */
 public final class CopyAction extends MultiChoiceModeAction {
 

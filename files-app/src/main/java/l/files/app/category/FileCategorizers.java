@@ -1,12 +1,12 @@
 package l.files.app.category;
 
 import l.files.R;
+import l.files.provider.FilesContract;
 
 import static java.lang.System.currentTimeMillis;
-import static l.files.provider.FilesContract.FileInfo;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
+import static l.files.provider.FilesContract.Files.SORT_BY_MODIFIED;
+import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
+import static l.files.provider.FilesContract.Files.SORT_BY_SIZE;
 
 public final class FileCategorizers {
   private FileCategorizers() {}
@@ -15,9 +15,9 @@ public final class FileCategorizers {
    * Gets a categorizer based on the given sort order.
    *
    * @param sortOrder the sort order, may be null
-   * @see FileInfo#SORT_BY_NAME
-   * @see FileInfo#SORT_BY_MODIFIED
-   * @see FileInfo#SORT_BY_SIZE
+   * @see FilesContract.Files#SORT_BY_NAME
+   * @see FilesContract.Files#SORT_BY_MODIFIED
+   * @see FilesContract.Files#SORT_BY_SIZE
    */
   public static Categorizer fromSortOrder(String sortOrder) {
     if (SORT_BY_MODIFIED.equals(sortOrder)) {
@@ -50,9 +50,9 @@ public final class FileCategorizers {
     }
 
     /**
-     * @see FileInfo#SORT_BY_NAME
-     * @see FileInfo#SORT_BY_MODIFIED
-     * @see FileInfo#SORT_BY_SIZE
+     * @see FilesContract.Files#SORT_BY_NAME
+     * @see FilesContract.Files#SORT_BY_MODIFIED
+     * @see FilesContract.Files#SORT_BY_SIZE
      */
     public String sortOrder() {
       return sortOrder;

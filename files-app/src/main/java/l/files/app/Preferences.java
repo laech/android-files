@@ -11,9 +11,9 @@ import l.files.analytics.Analytics;
 
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_SIZE;
+import static l.files.provider.FilesContract.Files.SORT_BY_MODIFIED;
+import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
+import static l.files.provider.FilesContract.Files.SORT_BY_SIZE;
 
 public final class Preferences {
 

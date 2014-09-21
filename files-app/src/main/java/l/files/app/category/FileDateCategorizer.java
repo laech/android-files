@@ -15,7 +15,7 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 /**
  * Categories files by their last modified date.
  *
- * @see FilesContract.FileInfo
+ * @see FilesContract.Files
  */
 final class FileDateCategorizer implements Categorizer {
 

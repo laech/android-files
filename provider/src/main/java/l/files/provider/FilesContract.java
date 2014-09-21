@@ -197,7 +197,7 @@ public final class FilesContract {
   }
 
   /**
-   * Gets the {@link FileInfo#ID} from the given URI built with {@link
+   * Gets the {@link Files#ID} from the given URI built with {@link
    * #buildFileUri(Context, String)}.
    *
    * @deprecated use {@link #getFileId(Uri)} instead
@@ -334,10 +334,7 @@ public final class FilesContract {
     }
   }
 
-  /**
-   * Represents a file.
-   */
-  public final static class FileInfo {
+  public final static class Files {
 
     /**
      * Type: STRING
@@ -451,7 +448,6 @@ public final class FilesContract {
         TYPE,
     };
 
-    FileInfo() {
-    }
+    private Files() {}
   }
 }

@@ -12,7 +12,7 @@ import l.files.provider.FileCursors;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static java.util.Arrays.sort;
-import static l.files.provider.FilesContract.FileInfo.SORT_BY_NAME;
+import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
 import static l.files.provider.FilesContract.getFileLocation;
 import static l.files.provider.bookmarks.BookmarksContract.buildBookmarkUri;
 import static l.files.provider.bookmarks.BookmarksContract.buildBookmarksUri;

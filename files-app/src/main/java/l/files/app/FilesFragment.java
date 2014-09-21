@@ -27,6 +27,7 @@ import l.files.app.mode.RenameAction;
 import l.files.app.mode.SelectAllAction;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
+import l.files.provider.FilesContract;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -36,7 +37,6 @@ import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.app.Preferences.isShowHiddenFilesKey;
 import static l.files.app.Preferences.isSortOrderKey;
-import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.buildFileChildrenUri;
 
 public final class FilesFragment extends BaseFileListFragment
@@ -58,14 +58,14 @@ public final class FilesFragment extends BaseFileListFragment
 
   /**
    * Creates a fragment to show the contents under the directory's {@link
-   * FileInfo#LOCATION}.
+   * FilesContract.Files#LOCATION}.
    */
   public static FilesFragment create(String directoryLocation) {
     return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY_LOCATION, directoryLocation);
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} of the directory that this fragment is
+   * Gets the {@link FilesContract.Files#LOCATION} of the directory that this fragment is
    * currently showing.
    */
   public String getDirectoryLocation() {

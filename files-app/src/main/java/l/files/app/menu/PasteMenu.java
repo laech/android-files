@@ -11,6 +11,7 @@ import l.files.analytics.AnalyticsMenu;
 import l.files.app.Clipboards;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
+import l.files.provider.FilesContract;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
@@ -20,13 +21,12 @@ import static l.files.app.Clipboards.getFileLocations;
 import static l.files.app.Clipboards.isCopy;
 import static l.files.app.Clipboards.isCut;
 import static l.files.common.app.SystemServices.getClipboardManager;
-import static l.files.provider.FilesContract.FileInfo;
 import static l.files.provider.FilesContract.copy;
 import static l.files.provider.FilesContract.cut;
 
 /**
  * Menu to paste files to a directory identified by the given {@link
- * FileInfo#LOCATION}.
+ * FilesContract.Files#LOCATION}.
  */
 public final class PasteMenu extends OptionsMenuAction {
 

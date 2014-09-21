@@ -6,15 +6,16 @@ import android.net.Uri;
 
 import java.util.List;
 
+import l.files.provider.FilesContract;
+
 import static android.content.UriMatcher.NO_MATCH;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.provider.FilesContract.FileInfo;
 
 /**
- * Enables bookmarking of {@link FileInfo}.
+ * Enables bookmarking of {@link FilesContract.Files}.
  */
 public final class BookmarksContract {
 
@@ -58,7 +59,7 @@ public final class BookmarksContract {
    * bookmarked, the resulting cursor will contain exactly one row, otherwise
    * the cursor will be empty.
    *
-   * @param fileLocation the {@link FileInfo#LOCATION} of the file
+   * @param fileLocation the {@link FilesContract.Files#LOCATION} of the file
    */
   public static Uri buildBookmarkUri(Context context, String fileLocation) {
     checkNotNull(fileLocation, "fileLocation");
@@ -70,7 +71,7 @@ public final class BookmarksContract {
   }
 
   /**
-   * Gets the {@link FileInfo#LOCATION} from the given content URI built with
+   * Gets the {@link FilesContract.Files#LOCATION} from the given content URI built with
    * {@link #buildBookmarkUri(android.content.Context, String)}.
    */
   public static String getBookmarkLocation(Uri bookmarkUri) {
@@ -85,7 +86,7 @@ public final class BookmarksContract {
   }
 
   /**
-   * Bookmarks the given {@link FileInfo#LOCATION}. Do not call this on the UI
+   * Bookmarks the given {@link FilesContract.Files#LOCATION}. Do not call this on the UI
    * thread.
    */
   public static void bookmark(Context context, String fileLocation) {
@@ -95,7 +96,7 @@ public final class BookmarksContract {
   }
 
   /**
-   * Unbookmarks the given {@link FileInfo#LOCATION}.Do not call this on the UI
+   * Unbookmarks the given {@link FilesContract.Files#LOCATION}.Do not call this on the UI
    * thread.
    */
   public static void unbookmark(Context context, String fileLocation) {

@@ -4,18 +4,18 @@ import l.files.common.database.BaseCursor;
 import l.files.io.file.FileInfo;
 
 import static l.files.common.database.DataTypes.booleanToInt;
-import static l.files.provider.FilesContract.FileInfo.ID;
-import static l.files.provider.FilesContract.FileInfo.MIME;
-import static l.files.provider.FilesContract.FileInfo.MODIFIED;
-import static l.files.provider.FilesContract.FileInfo.NAME;
-import static l.files.provider.FilesContract.FileInfo.READABLE;
-import static l.files.provider.FilesContract.FileInfo.SIZE;
-import static l.files.provider.FilesContract.FileInfo.TYPE;
-import static l.files.provider.FilesContract.FileInfo.TYPE_DIRECTORY;
-import static l.files.provider.FilesContract.FileInfo.TYPE_REGULAR_FILE;
-import static l.files.provider.FilesContract.FileInfo.TYPE_SYMLINK;
-import static l.files.provider.FilesContract.FileInfo.TYPE_UNKNOWN;
-import static l.files.provider.FilesContract.FileInfo.WRITABLE;
+import static l.files.provider.FilesContract.Files.ID;
+import static l.files.provider.FilesContract.Files.MIME;
+import static l.files.provider.FilesContract.Files.MODIFIED;
+import static l.files.provider.FilesContract.Files.NAME;
+import static l.files.provider.FilesContract.Files.READABLE;
+import static l.files.provider.FilesContract.Files.SIZE;
+import static l.files.provider.FilesContract.Files.TYPE;
+import static l.files.provider.FilesContract.Files.TYPE_DIRECTORY;
+import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
+import static l.files.provider.FilesContract.Files.TYPE_SYMLINK;
+import static l.files.provider.FilesContract.Files.TYPE_UNKNOWN;
+import static l.files.provider.FilesContract.Files.WRITABLE;
 
 final class FileCursor extends BaseCursor {
 

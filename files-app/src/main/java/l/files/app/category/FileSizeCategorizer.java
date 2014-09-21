@@ -4,15 +4,15 @@ import android.content.res.Resources;
 import android.database.Cursor;
 
 import l.files.R;
+import l.files.provider.FilesContract;
 
 import static l.files.provider.FileCursors.getSize;
 import static l.files.provider.FileCursors.isDirectory;
-import static l.files.provider.FilesContract.FileInfo;
 
 /**
  * Categorizes by file size (descending order).
  *
- * @see FileInfo#SORT_BY_SIZE
+ * @see FilesContract.Files#SORT_BY_SIZE
  */
 final class FileSizeCategorizer implements Categorizer {
 
