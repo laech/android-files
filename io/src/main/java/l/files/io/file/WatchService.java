@@ -2,6 +2,7 @@ package l.files.io.file;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -18,7 +19,7 @@ import java.io.IOException;
  * already be changed, therefore a robust application should have an alternative
  * way of handling instead of reply on this fully.
  */
-public abstract class WatchService {
+public abstract class WatchService implements Closeable {
 
   /*
     Note:
@@ -41,10 +42,21 @@ public abstract class WatchService {
       Path.from("/dev")
   );
 
-  private static final WatchService INSTANCE = new WatchServiceImpl(IGNORED);
+  private static final WatchService INSTANCE = new WatchServiceImpl(IGNORED) {
+    @Override public void close() {
+      throw new UnsupportedOperationException("Can't close shared instance");
+    }
+  };
 
+  /**
+   * Gets a shared instance. The return instance cannot be closed.
+   */
   public static WatchService get() {
     return INSTANCE;
+  }
+
+  public static WatchService create() {
+    return new WatchServiceImpl(IGNORED);
   }
 
   /**
@@ -61,18 +73,14 @@ public abstract class WatchService {
   /**
    * Returns true if the path can be watched, false otherwise.
    */
-  public abstract boolean isIgnored(Path path);
+  public abstract boolean isWatchable(Path path);
 
   /**
    * Checks whether the given file is currently being monitored.
    */
   abstract boolean isMonitored(Path path);
 
-  /**
-   * Shuts down this instance. This will stop all observers. Intended for
-   * testing.
-   */
-  abstract void stopAll();
+  @Override public abstract void close();
 
   /**
    * Checks whether there is a running observer at the given location. Intended

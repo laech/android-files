@@ -36,7 +36,7 @@ import static l.files.io.file.PathObserver.IN_IGNORED;
 import static l.files.io.file.WatchEvent.Kind;
 import static l.files.io.file.WatchEvent.Listener;
 
-final class WatchServiceImpl extends WatchService implements Closeable {
+class WatchServiceImpl extends WatchService implements Closeable {
 
   // TODO use different lock for different paths?
   // TODO should listeners be removed when a directory is deleted?
@@ -181,7 +181,7 @@ final class WatchServiceImpl extends WatchService implements Closeable {
   }
 
   @Override public void register(Path path, Listener listener) throws IOException {
-    if (!isIgnored(path)) {
+    if (!isWatchable(path)) {
       return;
     }
 
@@ -201,7 +201,7 @@ final class WatchServiceImpl extends WatchService implements Closeable {
     }
   }
 
-  @Override public boolean isIgnored(Path path) {
+  @Override public boolean isWatchable(Path path) {
     for (Path unwatchable : ignored) {
       if (path.startsWith(unwatchable)) {
         return false;
@@ -211,10 +211,6 @@ final class WatchServiceImpl extends WatchService implements Closeable {
   }
 
   @Override public void close() {
-    stopAll();
-  }
-
-  @Override void stopAll() {
     synchronized (this) {
       for (FileObserver observer : observers) {
         observer.stopWatching();
@@ -299,7 +295,7 @@ final class WatchServiceImpl extends WatchService implements Closeable {
   }
 
   private void monitor(Path path) throws IOException {
-    if (!isIgnored(path)) {
+    if (!isWatchable(path)) {
       return;
     }
 
@@ -346,13 +342,12 @@ final class WatchServiceImpl extends WatchService implements Closeable {
      * especially if the directory is large.
      */
 
-    DirectoryStream stream = DirectoryStream.open(parent.toString());
-    try {
+    try (DirectoryStream stream = DirectoryStream.open(parent.toString())) {
 
       for (DirectoryStream.Entry entry : stream) {
         if (entry.type() == TYPE_DIR) {
           Path path = parent.child(entry.name());
-          if (!isIgnored(path)) {
+          if (!isWatchable(path)) {
             continue;
           }
           try {
@@ -365,8 +360,6 @@ final class WatchServiceImpl extends WatchService implements Closeable {
 
     } catch (DirectoryIteratorException e) {
       throw new IOException(e);
-    } finally {
-      stream.close();
     }
   }
 

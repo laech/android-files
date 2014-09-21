@@ -34,7 +34,7 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
 
   @Override protected void tearDown() throws Exception {
     if (stopServiceOnTearDown()) {
-      service.stopAll();
+      service.close();
     }
     helper.delete();
     super.tearDown();
