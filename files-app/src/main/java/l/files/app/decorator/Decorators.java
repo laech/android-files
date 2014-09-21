@@ -120,11 +120,12 @@ public final class Decorators {
    * thumbnails will be scaled down to fit).
    */
   public static Decorator image(
+      Decoration<String> fileIds,
       Decoration<Uri> uris,
       Decoration<Boolean> predicate,
       LruCache<Object, Bitmap> cache,
       int maxWidth,
       int maxHeight) {
-    return new ImageDecorator(uris, predicate, cache, maxWidth, maxHeight);
+    return new ImageDecorator(fileIds, uris, predicate, cache, maxWidth, maxHeight);
   }
 }

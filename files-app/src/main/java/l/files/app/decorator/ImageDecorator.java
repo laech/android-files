@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.util.LruCache;
 import android.view.View;
 import android.widget.Adapter;
@@ -24,6 +23,7 @@ import l.files.analytics.Analytics;
 import l.files.app.decorator.decoration.Decoration;
 import l.files.app.util.ScaledSize;
 import l.files.common.graphics.drawable.SizedColorDrawable;
+import l.files.logging.Logger;
 
 import static android.graphics.Color.TRANSPARENT;
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
@@ -36,14 +36,16 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.app.util.Bitmaps.decodeScaledBitmap;
 import static l.files.app.util.Bitmaps.decodeScaledSize;
+import static l.files.provider.FilesContract.buildFileUri;
 
 final class ImageDecorator implements Decorator {
 
-  private static final String TAG = ImageDecorator.class.getSimpleName();
+  private static final Logger logger = Logger.get(ImageDecorator.class);
 
   private static final Set<Object> errors = newHashSet();
   private static final Map<Object, ScaledSize> sizes = newHashMap();
 
+  private final Decoration<String> fileIds;
   private final Decoration<Uri> uris;
   private final Decoration<Boolean> predicate;
   private final LruCache<Object, Bitmap> cache;
@@ -51,6 +53,7 @@ final class ImageDecorator implements Decorator {
   private final int maxHeight;
 
   ImageDecorator(
+      Decoration<String> fileIds,
       Decoration<Uri> uris,
       Decoration<Boolean> predicate,
       LruCache<Object, Bitmap> cache,
@@ -60,6 +63,7 @@ final class ImageDecorator implements Decorator {
     checkArgument(maxHeight > 0);
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
+    this.fileIds = checkNotNull(fileIds, "fileIds");
     this.uris = checkNotNull(uris, "uris");
     this.predicate = checkNotNull(predicate, "predicate");
     this.cache = checkNotNull(cache, "cache");
@@ -88,7 +92,7 @@ final class ImageDecorator implements Decorator {
       image.setImageDrawable(newPlaceholder(size));
       new DecodeImage(key, image, uri, size).executeOnExecutor(SERIAL_EXECUTOR);
     } else {
-      new DecodeSize(key, image, uri).executeOnExecutor(THREAD_POOL_EXECUTOR);
+      new DecodeSize(key, image, uri, fileIds.get(position, adapter)).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -123,11 +127,13 @@ final class ImageDecorator implements Decorator {
     private final Object key;
     private final ImageView view;
     private final Uri uri;
+    private final String fileId;
 
-    DecodeSize(Object key, ImageView view, Uri uri) {
+    DecodeSize(Object key, ImageView view, Uri uri, String fileId) {
       this.uri = uri;
       this.key = key;
       this.view = view;
+      this.fileId = fileId;
     }
 
     @Override protected void onPreExecute() {
@@ -142,11 +148,20 @@ final class ImageDecorator implements Decorator {
       try {
         // TODO check if exists
         URL url = new URI(uri.toString()).toURL();
-        return decodeScaledSize(url, maxWidth, maxHeight);
+
+        // TODO the following line is a temporary fix
+        // for infinite retries within native code if BitmapFactory is used
+        // directly on a special file such as /proc/1/maps
+        String type = view.getContext().getContentResolver().getType(buildFileUri(view.getContext(), fileId));
+        if (type != null && type.startsWith("image")) {
+          return decodeScaledSize(url, maxWidth, maxHeight);
+        } else {
+          return null;
+        }
       } catch (Exception e) {
         // Catch all unexpected internal errors from decoder
         Analytics.onException(view.getContext(), e);
-        Log.w(TAG, e);
+        logger.warn(e);
         return null;
       }
     }
@@ -201,7 +216,7 @@ final class ImageDecorator implements Decorator {
       } catch (Exception e) {
         // Catch all unexpected internal errors from decoder
         Analytics.onException(view.getContext(), e);
-        Log.w(TAG, e);
+        logger.warn(e);
         return null;
       }
     }
