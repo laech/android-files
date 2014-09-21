@@ -10,7 +10,7 @@ import l.files.common.testing.TempDir;
 import l.files.features.object.UiFileActivity;
 
 import static l.files.app.FilesActivity.EXTRA_DIRECTORY;
-import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesContract.getFileId;
 
 public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
@@ -40,6 +40,6 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   }
 
   private Intent newIntent(File dir) {
-    return new Intent().putExtra(EXTRA_DIRECTORY, getFileLocation(dir));
+    return new Intent().putExtra(EXTRA_DIRECTORY, getFileId(dir));
   }
 }

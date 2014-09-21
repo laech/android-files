@@ -3,6 +3,7 @@ package l.files.provider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.UriMatcher;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -16,6 +17,10 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.common.database.Cursors.getInt;
+import static l.files.common.database.Cursors.getLong;
+import static l.files.common.database.Cursors.getString;
+import static l.files.common.database.DataTypes.intToBoolean;
 
 public final class FilesContract {
 
@@ -70,12 +75,12 @@ public final class FilesContract {
   }
 
   /**
-   * Creates a URI for querying the hierarchy of a file. The result cursor will
+   * Gets a URI for querying the hierarchy of a file. The result cursor will
    * contain the file itself and all the ancestor files of the hierarchy. The
    * first item in the cursor will be the root ancestor, the last item will be
    * the file given there.
    */
-  public static Uri buildHierarchyUri(Context context, String id) {
+  public static Uri getHierarchyUri(Context context, String id) {
     checkNotNull(id, "id");
     return getAuthority(context)
         .buildUpon()
@@ -86,7 +91,7 @@ public final class FilesContract {
 
   /**
    * Gets the ID from the given content URI built with
-   * {@link #buildHierarchyUri(Context, String)}
+   * {@link #getHierarchyUri(Context, String)}
    */
   public static String getHierarchyFileId(Uri hierarchyUri) {
     List<String> segments = hierarchyUri.getPathSegments();
@@ -95,90 +100,74 @@ public final class FilesContract {
     return segments.get(1);
   }
 
-  static Uri buildFilesUri(Context context) {
-    return filesUriBuilder(context).build();
+  static Uri getFilesUri(Context context) {
+    return getFilesUriBuilder(context).build();
   }
 
   /**
-   * Creates a single file content URI to be queried, if the file exists, the
+   * Gets a single file content URI to be queried, if the file exists, the
    * resulting cursor will contain exactly one row, otherwise the cursor will be
    * empty.
    */
-  public static Uri buildFileUri(Context context, File f) {
-    return buildFileUri(context, getFileId(f));
+  public static Uri getFileUri(Context context, File f) {
+    return getFileUri(context, getFileId(f));
   }
 
   /**
-   * Creates a single file content URI to be queried, if the file exists, the
+   * Gets a single file content URI to be queried, if the file exists, the
    * resulting cursor will contain exactly one row, otherwise the cursor will be
    * empty.
    */
-  public static Uri buildFileUri(Context context, String id) {
+  public static Uri getFileUri(Context context, String id) {
     checkNotNull(id, "id");
-    return filesUriBuilder(context).appendPath(id).build();
+    return getFilesUriBuilder(context).appendPath(id).build();
   }
 
   /**
-   * Creates a URI based on a parent file's ID and the
+   * Gets a URI based on a parent file's ID and the
    * name of a file under that parent.
    */
-  public static Uri buildFileUri(Context context, String parentId, String name) {
+  public static Uri getFileUri(Context context, String parentId, String name) {
     Uri uri = Uri.parse(parentId).buildUpon().appendPath(name).build();
-    return buildFileUri(context, uri.toString());
+    return getFileUri(context, uri.toString());
   }
 
   /**
-   * Creates a URI for querying the children of the given directory.
+   * Gets a URI for querying the children of the given directory.
    */
-  public static Uri buildFilesUri(Context context, File dir, boolean showHidden) {
-    return buildFilesUri(context, getFileId(dir), showHidden);
+  public static Uri getFilesUri(Context context, File dir, boolean showHidden) {
+    return getFilesUri(context, getFileId(dir), showHidden);
   }
 
   /**
-   * Creates a URI for querying the children of the given directory.
+   * Gets a URI for querying the children of the given directory.
    */
-  public static Uri buildFilesUri(Context context, String dirId, boolean showHidden) {
+  public static Uri getFilesUri(Context context, String dirId, boolean showHidden) {
     checkNotNull(dirId, "dirId");
-    return filesUriBuilder(context)
+    return getFilesUriBuilder(context)
         .appendPath(dirId)
         .appendPath(PATH_CHILDREN)
         .appendQueryParameter(PARAM_SHOW_HIDDEN, Boolean.toString(showHidden))
         .build();
   }
 
-  /**
-   * @deprecated use {@link #buildFilesUri(Context, String, boolean)} instead
-   */
-  @Deprecated
-  public static Uri buildFileChildrenUri(Context context, String dirId, boolean showHidden) {
-    return buildFilesUri(context, dirId, showHidden);
-  }
-
-  private static Uri.Builder filesUriBuilder(Context context) {
+  private static Uri.Builder getFilesUriBuilder(Context context) {
     return getAuthority(context).buildUpon().appendPath(PATH_FILES);
   }
 
   /**
-   * Creates a URI for querying the given files.
+   * Gets a URI for querying the given files.
    */
-  public static Uri buildSelectionUri(Context context, String... ids) {
-    Uri.Builder builder = selectionUriBuilder(context);
+  public static Uri getSelectionUri(Context context, String... ids) {
+    Uri.Builder builder = getSelectionUriBuilder(context);
     for (String id : ids) {
       builder.appendQueryParameter(PARAM_SELECTION, id);
     }
     return builder.build();
   }
 
-  private static Uri.Builder selectionUriBuilder(Context context) {
+  private static Uri.Builder getSelectionUriBuilder(Context context) {
     return getAuthority(context).buildUpon().appendPath(PATH_SELECTION);
-  }
-
-  /**
-   * @deprecated use {@link #getFileId(File)} instead
-   */
-  @Deprecated
-  public static String getFileLocation(File file) {
-    return getFileId(file);
   }
 
   public static String getFileId(File file) {
@@ -197,19 +186,8 @@ public final class FilesContract {
   }
 
   /**
-   * Gets the {@link Files#ID} from the given URI built with {@link
-   * #buildFileUri(Context, String)}.
-   *
-   * @deprecated use {@link #getFileId(Uri)} instead
-   */
-  @Deprecated
-  public static String getFileLocation(Uri uri) {
-    return getFileId(uri);
-  }
-
-  /**
    * Gets the file ID from the given URI built with
-   * {@link #buildFileUri(Context, String)}.
+   * {@link #getFileUri(Context, String)}.
    */
   public static String getFileId(Uri uri) {
     return checkFilesUri(uri).get(1);
@@ -232,10 +210,9 @@ public final class FilesContract {
    */
   public static boolean createDirectory(Context context, String parentId, String name) {
     ensureNonMainThread();
-    Uri uri = buildFileUri(context, parentId, name);
+    Uri uri = getFileUri(context, parentId, name);
     return context.getContentResolver().insert(uri, null) != null;
   }
-
 
   /**
    * Gets a name that does not exist at the given directory ID.
@@ -252,7 +229,7 @@ public final class FilesContract {
     Bundle args = new Bundle(2);
     args.putString(EXTRA_FILE_ID, parentId);
     args.putString(EXTRA_NEW_NAME, baseName);
-    Uri uri = buildFilesUri(context);
+    Uri uri = getFilesUri(context);
     ContentResolver resolver = context.getContentResolver();
     Bundle result = resolver.call(uri, METHOD_SUGGESTION, null, args);
     return result.getString(EXTRA_NEW_NAME);
@@ -270,7 +247,7 @@ public final class FilesContract {
     Bundle args = new Bundle(2);
     args.putString(EXTRA_FILE_ID, id);
     args.putString(EXTRA_NEW_NAME, newName);
-    Uri uri = buildFileUri(context, id);
+    Uri uri = getFileUri(context, id);
     ContentResolver resolver = context.getContentResolver();
     Bundle result = resolver.call(uri, METHOD_RENAME, null, args);
     IOException e = (IOException) result.getSerializable(EXTRA_ERROR);
@@ -289,7 +266,7 @@ public final class FilesContract {
     String[] array = ids.toArray(new String[ids.size()]);
     Bundle args = new Bundle(1);
     args.putStringArray(EXTRA_FILE_IDS, array);
-    Uri uri = buildFilesUri(context);
+    Uri uri = getFilesUri(context);
     context.getContentResolver().call(uri, METHOD_DELETE, null, args);
   }
 
@@ -301,11 +278,6 @@ public final class FilesContract {
    */
   public static void copy(Context context, Collection<String> srcIds, String dstId) {
     paste(context, srcIds, dstId, METHOD_COPY);
-  }
-
-  @Deprecated
-  public static void cut(Context context, Collection<String> fileLocations, String dstLocation) {
-    move(context, fileLocations, dstLocation);
   }
 
   /**
@@ -324,7 +296,7 @@ public final class FilesContract {
     Bundle args = new Bundle(2);
     args.putStringArray(EXTRA_FILE_IDS, array);
     args.putString(EXTRA_DESTINATION_ID, dstId);
-    Uri uri = buildFileUri(context, dstId);
+    Uri uri = getFileUri(context, dstId);
     context.getContentResolver().call(uri, method, null, args);
   }
 
@@ -335,77 +307,15 @@ public final class FilesContract {
   }
 
   public final static class Files {
+    private Files() {}
 
-    /**
-     * Type: STRING
-     */
     public static final String ID = "id";
-
-    /**
-     * The location of a file, this is actually the file system URI of the file,
-     * but named location instead of URI to avoid confusion with Android's
-     * content URI.
-     * <p/>
-     * Type: STRING
-     *
-     * @deprecated use {@link #ID} instead
-     */
-    @Deprecated
-    public static final String LOCATION = ID;
-
-    /**
-     * Concrete MIME type of a file. For example, "image/png" or
-     * "application/pdf", or directory - {@link #MIME_DIR}.
-     * <p/>
-     * Type: STRING
-     *
-     * @see #MIME_DIR
-     */
     public static final String MIME = "mime";
-
-    /**
-     * Name of a file.
-     * <p/>
-     * Type: STRING
-     */
     public static final String NAME = "name";
-
-    /**
-     * Timestamp when a file was last modified, in milliseconds since January 1,
-     * 1970 00:00:00.0 UTC.
-     * <p/>
-     * Type: INTEGER (long)
-     */
     public static final String MODIFIED = "modified";
-
-    /**
-     * Size of a file, in bytes.
-     * <p/>
-     * Type: INTEGER (long)
-     */
-    public static final String SIZE = "size";
-
-    /**
-     * Flag indicating that a file is writable.
-     * <p/>
-     * Type: BOOLEAN
-     */
+    public static final String LENGTH = "length";
     public static final String WRITABLE = "writable";
-
-    /**
-     * Flag indicating that a file is readable.
-     * <p/>
-     * Type: BOOLEAN
-     */
     public static final String READABLE = "readable";
-
-    /**
-     * Flag indicating that a file is hidden.
-     * <p/>
-     * Type: BOOLEAN
-     */
-    public static final String HIDDEN = "hidden";
-
     public static final String TYPE = "type";
 
     public static final String TYPE_DIRECTORY = "directory";
@@ -415,8 +325,6 @@ public final class FilesContract {
 
     /**
      * Media type of a directory.
-     *
-     * @see #MIME
      */
     public static final String MIME_DIR = "application/x-directory";
 
@@ -439,15 +347,60 @@ public final class FilesContract {
     static final String[] COLUMNS = {
         ID,
         NAME,
-        SIZE,
+        LENGTH,
         READABLE,
         WRITABLE,
         MIME,
         MODIFIED,
-        HIDDEN,
         TYPE,
     };
 
-    private Files() {}
+    public static String id(Cursor cursor) {
+      return getString(cursor, ID);
+    }
+
+    /**
+     * Concrete MIME type of a file. For example, "image/png" or
+     * "application/pdf", or directory - {@link #MIME_DIR}.
+     * <p/>
+     * Type: STRING
+     */
+    public static String mime(Cursor cursor) {
+      return getString(cursor, MIME);
+    }
+
+    public static String name(Cursor cursor) {
+      return getString(cursor, NAME);
+    }
+
+    /**
+     * Timestamp when a file was last modified, in milliseconds.
+     */
+    public static long modified(Cursor cursor) {
+      return getLong(cursor, MODIFIED);
+    }
+
+    /**
+     * Length of a file, in bytes.
+     */
+    public static long length(Cursor cursor) {
+      return getLong(cursor, LENGTH);
+    }
+
+    public static boolean isReadable(Cursor cursor) {
+      return intToBoolean(getInt(cursor, READABLE));
+    }
+
+    public static boolean isWritable(Cursor cursor) {
+      return intToBoolean(getInt(cursor, WRITABLE));
+    }
+
+    public static boolean isDirectory(Cursor cursor) {
+      return MIME_DIR.equals(mime(cursor));
+    }
+
+    public static String type(Cursor cursor) {
+      return getString(cursor, TYPE);
+    }
   }
 }

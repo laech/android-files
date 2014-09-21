@@ -27,7 +27,6 @@ import l.files.app.mode.RenameAction;
 import l.files.app.mode.SelectAllAction;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
-import l.files.provider.FilesContract;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -37,7 +36,7 @@ import static java.lang.System.identityHashCode;
 import static l.files.app.Animations.animatePreDataSetChange;
 import static l.files.app.Preferences.isShowHiddenFilesKey;
 import static l.files.app.Preferences.isSortOrderKey;
-import static l.files.provider.FilesContract.buildFileChildrenUri;
+import static l.files.provider.FilesContract.getFilesUri;
 
 public final class FilesFragment extends BaseFileListFragment
     implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
@@ -45,11 +44,11 @@ public final class FilesFragment extends BaseFileListFragment
   // TODO implement progress
 
   public static final String TAG = FilesFragment.class.getSimpleName();
-  public static final String ARG_DIRECTORY_LOCATION = "directory_location";
+  public static final String ARG_DIR_ID = "dir_id";
 
   private static final int LOADER_ID = identityHashCode(FilesFragment.class);
 
-  private String directoryLocation;
+  private String dirId;
   private ProgressBar progress;
 
   public FilesFragment() {
@@ -57,25 +56,23 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   /**
-   * Creates a fragment to show the contents under the directory's {@link
-   * FilesContract.Files#LOCATION}.
+   * Creates a fragment to show the contents under the directory's ID.
    */
-  public static FilesFragment create(String directoryLocation) {
-    return Fragments.setArgs(new FilesFragment(), ARG_DIRECTORY_LOCATION, directoryLocation);
+  public static FilesFragment create(String dirId) {
+    return Fragments.setArgs(new FilesFragment(), ARG_DIR_ID, dirId);
   }
 
   /**
-   * Gets the {@link FilesContract.Files#LOCATION} of the directory that this fragment is
-   * currently showing.
+   * Gets the ID of the directory that this fragment is currently showing.
    */
-  public String getDirectoryLocation() {
-    return directoryLocation;
+  public String getDirectoryId() {
+    return dirId;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    directoryLocation = getArguments().getString(ARG_DIRECTORY_LOCATION);
+    dirId = getArguments().getString(ARG_DIR_ID);
     progress = (ProgressBar) getView().findViewById(android.R.id.progress);
 
     setupListView();
@@ -103,9 +100,9 @@ public final class FilesFragment extends BaseFileListFragment
   private void setupOptionsMenu() {
     Activity context = getActivity();
     setOptionsMenu(OptionsMenus.compose(
-        BookmarkMenu.create(context, directoryLocation),
-        NewDirMenu.create(context, directoryLocation),
-        PasteMenu.create(context, directoryLocation),
+        BookmarkMenu.create(context, dirId),
+        NewDirMenu.create(context, dirId),
+        PasteMenu.create(context, dirId),
         SortMenu.create(context),
         ShowHiddenFilesMenu.create(context)
     ));
@@ -121,7 +118,7 @@ public final class FilesFragment extends BaseFileListFragment
         CutAction.create(list),
         CopyAction.create(list),
         DeleteAction.create(list),
-        RenameAction.create(list, fragmentManager, directoryLocation)
+        RenameAction.create(list, fragmentManager, dirId)
     ));
   }
 
@@ -133,7 +130,7 @@ public final class FilesFragment extends BaseFileListFragment
     Activity context = getActivity();
     boolean showHidden = Preferences.getShowHiddenFiles(context);
     String sortOrder = Preferences.getSortOrder(context);
-    Uri uri = buildFileChildrenUri(context, getDirectoryLocation(), showHidden);
+    Uri uri = getFilesUri(context, getDirectoryId(), showHidden);
     return new CursorLoader(context, uri, null, null, null, sortOrder);
   }
 
@@ -160,7 +157,8 @@ public final class FilesFragment extends BaseFileListFragment
     getListAdapter().setCursor(null);
   }
 
-  @Override public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+  @Override
+  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     if (isSortOrderKey(key) || isShowHiddenFilesKey(key)) {
       getLoaderManager().restartLoader(LOADER_ID, null, this);
     }

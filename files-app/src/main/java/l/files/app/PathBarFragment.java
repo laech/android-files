@@ -21,11 +21,8 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
-import static l.files.provider.FileCursors.getLocation;
-import static l.files.provider.FileCursors.getName;
-import static l.files.provider.FileCursors.isDirectory;
-import static l.files.provider.FileCursors.isReadable;
-import static l.files.provider.FilesContract.buildHierarchyUri;
+import static l.files.provider.FilesContract.Files;
+import static l.files.provider.FilesContract.getHierarchyUri;
 
 public final class PathBarFragment extends Fragment
     implements LoaderCallbacks<Cursor>, OnClickListener {
@@ -56,7 +53,7 @@ public final class PathBarFragment extends Fragment
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle args) {
     Activity context = getActivity();
-    Uri uri = buildHierarchyUri(context, fileLocation);
+    Uri uri = getHierarchyUri(context, fileLocation);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 
@@ -74,19 +71,19 @@ public final class PathBarFragment extends Fragment
           view = inflater.inflate(R.layout.path_bar_item, container, false);
           container.addView(view);
         }
-        view.setTag(R.id.file_id, getLocation(cursor));
-        view.setTag(R.id.file_name, getName(cursor));
-        view.setTag(R.id.is_readable, isReadable(cursor));
-        view.setTag(R.id.is_directory, isDirectory(cursor));
+        view.setTag(R.id.file_id, Files.id(cursor));
+        view.setTag(R.id.file_name, Files.name(cursor));
+        view.setTag(R.id.is_readable, Files.isReadable(cursor));
+        view.setTag(R.id.is_directory, Files.isDirectory(cursor));
         view.setVisibility(VISIBLE);
         view.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(cursor.isFirst() ? Build.MODEL : getName(cursor));
+        title.setText(cursor.isFirst() ? Build.MODEL : Files.name(cursor));
 
         AssetManager asset = getActivity().getAssets();
         TextView icon = (TextView) view.findViewById(R.id.icon);
-        icon.setTypeface(IconFonts.forDirectoryLocation(asset, getLocation(cursor)));
+        icon.setTypeface(IconFonts.forDirectoryLocation(asset, Files.id(cursor)));
 
       } while (cursor.moveToNext());
       for (int i = cursor.getPosition(); i < container.getChildCount(); i++) {

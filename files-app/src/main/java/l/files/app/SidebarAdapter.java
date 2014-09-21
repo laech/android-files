@@ -10,8 +10,7 @@ import android.widget.TextView;
 
 import l.files.R;
 
-import static l.files.provider.FileCursors.getLocation;
-import static l.files.provider.FileCursors.getName;
+import static l.files.provider.FilesContract.Files;
 
 final class SidebarAdapter extends StableFilesAdapter {
 
@@ -25,8 +24,8 @@ final class SidebarAdapter extends StableFilesAdapter {
     Resources res = parent.getResources();
 
     Cursor cursor = getItem(position);
-    String id = getLocation(cursor);
-    String name = getName(cursor);
+    String id = Files.id(cursor);
+    String name = Files.name(cursor);
 
     ViewHolder holder = (ViewHolder) view.getTag();
     holder.setTitle(FileLabels.get(res, id, name));

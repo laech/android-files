@@ -15,7 +15,6 @@ import l.files.R;
 import l.files.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
-import l.files.provider.FilesContract;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
@@ -27,26 +26,25 @@ import static l.files.provider.bookmarks.BookmarksContract.buildBookmarkUri;
 import static l.files.provider.bookmarks.BookmarksContract.unbookmark;
 
 /**
- * Menu to bookmark/unbookmark a directory at the given {@link
- * FilesContract.Files#LOCATION}.
+ * Menu to bookmark/unbookmark a directory.
  */
 public final class BookmarkMenu
     extends OptionsMenuAction implements LoaderCallbacks<Cursor> {
 
   private final Activity context;
-  private final String directoryLocation;
+  private final String dirId;
 
   private Menu menu;
   private boolean bookmarked;
 
-  private BookmarkMenu(Activity context, String directoryLocation) {
+  private BookmarkMenu(Activity context, String dirId) {
     super(R.id.bookmark);
     this.context = checkNotNull(context, "context");
-    this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
+    this.dirId = checkNotNull(dirId, "dirId");
   }
 
-  public static OptionsMenu create(Activity activity, String directoryLocation) {
-    OptionsMenu menu = new BookmarkMenu(activity, directoryLocation);
+  public static OptionsMenu create(Activity activity, String dirId) {
+    OptionsMenu menu = new BookmarkMenu(activity, dirId);
     return new AnalyticsMenu(activity, menu, "bookmark");
   }
 
@@ -72,14 +70,14 @@ public final class BookmarkMenu
     final boolean checked = item.isChecked();
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
-        if (checked) unbookmark(context, directoryLocation);
-        else bookmark(context, directoryLocation);
+        if (checked) unbookmark(context, dirId);
+        else bookmark(context, dirId);
       }
     });
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri uri = buildBookmarkUri(context, directoryLocation);
+    Uri uri = buildBookmarkUri(context, dirId);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 

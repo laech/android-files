@@ -9,7 +9,7 @@ import l.files.app.FilesFragment;
 
 public final class TestFilesFragmentActivity extends Activity {
 
-  public static final String DIRECTORY = FilesFragment.ARG_DIRECTORY_LOCATION;
+  public static final String DIRECTORY = FilesFragment.ARG_DIR_ID;
 
   private FilesFragment fragment;
   private ActionMode mode;

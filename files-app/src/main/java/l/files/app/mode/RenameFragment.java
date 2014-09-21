@@ -22,9 +22,9 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
 import static l.files.app.FilesApp.getBus;
-import static l.files.provider.FileCursors.getName;
-import static l.files.provider.FileCursors.isDirectory;
-import static l.files.provider.FilesContract.buildFileUri;
+import static l.files.provider.FilesContract.Files;
+import static l.files.provider.FilesContract.Files.isDirectory;
+import static l.files.provider.FilesContract.getFileUri;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 public final class RenameFragment extends FileCreationFragment {
@@ -100,7 +100,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     private Loader<Cursor> onCreateFileLoader() {
       Activity context = getActivity();
-      return new CursorLoader(context, buildFileUri(context, getFileLocation()),
+      return new CursorLoader(context, getFileUri(context, getFileLocation()),
           null, null, null, null);
     }
 
@@ -114,7 +114,7 @@ public final class RenameFragment extends FileCreationFragment {
       if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
         return;
       }
-      String name = getName(cursor);
+      String name = Files.name(cursor);
       EditText field = getFilenameField();
       field.setText(name);
       if (isDirectory(cursor)) {

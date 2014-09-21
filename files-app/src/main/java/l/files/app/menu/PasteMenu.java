@@ -17,34 +17,34 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.app.Clipboards.clear;
-import static l.files.app.Clipboards.getFileLocations;
+import static l.files.app.Clipboards.getFileIds;
 import static l.files.app.Clipboards.isCopy;
 import static l.files.app.Clipboards.isCut;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.provider.FilesContract.copy;
-import static l.files.provider.FilesContract.cut;
+import static l.files.provider.FilesContract.move;
 
 /**
  * Menu to paste files to a directory identified by the given {@link
- * FilesContract.Files#LOCATION}.
+ * FilesContract.Files#ID}.
  */
 public final class PasteMenu extends OptionsMenuAction {
 
-  private final String directoryLocation;
+  private final String dirId;
   private final ClipboardManager manager;
   private final Context context;
 
   private PasteMenu(
-      Context context, ClipboardManager manager, String directoryLocation) {
+      Context context, ClipboardManager manager, String dirId) {
     super(android.R.id.paste);
     this.context = checkNotNull(context, "context");
     this.manager = checkNotNull(manager, "manager");
-    this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
+    this.dirId = checkNotNull(dirId, "dirId");
   }
 
-  public static OptionsMenu create(Activity activity, String directoryLocation) {
+  public static OptionsMenu create(Activity activity, String dirId) {
     ClipboardManager manager = getClipboardManager(activity);
-    PasteMenu menu = new PasteMenu(activity, manager, directoryLocation);
+    PasteMenu menu = new PasteMenu(activity, manager, dirId);
     return new AnalyticsMenu(activity, menu, "paste");
   }
 
@@ -67,9 +67,9 @@ public final class PasteMenu extends OptionsMenuAction {
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
         if (isCopy(manager)) {
-          copy(context, getFileLocations(manager), directoryLocation);
+          copy(context, getFileIds(manager), dirId);
         } else if (isCut(manager)) {
-          cut(context, getFileLocations(manager), directoryLocation);
+          move(context, getFileIds(manager), dirId);
           clear(manager);
         }
       }

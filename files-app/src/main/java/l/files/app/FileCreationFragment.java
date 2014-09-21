@@ -21,8 +21,8 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
-import static l.files.provider.FileCursors.getLocation;
-import static l.files.provider.FilesContract.buildFileUri;
+import static l.files.provider.FilesContract.Files;
+import static l.files.provider.FilesContract.getFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
     implements DialogInterface.OnClickListener {
@@ -116,7 +116,7 @@ public abstract class FileCreationFragment extends DialogFragment
 
     private Loader<Cursor> newChecker() {
       Activity context = getActivity();
-      Uri uri = buildFileUri(context, getParentLocation(), getFilename());
+      Uri uri = getFileUri(context, getParentLocation(), getFilename());
       return new CursorLoader(context, uri, null, null, null, null);
     }
 
@@ -132,7 +132,7 @@ public abstract class FileCreationFragment extends DialogFragment
       Button ok = getOkButton();
       if (cursor.getCount() > 0) {
         cursor.moveToFirst();
-        String newFileLocation = getLocation(cursor);
+        String newFileLocation = Files.id(cursor);
         editText.setError(getError(newFileLocation));
         ok.setEnabled(false);
       } else {

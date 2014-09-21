@@ -19,7 +19,6 @@ import java.util.Date;
 
 import l.files.app.IconFonts;
 import l.files.app.category.Categorizer;
-import l.files.provider.FilesContract;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -31,14 +30,8 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static l.files.common.database.Cursors.getBoolean;
 import static l.files.common.database.Cursors.getLong;
 import static l.files.common.database.Cursors.getString;
-import static l.files.provider.FileCursors.getLastModified;
-import static l.files.provider.FileCursors.getLocation;
-import static l.files.provider.FileCursors.getMediaType;
-import static l.files.provider.FileCursors.getSize;
-import static l.files.provider.FileCursors.getType;
-import static l.files.provider.FileCursors.isDirectory;
-import static l.files.provider.FileCursors.isReadable;
-import static l.files.provider.FilesContract.Files.LOCATION;
+import static l.files.provider.FilesContract.Files;
+import static l.files.provider.FilesContract.Files.ID;
 import static l.files.provider.FilesContract.Files.MODIFIED;
 import static l.files.provider.FilesContract.Files.NAME;
 import static l.files.provider.FilesContract.Files.READABLE;
@@ -142,96 +135,94 @@ public final class Decorations {
   }
 
   /**
-   * Returns a function to {@link FilesContract.Files#LOCATION}.
+   * Returns a function to get file ID.
    */
-  public static Decoration<String> fileLocation() {
-    return cursorString(LOCATION);
+  public static Decoration<String> fileId() {
+    return cursorString(ID);
   }
 
   /**
-   * Returns a function to get the name for each {@link FilesContract.Files}.
+   * Returns a function to get the name for each file.
    */
   public static Decoration<String> fileName() {
     return cursorString(NAME);
   }
 
   /**
-   * Returns a function to get the readability of each {@link FilesContract.Files}.
+   * Returns a function to get the readability of each file.
    */
   public static Decoration<Boolean> fileReadable() {
     return cursorBoolean(READABLE);
   }
 
   /**
-   * Returns a function to get the formatted last modified date of each {@link
-   * FilesContract.Files}.
+   * Returns a function to get the formatted last modified date of each file.
    */
   public static Decoration<String> fileDate(final Context context) {
     return cursorDateFormat(MODIFIED, context);
   }
 
   /**
-   * Returns a function to get the icon font for each {@link FilesContract.Files}.
+   * Returns a function to get the icon font for each file.
    */
   public static Decoration<Typeface> fileIcon(final AssetManager assets) {
     return new Decoration<Typeface>() {
       @Override public Typeface get(int position, Adapter adapter) {
         Cursor cursor = getCursor(adapter, position);
-        if (isDirectory(cursor)) {
-          return IconFonts.forDirectoryLocation(assets, getLocation(cursor));
+        if (Files.isDirectory(cursor)) {
+          return IconFonts.forDirectoryLocation(assets, Files.id(cursor));
         } else {
-          return IconFonts.forFileMediaType(assets, getMediaType(cursor));
+          return IconFonts.forFileMediaType(assets, Files.mime(cursor));
         }
       }
     };
   }
 
   /**
-   * Returns a function to format the file size for each {@link FilesContract.Files}.
+   * Returns a function to format the file size for each file.
    */
   public static Decoration<String> fileSize(final Context context) {
     return new Decoration<String>() {
       @Override public String get(int position, Adapter adapter) {
         Cursor cursor = getCursor(adapter, position);
-        if (isDirectory(cursor)) {
+        if (Files.isDirectory(cursor)) {
           return "";
         } else {
-          return formatShortFileSize(context, getSize(cursor));
+          return formatShortFileSize(context, Files.length(cursor));
         }
       }
     };
   }
 
   /**
-   * Returns true if the {@link FilesContract.Files#MODIFIED} is valid.
+   * Returns true if the {@link Files#MODIFIED} is valid.
    */
   public static Decoration<Boolean> fileHasDate() {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
-        return getLastModified(getCursor(adapter, position)) > 0;
+        return Files.modified(getCursor(adapter, position)) > 0;
       }
     };
   }
 
   /**
-   * Returns true if {@link FilesContract.Files#READABLE} is true.
+   * Returns true if file is readable.
    */
   public static Decoration<Boolean> fileIsReadable() {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
-        return isReadable(getCursor(adapter, position));
+        return Files.isReadable(getCursor(adapter, position));
       }
     };
   }
 
   /**
-   * Returns a function to indicate whether a {@link FilesContract.Files} is a regular
-   * file.
+   * Returns a function to indicate whether a file is a regular file.
    */
   public static Decoration<Boolean> isFile() {
     return new Decoration<Boolean>() {
       @Override public Boolean get(int position, Adapter adapter) {
-        return getType(getCursor(adapter, position)).equals(TYPE_REGULAR_FILE);
+        return Files.type(getCursor(adapter, position)).equals(TYPE_REGULAR_FILE);
       }
     };
   }

@@ -15,7 +15,7 @@ public final class Clipboards {
 
   private static final String ACTION_CUT = "l.files.intent.action.CUT";
   private static final String ACTION_COPY = "l.files.intent.action.COPY";
-  private static final String EXTRA_FILE_LOCATIONS = "l.files.intent.extra.FILE_LOCATIONS";
+  private static final String EXTRA_FILE_IDS = "l.files.intent.extra.FILE_IDS";
 
   private Clipboards() {}
 
@@ -37,12 +37,12 @@ public final class Clipboards {
     return ACTION_COPY.equals(getAction(manager));
   }
 
-  public static Set<String> getFileLocations(ClipboardManager manager) {
+  public static Set<String> getFileIds(ClipboardManager manager) {
     Intent intent = getClipboardIntent(manager);
     if (intent == null) {
       return emptySet();
     }
-    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_LOCATIONS);
+    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_IDS);
     if (extras == null) {
       return emptySet();
     }
@@ -80,7 +80,7 @@ public final class Clipboards {
   private static void setClipData(
       ClipboardManager manager, Set<String> fileLocations, String action) {
     String[] data = fileLocations.toArray(new String[fileLocations.size()]);
-    Intent intent = new Intent(action).putExtra(EXTRA_FILE_LOCATIONS, data);
+    Intent intent = new Intent(action).putExtra(EXTRA_FILE_IDS, data);
     manager.setPrimaryClip(newIntent(null, intent));
   }
 }

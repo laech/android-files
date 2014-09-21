@@ -14,14 +14,14 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
-import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesContract.getFileId;
 
 final class Bookmarks {
 
   static final String KEY = "bookmarks";
 
   private static final Set<String> DEFAULTS = ImmutableSet.<String>builder()
-      .add(getFileLocation(getExternalStorageDirectory()))
+      .add(getFileId(getExternalStorageDirectory()))
       .add(toLocation(DIRECTORY_DCIM))
       .add(toLocation(DIRECTORY_MUSIC))
       .add(toLocation(DIRECTORY_MOVIES))
@@ -34,7 +34,7 @@ final class Bookmarks {
   }
 
   private static String toLocation(String name) {
-    return getFileLocation(new File(getExternalStorageDirectory(), name));
+    return getFileId(new File(getExternalStorageDirectory(), name));
   }
 
   static String[] bookmarks(SharedPreferences pref) {

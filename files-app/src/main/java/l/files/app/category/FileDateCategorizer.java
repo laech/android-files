@@ -7,15 +7,14 @@ import org.joda.time.DateMidnight;
 import org.joda.time.MutableDateTime;
 
 import l.files.R;
-import l.files.provider.FilesContract;
 
-import static l.files.provider.FileCursors.getLastModified;
+import static l.files.provider.FilesContract.Files;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 /**
  * Categories files by their last modified date.
  *
- * @see FilesContract.Files
+ * @see Files
  */
 final class FileDateCategorizer implements Categorizer {
 
@@ -36,7 +35,7 @@ final class FileDateCategorizer implements Categorizer {
 
   @Override public String getCategory(Resources res, Cursor cursor) {
 
-    long modified = getLastModified(cursor);
+    long modified = Files.modified(cursor);
     if (modified >= startOfTomorrow)
       return res.getString(R.string.unknown);
     if (modified >= startOfToday)

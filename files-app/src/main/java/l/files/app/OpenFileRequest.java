@@ -4,7 +4,7 @@ import android.database.Cursor;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.provider.FileCursors;
+import static l.files.provider.FilesContract.Files;
 
 @AutoValue
 abstract class OpenFileRequest {
@@ -12,7 +12,7 @@ abstract class OpenFileRequest {
   OpenFileRequest() {
   }
 
-  public abstract String fileLocation();
+  public abstract String fileId();
 
   public abstract String filename();
 
@@ -27,9 +27,9 @@ abstract class OpenFileRequest {
 
   public static OpenFileRequest from(Cursor cursor) {
     return create(
-        FileCursors.getLocation(cursor),
-        FileCursors.getName(cursor),
-        FileCursors.isReadable(cursor),
-        FileCursors.isDirectory(cursor));
+        Files.id(cursor),
+        Files.name(cursor),
+        Files.isReadable(cursor),
+        Files.isDirectory(cursor));
   }
 }

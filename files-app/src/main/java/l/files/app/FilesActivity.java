@@ -54,7 +54,7 @@ import static l.files.app.FilesApp.getBus;
 import static l.files.app.Preferences.getShowPathBar;
 import static l.files.app.Preferences.isShowPathBarKey;
 import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.provider.FilesContract.getFileLocation;
+import static l.files.provider.FilesContract.getFileId;
 
 public final class FilesActivity extends AnalyticsActivity
     implements TabHandler, OnSharedPreferenceChangeListener {
@@ -158,7 +158,7 @@ public final class FilesActivity extends AnalyticsActivity
   private String getInitialDirectoryLocation() {
     String directoryLocation = getIntent().getStringExtra(EXTRA_DIRECTORY);
     return directoryLocation == null
-        ? getFileLocation(DIR_HOME)
+        ? getFileId(DIR_HOME)
         : directoryLocation;
   }
 
@@ -371,7 +371,7 @@ public final class FilesActivity extends AnalyticsActivity
       boolean show = getShowPathBar(this);
       FragmentTransaction tx = getFragmentManager().beginTransaction();
       if (show) {
-        pathBar.set(currentPagerFragment.getCurrentDirectoryLocation());
+        pathBar.set(currentPagerFragment.getCurrentDirectoryId());
         tx.show(pathBar);
       } else {
         tx.hide(pathBar);
@@ -417,7 +417,7 @@ public final class FilesActivity extends AnalyticsActivity
     private void updateTabTitle(final int position) {
       final String title = FileLabels.get(
           getResources(),
-          currentPagerFragment.getCurrentDirectoryLocation(),
+          currentPagerFragment.getCurrentDirectoryId(),
           currentPagerFragment.getCurrentDirectoryName());
       items.get(position).setTitle(title);
       handler.post(new Runnable() {
@@ -425,7 +425,7 @@ public final class FilesActivity extends AnalyticsActivity
           final boolean hasBackStack = currentPagerFragment.hasBackStack();
           actionBar.setTitle(title);
           actionBarDrawerToggle.setDrawerIndicatorEnabled(!hasBackStack);
-          pathBar.set(currentPagerFragment.getCurrentDirectoryLocation());
+          pathBar.set(currentPagerFragment.getCurrentDirectoryId());
           tabs.updateTab(position, title, hasBackStack);
         }
       });
@@ -455,8 +455,8 @@ public final class FilesActivity extends AnalyticsActivity
 
     void addItem(int id) {
       String title = FileLabels.get(
-          getResources(), getFileLocation(DIR_HOME), DIR_HOME.getName());
-      items.add(new TabItem(id, getFileLocation(DIR_HOME), title));
+          getResources(), getFileId(DIR_HOME), DIR_HOME.getName());
+      items.add(new TabItem(id, getFileId(DIR_HOME), title));
       tabs.addTab(title);
       notifyDataSetChanged();
     }

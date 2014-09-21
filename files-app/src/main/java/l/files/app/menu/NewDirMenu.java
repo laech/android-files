@@ -17,22 +17,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Menu to allow user to create a new directory under a parent directory
- * identified by the given {@link FilesContract.Files#LOCATION}.
+ * identified by the given {@link FilesContract.Files#ID}.
  */
 public final class NewDirMenu extends OptionsMenuAction {
 
-  private final String parentLocation;
+  private final String parentId;
   private final FragmentManager manager;
 
-  private NewDirMenu(FragmentManager manager, String parentLocation) {
+  private NewDirMenu(FragmentManager manager, String parentId) {
     super(R.id.new_dir);
     this.manager = checkNotNull(manager, "manager");
-    this.parentLocation = checkNotNull(parentLocation, "parentLocation");
+    this.parentId = checkNotNull(parentId, "parentId");
   }
 
-  public static OptionsMenu create(Activity activity, String parentLocation) {
+  public static OptionsMenu create(Activity activity, String parentId) {
     FragmentManager manager = activity.getFragmentManager();
-    OptionsMenu menu = new NewDirMenu(manager, parentLocation);
+    OptionsMenu menu = new NewDirMenu(manager, parentId);
     return new AnalyticsMenu(activity, menu, "new_dir");
   }
 
@@ -43,6 +43,6 @@ public final class NewDirMenu extends OptionsMenuAction {
   }
 
   @Override protected void onItemSelected(MenuItem item) {
-    NewDirFragment.create(parentLocation).show(manager, NewDirFragment.TAG);
+    NewDirFragment.create(parentId).show(manager, NewDirFragment.TAG);
   }
 }

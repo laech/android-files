@@ -13,27 +13,25 @@ import l.files.R;
 import l.files.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
-import l.files.provider.FilesContract;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.app.Fragments.setArgs;
-import static l.files.provider.FilesContract.buildFileUri;
+import static l.files.provider.FilesContract.getFileUri;
 
 public final class FilesPagerFragment extends Fragment {
 
-  private static final String ARG_INITIAL_DIRECTORY_LOCATION = "initial_directory_location";
-  private static final String ARG_INITIAL_DIRECTORY_NAME = "initial_directory_name";
+  private static final String ARG_INITIAL_DIR_ID = "initial_dir_id";
+  private static final String ARG_INITIAL_DIR_NAME = "initial_dir_name";
 
   /**
-   * @param initialDirectoryLocation the {@link FilesContract.Files#LOCATION} of the
-   * initial directory to show
-   * @param initialDirectoryName the name of the initial directory to show
+   * @param initialDirId   the ID of the initial directory to show
+   * @param initialDirName the name of the initial directory to show
    */
   public static FilesPagerFragment create(
-      String initialDirectoryLocation, String initialDirectoryName) {
+      String initialDirId, String initialDirName) {
     Bundle args = new Bundle(2);
-    args.putString(ARG_INITIAL_DIRECTORY_LOCATION, initialDirectoryLocation);
-    args.putString(ARG_INITIAL_DIRECTORY_NAME, initialDirectoryName);
+    args.putString(ARG_INITIAL_DIR_ID, initialDirId);
+    args.putString(ARG_INITIAL_DIR_NAME, initialDirName);
     return setArgs(new FilesPagerFragment(), args);
   }
 
@@ -54,7 +52,7 @@ public final class FilesPagerFragment extends Fragment {
     fileOpener = FileOpener.get(getActivity());
     manager = getChildFragmentManager();
     if (savedInstanceState == null) {
-      FilesFragment fragment = FilesFragment.create(getInitialDirectoryLocation());
+      FilesFragment fragment = FilesFragment.create(getInitialDirectoryId());
       manager
           .beginTransaction()
           .add(android.R.id.content, fragment, FilesFragment.TAG)
@@ -83,15 +81,14 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   /**
-   * Gets the {@link FilesContract.Files#LOCATION} of the directory that is currently
-   * showing.
+   * Gets the ID of the directory that is currently showing.
    */
-  public String getCurrentDirectoryLocation() {
+  public String getCurrentDirectoryId() {
     FilesFragment fragment = findCurrentFragment();
     if (fragment == null) {
-      return getInitialDirectoryLocation();
+      return getInitialDirectoryId();
     }
-    return fragment.getDirectoryLocation();
+    return fragment.getDirectoryId();
   }
 
   public String getCurrentDirectoryName() {
@@ -103,15 +100,14 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   /**
-   * Gets the {@link FilesContract.Files#LOCATION} of the initial showing directory of this
-   * fragment.
+   * Gets the ID of the initial showing directory of this fragment.
    */
-  private String getInitialDirectoryLocation() {
-    return getArguments().getString(ARG_INITIAL_DIRECTORY_LOCATION);
+  private String getInitialDirectoryId() {
+    return getArguments().getString(ARG_INITIAL_DIR_ID);
   }
 
   public String getInitialDirectoryName() {
-    return getArguments().getString(ARG_INITIAL_DIRECTORY_NAME);
+    return getArguments().getString(ARG_INITIAL_DIR_NAME);
   }
 
   public void show(OpenFileRequest request) {
@@ -132,12 +128,12 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   private void showDirectory(OpenFileRequest request) {
-    String location = request.fileLocation();
+    String id = request.fileId();
     FilesFragment current = findCurrentFragment();
-    if (current != null && current.getDirectoryLocation().equalsIgnoreCase(location)) {
+    if (current != null && current.getDirectoryId().equalsIgnoreCase(id)) {
       return;
     }
-    FilesFragment fragment = FilesFragment.create(location);
+    FilesFragment fragment = FilesFragment.create(id);
     manager
         .beginTransaction()
         .replace(android.R.id.content, fragment, FilesFragment.TAG)
@@ -150,7 +146,7 @@ public final class FilesPagerFragment extends Fragment {
   }
 
   private void showFile(OpenFileRequest request) {
-    fileOpener.apply(buildFileUri(getActivity(), request.fileLocation()));
+    fileOpener.apply(getFileUri(getActivity(), request.fileId()));
   }
 
   private FilesFragment findCurrentFragment() {

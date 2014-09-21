@@ -38,7 +38,7 @@ import static l.files.app.decorator.decoration.Decorations.fileDate;
 import static l.files.app.decorator.decoration.Decorations.fileHasDate;
 import static l.files.app.decorator.decoration.Decorations.fileIcon;
 import static l.files.app.decorator.decoration.Decorations.fileIsReadable;
-import static l.files.app.decorator.decoration.Decorations.fileLocation;
+import static l.files.app.decorator.decoration.Decorations.fileId;
 import static l.files.app.decorator.decoration.Decorations.fileName;
 import static l.files.app.decorator.decoration.Decorations.fileReadable;
 import static l.files.app.decorator.decoration.Decorations.fileSize;
@@ -59,14 +59,14 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     Decoration<Boolean> readable = fileReadable();
     Decoration<Boolean> categoryVisibility = categoryVisible(category);
     Decoration<Typeface> icon = memoize(fileIcon(context.getAssets()), this);
-    Decoration<Uri> uri = memoize(uri(fileLocation()), this);
+    Decoration<Uri> uri = memoize(uri(fileId()), this);
     LruCache<Object, Bitmap> cache = getBitmapCache(context);
     this.decorator = compose(
         on(id.title, enable(readable), text(fileName())),
         on(id.icon, enable(readable), font(icon)),
         on(id.date, enable(readable), text(date), visible(fileHasDate())),
         on(id.size, enable(readable), text(size), visible(isFile())),
-        on(id.preview, image(fileLocation(), uri, all(isFile(), fileIsReadable()), cache, width, height)),
+        on(id.preview, image(fileId(), uri, all(isFile(), fileIsReadable()), cache, width, height)),
         on(id.header_title, text(category)),
         on(id.header_container, visible(categoryVisibility))
     );

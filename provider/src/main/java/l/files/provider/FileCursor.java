@@ -9,7 +9,7 @@ import static l.files.provider.FilesContract.Files.MIME;
 import static l.files.provider.FilesContract.Files.MODIFIED;
 import static l.files.provider.FilesContract.Files.NAME;
 import static l.files.provider.FilesContract.Files.READABLE;
-import static l.files.provider.FilesContract.Files.SIZE;
+import static l.files.provider.FilesContract.Files.LENGTH;
 import static l.files.provider.FilesContract.Files.TYPE;
 import static l.files.provider.FilesContract.Files.TYPE_DIRECTORY;
 import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
@@ -68,7 +68,7 @@ final class FileCursor extends BaseCursor {
   @Override public long getLong(int column) {
     FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (SIZE.equals(col)) return file.size();
+    if (LENGTH.equals(col)) return file.size();
     if (MODIFIED.equals(col)) return file.modified();
     throw new IllegalArgumentException();
   }

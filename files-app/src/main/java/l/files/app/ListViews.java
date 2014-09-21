@@ -7,7 +7,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
-import static l.files.provider.FileCursors.getLocation;
+import static l.files.provider.FilesContract.Files;
 
 public final class ListViews {
   private ListViews() {}
@@ -17,7 +17,7 @@ public final class ListViews {
     List<String> ids = newArrayListWithCapacity(positions.size());
     for (int position : positions) {
       Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      ids.add(getLocation(cursor));
+      ids.add(Files.id(cursor));
     }
     return ids;
   }

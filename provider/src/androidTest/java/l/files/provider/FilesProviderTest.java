@@ -22,13 +22,7 @@ import static com.google.common.truth.Truth.ASSERT;
 import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.io.file.Files.symlink;
-import static l.files.provider.FileCursors.getId;
-import static l.files.provider.FileCursors.getLastModified;
-import static l.files.provider.FileCursors.getSize;
-import static l.files.provider.FileCursors.getType;
-import static l.files.provider.FileCursors.isDirectory;
-import static l.files.provider.FileCursors.isReadable;
-import static l.files.provider.FileCursors.isWritable;
+import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
 import static l.files.provider.FilesContract.Files.SORT_BY_SIZE;
@@ -36,10 +30,10 @@ import static l.files.provider.FilesContract.Files.TYPE_DIRECTORY;
 import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
 import static l.files.provider.FilesContract.Files.TYPE_SYMLINK;
 import static l.files.provider.FilesContract.Files.TYPE_UNKNOWN;
-import static l.files.provider.FilesContract.buildFileChildrenUri;
-import static l.files.provider.FilesContract.buildFileUri;
-import static l.files.provider.FilesContract.buildSelectionUri;
+import static l.files.provider.FilesContract.getFileUri;
+import static l.files.provider.FilesContract.getSelectionUri;
 import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getFilesUri;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
@@ -72,7 +66,7 @@ public final class FilesProviderTest extends FileBaseTest {
   }
 
   private String getMediaType(File file) {
-    Uri uri = buildFileUri(getContext(), getFileId(file));
+    Uri uri = getFileUri(getContext(), getFileId(file));
     return getContext().getContentResolver().getType(uri);
   }
 
@@ -143,11 +137,8 @@ public final class FilesProviderTest extends FileBaseTest {
         tmp().get(),
         tmp().createFile("a")
     };
-    Cursor cursor = querySelection(files);
-    try {
+    try (Cursor cursor = querySelection(files)) {
       verify(cursor, files);
-    } finally {
-      cursor.close();
     }
   }
 
@@ -214,8 +205,7 @@ public final class FilesProviderTest extends FileBaseTest {
 
   private void testNotifies(Runnable code)
       throws InterruptedException, IOException {
-    Cursor cursor = queryChildren();
-    try {
+    try (Cursor cursor = queryChildren()) {
 
       final CountDownLatch latch = new CountDownLatch(1);
       cursor.registerContentObserver(new ContentObserver(null) {
@@ -230,8 +220,6 @@ public final class FilesProviderTest extends FileBaseTest {
       assertTrue(latch.await(1, SECONDS));
       verify();
 
-    } finally {
-      cursor.close();
     }
   }
 
@@ -262,12 +250,9 @@ public final class FilesProviderTest extends FileBaseTest {
       Comparator<File> comparator,
       boolean showHidden,
       File... files) throws IOException {
-    Cursor cursor = queryChildren(dir, showHidden, order);
-    try {
+    try (Cursor cursor = queryChildren(dir, showHidden, order)) {
       sort(files, comparator);
       verify(cursor, files);
-    } finally {
-      cursor.close();
     }
   }
 
@@ -283,22 +268,22 @@ public final class FilesProviderTest extends FileBaseTest {
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
       FileInfo info = FileInfo.read(file.getPath());
-      ASSERT.that(FileCursors.getName(cursor)).is(info.name());
-      ASSERT.that(getId(cursor)).is(FilesContract.getFileId(file));
-      ASSERT.that(getLastModified(cursor)).is(info.modified());
-      ASSERT.that(getSize(cursor)).is(info.size());
-      ASSERT.that(isDirectory(cursor)).is(info.isDirectory());
-      ASSERT.that(isReadable(cursor)).is(info.isReadable());
-      ASSERT.that(isWritable(cursor)).is(info.isWritable());
+      ASSERT.that(Files.name(cursor)).is(info.name());
+      ASSERT.that(Files.id(cursor)).is(FilesContract.getFileId(file));
+      ASSERT.that(Files.modified(cursor)).is(info.modified());
+      ASSERT.that(Files.length(cursor)).is(info.size());
+      ASSERT.that(Files.isDirectory(cursor)).is(info.isDirectory());
+      ASSERT.that(Files.isReadable(cursor)).is(info.isReadable());
+      ASSERT.that(Files.isWritable(cursor)).is(info.isWritable());
 
       if (info.isRegularFile()) {
-        ASSERT.that(getType(cursor)).is(TYPE_REGULAR_FILE);
+        ASSERT.that(Files.type(cursor)).is(TYPE_REGULAR_FILE);
       } else if (info.isSymbolicLink()) {
-        ASSERT.that(getType(cursor)).is(TYPE_SYMLINK);
+        ASSERT.that(Files.type(cursor)).is(TYPE_SYMLINK);
       } else if (info.isDirectory()) {
-        ASSERT.that(getType(cursor)).is(TYPE_DIRECTORY);
+        ASSERT.that(Files.type(cursor)).is(TYPE_DIRECTORY);
       } else {
-        ASSERT.that(getType(cursor)).is(TYPE_UNKNOWN);
+        ASSERT.that(Files.type(cursor)).is(TYPE_UNKNOWN);
       }
     }
   }
@@ -307,7 +292,7 @@ public final class FilesProviderTest extends FileBaseTest {
     List<String> names = newArrayListWithCapacity(cursor.getCount());
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
-      names.add(getId(cursor));
+      names.add(Files.id(cursor));
     }
     return names;
   }
@@ -326,7 +311,7 @@ public final class FilesProviderTest extends FileBaseTest {
 
   private Cursor queryChildren(File dir, boolean showHidden, String order) {
     Context context = getContext();
-    Uri uri = buildFileChildrenUri(context, FilesContract.getFileId(dir), showHidden);
+    Uri uri = getFilesUri(context, FilesContract.getFileId(dir), showHidden);
     ContentResolver resolver = context.getContentResolver();
     return resolver.query(uri, null, null, null, order);
   }
@@ -338,7 +323,7 @@ public final class FilesProviderTest extends FileBaseTest {
     }
     Context context = getContext();
     ContentResolver resolver = context.getContentResolver();
-    Uri uri = buildSelectionUri(context, ids);
+    Uri uri = getSelectionUri(context, ids);
     return resolver.query(uri, null, null, null, null);
   }
 }

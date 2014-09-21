@@ -33,7 +33,7 @@ import static l.files.app.decorator.decoration.Decorations.fileDate;
 import static l.files.app.decorator.decoration.Decorations.fileSize;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
-import static l.files.provider.FileCursors.getName;
+import static l.files.provider.FilesContract.Files.name;
 import static l.files.test.Mocks.mockMenuItem;
 
 public final class UiFileActivity {
@@ -193,7 +193,7 @@ public final class UiFileActivity {
   public UiFileActivity assertCurrentDirectory(final File dir) {
     awaitOnMainThread(instrument, new Callable<Boolean>() {
       @Override public Boolean call() throws Exception {
-        String uri = activity.getCurrentPagerFragment().getCurrentDirectoryLocation();
+        String uri = activity.getCurrentPagerFragment().getCurrentDirectoryId();
         return dir.equals(new File(URI.create(uri)));
       }
     });
@@ -391,7 +391,7 @@ public final class UiFileActivity {
     int count = getListView().getCount();
     for (int i = 0; i < count; i++) {
       Cursor cursor = (Cursor) getListView().getItemAtPosition(i);
-      if (getName(cursor).equals(filename)) {
+      if (name(cursor).equals(filename)) {
         return Optional.of(i);
       }
     }

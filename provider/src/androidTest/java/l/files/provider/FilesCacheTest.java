@@ -18,10 +18,11 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.timeout;
 import static l.files.io.file.WatchEvent.Kind.MODIFY;
+import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.COLUMNS;
 import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
-import static l.files.provider.FilesContract.buildFileUri;
-import static l.files.provider.FilesContract.buildFilesUri;
+import static l.files.provider.FilesContract.getFileUri;
+import static l.files.provider.FilesContract.getFilesUri;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
@@ -55,7 +56,7 @@ public final class FilesCacheTest extends FileBaseTest {
     given(service.isWatchable(eq(ignoredPath))).willReturn(false);
 
     FilesCache cache = new FilesCache(getContext(), service, resolver);
-    Uri uri = buildFilesUri(getContext(), ignoredDir, true);
+    Uri uri = getFilesUri(getContext(), ignoredDir, true);
     ASSERT.that(cache.getFromCache(ignoredPath)).isNull();
     // noinspection UnusedDeclaration
     try (Cursor cursor = cache.get(uri, null, null, null)) {
@@ -66,7 +67,7 @@ public final class FilesCacheTest extends FileBaseTest {
   public void testCacheIsLiveWhenInUse() throws Exception {
     tmp().createFile("a");
     Path path = Path.from(tmp().get());
-    Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    Uri uri = getFilesUri(getContext(), tmp().get(), true);
     ASSERT.that(cache.getFromCache(path)).isNull();
 
     // Holding a reference to cursor, this should kept the cache alive
@@ -89,7 +90,7 @@ public final class FilesCacheTest extends FileBaseTest {
   public void testCacheIsClearedWhenNotUsed() throws Exception {
     tmp().createFile("a");
     Path path = Path.from(tmp().get());
-    Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    Uri uri = getFilesUri(getContext(), tmp().get(), true);
     ASSERT.that(cache.getFromCache(path)).isNull();
 
     // No reference is hold onto the cursor, this will cause the cache to clear
@@ -109,19 +110,19 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testUpdatesCacheOnFileAdded() throws Exception {
     final File a = tmp().createFile("a");
-    final Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
       ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(FileCursors.getName(cursor)).is(a.getName());
+      ASSERT.that(Files.name(cursor)).is(a.getName());
 
       final File b = tmp().createFile("b");
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
             ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(FileCursors.getName(cursor)).is(a.getName());
+            ASSERT.that(Files.name(cursor)).is(a.getName());
             ASSERT.that(cursor.moveToNext()).isTrue();
-            ASSERT.that(FileCursors.getName(cursor)).is(b.getName());
+            ASSERT.that(Files.name(cursor)).is(b.getName());
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
         }
@@ -132,19 +133,19 @@ public final class FilesCacheTest extends FileBaseTest {
   public void testUpdatesCacheOnFileRemoved() throws Exception {
     final File a = tmp().createFile("a");
     final File b = tmp().createFile("b");
-    final Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
       ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(FileCursors.getName(cursor)).is(a.getName());
+      ASSERT.that(Files.name(cursor)).is(a.getName());
       ASSERT.that(cursor.moveToNext()).isTrue();
-      ASSERT.that(FileCursors.getName(cursor)).is(b.getName());
+      ASSERT.that(Files.name(cursor)).is(b.getName());
 
       ASSERT.that(b.delete()).isTrue();
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
             ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(FileCursors.getName(cursor)).is(a.getName());
+            ASSERT.that(Files.name(cursor)).is(a.getName());
             ASSERT.that(cursor.getCount()).is(1);
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
@@ -155,17 +156,17 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testUpdatesCacheOnFileChanged() throws Exception {
     final File file = tmp().createFile("test");
-    final Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
       ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(FileCursors.getSize(cursor)).is(file.length());
+      ASSERT.that(Files.length(cursor)).is(file.length());
 
       write("hello world", file, UTF_8);
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
             ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(FileCursors.getSize(cursor)).is(file.length());
+            ASSERT.that(Files.length(cursor)).is(file.length());
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
         }
@@ -175,10 +176,10 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testDoesNotNotifyIfFileIsNotChanged() throws Exception {
     File file = tmp().createFile("test");
-    Uri uri = buildFilesUri(getContext(), tmp().get(), true);
+    Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
       ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(FileCursors.getSize(cursor)).is(file.length());
+      ASSERT.that(Files.length(cursor)).is(file.length());
 
       cache.onEvent(WatchEvent.create(MODIFY, Path.from(file)));
       sleep(1000);
@@ -187,6 +188,6 @@ public final class FilesCacheTest extends FileBaseTest {
   }
 
   private Uri buildRootNotificationUri() {
-    return buildFileUri(getContext(), tmp().get());
+    return getFileUri(getContext(), tmp().get());
   }
 }

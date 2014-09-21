@@ -59,11 +59,11 @@ public final class BookmarksContract {
    * bookmarked, the resulting cursor will contain exactly one row, otherwise
    * the cursor will be empty.
    *
-   * @param fileLocation the {@link FilesContract.Files#LOCATION} of the file
+   * @param fileId the {@link FilesContract.Files#ID} of the file
    */
-  public static Uri buildBookmarkUri(Context context, String fileLocation) {
-    checkNotNull(fileLocation, "fileLocation");
-    return bookmarksUriBuilder(context).appendPath(fileLocation).build();
+  public static Uri buildBookmarkUri(Context context, String fileId) {
+    checkNotNull(fileId, "fileId");
+    return bookmarksUriBuilder(context).appendPath(fileId).build();
   }
 
   private static Uri.Builder bookmarksUriBuilder(Context context) {
@@ -71,10 +71,10 @@ public final class BookmarksContract {
   }
 
   /**
-   * Gets the {@link FilesContract.Files#LOCATION} from the given content URI built with
+   * Gets the {@link FilesContract.Files#ID} from the given content URI built with
    * {@link #buildBookmarkUri(android.content.Context, String)}.
    */
-  public static String getBookmarkLocation(Uri bookmarkUri) {
+  public static String getBookmarkId(Uri bookmarkUri) {
     return checkBookmarkUri(bookmarkUri).get(1);
   }
 
@@ -86,22 +86,22 @@ public final class BookmarksContract {
   }
 
   /**
-   * Bookmarks the given {@link FilesContract.Files#LOCATION}. Do not call this on the UI
+   * Bookmarks the given {@link FilesContract.Files#ID}. Do not call this on the UI
    * thread.
    */
-  public static void bookmark(Context context, String fileLocation) {
+  public static void bookmark(Context context, String fileId) {
     ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileLocation);
+    Uri uri = buildBookmarkUri(context, fileId);
     context.getContentResolver().insert(uri, null);
   }
 
   /**
-   * Unbookmarks the given {@link FilesContract.Files#LOCATION}.Do not call this on the UI
+   * Unbookmarks the given {@link FilesContract.Files#ID}.Do not call this on the UI
    * thread.
    */
-  public static void unbookmark(Context context, String fileLocation) {
+  public static void unbookmark(Context context, String fileId) {
     ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileLocation);
+    Uri uri = buildBookmarkUri(context, fileId);
     context.getContentResolver().delete(uri, null, null);
   }
 

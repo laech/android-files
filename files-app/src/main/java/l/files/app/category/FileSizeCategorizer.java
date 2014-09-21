@@ -4,15 +4,13 @@ import android.content.res.Resources;
 import android.database.Cursor;
 
 import l.files.R;
-import l.files.provider.FilesContract;
 
-import static l.files.provider.FileCursors.getSize;
-import static l.files.provider.FileCursors.isDirectory;
+import static l.files.provider.FilesContract.Files;
 
 /**
  * Categorizes by file size (descending order).
  *
- * @see FilesContract.Files#SORT_BY_SIZE
+ * @see Files#SORT_BY_SIZE
  */
 final class FileSizeCategorizer implements Categorizer {
 
@@ -33,10 +31,10 @@ final class FileSizeCategorizer implements Categorizer {
   };
 
   @Override public String getCategory(Resources res, Cursor cursor) {
-    if (isDirectory(cursor)) {
+    if (Files.isDirectory(cursor)) {
       return res.getString(R.string.__);
     }
-    long size = getSize(cursor);
+    long size = Files.length(cursor);
     for (Group group : GROUPS) {
       if (size >= group.minSize) {
         return res.getString(group.label);

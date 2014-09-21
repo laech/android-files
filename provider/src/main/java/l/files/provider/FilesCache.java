@@ -35,8 +35,8 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static java.lang.Boolean.parseBoolean;
 import static l.files.provider.FilesContract.PARAM_SHOW_HIDDEN;
-import static l.files.provider.FilesContract.buildFileUri;
 import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getFileUri;
 
 final class FilesCache implements
     WatchEvent.Listener,
@@ -160,7 +160,7 @@ final class FilesCache implements
   @Override public void onEvent(WatchEvent event) {
     Path parent = event.path().parent();
     String location = getFileId(parent.toFile());
-    Uri uri = buildFileUri(context, location);
+    Uri uri = getFileUri(context, location);
     EventBatch batch;
     synchronized (this) {
       batch = batches.get(parent);
