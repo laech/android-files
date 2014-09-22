@@ -2,15 +2,13 @@ package l.files.io.file;
 
 import android.os.FileObserver;
 
-import com.google.common.base.Supplier;
-import com.google.common.collect.SetMultimap;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -27,9 +25,8 @@ import static android.os.FileObserver.MOVED_TO;
 import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Multimaps.newSetMultimap;
-import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.emptyList;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
 import static l.files.io.file.Files.checkExist;
 import static l.files.io.file.PathObserver.IN_IGNORED;
@@ -74,15 +71,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
    */
   private final List<PathObserver> observers = newArrayList();
 
-  private final SetMultimap<Path, Listener> listeners =
-      synchronizedSetMultimap(newSetMultimap(
-          new HashMap<Path, Collection<Listener>>(),
-          new Supplier<Set<Listener>>() {
-            @Override public Set<Listener> get() {
-              return new CopyOnWriteArraySet<>();
-            }
-          }
-      ));
+  private final Map<Path, CopyOnWriteArraySet<Listener>> listeners = new HashMap<>();
 
   private final PathObserver.Listener processor = new PathObserver.Listener() {
 
@@ -126,12 +115,12 @@ class WatchServiceImpl extends WatchService implements Closeable {
 
     private void send(Kind kind, Path path) {
       WatchEvent event = WatchEvent.create(kind, path);
-      for (Listener listener : listeners.get(path)) {
+      for (Listener listener : getListeners(path)) {
         listener.onEvent(event);
       }
       Path parent = path.parent();
       if (parent != null) {
-        for (Listener listener : listeners.get(parent)) {
+        for (Listener listener : getListeners(parent)) {
           listener.onEvent(event);
         }
       }
@@ -180,22 +169,45 @@ class WatchServiceImpl extends WatchService implements Closeable {
     this.ignored = ignored.toArray(new Path[ignored.size()]);
   }
 
-  @Override public void register(Path path, Listener listener) throws IOException {
+  @Override
+  public void register(Path path, Listener listener) throws IOException {
     if (!isWatchable(path)) {
       return;
     }
 
     synchronized (this) {
-      if (listeners.put(path, listener)) {
+      if (getOrCreateListeners(path).add(listener)) {
         monitor(path);
       }
     }
   }
 
+  private Collection<Listener> getOrCreateListeners(Path path) {
+    synchronized (this) {
+      CopyOnWriteArraySet<Listener> values = listeners.get(path);
+      if (values == null) {
+        values = new CopyOnWriteArraySet<>();
+        listeners.put(path, values);
+      }
+      return values;
+    }
+  }
+
+  private Collection<Listener> getListeners(Path path) {
+    Collection<Listener> result;
+    synchronized (this) {
+      result = listeners.get(path);
+    }
+    if (result == null) {
+      return emptyList();
+    }
+    return result;
+  }
+
   @Override public void unregister(Path path, Listener listener) {
     synchronized (this) {
-      if (listeners.remove(path, listener) &&
-          listeners.get(path).isEmpty()) {
+      Collection<Listener> values = getListeners(path);
+      if (values.remove(listener) && values.isEmpty()) {
         unmonitor(path);
       }
     }
@@ -318,7 +330,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
         return;
       }
 
-      listeners.removeAll(parent);
+      listeners.remove(parent);
 
       Iterator<PathObserver> it = observers.iterator();
       while (it.hasNext()) {
