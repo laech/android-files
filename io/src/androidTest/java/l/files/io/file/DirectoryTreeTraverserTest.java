@@ -6,7 +6,6 @@ import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.io.file.DirectoryTreeTraverser.Entry;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public final class DirectoryTreeTraverserTest extends FileBaseTest {
 
@@ -25,6 +24,6 @@ public final class DirectoryTreeTraverserTest extends FileBaseTest {
             .breadthFirstTraversal(Entry.create(tmp().get().getPath()))
     );
 
-    assertThat(actual).isEqualTo(expected);
+    assertEquals(expected, actual);
   }
 }

@@ -17,11 +17,11 @@ import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
 
 import static com.google.common.collect.Collections2.transform;
-import static com.google.common.truth.Truth.ASSERT;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.testing.util.concurrent.CountDownSubject.countDown;
+import static l.files.common.testing.Tests.assertExists;
+import static l.files.common.testing.Tests.assertNotExists;
 import static l.files.operations.OperationService.ACTION_CANCEL;
 import static l.files.operations.OperationService.EXTRA_TASK_ID;
 import static l.files.operations.OperationService.copy;
@@ -31,7 +31,6 @@ import static l.files.operations.OperationService.newCancelIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -39,10 +38,10 @@ public final class OperationServiceTest extends FileBaseTest {
 
   public void testCancelIntent() throws Exception {
     Intent intent = newCancelIntent(getContext(), 101);
-    ASSERT.that(intent.getAction()).is(ACTION_CANCEL);
-    ASSERT.that(intent.getIntExtra(EXTRA_TASK_ID, -1)).is(101);
-    ASSERT.that(intent.getComponent())
-        .is(new ComponentName(getContext(), OperationService.class));
+    assertEquals(ACTION_CANCEL, intent.getAction());
+    assertEquals(101, intent.getIntExtra(EXTRA_TASK_ID, -1));
+    assertEquals(new ComponentName(getContext(), OperationService.class),
+        intent.getComponent());
   }
 
   public void testCancelTaskNotFound() throws Exception {
@@ -61,8 +60,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       move(getContext(), asList(src.getPath()), dst.getPath());
       listener.await();
-      assertThat(src).doesNotExist();
-      assertThat(new File(dst, src.getName())).exists();
+      assertNotExists(src);
+      assertExists(new File(dst, src.getName()));
 
     } finally {
       unregister(listener);
@@ -77,8 +76,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       copy(getContext(), asList(src.getPath()), dst.getPath());
       listener.await();
-      assertThat(src).exists();
-      assertThat(new File(dst, src.getName())).exists();
+      assertExists(src);
+      assertExists(new File(dst, src.getName()));
 
     } finally {
       unregister(listener);
@@ -93,8 +92,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
       delete(getContext(), a.getPath(), b.getPath());
       listener.await();
-      assertThat(a).doesNotExist();
-      assertThat(b).doesNotExist();
+      assertNotExists(a);
+      assertNotExists(b);
 
     } finally {
       unregister(listener);
@@ -108,8 +107,8 @@ public final class OperationServiceTest extends FileBaseTest {
       delete(getContext(), tmp().createFile("a").getPath());
       delete(getContext(), tmp().createFile("2").getPath());
       listener.await();
-      assertThat(listener.getValues().size()).isGreaterThan(1);
-      assertThat(getTaskIds(listener.getValues())).hasSize(2);
+      assertTrue(listener.getValues().size() > 1);
+      assertEquals(2, getTaskIds(listener.getValues()).size());
 
     } finally {
       unregister(listener);
@@ -139,8 +138,8 @@ public final class OperationServiceTest extends FileBaseTest {
       long end = currentTimeMillis();
 
       Set<Long> times = getTaskStartTimes(listener.getValues());
-      assertThat(times.iterator().next()).isGreaterThanOrEqualTo(start);
-      assertThat(times.iterator().next()).isLessThanOrEqualTo(end);
+      assertTrue(times.iterator().next() >= start);
+      assertTrue(times.iterator().next() <= end);
 
     } finally {
       unregister(listener);
@@ -182,14 +181,14 @@ public final class OperationServiceTest extends FileBaseTest {
 
     @Subscribe public void onEvent(TaskState state) {
       values.add(state);
-      ASSERT.that(state.task().kind()).is(kind);
+      assertEquals(kind, state.task().kind());
       if (state.isFinished()) {
         latch.countDown();
       }
     }
 
     public void await() throws InterruptedException {
-      ASSERT.about(countDown()).that(latch).await(1, SECONDS);
+      assertTrue(latch.await(1, SECONDS));
     }
 
     public List<TaskState> getValues() {

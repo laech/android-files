@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import de.greenrobot.event.SubscriberExceptionEvent;
 import l.files.common.testing.BaseTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,7 +27,7 @@ public final class EventsTest extends BaseTest {
       captor.getValue().getCallback().run();
       fail();
     } catch (RuntimeException e) {
-      assertThat(e.getCause()).isSameAs(error);
+      assertSame(error, e.getCause());
     }
   }
 }

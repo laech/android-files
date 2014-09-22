@@ -7,7 +7,6 @@ import l.files.common.testing.BaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskKind.COPY;
-import static l.files.operations.testing.TaskStateSubject.assertThat;
 
 public final class TaskStateTest extends BaseTest {
 
@@ -25,61 +24,62 @@ public final class TaskStateTest extends BaseTest {
   }
 
   public void testCreatePending() throws Exception {
-    assertThat(pending).task(task).time(time).target(target);
+    assertEquals(task, pending.task());
+    assertEquals(time, pending.time());
+    assertEquals(target, pending.target());
   }
 
   public void testPendingToRunning() throws Exception {
     Progress items = Progress.create(10101, 1);
     Progress bytes = Progress.create(10100, 0);
     Time time = Time.create(1010, 11);
-    TaskState state = pending.running(time, items, bytes);
-    assertThat(state)
-        .task(task)
-        .time(time)
-        .items(items)
-        .bytes(bytes)
-        .target(target);
+    TaskState.Running state = pending.running(time, items, bytes);
+    assertEquals(task, state.task());
+    assertEquals(time, state.time());
+    assertEquals(items, state.items());
+    assertEquals(bytes, state.bytes());
+    assertEquals(target, state.target());
   }
 
   public void testPendingToRunningWithoutProgress() throws Exception {
     Time time = Time.create(10101, 100);
-    TaskState state = pending.running(time);
-    assertThat(state)
-        .task(task)
-        .time(time)
-        .items(Progress.none())
-        .bytes(Progress.none())
-        .target(target);
+    TaskState.Running state = pending.running(time);
+    assertEquals(task, state.task());
+    assertEquals(time, state.time());
+    assertEquals(target, state.target());
+    assertEquals(Progress.none(), state.items());
+    assertEquals(Progress.none(), state.bytes());
+
   }
 
   public void testRunningToRunningDoesNotChangeTime() throws Exception {
     Time time = Time.create(102, 2);
     Progress items = Progress.create(4, 2);
     Progress bytes = Progress.create(9, 2);
-    TaskState state = pending.running(time).running(items, bytes);
-    assertThat(state)
-        .task(task)
-        .time(time)
-        .items(items)
-        .bytes(bytes)
-        .target(target);
+    TaskState.Running state = pending.running(time).running(items, bytes);
+    assertEquals(task, state.task());
+    assertEquals(time, state.time());
+    assertEquals(items, state.items());
+    assertEquals(bytes, state.bytes());
+    assertEquals(target, state.target());
   }
 
   public void testRunningToSuccess() throws Exception {
     Time successTime = Time.create(2, 2);
     TaskState state = pending.running(time).success(successTime);
-    assertThat(state).task(task).target(target).time(successTime);
+    assertEquals(task, state.task());
+    assertEquals(successTime, state.time());
+    assertEquals(target, state.target());
   }
 
   public void testRunningToFailed() throws Exception {
     Time failureTime = Time.create(20, 2);
     List<Failure> failures = asList(Failure.create("1", new IOException("ok")));
-    TaskState state = pending.running(time).failed(failureTime, failures);
-    assertThat(state)
-        .task(task)
-        .target(target)
-        .time(failureTime)
-        .failures(failures);
+    TaskState.Failed state = pending.running(time).failed(failureTime, failures);
+    assertEquals(task, state.task());
+    assertEquals(failureTime, state.time());
+    assertEquals(target, state.target());
+    assertEquals(failures, state.failures());
   }
 
 }

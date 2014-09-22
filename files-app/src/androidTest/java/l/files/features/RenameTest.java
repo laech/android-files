@@ -7,8 +7,9 @@ import l.files.features.object.UiRename;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.Tests.assertExists;
+import static l.files.common.testing.Tests.assertNotExists;
 import static l.files.common.testing.Tests.timeout;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public final class RenameTest extends BaseFilesActivityTest {
 
@@ -22,8 +23,8 @@ public final class RenameTest extends BaseFilesActivityTest {
     timeout(1, SECONDS, new Runnable() {
       @Override
       public void run() {
-        assertThat(from).doesNotExist();
-        assertThat(to).exists();
+        assertNotExists(from);
+        assertExists(to);
       }
     });
   }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 
 import l.files.common.testing.FileBaseTest;
 
-import static com.google.common.truth.Truth.ASSERT;
 import static java.lang.Thread.sleep;
 import static l.files.io.file.WatchEvent.Listener;
 import static org.mockito.Mockito.mock;
@@ -21,19 +20,19 @@ public final class WatchServiceIsWatchableTest extends FileBaseTest {
       Listener listener = mock(Listener.class);
       srv.register(root, listener);
 
-      ASSERT.that(srv.isWatchable(root)).isFalse();
-      ASSERT.that(srv.isWatchable(dir1)).isFalse();
-      ASSERT.that(srv.isWatchable(dir2)).isFalse();
-      ASSERT.that(srv.isWatchable(root.child("a"))).isFalse();
-      ASSERT.that(srv.isWatchable(root.child("a/b"))).isFalse();
+      assertFalse(srv.isWatchable(root));
+      assertFalse(srv.isWatchable(dir1));
+      assertFalse(srv.isWatchable(dir2));
+      assertFalse(srv.isWatchable(root.child("a")));
+      assertFalse(srv.isWatchable(root.child("a/b")));
 
-      ASSERT.that(srv.isMonitored(root)).isFalse();
-      ASSERT.that(srv.isMonitored(dir1)).isFalse();
-      ASSERT.that(srv.isMonitored(dir2)).isFalse();
+      assertFalse(srv.isMonitored(root));
+      assertFalse(srv.isMonitored(dir1));
+      assertFalse(srv.isMonitored(dir2));
 
-      ASSERT.that(srv.hasObserver(root)).isFalse();
-      ASSERT.that(srv.hasObserver(dir1)).isFalse();
-      ASSERT.that(srv.hasObserver(dir2)).isFalse();
+      assertFalse(srv.hasObserver(root));
+      assertFalse(srv.hasObserver(dir1));
+      assertFalse(srv.hasObserver(dir2));
 
       tmp().createFile("a");
       tmp().createDir("b");

@@ -7,7 +7,6 @@ import java.util.concurrent.Executor;
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
 
-import static com.google.common.truth.Truth.ASSERT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -41,9 +40,9 @@ public final class EventsTest extends BaseTest {
       fail("Exception expected");
     } catch (Throwable actual) {
       if (checkCause) {
-        ASSERT.that(actual.getCause()).is(expected);
+        assertEquals(expected, actual.getCause());
       } else {
-        ASSERT.that(actual).is(expected);
+        assertEquals(expected, actual);
       }
     }
   }

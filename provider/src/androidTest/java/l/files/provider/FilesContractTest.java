@@ -5,9 +5,10 @@ import java.io.IOException;
 
 import l.files.common.testing.FileBaseTest;
 
-import static com.google.common.truth.Truth.ASSERT;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.Tests.assertExists;
+import static l.files.common.testing.Tests.assertNotExists;
 import static l.files.common.testing.Tests.timeout;
 import static l.files.provider.FilesContract.copy;
 import static l.files.provider.FilesContract.delete;
@@ -16,8 +17,6 @@ import static l.files.provider.FilesContract.getNameSuggestion;
 import static l.files.provider.FilesContract.move;
 import static l.files.provider.FilesContract.rename;
 import static org.apache.commons.io.FileUtils.forceDelete;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 public final class FilesContractTest extends FileBaseTest {
 
@@ -29,33 +28,33 @@ public final class FilesContractTest extends FileBaseTest {
       forceDelete(dir);
     }
     String after = getFileId(dir);
-    ASSERT.that(before).is(after);
+    assertEquals(before, after);
   }
 
   public void testGetIdFromFileReturnsUri() throws Exception {
     File a = tmp().createDir("a");
     File b = tmp().createFile("b");
-    ASSERT.that(getFileId(a)).is("file://" + tmp().get("a").getPath());
-    ASSERT.that(getFileId(b)).is("file://" + tmp().get("b").getPath());
-    ASSERT.that(getFileId(new File("/"))).is("file:///");
-    ASSERT.that(getFileId(new File("/c/b/../hello"))).is("file:///c/hello");
-    ASSERT.that(getFileId(new File("/c/./hello"))).is("file:///c/hello");
+    assertEquals("file://" + tmp().get("a").getPath(), getFileId(a));
+    assertEquals("file://" + tmp().get("b").getPath(), getFileId(b));
+    assertEquals("file:///", getFileId(new File("/")));
+    assertEquals("file:///c/hello", getFileId(new File("/c/b/../hello")));
+    assertEquals("file:///c/hello", getFileId(new File("/c/./hello")));
   }
 
   public void testRenamesFile() throws Exception {
     File a = tmp().createFile("a");
     File b = tmp().get("b");
     rename(getContext(), getFileId(a), b.getName());
-    assertThat(a).doesNotExist();
-    assertThat(b).exists();
+    assertNotExists(a);
+    assertExists(b);
   }
 
   public void testRenameThrowsExceptionOnError() throws Exception {
     File a = tmp().createFile("a");
-    assertThat(tmp().get().setWritable(false)).isTrue();
+    assertTrue(tmp().get().setWritable(false));
     try {
       rename(getContext(), getFileId(a), "b");
-      failBecauseExceptionWasNotThrown(IOException.class);
+      fail("Expecting " + IOException.class.getName());
     } catch (IOException e) {
       // Pass
     }
@@ -70,7 +69,7 @@ public final class FilesContractTest extends FileBaseTest {
     timeout(1, SECONDS, new Runnable() {
       @Override public void run() {
         File file = new File(dstDir, srcFile.getName());
-        assertThat(file).exists();
+        assertExists(file);
       }
     });
   }
@@ -83,7 +82,7 @@ public final class FilesContractTest extends FileBaseTest {
 
     timeout(1, SECONDS, new Runnable() {
       @Override public void run() {
-        assertThat(file).doesNotExist();
+        assertNotExists(file);
       }
     });
   }
@@ -93,13 +92,13 @@ public final class FilesContractTest extends FileBaseTest {
     String srcId = getFileId(tmp().get("a"));
     String dstId = getFileId(tmp().createDir("1"));
     copy(getContext(), asList(srcId), dstId);
-    assertThat(tmp().get("a/b")).exists();
+    assertExists(tmp().get("a/b"));
   }
 
   public void testGetNameSuggestion() throws Exception {
     File file = tmp().createFile("a");
     String id = getFileId(tmp().get());
     String name = getNameSuggestion(getContext(), id, file.getName());
-    assertThat(name).isEqualTo("a 2");
+    assertEquals("a 2", name);
   }
 }

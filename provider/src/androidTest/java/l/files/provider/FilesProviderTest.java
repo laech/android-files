@@ -18,9 +18,9 @@ import l.files.io.file.FileInfo;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.io.Files.write;
-import static com.google.common.truth.Truth.ASSERT;
 import static java.util.Arrays.sort;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.Tests.assertExists;
 import static l.files.io.file.Files.symlink;
 import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.SORT_BY_MODIFIED;
@@ -30,39 +30,38 @@ import static l.files.provider.FilesContract.Files.TYPE_DIRECTORY;
 import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
 import static l.files.provider.FilesContract.Files.TYPE_SYMLINK;
 import static l.files.provider.FilesContract.Files.TYPE_UNKNOWN;
-import static l.files.provider.FilesContract.getFileUri;
-import static l.files.provider.FilesContract.getSelectionUri;
 import static l.files.provider.FilesContract.getFileId;
+import static l.files.provider.FilesContract.getFileUri;
 import static l.files.provider.FilesContract.getFilesUri;
+import static l.files.provider.FilesContract.getSelectionUri;
 import static org.apache.commons.io.comparator.LastModifiedFileComparator.LASTMODIFIED_REVERSE;
 import static org.apache.commons.io.comparator.NameFileComparator.NAME_COMPARATOR;
 import static org.apache.commons.io.comparator.SizeFileComparator.SIZE_REVERSE;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public final class FilesProviderTest extends FileBaseTest {
 
   public void testDetectsMediaTypeForFile() throws Exception {
     File file = tmp().createFile("a.mp3");
     write("hello world", file, UTF_8);
-    ASSERT.that(getMediaType(file)).is("text/plain");
+    assertEquals("text/plain", getMediaType(file));
   }
 
   public void testDetectsMediaTypeForDirectory() throws Exception {
     File dir = tmp().createDir("a.mp3");
-    ASSERT.that(getMediaType(dir)).is("application/x-directory");
+    assertEquals("application/x-directory", getMediaType(dir));
   }
 
   public void testReturnUnknownMediaTypeForUnreadableFile() throws Exception {
     File file = tmp().createFile("a.txt");
     write("hello world", file, UTF_8);
-    ASSERT.that(file.setReadable(false)).isTrue();
-    ASSERT.that(getMediaType(file)).is("application/octet-stream");
+    assertTrue(file.setReadable(false));
+    assertEquals("application/octet-stream", getMediaType(file));
   }
 
   public void testReturnUnknownMediaTypeForSystemFile() throws Exception {
     File file = new File("/proc/1/maps");
-    assertThat(file).exists();
-    ASSERT.that(getMediaType(file)).is("application/octet-stream");
+    assertExists(file);
+    assertEquals("application/octet-stream", getMediaType(file));
   }
 
   private String getMediaType(File file) {
@@ -263,27 +262,27 @@ public final class FilesProviderTest extends FileBaseTest {
   private static void verify(Cursor cursor, File[] files) throws IOException {
     List<String> expected = getIds(files);
     List<String> actual = getIds(cursor);
-    ASSERT.that(actual).is(expected);
+    assertEquals(expected, actual);
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
       FileInfo info = FileInfo.read(file.getPath());
-      ASSERT.that(Files.name(cursor)).is(info.name());
-      ASSERT.that(Files.id(cursor)).is(FilesContract.getFileId(file));
-      ASSERT.that(Files.modified(cursor)).is(info.modified());
-      ASSERT.that(Files.length(cursor)).is(info.size());
-      ASSERT.that(Files.isDirectory(cursor)).is(info.isDirectory());
-      ASSERT.that(Files.isReadable(cursor)).is(info.isReadable());
-      ASSERT.that(Files.isWritable(cursor)).is(info.isWritable());
+      assertEquals(FilesContract.getFileId(file), Files.id(cursor));
+      assertEquals(info.name(), Files.name(cursor));
+      assertEquals(info.modified(), Files.modified(cursor));
+      assertEquals(info.size(), Files.length(cursor));
+      assertEquals(info.isDirectory(), Files.isDirectory(cursor));
+      assertEquals(info.isReadable(), Files.isReadable(cursor));
+      assertEquals(info.isWritable(), Files.isWritable(cursor));
 
       if (info.isRegularFile()) {
-        ASSERT.that(Files.type(cursor)).is(TYPE_REGULAR_FILE);
+        assertEquals(TYPE_REGULAR_FILE, Files.type(cursor));
       } else if (info.isSymbolicLink()) {
-        ASSERT.that(Files.type(cursor)).is(TYPE_SYMLINK);
+        assertEquals(TYPE_SYMLINK, Files.type(cursor));
       } else if (info.isDirectory()) {
-        ASSERT.that(Files.type(cursor)).is(TYPE_DIRECTORY);
+        assertEquals(TYPE_DIRECTORY, Files.type(cursor));
       } else {
-        ASSERT.that(Files.type(cursor)).is(TYPE_UNKNOWN);
+        assertEquals(TYPE_UNKNOWN, Files.type(cursor));
       }
     }
   }

@@ -13,7 +13,6 @@ import l.files.io.file.WatchService;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
-import static com.google.common.truth.Truth.ASSERT;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.timeout;
@@ -57,10 +56,10 @@ public final class FilesCacheTest extends FileBaseTest {
 
     FilesCache cache = new FilesCache(getContext(), service, resolver);
     Uri uri = getFilesUri(getContext(), ignoredDir, true);
-    ASSERT.that(cache.getFromCache(ignoredPath)).isNull();
+    assertNull(cache.getFromCache(ignoredPath));
     // noinspection UnusedDeclaration
     try (Cursor cursor = cache.get(uri, null, null, null)) {
-      ASSERT.that(cache.getFromCache(ignoredPath)).isNull();
+      assertNull(cache.getFromCache(ignoredPath));
     }
   }
 
@@ -68,19 +67,19 @@ public final class FilesCacheTest extends FileBaseTest {
     tmp().createFile("a");
     Path path = Path.from(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
-    ASSERT.that(cache.getFromCache(path)).isNull();
+    assertNull(cache.getFromCache(path));
 
     // Holding a reference to cursor, this should kept the cache alive
     // noinspection UnusedDeclaration
     try (Cursor cursor = cache.get(uri, null, null, null)) {
-      ASSERT.that(cache.getFromCache(path)).isNotNull();
+      assertNotNull(cache.getFromCache(path));
       byte[] data = new byte[256];
       while (true) {
         sleep(50);
         try {
           data = new byte[data.length * 2];
         } catch (OutOfMemoryError e) {
-          ASSERT.that(cache.getFromCache(path)).isNotNull();
+          assertNotNull(cache.getFromCache(path));
           break;
         }
       }
@@ -91,18 +90,18 @@ public final class FilesCacheTest extends FileBaseTest {
     tmp().createFile("a");
     Path path = Path.from(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
-    ASSERT.that(cache.getFromCache(path)).isNull();
+    assertNull(cache.getFromCache(path));
 
     // No reference is hold onto the cursor, this will cause the cache to clear
     cache.get(uri, null, null, null).close();
-    ASSERT.that(cache.getFromCache(path)).isNotNull();
+    assertNotNull(cache.getFromCache(path));
     byte[] data = new byte[256];
     while (true) {
       sleep(50);
       try {
         data = new byte[data.length * 2];
       } catch (OutOfMemoryError e) {
-        ASSERT.that(cache.getFromCache(path)).isNull();
+        assertNull(cache.getFromCache(path));
         break;
       }
     }
@@ -112,17 +111,17 @@ public final class FilesCacheTest extends FileBaseTest {
     final File a = tmp().createFile("a");
     final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
-      ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(Files.name(cursor)).is(a.getName());
+      assertTrue(cursor.moveToFirst());
+      assertEquals(a.getName(), Files.name(cursor));
 
       final File b = tmp().createFile("b");
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
-            ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(Files.name(cursor)).is(a.getName());
-            ASSERT.that(cursor.moveToNext()).isTrue();
-            ASSERT.that(Files.name(cursor)).is(b.getName());
+            assertTrue(cursor.moveToFirst());
+            assertEquals(a.getName(), Files.name(cursor));
+            assertTrue(cursor.moveToNext());
+            assertEquals(b.getName(), Files.name(cursor));
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
         }
@@ -135,18 +134,18 @@ public final class FilesCacheTest extends FileBaseTest {
     final File b = tmp().createFile("b");
     final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
-      ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(Files.name(cursor)).is(a.getName());
-      ASSERT.that(cursor.moveToNext()).isTrue();
-      ASSERT.that(Files.name(cursor)).is(b.getName());
+      assertTrue(cursor.moveToFirst());
+      assertEquals(a.getName(), Files.name(cursor));
+      assertTrue(cursor.moveToNext());
+      assertEquals(b.getName(), Files.name(cursor));
 
-      ASSERT.that(b.delete()).isTrue();
+      assertTrue(b.delete());
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, SORT_BY_NAME, null)) {
-            ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(Files.name(cursor)).is(a.getName());
-            ASSERT.that(cursor.getCount()).is(1);
+            assertTrue(cursor.moveToFirst());
+            assertEquals(a.getName(), Files.name(cursor));
+            assertEquals(1, cursor.getCount());
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
         }
@@ -158,15 +157,15 @@ public final class FilesCacheTest extends FileBaseTest {
     final File file = tmp().createFile("test");
     final Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
-      ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(Files.length(cursor)).is(file.length());
+      assertTrue(cursor.moveToFirst());
+      assertEquals(file.length(), Files.length(cursor));
 
       write("hello world", file, UTF_8);
       timeout(1, SECONDS, new Runnable() {
         @Override public void run() {
           try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
-            ASSERT.that(cursor.moveToFirst()).isTrue();
-            ASSERT.that(Files.length(cursor)).is(file.length());
+            assertTrue(cursor.moveToFirst());
+            assertEquals(file.length(), Files.length(cursor));
             verify(resolver).notifyChange(buildRootNotificationUri(), null);
           }
         }
@@ -178,8 +177,8 @@ public final class FilesCacheTest extends FileBaseTest {
     File file = tmp().createFile("test");
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
     try (Cursor cursor = cache.get(uri, COLUMNS, null, null)) {
-      ASSERT.that(cursor.moveToFirst()).isTrue();
-      ASSERT.that(Files.length(cursor)).is(file.length());
+      assertTrue(cursor.moveToFirst());
+      assertEquals(file.length(), Files.length(cursor));
 
       cache.onEvent(WatchEvent.create(MODIFY, Path.from(file)));
       sleep(1000);

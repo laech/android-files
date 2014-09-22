@@ -19,7 +19,6 @@ import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
 
-import static com.google.common.truth.Truth.ASSERT;
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.ui.FailuresActivity.getFailures;
@@ -91,8 +90,8 @@ public final class NotificationProviderTest extends BaseTest {
         FailureMessage.create("1", "test1"),
         FailureMessage.create("2", "test2")
     );
-    ASSERT.that(actual).is(expected);
-    ASSERT.that(getTitle(intent)).matches(".+");
+    assertEquals(expected, actual);
+    assertTrue(getTitle(intent).matches(".+"));
   }
 
 }

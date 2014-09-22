@@ -16,7 +16,6 @@ import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorS
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.MOVE;
-import static l.files.operations.testing.TaskStateSubject.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -38,7 +37,7 @@ public class TaskTest extends BaseTest {
         throw new InterruptedException("Test");
       }
     });
-    assertThat(captor.getValue()).isSuccess();
+    assertTrue(captor.getValue() instanceof TaskState.Success);
   }
 
   public void testNotifiesOnFailure() throws Throwable {
@@ -48,17 +47,17 @@ public class TaskTest extends BaseTest {
             Failure.create("a", new IOException("Test"))));
       }
     });
-    assertThat(captor.getValue()).isFailure();
+    assertTrue(captor.getValue() instanceof TaskState.Failed);
   }
 
   public void testNotifiesOnStart() throws Exception {
     ArgumentCaptor<TaskState> captor = capturedExecute();
-    assertThat(captor.getAllValues().get(0)).isPending();
+    assertTrue(captor.getAllValues().get(0) instanceof TaskState.Pending);
   }
 
   public void testNotifiesOnSuccess() throws Exception {
     ArgumentCaptor<TaskState> captor = capturedExecute();
-    assertThat(captor.getValue()).isSuccess();
+    assertTrue(captor.getValue() instanceof TaskState.Success);
   }
 
   private ArgumentCaptor<TaskState> capturedExecute() {

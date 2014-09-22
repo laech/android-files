@@ -51,6 +51,9 @@ public abstract class Progress {
    * Returns a value between 0 and 1.
    */
   public float processedPercentage() {
+    if (none().equals(this)) {
+      return 1;
+    }
     return processed() / (float) total();
   }
 

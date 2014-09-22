@@ -9,7 +9,6 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static l.files.io.file.Stat.lstat;
 import static l.files.io.file.Unistd.symlink;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public final class FileInfoTest extends FileBaseTest {
 
@@ -17,29 +16,29 @@ public final class FileInfoTest extends FileBaseTest {
     File file = tmp().createDir("file");
     File link = tmp().get("link");
     symlink(file.getPath(), link.getPath());
-    assertThat(info(file).isSymbolicLink()).isFalse();
-    assertThat(info(link).isSymbolicLink()).isTrue();
-    assertThat(info(link).stat()).isEqualTo(lstat(link.getPath()));
+    assertFalse(info(file).isSymbolicLink());
+    assertTrue(info(link).isSymbolicLink());
+    assertEquals(lstat(link.getPath()), info(link).stat());
   }
 
   public void testIsDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertThat(info(dir).isDirectory()).isTrue();
+    assertTrue(info(dir).isDirectory());
   }
 
   public void testIsRegularFile() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).isRegularFile()).isTrue();
+    assertTrue(info(file).isRegularFile());
   }
 
   public void testInodeNumber() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).inode()).isEqualTo(lstat(f.getPath()).ino());
+    assertEquals(lstat(f.getPath()).ino(), info(f).inode());
   }
 
   public void testDeviceId() throws Exception {
     File f = tmp().createFile("a");
-    assertThat(info(f).device()).isEqualTo(lstat(f.getPath()).dev());
+    assertEquals(lstat(f.getPath()).dev(), info(f).device());
   }
 
   public void testLastModifiedTime() throws Exception {
@@ -49,69 +48,68 @@ public final class FileInfoTest extends FileBaseTest {
 
   public void testReadable() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(file.setReadable(false)).isTrue();
-    assertThat(info(file).isReadable()).isFalse();
-    assertThat(file.setReadable(true)).isTrue();
-    assertThat(info(file).isReadable()).isTrue();
+    assertTrue(file.setReadable(false));
+    assertFalse(info(file).isReadable());
+    assertTrue(file.setReadable(true));
+    assertTrue(info(file).isReadable());
   }
 
   public void testWritable() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(file.setWritable(false)).isTrue();
-    assertThat(info(file).isWritable()).isFalse();
-    assertThat(file.setWritable(true)).isTrue();
-    assertThat(info(file).isWritable()).isTrue();
+    assertTrue(file.setWritable(false));
+    assertFalse(info(file).isWritable());
+    assertTrue(file.setWritable(true));
+    assertTrue(info(file).isWritable());
   }
 
   public void testName() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).name()).isEqualTo(file.getName());
+    assertEquals(file.getName(), info(file).name());
   }
 
   public void testMediaTypeForDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertThat(info(dir).mime()).isEqualTo("application/x-directory");
+    assertEquals("application/x-directory", info(dir).mime());
   }
 
   public void testMediaTypeForFile() throws Exception {
     File file = tmp().createFile("a.txt");
-    assertThat(info(file).mime()).isEqualTo("text/plain");
+    assertEquals("text/plain", info(file).mime());
   }
 
   public void testMediaTypeForSymlinkFile() throws Exception {
     File file = tmp().createFile("a.mp3");
     File link = tmp().get("b.txt");
     symlink(file.getPath(), link.getPath());
-    assertThat(info(link).mime()).isEqualTo("text/plain");
+    assertEquals("text/plain", info(link).mime());
   }
 
   public void testMediaTypeForSymlinkDirectory() throws Exception {
     File dir = tmp().createDir("a");
     File link = tmp().get("b");
     symlink(dir.getPath(), link.getPath());
-    assertThat(info(link).mime()).isEqualTo("application/x-directory");
+    assertEquals("application/x-directory", info(link).mime());
   }
 
   public void testDefaultMediaTypeIfUnknown() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).mime()).isEqualTo("application/octet-stream");
+    assertEquals("application/octet-stream", info(file).mime());
   }
 
   public void testUri() throws Exception {
     File file = tmp().createFile("a");
-    assertThat(info(file).uri())
-        .isEqualTo("file://" + file.getAbsolutePath());
+    assertEquals("file://" + file.getAbsolutePath(), info(file).uri());
   }
 
   public void testSize() throws Exception {
     File file = tmp().createFile("a");
     write("hello world", file, UTF_8);
-    assertThat(info(file).size()).isEqualTo(file.length());
+    assertEquals(file.length(), info(file).size());
   }
 
   public void testIsHidden() throws Exception {
-    assertThat(info(tmp().createFile(".a")).isHidden()).isTrue();
-    assertThat(info(tmp().createFile("a")).isHidden()).isFalse();
+    assertTrue(info(tmp().createFile(".a")).isHidden());
+    assertFalse(info(tmp().createFile("a")).isHidden());
   }
 
   private FileInfo info(File f) throws IOException {

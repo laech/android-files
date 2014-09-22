@@ -8,8 +8,6 @@ import android.test.AndroidTestCase;
 import java.io.File;
 import java.util.Collections;
 
-import l.files.provider.FilesContract;
-
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static java.util.Arrays.sort;
 import static l.files.provider.FilesContract.Files;

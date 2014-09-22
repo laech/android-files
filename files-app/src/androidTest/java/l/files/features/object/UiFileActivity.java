@@ -42,7 +42,7 @@ public final class UiFileActivity {
   private final FilesActivity activity;
 
   public UiFileActivity(Instrumentation in, FilesActivity activity) {
-    instrument = in;
+    this.instrument = in;
     this.activity = activity;
   }
 
@@ -55,11 +55,12 @@ public final class UiFileActivity {
     return this;
   }
 
-  /**
-   * Clicks the "Ne
-   */
   public UiNewFolder newFolder() {
-    assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_dir, 0));
+    await(instrument, new Runnable() {
+      @Override public void run() {
+        assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_dir, 0));
+      }
+    });
     return new UiNewFolder(instrument, activity);
   }
 
@@ -121,12 +122,20 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity openNewTab() {
-    assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_tab, 0));
+    await(instrument, new Runnable() {
+      @Override public void run() {
+        assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_tab, 0));
+      }
+    });
     return this;
   }
 
   public UiFileActivity closeCurrentTab() {
-    assertTrue(instrument.invokeMenuActionSync(activity, R.id.close_tab, 0));
+    await(instrument, new Runnable() {
+      @Override public void run() {
+        assertTrue(instrument.invokeMenuActionSync(activity, R.id.close_tab, 0));
+      }
+    });
     return this;
   }
 

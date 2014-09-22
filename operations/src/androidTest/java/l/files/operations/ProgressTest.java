@@ -2,25 +2,27 @@ package l.files.operations;
 
 import junit.framework.TestCase;
 
-import static l.files.operations.testing.ProgressSubject.assertThat;
-
 public final class ProgressTest extends TestCase {
 
   public void testTotal() throws Exception {
-    assertThat(Progress.create(1, 0)).total(1);
+    assertEquals(1, Progress.create(1, 0).total());
   }
 
   public void testProcessed() throws Exception {
-    assertThat(Progress.create(10, 5)).processed(5);
+    assertEquals(5, Progress.create(10, 5).processed());
   }
 
   public void testNone() throws Exception {
-    assertThat(Progress.none()).total(0).processed(0);
+    assertEquals(0, Progress.none().total());
+    assertEquals(0, Progress.none().processed());
+    assertEquals(1F, Progress.none().processedPercentage());
   }
 
   public void testCreate() throws Exception {
-    assertThat(Progress.create(2, 1)).total(2).processed(1);
-    assertThat(Progress.create(2, 2)).total(2).processed(2);
+    assertEquals(2, Progress.create(2, 1).total());
+    assertEquals(1, Progress.create(2, 1).processed());
+    assertEquals(2, Progress.create(2, 2).total());
+    assertEquals(2, Progress.create(2, 2).processed());
   }
 
   public void testCreateThrowsExceptionIfProcessedIsGreaterThanTotal() {
@@ -51,19 +53,20 @@ public final class ProgressTest extends TestCase {
   }
 
   public void testNormalize() throws Exception {
-    assertThat(Progress.normalize(1, 2)).total(2).processed(2);
+    assertEquals(2, Progress.normalize(1, 2).total());
+    assertEquals(2, Progress.normalize(1, 2).processed());
   }
 
   public void testProcessedPercentage() throws Exception {
-    assertThat(Progress.create(2, 1)).processedPercentage(0.5F);
+    assertEquals(0.5F, Progress.create(2, 1).processedPercentage());
   }
 
   public void testLeft() throws Exception {
-    assertThat(Progress.create(10, 2)).left(8);
+    assertEquals(8, Progress.create(10, 2).left());
   }
 
   public void testDone() {
-    assertThat(Progress.create(123, 123)).isDone(true);
-    assertThat(Progress.create(2, 1)).isDone(false);
+    assertTrue(Progress.create(123, 123).isDone());
+    assertFalse(Progress.create(2, 1).isDone());
   }
 }

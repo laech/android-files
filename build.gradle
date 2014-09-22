@@ -45,16 +45,8 @@ subprojects {
       }
     }
 
-    configurations {
-      androidTestCompile.exclude module: 'hamcrest-core'
-      androidTestCompile.exclude module: 'hamcrest-library'
-    }
-
     dependencies {
-      compile libs.auto_value
       androidTestCompile project(':testlib')
-      androidTestCompile libs.assertj
-      androidTestCompile libs.truth
     }
   }
 
@@ -87,11 +79,7 @@ libs.commons_lang = 'org.apache.commons:commons-lang3:3.1'
 libs.google_play_services = 'com.google.android.gms:play-services:5.0.89'
 
 libs.mockito = [
-    'org.mockito:mockito-core:1.9.+',
+    'org.mockito:mockito-core:1.9.5',
     'com.google.dexmaker:dexmaker:1.0',
     'com.google.dexmaker:dexmaker-mockito:1.0'
 ]
-libs.assertj = 'org.assertj:assertj-core:1.6.1'
-libs.truth = 'com.google.truth:truth:0.23'
-libs.junit = 'junit:junit:4.11'
-libs.compile_testing = 'com.google.testing.compile:compile-testing:0.5'
