@@ -1,7 +1,5 @@
 package l.files.io.file;
 
-import android.os.FileObserver;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
@@ -14,19 +12,19 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.logging.Logger;
 
-import static android.os.FileObserver.ATTRIB;
-import static android.os.FileObserver.CLOSE_WRITE;
-import static android.os.FileObserver.CREATE;
-import static android.os.FileObserver.DELETE;
-import static android.os.FileObserver.DELETE_SELF;
-import static android.os.FileObserver.MODIFY;
-import static android.os.FileObserver.MOVED_FROM;
-import static android.os.FileObserver.MOVED_TO;
-import static android.os.FileObserver.MOVE_SELF;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
+import static l.files.io.android.os.FileObserver.ATTRIB;
+import static l.files.io.android.os.FileObserver.CLOSE_WRITE;
+import static l.files.io.android.os.FileObserver.CREATE;
+import static l.files.io.android.os.FileObserver.DELETE;
+import static l.files.io.android.os.FileObserver.DELETE_SELF;
+import static l.files.io.android.os.FileObserver.MODIFY;
+import static l.files.io.android.os.FileObserver.MOVED_FROM;
+import static l.files.io.android.os.FileObserver.MOVED_TO;
+import static l.files.io.android.os.FileObserver.MOVE_SELF;
 import static l.files.io.file.DirectoryStream.Entry.TYPE_DIR;
 import static l.files.io.file.Files.checkExist;
 import static l.files.io.file.PathObserver.IN_IGNORED;
@@ -224,7 +222,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
 
   @Override public void close() {
     synchronized (this) {
-      for (FileObserver observer : observers) {
+      for (PathObserver observer : observers) {
         observer.stopWatching();
       }
       observers.clear();

@@ -1,6 +1,5 @@
 package l.files.io.file;
 
-import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 
@@ -12,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import l.files.io.android.os.FileObserver;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
