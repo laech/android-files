@@ -7,6 +7,7 @@ import android.net.Uri;
 import java.util.List;
 
 import l.files.provider.FilesContract;
+import l.files.provider.R;
 
 import static android.content.UriMatcher.NO_MATCH;
 import static android.os.Looper.getMainLooper;

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="files_provider_authority">l.files.test</string>
+  <string name="files_provider_bookmarks_authority">l.files.bookmarks.test</string>
 </resources>
