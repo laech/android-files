@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -168,6 +169,10 @@ public final class FilesContract {
 
   private static Uri.Builder getSelectionUriBuilder(Context context) {
     return getAuthority(context).buildUpon().appendPath(PATH_SELECTION);
+  }
+
+  static File getFile(String fileId) {
+    return new File(URI.create(fileId));
   }
 
   public static String getFileId(File file) {

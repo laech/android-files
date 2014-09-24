@@ -15,7 +15,6 @@ import org.apache.tika.Tika;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +51,7 @@ import static l.files.provider.FilesContract.METHOD_DELETE;
 import static l.files.provider.FilesContract.METHOD_RENAME;
 import static l.files.provider.FilesContract.METHOD_SUGGESTION;
 import static l.files.provider.FilesContract.PARAM_SELECTION;
+import static l.files.provider.FilesContract.getFile;
 import static l.files.provider.FilesContract.getFileId;
 import static l.files.provider.FilesContract.getHierarchyFileId;
 import static l.files.provider.FilesContract.newMatcher;
@@ -72,8 +72,8 @@ public final class FilesProvider extends ContentProvider {
   @Override public String getType(Uri uri) {
     switch (matcher.match(uri)) {
       case MATCH_FILES_ID:
-        String location = getFileId(uri);
-        File file = new File(URI.create(location));
+        String id = getFileId(uri);
+        File file = getFile(id);
         if (file.isDirectory()) {
           return MIME_DIR;
         }
@@ -106,7 +106,7 @@ public final class FilesProvider extends ContentProvider {
   public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
     switch (matcher.match(uri)) {
       case MATCH_FILES_ID:
-        File file = new File(URI.create(getFileId(uri)));
+        File file = getFile(getFileId(uri));
         return ParcelFileDescriptor.open(file, MODE_READ_ONLY);
     }
     return super.openFile(uri, mode);
@@ -138,7 +138,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryHierarchy(Uri uri, String[] projection, String sortOrder) {
-    File file = normalize(new File(URI.create(getHierarchyFileId(uri))));
+    File file = normalize(getFile(getHierarchyFileId(uri)));
     List<File> files = newArrayList();
     while (file != null) {
       files.add(file);
@@ -150,7 +150,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Cursor queryFile(Uri uri, String[] projection, String sortOrder) {
-    File file = new File(URI.create(getFileId(uri)));
+    File file = getFile(getFileId(uri));
     return newFileCursor(uri, projection, sortOrder, file);
   }
 
@@ -162,7 +162,7 @@ public final class FilesProvider extends ContentProvider {
     List<String> selection = uri.getQueryParameters(PARAM_SELECTION);
     File[] files = new File[selection.size()];
     for (int i = 0; i < files.length; i++) {
-      files[i] = new File(URI.create(selection.get(i)));
+      files[i] = getFile(selection.get(i));
     }
 
     return newFileCursor(uri, projection, sortOrder, files);
@@ -186,20 +186,20 @@ public final class FilesProvider extends ContentProvider {
 
   private Bundle callCut(Bundle extras) {
     String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_IDS));
-    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_ID))).getPath();
+    String dstPath = getFile(extras.getString(EXTRA_DESTINATION_ID)).getPath();
     OperationService.move(getContext(), asList(srcPaths), dstPath);
     return Bundle.EMPTY;
   }
 
   private Bundle callCopy(Bundle extras) {
     String[] srcPaths = toFilePaths(extras.getStringArray(EXTRA_FILE_IDS));
-    String dstPath = new File(URI.create(extras.getString(EXTRA_DESTINATION_ID))).getPath();
+    String dstPath = getFile(extras.getString(EXTRA_DESTINATION_ID)).getPath();
     OperationService.copy(getContext(), asList(srcPaths), dstPath);
     return Bundle.EMPTY;
   }
 
   private Bundle callRename(Bundle extras) {
-    File from = new File(URI.create(extras.getString(EXTRA_FILE_ID)));
+    File from = getFile(extras.getString(EXTRA_FILE_ID));
     File to = new File(from.getParentFile(), extras.getString(EXTRA_NEW_NAME));
     try {
       rename(from.getPath(), to.getPath());
@@ -218,7 +218,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Bundle callSuggestion(Bundle extras) {
-    File parent = new File(URI.create(extras.getString(EXTRA_FILE_ID)));
+    File parent = getFile(extras.getString(EXTRA_FILE_ID));
     String name = extras.getString(EXTRA_NEW_NAME);
     File file = new File(parent, name);
     for (int i = 2; file.exists(); i++) {
@@ -229,16 +229,16 @@ public final class FilesProvider extends ContentProvider {
     return result;
   }
 
-  private String[] toFilePaths(String[] fileLocations) {
-    Set<String> paths = newHashSetWithExpectedSize(fileLocations.length);
-    for (String location : fileLocations) {
-      paths.add(toFilePath(location));
+  private String[] toFilePaths(String[] fileIds) {
+    Set<String> paths = newHashSetWithExpectedSize(fileIds.length);
+    for (String fileId : fileIds) {
+      paths.add(toFilePath(fileId));
     }
     return paths.toArray(new String[paths.size()]);
   }
 
-  private String toFilePath(String location) {
-    return new File(URI.create(location)).getPath();
+  private String toFilePath(String fileId) {
+    return getFile(fileId).getPath();
   }
 
   @Override public Uri insert(Uri uri, ContentValues values) {
@@ -250,7 +250,7 @@ public final class FilesProvider extends ContentProvider {
   }
 
   private Uri insertDirectory(Uri uri) {
-    File file = new File(URI.create(getFileId(uri)));
+    File file = getFile(getFileId(uri));
     return (file.mkdirs() || file.isDirectory()) ? uri : null;
   }
 
