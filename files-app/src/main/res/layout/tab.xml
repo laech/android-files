@@ -14,7 +14,7 @@
       android:layout_centerVertical="true"
       android:layout_marginLeft="8dp"
       android:contentDescription="@null"
-      android:src="@drawable/ic_ab_back_holo_light_am"
+      android:src="@drawable/ic_up"
       android:visibility="gone"/>
 
   <!-- Not using ellipsize="marquee" gives the sidebar a smoother sliding experience -->
@@ -29,7 +29,6 @@
       android:ellipsize="middle"
       android:singleLine="true"
       android:fontFamily="sans-serif"
-      android:textColor="@color/text_tab"
       style="?android:attr/actionBarTabTextStyle"/>
 
 </RelativeLayout>

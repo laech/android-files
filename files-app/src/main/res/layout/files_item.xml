@@ -9,22 +9,22 @@
       android:id="@+id/header_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="vertical"
       android:background="@drawable/window_background"
-      android:visibility="gone"
       android:divider="?android:attr/dividerVertical"
-      android:showDividers="end">
+      android:orientation="vertical"
+      android:showDividers="end"
+      android:visibility="gone">
 
     <TextView
         android:id="@+id/header_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="14dp"
+        android:layout_marginTop="24dp"
         android:fontFamily="sans-serif"
-        android:textColor="?android:attr/textColorSecondary"
         android:textAllCaps="true"
+        android:textColor="?android:attr/textColorTertiary"
         android:textSize="12sp"/>
   </LinearLayout>
 
@@ -32,8 +32,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
-      android:minHeight="?android:attr/listPreferredItemHeight"
       android:gravity="center_vertical"
+      android:minHeight="?android:attr/listPreferredItemHeight"
       android:orientation="horizontal">
 
     <TextView
@@ -42,30 +42,31 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/ic_font_char"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="@dimen/text_size_list_icon_font"/>
 
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="@dimen/file_item_title_text_size"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingRight="?android:attr/listPreferredItemPaddingRight"
         android:gravity="right"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingRight="?android:attr/listPreferredItemPaddingRight">
 
       <TextView
           android:id="@+id/date"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:fontFamily="sans-serif-condensed"
           android:textColor="?android:attr/textColorSecondary"
           android:textSize="@dimen/file_item_summary_text_size"/>
 
@@ -73,7 +74,6 @@
           android:id="@+id/size"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:fontFamily="sans-serif-condensed"
           android:textColor="?android:attr/textColorSecondary"
           android:textSize="@dimen/file_item_summary_text_size"/>
 
@@ -87,7 +87,7 @@
       android:layout_marginBottom="16dp"
       android:layout_marginLeft="@dimen/files_list_icon_width"
       android:background="@drawable/file_preview_background"
-      android:visibility="gone"
-      android:contentDescription="@null"/>
+      android:contentDescription="@null"
+      android:visibility="gone"/>
 
 </LinearLayout>

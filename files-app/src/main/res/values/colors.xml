@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+  <color name="theme_primary">#3f51b5</color>
+  <color name="gray_background">#e5e5e5</color>
+
   <color name="item_pressed_dark">#33000000</color>
 
   <color name="sidebar_background">#4b4a47</color>
   <color name="sidebar_item_header">#e6e5e3</color>
   <color name="sidebar_item_header_separator">#3e3e3b</color>
 
-  <color name="text_tab_active">@color/text_primary</color>
-  <color name="text_tab_inactive">@color/text_secondary</color>
+  <color name="text_tab_active">@android:color/white</color>
+  <color name="text_tab_inactive">#77FFFFFF</color>
 
-  <color name="text_primary_normal">#AA000000</color>
+  <color name="text_primary_normal">#CC000000</color>
   <color name="text_primary_disabled">#55000000</color>
   <color name="text_primary_activated">@android:color/black</color>
 
   <color name="text_primary_inverse_normal">#e6e5e3</color>
   <color name="text_primary_inverse_disabled">#77e6e5e3</color>
 
-  <color name="text_secondary_normal">#77000000</color>
+  <color name="text_secondary_normal">#99000000</color>
+  <color name="text_secondary_disabled">#55000000</color>
   <color name="text_secondary_activated">#99000000</color>
 
-  <color name="window_background">#F0F0F0</color>
+  <color name="window_background">@android:color/white</color>
 
   <color name="image_view_border">#33000000</color>
 </resources>

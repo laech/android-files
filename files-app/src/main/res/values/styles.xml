@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <style name="Theme" parent="android:Theme.Holo.Light">
-    <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
+  <style name="Theme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <item name="android:actionBarStyle">@style/ActionBar</item>
+    <item name="android:actionBarTabTextStyle">@style/ActionBarTabText</item>
+    <item name="android:actionBarWidgetTheme">@style/ActionBarWidget</item>
+    <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow</item>
+    <item name="android:homeAsUpIndicator">@drawable/ic_up</item>
     <item name="android:textColor">@color/text_primary</item>
     <item name="android:textColorPrimary">@color/text_primary</item>
-    <item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>
     <item name="android:textColorSecondary">@color/text_secondary</item>
     <item name="android:textColorAlertDialogListItem">@color/text_primary</item>
     <item name="android:textAppearanceLarge">@style/TextAppearance.Large</item>
@@ -13,7 +16,40 @@
     <item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>
     <item name="android:textViewStyle">@style/Widget.TextView</item>
     <item name="android:listViewStyle">@style/Widget.ListView</item>
-    <item name="android:windowBackground">@drawable/window_background</item>
+    <item name="android:windowBackground">@android:color/white</item>
+    <item name="android:windowContentOverlay">@drawable/header_shadow</item>
+  </style>
+
+  <style name="ActionBar" parent="android:Widget.Holo.ActionBar">
+    <item name="android:background">@drawable/actionbar_background</item>
+    <item name="android:titleTextStyle">@style/ActionBar.TitleText</item>
+  </style>
+
+  <style name="ActionBar.TitleText" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+    <item name="android:textColor">#fff</item>
+    <item name="android:fontFamily">sans-serif-condensed</item>
+  </style>
+
+  <style name="ActionButton.Overflow" parent="android:Widget.Holo.ActionButton.Overflow">
+    <item name="android:src">@drawable/ic_action_overflow</item>
+  </style>
+  
+  <style name="ActionBarTabText" parent="android:Widget.Holo.ActionBar.TabText">
+    <item name="android:textColor">@color/text_tab</item>
+  </style>
+
+  <style name="ActionBarWidget" parent="android:Theme.Holo.Light">
+    <item name="android:dropDownListViewStyle">@style/Widget.ListView.DropDown</item>
+    <item name="android:textViewStyle">@style/Widget.TextView</item>
+  </style>
+
+  <style name="Widget.ListView.DropDown" parent="android:Widget.Holo.Light.ListView.DropDown">
+    <item name="android:divider">@null</item>
+    <item name="android:dividerHeight">0dp</item>
+  </style>
+
+  <style name="Widget.TextView" parent="android:Widget.Holo.Light.TextView">
+    <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
   <style name="TextAppearance.Large" parent="android:TextAppearance.Holo.Large">
@@ -28,48 +64,40 @@
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
-  <style name="TextAppearance.Widget.ActionBar.Title" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
-    <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
-  <style name="TextAppearance.Widget.ActionMode.Title" parent="android:TextAppearance.Holo.Widget.ActionMode.Title">
-    <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
-  <style name="Widget.ActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid">
-    <item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>
-  </style>
-
-  <style name="Theme.SeparatorHorizontal">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">@dimen/separator</item>
-  </style>
-
-  <style name="Widget.TextView" parent="android:Widget.Holo.Light.TextView">
-    <item name="android:fontFamily">sans-serif-condensed</item>
-  </style>
-
   <style name="Widget.ListView" parent="android:Widget.Holo.ListView">
     <item name="android:scrollbarStyle">outsideOverlay</item>
     <item name="android:fastScrollEnabled">true</item>
     <item name="android:divider">@null</item>
+    <item name="android:dividerHeight">0dp</item>
     <item name="android:paddingLeft">@dimen/files_list_padding_side</item>
     <item name="android:paddingRight">@dimen/files_list_padding_side</item>
   </style>
+
+
+  <!--<style name="Theme" parent="android:Theme.Holo.Light">-->
+  <!--<item name="android:actionBarStyle">@style/Widget.ActionBar</item>-->
+  <!--<item name="android:textColor">@color/text_primary</item>-->
+  <!--<item name="android:textColorPrimary">@color/text_primary</item>-->
+  <!--<item name="android:textColorPrimaryInverse">@color/text_primary_inverse</item>-->
+  <!--<item name="android:textColorSecondary">@color/text_secondary</item>-->
+  <!--<item name="android:textColorAlertDialogListItem">@color/text_primary</item>-->
+  <!--<item name="android:textAppearanceLarge">@style/TextAppearance.Large</item>-->
+  <!--<item name="android:textAppearanceMedium">@style/TextAppearance.Medium</item>-->
+  <!--<item name="android:textAppearanceSmall">@style/TextAppearance.Small</item>-->
+  <!--<item name="android:textViewStyle">@style/Widget.TextView</item>-->
+  <!--<item name="android:listViewStyle">@style/Widget.ListView</item>-->
+  <!--</style>-->
 
   <style name="Widget.ProgressBarBelowActionBar" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
     <item name="android:indeterminateDrawable">@drawable/ab_progress_indeterminate</item>
     <item name="android:progressDrawable">@drawable/ab_progress</item>
   </style>
 
-  <style name="Theme.ListView.Item" parent="Widget.TextView"/>
-
-
   <style name="Theme.Dialog" parent="android:Theme.Holo.Light.Dialog">
-    <item name="android:windowTitleStyle">@style/Theme.Dialog.Title</item>
+    <item name="android:windowTitleStyle">@style/DialogWindowTitle</item>
   </style>
 
-  <style name="Theme.Dialog.Title" parent="android:TextAppearance.Holo.DialogWindowTitle">
+  <style name="DialogWindowTitle" parent="android:TextAppearance.Holo.DialogWindowTitle">
     <item name="android:fontFamily">sans-serif-condensed</item>
   </style>
 
