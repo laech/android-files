@@ -23,7 +23,7 @@ public final class BookmarksContract {
   static final String PATH_BOOKMARKS = "bookmarks";
 
   static final int MATCH_BOOKMARKS = 100;
-  static final int MATCH_BOOKMARKS_LOCATION = 101;
+  static final int MATCH_BOOKMARKS_ID = 101;
 
   private static volatile Uri authority;
 
@@ -33,7 +33,7 @@ public final class BookmarksContract {
     String authority = getAuthorityString(context);
     UriMatcher matcher = new UriMatcher(NO_MATCH);
     matcher.addURI(authority, PATH_BOOKMARKS, MATCH_BOOKMARKS);
-    matcher.addURI(authority, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_LOCATION);
+    matcher.addURI(authority, PATH_BOOKMARKS + "/*", MATCH_BOOKMARKS_ID);
     return matcher;
   }
 
@@ -51,7 +51,7 @@ public final class BookmarksContract {
   /**
    * Creates a Uri for querying the list of all bookmarks.
    */
-  public static Uri buildBookmarksUri(Context context) {
+  public static Uri getBookmarksUri(Context context) {
     return bookmarksUriBuilder(context).build();
   }
 
@@ -62,7 +62,7 @@ public final class BookmarksContract {
    *
    * @param fileId the {@link FilesContract.Files#ID} of the file
    */
-  public static Uri buildBookmarkUri(Context context, String fileId) {
+  public static Uri getBookmarkUri(Context context, String fileId) {
     checkNotNull(fileId, "fileId");
     return bookmarksUriBuilder(context).appendPath(fileId).build();
   }
@@ -73,9 +73,9 @@ public final class BookmarksContract {
 
   /**
    * Gets the {@link FilesContract.Files#ID} from the given content URI built with
-   * {@link #buildBookmarkUri(android.content.Context, String)}.
+   * {@link #getBookmarkUri(android.content.Context, String)}.
    */
-  public static String getBookmarkId(Uri bookmarkUri) {
+  static String getBookmarkId(Uri bookmarkUri) {
     return checkBookmarkUri(bookmarkUri).get(1);
   }
 
@@ -92,7 +92,7 @@ public final class BookmarksContract {
    */
   public static void bookmark(Context context, String fileId) {
     ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileId);
+    Uri uri = getBookmarkUri(context, fileId);
     context.getContentResolver().insert(uri, null);
   }
 
@@ -102,7 +102,7 @@ public final class BookmarksContract {
    */
   public static void unbookmark(Context context, String fileId) {
     ensureNonMainThread();
-    Uri uri = buildBookmarkUri(context, fileId);
+    Uri uri = getBookmarkUri(context, fileId);
     context.getContentResolver().delete(uri, null, null);
   }
 

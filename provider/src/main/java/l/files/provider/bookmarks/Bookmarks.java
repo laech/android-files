@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -14,6 +15,7 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
+import static java.util.Arrays.asList;
 import static l.files.provider.FilesContract.getFileId;
 
 final class Bookmarks {
@@ -37,9 +39,18 @@ final class Bookmarks {
     return getFileId(new File(getExternalStorageDirectory(), name));
   }
 
-  static String[] bookmarks(SharedPreferences pref) {
+  static String[] get(SharedPreferences pref) {
     Set<String> set = pref.getStringSet(KEY, DEFAULTS);
     return set.toArray(new String[set.size()]);
+  }
+
+  /**
+   * Filters the given IDs, return the ones that are bookmarked.
+   */
+  static String[] filter(SharedPreferences pref, String... ids) {
+    Set<String> filtered = new LinkedHashSet<>(asList(ids));
+    filtered.retainAll(asList(get(pref)));
+    return filtered.toArray(new String[filtered.size()]);
   }
 
   static void add(SharedPreferences pref, String fileLocation) {

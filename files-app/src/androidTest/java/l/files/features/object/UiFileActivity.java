@@ -46,6 +46,26 @@ public final class UiFileActivity {
     this.activity = activity;
   }
 
+  public UiFileActivity bookmark() {
+    assertBookmarked(false);
+    await(instrument, new Runnable() {
+      @Override public void run() {
+        assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
+      }
+    });
+    return this;
+  }
+
+  public UiFileActivity unbookmark() {
+    assertBookmarked(true);
+    await(instrument, new Runnable() {
+      @Override public void run() {
+        assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
+      }
+    });
+    return this;
+  }
+
   public UiFileActivity check(final File file, final boolean checked) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
@@ -85,21 +105,20 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity selectItem(File file) {
-    return selectItem(file.getName());
-  }
-
-  public UiFileActivity selectItem(final String filename) {
+  public UiFileActivity selectItem(final File file) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         ListView list = getListView();
-        int position = findItemPositionOrThrow(filename);
+        int position = findItemPositionOrThrow(file.getName());
         int firstVisiblePosition = list.getFirstVisiblePosition();
         int viewPosition = position - firstVisiblePosition;
         View view = list.getChildAt(viewPosition);
         assertTrue(list.performItemClick(view, viewPosition, position));
       }
     });
+    if (file.isDirectory()) {
+      assertCurrentDirectory(file);
+    }
     return this;
   }
 
@@ -435,6 +454,15 @@ public final class UiFileActivity {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         assertEquals(present, activity.getCurrentActionMode() != null);
+      }
+    });
+    return this;
+  }
+
+  public UiFileActivity assertBookmarked(final boolean checked) {
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        assertEquals(checked, activity.getMenu().findItem(R.id.bookmark).isChecked());
       }
     });
     return this;

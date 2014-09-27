@@ -18,11 +18,10 @@ import l.files.common.app.OptionsMenuAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.identityHashCode;
 import static l.files.provider.bookmarks.BookmarksContract.bookmark;
-import static l.files.provider.bookmarks.BookmarksContract.buildBookmarkUri;
+import static l.files.provider.bookmarks.BookmarksContract.getBookmarkUri;
 import static l.files.provider.bookmarks.BookmarksContract.unbookmark;
 
 /**
@@ -52,9 +51,7 @@ public final class BookmarkMenu
     super.onCreateOptionsMenu(menu);
     LoaderManager loaders = context.getLoaderManager();
     loaders.initLoader(identityHashCode(this), null, this);
-    menu.add(NONE, id(), NONE, R.string.bookmark)
-        .setCheckable(true)
-        .setShowAsAction(SHOW_AS_ACTION_NEVER);
+    menu.add(NONE, id(), NONE, R.string.bookmark).setCheckable(true);
   }
 
   @Override public void onPrepareOptionsMenu(Menu menu) {
@@ -68,6 +65,7 @@ public final class BookmarkMenu
 
   @Override protected void onItemSelected(MenuItem item) {
     final boolean checked = item.isChecked();
+    item.setChecked(!checked);
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
         if (checked) unbookmark(context, dirId);
@@ -77,7 +75,7 @@ public final class BookmarkMenu
   }
 
   @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-    Uri uri = buildBookmarkUri(context, dirId);
+    Uri uri = getBookmarkUri(context, dirId);
     return new CursorLoader(context, uri, null, null, null, null);
   }
 

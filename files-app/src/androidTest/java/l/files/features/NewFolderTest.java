@@ -13,7 +13,7 @@ public final class NewFolderTest extends BaseFilesActivityTest {
         .newFolder()
         .setFilename("a")
         .ok()
-        .selectItem("a");
+        .selectItem(dir().get("a"));
   }
 
   public void testShowsDialogWithInitialNameSuggestion() {
