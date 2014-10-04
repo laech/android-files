@@ -180,14 +180,14 @@ public final class FilesContract {
      * Don't return File.toURI as it will append a "/" to the end of the URI
      * depending on whether or not the file is a directory, that means two calls
      * to the method before and after the directory is deleted will create two
-     * URIs that are not equal. URI.create(File) also changes between
-     * "file:/a/b/c.txt" and "file:///a/b/c.txt"
+     * URIs that are not equal.
      */
-    String path = file.toURI().normalize().getPath();
-    if (path.length() > 1 && path.endsWith("/")) {
-      path = path.substring(0, path.length() - 1);
+    URI uri = file.toURI().normalize();
+    String uriStr = uri.toString();
+    if (!uri.getRawPath().equals("/") && uriStr.endsWith("/")) {
+      return uriStr.substring(0, uriStr.length() - 1);
     }
-    return "file://" + path;
+    return uriStr;
   }
 
   /**

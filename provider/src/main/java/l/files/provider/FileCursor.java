@@ -16,6 +16,7 @@ import static l.files.provider.FilesContract.Files.TYPE_REGULAR_FILE;
 import static l.files.provider.FilesContract.Files.TYPE_SYMLINK;
 import static l.files.provider.FilesContract.Files.TYPE_UNKNOWN;
 import static l.files.provider.FilesContract.Files.WRITABLE;
+import static l.files.provider.FilesContract.getFileId;
 
 final class FileCursor extends BaseCursor {
 
@@ -43,7 +44,7 @@ final class FileCursor extends BaseCursor {
   @Override public String getString(int column) {
     FileInfo file = getCurrentFile();
     String col = columns[column];
-    if (ID.equals(col)) return file.uri();
+    if (ID.equals(col)) return getFileId(file.toFile());
     if (NAME.equals(col)) return file.name();
     if (MIME.equals(col)) return file.mime();
     if (TYPE.equals(col)) return getType(file);

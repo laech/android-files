@@ -1,6 +1,5 @@
 package l.files.io.file;
 
-import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
 import com.google.auto.value.AutoValue;
@@ -37,7 +36,6 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 @AutoValue
 public abstract class FileInfo {
 
-  private String uri;
   private String name;
   private String mime;
   private Boolean readable;
@@ -98,13 +96,6 @@ public abstract class FileInfo {
       }
     }
     return mime;
-  }
-
-  public String uri() {
-    if (uri == null) {
-      uri = Uri.fromFile(new File(path())).toString();
-    }
-    return uri;
   }
 
   public boolean isReadable() {

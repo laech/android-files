@@ -2,6 +2,7 @@ package l.files.provider;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 import l.files.common.testing.FileBaseTest;
 
@@ -34,11 +35,15 @@ public final class FilesContractTest extends FileBaseTest {
   public void testGetIdFromFileReturnsUri() throws Exception {
     File a = tmp().createDir("a");
     File b = tmp().createFile("b");
-    assertEquals("file://" + tmp().get("a").getPath(), getFileId(a));
-    assertEquals("file://" + tmp().get("b").getPath(), getFileId(b));
-    assertEquals("file:///", getFileId(new File("/")));
-    assertEquals("file:///c/hello", getFileId(new File("/c/b/../hello")));
-    assertEquals("file:///c/hello", getFileId(new File("/c/./hello")));
+    assertEquals("file:" + tmp().get("a").getPath(), getFileId(a));
+    assertEquals("file:" + tmp().get("b").getPath(), getFileId(b));
+    assertEquals("file:/", getFileId(new File("/")));
+    assertEquals("file:/c/hello", getFileId(new File("/c/b/../hello")));
+    assertEquals("file:/c/hello", getFileId(new File("/c/./hello")));
+  }
+
+  public void testGetIdReturnsValidUri() throws Exception {
+    new URI(getFileId(tmp().createFile("Hello World"))); // No exception
   }
 
   public void testRenamesFile() throws Exception {

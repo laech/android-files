@@ -15,11 +15,11 @@ import android.widget.TextView;
 import com.google.common.base.Optional;
 
 import java.io.File;
-import java.net.URI;
 import java.util.concurrent.Callable;
 
 import l.files.R;
 import l.files.app.FilesActivity;
+import l.files.app.FilesPagerFragment;
 
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
 import static android.app.ActionBar.DISPLAY_SHOW_HOME;
@@ -34,6 +34,7 @@ import static l.files.app.decorator.decoration.Decorations.fileSize;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 import static l.files.provider.FilesContract.Files.name;
+import static l.files.provider.FilesContract.getFileId;
 import static l.files.test.Mocks.mockMenuItem;
 
 public final class UiFileActivity {
@@ -219,10 +220,12 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity assertCurrentDirectory(final File dir) {
-    awaitOnMainThread(instrument, new Callable<Boolean>() {
-      @Override public Boolean call() throws Exception {
-        String uri = activity.getCurrentPagerFragment().getCurrentDirectoryId();
-        return dir.equals(new File(URI.create(uri)));
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        FilesPagerFragment fragment = activity.getCurrentPagerFragment();
+        String actual = fragment.getCurrentDirectoryId();
+        String expected = getFileId(dir);
+        assertEquals(expected, actual);
       }
     });
     return this;

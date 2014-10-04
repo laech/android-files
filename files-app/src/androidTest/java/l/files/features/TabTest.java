@@ -55,7 +55,7 @@ public final class TabTest extends BaseFilesActivityTest {
         .openNewTab()
         .selectPage(0)
         .selectItem(dir().createDir("a"))
-        .assertTabBackIndicatorVisibleAt(0, false);
+        .assertTabBackIndicatorVisibleAt(0, true);
   }
 
   public void testHidesBackIndicatorIfCanNotGoBack() {

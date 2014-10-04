@@ -96,11 +96,6 @@ public final class FileInfoTest extends FileBaseTest {
     assertEquals("application/octet-stream", info(file).mime());
   }
 
-  public void testUri() throws Exception {
-    File file = tmp().createFile("a");
-    assertEquals("file://" + file.getAbsolutePath(), info(file).uri());
-  }
-
   public void testSize() throws Exception {
     File file = tmp().createFile("a");
     write("hello world", file, UTF_8);
