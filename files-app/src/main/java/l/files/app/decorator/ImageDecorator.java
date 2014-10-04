@@ -13,8 +13,9 @@ import android.view.View;
 import android.widget.Adapter;
 import android.widget.ImageView;
 
+import com.google.common.base.Optional;
+
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,8 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.app.util.Bitmaps.decodeScaledBitmap;
-import static l.files.app.util.Bitmaps.decodeScaledSize;
-import static l.files.provider.FilesContract.getFileUri;
+import static l.files.app.util.Bitmaps.scaleSize;
+import static l.files.provider.MediaContract.Bounds;
+import static l.files.provider.MediaContract.decodeBounds;
 
 final class ImageDecorator implements Decorator {
 
@@ -145,25 +147,13 @@ final class ImageDecorator implements Decorator {
       if (isCancelled()) {
         return null;
       }
-      try {
-        // TODO check if exists
-        URL url = new URI(uri.toString()).toURL();
-
-        // TODO the following line is a temporary fix
-        // for infinite retries within native code if BitmapFactory is used
-        // directly on a special file such as /proc/1/maps
-        String type = view.getContext().getContentResolver().getType(getFileUri(view.getContext(), fileId));
-        if (type != null && type.startsWith("image")) {
-          return decodeScaledSize(url, maxWidth, maxHeight);
-        } else {
-          return null;
-        }
-      } catch (Exception e) {
-        // Catch all unexpected internal errors from decoder
-        Analytics.onException(view.getContext(), e);
-        logger.warn(e);
-        return null;
+      ScaledSize size = null;
+      Optional<Bounds> optional = decodeBounds(view.getContext(), fileId);
+      if (optional.isPresent()) {
+        Bounds bounds = optional.get();
+        size = scaleSize(bounds.width(), bounds.height(), maxWidth, maxHeight);
       }
+      return size;
     }
 
     @Override protected void onPostExecute(ScaledSize size) {
