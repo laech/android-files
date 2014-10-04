@@ -11,6 +11,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.os.Looper.getMainLooper;
+import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
 import static java.lang.Boolean.FALSE;
 import static java.lang.System.currentTimeMillis;
@@ -31,7 +33,7 @@ public final class Instrumentations {
     @Override public final T call() throws Exception {
       final Object[] result = {null};
       final Throwable[] error = {null};
-      mInstrumentation.runOnMainSync(new Runnable() {
+      Runnable code = new Runnable() {
         @Override public void run() {
           try {
             result[0] = mDelegate.call();
@@ -39,7 +41,12 @@ public final class Instrumentations {
             error[0] = e;
           }
         }
-      });
+      };
+      if (getMainLooper() == myLooper()) {
+        code.run();
+      } else {
+        mInstrumentation.runOnMainSync(code);
+      }
       if (error[0] instanceof AssertionError) {
         throw (AssertionError) error[0];
       }
@@ -135,7 +142,8 @@ public final class Instrumentations {
     } finally {
       screenshot.recycle();
     }
-    throw new AssertionError("Assertion failed, screenshot saved " + file, e);
+    throw new AssertionError(e.getMessage() +
+        "\nAssertion failed, screenshot saved " + file, e);
   }
 
   public static void await(Instrumentation in, Runnable runnable) {

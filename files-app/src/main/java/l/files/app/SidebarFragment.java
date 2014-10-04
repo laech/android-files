@@ -15,6 +15,7 @@ import l.files.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.app.Animations.animatePreDataSetChange;
+import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
 import static l.files.provider.bookmarks.BookmarksContract.getBookmarksUri;
 
 public final class SidebarFragment extends BaseFileListFragment
@@ -51,7 +52,7 @@ public final class SidebarFragment extends BaseFileListFragment
   @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
     Activity context = getActivity();
     return new CursorLoader(context, getBookmarksUri(context),
-        null, null, null, null);
+        null, null, null, SORT_BY_NAME);
   }
 
   @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

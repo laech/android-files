@@ -1,6 +1,8 @@
 package l.files.features.object;
 
 import android.app.ActionBar;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.Instrumentation;
 import android.database.Cursor;
 import android.view.ActionMode;
@@ -12,9 +14,12 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import l.files.R;
@@ -27,12 +32,14 @@ import static android.app.ActionBar.DISPLAY_SHOW_TITLE;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.app.decorator.decoration.Decorations.fileDate;
 import static l.files.app.decorator.decoration.Decorations.fileSize;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
+import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.name;
 import static l.files.provider.FilesContract.getFileId;
 import static l.files.test.Mocks.mockMenuItem;
@@ -48,7 +55,7 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity bookmark() {
-    assertBookmarked(false);
+    assertBookmarkMenuChecked(false);
     await(instrument, new Runnable() {
       @Override public void run() {
         assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
@@ -58,7 +65,7 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity unbookmark() {
-    assertBookmarked(true);
+    assertBookmarkMenuChecked(true);
     await(instrument, new Runnable() {
       @Override public void run() {
         assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
@@ -462,12 +469,58 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertBookmarked(final boolean checked) {
+  public UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         assertEquals(checked, activity.getMenu().findItem(R.id.bookmark).isChecked());
       }
     });
     return this;
+  }
+
+  public UiFileActivity assertBookmarkSidebarHasCurrentDirectory(final boolean has) {
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        String id = activity.getCurrentPagerFragment().getCurrentDirectoryId();
+        List<String> ids = getSidebarBookmarkIds();
+        assertEquals(ids.toString(), has, ids.contains(id));
+      }
+    });
+    return this;
+  }
+
+  public List<String> getSidebarBookmarkIds() {
+    return getSidebarBookmarks(new Function<Cursor, String>() {
+      @Override public String apply(Cursor input) {
+        return Files.id(input);
+      }
+    });
+  }
+
+  public List<String> getSidebarBookmarkNames() {
+    return getSidebarBookmarks(new Function<Cursor, String>() {
+      @Override public String apply(Cursor input) {
+        return Files.name(input);
+      }
+    });
+  }
+
+  private <T> List<T> getSidebarBookmarks(final Function<Cursor, T> fn) {
+    final List<T> result = new ArrayList<>();
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        FragmentManager manager = activity.getFragmentManager();
+        activity.getDrawerLayout().openDrawer(Gravity.START);
+        Fragment fragment = manager.findFragmentById(R.id.sidebar_fragment);
+        ListView list = (ListView) fragment.getView();
+        assertNotNull(list);
+        for (int i = list.getHeaderViewsCount(); i < list.getCount(); i++) {
+          Cursor cursor = (Cursor) list.getItemAtPosition(i);
+          assertNotNull(cursor);
+          result.add(fn.apply(cursor));
+        }
+      }
+    });
+    return result;
   }
 }

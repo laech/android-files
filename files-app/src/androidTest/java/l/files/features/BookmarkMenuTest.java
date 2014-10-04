@@ -4,17 +4,17 @@ import java.io.File;
 
 import l.files.test.BaseFilesActivityTest;
 
-public final class BookmarkTest extends BaseFilesActivityTest {
+public final class BookmarkMenuTest extends BaseFilesActivityTest {
 
   public void testBookmarkMenuIsUncheckedForNonBookmarkedDirectory() {
     File dir1 = dir().createDir("Not bookmarked 1");
     File dir2 = dir().createDir("Not bookmarked 2");
     screen()
         .selectItem(dir1)
-        .assertBookmarked(false)
+        .assertBookmarkMenuChecked(false)
         .pressBack()
         .selectItem(dir2)
-        .assertBookmarked(false);
+        .assertBookmarkMenuChecked(false);
   }
 
   public void testBookmarkMenuIsCheckedForBookmarkedDirectory() {
@@ -22,7 +22,7 @@ public final class BookmarkTest extends BaseFilesActivityTest {
     screen()
         .selectItem(dir)
         .bookmark()
-        .assertBookmarked(true);
+        .assertBookmarkMenuChecked(true);
   }
 
   public void testBookmarkUnbookmarkDirectoryChecksBookmarkMenuCorrectly() {
@@ -30,9 +30,9 @@ public final class BookmarkTest extends BaseFilesActivityTest {
     screen()
         .selectItem(dir)
         .bookmark()
-        .assertBookmarked(true)
+        .assertBookmarkMenuChecked(true)
         .unbookmark()
-        .assertBookmarked(false);
+        .assertBookmarkMenuChecked(false);
   }
 
   public void testNavigateThroughBookmarkedUnbookmarkedDirectoriesChecksBookmarkMenuCorrectly() {
@@ -41,13 +41,13 @@ public final class BookmarkTest extends BaseFilesActivityTest {
     screen()
         .selectItem(bookmarked)
         .bookmark()
-        .assertBookmarked(true)
+        .assertBookmarkMenuChecked(true)
         .selectItem(unbookmarked)
-        .assertBookmarked(false)
+        .assertBookmarkMenuChecked(false)
         .pressBack()
-        .assertBookmarked(true)
+        .assertBookmarkMenuChecked(true)
         .selectItem(unbookmarked)
-        .assertBookmarked(false);
+        .assertBookmarkMenuChecked(false);
   }
 
 }
