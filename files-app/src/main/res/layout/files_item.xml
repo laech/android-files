@@ -9,7 +9,7 @@
       android:id="@+id/header_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:background="@drawable/window_background"
+      android:background="@drawable/file_item_header"
       android:divider="?android:attr/dividerVertical"
       android:orientation="vertical"
       android:showDividers="end"
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginLeft="14dp"
+        android:layout_marginStart="14dp"
         android:layout_marginTop="24dp"
         android:fontFamily="sans-serif"
         android:textAllCaps="true"
@@ -50,7 +50,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:textColor="?android:attr/textColorPrimary"
@@ -59,9 +59,10 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity="end"
         android:orientation="vertical"
-        android:paddingRight="?android:attr/listPreferredItemPaddingRight">
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
       <TextView
           android:id="@+id/date"
@@ -85,7 +86,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
-      android:layout_marginLeft="@dimen/files_list_icon_width"
+      android:layout_marginStart="@dimen/files_list_icon_width"
       android:background="@drawable/file_preview_background"
       android:contentDescription="@null"
       android:visibility="gone"/>
