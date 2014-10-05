@@ -13,8 +13,6 @@ import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 /**
  * Categories files by their last modified date.
- *
- * @see Files
  */
 final class FileDateCategorizer implements Categorizer {
 
@@ -36,16 +34,24 @@ final class FileDateCategorizer implements Categorizer {
   @Override public String getCategory(Resources res, Cursor cursor) {
 
     long modified = Files.modified(cursor);
-    if (modified >= startOfTomorrow)
+    if (modified <= 0) {
+      return res.getString(R.string.__);
+    }
+    if (modified >= startOfTomorrow) {
       return res.getString(R.string.unknown);
-    if (modified >= startOfToday)
+    }
+    if (modified >= startOfToday) {
       return res.getString(R.string.today);
-    if (modified >= startOfYesterday)
+    }
+    if (modified >= startOfYesterday) {
       return res.getString(R.string.yesterday);
-    if (modified >= startOf7Days)
+    }
+    if (modified >= startOf7Days) {
       return res.getString(R.string.previous_7_days);
-    if (modified >= startOf30Days)
+    }
+    if (modified >= startOf30Days) {
       return res.getString(R.string.previous_30_days);
+    }
 
     timestamp.setMillis(startOfToday);
     int currentYear = timestamp.getYear();
