@@ -1,10 +1,11 @@
 package l.files.common.app;
 
+import android.view.Menu;
+
+import l.files.common.testing.BaseTest;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
-import android.view.Menu;
-import l.files.test.BaseTest;
 
 public final class CompositeMenuTest extends BaseTest {
 

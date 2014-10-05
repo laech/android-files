@@ -1,8 +1,8 @@
 package l.files.common.app;
 
-import static org.mockito.Mockito.mock;
+import l.files.common.testing.BaseTest;
 
-import l.files.test.BaseTest;
+import static org.mockito.Mockito.mock;
 
 public final class OptionsMenusTest extends BaseTest {
 

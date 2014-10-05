@@ -1,39 +1,40 @@
 package l.files.common.app;
 
+import android.view.Menu;
+
+import l.files.common.testing.BaseTest;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.view.Menu;
-import l.files.test.BaseTest;
-
-public final class BaseFragmentActivityTest extends BaseTest {
+public final class BaseListFragmentTest extends BaseTest {
 
   private Menu menu;
   private OptionsMenu optionsMenu;
-  private BaseFragmentActivity activity;
+  private BaseListFragment fragment;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     menu = mock(Menu.class);
     optionsMenu = mock(OptionsMenu.class);
-    activity = new BaseFragmentActivity();
-    activity.setOptionsMenu(optionsMenu);
+    fragment = new BaseListFragment();
+    fragment.setOptionsMenu(optionsMenu);
   }
 
   public void testOnCreateOptionsMenu_isDelegated() {
-    activity.onCreateOptionsMenu(menu);
+    fragment.onCreateOptionsMenu(menu, null);
     verify(optionsMenu).onCreateOptionsMenu(menu);
   }
 
   public void testOnPrepareOptionsMenu_isDelegated() {
-    activity.onPrepareOptionsMenu(menu);
+    fragment.onPrepareOptionsMenu(menu);
     verify(optionsMenu).onPrepareOptionsMenu(menu);
   }
 
   public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
-    BaseFragmentActivity activity = new BaseFragmentActivity();
-    activity.onCreateOptionsMenu(null);
-    activity.onPrepareOptionsMenu(null);
-    activity.onOptionsMenuClosed(null);
+    BaseListFragment fragment = new BaseListFragment();
+    fragment.onCreateOptionsMenu(null, null);
+    fragment.onPrepareOptionsMenu(null);
+    fragment.onOptionsMenuClosed(null);
   }
 }
