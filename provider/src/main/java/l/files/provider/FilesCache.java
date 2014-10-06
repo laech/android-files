@@ -19,7 +19,6 @@ import com.google.common.cache.RemovalNotification;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +102,7 @@ final class FilesCache implements
 
   private void sort(FileInfo[] data, String sortOrder) {
     if (sortOrder != null) {
-      Arrays.sort(data, SortBy.valueOf(sortOrder));
+      SortBy.valueOf(sortOrder).sort(data);
     }
   }
 

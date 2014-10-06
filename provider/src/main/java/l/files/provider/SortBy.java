@@ -1,23 +1,33 @@
 package l.files.provider;
 
-import java.util.Comparator;
+import java.util.Arrays;
 
 import l.files.io.file.FileInfo;
 
-enum SortBy implements Comparator<FileInfo> {
+enum SortBy {
 
-  NAME(FileSort.Name.get()),
-  DATE(FileSort.Date.get()),
-  SIZE(FileSort.Size.get());
+  NAME {
+    @Override public void sort(FileInfo[] files) {
+      sort(files, FileSort.Name.get());
+    }
+  },
 
-  private final Comparator<FileInfo> delegate;
+  DATE {
+    @Override public void sort(FileInfo[] files) {
+      sort(files, FileSort.Date.get());
+    }
+  },
 
-  private SortBy(Comparator<FileInfo> delegate) {
-    this.delegate = delegate;
-  }
+  SIZE {
+    @Override public void sort(FileInfo[] files) {
+      sort(files, FileSort.Size.get());
+    }
+  };
 
-  @Override public int compare(FileInfo a, FileInfo b) {
-    return delegate.compare(a, b);
+  public abstract void sort(FileInfo[] files);
+
+  void sort(FileInfo[] files, FileSort sort) {
+    Arrays.sort(files, sort);
   }
 
 }

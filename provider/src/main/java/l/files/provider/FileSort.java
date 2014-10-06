@@ -8,22 +8,28 @@ import java.util.Locale;
 
 import l.files.io.file.FileInfo;
 
+import static com.google.common.base.Objects.equal;
+
 abstract class FileSort implements Comparator<FileInfo> {
 
   /**
    * Sort files by name.
    */
   static final class Name extends FileSort {
-    private static final Name instance =
-        new Name(Locale.getDefault());
+    private static Name instance = new Name(Locale.getDefault());
 
+    private final Locale locale;
     private final Collator collator;
 
     Name(Locale locale) {
+      this.locale = locale;
       this.collator = Collator.getInstance(locale);
     }
 
-    public static Name get() {
+    public static synchronized Name get() {
+      if (!equal(Locale.getDefault(), instance.locale)) {
+        instance = new Name(Locale.getDefault());
+      }
       return instance;
     }
 

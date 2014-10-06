@@ -15,7 +15,6 @@ import org.apache.tika.Tika;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -266,7 +265,7 @@ public final class FilesProvider extends ContentProvider {
 
   private void sort(FileInfo[] data, String sortOrder) {
     if (sortOrder != null) {
-      Arrays.sort(data, SortBy.valueOf(sortOrder));
+      SortBy.valueOf(sortOrder).sort(data);
     }
   }
 

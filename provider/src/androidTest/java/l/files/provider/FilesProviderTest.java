@@ -8,8 +8,10 @@ import android.net.Uri;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
@@ -19,6 +21,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.sort;
+import static java.util.Locale.ENGLISH;
+import static java.util.Locale.SIMPLIFIED_CHINESE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.assertExists;
 import static l.files.io.file.Files.symlink;
@@ -148,6 +152,39 @@ public final class FilesProviderTest extends FileBaseTest {
     verify(tmp().get(), SORT_BY_NAME, NAME_COMPARATOR);
   }
 
+  public void testQuerySortByNameLocaleSensitive() throws Exception {
+    class NameCollator implements Comparator<File> {
+      private final Collator collator;
+
+      NameCollator(Collator collator) {
+        this.collator = collator;
+      }
+
+      @Override public int compare(File a, File b) {
+        return collator.compare(a.getName(), b.getName());
+      }
+    }
+
+    Locale original = Locale.getDefault();
+    try {
+      tmp().createFile("a");
+      tmp().createFile("b");
+      tmp().createFile("你");
+      tmp().createFile("好");
+
+      Locale.setDefault(ENGLISH);
+      verify(tmp().get(), SORT_BY_NAME,
+          new NameCollator(Collator.getInstance(ENGLISH)));
+
+      Locale.setDefault(SIMPLIFIED_CHINESE);
+      verify(tmp().get(), SORT_BY_NAME,
+          new NameCollator(Collator.getInstance(SIMPLIFIED_CHINESE)));
+
+    } finally {
+      Locale.setDefault(original);
+    }
+  }
+
   public void testQuerySortByDate() throws Exception {
     assertTrue(tmp().createFile("z").setLastModified(1000));
     assertTrue(tmp().createDir("x").setLastModified(2000));
@@ -238,7 +275,7 @@ public final class FilesProviderTest extends FileBaseTest {
     verify(tmp().get(), SORT_BY_NAME, NAME_COMPARATOR, showHidden, files);
   }
 
-  private void verify(File dir, String order, Comparator<File> comparator)
+  private void verify(File dir, String order, Comparator<? super File> comparator)
       throws IOException {
     verify(dir, order, comparator, true, dir.listFiles());
   }
@@ -246,7 +283,7 @@ public final class FilesProviderTest extends FileBaseTest {
   private void verify(
       File dir,
       String order,
-      Comparator<File> comparator,
+      Comparator<? super File> comparator,
       boolean showHidden,
       File... files) throws IOException {
     try (Cursor cursor = queryChildren(dir, showHidden, order)) {
