@@ -1,7 +1,0 @@
-apply plugin: 'android-library'
-
-dependencies {
-  compile files('lib/libGoogleAnalyticsServices-3.01.jar')
-  compile project(':files-common')
-  compile libs.android_support
-}

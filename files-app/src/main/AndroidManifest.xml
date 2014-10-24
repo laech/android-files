@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
     package="l.files"
-    android:versionCode="4"
-    android:versionName="1.0">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -35,7 +33,44 @@
       </intent-filter>
     </activity>
 
-    <activity android:exported="false" android:name="l.files.test.TestFilesFragmentActivity"/>
-    <activity android:exported="false" android:name="l.files.test.TestSidebarFragmentActivity"/>
+    <activity
+        android:name=".operations.ui.FailuresActivity"
+        android:exported="false"/>
+
+    <activity
+        android:name="l.files.test.TestFilesFragmentActivity"
+        android:exported="false"/>
+    <activity
+        android:name="l.files.test.TestSidebarFragmentActivity"
+        android:exported="false"/>
+
+    <service
+        android:name=".operations.OperationService"
+        android:exported="false">
+      <intent-filter>
+        <!--
+          When error occurs, the app crashes, but notification will still be
+          there, this allows the service to be started again when user attempts
+          to cancel the notification and have it removed.
+         -->
+        <action android:name="l.files.operations.CANCEL"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </service>
+
+    <provider
+        android:name=".provider.FilesProvider"
+        android:authorities="@string/files_provider_authority"
+        android:exported="false"/>
+
+    <provider
+        android:name=".provider.MediaProvider"
+        android:authorities="@string/files_provider_media_authority"
+        android:exported="false"/>
+
+    <provider
+        android:name=".provider.bookmarks.BookmarksProvider"
+        android:authorities="@string/files_provider_bookmarks_authority"
+        android:exported="false"/>
   </application>
 </manifest>

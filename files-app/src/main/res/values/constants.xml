@@ -4,4 +4,8 @@
   <!-- Admob ad unit ID -->
   <string name="ad_unit_id">ca-app-pub-3251738373408970/6115914240</string>
 
+  <string name="files_provider_authority">l.files</string>
+  <string name="files_provider_media_authority">l.files.media</string>
+  <string name="files_provider_bookmarks_authority">l.files.bookmarks</string>
+
 </resources>

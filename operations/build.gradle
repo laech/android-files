@@ -1,9 +1,0 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.neenbedankt.android-apt'
-
-dependencies {
-  compile project(':logging')
-  compile project(':io')
-  compile project(':eventbus')
-  compile libs.guava
-}

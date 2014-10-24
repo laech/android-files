@@ -13,48 +13,6 @@ subprojects {
     mavenCentral()
     mavenLocal()
   }
-
-  def androidConfig = {
-    android {
-      compileSdkVersion 19
-      buildToolsVersion "20"
-
-      defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 20
-      }
-
-      compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-      }
-
-      lintOptions {
-        abortOnError false
-      }
-
-      // Remove files from third party jars that causes 'duplicate files' build issues
-      packagingOptions {
-        exclude 'META-INF/services/javax.annotation.processing.Processor'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'LICENSE.txt'
-        exclude 'LICENSE'
-        exclude 'NOTICE'
-        exclude 'asm-license.txt'
-      }
-    }
-
-    dependencies {
-      androidTestCompile project(':testlib')
-    }
-  }
-
-  def androidApp = com.android.build.gradle.AppPlugin
-  def androidLib = com.android.build.gradle.LibraryPlugin
-
-  plugins.withType(androidLib, androidConfig)
-  plugins.withType(androidApp, androidConfig)
 }
 
 ext.libs = [:]
