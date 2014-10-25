@@ -4,6 +4,7 @@ import android.test.UiThreadTest;
 import com.squareup.otto.Subscribe;
 import l.files.event.BookmarksSetting;
 import l.files.test.TestSidebarFragmentActivity;
+import l.files.ui.SidebarFragment;
 
 import java.io.File;
 import java.lang.reflect.Method;

@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import l.files.R;
-import l.files.app.FilesActivity;
-import l.files.app.FilesPagerFragment;
+import l.files.ui.FilesActivity;
+import l.files.ui.FilesPagerFragment;
 
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
 import static android.app.ActionBar.DISPLAY_SHOW_HOME;
@@ -35,8 +35,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static l.files.app.decorator.decoration.Decorations.fileDate;
-import static l.files.app.decorator.decoration.Decorations.fileSize;
+import static l.files.ui.decorator.decoration.Decorations.fileDate;
+import static l.files.ui.decorator.decoration.Decorations.fileSize;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
 import static l.files.provider.FilesContract.Files;

@@ -4,7 +4,7 @@ import java.io.File;
 
 import l.files.test.BaseFilesActivityTest;
 
-import static l.files.app.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class TabTest extends BaseFilesActivityTest {
 

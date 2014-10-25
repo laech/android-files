@@ -1,4 +1,4 @@
-package l.files.app.mode;
+package l.files.ui.mode;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;

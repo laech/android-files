@@ -6,10 +6,12 @@ import android.view.ActionMode;
 import com.squareup.otto.Bus;
 import l.files.test.BaseActivityTest;
 import l.files.test.TempDir;
+import l.files.ui.CloseActionModeRequest;
+import l.files.ui.FilesActivity;
 
 import java.io.File;
 
-import static l.files.app.FilesActivity.EXTRA_DIR;
+import static l.files.ui.FilesActivity.EXTRA_DIR;
 import static org.mockito.Mockito.*;
 
 public final class FilesActivityTest extends BaseActivityTest<FilesActivity> {

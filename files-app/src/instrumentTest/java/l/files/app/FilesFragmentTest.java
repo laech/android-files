@@ -9,6 +9,7 @@ import com.google.common.base.Optional;
 import l.files.R;
 import l.files.test.TempDir;
 import l.files.test.TestFilesFragmentActivity;
+import l.files.ui.FilesFragment;
 
 import java.io.File;
 import java.util.List;

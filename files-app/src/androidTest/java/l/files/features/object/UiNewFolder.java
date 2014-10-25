@@ -6,8 +6,8 @@ import android.app.Instrumentation;
 import android.widget.Button;
 import android.widget.EditText;
 
-import l.files.app.FilesActivity;
-import l.files.app.menu.NewDirFragment;
+import l.files.ui.FilesActivity;
+import l.files.ui.menu.NewDirFragment;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;

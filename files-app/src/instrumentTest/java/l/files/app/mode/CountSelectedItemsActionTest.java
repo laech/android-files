@@ -1,4 +1,4 @@
-package l.files.app.mode;
+package l.files.ui.mode;
 
 import static android.widget.AbsListView.CHOICE_MODE_SINGLE;
 import static org.mockito.Mockito.mock;

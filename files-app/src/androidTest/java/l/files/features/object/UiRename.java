@@ -6,8 +6,8 @@ import android.widget.EditText;
 
 import java.util.concurrent.Callable;
 
-import l.files.app.FilesActivity;
-import l.files.app.mode.RenameFragment;
+import l.files.ui.FilesActivity;
+import l.files.ui.mode.RenameFragment;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;

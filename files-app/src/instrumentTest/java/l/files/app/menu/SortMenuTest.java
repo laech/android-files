@@ -1,4 +1,4 @@
-package l.files.app.menu;
+package l.files.ui.menu;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;

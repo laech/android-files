@@ -1,7 +1,7 @@
 package l.files.app.format;
 
-import static l.files.app.UserDirs.DIR_HOME;
-import static l.files.app.UserDirs.DIR_ROOT;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_ROOT;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
