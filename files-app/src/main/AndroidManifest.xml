@@ -37,13 +37,6 @@
         android:name=".operations.ui.FailuresActivity"
         android:exported="false"/>
 
-    <activity
-        android:name="l.files.test.TestFilesFragmentActivity"
-        android:exported="false"/>
-    <activity
-        android:name="l.files.test.TestSidebarFragmentActivity"
-        android:exported="false"/>
-
     <service
         android:name=".operations.OperationService"
         android:exported="false">
