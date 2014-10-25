@@ -11,12 +11,15 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.squareup.otto.Bus;
+
+import de.greenrobot.event.EventBus;
 import l.files.R;
 
 import static android.animation.LayoutTransition.TransitionListener;
 import static android.support.v4.view.ViewPager.OnPageChangeListener;
-import static android.view.View.*;
+import static android.view.View.GONE;
+import static android.view.View.OnClickListener;
+import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -27,10 +30,10 @@ public final class ViewPagerTabBar
 
   private final HorizontalScrollView root;
   private final LinearLayout tabs;
-  private final Bus bus;
+  private final EventBus bus;
   private ViewPager pager;
 
-  public ViewPagerTabBar(Context context, Bus bus) {
+  public ViewPagerTabBar(Context context, EventBus bus) {
     this.bus = checkNotNull(bus, "bus");
     this.root = (HorizontalScrollView) inflate(context, R.layout.tab_container);
     this.tabs = (LinearLayout) root.findViewById(R.id.tab_container);

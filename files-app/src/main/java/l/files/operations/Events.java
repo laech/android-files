@@ -21,11 +21,6 @@ public final class Events {
   Events() {
   }
 
-  /**
-   * Gets the event bus this module uses to post events,
-   * all events will be delivered on the main thread.
-   * Register/unregister can be called on any thread.
-   */
   public static EventBus get() {
     return bus;
   }
@@ -41,8 +36,7 @@ public final class Events {
       this.handler = checkNotNull(handler, "handler");
     }
 
-    @Subscribe
-    public void onEvent(final SubscriberExceptionEvent e) {
+    @Subscribe public void onEvent(final SubscriberExceptionEvent e) {
       handler.post(new Runnable() {
         @Override public void run() {
           throw new RuntimeException(e.throwable);

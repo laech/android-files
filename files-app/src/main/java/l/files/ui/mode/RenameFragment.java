@@ -13,6 +13,7 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.R;
+import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
 import l.files.ui.FileCreationFragment;
 import l.files.provider.FilesContract;
@@ -21,7 +22,6 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
-import static l.files.ui.FilesApp.getBus;
 import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.isDirectory;
 import static l.files.provider.FilesContract.getFileUri;
@@ -85,7 +85,7 @@ public final class RenameFragment extends FileCreationFragment {
         }
       }
     }.execute();
-    getBus(this).post(CloseActionModeRequest.INSTANCE);
+    Events.get().post(CloseActionModeRequest.INSTANCE);
   }
 
   private String getFileLocation() {

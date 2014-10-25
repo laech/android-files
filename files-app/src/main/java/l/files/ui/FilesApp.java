@@ -2,28 +2,16 @@ package l.files.ui;
 
 import android.app.ActivityManager;
 import android.app.Application;
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.StrictMode;
 import android.util.LruCache;
 
-import com.squareup.otto.Bus;
-
-import l.files.common.event.Events;
 import l.files.operations.ui.OperationsUi;
 
 import static l.files.BuildConfig.DEBUG;
 
 public final class FilesApp extends Application {
-
-  public static Bus getBus(Fragment fragment) {
-    return getBus(fragment.getActivity());
-  }
-
-  public static Bus getBus(Context context) {
-    return getApp(context).bus;
-  }
 
   public static LruCache<Object, Bitmap> getBitmapCache(Context context) {
     return getApp(context).bitmapCache;
@@ -33,14 +21,11 @@ public final class FilesApp extends Application {
     return (FilesApp) context.getApplicationContext();
   }
 
-  // TODO remove bus from here
-  private Bus bus;
   private LruCache<Object, Bitmap> bitmapCache;
 
   @Override public void onCreate() {
     super.onCreate();
 
-    bus = Events.bus();
     bitmapCache = createBitmapCache();
 
     Preferences.register(this, Preferences.newAnalyticsListener(this));

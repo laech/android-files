@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.R;
+import l.files.operations.Events;
 import l.files.ui.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -45,6 +46,7 @@ public final class PathBarFragment extends Fragment
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     View root = getView();
+    assert root != null;
     container = (ViewGroup) root.findViewById(R.id.path_item_container);
     if (fileLocation != null) {
       getLoaderManager().restartLoader(0, null, this);
@@ -95,7 +97,7 @@ public final class PathBarFragment extends Fragment
   @Override public void onLoaderReset(Loader<Cursor> loader) {}
 
   @Override public void onClick(View v) {
-    FilesApp.getBus(this).post(OpenFileRequest.create(
+    Events.get().post(OpenFileRequest.create(
         (String) v.getTag(R.id.file_id),
         (String) v.getTag(R.id.file_name),
         (boolean) v.getTag(R.id.is_readable),

@@ -7,13 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.squareup.otto.Bus;
-
+import de.greenrobot.event.EventBus;
 import l.files.common.app.BaseListFragment;
+import l.files.operations.Events;
 
 class BaseFileListFragment extends BaseListFragment {
 
-  private Bus bus;
+  private EventBus bus;
   private final int layoutResourceId;
 
   public BaseFileListFragment(int layoutResourceId) {
@@ -23,17 +23,17 @@ class BaseFileListFragment extends BaseListFragment {
   // TODO Review bus getter/setter is appropriate or not, possible leaks
   // when bus is changed after an object is registered?
 
-  public Bus getBus() {
+  public EventBus getBus() {
     return bus;
   }
 
-  public void setBus(Bus bus) {
+  public void setBus(EventBus bus) {
     this.bus = bus;
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    bus = FilesApp.getBus(this);
+    bus = Events.get();
   }
 
   @Override

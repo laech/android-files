@@ -46,7 +46,6 @@ dependencies {
   compile project(':eventbus-annotation')
   compile libs.eventbus
   compile libs.joda_time
-  compile libs.otto
   compile libs.google_play_services
   compile libs.guava
   compile libs.tika

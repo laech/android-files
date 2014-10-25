@@ -18,16 +18,16 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.DrawerListeners;
+import l.files.eventbus.Subscribe;
+import l.files.operations.Events;
 import l.files.provider.FilesContract;
 import l.files.ui.analytics.AnalyticsActivity;
 import l.files.ui.menu.AboutMenu;
@@ -49,6 +49,7 @@ import static com.google.android.gms.common.GooglePlayServicesUtil.getErrorDialo
 import static com.google.android.gms.common.GooglePlayServicesUtil.isGooglePlayServicesAvailable;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static de.greenrobot.event.ThreadMode.MainThread;
 
 public final class FilesActivity extends AnalyticsActivity
     implements TabHandler, OnSharedPreferenceChangeListener {
@@ -58,7 +59,7 @@ public final class FilesActivity extends AnalyticsActivity
   private static final String STATE_TAB_ITEMS = "tabTitles";
   private static final String STATE_ID_SEED = "idGenerator";
 
-  Bus bus;
+  EventBus bus;
   String directoryLocation;
 
   ViewPager viewPager;
@@ -159,7 +160,7 @@ public final class FilesActivity extends AnalyticsActivity
   private void initFields(int idSeed) {
 //    ad = (AdView) findViewById(R.id.ad_view);
     idGenerator = new IdGenerator(idSeed);
-    bus = FilesApp.getBus(this);
+    bus = Events.get();
     directoryLocation = getInitialDirectoryLocation();
     viewPager = (ViewPager) findViewById(R.id.pager);
     tabs = new ViewPagerTabBar(this, bus);
@@ -290,13 +291,15 @@ public final class FilesActivity extends AnalyticsActivity
     return (FilesPagerAdapter) viewPager.getAdapter();
   }
 
-  @Subscribe public void handle(CloseActionModeRequest request) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(CloseActionModeRequest request) {
     if (currentActionMode != null) {
       currentActionMode.finish();
     }
   }
 
-  @Subscribe public void handle(final OpenFileRequest request) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(final OpenFileRequest request) {
     if (currentActionMode != null) {
       currentActionMode.finish();
     }
@@ -307,7 +310,8 @@ public final class FilesActivity extends AnalyticsActivity
     });
   }
 
-  @Subscribe public void handle(ViewPagerTabBar.OnUpSelected up) {
+  @Subscribe(MainThread)
+  public void onEventMainThread(ViewPagerTabBar.OnUpSelected up) {
     if (currentPagerFragment.hasBackStack()) {
       closeDrawerThenRun(new Runnable() {
         @Override public void run() {
