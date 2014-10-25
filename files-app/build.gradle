@@ -3,6 +3,8 @@ apply plugin: 'com.neenbedankt.android-apt'
 
 android {
   defaultConfig {
+    minSdkVersion 19
+    targetSdkVersion 20
     ndk {
       moduleName 'io'
       ldLibs 'log'
@@ -11,11 +13,6 @@ android {
 
   compileSdkVersion 19
   buildToolsVersion "20"
-
-  defaultConfig {
-    minSdkVersion 19
-    targetSdkVersion 20
-  }
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
