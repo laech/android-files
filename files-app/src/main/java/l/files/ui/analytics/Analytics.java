@@ -1,4 +1,4 @@
-package l.files.analytics;
+package l.files.ui.analytics;
 
 import android.app.Activity;
 import android.content.Context;

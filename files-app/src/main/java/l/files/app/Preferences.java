@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
 
-import l.files.analytics.Analytics;
+import l.files.ui.analytics.Analytics;
 
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;

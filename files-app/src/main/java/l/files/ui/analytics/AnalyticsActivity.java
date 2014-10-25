@@ -1,4 +1,4 @@
-package l.files.analytics;
+package l.files.ui.analytics;
 
 import l.files.common.app.BaseActivity;
 

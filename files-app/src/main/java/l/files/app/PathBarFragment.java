@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.R;
-import l.files.analytics.Analytics;
+import l.files.ui.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;

@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import android.widget.AbsListView;
 
 import l.files.R;
-import l.files.analytics.AnalyticsAction;
+import l.files.ui.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
 
 import static android.view.Menu.NONE;

@@ -13,7 +13,7 @@ import android.widget.AbsListView;
 import java.util.List;
 
 import l.files.R;
-import l.files.analytics.AnalyticsAction;
+import l.files.ui.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.provider.FilesContract;
 

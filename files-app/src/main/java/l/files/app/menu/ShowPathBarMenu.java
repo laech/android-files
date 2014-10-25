@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.analytics.AnalyticsMenu;
+import l.files.ui.analytics.AnalyticsMenu;
 import l.files.app.Preferences;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;

@@ -11,7 +11,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import l.files.R;
-import l.files.analytics.Analytics;
+import l.files.ui.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.app.Animations.animatePreDataSetChange;

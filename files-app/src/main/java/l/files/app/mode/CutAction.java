@@ -10,7 +10,7 @@ import android.widget.AbsListView;
 import com.google.common.collect.ImmutableSet;
 
 import l.files.R;
-import l.files.analytics.AnalyticsAction;
+import l.files.ui.analytics.AnalyticsAction;
 import l.files.app.Clipboards;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.provider.FilesContract;

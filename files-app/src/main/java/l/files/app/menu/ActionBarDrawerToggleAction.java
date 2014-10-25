@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 
-import l.files.analytics.AnalyticsMenu;
+import l.files.ui.analytics.AnalyticsMenu;
 import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAdapter;
 

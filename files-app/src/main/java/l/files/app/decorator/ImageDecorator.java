@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import l.files.R;
-import l.files.analytics.Analytics;
+import l.files.ui.analytics.Analytics;
 import l.files.app.decorator.decoration.Decoration;
 import l.files.app.util.ScaledSize;
 import l.files.common.graphics.drawable.SizedColorDrawable;

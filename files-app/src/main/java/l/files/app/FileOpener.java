@@ -8,7 +8,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import l.files.R;
-import l.files.analytics.Analytics;
+import l.files.ui.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
