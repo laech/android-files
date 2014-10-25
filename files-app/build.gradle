@@ -4,15 +4,15 @@ apply plugin: 'com.neenbedankt.android-apt'
 android {
   defaultConfig {
     minSdkVersion 19
-    targetSdkVersion 20
+    targetSdkVersion 21
     ndk {
       moduleName 'io'
       ldLibs 'log'
     }
   }
 
-  compileSdkVersion 19
-  buildToolsVersion "20"
+  compileSdkVersion 21
+  buildToolsVersion "21.0.2"
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7
@@ -21,6 +21,12 @@ android {
 
   lintOptions {
     abortOnError false
+  }
+
+  buildTypes {
+    debug {
+      testCoverageEnabled = true
+    }
   }
 
   // Remove files from third party jars that causes 'duplicate files' build issues
