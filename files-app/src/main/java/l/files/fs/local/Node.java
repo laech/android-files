@@ -10,7 +10,7 @@ import com.google.auto.value.AutoValue;
 abstract class Node {
   Node() {}
 
-  public static Node from(FileInfo file) {
+  public static Node from(LocalFileStatus file) {
     return new AutoValue_Node(file.device(), file.inode());
   }
 

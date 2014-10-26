@@ -8,7 +8,7 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
 import l.files.fs.local.DirectoryTreeTraverser;
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.Files;
 import l.files.logging.Logger;
 
@@ -62,9 +62,9 @@ final class Copy extends Paste {
     for (Entry entry : DirectoryTreeTraverser.get().preOrderTraversal(root)) {
       checkInterrupt();
 
-      FileInfo file;
+      LocalFileStatus file;
       try {
-        file = FileInfo.read(entry.path());
+        file = LocalFileStatus.read(entry.path());
       } catch (IOException e) {
         listener.onFailure(entry.path(), e);
         continue;
@@ -81,7 +81,7 @@ final class Copy extends Paste {
     }
   }
 
-  private void copyLink(FileInfo src, String dst, FailureRecorder listener) {
+  private void copyLink(LocalFileStatus src, String dst, FailureRecorder listener) {
     try {
       String target = readlink(src.path());
       symlink(target, dst);
@@ -94,7 +94,7 @@ final class Copy extends Paste {
   }
 
   private void createDirectory(
-      FileInfo src, File dst, FailureRecorder listener) {
+      LocalFileStatus src, File dst, FailureRecorder listener) {
     try {
       forceMkdir(dst);
       copiedByteCount += src.size();
@@ -105,7 +105,7 @@ final class Copy extends Paste {
     }
   }
 
-  private void copyFile(FileInfo src, String dst, FailureRecorder listener)
+  private void copyFile(LocalFileStatus src, String dst, FailureRecorder listener)
       throws InterruptedException {
     checkInterrupt();
 
@@ -145,7 +145,7 @@ final class Copy extends Paste {
     setLastModifiedDate(src, dst);
   }
 
-  private void setLastModifiedDate(FileInfo src, String dst) {
+  private void setLastModifiedDate(LocalFileStatus src, String dst) {
     File dstFile = new File(dst);
     File srcFile = new File(src.path());
     //noinspection StatementWithEmptyBody

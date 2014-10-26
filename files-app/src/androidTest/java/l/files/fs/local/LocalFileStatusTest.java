@@ -4,14 +4,13 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.FileInfo;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
-public final class FileInfoTest extends FileBaseTest {
+public final class LocalFileStatusTest extends FileBaseTest {
 
   public void testSymbolicLink() throws Exception {
     File file = tmp().createDir("file");
@@ -43,7 +42,7 @@ public final class FileInfoTest extends FileBaseTest {
   }
 
   public void testLastModifiedTime() throws Exception {
-    FileInfo file = info(tmp().get());
+    LocalFileStatus file = info(tmp().get());
     assertEquals(tmp().get().lastModified(), file.modified());
   }
 
@@ -108,8 +107,8 @@ public final class FileInfoTest extends FileBaseTest {
     assertFalse(info(tmp().createFile("a")).isHidden());
   }
 
-  private FileInfo info(File f) throws IOException {
-    return FileInfo.read(f.getPath());
+  private LocalFileStatus info(File f) throws IOException {
+    return LocalFileStatus.read(f.getPath());
   }
 
 }

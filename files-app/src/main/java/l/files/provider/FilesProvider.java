@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.WatchService;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
@@ -263,25 +263,25 @@ public final class FilesProvider extends ContentProvider {
     throw new UnsupportedOperationException("Update not supported");
   }
 
-  private void sort(FileInfo[] data, String sortOrder) {
+  private void sort(LocalFileStatus[] data, String sortOrder) {
     if (sortOrder != null) {
       SortBy.valueOf(sortOrder).sort(data);
     }
   }
 
   private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, File... files) {
-    List<FileInfo> stats = newArrayListWithCapacity(files.length);
+    List<LocalFileStatus> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
-        stats.add(FileInfo.read(file.getPath()));
+        stats.add(LocalFileStatus.read(file.getPath()));
       } catch (IOException e) {
         logger.warn(e, "Failed to read info %s", file);
       }
     }
-    return newFileCursor(uri, projection, sortOrder, stats.toArray(new FileInfo[stats.size()]));
+    return newFileCursor(uri, projection, sortOrder, stats.toArray(new LocalFileStatus[stats.size()]));
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileInfo... files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, LocalFileStatus... files) {
     sort(files, sortOrder);
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(getContentResolver(), uri);

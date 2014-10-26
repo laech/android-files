@@ -1,7 +1,7 @@
 package l.files.provider;
 
 import l.files.common.database.BaseCursor;
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 
 import static l.files.common.database.DataTypes.booleanToInt;
 import static l.files.provider.FilesContract.Files.ID;
@@ -20,15 +20,15 @@ import static l.files.provider.FilesContract.getFileId;
 
 final class FileCursor extends BaseCursor {
 
-  private final FileInfo[] files;
+  private final LocalFileStatus[] files;
   private final String[] columns;
 
-  public FileCursor(FileInfo[] files, String[] columns) {
+  public FileCursor(LocalFileStatus[] files, String[] columns) {
     this.files = files;
     this.columns = columns;
   }
 
-  private FileInfo getCurrentFile() {
+  private LocalFileStatus getCurrentFile() {
     checkPosition();
     return files[getPosition()];
   }
@@ -42,7 +42,7 @@ final class FileCursor extends BaseCursor {
   }
 
   @Override public String getString(int column) {
-    FileInfo file = getCurrentFile();
+    LocalFileStatus file = getCurrentFile();
     String col = columns[column];
     if (ID.equals(col)) return getFileId(file.toFile());
     if (NAME.equals(col)) return file.name();
@@ -51,7 +51,7 @@ final class FileCursor extends BaseCursor {
     throw new IllegalArgumentException();
   }
 
-  private String getType(FileInfo file) {
+  private String getType(LocalFileStatus file) {
     if (file.isDirectory()) return TYPE_DIRECTORY;
     if (file.isSymbolicLink()) return TYPE_SYMLINK;
     if (file.isRegularFile()) return TYPE_REGULAR_FILE;
@@ -59,7 +59,7 @@ final class FileCursor extends BaseCursor {
   }
 
   @Override public int getInt(int column) {
-    FileInfo file = getCurrentFile();
+    LocalFileStatus file = getCurrentFile();
     String col = columns[column];
     if (READABLE.equals(col)) return booleanToInt(file.isReadable());
     if (WRITABLE.equals(col)) return booleanToInt(file.isWritable());
@@ -67,7 +67,7 @@ final class FileCursor extends BaseCursor {
   }
 
   @Override public long getLong(int column) {
-    FileInfo file = getCurrentFile();
+    LocalFileStatus file = getCurrentFile();
     String col = columns[column];
     if (LENGTH.equals(col)) return file.size();
     if (MODIFIED.equals(col)) return file.modified();

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
@@ -16,17 +16,17 @@ abstract class FileSortTest extends FileBaseTest {
 
   protected final void testSortMatches(FileSort sort, File... expectedOrder)
       throws Exception {
-    List<FileInfo> expected = mapData(expectedOrder);
-    List<FileInfo> actual = newArrayList(expected);
+    List<LocalFileStatus> expected = mapData(expectedOrder);
+    List<LocalFileStatus> actual = newArrayList(expected);
     shuffle(actual);
     sort(actual, sort);
     assertEquals(expected, actual);
   }
 
-  private List<FileInfo> mapData(File... files) throws IOException {
-    List<FileInfo> expected = new ArrayList<>(files.length);
+  private List<LocalFileStatus> mapData(File... files) throws IOException {
+    List<LocalFileStatus> expected = new ArrayList<>(files.length);
     for (File file : files) {
-      expected.add(FileInfo.read(file.getPath()));
+      expected.add(LocalFileStatus.read(file.getPath()));
     }
     return expected;
   }

@@ -17,21 +17,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.apache.commons.io.FilenameUtils.concat;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
-/**
- * Information regarding a file at a point in time.
- * <h3>
- * Difference between this class and {@link File}
- * </h3>
- * {@link File} represents a handle to the underlying file,
- * methods such as {@link File#lastModified()} will always return the
- * latest value by querying the underlying file.
- * <p/>
- * {@link FileInfo} is mostly a snapshot of the file information, therefore if
- * the underlying file changes after an instance of this class is created, the
- * change won't be reflected by the existing instance.
- */
 @AutoValue
-public abstract class FileInfo implements FileStatus {
+public abstract class LocalFileStatus implements FileStatus {
 
   private FileId id;
   private String name;
@@ -40,7 +27,7 @@ public abstract class FileInfo implements FileStatus {
   private Boolean writable;
   private Instant lastModifiedTime;
 
-  FileInfo() {}
+  LocalFileStatus() {}
 
   public abstract String path();
 
@@ -49,7 +36,7 @@ public abstract class FileInfo implements FileStatus {
   /**
    * @throws IOException includes path is not accessible or doesn't exist
    */
-  public static FileInfo read(String parent, String child) throws IOException {
+  public static LocalFileStatus read(String parent, String child) throws IOException {
     checkNotNull(parent, "parent");
     checkNotNull(child, "child");
     String path = concat(parent, child);
@@ -59,10 +46,10 @@ public abstract class FileInfo implements FileStatus {
   /**
    * @throws IOException includes path is not accessible or doesn't exist
    */
-  public static FileInfo read(String path) throws IOException {
+  public static LocalFileStatus read(String path) throws IOException {
     checkNotNull(path, "path");
     Stat stat = Stat.lstat(path);
-    return new AutoValue_FileInfo(path, stat);
+    return new AutoValue_LocalFileStatus(path, stat);
   }
 
   @Override public FileId id() {

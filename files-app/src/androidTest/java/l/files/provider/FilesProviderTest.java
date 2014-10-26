@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -303,7 +303,7 @@ public final class FilesProviderTest extends FileBaseTest {
     cursor.moveToPosition(-1);
     while (cursor.moveToNext()) {
       File file = files[cursor.getPosition()];
-      FileInfo info = FileInfo.read(file.getPath());
+      LocalFileStatus info = LocalFileStatus.read(file.getPath());
       assertEquals(FilesContract.getFileId(file), Files.id(cursor));
       assertEquals(info.name(), Files.name(cursor));
       assertEquals(info.modified(), Files.modified(cursor));

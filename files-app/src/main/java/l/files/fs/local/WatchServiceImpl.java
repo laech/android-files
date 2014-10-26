@@ -309,7 +309,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
       return;
     }
 
-    Node node = Node.from(FileInfo.read(path.toString()));
+    Node node = Node.from(LocalFileStatus.read(path.toString()));
 
     synchronized (this) {
       checkNode(path, node);
@@ -361,7 +361,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
             continue;
           }
           try {
-            startObserver(path, Node.from(FileInfo.read(path.toString())));
+            startObserver(path, Node.from(LocalFileStatus.read(path.toString())));
           } catch (IOException e) {
             // File no longer exits or inaccessible, ignore;
           }
@@ -430,7 +430,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
 
   private void onCreate(Path path) {
     try {
-      FileInfo file = FileInfo.read(path.toString());
+      LocalFileStatus file = LocalFileStatus.read(path.toString());
       if (file.isDirectory() && isMonitored(path.parent())) {
         startObserver(path, Node.from(file));
       }

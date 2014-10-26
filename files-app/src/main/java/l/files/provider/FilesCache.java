@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.Path;
 import l.files.fs.local.WatchEvent;
 import l.files.fs.local.WatchService;
@@ -45,14 +45,14 @@ final class FilesCache implements
   private static final Logger logger = Logger.get(FilesCache.class);
 
 
-  static final Predicate<FileInfo> HIDDEN = new Predicate<FileInfo>() {
+  static final Predicate<LocalFileStatus> HIDDEN = new Predicate<LocalFileStatus>() {
     @Override
-    public boolean apply(FileInfo input) {
+    public boolean apply(LocalFileStatus input) {
       return input.isHidden();
     }
   };
 
-  static final Predicate<FileInfo> NOT_HIDDEN = not(HIDDEN);
+  static final Predicate<LocalFileStatus> NOT_HIDDEN = not(HIDDEN);
 
 
   private final Context context;
@@ -81,7 +81,7 @@ final class FilesCache implements
   // TODO implement CancellationSignal
   public Cursor get(Uri uri, String[] columns, String sortOrder, CancellationSignal signal) {
     final ValueMap map = getCache(uri);
-    final FileInfo[] files = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
+    final LocalFileStatus[] files = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
     return new CursorWrapper(newFileCursor(uri, columns, sortOrder, files)) {
       // Hold a reference to keep the cache alive as long as the cursor is used
       @SuppressWarnings("UnusedDeclaration")
@@ -93,14 +93,14 @@ final class FilesCache implements
     return cache.getIfPresent(path);
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileInfo[] files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, LocalFileStatus[] files) {
     sort(files, sortOrder);
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(resolver, uri);
     return c;
   }
 
-  private void sort(FileInfo[] data, String sortOrder) {
+  private void sort(LocalFileStatus[] data, String sortOrder) {
     if (sortOrder != null) {
       SortBy.valueOf(sortOrder).sort(data);
     }
@@ -148,7 +148,7 @@ final class FilesCache implements
     for (String name : names) {
       try {
         Path child = path.child(name);
-        map.put(child, FileInfo.read(child.toString()));
+        map.put(child, LocalFileStatus.read(child.toString()));
       } catch (IOException e) {
         logger.debug(e, "Failed to read %s", path);
       }
@@ -192,8 +192,8 @@ final class FilesCache implements
     }
 
     try {
-      FileInfo newInfo = FileInfo.read(path.toString());
-      FileInfo oldInfo = data.put(path, newInfo);
+      LocalFileStatus newInfo = LocalFileStatus.read(path.toString());
+      LocalFileStatus oldInfo = data.put(path, newInfo);
       return !Objects.equal(newInfo, oldInfo);
     } catch (IOException e) {
       logger.debug(e, "Failed to read %s", path);
@@ -224,32 +224,32 @@ final class FilesCache implements
   }
 
   static final class ValueMap {
-    private final Map<Path, FileInfo> map;
+    private final Map<Path, LocalFileStatus> map;
 
     ValueMap() {
       map = new HashMap<>();
     }
 
-    synchronized FileInfo put(Path key, FileInfo value) {
+    synchronized LocalFileStatus put(Path key, LocalFileStatus value) {
       return map.put(key, value);
     }
 
-    synchronized FileInfo remove(Path key) {
+    synchronized LocalFileStatus remove(Path key) {
       return map.remove(key);
     }
 
-    FileInfo[] values() {
-      return values(Predicates.<FileInfo>alwaysTrue());
+    LocalFileStatus[] values() {
+      return values(Predicates.<LocalFileStatus>alwaysTrue());
     }
 
-    synchronized FileInfo[] values(Predicate<FileInfo> filter) {
-      List<FileInfo> list = newArrayListWithCapacity(map.size());
-      for (FileInfo data : map.values()) {
+    synchronized LocalFileStatus[] values(Predicate<LocalFileStatus> filter) {
+      List<LocalFileStatus> list = newArrayListWithCapacity(map.size());
+      for (LocalFileStatus data : map.values()) {
         if (filter.apply(data)) {
           list.add(data);
         }
       }
-      return list.toArray(new FileInfo[list.size()]);
+      return list.toArray(new LocalFileStatus[list.size()]);
     }
   }
 }

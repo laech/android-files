@@ -3,7 +3,7 @@ package l.files.operations;
 import java.io.IOException;
 
 import l.files.fs.local.DirectoryTreeTraverser;
-import l.files.fs.local.FileInfo;
+import l.files.fs.local.LocalFileStatus;
 
 import static l.files.fs.local.DirectoryTreeTraverser.Entry;
 import static l.files.fs.local.Files.remove;
@@ -50,7 +50,7 @@ public final class Delete extends AbstractOperation {
   }
 
   private void delete(String path) throws IOException {
-    long size = FileInfo.read(path).size();
+    long size = LocalFileStatus.read(path).size();
     remove(path);
     deletedByteCount += size;
     deletedItemCount++;
