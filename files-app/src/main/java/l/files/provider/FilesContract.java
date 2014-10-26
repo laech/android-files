@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import l.files.R;
+import l.files.fs.FileId;
 
 import static android.content.UriMatcher.NO_MATCH;
 import static android.os.Looper.getMainLooper;
@@ -178,18 +179,7 @@ public final class FilesContract {
   }
 
   public static String getFileId(File file) {
-    /*
-     * Don't return File.toURI as it will append a "/" to the end of the URI
-     * depending on whether or not the file is a directory, that means two calls
-     * to the method before and after the directory is deleted will create two
-     * URIs that are not equal.
-     */
-    URI uri = file.toURI().normalize();
-    String uriStr = uri.toString();
-    if (!uri.getRawPath().equals("/") && uriStr.endsWith("/")) {
-      return uriStr.substring(0, uriStr.length() - 1);
-    }
-    return uriStr;
+    return FileId.of(file).toString();
   }
 
   /**

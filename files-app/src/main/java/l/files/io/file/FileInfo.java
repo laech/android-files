@@ -3,18 +3,20 @@ package l.files.io.file;
 import android.webkit.MimeTypeMap;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.net.MediaType;
+
+import org.joda.time.Instant;
 
 import java.io.File;
 import java.io.IOException;
 
+import l.files.fs.FileId;
+import l.files.fs.FileStatus;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.file.Stat.S_ISBLK;
-import static l.files.io.file.Stat.S_ISCHR;
 import static l.files.io.file.Stat.S_ISDIR;
-import static l.files.io.file.Stat.S_ISFIFO;
 import static l.files.io.file.Stat.S_ISLNK;
 import static l.files.io.file.Stat.S_ISREG;
-import static l.files.io.file.Stat.S_ISSOCK;
 import static l.files.io.file.Unistd.R_OK;
 import static l.files.io.file.Unistd.W_OK;
 import static org.apache.commons.io.FilenameUtils.concat;
@@ -34,12 +36,14 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
  * change won't be reflected by the existing instance.
  */
 @AutoValue
-public abstract class FileInfo {
+public abstract class FileInfo implements FileStatus {
 
+  private FileId id;
   private String name;
-  private String mime;
+  private MediaType basicMediaType;
   private Boolean readable;
   private Boolean writable;
+  private Instant lastModifiedTime;
 
   FileInfo() {}
 
@@ -66,50 +70,76 @@ public abstract class FileInfo {
     return new AutoValue_FileInfo(path, stat);
   }
 
-  public String name() {
+  @Override public FileId id() {
+    if (id == null) {
+      id = FileId.of(toFile());
+    }
+    return id;
+  }
+
+  @Override public String name() {
     if (name == null) {
-      name = new File(path()).getName();
+      name = toFile().getName();
     }
     return name;
+  }
+
+  @Override public Instant lastModifiedTime() {
+    if (lastModifiedTime == null) {
+      lastModifiedTime = new Instant(modified());
+    }
+    return lastModifiedTime;
+  }
+
+  @Override public MediaType basicMediaType() {
+    if (basicMediaType == null) {
+      boolean dir;
+      if (isSymbolicLink()) {
+        // java.io.File will us about the actual file being linked to
+        dir = toFile().isDirectory();
+      } else {
+        dir = isDirectory();
+      }
+      if (dir) {
+        basicMediaType = MediaType.create("application", "x-directory");
+      } else {
+        MimeTypeMap typeMap = MimeTypeMap.getSingleton();
+        String ext = getExtension(name());
+        String typeString = typeMap.getMimeTypeFromExtension(ext);
+        if (typeString != null) {
+          basicMediaType = MediaType.parse(typeString);
+        } else {
+          basicMediaType = MediaType.OCTET_STREAM;
+        }
+      }
+    }
+
+    return basicMediaType;
   }
 
   /**
    * Gets the media type of this file based on its file extension or type.
    */
   public String mime() {
-    if (mime == null) {
-      boolean dir;
-      if (isSymbolicLink()) {
-        // java.io.File will us about the actual file being linked to
-        dir = new File(path()).isDirectory();
-      } else {
-        dir = isDirectory();
-      }
-      if (dir) {
-        mime = "application/x-directory";
-      } else {
-        mime = MimeTypeMap.getSingleton()
-            .getMimeTypeFromExtension(getExtension(name()));
-      }
-      if (mime == null) {
-        mime = "application/octet-stream";
-      }
-    }
-    return mime;
+    return basicMediaType().toString();
   }
 
-  public boolean isReadable() {
+  @Override public boolean isReadable() {
     if (readable == null) {
       readable = access(R_OK);
     }
     return readable;
   }
 
-  public boolean isWritable() {
+  @Override public boolean isWritable() {
     if (writable == null) {
       writable = access(W_OK);
     }
     return writable;
+  }
+
+  @Override public boolean isExecutable() {
+    return false;
   }
 
   private boolean access(int mode) {
@@ -121,7 +151,7 @@ public abstract class FileInfo {
     }
   }
 
-  public boolean isHidden() {
+  @Override public boolean isHidden() {
     return name().startsWith(".");
   }
 
@@ -142,7 +172,7 @@ public abstract class FileInfo {
   /**
    * Size of this file in bytes.
    */
-  public long size() {
+  @Override public long size() {
     return stat().size();
   }
 
@@ -153,32 +183,16 @@ public abstract class FileInfo {
     return stat().mtime() * 1000L;
   }
 
-  public boolean isSocket() {
-    return S_ISSOCK(stat().mode());
-  }
-
-  public boolean isSymbolicLink() {
+  @Override public boolean isSymbolicLink() {
     return S_ISLNK(stat().mode());
   }
 
-  public boolean isRegularFile() {
+  @Override public boolean isRegularFile() {
     return S_ISREG(stat().mode());
   }
 
-  public boolean isBlockDevice() {
-    return S_ISBLK(stat().mode());
-  }
-
-  public boolean isDirectory() {
+  @Override public boolean isDirectory() {
     return S_ISDIR(stat().mode());
-  }
-
-  public boolean isCharacterDevice() {
-    return S_ISCHR(stat().mode());
-  }
-
-  public boolean isFifo() {
-    return S_ISFIFO(stat().mode());
   }
 
   public File toFile() {
