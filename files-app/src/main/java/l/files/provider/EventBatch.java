@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import l.files.io.file.WatchEvent;
+import l.files.fs.local.WatchEvent;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;

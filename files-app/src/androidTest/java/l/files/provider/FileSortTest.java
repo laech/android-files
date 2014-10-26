@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;

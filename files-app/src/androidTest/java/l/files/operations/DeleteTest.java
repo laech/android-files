@@ -8,7 +8,7 @@ import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
-import static l.files.io.file.Files.symlink;
+import static l.files.fs.local.Files.symlink;
 
 public final class DeleteTest extends FileBaseTest {
 

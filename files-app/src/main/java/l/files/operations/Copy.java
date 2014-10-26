@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
-import l.files.io.file.DirectoryTreeTraverser;
-import l.files.io.file.FileInfo;
-import l.files.io.file.Files;
+import l.files.fs.local.DirectoryTreeTraverser;
+import l.files.fs.local.FileInfo;
+import l.files.fs.local.Files;
 import l.files.logging.Logger;
 
-import static l.files.io.file.DirectoryTreeTraverser.Entry;
-import static l.files.io.file.Files.readlink;
-import static l.files.io.file.Files.symlink;
+import static l.files.fs.local.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.Files.readlink;
+import static l.files.fs.local.Files.symlink;
 import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 

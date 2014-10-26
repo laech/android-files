@@ -7,16 +7,16 @@ import android.net.Uri;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.file.Path;
-import l.files.io.file.WatchEvent;
-import l.files.io.file.WatchService;
+import l.files.fs.local.Path;
+import l.files.fs.local.WatchEvent;
+import l.files.fs.local.WatchService;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.timeout;
-import static l.files.io.file.WatchEvent.Kind.MODIFY;
+import static l.files.fs.local.WatchEvent.Kind.MODIFY;
 import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.COLUMNS;
 import static l.files.provider.FilesContract.Files.SORT_BY_NAME;

@@ -1,7 +1,7 @@
 package l.files.provider;
 
 import l.files.common.database.BaseCursor;
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 
 import static l.files.common.database.DataTypes.booleanToInt;
 import static l.files.provider.FilesContract.Files.ID;

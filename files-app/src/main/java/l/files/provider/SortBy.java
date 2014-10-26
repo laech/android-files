@@ -2,7 +2,7 @@ package l.files.provider;
 
 import java.util.Arrays;
 
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 
 enum SortBy {
 

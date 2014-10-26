@@ -2,7 +2,7 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 import l.files.logging.Logger;
 
 final class Size extends Count {

@@ -6,7 +6,7 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
 
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 
 import static com.google.common.base.Objects.equal;
 

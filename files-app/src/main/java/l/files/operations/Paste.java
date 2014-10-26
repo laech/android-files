@@ -3,10 +3,10 @@ package l.files.operations;
 import java.io.File;
 import java.io.IOException;
 
-import l.files.io.file.Files;
+import l.files.fs.local.Files;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.io.file.Files.isAncestorOrSelf;
+import static l.files.fs.local.Files.isAncestorOrSelf;
 
 abstract class Paste extends AbstractOperation {
 

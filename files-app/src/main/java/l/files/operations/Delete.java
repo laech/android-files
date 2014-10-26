@@ -2,11 +2,11 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.io.file.DirectoryTreeTraverser;
-import l.files.io.file.FileInfo;
+import l.files.fs.local.DirectoryTreeTraverser;
+import l.files.fs.local.FileInfo;
 
-import static l.files.io.file.DirectoryTreeTraverser.Entry;
-import static l.files.io.file.Files.remove;
+import static l.files.fs.local.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.Files.remove;
 
 public final class Delete extends AbstractOperation {
 

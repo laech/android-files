@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import l.files.io.file.FileInfo;
-import l.files.io.file.Path;
-import l.files.io.file.WatchEvent;
-import l.files.io.file.WatchService;
+import l.files.fs.local.FileInfo;
+import l.files.fs.local.Path;
+import l.files.fs.local.WatchEvent;
+import l.files.fs.local.WatchService;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;

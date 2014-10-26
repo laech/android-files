@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.io.file.FileInfo;
+import l.files.fs.local.FileInfo;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -25,7 +25,7 @@ import static java.util.Locale.ENGLISH;
 import static java.util.Locale.SIMPLIFIED_CHINESE;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.assertExists;
-import static l.files.io.file.Files.symlink;
+import static l.files.fs.local.Files.symlink;
 import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.SORT_BY_MODIFIED;
 import static l.files.provider.FilesContract.Files.SORT_BY_NAME;

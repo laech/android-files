@@ -7,8 +7,8 @@ import java.io.File;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
-import static l.files.io.file.Files.readlink;
-import static l.files.io.file.Files.symlink;
+import static l.files.fs.local.Files.readlink;
+import static l.files.fs.local.Files.symlink;
 
 public final class MoveTest extends PasteTest {
 

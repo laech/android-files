@@ -1,8 +1,8 @@
 package l.files.operations;
 
-import l.files.io.file.DirectoryTreeTraverser;
+import l.files.fs.local.DirectoryTreeTraverser;
 
-import static l.files.io.file.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.DirectoryTreeTraverser.Entry;
 
 class Count extends AbstractOperation {
 

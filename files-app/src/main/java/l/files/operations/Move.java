@@ -2,7 +2,7 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import static l.files.io.file.Files.rename;
+import static l.files.fs.local.Files.rename;
 
 final class Move extends Paste {
 
