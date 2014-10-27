@@ -12,35 +12,39 @@ import java.net.URI;
 public abstract class FileId {
   FileId() {}
 
-  abstract String id();
+  public abstract URI toUri();
 
   /**
-   * Create a ID for the given path.
+   * Create an ID for the given path.
    */
   public static FileId of(File file) {
-    return new AutoValue_FileId(toId(file));
+    return new AutoValue_FileId(toUri(file));
   }
 
-  private static String toId(File file) {
+  private static URI toUri(File file) {
     /*
      * Don't return File.toURI as it will append a "/" to the end of the URI
-     * depending on whether or not the file is a directory, that means two calls
-     * to the method before and after the directory is deleted will create two
-     * URIs that are not equal.
+     * depending on whether or not the file is a directory, that means two
+     * calls to the method before and after the directory is deleted will
+     * create two URIs that are not equal.
      */
     URI uri = file.toURI().normalize();
     String uriStr = uri.toString();
     if (!uri.getRawPath().equals("/") && uriStr.endsWith("/")) {
-      return uriStr.substring(0, uriStr.length() - 1);
+      return URI.create(uriStr.substring(0, uriStr.length() - 1));
     }
-    return uriStr;
+    return uri;
+  }
+
+  public Scheme scheme() {
+    return Scheme.parse(toUri().getScheme());
   }
 
   @Override public String toString() {
-    return id();
+    return toUri().toString();
   }
 
   @Override public int hashCode() {
-    return id().hashCode();
+    return toUri().hashCode();
   }
 }

@@ -5,9 +5,13 @@ import android.util.SparseArray;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
+import l.files.fs.FileSystemException;
+import l.files.fs.NoSuchFileException;
+
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+@SuppressWarnings("UnusedDeclaration")
 final class ErrnoException extends IOException {
 
   public static final int EPERM = 1;
@@ -173,5 +177,14 @@ final class ErrnoException extends IOException {
       }
     }
     return errors;
+  }
+
+  FileSystemException toFileSystemException() {
+    switch (errno()) {
+      case ENOENT:
+        throw new NoSuchFileException(this);
+      default:
+        throw new FileSystemException(this);
+    }
   }
 }

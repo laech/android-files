@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import android.webkit.MimeTypeMap;
-
 import com.google.auto.value.AutoValue;
 import com.google.common.net.MediaType;
 
@@ -12,15 +10,25 @@ import java.io.IOException;
 
 import l.files.fs.FileId;
 import l.files.fs.FileStatus;
+import l.files.fs.FileSystemException;
+import l.files.fs.FileTypeDetector;
+import l.files.fs.LinkOption;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.fs.local.Stat.S_ISBLK;
+import static l.files.fs.local.Stat.S_ISCHR;
+import static l.files.fs.local.Stat.S_ISDIR;
+import static l.files.fs.local.Stat.S_ISFIFO;
+import static l.files.fs.local.Stat.S_ISLNK;
+import static l.files.fs.local.Stat.S_ISREG;
+import static l.files.fs.local.Stat.S_ISSOCK;
+import static l.files.fs.local.Stat.lstat;
 import static org.apache.commons.io.FilenameUtils.concat;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 
 @AutoValue
 public abstract class LocalFileStatus implements FileStatus {
 
-  private FileId id;
   private String name;
   private MediaType basicMediaType;
   private Boolean readable;
@@ -29,7 +37,11 @@ public abstract class LocalFileStatus implements FileStatus {
 
   LocalFileStatus() {}
 
-  public abstract String path();
+  @Override public abstract FileId id();
+
+  public String path() {
+    return id().toUri().getPath();
+  }
 
   abstract Stat stat();
 
@@ -48,15 +60,18 @@ public abstract class LocalFileStatus implements FileStatus {
    */
   public static LocalFileStatus read(String path) throws IOException {
     checkNotNull(path, "path");
-    Stat stat = Stat.lstat(path);
-    return new AutoValue_LocalFileStatus(path, stat);
+    Stat stat = lstat(path);
+    return new AutoValue_LocalFileStatus(FileId.of(new File(path)), stat);
   }
 
-  @Override public FileId id() {
-    if (id == null) {
-      id = FileId.of(toFile());
+  static LocalFileStatus read(FileId file, LinkOption option) throws ErrnoException {
+    final Stat stat;
+    if (option == LinkOption.FOLLOW) {
+      stat = Stat.stat(file.toUri().getPath());
+    } else {
+      stat = lstat(file.toUri().getPath());
     }
-    return id;
+    return new AutoValue_LocalFileStatus(file, stat);
   }
 
   @Override public String name() {
@@ -75,27 +90,13 @@ public abstract class LocalFileStatus implements FileStatus {
 
   @Override public MediaType basicMediaType() {
     if (basicMediaType == null) {
-      boolean dir;
-      if (isSymbolicLink()) {
-        // java.io.File will us about the actual file being linked to
-        dir = toFile().isDirectory();
-      } else {
-        dir = isDirectory();
-      }
-      if (dir) {
-        basicMediaType = MediaType.create("application", "x-directory");
-      } else {
-        MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        String ext = getExtension(name());
-        String typeString = typeMap.getMimeTypeFromExtension(ext);
-        if (typeString != null) {
-          basicMediaType = MediaType.parse(typeString);
-        } else {
-          basicMediaType = MediaType.OCTET_STREAM;
-        }
+      try {
+        FileTypeDetector detector = BasicFileTypeDetector.get();
+        basicMediaType = detector.detect(id(), LinkOption.FOLLOW);
+      } catch (FileSystemException e) {
+        basicMediaType = OCTET_STREAM;
       }
     }
-
     return basicMediaType;
   }
 
@@ -166,15 +167,31 @@ public abstract class LocalFileStatus implements FileStatus {
   }
 
   @Override public boolean isSymbolicLink() {
-    return Stat.S_ISLNK(stat().mode());
+    return S_ISLNK(stat().mode());
   }
 
   @Override public boolean isRegularFile() {
-    return Stat.S_ISREG(stat().mode());
+    return S_ISREG(stat().mode());
   }
 
   @Override public boolean isDirectory() {
-    return Stat.S_ISDIR(stat().mode());
+    return S_ISDIR(stat().mode());
+  }
+
+  public boolean isSocket() {
+    return S_ISSOCK(stat().mode());
+  }
+
+  public boolean isBlockDevice() {
+    return S_ISBLK(stat().mode());
+  }
+
+  public boolean isCharacterDevice() {
+    return S_ISCHR(stat().mode());
+  }
+
+  public boolean isFifo() {
+    return S_ISFIFO(stat().mode());
   }
 
   public File toFile() {

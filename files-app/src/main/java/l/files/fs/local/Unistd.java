@@ -21,7 +21,7 @@ final class Unistd extends Native {
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/symlink.html">symlink()</a>
    */
-  public static native void symlink(String srcPath, String dstPath) throws ErrnoException;
+  public static native void symlink(String target, String link) throws ErrnoException;
 
   /**
    * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/readlink.html">readlink()</a>

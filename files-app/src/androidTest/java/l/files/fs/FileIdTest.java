@@ -33,4 +33,7 @@ public final class FileIdTest extends FileBaseTest {
     new URI(FileId.of(tmp().createFile("Hello World")).toString());
   }
 
+  public void testScheme() throws Exception {
+    assertEquals(Scheme.parse("file"), FileId.of(tmp().get()).scheme());
+  }
 }

@@ -69,7 +69,7 @@ public final class LocalFileStatusTest extends FileBaseTest {
 
   public void testMediaTypeForDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertEquals("application/x-directory", info(dir).mime());
+    assertEquals("inode/directory", info(dir).mime());
   }
 
   public void testMediaTypeForFile() throws Exception {
@@ -88,7 +88,7 @@ public final class LocalFileStatusTest extends FileBaseTest {
     File dir = tmp().createDir("a");
     File link = tmp().get("b");
     symlink(dir.getPath(), link.getPath());
-    assertEquals("application/x-directory", info(link).mime());
+    assertEquals("inode/directory", info(link).mime());
   }
 
   public void testDefaultMediaTypeIfUnknown() throws Exception {
