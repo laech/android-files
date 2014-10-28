@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.fs.DirectoryIteratorException;
 import l.files.logging.Logger;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
@@ -25,7 +26,7 @@ import static l.files.fs.local.android.os.FileObserver.MODIFY;
 import static l.files.fs.local.android.os.FileObserver.MOVED_FROM;
 import static l.files.fs.local.android.os.FileObserver.MOVED_TO;
 import static l.files.fs.local.android.os.FileObserver.MOVE_SELF;
-import static l.files.fs.local.DirectoryStream.Entry.TYPE_DIR;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_DIR;
 import static l.files.fs.local.Files.checkExist;
 import static l.files.fs.local.PathObserver.IN_IGNORED;
 import static l.files.fs.local.WatchEvent.Kind;
@@ -352,9 +353,8 @@ class WatchServiceImpl extends WatchService implements Closeable {
      * especially if the directory is large.
      */
 
-    try (DirectoryStream stream = DirectoryStream.open(parent.toString())) {
-
-      for (DirectoryStream.Entry entry : stream) {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.toString())) {
+      for (LocalDirectoryStream.LocalEntry entry : stream) {
         if (entry.type() == TYPE_DIR) {
           Path path = parent.child(entry.name());
           if (!isWatchable(path)) {
@@ -367,7 +367,6 @@ class WatchServiceImpl extends WatchService implements Closeable {
           }
         }
       }
-
     } catch (DirectoryIteratorException e) {
       throw new IOException(e);
     }

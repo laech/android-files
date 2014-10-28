@@ -6,18 +6,17 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.DirectoryStream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static l.files.fs.local.DirectoryStream.Entry;
-import static l.files.fs.local.DirectoryStream.Entry.TYPE_DIR;
-import static l.files.fs.local.DirectoryStream.Entry.TYPE_LNK;
-import static l.files.fs.local.DirectoryStream.Entry.TYPE_REG;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_DIR;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_LNK;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_REG;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
-public final class DirectoryStreamTest extends FileBaseTest {
+public final class LocalDirectoryStreamTest extends FileBaseTest {
 
   public void testReturnCorrectEntries() throws Exception {
     File f1 = tmp().createFile("a");
@@ -25,48 +24,36 @@ public final class DirectoryStreamTest extends FileBaseTest {
     File f3 = tmp().get("d");
     symlink(f1.getPath(), f3.getPath());
 
-    DirectoryStream stream = DirectoryStream.open(tmp().get().getPath());
-    try {
-
-      List<Entry> expected = asList(
-          Entry.create(lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
-          Entry.create(lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
-          Entry.create(lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
+      List<LocalEntry> expected = asList(
+          LocalEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
+          LocalEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
+          LocalEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
       );
-      List<Entry> actual = newArrayList(stream);
+      List<LocalEntry> actual = newArrayList(stream);
       assertEquals(expected, actual);
-
-    } finally {
-      stream.close();
     }
   }
 
   public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
-    DirectoryStream stream = DirectoryStream.open(tmp().get().getPath());
-    try {
-      Iterator<Entry> iterator = stream.iterator();
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
+      Iterator<LocalEntry> iterator = stream.iterator();
       assertFalse(iterator.hasNext());
       assertFalse(iterator.hasNext());
-    } finally {
-      stream.close();
     }
   }
 
   public void testIteratorThrowsNoSuchElementExceptionOnEmpty() throws Exception {
-    DirectoryStream stream = DirectoryStream.open(tmp().get().getPath());
-    try {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
       stream.iterator().next();
       fail();
     } catch (NoSuchElementException e) {
       // Pass
-    } finally {
-      stream.close();
     }
   }
 
   public void testIteratorMethodCannotBeReused() throws Exception {
-    DirectoryStream stream = DirectoryStream.open(tmp().get().getPath());
-    try {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
       stream.iterator();
       try {
         stream.iterator();
@@ -74,8 +61,6 @@ public final class DirectoryStreamTest extends FileBaseTest {
       } catch (IllegalStateException e) {
         // Pass
       }
-    } finally {
-      stream.close();
     }
   }
 }

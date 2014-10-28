@@ -7,10 +7,12 @@ import com.google.common.collect.TreeTraverser;
 import java.io.File;
 import java.io.IOException;
 
+import l.files.fs.DirectoryStream;
 import l.files.logging.Logger;
 
 import static java.util.Collections.emptyList;
-import static l.files.fs.local.DirectoryStream.Entry.TYPE_DIR;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry;
+import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_DIR;
 import static org.apache.commons.io.FilenameUtils.concat;
 
 /**
@@ -42,41 +44,23 @@ public final class DirectoryTreeTraverser
       return emptyList();
     }
 
-    DirectoryStream stream = null;
-    try {
-
-      stream = DirectoryStream.open(root.path());
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(root.path())) {
       return children(root.path(), stream);
-
     } catch (IOException e) {
       logger.warn(e);
       return emptyList();
-
-    } finally {
-      close(stream);
     }
   }
 
-  private Iterable<Entry> children(String parent, DirectoryStream stream) {
+  private Iterable<Entry> children(String parent, DirectoryStream<LocalEntry> stream) {
     ImmutableList.Builder<Entry> builder = ImmutableList.builder();
-    for (DirectoryStream.Entry child : stream) {
+    for (LocalEntry child : stream) {
       // Ensure not using stat/lstat to get entry type, see design note at top
       boolean isDirectory = child.type() == TYPE_DIR;
       String path = concat(parent, child.name());
       builder.add(Entry.create(path, isDirectory));
     }
     return builder.build();
-  }
-
-  private static void close(DirectoryStream stream) {
-    if (stream == null) {
-      return;
-    }
-    try {
-      stream.close();
-    } catch (IOException e) {
-      logger.error(e);
-    }
   }
 
   @AutoValue
