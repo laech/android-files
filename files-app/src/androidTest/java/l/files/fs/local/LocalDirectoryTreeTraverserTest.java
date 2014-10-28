@@ -3,12 +3,11 @@ package l.files.fs.local;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.DirectoryTreeTraverser;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.fs.local.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 
-public final class DirectoryTreeTraverserTest extends FileBaseTest {
+public final class LocalDirectoryTreeTraverserTest extends FileBaseTest {
 
   public void testTraversal() {
     tmp().createFile("a/b");
@@ -21,7 +20,7 @@ public final class DirectoryTreeTraverserTest extends FileBaseTest {
         Entry.create(tmp().get("a/c").getPath())
     );
     Set<Entry> actual = newHashSet(
-        DirectoryTreeTraverser.get()
+        LocalDirectoryTreeTraverser.get()
             .breadthFirstTraversal(Entry.create(tmp().get().getPath()))
     );
 

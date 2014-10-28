@@ -3,11 +3,10 @@ package l.files.fs.local;
 import com.google.auto.value.AutoValue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.fs.DirectoryIteratorException;
+import l.files.fs.DirectoryEntry;
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileId;
 import l.files.fs.FileSystemException;
@@ -15,7 +14,7 @@ import l.files.fs.FileSystemException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 final class LocalDirectoryStream
-    implements DirectoryStream<LocalDirectoryStream.LocalEntry> {
+    implements DirectoryStream<LocalDirectoryStream.Entry> {
 
   /*
    * Design note: this basically uses <dirent.h> to read directory entries,
@@ -56,13 +55,17 @@ final class LocalDirectoryStream
     return open(new File(path));
   }
 
-  @Override public void close() throws IOException {
-    Dirent.closedir(dir);
+  @Override public void close() {
+    try {
+      Dirent.closedir(dir);
+    } catch (ErrnoException e) {
+      throw e.toFileSystemException();
+    }
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public Iterator<LocalEntry> iterator() {
+  public Iterator<Entry> iterator() {
     if (iterated) {
       throw new IllegalStateException("iterator() has already been called");
     }
@@ -70,10 +73,10 @@ final class LocalDirectoryStream
     return new DirectoryIterator(parent, dir);
   }
 
-  private static final class DirectoryIterator implements Iterator<LocalEntry> {
+  private static final class DirectoryIterator implements Iterator<Entry> {
     private final File parent;
     private final long dir;
-    private LocalEntry next;
+    private Entry next;
 
     DirectoryIterator(File parent, long dir) {
       this.parent = parent;
@@ -87,8 +90,8 @@ final class LocalDirectoryStream
       return next != null;
     }
 
-    @Override public LocalEntry next() {
-      LocalEntry entry = next;
+    @Override public Entry next() {
+      Entry entry = next;
       if (entry != null) {
         next = null;
       } else {
@@ -100,7 +103,7 @@ final class LocalDirectoryStream
       return entry;
     }
 
-    private LocalEntry readNext() {
+    private Entry readNext() {
       try {
 
         Dirent entry;
@@ -109,13 +112,13 @@ final class LocalDirectoryStream
         } while (entry != null && isSelfOrParent(entry));
 
         if (entry != null) {
-          return LocalEntry.create(parent, entry);
+          return Entry.create(parent, entry);
         } else {
           return null;
         }
 
       } catch (ErrnoException e) {
-        throw new DirectoryIteratorException(e);
+        throw e.toFileSystemException();
       }
     }
 
@@ -130,7 +133,7 @@ final class LocalDirectoryStream
 
   @AutoValue
   @SuppressWarnings("UnusedDeclaration")
-  static abstract class LocalEntry implements DirectoryStream.Entry {
+  static abstract class Entry implements DirectoryEntry {
 
     static final int TYPE_UNKNOWN = Dirent.DT_UNKNOWN;
     static final int TYPE_FIFO = Dirent.DT_FIFO;
@@ -142,7 +145,7 @@ final class LocalDirectoryStream
     static final int TYPE_SOCK = Dirent.DT_SOCK;
     static final int TYPE_WHT = Dirent.DT_WHT;
 
-    LocalEntry() {}
+    Entry() {}
 
     @Override public abstract FileId file();
 
@@ -152,13 +155,13 @@ final class LocalDirectoryStream
 
     abstract int type();
 
-    static LocalEntry create(File parent, Dirent entry) {
+    static Entry create(File parent, Dirent entry) {
       return create(parent, entry.ino(), entry.name(), entry.type());
     }
 
-    static LocalEntry create(File parent, long ino, String name, int type) {
+    static Entry create(File parent, long ino, String name, int type) {
       FileId id = FileId.of(new File(parent, name));
-      return new AutoValue_LocalDirectoryStream_LocalEntry(id, ino, name, type);
+      return new AutoValue_LocalDirectoryStream_Entry(id, ino, name, type);
     }
   }
 }

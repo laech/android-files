@@ -1,8 +1,8 @@
 package l.files.operations;
 
-import l.files.fs.local.DirectoryTreeTraverser;
+import l.files.fs.local.LocalDirectoryTreeTraverser;
 
-import static l.files.fs.local.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 
 class Count extends AbstractOperation {
 
@@ -26,7 +26,7 @@ class Count extends AbstractOperation {
 
   private void count(String path) throws InterruptedException {
     Entry root = Entry.create(path);
-    for (Entry entry : DirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
+    for (Entry entry : LocalDirectoryTreeTraverser.get().breadthFirstTraversal(root)) {
       checkInterrupt();
       count++;
       onCount(entry.path());

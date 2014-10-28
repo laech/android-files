@@ -2,10 +2,10 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.fs.local.DirectoryTreeTraverser;
+import l.files.fs.local.LocalDirectoryTreeTraverser;
 import l.files.fs.local.LocalFileStatus;
 
-import static l.files.fs.local.DirectoryTreeTraverser.Entry;
+import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 import static l.files.fs.local.Files.remove;
 
 public final class Delete extends AbstractOperation {
@@ -39,7 +39,7 @@ public final class Delete extends AbstractOperation {
   private void deleteTree(String path, FailureRecorder listener)
       throws InterruptedException {
     Entry root = Entry.create(path);
-    for (Entry entry : DirectoryTreeTraverser.get().postOrderTraversal(root)) {
+    for (Entry entry : LocalDirectoryTreeTraverser.get().postOrderTraversal(root)) {
       checkInterrupt();
       try {
         delete(entry.path());

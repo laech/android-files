@@ -9,10 +9,10 @@ import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static l.files.fs.local.LocalDirectoryStream.LocalEntry;
-import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_DIR;
-import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_LNK;
-import static l.files.fs.local.LocalDirectoryStream.LocalEntry.TYPE_REG;
+import static l.files.fs.local.LocalDirectoryStream.Entry;
+import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
+import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_LNK;
+import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_REG;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
@@ -25,19 +25,19 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
     symlink(f1.getPath(), f3.getPath());
 
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      List<LocalEntry> expected = asList(
-          LocalEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
-          LocalEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
-          LocalEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
+      List<Entry> expected = asList(
+          Entry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
+          Entry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
+          Entry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
       );
-      List<LocalEntry> actual = newArrayList(stream);
+      List<Entry> actual = newArrayList(stream);
       assertEquals(expected, actual);
     }
   }
 
   public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      Iterator<LocalEntry> iterator = stream.iterator();
+      Iterator<Entry> iterator = stream.iterator();
       assertFalse(iterator.hasNext());
       assertFalse(iterator.hasNext());
     }
