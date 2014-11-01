@@ -1,7 +1,8 @@
 package l.files.fs.local;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,13 +11,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.FileSystemException;
+import l.files.fs.Path;
+import l.files.fs.WatchEvent;
+import l.files.fs.WatchService;
 import l.files.logging.Logger;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
+import static l.files.fs.WatchEvent.Kind;
+import static l.files.fs.WatchEvent.Listener;
+import static l.files.fs.local.Files.checkExist;
+import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
+import static l.files.fs.local.LocalPath.checkPath;
+import static l.files.fs.local.PathObserver.IN_IGNORED;
 import static l.files.fs.local.android.os.FileObserver.ATTRIB;
 import static l.files.fs.local.android.os.FileObserver.CLOSE_WRITE;
 import static l.files.fs.local.android.os.FileObserver.CREATE;
@@ -26,18 +35,20 @@ import static l.files.fs.local.android.os.FileObserver.MODIFY;
 import static l.files.fs.local.android.os.FileObserver.MOVED_FROM;
 import static l.files.fs.local.android.os.FileObserver.MOVED_TO;
 import static l.files.fs.local.android.os.FileObserver.MOVE_SELF;
-import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
-import static l.files.fs.local.Files.checkExist;
-import static l.files.fs.local.PathObserver.IN_IGNORED;
-import static l.files.fs.local.WatchEvent.Kind;
-import static l.files.fs.local.WatchEvent.Listener;
 
-class WatchServiceImpl extends WatchService implements Closeable {
+public class LocalWatchService implements WatchService, Closeable {
+
+  /*
+    Note:
+    Two FileObserver instances cannot be monitoring on the same inode, if one is
+    stopped, the other will also be stopped, because FileObserver internally
+    uses global states.
+   */
 
   // TODO use different lock for different paths?
   // TODO should listeners be removed when a directory is deleted?
 
-  private static final Logger logger = Logger.get(WatchServiceImpl.class);
+  private static final Logger logger = Logger.get(LocalWatchService.class);
 
   private static final int MODIFICATION_MASK = ATTRIB
       | CREATE
@@ -47,6 +58,35 @@ class WatchServiceImpl extends WatchService implements Closeable {
       | MOVE_SELF
       | MOVED_FROM
       | MOVED_TO;
+
+  /**
+   * System directories such as /dev, /proc contain special files (some aren't
+   * really files), they generate tons of file system events (MODIFY etc)
+   * and they don't change. WatchService should not allow them and their sub
+   * paths to be watched.
+   */
+  static final ImmutableSet<Path> IGNORED = ImmutableSet.<Path>of(
+      LocalPath.from("/sys"),
+      LocalPath.from("/proc"),
+      LocalPath.from("/dev")
+  );
+
+  private static final LocalWatchService INSTANCE = new LocalWatchService(IGNORED) {
+    @Override public void close() {
+      throw new UnsupportedOperationException("Can't close shared instance");
+    }
+  };
+
+  public static LocalWatchService create() {
+    return new LocalWatchService(IGNORED);
+  }
+
+  /**
+   * Gets a shared instance. The return instance cannot be closed.
+   */
+  public static LocalWatchService get() {
+    return INSTANCE;
+  }
 
   private final Path[] ignored;
 
@@ -164,19 +204,23 @@ class WatchServiceImpl extends WatchService implements Closeable {
     }
   };
 
-  WatchServiceImpl(Set<Path> ignored) {
+  LocalWatchService(Set<Path> ignored) {
     this.ignored = ignored.toArray(new Path[ignored.size()]);
   }
 
-  @Override
-  public void register(Path path, Listener listener) throws IOException {
+  @Override public void register(Path path, Listener listener) {
+    checkPath(path);
     if (!isWatchable(path)) {
       return;
     }
 
     synchronized (this) {
       if (getOrCreateListeners(path).add(listener)) {
-        monitor(path);
+        try {
+          monitor(path);
+        } catch (ErrnoException e) {
+          throw e.toFileSystemException();
+        }
       }
     }
   }
@@ -204,6 +248,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
   }
 
   @Override public void unregister(Path path, Listener listener) {
+    checkPath(path);
     synchronized (this) {
       Collection<Listener> values = getListeners(path);
       if (values.remove(listener) && values.isEmpty()) {
@@ -213,6 +258,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
   }
 
   @Override public boolean isWatchable(Path path) {
+    checkPath(path);
     for (Path unwatchable : ignored) {
       if (path.startsWith(unwatchable)) {
         return false;
@@ -232,13 +278,13 @@ class WatchServiceImpl extends WatchService implements Closeable {
     }
   }
 
-  @Override boolean isMonitored(Path path) {
+  boolean isMonitored(Path path) {
     synchronized (this) {
       return monitored.contains(path);
     }
   }
 
-  @Override boolean hasObserver(Path path) {
+  boolean hasObserver(Path path) {
     synchronized (this) {
       for (PathObserver observer : observers) {
         if (observer.hasPath(path)) {
@@ -305,7 +351,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
     return null;
   }
 
-  private void monitor(Path path) throws IOException {
+  private void monitor(Path path) throws ErrnoException {
     if (!isWatchable(path)) {
       return;
     }
@@ -345,7 +391,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
     }
   }
 
-  private void startObserversForSubDirs(Path parent) throws IOException {
+  private void startObserversForSubDirs(Path parent) {
 
     /*
      * Using readdir() on the directory and check the child's type will be
@@ -362,13 +408,11 @@ class WatchServiceImpl extends WatchService implements Closeable {
           }
           try {
             startObserver(path, Node.from(LocalFileStatus.read(path.toString())));
-          } catch (IOException e) {
+          } catch (ErrnoException e) {
             // File no longer exits or inaccessible, ignore;
           }
         }
       }
-    } catch (FileSystemException e) {
-      throw new IOException(e);
     }
   }
 
@@ -433,7 +477,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
       if (file.isDirectory() && isMonitored(path.parent())) {
         startObserver(path, Node.from(file));
       }
-    } catch (IOException e) {
+    } catch (ErrnoException e) {
       // Path no longer exists, permission etc, ignore and continue
       logger.warn(e, "Failed to stat %s", path);
     }
@@ -443,7 +487,7 @@ class WatchServiceImpl extends WatchService implements Closeable {
     boolean accessible = true;
     try {
       checkExist(path.toString());
-    } catch (IOException e) {
+    } catch (ErrnoException e) {
       accessible = false;
     }
     if (!accessible) {

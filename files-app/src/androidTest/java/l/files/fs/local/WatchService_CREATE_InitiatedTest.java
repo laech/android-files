@@ -1,8 +1,8 @@
 package l.files.fs.local;
 
-import static l.files.fs.local.WatchEvent.Kind.CREATE;
-import static l.files.fs.local.WatchEvent.Kind.DELETE;
-import static l.files.fs.local.WatchEvent.Kind.MODIFY;
+import static l.files.fs.WatchEvent.Kind.CREATE;
+import static l.files.fs.WatchEvent.Kind.DELETE;
+import static l.files.fs.WatchEvent.Kind.MODIFY;
 
 /**
  * Tests file system operations started with creating files/directories.

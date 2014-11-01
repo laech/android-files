@@ -7,16 +7,18 @@ import android.net.Uri;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.Path;
-import l.files.fs.local.WatchEvent;
-import l.files.fs.local.WatchService;
+import l.files.fs.Path;
+import l.files.fs.WatchEvent;
+import l.files.fs.WatchService;
+import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalWatchService;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.timeout;
-import static l.files.fs.local.WatchEvent.Kind.MODIFY;
+import static l.files.fs.WatchEvent.Kind.MODIFY;
 import static l.files.provider.FilesContract.Files;
 import static l.files.provider.FilesContract.Files.COLUMNS;
 import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
@@ -32,13 +34,13 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public final class FilesCacheTest extends FileBaseTest {
 
   private ContentResolver resolver;
-  private WatchService service;
+  private LocalWatchService service;
   private FilesCache cache;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
     resolver = mock(ContentResolver.class);
-    service = WatchService.create();
+    service = LocalWatchService.create();
     cache = new FilesCache(getContext(), service, resolver);
   }
 
@@ -49,8 +51,8 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testDoesNotCacheIgnoredLocations() throws Exception {
     File ignoredDir = tmp().createDir("ignored");
-    Path ignoredPath = Path.from(ignoredDir);
-    WatchService service = mock(WatchService.class);
+    Path ignoredPath = LocalPath.from(ignoredDir);
+    WatchService service = mock(LocalWatchService.class);
     given(service.isWatchable(not(eq(ignoredPath)))).willReturn(true);
     given(service.isWatchable(eq(ignoredPath))).willReturn(false);
 
@@ -65,7 +67,7 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testCacheIsLiveWhenInUse() throws Exception {
     tmp().createFile("a");
-    Path path = Path.from(tmp().get());
+    Path path = LocalPath.from(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
     assertNull(cache.getFromCache(path));
 
@@ -88,7 +90,7 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testCacheIsClearedWhenNotUsed() throws Exception {
     tmp().createFile("a");
-    Path path = Path.from(tmp().get());
+    Path path = LocalPath.from(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
     assertNull(cache.getFromCache(path));
 
@@ -180,7 +182,7 @@ public final class FilesCacheTest extends FileBaseTest {
       assertTrue(cursor.moveToFirst());
       assertEquals(file.length(), Files.length(cursor));
 
-      cache.onEvent(WatchEvent.create(MODIFY, Path.from(file)));
+      cache.onEvent(WatchEvent.create(MODIFY, LocalPath.from(file)));
       sleep(1000);
       verifyZeroInteractions(resolver);
     }

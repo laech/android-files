@@ -2,8 +2,10 @@ package l.files.fs.local;
 
 import java.io.File;
 
-import static l.files.fs.local.WatchEvent.Kind.CREATE;
-import static l.files.fs.local.WatchEvent.Kind.DELETE;
+import l.files.fs.Path;
+
+import static l.files.fs.WatchEvent.Kind.CREATE;
+import static l.files.fs.WatchEvent.Kind.DELETE;
 
 /**
  * Tests file system operations started with move the root directory out.
@@ -18,7 +20,7 @@ public class WatchService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorSelf() {
     listen(tmpDir());
-    Path path = Path.from(tmp().get());
+    Path path = LocalPath.from(tmp().get());
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 
@@ -35,7 +37,7 @@ public class WatchService_MOVE_SELF_InitiatedTest
     await(event(CREATE, "a"), newCreate("a", FileType.DIR));
     listen("a");
 
-    Path path = Path.from(tmp().get("a"));
+    Path path = LocalPath.from(tmp().get("a"));
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 

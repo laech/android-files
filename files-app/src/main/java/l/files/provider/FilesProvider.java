@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.fs.local.LocalFileStatus;
-import l.files.fs.local.WatchService;
+import l.files.fs.local.LocalWatchService;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
 
@@ -30,9 +30,9 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
+import static l.files.BuildConfig.DEBUG;
 import static l.files.fs.local.Files.normalize;
 import static l.files.fs.local.Files.rename;
-import static l.files.BuildConfig.DEBUG;
 import static l.files.provider.FilesContract.EXTRA_DESTINATION_ID;
 import static l.files.provider.FilesContract.EXTRA_ERROR;
 import static l.files.provider.FilesContract.EXTRA_FILE_ID;
@@ -64,7 +64,7 @@ public final class FilesProvider extends ContentProvider {
 
   @Override public boolean onCreate() {
     matcher = newMatcher(getContext());
-    helper = new FilesCache(getContext(), WatchService.get());
+    helper = new FilesCache(getContext(), LocalWatchService.get());
     return true;
   }
 

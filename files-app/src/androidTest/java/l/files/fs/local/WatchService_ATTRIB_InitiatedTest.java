@@ -1,6 +1,8 @@
 package l.files.fs.local;
 
-import static l.files.fs.local.WatchEvent.Kind.MODIFY;
+import l.files.fs.WatchEvent;
+
+import static l.files.fs.WatchEvent.Kind.MODIFY;
 
 /**
  * Tests file system operations started with change files/directories

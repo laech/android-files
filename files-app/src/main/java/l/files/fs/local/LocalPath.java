@@ -4,30 +4,30 @@ import com.google.auto.value.AutoValue;
 
 import java.io.File;
 
+import l.files.fs.FileId;
+import l.files.fs.Path;
+
 import static org.apache.commons.io.FilenameUtils.getFullPathNoEndSeparator;
 import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.normalizeNoEndSeparator;
 
-/**
- * Represents a normalized local file system path, such as {@code
- * /sdcard/hello.txt}.
- */
 @AutoValue
-public abstract class Path {
+public abstract class LocalPath implements Path {
 
-  public static final Path ROOT = new AutoValue_Path("/");
+  public static final LocalPath ROOT = new AutoValue_LocalPath("/");
 
-  private Path parent;
+  private LocalPath parent;
   private String name;
 
-  Path() {}
+  LocalPath() {}
 
   abstract String path();
 
-  /**
-   * Returns true if the given path is an ancestor of this path.
-   */
-  public boolean startsWith(Path that) {
+  @Override public boolean startsWith(Path path) {
+    if (!(path instanceof LocalPath)) {
+      return false;
+    }
+    LocalPath that = (LocalPath) path;
     if (that.equals(ROOT) || that.equals(this)) {
       return true;
     }
@@ -37,23 +37,20 @@ public abstract class Path {
         && thisPath.charAt(thatPath.length()) == '/';
   }
 
-  public static Path from(File file) {
+  public static LocalPath from(File file) {
     String normalizedPath = normalizeNoEndSeparator(file.getAbsolutePath());
-    return new AutoValue_Path(normalizedPath);
+    return new AutoValue_LocalPath(normalizedPath);
   }
 
-  public static Path from(String path) {
+  public static LocalPath from(String path) {
     return from(new File(path));
   }
 
-  public File toFile() {
-    return new File(path());
+  static LocalPath of(FileId file) {
+    return from(new File(file.toUri()));
   }
 
-  /**
-   * Returns the parent of this path, or null if this is the root path.
-   */
-  public Path parent() {
+  @Override public LocalPath parent() {
     if (ROOT.equals(this)) {
       return null;
     }
@@ -61,24 +58,24 @@ public abstract class Path {
         : (parent = from(getFullPathNoEndSeparator(path())));
   }
 
-  /**
-   * Returns the name of this path, or empty if this is the root path.
-   */
-  public String name() {
+  @Override public String name() {
     return name != null ? name : (name = getName(path()));
   }
 
-  /**
-   * Returns a new child path with the given name.
-   */
-  public Path child(String name) {
+  @Override public LocalPath child(String name) {
     return from(new File(path(), name));
   }
 
-  /**
-   * Returns the path represented by this instance.
-   */
   @Override public String toString() {
     return path();
+  }
+
+  /**
+   * @throws IllegalArgumentException if the given path is not of this type
+   */
+  static void checkPath(Path path) {
+    if (!(path instanceof LocalPath)) {
+      throw new IllegalArgumentException(path.getClass() + ": " + path);
+    }
   }
 }

@@ -39,10 +39,8 @@ public final class Files {
 
   /**
    * Checks the given path exists.
-   *
-   * @throws IOException if the path does not exist
    */
-  public static void checkExist(String path) throws IOException {
+  public static void checkExist(String path) throws ErrnoException {
     Unistd.access(path, Unistd.F_OK);
   }
 

@@ -1,7 +1,9 @@
 package l.files.fs.local;
 
-import static l.files.fs.local.WatchEvent.Kind.CREATE;
-import static l.files.fs.local.WatchEvent.Kind.DELETE;
+import l.files.fs.Path;
+
+import static l.files.fs.WatchEvent.Kind.CREATE;
+import static l.files.fs.WatchEvent.Kind.DELETE;
 
 /**
  * Tests file system operations started with deleting files/directories.
@@ -27,7 +29,7 @@ public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest
    */
   public void testDeleteSelfNoLongerMonitorSelf() {
     listen(tmpDir());
-    Path path = Path.from(tmp().get());
+    Path path = LocalPath.from(tmp().get());
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 
@@ -44,7 +46,7 @@ public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest
     tmp().createDir("a");
     listen(tmpDir());
     listen("a");
-    Path path = Path.from(tmp().get("a"));
+    Path path = LocalPath.from(tmp().get("a"));
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 

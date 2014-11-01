@@ -23,10 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import l.files.fs.FileSystemException;
+import l.files.fs.Path;
+import l.files.fs.WatchEvent;
+import l.files.fs.WatchService;
 import l.files.fs.local.LocalFileStatus;
-import l.files.fs.local.Path;
-import l.files.fs.local.WatchEvent;
-import l.files.fs.local.WatchService;
+import l.files.fs.local.LocalPath;
 import l.files.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -108,7 +110,7 @@ final class FilesCache implements
 
   private ValueMap getCache(Uri uri) {
     File file = new File(URI.create(getFileId(uri)));
-    Path path = Path.from(file);
+    Path path = LocalPath.from(file);
     if (!service.isWatchable(path)) {
       return loadInto(new ValueMap(), path);
     }
@@ -133,7 +135,7 @@ final class FilesCache implements
       try {
         service.register(path, this);
         loadInto(values, path);
-      } catch (IOException e) {
+      } catch (FileSystemException e) {
         logger.debug(e, "Failed to read %s", path);
       }
     }
@@ -141,7 +143,7 @@ final class FilesCache implements
   }
 
   private ValueMap loadInto(ValueMap map, Path path) {
-    String[] names = path.toFile().list();
+    String[] names = new File(path.toString()).list();
     if (names == null) {
       return map;
     }
@@ -158,7 +160,7 @@ final class FilesCache implements
 
   @Override public void onEvent(WatchEvent event) {
     Path parent = event.path().parent();
-    String location = getFileId(parent.toFile());
+    String location = getFileId(new File(parent.toString()));
     Uri uri = getFileUri(context, location);
     EventBatch batch;
     synchronized (this) {

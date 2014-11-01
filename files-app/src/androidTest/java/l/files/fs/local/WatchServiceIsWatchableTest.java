@@ -3,21 +3,20 @@ package l.files.fs.local;
 import com.google.common.collect.ImmutableSet;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.Path;
-import l.files.fs.local.WatchServiceImpl;
+import l.files.fs.Path;
 
 import static java.lang.Thread.sleep;
-import static l.files.fs.local.WatchEvent.Listener;
+import static l.files.fs.WatchEvent.Listener;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 public final class WatchServiceIsWatchableTest extends FileBaseTest {
 
   public void testIsWatchable() throws Exception {
-    Path dir1 = Path.from(tmp().createDir("1"));
-    Path dir2 = Path.from(tmp().createDir("2"));
-    Path root = Path.from(tmp().get());
-    try (WatchServiceImpl srv = new WatchServiceImpl(ImmutableSet.of(root))) {
+    Path dir1 = LocalPath.from(tmp().createDir("1"));
+    Path dir2 = LocalPath.from(tmp().createDir("2"));
+    Path root = LocalPath.from(tmp().get());
+    try (LocalWatchService srv = new LocalWatchService(ImmutableSet.of(root))) {
 
       Listener listener = mock(Listener.class);
       srv.register(root, listener);

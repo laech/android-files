@@ -56,9 +56,9 @@ public abstract class LocalFileStatus implements FileStatus {
   }
 
   /**
-   * @throws IOException includes path is not accessible or doesn't exist
+   * @throws ErrnoException includes path is not accessible or doesn't exist
    */
-  public static LocalFileStatus read(String path) throws IOException {
+  public static LocalFileStatus read(String path) throws ErrnoException {
     checkNotNull(path, "path");
     Stat stat = lstat(path);
     return new AutoValue_LocalFileStatus(FileId.of(new File(path)), stat);

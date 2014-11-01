@@ -1,7 +1,6 @@
 package l.files.fs.local;
 
-
-import static l.files.fs.local.WatchEvent.Kind.DELETE;
+import static l.files.fs.WatchEvent.Kind.DELETE;
 
 /**
  * Tests file system operations started with moving files/directories from the

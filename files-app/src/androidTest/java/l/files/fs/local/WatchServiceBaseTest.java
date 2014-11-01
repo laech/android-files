@@ -11,15 +11,12 @@ import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
-import l.files.fs.local.Path;
-import l.files.fs.local.WatchEvent;
-import l.files.fs.local.WatchService;
-import l.files.fs.local.WatchServiceImpl;
+import l.files.fs.WatchEvent;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.local.WatchService.IGNORED;
+import static l.files.fs.local.LocalWatchService.IGNORED;
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -27,7 +24,7 @@ import static org.mockito.Mockito.mock;
 
 abstract class WatchServiceBaseTest extends FileBaseTest {
 
-  private WatchService service;
+  private LocalWatchService service;
   private TempDir helper;
 
   @Override protected void setUp() throws Exception {
@@ -48,15 +45,15 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     return tmp().get();
   }
 
-  protected WatchService createService() {
-    return new WatchServiceImpl(IGNORED);
+  protected LocalWatchService createService() {
+    return new LocalWatchService(IGNORED);
   }
 
   protected boolean stopServiceOnTearDown() {
     return true;
   }
 
-  protected final WatchService service() {
+  protected final LocalWatchService service() {
     return service;
   }
 
@@ -82,16 +79,12 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
 
   protected WatchEvent.Listener listen(File file) {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
-    try {
-      service().register(Path.from(file), listener);
-    } catch (IOException e) {
-      throw new AssertionError(e);
-    }
+    service().register(LocalPath.from(file), listener);
     return listener;
   }
 
   protected void unlisten(File file, WatchEvent.Listener listener) {
-    service().unregister(Path.from(file), listener);
+    service().unregister(LocalPath.from(file), listener);
   }
 
   protected Runnable newDelete(String relativePath) {
@@ -221,11 +214,11 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
   }
 
   protected WatchEvent event(WatchEvent.Kind kind, String relativePath) {
-    return WatchEvent.create(kind, Path.from(tmp().get(relativePath)));
+    return WatchEvent.create(kind, LocalPath.from(tmp().get(relativePath)));
   }
 
   protected WatchEvent event(WatchEvent.Kind kind, File file) {
-    return WatchEvent.create(kind, Path.from(file));
+    return WatchEvent.create(kind, LocalPath.from(file));
   }
 
   static enum Permission {
