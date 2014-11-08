@@ -6,13 +6,11 @@ import com.google.common.net.MediaType;
 import org.joda.time.Instant;
 
 import java.io.File;
-import java.io.IOException;
 
-import l.files.fs.FileId;
 import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
-import l.files.fs.LinkOption;
+import l.files.fs.Path;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -23,8 +21,6 @@ import static l.files.fs.local.Stat.S_ISFIFO;
 import static l.files.fs.local.Stat.S_ISLNK;
 import static l.files.fs.local.Stat.S_ISREG;
 import static l.files.fs.local.Stat.S_ISSOCK;
-import static l.files.fs.local.Stat.lstat;
-import static org.apache.commons.io.FilenameUtils.concat;
 
 @AutoValue
 public abstract class LocalFileStatus implements FileStatus {
@@ -37,41 +33,52 @@ public abstract class LocalFileStatus implements FileStatus {
 
   LocalFileStatus() {}
 
-  @Override public abstract FileId id();
-
-  public String path() {
-    return id().toUri().getPath();
-  }
+  @Override public abstract LocalPath path();
 
   abstract Stat stat();
 
-  /**
-   * @throws IOException includes path is not accessible or doesn't exist
-   */
-  public static LocalFileStatus read(String parent, String child) throws IOException {
+  @Deprecated
+  public static LocalFileStatus read(String parent, String child) {
     checkNotNull(parent, "parent");
     checkNotNull(child, "child");
-    String path = concat(parent, child);
-    return read(path);
+    return stat(new File(parent, child), false);
+  }
+
+  @Deprecated
+  public static LocalFileStatus read(String path) {
+    checkNotNull(path, "path");
+    try {
+      Stat stat = Stat.lstat(path);
+      return new AutoValue_LocalFileStatus(LocalPath.of(path), stat);
+    } catch (ErrnoException e) {
+      throw e.toFileSystemException();
+    }
   }
 
   /**
-   * @throws ErrnoException includes path is not accessible or doesn't exist
+   * @throws FileSystemException if failed to get status
    */
-  public static LocalFileStatus read(String path) throws ErrnoException {
-    checkNotNull(path, "path");
-    Stat stat = lstat(path);
-    return new AutoValue_LocalFileStatus(FileId.of(new File(path)), stat);
+  static LocalFileStatus stat(File file, boolean followLink) {
+    return stat(LocalPath.of(file), followLink);
   }
 
-  static LocalFileStatus read(FileId file, LinkOption option) throws ErrnoException {
+  /**
+   * @throws FileSystemException      if failed to get status
+   * @throws IllegalArgumentException if the path is not of supported type
+   */
+  public static LocalFileStatus stat(Path path, boolean followLink) {
+    LocalPath.check(path);
     final Stat stat;
-    if (option == LinkOption.FOLLOW) {
-      stat = Stat.stat(file.toUri().getPath());
-    } else {
-      stat = lstat(file.toUri().getPath());
+    try {
+      if (followLink) {
+        stat = Stat.stat(path.toString());
+      } else {
+        stat = Stat.lstat(path.toString());
+      }
+    } catch (ErrnoException e) {
+      throw e.toFileSystemException();
     }
-    return new AutoValue_LocalFileStatus(file, stat);
+    return new AutoValue_LocalFileStatus((LocalPath) path, stat);
   }
 
   @Override public String name() {
@@ -92,7 +99,7 @@ public abstract class LocalFileStatus implements FileStatus {
     if (basicMediaType == null) {
       try {
         FileTypeDetector detector = BasicFileTypeDetector.get();
-        basicMediaType = detector.detect(id(), LinkOption.FOLLOW);
+        basicMediaType = detector.detect(path(), true);
       } catch (FileSystemException e) {
         basicMediaType = OCTET_STREAM;
       }
@@ -127,7 +134,7 @@ public abstract class LocalFileStatus implements FileStatus {
 
   private boolean access(int mode) {
     try {
-      Unistd.access(path(), mode);
+      Unistd.access(path().toString(), mode);
       return true;
     } catch (ErrnoException e) {
       return false;
@@ -195,6 +202,6 @@ public abstract class LocalFileStatus implements FileStatus {
   }
 
   public File toFile() {
-    return new File(path());
+    return path().toFile();
   }
 }

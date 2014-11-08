@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import l.files.fs.FileSystemException;
 import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalWatchService;
 import l.files.logging.Logger;
 import l.files.operations.OperationService;
@@ -273,8 +275,8 @@ public final class FilesProvider extends ContentProvider {
     List<LocalFileStatus> stats = newArrayListWithCapacity(files.length);
     for (File file : files) {
       try {
-        stats.add(LocalFileStatus.read(file.getPath()));
-      } catch (IOException e) {
+        stats.add(LocalFileStatus.stat(LocalPath.of(file), false));
+      } catch (FileSystemException e) {
         logger.warn(e, "Failed to read info %s", file);
       }
     }

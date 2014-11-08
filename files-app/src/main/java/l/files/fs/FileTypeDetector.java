@@ -11,6 +11,6 @@ public interface FileTypeDetector {
    * @throws IllegalArgumentException if the given file scheme can't be handled
    *                                  by this detector's file system
    */
-  MediaType detect(FileId file, LinkOption option);
+  MediaType detect(Path path, boolean followLink);
 
 }

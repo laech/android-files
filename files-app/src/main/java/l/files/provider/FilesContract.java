@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.FileId;
+import l.files.fs.local.LocalPath;
 
 import static android.content.UriMatcher.NO_MATCH;
 import static android.os.Looper.getMainLooper;
@@ -179,7 +179,7 @@ public final class FilesContract {
   }
 
   public static String getFileId(File file) {
-    return FileId.of(file).toString();
+    return LocalPath.of(file).toUri().toString();
   }
 
   /**

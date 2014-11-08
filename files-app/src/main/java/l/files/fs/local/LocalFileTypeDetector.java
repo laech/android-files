@@ -5,10 +5,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.net.MediaType;
 
-import l.files.fs.FileId;
+import l.files.fs.Path;
 import l.files.fs.FileStatus;
 import l.files.fs.FileTypeDetector;
-import l.files.fs.LinkOption;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -49,8 +48,8 @@ abstract class LocalFileTypeDetector implements FileTypeDetector {
     this.fs = checkNotNull(fs, "fs");
   }
 
-  @Override public MediaType detect(FileId file, LinkOption option) {
-    LocalFileStatus stat = fs.stat(file, option);
+  @Override public MediaType detect(Path path, boolean followLink) {
+    LocalFileStatus stat = fs.stat(path, followLink);
     if (stat.isRegularFile()) {
       return detectRegularFile(stat);
     }

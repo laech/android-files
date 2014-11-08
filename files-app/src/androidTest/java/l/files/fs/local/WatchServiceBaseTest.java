@@ -1,13 +1,7 @@
 package l.files.fs.local;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
@@ -15,12 +9,11 @@ import l.files.fs.WatchEvent;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.local.LocalWatchService.IGNORED;
 import static org.apache.commons.io.FileUtils.forceDelete;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 abstract class WatchServiceBaseTest extends FileBaseTest {
 
@@ -79,12 +72,12 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
 
   protected WatchEvent.Listener listen(File file) {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
-    service().register(LocalPath.from(file), listener);
+    service().register(LocalPath.of(file), listener);
     return listener;
   }
 
   protected void unlisten(File file, WatchEvent.Listener listener) {
-    service().unregister(LocalPath.from(file), listener);
+    service().unregister(LocalPath.of(file), listener);
   }
 
   protected Runnable newDelete(String relativePath) {
@@ -188,37 +181,17 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
   }
 
   protected void await(final WatchEvent expected, Runnable code, WatchEvent.Listener listener) {
-    final List<WatchEvent> actual = new ArrayList<>();
-    final CountDownLatch latch = new CountDownLatch(1);
-    doAnswer(new Answer() {
-      @Override public Object answer(InvocationOnMock invocation) {
-        WatchEvent event = ((WatchEvent) invocation.getArguments()[0]);
-        actual.add(event);
-        if (expected.equals(event)) {
-          latch.countDown();
-        }
-        return null;
-      }
-    }).when(listener).onEvent(any(WatchEvent.class));
-
     code.run();
-
-    try {
-
-      assertTrue("\nExpect: " + expected + "\nActual: " + actual,
-          latch.await(1, SECONDS));
-
-    } catch (InterruptedException e) {
-      throw new AssertionError(e);
-    }
+    // FIXME remove atLeastOnce to see some double events
+    verify(listener, timeout(1000).atLeastOnce()).onEvent(expected);
   }
 
   protected WatchEvent event(WatchEvent.Kind kind, String relativePath) {
-    return WatchEvent.create(kind, LocalPath.from(tmp().get(relativePath)));
+    return WatchEvent.create(kind, LocalPath.of(tmp().get(relativePath)));
   }
 
   protected WatchEvent event(WatchEvent.Kind kind, File file) {
-    return WatchEvent.create(kind, LocalPath.from(file));
+    return WatchEvent.create(kind, LocalPath.of(file));
   }
 
   static enum Permission {

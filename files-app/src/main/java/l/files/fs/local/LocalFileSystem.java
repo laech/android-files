@@ -1,16 +1,9 @@
 package l.files.fs.local;
 
-import l.files.fs.FileId;
+import l.files.fs.Path;
 import l.files.fs.FileSystem;
-import l.files.fs.LinkOption;
-import l.files.fs.Scheme;
 
 public class LocalFileSystem extends FileSystem {
-
-  /**
-   * The URI scheme this file system handles.
-   */
-  public static final Scheme SCHEME = Scheme.parse("file");
 
   private static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
@@ -20,32 +13,26 @@ public class LocalFileSystem extends FileSystem {
 
   private LocalFileSystem() {}
 
-  @Override public Scheme scheme() {
-    return SCHEME;
-  }
-
-  @Override public LocalFileStatus stat(FileId file, LinkOption option) {
-    checkScheme(file);
+  public static boolean canHandle(Path path) {
     try {
-      return LocalFileStatus.read(file, option);
-    } catch (ErrnoException e) {
-      throw e.toFileSystemException();
+      LocalPath.check(path);
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
     }
   }
 
-  @Override public void symlink(FileId target, FileId link) {
-    checkScheme(target);
-    checkScheme(link);
-    try {
-      Unistd.symlink(target.toUri().getPath(), link.toUri().getPath());
-    } catch (ErrnoException e) {
-      throw e.toFileSystemException();
-    }
+  @Override public LocalFileStatus stat(Path path, boolean followLink) {
+    return LocalFileStatus.stat(path, followLink);
   }
 
-  private void checkScheme(FileId file) {
-    if (!scheme().equals(file.scheme())) {
-      throw new IllegalArgumentException(file.toString());
+  @Override public void symlink(Path target, Path link) {
+    LocalPath.check(target);
+    LocalPath.check(link);
+    try {
+      Unistd.symlink(target.toString(), link.toString());
+    } catch (ErrnoException e) {
+      throw e.toFileSystemException();
     }
   }
 }

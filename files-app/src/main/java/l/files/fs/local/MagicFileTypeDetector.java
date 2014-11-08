@@ -4,9 +4,9 @@ import com.google.common.net.MediaType;
 
 import org.apache.tika.Tika;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 
 import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
@@ -31,8 +31,8 @@ final class MagicFileTypeDetector extends LocalFileTypeDetector {
 
   @Override protected MediaType detectRegularFile(FileStatus stat) {
     try {
-      URL url = stat.id().toUri().toURL();
-      return cache().getUnchecked(LazyTika.TIKA.detect(url));
+      File file = LocalPath.check(stat.path()).toFile();
+      return cache().getUnchecked(LazyTika.TIKA.detect(file));
     } catch (FileNotFoundException e) {
       throw new NoSuchFileException(e);
     } catch (IOException e) {

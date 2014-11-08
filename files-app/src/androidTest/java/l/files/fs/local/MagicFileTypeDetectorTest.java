@@ -2,14 +2,12 @@ package l.files.fs.local;
 
 import java.io.File;
 
-import l.files.fs.FileId;
 import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static l.files.common.testing.Tests.assertExists;
-import static l.files.fs.LinkOption.FOLLOW;
 
 public final class MagicFileTypeDetectorTest
     extends LocalFileTypeDetectorTest {
@@ -23,7 +21,7 @@ public final class MagicFileTypeDetectorTest
     write("hello world", file, UTF_8);
     assertTrue(file.setReadable(false));
     try {
-      detector().detect(FileId.of(file), FOLLOW);
+      detector().detect(LocalPath.of(file), true);
       fail();
     } catch (FileSystemException e) {
       // Pass
@@ -34,7 +32,7 @@ public final class MagicFileTypeDetectorTest
     File file = new File("/proc/1/maps");
     assertExists(file);
     try {
-      detector().detect(FileId.of(file), FOLLOW);
+      detector().detect(LocalPath.of(file), true);
       fail();
     } catch (FileSystemException e) {
       // Pass

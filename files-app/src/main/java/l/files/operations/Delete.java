@@ -2,11 +2,13 @@ package l.files.operations;
 
 import java.io.IOException;
 
+import l.files.fs.Path;
 import l.files.fs.local.LocalDirectoryTreeTraverser;
 import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalPath;
 
-import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 import static l.files.fs.local.Files.remove;
+import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 
 public final class Delete extends AbstractOperation {
 
@@ -38,20 +40,20 @@ public final class Delete extends AbstractOperation {
 
   private void deleteTree(String path, FailureRecorder listener)
       throws InterruptedException {
-    Entry root = Entry.create(path);
-    for (Entry entry : LocalDirectoryTreeTraverser.get().postOrderTraversal(root)) {
+    // TODO fix this catch FileSystemException
+    for (Entry entry : LocalDirectoryTreeTraverser.get().postOrderTraversal(LocalPath.of(path))) {
       checkInterrupt();
       try {
         delete(entry.path());
       } catch (IOException e) {
-        listener.onFailure(entry.path(), e);
+        listener.onFailure(entry.toString(), e);
       }
     }
   }
 
-  private void delete(String path) throws IOException {
-    long size = LocalFileStatus.read(path).size();
-    remove(path);
+  private void delete(Path path) throws IOException {
+    long size = LocalFileStatus.stat(path, false).size();
+    remove(LocalPath.check(path).toFile().getPath());
     deletedByteCount += size;
     deletedItemCount++;
   }

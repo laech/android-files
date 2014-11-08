@@ -3,7 +3,8 @@ package l.files.fs;
 import java.util.Iterator;
 
 /**
- * A stream to iterate through the children of a directory.
+ * A stream to iterate through the children of a directory, does not follow
+ * symbolic links.
  * <p/>
  * {@link #iterator()} can only called once. Each call to the returned
  * iterator {@link Iterator#hasNext() hasNext()} and {@link Iterator#next()

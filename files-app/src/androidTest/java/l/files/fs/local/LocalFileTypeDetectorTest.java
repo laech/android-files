@@ -3,12 +3,10 @@ package l.files.fs.local;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.FileId;
+import l.files.fs.Path;
 import l.files.fs.FileTypeDetector;
 
 import static l.files.fs.Files.symlink;
-import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NO_FOLLOW;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -24,27 +22,27 @@ public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
   }
 
   public void testDetect_directory() throws Exception {
-    FileId dir = FileId.of(tmp().createDir("a"));
-    assertEquals("inode/directory", detector().detect(dir, NO_FOLLOW).toString());
+    Path dir = LocalPath.of(tmp().createDir("a"));
+    assertEquals("inode/directory", detector().detect(dir, false).toString());
   }
 
   public void testDetect_file() throws Exception {
-    FileId file = FileId.of(tmp().createFile("a.txt"));
-    assertEquals("text/plain", detector().detect(file, NO_FOLLOW).toString());
+    LocalPath file = LocalPath.of(tmp().createFile("a.txt"));
+    assertEquals("text/plain", detector().detect(file, false).toString());
   }
 
   public void testDetect_symlinkFile() throws Exception {
-    FileId file = FileId.of(tmp().createFile("a.mp3"));
-    FileId link = FileId.of(tmp().get("b.txt"));
+    Path file = LocalPath.of(tmp().createFile("a.mp3"));
+    Path link = LocalPath.of(tmp().get("b.txt"));
     symlink(file, link);
-    assertEquals("text/plain", detector().detect(link, FOLLOW).toString());
+    assertEquals("text/plain", detector().detect(link, true).toString());
   }
 
   public void testDetect_symlinkDirectory() throws Exception {
-    FileId dir = FileId.of(tmp().createDir("a"));
-    FileId link = FileId.of(tmp().get("b"));
+    Path dir = LocalPath.of(tmp().createDir("a"));
+    Path link = LocalPath.of(tmp().get("b"));
     symlink(dir, link);
-    assertEquals("inode/directory", detector().detect(link, FOLLOW).toString());
+    assertEquals("inode/directory", detector().detect(link, true).toString());
   }
 
   public void testDetect_fifo() throws Exception {
@@ -78,9 +76,9 @@ public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
   }
 
   private void testDetectSpecialFile(String expectedMime, LocalFileStatus stat) {
-    FileId file = FileId.of(new File("test"));
+    Path file = LocalPath.of(new File("test"));
     LocalFileSystem fs = mock(LocalFileSystem.class);
-    given(fs.stat(file, NO_FOLLOW)).willReturn(stat);
-    assertEquals(expectedMime, detector(fs).detect(file, NO_FOLLOW).toString());
+    given(fs.stat(file, false)).willReturn(stat);
+    assertEquals(expectedMime, detector(fs).detect(file, false).toString());
   }
 }

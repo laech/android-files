@@ -1,8 +1,8 @@
 package l.files.operations;
 
-import java.io.IOException;
-
+import l.files.fs.FileSystemException;
 import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalPath;
 import l.files.logging.Logger;
 
 final class Size extends Count {
@@ -25,8 +25,8 @@ final class Size extends Count {
   @Override protected void onCount(String path) {
     super.onCount(path);
     try {
-      size += LocalFileStatus.read(path).size();
-    } catch (IOException e) {
+      size += LocalFileStatus.stat(LocalPath.of(path), false).size();
+    } catch (FileSystemException e) {
       logger.warn(e);
     }
   }

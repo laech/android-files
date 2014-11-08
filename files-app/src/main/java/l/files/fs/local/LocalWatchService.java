@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
@@ -24,7 +25,6 @@ import static l.files.fs.WatchEvent.Kind;
 import static l.files.fs.WatchEvent.Listener;
 import static l.files.fs.local.Files.checkExist;
 import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
-import static l.files.fs.local.LocalPath.checkPath;
 import static l.files.fs.local.PathObserver.IN_IGNORED;
 import static l.files.fs.local.android.os.FileObserver.ATTRIB;
 import static l.files.fs.local.android.os.FileObserver.CLOSE_WRITE;
@@ -66,9 +66,9 @@ public class LocalWatchService implements WatchService, Closeable {
    * paths to be watched.
    */
   static final ImmutableSet<Path> IGNORED = ImmutableSet.<Path>of(
-      LocalPath.from("/sys"),
-      LocalPath.from("/proc"),
-      LocalPath.from("/dev")
+      LocalPath.of("/sys"),
+      LocalPath.of("/proc"),
+      LocalPath.of("/dev")
   );
 
   private static final LocalWatchService INSTANCE = new LocalWatchService(IGNORED) {
@@ -129,16 +129,16 @@ public class LocalWatchService implements WatchService, Closeable {
     private void handleEvent(Path path, int event, String child) {
 
       if (isChildAdded(event)) {
-        Path childPath = path.child(child);
+        Path childPath = path.resolve(child);
         onCreate(childPath);
         send(Kind.CREATE, childPath);
 
       } else if (isChildModified(event, child)) {
-        Path childPath = path.child(child);
+        Path childPath = path.resolve(child);
         send(Kind.MODIFY, childPath);
 
       } else if (isChildDeleted(event)) {
-        Path childPath = path.child(child);
+        Path childPath = path.resolve(child);
         onDelete(childPath);
         send(Kind.DELETE, childPath);
       }
@@ -157,7 +157,7 @@ public class LocalWatchService implements WatchService, Closeable {
       for (Listener listener : getListeners(path)) {
         listener.onEvent(event);
       }
-      Path parent = path.parent();
+      Path parent = path.getParent();
       if (parent != null) {
         for (Listener listener : getListeners(parent)) {
           listener.onEvent(event);
@@ -209,7 +209,7 @@ public class LocalWatchService implements WatchService, Closeable {
   }
 
   @Override public void register(Path path, Listener listener) {
-    checkPath(path);
+    LocalPath.check(path);
     if (!isWatchable(path)) {
       return;
     }
@@ -248,7 +248,7 @@ public class LocalWatchService implements WatchService, Closeable {
   }
 
   @Override public void unregister(Path path, Listener listener) {
-    checkPath(path);
+    LocalPath.check(path);
     synchronized (this) {
       Collection<Listener> values = getListeners(path);
       if (values.remove(listener) && values.isEmpty()) {
@@ -258,7 +258,7 @@ public class LocalWatchService implements WatchService, Closeable {
   }
 
   @Override public boolean isWatchable(Path path) {
-    checkPath(path);
+    LocalPath.check(path);
     for (Path unwatchable : ignored) {
       if (path.startsWith(unwatchable)) {
         return false;
@@ -356,7 +356,7 @@ public class LocalWatchService implements WatchService, Closeable {
       return;
     }
 
-    Node node = Node.from(LocalFileStatus.read(path.toString()));
+    Node node = Node.from(LocalFileStatus.stat(path, false));
 
     synchronized (this) {
       checkNode(path, node);
@@ -382,7 +382,7 @@ public class LocalWatchService implements WatchService, Closeable {
         PathObserver observer = it.next();
         observer.removePath(parent);
         for (Path path : observer.copyPaths()) {
-          if (parent.equals(path.parent()) && !monitored.contains(path)) {
+          if (parent.equals(path.getParent()) && !monitored.contains(path)) {
             observer.removePath(path);
           }
         }
@@ -399,16 +399,16 @@ public class LocalWatchService implements WatchService, Closeable {
      * especially if the directory is large.
      */
 
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.toString())) {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent)) {
       for (LocalDirectoryStream.Entry entry : stream) {
         if (entry.type() == TYPE_DIR) {
-          Path path = parent.child(entry.name());
-          if (!isWatchable(path)) {
+          Path child = entry.path();
+          if (!isWatchable(child)) {
             continue;
           }
           try {
-            startObserver(path, Node.from(LocalFileStatus.read(path.toString())));
-          } catch (ErrnoException e) {
+            startObserver(child, Node.from(LocalFileStatus.stat(child, false)));
+          } catch (FileSystemException e) {
             // File no longer exits or inaccessible, ignore;
           }
         }
@@ -473,11 +473,11 @@ public class LocalWatchService implements WatchService, Closeable {
 
   private void onCreate(Path path) {
     try {
-      LocalFileStatus file = LocalFileStatus.read(path.toString());
-      if (file.isDirectory() && isMonitored(path.parent())) {
+      LocalFileStatus file = LocalFileStatus.stat(path, false);
+      if (file.isDirectory() && isMonitored(path.getParent())) {
         startObserver(path, Node.from(file));
       }
-    } catch (ErrnoException e) {
+    } catch (FileSystemException e) {
       // Path no longer exists, permission etc, ignore and continue
       logger.warn(e, "Failed to stat %s", path);
     }

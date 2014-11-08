@@ -4,16 +4,16 @@ public final class Files {
   private Files() {}
 
   /**
-   * @see FileSystem#stat(FileId, LinkOption)
+   * @see FileSystem#stat(Path, boolean)
    */
-  public static FileStatus stat(FileId file, LinkOption option) {
-    return FileSystem.get(file).stat(file, option);
+  public static FileStatus stat(Path path, boolean followLink) {
+    return FileSystem.get(path).stat(path, followLink);
   }
 
   /**
-   * @see FileSystem#symlink(FileId, FileId).
+   * @see FileSystem#symlink(Path, Path).
    */
-  public static void symlink(FileId target, FileId link) {
+  public static void symlink(Path target, Path link) {
     FileSystem.get(target).symlink(target, link);
   }
 }

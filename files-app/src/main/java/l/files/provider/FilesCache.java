@@ -17,7 +17,6 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +109,7 @@ final class FilesCache implements
 
   private ValueMap getCache(Uri uri) {
     File file = new File(URI.create(getFileId(uri)));
-    Path path = LocalPath.from(file);
+    Path path = LocalPath.of(file);
     if (!service.isWatchable(path)) {
       return loadInto(new ValueMap(), path);
     }
@@ -149,9 +148,9 @@ final class FilesCache implements
     }
     for (String name : names) {
       try {
-        Path child = path.child(name);
-        map.put(child, LocalFileStatus.read(child.toString()));
-      } catch (IOException e) {
+        Path child = path.resolve(name);
+        map.put(child, LocalFileStatus.stat(child, false));
+      } catch (FileSystemException e) {
         logger.debug(e, "Failed to read %s", path);
       }
     }
@@ -159,8 +158,8 @@ final class FilesCache implements
   }
 
   @Override public void onEvent(WatchEvent event) {
-    Path parent = event.path().parent();
-    String location = getFileId(new File(parent.toString()));
+    Path parent = event.path().getParent();
+    String location = getFileId(LocalPath.check(parent).toFile());
     Uri uri = getFileUri(context, location);
     EventBatch batch;
     synchronized (this) {
@@ -186,7 +185,7 @@ final class FilesCache implements
   }
 
   private boolean addOrUpdate(Path path) {
-    Path parent = path.parent();
+    Path parent = path.getParent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
@@ -194,17 +193,17 @@ final class FilesCache implements
     }
 
     try {
-      LocalFileStatus newInfo = LocalFileStatus.read(path.toString());
+      LocalFileStatus newInfo = LocalFileStatus.stat(path, false);
       LocalFileStatus oldInfo = data.put(path, newInfo);
       return !Objects.equal(newInfo, oldInfo);
-    } catch (IOException e) {
+    } catch (FileSystemException e) {
       logger.debug(e, "Failed to read %s", path);
       return remove(path);
     }
   }
 
   private boolean remove(Path path) {
-    Path parent = path.parent();
+    Path parent = path.getParent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);

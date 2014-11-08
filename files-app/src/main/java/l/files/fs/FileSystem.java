@@ -8,31 +8,28 @@ import l.files.fs.local.LocalFileSystem;
 public abstract class FileSystem {
 
   /**
-   * Gets the file system that is able to handle the given file.
+   * Gets the file system that is able to handle the given path.
    * Currently only the local file system is supported.
    *
    * @throws NoSuchFileSystemException if no file system can be found to
-   *                                   handle the given type of file
+   *                                   handle the given type of path
    */
-  public static FileSystem get(FileId id) {
-    if (id.scheme().equals(LocalFileSystem.SCHEME)) {
+  public static FileSystem get(Path path) {
+    if (LocalFileSystem.canHandle(path)) {
       return LocalFileSystem.get();
     }
-    throw new NoSuchFileSystemException(id.toString());
+    throw new NoSuchFileSystemException(path.toString());
   }
-
-  /**
-   * Gets the URI scheme this file system handles.
-   */
-  public abstract Scheme scheme();
 
   /**
    * Reads the status of a file.
    *
+   * @param followLink if true return status of the target,
+   *                   else return status of the link itself
    * @throws FileSystemException      if failed to read file status
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  public abstract FileStatus stat(FileId file, LinkOption option);
+  public abstract FileStatus stat(Path path, boolean followLink);
 
   /**
    * Creates a symbolic link.
@@ -42,5 +39,5 @@ public abstract class FileSystem {
    * @throws FileSystemException      if failed to create the link
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  public abstract void symlink(FileId target, FileId link);
+  public abstract void symlink(Path target, Path link);
 }

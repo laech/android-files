@@ -20,7 +20,7 @@ public class WatchService_MOVE_SELF_InitiatedTest
    */
   public void testMoveSelfNoLongerMonitorSelf() {
     listen(tmpDir());
-    Path path = LocalPath.from(tmp().get());
+    Path path = LocalPath.of(tmp().get());
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 
@@ -37,7 +37,7 @@ public class WatchService_MOVE_SELF_InitiatedTest
     await(event(CREATE, "a"), newCreate("a", FileType.DIR));
     listen("a");
 
-    Path path = LocalPath.from(tmp().get("a"));
+    Path path = LocalPath.of(tmp().get("a"));
     assertTrue(service().isMonitored(path));
     assertTrue(service().hasObserver(path));
 

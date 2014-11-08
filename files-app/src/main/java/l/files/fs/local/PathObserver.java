@@ -6,12 +6,11 @@ import android.os.Message;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.local.android.os.FileObserver;
 import l.files.logging.Logger;
@@ -127,7 +126,7 @@ final class PathObserver extends FileObserver {
   public List<Path> removeNonExistPaths() {
     return removePaths(new Predicate<Path>() {
       @Override public boolean apply(Path path) {
-        return !new File(path.toString()).exists();
+        return !LocalPath.check(path).toFile().exists();
       }
     });
   }
@@ -190,12 +189,12 @@ final class PathObserver extends FileObserver {
   private void checkNode() {
     try {
 
-      LocalFileStatus file = LocalFileStatus.read(this.path.toString());
+      LocalFileStatus file = LocalFileStatus.stat(path, false);
       if (!Node.from(file).equals(node)) {
         stopWatching();
       }
 
-    } catch (IOException e) {
+    } catch (FileSystemException e) {
       stopWatching();
     }
   }

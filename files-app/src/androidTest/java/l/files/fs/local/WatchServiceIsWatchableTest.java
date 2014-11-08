@@ -13,9 +13,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public final class WatchServiceIsWatchableTest extends FileBaseTest {
 
   public void testIsWatchable() throws Exception {
-    Path dir1 = LocalPath.from(tmp().createDir("1"));
-    Path dir2 = LocalPath.from(tmp().createDir("2"));
-    Path root = LocalPath.from(tmp().get());
+    Path dir1 = LocalPath.of(tmp().createDir("1"));
+    Path dir2 = LocalPath.of(tmp().createDir("2"));
+    Path root = LocalPath.of(tmp().get());
     try (LocalWatchService srv = new LocalWatchService(ImmutableSet.of(root))) {
 
       Listener listener = mock(Listener.class);
@@ -24,8 +24,8 @@ public final class WatchServiceIsWatchableTest extends FileBaseTest {
       assertFalse(srv.isWatchable(root));
       assertFalse(srv.isWatchable(dir1));
       assertFalse(srv.isWatchable(dir2));
-      assertFalse(srv.isWatchable(root.child("a")));
-      assertFalse(srv.isWatchable(root.child("a/b")));
+      assertFalse(srv.isWatchable(root.resolve("a")));
+      assertFalse(srv.isWatchable(root.resolve("a/b")));
 
       assertFalse(srv.isMonitored(root));
       assertFalse(srv.isMonitored(dir1));

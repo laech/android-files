@@ -1,53 +1,47 @@
 package l.files.fs;
 
+import java.net.URI;
+
 /**
- * A path identifies a resource on a file system. This is a more strict version
- * of the traditional concept of a path.
- * <p/>
- * Implementation requirements for a path:
+ * Identifies a resource on a file system.
+ * With the following requirements:
  * <ul>
- * <li>It is absolute/normalized.</li>
+ * <li>A path and its {@link #toUri()} are always absolute and normalized.</li>
  * <li>The resource does not need to exist on the file system.</li>
- * <li>Every resource has only one path representation, regardless whether or
- * not it exists on the file system. For example, a traditional path for a
- * directory may or may not end with a "/", this is disallowed for
- * implementations of  this interface, as that's two path representations for
- * the directory.</li>
+ * <li>Every resource has only one path and one {@link #toUri()} representation,
+ * regardless whether or not it exists on the file system.
+ * For example, a traditional file URI for a directory may or may not end with
+ * a "/" depending on its existence, this is disallowed for implementations of
+ * this interface, as that's two representations for the resource.</li>
  * </ul>
  */
 public interface Path {
 
-  /**
-   * Returns true if the given path is an ancestor of this path, or is equal to
-   * this path. Will return false if the given path is of a different file
-   * system.
-   */
-  boolean startsWith(Path that);
+  URI toUri();
 
   /**
-   * Returns the parent of this path, or null if this is the root path.
+   * Gets the parent path, returns null if this is the root path.
    */
-  Path parent();
+  Path getParent();
 
   /**
-   * Returns the name of this path (last path segment),
-   * or empty if this is the root path.
+   * Resolves the given path/name relative to this path.
    */
-  String name();
+  Path resolve(String other);
 
   /**
-   * Returns a new child path with the given name.
+   * Returns true if the this path starts with the given path, including if
+   * the two paths are the same.
    */
-  Path child(String name);
+  boolean startsWith(Path path);
 
   /**
-   * Returns the path value. e.g. /dir/a.txt
+   * Returns the path string, such as {@code /a/b.txt}
    */
   @Override String toString();
 
   /**
-   * Two paths are equal if they are from the same file system and have the
-   * same path value determined by their file system.
+   * Returns true if the two path strings are the same.
    */
   @Override boolean equals(Object obj);
 

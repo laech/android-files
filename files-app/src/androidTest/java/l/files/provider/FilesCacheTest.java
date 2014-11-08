@@ -51,7 +51,7 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testDoesNotCacheIgnoredLocations() throws Exception {
     File ignoredDir = tmp().createDir("ignored");
-    Path ignoredPath = LocalPath.from(ignoredDir);
+    Path ignoredPath = LocalPath.of(ignoredDir);
     WatchService service = mock(LocalWatchService.class);
     given(service.isWatchable(not(eq(ignoredPath)))).willReturn(true);
     given(service.isWatchable(eq(ignoredPath))).willReturn(false);
@@ -67,7 +67,7 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testCacheIsLiveWhenInUse() throws Exception {
     tmp().createFile("a");
-    Path path = LocalPath.from(tmp().get());
+    Path path = LocalPath.of(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
     assertNull(cache.getFromCache(path));
 
@@ -90,7 +90,7 @@ public final class FilesCacheTest extends FileBaseTest {
 
   public void testCacheIsClearedWhenNotUsed() throws Exception {
     tmp().createFile("a");
-    Path path = LocalPath.from(tmp().get());
+    LocalPath path = LocalPath.of(tmp().get());
     Uri uri = getFilesUri(getContext(), tmp().get(), true);
     assertNull(cache.getFromCache(path));
 
@@ -182,7 +182,7 @@ public final class FilesCacheTest extends FileBaseTest {
       assertTrue(cursor.moveToFirst());
       assertEquals(file.length(), Files.length(cursor));
 
-      cache.onEvent(WatchEvent.create(MODIFY, LocalPath.from(file)));
+      cache.onEvent(WatchEvent.create(MODIFY, LocalPath.of(file)));
       sleep(1000);
       verifyZeroInteractions(resolver);
     }

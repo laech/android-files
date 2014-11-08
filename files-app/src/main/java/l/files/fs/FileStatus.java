@@ -10,10 +10,7 @@ import org.joda.time.Instant;
  */
 public interface FileStatus {
 
-  /**
-   * The universally unique identifier of this file.
-   */
-  FileId id();
+  Path path();
 
   String name();
 
@@ -55,5 +52,4 @@ public interface FileStatus {
    * without inspecting the content of the file.
    */
   MediaType basicMediaType();
-
 }

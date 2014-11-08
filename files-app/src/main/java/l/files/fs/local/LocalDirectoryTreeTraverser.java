@@ -8,13 +8,12 @@ import java.io.File;
 
 import l.files.fs.DirectoryEntry;
 import l.files.fs.DirectoryTreeTraverser;
-import l.files.fs.FileId;
+import l.files.fs.Path;
 import l.files.fs.FileSystemException;
 import l.files.logging.Logger;
 
 import static java.util.Collections.emptyList;
 import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
-import static org.apache.commons.io.FilenameUtils.concat;
 
 public final class LocalDirectoryTreeTraverser
     extends DirectoryTreeTraverser<LocalDirectoryTreeTraverser.Entry> {
@@ -43,60 +42,67 @@ public final class LocalDirectoryTreeTraverser
     }
 
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(root.path())) {
-      return children(root.path(), stream);
+      return children(stream);
     } catch (FileSystemException e) {
       logger.warn(e);
       return emptyList();
     }
   }
 
-  private Iterable<Entry> children(String parent, LocalDirectoryStream stream) {
+  private Iterable<Entry> children(LocalDirectoryStream stream) {
     ImmutableList.Builder<Entry> builder = ImmutableList.builder();
     for (LocalDirectoryStream.Entry child : stream) {
       // Ensure not using stat/lstat to get entry type, see design note at top
       boolean isDirectory = child.type() == TYPE_DIR;
-      String path = concat(parent, child.name());
-      builder.add(Entry.create(path, isDirectory));
+      builder.add(Entry.create(child.path(), isDirectory));
     }
     return builder.build();
   }
 
-  @Override
-  public FluentIterable<Entry> preOrderTraversal(FileId root) {
-    return preOrderTraversal(Entry.create(new File(root.toUri())));
+  @Override public FluentIterable<Entry> preOrderTraversal(Path root) {
+    return preOrderTraversal(Entry.stat(root));
   }
 
-  @Override
-  public FluentIterable<Entry> postOrderTraversal(FileId root) {
-    return postOrderTraversal(Entry.create(new File(root.toUri())));
+  @Override public FluentIterable<Entry> postOrderTraversal(Path root) {
+    return postOrderTraversal(Entry.stat(root));
   }
 
-  @Override
-  public FluentIterable<Entry> breadthFirstTraversal(FileId root) {
-    return breadthFirstTraversal(Entry.create(new File(root.toUri())));
+  @Override public FluentIterable<Entry> breadthFirstTraversal(Path root) {
+    return breadthFirstTraversal(Entry.stat(root));
   }
 
   @AutoValue
   public static abstract class Entry implements DirectoryEntry {
     Entry() {}
 
-    @Override public abstract FileId file();
+    @Override public abstract Path path();
 
-    public abstract String path();
-    public abstract boolean isDirectory();
+    abstract boolean isDirectory();
 
-    static Entry create(File file) {
-      return create(file.getPath(), file.isDirectory());
+    /**
+     * @throws FileSystemException if failed to get file status
+     */
+    static Entry stat(File file) {
+      return stat(LocalPath.of(file));
     }
 
+    /**
+     * @throws FileSystemException if failed to get file status
+     */
+    static Entry stat(Path path) {
+      LocalFileStatus status = LocalFileStatus.stat(path, false);
+      return new AutoValue_LocalDirectoryTreeTraverser_Entry(path, status.isDirectory());
+    }
+
+    @Deprecated
     public static Entry create(String path) {
       // File.isDirectory will call stat, do not use this during traversal
-      return create(path, new File(path).isDirectory());
+      File file = new File(path);
+      return create(LocalPath.of(file), file.isDirectory());
     }
 
-    static Entry create(String path, boolean isDirectory) {
-      FileId id = FileId.of(new File(path));
-      return new AutoValue_LocalDirectoryTreeTraverser_Entry(id, path, isDirectory);
+    static Entry create(Path path, boolean isDir) {
+      return new AutoValue_LocalDirectoryTreeTraverser_Entry(path, isDir);
     }
   }
 }

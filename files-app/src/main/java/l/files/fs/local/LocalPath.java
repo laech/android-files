@@ -3,79 +3,83 @@ package l.files.fs.local;
 import com.google.auto.value.AutoValue;
 
 import java.io.File;
+import java.net.URI;
 
-import l.files.fs.FileId;
 import l.files.fs.Path;
-
-import static org.apache.commons.io.FilenameUtils.getFullPathNoEndSeparator;
-import static org.apache.commons.io.FilenameUtils.getName;
-import static org.apache.commons.io.FilenameUtils.normalizeNoEndSeparator;
 
 @AutoValue
 public abstract class LocalPath implements Path {
-
-  public static final LocalPath ROOT = new AutoValue_LocalPath("/");
-
-  private LocalPath parent;
-  private String name;
-
   LocalPath() {}
 
-  abstract String path();
+  // This is normalized and absolute
+  public abstract File toFile();
 
-  @Override public boolean startsWith(Path path) {
-    if (!(path instanceof LocalPath)) {
-      return false;
+  /**
+   * If the given path is an instance of {@link LocalPath}.
+   *
+   * @throws IllegalArgumentException if the given path is of an instance of
+   *                                  {@link LocalPath}.
+   */
+  public static LocalPath check(Path path) {
+    if (path instanceof LocalPath) {
+      return (LocalPath) path;
     }
-    LocalPath that = (LocalPath) path;
-    if (that.equals(ROOT) || that.equals(this)) {
+    throw new IllegalArgumentException(path.toUri().toString());
+  }
+
+  public static LocalPath of(String path) {
+    return of(new File(path));
+  }
+
+  public static LocalPath of(File file) {
+    return new AutoValue_LocalPath(new File(sanitizedUri(file)));
+  }
+
+  @Override public URI toUri() {
+    return sanitizedUri(toFile());
+  }
+
+  private static URI sanitizedUri(File file) {
+    /*
+     * Don't return File.toURI as it will append a "/" to the end of the URI
+     * depending on whether or not the file is a directory, that means two
+     * calls to the method before and after the directory is deleted will
+     * create two URIs that are not equal.
+     */
+    URI uri = file.toURI().normalize();
+    String uriStr = uri.toString();
+    if (!uri.getRawPath().equals("/") && uriStr.endsWith("/")) {
+      return URI.create(uriStr.substring(0, uriStr.length() - 1));
+    }
+    return uri;
+  }
+
+  @Override public boolean startsWith(Path that) {
+    if (that.getParent() == null || that.equals(this)) {
       return true;
     }
-    String thisPath = path();
-    String thatPath = that.path();
-    return thisPath.startsWith(thatPath)
-        && thisPath.charAt(thatPath.length()) == '/';
+    if (that instanceof LocalPath) {
+      String thisPath = toFile().getPath();
+      String thatPath = ((LocalPath) that).toFile().getPath();
+      return thisPath.startsWith(thatPath)
+          && thisPath.charAt(thatPath.length()) == '/';
+    }
+    return false;
   }
 
-  public static LocalPath from(File file) {
-    String normalizedPath = normalizeNoEndSeparator(file.getAbsolutePath());
-    return new AutoValue_LocalPath(normalizedPath);
-  }
-
-  public static LocalPath from(String path) {
-    return from(new File(path));
-  }
-
-  static LocalPath of(FileId file) {
-    return from(new File(file.toUri()));
-  }
-
-  @Override public LocalPath parent() {
-    if (ROOT.equals(this)) {
+  @Override public LocalPath getParent() {
+    File parent = toFile().getParentFile();
+    if (parent == null) {
       return null;
     }
-    return parent != null ? parent
-        : (parent = from(getFullPathNoEndSeparator(path())));
+    return of(parent);
   }
 
-  @Override public String name() {
-    return name != null ? name : (name = getName(path()));
-  }
-
-  @Override public LocalPath child(String name) {
-    return from(new File(path(), name));
+  @Override public LocalPath resolve(String other) {
+    return of(new File(toFile(), other));
   }
 
   @Override public String toString() {
-    return path();
-  }
-
-  /**
-   * @throws IllegalArgumentException if the given path is not of this type
-   */
-  static void checkPath(Path path) {
-    if (!(path instanceof LocalPath)) {
-      throw new IllegalArgumentException(path.getClass() + ": " + path);
-    }
+    return toFile().toString();
   }
 }

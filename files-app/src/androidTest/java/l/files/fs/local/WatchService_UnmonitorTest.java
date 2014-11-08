@@ -13,17 +13,17 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
 
   public void testUnmonitorRootDirChildren() throws IOException {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
-    service().register(LocalPath.from("/"), listener);
-    assertTrue(service().toString(), service().hasObserver(LocalPath.from("/mnt")));
-    assertTrue(service().toString(), service().hasObserver(LocalPath.from("/data")));
+    service().register(LocalPath.of("/"), listener);
+    assertTrue(service().toString(), service().hasObserver(LocalPath.of("/mnt")));
+    assertTrue(service().toString(), service().hasObserver(LocalPath.of("/data")));
 
-    service().unregister(LocalPath.from("/"), listener);
-    assertFalse(service().toString(), service().hasObserver(LocalPath.from("/mnt")));
-    assertFalse(service().toString(), service().hasObserver(LocalPath.from("/data")));
+    service().unregister(LocalPath.of("/"), listener);
+    assertFalse(service().toString(), service().hasObserver(LocalPath.of("/mnt")));
+    assertFalse(service().toString(), service().hasObserver(LocalPath.of("/data")));
   }
 
   public void testUnmoniDonttorSelf() {
-    Path dir = LocalPath.from(tmp().get());
+    Path dir = LocalPath.of(tmp().get());
 
     WatchEvent.Listener listener = listen(tmpDir());
     assertTrue(service().isMonitored(dir));
@@ -40,7 +40,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
   }
 
   public void testUnmonitorRemovesImmediateChildObserver() {
-    Path dir = LocalPath.from(tmp().createDir("a"));
+    Path dir = LocalPath.of(tmp().createDir("a"));
 
     WatchEvent.Listener listener = listen(tmpDir());
     assertFalse(service().isMonitored(dir));
@@ -52,7 +52,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
   }
 
   public void testUnmonitorDoesNotRemoveImmediateChildObserverThatAreMonitored() {
-    Path dir = LocalPath.from(tmp().createDir("a"));
+    Path dir = LocalPath.of(tmp().createDir("a"));
 
     WatchEvent.Listener listener = listen(tmpDir());
     listen(new File(dir.toString()));
@@ -65,10 +65,10 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
   }
 
   public void testUnmonitorDoesNotRemoveGrandChildObserver() {
-    Path dir = LocalPath.from(tmp().createDir("a/b"));
+    LocalPath dir = LocalPath.of(tmp().createDir("a/b"));
 
     WatchEvent.Listener listener = listen(tmpDir());
-    listen(new File(dir.parent().toString()));
+    listen(dir.getParent().toFile());
     assertFalse(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 

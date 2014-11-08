@@ -8,10 +8,8 @@ import java.util.NoSuchElementException;
 
 import l.files.fs.DirectoryEntry;
 import l.files.fs.DirectoryStream;
-import l.files.fs.FileId;
+import l.files.fs.Path;
 import l.files.fs.FileSystemException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 final class LocalDirectoryStream
     implements DirectoryStream<LocalDirectoryStream.Entry> {
@@ -32,27 +30,22 @@ final class LocalDirectoryStream
   }
 
   /**
-   * Opens a new stream for the given directory.
-   *
+   * @throws FileSystemException if failed to open directory
+   */
+  static LocalDirectoryStream open(Path directory) {
+    return open(LocalPath.check(directory).toFile());
+  }
+
+  /**
    * @throws FileSystemException if failed to open directory
    */
   static LocalDirectoryStream open(File directory) {
-    checkNotNull(directory);
     try {
       long dir = Dirent.opendir(directory.getPath());
       return new LocalDirectoryStream(directory, dir);
     } catch (ErrnoException e) {
       throw e.toFileSystemException();
     }
-  }
-
-  /**
-   * Opens a new stream for the given directory.
-   *
-   * @throws FileSystemException if failed to open directory
-   */
-  static LocalDirectoryStream open(String path) {
-    return open(new File(path));
   }
 
   @Override public void close() {
@@ -147,11 +140,9 @@ final class LocalDirectoryStream
 
     Entry() {}
 
-    @Override public abstract FileId file();
+    @Override public abstract Path path();
 
     abstract long ino();
-
-    abstract String name();
 
     abstract int type();
 
@@ -160,8 +151,8 @@ final class LocalDirectoryStream
     }
 
     static Entry create(File parent, long ino, String name, int type) {
-      FileId id = FileId.of(new File(parent, name));
-      return new AutoValue_LocalDirectoryStream_Entry(id, ino, name, type);
+      LocalPath file = LocalPath.of(new File(parent, name));
+      return new AutoValue_LocalDirectoryStream_Entry(file, ino, type);
     }
   }
 }
