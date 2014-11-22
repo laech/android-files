@@ -1,7 +1,14 @@
 package l.files.fs.local;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
@@ -9,11 +16,13 @@ import l.files.fs.WatchEvent;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
+import static java.lang.Thread.sleep;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.local.LocalWatchService.IGNORED;
 import static org.apache.commons.io.FileUtils.forceDelete;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 abstract class WatchServiceBaseTest extends FileBaseTest {
 
@@ -181,9 +190,42 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
   }
 
   protected void await(final WatchEvent expected, Runnable code, WatchEvent.Listener listener) {
+    final Multiset<WatchEvent> actual = HashMultiset.create();
+    final CountDownLatch latch = new CountDownLatch(1);
+    doAnswer(new Answer<Void>() {
+      @Override public Void answer(InvocationOnMock invocation) {
+        WatchEvent event = ((WatchEvent) invocation.getArguments()[0]);
+        synchronized (actual) {
+          actual.add(event);
+        }
+        if (expected.equals(event)) {
+          latch.countDown();
+        }
+        return null;
+      }
+    }).when(listener).onEvent(any(WatchEvent.class));
+
     code.run();
-    // FIXME remove atLeastOnce to see some double events
-    verify(listener, timeout(1000).atLeastOnce()).onEvent(expected);
+
+    try {
+
+      /*
+       * Sleep for some time, this will allow for catching duplicate events.
+       */
+      sleep(5);
+
+      assertTrue("Timeout waiting for " + expected, latch.await(1, SECONDS));
+    } catch (InterruptedException e) {
+      throw new AssertionError(e);
+    }
+
+    //noinspection SynchronizationOnLocalVariableOrMethodParameter
+    synchronized (actual) {
+      int count = actual.count(expected);
+      if (count != 1) {
+        throw new AssertionError("Expecting 1 got " + count + " " + expected);
+      }
+    }
   }
 
   protected WatchEvent event(WatchEvent.Kind kind, String relativePath) {
@@ -215,6 +257,7 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     };
 
     abstract boolean get(File file);
+
     abstract void set(File file, boolean value);
   }
 

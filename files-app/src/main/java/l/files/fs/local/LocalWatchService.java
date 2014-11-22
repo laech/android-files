@@ -47,6 +47,7 @@ public class LocalWatchService implements WatchService, Closeable {
 
   // TODO use different lock for different paths?
   // TODO should listeners be removed when a directory is deleted?
+  // TODO send events in different thread to avoid blocking
 
   private static final Logger logger = Logger.get(LocalWatchService.class);
 
@@ -135,7 +136,14 @@ public class LocalWatchService implements WatchService, Closeable {
 
       } else if (isChildModified(event, child)) {
         Path childPath = path.resolve(child);
-        send(Kind.MODIFY, childPath);
+        /*
+         * Only send event if there is no observer running for the given child,
+         * otherwise this will send an event, and then the child observer sends
+         * a self modified event, resulting in duplicate events.
+         */
+        if (!hasObserver(childPath)) {
+          send(Kind.MODIFY, childPath);
+        }
 
       } else if (isChildDeleted(event)) {
         Path childPath = path.resolve(child);
@@ -147,8 +155,18 @@ public class LocalWatchService implements WatchService, Closeable {
         send(Kind.MODIFY, path);
 
       } else if (isSelfDeleted(event)) {
+        // Check before onDelete which removes the path from the monitored list
+        boolean monitored = isMonitored(path);
         onDelete(path);
-        send(Kind.DELETE, path);
+        /*
+         * I the parent path is monitored, an delete event would be sent for
+         * this child deletion. If the parent path is not monitored and this
+         * path is monitored, the code below will send the event. This way no
+         * duplicate event will be sent.
+         */
+        if (monitored) {
+          send(Kind.DELETE, path);
+        }
       }
     }
 
