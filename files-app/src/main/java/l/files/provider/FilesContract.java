@@ -323,7 +323,7 @@ public final class FilesContract {
     /**
      * Media type of a directory.
      */
-    public static final String MIME_DIR = "application/x-directory";
+    public static final String MIME_DIR = "inode/directory";
 
     /**
      * Sorts the files by their names alphabetically.

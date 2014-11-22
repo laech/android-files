@@ -52,7 +52,7 @@ public final class FilesProviderTest extends FileBaseTest {
 
   public void testDetectsMediaTypeForDirectory() throws Exception {
     File dir = tmp().createDir("a.mp3");
-    assertEquals("application/x-directory", getMediaType(dir));
+    assertEquals("inode/directory", getMediaType(dir));
   }
 
   public void testReturnUnknownMediaTypeForUnreadableFile() throws Exception {
