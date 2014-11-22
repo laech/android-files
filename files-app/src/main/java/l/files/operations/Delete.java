@@ -2,6 +2,7 @@ package l.files.operations;
 
 import java.io.IOException;
 
+import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.local.LocalDirectoryTreeTraverser;
 import l.files.fs.local.LocalFileStatus;
@@ -45,8 +46,10 @@ public final class Delete extends AbstractOperation {
       checkInterrupt();
       try {
         delete(entry.path());
+      } catch (NoSuchFileException e) {
+        // Ignore
       } catch (IOException e) {
-        listener.onFailure(entry.toString(), e);
+        listener.onFailure(entry.path().toString(), e);
       }
     }
   }
