@@ -1,12 +1,14 @@
 package l.files.fs.local;
 
+import com.google.common.collect.Sets;
+
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.fs.DirectoryEntry;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.fs.Files.symlink;
-import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 
 public final class LocalDirectoryTreeTraverserTest extends FileBaseTest {
 
@@ -18,16 +20,16 @@ public final class LocalDirectoryTreeTraverserTest extends FileBaseTest {
         LocalPath.of(tmp().get("a/d"))
     );
 
-    Set<Entry> expected = newHashSet(
-        Entry.stat(tmp().get()),
-        Entry.stat(tmp().get("a")),
-        Entry.stat(tmp().get("a/b")),
-        Entry.stat(tmp().get("a/c")),
-        Entry.stat(tmp().get("a/d"))
+    Set<DirectoryEntry> expected = Sets.<DirectoryEntry>newHashSet(
+        LocalDirectoryEntry.stat(tmp().get()),
+        LocalDirectoryEntry.stat(tmp().get("a")),
+        LocalDirectoryEntry.stat(tmp().get("a/b")),
+        LocalDirectoryEntry.stat(tmp().get("a/c")),
+        LocalDirectoryEntry.stat(tmp().get("a/d"))
     );
-    Set<Entry> actual = newHashSet(
+    Set<DirectoryEntry> actual = newHashSet(
         LocalDirectoryTreeTraverser.get()
-            .breadthFirstTraversal(Entry.stat(tmp().get()))
+            .breadthFirstTraversal(LocalDirectoryEntry.stat(tmp().get()))
     );
 
     assertEquals(expected, actual);

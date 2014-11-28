@@ -1,18 +1,15 @@
 package l.files.fs.local;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.fs.DirectoryEntry;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
-import static l.files.fs.local.LocalDirectoryStream.Entry;
-import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
-import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_LNK;
-import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_REG;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
@@ -25,19 +22,19 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
     symlink(f1.getPath(), f3.getPath());
 
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      List<Entry> expected = asList(
-          Entry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), TYPE_REG),
-          Entry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), TYPE_DIR),
-          Entry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), TYPE_LNK)
+      List<DirectoryEntry> expected = Arrays.<DirectoryEntry>asList(
+          LocalDirectoryEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), false),
+          LocalDirectoryEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), true),
+          LocalDirectoryEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), false)
       );
-      List<Entry> actual = newArrayList(stream);
+      List<DirectoryEntry> actual = newArrayList(stream);
       assertEquals(expected, actual);
     }
   }
 
   public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      Iterator<Entry> iterator = stream.iterator();
+      Iterator<DirectoryEntry> iterator = stream.iterator();
       assertFalse(iterator.hasNext());
       assertFalse(iterator.hasNext());
     }

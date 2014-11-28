@@ -7,8 +7,7 @@ import com.google.common.collect.TreeTraverser;
  * Traverses a directory tree and returns all the child paths.
  * Will not follow symbolic links.
  */
-public abstract class DirectoryTreeTraverser<T extends DirectoryEntry>
-    extends TreeTraverser<T> {
+public abstract class DirectoryTreeTraverser extends TreeTraverser<DirectoryEntry> {
 
   /**
    * Calls {@link #preOrderIterator(Object)} with the given file converted to
@@ -17,7 +16,7 @@ public abstract class DirectoryTreeTraverser<T extends DirectoryEntry>
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<T> preOrderTraversal(Path root);
+  public abstract FluentIterable<DirectoryEntry> preOrderTraversal(Path root);
 
   /**
    * Calls {@link #postOrderTraversal(Object)} with the given file converted to
@@ -26,7 +25,7 @@ public abstract class DirectoryTreeTraverser<T extends DirectoryEntry>
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<T> postOrderTraversal(Path root);
+  public abstract FluentIterable<DirectoryEntry> postOrderTraversal(Path root);
 
 
   /**
@@ -36,6 +35,6 @@ public abstract class DirectoryTreeTraverser<T extends DirectoryEntry>
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<T> breadthFirstTraversal(Path root);
+  public abstract FluentIterable<DirectoryEntry> breadthFirstTraversal(Path root);
 
 }

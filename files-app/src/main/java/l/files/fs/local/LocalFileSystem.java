@@ -1,9 +1,13 @@
 package l.files.fs.local;
 
-import l.files.fs.Path;
-import l.files.fs.FileSystem;
+import java.io.File;
+import java.net.URI;
 
-public class LocalFileSystem extends FileSystem {
+import l.files.fs.DirectoryStream;
+import l.files.fs.FileSystem;
+import l.files.fs.Path;
+
+public class LocalFileSystem implements FileSystem {
 
   private static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
@@ -22,6 +26,10 @@ public class LocalFileSystem extends FileSystem {
     }
   }
 
+  @Override public Path getPath(URI uri) {
+    return LocalPath.of(new File(uri));
+  }
+
   @Override public LocalFileStatus stat(Path path, boolean followLink) {
     return LocalFileStatus.stat(path, followLink);
   }
@@ -34,5 +42,9 @@ public class LocalFileSystem extends FileSystem {
     } catch (ErrnoException e) {
       throw e.toFileSystemException();
     }
+  }
+
+  @Override public DirectoryStream openDirectory(Path path) {
+    return LocalDirectoryStream.open(path);
   }
 }

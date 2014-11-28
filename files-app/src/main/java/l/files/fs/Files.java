@@ -7,13 +7,20 @@ public final class Files {
    * @see FileSystem#stat(Path, boolean)
    */
   public static FileStatus stat(Path path, boolean followLink) {
-    return FileSystem.get(path).stat(path, followLink);
+    return FileSystems.get(path).stat(path, followLink);
   }
 
   /**
    * @see FileSystem#symlink(Path, Path).
    */
   public static void symlink(Path target, Path link) {
-    FileSystem.get(target).symlink(target, link);
+    FileSystems.get(target).symlink(target, link);
+  }
+
+  /**
+   * @see FileSystem#openDirectory(Path)
+   */
+  public static DirectoryStream openDirectory(Path path) {
+    return FileSystems.get(path).openDirectory(path);
   }
 }

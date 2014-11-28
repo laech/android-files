@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.fs.DirectoryEntry;
 import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
@@ -24,7 +25,6 @@ import static java.util.Collections.emptyList;
 import static l.files.fs.WatchEvent.Kind;
 import static l.files.fs.WatchEvent.Listener;
 import static l.files.fs.local.Files.checkExist;
-import static l.files.fs.local.LocalDirectoryStream.Entry.TYPE_DIR;
 import static l.files.fs.local.PathObserver.IN_IGNORED;
 import static l.files.fs.local.android.os.FileObserver.ATTRIB;
 import static l.files.fs.local.android.os.FileObserver.CLOSE_WRITE;
@@ -374,7 +374,8 @@ public class LocalWatchService implements WatchService, Closeable {
       return;
     }
 
-    Node node = Node.from(LocalFileStatus.stat(path, false));
+    LocalFileStatus status = LocalFileStatus.stat(path, false);
+    Node node = Node.from(status);
 
     synchronized (this) {
       checkNode(path, node);
@@ -384,7 +385,7 @@ public class LocalWatchService implements WatchService, Closeable {
       startObserver(path, node);
     }
 
-    startObserversForSubDirs(path);
+    startObserversForSubDirs(status);
   }
 
   private void unmonitor(Path parent) {
@@ -409,23 +410,18 @@ public class LocalWatchService implements WatchService, Closeable {
     }
   }
 
-  private void startObserversForSubDirs(Path parent) {
-
-    /*
-     * Using readdir() on the directory and check the child's type will be
-     * faster than using File.isDirectory (because this uses a stat()),
-     * especially if the directory is large.
-     */
-
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent)) {
-      for (LocalDirectoryStream.Entry entry : stream) {
-        if (entry.type() == TYPE_DIR) {
+  private void startObserversForSubDirs(LocalFileStatus parent) {
+    // Using a directory stream without stating the children will be faster
+    // especially on large directories
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.path())) {
+      for (LocalDirectoryEntry entry : stream.local()) {
+        if (entry.isDirectory()) {
           Path child = entry.path();
           if (!isWatchable(child)) {
             continue;
           }
           try {
-            startObserver(child, Node.from(LocalFileStatus.stat(child, false)));
+            startObserver(child, Node.create(parent.device(), entry.ino()));
           } catch (FileSystemException e) {
             // File no longer exits or inaccessible, ignore;
           }

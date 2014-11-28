@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
+import l.files.fs.DirectoryEntry;
 import l.files.fs.FileSystemException;
 import l.files.fs.local.Files;
 import l.files.fs.local.LocalDirectoryTreeTraverser;
@@ -16,7 +17,6 @@ import l.files.logging.Logger;
 
 import static l.files.fs.local.Files.readlink;
 import static l.files.fs.local.Files.symlink;
-import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 import static org.apache.commons.io.FileUtils.forceMkdir;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -60,7 +60,7 @@ final class Copy extends Paste {
     File oldRoot = new File(from);
     File newRoot = new File(to);
 
-    for (Entry entry : LocalDirectoryTreeTraverser.get().preOrderTraversal(LocalPath.of(from))) {
+    for (DirectoryEntry entry : LocalDirectoryTreeTraverser.get().preOrderTraversal(LocalPath.of(from))) {
       checkInterrupt();
 
       LocalFileStatus file;

@@ -1,5 +1,6 @@
 package l.files.fs;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
 /**
@@ -13,8 +14,7 @@ import java.util.Iterator;
  * <p/>
  * An instance must be closed when no longer needed.
  */
-public interface DirectoryStream<T extends DirectoryEntry>
-    extends Iterable<T>, AutoCloseable {
+public interface DirectoryStream extends Iterable<DirectoryEntry>, Closeable {
 
   /**
    * @throws FileSystemException if failed to close this stream

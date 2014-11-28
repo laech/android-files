@@ -61,6 +61,12 @@ public final class Logger {
     }
   }
 
+  public void debug(Throwable e) {
+    if (isLoggable(tag, DEBUG)) {
+      Log.d(tag, e.getMessage(), e);
+    }
+  }
+
   public void warn(String format, Object arg) {
     if (isLoggable(tag, WARN)) {
       Log.w(tag, format(format, arg));

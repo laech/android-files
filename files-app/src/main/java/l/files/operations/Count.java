@@ -2,11 +2,10 @@ package l.files.operations;
 
 import java.io.IOException;
 
+import l.files.fs.DirectoryEntry;
 import l.files.fs.FileSystemException;
 import l.files.fs.local.LocalDirectoryTreeTraverser;
 import l.files.fs.local.LocalPath;
-
-import static l.files.fs.local.LocalDirectoryTreeTraverser.Entry;
 
 class Count extends AbstractOperation {
 
@@ -33,7 +32,7 @@ class Count extends AbstractOperation {
   }
 
   private void count(String path) throws InterruptedException {
-    for (Entry entry : LocalDirectoryTreeTraverser.get().breadthFirstTraversal(LocalPath.of(path))) {
+    for (DirectoryEntry entry : LocalDirectoryTreeTraverser.get().breadthFirstTraversal(LocalPath.of(path))) {
       checkInterrupt();
       count++;
       onCount(entry.path().toString());

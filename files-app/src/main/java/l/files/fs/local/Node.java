@@ -11,7 +11,11 @@ abstract class Node {
   Node() {}
 
   public static Node from(LocalFileStatus file) {
-    return new AutoValue_Node(file.device(), file.inode());
+    return create(file.device(), file.inode());
+  }
+
+  public static Node create(long dev, long ino) {
+    return new AutoValue_Node(dev, ino);
   }
 
   public abstract long dev();

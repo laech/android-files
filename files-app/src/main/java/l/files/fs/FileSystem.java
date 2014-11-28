@@ -1,25 +1,18 @@
 package l.files.fs;
 
-import l.files.fs.local.LocalFileSystem;
+import java.net.URI;
 
 /**
  * A virtual file system interface provides operations on files.
  */
-public abstract class FileSystem {
+public interface FileSystem {
 
   /**
-   * Gets the file system that is able to handle the given path.
-   * Currently only the local file system is supported.
+   * Gets the path from the given URI.
    *
-   * @throws NoSuchFileSystemException if no file system can be found to
-   *                                   handle the given type of path
+   * @throws IllegalArgumentException if the URI scheme is not supported
    */
-  public static FileSystem get(Path path) {
-    if (LocalFileSystem.canHandle(path)) {
-      return LocalFileSystem.get();
-    }
-    throw new NoSuchFileSystemException(path.toString());
-  }
+  Path getPath(URI uri);
 
   /**
    * Reads the status of a file.
@@ -29,7 +22,7 @@ public abstract class FileSystem {
    * @throws FileSystemException      if failed to read file status
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  public abstract FileStatus stat(Path path, boolean followLink);
+  FileStatus stat(Path path, boolean followLink);
 
   /**
    * Creates a symbolic link.
@@ -39,5 +32,12 @@ public abstract class FileSystem {
    * @throws FileSystemException      if failed to create the link
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  public abstract void symlink(Path target, Path link);
+  void symlink(Path target, Path link);
+
+  /**
+   * Opens a directory stream to iterate through the entries of the directory.
+   *
+   * @throws FileSystemException if failed to open the directory
+   */
+  DirectoryStream openDirectory(Path path);
 }
