@@ -6,6 +6,7 @@ import java.net.URI;
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileSystem;
 import l.files.fs.Path;
+import l.files.fs.WatchService;
 
 public class LocalFileSystem implements FileSystem {
 
@@ -46,5 +47,9 @@ public class LocalFileSystem implements FileSystem {
 
   @Override public DirectoryStream openDirectory(Path path) {
     return LocalDirectoryStream.open(path);
+  }
+
+  @Override public WatchService getWatchService() {
+    return LocalWatchService.get();
   }
 }

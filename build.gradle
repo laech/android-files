@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:0.14.4'
+    classpath 'com.android.tools.build:gradle:1.0.0'
     classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
   }
 }
@@ -24,8 +24,8 @@ libs.auto_value = [
 libs.auto_service = 'com.google.auto.service:auto-service:1.0-rc1'
 libs.eventbus = 'de.greenrobot:eventbus:2.2.1'
 libs.android_support = [
-    'com.android.support:support-v4:19.+',
-    'com.android.support:support-v13:19.+'
+    'com.android.support:support-v4:21.0.2',
+    'com.android.support:support-v13:21.0.2'
 ]
 libs.tika = 'org.apache.tika:tika-core:1.6'
 libs.guava = 'com.google.guava:guava:18.0'

@@ -40,4 +40,10 @@ public interface FileSystem {
    * @throws FileSystemException if failed to open the directory
    */
   DirectoryStream openDirectory(Path path);
+
+  /**
+   * Gets the shared watch service of this file system for monitoring file
+   * system events.
+   */
+  WatchService getWatchService();
 }

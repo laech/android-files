@@ -6,11 +6,11 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
 
-import l.files.fs.local.LocalFileStatus;
+import l.files.fs.FileStatus;
 
 import static com.google.common.base.Objects.equal;
 
-abstract class FileSort implements Comparator<LocalFileStatus> {
+abstract class FileSort implements Comparator<FileStatus> {
 
   /**
    * Sort files by name.
@@ -33,7 +33,7 @@ abstract class FileSort implements Comparator<LocalFileStatus> {
       return instance;
     }
 
-    @Override public int compare(LocalFileStatus a, LocalFileStatus b) {
+    @Override public int compare(FileStatus a, FileStatus b) {
       return collator.compare(a.name(), b.name());
     }
   }
@@ -50,8 +50,8 @@ abstract class FileSort implements Comparator<LocalFileStatus> {
       return instance;
     }
 
-    @Override public int compare(LocalFileStatus a, LocalFileStatus b) {
-      int compare = Longs.compare(b.modified(), a.modified());
+    @Override public int compare(FileStatus a, FileStatus b) {
+      int compare = b.lastModifiedTime().compareTo(a.lastModifiedTime());
       if (compare == 0) {
         return Name.get().compare(a, b);
       }
@@ -71,7 +71,7 @@ abstract class FileSort implements Comparator<LocalFileStatus> {
       return instance;
     }
 
-    @Override public int compare(LocalFileStatus a, LocalFileStatus b) {
+    @Override public int compare(FileStatus a, FileStatus b) {
       if (a.isDirectory() && a.isDirectory() == b.isDirectory()) {
         return Name.get().compare(a, b);
       }

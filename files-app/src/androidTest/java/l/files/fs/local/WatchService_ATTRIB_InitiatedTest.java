@@ -1,8 +1,13 @@
 package l.files.fs.local;
 
+import l.files.fs.Path;
 import l.files.fs.WatchEvent;
 
 import static l.files.fs.WatchEvent.Kind.MODIFY;
+import static l.files.fs.WatchEvent.Listener;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests file system operations started with change files/directories
@@ -11,6 +16,21 @@ import static l.files.fs.WatchEvent.Kind.MODIFY;
  * @see android.os.FileObserver#ATTRIB
  */
 public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
+
+  public void testSelfChange() {
+    Listener listener = mock(Listener.class);
+    Path path = LocalPath.of(tmpDir());
+    service().register(path, listener);
+    try {
+
+      assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
+      assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
+      verify(listener, timeout(1000)).onEvent(WatchEvent.create(MODIFY, path));
+
+    } finally {
+      service().unregister(path, listener);
+    }
+  }
 
   public void testLastModifiedDateChange_file() {
     testLastModifiedDateChange(FileType.FILE);

@@ -18,7 +18,10 @@ public interface WatchService extends AutoCloseable {
 
   /**
    * Starts monitoring on the given path, file systems event on the given
-   * path will be sent to the given registered listeners.
+   * path will be sent to the given registered listeners. Does nothing if the
+   * listener is already registered for the given path. Note that if the path
+   * is a directory, attribute change events of the directory itself will also
+   * be reported.
    *
    * @throws FileSystemException      if failed to listener on the given path
    * @throws IllegalArgumentException if path is not of this file system
@@ -26,7 +29,8 @@ public interface WatchService extends AutoCloseable {
   void register(Path path, WatchEvent.Listener listener);
 
   /**
-   * Stops monitoring on the given path.
+   * Stops monitoring on the given path. Does nothing if the listener is not
+   * registered for the given path.
    *
    * @throws IllegalArgumentException if path is not of this file system
    */

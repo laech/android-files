@@ -67,12 +67,6 @@ public final class Logger {
     }
   }
 
-  public void warn(String format, Object arg) {
-    if (isLoggable(tag, WARN)) {
-      Log.w(tag, format(format, arg));
-    }
-  }
-
   public void warn(Throwable err, String format, Object arg) {
     if (isLoggable(tag, WARN)) {
       Log.w(tag, format(format, arg), err);
@@ -88,6 +82,12 @@ public final class Logger {
   public void error(Throwable e) {
     if (isLoggable(tag, ERROR)) {
       Log.e(tag, e.getMessage(), e);
+    }
+  }
+
+  public void error(String message) {
+    if (isLoggable(tag, ERROR)) {
+      Log.e(tag, message);
     }
   }
 }
