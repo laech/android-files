@@ -31,6 +31,10 @@ public class LocalFileSystem implements FileSystem {
     return LocalPath.of(new File(uri));
   }
 
+  @Override public Path getPath(String path) {
+    return getPath(new File(path).toURI());
+  }
+
   @Override public LocalFileStatus stat(Path path, boolean followLink) {
     return LocalFileStatus.stat(path, followLink);
   }

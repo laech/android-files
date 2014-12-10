@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import java.io.File;
+
 import l.files.common.testing.FileBaseTest;
 
 public final class LocalFileSystemTest extends FileBaseTest {
@@ -9,6 +11,16 @@ public final class LocalFileSystemTest extends FileBaseTest {
   @Override protected void setUp() throws Exception {
     super.setUp();
     fs = LocalFileSystem.get();
+  }
+
+  public void testGetPathFromString() throws Exception {
+    assertEquals(LocalPath.of(new File("a")), fs.getPath("a"));
+    assertEquals(LocalPath.of(new File("/a")), fs.getPath("/a"));
+  }
+
+  public void testGetPathFromUri() throws Exception {
+    assertEquals(LocalPath.of(new File("a")), fs.getPath(new File("a").toURI()));
+    assertEquals(LocalPath.of(new File("/a")), fs.getPath(new File("/a").toURI()));
   }
 
   public void testScheme() throws Exception {

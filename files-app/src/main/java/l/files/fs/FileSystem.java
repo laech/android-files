@@ -15,6 +15,13 @@ public interface FileSystem {
   Path getPath(URI uri);
 
   /**
+   * Gets the path from the given path string.
+   *
+   * @throws IllegalArgumentException if the URI scheme is not supported
+   */
+  Path getPath(String path);
+
+  /**
    * Reads the status of a file.
    *
    * @param followLink if true return status of the target,
