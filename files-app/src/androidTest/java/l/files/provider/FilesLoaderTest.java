@@ -1,5 +1,6 @@
 package l.files.provider;
 
+import android.app.LoaderManager;
 import android.os.Bundle;
 
 import org.mockito.ArgumentCaptor;
@@ -8,6 +9,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
@@ -100,18 +102,23 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     FileSort comparator = FileSort.Name.get();
     FilesLoader loader = new FilesLoader(getActivity(), root, comparator, service);
     LoaderCallback callbacks = mockLoaderCallbacks(loader);
-    return new Subject(loader, callbacks);
+    return new Subject(getActivity().getLoaderManager(), loader, callbacks);
   }
 
   private static interface LoaderCallback extends LoaderCallbacks<List<FileStatus>> {}
 
-  private final class Subject {
+  private static final class Subject {
+    private static final Random random = new Random();
+    private final LoaderManager manager;
     private final FilesLoader loader;
     private final LoaderCallback listener;
+    private final int loaderId;
 
-    private Subject(FilesLoader loader, LoaderCallback listener) {
+    private Subject(LoaderManager manager, FilesLoader loader, LoaderCallback listener) {
+      this.manager = manager;
       this.loader = loader;
       this.listener = listener;
+      this.loaderId = random.nextInt();
     }
 
     Subject awaitOnLoadFinished(List<FileStatus> expected) {
@@ -120,12 +127,12 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     }
 
     Subject initLoader() {
-      getActivity().getLoaderManager().initLoader(0, null, listener);
+      manager.initLoader(loaderId, null, listener);
       return this;
     }
 
     Subject destroyLoader() {
-      getActivity().getLoaderManager().destroyLoader(0);
+      manager.destroyLoader(loaderId);
       return this;
     }
 
