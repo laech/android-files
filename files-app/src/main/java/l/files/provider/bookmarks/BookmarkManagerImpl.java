@@ -2,6 +2,7 @@ package l.files.provider.bookmarks;
 
 import android.content.SharedPreferences;
 
+import com.google.android.gms.common.util.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -50,8 +51,7 @@ final class BookmarkManagerImpl implements BookmarkManager {
   BookmarkManagerImpl(SharedPreferences pref) {
     this.pref = checkNotNull(pref);
     this.listeners = new CopyOnWriteArraySet<>();
-    this.bookmarks = new CopyOnWriteArraySet<>(
-        toPaths(pref.getStringSet(PREF_KEY, DEFAULTS)));
+    this.bookmarks = new CopyOnWriteArraySet<>();
   }
 
   private Set<Path> toPaths(Set<String> uriStrings) {
@@ -75,18 +75,23 @@ final class BookmarkManagerImpl implements BookmarkManager {
   @Override public void addBookmark(Path path) {
     checkNotNull(path);
     if (bookmarks.add(path)) {
-      saveBookmarks();
+      saveBookmarksAndNotify();
     }
   }
 
   @Override public void removeBookmark(Path path) {
     checkNotNull(path);
     if (bookmarks.remove(path)) {
-      saveBookmarks();
+      saveBookmarksAndNotify();
     }
   }
 
-  private void saveBookmarks() {
+  @VisibleForTesting boolean clearBookmarksSync() {
+    bookmarks.clear();
+    return pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).commit();
+  }
+
+  private void saveBookmarksAndNotify() {
     pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).apply();
     notifyListeners();
   }
@@ -110,17 +115,22 @@ final class BookmarkManagerImpl implements BookmarkManager {
   }
 
   @Override public Set<Path> getBookmarks() {
+    synchronized (this) {
+      if (bookmarks.isEmpty()) {
+        bookmarks.addAll(toPaths(pref.getStringSet(PREF_KEY, DEFAULTS)));
+      }
+    }
     return ImmutableSet.copyOf(bookmarks);
   }
 
   @Override
-  public void addBookmarkChangedListener(BookmarkChangedListener listener) {
+  public void registerBookmarkChangedListener(BookmarkChangedListener listener) {
     checkNotNull(listener);
     listeners.add(listener);
   }
 
   @Override
-  public void removeBookmarkChangedListener(BookmarkChangedListener listener) {
+  public void unregisterBookmarkChangedListener(BookmarkChangedListener listener) {
     checkNotNull(listener);
     listeners.remove(listener);
   }

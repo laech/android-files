@@ -10,12 +10,12 @@ import l.files.fs.FileStatus;
 
 import static com.google.common.base.Objects.equal;
 
-abstract class FileSort implements Comparator<FileStatus> {
+public abstract class FileSort implements Comparator<FileStatus> {
 
   /**
    * Sort files by name.
    */
-  static final class Name extends FileSort {
+  public static final class Name extends FileSort {
     private static Name instance = new Name(Locale.getDefault());
 
     private final Locale locale;
@@ -41,7 +41,7 @@ abstract class FileSort implements Comparator<FileStatus> {
   /**
    * Sort files by last modified date.
    */
-  static final class Date extends FileSort {
+  public static final class Date extends FileSort {
     private static final Date instance = new Date();
 
     Date() {}
@@ -62,7 +62,7 @@ abstract class FileSort implements Comparator<FileStatus> {
   /**
    * Sort files by size.
    */
-  static final class Size extends FileSort {
+  public static final class Size extends FileSort {
     private static final Size instance = new Size();
 
     Size() {}

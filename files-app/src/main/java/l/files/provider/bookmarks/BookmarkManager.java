@@ -14,9 +14,17 @@ public interface BookmarkManager {
 
   Set<Path> getBookmarks();
 
-  void addBookmarkChangedListener(BookmarkChangedListener listener);
+  /**
+   * Adds a listener for listening bookmark changes.
+   * Does nothing if the listener is already added.
+   */
+  void registerBookmarkChangedListener(BookmarkChangedListener listener);
 
-  void removeBookmarkChangedListener(BookmarkChangedListener listener);
+  /**
+   * Removes a listener from listening bookmark changes.
+   * Does nothing if the listener is not already added.
+   */
+  void unregisterBookmarkChangedListener(BookmarkChangedListener listener);
 
   static interface BookmarkChangedListener {
     /**

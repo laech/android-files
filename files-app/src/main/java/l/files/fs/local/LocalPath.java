@@ -75,6 +75,10 @@ public abstract class LocalPath implements Path {
     return of(parent);
   }
 
+  @Override public String getName() {
+    return toFile().getName();
+  }
+
   @Override public LocalPath resolve(String other) {
     return of(new File(toFile(), other));
   }

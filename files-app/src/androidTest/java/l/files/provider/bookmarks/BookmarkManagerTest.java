@@ -63,15 +63,15 @@ public final class BookmarkManagerTest extends BaseTest {
 
   public void testNotifiesOnBookmarkChanged() throws Exception {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
-    manager.addBookmarkChangedListener(listener);
+    manager.registerBookmarkChangedListener(listener);
     manager.addBookmark(fs.getPath("a"));
     verify(listener).onBookmarkChanged(manager);
   }
 
   public void testRemoveNotificationOnBookmarkChanged() throws Exception {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
-    manager.addBookmarkChangedListener(listener);
-    manager.removeBookmarkChangedListener(listener);
+    manager.registerBookmarkChangedListener(listener);
+    manager.unregisterBookmarkChangedListener(listener);
     manager.addBookmark(fs.getPath("a"));
     verify(listener, never()).onBookmarkChanged(manager);
   }

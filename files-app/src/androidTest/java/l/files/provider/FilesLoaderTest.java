@@ -4,7 +4,8 @@ import android.app.LoaderManager;
 import android.os.Bundle;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,12 +25,14 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.fs.WatchEvent.Listener;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
+
+  private static final Random random = new Random();
 
   private TempDir tmp;
   private FileSystem fs;
@@ -87,42 +90,38 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     return result;
   }
 
-  private LoaderCallback mockLoaderCallbacks(FilesLoader loader) {
-    LoaderCallback listener = mock(LoaderCallback.class);
-    given(listener.onCreateLoader(anyInt(), any(Bundle.class))).willReturn(loader);
-    return listener;
-  }
-
   Subject subject() {
     return subject(mock(WatchService.class));
   }
 
-  Subject subject(WatchService service) {
-    Path root = fs.getPath(tmp.get().toURI());
-    FileSort comparator = FileSort.Name.get();
-    FilesLoader loader = new FilesLoader(getActivity(), root, comparator, service);
-    LoaderCallback callbacks = mockLoaderCallbacks(loader);
-    return new Subject(getActivity().getLoaderManager(), loader, callbacks);
+  Subject subject(final WatchService service) {
+    final int loaderId = random.nextInt();
+    final Path root = fs.getPath(tmp.get().toURI());
+    final FileSort comparator = FileSort.Name.get();
+    final LoaderCallback listener = mock(LoaderCallback.class);
+    given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
+      @Override public FilesLoader answer(final InvocationOnMock invocation) {
+        return new FilesLoader(getActivity(), root, comparator, service);
+      }
+    });
+    return new Subject(loaderId, getActivity().getLoaderManager(), listener);
   }
 
   private static interface LoaderCallback extends LoaderCallbacks<List<FileStatus>> {}
 
   private static final class Subject {
-    private static final Random random = new Random();
-    private final LoaderManager manager;
-    private final FilesLoader loader;
-    private final LoaderCallback listener;
     private final int loaderId;
+    private final LoaderManager manager;
+    private final LoaderCallback listener;
 
-    private Subject(LoaderManager manager, FilesLoader loader, LoaderCallback listener) {
+    private Subject(int loaderId, LoaderManager manager, LoaderCallback listener) {
+      this.loaderId = loaderId;
       this.manager = manager;
-      this.loader = loader;
       this.listener = listener;
-      this.loaderId = random.nextInt();
     }
 
     Subject awaitOnLoadFinished(List<FileStatus> expected) {
-      Mockito.verify(listener, timeout(2000)).onLoadFinished(loader, expected);
+      verify(listener, timeout(2000)).onLoadFinished(any(FilesLoader.class), eq(expected));
       return this;
     }
 

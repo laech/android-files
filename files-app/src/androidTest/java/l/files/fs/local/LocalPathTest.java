@@ -9,6 +9,13 @@ import static org.apache.commons.io.FileUtils.getTempDirectory;
 
 public final class LocalPathTest extends FileBaseTest {
 
+  public void testGetName() throws Exception {
+    assertEquals("a", LocalPath.of("/a/").getName());
+    assertEquals("a", LocalPath.of("/a").getName());
+    assertEquals("a", LocalPath.of("a").getName());
+    assertEquals("", LocalPath.of("/").getName());
+  }
+
   public void testCreateFromDirectoryReturnsSameValueBeforeAfterDeletion() throws Exception {
     File dir = tmp().createDir("dir");
     LocalPath before = LocalPath.of(dir);

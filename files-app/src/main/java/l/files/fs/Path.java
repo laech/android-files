@@ -25,6 +25,11 @@ public interface Path {
   Path getParent();
 
   /**
+   * Gets the name part of this path, or empty if this is the root path
+   */
+  String getName();
+
+  /**
    * Resolves the given path/name relative to this path.
    */
   Path resolve(String other);
