@@ -26,11 +26,11 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     Path dir = LocalPath.of(tmp().get());
 
     WatchEvent.Listener listener = listen(tmpDir());
-    assertTrue(service().isMonitored(dir));
+    assertTrue(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
 
     unlisten(tmpDir(), listener);
-    assertFalse(service().isMonitored(dir));
+    assertFalse(service().isRegistered(dir));
     assertFalse(service().hasObserver(dir));
   }
 
@@ -43,11 +43,11 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     Path dir = LocalPath.of(tmp().createDir("a"));
 
     WatchEvent.Listener listener = listen(tmpDir());
-    assertFalse(service().isMonitored(dir));
+    assertFalse(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
 
     unlisten(tmpDir(), listener);
-    assertFalse(service().isMonitored(dir));
+    assertFalse(service().isRegistered(dir));
     assertFalse(service().hasObserver(dir));
   }
 
@@ -56,11 +56,11 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
 
     WatchEvent.Listener listener = listen(tmpDir());
     listen(new File(dir.toString()));
-    assertTrue(service().isMonitored(dir));
+    assertTrue(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
 
     unlisten(tmpDir(), listener);
-    assertTrue(service().isMonitored(dir));
+    assertTrue(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
   }
 
@@ -69,11 +69,11 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
 
     WatchEvent.Listener listener = listen(tmpDir());
     listen(dir.parent().file());
-    assertFalse(service().isMonitored(dir));
+    assertFalse(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
 
     unlisten(tmpDir(), listener);
-    assertFalse(service().isMonitored(dir));
+    assertFalse(service().isRegistered(dir));
     assertTrue(service().hasObserver(dir));
   }
 }

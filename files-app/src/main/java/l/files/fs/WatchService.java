@@ -37,6 +37,12 @@ public interface WatchService extends AutoCloseable {
   void unregister(Path path, WatchEvent.Listener listener);
 
   /**
+   * Returns true if the given path is registered via a previous call to
+   * {@link #register(Path, WatchEvent.Listener)}.
+   */
+  boolean isRegistered(Path path);
+
+  /**
    * Returns true if the path can be watched, false otherwise.
    *
    * @throws IllegalArgumentException if path is not of this file system

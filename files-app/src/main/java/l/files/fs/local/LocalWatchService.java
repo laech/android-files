@@ -155,7 +155,7 @@ public class LocalWatchService implements WatchService, Closeable {
 
       } else if (isSelfDeleted(event)) {
         // Check before onDelete which removes the path from the monitored list
-        boolean monitored = isMonitored(path);
+        boolean monitored = isRegistered(path);
         onDelete(path);
         /*
          * I the parent path is monitored, an delete event would be sent for
@@ -295,7 +295,7 @@ public class LocalWatchService implements WatchService, Closeable {
     }
   }
 
-  boolean isMonitored(Path path) {
+  @Override public boolean isRegistered(Path path) {
     synchronized (this) {
       return monitored.contains(path);
     }
@@ -487,7 +487,7 @@ public class LocalWatchService implements WatchService, Closeable {
   private void onCreate(Path path) {
     try {
       LocalFileStatus file = LocalFileStatus.stat(path, false);
-      if (file.isDirectory() && isMonitored(path.parent())) {
+      if (file.isDirectory() && isRegistered(path.parent())) {
         startObserver(path, Node.from(file));
       }
     } catch (FileSystemException e) {

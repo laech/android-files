@@ -30,11 +30,11 @@ public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest
   public void testDeleteSelfNoLongerMonitorSelf() {
     listen(tmpDir());
     Path path = LocalPath.of(tmp().get());
-    assertTrue(service().isMonitored(path));
+    assertTrue(service().isRegistered(path));
     assertTrue(service().hasObserver(path));
 
     awaitDeleteRoot();
-    assertFalse(service().isMonitored(path));
+    assertFalse(service().isRegistered(path));
     assertFalse(service().hasObserver(path));
   }
 
@@ -47,11 +47,11 @@ public class WatchService_DELETE_SELF_InitiatedTest extends WatchServiceBaseTest
     listen(tmpDir());
     listen("a");
     Path path = LocalPath.of(tmp().get("a"));
-    assertTrue(service().isMonitored(path));
+    assertTrue(service().isRegistered(path));
     assertTrue(service().hasObserver(path));
 
     awaitDeleteRoot();
-    assertFalse(service().isMonitored(path));
+    assertFalse(service().isRegistered(path));
     assertFalse(service().hasObserver(path));
   }
 

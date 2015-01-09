@@ -27,9 +27,9 @@ public final class WatchServiceIsWatchableTest extends FileBaseTest {
       assertFalse(srv.isWatchable(root.resolve("a")));
       assertFalse(srv.isWatchable(root.resolve("a/b")));
 
-      assertFalse(srv.isMonitored(root));
-      assertFalse(srv.isMonitored(dir1));
-      assertFalse(srv.isMonitored(dir2));
+      assertFalse(srv.isRegistered(root));
+      assertFalse(srv.isRegistered(dir1));
+      assertFalse(srv.isRegistered(dir2));
 
       assertFalse(srv.hasObserver(root));
       assertFalse(srv.hasObserver(dir1));

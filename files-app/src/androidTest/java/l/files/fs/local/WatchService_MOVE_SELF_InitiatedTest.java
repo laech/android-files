@@ -21,11 +21,11 @@ public class WatchService_MOVE_SELF_InitiatedTest
   public void testMoveSelfNoLongerMonitorSelf() {
     listen(tmpDir());
     Path path = LocalPath.of(tmp().get());
-    assertTrue(service().isMonitored(path));
+    assertTrue(service().isRegistered(path));
     assertTrue(service().hasObserver(path));
 
     awaitMoveRootTo(helper().get("b"));
-    assertFalse(service().isMonitored(path));
+    assertFalse(service().isRegistered(path));
     assertFalse(service().hasObserver(path));
   }
 
@@ -38,11 +38,11 @@ public class WatchService_MOVE_SELF_InitiatedTest
     listen("a");
 
     Path path = LocalPath.of(tmp().get("a"));
-    assertTrue(service().isMonitored(path));
+    assertTrue(service().isRegistered(path));
     assertTrue(service().hasObserver(path));
 
     awaitMoveRootTo(helper().get("b"));
-    assertFalse(service().isMonitored(path));
+    assertFalse(service().isRegistered(path));
     assertFalse(service().hasObserver(path));
   }
 
