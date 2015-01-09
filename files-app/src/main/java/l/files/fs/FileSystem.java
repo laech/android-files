@@ -49,7 +49,7 @@ public interface FileSystem {
   DirectoryStream openDirectory(Path path);
 
   /**
-   * Gets the shared watch service of this file system for monitoring file
+   * Gets the watch service of this file system for monitoring file
    * system events.
    */
   WatchService watcher();
