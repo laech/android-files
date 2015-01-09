@@ -179,7 +179,7 @@ public final class FilesContract {
   }
 
   public static String getFileId(File file) {
-    return LocalPath.of(file).toUri().toString();
+    return LocalPath.of(file).uri().toString();
   }
 
   /**

@@ -101,7 +101,7 @@ final class BookmarkManagerImpl implements BookmarkManager {
   private Set<String> toUriStrings(Set<Path> bookmarks) {
     return new HashSet<>(transform(bookmarks, new Function<Path, String>() {
       @Override public String apply(Path input) {
-        return input.toUri().toString();
+        return input.uri().toString();
       }
     }));
   }

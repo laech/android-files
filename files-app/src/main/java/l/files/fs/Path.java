@@ -6,9 +6,9 @@ import java.net.URI;
  * Identifies a resource on a file system.
  * With the following requirements:
  * <ul>
- * <li>A path and its {@link #toUri()} are always absolute and normalized.</li>
+ * <li>A path and its {@link #uri()} are always absolute and normalized.</li>
  * <li>The resource does not need to exist on the file system.</li>
- * <li>Every resource has only one path and one {@link #toUri()} representation,
+ * <li>Every resource has only one path and one {@link #uri()} representation,
  * regardless whether or not it exists on the file system.
  * For example, a traditional file URI for a directory may or may not end with
  * a "/" depending on its existence, this is disallowed for implementations of
@@ -17,17 +17,17 @@ import java.net.URI;
  */
 public interface Path {
 
-  URI toUri();
+  URI uri();
 
   /**
    * Gets the parent path, returns null if this is the root path.
    */
-  Path getParent();
+  Path parent();
 
   /**
    * Gets the name part of this path, or empty if this is the root path
    */
-  String getName();
+  String name();
 
   /**
    * Resolves the given path/name relative to this path.

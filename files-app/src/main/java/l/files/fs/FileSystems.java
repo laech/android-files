@@ -12,7 +12,7 @@ public final class FileSystems {
    *                                   handle the given type of path
    */
   public static FileSystem get(Path path) {
-    return get(path.toUri().getScheme());
+    return get(path.uri().getScheme());
   }
 
   /**

@@ -10,10 +10,10 @@ import static org.apache.commons.io.FileUtils.getTempDirectory;
 public final class LocalPathTest extends FileBaseTest {
 
   public void testGetName() throws Exception {
-    assertEquals("a", LocalPath.of("/a/").getName());
-    assertEquals("a", LocalPath.of("/a").getName());
-    assertEquals("a", LocalPath.of("a").getName());
-    assertEquals("", LocalPath.of("/").getName());
+    assertEquals("a", LocalPath.of("/a/").name());
+    assertEquals("a", LocalPath.of("/a").name());
+    assertEquals("a", LocalPath.of("a").name());
+    assertEquals("", LocalPath.of("/").name());
   }
 
   public void testCreateFromDirectoryReturnsSameValueBeforeAfterDeletion() throws Exception {
@@ -22,7 +22,7 @@ public final class LocalPathTest extends FileBaseTest {
     forceDelete(dir);
     LocalPath after = LocalPath.of(dir);
     assertEquals(before, after);
-    assertEquals(before.toUri(), after.toUri());
+    assertEquals(before.uri(), after.uri());
     assertEquals(before.toFile(), after.toFile());
     assertEquals(before.toString(), after.toString());
   }
@@ -30,11 +30,11 @@ public final class LocalPathTest extends FileBaseTest {
   public void testCreateToUri() throws Exception {
     File a = tmp().createDir("a");
     File b = tmp().createFile("b");
-    assertEquals("file:" + tmp().get("a").getPath(), LocalPath.of(a).toUri().toString());
-    assertEquals("file:" + tmp().get("b").getPath(), LocalPath.of(b).toUri().toString());
-    assertEquals("file:/", LocalPath.of(new File("/")).toUri().toString());
-    assertEquals("file:/c/hello", LocalPath.of(new File("/c/b/../hello")).toUri().toString());
-    assertEquals("file:/c/hello", LocalPath.of(new File("/c/./hello")).toUri().toString());
+    assertEquals("file:" + tmp().get("a").getPath(), LocalPath.of(a).uri().toString());
+    assertEquals("file:" + tmp().get("b").getPath(), LocalPath.of(b).uri().toString());
+    assertEquals("file:/", LocalPath.of(new File("/")).uri().toString());
+    assertEquals("file:/c/hello", LocalPath.of(new File("/c/b/../hello")).uri().toString());
+    assertEquals("file:/c/hello", LocalPath.of(new File("/c/./hello")).uri().toString());
   }
 
   public void testResolve() {
@@ -47,9 +47,9 @@ public final class LocalPathTest extends FileBaseTest {
   }
 
   public void testParent() {
-    assertEquals(null, LocalPath.of(new File("/")).getParent());
-    assertEquals("/", LocalPath.of("/a").getParent().toString());
-    assertEquals("/a/b", LocalPath.of("/a/b/c").getParent().toString());
+    assertEquals(null, LocalPath.of(new File("/")).parent());
+    assertEquals("/", LocalPath.of("/a").parent().toString());
+    assertEquals("/a/b", LocalPath.of("/a/b/c").parent().toString());
   }
 
   public void testFrom_file_noEndSeparatorRegardlessOfExistence() {
@@ -61,8 +61,8 @@ public final class LocalPathTest extends FileBaseTest {
     assertTrue(dir.delete());
     LocalPath p2 = LocalPath.of(dir);
 
-    assertFalse(p1.toUri().toString().endsWith("/"));
-    assertFalse(p2.toUri().toString().endsWith("/"));
+    assertFalse(p1.uri().toString().endsWith("/"));
+    assertFalse(p2.uri().toString().endsWith("/"));
     assertEquals(p1, p2);
   }
 

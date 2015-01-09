@@ -24,7 +24,7 @@ public abstract class LocalPath implements Path {
     if (path instanceof LocalPath) {
       return (LocalPath) path;
     }
-    throw new IllegalArgumentException(path.toUri().toString());
+    throw new IllegalArgumentException(path.uri().toString());
   }
 
   public static LocalPath of(String path) {
@@ -35,7 +35,7 @@ public abstract class LocalPath implements Path {
     return new AutoValue_LocalPath(new File(sanitizedUri(file)));
   }
 
-  @Override public URI toUri() {
+  @Override public URI uri() {
     return sanitizedUri(toFile());
   }
 
@@ -55,7 +55,7 @@ public abstract class LocalPath implements Path {
   }
 
   @Override public boolean startsWith(Path that) {
-    if (that.getParent() == null || that.equals(this)) {
+    if (that.parent() == null || that.equals(this)) {
       return true;
     }
     if (that instanceof LocalPath) {
@@ -67,7 +67,7 @@ public abstract class LocalPath implements Path {
     return false;
   }
 
-  @Override public LocalPath getParent() {
+  @Override public LocalPath parent() {
     File parent = toFile().getParentFile();
     if (parent == null) {
       return null;
@@ -75,7 +75,7 @@ public abstract class LocalPath implements Path {
     return of(parent);
   }
 
-  @Override public String getName() {
+  @Override public String name() {
     return toFile().getName();
   }
 

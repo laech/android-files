@@ -68,7 +68,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     LocalPath dir = LocalPath.of(tmp().createDir("a/b"));
 
     WatchEvent.Listener listener = listen(tmpDir());
-    listen(dir.getParent().toFile());
+    listen(dir.parent().toFile());
     assertFalse(service().isMonitored(dir));
     assertTrue(service().hasObserver(dir));
 

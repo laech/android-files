@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.DirectoryEntry;
 import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
@@ -175,7 +174,7 @@ public class LocalWatchService implements WatchService, Closeable {
       for (Listener listener : getListeners(path)) {
         listener.onEvent(event);
       }
-      Path parent = path.getParent();
+      Path parent = path.parent();
       if (parent != null) {
         for (Listener listener : getListeners(parent)) {
           listener.onEvent(event);
@@ -401,7 +400,7 @@ public class LocalWatchService implements WatchService, Closeable {
         PathObserver observer = it.next();
         observer.removePath(parent);
         for (Path path : observer.copyPaths()) {
-          if (parent.equals(path.getParent()) && !monitored.contains(path)) {
+          if (parent.equals(path.parent()) && !monitored.contains(path)) {
             observer.removePath(path);
           }
         }
@@ -488,7 +487,7 @@ public class LocalWatchService implements WatchService, Closeable {
   private void onCreate(Path path) {
     try {
       LocalFileStatus file = LocalFileStatus.stat(path, false);
-      if (file.isDirectory() && isMonitored(path.getParent())) {
+      if (file.isDirectory() && isMonitored(path.parent())) {
         startObserver(path, Node.from(file));
       }
     } catch (FileSystemException e) {

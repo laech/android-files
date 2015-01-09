@@ -158,7 +158,7 @@ final class FilesCache implements
   }
 
   @Override public void onEvent(WatchEvent event) {
-    Path parent = event.path().getParent();
+    Path parent = event.path().parent();
     String location = getFileId(LocalPath.check(parent).toFile());
     Uri uri = getFileUri(context, location);
     EventBatch batch;
@@ -185,7 +185,7 @@ final class FilesCache implements
   }
 
   private boolean addOrUpdate(Path path) {
-    Path parent = path.getParent();
+    Path parent = path.parent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
@@ -203,7 +203,7 @@ final class FilesCache implements
   }
 
   private boolean remove(Path path) {
-    Path parent = path.getParent();
+    Path parent = path.parent();
     ValueMap data = cache.getIfPresent(parent);
     if (data == null) {
       service.unregister(parent, this);
