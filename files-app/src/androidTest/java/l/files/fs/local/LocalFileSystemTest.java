@@ -14,13 +14,13 @@ public final class LocalFileSystemTest extends FileBaseTest {
   }
 
   public void testGetPathFromString() throws Exception {
-    assertEquals(LocalPath.of(new File("a")), fs.getPath("a"));
-    assertEquals(LocalPath.of(new File("/a")), fs.getPath("/a"));
+    assertEquals(LocalPath.of(new File("a")), fs.path("a"));
+    assertEquals(LocalPath.of(new File("/a")), fs.path("/a"));
   }
 
   public void testGetPathFromUri() throws Exception {
-    assertEquals(LocalPath.of(new File("a")), fs.getPath(new File("a").toURI()));
-    assertEquals(LocalPath.of(new File("/a")), fs.getPath(new File("/a").toURI()));
+    assertEquals(LocalPath.of(new File("a")), fs.path(new File("a").toURI()));
+    assertEquals(LocalPath.of(new File("/a")), fs.path(new File("/a").toURI()));
   }
 
   public void testScheme() throws Exception {

@@ -27,12 +27,12 @@ public class LocalFileSystem implements FileSystem {
     }
   }
 
-  @Override public Path getPath(URI uri) {
+  @Override public Path path(URI uri) {
     return LocalPath.of(new File(uri));
   }
 
-  @Override public Path getPath(String path) {
-    return getPath(new File(path).toURI());
+  @Override public Path path(String path) {
+    return path(new File(path).toURI());
   }
 
   @Override public LocalFileStatus stat(Path path, boolean followLink) {
@@ -53,7 +53,7 @@ public class LocalFileSystem implements FileSystem {
     return LocalDirectoryStream.open(path);
   }
 
-  @Override public WatchService getWatchService() {
+  @Override public WatchService watcher() {
     return LocalWatchService.get();
   }
 }

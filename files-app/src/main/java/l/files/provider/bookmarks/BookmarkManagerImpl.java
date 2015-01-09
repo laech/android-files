@@ -61,7 +61,7 @@ final class BookmarkManagerImpl implements BookmarkManager {
     for (String uriString : uriStrings) {
       try {
         URI uri = new URI(uriString);
-        Path path = fs.getPath(uri);
+        Path path = fs.path(uri);
         paths.add(path);
       } catch (URISyntaxException | FileSystemException e) {
         logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);

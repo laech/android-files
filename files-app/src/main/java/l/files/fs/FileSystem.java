@@ -12,14 +12,14 @@ public interface FileSystem {
    *
    * @throws IllegalArgumentException if the URI scheme is not supported
    */
-  Path getPath(URI uri);
+  Path path(URI uri);
 
   /**
    * Gets the path from the given path string.
    *
    * @throws IllegalArgumentException if the URI scheme is not supported
    */
-  Path getPath(String path);
+  Path path(String path);
 
   /**
    * Reads the status of a file.
@@ -52,5 +52,5 @@ public interface FileSystem {
    * Gets the shared watch service of this file system for monitoring file
    * system events.
    */
-  WatchService getWatchService();
+  WatchService watcher();
 }

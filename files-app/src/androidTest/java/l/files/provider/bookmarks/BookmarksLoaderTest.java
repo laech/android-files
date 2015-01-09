@@ -53,7 +53,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
   }
 
   public void testSortsBookmarksByName() throws Exception {
-    Path path = fs.getPath("/tmp");
+    Path path = fs.path("/tmp");
     manager.addBookmark(path);
     subject().initLoader().awaitOnLoadFinished(singletonList(path));
   }
@@ -61,7 +61,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
   public void testNotifiesBookmarkChange() throws Exception {
     Subject subject = subject().initLoader().awaitOnLoadFinished(Collections.<Path>emptyList());
 
-    Path path = fs.getPath("/tmp");
+    Path path = fs.path("/tmp");
     manager.addBookmark(path);
     subject.awaitOnLoadFinished(singletonList(path));
 

@@ -48,7 +48,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
    * @param comparator the comparator for sorting results
    */
   public FilesLoader(Context context, Path path, Comparator<FileStatus> comparator) {
-    this(context, path, comparator, path.system(), path.system().getWatchService());
+    this(context, path, comparator, path.system(), path.system().watcher());
   }
 
   public FilesLoader(

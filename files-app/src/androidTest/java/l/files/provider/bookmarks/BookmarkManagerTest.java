@@ -33,17 +33,17 @@ public final class BookmarkManagerTest extends BaseTest {
   }
 
   public void testAddBookmark() throws Exception {
-    Path p1 = fs.getPath("/a/b");
-    Path p2 = fs.getPath("/a/c");
+    Path p1 = fs.path("/a/b");
+    Path p2 = fs.path("/a/c");
     manager.addBookmark(p1);
     manager.addBookmark(p2);
     assertTrue(manager.getBookmarks().containsAll(asList(p1, p2)));
   }
 
   public void testRemoveBookmark() throws Exception {
-    Path p1 = fs.getPath("/a/b");
-    Path p2 = fs.getPath("/1");
-    Path p3 = fs.getPath("/x");
+    Path p1 = fs.path("/a/b");
+    Path p2 = fs.path("/1");
+    Path p3 = fs.path("/x");
     manager.addBookmark(p1);
     manager.addBookmark(p2);
     manager.addBookmark(p3);
@@ -55,7 +55,7 @@ public final class BookmarkManagerTest extends BaseTest {
   }
 
   public void testHasBookmark() throws Exception {
-    Path path = fs.getPath("/a/b");
+    Path path = fs.path("/a/b");
     assertFalse(manager.hasBookmark(path));
     manager.addBookmark(path);
     assertTrue(manager.hasBookmark(path));
@@ -64,7 +64,7 @@ public final class BookmarkManagerTest extends BaseTest {
   public void testNotifiesOnBookmarkChanged() throws Exception {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
     manager.registerBookmarkChangedListener(listener);
-    manager.addBookmark(fs.getPath("a"));
+    manager.addBookmark(fs.path("a"));
     verify(listener).onBookmarkChanged(manager);
   }
 
@@ -72,7 +72,7 @@ public final class BookmarkManagerTest extends BaseTest {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
     manager.registerBookmarkChangedListener(listener);
     manager.unregisterBookmarkChangedListener(listener);
-    manager.addBookmark(fs.getPath("a"));
+    manager.addBookmark(fs.path("a"));
     verify(listener, never()).onBookmarkChanged(manager);
   }
 }

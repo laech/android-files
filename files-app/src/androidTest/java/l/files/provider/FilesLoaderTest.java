@@ -59,7 +59,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   public void testMonitorsDirectoryChanges() throws Exception {
     List<FileStatus> expected = new ArrayList<>(createFiles("1", "2"));
-    Subject subject = subject(fs.getWatchService())
+    Subject subject = subject(fs.watcher())
         .initLoader().awaitOnLoadFinished(expected);
 
     expected.addAll(createFiles("3", "4", "5", "6"));
@@ -85,7 +85,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
       File file = i % 2 == 0 ? tmp.createFile(name) : tmp.createDir(name);
-      result.add(fs.stat(fs.getPath(file.toURI()), false));
+      result.add(fs.stat(fs.path(file.toURI()), false));
     }
     return result;
   }
@@ -96,7 +96,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   Subject subject(final WatchService service) {
     final int loaderId = random.nextInt();
-    final Path root = fs.getPath(tmp.get().toURI());
+    final Path root = fs.path(tmp.get().toURI());
     final FileSort comparator = FileSort.Name.get();
     final LoaderCallback listener = mock(LoaderCallback.class);
     given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
