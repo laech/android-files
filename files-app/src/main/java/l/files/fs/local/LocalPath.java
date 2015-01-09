@@ -12,7 +12,7 @@ public abstract class LocalPath implements Path {
   LocalPath() {}
 
   // This is normalized and absolute
-  public abstract File toFile();
+  public abstract File file();
 
   /**
    * If the given path is an instance of {@link LocalPath}.
@@ -36,7 +36,7 @@ public abstract class LocalPath implements Path {
   }
 
   @Override public URI uri() {
-    return sanitizedUri(toFile());
+    return sanitizedUri(file());
   }
 
   private static URI sanitizedUri(File file) {
@@ -59,8 +59,8 @@ public abstract class LocalPath implements Path {
       return true;
     }
     if (that instanceof LocalPath) {
-      String thisPath = toFile().getPath();
-      String thatPath = ((LocalPath) that).toFile().getPath();
+      String thisPath = file().getPath();
+      String thatPath = ((LocalPath) that).file().getPath();
       return thisPath.startsWith(thatPath)
           && thisPath.charAt(thatPath.length()) == '/';
     }
@@ -68,7 +68,7 @@ public abstract class LocalPath implements Path {
   }
 
   @Override public LocalPath parent() {
-    File parent = toFile().getParentFile();
+    File parent = file().getParentFile();
     if (parent == null) {
       return null;
     }
@@ -76,14 +76,14 @@ public abstract class LocalPath implements Path {
   }
 
   @Override public String name() {
-    return toFile().getName();
+    return file().getName();
   }
 
   @Override public LocalPath resolve(String other) {
-    return of(new File(toFile(), other));
+    return of(new File(file(), other));
   }
 
   @Override public String toString() {
-    return toFile().toString();
+    return file().toString();
   }
 }

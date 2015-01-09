@@ -72,7 +72,7 @@ final class Copy extends Paste {
         continue;
       }
 
-      File dst = Files.replace(LocalPath.check(entry.path()).toFile(), oldRoot, newRoot);
+      File dst = Files.replace(LocalPath.check(entry.path()).file(), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
         copyLink(file, dst.getPath(), listener);
       } else if (file.isDirectory()) {
@@ -115,7 +115,7 @@ final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(src.path().toFile());
+      fis = new FileInputStream(src.path().file());
       fos = new FileOutputStream(dst);
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
@@ -149,7 +149,7 @@ final class Copy extends Paste {
 
   private void setLastModifiedDate(LocalFileStatus src, String dst) {
     File dstFile = new File(dst);
-    File srcFile = src.path().toFile();
+    File srcFile = src.path().file();
     //noinspection StatementWithEmptyBody
     if (!dstFile.setLastModified(srcFile.lastModified())) {
       /*

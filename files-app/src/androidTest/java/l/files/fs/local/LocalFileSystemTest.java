@@ -30,11 +30,11 @@ public final class LocalFileSystemTest extends FileBaseTest {
   public void testSymlink() throws Exception {
     LocalPath target = LocalPath.of(tmp().createFile("a"));
     LocalPath link = LocalPath.of(tmp().get("b"));
-    assertFalse(link.toFile().exists());
+    assertFalse(link.file().exists());
 
     fs.symlink(target, link);
 
-    assertTrue(link.toFile().exists());
+    assertTrue(link.file().exists());
     assertTrue(fs.stat(link, true).isRegularFile());
     assertTrue(fs.stat(link, false).isSymbolicLink());
     assertEquals(

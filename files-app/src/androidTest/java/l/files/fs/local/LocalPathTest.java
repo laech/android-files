@@ -23,7 +23,7 @@ public final class LocalPathTest extends FileBaseTest {
     LocalPath after = LocalPath.of(dir);
     assertEquals(before, after);
     assertEquals(before.uri(), after.uri());
-    assertEquals(before.toFile(), after.toFile());
+    assertEquals(before.file(), after.file());
     assertEquals(before.toString(), after.toString());
   }
 

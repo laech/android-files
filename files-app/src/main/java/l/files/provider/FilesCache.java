@@ -159,7 +159,7 @@ final class FilesCache implements
 
   @Override public void onEvent(WatchEvent event) {
     Path parent = event.path().parent();
-    String location = getFileId(LocalPath.check(parent).toFile());
+    String location = getFileId(LocalPath.check(parent).file());
     Uri uri = getFileUri(context, location);
     EventBatch batch;
     synchronized (this) {

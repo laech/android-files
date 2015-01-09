@@ -202,6 +202,6 @@ public abstract class LocalFileStatus implements FileStatus {
   }
 
   public File toFile() {
-    return path().toFile();
+    return path().file();
   }
 }
