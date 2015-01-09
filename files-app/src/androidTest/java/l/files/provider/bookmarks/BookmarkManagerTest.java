@@ -4,8 +4,8 @@ import android.content.SharedPreferences;
 
 import l.files.common.testing.BaseTest;
 import l.files.fs.FileSystem;
-import l.files.fs.FileSystems;
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
@@ -22,7 +22,7 @@ public final class BookmarkManagerTest extends BaseTest {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    fs = FileSystems.get("file");
+    fs = LocalFileSystem.get();
     pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
     manager = new BookmarkManagerImpl(fs, pref);
   }

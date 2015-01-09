@@ -13,8 +13,8 @@ import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.fs.FileSystem;
-import l.files.fs.FileSystems;
 import l.files.fs.Path;
+import l.files.fs.local.LocalFileSystem;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -41,7 +41,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    fs = FileSystems.get("file");
+    fs = LocalFileSystem.get();
     preferences = getActivity().getSharedPreferences(getClass().getSimpleName(), MODE_PRIVATE);
     manager = new BookmarkManagerImpl(fs, preferences);
     assertTrue(manager.clearBookmarksSync());
