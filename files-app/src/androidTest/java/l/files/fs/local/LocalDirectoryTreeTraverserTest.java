@@ -8,14 +8,13 @@ import l.files.common.testing.FileBaseTest;
 import l.files.fs.DirectoryEntry;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static l.files.fs.Files.symlink;
 
 public final class LocalDirectoryTreeTraverserTest extends FileBaseTest {
 
   public void testTraversal() {
     tmp().createFile("a/b");
     tmp().createFile("a/c");
-    symlink(
+    LocalFileSystem.get().symlink(
         LocalPath.of(tmp().get("a/c")),
         LocalPath.of(tmp().get("a/d"))
     );

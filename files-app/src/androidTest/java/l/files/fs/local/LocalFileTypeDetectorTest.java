@@ -3,10 +3,9 @@ package l.files.fs.local;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.Path;
 import l.files.fs.FileTypeDetector;
+import l.files.fs.Path;
 
-import static l.files.fs.Files.symlink;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -34,14 +33,14 @@ public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
   public void testDetect_symlinkFile() throws Exception {
     Path file = LocalPath.of(tmp().createFile("a.mp3"));
     Path link = LocalPath.of(tmp().get("b.txt"));
-    symlink(file, link);
+    LocalFileSystem.get().symlink(file, link);
     assertEquals("text/plain", detector().detect(link, true).toString());
   }
 
   public void testDetect_symlinkDirectory() throws Exception {
     Path dir = LocalPath.of(tmp().createDir("a"));
     Path link = LocalPath.of(tmp().get("b"));
-    symlink(dir, link);
+    LocalFileSystem.get().symlink(dir, link);
     assertEquals("inode/directory", detector().detect(link, true).toString());
   }
 
