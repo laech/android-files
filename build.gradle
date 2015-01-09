@@ -18,9 +18,9 @@ ext.libs = [:]
 
 libs.auto_value = [
     'javax.annotation:javax.annotation-api:1.2',
-    'com.google.auto.value:auto-value:1.0-rc1'
+    'com.google.auto.value:auto-value:1.0'
 ]
-libs.auto_service = 'com.google.auto.service:auto-service:1.0-rc1'
+libs.auto_service = 'com.google.auto.service:auto-service:1.0-rc2'
 libs.eventbus = 'de.greenrobot:eventbus:2.2.1'
 libs.android_support = [
     'com.android.support:support-v4:21.0.2',
@@ -32,7 +32,7 @@ libs.picasso = 'com.squareup.picasso:picasso:2.1.+'
 libs.joda_time = 'joda-time:joda-time:2.2'
 libs.commons_io = 'commons-io:commons-io:2.4'
 libs.commons_lang = 'org.apache.commons:commons-lang3:3.1'
-libs.google_play_services = 'com.google.android.gms:play-services:5.0.89'
+libs.google_play_services_base = 'com.google.android.gms:play-services-base:6.5.87'
 
 libs.mockito = [
     'org.mockito:mockito-core:1.9.5',
