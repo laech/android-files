@@ -5,6 +5,7 @@ import com.google.auto.value.AutoValue;
 import java.io.File;
 import java.net.URI;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 @AutoValue
@@ -33,6 +34,10 @@ public abstract class LocalPath implements Path {
 
   public static LocalPath of(File file) {
     return new AutoValue_LocalPath(new File(sanitizedUri(file)));
+  }
+
+  @Override public FileSystem system() {
+    return LocalFileSystem.get();
   }
 
   @Override public URI uri() {

@@ -17,6 +17,14 @@ import java.net.URI;
  */
 public interface Path {
 
+  /**
+   * The file system this path belongs to.
+   */
+  FileSystem system();
+
+  /**
+   * The absolute/normalized URI representation of this path.
+   */
   URI uri();
 
   /**

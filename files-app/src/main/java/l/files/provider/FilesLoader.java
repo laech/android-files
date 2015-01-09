@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 import l.files.fs.DirectoryEntry;
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileStatus;
-import l.files.fs.Files;
+import l.files.fs.FileSystem;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
@@ -35,27 +35,34 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   private static final Logger logger = Logger.get(FilesLoader.class);
   private static final Handler handler = new Handler(getMainLooper());
 
+  private final FileSystem fs;
+  private final WatchService service;
   private final Path path;
   private final Comparator<FileStatus> comparator;
   private final ConcurrentMap<Path, FileStatus> data;
   private final EventListener listener;
-  private final WatchService service;
   private final Runnable deliverResult;
 
   /**
    * @param path       the path to load files from
    * @param comparator the comparator for sorting results
-   * @param service    the service to monitor changes file changes
    */
+  public FilesLoader(Context context, Path path, Comparator<FileStatus> comparator) {
+    this(context, path, comparator, path.system(), path.system().getWatchService());
+  }
+
   public FilesLoader(
       Context context,
       Path path,
       Comparator<FileStatus> comparator,
+      FileSystem fs,
       WatchService service) {
     super(context);
-    this.path = checkNotNull(path);
-    this.comparator = checkNotNull(comparator);
-    this.service = checkNotNull(service);
+
+    this.path = checkNotNull(path, "path");
+    this.comparator = checkNotNull(comparator, "comparator");
+    this.fs = checkNotNull(fs, "fs");
+    this.service = checkNotNull(service, "service");
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();
     this.deliverResult = new DeliverResultRunnable();
@@ -73,7 +80,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   @Override public List<FileStatus> loadInBackground() {
     data.clear();
     service.register(path, listener);
-    try (DirectoryStream stream = Files.openDirectory(path)) {
+    try (DirectoryStream stream = fs.openDirectory(path)) {
       for (DirectoryEntry entry : stream) {
         checkCancelled();
         addData(entry.path());
@@ -114,17 +121,13 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
    */
   private boolean addData(Path path) {
     try {
-      FileStatus newStat = stat(path);
+      FileStatus newStat = fs.stat(path, false);
       FileStatus oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
     } catch (NoSuchFileException e) {
       logger.debug(e);
     }
     return false;
-  }
-
-  private FileStatus stat(Path path) {
-    return Files.stat(path, false);
   }
 
   final class EventListener implements WatchEvent.Listener {
