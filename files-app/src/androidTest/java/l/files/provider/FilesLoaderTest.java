@@ -3,7 +3,7 @@ package l.files.provider;
 import android.app.LoaderManager;
 import android.os.Bundle;
 
-import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -15,19 +15,17 @@ import java.util.Random;
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
 import l.files.fs.FileStatus;
-import l.files.fs.FileSystem;
-import l.files.fs.FileSystems;
 import l.files.fs.Path;
-import l.files.fs.WatchService;
+import l.files.fs.local.LocalFileSystem;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
-import static l.files.fs.WatchEvent.Listener;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.common.testing.Tests.timeout;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
@@ -35,7 +33,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
   private static final Random random = new Random();
 
   private TempDir tmp;
-  private FileSystem fs;
+  private Path path;
 
   public FilesLoaderTest() {
     super(TestActivity.class);
@@ -44,7 +42,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
   @Override protected void setUp() throws Exception {
     super.setUp();
     tmp = TempDir.create();
-    fs = FileSystems.get("file");
+    path = LocalFileSystem.get().path(tmp.get().toURI());
   }
 
   @Override protected void tearDown() throws Exception {
@@ -59,25 +57,26 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   public void testMonitorsDirectoryChanges() throws Exception {
     List<FileStatus> expected = new ArrayList<>(createFiles("1", "2"));
-    Subject subject = subject(fs.watcher())
-        .initLoader().awaitOnLoadFinished(expected);
+    Subject subject = subject().initLoader().awaitOnLoadFinished(expected);
 
     expected.addAll(createFiles("3", "4", "5", "6"));
     subject.awaitOnLoadFinished(expected);
   }
 
   public void testUnregistersFromWatchServiceOnDestroy() throws Exception {
-    WatchService service = mock(WatchService.class);
-    ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
-    ArgumentCaptor<Listener> listenerCaptor = ArgumentCaptor.forClass(Listener.class);
-
-    Subject subject = subject(service).initLoader();
-    verify(service, timeout(2000)).register(pathCaptor.capture(), listenerCaptor.capture());
-    assertNotNull(pathCaptor.getValue());
-    assertNotNull(listenerCaptor.getValue());
+    Subject subject = subject().initLoader();
+    timeout(2, SECONDS, new Runnable() {
+      @Override public void run() {
+        assertTrue(path.system().watcher().isRegistered(path));
+      }
+    });
 
     subject.destroyLoader();
-    verify(service, timeout(2000)).unregister(pathCaptor.getValue(), listenerCaptor.getValue());
+    timeout(2, SECONDS, new Runnable() {
+      @Override public void run() {
+        assertFalse(path.system().watcher().isRegistered(path));
+      }
+    });
   }
 
   private List<FileStatus> createFiles(String... names) {
@@ -85,23 +84,18 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
       File file = i % 2 == 0 ? tmp.createFile(name) : tmp.createDir(name);
-      result.add(fs.stat(fs.path(file.toURI()), false));
+      result.add(path.system().stat(path.system().path(file.toURI()), false));
     }
     return result;
   }
 
   Subject subject() {
-    return subject(mock(WatchService.class));
-  }
-
-  Subject subject(final WatchService service) {
     final int loaderId = random.nextInt();
-    final Path root = fs.path(tmp.get().toURI());
     final FileSort comparator = FileSort.Name.get();
     final LoaderCallback listener = mock(LoaderCallback.class);
     given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
       @Override public FilesLoader answer(final InvocationOnMock invocation) {
-        return new FilesLoader(getActivity(), root, comparator, fs, service);
+        return new FilesLoader(getActivity(), path, comparator);
       }
     });
     return new Subject(loaderId, getActivity().getLoaderManager(), listener);
@@ -121,7 +115,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     }
 
     Subject awaitOnLoadFinished(List<FileStatus> expected) {
-      verify(listener, timeout(2000)).onLoadFinished(any(FilesLoader.class), eq(expected));
+      verify(listener, Mockito.timeout(2000)).onLoadFinished(any(FilesLoader.class), eq(expected));
       return this;
     }
 
