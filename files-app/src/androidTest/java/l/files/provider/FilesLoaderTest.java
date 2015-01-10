@@ -7,7 +7,6 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -52,39 +51,49 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   public void testLoadFiles() throws Exception {
     List<FileStatus> expected = createFiles("a", "b");
-    subject().initLoader().awaitOnLoadFinished(expected);
+    try (Subject subject = subject()) {
+      subject.initLoader().awaitOnLoadFinished(expected);
+    }
   }
 
   public void testMonitorsDirectoryChanges() throws Exception {
     List<FileStatus> expected = new ArrayList<>(createFiles("1", "2"));
-    Subject subject = subject().initLoader().awaitOnLoadFinished(expected);
-
-    expected.addAll(createFiles("3", "4", "5", "6"));
-    subject.awaitOnLoadFinished(expected);
+    try (Subject subject = subject()) {
+      subject.initLoader().awaitOnLoadFinished(expected);
+      expected.addAll(createFiles("3", "4", "5", "6"));
+      subject.awaitOnLoadFinished(expected);
+    }
   }
 
   public void testUnregistersFromWatchServiceOnDestroy() throws Exception {
-    Subject subject = subject().initLoader();
-    timeout(2, SECONDS, new Runnable() {
-      @Override public void run() {
-        assertTrue(path.system().watcher().isRegistered(path));
-      }
-    });
+    try (Subject subject = subject()) {
+      subject.initLoader();
 
-    subject.destroyLoader();
-    timeout(2, SECONDS, new Runnable() {
-      @Override public void run() {
-        assertFalse(path.system().watcher().isRegistered(path));
-      }
-    });
+      timeout(2, SECONDS, new Runnable() {
+        @Override public void run() {
+          assertTrue(path.system().watcher().isRegistered(path));
+        }
+      });
+
+      subject.destroyLoader();
+      timeout(2, SECONDS, new Runnable() {
+        @Override public void run() {
+          assertFalse(path.system().watcher().isRegistered(path));
+        }
+      });
+    }
   }
 
   private List<FileStatus> createFiles(String... names) {
     List<FileStatus> result = new ArrayList<>();
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
-      File file = i % 2 == 0 ? tmp.createFile(name) : tmp.createDir(name);
-      result.add(path.system().stat(path.system().path(file.toURI()), false));
+      if (i % 2 == 0) {
+        tmp.createFile(name);
+      } else {
+        tmp.createDir(name);
+      }
+      result.add(path.system().stat(path.resolve(name), false));
     }
     return result;
   }
@@ -103,7 +112,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   private static interface LoaderCallback extends LoaderCallbacks<List<FileStatus>> {}
 
-  private static final class Subject {
+  private static final class Subject implements AutoCloseable {
     private final int loaderId;
     private final LoaderManager manager;
     private final LoaderCallback listener;
@@ -129,5 +138,9 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       return this;
     }
 
+    @Override public void close() {
+      destroyLoader();
+    }
   }
+
 }
