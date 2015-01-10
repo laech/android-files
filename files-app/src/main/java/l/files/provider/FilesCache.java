@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
-import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.LocalPath;
 import l.files.logging.Logger;
 
@@ -46,14 +46,14 @@ final class FilesCache implements
   private static final Logger logger = Logger.get(FilesCache.class);
 
 
-  static final Predicate<LocalFileStatus> HIDDEN = new Predicate<LocalFileStatus>() {
+  static final Predicate<FileStatus> HIDDEN = new Predicate<FileStatus>() {
     @Override
-    public boolean apply(LocalFileStatus input) {
+    public boolean apply(FileStatus input) {
       return input.isHidden();
     }
   };
 
-  static final Predicate<LocalFileStatus> NOT_HIDDEN = not(HIDDEN);
+  static final Predicate<FileStatus> NOT_HIDDEN = not(HIDDEN);
 
 
   private final Context context;
@@ -82,7 +82,7 @@ final class FilesCache implements
   // TODO implement CancellationSignal
   public Cursor get(Uri uri, String[] columns, String sortOrder, CancellationSignal signal) {
     final ValueMap map = getCache(uri);
-    final LocalFileStatus[] files = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
+    final FileStatus[] files = showHidden(uri) ? map.values() : map.values(NOT_HIDDEN);
     return new CursorWrapper(newFileCursor(uri, columns, sortOrder, files)) {
       // Hold a reference to keep the cache alive as long as the cursor is used
       @SuppressWarnings("UnusedDeclaration")
@@ -94,21 +94,21 @@ final class FilesCache implements
     return cache.getIfPresent(path);
   }
 
-  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, LocalFileStatus[] files) {
+  private Cursor newFileCursor(Uri uri, String[] projection, String sortOrder, FileStatus[] files) {
     sort(files, sortOrder);
     Cursor c = new FileCursor(files, projection);
     c.setNotificationUri(resolver, uri);
     return c;
   }
 
-  private void sort(LocalFileStatus[] data, String sortOrder) {
+  private void sort(FileStatus[] data, String sortOrder) {
     if (sortOrder != null) {
       SortBy.valueOf(sortOrder).sort(data);
     }
   }
 
   private ValueMap getCache(Uri uri) {
-    File file = new File(URI.create(getFileId(uri)));
+    File file = new File(URI.create(getFileId(uri))); // TODO
     Path path = LocalPath.of(file);
     if (!service.isWatchable(path)) {
       return loadInto(new ValueMap(), path);
@@ -149,7 +149,7 @@ final class FilesCache implements
     for (String name : names) {
       try {
         Path child = path.resolve(name);
-        map.put(child, LocalFileStatus.stat(child, false));
+        map.put(child, child.system().stat(child, false));
       } catch (FileSystemException e) {
         logger.debug(e, "Failed to read %s", path);
       }
@@ -159,7 +159,7 @@ final class FilesCache implements
 
   @Override public void onEvent(WatchEvent event) {
     Path parent = event.path().parent();
-    String location = getFileId(LocalPath.check(parent).file());
+    String location = getFileId(new File(parent.uri()));
     Uri uri = getFileUri(context, location);
     EventBatch batch;
     synchronized (this) {
@@ -193,8 +193,8 @@ final class FilesCache implements
     }
 
     try {
-      LocalFileStatus newInfo = LocalFileStatus.stat(path, false);
-      LocalFileStatus oldInfo = data.put(path, newInfo);
+      FileStatus newInfo = path.system().stat(path, false);
+      FileStatus oldInfo = data.put(path, newInfo);
       return !Objects.equal(newInfo, oldInfo);
     } catch (FileSystemException e) {
       logger.debug(e, "Failed to read %s", path);
@@ -225,32 +225,32 @@ final class FilesCache implements
   }
 
   static final class ValueMap {
-    private final Map<Path, LocalFileStatus> map;
+    private final Map<Path, FileStatus> map;
 
     ValueMap() {
       map = new HashMap<>();
     }
 
-    synchronized LocalFileStatus put(Path key, LocalFileStatus value) {
+    synchronized FileStatus put(Path key, FileStatus value) {
       return map.put(key, value);
     }
 
-    synchronized LocalFileStatus remove(Path key) {
+    synchronized FileStatus remove(Path key) {
       return map.remove(key);
     }
 
-    LocalFileStatus[] values() {
-      return values(Predicates.<LocalFileStatus>alwaysTrue());
+    FileStatus[] values() {
+      return values(Predicates.<FileStatus>alwaysTrue());
     }
 
-    synchronized LocalFileStatus[] values(Predicate<LocalFileStatus> filter) {
-      List<LocalFileStatus> list = newArrayListWithCapacity(map.size());
-      for (LocalFileStatus data : map.values()) {
+    synchronized FileStatus[] values(Predicate<FileStatus> filter) {
+      List<FileStatus> list = newArrayListWithCapacity(map.size());
+      for (FileStatus data : map.values()) {
         if (filter.apply(data)) {
           list.add(data);
         }
       }
-      return list.toArray(new LocalFileStatus[list.size()]);
+      return list.toArray(new FileStatus[list.size()]);
     }
   }
 }
