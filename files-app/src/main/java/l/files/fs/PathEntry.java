@@ -1,5 +1,5 @@
 package l.files.fs;
 
-public interface DirectoryEntry {
+public interface PathEntry {
   Path path();
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.DirectoryEntry;
+import l.files.fs.PathEntry;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static l.files.fs.local.Stat.lstat;
@@ -22,19 +22,19 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
     symlink(f1.getPath(), f3.getPath());
 
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      List<DirectoryEntry> expected = Arrays.<DirectoryEntry>asList(
-          LocalDirectoryEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), false),
-          LocalDirectoryEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), true),
-          LocalDirectoryEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), false)
+      List<PathEntry> expected = Arrays.<PathEntry>asList(
+          LocalPathEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), false),
+          LocalPathEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), true),
+          LocalPathEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), false)
       );
-      List<DirectoryEntry> actual = newArrayList(stream);
+      List<PathEntry> actual = newArrayList(stream);
       assertEquals(expected, actual);
     }
   }
 
   public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      Iterator<DirectoryEntry> iterator = stream.iterator();
+      Iterator<PathEntry> iterator = stream.iterator();
       assertFalse(iterator.hasNext());
       assertFalse(iterator.hasNext());
     }

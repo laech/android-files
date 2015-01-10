@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.fs.DirectoryEntry;
+import l.files.fs.PathEntry;
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileSystemException;
 import l.files.fs.Path;
@@ -54,13 +54,13 @@ final class LocalDirectoryStream implements DirectoryStream {
   }
 
   @SuppressWarnings("unchecked")
-  Iterable<LocalDirectoryEntry> local() {
+  Iterable<LocalPathEntry> local() {
     Iterable<?> iterable = this;
-    return (Iterable<LocalDirectoryEntry>) iterable;
+    return (Iterable<LocalPathEntry>) iterable;
   }
 
   @Override
-  public Iterator<DirectoryEntry> iterator() {
+  public Iterator<PathEntry> iterator() {
     if (iterated) {
       throw new IllegalStateException("iterator() has already been called");
     }
@@ -68,10 +68,10 @@ final class LocalDirectoryStream implements DirectoryStream {
     return new DirectoryIterator(parent, dir);
   }
 
-  private static final class DirectoryIterator implements Iterator<DirectoryEntry> {
+  private static final class DirectoryIterator implements Iterator<PathEntry> {
     private final File parent;
     private final long dir;
-    private LocalDirectoryEntry next;
+    private LocalPathEntry next;
 
     DirectoryIterator(File parent, long dir) {
       this.parent = parent;
@@ -85,8 +85,8 @@ final class LocalDirectoryStream implements DirectoryStream {
       return next != null;
     }
 
-    @Override public LocalDirectoryEntry next() {
-      LocalDirectoryEntry entry = next;
+    @Override public LocalPathEntry next() {
+      LocalPathEntry entry = next;
       if (entry != null) {
         next = null;
       } else {
@@ -98,7 +98,7 @@ final class LocalDirectoryStream implements DirectoryStream {
       return entry;
     }
 
-    private LocalDirectoryEntry readNext() {
+    private LocalPathEntry readNext() {
       try {
 
         Dirent entry;
@@ -107,7 +107,7 @@ final class LocalDirectoryStream implements DirectoryStream {
         } while (entry != null && isSelfOrParent(entry));
 
         if (entry != null) {
-          return LocalDirectoryEntry.create(parent, entry);
+          return LocalPathEntry.create(parent, entry);
         } else {
           return null;
         }

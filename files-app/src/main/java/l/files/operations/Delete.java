@@ -2,10 +2,10 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.fs.DirectoryEntry;
+import l.files.fs.PathEntry;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
-import l.files.fs.local.LocalDirectoryTreeTraverser;
+import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.LocalPath;
 
@@ -42,7 +42,7 @@ public final class Delete extends AbstractOperation {
   private void deleteTree(String path, FailureRecorder listener)
       throws InterruptedException {
     // TODO fix this catch FileSystemException
-    for (DirectoryEntry entry : LocalDirectoryTreeTraverser.get().postOrderTraversal(LocalPath.of(path))) {
+    for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(LocalPath.of(path))) {
       checkInterrupt();
       try {
         delete(entry.path());

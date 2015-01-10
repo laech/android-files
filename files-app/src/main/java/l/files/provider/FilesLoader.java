@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import l.files.fs.DirectoryEntry;
+import l.files.fs.PathEntry;
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileStatus;
 import l.files.fs.FileSystem;
@@ -72,7 +72,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
     data.clear();
     service.register(path, listener);
     try (DirectoryStream stream = system.openDirectory(path)) {
-      for (DirectoryEntry entry : stream) {
+      for (PathEntry entry : stream) {
         checkCancelled();
         addData(entry.path());
       }

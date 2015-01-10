@@ -413,7 +413,7 @@ public class LocalWatchService implements WatchService, Closeable {
     // Using a directory stream without stating the children will be faster
     // especially on large directories
     try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.path())) {
-      for (LocalDirectoryEntry entry : stream.local()) {
+      for (LocalPathEntry entry : stream.local()) {
         if (entry.isDirectory()) {
           Path child = entry.path();
           if (!isWatchable(child)) {

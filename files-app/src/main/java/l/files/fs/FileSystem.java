@@ -47,6 +47,11 @@ public interface FileSystem {
   DirectoryStream openDirectory(Path path);
 
   /**
+   * Returns a visitor for traversing file trees.
+   */
+  FileVisitor visitor();
+
+  /**
    * Gets the watch service of this file system for monitoring file
    * system events.
    */
