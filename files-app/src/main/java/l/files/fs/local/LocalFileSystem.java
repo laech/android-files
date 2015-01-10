@@ -32,7 +32,7 @@ public class LocalFileSystem implements FileSystem {
   }
 
   @Override public Path path(String path) {
-    return path(new File(path).toURI());
+    return LocalPath.of(new File(path));
   }
 
   @Override public LocalFileStatus stat(Path path, boolean followLink) {

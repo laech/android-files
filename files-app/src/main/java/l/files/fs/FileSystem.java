@@ -16,8 +16,6 @@ public interface FileSystem {
 
   /**
    * Gets the path from the given path string.
-   *
-   * @throws IllegalArgumentException if the URI scheme is not supported
    */
   Path path(String path);
 
