@@ -35,7 +35,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   private static final Logger logger = Logger.get(FilesLoader.class);
   private static final Handler handler = new Handler(getMainLooper());
 
-  private final FileSystem fs;
+  private final FileSystem system;
   private final WatchService service;
   private final Path path;
   private final Comparator<FileStatus> comparator;
@@ -48,24 +48,15 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
    * @param comparator the comparator for sorting results
    */
   public FilesLoader(Context context, Path path, Comparator<FileStatus> comparator) {
-    this(context, path, comparator, path.system(), path.system().watcher());
-  }
-
-  public FilesLoader(
-      Context context,
-      Path path,
-      Comparator<FileStatus> comparator,
-      FileSystem fs,
-      WatchService service) {
     super(context);
 
     this.path = checkNotNull(path, "path");
     this.comparator = checkNotNull(comparator, "comparator");
-    this.fs = checkNotNull(fs, "fs");
-    this.service = checkNotNull(service, "service");
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();
     this.deliverResult = new DeliverResultRunnable();
+    this.system = path.system();
+    this.service = system.watcher();
   }
 
   @Override protected void onStartLoading() {
@@ -80,7 +71,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   @Override public List<FileStatus> loadInBackground() {
     data.clear();
     service.register(path, listener);
-    try (DirectoryStream stream = fs.openDirectory(path)) {
+    try (DirectoryStream stream = system.openDirectory(path)) {
       for (DirectoryEntry entry : stream) {
         checkCancelled();
         addData(entry.path());
@@ -121,7 +112,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
    */
   private boolean addData(Path path) {
     try {
-      FileStatus newStat = fs.stat(path, false);
+      FileStatus newStat = system.stat(path, false);
       FileStatus oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
     } catch (NoSuchFileException e) {
