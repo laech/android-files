@@ -2,8 +2,11 @@ package l.files.provider.bookmarks;
 
 import android.content.SharedPreferences;
 
+import java.net.URI;
+
 import l.files.common.testing.BaseTest;
 import l.files.fs.FileSystem;
+import l.files.fs.FileSystemProvider;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
 
@@ -24,7 +27,11 @@ public final class BookmarkManagerTest extends BaseTest {
     super.setUp();
     fs = LocalFileSystem.get();
     pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
-    manager = new BookmarkManagerImpl(fs, pref);
+    manager = new BookmarkManagerImpl(new FileSystemProvider() {
+      @Override public FileSystem get(URI uri) {
+        return fs;
+      }
+    }, pref);
   }
 
   @Override protected void tearDown() throws Exception {

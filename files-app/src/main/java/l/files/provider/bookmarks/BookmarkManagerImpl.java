@@ -14,8 +14,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.FileSystem;
 import l.files.fs.FileSystemException;
+import l.files.fs.FileSystemProvider;
 import l.files.fs.Path;
 import l.files.logging.Logger;
 
@@ -44,13 +44,13 @@ final class BookmarkManagerImpl implements BookmarkManager {
       .add(uri(DIRECTORY_DOWNLOADS))
       .build();
 
-  private final FileSystem fs;
+  private final FileSystemProvider provider;
   private final Set<Path> bookmarks;
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
-  BookmarkManagerImpl(FileSystem fs, SharedPreferences pref) {
-    this.fs = checkNotNull(fs, "fs");
+  BookmarkManagerImpl(FileSystemProvider provider, SharedPreferences pref) {
+    this.provider = checkNotNull(provider, "provider");
     this.pref = checkNotNull(pref, "pref");
     this.listeners = new CopyOnWriteArraySet<>();
     this.bookmarks = new CopyOnWriteArraySet<>();
@@ -61,7 +61,7 @@ final class BookmarkManagerImpl implements BookmarkManager {
     for (String uriString : uriStrings) {
       try {
         URI uri = new URI(uriString);
-        Path path = fs.path(uri);
+        Path path = provider.get(uri).path(uri);
         paths.add(path);
       } catch (URISyntaxException | FileSystemException e) {
         logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);
