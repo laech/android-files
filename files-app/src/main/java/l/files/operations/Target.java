@@ -4,6 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import java.io.File;
 
+import l.files.fs.Path;
+
 /**
  * Source and destination of a file task.
  */
@@ -44,6 +46,12 @@ public abstract class Target {
     return create(source, destination);
   }
 
+  public static Target fromPaths(Iterable<Path> srcPaths, Path dstPath) {
+    String source = srcPaths.iterator().next().parent().name();
+    String destination = dstPath.name();
+    return create(source, destination);
+  }
+
   /**
    * Creates an instance from the given file paths.
    * {@link #source()} and {@link #destination()} will be the parent's name of
@@ -52,6 +60,11 @@ public abstract class Target {
   public static Target fromPaths(Iterable<String> paths) {
     String first = paths.iterator().next();
     String name = new File(first).getParentFile().getName();
+    return create(name, name);
+  }
+
+  public static Target fromFsPaths(Iterable<Path> paths) {
+    String name = paths.iterator().next().parent().name();
     return create(name, name);
   }
 }

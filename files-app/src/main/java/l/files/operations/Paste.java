@@ -3,26 +3,28 @@ package l.files.operations;
 import java.io.File;
 import java.io.IOException;
 
+import l.files.fs.Path;
 import l.files.fs.local.Files;
+import l.files.fs.local.LocalPath;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.fs.local.Files.isAncestorOrSelf;
 
 abstract class Paste extends AbstractOperation {
 
-  private final String dstPath;
+  private final Path dstPath;
 
-  Paste(Iterable<String> sources, String dstPath) {
+  Paste(Iterable<? extends Path> sources, Path dstPath) {
     super(sources);
     this.dstPath = checkNotNull(dstPath, "dstPath");
   }
 
-  @Override void process(String from, FailureRecorder listener)
+  @Override void process(Path from, FailureRecorder listener)
       throws InterruptedException {
     checkInterrupt();
 
-    File destinationFile = new File(dstPath);
-    File fromFile = new File(from);
+    File destinationFile = new File(dstPath.uri());
+    File fromFile = new File(from.uri());
     try {
       if (isAncestorOrSelf(destinationFile, fromFile)) {
         throw new CannotPasteIntoSelfException(
@@ -36,7 +38,7 @@ abstract class Paste extends AbstractOperation {
     }
 
     File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
-    paste(from, to.getPath(), listener);
+    paste(from, LocalPath.of(to), listener);
   }
 
   /**
@@ -44,7 +46,7 @@ abstract class Paste extends AbstractOperation {
    * content into {@code to}. If {@code from} is a directory, paste its content
    * into {@code to}.
    */
-  abstract void paste(String from, String to, FailureRecorder listener)
+  abstract void paste(Path from, Path to, FailureRecorder listener)
       throws InterruptedException;
 
 }

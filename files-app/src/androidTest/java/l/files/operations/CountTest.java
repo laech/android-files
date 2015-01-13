@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.fs.local.LocalPath;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
@@ -22,7 +23,7 @@ public final class CountTest extends FileBaseTest {
         tmp().get("3/4"),
         tmp().get("3/4/c.txt"));
 
-    Count counter = new Count(asList(tmp().get().getPath()));
+    Count counter = new Count(asList(LocalPath.of(tmp().get())));
     counter.execute();
 
     assertEquals(expected.size(), counter.getCount());

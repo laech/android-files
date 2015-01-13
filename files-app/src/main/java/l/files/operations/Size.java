@@ -1,8 +1,8 @@
 package l.files.operations;
 
 import l.files.fs.FileSystemException;
+import l.files.fs.Path;
 import l.files.fs.local.LocalFileStatus;
-import l.files.fs.local.LocalPath;
 import l.files.logging.Logger;
 
 final class Size extends Count {
@@ -11,7 +11,7 @@ final class Size extends Count {
 
   private volatile long size;
 
-  public Size(Iterable<String> paths) {
+  public Size(Iterable<? extends Path> paths) {
     super(paths);
   }
 
@@ -22,10 +22,10 @@ final class Size extends Count {
     return size;
   }
 
-  @Override protected void onCount(String path) {
+  @Override protected void onCount(Path path) {
     super.onCount(path);
     try {
-      size += LocalFileStatus.stat(LocalPath.of(path), false).size();
+      size += LocalFileStatus.stat(path, false).size();
     } catch (FileSystemException e) {
       logger.warn(e);
     }

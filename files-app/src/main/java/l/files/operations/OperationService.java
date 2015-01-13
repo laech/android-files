@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ import java.util.concurrent.Future;
 import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.eventbus.Subscribe;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getService;
@@ -161,30 +164,41 @@ public final class OperationService extends Service {
   static enum FileAction {
 
     DELETE("l.files.operations.DELETE") {
-      @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<String> paths = intent.getStringArrayListExtra(EXTRA_PATHS);
+      @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+        List<Path> paths = getSourcePaths(intent);
         return new DeleteTask(id, Clock.system(), bus, handler, paths);
       }
     },
 
     COPY("l.files.operations.COPY") {
-      @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
-        String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new CopyTask(id, Clock.system(), bus, handler, srcPaths, dstPath);
+      @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+        List<Path> sources = getSourcePaths(intent);
+        Path destination = getDestinationPath(intent);
+        return new CopyTask(id, Clock.system(), bus, handler, sources, destination);
       }
     },
 
     MOVE("l.files.operations.MOVE") {
-      @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<String> srcPaths = intent.getStringArrayListExtra(EXTRA_PATHS);
-        String dstPath = intent.getStringExtra(EXTRA_DST_PATH);
-        return new MoveTask(id, Clock.system(), bus, handler, srcPaths, dstPath);
+      @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+        List<Path> sources = getSourcePaths(intent);
+        Path destination = getDestinationPath(intent);
+        return new MoveTask(id, Clock.system(), bus, handler, sources, destination);
       }
     };
+
+    private static Path getDestinationPath(Intent intent) {
+      String path = intent.getStringExtra(EXTRA_DST_PATH);
+      return LocalPath.of(path);
+    }
+
+    private static List<Path> getSourcePaths(Intent intent) {
+      List<String> uriStrings = intent.getStringArrayListExtra(EXTRA_PATHS);
+      List<Path> paths = new ArrayList<>(uriStrings.size());
+      for (String path : uriStrings) {
+        paths.add(LocalPath.of(path));
+      }
+      return paths;
+    }
 
     private final String action;
 

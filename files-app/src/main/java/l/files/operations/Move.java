@@ -1,6 +1,9 @@
 package l.files.operations;
 
+import java.io.File;
 import java.io.IOException;
+
+import l.files.fs.Path;
 
 import static l.files.fs.local.Files.rename;
 
@@ -8,7 +11,7 @@ final class Move extends Paste {
 
   private volatile int movedItemCount;
 
-  public Move(Iterable<String> sources, String dstDir) {
+  public Move(Iterable<Path> sources, Path dstDir) {
     super(sources, dstDir);
   }
 
@@ -19,9 +22,9 @@ final class Move extends Paste {
     return movedItemCount;
   }
 
-  @Override void paste(String from, String to, FailureRecorder listener) {
+  @Override void paste(Path from, Path to, FailureRecorder listener) {
     try {
-      rename(from, to);
+      rename(new File(from.uri()).getPath(), new File(to.uri()).getPath()); // TODO fix this
       movedItemCount++;
     } catch (IOException e) {
       listener.onFailure(from, e);

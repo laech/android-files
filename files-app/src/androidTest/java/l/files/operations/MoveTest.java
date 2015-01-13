@@ -4,6 +4,11 @@ import com.google.common.io.Files;
 
 import java.io.File;
 
+import autovalue.shaded.com.google.common.common.base.Function;
+import autovalue.shaded.com.google.common.common.collect.Iterables;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
+
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
@@ -61,7 +66,11 @@ public final class MoveTest extends PasteTest {
   }
 
   @Override protected Move create(Iterable<String> sources, String dstDir) {
-    return new Move(sources, dstDir);
+    return new Move(Iterables.transform(sources, new Function<String, Path>() {
+      @Override public Path apply(String s) {
+        return LocalPath.of(s);
+      }
+    }), LocalPath.of(dstDir));
   }
 
   private Move create(File src, File dst) {

@@ -2,16 +2,16 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.fs.PathEntry;
 import l.files.fs.FileSystemException;
+import l.files.fs.Path;
+import l.files.fs.PathEntry;
 import l.files.fs.local.LocalFileVisitor;
-import l.files.fs.local.LocalPath;
 
 class Count extends AbstractOperation {
 
   private volatile int count;
 
-  Count(Iterable<String> paths) {
+  Count(Iterable<? extends Path> paths) {
     super(paths);
   }
 
@@ -22,7 +22,7 @@ class Count extends AbstractOperation {
     return count;
   }
 
-  @Override void process(String path, FailureRecorder listener)
+  @Override void process(Path path, FailureRecorder listener)
       throws InterruptedException {
     try {
       count(path);
@@ -31,14 +31,14 @@ class Count extends AbstractOperation {
     }
   }
 
-  private void count(String path) throws InterruptedException {
-    for (PathEntry entry : LocalFileVisitor.get().breadthFirstTraversal(LocalPath.of(path))) {
+  private void count(Path path) throws InterruptedException {
+    for (PathEntry entry : LocalFileVisitor.get().breadthFirstTraversal(path)) {
       checkInterrupt();
       count++;
-      onCount(entry.path().toString());
+      onCount(entry.path());
     }
   }
 
-  void onCount(String path) {
+  void onCount(Path path) {
   }
 }

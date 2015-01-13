@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
-import l.files.fs.PathEntry;
+import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
+import l.files.fs.Path;
+import l.files.fs.PathEntry;
 import l.files.fs.local.Files;
-import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalPath;
 import l.files.logging.Logger;
 
@@ -36,7 +38,7 @@ final class Copy extends Paste {
   private volatile long copiedByteCount;
   private volatile int copiedItemCount;
 
-  public Copy(Iterable<String> sources, String dstDir) {
+  public Copy(Iterable<? extends Path> sources, Path dstDir) {
     super(sources, dstDir);
   }
 
@@ -54,13 +56,13 @@ final class Copy extends Paste {
     return copiedItemCount;
   }
 
-  @Override void paste(String from, String to, FailureRecorder listener)
+  @Override void paste(Path from, Path to, FailureRecorder listener)
       throws InterruptedException {
 
-    File oldRoot = new File(from);
-    File newRoot = new File(to);
+    File oldRoot = new File(from.uri());
+    File newRoot = new File(to.uri());
 
-    for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(LocalPath.of(from))) {
+    for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
       checkInterrupt();
 
       LocalFileStatus file;
@@ -68,46 +70,45 @@ final class Copy extends Paste {
         file = LocalFileStatus.stat(entry.path(), false);
       } catch (FileSystemException e) {
         // TODO fix this
-        listener.onFailure(entry.path().toString(), new IOException(e.getMessage(), e));
+        listener.onFailure(entry.path(), new IOException(e.getMessage(), e));
         continue;
       }
 
       File dst = Files.replace(LocalPath.check(entry.path()).file(), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
-        copyLink(file, dst.getPath(), listener);
+        copyLink(file, LocalPath.of(dst), listener);
       } else if (file.isDirectory()) {
-        createDirectory(file, dst, listener);
+        createDirectory(file, LocalPath.of(dst), listener);
       } else {
-        copyFile(file, dst.getPath(), listener);
+        copyFile(file, LocalPath.of(dst.getPath()), listener);
       }
     }
   }
 
-  private void copyLink(LocalFileStatus src, String dst, FailureRecorder listener) {
+  private void copyLink(FileStatus src, Path dst, FailureRecorder listener) {
     try {
-      String target = readlink(src.path().toString());
-      symlink(target, dst);
+      String target = readlink(new File(src.path().uri()).getPath()); // TODO fix this
+      symlink(target, new File(dst.uri()).getPath()); // TODO fix this
       copiedByteCount += src.size();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      listener.onFailure(src.path().toString(), e);
+      listener.onFailure(src.path(), e);
     }
   }
 
-  private void createDirectory(
-      LocalFileStatus src, File dst, FailureRecorder listener) {
+  private void createDirectory(FileStatus src, Path dst, FailureRecorder listener) {
     try {
-      forceMkdir(dst);
+      forceMkdir(new File(dst.uri())); // TODO fix this
       copiedByteCount += src.size();
       copiedItemCount++;
-      setLastModifiedDate(src, dst.getPath());
+      setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      listener.onFailure(src.path().toString(), e);
+      listener.onFailure(src.path(), e);
     }
   }
 
-  private void copyFile(LocalFileStatus src, String dst, FailureRecorder listener)
+  private void copyFile(FileStatus src, Path dst, FailureRecorder listener)
       throws InterruptedException {
     checkInterrupt();
 
@@ -115,8 +116,8 @@ final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(src.path().file());
-      fos = new FileOutputStream(dst);
+      fis = new FileInputStream(new File(src.path().uri()));// TODO fix this
+      fos = new FileOutputStream(new File(dst.uri())); // TODO fix this
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
       long size = input.size();
@@ -130,13 +131,13 @@ final class Copy extends Paste {
       copiedItemCount++;
 
     } catch (IOException e) {
-      if (!new File(dst).delete()) {
+      if (!new File(dst.uri()).delete()) { // TODO fix this
         logger.warn(e, "Failed to delete path on exception %s", dst);
       }
       if (e instanceof ClosedByInterruptException) {
         throw new InterruptedException();
       } else {
-        listener.onFailure(src.path().toString(), e);
+        listener.onFailure(src.path(), e);
       }
 
     } finally {
@@ -147,9 +148,9 @@ final class Copy extends Paste {
     setLastModifiedDate(src, dst);
   }
 
-  private void setLastModifiedDate(LocalFileStatus src, String dst) {
-    File dstFile = new File(dst);
-    File srcFile = src.path().file();
+  private void setLastModifiedDate(FileStatus src, Path dst) {
+    File dstFile = new File(dst.uri()); // TODO fix this
+    File srcFile = new File(src.path().uri()); // TODO fix this
     //noinspection StatementWithEmptyBody
     if (!dstFile.setLastModified(srcFile.lastModified())) {
       /*

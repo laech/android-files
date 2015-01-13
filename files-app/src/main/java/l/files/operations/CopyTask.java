@@ -3,6 +3,7 @@ package l.files.operations;
 import android.os.Handler;
 
 import de.greenrobot.event.EventBus;
+import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.COPY;
 
@@ -12,7 +13,7 @@ final class CopyTask extends Task {
   private final Copy copy;
 
   CopyTask(int id, Clock clock, EventBus bus, Handler handler,
-           Iterable<String> sources, String dstPath) {
+           Iterable<Path> sources, Path dstPath) {
     super(TaskId.create(id, COPY), Target.fromPaths(sources, dstPath),
         clock, bus, handler);
     this.size = new Size(sources);

@@ -3,6 +3,7 @@ package l.files.operations;
 import android.os.Handler;
 
 import de.greenrobot.event.EventBus;
+import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.DELETE;
 
@@ -12,8 +13,8 @@ final class DeleteTask extends Task {
   private final Delete delete;
 
   DeleteTask(int id, Clock clock, EventBus bus, Handler handler,
-             Iterable<String> paths) {
-    super(TaskId.create(id, DELETE), Target.fromPaths(paths),
+             Iterable<Path> paths) {
+    super(TaskId.create(id, DELETE), Target.fromFsPaths(paths),
         clock, bus, handler);
     this.count = new Size(paths);
     this.delete = new Delete(paths);

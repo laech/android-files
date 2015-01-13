@@ -6,6 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import autovalue.shaded.com.google.common.common.base.Function;
+import autovalue.shaded.com.google.common.common.collect.Iterables;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
+
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.util.Arrays.asList;
@@ -86,6 +91,10 @@ public final class CopyTest extends PasteTest {
 
   @Override
   protected Copy create(Iterable<String> sources, String dstDir) {
-    return new Copy(sources, dstDir);
+    return new Copy(Iterables.transform(sources, new Function<String, Path>() {
+      @Override public Path apply(String input) {
+        return LocalPath.of(input);
+      }
+    }), LocalPath.of(dstDir));
   }
 }

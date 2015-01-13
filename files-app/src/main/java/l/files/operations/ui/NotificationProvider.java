@@ -154,7 +154,7 @@ final class NotificationProvider {
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
       messages.add(FailureMessage.create(
-          failure.path(), failure.cause().getMessage()));
+          failure.path().toString(), failure.cause().getMessage()));
     }
     String title = viewer.getContentTitle(state);
     return FailuresActivity.newIntent(context, title, messages);

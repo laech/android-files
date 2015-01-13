@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import l.files.fs.Path;
+
 abstract class AbstractOperation implements FileOperation {
 
   /**
@@ -15,9 +17,9 @@ abstract class AbstractOperation implements FileOperation {
    */
   private static final int ERROR_LIMIT = 20;
 
-  private final Iterable<String> paths;
+  private final Iterable<Path> paths;
 
-  AbstractOperation(Iterable<String> paths) {
+  AbstractOperation(Iterable<? extends Path> paths) {
     this.paths = ImmutableSet.copyOf(paths);
   }
 
@@ -30,14 +32,14 @@ abstract class AbstractOperation implements FileOperation {
   @Override
   public void execute() throws InterruptedException {
     FailureRecorder listener = new FailureRecorder(ERROR_LIMIT);
-    for (String path : paths) {
+    for (Path path : paths) {
       checkInterrupt();
       process(path, listener);
     }
     listener.throwIfNotEmpty();
   }
 
-  abstract void process(String path, FailureRecorder listener)
+  abstract void process(Path path, FailureRecorder listener)
       throws InterruptedException;
 
   static final class FailureRecorder {
@@ -49,12 +51,12 @@ abstract class AbstractOperation implements FileOperation {
       this.failures = new ArrayList<>();
     }
 
-    public void onFailure(String path, IOException failure)
+    public void onFailure(Path path, IOException failure)
         throws FileException {
       if (failures.size() > limit) {
         throw new FileException(failures);
       }
-      failures.add(Failure.create(path, failure));
+      failures.add(Failure.create(path.toString(), failure));
     }
 
     void throwIfNotEmpty() {

@@ -2,11 +2,11 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.fs.PathEntry;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileVisitor;
+import l.files.fs.PathEntry;
 import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalPath;
 
 import static l.files.fs.local.Files.remove;
@@ -16,7 +16,7 @@ public final class Delete extends AbstractOperation {
   private volatile int deletedItemCount;
   private volatile long deletedByteCount;
 
-  public Delete(Iterable<String> paths) {
+  public Delete(Iterable<? extends Path> paths) {
     super(paths);
   }
 
@@ -34,22 +34,22 @@ public final class Delete extends AbstractOperation {
     return deletedByteCount;
   }
 
-  @Override void process(String path, FailureRecorder listener)
+  @Override void process(Path path, FailureRecorder listener)
       throws InterruptedException {
     deleteTree(path, listener);
   }
 
-  private void deleteTree(String path, FailureRecorder listener)
+  private void deleteTree(Path path, FailureRecorder listener)
       throws InterruptedException {
     // TODO fix this catch FileSystemException
-    for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(LocalPath.of(path))) {
+    for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(path)) {
       checkInterrupt();
       try {
         delete(entry.path());
       } catch (NoSuchFileException e) {
         // Ignore
       } catch (IOException e) {
-        listener.onFailure(entry.path().toString(), e);
+        listener.onFailure(entry.path(), e);
       }
     }
   }
