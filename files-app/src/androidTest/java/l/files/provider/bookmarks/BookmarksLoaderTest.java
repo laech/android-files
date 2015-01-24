@@ -7,12 +7,14 @@ import android.os.Bundle;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.fs.FileSystem;
+import l.files.fs.FileSystemProvider;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
 import l.files.test.TestActivity;
@@ -43,7 +45,11 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
     super.setUp();
     fs = LocalFileSystem.get();
     preferences = getActivity().getSharedPreferences(getClass().getSimpleName(), MODE_PRIVATE);
-    manager = new BookmarkManagerImpl(fs, preferences);
+    manager = new BookmarkManagerImpl(new FileSystemProvider() {
+      @Override public FileSystem get(URI uri) {
+        return fs;
+      }
+    }, preferences);
     assertTrue(manager.clearBookmarksSync());
   }
 
