@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'provided-base'
 
 android {
   compileSdkVersion 21
@@ -54,9 +55,10 @@ dependencies {
   compile libs.google_play_services_base
   compile libs.guava
   compile libs.tika
-  compile libs.auto_value
   compile libs.commons_io
   compile libs.android_support
+  provided libs.auto_value
+  apt libs.auto_value
 
   androidTestCompile libs.mockito
 }
