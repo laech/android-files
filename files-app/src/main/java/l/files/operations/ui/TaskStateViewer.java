@@ -1,5 +1,7 @@
 package l.files.operations.ui;
 
+import android.content.Context;
+
 import l.files.operations.TaskState;
 
 /**
@@ -8,7 +10,7 @@ import l.files.operations.TaskState;
 interface TaskStateViewer {
 
   // android.app.Notification.Builder#setSmallIcon(int)
-  int getSmallIcon();
+  int getSmallIcon(Context context);
 
   // android.app.Notification.Builder#setContentTitle(CharSequence)
   String getContentTitle(TaskState.Pending state);

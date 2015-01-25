@@ -13,9 +13,9 @@ import android.widget.AbsListView;
 import java.util.List;
 
 import l.files.R;
-import l.files.ui.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.provider.FilesContract;
+import l.files.ui.analytics.AnalyticsAction;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
@@ -50,7 +50,6 @@ public final class DeleteAction extends MultiChoiceModeAction {
   @Override
   public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, R.string.delete)
-        .setIcon(R.drawable.ic_action_discard)
         .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
     return true;
   }

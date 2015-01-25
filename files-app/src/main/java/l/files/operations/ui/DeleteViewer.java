@@ -25,8 +25,8 @@ final class DeleteViewer extends ProgressViewer {
     return R.plurals.deleting_x_items_from_x;
   }
 
-  @Override public int getSmallIcon() {
-    return R.drawable.ic_stat_notify_delete;
+  @Override public int getSmallIcon(Context context) {
+    return android.R.drawable.ic_menu_delete;
   }
 
   @Override protected int getTitleFailed() {

@@ -30,7 +30,4 @@ public final class DeleteViewerTest extends ProgressViewerTest {
     return R.plurals.fail_to_delete;
   }
 
-  @Override protected int getSmallIcon() {
-    return R.drawable.ic_stat_notify_delete;
-  }
 }

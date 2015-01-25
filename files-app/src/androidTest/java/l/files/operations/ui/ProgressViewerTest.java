@@ -60,11 +60,6 @@ public abstract class ProgressViewerTest extends BaseTest {
    */
   protected abstract int getTitleFailed();
 
-  /**
-   * Returns the expected value for {@link ProgressViewer#getSmallIcon()}.
-   */
-  protected abstract int getSmallIcon();
-
   @Override protected void setUp() throws Exception {
     super.setUp();
     res = getContext().getResources();
@@ -80,10 +75,6 @@ public abstract class ProgressViewerTest extends BaseTest {
         Progress.create(1, 0),
         Progress.create(1, 0)
     );
-  }
-
-  public void testGetSmallIcon() throws Exception {
-    assertEquals(getSmallIcon(), viewer.getSmallIcon());
   }
 
   public void testGetContentTitle_Pending() throws Exception {

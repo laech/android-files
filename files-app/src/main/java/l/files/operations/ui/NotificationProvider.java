@@ -122,7 +122,7 @@ final class NotificationProvider {
     TaskStateViewer viewer = getViewer(state);
     return new Notification.Builder(context)
         .setPriority(PRIORITY_LOW)
-        .setSmallIcon(viewer.getSmallIcon())
+        .setSmallIcon(viewer.getSmallIcon(context))
         /*
          * Set when to a fixed value to prevent flickering on update when there
          * are multiple notifications being displayed/updated.

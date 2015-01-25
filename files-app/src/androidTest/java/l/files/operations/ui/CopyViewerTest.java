@@ -29,8 +29,4 @@ public final class CopyViewerTest extends ProgressViewerTest {
   @Override protected int getTitleFailed() {
     return R.plurals.fail_to_copy;
   }
-
-  @Override protected int getSmallIcon() {
-    return R.drawable.ic_stat_notify_copy;
-  }
 }

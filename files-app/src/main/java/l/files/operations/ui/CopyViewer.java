@@ -7,6 +7,8 @@ import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
+import static l.files.common.content.res.Styles.getResourceId;
+
 final class CopyViewer extends ProgressViewer {
 
   CopyViewer(Context context, Clock clock) {
@@ -29,7 +31,7 @@ final class CopyViewer extends ProgressViewer {
     return R.plurals.fail_to_copy;
   }
 
-  @Override public int getSmallIcon() {
-    return R.drawable.ic_stat_notify_copy;
+  @Override public int getSmallIcon(Context context) {
+    return getResourceId(android.R.attr.actionModeCopyDrawable, context);
   }
 }

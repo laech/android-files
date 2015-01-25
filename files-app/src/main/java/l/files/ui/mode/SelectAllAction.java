@@ -5,15 +5,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 
-import l.files.R;
-import l.files.ui.analytics.AnalyticsAction;
 import l.files.common.widget.MultiChoiceModeAction;
+import l.files.ui.analytics.AnalyticsAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static l.files.common.content.res.Styles.getDrawable;
 
 /**
  * Selects all the items in the list view.
@@ -38,8 +37,8 @@ public final class SelectAllAction extends MultiChoiceModeAction {
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, android.R.string.selectAll)
-        .setIcon(R.drawable.ic_action_select_all)
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
+        .setIcon(getDrawable(android.R.attr.actionModeSelectAllDrawable, list))
+        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
     return true;
   }
 

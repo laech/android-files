@@ -7,6 +7,8 @@ import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
+import static l.files.common.content.res.Styles.getResourceId;
+
 final class MoveViewer extends ProgressViewer {
 
   MoveViewer(Context context, Clock system) {
@@ -29,8 +31,8 @@ final class MoveViewer extends ProgressViewer {
     return R.plurals.fail_to_move;
   }
 
-  @Override public int getSmallIcon() {
-    return R.drawable.ic_stat_notify_cut;
+  @Override public int getSmallIcon(Context context) {
+    return getResourceId(android.R.attr.actionModeCutDrawable, context);
   }
 
 }

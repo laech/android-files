@@ -1,26 +1,27 @@
 package l.files.ui.mode;
 
-import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
-import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
-import static com.google.common.collect.Sets.newHashSet;
-import static l.files.test.Mocks.mockMenuItem;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.*;
-
 import android.test.AndroidTestCase;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import com.squareup.otto.Bus;
-import java.io.File;
-import l.files.R;
-import l.files.event.CopyRequest;
+
 import org.mockito.ArgumentCaptor;
+
+import java.io.File;
+
+import l.files.event.CopyRequest;
+
+import static android.view.Menu.NONE;
+import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE;
+import static com.google.common.collect.Sets.newHashSet;
+import static l.files.test.Mocks.mockMenuItem;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.*;
 
 public final class CopyActionTest extends AndroidTestCase {
 
@@ -45,8 +46,6 @@ public final class CopyActionTest extends AndroidTestCase {
 
   public void testCreatesMenuItemCorrectly() {
     assertTrue(action.onCreateActionMode(mode, menu));
-    verify(item).setIcon(R.drawable.ic_action_copy);
-    verify(item).setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
   }
 
   public void testFinishActionModeOnClick() {
