@@ -30,7 +30,6 @@ import l.files.ui.FilesActivity;
 import l.files.ui.FilesPagerFragment;
 
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
-import static android.app.ActionBar.DISPLAY_SHOW_HOME;
 import static android.app.ActionBar.DISPLAY_SHOW_TITLE;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.View.VISIBLE;
@@ -330,15 +329,12 @@ public final class UiFileActivity {
       @Override public void run() {
         ActionBar actionBar = activity.getActionBar();
         //noinspection ConstantConditions
-        int showHome = actionBar.getDisplayOptions() & DISPLAY_SHOW_HOME;
         int showTitle = actionBar.getDisplayOptions() & DISPLAY_SHOW_TITLE;
         int showCustom = actionBar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM;
         if (visible) {
-          assertEquals(0, showHome);
           assertEquals(0, showTitle);
           assertNotEqual(0, showCustom);
         } else {
-          assertNotEqual(0, showHome);
           assertNotEqual(0, showTitle);
           assertEquals(0, showCustom);
         }
@@ -423,8 +419,9 @@ public final class UiFileActivity {
   private Optional<Integer> findItemPosition(String filename) {
     int count = getListView().getCount();
     for (int i = 0; i < count; i++) {
-      FileStatus stat = (FileStatus) getListView().getItemAtPosition(i);
-      if (stat.name().equals(filename)) {
+      Object item = getListView().getItemAtPosition(i);
+      if (item instanceof FileStatus
+          && ((FileStatus) item).name().equals(filename)) {
         return Optional.of(i);
       }
     }

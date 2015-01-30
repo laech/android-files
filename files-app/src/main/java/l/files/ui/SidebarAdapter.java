@@ -10,7 +10,7 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.fs.Path;
 
-final class SidebarAdapter extends StableFilesAdapter<Path> {
+final class SidebarAdapter extends StableFilesAdapter {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
@@ -29,7 +29,11 @@ final class SidebarAdapter extends StableFilesAdapter<Path> {
     return view;
   }
 
-  @Override protected Path getPath(int position) {
+  @Override public Path getItem(int position) {
+    return (Path) super.getItem(position);
+  }
+
+  @Override protected Object getItemIdObject(int position) {
     return getItem(position);
   }
 

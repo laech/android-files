@@ -2,20 +2,22 @@ package l.files.ui;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileStatus;
+import l.files.fs.FileSystemException;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
@@ -25,12 +27,13 @@ import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyList;
 
 /**
  * Loader to load files of a directory and will continue to monitor the
  * directory for changes and notifies observer when that happens.
  */
-public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
+public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
 
   private static final Logger logger = Logger.get(FilesLoader.class);
   private static final Handler handler = new Handler(getMainLooper());
@@ -41,20 +44,20 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   private final Runnable deliverResult;
 
   private final Path path;
-  private final Comparator<FileStatus> comparator;
+  private final FileSort sort;
   private final boolean showHidden;
 
   /**
    * @param path       the path to load files from
-   * @param comparator the comparator for sorting results
+   * @param sort       the comparator for sorting results
    * @param showHidden whether to show hidden files
    */
   public FilesLoader(Context context, Path path,
-                     Comparator<FileStatus> comparator, boolean showHidden) {
+                     FileSort sort, boolean showHidden) {
     super(context);
 
     this.path = checkNotNull(path, "path");
-    this.comparator = checkNotNull(comparator, "comparator");
+    this.sort = checkNotNull(sort, "sort");
     this.showHidden = showHidden;
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();
@@ -71,9 +74,14 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
     }
   }
 
-  @Override public List<FileStatus> loadInBackground() {
+  @Override public List<Object> loadInBackground() {
     data.clear();
-    service.register(path, listener);
+    try {
+      service.register(path, listener);
+    } catch (FileSystemException e) {
+      // TODO
+      return emptyList();
+    }
     try (DirectoryStream stream = path.getResource().newDirectoryStream()) {
       for (PathEntry entry : stream) {
         checkCancelled();
@@ -85,18 +93,40 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
     return buildResult();
   }
 
-  private List<FileStatus> buildResult() {
-    List<FileStatus> result = new ArrayList<>(data.size());
+  private List<Object> buildResult() {
+    List<FileStatus> files = new ArrayList<>(data.size());
     if (showHidden) {
-      result.addAll(data.values());
+      files.addAll(data.values());
     } else {
       for (FileStatus status : data.values()) {
         if (!status.isHidden()) {
-          result.add(status);
+          files.add(status);
         }
       }
     }
-    Collections.sort(result, comparator);
+    Collections.sort(files, sort.newComparator(Locale.getDefault()));
+
+    List<Object> result = new ArrayList<>(files.size() + 6);
+
+    Categorizer categorizer = sort.newCategorizer();
+    Resources res = getContext().getResources();
+    String preCategory = null;
+    for (int i = 0; i < files.size(); i++) {
+      FileStatus stat = files.get(i);
+      String category = categorizer.get(res, stat);
+      if (i == 0) {
+        if (category != null) {
+          result.add(category);
+        }
+      } else {
+        if (!Objects.equals(preCategory, category)) {
+          result.add(category);
+        }
+      }
+      result.add(stat);
+      preCategory = category;
+    }
+
     return result;
   }
 

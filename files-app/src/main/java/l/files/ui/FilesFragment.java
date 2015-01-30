@@ -12,10 +12,7 @@ import android.widget.TextView;
 
 import com.google.common.base.Supplier;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import l.files.R;
@@ -41,6 +38,7 @@ import static android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import static android.view.View.GONE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Collections.emptyList;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.common.widget.ListViews.getCheckedItemPositions;
 import static l.files.ui.Preferences.getSort;
@@ -48,7 +46,7 @@ import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
 
 public final class FilesFragment extends BaseFileListFragment
-    implements LoaderCallbacks<List<FileStatus>>, OnSharedPreferenceChangeListener, Supplier<Set<Path>> {
+    implements LoaderCallbacks<List<Object>>, OnSharedPreferenceChangeListener, Supplier<Set<Path>> {
 
   // TODO implement progress
 
@@ -141,24 +139,27 @@ public final class FilesFragment extends BaseFileListFragment
     List<Integer> positions = getCheckedItemPositions(list);
     Set<Path> paths = newHashSetWithExpectedSize(positions.size());
     for (int position : positions) {
-      paths.add(((FileStatus) list.getItemAtPosition(position)).path());
+      Object item = list.getItemAtPosition(position);
+      if (item instanceof FileStatus) {
+        paths.add(((FileStatus) item).path());
+      }
     }
     return paths;
   }
 
-  @Override public Loader<List<FileStatus>> onCreateLoader(int id, Bundle bundle) {
+  @Override public Loader<List<Object>> onCreateLoader(int id, Bundle bundle) {
     Activity context = getActivity();
+    FileSort sort = getSort(context);
     boolean showHidden = Preferences.getShowHiddenFiles(context);
-    Comparator<FileStatus> sort = getSort(context).newComparator(Locale.getDefault());
     return new FilesLoader(context, path, sort, showHidden);
   }
 
-  @Override public void onLoadFinished(Loader<List<FileStatus>> loader, List<FileStatus> data) {
+  @Override public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
     if (getActivity() != null && !getActivity().isFinishing()) {
       if (!getListAdapter().isEmpty() && isResumed()) {
         Animations.animatePreDataSetChange(getListView());
       }
-      getListAdapter().setItems(data, getSort(getActivity()).newCategorizer());
+      getListAdapter().setItems(data);
       if (getListAdapter().isEmpty()) {
         overrideEmptyText(R.string.empty);
       }
@@ -172,8 +173,8 @@ public final class FilesFragment extends BaseFileListFragment
     }
   }
 
-  @Override public void onLoaderReset(Loader<List<FileStatus>> loader) {
-    getListAdapter().setItems(Collections.<FileStatus>emptyList());
+  @Override public void onLoaderReset(Loader<List<Object>> loader) {
+    getListAdapter().setItems(emptyList());
   }
 
   @Override

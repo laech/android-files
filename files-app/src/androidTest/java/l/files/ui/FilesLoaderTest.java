@@ -9,9 +9,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
@@ -103,17 +101,16 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
   Subject subject() {
     final int loaderId = random.nextInt();
-    final Comparator<FileStatus> comparator = FileSort.NAME.newComparator(Locale.getDefault());
     final LoaderCallback listener = mock(LoaderCallback.class);
     given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
       @Override public FilesLoader answer(final InvocationOnMock invocation) {
-        return new FilesLoader(getActivity(), path, comparator, true);
+        return new FilesLoader(getActivity(), path, FileSort.NAME, true);
       }
     });
     return new Subject(loaderId, getActivity().getLoaderManager(), listener);
   }
 
-  private static interface LoaderCallback extends LoaderCallbacks<List<FileStatus>> {}
+  private static interface LoaderCallback extends LoaderCallbacks<List<Object>> {}
 
   private static final class Subject implements AutoCloseable {
     private final int loaderId;
@@ -126,8 +123,9 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       this.listener = listener;
     }
 
-    Subject awaitOnLoadFinished(List<FileStatus> expected) {
-      verify(listener, Mockito.timeout(2000)).onLoadFinished(any(FilesLoader.class), eq(expected));
+    @SuppressWarnings("unchecked") Subject awaitOnLoadFinished(List<?> expected) {
+      verify(listener, Mockito.timeout(2000))
+          .onLoadFinished(any(FilesLoader.class), (List<Object>) eq(expected));
       return this;
     }
 

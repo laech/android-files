@@ -8,19 +8,17 @@ import android.widget.BaseAdapter;
 import java.util.List;
 import java.util.Map;
 
-import l.files.fs.Path;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 
-abstract class StableFilesAdapter<T> extends BaseAdapter {
+abstract class StableFilesAdapter extends BaseAdapter {
 
-  private static final Map<Path, Long> ids = newHashMap();
+  private static final Map<Object, Long> ids = newHashMap();
 
-  private List<T> items = emptyList();
+  private List<?> items = emptyList();
 
-  protected void setItems(List<T> items) {
+  public void setItems(List<?> items) {
     this.items = checkNotNull(items);
     notifyDataSetChanged();
   }
@@ -30,18 +28,18 @@ abstract class StableFilesAdapter<T> extends BaseAdapter {
   }
 
   @Override public long getItemId(int position) {
-    Path path = getPath(position);
-    Long id = ids.get(path);
+    Object object = getItemIdObject(position);
+    Long id = ids.get(object);
     if (id == null) {
       id = ids.size() + 1L;
-      ids.put(path, id);
+      ids.put(object, id);
     }
     return id;
   }
 
-  protected abstract Path getPath(int position);
+  protected abstract Object getItemIdObject(int position);
 
-  @Override public T getItem(int position) {
+  @Override public Object getItem(int position) {
     return items.get(position);
   }
 

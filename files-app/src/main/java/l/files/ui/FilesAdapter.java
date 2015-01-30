@@ -12,16 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.common.base.Supplier;
 
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
 
 import l.files.R;
 import l.files.fs.FileStatus;
-import l.files.fs.Path;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -34,12 +30,10 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.ui.FilesApp.getBitmapCache;
 
-final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Supplier<Categorizer> {
+final class FilesAdapter extends StableFilesAdapter {
 
-  private Categorizer categorizer;
   private final Function<FileStatus, CharSequence> dateFormatter;
   private final ImageDecorator imageDecorator;
 
@@ -49,20 +43,43 @@ final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Suppl
         getBitmapCache(context), maxThumbnailWidth, maxThumbnailHeight);
   }
 
+  @Override public int getViewTypeCount() {
+    return 2;
+  }
+
+  @Override public int getItemViewType(int position) {
+    return getItem(position) instanceof FileStatus ? 1 : 0;
+  }
+
+  @Override public boolean isEnabled(int position) {
+    return getItem(position) instanceof FileStatus;
+  }
+
+  @Override public boolean areAllItemsEnabled() {
+    return false;
+  }
+
   @Override public View getView(int position, View view, ViewGroup parent) {
-    final ViewHolder holder;
+    Object item = getItem(position);
+    if (item instanceof FileStatus) {
+      return getFileView((FileStatus) item, view, parent);
+    } else {
+      return getHeaderView(item, view, parent);
+    }
+  }
+
+  private View getFileView(FileStatus file, View view, ViewGroup parent) {
+    final FileViewHolder holder;
     if (view == null) {
       view = inflate(R.layout.files_item, parent);
-      holder = new ViewHolder(view);
+      holder = new FileViewHolder(view);
       view.setTag(holder);
     } else {
-      holder = (ViewHolder) view.getTag();
+      holder = (FileViewHolder) view.getTag();
     }
 
     Context context = view.getContext();
     AssetManager assets = context.getAssets();
-    Resources res = view.getResources();
-    FileStatus file = getItem(position);
 
     holder.title.setEnabled(file.isReadable());
     holder.title.setText(file.name());
@@ -77,11 +94,21 @@ final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Suppl
     holder.size.setText(file.isDirectory() ? "" : formatShortFileSize(context, file.size()));
     holder.size.setVisibility(file.isRegularFile() ? VISIBLE : GONE);
 
-    holder.header.setText(categorizer.get(res, file));
-    holder.headerContainer.setVisibility(showHeader(position, res, file) ? VISIBLE : GONE);
-
     imageDecorator.decorate(holder.preview, file);
 
+    return view;
+  }
+
+  private View getHeaderView(Object item, View view, ViewGroup parent) {
+    final HeaderViewHolder holder;
+    if (view == null) {
+      view = inflate(R.layout.files_item_header, parent);
+      holder = new HeaderViewHolder(view);
+      view.setTag(holder);
+    } else {
+      holder = (HeaderViewHolder) view.getTag();
+    }
+    holder.title.setText(item.toString());
     return view;
   }
 
@@ -121,15 +148,6 @@ final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Suppl
     };
   }
 
-  private boolean showHeader(int position, Resources res, FileStatus file) {
-    Object current = categorizer.get(res, file);
-    if (position == 0) {
-      return current != null;
-    }
-    Object previous = categorizer.get(res, getItem(position - 1));
-    return !Objects.equal(current, previous);
-  }
-
   static FilesAdapter get(Context context) {
     Resources res = context.getResources();
     DisplayMetrics metrics = res.getDisplayMetrics();
@@ -143,36 +161,35 @@ final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Suppl
     return new FilesAdapter(context, width, height);
   }
 
-  public void setItems(List<FileStatus> items, Categorizer categorizer) {
-    this.categorizer = checkNotNull(categorizer);
-    super.setItems(items);
+  @Override protected Object getItemIdObject(int position) {
+    Object item = getItem(position);
+    if (item instanceof FileStatus) {
+      return ((FileStatus) item).path();
+    }
+    return item;
   }
 
-  @Override public Categorizer get() {
-    return categorizer;
-  }
-
-  @Override protected Path getPath(int position) {
-    return getItem(position).path();
-  }
-
-  private static class ViewHolder {
+  private static class FileViewHolder {
     final TextView title;
     final TextView icon;
     final TextView date;
     final TextView size;
     final ImageView preview;
-    final TextView header;
-    final View headerContainer;
 
-    ViewHolder(View root) {
+    FileViewHolder(View root) {
       title = (TextView) root.findViewById(R.id.title);
       icon = (TextView) root.findViewById(R.id.icon);
       date = (TextView) root.findViewById(R.id.date);
       size = (TextView) root.findViewById(R.id.size);
       preview = (ImageView) root.findViewById(R.id.preview);
-      header = (TextView) root.findViewById(R.id.header_title);
-      headerContainer = root.findViewById(R.id.header_container);
+    }
+  }
+
+  private static class HeaderViewHolder {
+    final TextView title;
+
+    HeaderViewHolder(View root) {
+      title = (TextView) root.findViewById(android.R.id.title);
     }
   }
 

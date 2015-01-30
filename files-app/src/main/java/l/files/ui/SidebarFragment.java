@@ -65,6 +65,6 @@ public final class SidebarFragment extends BaseFileListFragment
   }
 
   @Override public void onLoaderReset(Loader<List<Path>> loader) {
-    getListAdapter().setItems(Collections.<Path>emptyList());
+    getListAdapter().setItems(Collections.emptyList());
   }
 }
