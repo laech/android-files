@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -135,15 +134,9 @@ final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Suppl
     Resources res = context.getResources();
     DisplayMetrics metrics = res.getDisplayMetrics();
 
-    TypedValue value = new TypedValue();
-    context.getTheme().resolveAttribute(
-        android.R.attr.listPreferredItemPaddingRight, value, true);
-
     int width = metrics.widthPixels
         - res.getDimensionPixelSize(R.dimen.files_list_icon_width)
-        - res.getDimensionPixelSize(R.dimen.files_list_padding_side) * 2
-        - (int) (value.getDimension(metrics) + 0.5f)
-        - (int) (applyDimension(COMPLEX_UNIT_DIP, 2, metrics) + 0.5f);
+        - (int) (applyDimension(COMPLEX_UNIT_DIP, 16, metrics) + 0.5f);
 
     int height = (int) (metrics.heightPixels * 0.6f);
 

@@ -16,7 +16,7 @@ final class FileLabels {
   static String get(Resources res, Path path) {
     if (DIR_HOME.equals(path)) return res.getString(R.string.home);
     if (DIR_ROOT.equals(path)) return Build.MODEL;
-    return path.name();
+    return path.getName();
   }
 
 }

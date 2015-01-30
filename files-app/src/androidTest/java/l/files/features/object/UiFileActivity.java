@@ -491,7 +491,7 @@ public final class UiFileActivity {
   public List<String> getSidebarBookmarkNames() {
     return getSidebarBookmarks(new Function<Path, String>() {
       @Override public String apply(Path input) {
-        return input.name();
+        return input.getName();
       }
     });
   }

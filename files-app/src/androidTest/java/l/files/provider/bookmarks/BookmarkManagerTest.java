@@ -25,7 +25,7 @@ public final class BookmarkManagerTest extends BaseTest {
     super.setUp();
     fs = LocalFileSystem.get();
     pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
-    manager = new BookmarkManagerImpl(new DefaultPathProvider(), pref);
+    manager = new BookmarkManagerImpl(DefaultPathProvider.INSTANCE, pref);
   }
 
   @Override protected void tearDown() throws Exception {

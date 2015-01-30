@@ -44,7 +44,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
     super.setUp();
     fs = LocalFileSystem.get();
     preferences = getActivity().getSharedPreferences(getClass().getSimpleName(), MODE_PRIVATE);
-    manager = new BookmarkManagerImpl(new DefaultPathProvider(), preferences);
+    manager = new BookmarkManagerImpl(DefaultPathProvider.INSTANCE, preferences);
     assertTrue(manager.clearBookmarksSync());
   }
 

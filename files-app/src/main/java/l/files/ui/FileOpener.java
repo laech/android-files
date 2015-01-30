@@ -55,7 +55,7 @@ final class FileOpener implements Consumer<Path> {
 
     @Override protected MediaType doInBackground(Void... params) {
       try {
-        return path.resource().detectMediaType();
+        return path.getResource().detectMediaType();
       } catch (IOException e) {
         return null;
       }
@@ -84,7 +84,7 @@ final class FileOpener implements Consumer<Path> {
 
     private void showFile(MediaType media) throws ActivityNotFoundException {
       context.startActivity(new Intent(ACTION_VIEW)
-          .setDataAndType(Uri.parse(path.uri().toString()), media.toString()));
+          .setDataAndType(Uri.parse(path.getUri().toString()), media.toString()));
     }
 
     private void debug(MediaType media) {

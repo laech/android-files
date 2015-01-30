@@ -189,7 +189,8 @@ public abstract class LocalFileStatus implements FileStatus {
     return S_ISFIFO(stat().mode());
   }
 
+  // TODO
   public File toFile() {
-    return path().file();
+    return path().getFile();
   }
 }

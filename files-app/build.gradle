@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'provided-base'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 21
@@ -16,6 +17,11 @@ android {
       moduleName 'files'
       ldLibs 'log'
     }
+  }
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    androidTest.java.srcDirs += 'src/androidTest/kotlin'
   }
 
   compileOptions {
@@ -59,6 +65,7 @@ dependencies {
   compile 'com.android.support:appcompat-v7:21.0.3'
   compile 'com.android.support:support-v13:21.0.3'
   compile 'com.android.support:recyclerview-v7:21.0.3'
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
   provided libs.auto_value
   apt libs.auto_value

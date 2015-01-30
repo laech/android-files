@@ -3,6 +3,7 @@ package l.files.common.content.res;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 import android.view.View;
 
 /**
@@ -12,6 +13,12 @@ public final class Styles {
   private Styles() {}
 
   private static final int UNDEFINED = -1;
+
+  public static float getDimension(int attr, Context context) {
+    TypedValue value = new TypedValue();
+    context.getTheme().resolveAttribute(attr, value, true);
+    return value.getDimension(context.getResources().getDisplayMetrics());
+  }
 
   /**
    * Gets the resource ID assigned to the given attribute.

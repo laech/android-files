@@ -24,7 +24,7 @@ final class Move extends Paste {
 
   @Override void paste(Path from, Path to, FailureRecorder listener) {
     try {
-      rename(new File(from.uri()).getPath(), new File(to.uri()).getPath()); // TODO fix this
+      rename(new File(from.getUri()).getPath(), new File(to.getUri()).getPath()); // TODO fix this
       movedItemCount++;
     } catch (IOException e) {
       listener.onFailure(from, e);

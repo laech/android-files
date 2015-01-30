@@ -5,7 +5,9 @@ import java.net.URI;
 
 import l.files.fs.local.LocalPath;
 
-public final class DefaultPathProvider implements PathProvider {
+public enum DefaultPathProvider implements PathProvider {
+
+  INSTANCE;
 
   @Override public Path get(URI uri) {
     return LocalPath.of(new File(uri));

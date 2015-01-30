@@ -64,9 +64,9 @@ public final class PathBarFragment extends Fragment
     return new AsyncTaskLoader<List<FileStatus>>(getActivity()) {
       @Override public List<FileStatus> loadInBackground() {
         List<FileStatus> hierarchy = new ArrayList<>();
-        for (Path p = path; p != null; p = p.parent()) {
+        for (Path p = path; p != null; p = p.getParent()) {
           try {
-            hierarchy.add(p.resource().stat());
+            hierarchy.add(p.getResource().stat());
           } catch (IOException | FileSystemException e) { // TODO
             log.error(e);
             return emptyList();

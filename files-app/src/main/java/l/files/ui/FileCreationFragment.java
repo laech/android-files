@@ -35,11 +35,6 @@ public abstract class FileCreationFragment extends DialogFragment
   private LoaderCallbacks<FileStatus> checkerCallback = new CheckerCallback();
   private EditText editText;
 
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setStyle(STYLE_NORMAL, R.style.Theme_Dialog);
-  }
-
   @Override public void onResume() {
     super.onResume();
     getDialog().getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -118,7 +113,7 @@ public abstract class FileCreationFragment extends DialogFragment
       return new AsyncTaskLoader<FileStatus>(getActivity()) {
         @Override public FileStatus loadInBackground() {
           try {
-            return path.resource().stat();
+            return path.getResource().stat();
           } catch (IOException | FileSystemException e) { // TODO
             return null;
           }

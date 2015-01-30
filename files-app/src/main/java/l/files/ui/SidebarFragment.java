@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.provider.bookmarks.BookmarksLoader;
@@ -38,7 +37,7 @@ public final class SidebarFragment extends BaseFileListFragment
     super.onListItemClick(l, v, pos, id);
     Path path = (Path) l.getItemAtPosition(pos);
     try {
-      getBus().post(OpenFileRequest.create(path.resource().stat()));
+      getBus().post(OpenFileRequest.create(path.getResource().stat()));
     } catch (IOException e) {
       throw new RuntimeException(); // TODO
     }

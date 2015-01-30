@@ -31,7 +31,7 @@ final class MagicFileTypeDetector extends LocalFileTypeDetector {
 
   @Override protected MediaType detectRegularFile(FileStatus stat) {
     try {
-      File file = LocalPath.check(stat.path()).file();
+      File file = LocalPath.check(stat.path()).getFile();
       return cache().getUnchecked(LazyTika.TIKA.detect(file));
     } catch (FileNotFoundException e) {
       throw new NoSuchFileException(e);

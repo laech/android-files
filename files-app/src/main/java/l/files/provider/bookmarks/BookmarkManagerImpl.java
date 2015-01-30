@@ -39,7 +39,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     synchronized (BookmarkManagerImpl.class) {
       if (instance == null) {
         SharedPreferences pref = getDefaultSharedPreferences(context);
-        instance = new BookmarkManagerImpl(new DefaultPathProvider(), pref);
+        instance = new BookmarkManagerImpl(DefaultPathProvider.INSTANCE, pref);
       }
       return instance;
     }
@@ -115,7 +115,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   private Set<String> toUriStrings(Set<Path> bookmarks) {
     return new HashSet<>(transform(bookmarks, new Function<Path, String>() {
       @Override public String apply(Path input) {
-        return input.uri().toString();
+        return input.getUri().toString();
       }
     }));
   }

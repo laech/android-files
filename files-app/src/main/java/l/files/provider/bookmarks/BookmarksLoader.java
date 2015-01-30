@@ -31,7 +31,7 @@ public final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     final List<Path> paths = new ArrayList<>(manager.getBookmarks());
     Collections.sort(paths, new Comparator<Path>() {
       @Override public int compare(Path a, Path b) {
-        return collator.compare(a.name(), b.name());
+        return collator.compare(a.getName(), b.getName());
       }
     });
     return paths;

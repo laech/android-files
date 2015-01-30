@@ -26,7 +26,7 @@ abstract class LocalResource implements Resource {
   }
 
   @Override public String name() {
-    return path().name();
+    return path().getName();
   }
 
   @Override public Resource resolve(String other) {
@@ -59,10 +59,10 @@ abstract class LocalResource implements Resource {
   }
 
   private void createDirectory(LocalPath path) throws IOException {
-    if (path.resource().exists()) {
+    if (path.getResource().exists()) {
       return;
     }
-    createDirectory(path.parent());
+    createDirectory(path.getParent());
     if (!new java.io.File(path.toString()).mkdir()) {
       throw new IOException(); // TODO use native code to get errno
     }

@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileStatus;
-import l.files.fs.FileSystem;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
@@ -60,7 +59,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();
     this.deliverResult = new DeliverResultRunnable();
-    this.service = path.resource().watcher();
+    this.service = path.getResource().watcher();
   }
 
   @Override protected void onStartLoading() {
@@ -75,7 +74,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
   @Override public List<FileStatus> loadInBackground() {
     data.clear();
     service.register(path, listener);
-    try (DirectoryStream stream = path.resource().newDirectoryStream()) {
+    try (DirectoryStream stream = path.getResource().newDirectoryStream()) {
       for (PathEntry entry : stream) {
         checkCancelled();
         addData(entry.path());
@@ -127,7 +126,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileStatus>> {
    */
   private boolean addData(Path path) {
     try {
-      FileStatus newStat = path.resource().stat();
+      FileStatus newStat = path.getResource().stat();
       FileStatus oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
     } catch (NoSuchFileException e) {

@@ -23,11 +23,6 @@ public final class SortDialog
 
   public static final String FRAGMENT_TAG = "sort-dialog";
 
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setStyle(STYLE_NORMAL, R.style.Theme_Dialog);
-  }
-
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     getDialog().setTitle(R.string.sort_by);

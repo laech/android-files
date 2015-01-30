@@ -177,7 +177,7 @@ public final class FilesActivity extends BaseActivity
   }
 
   private void setActionBar() {
-    actionBar.setIcon(R.drawable.ic_action_storage);
+    actionBar.setDisplayShowHomeEnabled(false);
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setHomeButtonEnabled(true);
     actionBar.setCustomView(tabs.getRootContainer(),
@@ -335,7 +335,7 @@ public final class FilesActivity extends BaseActivity
   private void setShowTabs(boolean showTabs) {
     actionBar.setDisplayHomeAsUpEnabled(!showTabs);
     actionBar.setDisplayShowTitleEnabled(!showTabs);
-    actionBar.setDisplayShowHomeEnabled(!showTabs);
+//    actionBar.setDisplayShowHomeEnabled(!showTabs);
     actionBar.setDisplayShowCustomEnabled(showTabs);
   }
 

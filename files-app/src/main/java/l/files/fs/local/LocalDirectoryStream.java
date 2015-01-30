@@ -30,7 +30,7 @@ final class LocalDirectoryStream implements DirectoryStream {
    * @throws FileSystemException if failed to open directory
    */
   static LocalDirectoryStream open(Path directory) throws FileSystemException {
-    return open(LocalPath.check(directory).file());
+    return open(LocalPath.check(directory).getFile());
   }
 
   /**

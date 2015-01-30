@@ -23,8 +23,8 @@ abstract class Paste extends AbstractOperation {
       throws InterruptedException {
     checkInterrupt();
 
-    File destinationFile = new File(dstPath.uri());
-    File fromFile = new File(from.uri());
+    File destinationFile = new File(dstPath.getUri());
+    File fromFile = new File(from.getUri());
     try {
       if (isAncestorOrSelf(destinationFile, fromFile)) {
         throw new CannotPasteIntoSelfException(

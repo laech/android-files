@@ -47,8 +47,8 @@ public abstract class Target {
   }
 
   public static Target fromPaths(Iterable<Path> srcPaths, Path dstPath) {
-    String source = srcPaths.iterator().next().parent().name();
-    String destination = dstPath.name();
+    String source = srcPaths.iterator().next().getParent().getName();
+    String destination = dstPath.getName();
     return create(source, destination);
   }
 
@@ -64,7 +64,7 @@ public abstract class Target {
   }
 
   public static Target fromFsPaths(Iterable<Path> paths) {
-    String name = paths.iterator().next().parent().name();
+    String name = paths.iterator().next().getParent().getName();
     return create(name, name);
   }
 }

@@ -91,7 +91,7 @@ final class ImageDecorator {
   }
 
   private Object buildCacheKey(FileStatus file) {
-    return file.path().uri() + "?bounds=" + maxWidth + "x" + maxHeight;
+    return file.path().getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
   }
 
   private SizedColorDrawable newPlaceholder(ScaledSize size) {

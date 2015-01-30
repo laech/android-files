@@ -35,7 +35,7 @@ public final class RenameFragment extends FileCreationFragment {
 
   static RenameFragment create(Path path) {
     Bundle args = new Bundle(2);
-    args.putParcelable(ARG_PARENT_PATH, path.parent());
+    args.putParcelable(ARG_PARENT_PATH, path.getParent());
     args.putParcelable(ARG_PATH, path);
     RenameFragment fragment = new RenameFragment();
     fragment.setArguments(args);
@@ -66,7 +66,7 @@ public final class RenameFragment extends FileCreationFragment {
 
       @Override protected IOException doInBackground(Void... params) {
         try {
-          getPath().resource().move(getParentPath().resolve(getFilename()));
+          getPath().getResource().move(getParentPath().resolve(getFilename()));
           return null;
         } catch (IOException e) {
           return e;
@@ -98,7 +98,7 @@ public final class RenameFragment extends FileCreationFragment {
       return new AsyncTaskLoader<FileStatus>(getActivity()) {
         @Override public FileStatus loadInBackground() {
           try {
-            return getPath().resource().stat();
+            return getPath().getResource().stat();
           } catch (IOException e) {
             return null;
           }

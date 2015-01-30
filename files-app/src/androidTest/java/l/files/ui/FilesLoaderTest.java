@@ -20,8 +20,6 @@ import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
 import l.files.test.TestActivity;
-import l.files.ui.FileSort;
-import l.files.ui.FilesLoader;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -76,14 +74,14 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
       timeout(2, SECONDS, new Runnable() {
         @Override public void run() {
-          assertTrue(path.resource().watcher().isRegistered(path));
+          assertTrue(path.getResource().watcher().isRegistered(path));
         }
       });
 
       subject.destroyLoader();
       timeout(2, SECONDS, new Runnable() {
         @Override public void run() {
-          assertFalse(path.resource().watcher().isRegistered(path));
+          assertFalse(path.getResource().watcher().isRegistered(path));
         }
       });
     }
@@ -98,7 +96,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       } else {
         tmp.createDir(name);
       }
-      result.add(path.resolve(name).resource().stat());
+      result.add(path.resolve(name).getResource().stat());
     }
     return result;
   }

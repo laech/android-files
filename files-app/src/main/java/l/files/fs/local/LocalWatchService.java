@@ -174,7 +174,7 @@ public class LocalWatchService implements WatchService, Closeable {
       for (Listener listener : getListeners(path)) {
         listener.onEvent(event);
       }
-      Path parent = path.parent();
+      Path parent = path.getParent();
       if (parent != null) {
         for (Listener listener : getListeners(parent)) {
           listener.onEvent(event);
@@ -400,7 +400,7 @@ public class LocalWatchService implements WatchService, Closeable {
         PathObserver observer = it.next();
         observer.removePath(parent);
         for (Path path : observer.copyPaths()) {
-          if (parent.equals(path.parent()) && !monitored.contains(path)) {
+          if (parent.equals(path.getParent()) && !monitored.contains(path)) {
             observer.removePath(path);
           }
         }
@@ -487,7 +487,7 @@ public class LocalWatchService implements WatchService, Closeable {
   private void onCreate(Path path) {
     try {
       LocalFileStatus file = LocalFileStatus.stat(path, false);
-      if (file.isDirectory() && isRegistered(path.parent())) {
+      if (file.isDirectory() && isRegistered(path.getParent())) {
         startObserver(path, Node.from(file));
       }
     } catch (FileSystemException e) {

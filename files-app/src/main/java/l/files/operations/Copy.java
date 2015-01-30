@@ -59,8 +59,8 @@ final class Copy extends Paste {
   @Override void paste(Path from, Path to, FailureRecorder listener)
       throws InterruptedException {
 
-    File oldRoot = new File(from.uri());
-    File newRoot = new File(to.uri());
+    File oldRoot = new File(from.getUri());
+    File newRoot = new File(to.getUri());
 
     for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
       checkInterrupt();
@@ -74,7 +74,7 @@ final class Copy extends Paste {
         continue;
       }
 
-      File dst = Files.replace(LocalPath.check(entry.path()).file(), oldRoot, newRoot);
+      File dst = Files.replace(LocalPath.check(entry.path()).getFile(), oldRoot, newRoot);
       if (file.isSymbolicLink()) {
         copyLink(file, LocalPath.of(dst), listener);
       } else if (file.isDirectory()) {
@@ -87,8 +87,8 @@ final class Copy extends Paste {
 
   private void copyLink(FileStatus src, Path dst, FailureRecorder listener) {
     try {
-      String target = readlink(new File(src.path().uri()).getPath()); // TODO fix this
-      symlink(target, new File(dst.uri()).getPath()); // TODO fix this
+      String target = readlink(new File(src.path().getUri()).getPath()); // TODO fix this
+      symlink(target, new File(dst.getUri()).getPath()); // TODO fix this
       copiedByteCount += src.size();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
@@ -99,7 +99,7 @@ final class Copy extends Paste {
 
   private void createDirectory(FileStatus src, Path dst, FailureRecorder listener) {
     try {
-      forceMkdir(new File(dst.uri())); // TODO fix this
+      forceMkdir(new File(dst.getUri())); // TODO fix this
       copiedByteCount += src.size();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
@@ -116,8 +116,8 @@ final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(new File(src.path().uri()));// TODO fix this
-      fos = new FileOutputStream(new File(dst.uri())); // TODO fix this
+      fis = new FileInputStream(new File(src.path().getUri()));// TODO fix this
+      fos = new FileOutputStream(new File(dst.getUri())); // TODO fix this
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
       long size = input.size();
@@ -131,7 +131,7 @@ final class Copy extends Paste {
       copiedItemCount++;
 
     } catch (IOException e) {
-      if (!new File(dst.uri()).delete()) { // TODO fix this
+      if (!new File(dst.getUri()).delete()) { // TODO fix this
         logger.warn(e, "Failed to delete path on exception %s", dst);
       }
       if (e instanceof ClosedByInterruptException) {
@@ -149,8 +149,8 @@ final class Copy extends Paste {
   }
 
   private void setLastModifiedDate(FileStatus src, Path dst) {
-    File dstFile = new File(dst.uri()); // TODO fix this
-    File srcFile = new File(src.path().uri()); // TODO fix this
+    File dstFile = new File(dst.getUri()); // TODO fix this
+    File srcFile = new File(src.path().getUri()); // TODO fix this
     //noinspection StatementWithEmptyBody
     if (!dstFile.setLastModified(srcFile.lastModified())) {
       /*

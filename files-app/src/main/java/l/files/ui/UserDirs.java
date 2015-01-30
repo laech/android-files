@@ -4,8 +4,8 @@ import android.os.Environment;
 
 import java.io.File;
 
+import l.files.fs.DefaultPathProvider;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -13,8 +13,8 @@ import static android.os.Environment.getExternalStoragePublicDirectory;
 public final class UserDirs {
   private UserDirs() {}
 
-  public static final Path DIR_ROOT = Paths.get(new File("/"));
-  public static final Path DIR_HOME = Paths.get(getExternalStorageDirectory());
+  public static final Path DIR_ROOT = DefaultPathProvider.INSTANCE.get(new File("/").toURI());
+  public static final Path DIR_HOME = DefaultPathProvider.INSTANCE.get(getExternalStorageDirectory().toURI());
   public static final Path DIR_ALARMS = dir(Environment.DIRECTORY_ALARMS);
   public static final Path DIR_ANDROID = dir("Android");
   public static final Path DIR_DCIM = dir(Environment.DIRECTORY_DCIM);
@@ -27,6 +27,6 @@ public final class UserDirs {
   public static final Path DIR_RINGTONES = dir(Environment.DIRECTORY_RINGTONES);
 
   private static Path dir(String type) {
-    return Paths.get(getExternalStoragePublicDirectory(type));
+    return DefaultPathProvider.INSTANCE.get(getExternalStoragePublicDirectory(type).toURI());
   }
 }
