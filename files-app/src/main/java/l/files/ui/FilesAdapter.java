@@ -1,75 +1,134 @@
 package l.files.ui;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.net.Uri;
+import android.text.format.Time;
 import android.util.DisplayMetrics;
-import android.util.LruCache;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Supplier;
 
-import l.files.R;
-import l.files.ui.category.Categorizer;
-import l.files.ui.category.FileCategorizers;
-import l.files.ui.decorator.Decorator;
-import l.files.ui.decorator.decoration.Decoration;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
 
+import l.files.R;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
+
+import static android.text.format.DateFormat.getDateFormat;
+import static android.text.format.DateFormat.getTimeFormat;
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_NO_YEAR;
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.text.format.DateUtils.formatDateTime;
+import static android.text.format.Formatter.formatShortFileSize;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
-import static l.files.R.id;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.ui.FilesApp.getBitmapCache;
-import static l.files.ui.decorator.Decorators.compose;
-import static l.files.ui.decorator.Decorators.enable;
-import static l.files.ui.decorator.Decorators.font;
-import static l.files.ui.decorator.Decorators.image;
-import static l.files.ui.decorator.Decorators.on;
-import static l.files.ui.decorator.Decorators.text;
-import static l.files.ui.decorator.Decorators.visible;
-import static l.files.ui.decorator.decoration.Decorations.all;
-import static l.files.ui.decorator.decoration.Decorations.category;
-import static l.files.ui.decorator.decoration.Decorations.categoryVisible;
-import static l.files.ui.decorator.decoration.Decorations.fileDate;
-import static l.files.ui.decorator.decoration.Decorations.fileHasDate;
-import static l.files.ui.decorator.decoration.Decorations.fileIcon;
-import static l.files.ui.decorator.decoration.Decorations.fileIsReadable;
-import static l.files.ui.decorator.decoration.Decorations.fileId;
-import static l.files.ui.decorator.decoration.Decorations.fileName;
-import static l.files.ui.decorator.decoration.Decorations.fileReadable;
-import static l.files.ui.decorator.decoration.Decorations.fileSize;
-import static l.files.ui.decorator.decoration.Decorations.isFile;
-import static l.files.ui.decorator.decoration.Decorations.memoize;
-import static l.files.ui.decorator.decoration.Decorations.uri;
 
-final class FilesAdapter extends StableFilesAdapter implements Supplier<Categorizer> {
+final class FilesAdapter extends StableFilesAdapter<FileStatus> implements Supplier<Categorizer> {
 
   private Categorizer categorizer;
-  private final Decorator decorator;
+  private final Function<FileStatus, CharSequence> dateFormatter;
+  private final ImageDecorator imageDecorator;
 
-  FilesAdapter(Context context, int width, int height) {
-    Resources res = context.getResources();
-    Decoration<String> category = memoize(category(this, res), this);
-    Decoration<String> date = memoize(fileDate(context), this);
-    Decoration<String> size = memoize(fileSize(context), this);
-    Decoration<Boolean> readable = fileReadable();
-    Decoration<Boolean> categoryVisibility = categoryVisible(category);
-    Decoration<Typeface> icon = memoize(fileIcon(context.getAssets()), this);
-    Decoration<Uri> uri = memoize(uri(fileId()), this);
-    LruCache<Object, Bitmap> cache = getBitmapCache(context);
-    this.decorator = compose(
-        on(id.title, enable(readable), text(fileName())),
-        on(id.icon, enable(readable), font(icon)),
-        on(id.date, enable(readable), text(date), visible(fileHasDate())),
-        on(id.size, enable(readable), text(size), visible(isFile())),
-        on(id.preview, image(fileId(), uri, all(isFile(), fileIsReadable()), cache, width, height)),
-        on(id.header_title, text(category)),
-        on(id.header_container, visible(categoryVisibility))
-    );
+  FilesAdapter(Context context, int maxThumbnailWidth, int maxThumbnailHeight) {
+    this.dateFormatter = newDateFormatter(context);
+    this.imageDecorator = new ImageDecorator(
+        getBitmapCache(context), maxThumbnailWidth, maxThumbnailHeight);
+  }
+
+  @Override public View getView(int position, View view, ViewGroup parent) {
+    final ViewHolder holder;
+    if (view == null) {
+      view = inflate(R.layout.files_item, parent);
+      holder = new ViewHolder(view);
+      view.setTag(holder);
+    } else {
+      holder = (ViewHolder) view.getTag();
+    }
+
+    Context context = view.getContext();
+    AssetManager assets = context.getAssets();
+    Resources res = view.getResources();
+    FileStatus file = getItem(position);
+
+    holder.title.setEnabled(file.isReadable());
+    holder.title.setText(file.name());
+
+    holder.icon.setEnabled(file.isReadable());
+    holder.icon.setTypeface(getIcon(file, assets));
+
+    holder.date.setEnabled(file.isReadable());
+    holder.date.setText(dateFormatter.apply(file));
+
+    holder.size.setEnabled(file.isReadable());
+    holder.size.setText(file.isDirectory() ? "" : formatShortFileSize(context, file.size()));
+    holder.size.setVisibility(file.isRegularFile() ? VISIBLE : GONE);
+
+    holder.header.setText(categorizer.get(res, file));
+    holder.headerContainer.setVisibility(showHeader(position, res, file) ? VISIBLE : GONE);
+
+    imageDecorator.decorate(holder.preview, file);
+
+    return view;
+  }
+
+  private Typeface getIcon(FileStatus file, AssetManager assets) {
+    if (file.isDirectory()) {
+      return IconFonts.forDirectoryLocation(assets, file.path());
+    } else {
+      return IconFonts.forFileMediaType(assets, file.basicMediaType());
+    }
+  }
+
+  private static Function<FileStatus, CharSequence> newDateFormatter(final Context context) {
+    final DateFormat dateFormat = getDateFormat(context);
+    final DateFormat timeFormat = getTimeFormat(context);
+    final Date date = new Date();
+    final Time t1 = new Time();
+    final Time t2 = new Time();
+    final int flags = FORMAT_SHOW_DATE | FORMAT_ABBREV_MONTH | FORMAT_NO_YEAR;
+    return new Function<FileStatus, CharSequence>() {
+      @Override public CharSequence apply(FileStatus file) {
+        long time = file.lastModifiedTime();
+        if (time == 0) {
+          return context.getString(R.string.__);
+        }
+        date.setTime(time);
+        t1.setToNow();
+        t2.set(time);
+        if (t1.year == t2.year) {
+          if (t1.yearDay == t2.yearDay) {
+            return timeFormat.format(date);
+          } else {
+            return formatDateTime(context, time, flags);
+          }
+        }
+        return dateFormat.format(date);
+      }
+    };
+  }
+
+  private boolean showHeader(int position, Resources res, FileStatus file) {
+    Object current = categorizer.get(res, file);
+    if (position == 0) {
+      return current != null;
+    }
+    Object previous = categorizer.get(res, getItem(position - 1));
+    return !Objects.equal(current, previous);
   }
 
   static FilesAdapter get(Context context) {
@@ -91,30 +150,37 @@ final class FilesAdapter extends StableFilesAdapter implements Supplier<Categori
     return new FilesAdapter(context, width, height);
   }
 
-  @Override public void setCursor(Cursor cursor) {
-    setCursor(cursor, null);
-  }
-
-  public void setCursor(Cursor cursor, String sortOrder) {
-    if (cursor != null) {
-      setCategorizer(sortOrder);
-    }
-    super.setCursor(cursor);
-  }
-
-  private void setCategorizer(String sortOrder) {
-    categorizer = FileCategorizers.fromSortOrder(sortOrder);
-  }
-
-  @Override public View getView(int position, View view, ViewGroup parent) {
-    if (view == null) {
-      view = inflate(R.layout.files_item, parent);
-    }
-    decorator.decorate(position, this, view);
-    return view;
+  public void setItems(List<FileStatus> items, Categorizer categorizer) {
+    this.categorizer = checkNotNull(categorizer);
+    super.setItems(items);
   }
 
   @Override public Categorizer get() {
     return categorizer;
   }
+
+  @Override protected Path getPath(int position) {
+    return getItem(position).path();
+  }
+
+  private static class ViewHolder {
+    final TextView title;
+    final TextView icon;
+    final TextView date;
+    final TextView size;
+    final ImageView preview;
+    final TextView header;
+    final View headerContainer;
+
+    ViewHolder(View root) {
+      title = (TextView) root.findViewById(R.id.title);
+      icon = (TextView) root.findViewById(R.id.icon);
+      date = (TextView) root.findViewById(R.id.date);
+      size = (TextView) root.findViewById(R.id.size);
+      preview = (ImageView) root.findViewById(R.id.preview);
+      header = (TextView) root.findViewById(R.id.header_title);
+      headerContainer = root.findViewById(R.id.header_container);
+    }
+  }
+
 }

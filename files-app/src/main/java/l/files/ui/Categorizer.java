@@ -1,26 +1,25 @@
-package l.files.ui.category;
+package l.files.ui;
 
 import android.content.res.Resources;
-import android.database.Cursor;
+
+import l.files.fs.FileStatus;
 
 /**
  * Provides category information for items in cursors.
  */
-public interface Categorizer {
+interface Categorizer {
 
   /**
    * Always return null categories.
    */
   Categorizer NULL = new Categorizer() {
-    @Override public String getCategory(Resources res, Cursor cursor) {
+    @Override public String get(Resources res, FileStatus file) {
       return null;
     }
   };
 
   /**
-   * Gets the category of the item at the current cursor position.
-   *
    * @return the category for displaying purposes, or null
    */
-  String getCategory(Resources res, Cursor cursor);
+  String get(Resources res, FileStatus file);
 }

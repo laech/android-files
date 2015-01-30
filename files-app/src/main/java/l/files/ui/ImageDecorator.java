@@ -1,4 +1,4 @@
-package l.files.ui.decorator;
+package l.files.ui;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -6,26 +6,24 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.LruCache;
-import android.view.View;
-import android.widget.Adapter;
 import android.widget.ImageView;
 
-import com.google.common.base.Optional;
-
-import java.net.URI;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
 import l.files.R;
-import l.files.ui.analytics.Analytics;
-import l.files.ui.decorator.decoration.Decoration;
-import l.files.ui.util.ScaledSize;
 import l.files.common.graphics.drawable.SizedColorDrawable;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
 import l.files.logging.Logger;
+import l.files.ui.util.ScaledSize;
 
+import static android.graphics.BitmapFactory.Options;
+import static android.graphics.BitmapFactory.decodeStream;
 import static android.graphics.Color.TRANSPARENT;
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
@@ -37,64 +35,48 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
-import static l.files.provider.MediaContract.Bounds;
-import static l.files.provider.MediaContract.decodeBounds;
 
-final class ImageDecorator implements Decorator {
+final class ImageDecorator {
 
   private static final Logger logger = Logger.get(ImageDecorator.class);
 
   private static final Set<Object> errors = newHashSet();
   private static final Map<Object, ScaledSize> sizes = newHashMap();
 
-  private final Decoration<String> fileIds;
-  private final Decoration<Uri> uris;
-  private final Decoration<Boolean> predicate;
   private final LruCache<Object, Bitmap> cache;
   private final int maxWidth;
   private final int maxHeight;
 
-  ImageDecorator(
-      Decoration<String> fileIds,
-      Decoration<Uri> uris,
-      Decoration<Boolean> predicate,
-      LruCache<Object, Bitmap> cache,
-      int maxWidth,
-      int maxHeight) {
+  ImageDecorator(LruCache<Object, Bitmap> cache, int maxWidth, int maxHeight) {
     checkArgument(maxWidth > 0);
     checkArgument(maxHeight > 0);
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
-    this.fileIds = checkNotNull(fileIds, "fileIds");
-    this.uris = checkNotNull(uris, "uris");
-    this.predicate = checkNotNull(predicate, "predicate");
     this.cache = checkNotNull(cache, "cache");
   }
 
-  @Override public void decorate(int position, Adapter adapter, View view) {
-    Uri uri = uris.get(position, adapter);
-    Object key = buildCacheKey(uri);
+  public void decorate(ImageView view, FileStatus file) {
+    Object key = buildCacheKey(file);
 
     Task task = (Task) view.getTag(R.id.image_decorator_task);
-    if (task != null && task.uri().equals(uri)) return;
+    if (task != null && task.path().equals(file.path())) return;
     if (task != null) task.cancel(true);
 
-    ImageView image = (ImageView) view;
-    image.setImageDrawable(null);
-    image.setVisibility(GONE);
-    image.setTag(R.id.image_decorator_task, null);
+    view.setImageDrawable(null);
+    view.setVisibility(GONE);
+    view.setTag(R.id.image_decorator_task, null);
 
-    if (!predicate.get(position, adapter)) return;
+    if (!file.isReadable() || !file.isRegularFile()) return;
     if (errors.contains(key)) return;
-    if (setCachedBitmap(image, key)) return;
+    if (setCachedBitmap(view, key)) return;
 
     ScaledSize size = sizes.get(key);
     if (size != null) {
-      image.setVisibility(VISIBLE);
-      image.setImageDrawable(newPlaceholder(size));
-      new DecodeImage(key, image, uri, size).executeOnExecutor(SERIAL_EXECUTOR);
+      view.setVisibility(VISIBLE);
+      view.setImageDrawable(newPlaceholder(size));
+      new DecodeImage(key, view, file, size).executeOnExecutor(SERIAL_EXECUTOR);
     } else {
-      new DecodeSize(key, image, uri, fileIds.get(position, adapter)).executeOnExecutor(THREAD_POOL_EXECUTOR);
+      new DecodeSize(key, view, file).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -108,10 +90,8 @@ final class ImageDecorator implements Decorator {
     return false;
   }
 
-  private Object buildCacheKey(Uri uri) {
-    return uri.buildUpon()
-        .appendQueryParameter("bounds", maxWidth + "x" + maxHeight)
-        .build();
+  private Object buildCacheKey(FileStatus file) {
+    return file.path().uri() + "?bounds=" + maxWidth + "x" + maxHeight;
   }
 
   private SizedColorDrawable newPlaceholder(ScaledSize size) {
@@ -120,7 +100,7 @@ final class ImageDecorator implements Decorator {
 
   private static interface Task {
 
-    Uri uri();
+    Path path();
 
     boolean cancel(boolean mayInterruptIfRunning);
   }
@@ -128,14 +108,12 @@ final class ImageDecorator implements Decorator {
   private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
     private final Object key;
     private final ImageView view;
-    private final Uri uri;
-    private final String fileId;
+    private final FileStatus file;
 
-    DecodeSize(Object key, ImageView view, Uri uri, String fileId) {
-      this.uri = uri;
+    DecodeSize(Object key, ImageView view, FileStatus file) {
       this.key = key;
       this.view = view;
-      this.fileId = fileId;
+      this.file = file;
     }
 
     @Override protected void onPreExecute() {
@@ -147,13 +125,35 @@ final class ImageDecorator implements Decorator {
       if (isCancelled()) {
         return null;
       }
-      ScaledSize size = null;
-      Optional<Bounds> optional = decodeBounds(view.getContext(), fileId);
-      if (optional.isPresent()) {
-        Bounds bounds = optional.get();
-        size = scaleSize(bounds.width(), bounds.height(), maxWidth, maxHeight);
+
+      /* Some files are protected by more than just permission attributes, a file
+       * with readable bits set doesn't mean it will be readable, they are also
+       * being protected by other means, e.g. /proc/1/maps. Attempt to read those
+       * files with BitmapFactory will cause the native code to catch and ignore
+       * the exception and loop forever, see
+       * https://github.com/android/platform_frameworks_base/blob/master/core/jni/android/graphics/CreateJavaOutputStreamAdaptor.cpp
+       * This code here is a workaround for that, attempt to read one byte off the
+       * file, if an exception occurs, meaning it can't be read, let the exception
+       * propagate, and return no result.
+       */
+      try (InputStream in = file.resource().newInputStream()) {
+        //noinspection ResultOfMethodCallIgnored
+        in.read();
+      } catch (IOException e) {
+        return null;
       }
-      return size;
+
+      Options options = new Options();
+      options.inJustDecodeBounds = true;
+      try (InputStream in = file.resource().newInputStream()) {
+        decodeStream(in, null, options);
+      } catch (IOException e) {
+        return null;
+      }
+      if (options.outWidth > 0 && options.outHeight > 0) {
+        return scaleSize(options.outWidth, options.outHeight, maxWidth, maxHeight);
+      }
+      return null;
     }
 
     @Override protected void onPostExecute(ScaledSize size) {
@@ -169,26 +169,26 @@ final class ImageDecorator implements Decorator {
           view.setTag(R.id.image_decorator_task, null);
           view.setImageDrawable(newPlaceholder(size));
           view.setVisibility(VISIBLE);
-          new DecodeImage(key, view, uri, size).executeOnExecutor(SERIAL_EXECUTOR);
+          new DecodeImage(key, view, file, size).executeOnExecutor(SERIAL_EXECUTOR);
         }
       }
     }
 
-    @Override public Uri uri() {
-      return uri;
+    @Override public Path path() {
+      return file.path();
     }
   }
 
   private final class DecodeImage extends AsyncTask<Void, Void, Bitmap> implements Task {
     private final Object key;
     private final ImageView view;
-    private final Uri uri;
+    private final FileStatus file;
     private final ScaledSize size;
 
-    DecodeImage(Object key, ImageView view, Uri uri, ScaledSize size) {
+    DecodeImage(Object key, ImageView view, FileStatus file, ScaledSize size) {
       this.key = key;
       this.view = view;
-      this.uri = uri;
+      this.file = file;
       this.size = size;
     }
 
@@ -201,11 +201,10 @@ final class ImageDecorator implements Decorator {
       if (isCancelled()) {
         return null;
       }
-      try {
-        return decodeScaledBitmap(new URI(uri.toString()).toURL(), size);
+      try (InputStream in = file.resource().newInputStream()) {
+        return decodeScaledBitmap(in, size);
       } catch (Exception e) {
         // Catch all unexpected internal errors from decoder
-        Analytics.onException(view.getContext(), e);
         logger.warn(e);
         return null;
       }
@@ -244,8 +243,8 @@ final class ImageDecorator implements Decorator {
       cache.put(key, bitmap);
     }
 
-    @Override public Uri uri() {
-      return uri;
+    @Override public Path path() {
+      return file.path();
     }
   }
 }

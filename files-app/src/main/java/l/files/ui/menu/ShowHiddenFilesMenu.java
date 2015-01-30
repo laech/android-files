@@ -5,30 +5,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.ui.analytics.AnalyticsMenu;
-import l.files.ui.Preferences;
-import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
+import l.files.ui.Preferences;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Menu to show/hide hidden files.
- */
 public final class ShowHiddenFilesMenu extends OptionsMenuAction {
 
   private final Context context;
 
-  private ShowHiddenFilesMenu(Context context) {
+  public ShowHiddenFilesMenu(Context context) {
     super(R.id.show_hidden_files);
-    this.context = checkNotNull(context, "context");
-  }
-
-  public static OptionsMenu create(Context context) {
-    OptionsMenu menu = new ShowHiddenFilesMenu(context);
-    return new AnalyticsMenu(context, menu, "show_hidden_files");
+    this.context = checkNotNull(context);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

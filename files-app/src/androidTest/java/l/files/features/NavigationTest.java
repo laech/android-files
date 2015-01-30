@@ -3,11 +3,13 @@ package l.files.features;
 import java.io.File;
 import java.io.IOException;
 
+import l.files.common.base.Consumer;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.io.Files.write;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.io.Files.append;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
@@ -72,24 +74,52 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void testUpdatesViewOnChildDirectoryModified() throws Exception {
-    testUpdatesViewOnChildModified(dir().createDir("a"));
+    testUpdatesDateViewOnChildModified(dir().createDir("a"));
   }
 
   public void testUpdatesViewOnChildFileModified() throws Exception {
-    testUpdatesViewOnChildModified(dir().createFile("a"));
+    testUpdatesDateViewOnChildModified(dir().createFile("a"));
+    testUpdatesSizeViewOnChildModified(dir().createFile("a"));
   }
 
-  private void testUpdatesViewOnChildModified(File f) throws IOException {
+  private void testUpdatesSizeViewOnChildModified(File f) throws IOException {
     assertTrue(f.setLastModified(0));
-    screen()
-        .assertFileModifiedDateView(f)
-        .assertFileSizeView(f);
+
+    final CharSequence[] size = {null};
+    screen().assertFileSizeView(f, new Consumer<CharSequence>() {
+      @Override public void apply(CharSequence input) {
+        assertFalse(isNullOrEmpty(input.toString()));
+        size[0] = input;
+      }
+    });
 
     modify(f);
 
-    screen()
-        .assertFileModifiedDateView(f)
-        .assertFileSizeView(f);
+    screen().assertFileSizeView(f, new Consumer<CharSequence>() {
+      @Override public void apply(CharSequence input) {
+        assertNotEqual(size[0], input);
+      }
+    });
+  }
+
+  private void testUpdatesDateViewOnChildModified(File f) throws IOException {
+    assertTrue(f.setLastModified(0));
+
+    final CharSequence[] date = {null};
+    screen().assertFileModifiedDateView(f, new Consumer<CharSequence>() {
+      @Override public void apply(CharSequence input) {
+        assertFalse(isNullOrEmpty(input.toString()));
+        date[0] = input;
+      }
+    });
+
+    modify(f);
+
+    screen().assertFileModifiedDateView(f, new Consumer<CharSequence>() {
+      @Override public void apply(CharSequence input) {
+        assertNotEqual(date[0], input);
+      }
+    });
   }
 
   private File delete(File file) {
@@ -102,7 +132,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     if (file.isDirectory()) {
       assertTrue(new File(file, String.valueOf(System.nanoTime())).mkdir());
     } else {
-      write("test", file, UTF_8);
+      append("test", file, UTF_8);
     }
     long lastModifiedAfter = file.lastModified();
     assertNotEqual(lastModifiedBefore, lastModifiedAfter);

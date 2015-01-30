@@ -2,19 +2,18 @@ package l.files.fs;
 
 import com.google.common.net.MediaType;
 
-import org.joda.time.Instant;
-
 /**
- * Contains static information regarding a file.
- * this status is created.
+ * Contains static information regarding a file. this status is created.
  */
 public interface FileStatus {
+
+  Resource resource();
 
   Path path();
 
   String name();
 
-  Instant lastModifiedTime();
+  long lastModifiedTime();
 
   boolean isRegularFile();
 

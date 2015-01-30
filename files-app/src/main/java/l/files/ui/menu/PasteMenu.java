@@ -1,51 +1,35 @@
 package l.files.ui.menu;
 
-import android.app.Activity;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.analytics.AnalyticsMenu;
-import l.files.ui.Clipboards;
-import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
-import l.files.provider.FilesContract;
+import l.files.fs.Path;
+import l.files.operations.OperationService;
+import l.files.ui.Clipboards;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.ui.Clipboards.clear;
-import static l.files.ui.Clipboards.getFileIds;
+import static l.files.ui.Clipboards.getPaths;
 import static l.files.ui.Clipboards.isCopy;
 import static l.files.ui.Clipboards.isCut;
-import static l.files.common.app.SystemServices.getClipboardManager;
-import static l.files.provider.FilesContract.copy;
-import static l.files.provider.FilesContract.move;
 
-/**
- * Menu to paste files to a directory identified by the given {@link
- * FilesContract.Files#ID}.
- */
 public final class PasteMenu extends OptionsMenuAction {
 
-  private final String dirId;
+  private final Path path;
   private final ClipboardManager manager;
   private final Context context;
 
-  private PasteMenu(
-      Context context, ClipboardManager manager, String dirId) {
+  public PasteMenu(Context context, ClipboardManager manager, Path path) {
     super(android.R.id.paste);
-    this.context = checkNotNull(context, "context");
-    this.manager = checkNotNull(manager, "manager");
-    this.dirId = checkNotNull(dirId, "dirId");
-  }
-
-  public static OptionsMenu create(Activity activity, String dirId) {
-    ClipboardManager manager = getClipboardManager(activity);
-    PasteMenu menu = new PasteMenu(activity, manager, dirId);
-    return new AnalyticsMenu(activity, menu, "paste");
+    this.context = checkNotNull(context);
+    this.manager = checkNotNull(manager);
+    this.path = checkNotNull(path);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {
@@ -67,9 +51,9 @@ public final class PasteMenu extends OptionsMenuAction {
     AsyncTask.execute(new Runnable() {
       @Override public void run() {
         if (isCopy(manager)) {
-          copy(context, getFileIds(manager), dirId);
+          OperationService.copy(context, getPaths(manager), path);
         } else if (isCut(manager)) {
-          move(context, getFileIds(manager), dirId);
+          OperationService.move(context, getPaths(manager), path);
           clear(manager);
         }
       }

@@ -2,6 +2,8 @@ package l.files.common.testing;
 
 public abstract class FileBaseTest extends BaseTest {
 
+  // TODO use Path instead of File
+
   private TempDir tmp;
 
   @Override protected void setUp() throws Exception {

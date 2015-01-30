@@ -5,31 +5,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.ui.analytics.AnalyticsMenu;
-import l.files.ui.Preferences;
-import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
+import l.files.ui.Preferences;
 
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Menu to show/hide the path bar.
- */
 public final class ShowPathBarMenu extends OptionsMenuAction {
 
   private final Context context;
 
-  private ShowPathBarMenu(Context context) {
+  public ShowPathBarMenu(Context context) {
     super(R.id.show_path_bar);
-    this.context = checkNotNull(context, "context");
-  }
-
-  public static OptionsMenu create(Context context) {
-    OptionsMenu menu = new ShowPathBarMenu(context);
-    return new AnalyticsMenu(context, menu, "show_path");
+    this.context = checkNotNull(context);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

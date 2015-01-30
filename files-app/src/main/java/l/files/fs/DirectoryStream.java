@@ -16,8 +16,4 @@ import java.util.Iterator;
  */
 public interface DirectoryStream extends Iterable<PathEntry>, Closeable {
 
-  /**
-   * @throws FileSystemException if failed to close this stream
-   */
-  @Override void close();
 }

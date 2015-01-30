@@ -1,5 +1,6 @@
 package l.files.fs;
 
+import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -27,7 +28,7 @@ public interface FileSystem {
    * @throws FileSystemException      if failed to read file status
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  FileStatus stat(Path path, boolean followLink);
+  FileStatus stat(Path path, boolean followLink) throws FileSystemException;
 
   /**
    * Creates a symbolic link.
@@ -37,14 +38,14 @@ public interface FileSystem {
    * @throws FileSystemException      if failed to create the link
    * @throws IllegalArgumentException if file scheme is known to this instance
    */
-  void symlink(Path target, Path link);
+  void symlink(Path target, Path link) throws FileSystemException;
 
   /**
    * Opens a directory stream to iterate through the entries of the directory.
    *
    * @throws FileSystemException if failed to open the directory
    */
-  DirectoryStream openDirectory(Path path);
+  DirectoryStream openDirectory(Path path) throws FileSystemException;
 
   /**
    * Returns a visitor for traversing file trees.

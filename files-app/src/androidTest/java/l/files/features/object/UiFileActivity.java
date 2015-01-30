@@ -4,17 +4,16 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.Instrumentation;
-import android.database.Cursor;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Optional;
 
 import java.io.File;
@@ -23,6 +22,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import l.files.R;
+import l.files.common.base.Consumer;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 import l.files.ui.FilesActivity;
 import l.files.ui.FilesPagerFragment;
 
@@ -35,13 +38,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static l.files.ui.decorator.decoration.Decorations.fileDate;
-import static l.files.ui.decorator.decoration.Decorations.fileSize;
 import static l.files.features.object.Instrumentations.await;
 import static l.files.features.object.Instrumentations.awaitOnMainThread;
-import static l.files.provider.FilesContract.Files;
-import static l.files.provider.FilesContract.Files.name;
-import static l.files.provider.FilesContract.getFileId;
 import static l.files.test.Mocks.mockMenuItem;
 
 public final class UiFileActivity {
@@ -226,16 +224,19 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertCurrentDirectory(final File dir) {
+  public UiFileActivity assertCurrentDirectory(final Path expected) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         FilesPagerFragment fragment = activity.getCurrentPagerFragment();
-        String actual = fragment.getCurrentDirectoryId();
-        String expected = getFileId(dir);
+        Path actual = fragment.getCurrentPath();
         assertEquals(expected, actual);
       }
     });
     return this;
+  }
+
+  public UiFileActivity assertCurrentDirectory(File dir) {
+    return assertCurrentDirectory(LocalPath.of(dir));
   }
 
   public UiFileActivity assertSelectedTabPosition(final int position) {
@@ -304,27 +305,21 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertFileModifiedDateView(final File file) {
+  public UiFileActivity assertFileModifiedDateView(final File file, final Consumer<CharSequence> assertion) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        int pos = findItemPositionOrThrow(file.getName());
-        ListAdapter adapter = getListView().getAdapter();
-        CharSequence expected = fileDate(activity).get(pos, adapter);
         CharSequence actual = getFileModifiedView(file).getText();
-        assertEquals(expected, actual);
+        assertion.apply(actual);
       }
     });
     return this;
   }
 
-  public UiFileActivity assertFileSizeView(final File file) {
+  public UiFileActivity assertFileSizeView(final File file, final Consumer<CharSequence> assertion) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        int pos = findItemPositionOrThrow(file.getName());
-        ListAdapter adapter = getListView().getAdapter();
-        CharSequence expected = fileSize(activity).get(pos, adapter);
         CharSequence actual = getFileSizeView(file).getText();
-        assertEquals(expected, actual);
+        assertion.apply(actual);
       }
     });
     return this;
@@ -428,8 +423,8 @@ public final class UiFileActivity {
   private Optional<Integer> findItemPosition(String filename) {
     int count = getListView().getCount();
     for (int i = 0; i < count; i++) {
-      Cursor cursor = (Cursor) getListView().getItemAtPosition(i);
-      if (name(cursor).equals(filename)) {
+      FileStatus stat = (FileStatus) getListView().getItemAtPosition(i);
+      if (stat.name().equals(filename)) {
         return Optional.of(i);
       }
     }
@@ -481,31 +476,27 @@ public final class UiFileActivity {
   public UiFileActivity assertBookmarkSidebarHasCurrentDirectory(final boolean has) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        String id = activity.getCurrentPagerFragment().getCurrentDirectoryId();
-        List<String> ids = getSidebarBookmarkIds();
-        assertEquals(ids.toString(), has, ids.contains(id));
+        Path path = activity.getCurrentPagerFragment().getCurrentPath();
+        List<Path> paths = getSidebarBookmark();
+        assertEquals(paths.toString(), has, paths.contains(path));
       }
     });
     return this;
   }
 
-  public List<String> getSidebarBookmarkIds() {
-    return getSidebarBookmarks(new Function<Cursor, String>() {
-      @Override public String apply(Cursor input) {
-        return Files.id(input);
-      }
-    });
+  public List<Path> getSidebarBookmark() {
+    return getSidebarBookmarks(Functions.<Path>identity());
   }
 
   public List<String> getSidebarBookmarkNames() {
-    return getSidebarBookmarks(new Function<Cursor, String>() {
-      @Override public String apply(Cursor input) {
-        return Files.name(input);
+    return getSidebarBookmarks(new Function<Path, String>() {
+      @Override public String apply(Path input) {
+        return input.name();
       }
     });
   }
 
-  private <T> List<T> getSidebarBookmarks(final Function<Cursor, T> fn) {
+  private <T> List<T> getSidebarBookmarks(final Function<Path, T> fn) {
     final List<T> result = new ArrayList<>();
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
@@ -515,9 +506,9 @@ public final class UiFileActivity {
         ListView list = (ListView) fragment.getView();
         assertNotNull(list);
         for (int i = list.getHeaderViewsCount(); i < list.getCount(); i++) {
-          Cursor cursor = (Cursor) list.getItemAtPosition(i);
-          assertNotNull(cursor);
-          result.add(fn.apply(cursor));
+          Path path = (Path) list.getItemAtPosition(i);
+          assertNotNull(path);
+          result.add(fn.apply(path));
         }
       }
     });

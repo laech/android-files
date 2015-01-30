@@ -1,19 +1,29 @@
 package l.files.ui;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.content.CursorLoader;
+import android.content.ClipboardManager;
 import android.content.Loader;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.common.base.Supplier;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import l.files.R;
+import l.files.common.app.OptionsMenus;
+import l.files.common.widget.MultiChoiceModeListeners;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
+import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.menu.BookmarkMenu;
 import l.files.ui.menu.NewDirMenu;
 import l.files.ui.menu.PasteMenu;
@@ -25,60 +35,58 @@ import l.files.ui.mode.CutAction;
 import l.files.ui.mode.DeleteAction;
 import l.files.ui.mode.RenameAction;
 import l.files.ui.mode.SelectAllAction;
-import l.files.common.app.OptionsMenus;
-import l.files.common.widget.MultiChoiceModeListeners;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.view.View.GONE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
-import static java.lang.System.identityHashCode;
+import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static l.files.common.app.SystemServices.getClipboardManager;
+import static l.files.common.widget.ListViews.getCheckedItemPositions;
+import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
-import static l.files.ui.Preferences.isSortOrderKey;
-import static l.files.provider.FilesContract.getFilesUri;
+import static l.files.ui.Preferences.isSortKey;
 
 public final class FilesFragment extends BaseFileListFragment
-    implements LoaderCallbacks<Cursor>, OnSharedPreferenceChangeListener {
+    implements LoaderCallbacks<List<FileStatus>>, OnSharedPreferenceChangeListener, Supplier<Set<Path>> {
 
   // TODO implement progress
 
   public static final String TAG = FilesFragment.class.getSimpleName();
-  public static final String ARG_DIR_ID = "dir_id";
 
-  private static final int LOADER_ID = identityHashCode(FilesFragment.class);
+  private static final String ARG_PATH = "path";
 
-  private String dirId;
+  public static FilesFragment create(Path path) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(ARG_PATH, path);
+
+    FilesFragment browser = new FilesFragment();
+    browser.setArguments(bundle);
+    return browser;
+  }
+
+  private Path path;
   private ProgressBar progress;
 
   public FilesFragment() {
     super(R.layout.files_fragment);
   }
 
-  /**
-   * Creates a fragment to show the contents under the directory's ID.
-   */
-  public static FilesFragment create(String dirId) {
-    return Fragments.setArgs(new FilesFragment(), ARG_DIR_ID, dirId);
-  }
-
-  /**
-   * Gets the ID of the directory that this fragment is currently showing.
-   */
-  public String getDirectoryId() {
-    return dirId;
+  public Path getPath() {
+    return path;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
 
-    dirId = getArguments().getString(ARG_DIR_ID);
+    path = getArguments().getParcelable(ARG_PATH);
     progress = (ProgressBar) getView().findViewById(android.R.id.progress);
 
     setupListView();
     setupOptionsMenu();
     setListAdapter(FilesAdapter.get(getActivity()));
 
-    getLoaderManager().initLoader(LOADER_ID, null, this);
+    getLoaderManager().initLoader(0, null, this);
     Preferences.register(getActivity(), this);
   }
 
@@ -92,6 +100,12 @@ public final class FilesFragment extends BaseFileListFragment
     progress.setVisibility(GONE);
   }
 
+  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
+    super.onListItemClick(l, v, pos, id);
+    FileStatus item = (FileStatus) l.getItemAtPosition(pos);
+    getBus().post(OpenFileRequest.create(item));
+  }
+
   @Override public FilesAdapter getListAdapter() {
     return (FilesAdapter) super.getListAdapter();
   }
@@ -99,47 +113,53 @@ public final class FilesFragment extends BaseFileListFragment
   private void setupOptionsMenu() {
     Activity context = getActivity();
     setOptionsMenu(OptionsMenus.compose(
-        BookmarkMenu.create(context, dirId),
-        NewDirMenu.create(context, dirId),
-        PasteMenu.create(context, dirId),
-        SortMenu.create(context),
-        ShowHiddenFilesMenu.create(context)
+        new BookmarkMenu(BookmarkManagerImpl.get(context), path),
+        new NewDirMenu(context.getFragmentManager(), path),
+        new PasteMenu(context, getClipboardManager(context), path),
+        new SortMenu(context.getFragmentManager()),
+        new ShowHiddenFilesMenu(context)
     ));
   }
 
   private void setupListView() {
-    ListView list = getListView();
+    final Activity context = getActivity();
+    final ClipboardManager clipboard = getClipboardManager(context);
+    final ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-    FragmentManager fragmentManager = getActivityFragmentManager();
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
-        CountSelectedItemsAction.create(list),
-        SelectAllAction.create(list),
-        CutAction.create(list),
-        CopyAction.create(list),
-        DeleteAction.create(list),
-        RenameAction.create(list, fragmentManager, dirId)
+        new CountSelectedItemsAction(list),
+        new SelectAllAction(list),
+        new CutAction(context, clipboard, this),
+        new CopyAction(context, clipboard, this),
+        new DeleteAction(context, this),
+        new RenameAction(context.getFragmentManager(), list)
     ));
   }
 
-  private FragmentManager getActivityFragmentManager() {
-    return getActivity().getFragmentManager();
+  @Override public Set<Path> get() {
+    ListView list = getListView();
+    List<Integer> positions = getCheckedItemPositions(list);
+    Set<Path> paths = newHashSetWithExpectedSize(positions.size());
+    for (int position : positions) {
+      paths.add(((FileStatus) list.getItemAtPosition(position)).path());
+    }
+    return paths;
   }
 
-  @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+  @Override public Loader<List<FileStatus>> onCreateLoader(int id, Bundle bundle) {
     Activity context = getActivity();
     boolean showHidden = Preferences.getShowHiddenFiles(context);
-    String sortOrder = Preferences.getSortOrder(context);
-    Uri uri = getFilesUri(context, getDirectoryId(), showHidden);
-    return new CursorLoader(context, uri, null, null, null, sortOrder);
+    Comparator<FileStatus> sort = getSort(context).newComparator(Locale.getDefault());
+    return new FilesLoader(context, path, sort, showHidden);
   }
 
-  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+  @Override public void onLoadFinished(Loader<List<FileStatus>> loader, List<FileStatus> data) {
     if (getActivity() != null && !getActivity().isFinishing()) {
-      if (getListAdapter().getCursor() != null && isResumed()) {
+      if (!getListAdapter().isEmpty() && isResumed()) {
         Animations.animatePreDataSetChange(getListView());
       }
-      getListAdapter().setCursor(cursor, Preferences.getSortOrder(getActivity()));
-      if (cursor.getCount() == 0) {
+      getListAdapter().setItems(data, getSort(getActivity()).newCategorizer());
+      if (getListAdapter().isEmpty()) {
         overrideEmptyText(R.string.empty);
       }
     }
@@ -152,14 +172,14 @@ public final class FilesFragment extends BaseFileListFragment
     }
   }
 
-  @Override public void onLoaderReset(Loader<Cursor> loader) {
-    getListAdapter().setCursor(null);
+  @Override public void onLoaderReset(Loader<List<FileStatus>> loader) {
+    getListAdapter().setItems(Collections.<FileStatus>emptyList());
   }
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (isSortOrderKey(key) || isShowHiddenFilesKey(key)) {
-      getLoaderManager().restartLoader(LOADER_ID, null, this);
+    if (isSortKey(key) || isShowHiddenFilesKey(key)) {
+      getLoaderManager().restartLoader(0, null, this);
     }
   }
 }

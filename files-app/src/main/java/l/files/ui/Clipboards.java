@@ -5,17 +5,21 @@ import android.content.Intent;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.util.ArrayList;
 import java.util.Set;
+
+import l.files.fs.Path;
 
 import static android.content.ClipData.newIntent;
 import static android.content.ClipData.newPlainText;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptySet;
 
 public final class Clipboards {
 
   private static final String ACTION_CUT = "l.files.intent.action.CUT";
   private static final String ACTION_COPY = "l.files.intent.action.COPY";
-  private static final String EXTRA_FILE_IDS = "l.files.intent.extra.FILE_IDS";
+  private static final String EXTRA_PATHS = "l.files.intent.extra.PATHS";
 
   private Clipboards() {}
 
@@ -37,12 +41,13 @@ public final class Clipboards {
     return ACTION_COPY.equals(getAction(manager));
   }
 
-  public static Set<String> getFileIds(ClipboardManager manager) {
+  public static Set<Path> getPaths(ClipboardManager manager) {
     Intent intent = getClipboardIntent(manager);
+    intent.setExtrasClassLoader(Clipboards.class.getClassLoader());
     if (intent == null) {
       return emptySet();
     }
-    String[] extras = intent.getStringArrayExtra(EXTRA_FILE_IDS);
+    ArrayList<Path> extras = intent.getParcelableArrayListExtra(EXTRA_PATHS);
     if (extras == null) {
       return emptySet();
     }
@@ -67,20 +72,17 @@ public final class Clipboards {
     return intent.getAction();
   }
 
-  public static void setCut(
-      ClipboardManager manager, Set<String> fileLocations) {
-    setClipData(manager, fileLocations, ACTION_CUT);
+  public static void setCut(ClipboardManager manager, Set<Path> paths) {
+    setClipData(manager, paths, ACTION_CUT);
   }
 
-  public static void setCopy(
-      ClipboardManager manager, Set<String> fileLocations) {
-    setClipData(manager, fileLocations, ACTION_COPY);
+  public static void setCopy(ClipboardManager manager, Set<Path> paths) {
+    setClipData(manager, paths, ACTION_COPY);
   }
 
   private static void setClipData(
-      ClipboardManager manager, Set<String> fileLocations, String action) {
-    String[] data = fileLocations.toArray(new String[fileLocations.size()]);
-    Intent intent = new Intent(action).putExtra(EXTRA_FILE_IDS, data);
+      ClipboardManager manager, Set<Path> paths, String action) {
+    Intent intent = new Intent(action).putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(paths));
     manager.setPrimaryClip(newIntent(null, intent));
   }
 }

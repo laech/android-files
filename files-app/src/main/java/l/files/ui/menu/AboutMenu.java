@@ -7,8 +7,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.ui.analytics.AnalyticsMenu;
-import l.files.common.app.OptionsMenu;
 import l.files.common.app.OptionsMenuAction;
 
 import static android.content.Intent.ACTION_VIEW;
@@ -21,13 +19,9 @@ public final class AboutMenu extends OptionsMenuAction {
 
   private final Context context;
 
-  private AboutMenu(Context context) {
+  public AboutMenu(Context context) {
     super(R.id.about);
     this.context = checkNotNull(context, "context");
-  }
-
-  public static OptionsMenu create(Context context) {
-    return new AnalyticsMenu(context, new AboutMenu(context), "about");
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

@@ -15,10 +15,12 @@ import java.util.concurrent.CountDownLatch;
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.FileBaseTest;
 import l.files.eventbus.Subscribe;
+import l.files.fs.local.LocalPath;
 
 import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.assertExists;
 import static l.files.common.testing.Tests.assertNotExists;
@@ -58,7 +60,7 @@ public final class OperationServiceTest extends FileBaseTest {
     CountDownListener listener = register(new CountDownListener(MOVE));
     try {
 
-      move(getContext(), asList(src.getPath()), dst.getPath());
+      move(getContext(), singleton(LocalPath.of(src)), LocalPath.of(dst));
       listener.await();
       assertNotExists(src);
       assertExists(new File(dst, src.getName()));
@@ -74,7 +76,7 @@ public final class OperationServiceTest extends FileBaseTest {
     CountDownListener listener = register(new CountDownListener(COPY));
     try {
 
-      copy(getContext(), asList(src.getPath()), dst.getPath());
+      copy(getContext(), singleton(LocalPath.of(src)), LocalPath.of(dst));
       listener.await();
       assertExists(src);
       assertExists(new File(dst, src.getName()));
@@ -90,7 +92,7 @@ public final class OperationServiceTest extends FileBaseTest {
     CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 
-      delete(getContext(), a.getPath(), b.getPath());
+      delete(getContext(), newHashSet(LocalPath.of(a), LocalPath.of(b)));
       listener.await();
       assertNotExists(a);
       assertNotExists(b);
@@ -104,8 +106,8 @@ public final class OperationServiceTest extends FileBaseTest {
     CountDownListener listener = register(new CountDownListener(DELETE, 2));
     try {
 
-      delete(getContext(), tmp().createFile("a").getPath());
-      delete(getContext(), tmp().createFile("2").getPath());
+      delete(getContext(), singleton(LocalPath.of(tmp().createFile("a"))));
+      delete(getContext(), singleton(LocalPath.of(tmp().createFile("2"))));
       listener.await();
       assertTrue(listener.getValues().size() > 1);
       assertEquals(2, getTaskIds(listener.getValues()).size());
@@ -125,14 +127,14 @@ public final class OperationServiceTest extends FileBaseTest {
   }
 
   public void testTaskStartTimeIsCorrect() throws Exception {
-    String path1 = tmp().createFile("a").getPath();
-    String path2 = tmp().createFile("b").getPath();
+    File file1 = tmp().createFile("a");
+    File file2 = tmp().createFile("b");
     CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 
       long start = currentTimeMillis();
       {
-        delete(getContext(), path1, path2);
+        delete(getContext(), newHashSet(LocalPath.of(file1), LocalPath.of(file2)));
         listener.await();
       }
       long end = currentTimeMillis();

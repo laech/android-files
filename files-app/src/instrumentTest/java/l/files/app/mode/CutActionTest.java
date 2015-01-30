@@ -41,7 +41,7 @@ public final class CutActionTest extends AndroidTestCase {
     bus = mock(Bus.class);
     list = new ListView(getContext());
     list.setChoiceMode(CHOICE_MODE_MULTIPLE);
-    action = new CutAction(list, bus);
+    action = new CutAction(context, bus, list);
   }
 
   public void testCreatesMenuItemCorrectly() {

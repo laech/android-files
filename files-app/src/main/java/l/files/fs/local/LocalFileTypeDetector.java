@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.net.MediaType;
 
+import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.FileStatus;
 import l.files.fs.FileTypeDetector;
@@ -48,7 +49,8 @@ abstract class LocalFileTypeDetector implements FileTypeDetector {
     this.fs = checkNotNull(fs, "fs");
   }
 
-  @Override public MediaType detect(Path path, boolean followLink) {
+  @Override public MediaType detect(Path path, boolean followLink)
+      throws FileSystemException {
     LocalFileStatus stat = fs.stat(path, followLink);
     if (stat.isRegularFile()) {
       return detectRegularFile(stat);

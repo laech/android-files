@@ -1,12 +1,14 @@
 package l.files.fs.local;
 
+import android.os.Parcel;
+
 import com.google.auto.value.AutoValue;
 
 import java.io.File;
 import java.net.URI;
 
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 
 @AutoValue
 public abstract class LocalPath implements Path {
@@ -36,8 +38,8 @@ public abstract class LocalPath implements Path {
     return new AutoValue_LocalPath(new File(sanitizedUri(file)));
   }
 
-  @Override public FileSystem system() {
-    return LocalFileSystem.get();
+  @Override public Resource resource() {
+    return LocalResource.create(this);
   }
 
   @Override public URI uri() {
@@ -90,5 +92,23 @@ public abstract class LocalPath implements Path {
 
   @Override public String toString() {
     return file().toString();
+  }
+
+  public static final Creator<LocalPath> CREATOR = new Creator<LocalPath>() {
+    @Override public LocalPath createFromParcel(Parcel source) {
+      return LocalPath.of(source.readString());
+    }
+
+    @Override public LocalPath[] newArray(int size) {
+      return new LocalPath[size];
+    }
+  };
+
+  @Override public void writeToParcel(Parcel dst, int flags) {
+    dst.writeString(file().getPath());
+  }
+
+  @Override public int describeContents() {
+    return 0;
   }
 }

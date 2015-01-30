@@ -5,24 +5,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
+
+import com.google.common.net.MediaType;
+
+import java.io.IOException;
 
 import l.files.R;
-import l.files.ui.analytics.Analytics;
 import l.files.common.base.Consumer;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
+import l.files.fs.Path;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.provider.FilesContract.getFileId;
 
-final class FileOpener implements Consumer<Uri> {
-
-  private static final String TAG = FileOpener.class.getSimpleName();
+final class FileOpener implements Consumer<Path> {
 
   public static FileOpener get(Context context) {
     return new FileOpener(
@@ -42,35 +42,34 @@ final class FileOpener implements Consumer<Uri> {
     this.executor = checkNotNull(executor, "executor");
   }
 
-  @Override public void apply(Uri uri) {
-    executor.execute(new ShowFileTask(uri));
+  @Override public void apply(Path path) {
+    executor.execute(new ShowFileTask(path));
   }
 
-  class ShowFileTask extends AsyncTask<Void, Void, String> {
-    private final Uri uri;
+  class ShowFileTask extends AsyncTask<Void, Void, MediaType> {
+    private final Path path;
 
-    ShowFileTask(Uri uri) {
-      this.uri = uri;
+    ShowFileTask(Path path) {
+      this.path = path;
     }
 
-    @Override protected String doInBackground(Void... params) {
-      return context.getContentResolver().getType(uri);
+    @Override protected MediaType doInBackground(Void... params) {
+      try {
+        return path.resource().detectMediaType();
+      } catch (IOException e) {
+        return null;
+      }
     }
 
-    @Override protected void onPostExecute(String media) {
+    @Override protected void onPostExecute(MediaType media) {
       if (media == null) {
         showFailedToGetFileInfo();
         return;
       }
       try {
         showFile(media);
-        Analytics.onEvent(context, "files", "open_file_success", media);
       } catch (ActivityNotFoundException e) {
         showActivityNotFound();
-        Analytics.onEvent(context, "files", "open_file_failed", media);
-        if (DEBUG) {
-          Log.d(TAG, media, e);
-        }
       }
       debug(media);
     }
@@ -83,12 +82,12 @@ final class FileOpener implements Consumer<Uri> {
       toaster.toast(context, R.string.no_app_to_open_file);
     }
 
-    private void showFile(String media) throws ActivityNotFoundException {
+    private void showFile(MediaType media) throws ActivityNotFoundException {
       context.startActivity(new Intent(ACTION_VIEW)
-          .setDataAndType(Uri.parse(getFileId(uri)), media));
+          .setDataAndType(Uri.parse(path.uri().toString()), media.toString()));
     }
 
-    private void debug(String media) {
+    private void debug(MediaType media) {
       if (DEBUG) makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
     }
   }

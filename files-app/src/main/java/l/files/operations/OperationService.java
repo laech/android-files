@@ -8,10 +8,10 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -19,7 +19,6 @@ import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.eventbus.Subscribe;
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getService;
@@ -49,31 +48,29 @@ public final class OperationService extends Service {
   private Handler handler;
   private Map<Integer, Future<?>> tasks;
 
-  public static void delete(Context context, String... paths) {
+  public static void delete(Context context, Set<? extends Path> paths) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(DELETE.action())
-            .putStringArrayListExtra(EXTRA_PATHS, newArrayList(paths))
+            .putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(paths))
     );
   }
 
-  public static void copy(
-      Context context, Iterable<String> srcPaths, String dstPath) {
-    paste(COPY.action(), context, srcPaths, dstPath);
+  public static void copy(Context context, Set<? extends Path> src, Path dst) {
+    paste(COPY.action(), context, src, dst);
   }
 
-  public static void move(
-      Context context, Iterable<String> srcPaths, String dstPath) {
-    paste(MOVE.action(), context, srcPaths, dstPath);
+  public static void move(Context context, Set<? extends Path> src, Path dst) {
+    paste(MOVE.action(), context, src, dst);
   }
 
   private static void paste(String action, Context context,
-                            Iterable<String> srcPaths, String dstPath) {
+                            Set<? extends Path> src, Path dst) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(action)
-            .putExtra(EXTRA_DST_PATH, dstPath)
-            .putStringArrayListExtra(EXTRA_PATHS, newArrayList(srcPaths))
+            .putExtra(EXTRA_DST_PATH, dst)
+            .putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(src))
     );
   }
 
@@ -143,6 +140,7 @@ public final class OperationService extends Service {
   }
 
   private Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+    intent.setExtrasClassLoader(getClassLoader());
     return FileAction
         .fromIntent(intent.getAction())
         .newTask(intent, id, bus, handler);
@@ -165,40 +163,26 @@ public final class OperationService extends Service {
 
     DELETE("l.files.operations.DELETE") {
       @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<Path> paths = getSourcePaths(intent);
+        List<Path> paths = intent.getParcelableArrayListExtra(EXTRA_PATHS);
         return new DeleteTask(id, Clock.system(), bus, handler, paths);
       }
     },
 
     COPY("l.files.operations.COPY") {
       @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<Path> sources = getSourcePaths(intent);
-        Path destination = getDestinationPath(intent);
+        List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+        Path destination = intent.getParcelableExtra(EXTRA_DST_PATH);
         return new CopyTask(id, Clock.system(), bus, handler, sources, destination);
       }
     },
 
     MOVE("l.files.operations.MOVE") {
       @Override Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
-        List<Path> sources = getSourcePaths(intent);
-        Path destination = getDestinationPath(intent);
+        List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+        Path destination = intent.getParcelableExtra(EXTRA_DST_PATH);
         return new MoveTask(id, Clock.system(), bus, handler, sources, destination);
       }
     };
-
-    private static Path getDestinationPath(Intent intent) {
-      String path = intent.getStringExtra(EXTRA_DST_PATH);
-      return LocalPath.of(path);
-    }
-
-    private static List<Path> getSourcePaths(Intent intent) {
-      List<String> uriStrings = intent.getStringArrayListExtra(EXTRA_PATHS);
-      List<Path> paths = new ArrayList<>(uriStrings.size());
-      for (String path : uriStrings) {
-        paths.add(LocalPath.of(path));
-      }
-      return paths;
-    }
 
     private final String action;
 

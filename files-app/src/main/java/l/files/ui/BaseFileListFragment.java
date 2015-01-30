@@ -1,11 +1,9 @@
 package l.files.ui;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.app.BaseListFragment;
@@ -36,18 +34,8 @@ class BaseFileListFragment extends BaseListFragment {
     bus = Events.get();
   }
 
-  @Override
-  public View onCreateView(
-      @SuppressWarnings("NullableProblems") LayoutInflater inflater,
-      ViewGroup container,
-      Bundle state) {
+  @Override public View onCreateView(
+      LayoutInflater inflater, ViewGroup container, Bundle state) {
     return inflater.inflate(layoutResourceId, container, false);
-  }
-
-  @Override
-  public void onListItemClick(ListView l, View v, int pos, long id) {
-    super.onListItemClick(l, v, pos, id);
-    Cursor cursor = (Cursor) l.getItemAtPosition(pos);
-    bus.post(OpenFileRequest.from(cursor));
   }
 }

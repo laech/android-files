@@ -6,20 +6,27 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
 
+import java.io.IOException;
+
 import l.files.R;
+import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.ui.FileCreationFragment;
-import l.files.provider.FilesContract;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static l.files.ui.Fragments.setArgs;
 
 public final class NewDirFragment extends FileCreationFragment {
 
   public static final String TAG = NewDirFragment.class.getSimpleName();
 
-  static NewDirFragment create(String parentLocation) {
-    return setArgs(new NewDirFragment(), ARG_PARENT_LOCATION, parentLocation);
+  static NewDirFragment create(Path path) {
+    Bundle bundle = new Bundle(1);
+    bundle.putParcelable(ARG_PARENT_PATH, path);
+
+    NewDirFragment fragment = new NewDirFragment();
+    fragment.setArguments(bundle);
+    return fragment;
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -28,12 +35,15 @@ public final class NewDirFragment extends FileCreationFragment {
   }
 
   private void getNameSuggestion() {
-    final String location = getParentLocation();
+    final Resource parent = getParentPath().resource();
     final String basename = getString(R.string.untitled_dir);
-    final Activity context = getActivity();
     new AsyncTask<Object, Object, String>() {
       @Override protected String doInBackground(Object... params) {
-        return FilesContract.getNameSuggestion(context, location, basename);
+        Resource resource = parent.resolve(basename);
+        for (int i = 2; resource.exists(); i++) {
+          resource = parent.resolve(basename + " " + i);
+        }
+        return resource.name();
       }
 
       @Override protected void onPostExecute(String name) {
@@ -53,11 +63,15 @@ public final class NewDirFragment extends FileCreationFragment {
 
   private void createDirectory() {
     final Activity context = getActivity();
-    final String parentLocation = getParentLocation();
-    final String filename = getFilename();
+    final Path path = getParentPath().resolve(getFilename());
     new AsyncTask<Void, Void, Boolean>() {
       @Override protected Boolean doInBackground(Void... params) {
-        return FilesContract.createDirectory(context, parentLocation, filename);
+        try {
+          path.resource().createDirectory();
+          return true;
+        } catch (IOException e) {
+          return false;
+        }
       }
 
       @Override protected void onPostExecute(Boolean success) {

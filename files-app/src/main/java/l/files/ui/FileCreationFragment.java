@@ -1,13 +1,10 @@
 package l.files.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
-import android.content.CursorLoader;
+import android.content.AsyncTaskLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -15,24 +12,27 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.io.IOException;
+
 import l.files.R;
+import l.files.fs.FileStatus;
+import l.files.fs.FileSystemException;
+import l.files.fs.Path;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
-import static l.files.provider.FilesContract.Files;
-import static l.files.provider.FilesContract.getFileUri;
 
 public abstract class FileCreationFragment extends DialogFragment
     implements DialogInterface.OnClickListener {
 
-  public static final String ARG_PARENT_LOCATION = "parent_location";
+  public static final String ARG_PARENT_PATH = "parent";
 
   private static final int LOADER_CHECKER =
       identityHashCode(FileCreationFragment.class);
 
-  private LoaderCallbacks<Cursor> checkerCallback = new CheckerCallback();
+  private LoaderCallbacks<FileStatus> checkerCallback = new CheckerCallback();
   private EditText editText;
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public abstract class FileCreationFragment extends DialogFragment
         .create();
   }
 
-  protected CharSequence getError(String newFileLocation) {
+  protected CharSequence getError(Path target) {
     return getString(R.string.name_exists);
   }
 
@@ -87,9 +87,8 @@ public abstract class FileCreationFragment extends DialogFragment
     getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
   }
 
-
-  protected String getParentLocation() {
-    return getArguments().getString(ARG_PARENT_LOCATION);
+  protected Path getParentPath() {
+    return getArguments().getParcelable(ARG_PARENT_PATH);
   }
 
   protected String getFilename() {
@@ -105,35 +104,45 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
 
-  class CheckerCallback implements LoaderCallbacks<Cursor> {
+  class CheckerCallback implements LoaderCallbacks<FileStatus> {
 
-    @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+    @Override public Loader<FileStatus> onCreateLoader(int id, Bundle bundle) {
       if (id == LOADER_CHECKER) {
         return newChecker();
       }
       return null;
     }
 
-    private Loader<Cursor> newChecker() {
-      Activity context = getActivity();
-      Uri uri = getFileUri(context, getParentLocation(), getFilename());
-      return new CursorLoader(context, uri, null, null, null, null);
+    private Loader<FileStatus> newChecker() {
+      final Path path = getParentPath().resolve(getFilename());
+      return new AsyncTaskLoader<FileStatus>(getActivity()) {
+        @Override public FileStatus loadInBackground() {
+          try {
+            return path.resource().stat();
+          } catch (IOException | FileSystemException e) { // TODO
+            return null;
+          }
+        }
+
+        @Override protected void onStartLoading() {
+          super.onStartLoading();
+          forceLoad();
+        }
+      };
     }
 
-    @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    @Override public void onLoadFinished(Loader<FileStatus> loader, FileStatus stat) {
       if (loader.getId() == LOADER_CHECKER) {
-        onCheckFinished(cursor);
+        onCheckFinished(stat);
       }
     }
 
-    @Override public void onLoaderReset(Loader<Cursor> loader) {}
+    @Override public void onLoaderReset(Loader<FileStatus> loader) {}
 
-    private void onCheckFinished(Cursor cursor) {
+    private void onCheckFinished(FileStatus stat) {
       Button ok = getOkButton();
-      if (cursor.getCount() > 0) {
-        cursor.moveToFirst();
-        String newFileLocation = Files.id(cursor);
-        editText.setError(getError(newFileLocation));
+      if (stat != null) {
+        editText.setError(getError(stat.path()));
         ok.setEnabled(false);
       } else {
         editText.setError(null);

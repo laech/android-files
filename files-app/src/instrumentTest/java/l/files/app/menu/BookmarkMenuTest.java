@@ -29,7 +29,7 @@ public final class BookmarkMenuTest extends TestCase {
     super.setUp();
     bus = mock(Bus.class);
     dir = new File("/");
-    action = new BookmarkMenu(bus, dir);
+    action = new BookmarkMenu(bus, bookmarks, dir);
   }
 
   public void testOnCreate() {

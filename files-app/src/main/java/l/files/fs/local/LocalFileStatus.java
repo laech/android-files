@@ -3,14 +3,13 @@ package l.files.fs.local;
 import com.google.auto.value.AutoValue;
 import com.google.common.net.MediaType;
 
-import org.joda.time.Instant;
-
 import java.io.File;
 
 import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -29,7 +28,6 @@ public abstract class LocalFileStatus implements FileStatus {
   private MediaType basicMediaType;
   private Boolean readable;
   private Boolean writable;
-  private Instant lastModifiedTime;
 
   LocalFileStatus() {}
 
@@ -38,14 +36,15 @@ public abstract class LocalFileStatus implements FileStatus {
   abstract Stat stat();
 
   @Deprecated
-  public static LocalFileStatus read(String parent, String child) {
+  public static LocalFileStatus read(String parent, String child)
+      throws FileSystemException {
     checkNotNull(parent, "parent");
     checkNotNull(child, "child");
     return stat(new File(parent, child), false);
   }
 
   @Deprecated
-  public static LocalFileStatus read(String path) {
+  public static LocalFileStatus read(String path) throws FileSystemException {
     checkNotNull(path, "path");
     try {
       Stat stat = Stat.lstat(path);
@@ -58,7 +57,8 @@ public abstract class LocalFileStatus implements FileStatus {
   /**
    * @throws FileSystemException if failed to get status
    */
-  static LocalFileStatus stat(File file, boolean followLink) {
+  static LocalFileStatus stat(File file, boolean followLink)
+      throws FileSystemException {
     return stat(LocalPath.of(file), followLink);
   }
 
@@ -66,7 +66,8 @@ public abstract class LocalFileStatus implements FileStatus {
    * @throws FileSystemException      if failed to get status
    * @throws IllegalArgumentException if the path is not of supported type
    */
-  public static LocalFileStatus stat(Path path, boolean followLink) {
+  public static LocalFileStatus stat(Path path, boolean followLink)
+      throws FileSystemException {
     LocalPath.check(path);
     final Stat stat;
     try {
@@ -81,6 +82,10 @@ public abstract class LocalFileStatus implements FileStatus {
     return new AutoValue_LocalFileStatus((LocalPath) path, stat);
   }
 
+  @Override public Resource resource() {
+    return LocalResource.create(path());
+  }
+
   @Override public String name() {
     if (name == null) {
       name = toFile().getName();
@@ -88,11 +93,8 @@ public abstract class LocalFileStatus implements FileStatus {
     return name;
   }
 
-  @Override public Instant lastModifiedTime() {
-    if (lastModifiedTime == null) {
-      lastModifiedTime = new Instant(modified());
-    }
-    return lastModifiedTime;
+  @Override public long lastModifiedTime() {
+    return stat().mtime() * 1000L;
   }
 
   @Override public MediaType basicMediaType() {
@@ -105,13 +107,6 @@ public abstract class LocalFileStatus implements FileStatus {
       }
     }
     return basicMediaType;
-  }
-
-  /**
-   * Gets the media type of this file based on its file extension or type.
-   */
-  public String mime() {
-    return basicMediaType().toString();
   }
 
   @Override public boolean isReadable() {
@@ -164,13 +159,6 @@ public abstract class LocalFileStatus implements FileStatus {
    */
   @Override public long size() {
     return stat().size();
-  }
-
-  /**
-   * Last modified time of this file in milliseconds.
-   */
-  public long modified() {
-    return stat().mtime() * 1000L;
   }
 
   @Override public boolean isSymbolicLink() {

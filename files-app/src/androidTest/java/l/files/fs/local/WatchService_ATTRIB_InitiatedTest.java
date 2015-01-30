@@ -24,7 +24,6 @@ public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
     try {
 
       assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
-      assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
       verify(listener, timeout(1000)).onEvent(WatchEvent.create(MODIFY, path));
 
     } finally {

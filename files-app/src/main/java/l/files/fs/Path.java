@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import android.os.Parcelable;
+
 import java.net.URI;
 
 /**
@@ -15,12 +17,9 @@ import java.net.URI;
  * this interface, as that's two representations for the resource.</li>
  * </ul>
  */
-public interface Path {
+public interface Path extends Parcelable {
 
-  /**
-   * The file system this path belongs to.
-   */
-  FileSystem system();
+  Resource resource();
 
   /**
    * The absolute/normalized URI representation of this path.

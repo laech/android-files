@@ -30,14 +30,14 @@ abstract class LocalPathEntry implements PathEntry {
   /**
    * @throws FileSystemException if failed to get file status
    */
-  static LocalPathEntry stat(File file) {
+  static LocalPathEntry stat(File file) throws FileSystemException {
     return stat(LocalPath.of(file));
   }
 
   /**
    * @throws FileSystemException if failed to get file status
    */
-  static LocalPathEntry stat(Path path) {
+  static LocalPathEntry stat(Path path) throws FileSystemException {
     LocalFileStatus status = LocalFileStatus.stat(path, false);
     return new AutoValue_LocalPathEntry(path, status.inode(), status.isDirectory());
   }

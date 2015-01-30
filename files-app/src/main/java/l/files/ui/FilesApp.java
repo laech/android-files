@@ -28,8 +28,6 @@ public final class FilesApp extends Application {
 
     bitmapCache = createBitmapCache();
 
-    Preferences.register(this, Preferences.newAnalyticsListener(this));
-
     new OperationsUi().init(this);
 
     if (DEBUG) {

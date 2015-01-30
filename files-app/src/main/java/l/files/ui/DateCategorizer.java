@@ -1,20 +1,19 @@
-package l.files.ui.category;
+package l.files.ui;
 
 import android.content.res.Resources;
-import android.database.Cursor;
 
 import org.joda.time.DateMidnight;
 import org.joda.time.MutableDateTime;
 
 import l.files.R;
+import l.files.fs.FileStatus;
 
-import static l.files.provider.FilesContract.Files;
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 /**
  * Categories files by their last modified date.
  */
-final class FileDateCategorizer implements Categorizer {
+final class DateCategorizer implements Categorizer {
 
   private final MutableDateTime timestamp = new MutableDateTime();
   private final long startOfToday;
@@ -23,7 +22,7 @@ final class FileDateCategorizer implements Categorizer {
   private final long startOf7Days;
   private final long startOf30Days;
 
-  public FileDateCategorizer(long now) {
+  public DateCategorizer(long now) {
     startOfToday = new DateMidnight(now).getMillis();
     startOfTomorrow = startOfToday + MILLIS_PER_DAY;
     startOfYesterday = startOfToday - MILLIS_PER_DAY;
@@ -31,9 +30,9 @@ final class FileDateCategorizer implements Categorizer {
     startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
   }
 
-  @Override public String getCategory(Resources res, Cursor cursor) {
+  @Override public String get(Resources res, FileStatus file) {
 
-    long modified = Files.modified(cursor);
+    long modified = file.lastModifiedTime();
     if (modified <= 0) {
       return res.getString(R.string.__);
     }

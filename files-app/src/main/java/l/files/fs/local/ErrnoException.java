@@ -179,7 +179,7 @@ final class ErrnoException extends IOException {
     return errors;
   }
 
-  FileSystemException toFileSystemException() {
+  FileSystemException toFileSystemException() throws FileSystemException {
     switch (errno()) {
       case ENOENT:
         throw new NoSuchFileException(this);

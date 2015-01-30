@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.Options;
@@ -51,10 +50,10 @@ public final class Bitmaps {
    * Returns null if failed to decode the image.
    */
   public static Bitmap decodeScaledBitmap(
-      URL url, ScaledSize size) throws IOException {
-    checkNotNull(url);
+      InputStream in, ScaledSize size) throws IOException {
+    checkNotNull(in);
     checkNotNull(size);
-    Bitmap bitmap = decodeBitmap(url, size);
+    Bitmap bitmap = decodeBitmap(in, size);
     if (bitmap == null) {
       return null;
     }
@@ -75,15 +74,9 @@ public final class Bitmaps {
   }
 
   private static Bitmap decodeBitmap(
-      URL url, ScaledSize size) throws IOException {
-    InputStream stream = url.openStream();
-    //noinspection TryFinallyCanBeTryWithResources
-    try {
-      Options options = new Options();
-      options.inSampleSize = (int) (1 / size.scale);
-      return decodeStream(stream, null, options);
-    } finally {
-      stream.close();
-    }
+      InputStream in, ScaledSize size) throws IOException {
+    Options options = new Options();
+    options.inSampleSize = (int) (1 / size.scale);
+    return decodeStream(in, null, options);
   }
 }

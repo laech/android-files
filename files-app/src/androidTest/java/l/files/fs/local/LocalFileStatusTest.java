@@ -45,7 +45,7 @@ public final class LocalFileStatusTest extends FileBaseTest {
 
   public void testLastModifiedTime() throws Exception {
     LocalFileStatus file = stat(tmp().get(), false);
-    assertEquals(tmp().get().lastModified(), file.modified());
+    assertEquals(tmp().get().lastModified(), file.lastModifiedTime());
   }
 
   public void testReadable() throws Exception {

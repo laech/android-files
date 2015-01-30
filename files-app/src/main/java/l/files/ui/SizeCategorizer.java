@@ -1,18 +1,14 @@
-package l.files.ui.category;
+package l.files.ui;
 
 import android.content.res.Resources;
-import android.database.Cursor;
 
 import l.files.R;
-
-import static l.files.provider.FilesContract.Files;
+import l.files.fs.FileStatus;
 
 /**
  * Categorizes by file size (descending order).
- *
- * @see Files#SORT_BY_SIZE
  */
-final class FileSizeCategorizer implements Categorizer {
+final class SizeCategorizer implements Categorizer {
 
   private static final long ZERO = 0;
   private static final long KB_1 = 1024;
@@ -30,11 +26,11 @@ final class FileSizeCategorizer implements Categorizer {
       new Group(ZERO, R.string.less_than_1kb),
   };
 
-  @Override public String getCategory(Resources res, Cursor cursor) {
-    if (Files.isDirectory(cursor)) {
+  @Override public String get(Resources res, FileStatus file) {
+    if (file.isDirectory()) {
       return res.getString(R.string.__);
     }
-    long size = Files.length(cursor);
+    long size = file.size();
     for (Group group : GROUPS) {
       if (size >= group.minSize) {
         return res.getString(group.label);

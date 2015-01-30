@@ -3,48 +3,35 @@ package l.files.ui.mode;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AbsListView;
 
-import java.util.List;
+import com.google.common.base.Supplier;
+
+import java.util.Set;
 
 import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
-import l.files.provider.FilesContract;
-import l.files.ui.analytics.AnalyticsAction;
+import l.files.fs.Path;
+import l.files.operations.OperationService;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
-import static android.widget.AbsListView.MultiChoiceModeListener;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static l.files.common.widget.ListViews.getCheckedItemPositions;
-import static l.files.provider.FilesContract.Files;
 
-/**
- * Deletes selected files from the list view cursor.
- *
- * @see Files
- */
 public final class DeleteAction extends MultiChoiceModeAction {
 
-  private final AbsListView list;
+  private final Context context;
+  private final Supplier<Set<Path>> supplier;
 
-  private DeleteAction(AbsListView list) {
+  public DeleteAction(Context context, Supplier<Set<Path>> supplier) {
     super(R.id.delete);
-    this.list = checkNotNull(list, "list");
-  }
-
-  public static MultiChoiceModeListener create(AbsListView list) {
-    Context context = list.getContext();
-    MultiChoiceModeListener action = new DeleteAction(list);
-    return new AnalyticsAction(context, action, "delete");
+    this.context = checkNotNull(context);
+    this.supplier = checkNotNull(supplier);
   }
 
   @Override
@@ -56,40 +43,31 @@ public final class DeleteAction extends MultiChoiceModeAction {
 
   @Override
   protected void onItemSelected(final ActionMode mode, MenuItem item) {
-    final List<String> fileLocations = getCheckedFileLocations();
-    new AlertDialog.Builder(list.getContext())
-        .setMessage(getConfirmMessage(fileLocations.size()))
+    final Set<Path> paths = supplier.get();
+    new AlertDialog.Builder(context)
+        .setMessage(getConfirmMessage(paths.size()))
         .setNegativeButton(android.R.string.cancel, null)
         .setPositiveButton(R.string.delete, new OnClickListener() {
           @Override
           public void onClick(DialogInterface dialog, int which) {
-            requestDelete(fileLocations);
+            requestDelete(paths);
             mode.finish();
           }
         })
         .show();
   }
 
-  private List<String> getCheckedFileLocations() {
-    List<Integer> positions = getCheckedItemPositions(list);
-    List<String> fileLocations = newArrayListWithCapacity(positions.size());
-    for (int position : positions) {
-      Cursor cursor = (Cursor) list.getItemAtPosition(position);
-      fileLocations.add(Files.id(cursor));
-    }
-    return fileLocations;
-  }
-
-  private void requestDelete(final List<String> fileLocations) {
+  private void requestDelete(final Set<Path> paths) {
     AsyncTask.execute(new Runnable() {
       @Override
       public void run() {
-        FilesContract.delete(list.getContext(), fileLocations);
+        OperationService.delete(context, paths);
       }
     });
   }
 
   private String getConfirmMessage(int size) {
-    return list.getResources().getQuantityString(R.plurals.confirm_delete_question, size, size);
+    return context.getResources().getQuantityString(
+        R.plurals.confirm_delete_question, size, size);
   }
 }

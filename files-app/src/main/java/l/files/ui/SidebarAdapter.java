@@ -2,17 +2,15 @@ package l.files.ui;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.R;
+import l.files.fs.Path;
 
-import static l.files.provider.FilesContract.Files;
-
-final class SidebarAdapter extends StableFilesAdapter {
+final class SidebarAdapter extends StableFilesAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
@@ -23,15 +21,16 @@ final class SidebarAdapter extends StableFilesAdapter {
     AssetManager assets = parent.getContext().getAssets();
     Resources res = parent.getResources();
 
-    Cursor cursor = getItem(position);
-    String id = Files.id(cursor);
-    String name = Files.name(cursor);
-
+    Path path = getItem(position);
     ViewHolder holder = (ViewHolder) view.getTag();
-    holder.setTitle(FileLabels.get(res, id, name));
-    holder.setIcon(IconFonts.forDirectoryLocation(assets, id));
+    holder.setTitle(FileLabels.get(res, path));
+    holder.setIcon(IconFonts.forDirectoryLocation(assets, path));
 
     return view;
+  }
+
+  @Override protected Path getPath(int position) {
+    return getItem(position);
   }
 
   private static final class ViewHolder {

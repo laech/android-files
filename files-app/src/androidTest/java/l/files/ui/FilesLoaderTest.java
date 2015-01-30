@@ -1,4 +1,4 @@
-package l.files.provider;
+package l.files.ui;
 
 import android.app.LoaderManager;
 import android.os.Bundle;
@@ -7,8 +7,11 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
@@ -17,6 +20,8 @@ import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.fs.local.LocalFileSystem;
 import l.files.test.TestActivity;
+import l.files.ui.FileSort;
+import l.files.ui.FilesLoader;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -71,20 +76,20 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
       timeout(2, SECONDS, new Runnable() {
         @Override public void run() {
-          assertTrue(path.system().watcher().isRegistered(path));
+          assertTrue(path.resource().watcher().isRegistered(path));
         }
       });
 
       subject.destroyLoader();
       timeout(2, SECONDS, new Runnable() {
         @Override public void run() {
-          assertFalse(path.system().watcher().isRegistered(path));
+          assertFalse(path.resource().watcher().isRegistered(path));
         }
       });
     }
   }
 
-  private List<FileStatus> createFiles(String... names) {
+  private List<FileStatus> createFiles(String... names) throws IOException {
     List<FileStatus> result = new ArrayList<>();
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
@@ -93,18 +98,18 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       } else {
         tmp.createDir(name);
       }
-      result.add(path.system().stat(path.resolve(name), false));
+      result.add(path.resolve(name).resource().stat());
     }
     return result;
   }
 
   Subject subject() {
     final int loaderId = random.nextInt();
-    final FileSort comparator = FileSort.Name.get();
+    final Comparator<FileStatus> comparator = FileSort.NAME.newComparator(Locale.getDefault());
     final LoaderCallback listener = mock(LoaderCallback.class);
     given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
       @Override public FilesLoader answer(final InvocationOnMock invocation) {
-        return new FilesLoader(getActivity(), path, comparator);
+        return new FilesLoader(getActivity(), path, comparator, true);
       }
     });
     return new Subject(loaderId, getActivity().getLoaderManager(), listener);

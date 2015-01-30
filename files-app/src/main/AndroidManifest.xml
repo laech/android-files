@@ -19,11 +19,6 @@
         android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version"/>
 
-    <!-- Activity required to show ad overlays. -->
-    <activity
-        android:name="com.google.android.gms.ads.AdActivity"
-        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
-
     <activity
         android:name=".ui.FilesActivity"
         android:launchMode="singleTask">
@@ -51,19 +46,5 @@
       </intent-filter>
     </service>
 
-    <provider
-        android:name=".provider.FilesProvider"
-        android:authorities="@string/files_provider_authority"
-        android:exported="false"/>
-
-    <provider
-        android:name=".provider.MediaProvider"
-        android:authorities="@string/files_provider_media_authority"
-        android:exported="false"/>
-
-    <provider
-        android:name=".provider.bookmarks.BookmarksProvider"
-        android:authorities="@string/files_provider_bookmarks_authority"
-        android:exported="false"/>
   </application>
 </manifest>

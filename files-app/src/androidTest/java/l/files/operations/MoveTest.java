@@ -1,11 +1,11 @@
 package l.files.operations;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 
 import java.io.File;
 
-import autovalue.shaded.com.google.common.common.base.Function;
-import autovalue.shaded.com.google.common.common.collect.Iterables;
 import l.files.fs.Path;
 import l.files.fs.local.LocalPath;
 

@@ -24,16 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"/>
 
-    <!--
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/ad_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/black"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="@string/ad_unit_id"/>
-    -->
-
   </LinearLayout>
 
   <fragment

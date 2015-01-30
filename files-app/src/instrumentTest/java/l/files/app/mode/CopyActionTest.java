@@ -41,7 +41,7 @@ public final class CopyActionTest extends AndroidTestCase {
     bus = mock(Bus.class);
     list = new ListView(getContext());
     list.setChoiceMode(CHOICE_MODE_MULTIPLE);
-    action = new CopyAction(list, bus);
+    action = new CopyAction(context, list, bus);
   }
 
   public void testCreatesMenuItemCorrectly() {

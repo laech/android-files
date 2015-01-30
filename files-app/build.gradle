@@ -48,7 +48,6 @@ android {
 }
 
 dependencies {
-  compile files('lib/libGoogleAnalyticsServices-3.01.jar')
   compile project(':eventbus-annotation')
   compile libs.eventbus
   compile libs.joda_time
@@ -56,7 +55,11 @@ dependencies {
   compile libs.guava
   compile libs.tika
   compile libs.commons_io
-  compile libs.android_support
+  compile 'com.android.support:support-v4:21.0.3'
+  compile 'com.android.support:appcompat-v7:21.0.3'
+  compile 'com.android.support:support-v13:21.0.3'
+  compile 'com.android.support:recyclerview-v7:21.0.3'
+
   provided libs.auto_value
   apt libs.auto_value
 

@@ -12,12 +12,11 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 
 import l.files.R;
+import l.files.ui.FileSort;
 import l.files.ui.Preferences;
-import l.files.ui.category.FileCategorizers;
 
 import static android.widget.AdapterView.OnItemClickListener;
-import static l.files.ui.Preferences.getSortOrder;
-import static l.files.ui.category.FileCategorizers.SortOption;
+import static l.files.ui.Preferences.getSort;
 
 public final class SortDialog
     extends DialogFragment implements OnItemClickListener {
@@ -48,24 +47,24 @@ public final class SortDialog
 
   @Override public void onItemClick(
       AdapterView<?> parent, View view, int position, long id) {
-    String sortOrder = ((SortOption) parent.getItemAtPosition(position)).sortOrder();
-    Preferences.setSortOrder(getActivity(), sortOrder);
+    FileSort sort = (FileSort) parent.getItemAtPosition(position);
+    Preferences.setSort(getActivity(), sort);
     getDialog().dismiss();
   }
 
-  class SorterAdapter extends ArrayAdapter<SortOption> {
+  class SorterAdapter extends ArrayAdapter<FileSort> {
 
     SorterAdapter(Context context) {
-      super(context, R.layout.sort_by_item, FileCategorizers.getSortOptions());
+      super(context, R.layout.sort_by_item, FileSort.values());
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       View view = super.getView(position, convertView, parent);
-      SortOption item = getItem(position);
+      FileSort item = getItem(position);
       CheckedTextView check = (CheckedTextView) view.findViewById(R.id.title);
-      check.setText(item.labelId());
-      check.setChecked(item.sortOrder().equals(getSortOrder(parent.getContext())));
+      check.setText(item.getLabel(view.getResources()));
+      check.setChecked(item.equals(getSort(parent.getContext())));
       return view;
     }
   }

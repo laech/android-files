@@ -1,8 +1,9 @@
 package l.files.provider.bookmarks;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.android.gms.common.util.VisibleForTesting;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -14,9 +15,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import l.files.fs.DefaultPathProvider;
 import l.files.fs.FileSystemException;
-import l.files.fs.FileSystemProvider;
 import l.files.fs.Path;
+import l.files.fs.PathProvider;
 import l.files.logging.Logger;
 
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -25,18 +27,30 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
-import static l.files.provider.FilesContract.getFileId;
 
-final class BookmarkManagerImpl implements BookmarkManager {
+public final class BookmarkManagerImpl implements BookmarkManager {
+
+  private static BookmarkManagerImpl instance;
+
+  public static BookmarkManagerImpl get(Context context) {
+    synchronized (BookmarkManagerImpl.class) {
+      if (instance == null) {
+        SharedPreferences pref = getDefaultSharedPreferences(context);
+        instance = new BookmarkManagerImpl(new DefaultPathProvider(), pref);
+      }
+      return instance;
+    }
+  }
 
   private static final Logger logger = Logger.get(BookmarkManagerImpl.class);
 
   private static final String PREF_KEY = "bookmarks";
 
   private static final Set<String> DEFAULTS = ImmutableSet.<String>builder()
-      .add(getFileId(getExternalStorageDirectory()))
+      .add(getExternalStorageDirectory().toURI().toString())
       .add(uri(DIRECTORY_DCIM))
       .add(uri(DIRECTORY_MUSIC))
       .add(uri(DIRECTORY_MOVIES))
@@ -44,14 +58,18 @@ final class BookmarkManagerImpl implements BookmarkManager {
       .add(uri(DIRECTORY_DOWNLOADS))
       .build();
 
-  private final FileSystemProvider provider;
+  private static String uri(String name) {
+    return new File(getExternalStorageDirectory(), name).toURI().toString();
+  }
+
+  private final PathProvider provider;
   private final Set<Path> bookmarks;
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
-  BookmarkManagerImpl(FileSystemProvider provider, SharedPreferences pref) {
-    this.provider = checkNotNull(provider, "provider");
-    this.pref = checkNotNull(pref, "pref");
+  BookmarkManagerImpl(PathProvider provider, SharedPreferences pref) {
+    this.provider = checkNotNull(provider);
+    this.pref = checkNotNull(pref);
     this.listeners = new CopyOnWriteArraySet<>();
     this.bookmarks = new CopyOnWriteArraySet<>();
   }
@@ -61,17 +79,13 @@ final class BookmarkManagerImpl implements BookmarkManager {
     for (String uriString : uriStrings) {
       try {
         URI uri = new URI(uriString);
-        Path path = provider.get(uri).path(uri);
+        Path path = provider.get(uri);
         paths.add(path);
       } catch (URISyntaxException | FileSystemException e) {
         logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);
       }
     }
     return paths;
-  }
-
-  private static String uri(String name) {
-    return new File(getExternalStorageDirectory(), name).toURI().toString();
   }
 
   @Override public void addBookmark(Path path) {

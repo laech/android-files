@@ -5,6 +5,7 @@ import java.net.URI;
 
 import l.files.fs.DirectoryStream;
 import l.files.fs.FileSystem;
+import l.files.fs.FileSystemException;
 import l.files.fs.FileVisitor;
 import l.files.fs.Path;
 import l.files.fs.WatchService;
@@ -36,11 +37,11 @@ public class LocalFileSystem implements FileSystem {
     return LocalPath.of(new File(path));
   }
 
-  @Override public LocalFileStatus stat(Path path, boolean followLink) {
+  @Override public LocalFileStatus stat(Path path, boolean followLink) throws FileSystemException {
     return LocalFileStatus.stat(path, followLink);
   }
 
-  @Override public void symlink(Path target, Path link) {
+  @Override public void symlink(Path target, Path link) throws FileSystemException {
     LocalPath.check(target);
     LocalPath.check(link);
     try {
@@ -50,7 +51,7 @@ public class LocalFileSystem implements FileSystem {
     }
   }
 
-  @Override public DirectoryStream openDirectory(Path path) {
+  @Override public DirectoryStream openDirectory(Path path) throws FileSystemException {
     return LocalDirectoryStream.open(path);
   }
 

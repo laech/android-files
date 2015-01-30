@@ -1,11 +1,9 @@
 package l.files.ui.mode;
 
-import android.app.Activity;
+import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -13,34 +11,32 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.R;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
 import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
 import l.files.ui.FileCreationFragment;
-import l.files.provider.FilesContract;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.lang.System.identityHashCode;
-import static l.files.provider.FilesContract.Files;
-import static l.files.provider.FilesContract.Files.isDirectory;
-import static l.files.provider.FilesContract.getFileUri;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 public final class RenameFragment extends FileCreationFragment {
 
   public static final String TAG = RenameFragment.class.getSimpleName();
 
-  private static final String ARG_FILE_LOCATION = "file_location";
+  private static final String ARG_PATH = "path";
 
   private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
-  private LoaderCallbacks<Cursor> fileCallback = new FileCallback();
+  private LoaderCallbacks<FileStatus> fileCallback = new NameHighlighter();
 
-  static RenameFragment create(String parentLocation, String fileLocation) {
+  static RenameFragment create(Path path) {
     Bundle args = new Bundle(2);
-    args.putString(ARG_PARENT_LOCATION, parentLocation);
-    args.putString(ARG_FILE_LOCATION, fileLocation);
+    args.putParcelable(ARG_PARENT_PATH, path.parent());
+    args.putParcelable(ARG_PATH, path);
     RenameFragment fragment = new RenameFragment();
     fragment.setArguments(args);
     return fragment;
@@ -53,11 +49,11 @@ public final class RenameFragment extends FileCreationFragment {
     }
   }
 
-  @Override protected CharSequence getError(String newFileLocation) {
-    if (getFileLocation().equals(newFileLocation)) {
+  @Override protected CharSequence getError(Path target) {
+    if (getPath().equals(target)) {
       return null;
     }
-    return super.getError(newFileLocation);
+    return super.getError(target);
   }
 
   @Override protected int getTitleResourceId() {
@@ -70,7 +66,7 @@ public final class RenameFragment extends FileCreationFragment {
 
       @Override protected IOException doInBackground(Void... params) {
         try {
-          FilesContract.rename(context, getFileLocation(), getFilename());
+          getPath().resource().move(getParentPath().resolve(getFilename()));
           return null;
         } catch (IOException e) {
           return e;
@@ -88,39 +84,49 @@ public final class RenameFragment extends FileCreationFragment {
     Events.get().post(CloseActionModeRequest.INSTANCE);
   }
 
-  private String getFileLocation() {
-    return getArguments().getString(ARG_FILE_LOCATION);
+  private Path getPath() {
+    return getArguments().getParcelable(ARG_PATH);
   }
 
-  class FileCallback implements LoaderCallbacks<Cursor> {
+  class NameHighlighter implements LoaderCallbacks<FileStatus> {
 
-    @Override public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+    @Override public Loader<FileStatus> onCreateLoader(int id, Bundle bundle) {
       return onCreateFileLoader();
     }
 
-    private Loader<Cursor> onCreateFileLoader() {
-      Activity context = getActivity();
-      return new CursorLoader(context, getFileUri(context, getFileLocation()),
-          null, null, null, null);
+    private Loader<FileStatus> onCreateFileLoader() {
+      return new AsyncTaskLoader<FileStatus>(getActivity()) {
+        @Override public FileStatus loadInBackground() {
+          try {
+            return getPath().resource().stat();
+          } catch (IOException e) {
+            return null;
+          }
+        }
+
+        @Override protected void onStartLoading() {
+          super.onStartLoading();
+          forceLoad();
+        }
+      };
     }
 
-    @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cr) {
-      onFileLoaded(cr);
+    @Override public void onLoadFinished(Loader<FileStatus> loader, FileStatus stat) {
+      onFileLoaded(stat);
     }
 
-    @Override public void onLoaderReset(Loader<Cursor> loader) {}
+    @Override public void onLoaderReset(Loader<FileStatus> loader) {}
 
-    private void onFileLoaded(Cursor cursor) {
-      if (!cursor.moveToFirst() || !getFilename().isEmpty()) {
+    private void onFileLoaded(FileStatus stat) {
+      if (stat == null || !getFilename().isEmpty()) {
         return;
       }
-      String name = Files.name(cursor);
       EditText field = getFilenameField();
-      field.setText(name);
-      if (isDirectory(cursor)) {
+      field.setText(stat.name());
+      if (stat.isDirectory()) {
         field.selectAll();
       } else {
-        field.setSelection(0, getBaseName(name).length());
+        field.setSelection(0, getBaseName(stat.name()).length());
       }
     }
   }

@@ -29,14 +29,14 @@ final class LocalDirectoryStream implements DirectoryStream {
   /**
    * @throws FileSystemException if failed to open directory
    */
-  static LocalDirectoryStream open(Path directory) {
+  static LocalDirectoryStream open(Path directory) throws FileSystemException {
     return open(LocalPath.check(directory).file());
   }
 
   /**
    * @throws FileSystemException if failed to open directory
    */
-  static LocalDirectoryStream open(File directory) {
+  static LocalDirectoryStream open(File directory) throws FileSystemException {
     try {
       long dir = Dirent.opendir(directory.getPath());
       return new LocalDirectoryStream(directory, dir);
@@ -45,7 +45,7 @@ final class LocalDirectoryStream implements DirectoryStream {
     }
   }
 
-  @Override public void close() {
+  @Override public void close() throws FileSystemException {
     try {
       Dirent.closedir(dir);
     } catch (ErrnoException e) {
@@ -113,7 +113,7 @@ final class LocalDirectoryStream implements DirectoryStream {
         }
 
       } catch (ErrnoException e) {
-        throw e.toFileSystemException();
+        throw new RuntimeException(e); // TODO
       }
     }
 

@@ -9,9 +9,9 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -24,12 +24,12 @@ import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;
+import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.DrawerListeners;
 import l.files.eventbus.Subscribe;
+import l.files.fs.Path;
 import l.files.operations.Events;
-import l.files.provider.FilesContract;
-import l.files.ui.analytics.AnalyticsActivity;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.CloseTabMenu;
@@ -51,16 +51,16 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static de.greenrobot.event.ThreadMode.MainThread;
 
-public final class FilesActivity extends AnalyticsActivity
+public final class FilesActivity extends BaseActivity
     implements TabHandler, OnSharedPreferenceChangeListener {
 
-  public static final String EXTRA_DIRECTORY = "directory";
+  public static final String EXTRA_PATH = "directory";
 
   private static final String STATE_TAB_ITEMS = "tabTitles";
   private static final String STATE_ID_SEED = "idGenerator";
 
   EventBus bus;
-  String directoryLocation;
+  Path path;
 
   ViewPager viewPager;
   ViewPagerTabBar tabs;
@@ -79,8 +79,6 @@ public final class FilesActivity extends AnalyticsActivity
 
   final Handler handler = new Handler();
 
-//  AdView ad;
-
   @Override protected void onCreate(Bundle state) {
     super.onCreate(state);
     setContentView(R.layout.files_activity);
@@ -91,23 +89,18 @@ public final class FilesActivity extends AnalyticsActivity
     setActionBar();
     setPathBar();
     setOptionsMenu(OptionsMenus.compose(
-        ActionBarDrawerToggleAction.create(this, actionBarDrawerToggle),
-        GoBackOnHomePressedAction.create(this),
-        NewTabMenu.create(this, this),
-        CloseTabMenu.create(this, this),
-        ShowPathBarMenu.create(this),
-        SendFeedbackMenu.create(this),
-        AboutMenu.create(this)));
+        new ActionBarDrawerToggleAction(actionBarDrawerToggle),
+        new GoBackOnHomePressedAction(this),
+        new NewTabMenu(this),
+        new CloseTabMenu(this),
+        new ShowPathBarMenu(this),
+        new SendFeedbackMenu(this),
+        new AboutMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);
 
     checkGooglePlayServices();
-//    setAdView();
   }
-
-//  private void setAdView() {
-//    ad.loadAd(new AdRequest.Builder().build());
-//  }
 
   private void checkGooglePlayServices() {
     int result = isGooglePlayServicesAvailable(this);
@@ -128,7 +121,6 @@ public final class FilesActivity extends AnalyticsActivity
 
   @Override protected void onDestroy() {
     Preferences.unregister(this, this);
-//    ad.destroy();
     super.onDestroy();
   }
 
@@ -150,18 +142,15 @@ public final class FilesActivity extends AnalyticsActivity
     return Bundles.getParcelableArrayList(state, STATE_TAB_ITEMS, TabItem.class);
   }
 
-  private String getInitialDirectoryLocation() {
-    String directoryLocation = getIntent().getStringExtra(EXTRA_DIRECTORY);
-    return directoryLocation == null
-        ? FilesContract.getFileId(UserDirs.DIR_HOME)
-        : directoryLocation;
+  private Path getInitialPath() {
+    Path path = getIntent().getParcelableExtra(EXTRA_PATH);
+    return path == null ? UserDirs.DIR_HOME : path;
   }
 
   private void initFields(int idSeed) {
-//    ad = (AdView) findViewById(R.id.ad_view);
     idGenerator = new IdGenerator(idSeed);
     bus = Events.get();
-    directoryLocation = getInitialDirectoryLocation();
+    path = getInitialPath();
     viewPager = (ViewPager) findViewById(R.id.pager);
     tabs = new ViewPagerTabBar(this, bus);
     drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -169,15 +158,13 @@ public final class FilesActivity extends AnalyticsActivity
     pathBar = (PathBarFragment) getFragmentManager().findFragmentById(R.id.path_bar_fragment);
     actionBar = getActionBar();
     actionBarDrawerToggle = new ActionBarDrawerToggle(
-        this, drawerLayout, R.drawable.ic_drawer, 0, 0);
+        this, drawerLayout, 0, 0);
   }
 
   private void setViewPager(ArrayList<TabItem> items) {
     if (items.isEmpty()) {
-      items = newArrayList(new TabItem(
-          idGenerator.get(),
-          directoryLocation,
-          FileLabels.get(getResources(), directoryLocation, "")));
+      items = newArrayList(new TabItem(idGenerator.get(), path,
+          FileLabels.get(getResources(), path)));
     }
     viewPager.setAdapter(new FilesPagerAdapter(items));
     viewPager.setOffscreenPageLimit(2);
@@ -200,12 +187,10 @@ public final class FilesActivity extends AnalyticsActivity
   @Override protected void onResume() {
     super.onResume();
     bus.register(this);
-//    ad.resume();
   }
 
   @Override protected void onPause() {
     bus.unregister(this);
-//    ad.pause();
     super.onPause();
   }
 
@@ -369,7 +354,7 @@ public final class FilesActivity extends AnalyticsActivity
       boolean show = Preferences.getShowPathBar(this);
       FragmentTransaction tx = getFragmentManager().beginTransaction();
       if (show) {
-        pathBar.set(currentPagerFragment.getCurrentDirectoryId());
+        pathBar.set(currentPagerFragment.getCurrentPath());
         tx.show(pathBar);
       } else {
         tx.hide(pathBar);
@@ -394,9 +379,9 @@ public final class FilesActivity extends AnalyticsActivity
 
     @Override public Fragment getItem(int position) {
       TabItem tab = items.get(position);
-      String location = tab.getDirectoryLocation();
+      Path path = tab.getPath();
       String title = tab.getTitle();
-      Fragment fragment = FilesPagerFragment.create(location, title);
+      Fragment fragment = FilesPagerFragment.create(path, title);
       positions.put(fragment, position);
       return fragment;
     }
@@ -413,17 +398,14 @@ public final class FilesActivity extends AnalyticsActivity
     }
 
     private void updateTabTitle(final int position) {
-      final String title = FileLabels.get(
-          getResources(),
-          currentPagerFragment.getCurrentDirectoryId(),
-          currentPagerFragment.getCurrentDirectoryName());
+      final String title = FileLabels.get(getResources(), currentPagerFragment.getCurrentPath());
       items.get(position).setTitle(title);
       handler.post(new Runnable() {
         @Override public void run() {
           final boolean hasBackStack = currentPagerFragment.hasBackStack();
           actionBar.setTitle(title);
           actionBarDrawerToggle.setDrawerIndicatorEnabled(!hasBackStack);
-          pathBar.set(currentPagerFragment.getCurrentDirectoryId());
+          pathBar.set(currentPagerFragment.getCurrentPath());
           tabs.updateTab(position, title, hasBackStack);
         }
       });
@@ -452,9 +434,8 @@ public final class FilesActivity extends AnalyticsActivity
     }
 
     void addItem(int id) {
-      String title = FileLabels.get(
-          getResources(), FilesContract.getFileId(UserDirs.DIR_HOME), UserDirs.DIR_HOME.getName());
-      items.add(new TabItem(id, FilesContract.getFileId(UserDirs.DIR_HOME), title));
+      String title = FileLabels.get(getResources(), UserDirs.DIR_HOME);
+      items.add(new TabItem(id, UserDirs.DIR_HOME, title));
       tabs.addTab(title);
       notifyDataSetChanged();
     }

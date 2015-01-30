@@ -3,16 +3,18 @@ package l.files.ui;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import l.files.fs.Path;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class TabItem implements Parcelable {
 
   public static final Creator<TabItem> CREATOR = new Creator<TabItem>() {
     @Override public TabItem createFromParcel(Parcel source) {
-      final int id = source.readInt();
-      final String directoryLocation = source.readString();
-      final String title = source.readString();
-      return new TabItem(id, directoryLocation, title);
+      int id = source.readInt();
+      Path path = source.readParcelable(null);
+      String title = source.readString();
+      return new TabItem(id, path, title);
     }
 
     @Override public TabItem[] newArray(int size) {
@@ -21,21 +23,21 @@ public final class TabItem implements Parcelable {
   };
 
   private final int id;
-  private final String directoryLocation;
+  private final Path path;
   private String title;
 
-  public TabItem(int id, String directoryLocation, String title) {
+  public TabItem(int id, Path path, String title) {
     this.id = id;
-    this.directoryLocation = checkNotNull(directoryLocation, "directoryLocation");
-    this.title = checkNotNull(title, "title");
+    this.path = checkNotNull(path);
+    this.title = checkNotNull(title);
   }
 
   public int getId() {
     return id;
   }
 
-  public String getDirectoryLocation() {
-    return directoryLocation;
+  public Path getPath() {
+    return path;
   }
 
   public String getTitle() {
@@ -52,7 +54,7 @@ public final class TabItem implements Parcelable {
 
   @Override public void writeToParcel(Parcel dst, int flags) {
     dst.writeInt(id);
-    dst.writeString(directoryLocation);
+    dst.writeParcelable(path, 0);
     dst.writeString(title);
   }
 }

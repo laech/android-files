@@ -1,24 +1,26 @@
 package l.files.ui;
 
-import android.app.Activity;
-import android.content.CursorLoader;
 import android.content.Loader;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
 import l.files.R;
-import l.files.ui.analytics.Analytics;
+import l.files.fs.FileStatus;
+import l.files.fs.Path;
+import l.files.provider.bookmarks.BookmarkManagerImpl;
+import l.files.provider.bookmarks.BookmarksLoader;
 
 import static android.app.LoaderManager.LoaderCallbacks;
-import static l.files.provider.FilesContract.Files.SORT_BY_NAME;
-import static l.files.provider.bookmarks.BookmarksContract.getBookmarksUri;
 
 public final class SidebarFragment extends BaseFileListFragment
-    implements LoaderCallbacks<Cursor> {
+    implements LoaderCallbacks<List<Path>> {
 
   public SidebarFragment() {
     super(R.layout.sidebar_fragment);
@@ -31,6 +33,17 @@ public final class SidebarFragment extends BaseFileListFragment
     getLoaderManager().initLoader(0, null, this);
   }
 
+
+  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
+    super.onListItemClick(l, v, pos, id);
+    Path path = (Path) l.getItemAtPosition(pos);
+    try {
+      getBus().post(OpenFileRequest.create(path.resource().stat()));
+    } catch (IOException e) {
+      throw new RuntimeException(); // TODO
+    }
+  }
+
   private void addBookmarksHeader() {
     LayoutInflater inflater = LayoutInflater.from(getActivity());
     View header = inflater.inflate(R.layout.sidebar_item_header, null, false);
@@ -39,27 +52,20 @@ public final class SidebarFragment extends BaseFileListFragment
     getListView().addHeaderView(header, null, false);
   }
 
-  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
-    super.onListItemClick(l, v, pos, id);
-    Analytics.onEvent(getActivity(), "sidebar", "click");
-  }
-
   @Override public SidebarAdapter getListAdapter() {
     return (SidebarAdapter) super.getListAdapter();
   }
 
-  @Override public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-    Activity context = getActivity();
-    return new CursorLoader(context, getBookmarksUri(context),
-        null, null, null, SORT_BY_NAME);
+  @Override public Loader<List<Path>> onCreateLoader(int i, Bundle bundle) {
+    return new BookmarksLoader(getActivity(), BookmarkManagerImpl.get(getActivity()));
   }
 
-  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+  @Override public void onLoadFinished(Loader<List<Path>> loader, List<Path> bookmarks) {
     Animations.animatePreDataSetChange(getListView());
-    getListAdapter().setCursor(cursor);
+    getListAdapter().setItems(bookmarks);
   }
 
-  @Override public void onLoaderReset(Loader<Cursor> loader) {
-    getListAdapter().setCursor(null);
+  @Override public void onLoaderReset(Loader<List<Path>> loader) {
+    getListAdapter().setItems(Collections.<Path>emptyList());
   }
 }

@@ -4,13 +4,13 @@ import android.content.Intent;
 
 import java.io.File;
 
-import l.files.ui.FilesActivity;
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
 import l.files.features.object.UiFileActivity;
+import l.files.fs.local.LocalPath;
+import l.files.ui.FilesActivity;
 
-import static l.files.ui.FilesActivity.EXTRA_DIRECTORY;
-import static l.files.provider.FilesContract.getFileId;
+import static l.files.ui.FilesActivity.EXTRA_PATH;
 
 public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
@@ -40,6 +40,6 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   }
 
   private Intent newIntent(File dir) {
-    return new Intent().putExtra(EXTRA_DIRECTORY, getFileId(dir));
+    return new Intent().putExtra(EXTRA_PATH, LocalPath.of(dir));
   }
 }

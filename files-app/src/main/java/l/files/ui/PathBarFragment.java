@@ -1,12 +1,9 @@
 package l.files.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.content.CursorLoader;
+import android.content.AsyncTaskLoader;
 import android.content.Loader;
 import android.content.res.AssetManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,25 +11,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import l.files.R;
+import l.files.fs.FileStatus;
+import l.files.fs.FileSystemException;
+import l.files.fs.Path;
+import l.files.logging.Logger;
 import l.files.operations.Events;
-import l.files.ui.analytics.Analytics;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
-import static l.files.provider.FilesContract.Files;
-import static l.files.provider.FilesContract.getHierarchyUri;
+import static java.util.Collections.emptyList;
 
 public final class PathBarFragment extends Fragment
-    implements LoaderCallbacks<Cursor>, OnClickListener {
+    implements LoaderCallbacks<List<FileStatus>>, OnClickListener {
 
-  private String fileLocation;
+  private static final Logger log = Logger.get(PathBarFragment.class);
+
+  private Path path;
   private ViewGroup container;
 
-  public void set(String fileLocation) {
-    this.fileLocation = fileLocation;
+  public void set(Path path) {
+    this.path = path;
     if (getActivity() != null) {
       getLoaderManager().restartLoader(0, null, this);
     }
@@ -48,61 +54,74 @@ public final class PathBarFragment extends Fragment
     View root = getView();
     assert root != null;
     container = (ViewGroup) root.findViewById(R.id.path_item_container);
-    if (fileLocation != null) {
+    if (path != null) {
       getLoaderManager().restartLoader(0, null, this);
     }
   }
 
-  @Override public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-    Activity context = getActivity();
-    Uri uri = getHierarchyUri(context, fileLocation);
-    return new CursorLoader(context, uri, null, null, null, null);
-  }
-
-  @Override public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-    updatePathBar(cursor);
-  }
-
-  private void updatePathBar(Cursor cursor) {
-    if (cursor.moveToFirst()) {
-      LayoutInflater inflater = LayoutInflater.from(getActivity());
-
-      do {
-        View view = container.getChildAt(cursor.getPosition());
-        if (view == null) {
-          view = inflater.inflate(R.layout.path_bar_item, container, false);
-          container.addView(view);
+  @Override public Loader<List<FileStatus>> onCreateLoader(int id, Bundle args) {
+    final Path path = this.path;
+    return new AsyncTaskLoader<List<FileStatus>>(getActivity()) {
+      @Override public List<FileStatus> loadInBackground() {
+        List<FileStatus> hierarchy = new ArrayList<>();
+        for (Path p = path; p != null; p = p.parent()) {
+          try {
+            hierarchy.add(p.resource().stat());
+          } catch (IOException | FileSystemException e) { // TODO
+            log.error(e);
+            return emptyList();
+          }
         }
-        view.setTag(R.id.file_id, Files.id(cursor));
-        view.setTag(R.id.file_name, Files.name(cursor));
-        view.setTag(R.id.is_readable, Files.isReadable(cursor));
-        view.setTag(R.id.is_directory, Files.isDirectory(cursor));
-        view.setVisibility(VISIBLE);
-        view.setOnClickListener(this);
-
-        TextView title = (TextView) view.findViewById(R.id.title);
-        title.setText(cursor.isFirst() ? Build.MODEL : Files.name(cursor));
-
-        AssetManager asset = getActivity().getAssets();
-        TextView icon = (TextView) view.findViewById(R.id.icon);
-        icon.setTypeface(IconFonts.forDirectoryLocation(asset, Files.id(cursor)));
-
-      } while (cursor.moveToNext());
-      for (int i = cursor.getPosition(); i < container.getChildCount(); i++) {
-        container.getChildAt(i).setVisibility(GONE);
+        Collections.reverse(hierarchy);
+        return hierarchy;
       }
+
+      @Override protected void onStartLoading() {
+        super.onStartLoading();
+        forceLoad();
+      }
+    };
+  }
+
+  @Override public void onLoadFinished(Loader<List<FileStatus>> loader,
+                                       List<FileStatus> hierarchy) {
+    updatePathBar(hierarchy);
+  }
+
+  private void updatePathBar(List<FileStatus> hierarchy) {
+    LayoutInflater inflater = LayoutInflater.from(getActivity());
+
+    int i = 0;
+    for (; i < hierarchy.size(); i++) {
+      View view = container.getChildAt(i);
+      if (view == null) {
+        view = inflater.inflate(R.layout.path_bar_item, container, false);
+        container.addView(view);
+      }
+
+      FileStatus stat = hierarchy.get(i);
+      view.setTag(stat);
+      view.setVisibility(VISIBLE);
+      view.setOnClickListener(this);
+
+      TextView title = (TextView) view.findViewById(R.id.title);
+      title.setText(i == 0 ? Build.MODEL : stat.name());
+
+      AssetManager asset = getActivity().getAssets();
+      TextView icon = (TextView) view.findViewById(R.id.icon);
+      icon.setTypeface(IconFonts.forDirectoryLocation(asset, stat.path()));
+
+    }
+
+    for (; i < container.getChildCount(); i++) {
+      container.getChildAt(i).setVisibility(GONE);
     }
   }
 
-  @Override public void onLoaderReset(Loader<Cursor> loader) {}
+  @Override public void onLoaderReset(Loader<List<FileStatus>> loader) {}
 
   @Override public void onClick(View v) {
-    Events.get().post(OpenFileRequest.create(
-        (String) v.getTag(R.id.file_id),
-        (String) v.getTag(R.id.file_name),
-        (boolean) v.getTag(R.id.is_readable),
-        (boolean) v.getTag(R.id.is_directory)));
-
-    Analytics.onEvent(getActivity(), "path_bar", "click");
+    Events.get().post(OpenFileRequest.create((FileStatus) v.getTag()));
   }
+
 }
