@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Not using fading edges gives the sidebar a smoother sliding experience -->
 <HorizontalScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/path_bar_scroll"
-    android:layout_width="match_parent"
-    android:layout_height="?android:attr/actionBarSize"
-    android:background="@drawable/ab_bottom_solid_light_holo"
-    android:gravity="center_vertical"
-    android:scrollbars="none"
-    android:overScrollMode="never"
-    style="?android:attr/actionBarSplitStyle">
+  android:id="@+id/path_bar_scroll"
+  style="?android:attr/actionBarSplitStyle"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:gravity="center_vertical"
+  android:overScrollMode="never"
+  android:scrollbars="none">
 
   <LinearLayout
-      android:id="@+id/path_item_container"
-      android:layout_width="wrap_content"
-      android:layout_height="match_parent"
-      android:layout_gravity="center_vertical"
-      android:animateLayoutChanges="true"
-      android:orientation="horizontal"
-      style="?android:attr/buttonBarStyle">
+    android:id="@+id/path_item_container"
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical"
+    android:animateLayoutChanges="true"
+    android:orientation="horizontal">
 
   </LinearLayout>
 

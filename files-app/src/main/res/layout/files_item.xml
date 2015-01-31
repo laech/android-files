@@ -22,7 +22,7 @@
       android:layout_marginStart="16dp"
       android:gravity="center"
       android:text="@string/ic_font_char"
-      android:textColor="?android:attr/textColorPrimaryInverse"
+      android:textColor="@android:color/white"
       android:textSize="20sp"/>
 
     <TextView
@@ -49,14 +49,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/file_item_summary_text_size"/>
+        android:textSize="12sp"/>
 
       <TextView
         android:id="@+id/size"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/file_item_summary_text_size"/>
+        android:textSize="12sp"/>
 
     </LinearLayout>
   </LinearLayout>

@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.common.base.Supplier;
@@ -35,7 +34,6 @@ import l.files.ui.mode.SelectAllAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import static android.view.View.GONE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.emptyList;
@@ -64,8 +62,6 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   private Path path;
-  private ProgressBar progress;
-
   public FilesFragment() {
     super(R.layout.files_fragment);
   }
@@ -78,7 +74,6 @@ public final class FilesFragment extends BaseFileListFragment
     super.onActivityCreated(savedInstanceState);
 
     path = getArguments().getParcelable(ARG_PATH);
-    progress = (ProgressBar) getView().findViewById(android.R.id.progress);
 
     setupListView();
     setupOptionsMenu();
@@ -91,11 +86,6 @@ public final class FilesFragment extends BaseFileListFragment
   @Override public void onDestroy() {
     super.onDestroy();
     Preferences.unregister(getActivity(), this);
-  }
-
-  @Override public void onStart() {
-    super.onStart();
-    progress.setVisibility(GONE);
   }
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {

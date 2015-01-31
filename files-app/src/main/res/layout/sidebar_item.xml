@@ -13,7 +13,7 @@
       android:layout_height="wrap_content"
       android:gravity="center"
       android:text="@string/ic_font_char"
-      android:textSize="@dimen/text_size_sidebar_icon_font"
+      android:textSize="14sp"
       android:textColor="?android:attr/textColorPrimary"/>
 
   <TextView
@@ -24,7 +24,7 @@
       android:layout_marginRight="8dp"
       android:ellipsize="end"
       android:singleLine="true"
-      android:textSize="@dimen/text_size_sidebar_item"
+      android:textSize="14sp"
       android:textColor="?android:attr/textColorPrimary"/>
 
 </LinearLayout>
