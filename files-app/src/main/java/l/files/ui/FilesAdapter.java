@@ -153,8 +153,7 @@ final class FilesAdapter extends StableFilesAdapter {
     DisplayMetrics metrics = res.getDisplayMetrics();
 
     int width = metrics.widthPixels
-        - res.getDimensionPixelSize(R.dimen.files_list_icon_width)
-        - (int) (applyDimension(COMPLEX_UNIT_DIP, 16, metrics) + 0.5f);
+        - (int) (applyDimension(COMPLEX_UNIT_DIP, 90, metrics) + 0.5f);
 
     int height = (int) (metrics.heightPixels * 0.6f);
 
