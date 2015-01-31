@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+  android:id="@+id/drawer_layout"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
 
   <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="vertical"
-      android:animateLayoutChanges="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
 
     <l.files.common.widget.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+      android:id="@+id/pager"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"/>
 
     <fragment
-        android:id="@+id/path_bar_fragment"
-        android:name="l.files.ui.PathBarFragment"
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"/>
+      android:id="@+id/path_bar_fragment"
+      android:name="l.files.ui.PathBarFragment"
+      android:layout_width="match_parent"
+      android:layout_height="?android:attr/actionBarSize"/>
 
   </LinearLayout>
 
   <fragment
-      android:id="@+id/sidebar_fragment"
-      android:name="l.files.ui.SidebarFragment"
-      android:layout_width="280dp"
-      android:layout_height="match_parent"
-      android:layout_gravity="start"/>
+    android:id="@+id/sidebar_fragment"
+    android:name="l.files.ui.SidebarFragment"
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"/>
 
 </android.support.v4.widget.DrawerLayout>

@@ -1,74 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<GridLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:background="?android:attr/activatedBackgroundIndicator"
-  android:orientation="vertical">
+  android:columnCount="3"
+  android:paddingEnd="16dp"
+  android:paddingStart="16dp"
+  android:rowCount="2">
 
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+  <l.files.common.widget.CircleTextView
+    android:id="@+id/icon"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_column="0"
     android:layout_gravity="center_vertical"
+    android:layout_marginEnd="16dp"
+    android:layout_row="0"
+    android:gravity="center"
+    android:text="@string/ic_font_char"
+    android:textColor="@android:color/white"
+    android:textSize="20sp"/>
+
+  <TextView
+    android:id="@+id/title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_column="1"
+    android:layout_columnWeight="1"
+    android:layout_gravity="center_vertical"
+    android:layout_row="0"
     android:gravity="center_vertical"
     android:minHeight="72dp"
-    android:orientation="horizontal">
+    android:textColor="?android:attr/textColorPrimary"
+    android:textSize="16sp"/>
 
-    <l.files.common.widget.CircleTextView
-      android:id="@+id/icon"
-      android:layout_width="40dp"
-      android:layout_height="40dp"
-      android:layout_marginEnd="16dp"
-      android:layout_marginStart="16dp"
-      android:gravity="center"
-      android:text="@string/ic_font_char"
-      android:textColor="@android:color/white"
-      android:textSize="20sp"/>
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_column="2"
+    android:layout_gravity="center_vertical"
+    android:layout_row="0"
+    android:orientation="vertical">
 
     <TextView
-      android:id="@+id/title"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginTop="8dp"
-      android:layout_weight="1"
-      android:textColor="?android:attr/textColorPrimary"
-      android:textSize="16sp"/>
-
-    <LinearLayout
+      android:id="@+id/date"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:gravity="end"
-      android:orientation="vertical"
-      android:paddingEnd="16dp"
-      android:paddingStart="8dp">
+      android:layout_gravity="end"
+      android:textColor="?android:attr/textColorSecondary"
+      android:textSize="12sp"/>
 
-      <TextView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="12sp"/>
+    <TextView
+      android:id="@+id/size"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="end"
+      android:textColor="?android:attr/textColorSecondary"
+      android:textSize="12sp"/>
 
-      <TextView
-        android:id="@+id/size"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="12sp"/>
-
-    </LinearLayout>
   </LinearLayout>
 
   <ImageView
     android:id="@+id/preview"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_column="1"
+    android:layout_columnSpan="2"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="72dp"
+    android:layout_row="1"
     android:background="@drawable/file_preview_background"
-    android:contentDescription="@null"
     android:visibility="gone"/>
 
-</LinearLayout>
+
+</GridLayout>

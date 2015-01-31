@@ -48,7 +48,7 @@ public final class FilesPagerFragment extends Fragment {
       FilesFragment fragment = FilesFragment.create(getInitialPath());
       manager
           .beginTransaction()
-          .add(android.R.id.content, fragment, FilesFragment.TAG)
+          .replace(android.R.id.content, fragment, FilesFragment.TAG)
           .commit();
     }
   }
