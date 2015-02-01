@@ -82,6 +82,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
       // TODO
       return emptyList();
     }
+    // TODO this will error on dirs like /proc/xxx
     try (DirectoryStream stream = path.getResource().newDirectoryStream()) {
       for (PathEntry entry : stream) {
         checkCancelled();
