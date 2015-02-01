@@ -161,8 +161,9 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
       return !Objects.equals(newStat, oldStat);
     } catch (NoSuchFileException e) {
       logger.debug(e);
-    } catch (IOException e) {
-      // TODO
+    } catch (IOException | FileSystemException e) {
+      logger.error(e, "Failed to stat %s", path);
+      // TODO use wrapper class for error paths e.g. /storage/ext_sd/.android_secure
     }
     return false;
   }

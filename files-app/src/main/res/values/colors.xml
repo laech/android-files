@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="text_tab_active">@android:color/white</color>
-  <color name="text_tab_inactive">#77FFFFFF</color>
-  <color name="image_view_border">#33000000</color>
+  <color name="pdf">#F44336</color>
+  <color name="audio">#FF9800</color>
+  <color name="document">#2196F3</color>
+  <color name="archive">#FFC107</color>
+  <color name="video">#E91E63</color>
+  <color name="image">#2196F3</color>
 </resources>

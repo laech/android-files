@@ -1,6 +1,8 @@
 package l.files.ui;
 
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 
 import com.google.common.collect.ImmutableMap;
@@ -10,9 +12,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import l.files.R;
 import l.files.fs.Path;
 
 import static android.graphics.Typeface.createFromAsset;
+import static l.files.common.content.res.Styles.getColor;
 
 public final class IconFonts {
 
@@ -27,6 +31,21 @@ public final class IconFonts {
   private static Typeface iconText;
   private static Typeface iconPdf;
   private static Set<String> archiveSubtypes;
+
+  public static int getColorForDirectory(Context context) {
+    return getColor(android.R.attr.textColorTertiary, context);
+  }
+
+  public static int getColorForFileMediaType(Context context, MediaType mime) {
+    Resources res = context.getResources();
+    if (mime.subtype().equals("pdf")) return res.getColor(R.color.pdf);
+    if (mime.type().equals("audio")) return res.getColor(R.color.audio);
+    if (mime.type().equals("video")) return res.getColor(R.color.video);
+    if (mime.type().equals("image")) return res.getColor(R.color.image);
+    if (mime.type().equals("text")) return res.getColor(R.color.document);
+    if (archiveSubtypes.contains(mime.subtype())) return res.getColor(R.color.archive);
+    return getColor(android.R.attr.textColorTertiary, context);
+  }
 
   public static Typeface forDirectoryLocation(AssetManager assets, Path path) {
     init(assets);

@@ -85,6 +85,12 @@ public final class Logger {
     }
   }
 
+  public void error(Throwable e, String format, Object arg) {
+    if (isLoggable(tag, ERROR)) {
+      Log.e(tag, format(format, arg), e);
+    }
+  }
+
   public void error(String message) {
     if (isLoggable(tag, ERROR)) {
       Log.e(tag, message);

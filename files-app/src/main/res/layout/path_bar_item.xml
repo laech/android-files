@@ -16,6 +16,7 @@
     android:layout_height="wrap_content"
     android:text="@string/ic_font_char"
     android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="?android:attr/textColorTertiary"
     android:textSize="16sp"/>
 
   <TextView
@@ -24,6 +25,7 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="6dp"
     android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="?android:attr/textColorSecondary"
     android:textSize="16sp"/>
 
 </LinearLayout>

@@ -6,15 +6,12 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import static l.files.common.content.res.Styles.getColor;
-
 public class CircleTextView extends TextView {
 
   private final Paint paint;
 
   {
     paint = new Paint(0);
-    paint.setColor(getColor(android.R.attr.textColorTertiary, getContext()));
     paint.setAntiAlias(true);
   }
 
@@ -36,7 +33,16 @@ public class CircleTextView extends TextView {
 
   @Override protected void onDraw(Canvas canvas) {
     float size = getMeasuredWidth() / 2f;
+    int alpha = paint.getAlpha();
+    if (!isEnabled()) {
+      paint.setAlpha(alpha / 2);
+    }
     canvas.drawCircle(size, size, size, paint);
+    paint.setAlpha(alpha);
     super.onDraw(canvas);
+  }
+
+  public void setCircleColor(int color) {
+    paint.setColor(color);
   }
 }
