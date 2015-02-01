@@ -3,7 +3,6 @@ package l.files.common.content.res;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.util.TypedValue;
 import android.view.View;
 
 /**
@@ -14,15 +13,6 @@ public final class Styles {
 
   private static final int UNDEFINED = -1;
 
-  public static float getDimension(int attr, Context context) {
-    TypedValue value = new TypedValue();
-    context.getTheme().resolveAttribute(attr, value, true);
-    return value.getDimension(context.getResources().getDisplayMetrics());
-  }
-
-  /**
-   * Gets the resource ID assigned to the given attribute.
-   */
   public static int getResourceId(int attr, Context context) {
     TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
     int id = ta.getResourceId(0, UNDEFINED);
@@ -33,9 +23,6 @@ public final class Styles {
     return id;
   }
 
-  /**
-   * Gets the drawable assigned to the given attribute.
-   */
   public static Drawable getDrawable(int attr, Context context) {
     TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
     Drawable icon = ta.getDrawable(0);
@@ -43,11 +30,18 @@ public final class Styles {
     return icon;
   }
 
-  /**
-   * Gets the drawable assigned to the given attribute.
-   */
   public static Drawable getDrawable(int attr, View view) {
     return getDrawable(attr, view.getContext());
+  }
+
+  public static int getColor(int attr, Context context) {
+    TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+    int color = ta.getColor(0, UNDEFINED);
+    if (color == UNDEFINED) {
+      throw new AssertionError();
+    }
+    ta.recycle();
+    return color;
   }
 
 }

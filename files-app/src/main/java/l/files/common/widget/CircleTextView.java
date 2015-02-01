@@ -6,13 +6,15 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import static l.files.common.content.res.Styles.getColor;
+
 public class CircleTextView extends TextView {
 
   private final Paint paint;
 
   {
     paint = new Paint(0);
-    paint.setARGB(100, 0, 0, 0);
+    paint.setColor(getColor(android.R.attr.textColorTertiary, getContext()));
     paint.setAntiAlias(true);
   }
 
