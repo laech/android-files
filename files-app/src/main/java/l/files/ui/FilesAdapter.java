@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -17,7 +20,6 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import l.files.R;
-import l.files.common.widget.CircleTextView;
 import l.files.fs.FileStatus;
 
 import static android.text.format.DateFormat.getDateFormat;
@@ -87,7 +89,14 @@ final class FilesAdapter extends StableFilesAdapter {
 
     holder.icon.setEnabled(file.isReadable());
     holder.icon.setTypeface(getIcon(file, assets));
-    holder.icon.setCircleColor(getIconColor(file, context));
+    if (holder.icon.getBackground() instanceof ShapeDrawable) {
+      ((ShapeDrawable) holder.icon.getBackground())
+          .getPaint().setColor(getIconColor(file, context));
+    } else {
+      PaintDrawable background = new PaintDrawable(getIconColor(file, context));
+      background.setShape(new OvalShape());
+      holder.icon.setBackground(background);
+    }
 
     holder.date.setEnabled(file.isReadable());
     holder.date.setText(dateFormatter.apply(file));
@@ -179,14 +188,14 @@ final class FilesAdapter extends StableFilesAdapter {
   }
 
   private static class FileViewHolder {
-    final CircleTextView icon;
+    final TextView icon;
     final TextView title;
     final TextView date;
     final TextView size;
     final ImageView preview;
 
     FileViewHolder(View root) {
-      icon = (CircleTextView) root.findViewById(R.id.icon);
+      icon = (TextView) root.findViewById(R.id.icon);
       title = (TextView) root.findViewById(R.id.title);
       date = (TextView) root.findViewById(R.id.date);
       size = (TextView) root.findViewById(R.id.size);
