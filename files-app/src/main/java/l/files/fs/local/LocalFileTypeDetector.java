@@ -5,12 +5,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.net.MediaType;
 
-import l.files.fs.FileSystemException;
-import l.files.fs.Path;
 import l.files.fs.FileStatus;
+import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
+import l.files.fs.Path;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
 abstract class LocalFileTypeDetector implements FileTypeDetector {
@@ -43,15 +42,10 @@ abstract class LocalFileTypeDetector implements FileTypeDetector {
     return cache;
   }
 
-  private final LocalFileSystem fs;
-
-  LocalFileTypeDetector(LocalFileSystem fs) {
-    this.fs = checkNotNull(fs, "fs");
-  }
-
   @Override public MediaType detect(Path path, boolean followLink)
       throws FileSystemException {
-    LocalFileStatus stat = fs.stat(path, followLink);
+    LocalPath.check(path);
+    LocalFileStatus stat = ((LocalPath) path).getResource().stat();
     if (stat.isRegularFile()) {
       return detectRegularFile(stat);
     }

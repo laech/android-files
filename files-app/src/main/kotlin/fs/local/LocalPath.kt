@@ -9,7 +9,7 @@ import java.net.URI
 import l.files.fs.Path
 import kotlin.platform.platformStatic
 
-private data class LocalPath private(val file: File) : Path {
+data class LocalPath private(val file: File) : Path {
 
     override val resource = LocalResource(this)
 

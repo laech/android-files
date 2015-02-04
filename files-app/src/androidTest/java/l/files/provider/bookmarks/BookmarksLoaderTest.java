@@ -13,9 +13,8 @@ import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.fs.DefaultPathProvider;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -34,7 +33,6 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
 
   private BookmarkManagerImpl manager;
   private SharedPreferences preferences;
-  private FileSystem fs;
 
   public BookmarksLoaderTest() {
     super(TestActivity.class);
@@ -42,7 +40,6 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    fs = LocalFileSystem.get();
     preferences = getActivity().getSharedPreferences(getClass().getSimpleName(), MODE_PRIVATE);
     manager = new BookmarkManagerImpl(DefaultPathProvider.INSTANCE, preferences);
     assertTrue(manager.clearBookmarksSync());
@@ -54,7 +51,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
   }
 
   public void testSortsBookmarksByName() throws Exception {
-    Path path = fs.path("/tmp");
+    Path path = LocalPath.of("/tmp");
     manager.addBookmark(path);
     subject().initLoader().awaitOnLoadFinished(singletonList(path));
   }
@@ -62,7 +59,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
   public void testNotifiesBookmarkChange() throws Exception {
     Subject subject = subject().initLoader().awaitOnLoadFinished(Collections.<Path>emptyList());
 
-    Path path = fs.path("/tmp");
+    Path path = LocalPath.of("/tmp");
     manager.addBookmark(path);
     subject.awaitOnLoadFinished(singletonList(path));
 

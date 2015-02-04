@@ -62,6 +62,13 @@ trait Resource : Parcelable {
     fun createFile()
 
     /**
+     * Creates the underlying resource as a symbolic link to point to the
+     * given location.
+     */
+    throws(javaClass<IOException>())
+    fun createSymbolicLink(target: Path)
+
+    /**
      * Moves this resource tree to the given destination.
      */
     throws(javaClass<IOException>())

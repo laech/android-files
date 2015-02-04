@@ -16,7 +16,7 @@ import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
 import l.files.fs.FileStatus;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -42,7 +42,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
   @Override protected void setUp() throws Exception {
     super.setUp();
     tmp = TempDir.create();
-    path = LocalFileSystem.get().path(tmp.get().toURI());
+    path = LocalPath.of(tmp.get());
   }
 
   @Override protected void tearDown() throws Exception {

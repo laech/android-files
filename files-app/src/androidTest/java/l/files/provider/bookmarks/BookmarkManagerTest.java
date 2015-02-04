@@ -4,9 +4,8 @@ import android.content.SharedPreferences;
 
 import l.files.common.testing.BaseTest;
 import l.files.fs.DefaultPathProvider;
-import l.files.fs.FileSystem;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileSystem;
+import l.files.fs.local.LocalPath;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
@@ -17,13 +16,11 @@ import static org.mockito.Mockito.verify;
 
 public final class BookmarkManagerTest extends BaseTest {
 
-  private FileSystem fs;
   private BookmarkManager manager;
   private SharedPreferences pref;
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    fs = LocalFileSystem.get();
     pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
     manager = new BookmarkManagerImpl(DefaultPathProvider.INSTANCE, pref);
   }
@@ -34,17 +31,17 @@ public final class BookmarkManagerTest extends BaseTest {
   }
 
   public void testAddBookmark() throws Exception {
-    Path p1 = fs.path("/a/b");
-    Path p2 = fs.path("/a/c");
+    Path p1 = LocalPath.of("/a/b");
+    Path p2 = LocalPath.of("/a/c");
     manager.addBookmark(p1);
     manager.addBookmark(p2);
     assertTrue(manager.getBookmarks().containsAll(asList(p1, p2)));
   }
 
   public void testRemoveBookmark() throws Exception {
-    Path p1 = fs.path("/a/b");
-    Path p2 = fs.path("/1");
-    Path p3 = fs.path("/x");
+    Path p1 = LocalPath.of("/a/b");
+    Path p2 = LocalPath.of("/1");
+    Path p3 = LocalPath.of("/x");
     manager.addBookmark(p1);
     manager.addBookmark(p2);
     manager.addBookmark(p3);
@@ -56,7 +53,7 @@ public final class BookmarkManagerTest extends BaseTest {
   }
 
   public void testHasBookmark() throws Exception {
-    Path path = fs.path("/a/b");
+    Path path = LocalPath.of("/a/b");
     assertFalse(manager.hasBookmark(path));
     manager.addBookmark(path);
     assertTrue(manager.hasBookmark(path));
@@ -65,7 +62,7 @@ public final class BookmarkManagerTest extends BaseTest {
   public void testNotifiesOnBookmarkChanged() throws Exception {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
     manager.registerBookmarkChangedListener(listener);
-    manager.addBookmark(fs.path("a"));
+    manager.addBookmark(LocalPath.of("a"));
     verify(listener).onBookmarkChanged(manager);
   }
 
@@ -73,7 +70,7 @@ public final class BookmarkManagerTest extends BaseTest {
     BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
     manager.registerBookmarkChangedListener(listener);
     manager.unregisterBookmarkChangedListener(listener);
-    manager.addBookmark(fs.path("a"));
+    manager.addBookmark(LocalPath.of("a"));
     verify(listener, never()).onBookmarkChanged(manager);
   }
 }

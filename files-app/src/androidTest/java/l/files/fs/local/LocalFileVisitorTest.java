@@ -14,10 +14,8 @@ public final class LocalFileVisitorTest extends FileBaseTest {
   public void testTraversal() {
     tmp().createFile("a/b");
     tmp().createFile("a/c");
-    LocalFileSystem.get().symlink(
-        LocalPath.of(tmp().get("a/c")),
-        LocalPath.of(tmp().get("a/d"))
-    );
+    LocalPath.of(tmp().get("a/d")).getResource()
+        .createSymbolicLink(LocalPath.of(tmp().get("a/c")));
 
     Set<PathEntry> expected = Sets.<PathEntry>newHashSet(
         LocalPathEntry.stat(tmp().get()),

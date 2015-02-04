@@ -15,14 +15,10 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 final class BasicFileTypeDetector extends LocalFileTypeDetector {
 
   private static final BasicFileTypeDetector INSTANCE =
-      new BasicFileTypeDetector(LocalFileSystem.get());
+      new BasicFileTypeDetector();
 
   static BasicFileTypeDetector get() {
     return INSTANCE;
-  }
-
-  BasicFileTypeDetector(LocalFileSystem fs) {
-    super(fs);
   }
 
   @Override protected MediaType detectRegularFile(FileStatus stat) {

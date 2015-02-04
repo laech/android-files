@@ -14,7 +14,7 @@ import kotlin.properties.Delegates
 import android.os.Parcel
 import android.os.Parcelable.Creator
 
-private data class LocalResource(override val path: LocalPath) : Resource {
+data class LocalResource(override val path: LocalPath) : Resource {
 
     override val watcher: WatchService get() = LocalWatchService.get()
 
@@ -38,26 +38,33 @@ private data class LocalResource(override val path: LocalPath) : Resource {
     }
 
     private fun createDirectory(path: LocalPath) {
-        if (path.resource.exists) {
-            return
+        if (!path.parent!!.resource.exists) {
+            createDirectory(path.parent)
         }
-        createDirectory(path.parent!!)
-        if (!java.io.File(path.toString()).mkdir()) {
+        val f = java.io.File(path.toString())
+        if (!f.isDirectory() && !f.mkdir()) {
             throw IOException() // TODO use native code to get errno
         }
     }
 
-    override fun move(dst: Path) {
-        assert(dst is LocalPath)
-        try {
-            Stdio.rename(path.toString(), dst.toString())
-        } catch (e: ErrnoException) {
-            throw e.toFileSystemException() // TODO
+    override fun createFile() {
+        if (!java.io.File(path.toString()).createNewFile()) {
+            throw IOException() // TODO use native code to get errno
         }
     }
 
-    override fun detectMediaType(): MediaType {
-        newInputStream().use { `in` -> return MediaType.parse(tika.detect(`in`)) }
+    override fun createSymbolicLink(target: Path) {
+        LocalPath.check(target)
+        Unistd.symlink(target.toString(), path.toString())
+    }
+
+    override fun move(dst: Path) {
+        LocalPath.check(dst)
+        Stdio.rename(path.toString(), dst.toString())
+    }
+
+    override fun detectMediaType() = newInputStream().use {
+        MediaType.parse(tika.detect(it))
     }
 
     override fun describeContents() = 0
