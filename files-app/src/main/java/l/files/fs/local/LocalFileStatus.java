@@ -83,7 +83,7 @@ public abstract class LocalFileStatus implements FileStatus {
   }
 
   @Override public Resource resource() {
-    return LocalResource.create(path());
+    return new LocalResource(path());
   }
 
   @Override public String name() {

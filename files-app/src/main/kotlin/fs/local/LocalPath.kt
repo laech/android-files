@@ -11,7 +11,7 @@ import kotlin.platform.platformStatic
 
 private data class LocalPath private(val file: File) : Path {
 
-    override val resource = LocalResource.create(this)
+    override val resource = LocalResource(this)
 
     override val uri = file.sanitizedUri()
 
@@ -22,7 +22,8 @@ private data class LocalPath private(val file: File) : Path {
         if (other is LocalPath) {
             val thisPath = file.path
             val thatPath = other.file.path
-            return thisPath.startsWith(thatPath) && thisPath.charAt(thatPath.length()) == '/'
+            return thisPath.startsWith(thatPath) &&
+                    thisPath.charAt(thatPath.length()) == '/'
         }
         return false
     }

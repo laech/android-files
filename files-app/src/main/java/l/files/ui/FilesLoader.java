@@ -62,7 +62,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();
     this.deliverResult = new DeliverResultRunnable();
-    this.service = path.getResource().watcher();
+    this.service = path.getResource().getWatcher();
   }
 
   @Override protected void onStartLoading() {
