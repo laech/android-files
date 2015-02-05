@@ -22,16 +22,15 @@ class Count extends AbstractOperation {
     return count;
   }
 
-  @Override void process(Path path, FailureRecorder listener)
-      throws InterruptedException {
+  @Override void process(Path path, FailureRecorder listener) throws InterruptedException {
     try {
       count(path);
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       listener.onFailure(path, new IOException(e)); // TODO no IO wrapper
     }
   }
 
-  private void count(Path path) throws InterruptedException {
+  private void count(Path path) throws InterruptedException, IOException {
     for (PathEntry entry : LocalFileVisitor.get().breadthFirstTraversal(path)) {
       checkInterrupt();
       count++;

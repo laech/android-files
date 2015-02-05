@@ -8,14 +8,13 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.common.base.Supplier;
-
-import java.util.Set;
+import java.util.List;
 
 import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.fs.Path;
 import l.files.operations.OperationService;
+import l.files.ui.ListProvider;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
@@ -26,12 +25,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class DeleteAction extends MultiChoiceModeAction {
 
   private final Context context;
-  private final Supplier<Set<Path>> supplier;
+  private final ListProvider<Path> supplier;
 
-  public DeleteAction(Context context, Supplier<Set<Path>> supplier) {
+  @SuppressWarnings("unchecked")
+  public DeleteAction(Context context, ListProvider<? extends Path> supplier) {
     super(R.id.delete);
     this.context = checkNotNull(context);
-    this.supplier = checkNotNull(supplier);
+    this.supplier = (ListProvider<Path>) checkNotNull(supplier);
   }
 
   @Override
@@ -43,7 +43,7 @@ public final class DeleteAction extends MultiChoiceModeAction {
 
   @Override
   protected void onItemSelected(final ActionMode mode, MenuItem item) {
-    final Set<Path> paths = supplier.get();
+    final List<Path> paths = supplier.getCheckedItems();
     new AlertDialog.Builder(context)
         .setMessage(getConfirmMessage(paths.size()))
         .setNegativeButton(android.R.string.cancel, null)
@@ -57,7 +57,7 @@ public final class DeleteAction extends MultiChoiceModeAction {
         .show();
   }
 
-  private void requestDelete(final Set<Path> paths) {
+  private void requestDelete(final Iterable<Path> paths) {
     AsyncTask.execute(new Runnable() {
       @Override
       public void run() {

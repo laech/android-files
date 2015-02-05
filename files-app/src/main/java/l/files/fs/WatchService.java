@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import java.io.IOException;
+
 /**
  * Service designed for monitoring file changes within a directory.
  * <p/>
@@ -26,7 +28,7 @@ public interface WatchService extends AutoCloseable {
    * @throws FileSystemException      if failed to listener on the given path
    * @throws IllegalArgumentException if path is not of this file system
    */
-  void register(Path path, WatchEvent.Listener listener);
+  void register(Path path, WatchEvent.Listener listener) throws IOException;
 
   /**
    * Stops monitoring on the given path. Does nothing if the listener is not

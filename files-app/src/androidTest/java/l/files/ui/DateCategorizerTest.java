@@ -9,6 +9,7 @@ import org.joda.time.ReadableInstant;
 import l.files.R;
 import l.files.common.testing.BaseTest;
 import l.files.fs.FileStatus;
+import l.files.fs.Path;
 
 import static org.joda.time.Period.hours;
 import static org.joda.time.Period.millis;
@@ -95,19 +96,19 @@ public final class DateCategorizerTest extends BaseTest {
     assertCategory(unknown, mockStat(-1L), mockStat(0L));
   }
 
-  private FileStatus mockStat(ReadableInstant time) {
+  private FileListItem.File mockStat(ReadableInstant time) {
     return mockStat(time.getMillis());
   }
 
-  private FileStatus mockStat(long time) {
+  private FileListItem.File mockStat(long time) {
     FileStatus stat = mock(FileStatus.class);
     given(stat.lastModifiedTime()).willReturn(time);
-    return stat;
+    return new FileListItem.File(mock(Path.class), stat);
   }
 
-  private void assertCategory(String expected, FileStatus... stats) {
-    for (FileStatus stat : stats) {
-      assertEquals(stat.toString(), expected, categorizer.get(res, stat));
+  private void assertCategory(String expected, FileListItem.File... stats) {
+    for (FileListItem.File file : stats) {
+      assertEquals(file.toString(), expected, categorizer.get(res, file));
     }
   }
 }

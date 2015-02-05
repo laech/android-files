@@ -3,6 +3,8 @@ package l.files.fs.local;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 
+import java.io.IOException;
+
 import l.files.fs.PathEntry;
 import l.files.fs.FileVisitor;
 import l.files.fs.FileSystemException;
@@ -44,15 +46,15 @@ public final class LocalFileVisitor extends FileVisitor {
     }
   }
 
-  @Override public FluentIterable<PathEntry> preOrderTraversal(Path root) {
+  @Override public FluentIterable<PathEntry> preOrderTraversal(Path root) throws IOException {
     return preOrderTraversal(LocalPathEntry.stat(root));
   }
 
-  @Override public FluentIterable<PathEntry> postOrderTraversal(Path root) {
+  @Override public FluentIterable<PathEntry> postOrderTraversal(Path root) throws IOException {
     return postOrderTraversal(LocalPathEntry.stat(root));
   }
 
-  @Override public FluentIterable<PathEntry> breadthFirstTraversal(Path root) {
+  @Override public FluentIterable<PathEntry> breadthFirstTraversal(Path root) throws IOException {
     return breadthFirstTraversal(LocalPathEntry.stat(root));
   }
 }

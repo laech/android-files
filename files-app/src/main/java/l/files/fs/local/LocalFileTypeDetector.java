@@ -5,8 +5,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.net.MediaType;
 
+import java.io.IOException;
+
 import l.files.fs.FileStatus;
-import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
 import l.files.fs.Path;
 
@@ -42,10 +43,20 @@ abstract class LocalFileTypeDetector implements FileTypeDetector {
     return cache;
   }
 
-  @Override public MediaType detect(Path path, boolean followLink)
-      throws FileSystemException {
+  @Override public MediaType detect(Path path) throws IOException {
     LocalPath.check(path);
     LocalFileStatus stat = ((LocalPath) path).getResource().stat();
+    return detectLocal(stat);
+  }
+
+  @Override public MediaType detect(FileStatus stat) throws IOException {
+    if (!(stat instanceof LocalFileStatus)) {
+      throw new IllegalArgumentException();
+    }
+    return detectLocal((LocalFileStatus) stat);
+  }
+
+  private MediaType detectLocal(LocalFileStatus stat) throws IOException {
     if (stat.isRegularFile()) {
       return detectRegularFile(stat);
     }

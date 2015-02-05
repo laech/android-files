@@ -3,6 +3,7 @@ package l.files.fs.local;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,9 +62,9 @@ public class LocalWatchService implements WatchService, Closeable {
 
   /**
    * System directories such as /dev, /proc contain special files (some aren't
-   * really files), they generate tons of file system events (MODIFY etc)
-   * and they don't change. WatchService should not allow them and their sub
-   * paths to be watched.
+   * really files), they generate tons of file system events (MODIFY etc) and
+   * they don't change. WatchService should not allow them and their sub paths
+   * to be watched.
    */
   static final ImmutableSet<Path> IGNORED = ImmutableSet.<Path>of(
       LocalPath.of("/sys"),
@@ -225,7 +226,7 @@ public class LocalWatchService implements WatchService, Closeable {
     this.ignored = ignored.toArray(new Path[ignored.size()]);
   }
 
-  @Override public void register(Path path, Listener listener) {
+  @Override public void register(Path path, Listener listener) throws IOException {
     LocalPath.check(path);
     if (!isWatchable(path)) {
       return;
@@ -233,11 +234,7 @@ public class LocalWatchService implements WatchService, Closeable {
 
     synchronized (this) {
       if (getOrCreateListeners(path).add(listener)) {
-        try {
-          monitor(path);
-        } catch (ErrnoException e) {
-          throw e.toFileSystemException();
-        }
+        monitor(path);
       }
     }
   }
@@ -368,7 +365,7 @@ public class LocalWatchService implements WatchService, Closeable {
     return null;
   }
 
-  private void monitor(Path path) throws ErrnoException {
+  private void monitor(Path path) throws IOException {
     if (!isWatchable(path)) {
       return;
     }
@@ -490,7 +487,7 @@ public class LocalWatchService implements WatchService, Closeable {
       if (file.isDirectory() && isRegistered(path.getParent())) {
         startObserver(path, Node.from(file));
       }
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       // Path no longer exists, permission etc, ignore and continue
       logger.warn(e, "Failed to stat %s", path);
     }

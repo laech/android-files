@@ -51,14 +51,14 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
   }
 
   public void testLoadFiles() throws Exception {
-    List<FileStatus> expected = createFiles("a", "b");
+    List<FileListItem.File> expected = createFiles("a", "b");
     try (Subject subject = subject()) {
       subject.initLoader().awaitOnLoadFinished(expected);
     }
   }
 
   public void testMonitorsDirectoryChanges() throws Exception {
-    List<FileStatus> expected = new ArrayList<>(createFiles("1", "2"));
+    List<FileListItem.File> expected = new ArrayList<>(createFiles("1", "2"));
     try (Subject subject = subject()) {
       subject.initLoader().awaitOnLoadFinished(expected);
       expected.addAll(createFiles("3", "4", "5", "6"));
@@ -85,8 +85,8 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     }
   }
 
-  private List<FileStatus> createFiles(String... names) throws IOException {
-    List<FileStatus> result = new ArrayList<>();
+  private List<FileListItem.File> createFiles(String... names) throws IOException {
+    List<FileListItem.File> result = new ArrayList<>();
     for (int i = 0; i < names.length; i++) {
       String name = names[i];
       if (i % 2 == 0) {
@@ -94,7 +94,9 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       } else {
         tmp.createDir(name);
       }
-      result.add(path.resolve(name).getResource().stat());
+      Path child = path.resolve(name);
+      FileStatus stat = child.getResource().stat();
+      result.add(new FileListItem.File(child, stat));
     }
     return result;
   }
@@ -110,7 +112,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     return new Subject(loaderId, getActivity().getLoaderManager(), listener);
   }
 
-  private static interface LoaderCallback extends LoaderCallbacks<List<Object>> {}
+  private static interface LoaderCallback extends LoaderCallbacks<List<FileListItem>> {}
 
   private static final class Subject implements AutoCloseable {
     private final int loaderId;
@@ -125,7 +127,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 
     @SuppressWarnings("unchecked") Subject awaitOnLoadFinished(List<?> expected) {
       verify(listener, Mockito.timeout(2000))
-          .onLoadFinished(any(FilesLoader.class), (List<Object>) eq(expected));
+          .onLoadFinished(any(FilesLoader.class), (List<FileListItem>) eq(expected));
       return this;
     }
 

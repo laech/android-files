@@ -103,7 +103,7 @@ final class LocalDirectoryStream implements DirectoryStream {
 
         Dirent entry;
         do {
-          entry = Dirent.readdir(dir);
+          entry = Dirent.readdir(dir); // TODO use rewind to handle invalid position (file added/removed)
         } while (entry != null && isSelfOrParent(entry));
 
         if (entry != null) {

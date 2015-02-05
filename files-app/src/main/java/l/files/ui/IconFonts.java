@@ -32,7 +32,7 @@ public final class IconFonts {
   private static Typeface iconPdf;
   private static Set<String> archiveSubtypes;
 
-  public static int getColorForDirectory(Context context) {
+  public static int getDefaultColor(Context context) {
     return getColor(android.R.attr.textColorTertiary, context);
   }
 
@@ -63,6 +63,11 @@ public final class IconFonts {
     if (mime.type().equals("image")) return iconImage;
     if (mime.type().equals("text")) return iconText;
     if (archiveSubtypes.contains(mime.subtype())) return iconArchive;
+    return iconFile;
+  }
+
+  public static Typeface getDefaultFileIcon(AssetManager assets) {
+    init(assets);
     return iconFile;
   }
 

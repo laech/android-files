@@ -72,16 +72,16 @@ public final class Clipboards {
     return intent.getAction();
   }
 
-  public static void setCut(ClipboardManager manager, Set<Path> paths) {
+  public static void setCut(ClipboardManager manager, Iterable<Path> paths) {
     setClipData(manager, paths, ACTION_CUT);
   }
 
-  public static void setCopy(ClipboardManager manager, Set<Path> paths) {
+  public static void setCopy(ClipboardManager manager, Iterable<Path> paths) {
     setClipData(manager, paths, ACTION_COPY);
   }
 
   private static void setClipData(
-      ClipboardManager manager, Set<Path> paths, String action) {
+      ClipboardManager manager, Iterable<Path> paths, String action) {
     Intent intent = new Intent(action).putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(paths));
     manager.setPrimaryClip(newIntent(null, intent));
   }

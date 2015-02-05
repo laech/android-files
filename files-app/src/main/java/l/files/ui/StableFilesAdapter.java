@@ -12,14 +12,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 
-abstract class StableFilesAdapter extends BaseAdapter {
+abstract class StableFilesAdapter<T> extends BaseAdapter {
 
   private static final Map<Object, Long> ids = newHashMap();
 
-  private List<?> items = emptyList();
+  private List<T> items = emptyList();
 
-  public void setItems(List<?> items) {
-    this.items = checkNotNull(items);
+  @SuppressWarnings("unchecked")
+  public void setItems(List<? extends T> items) {
+    this.items = (List<T>) checkNotNull(items);
     notifyDataSetChanged();
   }
 
@@ -39,7 +40,7 @@ abstract class StableFilesAdapter extends BaseAdapter {
 
   protected abstract Object getItemIdObject(int position);
 
-  @Override public Object getItem(int position) {
+  @Override public T getItem(int position) {
     return items.get(position);
   }
 

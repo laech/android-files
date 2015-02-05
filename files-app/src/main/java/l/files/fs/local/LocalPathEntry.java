@@ -3,10 +3,10 @@ package l.files.fs.local;
 import com.google.auto.value.AutoValue;
 
 import java.io.File;
+import java.io.IOException;
 
-import l.files.fs.PathEntry;
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
+import l.files.fs.PathEntry;
 
 @AutoValue
 abstract class LocalPathEntry implements PathEntry {
@@ -27,17 +27,11 @@ abstract class LocalPathEntry implements PathEntry {
     return new AutoValue_LocalPathEntry(file, ino, isDirectory);
   }
 
-  /**
-   * @throws FileSystemException if failed to get file status
-   */
-  static LocalPathEntry stat(File file) throws FileSystemException {
+  static LocalPathEntry stat(File file) throws IOException {
     return stat(LocalPath.of(file));
   }
 
-  /**
-   * @throws FileSystemException if failed to get file status
-   */
-  static LocalPathEntry stat(Path path) throws FileSystemException {
+  static LocalPathEntry stat(Path path) throws IOException {
     LocalFileStatus status = LocalFileStatus.stat(path, false);
     return new AutoValue_LocalPathEntry(path, status.inode(), status.isDirectory());
   }

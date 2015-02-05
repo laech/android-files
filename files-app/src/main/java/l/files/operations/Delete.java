@@ -41,16 +41,19 @@ public final class Delete extends AbstractOperation {
 
   private void deleteTree(Path path, FailureRecorder listener)
       throws InterruptedException {
-    // TODO fix this catch FileSystemException
-    for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(path)) {
-      checkInterrupt();
-      try {
-        delete(entry.path());
-      } catch (NoSuchFileException e) {
-        // Ignore
-      } catch (IOException e) {
-        listener.onFailure(entry.path(), e);
+    try {
+      for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(path)) {
+        checkInterrupt();
+        try {
+          delete(entry.path());
+        } catch (NoSuchFileException e) {
+          // Ignore
+        } catch (IOException e) {
+          listener.onFailure(entry.path(), e);
+        }
       }
+    } catch (IOException e) {
+      listener.onFailure(path, e);
     }
   }
 

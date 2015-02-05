@@ -3,7 +3,6 @@ package l.files.ui;
 import android.content.res.Resources;
 
 import l.files.R;
-import l.files.fs.FileStatus;
 
 /**
  * Categorizes by file size (descending order).
@@ -26,11 +25,14 @@ final class SizeCategorizer implements Categorizer {
       new Group(ZERO, R.string.less_than_1kb),
   };
 
-  @Override public String get(Resources res, FileStatus file) {
-    if (file.isDirectory()) {
+  @Override public String get(Resources res, FileListItem.File file) {
+    if (file.getStat() == null) {
       return res.getString(R.string.__);
     }
-    long size = file.size();
+    if (file.getStat().isDirectory()) {
+      return res.getString(R.string.__);
+    }
+    long size = file.getStat().size();
     for (Group group : GROUPS) {
       if (size >= group.minSize) {
         return res.getString(group.label);

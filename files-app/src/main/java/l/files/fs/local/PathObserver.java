@@ -6,11 +6,11 @@ import android.os.Message;
 import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.local.android.os.FileObserver;
 import l.files.logging.Logger;
@@ -194,7 +194,7 @@ final class PathObserver extends FileObserver {
         stopWatching();
       }
 
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       stopWatching();
     }
   }

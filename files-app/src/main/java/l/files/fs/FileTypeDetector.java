@@ -2,15 +2,17 @@ package l.files.fs;
 
 import com.google.common.net.MediaType;
 
+import java.io.IOException;
+
+
+/**
+ * Detects the content type of a file, if the file is a link returns the content
+ * type of the target file.
+ */
 public interface FileTypeDetector {
 
-  /**
-   * Detects the content type of a file.
-   *
-   * @throws FileSystemException      if failed to detect the file's media type
-   * @throws IllegalArgumentException if the given file scheme can't be handled
-   *                                  by this detector's file system
-   */
-  MediaType detect(Path path, boolean followLink) throws FileSystemException;
+  MediaType detect(Path path) throws IOException;
+
+  MediaType detect(FileStatus status) throws IOException;
 
 }

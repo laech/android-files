@@ -11,7 +11,6 @@ import android.os.IBinder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -48,7 +47,7 @@ public final class OperationService extends Service {
   private Handler handler;
   private Map<Integer, Future<?>> tasks;
 
-  public static void delete(Context context, Set<? extends Path> paths) {
+  public static void delete(Context context, Iterable<? extends Path> paths) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(DELETE.action())
@@ -56,16 +55,16 @@ public final class OperationService extends Service {
     );
   }
 
-  public static void copy(Context context, Set<? extends Path> src, Path dst) {
+  public static void copy(Context context, Iterable<? extends Path> src, Path dst) {
     paste(COPY.action(), context, src, dst);
   }
 
-  public static void move(Context context, Set<? extends Path> src, Path dst) {
+  public static void move(Context context, Iterable<? extends Path> src, Path dst) {
     paste(MOVE.action(), context, src, dst);
   }
 
   private static void paste(String action, Context context,
-                            Set<? extends Path> src, Path dst) {
+                            Iterable<? extends Path> src, Path dst) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(action)

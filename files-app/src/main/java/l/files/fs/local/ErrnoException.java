@@ -2,6 +2,7 @@ package l.files.fs.local;
 
 import android.util.SparseArray;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
@@ -185,6 +186,18 @@ final class ErrnoException extends IOException {
         throw new NoSuchFileException(this);
       default:
         throw new FileSystemException(this);
+    }
+  }
+
+  IOException toIOException() throws IOException {
+    switch (errno()) {
+      case ENOENT: {
+        FileNotFoundException e = new FileNotFoundException();
+        e.initCause(this);
+        throw e;
+      }
+      default:
+        throw this;
     }
   }
 }

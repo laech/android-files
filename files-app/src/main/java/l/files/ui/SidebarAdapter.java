@@ -10,7 +10,7 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.fs.Path;
 
-final class SidebarAdapter extends StableFilesAdapter {
+final class SidebarAdapter extends StableFilesAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
@@ -27,10 +27,6 @@ final class SidebarAdapter extends StableFilesAdapter {
     holder.setIcon(IconFonts.forDirectoryLocation(assets, path));
 
     return view;
-  }
-
-  @Override public Path getItem(int position) {
-    return (Path) super.getItem(position);
   }
 
   @Override protected Object getItemIdObject(int position) {

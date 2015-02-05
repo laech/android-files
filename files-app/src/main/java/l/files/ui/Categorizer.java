@@ -2,8 +2,6 @@ package l.files.ui;
 
 import android.content.res.Resources;
 
-import l.files.fs.FileStatus;
-
 /**
  * Provides category information for items in cursors.
  */
@@ -13,7 +11,7 @@ interface Categorizer {
    * Always return null categories.
    */
   Categorizer NULL = new Categorizer() {
-    @Override public String get(Resources res, FileStatus file) {
+    @Override public String get(Resources res, FileListItem.File file) {
       return null;
     }
   };
@@ -21,5 +19,5 @@ interface Categorizer {
   /**
    * @return the category for displaying purposes, or null
    */
-  String get(Resources res, FileStatus file);
+  String get(Resources res, FileListItem.File file);
 }

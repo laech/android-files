@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import l.files.fs.DirectoryStream;
-import l.files.fs.FileStatus;
-import l.files.fs.FileSystemException;
-import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
 import l.files.fs.WatchEvent;
@@ -29,17 +27,13 @@ import static android.os.Looper.getMainLooper;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 
-/**
- * Loader to load files of a directory and will continue to monitor the
- * directory for changes and notifies observer when that happens.
- */
-public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
+public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
   private static final Logger logger = Logger.get(FilesLoader.class);
   private static final Handler handler = new Handler(getMainLooper());
 
   private final WatchService service;
-  private final ConcurrentMap<Path, FileStatus> data;
+  private final ConcurrentMap<Path, FileListItem.File> data;
   private final EventListener listener;
   private final Runnable deliverResult;
 
@@ -74,11 +68,11 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
     }
   }
 
-  @Override public List<Object> loadInBackground() {
+  @Override public List<FileListItem> loadInBackground() {
     data.clear();
     try {
       service.register(path, listener);
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       // TODO
       return emptyList();
     }
@@ -94,34 +88,34 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
     return buildResult();
   }
 
-  private List<Object> buildResult() {
-    List<FileStatus> files = new ArrayList<>(data.size());
+  private List<FileListItem> buildResult() {
+    List<FileListItem.File> files = new ArrayList<>(data.size());
     if (showHidden) {
       files.addAll(data.values());
     } else {
-      for (FileStatus status : data.values()) {
-        if (!status.isHidden()) {
-          files.add(status);
+      for (FileListItem.File item : data.values()) {
+        if (!item.getPath().getHidden()) {
+          files.add(item);
         }
       }
     }
     Collections.sort(files, sort.newComparator(Locale.getDefault()));
 
-    List<Object> result = new ArrayList<>(files.size() + 6);
+    List<FileListItem> result = new ArrayList<>(files.size() + 6);
 
     Categorizer categorizer = sort.newCategorizer();
     Resources res = getContext().getResources();
     String preCategory = null;
     for (int i = 0; i < files.size(); i++) {
-      FileStatus stat = files.get(i);
+      FileListItem.File stat = files.get(i);
       String category = categorizer.get(res, stat);
       if (i == 0) {
         if (category != null) {
-          result.add(category);
+          result.add(new FileListItem.Header(category));
         }
       } else {
         if (!Objects.equals(preCategory, category)) {
-          result.add(category);
+          result.add(new FileListItem.Header(category));
         }
       }
       result.add(stat);
@@ -157,16 +151,18 @@ public final class FilesLoader extends AsyncTaskLoader<List<Object>> {
    */
   private boolean addData(Path path) {
     try {
-      FileStatus newStat = path.getResource().stat();
-      FileStatus oldStat = data.put(path, newStat);
+
+      FileListItem.File newStat = new FileListItem.File(path, path.getResource().stat());
+      FileListItem.File oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
-    } catch (NoSuchFileException e) {
-      logger.debug(e);
-    } catch (IOException | FileSystemException e) {
-      logger.error(e, "Failed to stat %s", path);
-      // TODO use wrapper class for error paths e.g. /storage/ext_sd/.android_secure
+
+    } catch (FileNotFoundException e) {
+      return data.remove(path) != null;
+
+    } catch (IOException e) {
+      data.put(path, new FileListItem.File(path, null));
+      return true;
     }
-    return false;
   }
 
   final class EventListener implements WatchEvent.Listener {

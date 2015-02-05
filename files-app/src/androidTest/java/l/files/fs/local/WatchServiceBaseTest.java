@@ -81,7 +81,11 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
 
   protected WatchEvent.Listener listen(File file) {
     WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
-    service().register(LocalPath.of(file), listener);
+    try {
+      service().register(LocalPath.of(file), listener);
+    } catch (IOException e) {
+      throw new AssertionError(e);
+    }
     return listener;
   }
 

@@ -9,15 +9,14 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.base.Supplier;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import l.files.R;
 import l.files.common.app.OptionsMenus;
+import l.files.common.widget.ListViews;
 import l.files.common.widget.MultiChoiceModeListeners;
-import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.menu.BookmarkMenu;
@@ -35,16 +34,15 @@ import l.files.ui.mode.SelectAllAction;
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
-import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
-import static java.util.Collections.emptyList;
 import static l.files.common.app.SystemServices.getClipboardManager;
-import static l.files.common.widget.ListViews.getCheckedItemPositions;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
 
-public final class FilesFragment extends BaseFileListFragment
-    implements LoaderCallbacks<List<Object>>, OnSharedPreferenceChangeListener, Supplier<Set<Path>> {
+public final class FilesFragment extends BaseFileListFragment implements
+    LoaderCallbacks<List<FileListItem>>,
+    OnSharedPreferenceChangeListener,
+    ListProvider<Path> {
 
   // TODO implement progress
 
@@ -62,6 +60,7 @@ public final class FilesFragment extends BaseFileListFragment
   }
 
   private Path path;
+
   public FilesFragment() {
     super(R.layout.files_fragment);
   }
@@ -90,8 +89,10 @@ public final class FilesFragment extends BaseFileListFragment
 
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
-    FileStatus item = (FileStatus) l.getItemAtPosition(pos);
-    getBus().post(OpenFileRequest.create(item));
+    FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
+    if (item.getStat() != null) {
+      getBus().post(OpenFileRequest.create(item.getStat()));
+    }
   }
 
   @Override public FilesAdapter getListAdapter() {
@@ -120,31 +121,47 @@ public final class FilesFragment extends BaseFileListFragment
         new CutAction(context, clipboard, this),
         new CopyAction(context, clipboard, this),
         new DeleteAction(context, this),
-        new RenameAction(context.getFragmentManager(), list)
+        new RenameAction(context.getFragmentManager(), this)
     ));
   }
 
-  @Override public Set<Path> get() {
-    ListView list = getListView();
-    List<Integer> positions = getCheckedItemPositions(list);
-    Set<Path> paths = newHashSetWithExpectedSize(positions.size());
+  @Override public int getCheckedItemCount() {
+    return getListView().getCheckedItemCount();
+  }
+
+  @Override public int getCheckedItemPosition() {
+    return ListViews.getCheckedItemPosition(getListView());
+  }
+
+  @Override public List<Integer> getCheckedItemPositions() {
+    return ListViews.getCheckedItemPositions(getListView());
+  }
+
+  @Override public Path getCheckedItem() {
+    int position = getCheckedItemPosition();
+    return ((FileListItem.File) getListView().getItemAtPosition(position)).getPath();
+  }
+
+  @Override public List<Path> getCheckedItems() {
+    List<Integer> positions = getCheckedItemPositions();
+    List<Path> paths = new ArrayList<>(positions.size());
     for (int position : positions) {
-      Object item = list.getItemAtPosition(position);
-      if (item instanceof FileStatus) {
-        paths.add(((FileStatus) item).path());
+      FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
+      if (item.getIsFile()) {
+        paths.add(((FileListItem.File) item).getPath());
       }
     }
     return paths;
   }
 
-  @Override public Loader<List<Object>> onCreateLoader(int id, Bundle bundle) {
+  @Override public Loader<List<FileListItem>> onCreateLoader(int id, Bundle bundle) {
     Activity context = getActivity();
     FileSort sort = getSort(context);
     boolean showHidden = Preferences.getShowHiddenFiles(context);
     return new FilesLoader(context, path, sort, showHidden);
   }
 
-  @Override public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
+  @Override public void onLoadFinished(Loader<List<FileListItem>> loader, List<FileListItem> data) {
     if (getActivity() != null && !getActivity().isFinishing()) {
       if (!getListAdapter().isEmpty() && isResumed()) {
         Animations.animatePreDataSetChange(getListView());
@@ -163,8 +180,8 @@ public final class FilesFragment extends BaseFileListFragment
     }
   }
 
-  @Override public void onLoaderReset(Loader<List<Object>> loader) {
-    getListAdapter().setItems(emptyList());
+  @Override public void onLoaderReset(Loader<List<FileListItem>> loader) {
+    getListAdapter().setItems(Collections.<FileListItem>emptyList());
   }
 
   @Override

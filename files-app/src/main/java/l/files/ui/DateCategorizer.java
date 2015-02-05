@@ -30,9 +30,12 @@ final class DateCategorizer implements Categorizer {
     startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
   }
 
-  @Override public String get(Resources res, FileStatus file) {
+  @Override public String get(Resources res, FileListItem.File file) {
+    if (file.getStat() == null) {
+      return res.getString(R.string.__);
+    }
 
-    long modified = file.lastModifiedTime();
+    long modified = file.getStat().lastModifiedTime();
     if (modified <= 0) {
       return res.getString(R.string.__);
     }

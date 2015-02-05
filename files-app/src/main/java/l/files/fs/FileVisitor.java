@@ -3,6 +3,8 @@ package l.files.fs;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.TreeTraverser;
 
+import java.io.IOException;
+
 /**
  * Traverses a file tree and returns all the child paths.
  * Will not follow symbolic links.
@@ -16,7 +18,7 @@ public abstract class FileVisitor extends TreeTraverser<PathEntry> {
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<PathEntry> preOrderTraversal(Path root);
+  public abstract FluentIterable<PathEntry> preOrderTraversal(Path root) throws IOException;
 
   /**
    * Calls {@link #postOrderTraversal(Object)} with the given file converted to
@@ -25,7 +27,7 @@ public abstract class FileVisitor extends TreeTraverser<PathEntry> {
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<PathEntry> postOrderTraversal(Path root);
+  public abstract FluentIterable<PathEntry> postOrderTraversal(Path root) throws IOException;
 
 
   /**
@@ -35,6 +37,6 @@ public abstract class FileVisitor extends TreeTraverser<PathEntry> {
    * @throws IllegalArgumentException if the given file scheme is not supported
    * @throws FileSystemException      if failed to create entry from given root
    */
-  public abstract FluentIterable<PathEntry> breadthFirstTraversal(Path root);
+  public abstract FluentIterable<PathEntry> breadthFirstTraversal(Path root) throws IOException;
 
 }

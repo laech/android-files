@@ -4,27 +4,27 @@ import android.app.FragmentManager;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AbsListView;
 
 import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
-import l.files.fs.FileStatus;
+import l.files.fs.Path;
+import l.files.ui.ListProvider;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static l.files.common.widget.ListViews.getCheckedItemPosition;
 
 public final class RenameAction extends MultiChoiceModeAction {
 
-  private final AbsListView list;
+  private final ListProvider<Path> provider;
   private final FragmentManager manager;
 
-  public RenameAction(FragmentManager manager, AbsListView list) {
+  @SuppressWarnings("unchecked")
+  public RenameAction(FragmentManager manager, ListProvider<? extends Path> provider) {
     super(R.id.rename);
     this.manager = checkNotNull(manager);
-    this.list = checkNotNull(list);
+    this.provider = (ListProvider<Path>) checkNotNull(provider);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -37,13 +37,12 @@ public final class RenameAction extends MultiChoiceModeAction {
       ActionMode mode, int position, long id, boolean checked) {
     MenuItem item = mode.getMenu().findItem(R.id.rename);
     if (item != null) {
-      item.setEnabled(list.getCheckedItemCount() == 1);
+      item.setEnabled(provider.getCheckedItemCount() == 1);
     }
   }
 
   @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
-    int position = getCheckedItemPosition(list);
-    FileStatus stat = (FileStatus) list.getItemAtPosition(position);
-    RenameFragment.create(stat.path()).show(manager, RenameFragment.TAG);
+    Path path = provider.getCheckedItem();
+    RenameFragment.create(path).show(manager, RenameFragment.TAG);
   }
 }

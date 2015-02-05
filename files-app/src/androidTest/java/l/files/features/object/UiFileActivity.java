@@ -23,9 +23,9 @@ import java.util.concurrent.Callable;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.fs.local.LocalPath;
+import l.files.ui.FileListItem;
 import l.files.ui.FilesActivity;
 import l.files.ui.FilesPagerFragment;
 
@@ -419,9 +419,9 @@ public final class UiFileActivity {
   private Optional<Integer> findItemPosition(String filename) {
     int count = getListView().getCount();
     for (int i = 0; i < count; i++) {
-      Object item = getListView().getItemAtPosition(i);
-      if (item instanceof FileStatus
-          && ((FileStatus) item).name().equals(filename)) {
+      FileListItem item = (FileListItem) getListView().getItemAtPosition(i);
+      if (item.getIsFile() &&
+          ((FileListItem.File) item).getPath().getName().equals(filename)) {
         return Optional.of(i);
       }
     }

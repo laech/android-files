@@ -15,6 +15,7 @@ import l.files.common.base.Consumer;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
 import l.files.fs.Path;
+import l.files.logging.Logger;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -23,6 +24,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.BuildConfig.DEBUG;
 
 final class FileOpener implements Consumer<Path> {
+
+  private static final Logger log = Logger.get(FileOpener.class);
 
   public static FileOpener get(Context context) {
     return new FileOpener(
@@ -57,6 +60,7 @@ final class FileOpener implements Consumer<Path> {
       try {
         return path.getResource().detectMediaType();
       } catch (IOException e) {
+        log.warn(e);
         return null;
       }
     }

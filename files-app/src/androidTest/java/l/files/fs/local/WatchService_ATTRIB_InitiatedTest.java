@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
  */
 public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
 
-  public void testSelfChange() {
+  public void testSelfChange() throws Exception {
     Listener listener = mock(Listener.class);
     Path path = LocalPath.of(tmpDir());
     service().register(path, listener);

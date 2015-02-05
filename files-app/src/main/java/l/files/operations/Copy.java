@@ -8,7 +8,6 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
 import l.files.fs.FileStatus;
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
 import l.files.fs.local.Files;
@@ -62,26 +61,29 @@ final class Copy extends Paste {
     File oldRoot = new File(from.getUri());
     File newRoot = new File(to.getUri());
 
-    for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
-      checkInterrupt();
+    try {
+      for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
+        checkInterrupt();
 
-      LocalFileStatus file;
-      try {
-        file = LocalFileStatus.stat(entry.path(), false);
-      } catch (FileSystemException e) {
-        // TODO fix this
-        listener.onFailure(entry.path(), new IOException(e.getMessage(), e));
-        continue;
-      }
+        LocalFileStatus file;
+        try {
+          file = LocalFileStatus.stat(entry.path(), false);
+        } catch (IOException e) {
+          listener.onFailure(entry.path(), e);
+          continue;
+        }
 
-      File dst = Files.replace(LocalPath.check(entry.path()).getFile(), oldRoot, newRoot);
-      if (file.isSymbolicLink()) {
-        copyLink(file, LocalPath.of(dst), listener);
-      } else if (file.isDirectory()) {
-        createDirectory(file, LocalPath.of(dst), listener);
-      } else {
-        copyFile(file, LocalPath.of(dst.getPath()), listener);
+        File dst = Files.replace(LocalPath.check(entry.path()).getFile(), oldRoot, newRoot);
+        if (file.isSymbolicLink()) {
+          copyLink(file, LocalPath.of(dst), listener);
+        } else if (file.isDirectory()) {
+          createDirectory(file, LocalPath.of(dst), listener);
+        } else {
+          copyFile(file, LocalPath.of(dst.getPath()), listener);
+        }
       }
+    } catch (IOException e) {
+      listener.onFailure(from, e);
     }
   }
 

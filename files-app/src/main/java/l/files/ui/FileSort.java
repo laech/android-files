@@ -16,11 +16,11 @@ import static java.lang.System.currentTimeMillis;
 public enum FileSort {
 
   NAME(R.string.name) {
-    @Override public Comparator<FileStatus> newComparator(Locale locale) {
+    @Override public Comparator<FileListItem.File> newComparator(Locale locale) {
       final Collator collator = Collator.getInstance(locale);
-      return new Comparator<FileStatus>() {
-        @Override public int compare(FileStatus a, FileStatus b) {
-          return collator.compare(a.name(), b.name());
+      return new Comparator<FileListItem.File>() {
+        @Override public int compare(FileListItem.File a, FileListItem.File b) {
+          return collator.compare(a.getPath().getName(), b.getPath().getName());
         }
       };
     }
@@ -31,13 +31,12 @@ public enum FileSort {
   },
 
   MODIFIED(R.string.date_modified) {
-    @Override public Comparator<FileStatus> newComparator(Locale locale) {
-      final Comparator<FileStatus> nameComparator = NAME.newComparator(locale);
-      return new Comparator<FileStatus>() {
-        @Override public int compare(FileStatus a, FileStatus b) {
+    @Override public Comparator<FileListItem.File> newComparator(Locale locale) {
+      return new NullableFileStatComparator(locale) {
+        @Override public int compareNotNull(FileStatus a, FileStatus b) {
           int result = Longs.compare(b.lastModifiedTime(), a.lastModifiedTime());
           if (result == 0) {
-            result = nameComparator.compare(a, b);
+            result = nameComparator.compare(a.name(), b.name());
           }
           return result;
         }
@@ -50,12 +49,11 @@ public enum FileSort {
   },
 
   SIZE(R.string.size) {
-    @Override public Comparator<FileStatus> newComparator(final Locale locale) {
-      final Comparator<FileStatus> nameComparator = NAME.newComparator(locale);
-      return new Comparator<FileStatus>() {
-        @Override public int compare(FileStatus a, FileStatus b) {
-          if (a.isDirectory() && a.isDirectory() == b.isDirectory()) {
-            return nameComparator.compare(a, b);
+    @Override public Comparator<FileListItem.File> newComparator(final Locale locale) {
+      return new NullableFileStatComparator(locale) {
+        @Override public int compareNotNull(FileStatus a, FileStatus b) {
+          if (a.isDirectory() && b.isDirectory()) {
+            return nameComparator.compare(a.name(), b.name());
           }
           if (a.isDirectory()) {
             return 1;
@@ -65,7 +63,7 @@ public enum FileSort {
           }
           int compare = Longs.compare(b.size(), a.size());
           if (compare == 0) {
-            return nameComparator.compare(a, b);
+            return nameComparator.compare(a.name(), b.name());
           }
           return compare;
         }
@@ -87,7 +85,31 @@ public enum FileSort {
     return res.getString(labelId);
   }
 
-  public abstract Comparator<FileStatus> newComparator(Locale locale);
+  public abstract Comparator<FileListItem.File> newComparator(Locale locale);
 
   public abstract Categorizer newCategorizer();
+
+  private static abstract class NullableFileStatComparator implements Comparator<FileListItem.File> {
+
+    protected final Collator nameComparator;
+
+    NullableFileStatComparator(Locale locale) {
+      nameComparator = Collator.getInstance(locale);
+    }
+
+    @Override public int compare(FileListItem.File a, FileListItem.File b) {
+      if (a.getStat() == null && b.getStat() == null) {
+        return nameComparator.compare(a.getPath().getName(), b.getPath().getName());
+      }
+      if (a.getStat() == null) {
+        return 1;
+      }
+      if (b.getStat() == null) {
+        return -1;
+      }
+      return compareNotNull(a.getStat(), b.getStat());
+    }
+
+    protected abstract int compareNotNull(FileStatus a, FileStatus b);
+  }
 }

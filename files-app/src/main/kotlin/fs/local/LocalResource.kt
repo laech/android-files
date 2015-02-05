@@ -63,9 +63,7 @@ data class LocalResource(override val path: LocalPath) : Resource {
         Stdio.rename(path.toString(), dst.toString())
     }
 
-    override fun detectMediaType() = newInputStream().use {
-        MediaType.parse(tika.detect(it))
-    }
+    override fun detectMediaType() = MagicFileTypeDetector.get().detect(path)
 
     override fun describeContents() = 0
 
@@ -74,8 +72,6 @@ data class LocalResource(override val path: LocalPath) : Resource {
     }
 
     class object {
-
-        private val tika: Tika by Delegates.lazy { Tika() }
 
         public val CREATOR: Creator<LocalResource> = object : Creator<LocalResource> {
             override fun newArray(size: Int) = arrayOfNulls<LocalResource>(size)

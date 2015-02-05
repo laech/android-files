@@ -11,7 +11,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 public final class LocalFileVisitorTest extends FileBaseTest {
 
-  public void testTraversal() {
+  public void testTraversal() throws Exception {
     tmp().createFile("a/b");
     tmp().createFile("a/c");
     LocalPath.of(tmp().get("a/d")).getResource()

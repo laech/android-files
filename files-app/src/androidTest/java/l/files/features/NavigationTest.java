@@ -13,6 +13,8 @@ import static com.google.common.io.Files.append;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+  // TODO test symlink dir
+
   public void testPressActionBarUpIndicatorWillGoBack() {
     File dir = dir().createDir("a");
     screen()

@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.net.MediaType;
 
 import java.io.File;
+import java.io.IOException;
 
 import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
@@ -36,8 +37,7 @@ public abstract class LocalFileStatus implements FileStatus {
   abstract Stat stat();
 
   @Deprecated
-  public static LocalFileStatus read(String parent, String child)
-      throws FileSystemException {
+  public static LocalFileStatus read(String parent, String child) throws IOException {
     checkNotNull(parent, "parent");
     checkNotNull(child, "child");
     return stat(new File(parent, child), false);
@@ -57,8 +57,7 @@ public abstract class LocalFileStatus implements FileStatus {
   /**
    * @throws FileSystemException if failed to get status
    */
-  static LocalFileStatus stat(File file, boolean followLink)
-      throws FileSystemException {
+  static LocalFileStatus stat(File file, boolean followLink) throws IOException {
     return stat(LocalPath.of(file), followLink);
   }
 
@@ -66,8 +65,7 @@ public abstract class LocalFileStatus implements FileStatus {
    * @throws FileSystemException      if failed to get status
    * @throws IllegalArgumentException if the path is not of supported type
    */
-  public static LocalFileStatus stat(Path path, boolean followLink)
-      throws FileSystemException {
+  public static LocalFileStatus stat(Path path, boolean followLink) throws IOException {
     LocalPath.check(path);
     final Stat stat;
     try {
@@ -77,7 +75,7 @@ public abstract class LocalFileStatus implements FileStatus {
         stat = Stat.lstat(path.toString());
       }
     } catch (ErrnoException e) {
-      throw e.toFileSystemException();
+      throw e.toIOException();
     }
     return new AutoValue_LocalFileStatus((LocalPath) path, stat);
   }
@@ -101,8 +99,8 @@ public abstract class LocalFileStatus implements FileStatus {
     if (basicMediaType == null) {
       try {
         FileTypeDetector detector = BasicFileTypeDetector.get();
-        basicMediaType = detector.detect(path(), true);
-      } catch (FileSystemException e) {
+        basicMediaType = detector.detect(path());
+      } catch (IOException e) {
         basicMediaType = OCTET_STREAM;
       }
     }

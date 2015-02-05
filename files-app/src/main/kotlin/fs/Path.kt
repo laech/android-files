@@ -35,6 +35,11 @@ trait Path : Parcelable {
     val name: String
 
     /**
+     * True if this path is considered a hidden resource.
+     */
+    val hidden: Boolean
+
+    /**
      * Resolves the given path/name relative to this path.
      */
     fun resolve(other: String): Path
