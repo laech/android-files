@@ -7,6 +7,7 @@ import java.io.File;
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
 import l.files.features.object.UiFileActivity;
+import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
 import l.files.ui.FilesActivity;
 
@@ -37,6 +38,10 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
   protected final TempDir dir() {
     return dir;
+  }
+
+  protected final Resource resource() {
+    return LocalPath.of(dir.get()).getResource();
   }
 
   private Intent newIntent(File dir) {

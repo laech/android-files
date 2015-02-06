@@ -8,7 +8,7 @@ import org.joda.time.ReadableInstant;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
-import l.files.fs.FileStatus;
+import l.files.fs.ResourceStatus;
 import l.files.fs.Path;
 
 import static org.joda.time.Period.hours;
@@ -101,9 +101,9 @@ public final class DateCategorizerTest extends BaseTest {
   }
 
   private FileListItem.File mockStat(long time) {
-    FileStatus stat = mock(FileStatus.class);
-    given(stat.lastModifiedTime()).willReturn(time);
-    return new FileListItem.File(mock(Path.class), stat);
+    ResourceStatus stat = mock(ResourceStatus.class);
+    given(stat.getLastModifiedTime()).willReturn(time);
+    return new FileListItem.File(mock(Path.class), stat, stat);
   }
 
   private void assertCategory(String expected, FileListItem.File... stats) {

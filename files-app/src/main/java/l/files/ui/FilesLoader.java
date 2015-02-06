@@ -19,6 +19,8 @@ import java.util.concurrent.ConcurrentMap;
 import l.files.fs.DirectoryStream;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
+import l.files.fs.Resource;
+import l.files.fs.ResourceStatus;
 import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
 import l.files.logging.Logger;
@@ -80,7 +82,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     try (DirectoryStream stream = path.getResource().newDirectoryStream()) {
       for (PathEntry entry : stream) {
         checkCancelled();
-        addData(entry.path());
+        addData(entry.getPath());
       }
     } catch (IOException e) {
       throw new RuntimeException(e); // TODO
@@ -94,7 +96,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       files.addAll(data.values());
     } else {
       for (FileListItem.File item : data.values()) {
-        if (!item.getPath().getHidden()) {
+        if (!item.getPath().getIsHidden()) {
           files.add(item);
         }
       }
@@ -152,7 +154,10 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
   private boolean addData(Path path) {
     try {
 
-      FileListItem.File newStat = new FileListItem.File(path, path.getResource().stat());
+      Resource resource = path.getResource();
+      ResourceStatus stat = resource.readStatus(false);
+      ResourceStatus targetStat = readTargetStatus(stat);
+      FileListItem.File newStat = new FileListItem.File(path, stat, targetStat);
       FileListItem.File oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
 
@@ -160,9 +165,20 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       return data.remove(path) != null;
 
     } catch (IOException e) {
-      data.put(path, new FileListItem.File(path, null));
+      data.put(path, new FileListItem.File(path, null, null));
       return true;
     }
+  }
+
+  private ResourceStatus readTargetStatus(ResourceStatus status) {
+    if (status.getIsSymbolicLink()) {
+      try {
+        return status.getResource().readStatus(true);
+      } catch (IOException e) {
+        logger.debug(e);
+      }
+    }
+    return status;
   }
 
   final class EventListener implements WatchEvent.Listener {

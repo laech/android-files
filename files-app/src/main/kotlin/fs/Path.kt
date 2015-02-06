@@ -4,15 +4,13 @@ import android.os.Parcelable
 
 import java.net.URI
 
-import l.files.fs.Resource
-
 /**
  * Path to a resource on a file system. A path and its `uri` are always
  * absolute and normalized, relative paths are not supported.
  */
-trait Path : Parcelable {
+trait Path : PathEntry, Parcelable {
 
-    val resource: Resource
+    override val path: Path get() = this
 
     /**
      * The normalized/absolute URI of this path.
@@ -37,7 +35,7 @@ trait Path : Parcelable {
     /**
      * True if this path is considered a hidden resource.
      */
-    val hidden: Boolean
+    val isHidden: Boolean
 
     /**
      * Resolves the given path/name relative to this path.

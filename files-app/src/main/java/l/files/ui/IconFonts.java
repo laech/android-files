@@ -47,14 +47,14 @@ public final class IconFonts {
     return getColor(android.R.attr.textColorTertiary, context);
   }
 
-  public static Typeface forDirectoryLocation(AssetManager assets, Path path) {
+  public static Typeface getDirectoryIcon(AssetManager assets, Path path) {
     init(assets);
     Typeface icon = iconByDirectoryUri.get(path);
     if (icon != null) return icon;
     return iconDirectory;
   }
 
-  public static Typeface forFileMediaType(AssetManager assets, MediaType mime) {
+  public static Typeface getIconForFileMediaType(AssetManager assets, MediaType mime) {
     init(assets);
     if (mime == null) return iconFile;
     if (mime.subtype().equals("pdf")) return iconPdf;

@@ -14,7 +14,7 @@ import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
-import l.files.fs.FileStatus;
+import l.files.fs.ResourceStatus;
 import l.files.fs.Path;
 import l.files.fs.local.LocalPath;
 import l.files.test.TestActivity;
@@ -95,8 +95,8 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
         tmp.createDir(name);
       }
       Path child = path.resolve(name);
-      FileStatus stat = child.getResource().stat();
-      result.add(new FileListItem.File(child, stat));
+      ResourceStatus stat = child.getResource().readStatus(false);
+      result.add(new FileListItem.File(child, stat, stat));
     }
     return result;
   }

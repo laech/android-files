@@ -11,7 +11,7 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.R;
-import l.files.fs.FileStatus;
+import l.files.fs.ResourceStatus;
 import l.files.fs.Path;
 import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
@@ -31,7 +31,7 @@ public final class RenameFragment extends FileCreationFragment {
 
   private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
-  private LoaderCallbacks<FileStatus> fileCallback = new NameHighlighter();
+  private LoaderCallbacks<ResourceStatus> fileCallback = new NameHighlighter();
 
   static RenameFragment create(Path path) {
     Bundle args = new Bundle(2);
@@ -88,17 +88,17 @@ public final class RenameFragment extends FileCreationFragment {
     return getArguments().getParcelable(ARG_PATH);
   }
 
-  class NameHighlighter implements LoaderCallbacks<FileStatus> {
+  class NameHighlighter implements LoaderCallbacks<ResourceStatus> {
 
-    @Override public Loader<FileStatus> onCreateLoader(int id, Bundle bundle) {
+    @Override public Loader<ResourceStatus> onCreateLoader(int id, Bundle bundle) {
       return onCreateFileLoader();
     }
 
-    private Loader<FileStatus> onCreateFileLoader() {
-      return new AsyncTaskLoader<FileStatus>(getActivity()) {
-        @Override public FileStatus loadInBackground() {
+    private Loader<ResourceStatus> onCreateFileLoader() {
+      return new AsyncTaskLoader<ResourceStatus>(getActivity()) {
+        @Override public ResourceStatus loadInBackground() {
           try {
-            return getPath().getResource().stat();
+            return getPath().getResource().readStatus(false);
           } catch (IOException e) {
             return null;
           }
@@ -111,22 +111,22 @@ public final class RenameFragment extends FileCreationFragment {
       };
     }
 
-    @Override public void onLoadFinished(Loader<FileStatus> loader, FileStatus stat) {
+    @Override public void onLoadFinished(Loader<ResourceStatus> loader, ResourceStatus stat) {
       onFileLoaded(stat);
     }
 
-    @Override public void onLoaderReset(Loader<FileStatus> loader) {}
+    @Override public void onLoaderReset(Loader<ResourceStatus> loader) {}
 
-    private void onFileLoaded(FileStatus stat) {
+    private void onFileLoaded(ResourceStatus stat) {
       if (stat == null || !getFilename().isEmpty()) {
         return;
       }
       EditText field = getFilenameField();
-      field.setText(stat.name());
-      if (stat.isDirectory()) {
+      field.setText(stat.getName());
+      if (stat.getIsDirectory()) {
         field.selectAll();
       } else {
-        field.setSelection(0, getBaseName(stat.name()).length());
+        field.setSelection(0, getBaseName(stat.getName()).length());
       }
     }
   }

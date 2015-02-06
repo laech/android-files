@@ -17,9 +17,9 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.FileStatus;
 import l.files.fs.FileSystemException;
 import l.files.fs.Path;
+import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 import l.files.operations.Events;
 
@@ -28,9 +28,10 @@ import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
+import static l.files.ui.IconFonts.getDirectoryIcon;
 
 public final class PathBarFragment extends Fragment
-    implements LoaderCallbacks<List<FileStatus>>, OnClickListener {
+    implements LoaderCallbacks<List<ResourceStatus>>, OnClickListener {
 
   private static final Logger log = Logger.get(PathBarFragment.class);
 
@@ -59,14 +60,14 @@ public final class PathBarFragment extends Fragment
     }
   }
 
-  @Override public Loader<List<FileStatus>> onCreateLoader(int id, Bundle args) {
+  @Override public Loader<List<ResourceStatus>> onCreateLoader(int id, Bundle args) {
     final Path path = this.path;
-    return new AsyncTaskLoader<List<FileStatus>>(getActivity()) {
-      @Override public List<FileStatus> loadInBackground() {
-        List<FileStatus> hierarchy = new ArrayList<>();
+    return new AsyncTaskLoader<List<ResourceStatus>>(getActivity()) {
+      @Override public List<ResourceStatus> loadInBackground() {
+        List<ResourceStatus> hierarchy = new ArrayList<>();
         for (Path p = path; p != null; p = p.getParent()) {
           try {
-            hierarchy.add(p.getResource().stat());
+            hierarchy.add(p.getResource().readStatus(true));
           } catch (IOException | FileSystemException e) { // TODO
             log.error(e);
             return emptyList();
@@ -83,12 +84,12 @@ public final class PathBarFragment extends Fragment
     };
   }
 
-  @Override public void onLoadFinished(Loader<List<FileStatus>> loader,
-                                       List<FileStatus> hierarchy) {
+  @Override public void onLoadFinished(Loader<List<ResourceStatus>> loader,
+                                       List<ResourceStatus> hierarchy) {
     updatePathBar(hierarchy);
   }
 
-  private void updatePathBar(List<FileStatus> hierarchy) {
+  private void updatePathBar(List<ResourceStatus> hierarchy) {
     LayoutInflater inflater = LayoutInflater.from(getActivity());
 
     int i = 0;
@@ -99,17 +100,17 @@ public final class PathBarFragment extends Fragment
         container.addView(view);
       }
 
-      FileStatus stat = hierarchy.get(i);
+      ResourceStatus stat = hierarchy.get(i);
       view.setTag(stat);
       view.setVisibility(VISIBLE);
       view.setOnClickListener(this);
 
       TextView title = (TextView) view.findViewById(R.id.title);
-      title.setText(i == 0 ? Build.MODEL : stat.name());
+      title.setText(i == 0 ? Build.MODEL : stat.getPath().getName());
 
       AssetManager asset = getActivity().getAssets();
       TextView icon = (TextView) view.findViewById(R.id.icon);
-      icon.setTypeface(IconFonts.forDirectoryLocation(asset, stat.path()));
+      icon.setTypeface(getDirectoryIcon(asset, stat.getPath()));
 
     }
 
@@ -118,10 +119,11 @@ public final class PathBarFragment extends Fragment
     }
   }
 
-  @Override public void onLoaderReset(Loader<List<FileStatus>> loader) {}
+  @Override public void onLoaderReset(Loader<List<ResourceStatus>> loader) {}
 
   @Override public void onClick(View v) {
-    Events.get().post(OpenFileRequest.create((FileStatus) v.getTag()));
+    ResourceStatus status = (ResourceStatus) v.getTag();
+    Events.get().post(new OpenFileRequest(status.getPath()));
   }
 
 }

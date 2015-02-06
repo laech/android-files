@@ -5,7 +5,7 @@ import java.io.IOException;
 import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
-import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalResourceStatus;
 import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalPath;
 
@@ -45,11 +45,11 @@ public final class Delete extends AbstractOperation {
       for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(path)) {
         checkInterrupt();
         try {
-          delete(entry.path());
+          delete(entry.getPath());
         } catch (NoSuchFileException e) {
           // Ignore
         } catch (IOException e) {
-          listener.onFailure(entry.path(), e);
+          listener.onFailure(entry.getPath(), e);
         }
       }
     } catch (IOException e) {
@@ -58,7 +58,7 @@ public final class Delete extends AbstractOperation {
   }
 
   private void delete(Path path) throws IOException {
-    long size = LocalFileStatus.stat(path, false).size();
+    long size = LocalResourceStatus.stat(path, false).getSize();
     remove(LocalPath.check(path).getFile().getPath());
     deletedByteCount += size;
     deletedItemCount++;

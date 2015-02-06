@@ -15,7 +15,7 @@ data class LocalPath private(val file: File) : Path {
 
     override val uri = file.sanitizedUri()
 
-    override val hidden = file.isHidden()
+    override val isHidden = file.isHidden()
 
     override fun startsWith(other: Path): Boolean {
         if (other.parent == null || other == this) {

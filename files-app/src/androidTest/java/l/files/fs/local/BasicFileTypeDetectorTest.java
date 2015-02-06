@@ -6,6 +6,6 @@ public final class BasicFileTypeDetectorTest
     extends LocalFileTypeDetectorTest {
 
   @Override protected FileTypeDetector detector() {
-    return new BasicFileTypeDetector();
+    return BasicFileTypeDetector.INSTANCE$;
   }
 }

@@ -3,7 +3,7 @@ package l.files.operations;
 import java.io.IOException;
 
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileStatus;
+import l.files.fs.local.LocalResourceStatus;
 import l.files.logging.Logger;
 
 final class Size extends Count {
@@ -26,7 +26,7 @@ final class Size extends Count {
   @Override protected void onCount(Path path) {
     super.onCount(path);
     try {
-      size += LocalFileStatus.stat(path, false).size();
+      size += LocalResourceStatus.stat(path, false).getSize();
     } catch (IOException e) {
       logger.warn(e);
     }

@@ -5,10 +5,9 @@ import l.files.common.testing.FileBaseTest;
 public final class NodeTest extends FileBaseTest {
 
   public void testCreation() throws Exception {
-    String path = tmp().get().getPath();
-    LocalFileStatus file = LocalFileStatus.read(path);
+    LocalResourceStatus file = LocalResourceStatus.stat(tmp().get(), false);
     Node node = Node.from(file);
-    assertEquals(file.device(), node.dev());
-    assertEquals(file.inode(), node.ino());
+    assertEquals(file.getDevice(), node.dev());
+    assertEquals(file.getInode(), node.ino());
   }
 }

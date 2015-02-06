@@ -6,77 +6,73 @@ import l.files.common.testing.FileBaseTest;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
-import static l.files.fs.local.LocalFileStatus.stat;
+import static l.files.fs.local.LocalResourceStatus.stat;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
-public final class LocalFileStatusTest extends FileBaseTest {
+public final class LocalResourceStatusTest extends FileBaseTest {
 
   public void testSymbolicLink() throws Exception {
     File file = tmp().createDir("file");
     File link = tmp().get("link");
     symlink(file.getPath(), link.getPath());
-    assertFalse(stat(file, false).isSymbolicLink());
-    assertFalse(stat(link, true).isSymbolicLink());
-    assertTrue(stat(link, false).isSymbolicLink());
-    assertEquals(Stat.lstat(link.getPath()), stat(link, false).stat());
-    assertEquals(Stat.stat(link.getPath()), stat(link, true).stat());
+    assertFalse(stat(file, false).getIsSymbolicLink());
+    assertFalse(stat(link, true).getIsSymbolicLink());
+    assertTrue(stat(link, false).getIsSymbolicLink());
+    assertEquals(Stat.lstat(link.getPath()), stat(link, false).getStat());
+    assertEquals(Stat.stat(link.getPath()), stat(link, true).getStat());
   }
 
   public void testIsDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertTrue(stat(dir, false).isDirectory());
+    assertTrue(stat(dir, false).getIsDirectory());
   }
 
   public void testIsRegularFile() throws Exception {
     File file = tmp().createFile("a");
-    assertTrue(stat(file, false).isRegularFile());
+    assertTrue(stat(file, false).getIsRegularFile());
   }
 
   public void testInodeNumber() throws Exception {
     File f = tmp().createFile("a");
-    assertEquals(lstat(f.getPath()).ino(), stat(f, false).inode());
+    assertEquals(lstat(f.getPath()).ino(), stat(f, false).getInode());
   }
 
   public void testDeviceId() throws Exception {
     File f = tmp().createFile("a");
-    assertEquals(lstat(f.getPath()).dev(), stat(f, false).device());
+    assertEquals(lstat(f.getPath()).dev(), stat(f, false).getDevice());
   }
 
   public void testLastModifiedTime() throws Exception {
-    LocalFileStatus file = stat(tmp().get(), false);
-    assertEquals(tmp().get().lastModified(), file.lastModifiedTime());
+    LocalResourceStatus file = stat(tmp().get(), false);
+    assertEquals(tmp().get().lastModified(), file.getLastModifiedTime());
   }
 
   public void testReadable() throws Exception {
     File file = tmp().createFile("a");
     assertTrue(file.setReadable(false));
-    assertFalse(stat(file, false).isReadable());
+    assertFalse(stat(file, false).getIsReadable());
     assertTrue(file.setReadable(true));
-    assertTrue(stat(file, false).isReadable());
+    assertTrue(stat(file, false).getIsReadable());
   }
 
   public void testWritable() throws Exception {
     File file = tmp().createFile("a");
     assertTrue(file.setWritable(false));
-    assertFalse(stat(file, false).isWritable());
+    assertFalse(stat(file, false).getIsWritable());
     assertTrue(file.setWritable(true));
-    assertTrue(stat(file, false).isWritable());
+    assertTrue(stat(file, false).getIsWritable());
   }
 
   public void testName() throws Exception {
     File file = tmp().createFile("a");
-    assertEquals(file.getName(), stat(file, false).name());
+    assertEquals(file.getName(), stat(file, false).getName());
   }
 
   public void testSize() throws Exception {
     File file = tmp().createFile("a");
     write("hello world", file, UTF_8);
-    assertEquals(file.length(), stat(file, false).size());
+    assertEquals(file.length(), stat(file, false).getSize());
   }
 
-  public void testIsHidden() throws Exception {
-    assertTrue(stat(tmp().createFile(".a"), false).isHidden());
-    assertFalse(stat(tmp().createFile("a"), false).isHidden());
-  }
 }

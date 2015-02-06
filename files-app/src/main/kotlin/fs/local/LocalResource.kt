@@ -1,26 +1,23 @@
 package l.files.fs.local
 
-import com.google.common.net.MediaType
-
-import org.apache.tika.Tika
-
 import java.io.FileInputStream
 import java.io.IOException
 
 import l.files.fs.Path
 import l.files.fs.Resource
 import l.files.fs.WatchService
-import kotlin.properties.Delegates
 import android.os.Parcel
 import android.os.Parcelable.Creator
 
 data class LocalResource(override val path: LocalPath) : Resource {
 
+    override val resource: LocalResource get() = path.resource
+
     override val watcher: WatchService get() = LocalWatchService.get()
 
     override fun resolve(other: String) = LocalResource(path.resolve(other))
 
-    override fun stat() = LocalFileStatus.stat(path, false)
+    override fun readStatus(followLink: Boolean) = LocalResourceStatus.stat(path, followLink)
 
     override val exists: Boolean get() = try {
         Unistd.access(path.toString(), Unistd.F_OK)
@@ -58,12 +55,18 @@ data class LocalResource(override val path: LocalPath) : Resource {
         Unistd.symlink(target.toString(), path.toString())
     }
 
+    override fun readSymbolicLink() = try {
+        LocalResource(LocalPath.of(Unistd.readlink(path.toString())))
+    } catch (e: ErrnoException) {
+        throw e.toIOException()
+    }
+
     override fun move(dst: Path) {
         LocalPath.check(dst)
         Stdio.rename(path.toString(), dst.toString())
     }
 
-    override fun detectMediaType() = MagicFileTypeDetector.get().detect(path)
+    override fun detectMediaType() = MagicFileTypeDetector.detect(path)
 
     override fun describeContents() = 0
 

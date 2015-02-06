@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 import l.files.R;
-import l.files.fs.FileStatus;
+import l.files.fs.ResourceStatus;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -33,10 +33,10 @@ public enum FileSort {
   MODIFIED(R.string.date_modified) {
     @Override public Comparator<FileListItem.File> newComparator(Locale locale) {
       return new NullableFileStatComparator(locale) {
-        @Override public int compareNotNull(FileStatus a, FileStatus b) {
-          int result = Longs.compare(b.lastModifiedTime(), a.lastModifiedTime());
+        @Override public int compareNotNull(ResourceStatus a, ResourceStatus b) {
+          int result = Longs.compare(b.getLastModifiedTime(), a.getLastModifiedTime());
           if (result == 0) {
-            result = nameComparator.compare(a.name(), b.name());
+            result = nameComparator.compare(a.getName(), b.getName());
           }
           return result;
         }
@@ -51,19 +51,19 @@ public enum FileSort {
   SIZE(R.string.size) {
     @Override public Comparator<FileListItem.File> newComparator(final Locale locale) {
       return new NullableFileStatComparator(locale) {
-        @Override public int compareNotNull(FileStatus a, FileStatus b) {
-          if (a.isDirectory() && b.isDirectory()) {
-            return nameComparator.compare(a.name(), b.name());
+        @Override public int compareNotNull(ResourceStatus a, ResourceStatus b) {
+          if (a.getIsDirectory() && b.getIsDirectory()) {
+            return nameComparator.compare(a.getName(), b.getName());
           }
-          if (a.isDirectory()) {
+          if (a.getIsDirectory()) {
             return 1;
           }
-          if (b.isDirectory()) {
+          if (b.getIsDirectory()) {
             return -1;
           }
-          int compare = Longs.compare(b.size(), a.size());
+          int compare = Longs.compare(b.getSize(), a.getSize());
           if (compare == 0) {
-            return nameComparator.compare(a.name(), b.name());
+            return nameComparator.compare(a.getName(), b.getName());
           }
           return compare;
         }
@@ -110,6 +110,6 @@ public enum FileSort {
       return compareNotNull(a.getStat(), b.getStat());
     }
 
-    protected abstract int compareNotNull(FileStatus a, FileStatus b);
+    protected abstract int compareNotNull(ResourceStatus a, ResourceStatus b);
   }
 }

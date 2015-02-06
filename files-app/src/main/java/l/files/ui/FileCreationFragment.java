@@ -12,11 +12,7 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.io.IOException;
-
 import l.files.R;
-import l.files.fs.FileStatus;
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -32,7 +28,7 @@ public abstract class FileCreationFragment extends DialogFragment
   private static final int LOADER_CHECKER =
       identityHashCode(FileCreationFragment.class);
 
-  private LoaderCallbacks<FileStatus> checkerCallback = new CheckerCallback();
+  private LoaderCallbacks<Existence> checkerCallback = new CheckerCallback();
   private EditText editText;
 
   @Override public void onResume() {
@@ -99,24 +95,20 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
 
-  class CheckerCallback implements LoaderCallbacks<FileStatus> {
+  class CheckerCallback implements LoaderCallbacks<Existence> {
 
-    @Override public Loader<FileStatus> onCreateLoader(int id, Bundle bundle) {
+    @Override public Loader<Existence> onCreateLoader(int id, Bundle bundle) {
       if (id == LOADER_CHECKER) {
         return newChecker();
       }
       return null;
     }
 
-    private Loader<FileStatus> newChecker() {
+    private Loader<Existence> newChecker() {
       final Path path = getParentPath().resolve(getFilename());
-      return new AsyncTaskLoader<FileStatus>(getActivity()) {
-        @Override public FileStatus loadInBackground() {
-          try {
-            return path.getResource().stat();
-          } catch (IOException | FileSystemException e) { // TODO
-            return null;
-          }
+      return new AsyncTaskLoader<Existence>(getActivity()) {
+        @Override public Existence loadInBackground() {
+          return new Existence(path, path.getResource().getExists());
         }
 
         @Override protected void onStartLoading() {
@@ -126,23 +118,33 @@ public abstract class FileCreationFragment extends DialogFragment
       };
     }
 
-    @Override public void onLoadFinished(Loader<FileStatus> loader, FileStatus stat) {
+    @Override public void onLoadFinished(Loader<Existence> loader, Existence existence) {
       if (loader.getId() == LOADER_CHECKER) {
-        onCheckFinished(stat);
+        onCheckFinished(existence);
       }
     }
 
-    @Override public void onLoaderReset(Loader<FileStatus> loader) {}
+    @Override public void onLoaderReset(Loader<Existence> loader) {}
 
-    private void onCheckFinished(FileStatus stat) {
+    private void onCheckFinished(Existence existence) {
       Button ok = getOkButton();
-      if (stat != null) {
-        editText.setError(getError(stat.path()));
+      if (existence.exists) {
+        editText.setError(getError(existence.path));
         ok.setEnabled(false);
       } else {
         editText.setError(null);
         ok.setEnabled(true);
       }
+    }
+  }
+
+  private static final class Existence {
+    final Path path;
+    final boolean exists;
+
+    Existence(Path path, boolean exists) {
+      this.path = path;
+      this.exists = exists;
     }
   }
 

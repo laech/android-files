@@ -189,7 +189,7 @@ final class PathObserver extends FileObserver {
   private void checkNode() {
     try {
 
-      LocalFileStatus file = LocalFileStatus.stat(path, false);
+      LocalResourceStatus file = LocalResourceStatus.stat(path, false);
       if (!Node.from(file).equals(node)) {
         stopWatching();
       }

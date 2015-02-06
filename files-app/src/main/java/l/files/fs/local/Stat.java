@@ -23,7 +23,7 @@ import com.google.auto.value.AutoValue;
  */
 @AutoValue
 @SuppressWarnings("OctalInteger")
-abstract class Stat extends Native {
+public abstract class Stat extends Native {
 
   /* See /usr/include/linux/stat.h for meaning of these constants. */
 

@@ -2,7 +2,6 @@ package l.files.operations;
 
 import java.io.IOException;
 
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
 import l.files.fs.local.LocalFileVisitor;
@@ -34,7 +33,7 @@ class Count extends AbstractOperation {
     for (PathEntry entry : LocalFileVisitor.get().breadthFirstTraversal(path)) {
       checkInterrupt();
       count++;
-      onCount(entry.path());
+      onCount(entry.getPath());
     }
   }
 

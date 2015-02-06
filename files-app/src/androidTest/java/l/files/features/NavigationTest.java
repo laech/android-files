@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
+import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -13,7 +14,31 @@ import static com.google.common.io.Files.append;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
-  // TODO test symlink dir
+  public void testSymbolicLinkIconDisplayed() throws Exception {
+    Resource dir = resource().resolve("dir");
+    Resource link = resource().resolve("link");
+    dir.createDirectory();
+    link.createSymbolicLink(dir);
+
+    screen()
+        .assertSymbolicLinkIconDisplayed(dir, false)
+        .assertSymbolicLinkIconDisplayed(link, true);
+  }
+
+  public void testCanNavigateIntoSymlinkDirectory() throws Exception {
+    Resource dir = resource().resolve("dir");
+    dir.createDirectory();
+    dir.resolve("a").createDirectory();
+
+    Resource link = resource().resolve("link");
+    link.createSymbolicLink(dir);
+    Resource linkChild = link.resolve("a");
+
+    screen()
+        .selectItem(link)
+        .selectItem(linkChild)
+        .assertCurrentDirectory(linkChild);
+  }
 
   public void testPressActionBarUpIndicatorWillGoBack() {
     File dir = dir().createDir("a");

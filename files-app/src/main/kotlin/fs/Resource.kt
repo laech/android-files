@@ -5,9 +5,9 @@ import com.google.common.net.MediaType
 import java.io.InputStream
 import java.io.IOException
 
-trait Resource : Parcelable {
+trait Resource : PathEntry, Parcelable {
 
-    val path: Path
+    override val resource: Resource get() = this
 
     /**
      * Gets the name of this resource, or empty if this is the root
@@ -29,12 +29,6 @@ trait Resource : Parcelable {
      * Resolves the given name/path relative to this resource.
      */
     fun resolve(other: String): Resource
-
-    /**
-     * Reads the status of this resource.
-     */
-    throws(javaClass<IOException>())
-    fun stat(): FileStatus
 
     /**
      * Opens a new directory stream to iterate through the children of
@@ -67,6 +61,21 @@ trait Resource : Parcelable {
      */
     throws(javaClass<IOException>())
     fun createSymbolicLink(target: Path)
+
+    throws(javaClass<IOException>())
+    fun createSymbolicLink(target: Resource) = createSymbolicLink(target.path)
+
+    /**
+     * If this is a symbolic link, returns the target file.
+     */
+    throws(javaClass<IOException>())
+    fun readSymbolicLink(): Resource
+
+    /**
+     * Reads the status of this resource.
+     */
+    throws(javaClass<IOException>())
+    fun readStatus(followLink: Boolean): ResourceStatus
 
     /**
      * Moves this resource tree to the given destination.

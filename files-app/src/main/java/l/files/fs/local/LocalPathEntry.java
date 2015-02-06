@@ -7,12 +7,17 @@ import java.io.IOException;
 
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
+import l.files.fs.Resource;
 
 @AutoValue
 abstract class LocalPathEntry implements PathEntry {
   LocalPathEntry() {}
 
-  @Override public abstract Path path();
+  @Override public abstract LocalPath getPath();
+
+  @Override public Resource getResource() {
+    return new LocalResource(getPath());
+  }
 
   abstract long ino();
 
@@ -32,7 +37,7 @@ abstract class LocalPathEntry implements PathEntry {
   }
 
   static LocalPathEntry stat(Path path) throws IOException {
-    LocalFileStatus status = LocalFileStatus.stat(path, false);
-    return new AutoValue_LocalPathEntry(path, status.inode(), status.isDirectory());
+    LocalResourceStatus status = LocalResourceStatus.stat(path, false);
+    return new AutoValue_LocalPathEntry((LocalPath) path, status.getInode(), status.getIsDirectory());
   }
 }

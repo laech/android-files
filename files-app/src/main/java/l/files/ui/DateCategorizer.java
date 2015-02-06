@@ -6,7 +6,6 @@ import org.joda.time.DateMidnight;
 import org.joda.time.MutableDateTime;
 
 import l.files.R;
-import l.files.fs.FileStatus;
 
 import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
@@ -35,7 +34,7 @@ final class DateCategorizer implements Categorizer {
       return res.getString(R.string.__);
     }
 
-    long modified = file.getStat().lastModifiedTime();
+    long modified = file.getStat().getLastModifiedTime();
     if (modified <= 0) {
       return res.getString(R.string.__);
     }

@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Path;
+import l.files.fs.PathEntry;
 import l.files.fs.local.LocalPath;
 import l.files.ui.FileListItem;
 import l.files.ui.FilesActivity;
@@ -32,6 +33,7 @@ import l.files.ui.FilesPagerFragment;
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
 import static android.app.ActionBar.DISPLAY_SHOW_TITLE;
 import static android.test.MoreAsserts.assertNotEqual;
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -108,6 +110,10 @@ public final class UiFileActivity {
       }
     });
     return this;
+  }
+
+  public UiFileActivity selectItem(final PathEntry resource) {
+    return selectItem(new File(resource.getPath().getUri()));
   }
 
   public UiFileActivity selectItem(final File file) {
@@ -223,12 +229,12 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertCurrentDirectory(final Path expected) {
+  public UiFileActivity assertCurrentDirectory(final PathEntry expected) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         FilesPagerFragment fragment = activity.getCurrentPagerFragment();
         Path actual = fragment.getCurrentPath();
-        assertEquals(expected, actual);
+        assertEquals(expected.getPath(), actual);
       }
     });
     return this;
@@ -370,9 +376,17 @@ public final class UiFileActivity {
     return (TextView) getView(file).findViewById(R.id.size);
   }
 
+  private View getView(PathEntry file) {
+    return getView(file.getPath().getName());
+  }
+
   private View getView(File file) {
+    return getView(file.getName());
+  }
+
+  private View getView(String name) {
     ListView list = getListView();
-    int index = findItemPositionOrThrow(file.getName());
+    int index = findItemPositionOrThrow(name);
     return list.getChildAt(index - list.getFirstVisiblePosition());
   }
 
@@ -511,4 +525,19 @@ public final class UiFileActivity {
     });
     return result;
   }
+
+  public UiFileActivity assertSymbolicLinkIconDisplayed(final PathEntry resource, final boolean displayed) {
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        View view = getView(resource).findViewById(R.id.symlink);
+        if (displayed) {
+          assertEquals(VISIBLE, view.getVisibility());
+        } else {
+          assertEquals(GONE, view.getVisibility());
+        }
+      }
+    });
+    return this;
+  }
+
 }

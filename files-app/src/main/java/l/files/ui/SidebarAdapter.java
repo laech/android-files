@@ -10,6 +10,8 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.fs.Path;
 
+import static l.files.ui.IconFonts.getDirectoryIcon;
+
 final class SidebarAdapter extends StableFilesAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
@@ -24,7 +26,7 @@ final class SidebarAdapter extends StableFilesAdapter<Path> {
     Path path = getItem(position);
     ViewHolder holder = (ViewHolder) view.getTag();
     holder.setTitle(FileLabels.get(res, path));
-    holder.setIcon(IconFonts.forDirectoryLocation(assets, path));
+    holder.setIcon(getDirectoryIcon(assets, path));
 
     return view;
   }

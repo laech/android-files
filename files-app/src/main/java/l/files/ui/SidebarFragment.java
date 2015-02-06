@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,11 +35,7 @@ public final class SidebarFragment extends BaseFileListFragment
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     Path path = (Path) l.getItemAtPosition(pos);
-    try {
-      getBus().post(OpenFileRequest.create(path.getResource().stat()));
-    } catch (IOException e) {
-      throw new RuntimeException(); // TODO
-    }
+    getBus().post(new OpenFileRequest(path));
   }
 
   private void addBookmarksHeader() {

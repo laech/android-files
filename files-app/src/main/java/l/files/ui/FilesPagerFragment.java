@@ -1,17 +1,22 @@
 package l.files.ui;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import java.io.IOException;
+
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 import l.files.fs.Path;
+import l.files.fs.ResourceStatus;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.ui.Fragments.setArgs;
@@ -28,9 +33,9 @@ public final class FilesPagerFragment extends Fragment {
     return setArgs(new FilesPagerFragment(), args);
   }
 
-  Toaster toaster;
-  Consumer<Path> fileOpener;
-  FragmentManager manager;
+  private Toaster toaster;
+  private Consumer<Path> fileOpener;
+  private FragmentManager manager;
 
   @Override public View onCreateView(
       LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,32 +86,44 @@ public final class FilesPagerFragment extends Fragment {
     return fragment.getPath();
   }
 
-  public String getCurrentTitle() {
-    if (manager.getBackStackEntryCount() == 0) {
-      return getInitialTitle();
-    }
-    return manager.getBackStackEntryAt(manager.getBackStackEntryCount() - 1)
-        .getBreadCrumbTitle().toString();
-  }
-
   private Path getInitialPath() {
     return getArguments().getParcelable(ARG_INITIAL_PATH);
   }
 
-  public String getInitialTitle() {
-    return getArguments().getString(ARG_INITIAL_TITLE);
+  public void show(final OpenFileRequest request) {
+    new AsyncTask<Void, Void, ResourceStatus>() {
+      @Override protected ResourceStatus doInBackground(Void... params) {
+        try {
+          return request.getPath().getResource().readStatus(true);
+        } catch (IOException e) {
+          return null;
+        }
+      }
+
+      @Override protected void onPostExecute(ResourceStatus status) {
+        super.onPostExecute(status);
+        Activity activity = getActivity();
+        if (activity != null) {
+          if (status != null) {
+            show(status);
+          } else {
+            toaster.toast(activity, R.string.failed_to_get_file_info);
+          }
+        }
+      }
+    }.execute();
   }
 
-  public void show(OpenFileRequest request) {
+  private void show(ResourceStatus status) {
     if (getActivity() == null) {
       return;
     }
-    if (!request.file().isReadable()) {
+    if (!status.getIsReadable()) {
       showPermissionDenied();
-    } else if (request.file().isDirectory()) {
-      showDirectory(request);
+    } else if (status.getIsDirectory()) {
+      showDirectory(status.getPath());
     } else {
-      showFile(request);
+      showFile(status.getPath());
     }
   }
 
@@ -114,8 +131,7 @@ public final class FilesPagerFragment extends Fragment {
     toaster.toast(getActivity(), R.string.permission_denied);
   }
 
-  private void showDirectory(OpenFileRequest request) {
-    Path path = request.file().path();
+  private void showDirectory(Path path) {
     FilesFragment current = findCurrentFragment();
     if (current != null && current.getPath().equals(path)) {
       return;
@@ -125,13 +141,13 @@ public final class FilesPagerFragment extends Fragment {
         .beginTransaction()
         .replace(android.R.id.content, fragment, FilesFragment.TAG)
         .addToBackStack(null)
-        .setBreadCrumbTitle(request.file().name())
+        .setBreadCrumbTitle(path.getName())
         .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
   }
 
-  private void showFile(OpenFileRequest request) {
-    fileOpener.apply(request.file().path());
+  private void showFile(Path path) {
+    fileOpener.apply(path);
   }
 
   private FilesFragment findCurrentFragment() {

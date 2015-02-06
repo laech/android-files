@@ -37,7 +37,7 @@ public final class LocalFileVisitor extends FileVisitor {
       return emptyList();
     }
 
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(root.path())) {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(root.getPath())) {
       return ImmutableList.copyOf(stream);
     } catch (FileSystemException e) {
       // TODO accept an exception handler as constructor parameter for this

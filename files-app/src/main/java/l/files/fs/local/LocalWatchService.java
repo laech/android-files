@@ -370,7 +370,7 @@ public class LocalWatchService implements WatchService, Closeable {
       return;
     }
 
-    LocalFileStatus status = LocalFileStatus.stat(path, false);
+    LocalResourceStatus status = LocalResourceStatus.stat(path, false);
     Node node = Node.from(status);
 
     synchronized (this) {
@@ -406,18 +406,18 @@ public class LocalWatchService implements WatchService, Closeable {
     }
   }
 
-  private void startObserversForSubDirs(LocalFileStatus parent) {
+  private void startObserversForSubDirs(LocalResourceStatus parent) {
     // Using a directory stream without stating the children will be faster
     // especially on large directories
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.path())) {
+    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.getPath())) {
       for (LocalPathEntry entry : stream.local()) {
         if (entry.isDirectory()) {
-          Path child = entry.path();
+          Path child = entry.getPath();
           if (!isWatchable(child)) {
             continue;
           }
           try {
-            startObserver(child, Node.create(parent.device(), entry.ino()));
+            startObserver(child, Node.create(parent.getDevice(), entry.ino()));
           } catch (FileSystemException e) {
             // File no longer exits or inaccessible, ignore;
           }
@@ -483,8 +483,8 @@ public class LocalWatchService implements WatchService, Closeable {
 
   private void onCreate(Path path) {
     try {
-      LocalFileStatus file = LocalFileStatus.stat(path, false);
-      if (file.isDirectory() && isRegistered(path.getParent())) {
+      LocalResourceStatus file = LocalResourceStatus.stat(path, false);
+      if (file.getIsDirectory() && isRegistered(path.getParent())) {
         startObserver(path, Node.from(file));
       }
     } catch (IOException e) {

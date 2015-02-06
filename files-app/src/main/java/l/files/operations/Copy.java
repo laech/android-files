@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 
-import l.files.fs.FileStatus;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
+import l.files.fs.ResourceStatus;
 import l.files.fs.local.Files;
-import l.files.fs.local.LocalFileStatus;
 import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResourceStatus;
 import l.files.logging.Logger;
 
 import static l.files.fs.local.Files.readlink;
@@ -65,18 +65,18 @@ final class Copy extends Paste {
       for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
         checkInterrupt();
 
-        LocalFileStatus file;
+        LocalResourceStatus file;
         try {
-          file = LocalFileStatus.stat(entry.path(), false);
+          file = LocalResourceStatus.stat(entry.getPath(), false);
         } catch (IOException e) {
-          listener.onFailure(entry.path(), e);
+          listener.onFailure(entry.getPath(), e);
           continue;
         }
 
-        File dst = Files.replace(LocalPath.check(entry.path()).getFile(), oldRoot, newRoot);
-        if (file.isSymbolicLink()) {
+        File dst = Files.replace(LocalPath.check(entry.getPath()).getFile(), oldRoot, newRoot);
+        if (file.getIsSymbolicLink()) {
           copyLink(file, LocalPath.of(dst), listener);
-        } else if (file.isDirectory()) {
+        } else if (file.getIsDirectory()) {
           createDirectory(file, LocalPath.of(dst), listener);
         } else {
           copyFile(file, LocalPath.of(dst.getPath()), listener);
@@ -87,30 +87,30 @@ final class Copy extends Paste {
     }
   }
 
-  private void copyLink(FileStatus src, Path dst, FailureRecorder listener) {
+  private void copyLink(ResourceStatus src, Path dst, FailureRecorder listener) {
     try {
-      String target = readlink(new File(src.path().getUri()).getPath()); // TODO fix this
+      String target = readlink(new File(src.getPath().getUri()).getPath()); // TODO fix this
       symlink(target, new File(dst.getUri()).getPath()); // TODO fix this
-      copiedByteCount += src.size();
+      copiedByteCount += src.getSize();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      listener.onFailure(src.path(), e);
+      listener.onFailure(src.getPath(), e);
     }
   }
 
-  private void createDirectory(FileStatus src, Path dst, FailureRecorder listener) {
+  private void createDirectory(ResourceStatus src, Path dst, FailureRecorder listener) {
     try {
       forceMkdir(new File(dst.getUri())); // TODO fix this
-      copiedByteCount += src.size();
+      copiedByteCount += src.getSize();
       copiedItemCount++;
       setLastModifiedDate(src, dst);
     } catch (IOException e) {
-      listener.onFailure(src.path(), e);
+      listener.onFailure(src.getPath(), e);
     }
   }
 
-  private void copyFile(FileStatus src, Path dst, FailureRecorder listener)
+  private void copyFile(ResourceStatus src, Path dst, FailureRecorder listener)
       throws InterruptedException {
     checkInterrupt();
 
@@ -118,7 +118,7 @@ final class Copy extends Paste {
     FileOutputStream fos = null;
     try {
 
-      fis = new FileInputStream(new File(src.path().getUri()));// TODO fix this
+      fis = new FileInputStream(new File(src.getPath().getUri()));// TODO fix this
       fos = new FileOutputStream(new File(dst.getUri())); // TODO fix this
       FileChannel input = fis.getChannel();
       FileChannel output = fos.getChannel();
@@ -139,7 +139,7 @@ final class Copy extends Paste {
       if (e instanceof ClosedByInterruptException) {
         throw new InterruptedException();
       } else {
-        listener.onFailure(src.path(), e);
+        listener.onFailure(src.getPath(), e);
       }
 
     } finally {
@@ -150,11 +150,10 @@ final class Copy extends Paste {
     setLastModifiedDate(src, dst);
   }
 
-  private void setLastModifiedDate(FileStatus src, Path dst) {
+  private void setLastModifiedDate(ResourceStatus src, Path dst) {
     File dstFile = new File(dst.getUri()); // TODO fix this
-    File srcFile = new File(src.path().getUri()); // TODO fix this
     //noinspection StatementWithEmptyBody
-    if (!dstFile.setLastModified(srcFile.lastModified())) {
+    if (!dstFile.setLastModified(src.getLastModifiedTime())) {
       /*
        * Setting last modified time currently fails, see:
        *

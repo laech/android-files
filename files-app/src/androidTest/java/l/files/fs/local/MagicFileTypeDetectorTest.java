@@ -1,8 +1,8 @@
 package l.files.fs.local;
 
 import java.io.File;
+import java.io.IOException;
 
-import l.files.fs.FileSystemException;
 import l.files.fs.FileTypeDetector;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -22,7 +22,7 @@ public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
     try {
       detector().detect(LocalPath.of(file));
       fail();
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       // Pass
     }
   }
@@ -33,7 +33,7 @@ public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
     try {
       detector().detect(LocalPath.of(file));
       fail();
-    } catch (FileSystemException e) {
+    } catch (IOException e) {
       // Pass
     }
   }

@@ -35,4 +35,13 @@ public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
     assertEquals("inode/directory", detector().detect(link).toString());
   }
 
+  public void testDetect_symlinkDirectoryMulti() throws Exception {
+    Path dir = LocalPath.of(tmp().createDir("a"));
+    Path link1 = LocalPath.of(tmp().get("b"));
+    Path link2 = LocalPath.of(tmp().get("c"));
+    link1.getResource().createSymbolicLink(dir);
+    link2.getResource().createSymbolicLink(link1);
+    assertEquals("inode/directory", detector().detect(link2).toString());
+  }
+
 }

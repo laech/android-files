@@ -7,10 +7,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.FileStatus;
 import l.files.fs.Path;
-import l.files.fs.local.LocalFileStatus;
+import l.files.fs.ResourceStatus;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResourceStatus;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
@@ -31,8 +31,8 @@ abstract class FileSortTest extends FileBaseTest {
     List<FileListItem.File> expected = new ArrayList<>(files.length);
     for (File file : files) {
       Path path = LocalPath.of(file);
-      FileStatus stat = LocalFileStatus.stat(path, false);
-      expected.add(new FileListItem.File(path, stat));
+      ResourceStatus stat = LocalResourceStatus.stat(path, false);
+      expected.add(new FileListItem.File(path, stat, stat));
     }
     return expected;
   }

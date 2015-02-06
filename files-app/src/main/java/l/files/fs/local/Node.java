@@ -10,8 +10,8 @@ import com.google.auto.value.AutoValue;
 abstract class Node {
   Node() {}
 
-  public static Node from(LocalFileStatus file) {
-    return create(file.device(), file.inode());
+  public static Node from(LocalResourceStatus file) {
+    return create(file.getDevice(), file.getInode());
   }
 
   public static Node create(long dev, long ino) {

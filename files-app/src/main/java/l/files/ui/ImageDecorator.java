@@ -17,7 +17,7 @@ import java.util.Set;
 
 import l.files.R;
 import l.files.common.graphics.drawable.SizedColorDrawable;
-import l.files.fs.FileStatus;
+import l.files.fs.ResourceStatus;
 import l.files.fs.Path;
 import l.files.logging.Logger;
 import l.files.ui.util.ScaledSize;
@@ -55,18 +55,18 @@ final class ImageDecorator {
     this.cache = checkNotNull(cache, "cache");
   }
 
-  public void decorate(ImageView view, FileStatus file) {
+  public void decorate(ImageView view, ResourceStatus file) {
     Object key = buildCacheKey(file);
 
     Task task = (Task) view.getTag(R.id.image_decorator_task);
-    if (task != null && task.path().equals(file.path())) return;
+    if (task != null && task.path().equals(file.getPath())) return;
     if (task != null) task.cancel(true);
 
     view.setImageDrawable(null);
     view.setVisibility(GONE);
     view.setTag(R.id.image_decorator_task, null);
 
-    if (!file.isReadable() || !file.isRegularFile()) return;
+    if (!file.getIsReadable() || !file.getIsRegularFile()) return;
     if (errors.contains(key)) return;
     if (setCachedBitmap(view, key)) return;
 
@@ -90,8 +90,8 @@ final class ImageDecorator {
     return false;
   }
 
-  private Object buildCacheKey(FileStatus file) {
-    return file.path().getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
+  private Object buildCacheKey(ResourceStatus file) {
+    return file.getPath().getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
   }
 
   private SizedColorDrawable newPlaceholder(ScaledSize size) {
@@ -108,9 +108,9 @@ final class ImageDecorator {
   private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
     private final Object key;
     private final ImageView view;
-    private final FileStatus file;
+    private final ResourceStatus file;
 
-    DecodeSize(Object key, ImageView view, FileStatus file) {
+    DecodeSize(Object key, ImageView view, ResourceStatus file) {
       this.key = key;
       this.view = view;
       this.file = file;
@@ -136,7 +136,7 @@ final class ImageDecorator {
        * file, if an exception occurs, meaning it can't be read, let the exception
        * propagate, and return no result.
        */
-      try (InputStream in = file.resource().newInputStream()) {
+      try (InputStream in = file.getResource().newInputStream()) {
         //noinspection ResultOfMethodCallIgnored
         in.read();
       } catch (IOException e) {
@@ -145,7 +145,7 @@ final class ImageDecorator {
 
       Options options = new Options();
       options.inJustDecodeBounds = true;
-      try (InputStream in = file.resource().newInputStream()) {
+      try (InputStream in = file.getResource().newInputStream()) {
         decodeStream(in, null, options);
       } catch (IOException e) {
         return null;
@@ -175,17 +175,17 @@ final class ImageDecorator {
     }
 
     @Override public Path path() {
-      return file.path();
+      return file.getPath();
     }
   }
 
   private final class DecodeImage extends AsyncTask<Void, Void, Bitmap> implements Task {
     private final Object key;
     private final ImageView view;
-    private final FileStatus file;
+    private final ResourceStatus file;
     private final ScaledSize size;
 
-    DecodeImage(Object key, ImageView view, FileStatus file, ScaledSize size) {
+    DecodeImage(Object key, ImageView view, ResourceStatus file, ScaledSize size) {
       this.key = key;
       this.view = view;
       this.file = file;
@@ -201,7 +201,7 @@ final class ImageDecorator {
       if (isCancelled()) {
         return null;
       }
-      try (InputStream in = file.resource().newInputStream()) {
+      try (InputStream in = file.getResource().newInputStream()) {
         return decodeScaledBitmap(in, size);
       } catch (Exception e) {
         // Catch all unexpected internal errors from decoder
@@ -244,7 +244,7 @@ final class ImageDecorator {
     }
 
     @Override public Path path() {
-      return file.path();
+      return file.getPath();
     }
   }
 }
