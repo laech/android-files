@@ -10,7 +10,7 @@ import com.google.common.net.MediaType.OCTET_STREAM
 import org.apache.commons.io.FilenameUtils.getExtension
 import l.files.fs.Path
 
-object BasicFileTypeDetector : LocalFileTypeDetector() {
+private object BasicFileTypeDetector : LocalFileTypeDetector() {
 
     override fun detectRegularFile(status: ResourceStatus): MediaType {
         val typeMap = MimeTypeMap.getSingleton()

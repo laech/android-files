@@ -17,7 +17,7 @@ import kotlin.properties.Delegates
 import kotlin.platform.platformStatic
 import com.google.common.net.MediaType
 
-data class LocalResourceStatus private (
+private data class LocalResourceStatus private (
         override val path: LocalPath,
         val stat: Stat) : ResourceStatus {
 
@@ -57,7 +57,7 @@ data class LocalResourceStatus private (
         }
     }
 
-    class object {
+    public class object {
 
         platformStatic
         throws(javaClass<IOException>())

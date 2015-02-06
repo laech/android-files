@@ -9,7 +9,7 @@ import java.net.URI
 import l.files.fs.Path
 import kotlin.platform.platformStatic
 
-data class LocalPath private(val file: File) : Path {
+private data class LocalPath private(val file: File) : Path {
 
     override val resource = LocalResource(this)
 
@@ -48,7 +48,7 @@ data class LocalPath private(val file: File) : Path {
 
     override fun toString() = file.path
 
-    class object {
+    public class object {
 
         public val CREATOR: Creator<LocalPath> = object : Creator<LocalPath> {
             override fun createFromParcel(source: Parcel) = File(source.readString()).toLocalPath()

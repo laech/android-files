@@ -9,7 +9,7 @@ import l.files.logging.Logger
 
 import com.google.common.net.MediaType.OCTET_STREAM
 
-abstract class LocalFileTypeDetector : FileTypeDetector {
+private abstract class LocalFileTypeDetector : FileTypeDetector {
 
     override fun detect(path: Path) =
             detectLocal((path as LocalPath).resource.readStatus(true))

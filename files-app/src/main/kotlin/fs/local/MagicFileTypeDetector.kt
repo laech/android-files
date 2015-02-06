@@ -8,7 +8,7 @@ import com.google.common.net.MediaType
 import com.google.common.net.MediaType.OCTET_STREAM
 import org.apache.tika.io.TaggedIOException
 
-object MagicFileTypeDetector : LocalFileTypeDetector() {
+private object MagicFileTypeDetector : LocalFileTypeDetector() {
 
     private val tika: Tika by Delegates.lazy { Tika() }
 

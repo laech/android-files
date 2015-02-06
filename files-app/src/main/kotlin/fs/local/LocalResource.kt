@@ -9,7 +9,7 @@ import l.files.fs.WatchService
 import android.os.Parcel
 import android.os.Parcelable.Creator
 
-data class LocalResource(override val path: LocalPath) : Resource {
+private data class LocalResource(override val path: LocalPath) : Resource {
 
     override val resource: LocalResource get() = path.resource
 
