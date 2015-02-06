@@ -50,7 +50,11 @@ data class LocalResourceStatus private (
     val isCharacterDevice = S_ISCHR(stat.mode())
 
     override val basicMediaType: MediaType by Delegates.lazy {
-        BasicFileTypeDetector.detect(this)
+        try {
+            BasicFileTypeDetector.detect(this)
+        } catch (e: IOException) {
+            MediaType.OCTET_STREAM
+        }
     }
 
     class object {
