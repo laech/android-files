@@ -36,7 +36,6 @@ import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.CloseTabMenu;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.menu.NewTabMenu;
-import l.files.ui.menu.SendFeedbackMenu;
 import l.files.ui.menu.ShowPathBarMenu;
 import l.files.ui.pathbar.PathBarFragment;
 import l.files.ui.tab.TabHandler;
@@ -99,7 +98,6 @@ public final class FilesActivity extends BaseActivity
         new NewTabMenu(this),
         new CloseTabMenu(this),
         new ShowPathBarMenu(this),
-        new SendFeedbackMenu(this),
         new AboutMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);
