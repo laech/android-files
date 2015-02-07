@@ -35,12 +35,12 @@ public final class LocalResourceStatusTest extends FileBaseTest {
 
   public void testInodeNumber() throws Exception {
     File f = tmp().createFile("a");
-    assertEquals(lstat(f.getPath()).ino(), stat(f, false).getInode());
+    assertEquals(lstat(f.getPath()).getIno(), stat(f, false).getInode());
   }
 
   public void testDeviceId() throws Exception {
     File f = tmp().createFile("a");
-    assertEquals(lstat(f.getPath()).dev(), stat(f, false).getDevice());
+    assertEquals(lstat(f.getPath()).getDev(), stat(f, false).getDevice());
   }
 
   public void testLastModifiedTime() throws Exception {

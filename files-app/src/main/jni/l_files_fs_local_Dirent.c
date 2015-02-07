@@ -6,8 +6,8 @@
 static jmethodID dirent_create;
 
 void Java_l_files_fs_local_Dirent_init(JNIEnv *env, jclass clazz) {
-  dirent_create = (*env)->GetStaticMethodID(env, clazz, "create",
-      "(JILjava/lang/String;)Ll/files/fs/local/Dirent;");
+  dirent_create = (*env)->GetMethodID(env, clazz, "<init>",
+      "(JILjava/lang/String;)V");
 }
 
 jlong Java_l_files_fs_local_Dirent_opendir(JNIEnv *env, jclass clazz, jstring jpath) {
@@ -42,6 +42,6 @@ jobject Java_l_files_fs_local_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jd
   }
 
   jstring jname = (*env)->NewStringUTF(env, entry->d_name);
-  return (*env)->CallStaticObjectMethod(env, clazz, dirent_create,
+  return (*env)->NewObject(env, clazz, dirent_create,
       entry->d_ino, entry->d_type, jname);
 }

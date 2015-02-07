@@ -59,7 +59,7 @@ abstract class AbstractOperation implements FileOperation {
       if (failures.size() > limit) {
         throw new FileException(failures);
       }
-      failures.add(Failure.create(path.toString(), failure));
+      failures.add(new Failure(path, failure));
     }
 
     void throwIfNotEmpty() {

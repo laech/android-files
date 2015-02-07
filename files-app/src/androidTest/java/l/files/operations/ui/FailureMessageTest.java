@@ -6,16 +6,12 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 
+import l.files.fs.local.LocalPath;
+
 public final class FailureMessageTest extends TestCase {
 
-  public void testGettersReturnCorrectProperties() {
-    FailureMessage msg = FailureMessage.create("my.path", "my.message");
-    assertEquals("my.path", msg.path());
-    assertEquals("my.message", msg.message());
-  }
-
   public void testCanBeParceled() {
-    FailureMessage expected = FailureMessage.create("path", "message");
+    FailureMessage expected = new FailureMessage(LocalPath.of("path"), "message");
     Parcel parcel = Parcel.obtain();
     try {
       expected.writeToParcel(parcel, 0);

@@ -97,8 +97,8 @@ public final class OperationService extends Service {
 
   @Subscribe(MainThread)
   public void onEventMainThread(TaskState state) {
-    if (state.isFinished()) {
-      tasks.remove(state.task().id());
+    if (state.getIsFinished()) {
+      tasks.remove(state.getTask().getId());
       if (tasks.isEmpty()) {
         stopSelf();
       }
@@ -151,7 +151,7 @@ public final class OperationService extends Service {
     if (task != null) {
       task.cancel(true);
     } else {
-      bus.post(TaskNotFound.create(startId));
+      bus.post(new TaskNotFound(startId));
     }
     if (tasks.isEmpty()) {
       stopSelf();

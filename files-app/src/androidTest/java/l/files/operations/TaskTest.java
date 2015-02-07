@@ -11,6 +11,7 @@ import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
 import l.files.eventbus.Events;
 import l.files.eventbus.Subscribe;
+import l.files.fs.local.LocalPath;
 
 import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService;
 import static java.util.Arrays.asList;
@@ -44,7 +45,7 @@ public class TaskTest extends BaseTest {
     ArgumentCaptor<TaskState> captor = capturedExecute(new Command() {
       @Override public void execute() throws FileException {
         throw new FileException(asList(
-            Failure.create("a", new IOException("Test"))));
+            new Failure(LocalPath.of("a"), new IOException("Test"))));
       }
     });
     assertTrue(captor.getValue() instanceof TaskState.Failed);
@@ -81,7 +82,7 @@ public class TaskTest extends BaseTest {
   }
 
   protected Task create(int id, Clock clock, EventBus bus, Handler handler) {
-    return new Task(TaskId.create(id, MOVE), Target.none(), clock, bus, handler) {
+    return new Task(new TaskId(id, MOVE), Target.NONE, clock, bus, handler) {
       @Override protected void doTask() {}
 
       @Override protected TaskState.Running running(TaskState.Running state) {
@@ -92,7 +93,7 @@ public class TaskTest extends BaseTest {
 
   private static abstract class TestTask extends Task {
     TestTask(EventBus bus, Handler handler) {
-      super(TaskId.create(0, COPY), Target.none(), Clock.system(), bus, handler);
+      super(new TaskId(0, COPY), Target.NONE, Clock.system(), bus, handler);
     }
 
     @Override protected TaskState.Running running(TaskState.Running state) {

@@ -65,8 +65,5 @@ dependencies {
   compile 'com.android.support:support-v13:21.0.3'
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-  provided libs.auto_value
-  apt libs.auto_value
-
   androidTestCompile libs.mockito
 }

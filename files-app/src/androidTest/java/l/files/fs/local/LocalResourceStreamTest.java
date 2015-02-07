@@ -22,9 +22,9 @@ public final class LocalResourceStreamTest extends FileBaseTest {
 
     try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
       List<LocalPathEntry> expected = asList(
-          new LocalPathEntry(tmpPath().resolve("a"), lstat(f1.getPath()).ino(), false),
-          new LocalPathEntry(tmpPath().resolve("b"), lstat(f2.getPath()).ino(), true),
-          new LocalPathEntry(tmpPath().resolve("d"), lstat(f3.getPath()).ino(), false)
+          new LocalPathEntry(tmpPath().resolve("a"), lstat(f1.getPath()).getIno(), false),
+          new LocalPathEntry(tmpPath().resolve("b"), lstat(f2.getPath()).getIno(), true),
+          new LocalPathEntry(tmpPath().resolve("d"), lstat(f3.getPath()).getIno(), false)
       );
       List<LocalPathEntry> actual = toArrayList(stream);
       assertEquals(expected, actual);

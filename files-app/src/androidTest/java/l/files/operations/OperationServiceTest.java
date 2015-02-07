@@ -51,7 +51,7 @@ public final class OperationServiceTest extends FileBaseTest {
     service.onCreate();
     service.bus = mock(EventBus.class);
     service.onStartCommand(newCancelIntent(getContext(), 1011), 0, 0);
-    verify(service.bus).post(TaskNotFound.create(1011));
+    verify(service.bus).post(new TaskNotFound(1011));
   }
 
   public void testMovesFile() throws Exception {
@@ -120,7 +120,7 @@ public final class OperationServiceTest extends FileBaseTest {
   private Set<Integer> getTaskIds(List<? extends TaskState> values) {
     return new HashSet<>(transform(values, new Function<TaskState, Integer>() {
           @Override public Integer apply(TaskState state) {
-            return state.task().id();
+            return state.getTask().getId();
           }
         }
     ));
@@ -151,7 +151,7 @@ public final class OperationServiceTest extends FileBaseTest {
   private Set<Long> getTaskStartTimes(List<? extends TaskState> values) {
     return new HashSet<>(transform(values, new Function<TaskState, Long>() {
           @Override public Long apply(TaskState value) {
-            return value.time().time();
+            return value.getTime().getTime();
           }
         }
     ));
@@ -183,8 +183,8 @@ public final class OperationServiceTest extends FileBaseTest {
 
     @Subscribe public void onEvent(TaskState state) {
       values.add(state);
-      assertEquals(kind, state.task().kind());
-      if (state.isFinished()) {
+      assertEquals(kind, state.getTask().getKind());
+      if (state.getIsFinished()) {
         latch.countDown();
       }
     }

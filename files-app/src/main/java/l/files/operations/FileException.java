@@ -19,7 +19,7 @@ final class FileException extends RuntimeException {
     checkArgument(!this.failures.isEmpty());
 
     for (Failure failure : failures) {
-      addSuppressed(failure.cause());
+      addSuppressed(failure.getCause());
     }
   }
 

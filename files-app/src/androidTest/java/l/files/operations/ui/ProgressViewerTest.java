@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
+import l.files.fs.local.LocalPath;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
 import l.files.operations.Progress;
@@ -65,13 +66,13 @@ public abstract class ProgressViewerTest extends BaseTest {
     res = getContext().getResources();
     clock = mock(Clock.class);
     viewer = create(getContext(), clock);
-    pending = TaskState.pending(
-        TaskId.create(1, COPY),
-        Target.create("src", "dst"),
-        Time.create(1, 1)
+    pending = TaskState.OBJECT$.pending(
+        new TaskId(1, COPY),
+        new Target("src", "dst"),
+        new Time(1, 1)
     );
     running = pending.running(
-        Time.create(2, 2),
+        new Time(2, 2),
         Progress.create(1, 0),
         Progress.create(1, 0)
     );
@@ -83,9 +84,9 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentTitle_Failed() throws Exception {
-    TaskState.Failed state = running.failed(Time.create(2, 2), asList(
-        Failure.create("a", new IOException("1")),
-        Failure.create("b", new IOException("2"))
+    TaskState.Failed state = running.failed(new Time(2, 2), asList(
+        new Failure(LocalPath.of("a"), new IOException("1")),
+        new Failure(LocalPath.of("b"), new IOException("2"))
     ));
     String expected = res.getQuantityString(getTitleFailed(), 2);
     String actual = viewer.getContentTitle(state);
@@ -96,10 +97,10 @@ public abstract class ProgressViewerTest extends BaseTest {
     TaskState.Running state = setProgress(running, Progress.create(1, 0));
     state = state.running(
         Progress.create(100, 0),
-        state.bytes()
+        state.getBytes()
     );
     String expected = res.getQuantityString(
-        getTitlePreparing(), 100, 100, state.target().destination());
+        getTitlePreparing(), 100, 100, state.getTarget().getDestination());
     String actual = viewer.getContentTitle(state);
     assertEquals(expected, actual);
   }
@@ -108,12 +109,12 @@ public abstract class ProgressViewerTest extends BaseTest {
     TaskState.Running state = setProgress(running, Progress.create(2, 1));
     state = state.running(
         Progress.create(100, 1),
-        state.bytes()
+        state.getBytes()
     );
 
     String actual = viewer.getContentTitle(state);
     String expected = res.getQuantityString(
-        getTitleRunning(), 100, 100, state.target().destination());
+        getTitleRunning(), 100, 100, state.getTarget().getDestination());
     assertEquals(expected, actual);
   }
 
@@ -146,15 +147,12 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentText_noWorkDoneYet_showNothing() throws Exception {
-    TaskState.Running state = running.running(
-        Progress.none(),
-        Progress.none()
-    );
+    TaskState.Running state = running.running(Progress.NONE, Progress.NONE);
     assertEquals("", viewer.getContentText(state));
   }
 
   public void testGetContentInfo_showTimeRemaining() throws Exception {
-    TaskState.Running state = pending.running(Time.create(0, 0));
+    TaskState.Running state = pending.running(new Time(0, 0));
     state = setProgress(state, Progress.create(10000, 10));
     given(clock.tick()).willReturn(1000L);
     String actual = viewer.getContentInfo(state);
@@ -164,7 +162,7 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentInfo_noWorkDoneYet_showNothing() throws Exception {
-    TaskState.Running state = pending.running(Time.create(0, 0));
+    TaskState.Running state = pending.running(new Time(0, 0));
     state = setProgress(state, Progress.create(1, 0));
     given(clock.tick()).willReturn(1000L);
     assertEquals("", viewer.getContentInfo(state));

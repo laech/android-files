@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.Dirent;
-import l.files.fs.local.ErrnoException;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static l.files.fs.local.Dirent.DT_DIR;
@@ -42,10 +40,10 @@ public final class DirentTest extends FileBaseTest {
     try {
 
       Set<Dirent> expected = newHashSet(
-          Dirent.create(ino(current), DT_DIR, "."),
-          Dirent.create(ino(parent), DT_DIR, ".."),
-          Dirent.create(ino(child1), DT_DIR, child1.getName()),
-          Dirent.create(ino(child2), DT_REG, child2.getName()));
+          new Dirent(ino(current), DT_DIR, "."),
+          new Dirent(ino(parent), DT_DIR, ".."),
+          new Dirent(ino(child1), DT_DIR, child1.getName()),
+          new Dirent(ino(child2), DT_REG, child2.getName()));
 
       Set<Dirent> actual = newHashSet(
           readdir(dir),
@@ -62,6 +60,6 @@ public final class DirentTest extends FileBaseTest {
   }
 
   private long ino(File file) throws ErrnoException {
-    return stat(file.getPath()).ino();
+    return stat(file.getPath()).getIno();
   }
 }

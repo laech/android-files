@@ -23,7 +23,7 @@ public abstract class Clock {
    * Reads the current time.
    */
   public Time read() {
-    return Time.create(this);
+    return Time.from(this);
   }
 
   /**

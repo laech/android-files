@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.ErrnoException;
-import l.files.fs.local.Stat;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
@@ -58,15 +56,15 @@ public final class StatTest extends FileBaseTest {
     Stat stat = fn.apply(file);
 
     assertNotNull(stat);
-    assertEquals(file.length(), stat.size());
-    assertEquals(1, stat.nlink());
-    assertTrue(stat.atime() >= start);
-    assertTrue(stat.ctime() >= start);
-    assertTrue(stat.mtime() >= start);
-    assertTrue(stat.atime() >= end);
-    assertTrue(stat.ctime() >= end);
-    assertTrue(stat.mtime() >= end);
-    assertTrue(stat.ino() > 0);
+    assertEquals(file.length(), stat.getSize());
+    assertEquals(1, stat.getNlink());
+    assertTrue(stat.getAtime() >= start);
+    assertTrue(stat.getCtime() >= start);
+    assertTrue(stat.getMtime() >= start);
+    assertTrue(stat.getAtime() >= end);
+    assertTrue(stat.getCtime() >= end);
+    assertTrue(stat.getMtime() >= end);
+    assertTrue(stat.getIno() > 0);
 
     // TODO more tests when there are more supporting test functions
   }

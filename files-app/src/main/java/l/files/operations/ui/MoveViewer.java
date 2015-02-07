@@ -16,7 +16,7 @@ final class MoveViewer extends ProgressViewer {
   }
 
   @Override protected Progress getWork(TaskState.Running state) {
-    return state.bytes();
+    return state.getBytes();
   }
 
   @Override protected int getTitlePreparing() {

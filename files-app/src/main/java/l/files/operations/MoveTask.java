@@ -8,7 +8,6 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
 
 import static com.google.common.collect.Lists.transform;
 import static l.files.operations.TaskKind.MOVE;
@@ -21,7 +20,7 @@ final class MoveTask extends Task {
 
   MoveTask(int id, Clock clock, EventBus bus, Handler handler,
            Iterable<Path> sources, Path dstPath) {
-    super(TaskId.create(id, MOVE), Target.fromPaths(sources, dstPath),
+    super(new TaskId(id, MOVE), Target.fromPaths(sources, dstPath),
         clock, bus, handler);
     this.move = new Move(sources, dstPath);
     this.count = new Size(sources);
@@ -40,7 +39,7 @@ final class MoveTask extends Task {
       throws FileException, InterruptedException {
     List<Path> paths = transform(failures, new Function<Failure, Path>() {
       @Override public Path apply(Failure input) {
-        return LocalPath.of(input.path());
+        return input.getPath();
       }
     });
 

@@ -5,7 +5,6 @@ import android.os.Handler;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -20,7 +19,7 @@ abstract class Task {
 
   private final Runnable update = new Runnable() {
     @Override public void run() {
-      if (!state.isFinished()) {
+      if (!state.getIsFinished()) {
         state = running((TaskState.Running) state);
         notifyProgress(state);
         handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
@@ -73,7 +72,7 @@ abstract class Task {
   }
 
   private void onPending() {
-    state = TaskState.pending(id, target, clock.read());
+    state = TaskState.OBJECT$.pending(id, target, clock.read());
     if (!currentThread().isInterrupted()) {
       notifyProgress(state);
     }

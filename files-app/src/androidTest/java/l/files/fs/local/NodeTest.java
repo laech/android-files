@@ -7,7 +7,7 @@ public final class NodeTest extends FileBaseTest {
   public void testCreation() throws Exception {
     LocalResourceStatus file = LocalResourceStatus.stat(tmp().get(), false);
     Node node = Node.from(file);
-    assertEquals(file.getDevice(), node.dev());
-    assertEquals(file.getInode(), node.ino());
+    assertEquals(file.getDevice(), node.getDevice());
+    assertEquals(file.getInode(), node.getInode());
   }
 }

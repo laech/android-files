@@ -14,7 +14,7 @@ final class CopyTask extends Task {
 
   CopyTask(int id, Clock clock, EventBus bus, Handler handler,
            Iterable<Path> sources, Path dstPath) {
-    super(TaskId.create(id, COPY), Target.fromPaths(sources, dstPath),
+    super(new TaskId(id, COPY), Target.fromPaths(sources, dstPath),
         clock, bus, handler);
     this.size = new Size(sources);
     this.copy = new Copy(sources, dstPath);

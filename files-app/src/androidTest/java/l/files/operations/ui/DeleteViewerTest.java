@@ -15,7 +15,7 @@ public final class DeleteViewerTest extends ProgressViewerTest {
 
   @Override protected TaskState.Running setProgress(
       TaskState.Running state, Progress progress) {
-    return state.running(progress, state.bytes());
+    return state.running(progress, state.getBytes());
   }
 
   @Override protected int getTitlePreparing() {

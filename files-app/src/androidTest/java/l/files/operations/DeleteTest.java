@@ -69,7 +69,7 @@ public final class DeleteTest extends FileBaseTest {
     } catch (FileException e) {
       failures = e.failures();
     }
-    assertEquals(a.getPath(), failures.get(0).path());
+    assertEquals(LocalPath.of(a.getPath()), failures.get(0).getPath());
     assertEquals(1, failures.size());
   }
 

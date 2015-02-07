@@ -26,10 +26,10 @@ private class LocalResourceStream private(
                 .iterator()
     }
 
-    private fun Dirent.isSelfOrParent() = name() == "." || name() == ".."
+    private fun Dirent.isSelfOrParent() = name == "." || name == ".."
 
-    private fun Dirent.toEntry() = LocalPathEntry(parent.resolve(this.name()),
-            this.ino(), this.type() == Dirent.DT_DIR)
+    private fun Dirent.toEntry() = LocalPathEntry(parent.resolve(name),
+            inode, type == Dirent.DT_DIR)
 
     override fun close() {
         try {

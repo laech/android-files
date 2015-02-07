@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import l.files.R;
 import l.files.common.testing.BaseActivityTest;
+import l.files.fs.local.LocalPath;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static l.files.operations.ui.FailuresActivity.EXTRA_FAILURES;
@@ -34,8 +35,8 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
   }
 
   public void testSetsFailuresFromIntent() {
-    FailureMessage f1 = FailureMessage.create("1", "test1");
-    FailureMessage f2 = FailureMessage.create("2", "test2");
+    FailureMessage f1 = new FailureMessage(LocalPath.of("1"), "test1");
+    FailureMessage f2 = new FailureMessage(LocalPath.of("2"), "test2");
     setActivityIntent(newIntent().putParcelableArrayListExtra(EXTRA_FAILURES, newArrayList(f1, f2)));
 
     ListView list = (ListView) getActivity().findViewById(android.R.id.list);
@@ -46,8 +47,8 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
   }
 
   private void assertFailureView(FailureMessage msg, View view) {
-    assertEquals(msg.path(), ((TextView) view.findViewById(R.id.failure_path)).getText());
-    assertEquals(msg.message(), ((TextView) view.findViewById(R.id.failure_message)).getText());
+    assertEquals(msg.getPath().toString(), ((TextView) view.findViewById(R.id.failure_path)).getText());
+    assertEquals(msg.getMessage(), ((TextView) view.findViewById(R.id.failure_message)).getText());
   }
 
   public void testFinishesActivityOnHomeClick() {

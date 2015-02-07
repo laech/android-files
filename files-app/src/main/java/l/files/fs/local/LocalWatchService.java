@@ -370,7 +370,7 @@ public class LocalWatchService implements WatchService, Closeable {
     }
 
     LocalResourceStatus status = LocalResourceStatus.stat(path, false);
-    Node node = Node.from(status);
+    Node node = new Node(status.getDevice(), status.getInode());
 
     synchronized (this) {
       checkNode(path, node);
@@ -417,7 +417,7 @@ public class LocalWatchService implements WatchService, Closeable {
           if (!isWatchable(child)) {
             continue;
           }
-          startObserver(child, Node.create(parent.getDevice(), entry.getIno()));
+          startObserver(child, new Node(parent.getDevice(), entry.getIno()));
         }
       }
     } catch (IOException e) {
@@ -485,7 +485,7 @@ public class LocalWatchService implements WatchService, Closeable {
     try {
       LocalResourceStatus file = LocalResourceStatus.stat(path, false);
       if (file.getIsDirectory() && isRegistered(path.getParent())) {
-        startObserver(path, Node.from(file));
+        startObserver(path, new Node(file.getDevice(), file.getInode()));
       }
     } catch (IOException e) {
       // Path no longer exists, permission etc, ignore and continue

@@ -53,21 +53,21 @@ final class NotificationProvider {
   }
 
   @Subscribe public void onEvent(TaskState.Pending state) {
-    manager.notify(state.task().id(), newIndeterminateNotification(state));
+    manager.notify(state.getTask().getId(), newIndeterminateNotification(state));
   }
 
   @Subscribe public void onEvent(TaskState.Running state) {
-    manager.notify(state.task().id(), newProgressNotification(state));
+    manager.notify(state.getTask().getId(), newProgressNotification(state));
   }
 
   @Subscribe public void onEvent(TaskState.Failed state) {
-    manager.cancel(state.task().id());
-    if (!state.failures().isEmpty()) {
+    manager.cancel(state.getTask().getId());
+    if (!state.getFailures().isEmpty()) {
       // This is the last notification we will display for this task, and it
       // needs to stay until the user dismissed it, can't use the task ID as
       // the notification as when the service finishes, it will bring down the
       // startForeground notification with it.
-      int id = Integer.MAX_VALUE - state.task().id();
+      int id = Integer.MAX_VALUE - state.getTask().getId();
       manager.notify(id, newFailureNotification(state));
     }
     // If no file failures in collection, then failure is caused by some other
@@ -75,15 +75,15 @@ final class NotificationProvider {
   }
 
   @Subscribe public void onEvent(TaskState.Success state) {
-    manager.cancel(state.task().id());
+    manager.cancel(state.getTask().getId());
   }
 
   @Subscribe public void onEvent(TaskNotFound event) {
-    manager.cancel(event.id());
+    manager.cancel(event.getTaskId());
   }
 
   private TaskStateViewer getViewer(TaskState state) {
-    TaskStateViewer viewer = viewers.get(state.task().kind());
+    TaskStateViewer viewer = viewers.get(state.getTask().getKind());
     if (viewer == null) {
       throw new AssertionError(state);
     }
@@ -104,7 +104,7 @@ final class NotificationProvider {
 
   private Notification newProgressNotification(TaskState.Running state) {
     TaskStateViewer viewer = getViewer(state);
-    if (state.items().isDone() || state.bytes().isDone()) {
+    if (state.getItems().getIsDone() || state.getBytes().getIsDone()) {
       return newIndeterminateNotification(state, viewer.getContentTitle(state));
     }
     int progressMax = 10000;
@@ -127,18 +127,18 @@ final class NotificationProvider {
          * Set when to a fixed value to prevent flickering on update when there
          * are multiple notifications being displayed/updated.
          */
-        .setWhen(state.time().time())
+        .setWhen(state.getTime().getTime())
         .setOnlyAlertOnce(true)
         .setOngoing(true)
         .addAction(
             android.R.drawable.ic_menu_close_clear_cancel,
             context.getString(android.R.string.cancel),
-            newCancelPendingIntent(context, state.task().id()));
+            newCancelPendingIntent(context, state.getTask().getId()));
   }
 
   private Notification newFailureNotification(TaskState.Failed state) {
     Intent intent = getFailureIntent(state);
-    PendingIntent pending = getActivity(context, state.task().id(), intent,
+    PendingIntent pending = getActivity(context, state.getTask().getId(), intent,
         FLAG_UPDATE_CURRENT);
     return new Notification.Builder(context)
         .setSmallIcon(android.R.drawable.stat_notify_error)
@@ -150,11 +150,11 @@ final class NotificationProvider {
 
   @VisibleForTesting Intent getFailureIntent(TaskState.Failed state) {
     TaskStateViewer viewer = getViewer(state);
-    Collection<l.files.operations.Failure> failures = state.failures();
+    Collection<l.files.operations.Failure> failures = state.getFailures();
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
-      messages.add(FailureMessage.create(
-          failure.path().toString(), failure.cause().getMessage()));
+      messages.add(new FailureMessage(
+          failure.getPath(), failure.getCause().getMessage()));
     }
     String title = viewer.getContentTitle(state);
     return FailuresActivity.newIntent(context, title, messages);
