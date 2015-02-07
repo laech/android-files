@@ -1,14 +1,15 @@
 package l.files.operations;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 
-import l.files.fs.NoSuchFileException;
 import l.files.fs.Path;
-import l.files.fs.PathEntry;
-import l.files.fs.local.LocalResourceStatus;
-import l.files.fs.local.LocalFileVisitor;
+import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResourceStatus;
 
+import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
 import static l.files.fs.local.Files.remove;
 
 public final class Delete extends AbstractOperation {
@@ -42,11 +43,14 @@ public final class Delete extends AbstractOperation {
   private void deleteTree(Path path, FailureRecorder listener)
       throws InterruptedException {
     try {
-      for (PathEntry entry : LocalFileVisitor.get().postOrderTraversal(path)) {
+      Iterator<Resource> it = path.getResource().traverse(
+          POST_ORDER, new ErrorCollector(listener)).iterator();
+      while (it.hasNext()) {
+        Resource entry = it.next();
         checkInterrupt();
         try {
           delete(entry.getPath());
-        } catch (NoSuchFileException e) {
+        } catch (FileNotFoundException e) {
           // Ignore
         } catch (IOException e) {
           listener.onFailure(entry.getPath(), e);

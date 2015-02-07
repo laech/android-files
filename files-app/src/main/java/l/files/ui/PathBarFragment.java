@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
@@ -68,7 +67,7 @@ public final class PathBarFragment extends Fragment
         for (Path p = path; p != null; p = p.getParent()) {
           try {
             hierarchy.add(p.getResource().readStatus(true));
-          } catch (IOException | FileSystemException e) { // TODO
+          } catch (IOException e) { // TODO
             log.error(e);
             return emptyList();
           }

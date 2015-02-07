@@ -6,9 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
-import l.files.fs.FileSystemException;
-import l.files.fs.NoSuchFileException;
-
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
@@ -178,15 +175,6 @@ final class ErrnoException extends IOException {
       }
     }
     return errors;
-  }
-
-  FileSystemException toFileSystemException() throws FileSystemException {
-    switch (errno()) {
-      case ENOENT:
-        throw new NoSuchFileException(this);
-      default:
-        throw new FileSystemException(this);
-    }
   }
 
   IOException toIOException() throws IOException {

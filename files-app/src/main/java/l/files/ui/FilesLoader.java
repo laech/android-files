@@ -10,17 +10,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import l.files.fs.DirectoryStream;
 import l.files.fs.Path;
-import l.files.fs.PathEntry;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+import l.files.fs.ResourceStream;
 import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
 import l.files.logging.Logger;
@@ -79,10 +79,11 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       return emptyList();
     }
     // TODO this will error on dirs like /proc/xxx
-    try (DirectoryStream stream = path.getResource().newDirectoryStream()) {
-      for (PathEntry entry : stream) {
+    try (ResourceStream<? extends Resource> stream = path.getResource().openResourceStream()) {
+      Iterator<? extends Resource> it = stream.iterator();
+      while (it.hasNext()) {
         checkCancelled();
-        addData(entry.getPath());
+        addData(it.next().getPath());
       }
     } catch (IOException e) {
       throw new RuntimeException(e); // TODO

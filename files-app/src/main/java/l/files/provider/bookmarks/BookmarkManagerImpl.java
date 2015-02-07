@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.fs.DefaultPathProvider;
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.PathProvider;
 import l.files.logging.Logger;
@@ -81,7 +80,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
         URI uri = new URI(uriString);
         Path path = provider.get(uri);
         paths.add(path);
-      } catch (URISyntaxException | FileSystemException e) {
+      } catch (URISyntaxException | IllegalArgumentException e) {
         logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);
       }
     }

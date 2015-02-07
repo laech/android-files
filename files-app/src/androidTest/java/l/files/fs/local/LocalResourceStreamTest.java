@@ -1,19 +1,18 @@
 package l.files.fs.local;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.PathEntry;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static kotlin.KotlinPackage.toArrayList;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
-public final class LocalDirectoryStreamTest extends FileBaseTest {
+public final class LocalResourceStreamTest extends FileBaseTest {
 
   public void testReturnCorrectEntries() throws Exception {
     File f1 = tmp().createFile("a");
@@ -21,27 +20,27 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
     File f3 = tmp().get("d");
     symlink(f1.getPath(), f3.getPath());
 
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      List<PathEntry> expected = Arrays.<PathEntry>asList(
-          LocalPathEntry.create(tmp().get(), lstat(f1.getPath()).ino(), f1.getName(), false),
-          LocalPathEntry.create(tmp().get(), lstat(f2.getPath()).ino(), f2.getName(), true),
-          LocalPathEntry.create(tmp().get(), lstat(f3.getPath()).ino(), f3.getName(), false)
+    try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+      List<LocalPathEntry> expected = asList(
+          new LocalPathEntry(tmpPath().resolve("a"), lstat(f1.getPath()).ino(), false),
+          new LocalPathEntry(tmpPath().resolve("b"), lstat(f2.getPath()).ino(), true),
+          new LocalPathEntry(tmpPath().resolve("d"), lstat(f3.getPath()).ino(), false)
       );
-      List<PathEntry> actual = newArrayList(stream);
+      List<LocalPathEntry> actual = toArrayList(stream);
       assertEquals(expected, actual);
     }
   }
 
   public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
-      Iterator<PathEntry> iterator = stream.iterator();
+    try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+      Iterator<?> iterator = stream.iterator();
       assertFalse(iterator.hasNext());
       assertFalse(iterator.hasNext());
     }
   }
 
   public void testIteratorThrowsNoSuchElementExceptionOnEmpty() throws Exception {
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
+    try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
       stream.iterator().next();
       fail();
     } catch (NoSuchElementException e) {
@@ -50,7 +49,7 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
   }
 
   public void testIteratorMethodCannotBeReused() throws Exception {
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(tmp().get())) {
+    try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
       stream.iterator();
       try {
         stream.iterator();
@@ -60,4 +59,6 @@ public final class LocalDirectoryStreamTest extends FileBaseTest {
       }
     }
   }
+
+  private LocalPath tmpPath() {return LocalPath.of(tmp().get());}
 }

@@ -4,6 +4,10 @@ import android.os.Parcelable
 import com.google.common.net.MediaType
 import java.io.InputStream
 import java.io.IOException
+import com.google.common.collect.TreeTraverser
+import l.files.fs.Resource.TraversalOrder.BREATH_FIRST
+import l.files.fs.Resource.TraversalOrder.POST_ORDER
+import l.files.fs.Resource.TraversalOrder.PRE_ORDER
 
 trait Resource : PathEntry, Parcelable {
 
@@ -31,11 +35,17 @@ trait Resource : PathEntry, Parcelable {
     fun resolve(other: String): Resource
 
     /**
-     * Opens a new directory stream to iterate through the children of
-     * this directory.
+     * Traverse this subtree. Accepts an error handler, if the handler does not
+     * rethrow the exception, traversal will continue.
      */
     throws(javaClass<IOException>())
-    fun newDirectoryStream(): DirectoryStream
+    fun traverse(order: TraversalOrder, handler: (Resource, IOException) -> Unit): Stream<Resource>
+
+    /**
+     * Opens a resource stream to iterate through the immediate children.
+     */
+    throws(javaClass<IOException>())
+    fun openResourceStream(): ResourceStream<Resource>
 
     /**
      * Opens a new input stream to write to the underlying file.
@@ -88,5 +98,11 @@ trait Resource : PathEntry, Parcelable {
      */
     throws(javaClass<IOException>())
     fun detectMediaType(): MediaType
+
+    enum class TraversalOrder {
+        BREATH_FIRST
+        PRE_ORDER
+        POST_ORDER
+    }
 
 }

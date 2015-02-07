@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.FileSystemException;
 import l.files.fs.Path;
 import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
@@ -409,20 +408,21 @@ public class LocalWatchService implements WatchService, Closeable {
   private void startObserversForSubDirs(LocalResourceStatus parent) {
     // Using a directory stream without stating the children will be faster
     // especially on large directories
-    try (LocalDirectoryStream stream = LocalDirectoryStream.open(parent.getPath())) {
-      for (LocalPathEntry entry : stream.local()) {
-        if (entry.isDirectory()) {
+    try (LocalResourceStream stream = LocalResourceStream.open(parent.getPath())) {
+      Iterator<LocalPathEntry> it = stream.iterator();
+      while (it.hasNext()) {
+        LocalPathEntry entry = it.next();
+        if (entry.getIsDirectory()) {
           Path child = entry.getPath();
           if (!isWatchable(child)) {
             continue;
           }
-          try {
-            startObserver(child, Node.create(parent.getDevice(), entry.ino()));
-          } catch (FileSystemException e) {
-            // File no longer exits or inaccessible, ignore;
-          }
+          startObserver(child, Node.create(parent.getDevice(), entry.getIno()));
         }
       }
+    } catch (IOException e) {
+      logger.debug(e);
+      // File no longer exits or inaccessible, ignore;
     }
   }
 

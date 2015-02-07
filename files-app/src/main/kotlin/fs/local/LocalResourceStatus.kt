@@ -6,13 +6,6 @@ import java.io.IOException
 import l.files.fs.ResourceStatus
 import l.files.fs.Path
 
-import l.files.fs.local.Stat.S_ISBLK
-import l.files.fs.local.Stat.S_ISCHR
-import l.files.fs.local.Stat.S_ISDIR
-import l.files.fs.local.Stat.S_ISFIFO
-import l.files.fs.local.Stat.S_ISLNK
-import l.files.fs.local.Stat.S_ISREG
-import l.files.fs.local.Stat.S_ISSOCK
 import kotlin.properties.Delegates
 import kotlin.platform.platformStatic
 import com.google.common.net.MediaType
@@ -37,17 +30,17 @@ private data class LocalResourceStatus private (
     override val lastModifiedTime = stat.mtime() * 1000
     override val size = stat.size()
 
-    override val isSymbolicLink = S_ISLNK(stat.mode())
-    override val isRegularFile = S_ISREG(stat.mode())
-    override val isDirectory = S_ISDIR(stat.mode())
+    override val isSymbolicLink = Stat.S_ISLNK(stat.mode())
+    override val isRegularFile = Stat.S_ISREG(stat.mode())
+    override val isDirectory = Stat.S_ISDIR(stat.mode())
 
     val device = stat.dev()
     val inode = stat.ino()
 
-    val isFifo = S_ISFIFO(stat.mode())
-    val isSocket = S_ISSOCK(stat.mode())
-    val isBlockDevice = S_ISBLK(stat.mode())
-    val isCharacterDevice = S_ISCHR(stat.mode())
+    val isFifo = Stat.S_ISFIFO(stat.mode())
+    val isSocket = Stat.S_ISSOCK(stat.mode())
+    val isBlockDevice = Stat.S_ISBLK(stat.mode())
+    val isCharacterDevice = Stat.S_ISCHR(stat.mode())
 
     override val basicMediaType: MediaType by Delegates.lazy {
         try {

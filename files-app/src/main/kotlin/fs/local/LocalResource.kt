@@ -8,6 +8,13 @@ import l.files.fs.Resource
 import l.files.fs.WatchService
 import android.os.Parcel
 import android.os.Parcelable.Creator
+import l.files.fs.Resource.TraversalOrder
+import l.files.fs.Resource.TraversalOrder.BREATH_FIRST
+import l.files.fs.Resource.TraversalOrder.POST_ORDER
+import l.files.fs.Resource.TraversalOrder.PRE_ORDER
+import com.google.common.collect.TreeTraverser
+import l.files.fs.PathEntry
+import l.files.fs.ResourceStream
 
 private data class LocalResource(override val path: LocalPath) : Resource {
 
@@ -26,7 +33,42 @@ private data class LocalResource(override val path: LocalPath) : Resource {
         false
     }
 
-    override fun newDirectoryStream() = LocalDirectoryStream.open(path)
+    override fun traverse(
+            order: TraversalOrder,
+            handler: (Resource, IOException) -> Unit): Stream<LocalResource> {
+
+        val root = LocalPathEntry.read(path)
+        val fn: (PathEntry, IOException) -> Unit = { entry, exception ->
+            handler(entry.resource, exception)
+        }
+        return when (order) {
+            BREATH_FIRST -> Traverser(fn).breadthFirstTraversal(root)
+            POST_ORDER -> Traverser(fn).postOrderTraversal(root)
+            PRE_ORDER -> Traverser(fn).preOrderTraversal(root)
+        }.stream().map { it.resource }
+    }
+
+    private class Traverser(private val handler: (PathEntry, IOException) -> Unit) : TreeTraverser<LocalPathEntry>() {
+
+        override fun children(root: LocalPathEntry) = try {
+            if (root.isDirectory) {
+                LocalResourceStream.open(root.path).use { it.toArrayList() }
+            } else {
+                emptyList<LocalPathEntry>()
+            }
+        } catch (e: IOException) {
+            handler(root, e)
+            emptyList<LocalPathEntry>()
+        }
+    }
+
+    override fun openResourceStream() = object : ResourceStream<LocalResource> {
+        val stream = LocalResourceStream.open(path)
+        override fun iterator() = stream.map { it.resource }.iterator()
+        override fun close() {
+            stream.close()
+        }
+    }
 
     override fun newInputStream() = FileInputStream(path.toString())
 

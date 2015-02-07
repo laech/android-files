@@ -6,16 +6,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 
 import l.files.fs.Path;
-import l.files.fs.PathEntry;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.fs.local.Files;
-import l.files.fs.local.LocalFileVisitor;
 import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalResourceStatus;
 import l.files.logging.Logger;
 
+import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
 import static l.files.fs.local.Files.readlink;
 import static l.files.fs.local.Files.symlink;
 import static org.apache.commons.io.FileUtils.forceMkdir;
@@ -62,9 +63,11 @@ final class Copy extends Paste {
     File newRoot = new File(to.getUri());
 
     try {
-      for (PathEntry entry : LocalFileVisitor.get().preOrderTraversal(from)) {
+      Iterator<Resource> it = from.getResource().traverse(PRE_ORDER, new ErrorCollector(listener)).iterator();
+      while (it.hasNext()) {
         checkInterrupt();
 
+        Resource entry = it.next();
         LocalResourceStatus file;
         try {
           file = LocalResourceStatus.stat(entry.getPath(), false);
