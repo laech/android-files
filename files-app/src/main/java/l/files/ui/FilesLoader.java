@@ -184,15 +184,15 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
   final class EventListener implements WatchEvent.Listener {
     @Override public void onEvent(WatchEvent event) {
-      switch (event.kind()) {
+      switch (event.getKind()) {
         case CREATE:
         case MODIFY:
-          if (!path.equals(event.path()) && addData(event.path())) {
+          if (!path.equals(event.getPath()) && addData(event.getPath())) {
             redeliverResult();
           }
           break;
         case DELETE:
-          if (data.remove(event.path()) != null) {
+          if (data.remove(event.getPath()) != null) {
             redeliverResult();
           }
           break;
