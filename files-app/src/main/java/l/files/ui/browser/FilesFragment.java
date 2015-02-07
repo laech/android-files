@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.browser;
 
 import android.app.Activity;
 import android.content.ClipboardManager;
@@ -19,6 +19,11 @@ import l.files.common.widget.ListViews;
 import l.files.common.widget.MultiChoiceModeListeners;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
+import l.files.ui.Animations;
+import l.files.ui.BaseFileListFragment;
+import l.files.ui.ListProvider;
+import l.files.ui.OpenFileRequest;
+import l.files.ui.Preferences;
 import l.files.ui.menu.BookmarkMenu;
 import l.files.ui.menu.NewDirMenu;
 import l.files.ui.menu.PasteMenu;

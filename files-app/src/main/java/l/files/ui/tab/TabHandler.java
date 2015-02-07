@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.tab;
 
 public interface TabHandler {
 
@@ -6,5 +6,4 @@ public interface TabHandler {
 
   void closeCurrentTab();
 
-  int getTabCount();
 }

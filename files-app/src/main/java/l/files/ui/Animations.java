@@ -14,7 +14,7 @@ import static com.google.common.collect.Sets.union;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-final class Animations {
+public final class Animations {
 
   private static final long ANIMATE_DURATION = 300;
 

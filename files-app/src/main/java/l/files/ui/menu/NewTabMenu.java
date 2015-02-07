@@ -5,7 +5,7 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.common.app.OptionsMenuAction;
-import l.files.ui.TabHandler;
+import l.files.ui.tab.TabHandler;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;

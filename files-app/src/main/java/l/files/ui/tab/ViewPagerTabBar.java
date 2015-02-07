@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.tab;
 
 import android.animation.LayoutTransition;
 import android.content.Context;
@@ -188,7 +188,7 @@ public final class ViewPagerTabBar
     }
   }
 
-  enum OnUpSelected {
+  public enum OnUpSelected {
     INSTANCE
   }
 }

@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 
-abstract class StableFilesAdapter<T> extends BaseAdapter {
+public abstract class StableFilesAdapter<T> extends BaseAdapter {
 
   private static final Map<Object, Long> ids = newHashMap();
 

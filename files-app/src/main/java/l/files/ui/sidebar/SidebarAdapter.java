@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.sidebar;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import l.files.R;
 import l.files.fs.Path;
+import l.files.ui.FileLabels;
+import l.files.ui.StableFilesAdapter;
 
 import static l.files.ui.IconFonts.getDirectoryIcon;
 

@@ -26,9 +26,9 @@ import l.files.common.base.Consumer;
 import l.files.fs.Path;
 import l.files.fs.PathEntry;
 import l.files.fs.local.LocalPath;
-import l.files.ui.FileListItem;
+import l.files.ui.browser.FileListItem;
 import l.files.ui.FilesActivity;
-import l.files.ui.FilesPagerFragment;
+import l.files.ui.browser.FilesPagerFragment;
 
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
 import static android.app.ActionBar.DISPLAY_SHOW_TITLE;

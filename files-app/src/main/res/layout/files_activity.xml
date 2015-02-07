@@ -19,7 +19,7 @@
 
     <fragment
       android:id="@+id/path_bar_fragment"
-      android:name="l.files.ui.PathBarFragment"
+      android:name="l.files.ui.pathbar.PathBarFragment"
       android:layout_width="match_parent"
       android:layout_height="?android:attr/actionBarSize"/>
 
@@ -27,7 +27,7 @@
 
   <fragment
     android:id="@+id/sidebar_fragment"
-    android:name="l.files.ui.SidebarFragment"
+    android:name="l.files.ui.sidebar.SidebarFragment"
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"/>

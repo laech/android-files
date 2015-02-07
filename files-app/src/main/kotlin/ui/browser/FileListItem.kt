@@ -1,7 +1,7 @@
-package l.files.ui
+package l.files.ui.browser
 
-import l.files.fs.ResourceStatus
 import l.files.fs.Path
+import l.files.fs.ResourceStatus
 
 abstract class FileListItem() {
 

@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.sidebar;
 
 import android.content.Loader;
 import android.os.Bundle;
@@ -14,6 +14,9 @@ import l.files.R;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.provider.bookmarks.BookmarksLoader;
+import l.files.ui.Animations;
+import l.files.ui.BaseFileListFragment;
+import l.files.ui.OpenFileRequest;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 

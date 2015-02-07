@@ -12,7 +12,7 @@ import android.widget.CheckedTextView;
 import android.widget.ListView;
 
 import l.files.R;
-import l.files.ui.FileSort;
+import l.files.ui.browser.FileSort;
 import l.files.ui.Preferences;
 
 import static android.widget.AdapterView.OnItemClickListener;

@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -21,6 +21,7 @@ import java.util.Date;
 
 import l.files.R;
 import l.files.fs.ResourceStatus;
+import l.files.ui.StableFilesAdapter;
 
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;

@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.pathbar;
 
 import android.app.Fragment;
 import android.content.AsyncTaskLoader;
@@ -21,6 +21,7 @@ import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 import l.files.operations.Events;
+import l.files.ui.OpenFileRequest;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;

@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.browser;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -17,6 +17,7 @@ import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
+import l.files.ui.OpenFileRequest;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.ui.Fragments.setArgs;

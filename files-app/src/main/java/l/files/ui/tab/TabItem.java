@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.ui.tab;
 
 import android.os.Parcel;
 import android.os.Parcelable;

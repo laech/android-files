@@ -30,6 +30,7 @@ import l.files.common.widget.DrawerListeners;
 import l.files.eventbus.Subscribe;
 import l.files.fs.Path;
 import l.files.operations.Events;
+import l.files.ui.browser.FilesPagerFragment;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.CloseTabMenu;
@@ -37,6 +38,10 @@ import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.menu.NewTabMenu;
 import l.files.ui.menu.SendFeedbackMenu;
 import l.files.ui.menu.ShowPathBarMenu;
+import l.files.ui.pathbar.PathBarFragment;
+import l.files.ui.tab.TabHandler;
+import l.files.ui.tab.TabItem;
+import l.files.ui.tab.ViewPagerTabBar;
 
 import static android.app.ActionBar.LayoutParams;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -324,10 +329,6 @@ public final class FilesActivity extends BaseActivity
     }
   }
 
-  @Override public int getTabCount() {
-    return getPagerAdapter().getCount();
-  }
-
   private void updateShowTabs() {
     setShowTabs(getPagerAdapter().getCount() > 1);
   }
@@ -335,7 +336,6 @@ public final class FilesActivity extends BaseActivity
   private void setShowTabs(boolean showTabs) {
     actionBar.setDisplayHomeAsUpEnabled(!showTabs);
     actionBar.setDisplayShowTitleEnabled(!showTabs);
-//    actionBar.setDisplayShowHomeEnabled(!showTabs);
     actionBar.setDisplayShowCustomEnabled(showTabs);
   }
 

@@ -9,7 +9,7 @@ import de.greenrobot.event.EventBus;
 import l.files.common.app.BaseListFragment;
 import l.files.operations.Events;
 
-class BaseFileListFragment extends BaseListFragment {
+public class BaseFileListFragment extends BaseListFragment {
 
   private EventBus bus;
   private final int layoutResourceId;

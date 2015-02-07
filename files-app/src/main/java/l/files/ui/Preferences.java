@@ -3,6 +3,8 @@ package l.files.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import l.files.ui.browser.FileSort;
+
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
