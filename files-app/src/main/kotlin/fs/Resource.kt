@@ -93,6 +93,9 @@ trait Resource : PathEntry, Parcelable {
     throws(javaClass<IOException>())
     fun move(dst: Path)
 
+    throws(javaClass<IOException>())
+    fun delete()
+
     /**
      * Detects the media type of the underlying file by reading it's content.
      */

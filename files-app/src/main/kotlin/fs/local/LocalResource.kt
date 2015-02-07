@@ -94,7 +94,11 @@ private data class LocalResource(override val path: LocalPath) : Resource {
 
     override fun createSymbolicLink(target: Path) {
         LocalPath.check(target)
-        Unistd.symlink(target.toString(), path.toString())
+        try {
+            Unistd.symlink(target.toString(), path.toString())
+        } catch (e: ErrnoException) {
+            throw e.toIOException()
+        }
     }
 
     override fun readSymbolicLink() = try {
@@ -105,7 +109,19 @@ private data class LocalResource(override val path: LocalPath) : Resource {
 
     override fun move(dst: Path) {
         LocalPath.check(dst)
-        Stdio.rename(path.toString(), dst.toString())
+        try {
+            Stdio.rename(path.toString(), dst.toString())
+        } catch (e: ErrnoException) {
+            throw e.toIOException()
+        }
+    }
+
+    override fun delete() {
+        try {
+            Stdio.remove(path.toString());
+        } catch (e: ErrnoException) {
+            throw e.toIOException()
+        }
     }
 
     override fun detectMediaType() = MagicFileTypeDetector.detect(path)
