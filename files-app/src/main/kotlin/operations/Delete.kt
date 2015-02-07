@@ -9,10 +9,10 @@ import l.files.fs.Resource
 
 private class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
 
-    volatile var deletedItemCount: Int = 0
+    volatile var deletedItemCount = 0
         private set
 
-    volatile var deletedByteCount: Long = 0
+    volatile var deletedByteCount = 0L
         private set
 
     override fun process(path: Path, listener: FailureRecorder) {
@@ -24,16 +24,16 @@ private class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
     }
 
     private fun deleteTree(path: Path, listener: FailureRecorder) {
-        path.resource.traverse(POST_ORDER) { res, err ->
-            listener.onFailure(res.path, err)
-        }.forEach {
-            checkInterrupt()
-            try {
-                delete(it)
-            } catch (e: IOException) {
-                listener.onFailure(it.path, e)
-            }
-        }
+        path.resource
+                .traverse(POST_ORDER) { res, err -> listener.onFailure(res.path, err) }
+                .takeWhile { !Thread.currentThread().isInterrupted() }
+                .forEach {
+                    try {
+                        delete(it)
+                    } catch (e: IOException) {
+                        listener.onFailure(it.path, e)
+                    }
+                }
     }
 
     private fun delete(resource: Resource) {

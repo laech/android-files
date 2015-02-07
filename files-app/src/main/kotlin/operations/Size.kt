@@ -7,7 +7,7 @@ import l.files.fs.Resource
 
 private class Size(paths: Iterable<Path>) : Count(paths) {
 
-    volatile var size: Long = 0
+    volatile var size = 0L
         private set
 
     override fun onCount(resource: Resource) {
