@@ -4,13 +4,15 @@
 #include <string.h>
 #include "util.h"
 
-jboolean Java_l_files_fs_local_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsrc, jstring jdst) {
+void Java_l_files_fs_local_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsrc, jstring jdst) {
   const char *src = (*env)->GetStringUTFChars(env, jsrc, NULL);
   const char *dst = (*env)->GetStringUTFChars(env, jdst, NULL);
   int result = TEMP_FAILURE_RETRY(symlink(src, dst));
   (*env)->ReleaseStringUTFChars(env, jsrc, src);
   (*env)->ReleaseStringUTFChars(env, jdst, dst);
-  return (-1 == result) ? JNI_FALSE : JNI_TRUE;
+  if (0 != result) {
+    throw_errno_exception(env);
+  }
 }
 
 void Java_l_files_fs_local_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
