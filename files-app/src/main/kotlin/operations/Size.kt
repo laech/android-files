@@ -3,26 +3,20 @@ package l.files.operations
 import java.io.IOException
 
 import l.files.fs.Path
-import l.files.logging.Logger
+import l.files.fs.Resource
 
 private class Size(paths: Iterable<Path>) : Count(paths) {
 
     volatile var size: Long = 0
         private set
 
-    override fun onCount(path: Path) {
-        super.onCount(path)
+    override fun onCount(resource: Resource) {
+        super.onCount(resource)
         try {
-            size += path.resource.readStatus(false).size
+            size += resource.readStatus(false).size
         } catch (e: IOException) {
-            logger.debug(e)
+            // Ignore count
         }
-    }
-
-    class object {
-
-        private val logger = Logger.get(javaClass<Size>())
-
     }
 
 }

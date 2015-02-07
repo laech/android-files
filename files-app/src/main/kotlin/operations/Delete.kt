@@ -1,6 +1,5 @@
 package l.files.operations
 
-import java.io.FileNotFoundException
 import java.io.IOException
 
 import l.files.fs.Path
@@ -19,8 +18,6 @@ private class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
     override fun process(path: Path, listener: FailureRecorder) {
         try {
             deleteTree(path, listener)
-        } catch (e: FileNotFoundException) {
-            // Ignore
         } catch (e: IOException) {
             listener.onFailure(path, e)
         }
@@ -33,8 +30,6 @@ private class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
             checkInterrupt()
             try {
                 delete(it)
-            } catch (e: FileNotFoundException) {
-                // Ignore
             } catch (e: IOException) {
                 listener.onFailure(it.path, e)
             }
