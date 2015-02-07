@@ -1,7 +1,6 @@
 package l.files.ui;
 
 import android.app.ActionBar;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
@@ -49,8 +48,6 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.google.android.gms.common.GooglePlayServicesUtil.getErrorDialog;
-import static com.google.android.gms.common.GooglePlayServicesUtil.isGooglePlayServicesAvailable;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static de.greenrobot.event.ThreadMode.MainThread;
@@ -101,16 +98,6 @@ public final class FilesActivity extends BaseActivity
         new AboutMenu(this)));
     updateShowTabs();
     Preferences.register(this, this);
-
-    checkGooglePlayServices();
-  }
-
-  private void checkGooglePlayServices() {
-    int result = isGooglePlayServicesAvailable(this);
-    Dialog dialog = getErrorDialog(result, this, 0);
-    if (dialog != null) { // Null if services are okay
-      dialog.show();
-    }
   }
 
   private void setPathBar() {
