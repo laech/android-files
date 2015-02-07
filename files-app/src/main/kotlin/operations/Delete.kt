@@ -8,7 +8,7 @@ import l.files.fs.Path
 import l.files.fs.Resource.TraversalOrder.POST_ORDER
 import l.files.fs.Resource
 
-class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
+private class Delete(paths: Iterable<Path>) : AbstractOperation(paths) {
 
     volatile var deletedItemCount: Int = 0
         private set
