@@ -29,4 +29,18 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     assertTrue(msg, waitFor(new File(dir().get(), "d/b"), 5));
     assertTrue(msg, waitFor(new File(dir().get(), "d/c"), 5));
   }
+
+  public void testPasteMenuIsDisabledInsideFolderBeingCopied() throws Exception {
+    File dir = dir().createDir("dir");
+
+    screen()
+        .check(dir, true)
+        .copy()
+        .assertCanPaste(true)
+        .selectItem(dir)
+        .assertCanPaste(false)
+        .pressBack()
+        .assertCanPaste(true);
+  }
+
 }

@@ -215,8 +215,17 @@ public final class UiFileActivity {
     });
   }
 
-  public UiFileActivity assertCanRename(final boolean can) {
+  public UiFileActivity assertCanRename(boolean can) {
     assertEquals(can, getRenameMenuItem().isEnabled());
+    return this;
+  }
+
+  public UiFileActivity assertCanPaste(final boolean can) {
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
+        assertEquals(can, getPasteMenuItem().isEnabled());
+      }
+    });
     return this;
   }
 
@@ -400,6 +409,10 @@ public final class UiFileActivity {
 
   private MenuItem getRenameMenuItem() {
     return activity.getCurrentActionMode().getMenu().findItem(R.id.rename);
+  }
+
+  private MenuItem getPasteMenuItem() {
+    return activity.getMenu().findItem(android.R.id.paste);
   }
 
   private void selectActionModeAction(final int id) {

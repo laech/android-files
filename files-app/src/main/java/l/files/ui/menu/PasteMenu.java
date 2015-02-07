@@ -44,6 +44,13 @@ public final class PasteMenu extends OptionsMenuAction {
     if (item != null) {
       // TODO check existence of the files in the clipboard?
       item.setEnabled(Clipboards.hasClip(manager));
+      for (Path p : Clipboards.getPaths(manager)) {
+        if (this.path.startsWith(p)) {
+          // Can't paste into itself
+          item.setEnabled(false);
+          break;
+        }
+      }
     }
   }
 
