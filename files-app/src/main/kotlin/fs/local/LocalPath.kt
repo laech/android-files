@@ -8,6 +8,7 @@ import java.net.URI
 
 import l.files.fs.Path
 import kotlin.platform.platformStatic
+import com.google.common.base.Preconditions.checkArgument
 
 private data class LocalPath private(val file: File) : Path {
 
@@ -39,6 +40,15 @@ private data class LocalPath private(val file: File) : Path {
     override val name = file.name
 
     override fun resolve(other: String) = File(file, other).toLocalPath()
+
+    override fun replace(prefix: Path, new: Path): Path {
+        check(prefix)
+        check(new)
+        checkArgument(startsWith(prefix))
+        val parent = (new as LocalPath).file
+        val child = file.path.substring(prefix.toString().length())
+        return LocalPath(File(parent, child))
+    }
 
     override fun writeToParcel(dst: Parcel, flags: Int) {
         dst.writeString(file.path)

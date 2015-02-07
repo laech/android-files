@@ -136,7 +136,7 @@ final class ImageDecorator {
        * file, if an exception occurs, meaning it can't be read, let the exception
        * propagate, and return no result.
        */
-      try (InputStream in = file.getResource().newInputStream()) {
+      try (InputStream in = file.getResource().openInputStream()) {
         //noinspection ResultOfMethodCallIgnored
         in.read();
       } catch (IOException e) {
@@ -145,7 +145,7 @@ final class ImageDecorator {
 
       Options options = new Options();
       options.inJustDecodeBounds = true;
-      try (InputStream in = file.getResource().newInputStream()) {
+      try (InputStream in = file.getResource().openInputStream()) {
         decodeStream(in, null, options);
       } catch (IOException e) {
         return null;
@@ -201,7 +201,7 @@ final class ImageDecorator {
       if (isCancelled()) {
         return null;
       }
-      try (InputStream in = file.getResource().newInputStream()) {
+      try (InputStream in = file.getResource().openInputStream()) {
         return decodeScaledBitmap(in, size);
       } catch (Exception e) {
         // Catch all unexpected internal errors from decoder

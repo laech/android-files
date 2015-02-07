@@ -43,6 +43,13 @@ trait Path : PathEntry, Parcelable {
     fun resolve(other: String): Path
 
     /**
+     * Returns a new path with the given prefix replaced.
+     * Throws IllegalArgumentException if this path does not start with the
+     * given prefix.
+     */
+    fun replace(prefix: Path, new: Path): Path
+
+    /**
      * Returns true if the this path starts with the given path, including if
      * the two paths are the same.
      */

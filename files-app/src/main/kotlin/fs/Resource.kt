@@ -4,10 +4,7 @@ import android.os.Parcelable
 import com.google.common.net.MediaType
 import java.io.InputStream
 import java.io.IOException
-import com.google.common.collect.TreeTraverser
-import l.files.fs.Resource.TraversalOrder.BREATH_FIRST
-import l.files.fs.Resource.TraversalOrder.POST_ORDER
-import l.files.fs.Resource.TraversalOrder.PRE_ORDER
+import java.io.OutputStream
 
 trait Resource : PathEntry, Parcelable {
 
@@ -47,11 +44,11 @@ trait Resource : PathEntry, Parcelable {
     throws(javaClass<IOException>())
     fun openResourceStream(): ResourceStream<Resource>
 
-    /**
-     * Opens a new input stream to write to the underlying file.
-     */
     throws(javaClass<IOException>())
-    fun newInputStream(): InputStream
+    fun openInputStream(): InputStream
+
+    throws(javaClass<IOException>())
+    fun openOutputStream(): OutputStream
 
     /**
      * Creates the underlying resource as a directory.
@@ -95,6 +92,9 @@ trait Resource : PathEntry, Parcelable {
 
     throws(javaClass<IOException>())
     fun delete()
+
+    throws(javaClass<IOException>())
+    fun setLastModifiedTime(time: Long)
 
     /**
      * Detects the media type of the underlying file by reading it's content.

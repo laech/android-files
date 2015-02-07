@@ -3,6 +3,7 @@ package l.files.fs.local;
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.fs.Path;
 
 import static org.apache.commons.io.FileUtils.forceDelete;
 import static org.apache.commons.io.FileUtils.getTempDirectory;
@@ -89,4 +90,14 @@ public final class LocalPathTest extends FileBaseTest {
   private void testStartsWith(boolean expected, String parent, String child) {
     assertEquals(expected, LocalPath.of(child).startsWith(LocalPath.of(parent)));
   }
+
+  public void testReplace() {
+    Path file = LocalPath.of("/a/b/c.txt");
+    Path match = LocalPath.of("/a");
+    Path replacement = LocalPath.of("/1/2/3/4");
+    Path expected = LocalPath.of("/1/2/3/4/b/c.txt");
+    Path actual = file.replace(match, replacement);
+    assertEquals(expected, actual);
+  }
+
 }

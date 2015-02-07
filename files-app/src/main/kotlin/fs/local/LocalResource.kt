@@ -15,6 +15,7 @@ import l.files.fs.Resource.TraversalOrder.PRE_ORDER
 import com.google.common.collect.TreeTraverser
 import l.files.fs.PathEntry
 import l.files.fs.ResourceStream
+import java.io.FileOutputStream
 
 private data class LocalResource(override val path: LocalPath) : Resource {
 
@@ -70,7 +71,9 @@ private data class LocalResource(override val path: LocalPath) : Resource {
         }
     }
 
-    override fun newInputStream() = FileInputStream(path.toString())
+    override fun openInputStream() = FileInputStream(path.toString())
+
+    override fun openOutputStream() = FileOutputStream(path.toString())
 
     override fun createDirectory() {
         createDirectory(path)
@@ -121,6 +124,12 @@ private data class LocalResource(override val path: LocalPath) : Resource {
             Stdio.remove(path.toString());
         } catch (e: ErrnoException) {
             throw e.toIOException()
+        }
+    }
+
+    override fun setLastModifiedTime(time: Long) {
+        if (!java.io.File(path.toString()).setLastModified(time)) {
+            throw IOException() // TODO use native code to get errno
         }
     }
 
