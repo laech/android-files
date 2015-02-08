@@ -17,6 +17,7 @@ import static android.os.SystemClock.sleep;
 import static java.lang.Boolean.FALSE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static junit.framework.Assert.assertTrue;
 
 public final class Instrumentations {
 
@@ -130,6 +131,8 @@ public final class Instrumentations {
       Instrumentation in, AssertionError e) {
     File file = new File(getExternalStorageDirectory(),
         "test/failed-" + System.currentTimeMillis() + ".jpg");
+    File parent = file.getParentFile();
+    assertTrue(parent.isDirectory() || parent.mkdir());
     Bitmap screenshot = in.getUiAutomation().takeScreenshot();
     try (OutputStream out = new FileOutputStream(file)) {
       screenshot.compress(Bitmap.CompressFormat.JPEG, 90, out);

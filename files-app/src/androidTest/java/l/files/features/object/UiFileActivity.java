@@ -223,6 +223,12 @@ public final class UiFileActivity {
   public UiFileActivity assertCanPaste(final boolean can) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
+        activity.closeOptionsMenu();
+        activity.openOptionsMenu();
+      }
+    });
+    awaitOnMainThread(instrument, new Runnable() {
+      @Override public void run() {
         assertEquals(can, getPasteMenuItem().isEnabled());
       }
     });
