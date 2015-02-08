@@ -78,7 +78,6 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       logger.debug(e);
       return emptyList();
     }
-    // TODO this will error on dirs like /proc/xxx
     try (ResourceStream<? extends Resource> stream = path.getResource().openResourceStream()) {
       Iterator<? extends Resource> it = stream.iterator();
       while (it.hasNext()) {
@@ -205,7 +204,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
   private void redeliverResult() {
     handler.removeCallbacks(deliverResult);
-    handler.postDelayed(deliverResult, 1000);
+    handler.postDelayed(deliverResult, 100);
   }
 
   final class DeliverResultRunnable implements Runnable {
