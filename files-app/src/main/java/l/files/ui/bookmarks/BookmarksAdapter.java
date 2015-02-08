@@ -1,4 +1,4 @@
-package l.files.ui.sidebar;
+package l.files.ui.bookmarks;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -14,7 +14,7 @@ import l.files.ui.StableFilesAdapter;
 
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
-final class SidebarAdapter extends StableFilesAdapter<Path> {
+final class BookmarksAdapter extends StableFilesAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {

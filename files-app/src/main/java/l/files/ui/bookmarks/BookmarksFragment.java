@@ -1,4 +1,4 @@
-package l.files.ui.sidebar;
+package l.files.ui.bookmarks;
 
 import android.content.Loader;
 import android.os.Bundle;
@@ -20,17 +20,17 @@ import l.files.ui.OpenFileRequest;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 
-public final class SidebarFragment extends BaseFileListFragment
+public final class BookmarksFragment extends BaseFileListFragment
     implements LoaderCallbacks<List<Path>> {
 
-  public SidebarFragment() {
+  public BookmarksFragment() {
     super(R.layout.sidebar_fragment);
   }
 
   @Override public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
     addBookmarksHeader();
-    setListAdapter(new SidebarAdapter());
+    setListAdapter(new BookmarksAdapter());
     getLoaderManager().initLoader(0, null, this);
   }
 
@@ -49,8 +49,8 @@ public final class SidebarFragment extends BaseFileListFragment
     getListView().addHeaderView(header, null, false);
   }
 
-  @Override public SidebarAdapter getListAdapter() {
-    return (SidebarAdapter) super.getListAdapter();
+  @Override public BookmarksAdapter getListAdapter() {
+    return (BookmarksAdapter) super.getListAdapter();
   }
 
   @Override public Loader<List<Path>> onCreateLoader(int i, Bundle bundle) {

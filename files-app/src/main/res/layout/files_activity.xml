@@ -27,7 +27,7 @@
 
   <fragment
     android:id="@+id/sidebar_fragment"
-    android:name="l.files.ui.sidebar.SidebarFragment"
+    android:name="l.files.ui.bookmarks.BookmarksFragment"
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"/>
