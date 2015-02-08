@@ -1,8 +1,6 @@
 package l.files.ui;
 
-import android.content.Context;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.graphics.Typeface;
 
 import com.google.common.collect.ImmutableMap;
@@ -16,7 +14,6 @@ import l.files.R;
 import l.files.fs.Path;
 
 import static android.graphics.Typeface.createFromAsset;
-import static l.files.common.content.res.Styles.getColor;
 
 public final class IconFonts {
 
@@ -32,19 +29,38 @@ public final class IconFonts {
   private static Typeface iconPdf;
   private static Set<String> archiveSubtypes;
 
-  public static int getDefaultColor(Context context) {
-    return getColor(android.R.attr.textColorTertiary, context);
+  private enum Icon {
+    PDF(R.drawable.file_circle_pdf),
+    AUDIO(R.drawable.file_circle_audio),
+    VIDEO(R.drawable.file_circle_video),
+    IMAGE(R.drawable.file_circle_image),
+    ARCHIVE(R.drawable.file_circle_archive),
+    DOCUMENT(R.drawable.file_circle_document),
+    DEFAULT(R.drawable.file_circle);
+
+    final int backgroundResourceId;
+
+    Icon(int backgroundResourceId) {
+      this.backgroundResourceId = backgroundResourceId;
+    }
+
+    static Icon get(MediaType mime) {
+      if (mime.subtype().equals("pdf")) return Icon.PDF;
+      if (mime.type().equals("audio")) return Icon.AUDIO;
+      if (mime.type().equals("video")) return Icon.VIDEO;
+      if (mime.type().equals("image")) return Icon.IMAGE;
+      if (mime.type().equals("text")) return Icon.DOCUMENT;
+      if (archiveSubtypes.contains(mime.subtype())) return Icon.ARCHIVE;
+      return Icon.DEFAULT;
+    }
   }
 
-  public static int getColorForFileMediaType(Context context, MediaType mime) {
-    Resources res = context.getResources();
-    if (mime.subtype().equals("pdf")) return res.getColor(R.color.pdf);
-    if (mime.type().equals("audio")) return res.getColor(R.color.audio);
-    if (mime.type().equals("video")) return res.getColor(R.color.video);
-    if (mime.type().equals("image")) return res.getColor(R.color.image);
-    if (mime.type().equals("text")) return res.getColor(R.color.document);
-    if (archiveSubtypes.contains(mime.subtype())) return res.getColor(R.color.archive);
-    return getColor(android.R.attr.textColorTertiary, context);
+  public static int getDefaultBackgroundResource() {
+    return Icon.DEFAULT.backgroundResourceId;
+  }
+
+  public static int getBackgroundResourceForFileMediaType(MediaType mime) {
+    return Icon.get(mime).backgroundResourceId;
   }
 
   public static Typeface getDirectoryIcon(AssetManager assets, Path path) {

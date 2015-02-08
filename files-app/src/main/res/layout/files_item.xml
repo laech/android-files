@@ -31,8 +31,9 @@
     android:layout_row="0"
     android:gravity="bottom|end"
     android:paddingBottom="3dp"
-    android:paddingEnd="12dp"
+    android:paddingEnd="10dp"
     android:text="➥"
+    android:textColor="?android:attr/textColorTertiary"
     android:textAppearance="?android:attr/textAppearanceMedium"/>
 
   <TextView

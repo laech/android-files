@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.graphics.drawable.PaintDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -35,8 +32,8 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static l.files.ui.FilesApp.getBitmapCache;
-import static l.files.ui.IconFonts.getColorForFileMediaType;
-import static l.files.ui.IconFonts.getDefaultColor;
+import static l.files.ui.IconFonts.getBackgroundResourceForFileMediaType;
+import static l.files.ui.IconFonts.getDefaultBackgroundResource;
 import static l.files.ui.IconFonts.getDefaultFileIcon;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 import static l.files.ui.IconFonts.getIconForFileMediaType;
@@ -187,14 +184,7 @@ final class FilesAdapter extends StableFilesAdapter<FileListItem> {
       AssetManager assets = context.getAssets();
       icon.setEnabled(file.getStat() != null && file.getStat().getIsReadable());
       icon.setTypeface(getIcon(file, assets));
-      if (icon.getBackground() instanceof ShapeDrawable) {
-        ((ShapeDrawable) icon.getBackground())
-            .getPaint().setColor(getIconColor(file, context));
-      } else {
-        PaintDrawable background = new PaintDrawable(getIconColor(file, context));
-        background.setShape(new OvalShape());
-        icon.setBackground(background);
-      }
+      icon.setBackgroundResource(getIconBackgroundResource(file));
     }
 
     private Typeface getIcon(FileListItem.File file, AssetManager assets) {
@@ -210,14 +200,14 @@ final class FilesAdapter extends StableFilesAdapter<FileListItem> {
       }
     }
 
-    private int getIconColor(FileListItem.File file, Context context) {
+    private int getIconBackgroundResource(FileListItem.File file) {
       ResourceStatus stat = file.getStat();
       if (stat == null
           || stat.getIsDirectory()
           || file.getTargetStat().getIsDirectory()) {
-        return getDefaultColor(context);
+        return getDefaultBackgroundResource();
       } else {
-        return getColorForFileMediaType(context, stat.getBasicMediaType());
+        return getBackgroundResourceForFileMediaType(stat.getBasicMediaType());
       }
     }
 
@@ -254,10 +244,11 @@ final class FilesAdapter extends StableFilesAdapter<FileListItem> {
     }
 
     void setSymlink(FileListItem.File file) {
-      if (file.getStat() == null || !file.getStat().getIsSymbolicLink()) {
+      ResourceStatus stat = file.getStat();
+      if (stat == null || !stat.getIsSymbolicLink()) {
         symlink.setVisibility(GONE);
       } else {
-        symlink.setTextColor(getIconColor(file, symlink.getContext()));
+        symlink.setEnabled(stat.getIsReadable());
         symlink.setVisibility(VISIBLE);
       }
     }
