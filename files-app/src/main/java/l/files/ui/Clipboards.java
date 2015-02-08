@@ -43,10 +43,10 @@ public final class Clipboards {
 
   public static Set<Path> getPaths(ClipboardManager manager) {
     Intent intent = getClipboardIntent(manager);
-    intent.setExtrasClassLoader(Clipboards.class.getClassLoader());
     if (intent == null) {
       return emptySet();
     }
+    intent.setExtrasClassLoader(Clipboards.class.getClassLoader());
     ArrayList<Path> extras = intent.getParcelableArrayListExtra(EXTRA_PATHS);
     if (extras == null) {
       return emptySet();
