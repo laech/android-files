@@ -11,8 +11,7 @@ import l.files.fs.Path;
 import l.files.ui.ListProvider;
 
 import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_WITH_TEXT;
+import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class RenameAction extends MultiChoiceModeAction {
@@ -29,7 +28,7 @@ public final class RenameAction extends MultiChoiceModeAction {
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
     menu.add(NONE, id(), NONE, R.string.rename)
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM | SHOW_AS_ACTION_WITH_TEXT);
+        .setShowAsAction(SHOW_AS_ACTION_NEVER);
     return true;
   }
 
