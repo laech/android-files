@@ -17,12 +17,15 @@ import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
+import l.files.logging.Logger;
 import l.files.ui.OpenFileRequest;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static l.files.ui.Fragments.setArgs;
 
 public final class FilesPagerFragment extends Fragment {
+
+  private static final Logger log = Logger.get(FilesPagerFragment.class);
 
   private static final String ARG_INITIAL_PATH = "path";
   private static final String ARG_INITIAL_TITLE = "title";
@@ -97,6 +100,7 @@ public final class FilesPagerFragment extends Fragment {
         try {
           return request.getPath().getResource().readStatus(true);
         } catch (IOException e) {
+          log.debug(e, "%s", request);
           return null;
         }
       }

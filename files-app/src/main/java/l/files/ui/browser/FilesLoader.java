@@ -75,7 +75,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     try {
       service.register(path, listener);
     } catch (IOException e) {
-      // TODO
+      logger.debug(e);
       return emptyList();
     }
     // TODO this will error on dirs like /proc/xxx
@@ -86,7 +86,8 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         addData(it.next().getPath());
       }
     } catch (IOException e) {
-      throw new RuntimeException(e); // TODO
+      logger.debug(e);
+      return emptyList();
     }
     return buildResult();
   }

@@ -20,10 +20,13 @@ private class LocalResourceStream private(
         throw IllegalStateException("iterator() has already been called")
     } else {
         iterated = true
-        stream { Dirent.readdir(dir) }
-                .filter { !it.isSelfOrParent() }
-                .map { it.toEntry() }
-                .iterator()
+        stream {
+            try {
+                Dirent.readdir(dir)
+            } catch (e: ErrnoException) {
+                throw e.toIOException()
+            }
+        }.filter { !it.isSelfOrParent() }.map { it.toEntry() }.iterator()
     }
 
     private fun Dirent.isSelfOrParent() = name == "." || name == ".."
