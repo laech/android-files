@@ -82,19 +82,19 @@ public final class PathBarFragment extends Fragment
     LayoutInflater inflater = LayoutInflater.from(getActivity());
 
     int i = 0;
-    for (Path path : hierarchy.paths) {
+    for (; i < hierarchy.paths.size(); i++) {
+      Path path = hierarchy.paths.get(i);
       View view = container.getChildAt(i);
       if (view == null) {
         view = inflater.inflate(R.layout.path_bar_item, container, false);
         container.addView(view);
       }
-
       view.setTag(path);
       view.setVisibility(VISIBLE);
       view.setOnClickListener(this);
 
       TextView title = (TextView) view.findViewById(R.id.title);
-      title.setText(path.getParent() == null ? Build.MODEL : path.getPath().getName());
+      title.setText(i == 0 ? Build.MODEL : path.getPath().getName());
 
       AssetManager asset = getActivity().getAssets();
       TextView icon = (TextView) view.findViewById(R.id.icon);
