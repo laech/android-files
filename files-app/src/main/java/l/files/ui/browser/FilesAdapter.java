@@ -18,8 +18,11 @@ import java.util.Date;
 
 import l.files.R;
 import l.files.fs.ResourceStatus;
+import l.files.fs.local.LocalResourceStatus;
 import l.files.ui.StableFilesAdapter;
 
+import static android.graphics.Typeface.BOLD;
+import static android.graphics.Typeface.SANS_SERIF;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -182,9 +185,34 @@ final class FilesAdapter extends StableFilesAdapter<FileListItem> {
     void setIcon(FileListItem.File file) {
       Context context = icon.getContext();
       AssetManager assets = context.getAssets();
-      icon.setEnabled(file.getStat() != null && file.getStat().getIsReadable());
-      icon.setTypeface(getIcon(file, assets));
+      icon.setEnabled(file.getTargetStat() != null && file.getTargetStat().getIsReadable());
+      if (file.getTargetStat() != null && setLocalIcon(icon, file.getTargetStat())) {
+        icon.setTypeface(SANS_SERIF, BOLD);
+      } else {
+        icon.setText(R.string.ic_font_char);
+        icon.setTypeface(getIcon(file, assets));
+      }
       icon.setBackgroundResource(getIconBackgroundResource(file));
+    }
+
+    boolean setLocalIcon(TextView icon, ResourceStatus status) {
+      if (status instanceof LocalResourceStatus) {
+        // Sets single character type consistent with ls command
+        LocalResourceStatus local = (LocalResourceStatus) status;
+        if (local.getIsBlockDevice()) {
+          icon.setText("B");
+        } else if (local.getIsCharacterDevice()) {
+          icon.setText("C");
+        } else if (local.getIsSocket()) {
+          icon.setText("S");
+        } else if (local.getIsFifo()) {
+          icon.setText("P");
+        } else {
+          return false;
+        }
+        return true;
+      }
+      return false;
     }
 
     private Typeface getIcon(FileListItem.File file, AssetManager assets) {
