@@ -11,15 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
 import l.files.fs.Path;
-import l.files.fs.ResourceStatus;
-import l.files.logging.Logger;
 import l.files.operations.Events;
 import l.files.ui.OpenFileRequest;
 
@@ -27,13 +24,10 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
-import static java.util.Collections.emptyList;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
 public final class PathBarFragment extends Fragment
-    implements LoaderCallbacks<List<ResourceStatus>>, OnClickListener {
-
-  private static final Logger log = Logger.get(PathBarFragment.class);
+    implements LoaderCallbacks<PathBarFragment.Hierarchy>, OnClickListener {
 
   private Path path;
   private ViewGroup container;
@@ -60,21 +54,16 @@ public final class PathBarFragment extends Fragment
     }
   }
 
-  @Override public Loader<List<ResourceStatus>> onCreateLoader(int id, Bundle args) {
+  @Override public Loader<Hierarchy> onCreateLoader(int id, Bundle args) {
     final Path path = this.path;
-    return new AsyncTaskLoader<List<ResourceStatus>>(getActivity()) {
-      @Override public List<ResourceStatus> loadInBackground() {
-        List<ResourceStatus> hierarchy = new ArrayList<>();
+    return new AsyncTaskLoader<Hierarchy>(getActivity()) {
+      @Override public Hierarchy loadInBackground() {
+        List<Path> hierarchy = new ArrayList<>();
         for (Path p = path; p != null; p = p.getParent()) {
-          try {
-            hierarchy.add(p.getResource().readStatus(true));
-          } catch (IOException e) { // TODO
-            log.error(e);
-            return emptyList();
-          }
+          hierarchy.add(p);
         }
         Collections.reverse(hierarchy);
-        return hierarchy;
+        return new Hierarchy(hierarchy);
       }
 
       @Override protected void onStartLoading() {
@@ -84,33 +73,32 @@ public final class PathBarFragment extends Fragment
     };
   }
 
-  @Override public void onLoadFinished(Loader<List<ResourceStatus>> loader,
-                                       List<ResourceStatus> hierarchy) {
+  @Override public void onLoadFinished(Loader<Hierarchy> loader,
+                                       Hierarchy hierarchy) {
     updatePathBar(hierarchy);
   }
 
-  private void updatePathBar(List<ResourceStatus> hierarchy) {
+  private void updatePathBar(Hierarchy hierarchy) {
     LayoutInflater inflater = LayoutInflater.from(getActivity());
 
     int i = 0;
-    for (; i < hierarchy.size(); i++) {
+    for (Path path : hierarchy.paths) {
       View view = container.getChildAt(i);
       if (view == null) {
         view = inflater.inflate(R.layout.path_bar_item, container, false);
         container.addView(view);
       }
 
-      ResourceStatus stat = hierarchy.get(i);
-      view.setTag(stat);
+      view.setTag(path);
       view.setVisibility(VISIBLE);
       view.setOnClickListener(this);
 
       TextView title = (TextView) view.findViewById(R.id.title);
-      title.setText(i == 0 ? Build.MODEL : stat.getPath().getName());
+      title.setText(path.getParent() == null ? Build.MODEL : path.getPath().getName());
 
       AssetManager asset = getActivity().getAssets();
       TextView icon = (TextView) view.findViewById(R.id.icon);
-      icon.setTypeface(getDirectoryIcon(asset, stat.getPath()));
+      icon.setTypeface(getDirectoryIcon(asset, path.getPath()));
 
     }
 
@@ -119,11 +107,19 @@ public final class PathBarFragment extends Fragment
     }
   }
 
-  @Override public void onLoaderReset(Loader<List<ResourceStatus>> loader) {}
+  @Override public void onLoaderReset(Loader<Hierarchy> loader) {}
 
   @Override public void onClick(View v) {
-    ResourceStatus status = (ResourceStatus) v.getTag();
+    Path status = (Path) v.getTag();
     Events.get().post(new OpenFileRequest(status.getPath()));
+  }
+
+  static final class Hierarchy {
+    final List<Path> paths;
+
+    private Hierarchy(List<Path> paths) {
+      this.paths = paths;
+    }
   }
 
 }
