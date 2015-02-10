@@ -1,19 +1,18 @@
-package l.files.features.object;
+package l.files.features.objects;
 
 import android.app.AlertDialog;
 import android.app.Instrumentation;
 import android.widget.EditText;
-
-import java.util.concurrent.Callable;
 
 import l.files.ui.FilesActivity;
 import l.files.ui.mode.RenameFragment;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static l.files.features.object.Instrumentations.awaitOnMainThread;
+import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 
 public final class UiRename {
 
@@ -44,14 +43,11 @@ public final class UiRename {
   }
 
   public UiRename assertOkButtonEnabled(final boolean enabled) {
-    awaitOnMainThread(in, new Callable<Boolean>() {
-      @Override public Boolean call() {
+    awaitOnMainThread(in, new Runnable() {
+      @Override public void run() {
         RenameFragment fragment = fragment();
-        if (fragment == null) {
-          return null;
-        }
+        assertNotNull(fragment);
         assertEquals(enabled, dialog().getButton(BUTTON_POSITIVE).isEnabled());
-        return true;
       }
     });
     return this;

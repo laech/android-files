@@ -15,13 +15,12 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.app.OptionsMenus;
-import l.files.common.widget.ListViews;
 import l.files.common.widget.MultiChoiceModeListeners;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.Animations;
 import l.files.ui.BaseFileListFragment;
-import l.files.ui.ListProvider;
+import l.files.ui.ListSelection;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.Preferences;
 import l.files.ui.menu.BookmarkMenu;
@@ -47,7 +46,7 @@ import static l.files.ui.Preferences.isSortKey;
 public final class FilesFragment extends BaseFileListFragment implements
     LoaderCallbacks<List<FileListItem>>,
     OnSharedPreferenceChangeListener,
-    ListProvider<Path> {
+    ListSelection<Path> {
 
   // TODO implement progress
 
@@ -119,25 +118,13 @@ public final class FilesFragment extends BaseFileListFragment implements
     final ListView list = getListView();
     list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
     list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
-        new CountSelectedItemsAction(list),
+        new CountSelectedItemsAction(this),
         new SelectAllAction(list),
         new CutAction(context, clipboard, this),
         new CopyAction(context, clipboard, this),
         new DeleteAction(context, this),
         new RenameAction(context.getFragmentManager(), this)
     ));
-  }
-
-  @Override public int getCheckedItemCount() {
-    return getListView().getCheckedItemCount();
-  }
-
-  @Override public int getCheckedItemPosition() {
-    return ListViews.getCheckedItemPosition(getListView());
-  }
-
-  @Override public List<Integer> getCheckedItemPositions() {
-    return ListViews.getCheckedItemPositions(getListView());
   }
 
   @Override public Path getCheckedItem() {

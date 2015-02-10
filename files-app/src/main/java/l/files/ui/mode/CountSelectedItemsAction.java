@@ -2,18 +2,18 @@ package l.files.ui.mode;
 
 import android.view.ActionMode;
 import android.view.Menu;
-import android.widget.AbsListView;
 
 import l.files.common.widget.MultiChoiceModeListenerAdapter;
+import l.files.ui.ListSelection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
 
-  private final AbsListView list;
+  private final ListSelection<?> selection;
 
-  public CountSelectedItemsAction(AbsListView list) {
-    this.list = checkNotNull(list);
+  public CountSelectedItemsAction(ListSelection<?> selection) {
+    this.selection = checkNotNull(selection);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -27,7 +27,6 @@ public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapt
   }
 
   private void updateSelectedItemCount(ActionMode mode) {
-    int n = list.getCheckedItemCount();
-    mode.setTitle(String.valueOf(n));
+    mode.setTitle(Integer.toString(selection.getCheckedItemCount()));
   }
 }

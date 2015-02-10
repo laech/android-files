@@ -14,7 +14,7 @@ import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.fs.Path;
 import l.files.operations.OperationService;
-import l.files.ui.ListProvider;
+import l.files.ui.ListSelection;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
@@ -24,13 +24,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class DeleteAction extends MultiChoiceModeAction {
 
   private final Context context;
-  private final ListProvider<Path> supplier;
+  private final ListSelection<Path> supplier;
 
   @SuppressWarnings("unchecked")
-  public DeleteAction(Context context, ListProvider<? extends Path> supplier) {
+  public DeleteAction(Context context, ListSelection<? extends Path> supplier) {
     super(R.id.delete);
     this.context = checkNotNull(context);
-    this.supplier = (ListProvider<Path>) checkNotNull(supplier);
+    this.supplier = (ListSelection<Path>) checkNotNull(supplier);
   }
 
   @Override

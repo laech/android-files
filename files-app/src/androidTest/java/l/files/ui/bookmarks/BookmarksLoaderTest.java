@@ -1,4 +1,4 @@
-package l.files.provider.bookmarks;
+package l.files.ui.bookmarks;
 
 import android.app.LoaderManager;
 import android.content.SharedPreferences;
@@ -15,6 +15,7 @@ import l.files.common.testing.BaseActivityTest;
 import l.files.fs.DefaultPathProvider;
 import l.files.fs.Path;
 import l.files.fs.local.LocalPath;
+import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;

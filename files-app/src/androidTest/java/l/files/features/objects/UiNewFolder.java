@@ -1,4 +1,4 @@
-package l.files.features.object;
+package l.files.features.objects;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
@@ -11,7 +11,7 @@ import l.files.ui.menu.NewDirFragment;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;
-import static l.files.features.object.Instrumentations.awaitOnMainThread;
+import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 
 public class UiNewFolder {
 

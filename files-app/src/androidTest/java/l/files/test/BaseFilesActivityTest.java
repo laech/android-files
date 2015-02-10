@@ -6,7 +6,7 @@ import java.io.File;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.common.testing.TempDir;
-import l.files.features.object.UiFileActivity;
+import l.files.features.objects.UiFileActivity;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
 import l.files.ui.FilesActivity;

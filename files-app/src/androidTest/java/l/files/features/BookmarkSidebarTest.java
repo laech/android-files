@@ -1,41 +1,71 @@
 package l.files.features;
 
-import java.io.File;
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.List;
-
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 import l.files.test.BaseFilesActivityTest;
 
-import static java.util.Collections.sort;
-
 public final class BookmarkSidebarTest extends BaseFilesActivityTest {
+
+  public void testBookmarksSidebarLockedOnBookmarksActionMode() throws Exception {
+    Path a = LocalPath.of(dir().createDir("a"));
+
+    screen()
+        .selectItem(a)
+        .bookmark()
+        .openBookmarksDrawer()
+        .checkBookmark(a, true)
+        .getActivityObject()
+        .assertBookmarksSidebarIsOpenLocked(true);
+  }
+
+  public void testDeleteBookmarksFromSidebar() throws Exception {
+    Path a = LocalPath.of(dir().createDir("a"));
+    Path b = LocalPath.of(dir().createDir("b"));
+    Path c = LocalPath.of(dir().createDir("c"));
+
+    screen()
+
+        .selectItem(a).bookmark().pressBack()
+        .selectItem(b).bookmark().pressBack()
+        .selectItem(c).bookmark().pressBack()
+
+        .openBookmarksDrawer()
+        .assertBookmarked(a, true)
+        .assertBookmarked(b, true)
+        .assertBookmarked(c, true)
+
+        .checkBookmark(a, true)
+        .checkBookmark(b, true)
+        .deleteCheckedBookmarks()
+
+        .assertBookmarked(a, false)
+        .assertBookmarked(b, false)
+        .assertBookmarked(c, true);
+  }
 
   public void testBookmarkAppearsInSidebar() throws Exception {
     screen()
         .selectItem(dir().createDir("a"))
         .bookmark()
-        .assertBookmarkSidebarHasCurrentDirectory(true)
+        .openBookmarksDrawer()
+        .assertCurrentDirectoryBookmarked(true)
+        .getActivityObject()
         .unbookmark()
-        .assertBookmarkSidebarHasCurrentDirectory(false);
+        .openBookmarksDrawer()
+        .assertCurrentDirectoryBookmarked(false);
   }
 
   public void testBookmarksAreSortedByName() throws Exception {
-    File a = dir().createDir("a");
-    File b = dir().createDir("b");
-    File c = dir().createDir("c");
-    List<String> bookmarks = screen()
+    Path b = LocalPath.of(dir().createDir("b"));
+    Path a = LocalPath.of(dir().createDir("a"));
+    Path c = LocalPath.of(dir().createDir("c"));
+    screen()
         .selectItem(a).bookmark().pressBack()
         .selectItem(c).bookmark().pressBack()
         .selectItem(b).bookmark()
-        .assertBookmarkSidebarHasCurrentDirectory(true)
-        .getSidebarBookmarkNames();
-
-    List<String> copy = new ArrayList<>(bookmarks);
-    sort(copy, Collator.getInstance());
-    assertEquals(copy, bookmarks);
-    assertTrue(bookmarks.contains(a.getName()));
-    assertTrue(bookmarks.contains(b.getName()));
-    assertTrue(bookmarks.contains(c.getName()));
+        .openBookmarksDrawer()
+        .assertCurrentDirectoryBookmarked(true)
+        .assertContainsBookmarksInOrder(a, b, c);
   }
+
 }

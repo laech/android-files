@@ -1,4 +1,4 @@
-package l.files.provider.bookmarks;
+package l.files.ui.bookmarks;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
@@ -10,17 +10,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.fs.Path;
+import l.files.provider.bookmarks.BookmarkManager;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 
-public final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
+final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
 
   private final BookmarkManager manager;
   private final BookmarkChangedListener listener;
   private List<Path> bookmarks;
 
-  public BookmarksLoader(Context context, BookmarkManager manager) {
+  BookmarksLoader(Context context, BookmarkManager manager) {
     super(context);
     this.manager = checkNotNull(manager);
     this.listener = new BookmarkListener();

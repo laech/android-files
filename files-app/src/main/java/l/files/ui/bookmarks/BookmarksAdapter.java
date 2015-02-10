@@ -18,7 +18,7 @@ final class BookmarksAdapter extends StableFilesAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {
-      view = inflate(R.layout.sidebar_item, parent);
+      view = inflate(R.layout.bookmark_item, parent);
       view.setTag(new ViewHolder(view));
     }
 

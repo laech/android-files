@@ -44,6 +44,7 @@ import l.files.ui.tab.ViewPagerTabBar;
 import static android.app.ActionBar.LayoutParams;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
+import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
@@ -193,6 +194,10 @@ public final class FilesActivity extends BaseActivity
   }
 
   @Override public void onBackPressed() {
+    if (isSidebarOpen()) {
+      closeSidebar();
+      return;
+    }
     if (currentPagerFragment.popBackStack()) {
       return;
     }
@@ -225,7 +230,19 @@ public final class FilesActivity extends BaseActivity
     super.onActionModeStarted(mode);
     currentActionMode = mode;
     viewPager.setEnabled(false);
-    drawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+    if (isSidebarOpen()) {
+      drawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
+    } else {
+      drawerLayout.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+    }
+  }
+
+  private boolean isSidebarOpen() {
+    return drawerLayout.isDrawerOpen(Gravity.START);
+  }
+
+  private void closeSidebar() {
+    drawerLayout.closeDrawer(Gravity.START);
   }
 
   @Override
@@ -293,7 +310,7 @@ public final class FilesActivity extends BaseActivity
           currentPagerFragment.popBackStack();
         }
       });
-    } else if (drawerLayout.isDrawerOpen(Gravity.START)) {
+    } else if (isSidebarOpen()) {
       drawerLayout.closeDrawers();
     } else {
       drawerLayout.openDrawer(Gravity.START);

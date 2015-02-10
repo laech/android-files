@@ -52,6 +52,19 @@ public final class BookmarkManagerTest extends BaseTest {
     assertFalse(manager.hasBookmark(p3));
   }
 
+  public void testRemoveBookmarks() throws Exception {
+    Path p1 = LocalPath.of("/a/b");
+    Path p2 = LocalPath.of("/1");
+    Path p3 = LocalPath.of("/x");
+    manager.addBookmark(p1);
+    manager.addBookmark(p2);
+    manager.addBookmark(p3);
+    manager.removeBookmarks(asList(p1, p2));
+    assertFalse(manager.hasBookmark(p1));
+    assertFalse(manager.hasBookmark(p2));
+    assertTrue(manager.hasBookmark(p3));
+  }
+
   public void testHasBookmark() throws Exception {
     Path path = LocalPath.of("/a/b");
     assertFalse(manager.hasBookmark(path));

@@ -125,7 +125,8 @@ public final class TabTest extends BaseFilesActivityTest {
     screen()
         .selectItem(dir().createDir("a"))
         .assertTabBackIndicatorVisibleAt(0, true)
-        .openDrawer()
+        .openBookmarksDrawer()
+        .getActivityObject()
         .assertDrawerIsOpened(true)
         .selectTabAt(0)
         .assertDrawerIsOpened(false);

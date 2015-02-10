@@ -3,7 +3,7 @@ package l.files.features;
 import java.io.File;
 
 import l.files.R;
-import l.files.features.object.UiRename;
+import l.files.features.objects.UiRename;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;

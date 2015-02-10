@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.fs.Path;
-import l.files.ui.ListProvider;
+import l.files.ui.ListSelection;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
@@ -16,14 +16,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class RenameAction extends MultiChoiceModeAction {
 
-  private final ListProvider<Path> provider;
+  private final ListSelection<Path> provider;
   private final FragmentManager manager;
 
   @SuppressWarnings("unchecked")
-  public RenameAction(FragmentManager manager, ListProvider<? extends Path> provider) {
+  public RenameAction(FragmentManager manager, ListSelection<? extends Path> provider) {
     super(R.id.rename);
     this.manager = checkNotNull(manager);
-    this.provider = (ListProvider<Path>) checkNotNull(provider);
+    this.provider = (ListSelection<Path>) checkNotNull(provider);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

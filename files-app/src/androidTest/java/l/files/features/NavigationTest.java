@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
+import l.files.fs.Path;
 import l.files.fs.Resource;
+import l.files.fs.local.LocalPath;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -82,9 +84,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void testOpenNewDirectoryWillCloseOpenedDrawer() {
-    File dir = dir().createDir("a");
+    Path dir = LocalPath.of(dir().createDir("a"));
     screen()
-        .openDrawer()
+        .openBookmarksDrawer()
+        .getActivityObject()
         .selectItem(dir)
         .assertDrawerIsOpened(false);
   }

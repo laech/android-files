@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import l.files.common.widget.MultiChoiceModeAction;
 import l.files.fs.Path;
 import l.files.ui.Clipboards;
-import l.files.ui.ListProvider;
+import l.files.ui.ListSelection;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
@@ -20,15 +20,15 @@ public final class CutAction extends MultiChoiceModeAction {
 
   private final Context context;
   private final ClipboardManager manager;
-  private final ListProvider<Path> provider;
+  private final ListSelection<Path> provider;
 
   @SuppressWarnings("unchecked")
   public CutAction(Context context, ClipboardManager manager,
-                   ListProvider<? extends Path> provider) {
+                   ListSelection<? extends Path> provider) {
     super(android.R.id.cut);
     this.context = checkNotNull(context);
     this.manager = checkNotNull(manager);
-    this.provider = (ListProvider<Path>) checkNotNull(provider);
+    this.provider = (ListSelection<Path>) checkNotNull(provider);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

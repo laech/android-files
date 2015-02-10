@@ -1,4 +1,4 @@
-package l.files.features.object;
+package l.files.features.objects;
 
 import android.app.Instrumentation;
 import android.graphics.Bitmap;
@@ -8,13 +8,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
-import static java.lang.Boolean.FALSE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
@@ -71,13 +71,6 @@ public final class Instrumentations {
     });
   }
 
-  /**
-   * Awaits the for {@code callable} to return a successful value
-   * (a successful value is anything that is not null or false),
-   * or until the specified duration times out - in this case an error will be
-   * thrown.
-   */
-  @Deprecated
   public static <T> T await(
       Instrumentation in, Callable<T> callable, long time, TimeUnit unit) {
     long start = currentTimeMillis();
@@ -85,10 +78,9 @@ public final class Instrumentations {
     AssertionError error = null;
     while ((start + duration) > currentTimeMillis()) {
       try {
-        T result = callable.call();
-        if (result != null && !result.equals(FALSE)) {
-          return result;
-        }
+        return callable.call();
+      } catch (RuntimeException e) {
+        throw e;
       } catch (Exception e) {
         throw new AssertionError(e);
       } catch (AssertionError e) {
@@ -101,30 +93,6 @@ public final class Instrumentations {
     }
     takeScreenshotAndThrow(in, error);
     return null;
-  }
-
-  /**
-   * Awaits for the runnable to return without an error, or until the
-   * specified duration times out - in this case an error will be thrown.
-   */
-  public static void await(
-      Instrumentation in, Runnable runnable, long time, TimeUnit unit) {
-    long start = currentTimeMillis();
-    long duration = unit.toMillis(time);
-    AssertionError error = null;
-    while ((start + duration) > currentTimeMillis()) {
-      try {
-        runnable.run();
-        return;
-      } catch (AssertionError e) {
-        error = e;
-        sleep(5);
-      }
-    }
-    if (error == null) {
-      error = new AssertionError("Timed out.");
-    }
-    takeScreenshotAndThrow(in, error);
   }
 
   private static void takeScreenshotAndThrow(
@@ -150,7 +118,7 @@ public final class Instrumentations {
   }
 
   public static void await(Instrumentation in, Runnable runnable) {
-    await(in, runnable, 1, SECONDS);
+    await(in, Executors.callable(runnable), 1, SECONDS);
   }
 
 }

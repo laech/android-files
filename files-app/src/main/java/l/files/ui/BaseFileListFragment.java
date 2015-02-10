@@ -5,11 +5,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import de.greenrobot.event.EventBus;
 import l.files.common.app.BaseListFragment;
+import l.files.common.widget.ListViews;
+import l.files.fs.Path;
 import l.files.operations.Events;
 
-public class BaseFileListFragment extends BaseListFragment {
+public abstract class BaseFileListFragment
+    extends BaseListFragment implements ListSelection<Path> {
 
   private EventBus bus;
   private final int layoutResourceId;
@@ -38,4 +43,17 @@ public class BaseFileListFragment extends BaseListFragment {
       LayoutInflater inflater, ViewGroup container, Bundle state) {
     return inflater.inflate(layoutResourceId, container, false);
   }
+
+  @Override public int getCheckedItemCount() {
+    return getListView().getCheckedItemCount();
+  }
+
+  @Override public int getCheckedItemPosition() {
+    return ListViews.getCheckedItemPosition(getListView());
+  }
+
+  @Override public List<Integer> getCheckedItemPositions() {
+    return ListViews.getCheckedItemPositions(getListView());
+  }
+
 }

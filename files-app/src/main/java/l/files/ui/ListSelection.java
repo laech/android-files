@@ -2,7 +2,7 @@ package l.files.ui;
 
 import java.util.List;
 
-public interface ListProvider<T> {
+public interface ListSelection<T> {
 
   int getCheckedItemCount();
 

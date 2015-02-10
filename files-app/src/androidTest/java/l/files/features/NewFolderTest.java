@@ -3,7 +3,7 @@ package l.files.features;
 import android.widget.EditText;
 
 import l.files.R;
-import l.files.features.object.UiNewFolder;
+import l.files.features.objects.UiNewFolder;
 import l.files.test.BaseFilesActivityTest;
 
 public final class NewFolderTest extends BaseFilesActivityTest {

@@ -18,5 +18,6 @@
   <item type="id" name="send_feedback"/>
   <item type="id" name="about"/>
   <item type="id" name="image_decorator_task"/>
+  <item type="id" name="delete_selected_bookmarks"/>
 
 </resources>

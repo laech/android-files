@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -66,7 +67,8 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
-  BookmarkManagerImpl(PathProvider provider, SharedPreferences pref) {
+  @VisibleForTesting
+  public BookmarkManagerImpl(PathProvider provider, SharedPreferences pref) {
     this.provider = checkNotNull(provider);
     this.pref = checkNotNull(pref);
     this.listeners = new CopyOnWriteArraySet<>();
@@ -101,7 +103,14 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     }
   }
 
-  @VisibleForTesting boolean clearBookmarksSync() {
+  @Override public void removeBookmarks(Collection<Path> bookmarks) {
+    checkNotNull(bookmarks);
+    if (this.bookmarks.removeAll(bookmarks)) {
+      saveBookmarksAndNotify();
+    }
+  }
+
+  @VisibleForTesting public boolean clearBookmarksSync() {
     bookmarks.clear();
     return pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).commit();
   }
