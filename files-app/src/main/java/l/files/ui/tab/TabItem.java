@@ -12,7 +12,7 @@ public final class TabItem implements Parcelable {
   public static final Creator<TabItem> CREATOR = new Creator<TabItem>() {
     @Override public TabItem createFromParcel(Parcel source) {
       int id = source.readInt();
-      Path path = source.readParcelable(null);
+      Path path = source.readParcelable(Path.class.getClassLoader());
       String title = source.readString();
       return new TabItem(id, path, title);
     }
