@@ -19,7 +19,7 @@ import java.util.Date;
 import l.files.R;
 import l.files.fs.ResourceStatus;
 import l.files.fs.local.LocalResourceStatus;
-import l.files.ui.StableFilesAdapter;
+import l.files.ui.StableAdapter;
 
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
@@ -41,7 +41,7 @@ import static l.files.ui.IconFonts.getDefaultFileIcon;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 import static l.files.ui.IconFonts.getIconForFileMediaType;
 
-final class FilesAdapter extends StableFilesAdapter<FileListItem> {
+final class FilesAdapter extends StableAdapter<FileListItem> {
 
   // TODO decorator for symlink and others
 

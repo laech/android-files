@@ -10,11 +10,11 @@ import android.widget.TextView;
 import l.files.R;
 import l.files.fs.Path;
 import l.files.ui.FileLabels;
-import l.files.ui.StableFilesAdapter;
+import l.files.ui.StableAdapter;
 
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
-final class BookmarksAdapter extends StableFilesAdapter<Path> {
+final class BookmarksAdapter extends StableAdapter<Path> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     if (view == null) {

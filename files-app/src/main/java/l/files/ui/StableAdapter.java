@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 
-public abstract class StableFilesAdapter<T> extends BaseAdapter {
+public abstract class StableAdapter<T> extends BaseAdapter {
 
   private static final Map<Object, Long> ids = newHashMap();
 
@@ -49,7 +49,7 @@ public abstract class StableFilesAdapter<T> extends BaseAdapter {
   }
 
   protected View inflate(int layout, ViewGroup parent) {
-    return LayoutInflater.from(parent.getContext())
-        .inflate(layout, parent, false);
+    return LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
   }
+
 }
