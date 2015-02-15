@@ -20,7 +20,7 @@ public final class Bitmaps {
     float scale = scale(width, height, maxWidth, maxHeight);
     int scaledWith = round(width * scale);
     int scaledHeight = round(height * scale);
-    return new ScaledSize(scaledWith, scaledHeight, scale);
+    return new ScaledSize(width, height, scaledWith, scaledHeight, scale);
   }
 
   private static float scale(
