@@ -36,7 +36,7 @@ trait Resource : PathEntry, Parcelable {
      * rethrow the exception, traversal will continue.
      */
     throws(javaClass<IOException>())
-    fun traverse(order: TraversalOrder, handler: (Resource, IOException) -> Unit): Stream<Resource>
+    fun traverse(order: TraversalOrder, handler: (Resource, IOException) -> Unit): Sequence<Resource>
 
     /**
      * Opens a resource stream to iterate through the immediate children.

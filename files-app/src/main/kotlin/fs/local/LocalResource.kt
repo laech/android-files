@@ -36,7 +36,7 @@ private data class LocalResource(override val path: LocalPath) : Resource {
 
     override fun traverse(
             order: TraversalOrder,
-            handler: (Resource, IOException) -> Unit): Stream<LocalResource> {
+            handler: (Resource, IOException) -> Unit): Sequence<LocalResource> {
 
         val root = LocalPathEntry.read(path)
         val fn: (PathEntry, IOException) -> Unit = { entry, exception ->
@@ -46,7 +46,7 @@ private data class LocalResource(override val path: LocalPath) : Resource {
             BREATH_FIRST -> Traverser(fn).breadthFirstTraversal(root)
             POST_ORDER -> Traverser(fn).postOrderTraversal(root)
             PRE_ORDER -> Traverser(fn).preOrderTraversal(root)
-        }.stream().map { it.resource }
+        }.sequence().map { it.resource }
     }
 
     private class Traverser(private val handler: (PathEntry, IOException) -> Unit) : TreeTraverser<LocalPathEntry>() {
