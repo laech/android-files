@@ -18,7 +18,7 @@ data class Target(
          */
         val destination: String) {
 
-    class object {
+    companion object {
 
         val NONE = Target("", "")
 

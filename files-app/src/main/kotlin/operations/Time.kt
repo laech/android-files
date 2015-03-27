@@ -16,7 +16,7 @@ data class Time(
          */
         val tick: Long) {
 
-    class object {
+    companion object {
 
         platformStatic fun from(clock: Clock): Time {
             return Time(clock.time(), clock.tick())

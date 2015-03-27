@@ -7,7 +7,7 @@ import kotlin.platform.platformStatic
  */
 private data class Dirent(val inode: Long, val type: Int, val name: String) : Native() {
 
-    public class object {
+    public companion object {
 
         val DT_UNKNOWN: Int = 0
         val DT_FIFO: Int = 1
@@ -19,7 +19,7 @@ private data class Dirent(val inode: Long, val type: Int, val name: String) : Na
         val DT_SOCK: Int = 12
         val DT_WHT: Int = 14
 
-        {
+        init {
             init()
         }
 

@@ -42,7 +42,7 @@ private class LocalResourceStream private(
         }
     }
 
-    public class object {
+    public companion object {
 
         platformStatic
         throws(javaClass<IOException>())

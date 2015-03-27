@@ -141,7 +141,7 @@ private data class LocalResource(override val path: LocalPath) : Resource {
         dest.writeParcelable(path, 0)
     }
 
-    class object {
+    companion object {
 
         public val CREATOR: Creator<LocalResource> = object : Creator<LocalResource> {
             override fun newArray(size: Int) = arrayOfNulls<LocalResource>(size)

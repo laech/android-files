@@ -81,7 +81,7 @@ trait TaskState {
                       val failures: List<Failure>) : TaskState
 
 
-    class object {
+    companion object {
 
         fun pending(task: TaskId, target: Target, time: Time) =
                 Pending(task, target, time)

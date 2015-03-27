@@ -130,7 +130,7 @@ private class Copy(sources: Iterable<Path>, dstDir: Path) : Paste(sources, dstDi
          */
     }
 
-    class object {
+    companion object {
 
         private val logger = Logger.get(javaClass<Copy>())
 

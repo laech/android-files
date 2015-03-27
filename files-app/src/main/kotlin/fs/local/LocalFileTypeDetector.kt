@@ -33,9 +33,7 @@ private abstract class LocalFileTypeDetector : FileTypeDetector {
 
     protected abstract fun detectRegularFile(status: ResourceStatus): MediaType
 
-    class object {
-
-        private val log = Logger.get(javaClass<LocalFileTypeDetector>())
+    companion object {
 
         // Media types for file types, kept consistent with the linux "file" command
         private val INODE_DIRECTORY = MediaType.parse("inode/directory")

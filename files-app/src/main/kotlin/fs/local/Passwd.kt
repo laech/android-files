@@ -11,9 +11,9 @@ private data class Passwd(val name: String,
                   val dir: String,
                   val shell: String) : Native() {
 
-    public class object {
+    public companion object {
 
-        {
+        init {
             init()
         }
 

@@ -14,7 +14,7 @@ data class FailureMessage(val path: Path, val message: String) : Parcelable {
 
     override fun describeContents() = 0
 
-    class object {
+    companion object {
 
         val CREATOR: Creator<FailureMessage> = object : Creator<FailureMessage> {
             override fun createFromParcel(source: Parcel): FailureMessage {

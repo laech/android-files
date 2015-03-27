@@ -58,7 +58,7 @@ private data class LocalPath private(val file: File) : Path {
 
     override fun toString() = file.path
 
-    public class object {
+    public companion object {
 
         public val CREATOR: Creator<LocalPath> = object : Creator<LocalPath> {
             override fun createFromParcel(source: Parcel) = File(source.readString()).toLocalPath()

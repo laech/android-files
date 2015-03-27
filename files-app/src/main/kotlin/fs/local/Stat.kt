@@ -37,7 +37,7 @@ data class Stat(
 
         val blocks: Long) : Native() {
 
-    class object {
+    companion object {
 
         /* See /usr/include/linux/stat.h for meaning of these constants. */
 
@@ -76,7 +76,7 @@ data class Stat(
         val S_IWOTH = 2
         val S_IXOTH = 1
 
-        {
+        init {
             init()
         }
 

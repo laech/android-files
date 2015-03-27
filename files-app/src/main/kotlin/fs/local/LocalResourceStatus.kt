@@ -50,7 +50,7 @@ private data class LocalResourceStatus private (
         }
     }
 
-    public class object {
+    public companion object {
 
         throws(javaClass<IOException>())
         platformStatic fun stat(file: File, followLink: Boolean) =

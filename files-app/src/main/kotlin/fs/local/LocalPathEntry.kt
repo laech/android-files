@@ -11,7 +11,7 @@ private data class LocalPathEntry(
 
     override val resource = path.resource
 
-    public class object {
+    public companion object {
 
         throws(javaClass<IOException>())
         fun stat(file: File): LocalPathEntry {

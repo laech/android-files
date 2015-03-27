@@ -15,7 +15,7 @@ data class Progress private(val total: Long, val processed: Long) {
 
     val isDone: Boolean get() = total == processed
 
-    class object {
+    companion object {
 
         val NONE = normalize(0, 0)
 

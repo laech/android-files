@@ -7,9 +7,9 @@ import kotlin.platform.platformStatic
  */
 private data class Group(val name: String, val gid: Int) : Native() {
 
-    public class object {
+    public companion object {
 
-        {
+        init {
             init()
         }
 
