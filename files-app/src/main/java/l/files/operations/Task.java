@@ -19,7 +19,7 @@ abstract class Task {
 
   private final Runnable update = new Runnable() {
     @Override public void run() {
-      if (!state.getIsFinished()) {
+      if (!state.isFinished()) {
         state = running((TaskState.Running) state);
         notifyProgress(state);
         handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
@@ -72,7 +72,7 @@ abstract class Task {
   }
 
   private void onPending() {
-    state = TaskState.OBJECT$.pending(id, target, clock.read());
+    state = TaskState.pending(id, target, clock.read());
     if (!currentThread().isInterrupted()) {
       notifyProgress(state);
     }
