@@ -14,7 +14,7 @@ final class DeleteTask extends Task {
 
   DeleteTask(int id, Clock clock, EventBus bus, Handler handler,
              Iterable<Path> paths) {
-    super(new TaskId(id, DELETE), Target.fromPaths(paths),
+    super(TaskId.create(id, DELETE), Target.fromPaths(paths),
         clock, bus, handler);
     this.count = new Size(paths);
     this.delete = new Delete(paths);

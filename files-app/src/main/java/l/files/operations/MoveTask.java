@@ -20,7 +20,7 @@ final class MoveTask extends Task {
 
   MoveTask(int id, Clock clock, EventBus bus, Handler handler,
            Iterable<Path> sources, Path dstPath) {
-    super(new TaskId(id, MOVE), Target.fromPaths(sources, dstPath),
+    super(TaskId.create(id, MOVE), Target.fromPaths(sources, dstPath),
         clock, bus, handler);
     this.move = new Move(sources, dstPath);
     this.count = new Size(sources);
