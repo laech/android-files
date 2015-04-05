@@ -123,7 +123,7 @@ public final class RenameFragment extends FileCreationFragment {
       }
       EditText field = getFilenameField();
       field.setText(stat.getName());
-      if (stat.getIsDirectory()) {
+      if (stat.isDirectory()) {
         field.selectAll();
       } else {
         field.setSelection(0, getBaseName(stat.getName()).length());

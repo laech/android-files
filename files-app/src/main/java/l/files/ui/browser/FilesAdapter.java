@@ -179,13 +179,13 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
     void setTitle(FileListItem.File file) {
       title.setText(file.getPath().getName());
-      title.setEnabled(file.getStat() != null && file.getStat().getIsReadable());
+      title.setEnabled(file.getStat() != null && file.getStat().isReadable());
     }
 
     void setIcon(FileListItem.File file) {
       Context context = icon.getContext();
       AssetManager assets = context.getAssets();
-      icon.setEnabled(file.getTargetStat() != null && file.getTargetStat().getIsReadable());
+      icon.setEnabled(file.getTargetStat() != null && file.getTargetStat().isReadable());
       if (file.getTargetStat() != null && setLocalIcon(icon, file.getTargetStat())) {
         icon.setTypeface(SANS_SERIF, BOLD);
       } else {
@@ -199,13 +199,13 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
       if (status instanceof LocalResourceStatus) {
         // Sets single character type consistent with ls command
         LocalResourceStatus local = (LocalResourceStatus) status;
-        if (local.getIsBlockDevice()) {
+        if (local.isBlockDevice()) {
           icon.setText("B");
-        } else if (local.getIsCharacterDevice()) {
+        } else if (local.isCharacterDevice()) {
           icon.setText("C");
-        } else if (local.getIsSocket()) {
+        } else if (local.isSocket()) {
           icon.setText("S");
-        } else if (local.getIsFifo()) {
+        } else if (local.isFifo()) {
           icon.setText("P");
         } else {
           return false;
@@ -220,8 +220,8 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
       if (stat == null) {
         return getDefaultFileIcon(assets);
       }
-      if (stat.getIsDirectory()
-          || file.getTargetStat().getIsDirectory()) {
+      if (stat.isDirectory()
+          || file.getTargetStat().isDirectory()) {
         return getDirectoryIcon(assets, file.getPath());
       } else {
         return getIconForFileMediaType(assets, stat.getBasicMediaType());
@@ -231,8 +231,8 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
     private int getIconBackgroundResource(FileListItem.File file) {
       ResourceStatus stat = file.getStat();
       if (stat == null
-          || stat.getIsDirectory()
-          || file.getTargetStat().getIsDirectory()) {
+          || stat.isDirectory()
+          || file.getTargetStat().isDirectory()) {
         return getDefaultBackgroundResource();
       } else {
         return getBackgroundResourceForFileMediaType(stat.getBasicMediaType());
@@ -245,7 +245,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         date.setText("");
         date.setVisibility(GONE);
       } else {
-        date.setEnabled(stat.getIsReadable());
+        date.setEnabled(stat.isReadable());
         date.setText(dateFormatter.apply(stat));
       }
     }
@@ -256,9 +256,9 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         size.setText("");
         size.setVisibility(GONE);
       } else {
-        size.setEnabled(stat.getIsReadable());
-        size.setText(stat.getIsDirectory() ? "" : formatShortFileSize(size.getContext(), stat.getSize()));
-        size.setVisibility(stat.getIsRegularFile() ? VISIBLE : GONE);
+        size.setEnabled(stat.isReadable());
+        size.setText(stat.isDirectory() ? "" : formatShortFileSize(size.getContext(), stat.getSize()));
+        size.setVisibility(stat.isRegularFile() ? VISIBLE : GONE);
       }
     }
 
@@ -273,10 +273,10 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
     void setSymlink(FileListItem.File file) {
       ResourceStatus stat = file.getStat();
-      if (stat == null || !stat.getIsSymbolicLink()) {
+      if (stat == null || !stat.isSymbolicLink()) {
         symlink.setVisibility(GONE);
       } else {
-        symlink.setEnabled(stat.getIsReadable());
+        symlink.setEnabled(stat.isReadable());
         symlink.setVisibility(VISIBLE);
       }
     }

@@ -6,8 +6,8 @@
 static jmethodID ctor;
 
 void Java_l_files_fs_local_Passwd_init(JNIEnv *env, jclass clazz) {
-  ctor = (*env)->GetMethodID(env, clazz, "<init>",
-      "(Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)V");
+  ctor = (*env)->GetStaticMethodID(env, clazz, "create",
+      "(Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;)Ll/files/fs/local/Passwd;");
 }
 
 jobject Java_l_files_fs_local_Passwd_getpwuid(JNIEnv* env, jclass clazz, jint juid) {
@@ -20,7 +20,7 @@ jobject Java_l_files_fs_local_Passwd_getpwuid(JNIEnv* env, jclass clazz, jint ju
     jstring jname = (*env)->NewStringUTF(env, pw->pw_name);
     jstring jdir = (*env)->NewStringUTF(env, pw->pw_dir);
     jstring jshell = (*env)->NewStringUTF(env, pw->pw_shell);
-    return (*env)->NewObject(env, clazz, ctor,
+    return (*env)->CallStaticObjectMethod(env, clazz, ctor,
         jname,
         (jint) pw->pw_uid,
         (jint) pw->pw_gid,

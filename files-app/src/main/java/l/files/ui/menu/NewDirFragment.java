@@ -40,7 +40,7 @@ public final class NewDirFragment extends FileCreationFragment {
     new AsyncTask<Object, Object, String>() {
       @Override protected String doInBackground(Object... params) {
         Resource resource = parent.resolve(basename);
-        for (int i = 2; resource.getExists(); i++) {
+        for (int i = 2; resource.exists(); i++) {
           resource = parent.resolve(basename + " " + i);
         }
         return resource.getName();

@@ -123,9 +123,9 @@ public final class FilesPagerFragment extends Fragment {
     if (getActivity() == null) {
       return;
     }
-    if (!status.getIsReadable()) {
+    if (!status.isReadable()) {
       showPermissionDenied();
-    } else if (status.getIsDirectory()) {
+    } else if (status.isDirectory()) {
       showDirectory(status.getPath());
     } else {
       showFile(status.getPath());

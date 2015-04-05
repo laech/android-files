@@ -177,15 +177,15 @@ final class ErrnoException extends IOException {
     return errors;
   }
 
-  IOException toIOException() throws IOException {
+  IOException toIOException() {
     switch (errno()) {
       case ENOENT: {
         FileNotFoundException e = new FileNotFoundException();
         e.initCause(this);
-        throw e;
+        return e;
       }
       default:
-        throw this;
+        return this;
     }
   }
 }

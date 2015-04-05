@@ -6,8 +6,8 @@
 static jmethodID ctor;
 
 void Java_l_files_fs_local_Group_init(JNIEnv *env, jclass clazz) {
-  ctor = (*env)->GetMethodID(env, clazz, "<init>",
-      "(Ljava/lang/String;I)V");
+  ctor = (*env)->GetStaticMethodID(env, clazz, "create",
+      "(Ljava/lang/String;I)Ll/files/fs/local/Group;");
 }
 
 jobject Java_l_files_fs_local_Group_getgrgid(JNIEnv* env, jclass clazz, jint jgid) {
@@ -18,5 +18,5 @@ jobject Java_l_files_fs_local_Group_getgrgid(JNIEnv* env, jclass clazz, jint jgi
       return NULL;
     }
     jstring jname = (*env)->NewStringUTF(env, gr->gr_name);
-    return (*env)->NewObject(env, clazz, ctor, jname, (jint) gr->gr_gid);
+    return (*env)->CallStaticObjectMethod(env, clazz, ctor, jname, (jint) gr->gr_gid);
 }

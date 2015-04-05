@@ -108,7 +108,7 @@ public abstract class FileCreationFragment extends DialogFragment
       final Path path = getParentPath().resolve(getFilename());
       return new AsyncTaskLoader<Existence>(getActivity()) {
         @Override public Existence loadInBackground() {
-          return new Existence(path, path.getResource().getExists());
+          return new Existence(path, path.getResource().exists());
         }
 
         @Override protected void onStartLoading() {

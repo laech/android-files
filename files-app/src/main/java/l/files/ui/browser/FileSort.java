@@ -52,13 +52,13 @@ public enum FileSort {
     @Override public Comparator<FileListItem.File> newComparator(final Locale locale) {
       return new NullableFileStatComparator(locale) {
         @Override public int compareNotNull(ResourceStatus a, ResourceStatus b) {
-          if (a.getIsDirectory() && b.getIsDirectory()) {
+          if (a.isDirectory() && b.isDirectory()) {
             return nameComparator.compare(a.getName(), b.getName());
           }
-          if (a.getIsDirectory()) {
+          if (a.isDirectory()) {
             return 1;
           }
-          if (b.getIsDirectory()) {
+          if (b.isDirectory()) {
             return -1;
           }
           int compare = Longs.compare(b.getSize(), a.getSize());

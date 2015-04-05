@@ -1,15 +1,13 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import kotlin.Function2;
-import kotlin.Unit;
 import l.files.fs.Path;
 import l.files.fs.Resource;
 
+import static l.files.fs.Resource.TraversalExceptionHandler;
 import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
 
 final class Delete extends AbstractOperation {
@@ -30,7 +28,7 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(Path path, FailureRecorder listener) {
+    void process(Path path, FailureRecorder listener) throws InterruptedException {
         try {
             deleteTree(path, listener);
         } catch (IOException e) {
@@ -38,16 +36,15 @@ final class Delete extends AbstractOperation {
         }
     }
 
-    private void deleteTree(Path path, final FailureRecorder listener) throws IOException {
-        Iterator<Resource> it = path.getResource().traverse(POST_ORDER, new Function2<Resource, IOException, Unit>() {
+    private void deleteTree(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
+        Iterable<Resource> resources = path.getResource().traverse(POST_ORDER, new TraversalExceptionHandler() {
             @Override
-            public Unit invoke(Resource resource, IOException e) {
+            public void handle(Resource resource, IOException e) {
                 listener.onFailure(resource.getPath(), e);
-                return null;
             }
-        }).iterator();
-        while (it.hasNext() && !Thread.currentThread().isInterrupted()) {
-            Resource resource = it.next();
+        });
+        for (Resource resource : resources) {
+            checkInterrupt();
             try {
                 delete(resource);
             } catch (IOException e) {

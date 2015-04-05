@@ -97,7 +97,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       files.addAll(data.values());
     } else {
       for (FileListItem.File item : data.values()) {
-        if (!item.getPath().getIsHidden()) {
+        if (!item.getPath().isHidden()) {
           files.add(item);
         }
       }
@@ -172,7 +172,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
   }
 
   private ResourceStatus readTargetStatus(ResourceStatus status) {
-    if (status.getIsSymbolicLink()) {
+    if (status.isSymbolicLink()) {
       try {
         return status.getResource().readStatus(true);
       } catch (IOException e) {

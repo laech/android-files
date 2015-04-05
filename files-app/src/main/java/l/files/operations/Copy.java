@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.ClosedByInterruptException;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import kotlin.Function2;
-import kotlin.Unit;
 import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 
+import static l.files.fs.Resource.TraversalExceptionHandler;
 import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
 
 final class Copy extends Paste {
@@ -40,24 +38,22 @@ final class Copy extends Paste {
     @Override
     void paste(Path from, Path to, final FailureRecorder listener) throws InterruptedException {
 
-        Iterator<Resource> it;
+        Iterable<Resource> iterable;
         try {
-            it = from.getResource().traverse(PRE_ORDER, new Function2<Resource, IOException, Unit>() {
+            iterable = from.getResource().traverse(PRE_ORDER, new TraversalExceptionHandler() {
                 @Override
-                public Unit invoke(Resource resource, IOException e) {
+                public void handle(Resource resource, IOException e) {
                     listener.onFailure(resource.getPath(), e);
-                    return null;
                 }
-            }).iterator();
+            });
         } catch (IOException e) {
             listener.onFailure(from, e);
             return;
         }
 
-        while (it.hasNext()) {
+        for (Resource resource : iterable) {
             checkInterrupt();
 
-            Resource resource = it.next();
             Path path = resource.getPath();
             ResourceStatus status;
             try {
@@ -69,13 +65,13 @@ final class Copy extends Paste {
 
             Path dst = path.replace(from, to);
 
-            if (status.getIsSymbolicLink()) {
+            if (status.isSymbolicLink()) {
                 copyLink(status, dst, listener);
 
-            } else if (status.getIsDirectory()) {
+            } else if (status.isDirectory()) {
                 createDirectory(status, dst, listener);
 
-            } else if (status.getIsRegularFile()) {
+            } else if (status.isRegularFile()) {
                 copyFile(status, dst, listener);
 
             } else {

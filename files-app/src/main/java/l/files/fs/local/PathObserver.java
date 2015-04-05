@@ -126,7 +126,7 @@ final class PathObserver extends FileObserver {
   public List<Path> removeNonExistPaths() {
     return removePaths(new Predicate<Path>() {
       @Override public boolean apply(Path path) {
-        return !path.getResource().getExists();
+        return !path.getResource().exists();
       }
     });
   }
