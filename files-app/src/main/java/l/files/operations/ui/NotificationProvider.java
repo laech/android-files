@@ -153,7 +153,7 @@ final class NotificationProvider {
     Collection<l.files.operations.Failure> failures = state.getFailures();
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
-      messages.add(new FailureMessage(
+      messages.add(FailureMessage.create(
           failure.getPath(), failure.getCause().getMessage() + ""));
     }
     String title = viewer.getContentTitle(state);
