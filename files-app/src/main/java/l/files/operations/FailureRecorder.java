@@ -21,7 +21,7 @@ final class FailureRecorder {
     if (failures.size() > limit) {
       throw new FileException(failures);
     }
-    failures.add(new Failure(path, failure));
+    failures.add(Failure.create(path, failure));
   }
 
   void throwIfNotEmpty() {
