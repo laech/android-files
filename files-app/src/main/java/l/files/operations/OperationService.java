@@ -151,7 +151,7 @@ public final class OperationService extends Service {
     if (task != null) {
       task.cancel(true);
     } else {
-      bus.post(new TaskNotFound(startId));
+      bus.post(TaskNotFound.create(startId));
     }
     if (tasks.isEmpty()) {
       stopSelf();
