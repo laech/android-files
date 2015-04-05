@@ -104,7 +104,7 @@ final class NotificationProvider {
 
   private Notification newProgressNotification(TaskState.Running state) {
     TaskStateViewer viewer = getViewer(state);
-    if (state.getItems().getIsDone() || state.getBytes().getIsDone()) {
+    if (state.getItems().isDone() || state.getBytes().isDone()) {
       return newIndeterminateNotification(state, viewer.getContentTitle(state));
     }
     int progressMax = 10000;

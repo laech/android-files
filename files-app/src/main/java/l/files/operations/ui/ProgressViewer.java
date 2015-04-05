@@ -33,7 +33,7 @@ abstract class ProgressViewer implements TaskStateViewer {
   }
 
   @Override public final String getContentTitle(TaskState.Running state) {
-    if (state.getItems().getIsDone() || state.getBytes().getIsDone()) {
+    if (state.getItems().isDone() || state.getBytes().isDone()) {
       return context.getString(R.string.cleaning_up);
     }
     int total = Ints.saturatedCast(state.getItems().getTotal());
