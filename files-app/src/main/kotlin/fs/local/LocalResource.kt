@@ -1,34 +1,31 @@
 package l.files.fs.local
 
-import java.io.FileInputStream
-import java.io.IOException
-
-import l.files.fs.Path
-import l.files.fs.Resource
-import l.files.fs.WatchService
 import android.os.Parcel
 import android.os.Parcelable.Creator
+import com.google.common.collect.TreeTraverser
+import l.files.fs.*
 import l.files.fs.Resource.TraversalOrder
 import l.files.fs.Resource.TraversalOrder.BREATH_FIRST
 import l.files.fs.Resource.TraversalOrder.POST_ORDER
 import l.files.fs.Resource.TraversalOrder.PRE_ORDER
-import com.google.common.collect.TreeTraverser
-import l.files.fs.PathEntry
-import l.files.fs.ResourceStream
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.IOException
 
-private data class LocalResource(override val path: LocalPath) : Resource {
+private data class LocalResource(private val _path: LocalPath) : Resource {
 
-    override val resource: LocalResource get() = path.resource
+    override fun getPath() = _path
+
+    override fun getResource() = getPath().getResource()
 
     override val watcher: WatchService get() = LocalWatchService.get()
 
-    override fun resolve(other: String) = LocalResource(path.resolve(other))
+    override fun resolve(other: String) = LocalResource(getPath().resolve(other))
 
-    override fun readStatus(followLink: Boolean) = LocalResourceStatus.stat(path, followLink)
+    override fun readStatus(followLink: Boolean) = LocalResourceStatus.stat(getPath(), followLink)
 
     override val exists: Boolean get() = try {
-        Unistd.access(path.toString(), Unistd.F_OK)
+        Unistd.access(getPath().toString(), Unistd.F_OK)
         true
     } catch (e: ErrnoException) {
         false
@@ -38,22 +35,22 @@ private data class LocalResource(override val path: LocalPath) : Resource {
             order: TraversalOrder,
             handler: (Resource, IOException) -> Unit): Sequence<LocalResource> {
 
-        val root = LocalPathEntry.read(path)
+        val root = LocalPathEntry.read(getPath())
         val fn: (PathEntry, IOException) -> Unit = { entry, exception ->
-            handler(entry.resource, exception)
+            handler(entry.getResource(), exception)
         }
         return when (order) {
             BREATH_FIRST -> Traverser(fn).breadthFirstTraversal(root)
             POST_ORDER -> Traverser(fn).postOrderTraversal(root)
             PRE_ORDER -> Traverser(fn).preOrderTraversal(root)
-        }.sequence().map { it.resource }
+        }.sequence().map { it.getResource() }
     }
 
     private class Traverser(private val handler: (PathEntry, IOException) -> Unit) : TreeTraverser<LocalPathEntry>() {
 
         override fun children(root: LocalPathEntry) = try {
             if (root.isDirectory) {
-                LocalResourceStream.open(root.path).use { it.toArrayList() }
+                LocalResourceStream.open(root.getPath()).use { it.toArrayList() }
             } else {
                 emptyList<LocalPathEntry>()
             }
@@ -64,33 +61,33 @@ private data class LocalResource(override val path: LocalPath) : Resource {
     }
 
     override fun openResourceStream() = object : ResourceStream<LocalResource> {
-        val stream = LocalResourceStream.open(path)
-        override fun iterator() = stream.map { it.resource }.iterator()
+        val stream = LocalResourceStream.open(getPath())
+        override fun iterator() = stream.map { it.getResource() }.iterator()
         override fun close() {
             stream.close()
         }
     }
 
-    override fun openInputStream() = FileInputStream(path.toString())
+    override fun openInputStream() = FileInputStream(getPath().toString())
 
-    override fun openOutputStream() = FileOutputStream(path.toString())
+    override fun openOutputStream() = FileOutputStream(getPath().toString())
 
     override fun createDirectory() {
-        createDirectory(path)
+        createDirectory(getPath())
     }
 
     private fun createDirectory(path: LocalPath) {
-        if (!path.parent!!.resource.exists) {
-            createDirectory(path.parent)
+        if (!getPath().parent!!.getResource().exists) {
+            createDirectory(getPath().parent)
         }
-        val f = java.io.File(path.toString())
+        val f = java.io.File(getPath().toString())
         if (!f.isDirectory() && !f.mkdir()) {
             throw IOException() // TODO use native code to get errno
         }
     }
 
     override fun createFile() {
-        if (!java.io.File(path.toString()).createNewFile()) {
+        if (!java.io.File(getPath().toString()).createNewFile()) {
             throw IOException() // TODO use native code to get errno
         }
     }
@@ -98,14 +95,14 @@ private data class LocalResource(override val path: LocalPath) : Resource {
     override fun createSymbolicLink(target: Path) {
         LocalPath.check(target)
         try {
-            Unistd.symlink(target.toString(), path.toString())
+            Unistd.symlink(target.toString(), getPath().toString())
         } catch (e: ErrnoException) {
             throw e.toIOException()
         }
     }
 
     override fun readSymbolicLink() = try {
-        LocalResource(LocalPath.of(Unistd.readlink(path.toString())))
+        LocalResource(LocalPath.of(Unistd.readlink(getPath().toString())))
     } catch (e: ErrnoException) {
         throw e.toIOException()
     }
@@ -113,7 +110,7 @@ private data class LocalResource(override val path: LocalPath) : Resource {
     override fun move(dst: Path) {
         LocalPath.check(dst)
         try {
-            Stdio.rename(path.toString(), dst.toString())
+            Stdio.rename(getPath().toString(), dst.toString())
         } catch (e: ErrnoException) {
             throw e.toIOException()
         }
@@ -121,24 +118,24 @@ private data class LocalResource(override val path: LocalPath) : Resource {
 
     override fun delete() {
         try {
-            Stdio.remove(path.toString());
+            Stdio.remove(getPath().toString());
         } catch (e: ErrnoException) {
             throw e.toIOException()
         }
     }
 
     override fun setLastModifiedTime(time: Long) {
-        if (!java.io.File(path.toString()).setLastModified(time)) {
+        if (!java.io.File(getPath().toString()).setLastModified(time)) {
             throw IOException() // TODO use native code to get errno
         }
     }
 
-    override fun detectMediaType() = MagicFileTypeDetector.detect(path)
+    override fun detectMediaType() = MagicFileTypeDetector.detect(getPath())
 
     override fun describeContents() = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeParcelable(path, 0)
+        dest.writeParcelable(getPath(), 0)
     }
 
     companion object {

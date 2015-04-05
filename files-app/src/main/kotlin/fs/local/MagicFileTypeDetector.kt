@@ -13,7 +13,7 @@ private object MagicFileTypeDetector : LocalFileTypeDetector() {
     private val tika: Tika by Delegates.lazy { Tika() }
 
     override fun detectRegularFile(status: ResourceStatus) = try {
-        MediaType.parse(tika.detect(LocalPath.check(status.path).file))
+        MediaType.parse(tika.detect(LocalPath.check(status.getPath()).file))
 
     } catch (e: TaggedIOException) {
         if (e.getCause() != null) {

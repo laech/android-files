@@ -11,17 +11,19 @@ import kotlin.platform.platformStatic
 import com.google.common.net.MediaType
 
 private data class LocalResourceStatus private (
-        override val path: LocalPath,
+        private val _path: LocalPath,
         val stat: Stat) : ResourceStatus {
 
-    override val resource: LocalResource get() = path.resource
+    override fun getPath() = _path
+
+    override fun getResource() = getPath().getResource()
 
     override val isReadable: Boolean by Delegates.lazy { access(Unistd.R_OK) }
     override val isWritable: Boolean by Delegates.lazy { access(Unistd.W_OK) }
     override val isExecutable: Boolean by Delegates.lazy { access(Unistd.X_OK) }
 
     private fun access(mode: Int) = try {
-        Unistd.access(path.toString(), mode)
+        Unistd.access(getPath().toString(), mode)
         true
     } catch (e: ErrnoException) {
         false

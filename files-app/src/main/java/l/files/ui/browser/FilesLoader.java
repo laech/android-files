@@ -114,11 +114,11 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       String category = categorizer.get(res, stat);
       if (i == 0) {
         if (category != null) {
-          result.add(new FileListItem.Header(category));
+          result.add(FileListItem.Header.create(category));
         }
       } else {
         if (!Objects.equals(preCategory, category)) {
-          result.add(new FileListItem.Header(category));
+          result.add(FileListItem.Header.create(category));
         }
       }
       result.add(stat);
@@ -158,7 +158,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       Resource resource = path.getResource();
       ResourceStatus stat = resource.readStatus(false);
       ResourceStatus targetStat = readTargetStatus(stat);
-      FileListItem.File newStat = new FileListItem.File(path, stat, targetStat);
+      FileListItem.File newStat = FileListItem.File.create(path, stat, targetStat);
       FileListItem.File oldStat = data.put(path, newStat);
       return !Objects.equals(newStat, oldStat);
 
@@ -166,7 +166,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
       return data.remove(path) != null;
 
     } catch (IOException e) {
-      data.put(path, new FileListItem.File(path, null, null));
+      data.put(path, FileListItem.File.create(path, null, null));
       return true;
     }
   }

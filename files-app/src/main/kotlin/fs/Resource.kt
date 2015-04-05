@@ -8,12 +8,12 @@ import java.io.OutputStream
 
 trait Resource : PathEntry, Parcelable {
 
-    override val resource: Resource get() = this
+    override fun getResource() = this
 
     /**
      * Gets the name of this resource, or empty if this is the root
      */
-    val name: String get() = path.name
+    val name: String get() = getPath().name
 
     /**
      * Returns the watch service for the underlying file system.
@@ -70,7 +70,7 @@ trait Resource : PathEntry, Parcelable {
     fun createSymbolicLink(target: Path)
 
     throws(javaClass<IOException>())
-    fun createSymbolicLink(target: Resource) = createSymbolicLink(target.path)
+    fun createSymbolicLink(target: Resource) = createSymbolicLink(target.getPath())
 
     /**
      * If this is a symbolic link, returns the target file.

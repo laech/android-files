@@ -59,11 +59,11 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
   }
 
   @Override public int getItemViewType(int position) {
-    return getItem(position).getIsFile() ? 1 : 0;
+    return getItem(position).isFile() ? 1 : 0;
   }
 
   @Override public boolean isEnabled(int position) {
-    return getItem(position).getIsFile();
+    return getItem(position).isFile();
   }
 
   @Override public boolean areAllItemsEnabled() {
@@ -72,7 +72,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
   @Override public View getView(int position, View view, ViewGroup parent) {
     FileListItem item = getItem(position);
-    if (item.getIsHeader()) {
+    if (item.isHeader()) {
       return getHeaderView(item, view, parent);
     } else {
       return getFileView((FileListItem.File) item, view, parent);

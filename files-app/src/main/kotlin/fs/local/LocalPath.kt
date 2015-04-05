@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions.checkArgument
 
 private data class LocalPath private(val file: File) : Path {
 
-    override val resource = LocalResource(this)
+    override fun getResource() = LocalResource(this)
 
     override val uri = file.sanitizedUri()
 

@@ -94,7 +94,7 @@ public final class FilesFragment extends BaseFileListFragment implements
   @Override public void onListItemClick(ListView l, View v, int pos, long id) {
     super.onListItemClick(l, v, pos, id);
     FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
-    getBus().post(new OpenFileRequest(item.getPath()));
+    getBus().post(OpenFileRequest.create(item.getPath()));
   }
 
   @Override public FilesAdapter getListAdapter() {
@@ -137,7 +137,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     List<Path> paths = new ArrayList<>(positions.size());
     for (int position : positions) {
       FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
-      if (item.getIsFile()) {
+      if (item.isFile()) {
         paths.add(((FileListItem.File) item).getPath());
       }
     }

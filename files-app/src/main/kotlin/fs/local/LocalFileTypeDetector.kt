@@ -12,16 +12,16 @@ import com.google.common.net.MediaType.OCTET_STREAM
 private abstract class LocalFileTypeDetector : FileTypeDetector {
 
     override fun detect(path: Path) =
-            detectLocal((path as LocalPath).resource.readStatus(true))
+            detectLocal((path as LocalPath).getResource().readStatus(true))
 
     override fun detect(status: ResourceStatus) = if (status.isSymbolicLink) {
-        detect(status.path)
+        detect(status.getPath())
     } else {
         detectLocal(status as LocalResourceStatus)
     }
 
     private fun detectLocal(status: LocalResourceStatus): MediaType {
-        if (status.isSymbolicLink) return detectLocal(status.resource.readStatus(true))
+        if (status.isSymbolicLink) return detectLocal(status.getResource().readStatus(true))
         if (status.isRegularFile) return detectRegularFile(status)
         if (status.isFifo) return INODE_FIFO
         if (status.isSocket) return INODE_SOCKET

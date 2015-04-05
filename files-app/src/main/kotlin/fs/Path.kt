@@ -10,7 +10,7 @@ import java.net.URI
  */
 trait Path : PathEntry, Parcelable {
 
-    override val path: Path get() = this
+    override fun getPath() = this
 
     /**
      * The normalized/absolute URI of this path.

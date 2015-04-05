@@ -4,7 +4,7 @@ import com.google.common.net.MediaType
 
 trait ResourceStatus : PathEntry {
 
-    val name: String get() = path.name
+    val name: String get() = getPath().name
     val size: Long
     val isRegularFile: Boolean
     val isDirectory: Boolean
