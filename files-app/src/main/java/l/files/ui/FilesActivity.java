@@ -26,7 +26,6 @@ import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.DrawerListeners;
-import l.files.eventbus.Subscribe;
 import l.files.fs.Path;
 import l.files.operations.Events;
 import l.files.ui.browser.FilesPagerFragment;
@@ -51,7 +50,6 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static de.greenrobot.event.ThreadMode.MainThread;
 
 public final class FilesActivity extends BaseActivity
     implements TabHandler, OnSharedPreferenceChangeListener {

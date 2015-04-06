@@ -1,69 +1,91 @@
 package l.files.ui.browser;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
-import org.joda.time.DateMidnight;
-import org.joda.time.MutableDateTime;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import l.files.R;
-
-import static org.joda.time.DateTimeConstants.MILLIS_PER_DAY;
 
 /**
  * Categories files by their last modified date.
  */
 final class DateCategorizer implements Categorizer {
 
-  private final MutableDateTime timestamp = new MutableDateTime();
-  private final long startOfToday;
-  private final long startOfTomorrow;
-  private final long startOfYesterday;
-  private final long startOf7Days;
-  private final long startOf30Days;
+    private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
 
-  public DateCategorizer(long now) {
-    startOfToday = new DateMidnight(now).getMillis();
-    startOfTomorrow = startOfToday + MILLIS_PER_DAY;
-    startOfYesterday = startOfToday - MILLIS_PER_DAY;
-    startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
-    startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
-  }
+    @SuppressLint("SimpleDateFormat")
+    private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
+    private final Map<Integer, String> monthCache = new HashMap<>();
 
-  @Override public String get(Resources res, FileListItem.File file) {
-    if (file.getStat() == null) {
-      return res.getString(R.string.__);
-    }
+    private final Calendar timestamp = new GregorianCalendar();
+    private final long startOfToday;
+    private final long startOfTomorrow;
+    private final long startOfYesterday;
+    private final long startOf7Days;
+    private final long startOf30Days;
 
-    long modified = file.getStat().getLastModifiedTime();
-    if (modified <= 0) {
-      return res.getString(R.string.__);
-    }
-    if (modified >= startOfTomorrow) {
-      return res.getString(R.string.unknown);
-    }
-    if (modified >= startOfToday) {
-      return res.getString(R.string.today);
-    }
-    if (modified >= startOfYesterday) {
-      return res.getString(R.string.yesterday);
-    }
-    if (modified >= startOf7Days) {
-      return res.getString(R.string.previous_7_days);
-    }
-    if (modified >= startOf30Days) {
-      return res.getString(R.string.previous_30_days);
+    public DateCategorizer(long now) {
+        timestamp.setTimeInMillis(now);
+        timestamp.set(Calendar.HOUR_OF_DAY, 0);
+        timestamp.set(Calendar.MINUTE, 0);
+        timestamp.set(Calendar.SECOND, 0);
+        timestamp.set(Calendar.MILLISECOND, 0);
+
+        startOfToday = timestamp.getTimeInMillis();
+        startOfTomorrow = startOfToday + MILLIS_PER_DAY;
+        startOfYesterday = startOfToday - MILLIS_PER_DAY;
+        startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
+        startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
     }
 
-    timestamp.setMillis(startOfToday);
-    int currentYear = timestamp.getYear();
+    @Override
+    public String get(Resources res, FileListItem.File file) {
+        if (file.getStat() == null) {
+            return res.getString(R.string.__);
+        }
 
-    timestamp.setMillis(modified);
-    int thatYear = timestamp.getYear();
+        long modified = file.getStat().getLastModifiedTime();
+        if (modified <= 0) {
+            return res.getString(R.string.__);
+        }
+        if (modified >= startOfTomorrow) {
+            return res.getString(R.string.unknown);
+        }
+        if (modified >= startOfToday) {
+            return res.getString(R.string.today);
+        }
+        if (modified >= startOfYesterday) {
+            return res.getString(R.string.yesterday);
+        }
+        if (modified >= startOf7Days) {
+            return res.getString(R.string.previous_7_days);
+        }
+        if (modified >= startOf30Days) {
+            return res.getString(R.string.previous_30_days);
+        }
 
-    if (currentYear != thatYear) {
-      return String.valueOf(thatYear);
+        timestamp.setTimeInMillis(startOfToday);
+        int currentYear = timestamp.get(Calendar.YEAR);
+
+        timestamp.setTimeInMillis(modified);
+        int thatYear = timestamp.get(Calendar.YEAR);
+
+        if (currentYear != thatYear) {
+            return String.valueOf(thatYear);
+        }
+
+        int month = timestamp.get(Calendar.MONTH);
+        String format = monthCache.get(month);
+        if (format == null) {
+            format = monthFormat.format(timestamp.getTime());
+            monthCache.put(month, format);
+        }
+        return format;
     }
-
-    return timestamp.monthOfYear().getAsText();
-  }
 }

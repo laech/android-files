@@ -48,7 +48,6 @@ android {
 
 dependencies {
     compile libs.eventbus
-    compile libs.joda_time
     compile libs.guava
     compile libs.tika
     compile libs.commons_io

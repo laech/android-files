@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;
-import l.files.eventbus.Subscribe;
 import l.files.fs.Path;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;

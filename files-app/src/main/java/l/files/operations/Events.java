@@ -5,7 +5,6 @@ import android.os.Looper;
 
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.SubscriberExceptionEvent;
-import l.files.eventbus.Subscribe;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
