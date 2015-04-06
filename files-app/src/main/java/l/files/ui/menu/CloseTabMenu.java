@@ -9,7 +9,7 @@ import l.files.ui.tab.TabHandler;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class CloseTabMenu extends OptionsMenuAction {
 
@@ -17,7 +17,7 @@ public final class CloseTabMenu extends OptionsMenuAction {
 
   public CloseTabMenu(TabHandler handler) {
     super(R.id.close_tab);
-    this.handler = checkNotNull(handler);
+    this.handler = requireNonNull(handler);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

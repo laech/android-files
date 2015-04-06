@@ -6,14 +6,14 @@ import android.view.Menu;
 import l.files.common.widget.MultiChoiceModeListenerAdapter;
 import l.files.ui.ListSelection;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
 
   private final ListSelection<?> selection;
 
   public CountSelectedItemsAction(ListSelection<?> selection) {
-    this.selection = checkNotNull(selection);
+    this.selection = requireNonNull(selection);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

@@ -12,7 +12,7 @@ import l.files.ui.ListSelection;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class RenameAction extends MultiChoiceModeAction {
 
@@ -22,8 +22,8 @@ public final class RenameAction extends MultiChoiceModeAction {
   @SuppressWarnings("unchecked")
   public RenameAction(FragmentManager manager, ListSelection<? extends Path> provider) {
     super(R.id.rename);
-    this.manager = checkNotNull(manager);
-    this.provider = (ListSelection<Path>) checkNotNull(provider);
+    this.manager = requireNonNull(manager);
+    this.provider = (ListSelection<Path>) requireNonNull(provider);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

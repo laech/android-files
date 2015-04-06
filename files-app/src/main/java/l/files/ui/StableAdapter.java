@@ -8,9 +8,9 @@ import android.widget.BaseAdapter;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 
 public abstract class StableAdapter<T> extends BaseAdapter {
 
@@ -20,7 +20,7 @@ public abstract class StableAdapter<T> extends BaseAdapter {
 
   @SuppressWarnings("unchecked")
   public void setItems(List<? extends T> items) {
-    this.items = (List<T>) checkNotNull(items);
+    this.items = (List<T>) requireNonNull(items);
     notifyDataSetChanged();
   }
 

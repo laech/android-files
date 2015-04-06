@@ -9,7 +9,7 @@ import l.files.ui.tab.TabHandler;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Menu to open a new tab to view files.
@@ -20,7 +20,7 @@ public final class NewTabMenu extends OptionsMenuAction {
 
   public NewTabMenu(TabHandler handler) {
     super(R.id.new_tab);
-    this.handler = checkNotNull(handler);
+    this.handler = requireNonNull(handler);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

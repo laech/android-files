@@ -19,7 +19,7 @@ import l.files.ui.ListSelection;
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class DeleteAction extends MultiChoiceModeAction {
 
@@ -29,8 +29,8 @@ public final class DeleteAction extends MultiChoiceModeAction {
   @SuppressWarnings("unchecked")
   public DeleteAction(Context context, ListSelection<? extends Path> supplier) {
     super(R.id.delete);
-    this.context = checkNotNull(context);
-    this.supplier = (ListSelection<Path>) checkNotNull(supplier);
+    this.context = requireNonNull(context);
+    this.supplier = (ListSelection<Path>) requireNonNull(supplier);
   }
 
   @Override

@@ -11,7 +11,7 @@ import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
 import static android.text.format.Formatter.formatFileSize;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.operations.ui.Formats.formatTimeRemaining;
 
 /**
@@ -24,8 +24,8 @@ abstract class ProgressViewer implements TaskStateViewer {
   private final Clock clock;
 
   ProgressViewer(Context context, Clock clock) {
-    this.context = checkNotNull(context, "context");
-    this.clock = checkNotNull(clock, "clock");
+    this.context = requireNonNull(context, "context");
+    this.clock = requireNonNull(clock, "clock");
   }
 
   @Override public final String getContentTitle(TaskState.Pending state) {

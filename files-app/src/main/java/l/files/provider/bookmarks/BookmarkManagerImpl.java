@@ -28,8 +28,8 @@ import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
+import static java.util.Objects.requireNonNull;
 
 public final class BookmarkManagerImpl implements BookmarkManager {
 
@@ -69,8 +69,8 @@ public final class BookmarkManagerImpl implements BookmarkManager {
 
   @VisibleForTesting
   public BookmarkManagerImpl(PathProvider provider, SharedPreferences pref) {
-    this.provider = checkNotNull(provider);
-    this.pref = checkNotNull(pref);
+    this.provider = requireNonNull(provider);
+    this.pref = requireNonNull(pref);
     this.listeners = new CopyOnWriteArraySet<>();
     this.bookmarks = new CopyOnWriteArraySet<>();
   }
@@ -90,21 +90,21 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   }
 
   @Override public void addBookmark(Path path) {
-    checkNotNull(path);
+    requireNonNull(path);
     if (bookmarks.add(path)) {
       saveBookmarksAndNotify();
     }
   }
 
   @Override public void removeBookmark(Path path) {
-    checkNotNull(path);
+    requireNonNull(path);
     if (bookmarks.remove(path)) {
       saveBookmarksAndNotify();
     }
   }
 
   @Override public void removeBookmarks(Collection<Path> bookmarks) {
-    checkNotNull(bookmarks);
+    requireNonNull(bookmarks);
     if (this.bookmarks.removeAll(bookmarks)) {
       saveBookmarksAndNotify();
     }
@@ -149,13 +149,13 @@ public final class BookmarkManagerImpl implements BookmarkManager {
 
   @Override
   public void registerBookmarkChangedListener(BookmarkChangedListener listener) {
-    checkNotNull(listener);
+    requireNonNull(listener);
     listeners.add(listener);
   }
 
   @Override
   public void unregisterBookmarkChangedListener(BookmarkChangedListener listener) {
-    checkNotNull(listener);
+    requireNonNull(listener);
     listeners.remove(listener);
   }
 }

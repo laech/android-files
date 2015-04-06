@@ -5,14 +5,14 @@ import android.view.MenuItem;
 
 import l.files.common.app.OptionsMenuAdapter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ActionBarDrawerToggleAction extends OptionsMenuAdapter {
 
   private final ActionBarDrawerToggle toggle;
 
   public ActionBarDrawerToggleAction(ActionBarDrawerToggle toggle) {
-    this.toggle = checkNotNull(toggle);
+    this.toggle = requireNonNull(toggle);
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {

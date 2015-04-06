@@ -9,7 +9,7 @@ import l.files.common.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class SortMenu extends OptionsMenuAction {
 
@@ -17,7 +17,7 @@ public final class SortMenu extends OptionsMenuAction {
 
   public SortMenu(FragmentManager manager) {
     super(R.id.sort_by);
-    this.manager = checkNotNull(manager);
+    this.manager = requireNonNull(manager);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

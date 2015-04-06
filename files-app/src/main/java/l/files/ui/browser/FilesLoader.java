@@ -26,8 +26,8 @@ import l.files.fs.WatchService;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 
 public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
@@ -52,8 +52,8 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
                      FileSort sort, boolean showHidden) {
     super(context);
 
-    this.path = checkNotNull(path, "path");
-    this.sort = checkNotNull(sort, "sort");
+    this.path = requireNonNull(path, "path");
+    this.sort = requireNonNull(sort, "sort");
     this.showHidden = showHidden;
     this.data = new ConcurrentHashMap<>();
     this.listener = new EventListener();

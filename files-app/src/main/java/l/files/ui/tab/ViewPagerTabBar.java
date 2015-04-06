@@ -23,7 +23,7 @@ import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ViewPagerTabBar
     implements OnPageChangeListener, OnClickListener, TransitionListener {
@@ -34,7 +34,7 @@ public final class ViewPagerTabBar
   private ViewPager pager;
 
   public ViewPagerTabBar(Context context, EventBus bus) {
-    this.bus = checkNotNull(bus, "bus");
+    this.bus = requireNonNull(bus, "bus");
     this.root = (HorizontalScrollView) inflate(context, R.layout.tab_container);
     this.tabs = (LinearLayout) root.findViewById(R.id.tab_container);
     this.tabs.getLayoutTransition().addTransitionListener(this);

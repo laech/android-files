@@ -13,7 +13,7 @@ import static android.content.Intent.ACTION_VIEW;
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class AboutMenu extends OptionsMenuAction {
 
@@ -21,7 +21,7 @@ public final class AboutMenu extends OptionsMenuAction {
 
   public AboutMenu(Context context) {
     super(R.id.about);
-    this.context = checkNotNull(context, "context");
+    this.context = requireNonNull(context, "context");
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

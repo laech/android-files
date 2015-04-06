@@ -9,11 +9,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.Integer.parseInt;
+import static java.util.Objects.requireNonNull;
 
 public final class Files {
 
@@ -129,7 +129,7 @@ public final class Files {
    * @see #normalize(File)
    */
   public static Set<File> hierarchy(File file) {
-    checkNotNull(file, "file");
+    requireNonNull(file, "file");
     return hierarchy(normalize(file), new HashSet<File>());
   }
 

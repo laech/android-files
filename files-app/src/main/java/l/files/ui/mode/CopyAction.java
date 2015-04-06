@@ -13,7 +13,7 @@ import l.files.ui.ListSelection;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.common.content.res.Styles.getDrawable;
 
 public final class CopyAction extends MultiChoiceModeAction {
@@ -26,9 +26,9 @@ public final class CopyAction extends MultiChoiceModeAction {
   public CopyAction(Context context, ClipboardManager manager,
                     ListSelection<? extends Path> provider) {
     super(android.R.id.copy);
-    this.context = checkNotNull(context);
-    this.manager = checkNotNull(manager);
-    this.provider = (ListSelection<Path>) checkNotNull(provider);
+    this.context = requireNonNull(context);
+    this.manager = requireNonNull(manager);
+    this.provider = (ListSelection<Path>) requireNonNull(provider);
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

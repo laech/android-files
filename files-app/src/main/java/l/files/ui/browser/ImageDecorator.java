@@ -17,8 +17,8 @@ import java.util.Set;
 
 import l.files.R;
 import l.files.common.graphics.drawable.SizedColorDrawable;
-import l.files.fs.ResourceStatus;
 import l.files.fs.Path;
+import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 import l.files.ui.util.ScaledSize;
 
@@ -30,9 +30,9 @@ import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Objects.requireNonNull;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
 
@@ -52,7 +52,7 @@ final class ImageDecorator {
     checkArgument(maxHeight > 0);
     this.maxWidth = maxWidth;
     this.maxHeight = maxHeight;
-    this.cache = checkNotNull(cache, "cache");
+    this.cache = requireNonNull(cache, "cache");
   }
 
   public void decorate(ImageView view, ResourceStatus file) {

@@ -10,7 +10,7 @@ import l.files.fs.Path;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class NewDirMenu extends OptionsMenuAction {
 
@@ -19,8 +19,8 @@ public final class NewDirMenu extends OptionsMenuAction {
 
   public NewDirMenu(FragmentManager manager, Path path) {
     super(R.id.new_dir);
-    this.manager = checkNotNull(manager, "manager");
-    this.path = checkNotNull(path, "path");
+    this.manager = requireNonNull(manager, "manager");
+    this.path = requireNonNull(path, "path");
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

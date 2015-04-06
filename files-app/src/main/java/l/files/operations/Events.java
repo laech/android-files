@@ -6,7 +6,7 @@ import android.os.Looper;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.SubscriberExceptionEvent;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 // TODO replace this with dependency injection
 public final class Events {
@@ -32,7 +32,7 @@ public final class Events {
     private final Handler handler;
 
     Crasher(Handler handler) {
-      this.handler = checkNotNull(handler, "handler");
+      this.handler = requireNonNull(handler, "handler");
     }
 
     public void onEvent(final SubscriberExceptionEvent e) {

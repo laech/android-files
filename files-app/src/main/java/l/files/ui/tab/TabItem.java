@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import l.files.fs.Path;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class TabItem implements Parcelable {
 
@@ -28,8 +28,8 @@ public final class TabItem implements Parcelable {
 
   public TabItem(int id, Path path, String title) {
     this.id = id;
-    this.path = checkNotNull(path);
-    this.title = checkNotNull(title);
+    this.path = requireNonNull(path);
+    this.title = requireNonNull(title);
   }
 
   public int getId() {

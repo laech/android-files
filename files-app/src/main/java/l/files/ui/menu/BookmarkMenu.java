@@ -9,7 +9,7 @@ import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManager;
 
 import static android.view.Menu.NONE;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class BookmarkMenu extends OptionsMenuAction {
 
@@ -18,8 +18,8 @@ public final class BookmarkMenu extends OptionsMenuAction {
 
   public BookmarkMenu(BookmarkManager bookmarks, Path path) {
     super(R.id.bookmark);
-    this.bookmarks = checkNotNull(bookmarks);
-    this.path = checkNotNull(path);
+    this.bookmarks = requireNonNull(bookmarks);
+    this.path = requireNonNull(path);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

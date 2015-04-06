@@ -18,8 +18,8 @@ import l.files.ui.Clipboards;
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Objects.requireNonNull;
 import static l.files.ui.Clipboards.clear;
 import static l.files.ui.Clipboards.getPaths;
 import static l.files.ui.Clipboards.isCopy;
@@ -36,9 +36,9 @@ public final class PasteMenu extends OptionsMenuAction
 
   public PasteMenu(Activity context, ClipboardManager manager, Path path) {
     super(android.R.id.paste);
-    this.context = checkNotNull(context);
-    this.manager = checkNotNull(manager);
-    this.path = checkNotNull(path);
+    this.context = requireNonNull(context);
+    this.manager = requireNonNull(manager);
+    this.path = requireNonNull(path);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

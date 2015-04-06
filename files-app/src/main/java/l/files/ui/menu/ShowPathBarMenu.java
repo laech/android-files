@@ -11,7 +11,7 @@ import l.files.ui.Preferences;
 import static android.view.Menu.CATEGORY_SECONDARY;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class ShowPathBarMenu extends OptionsMenuAction {
 
@@ -19,7 +19,7 @@ public final class ShowPathBarMenu extends OptionsMenuAction {
 
   public ShowPathBarMenu(Context context) {
     super(R.id.show_path_bar);
-    this.context = checkNotNull(context);
+    this.context = requireNonNull(context);
   }
 
   @Override public void onCreateOptionsMenu(Menu menu) {

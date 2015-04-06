@@ -9,7 +9,7 @@ import l.files.common.widget.MultiChoiceModeAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.common.content.res.Styles.getDrawable;
 
 public final class SelectAllAction extends MultiChoiceModeAction {
@@ -18,7 +18,7 @@ public final class SelectAllAction extends MultiChoiceModeAction {
 
   public SelectAllAction(AbsListView list) {
     super(android.R.id.selectAll);
-    this.list = checkNotNull(list, "list");
+    this.list = requireNonNull(list, "list");
   }
 
   @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {

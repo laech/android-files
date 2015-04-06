@@ -20,7 +20,7 @@ import l.files.logging.Logger;
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
 
 final class FileOpener implements Consumer<Path> {
@@ -40,9 +40,9 @@ final class FileOpener implements Consumer<Path> {
       Context context,
       Toaster toaster,
       AsyncTaskExecutor executor) {
-    this.context = checkNotNull(context, "context");
-    this.toaster = checkNotNull(toaster, "toaster");
-    this.executor = checkNotNull(executor, "executor");
+    this.context = requireNonNull(context, "context");
+    this.toaster = requireNonNull(toaster, "toaster");
+    this.executor = requireNonNull(executor, "executor");
   }
 
   @Override public void apply(Path path) {

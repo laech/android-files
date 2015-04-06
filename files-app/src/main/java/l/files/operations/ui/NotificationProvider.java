@@ -22,7 +22,7 @@ import static android.app.Notification.PRIORITY_LOW;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getActivity;
 import static android.content.Context.NOTIFICATION_SERVICE;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.operations.OperationService.newCancelPendingIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
@@ -42,8 +42,8 @@ final class NotificationProvider {
 
   NotificationProvider(
       Context context, Clock clock, NotificationManager manager) {
-    this.context = checkNotNull(context, "context");
-    this.manager = checkNotNull(manager, "manager");
+    this.context = requireNonNull(context, "context");
+    this.manager = requireNonNull(manager, "manager");
     this.viewers = ImmutableMap.of(
         MOVE, new MoveViewer(context, clock),
         COPY, new CopyViewer(context, clock),

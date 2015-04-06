@@ -12,7 +12,7 @@ import java.util.List;
 import l.files.fs.Path;
 import l.files.provider.bookmarks.BookmarkManager;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 
 final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
@@ -23,7 +23,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
 
   BookmarksLoader(Context context, BookmarkManager manager) {
     super(context);
-    this.manager = checkNotNull(manager);
+    this.manager = requireNonNull(manager);
     this.listener = new BookmarkListener();
   }
 

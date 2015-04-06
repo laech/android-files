@@ -7,7 +7,7 @@ import l.files.fs.Path;
 import l.files.fs.local.Files;
 import l.files.fs.local.LocalPath;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static l.files.fs.local.Files.isAncestorOrSelf;
 
 abstract class Paste extends AbstractOperation {
@@ -16,7 +16,7 @@ abstract class Paste extends AbstractOperation {
 
   Paste(Iterable<? extends Path> sources, Path dstPath) {
     super(sources);
-    this.dstPath = checkNotNull(dstPath, "dstPath");
+    this.dstPath = requireNonNull(dstPath, "dstPath");
   }
 
   @Override void process(Path from, FailureRecorder listener)

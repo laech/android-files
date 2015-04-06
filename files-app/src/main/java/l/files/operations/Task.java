@@ -10,8 +10,8 @@ import java.util.concurrent.Future;
 
 import de.greenrobot.event.EventBus;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.currentThread;
+import static java.util.Objects.requireNonNull;
 
 abstract class Task {
 
@@ -36,11 +36,11 @@ abstract class Task {
   private volatile TaskState state;
 
   Task(TaskId id, Target target, Clock clock, EventBus bus, Handler handler) {
-    this.id = checkNotNull(id, "id");
-    this.target = checkNotNull(target, "target");
-    this.clock = checkNotNull(clock, "clock");
-    this.bus = checkNotNull(bus, "bus");
-    this.handler = checkNotNull(handler, "handler");
+    this.id = requireNonNull(id, "id");
+    this.target = requireNonNull(target, "target");
+    this.clock = requireNonNull(clock, "clock");
+    this.bus = requireNonNull(bus, "bus");
+    this.handler = requireNonNull(handler, "handler");
   }
 
   Future<?> execute(ExecutorService executor) {

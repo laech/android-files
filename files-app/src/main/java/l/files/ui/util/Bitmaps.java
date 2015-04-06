@@ -8,9 +8,9 @@ import java.io.InputStream;
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.Options;
 import static android.graphics.BitmapFactory.decodeStream;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
+import static java.util.Objects.requireNonNull;
 
 public final class Bitmaps {
   private Bitmaps() {}
@@ -51,8 +51,8 @@ public final class Bitmaps {
    */
   public static Bitmap decodeScaledBitmap(
       InputStream in, ScaledSize size) throws IOException {
-    checkNotNull(in);
-    checkNotNull(size);
+    requireNonNull(in);
+    requireNonNull(size);
     Bitmap bitmap = decodeBitmap(in, size);
     if (bitmap == null) {
       return null;

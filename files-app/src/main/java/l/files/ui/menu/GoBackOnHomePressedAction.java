@@ -5,7 +5,7 @@ import android.view.MenuItem;
 
 import l.files.common.app.OptionsMenuAction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 public final class GoBackOnHomePressedAction extends OptionsMenuAction {
 
@@ -13,7 +13,7 @@ public final class GoBackOnHomePressedAction extends OptionsMenuAction {
 
   public GoBackOnHomePressedAction(Activity activity) {
     super(android.R.id.home);
-    this.activity = checkNotNull(activity, "activity");
+    this.activity = requireNonNull(activity, "activity");
   }
 
   @Override protected void onItemSelected(MenuItem item) {
