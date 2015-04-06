@@ -110,7 +110,7 @@ public class TaskTest extends BaseTest {
   }
 
   public static abstract class Listener {
-    @Subscribe public abstract void onEvent(TaskState state);
+    public abstract void onEvent(TaskState state);
 
     final ArgumentCaptor<TaskState> captor() {
       return ArgumentCaptor.forClass(TaskState.class);

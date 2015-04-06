@@ -47,7 +47,6 @@ android {
 }
 
 dependencies {
-    compile project(':eventbus-annotation')
     compile libs.eventbus
     compile libs.joda_time
     compile libs.guava

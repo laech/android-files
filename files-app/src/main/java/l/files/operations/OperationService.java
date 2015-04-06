@@ -95,7 +95,6 @@ public final class OperationService extends Service {
     bus.register(this);
   }
 
-  @Subscribe(MainThread)
   public void onEventMainThread(TaskState state) {
     if (state.isFinished()) {
       tasks.remove(state.getTask().getId());

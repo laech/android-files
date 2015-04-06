@@ -181,7 +181,7 @@ public final class OperationServiceTest extends FileBaseTest {
       this.kind = kind;
     }
 
-    @Subscribe public void onEvent(TaskState state) {
+    public void onEvent(TaskState state) {
       values.add(state);
       assertEquals(kind, state.getTask().getKind());
       if (state.isFinished()) {

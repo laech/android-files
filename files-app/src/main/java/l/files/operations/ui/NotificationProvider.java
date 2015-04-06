@@ -52,15 +52,15 @@ final class NotificationProvider {
     );
   }
 
-  @Subscribe public void onEvent(TaskState.Pending state) {
+  public void onEvent(TaskState.Pending state) {
     manager.notify(state.getTask().getId(), newIndeterminateNotification(state));
   }
 
-  @Subscribe public void onEvent(TaskState.Running state) {
+  public void onEvent(TaskState.Running state) {
     manager.notify(state.getTask().getId(), newProgressNotification(state));
   }
 
-  @Subscribe public void onEvent(TaskState.Failed state) {
+  public void onEvent(TaskState.Failed state) {
     manager.cancel(state.getTask().getId());
     if (!state.getFailures().isEmpty()) {
       // This is the last notification we will display for this task, and it
@@ -74,11 +74,11 @@ final class NotificationProvider {
     // errors, let other process handle that error, remove the notification
   }
 
-  @Subscribe public void onEvent(TaskState.Success state) {
+  public void onEvent(TaskState.Success state) {
     manager.cancel(state.getTask().getId());
   }
 
-  @Subscribe public void onEvent(TaskNotFound event) {
+  public void onEvent(TaskNotFound event) {
     manager.cancel(event.getTaskId());
   }
 

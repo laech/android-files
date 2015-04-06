@@ -36,7 +36,7 @@ public final class Events {
       this.handler = checkNotNull(handler, "handler");
     }
 
-    @Subscribe public void onEvent(final SubscriberExceptionEvent e) {
+    public void onEvent(final SubscriberExceptionEvent e) {
       handler.post(new Runnable() {
         @Override public void run() {
           throw new RuntimeException(e.throwable);

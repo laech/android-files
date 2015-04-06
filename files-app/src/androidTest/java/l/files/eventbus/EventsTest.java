@@ -29,7 +29,7 @@ public final class EventsTest extends BaseTest {
     ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
     EventBus bus = Events.failFast(new EventBus(), executor);
     bus.register(new Object() {
-      @Subscribe public void onEvent(Throwable e) throws Throwable {
+      public void onEvent(Throwable e) throws Throwable {
         throw e;
       }
     });

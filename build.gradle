@@ -18,11 +18,9 @@ allprojects {
 
 ext.libs = [:]
 
-libs.auto_service = 'com.google.auto.service:auto-service:1.0-rc2'
 libs.eventbus = 'de.greenrobot:eventbus:2.2.1'
 libs.tika = 'org.apache.tika:tika-core:1.6'
 libs.guava = 'com.google.guava:guava:18.0'
-libs.picasso = 'com.squareup.picasso:picasso:2.1.+'
 libs.joda_time = 'joda-time:joda-time:2.2'
 libs.commons_io = 'commons-io:commons-io:2.4'
 libs.commons_lang = 'org.apache.commons:commons-lang3:3.1'

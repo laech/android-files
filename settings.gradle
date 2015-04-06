@@ -1,2 +1,1 @@
-include ':eventbus-annotation'
 include ':files-app'

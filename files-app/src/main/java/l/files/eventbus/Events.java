@@ -19,7 +19,7 @@ public final class Events {
    */
   public static EventBus failFast(EventBus bus, final Executor executor) {
     bus.register(new Object() {
-      @Subscribe public void onEvent(final SubscriberExceptionEvent event) {
+      public void onEvent(final SubscriberExceptionEvent event) {
         executor.execute(new Runnable() {
           @Override public void run() {
             Throwables.propagate(event.throwable);

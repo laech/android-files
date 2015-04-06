@@ -283,14 +283,12 @@ public final class FilesActivity extends BaseActivity
     return (FilesPagerAdapter) viewPager.getAdapter();
   }
 
-  @Subscribe(MainThread)
   public void onEventMainThread(CloseActionModeRequest request) {
     if (currentActionMode != null) {
       currentActionMode.finish();
     }
   }
 
-  @Subscribe(MainThread)
   public void onEventMainThread(final OpenFileRequest request) {
     if (currentActionMode != null) {
       currentActionMode.finish();
@@ -302,7 +300,6 @@ public final class FilesActivity extends BaseActivity
     });
   }
 
-  @Subscribe(MainThread)
   public void onEventMainThread(ViewPagerTabBar.OnUpSelected up) {
     if (currentPagerFragment.hasBackStack()) {
       closeDrawerThenRun(new Runnable() {
