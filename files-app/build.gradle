@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 21
@@ -18,11 +17,6 @@ android {
         }
     }
 
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
@@ -32,11 +26,11 @@ android {
         abortOnError false
     }
 
-    buildTypes {
-        debug {
-            testCoverageEnabled = true
-        }
-    }
+//    buildTypes {
+//        debug {
+//            testCoverageEnabled = true
+//        }
+//    }
 
     // Remove files from third party jars that causes 'duplicate files' build issues
     packagingOptions {
@@ -62,7 +56,6 @@ dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v13:21.0.3'
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     compile 'com.github.frankiesardo:auto-parcel:0.3'
     apt 'com.github.frankiesardo:auto-parcel-processor:0.3'
