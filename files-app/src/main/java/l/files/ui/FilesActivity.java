@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,6 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.google.common.collect.Maps.newHashMap;
 
 public final class FilesActivity extends BaseActivity
     implements TabHandler, OnSharedPreferenceChangeListener {
@@ -367,7 +367,7 @@ public final class FilesActivity extends BaseActivity
     FilesPagerAdapter(List<TabItem> items) {
       super(getFragmentManager());
       this.items = items;
-      this.positions = newHashMap();
+      this.positions = new HashMap<>();
     }
 
     @Override public long getItemId(int position) {

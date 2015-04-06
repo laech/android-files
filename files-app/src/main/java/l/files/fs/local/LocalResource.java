@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -27,7 +28,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 @AutoParcel
-abstract class LocalResource implements Resource {
+public abstract class LocalResource implements Resource {
 
     LocalResource() {
     }
@@ -37,6 +38,11 @@ abstract class LocalResource implements Resource {
 
     public static LocalResource create(LocalPath path) {
         return new AutoParcel_LocalResource(path);
+    }
+
+    @Override
+    public URI getUri() {
+        return getPath().getUri();
     }
 
     @Override

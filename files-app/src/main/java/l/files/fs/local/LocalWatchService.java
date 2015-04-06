@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,9 @@ import l.files.fs.WatchService;
 import l.files.logging.Logger;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static l.files.fs.WatchEvent.Kind;
 import static l.files.fs.WatchEvent.Listener;
-import static l.files.fs.local.Files.checkExist;
 import static l.files.fs.local.PathObserver.IN_IGNORED;
 import static l.files.fs.local.android.os.FileObserver.ATTRIB;
 import static l.files.fs.local.android.os.FileObserver.CLOSE_WRITE;
@@ -100,7 +99,7 @@ public class LocalWatchService implements WatchService, Closeable {
    * adding/removing files in the child directory, which will cause the child
    * directory's last modified timestamp to be changed.
    */
-  private final Set<Path> monitored = newHashSet();
+  private final Set<Path> monitored = new HashSet<>();
 
   /**
    * Observers operate on inodes, there could be multiple paths pointing to the
@@ -494,13 +493,7 @@ public class LocalWatchService implements WatchService, Closeable {
   }
 
   private void onDelete(Path path) {
-    boolean accessible = true;
-    try {
-      checkExist(path.toString());
-    } catch (ErrnoException e) {
-      accessible = false;
-    }
-    if (!accessible) {
+    if (!path.getResource().exists()) {
       synchronized (this) {
         removePath(path);
       }

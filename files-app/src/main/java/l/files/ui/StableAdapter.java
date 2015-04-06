@@ -5,16 +5,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 public abstract class StableAdapter<T> extends BaseAdapter {
 
-  private static final Map<Object, Long> ids = newHashMap();
+  private static final Map<Object, Long> ids = new HashMap<>();
 
   private List<T> items = emptyList();
 

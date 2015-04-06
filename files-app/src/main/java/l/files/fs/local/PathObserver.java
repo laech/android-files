@@ -9,6 +9,7 @@ import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,6 @@ import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.collect.Sets.newHashSet;
 
 final class PathObserver extends FileObserver {
 
@@ -52,7 +52,7 @@ final class PathObserver extends FileObserver {
     this.path = path;
     this.node = node;
     this.listener = listener;
-    this.paths = newHashSet();
+    this.paths = new HashSet<>();
     addPath(path);
   }
 

@@ -7,9 +7,9 @@ import java.io.IOException;
 
 import l.files.common.testing.FileBaseTest;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
 import static java.lang.System.currentTimeMillis;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.fs.local.ErrnoException.ENOENT;
 
 public final class StatTest extends FileBaseTest {

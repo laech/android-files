@@ -14,9 +14,9 @@ import l.files.common.testing.FileBaseTest;
 import l.files.common.testing.TempDir;
 import l.files.fs.WatchEvent;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.append;
 import static java.lang.Thread.sleep;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.local.LocalWatchService.IGNORED;
 import static org.mockito.Matchers.any;

@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import l.files.fs.FileTypeDetector;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
 
 public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {

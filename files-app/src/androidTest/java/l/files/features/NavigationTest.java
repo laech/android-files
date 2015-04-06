@@ -10,9 +10,9 @@ import l.files.fs.local.LocalPath;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.io.Files.append;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 

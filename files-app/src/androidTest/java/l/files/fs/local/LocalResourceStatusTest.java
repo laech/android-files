@@ -4,8 +4,8 @@ import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.fs.local.LocalResourceStatus.stat;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;

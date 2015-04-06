@@ -1,11 +1,12 @@
 package l.files.fs.local;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
 import static l.files.fs.local.Dirent.DT_DIR;
 import static l.files.fs.local.Dirent.DT_REG;
 import static l.files.fs.local.Dirent.closedir;
@@ -39,17 +40,17 @@ public final class DirentTest extends FileBaseTest {
     long dir = opendir(tmp().get().toString());
     try {
 
-      Set<Dirent> expected = newHashSet(
+      Set<Dirent> expected = new HashSet<>(asList(
           Dirent.create(ino(current), DT_DIR, "."),
           Dirent.create(ino(parent), DT_DIR, ".."),
           Dirent.create(ino(child1), DT_DIR, child1.getName()),
-          Dirent.create(ino(child2), DT_REG, child2.getName()));
+          Dirent.create(ino(child2), DT_REG, child2.getName())));
 
-      Set<Dirent> actual = newHashSet(
+      Set<Dirent> actual = new HashSet<>(asList(
           readdir(dir),
           readdir(dir),
           readdir(dir),
-          readdir(dir));
+          readdir(dir)));
 
       assertEquals(expected, actual);
       assertNull(readdir(dir));

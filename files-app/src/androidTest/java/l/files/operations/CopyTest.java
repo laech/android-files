@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.util.List;
 
 import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
-import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.io.Files.write;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static l.files.fs.local.Files.readlink;
-import static l.files.fs.local.Files.symlink;
 
 public final class CopyTest extends PasteTest {
 
@@ -45,13 +45,14 @@ public final class CopyTest extends PasteTest {
   }
 
   public void testCopiesSymlink() throws Exception {
-    File target = tmp().createFile("target");
-    File link = tmp().get("link");
-    symlink(target.getPath(), link.getPath());
+      Resource target = LocalPath.of(tmp().createFile("target")).getResource();
+      Resource link = LocalPath.of(tmp().get("link")).getResource();
+      link.createSymbolicLink(target);
 
-    copy(link, tmp().createDir("copied"));
+      copy(new File(link.getUri()), tmp().createDir("copied"));
 
-    assertEquals(target.getPath(), readlink(tmp().get("copied/link").getPath()));
+      LocalResource copied = LocalPath.of(tmp().get("copied/link").getPath()).getResource();
+      assertEquals(target.getPath(), copied.readSymbolicLink());
   }
 
   public void testCopiesDirectory() throws Exception {

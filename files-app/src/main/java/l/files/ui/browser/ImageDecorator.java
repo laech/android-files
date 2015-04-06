@@ -12,6 +12,8 @@ import android.widget.ImageView;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,8 +32,6 @@ import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
@@ -40,8 +40,8 @@ final class ImageDecorator {
 
   private static final Logger logger = Logger.get(ImageDecorator.class);
 
-  private static final Set<Object> errors = newHashSet();
-  private static final Map<Object, ScaledSize> sizes = newHashMap();
+  private static final Set<Object> errors = new HashSet<>();
+  private static final Map<Object, ScaledSize> sizes = new HashMap<>();
 
   private final LruCache<Object, Bitmap> cache;
   private final int maxWidth;
