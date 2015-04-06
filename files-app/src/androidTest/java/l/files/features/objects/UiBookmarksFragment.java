@@ -38,7 +38,7 @@ public final class UiBookmarksFragment {
         return (FilesActivity) fragment.getActivity();
     }
 
-    private UiFileActivity getActivityObject() {
+    public UiFileActivity getActivityObject() {
         return new UiFileActivity(instrument, getActivity());
     }
 

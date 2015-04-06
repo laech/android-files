@@ -66,7 +66,7 @@ public final class ProgressTest extends TestCase {
   }
 
   public void testDone() {
-    assertTrue(Progress.create(123, 123).getIsDone());
-    assertFalse(Progress.create(2, 1).getIsDone());
+    assertTrue(Progress.create(123, 123).isDone());
+    assertFalse(Progress.create(2, 1).isDone());
   }
 }

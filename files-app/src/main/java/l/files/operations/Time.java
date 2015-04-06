@@ -20,9 +20,12 @@ public abstract class Time {
      */
     public abstract long getTick();
 
+    public static Time create(long time, long tick) {
+        return new AutoParcel_Time(time, tick);
+    }
 
     public static Time from(Clock clock) {
-        return new AutoParcel_Time(clock.time(), clock.tick());
+        return create(clock.time(), clock.tick());
     }
 
 }

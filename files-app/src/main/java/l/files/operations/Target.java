@@ -25,17 +25,17 @@ public abstract class Target {
      */
     public abstract String getDestination();
 
-    private static Target create(String source, String destination) {
+    public static Target create(String source, String destination) {
         return new AutoParcel_Target(source, destination);
     }
 
-    public static Target fromPaths(Iterable<Path> sources, Path dst) {
+    public static Target fromPaths(Iterable<? extends Path> sources, Path dst) {
         Path src = sources.iterator().next().getParent();
         assert src != null;
         return create(src.getName(), dst.getName());
     }
 
-    public static Target fromPaths(Iterable<Path> paths) {
+    public static Target fromPaths(Iterable<? extends Path> paths) {
         Path parent = paths.iterator().next().getParent();
         assert parent != null;
         return create(parent.getName(), parent.getName());

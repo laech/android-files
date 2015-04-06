@@ -103,7 +103,7 @@ public final class DateCategorizerTest extends BaseTest {
   private FileListItem.File mockStat(long time) {
     ResourceStatus stat = mock(ResourceStatus.class);
     given(stat.getLastModifiedTime()).willReturn(time);
-    return new FileListItem.File(mock(Path.class), stat, stat);
+    return FileListItem.File.create(mock(Path.class), stat, stat);
   }
 
   private void assertCategory(String expected, FileListItem.File... stats) {

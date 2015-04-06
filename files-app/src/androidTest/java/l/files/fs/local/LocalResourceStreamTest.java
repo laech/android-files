@@ -7,8 +7,8 @@ import java.util.NoSuchElementException;
 
 import l.files.common.testing.FileBaseTest;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static kotlin.KotlinPackage.toArrayList;
 import static l.files.fs.local.Stat.lstat;
 import static l.files.fs.local.Unistd.symlink;
 
@@ -26,7 +26,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
           LocalPathEntry.create(tmpPath().resolve("b"), lstat(f2.getPath()).getIno(), true),
           LocalPathEntry.create(tmpPath().resolve("d"), lstat(f3.getPath()).getIno(), false)
       );
-      List<LocalPathEntry> actual = toArrayList(stream);
+      List<LocalPathEntry> actual = newArrayList(stream);
       assertEquals(expected, actual);
     }
   }

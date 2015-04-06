@@ -96,7 +96,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
       }
       Path child = path.resolve(name);
       ResourceStatus stat = child.getResource().readStatus(false);
-      result.add(new FileListItem.File(child, stat, stat));
+      result.add(FileListItem.File.create(child, stat, stat));
     }
     return result;
   }

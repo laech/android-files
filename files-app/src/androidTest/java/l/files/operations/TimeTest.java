@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 public final class TimeTest extends BaseTest {
 
   public void testCreate() throws Exception {
-    Time time = new Time(1, 2);
+    Time time = Time.create(1, 2);
     assertEquals(1, time.getTime());
     assertEquals(2, time.getTick());
   }

@@ -66,13 +66,13 @@ public abstract class ProgressViewerTest extends BaseTest {
     res = getContext().getResources();
     clock = mock(Clock.class);
     viewer = create(getContext(), clock);
-    pending = TaskState.OBJECT$.pending(
-        new TaskId(1, COPY),
-        new Target("src", "dst"),
-        new Time(1, 1)
+    pending = TaskState.pending(
+        TaskId.create(1, COPY),
+        Target.create("src", "dst"),
+        Time.create(1, 1)
     );
     running = pending.running(
-        new Time(2, 2),
+        Time.create(2, 2),
         Progress.create(1, 0),
         Progress.create(1, 0)
     );
@@ -84,9 +84,9 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentTitle_Failed() throws Exception {
-    TaskState.Failed state = running.failed(new Time(2, 2), asList(
-        new Failure(LocalPath.of("a"), new IOException("1")),
-        new Failure(LocalPath.of("b"), new IOException("2"))
+    TaskState.Failed state = running.failed(Time.create(2, 2), asList(
+        Failure.create(LocalPath.of("a"), new IOException("1")),
+        Failure.create(LocalPath.of("b"), new IOException("2"))
     ));
     String expected = res.getQuantityString(getTitleFailed(), 2);
     String actual = viewer.getContentTitle(state);
@@ -152,7 +152,7 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentInfo_showTimeRemaining() throws Exception {
-    TaskState.Running state = pending.running(new Time(0, 0));
+    TaskState.Running state = pending.running(Time.create(0, 0));
     state = setProgress(state, Progress.create(10000, 10));
     given(clock.tick()).willReturn(1000L);
     String actual = viewer.getContentInfo(state);
@@ -162,7 +162,7 @@ public abstract class ProgressViewerTest extends BaseTest {
   }
 
   public void testGetContentInfo_noWorkDoneYet_showNothing() throws Exception {
-    TaskState.Running state = pending.running(new Time(0, 0));
+    TaskState.Running state = pending.running(Time.create(0, 0));
     state = setProgress(state, Progress.create(1, 0));
     given(clock.tick()).willReturn(1000L);
     assertEquals("", viewer.getContentInfo(state));

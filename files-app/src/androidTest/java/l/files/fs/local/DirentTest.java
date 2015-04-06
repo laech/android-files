@@ -40,10 +40,10 @@ public final class DirentTest extends FileBaseTest {
     try {
 
       Set<Dirent> expected = newHashSet(
-          new Dirent(ino(current), DT_DIR, "."),
-          new Dirent(ino(parent), DT_DIR, ".."),
-          new Dirent(ino(child1), DT_DIR, child1.getName()),
-          new Dirent(ino(child2), DT_REG, child2.getName()));
+          Dirent.create(ino(current), DT_DIR, "."),
+          Dirent.create(ino(parent), DT_DIR, ".."),
+          Dirent.create(ino(child1), DT_DIR, child1.getName()),
+          Dirent.create(ino(child2), DT_REG, child2.getName()));
 
       Set<Dirent> actual = newHashSet(
           readdir(dir),

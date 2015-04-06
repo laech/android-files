@@ -32,7 +32,7 @@ abstract class FileSortTest extends FileBaseTest {
     for (File file : files) {
       Path path = LocalPath.of(file);
       ResourceStatus stat = LocalResourceStatus.stat(path, false);
-      expected.add(new FileListItem.File(path, stat, stat));
+      expected.add(FileListItem.File.create(path, stat, stat));
     }
     return expected;
   }

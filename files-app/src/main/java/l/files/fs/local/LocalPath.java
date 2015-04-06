@@ -117,7 +117,7 @@ public abstract class LocalPath implements Path {
          */
         URI uri = file.toURI().normalize();
         String uriStr = uri.toString();
-        if ("/".equals(uri.getRawPath()) && uriStr.endsWith("/")) {
+        if (!"/".equals(uri.getRawPath()) && uriStr.endsWith("/")) {
             return URI.create(uriStr.substring(0, uriStr.length() - 1));
         }
         return uri;

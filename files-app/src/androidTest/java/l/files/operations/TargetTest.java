@@ -9,7 +9,7 @@ import static java.util.Arrays.asList;
 public final class TargetTest extends TestCase {
 
   public void testCreate() throws Exception {
-    Target target = new Target("src", "dst");
+    Target target = Target.create("src", "dst");
     assertEquals("src", target.getSource());
     assertEquals("dst", target.getDestination());
   }

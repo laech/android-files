@@ -12,7 +12,7 @@ import static l.files.common.testing.Tests.assertExists;
 public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
 
   @Override protected FileTypeDetector detector() {
-    return new MagicFileTypeDetector();
+    return MagicFileTypeDetector.INSTANCE;
   }
 
   public void testDetect_returnsOctetStreamForUnreadable() throws Exception {

@@ -35,8 +35,8 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
   }
 
   public void testSetsFailuresFromIntent() {
-    FailureMessage f1 = new FailureMessage(LocalPath.of("1"), "test1");
-    FailureMessage f2 = new FailureMessage(LocalPath.of("2"), "test2");
+    FailureMessage f1 = FailureMessage.create(LocalPath.of("1"), "test1");
+    FailureMessage f2 = FailureMessage.create(LocalPath.of("2"), "test2");
     setActivityIntent(newIntent().putParcelableArrayListExtra(EXTRA_FAILURES, newArrayList(f1, f2)));
 
     ListView list = (ListView) getActivity().findViewById(android.R.id.list);

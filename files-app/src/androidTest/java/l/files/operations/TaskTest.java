@@ -45,7 +45,7 @@ public class TaskTest extends BaseTest {
     ArgumentCaptor<TaskState> captor = capturedExecute(new Command() {
       @Override public void execute() throws FileException {
         throw new FileException(asList(
-            new Failure(LocalPath.of("a"), new IOException("Test"))));
+            Failure.create(LocalPath.of("a"), new IOException("Test"))));
       }
     });
     assertTrue(captor.getValue() instanceof TaskState.Failed);
@@ -82,7 +82,7 @@ public class TaskTest extends BaseTest {
   }
 
   protected Task create(int id, Clock clock, EventBus bus, Handler handler) {
-    return new Task(new TaskId(id, MOVE), Target.NONE, clock, bus, handler) {
+    return new Task(TaskId.create(id, MOVE), Target.NONE, clock, bus, handler) {
       @Override protected void doTask() {}
 
       @Override protected TaskState.Running running(TaskState.Running state) {
@@ -93,7 +93,7 @@ public class TaskTest extends BaseTest {
 
   private static abstract class TestTask extends Task {
     TestTask(EventBus bus, Handler handler) {
-      super(new TaskId(0, COPY), Target.NONE, Clock.system(), bus, handler);
+      super(TaskId.create(0, COPY), Target.NONE, Clock.system(), bus, handler);
     }
 
     @Override protected TaskState.Running running(TaskState.Running state) {

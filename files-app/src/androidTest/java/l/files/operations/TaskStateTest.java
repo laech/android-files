@@ -18,10 +18,10 @@ public final class TaskStateTest extends BaseTest {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    this.time = new Time(10, 11);
-    this.task = new TaskId(1, COPY);
-    this.target = new Target("src", "dst");
-    this.pending = TaskState.OBJECT$.pending(task, target, time);
+    this.time = Time.create(10, 11);
+    this.task = TaskId.create(1, COPY);
+    this.target = Target.create("src", "dst");
+    this.pending = TaskState.pending(task, target, time);
   }
 
   public void testCreatePending() throws Exception {
@@ -33,7 +33,7 @@ public final class TaskStateTest extends BaseTest {
   public void testPendingToRunning() throws Exception {
     Progress items = Progress.create(10101, 1);
     Progress bytes = Progress.create(10100, 0);
-    Time time = new Time(1010, 11);
+    Time time = Time.create(1010, 11);
     TaskState.Running state = pending.running(time, items, bytes);
     assertEquals(task, state.getTask());
     assertEquals(time, state.getTime());
@@ -43,7 +43,7 @@ public final class TaskStateTest extends BaseTest {
   }
 
   public void testPendingToRunningWithoutProgress() throws Exception {
-    Time time = new Time(10101, 100);
+    Time time = Time.create(10101, 100);
     TaskState.Running state = pending.running(time);
     assertEquals(task, state.getTask());
     assertEquals(time, state.getTime());
@@ -54,7 +54,7 @@ public final class TaskStateTest extends BaseTest {
   }
 
   public void testRunningToRunningDoesNotChangeTime() throws Exception {
-    Time time = new Time(102, 2);
+    Time time = Time.create(102, 2);
     Progress items = Progress.create(4, 2);
     Progress bytes = Progress.create(9, 2);
     TaskState.Running state = pending.running(time).running(items, bytes);
@@ -66,7 +66,7 @@ public final class TaskStateTest extends BaseTest {
   }
 
   public void testRunningToSuccess() throws Exception {
-    Time successTime = new Time(2, 2);
+    Time successTime = Time.create(2, 2);
     TaskState state = pending.running(time).success(successTime);
     assertEquals(task, state.getTask());
     assertEquals(successTime, state.getTime());
@@ -74,8 +74,8 @@ public final class TaskStateTest extends BaseTest {
   }
 
   public void testRunningToFailed() throws Exception {
-    Time failureTime = new Time(20, 2);
-    List<Failure> failures = asList(new Failure(LocalPath.of("1"), new IOException("ok")));
+    Time failureTime = Time.create(20, 2);
+    List<Failure> failures = asList(Failure.create(LocalPath.of("1"), new IOException("ok")));
     TaskState.Failed state = pending.running(time).failed(failureTime, failures);
     assertEquals(task, state.getTask());
     assertEquals(failureTime, state.getTime());

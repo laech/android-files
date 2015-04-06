@@ -16,21 +16,21 @@ public final class LocalResourceStatusTest extends FileBaseTest {
     File file = tmp().createDir("file");
     File link = tmp().get("link");
     symlink(file.getPath(), link.getPath());
-    assertFalse(stat(file, false).getIsSymbolicLink());
-    assertFalse(stat(link, true).getIsSymbolicLink());
-    assertTrue(stat(link, false).getIsSymbolicLink());
+    assertFalse(stat(file, false).isSymbolicLink());
+    assertFalse(stat(link, true).isSymbolicLink());
+    assertTrue(stat(link, false).isSymbolicLink());
     assertEquals(Stat.lstat(link.getPath()), stat(link, false).getStat());
     assertEquals(Stat.stat(link.getPath()), stat(link, true).getStat());
   }
 
   public void testIsDirectory() throws Exception {
     File dir = tmp().createDir("a");
-    assertTrue(stat(dir, false).getIsDirectory());
+    assertTrue(stat(dir, false).isDirectory());
   }
 
   public void testIsRegularFile() throws Exception {
     File file = tmp().createFile("a");
-    assertTrue(stat(file, false).getIsRegularFile());
+    assertTrue(stat(file, false).isRegularFile());
   }
 
   public void testInodeNumber() throws Exception {
@@ -51,17 +51,17 @@ public final class LocalResourceStatusTest extends FileBaseTest {
   public void testReadable() throws Exception {
     File file = tmp().createFile("a");
     assertTrue(file.setReadable(false));
-    assertFalse(stat(file, false).getIsReadable());
+    assertFalse(stat(file, false).isReadable());
     assertTrue(file.setReadable(true));
-    assertTrue(stat(file, false).getIsReadable());
+    assertTrue(stat(file, false).isReadable());
   }
 
   public void testWritable() throws Exception {
     File file = tmp().createFile("a");
     assertTrue(file.setWritable(false));
-    assertFalse(stat(file, false).getIsWritable());
+    assertFalse(stat(file, false).isWritable());
     assertTrue(file.setWritable(true));
-    assertTrue(stat(file, false).getIsWritable());
+    assertTrue(stat(file, false).isWritable());
   }
 
   public void testName() throws Exception {
