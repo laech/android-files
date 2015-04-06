@@ -6,7 +6,7 @@ import auto.parcel.AutoParcel;
 import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
 
-abstract class FileListItem {
+public abstract class FileListItem {
 
     FileListItem() {
     }
@@ -18,7 +18,7 @@ abstract class FileListItem {
     }
 
     @AutoParcel
-    static abstract class Header extends FileListItem {
+    public static abstract class Header extends FileListItem {
 
         Header() {
         }
@@ -41,7 +41,7 @@ abstract class FileListItem {
     }
 
     @AutoParcel
-    static abstract class File extends FileListItem {
+    public static abstract class File extends FileListItem {
 
         File() {
         }
