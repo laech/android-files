@@ -50,7 +50,6 @@ dependencies {
     compile libs.eventbus
     compile libs.guava
     compile libs.tika
-    compile libs.commons_io
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v13:21.0.3'

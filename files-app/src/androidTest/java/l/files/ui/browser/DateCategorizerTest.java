@@ -29,7 +29,8 @@ public final class DateCategorizerTest extends BaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         midnight = new GregorianCalendar(2014, JUNE, 12);
-        now = (Calendar) midnight.clone();
+        now = Calendar.getInstance();
+        now.setTimeInMillis(midnight.getTimeInMillis());
         now.add(Calendar.HOUR_OF_DAY, 8);
         res = mock(Resources.class);
         categorizer = new DateCategorizer(now.getTimeInMillis());
@@ -76,19 +77,22 @@ public final class DateCategorizerTest extends BaseTest {
 
     public void testModifiedThisYear() {
         Calendar month0 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(30) - 1);
-        Calendar month1 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(30));
-        Calendar month2 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(30 * 2));
+        Calendar month1 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(31));
+        Calendar month2 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(31 * 2));
         assertEquals(formatMonth(month0), categorizer.get(res, mockStat(month0)));
         assertEquals(formatMonth(month1), categorizer.get(res, mockStat(month1)));
         assertEquals(formatMonth(month2), categorizer.get(res, mockStat(month2)));
     }
 
     private String formatMonth(Calendar calendar) {
-        return new SimpleDateFormat("EEEE").format(calendar.getTime());
+        return new SimpleDateFormat("MMMM").format(calendar.getTime());
     }
 
     public void testModifiedYearsAgo() {
         Calendar year0 = calendar(midnight.getTimeInMillis());
+        year0.set(Calendar.MONTH, Calendar.JANUARY);
+        year0.set(Calendar.DAY_OF_MONTH, 1);
+        year0.add(Calendar.MILLISECOND, -1);
         Calendar year1 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(365));
         Calendar year2 = calendar(midnight.getTimeInMillis() - DAYS.toMillis(365 * 2));
         assertEquals(String.valueOf(year0.get(YEAR)), categorizer.get(res, mockStat(year0)));
@@ -99,7 +103,7 @@ public final class DateCategorizerTest extends BaseTest {
     public void testModifiedUnknownFuture() {
         String unknown = "unknown";
         given(res.getString(R.string.unknown)).willReturn(unknown);
-        assertCategory(unknown, mockStat(midnight.getTimeInMillis() - DAYS.toMillis(1)));
+        assertCategory(unknown, mockStat(midnight.getTimeInMillis() + DAYS.toMillis(1)));
     }
 
     public void testModifiedUnknownPast() {

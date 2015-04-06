@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.FileBaseTest;
-import l.files.eventbus.Subscribe;
 import l.files.fs.local.LocalPath;
 
 import static com.google.common.collect.Collections2.transform;

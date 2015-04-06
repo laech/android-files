@@ -2,12 +2,13 @@ package l.files.fs.local;
 
 import android.webkit.MimeTypeMap;
 
+import com.google.common.io.*;
 import com.google.common.net.MediaType;
 
 import l.files.fs.ResourceStatus;
 
+import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.net.MediaType.OCTET_STREAM;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 
 final class BasicFileTypeDetector extends LocalFileTypeDetector {
 
@@ -19,7 +20,7 @@ final class BasicFileTypeDetector extends LocalFileTypeDetector {
     @Override
     protected MediaType detectRegularFile(ResourceStatus status) {
         MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        String ext = getExtension(status.getName());
+        String ext = getFileExtension(status.getName());
         String type = typeMap.getMimeTypeFromExtension(ext);
         if (type == null) {
             return OCTET_STREAM;

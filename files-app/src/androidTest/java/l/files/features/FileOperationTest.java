@@ -2,10 +2,12 @@ package l.files.features;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import l.files.test.BaseFilesActivityTest;
 
-import static org.apache.commons.io.FileUtils.waitFor;
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public final class FileOperationTest extends BaseFilesActivityTest {
 
@@ -25,12 +27,23 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     String msg = Arrays.toString(dir().get().list()) +
         ":" + Arrays.toString(d.list());
-    assertTrue(msg, waitFor(new File(dir().get(), "d/a"), 5));
-    assertTrue(msg, waitFor(new File(dir().get(), "d/b"), 5));
-    assertTrue(msg, waitFor(new File(dir().get(), "d/c"), 5));
+    assertTrue(msg, waitFor(new File(dir().get(), "d/a"), 5, SECONDS));
+    assertTrue(msg, waitFor(new File(dir().get(), "d/b"), 5, SECONDS));
+    assertTrue(msg, waitFor(new File(dir().get(), "d/c"), 5, SECONDS));
   }
 
-  public void testPasteMenuIsDisabledInsideFolderBeingCopied() throws Exception {
+    private boolean waitFor(File file, int time, TimeUnit unit) throws InterruptedException {
+        long end = currentTimeMillis() + unit.toMillis(time);
+        while (currentTimeMillis() < end) {
+            if (file.exists()) {
+                return true;
+            }
+            Thread.sleep(20);
+        }
+        return false;
+    }
+
+    public void testPasteMenuIsDisabledInsideFolderBeingCopied() throws Exception {
     File dir = dir().createDir("dir");
 
     screen()

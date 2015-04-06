@@ -20,8 +20,8 @@ import l.files.ui.FileCreationFragment;
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
+import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.System.identityHashCode;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 public final class RenameFragment extends FileCreationFragment {
 
@@ -126,7 +126,7 @@ public final class RenameFragment extends FileCreationFragment {
       if (stat.isDirectory()) {
         field.selectAll();
       } else {
-        field.setSelection(0, getBaseName(stat.getName()).length());
+        field.setSelection(0, getNameWithoutExtension(stat.getName()).length());
       }
     }
   }

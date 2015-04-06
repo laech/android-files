@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
 import l.files.eventbus.Events;
-import l.files.eventbus.Subscribe;
 import l.files.fs.local.LocalPath;
 
 import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService;

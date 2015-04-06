@@ -11,9 +11,9 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.io.Files.getFileExtension;
+import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.Integer.parseInt;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public final class Files {
 
@@ -157,8 +157,8 @@ public final class Files {
       last = "";
     } else {
       String name = source.getName();
-      base = getBaseName(name);
-      last = getExtension(name);
+      base = getNameWithoutExtension(name);
+      last = getFileExtension(name);
       if (!isNullOrEmpty(last)) {
         last = "." + last;
       }
