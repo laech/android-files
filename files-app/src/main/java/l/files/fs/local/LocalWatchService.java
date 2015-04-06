@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,7 +19,6 @@ import l.files.fs.WatchService;
 import l.files.logging.Logger;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptyList;
 import static l.files.fs.WatchEvent.Kind;
@@ -108,7 +108,7 @@ public class LocalWatchService implements WatchService, Closeable {
    * mount points (/sdcard, /storage/emulated/0, /storage/emulated/legacy,
    * /storage/sdcard0, they are all mount points of the same device).
    */
-  private final List<PathObserver> observers = newArrayList();
+  private final List<PathObserver> observers = new ArrayList<>();
 
   private final Map<Path, CopyOnWriteArraySet<Listener>> listeners = new HashMap<>();
 

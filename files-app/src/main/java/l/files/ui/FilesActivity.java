@@ -48,7 +48,6 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
 public final class FilesActivity extends BaseActivity
@@ -152,7 +151,8 @@ public final class FilesActivity extends BaseActivity
 
   private void setViewPager(ArrayList<TabItem> items) {
     if (items.isEmpty()) {
-      items = newArrayList(new TabItem(idGenerator.get(), path,
+      items = new ArrayList<>();
+      items.add(new TabItem(idGenerator.get(), path,
           FileLabels.get(getResources(), path)));
     }
     viewPager.setAdapter(new FilesPagerAdapter(items));
@@ -188,7 +188,7 @@ public final class FilesActivity extends BaseActivity
     super.onSaveInstanceState(outState);
     outState.putInt(STATE_ID_SEED, idGenerator.get());
     outState.putParcelableArrayList(STATE_TAB_ITEMS,
-        newArrayList(getPagerAdapter().getItems()));
+        new ArrayList<>(getPagerAdapter().getItems()));
   }
 
   @Override public void onBackPressed() {

@@ -6,13 +6,13 @@ import android.content.Intent;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 import l.files.fs.Path;
 
 import static android.content.ClipData.newIntent;
 import static android.content.ClipData.newPlainText;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptySet;
 
 public final class Clipboards {
@@ -72,17 +72,17 @@ public final class Clipboards {
     return intent.getAction();
   }
 
-  public static void setCut(ClipboardManager manager, Iterable<Path> paths) {
+  public static void setCut(ClipboardManager manager, Collection<Path> paths) {
     setClipData(manager, paths, ACTION_CUT);
   }
 
-  public static void setCopy(ClipboardManager manager, Iterable<Path> paths) {
+  public static void setCopy(ClipboardManager manager, Collection<Path> paths) {
     setClipData(manager, paths, ACTION_COPY);
   }
 
   private static void setClipData(
-      ClipboardManager manager, Iterable<Path> paths, String action) {
-    Intent intent = new Intent(action).putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(paths));
+      ClipboardManager manager, Collection<Path> paths, String action) {
+    Intent intent = new Intent(action).putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(paths));
     manager.setPrimaryClip(newIntent(null, intent));
   }
 }

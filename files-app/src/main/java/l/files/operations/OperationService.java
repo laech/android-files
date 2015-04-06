@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +22,6 @@ import l.files.fs.Path;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getService;
-import static com.google.common.collect.Lists.newArrayList;
-import static de.greenrobot.event.ThreadMode.MainThread;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.operations.OperationService.FileAction.COPY;
 import static l.files.operations.OperationService.FileAction.DELETE;
@@ -46,29 +46,29 @@ public final class OperationService extends Service {
   private Handler handler;
   private Map<Integer, Future<?>> tasks;
 
-  public static void delete(Context context, Iterable<? extends Path> paths) {
+  public static void delete(Context context, Collection<? extends Path> paths) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(DELETE.action())
-            .putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(paths))
+            .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(paths))
     );
   }
 
-  public static void copy(Context context, Iterable<? extends Path> src, Path dst) {
+  public static void copy(Context context, Collection<? extends Path> src, Path dst) {
     paste(COPY.action(), context, src, dst);
   }
 
-  public static void move(Context context, Iterable<? extends Path> src, Path dst) {
+  public static void move(Context context, Collection<? extends Path> src, Path dst) {
     paste(MOVE.action(), context, src, dst);
   }
 
   private static void paste(String action, Context context,
-                            Iterable<? extends Path> src, Path dst) {
+                            Collection<? extends Path> src, Path dst) {
     context.startService(
         new Intent(context, OperationService.class)
             .setAction(action)
             .putExtra(EXTRA_DST_PATH, dst)
-            .putParcelableArrayListExtra(EXTRA_PATHS, newArrayList(src))
+            .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(src))
     );
   }
 

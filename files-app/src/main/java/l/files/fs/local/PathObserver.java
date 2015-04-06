@@ -7,6 +7,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -17,8 +18,6 @@ import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newHashSet;
 
 final class PathObserver extends FileObserver {
@@ -69,7 +68,7 @@ final class PathObserver extends FileObserver {
 
   public Collection<Path> copyPaths() {
     synchronized (this) {
-      return newArrayList(paths);
+      return new ArrayList<>(paths);
     }
   }
 
@@ -104,7 +103,7 @@ final class PathObserver extends FileObserver {
    */
   public List<Path> removePaths(Predicate<Path> pred) {
     synchronized (this) {
-      List<Path> result = newArrayListWithCapacity(paths.size());
+      List<Path> result = new ArrayList<>(paths.size());
       for (Path path : paths) {
         if (pred.apply(path)) {
           result.add(path);
@@ -133,7 +132,7 @@ final class PathObserver extends FileObserver {
 
   public List<Path> removePaths() {
     synchronized (this) {
-      List<Path> result = newArrayList(paths);
+      List<Path> result = new ArrayList<>(paths);
       paths.clear();
       return result;
     }

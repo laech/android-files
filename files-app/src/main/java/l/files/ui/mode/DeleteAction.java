@@ -8,6 +8,7 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Collection;
 import java.util.List;
 
 import l.files.R;
@@ -56,7 +57,7 @@ public final class DeleteAction extends MultiChoiceModeAction {
         .show();
   }
 
-  private void requestDelete(final Iterable<Path> paths) {
+  private void requestDelete(final Collection<Path> paths) {
     AsyncTask.execute(new Runnable() {
       @Override
       public void run() {
