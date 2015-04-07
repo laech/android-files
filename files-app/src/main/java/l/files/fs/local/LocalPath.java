@@ -25,7 +25,7 @@ public abstract class LocalPath implements Path {
 
     @Override
     public LocalResource getResource() {
-        return LocalResource.create(this);
+        return LocalResource.create(getFile());
     }
 
     @Override

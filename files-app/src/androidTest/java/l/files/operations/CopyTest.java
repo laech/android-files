@@ -52,7 +52,7 @@ public final class CopyTest extends PasteTest {
       copy(new File(link.getUri()), tmp().createDir("copied"));
 
       LocalResource copied = LocalPath.of(tmp().get("copied/link").getPath()).getResource();
-      assertEquals(target.getPath(), copied.readSymbolicLink());
+      assertEquals(target, copied.readSymbolicLink());
   }
 
   public void testCopiesDirectory() throws Exception {

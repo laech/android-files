@@ -51,7 +51,7 @@ public final class DeleteTest extends FileBaseTest {
     public void testDeletesSymbolicLinkButNotLinkedFile() throws Exception {
         File a = tmp().createFile("a");
         File b = tmp().get("b");
-        LocalPath.of(b).getResource().createSymbolicLink(LocalPath.of(a));
+        LocalPath.of(b).getResource().createSymbolicLink(LocalPath.of(a).getResource());
         assertTrue(a.exists());
         assertTrue(b.exists());
         delete(b);

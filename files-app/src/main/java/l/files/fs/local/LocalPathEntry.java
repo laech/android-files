@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.Path;
 import l.files.fs.PathEntry;
-import l.files.fs.Resource;
 
 @AutoParcel
 abstract class LocalPathEntry implements PathEntry {

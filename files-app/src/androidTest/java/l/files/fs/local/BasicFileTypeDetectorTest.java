@@ -1,11 +1,10 @@
 package l.files.fs.local;
 
-import l.files.fs.FileTypeDetector;
+public final class BasicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
 
-public final class BasicFileTypeDetectorTest
-    extends LocalFileTypeDetectorTest {
+    @Override
+    protected LocalFileTypeDetector detector() {
+        return BasicFileTypeDetector.INSTANCE;
+    }
 
-  @Override protected FileTypeDetector detector() {
-    return BasicFileTypeDetector.INSTANCE;
-  }
 }

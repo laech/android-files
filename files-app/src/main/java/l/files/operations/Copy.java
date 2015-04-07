@@ -12,6 +12,7 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 
+import static l.files.fs.Resource.ResourceStream;
 import static l.files.fs.Resource.TraversalExceptionHandler;
 import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
 
@@ -38,45 +39,38 @@ final class Copy extends Paste {
     @Override
     void paste(Path from, Path to, final FailureRecorder listener) throws InterruptedException {
 
-        Iterable<Resource> iterable;
-        try {
-            iterable = from.getResource().traverse(PRE_ORDER, new TraversalExceptionHandler() {
-                @Override
-                public void handle(Resource resource, IOException e) {
-                    listener.onFailure(resource.getPath(), e);
+        try (ResourceStream resources = traverse(from, PRE_ORDER, listener)) {
+
+            for (Resource resource : resources) {
+                checkInterrupt();
+
+                Path path = resource.getPath();
+                ResourceStatus status;
+                try {
+                    status = resource.readStatus(false);
+                } catch (IOException e) {
+                    listener.onFailure(path, e);
+                    continue;
                 }
-            });
+
+                Path dst = path.replace(from, to);
+
+                if (status.isSymbolicLink()) {
+                    copyLink(status, dst, listener);
+
+                } else if (status.isDirectory()) {
+                    createDirectory(status, dst, listener);
+
+                } else if (status.isRegularFile()) {
+                    copyFile(status, dst, listener);
+
+                } else {
+                    listener.onFailure(path, new IOException("Not a file or directory"));
+                }
+            }
+
         } catch (IOException e) {
             listener.onFailure(from, e);
-            return;
-        }
-
-        for (Resource resource : iterable) {
-            checkInterrupt();
-
-            Path path = resource.getPath();
-            ResourceStatus status;
-            try {
-                status = resource.readStatus(false);
-            } catch (IOException e) {
-                listener.onFailure(path, e);
-                continue;
-            }
-
-            Path dst = path.replace(from, to);
-
-            if (status.isSymbolicLink()) {
-                copyLink(status, dst, listener);
-
-            } else if (status.isDirectory()) {
-                createDirectory(status, dst, listener);
-
-            } else if (status.isRegularFile()) {
-                copyFile(status, dst, listener);
-
-            } else {
-                listener.onFailure(path, new IOException("Not a file or directory"));
-            }
         }
 
     }

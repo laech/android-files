@@ -21,7 +21,7 @@ final class Move extends Paste {
     @Override
     void paste(Path from, Path to, FailureRecorder listener) {
         try {
-            from.getResource().move(to);
+            from.getResource().move(to.getResource());
             movedItemCount.incrementAndGet();
         } catch (IOException e) {
             listener.onFailure(from, e);

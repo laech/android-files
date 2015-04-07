@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.fs.ResourceStream;
+import l.files.fs.Resource;
 import l.files.fs.UncheckedIOException;
 
-final class LocalResourceStream implements ResourceStream<LocalPathEntry> {
+final class LocalResourceStream implements Resource.Stream<LocalPathEntry> {
 
     /*
      * Design note: this basically uses <dirent.h> to read directory entries,

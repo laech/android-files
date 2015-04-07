@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import l.files.fs.Path;
 import l.files.fs.Resource;
 
-import static l.files.fs.Resource.TraversalExceptionHandler;
+import static l.files.fs.Resource.ResourceStream;
 import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
 
 final class Delete extends AbstractOperation {
@@ -37,18 +37,14 @@ final class Delete extends AbstractOperation {
     }
 
     private void deleteTree(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
-        Iterable<Resource> resources = path.getResource().traverse(POST_ORDER, new TraversalExceptionHandler() {
-            @Override
-            public void handle(Resource resource, IOException e) {
-                listener.onFailure(resource.getPath(), e);
-            }
-        });
-        for (Resource resource : resources) {
-            checkInterrupt();
-            try {
-                delete(resource);
-            } catch (IOException e) {
-                listener.onFailure(resource.getPath(), e);
+        try (ResourceStream resources = traverse(path, POST_ORDER, listener)) {
+            for (Resource resource : resources) {
+                checkInterrupt();
+                try {
+                    delete(resource);
+                } catch (IOException e) {
+                    listener.onFailure(resource.getPath(), e);
+                }
             }
         }
     }
