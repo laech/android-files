@@ -106,7 +106,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     final LoaderCallback listener = mock(LoaderCallback.class);
     given(listener.onCreateLoader(eq(loaderId), any(Bundle.class))).will(new Answer<FilesLoader>() {
       @Override public FilesLoader answer(final InvocationOnMock invocation) {
-        return new FilesLoader(getActivity(), path, FileSort.NAME, true);
+        return new FilesLoader(getActivity(), path.getResource(), FileSort.NAME, true);
       }
     });
     return new Subject(loaderId, getActivity().getLoaderManager(), listener);

@@ -247,11 +247,11 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     }
 
     protected WatchEvent event(WatchEvent.Kind kind, String relativePath) {
-        return WatchEvent.create(kind, LocalPath.of(tmp().get(relativePath)));
+        return WatchEvent.create(kind, LocalPath.of(tmp().get(relativePath)).getResource());
     }
 
     protected WatchEvent event(WatchEvent.Kind kind, File file) {
-        return WatchEvent.create(kind, LocalPath.of(file));
+        return WatchEvent.create(kind, LocalPath.of(file).getResource());
     }
 
     static enum Permission {

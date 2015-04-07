@@ -169,7 +169,7 @@ public class LocalWatchService implements WatchService, Closeable {
     }
 
     private void send(Kind kind, Path path) {
-      WatchEvent event = WatchEvent.create(kind, path);
+      WatchEvent event = WatchEvent.create(kind, path.getResource());
       for (Listener listener : getListeners(path)) {
         listener.onEvent(event);
       }

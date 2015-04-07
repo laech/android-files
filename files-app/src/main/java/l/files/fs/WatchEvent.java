@@ -10,10 +10,10 @@ public abstract class WatchEvent {
 
     public abstract Kind getKind();
 
-    public abstract Path getPath();
+    public abstract Resource getResource();
 
-    public static WatchEvent create(Kind kind, Path path) {
-        return new AutoParcel_WatchEvent(kind, path);
+    public static WatchEvent create(Kind kind, Resource resource) {
+        return new AutoParcel_WatchEvent(kind, resource);
     }
 
     public static enum Kind {

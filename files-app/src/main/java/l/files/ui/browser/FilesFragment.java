@@ -148,7 +148,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     Activity context = getActivity();
     FileSort sort = getSort(context);
     boolean showHidden = Preferences.getShowHiddenFiles(context);
-    return new FilesLoader(context, path, sort, showHidden);
+    return new FilesLoader(context, path.getResource(), sort, showHidden);
   }
 
   @Override public void onLoadFinished(Loader<List<FileListItem>> loader, List<FileListItem> data) {

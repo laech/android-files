@@ -12,6 +12,10 @@ import java.net.URI;
 
 import javax.annotation.Nullable;
 
+/**
+ * Represents a file system resource, such as a file or directory. Two resources
+ * are equal if their URIs are equal.
+ */
 public interface Resource extends PathEntry, Parcelable {
 
     /**
