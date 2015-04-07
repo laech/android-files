@@ -12,8 +12,6 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 
-import static l.files.fs.Resource.ResourceStream;
-import static l.files.fs.Resource.TraversalExceptionHandler;
 import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
 
 final class Copy extends Paste {
@@ -39,7 +37,7 @@ final class Copy extends Paste {
     @Override
     void paste(Path from, Path to, final FailureRecorder listener) throws InterruptedException {
 
-        try (ResourceStream resources = traverse(from, PRE_ORDER, listener)) {
+        try (Resource.Stream resources = traverse(from, PRE_ORDER, listener)) {
 
             for (Resource resource : resources) {
                 checkInterrupt();

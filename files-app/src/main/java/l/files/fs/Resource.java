@@ -75,18 +75,20 @@ public interface Resource extends PathEntry, Parcelable {
      */
     WatchService getWatcher();
 
+    // TODO replace WatchService
+    // ResourceSubscription observe(ResourceObserver observer) throws IOException;
+
     /**
      * Traverse this subtree. Accepts an error handler, if the handler does not
      * rethrow the exception, traversal will continue.
      */
-    ResourceStream traverse(
-            TraversalOrder order,
-            TraversalExceptionHandler handler) throws IOException;
+    Stream traverse(TraversalOrder order,
+                    TraversalExceptionHandler handler) throws IOException;
 
     /**
      * Opens a resource stream to iterate through the immediate children.
      */
-    ResourceStream openDirectory() throws IOException;
+    Stream openDirectory() throws IOException;
 
     InputStream openInputStream() throws IOException;
 
@@ -153,10 +155,7 @@ public interface Resource extends PathEntry, Parcelable {
         void handle(Resource resource, IOException e);
     }
 
-    interface Stream<T> extends Iterable<T>, Closeable {
-    }
-
-    interface ResourceStream extends Stream<Resource> {
+    interface Stream extends Iterable<Resource>, Closeable {
     }
 
 }

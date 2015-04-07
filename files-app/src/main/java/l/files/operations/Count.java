@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import l.files.fs.Path;
 import l.files.fs.Resource;
 
-import static l.files.fs.Resource.ResourceStream;
 import static l.files.fs.Resource.TraversalOrder.BREATH_FIRST;
 
 class Count extends AbstractOperation {
@@ -32,7 +31,7 @@ class Count extends AbstractOperation {
     }
 
     private void count(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
-        try (ResourceStream resources = traverse(path, BREATH_FIRST, listener)) {
+        try (Resource.Stream resources = traverse(path, BREATH_FIRST, listener)) {
             for (Resource resource : resources) {
                 checkInterrupt();
                 onCount(resource);

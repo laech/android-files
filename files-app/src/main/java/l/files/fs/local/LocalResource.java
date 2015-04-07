@@ -148,7 +148,7 @@ public abstract class LocalResource implements PathEntry, Resource {
     }
 
     @Override
-    public ResourceStream traverse(
+    public Stream traverse(
             TraversalOrder order,
             TraversalExceptionHandler handler) throws IOException {
 
@@ -176,7 +176,7 @@ public abstract class LocalResource implements PathEntry, Resource {
             }
         });
 
-        return new ResourceStream() {
+        return new Stream() {
             @Override
             public void close() throws IOException {
             }
@@ -218,9 +218,9 @@ public abstract class LocalResource implements PathEntry, Resource {
     }
 
     @Override
-    public ResourceStream openDirectory() throws IOException {
+    public Stream openDirectory() throws IOException {
         final LocalResourceStream stream = LocalResourceStream.open(getPath());
-        return new ResourceStream() {
+        return new Stream() {
             @Override
             public void close() throws IOException {
                 stream.close();

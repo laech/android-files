@@ -1,13 +1,13 @@
 package l.files.fs.local;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.fs.Resource;
 import l.files.fs.UncheckedIOException;
 
-final class LocalResourceStream implements Resource.Stream<LocalPathEntry> {
+final class LocalResourceStream implements Iterable<LocalPathEntry>, Closeable {
 
     /*
      * Design note: this basically uses <dirent.h> to read directory entries,

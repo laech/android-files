@@ -43,7 +43,7 @@ abstract class AbstractOperation implements FileOperation {
     abstract void process(Path path, FailureRecorder listener)
             throws InterruptedException;
 
-    protected final Resource.ResourceStream traverse(Path path, TraversalOrder order, final FailureRecorder listener) throws IOException {
+    protected final Resource.Stream traverse(Path path, TraversalOrder order, final FailureRecorder listener) throws IOException {
         return path.getResource().traverse(order, new Resource.TraversalExceptionHandler() {
             @Override
             public void handle(Resource resource, IOException e) {

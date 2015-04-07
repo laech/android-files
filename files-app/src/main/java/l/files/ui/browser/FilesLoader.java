@@ -25,7 +25,6 @@ import l.files.logging.Logger;
 import static android.os.Looper.getMainLooper;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
-import static l.files.fs.Resource.ResourceStream;
 
 public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
@@ -78,7 +77,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             logger.debug(e);
             return emptyList();
         }
-        try (ResourceStream resources = resource.getResource().openDirectory()) {
+        try (Resource.Stream resources = resource.getResource().openDirectory()) {
             for (Resource resource : resources) {
                 checkCancelled();
                 addData(resource);

@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import l.files.fs.Path;
 import l.files.fs.Resource;
 
-import static l.files.fs.Resource.ResourceStream;
 import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
 
 final class Delete extends AbstractOperation {
@@ -37,7 +36,7 @@ final class Delete extends AbstractOperation {
     }
 
     private void deleteTree(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
-        try (ResourceStream resources = traverse(path, POST_ORDER, listener)) {
+        try (Resource.Stream resources = traverse(path, POST_ORDER, listener)) {
             for (Resource resource : resources) {
                 checkInterrupt();
                 try {
