@@ -1,10 +1,12 @@
 package l.files.operations;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import l.files.common.testing.BaseTest;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskKind.COPY;
@@ -75,7 +77,9 @@ public final class TaskStateTest extends BaseTest {
 
   public void testRunningToFailed() throws Exception {
     Time failureTime = Time.create(20, 2);
-    List<Failure> failures = asList(Failure.create(LocalPath.of("1"), new IOException("ok")));
+    List<Failure> failures = asList(Failure.create(
+            LocalResource.create(new File("1")), new IOException("ok")
+    ));
     TaskState.Failed state = pending.running(time).failed(failureTime, failures);
     assertEquals(task, state.getTask());
     assertEquals(failureTime, state.getTime());

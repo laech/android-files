@@ -3,15 +3,14 @@ package l.files.operations;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
 final class Size extends Count {
 
     private final AtomicLong size = new AtomicLong();
 
-    Size(Iterable<? extends Path> paths) {
-        super(paths);
+    Size(Iterable<? extends Resource> resources) {
+        super(resources);
     }
 
     public long getSize() {

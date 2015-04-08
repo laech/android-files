@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
 
 import static java.util.Arrays.asList;
@@ -22,7 +22,7 @@ public final class DeleteTest extends FileBaseTest {
                 tmp().get("a/b")
         ));
 
-        Delete delete = create(asList(LocalPath.of(src)));
+        Delete delete = create(asList(LocalPath.of(src).getResource()));
         delete.execute();
 
         assertEquals(delete.getDeletedItemCount(), expected.size());
@@ -70,15 +70,15 @@ public final class DeleteTest extends FileBaseTest {
         } catch (FileException e) {
             failures = e.failures();
         }
-        assertEquals(LocalPath.of(a.getPath()), failures.get(0).getPath());
+        assertEquals(LocalPath.of(a.getPath()).getResource(), failures.get(0).getResource());
         assertEquals(1, failures.size());
     }
 
     private void delete(File file) throws Exception {
-        create(asList(LocalPath.of(file))).execute();
+        create(asList(LocalPath.of(file).getResource())).execute();
     }
 
-    private Delete create(Iterable<? extends Path> paths) {
-        return new Delete(paths);
+    private Delete create(Iterable<? extends Resource> resources) {
+        return new Delete(resources);
     }
 }

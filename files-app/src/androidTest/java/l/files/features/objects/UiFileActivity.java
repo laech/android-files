@@ -2,9 +2,7 @@ package l.files.features.objects;
 
 import android.app.ActionBar;
 import android.app.Instrumentation;
-import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -255,7 +253,7 @@ public final class UiFileActivity {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         FilesPagerFragment fragment = activity.getCurrentPagerFragment();
-        Path actual = fragment.getCurrentPath();
+        Path actual = fragment.getCurrentDirectory().getPath();
         assertEquals(expected.getPath(), actual);
       }
     });

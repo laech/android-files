@@ -13,7 +13,7 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.operations.OperationService;
 import l.files.ui.ListSelection;
 
@@ -24,50 +24,50 @@ import static java.util.Objects.requireNonNull;
 
 public final class DeleteAction extends MultiChoiceModeAction {
 
-  private final Context context;
-  private final ListSelection<Path> supplier;
+    private final Context context;
+    private final ListSelection<Resource> supplier;
 
-  @SuppressWarnings("unchecked")
-  public DeleteAction(Context context, ListSelection<? extends Path> supplier) {
-    super(R.id.delete);
-    this.context = requireNonNull(context);
-    this.supplier = (ListSelection<Path>) requireNonNull(supplier);
-  }
+    @SuppressWarnings("unchecked")
+    public DeleteAction(Context context, ListSelection<? extends Resource> supplier) {
+        super(R.id.delete);
+        this.context = requireNonNull(context);
+        this.supplier = (ListSelection<Resource>) requireNonNull(supplier);
+    }
 
-  @Override
-  public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    menu.add(NONE, id(), NONE, R.string.delete)
-        .setShowAsAction(SHOW_AS_ACTION_NEVER);
-    return true;
-  }
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        menu.add(NONE, id(), NONE, R.string.delete)
+                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+        return true;
+    }
 
-  @Override
-  protected void onItemSelected(final ActionMode mode, MenuItem item) {
-    final List<Path> paths = supplier.getCheckedItems();
-    new AlertDialog.Builder(context)
-        .setMessage(getConfirmMessage(paths.size()))
-        .setNegativeButton(android.R.string.cancel, null)
-        .setPositiveButton(R.string.delete, new OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            requestDelete(paths);
-            mode.finish();
-          }
-        })
-        .show();
-  }
+    @Override
+    protected void onItemSelected(final ActionMode mode, MenuItem item) {
+        final List<Resource> resources = supplier.getCheckedItems();
+        new AlertDialog.Builder(context)
+                .setMessage(getConfirmMessage(resources.size()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.delete, new OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestDelete(resources);
+                        mode.finish();
+                    }
+                })
+                .show();
+    }
 
-  private void requestDelete(final Collection<Path> paths) {
-    AsyncTask.execute(new Runnable() {
-      @Override
-      public void run() {
-        OperationService.delete(context, paths);
-      }
-    });
-  }
+    private void requestDelete(final Collection<? extends Resource> resources) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                OperationService.delete(context, resources);
+            }
+        });
+    }
 
-  private String getConfirmMessage(int size) {
-    return context.getResources().getQuantityString(
-        R.plurals.confirm_delete_question, size, size);
-  }
+    private String getConfirmMessage(int size) {
+        return context.getResources().getQuantityString(
+                R.plurals.confirm_delete_question, size, size);
+    }
 }

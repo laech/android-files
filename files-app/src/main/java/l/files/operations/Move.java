@@ -4,14 +4,14 @@ package l.files.operations;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.Path;
+import l.files.fs.Resource;
 
 final class Move extends Paste {
 
     private final AtomicInteger movedItemCount = new AtomicInteger();
 
-    Move(Iterable<? extends Path> sources, Path dstPath) {
-        super(sources, dstPath);
+    Move(Iterable<? extends Resource> sources, Resource destination) {
+        super(sources, destination);
     }
 
     public int getMovedItemCount() {
@@ -19,7 +19,7 @@ final class Move extends Paste {
     }
 
     @Override
-    void paste(Path from, Path to, FailureRecorder listener) {
+    void paste(Resource from, Resource to, FailureRecorder listener) {
         try {
             from.getResource().move(to.getResource());
             movedItemCount.incrementAndGet();

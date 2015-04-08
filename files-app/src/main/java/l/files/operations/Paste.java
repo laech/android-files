@@ -2,7 +2,7 @@ package l.files.operations;
 
 import java.io.File;
 
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.local.Files;
 import l.files.fs.local.LocalPath;
 
@@ -10,30 +10,30 @@ import static java.util.Objects.requireNonNull;
 
 abstract class Paste extends AbstractOperation {
 
-    private final Path dstPath;
+    private final Resource destination;
 
-    Paste(Iterable<? extends Path> sources, Path dstPath) {
-        super(sources);
-        this.dstPath = requireNonNull(dstPath, "dstPath");
+    Paste(Iterable<? extends Resource> resources, Resource destination) {
+        super(resources);
+        this.destination = requireNonNull(destination, "destination");
     }
 
     @Override
-    void process(Path from, FailureRecorder listener)
+    void process(Resource resource, FailureRecorder listener)
             throws InterruptedException {
         checkInterrupt();
 
-        File destinationFile = new File(dstPath.getUri());
-        File fromFile = new File(from.getUri());
-        if (dstPath.equals(from) || dstPath.startsWith(from)) {
+        File destinationFile = new File(destination.getUri());
+        File fromFile = new File(resource.getUri());
+        if (destination.equals(resource) || destination.startsWith(resource)) {
             // TODO prevent this from UI
             throw new CannotPasteIntoSelfException(
-                    "Cannot paste directory " + from +
-                            " into its own sub directory " + dstPath
+                    "Cannot paste directory " + resource +
+                            " into its own sub directory " + destination
             );
         }
 
         File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
-        paste(from, LocalPath.of(to), listener);
+        paste(resource, LocalPath.of(to).getResource(), listener);
     }
 
     /**
@@ -41,7 +41,7 @@ abstract class Paste extends AbstractOperation {
      * its content into {@code to}. If {@code from} is a directory, paste its
      * content into {@code to}.
      */
-    abstract void paste(Path from, Path to, FailureRecorder listener)
+    abstract void paste(Resource from, Resource to, FailureRecorder listener)
             throws InterruptedException;
 
 }

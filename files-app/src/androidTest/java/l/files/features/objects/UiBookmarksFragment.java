@@ -96,7 +96,7 @@ public final class UiBookmarksFragment {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                Path path = getActivity().getCurrentPagerFragment().getCurrentPath();
+                Path path = getActivity().getCurrentPagerFragment().getCurrentDirectory().getPath();
                 List<Path> paths = getBookmarks();
                 assertEquals(paths.toString(), bookmarked, paths.contains(path));
             }

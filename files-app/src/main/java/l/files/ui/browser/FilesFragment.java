@@ -16,11 +16,10 @@ import java.util.List;
 import l.files.R;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.MultiChoiceModeListeners;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.Animations;
 import l.files.ui.BaseFileListFragment;
-import l.files.ui.ListSelection;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.Preferences;
 import l.files.ui.menu.BookmarkMenu;
@@ -44,140 +43,147 @@ import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
 
 public final class FilesFragment extends BaseFileListFragment implements
-    LoaderCallbacks<List<FileListItem>>,
-    OnSharedPreferenceChangeListener,
-    ListSelection<Path> {
+        LoaderCallbacks<List<FileListItem>>, OnSharedPreferenceChangeListener {
 
-  // TODO implement progress
+    // TODO implement progress
 
-  public static final String TAG = FilesFragment.class.getSimpleName();
+    public static final String TAG = FilesFragment.class.getSimpleName();
 
-  private static final String ARG_PATH = "path";
+    private static final String ARG_DIRECTORY = "directory";
 
-  public static FilesFragment create(Path path) {
-    Bundle bundle = new Bundle(1);
-    bundle.putParcelable(ARG_PATH, path);
+    public static FilesFragment create(Resource directory) {
+        Bundle bundle = new Bundle(1);
+        bundle.putParcelable(ARG_DIRECTORY, directory);
 
-    FilesFragment browser = new FilesFragment();
-    browser.setArguments(bundle);
-    return browser;
-  }
-
-  private Path path;
-
-  public FilesFragment() {
-    super(R.layout.files_fragment);
-  }
-
-  public Path getPath() {
-    return path;
-  }
-
-  @Override public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-
-    path = getArguments().getParcelable(ARG_PATH);
-
-    setupListView();
-    setupOptionsMenu();
-    setListAdapter(FilesAdapter.get(getActivity()));
-
-    getLoaderManager().initLoader(0, null, this);
-    Preferences.register(getActivity(), this);
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
-    Preferences.unregister(getActivity(), this);
-  }
-
-  @Override public void onListItemClick(ListView l, View v, int pos, long id) {
-    super.onListItemClick(l, v, pos, id);
-    FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
-    getBus().post(OpenFileRequest.create(item.getPath()));
-  }
-
-  @Override public FilesAdapter getListAdapter() {
-    return (FilesAdapter) super.getListAdapter();
-  }
-
-  private void setupOptionsMenu() {
-    Activity context = getActivity();
-    setOptionsMenu(OptionsMenus.compose(
-        new BookmarkMenu(BookmarkManagerImpl.get(context), path),
-        new NewDirMenu(context.getFragmentManager(), path),
-        new PasteMenu(context, getClipboardManager(context), path),
-        new SortMenu(context.getFragmentManager()),
-        new ShowHiddenFilesMenu(context)
-    ));
-  }
-
-  private void setupListView() {
-    final Activity context = getActivity();
-    final ClipboardManager clipboard = getClipboardManager(context);
-    final ListView list = getListView();
-    list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
-    list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
-        new CountSelectedItemsAction(this),
-        new SelectAllAction(list),
-        new CutAction(context, clipboard, this),
-        new CopyAction(context, clipboard, this),
-        new DeleteAction(context, this),
-        new RenameAction(context.getFragmentManager(), this)
-    ));
-  }
-
-  @Override public Path getCheckedItem() {
-    int position = getCheckedItemPosition();
-    return ((FileListItem.File) getListView().getItemAtPosition(position)).getPath();
-  }
-
-  @Override public List<Path> getCheckedItems() {
-    List<Integer> positions = getCheckedItemPositions();
-    List<Path> paths = new ArrayList<>(positions.size());
-    for (int position : positions) {
-      FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
-      if (item.isFile()) {
-        paths.add(((FileListItem.File) item).getPath());
-      }
+        FilesFragment browser = new FilesFragment();
+        browser.setArguments(bundle);
+        return browser;
     }
-    return paths;
-  }
 
-  @Override public Loader<List<FileListItem>> onCreateLoader(int id, Bundle bundle) {
-    Activity context = getActivity();
-    FileSort sort = getSort(context);
-    boolean showHidden = Preferences.getShowHiddenFiles(context);
-    return new FilesLoader(context, path.getResource(), sort, showHidden);
-  }
+    private Resource directory;
 
-  @Override public void onLoadFinished(Loader<List<FileListItem>> loader, List<FileListItem> data) {
-    if (getActivity() != null && !getActivity().isFinishing()) {
-      if (!getListAdapter().isEmpty() && isResumed()) {
-        Animations.animatePreDataSetChange(getListView());
-      }
-      getListAdapter().setItems(data);
-      if (getListAdapter().isEmpty()) {
-        overrideEmptyText(R.string.empty);
-      }
+    public FilesFragment() {
+        super(R.layout.files_fragment);
     }
-  }
 
-  private void overrideEmptyText(int resId) {
-    View root = getView();
-    if (root != null) {
-      ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
+    public Resource getDirectory() {
+        return directory;
     }
-  }
 
-  @Override public void onLoaderReset(Loader<List<FileListItem>> loader) {
-    getListAdapter().setItems(Collections.<FileListItem>emptyList());
-  }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-  @Override
-  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    if (isSortKey(key) || isShowHiddenFilesKey(key)) {
-      getLoaderManager().restartLoader(0, null, this);
+        directory = getArguments().getParcelable(ARG_DIRECTORY);
+
+        setupListView();
+        setupOptionsMenu();
+        setListAdapter(FilesAdapter.get(getActivity()));
+
+        getLoaderManager().initLoader(0, null, this);
+        Preferences.register(getActivity(), this);
     }
-  }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Preferences.unregister(getActivity(), this);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int pos, long id) {
+        super.onListItemClick(l, v, pos, id);
+        FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
+        getBus().post(OpenFileRequest.create(item.getPath()));
+    }
+
+    @Override
+    public FilesAdapter getListAdapter() {
+        return (FilesAdapter) super.getListAdapter();
+    }
+
+    private void setupOptionsMenu() {
+        Activity context = getActivity();
+        setOptionsMenu(OptionsMenus.compose(
+                new BookmarkMenu(BookmarkManagerImpl.get(context), directory.getPath()),
+                new NewDirMenu(context.getFragmentManager(), directory.getResource()),
+                new PasteMenu(context, getClipboardManager(context), directory.getResource()),
+                new SortMenu(context.getFragmentManager()),
+                new ShowHiddenFilesMenu(context)
+        ));
+    }
+
+    private void setupListView() {
+        final Activity context = getActivity();
+        final ClipboardManager clipboard = getClipboardManager(context);
+        final ListView list = getListView();
+        list.setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL);
+        list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
+                new CountSelectedItemsAction(this),
+                new SelectAllAction(list),
+                new CutAction(context, clipboard, this),
+                new CopyAction(context, clipboard, this),
+                new DeleteAction(context, this),
+                new RenameAction(context.getFragmentManager(), this)
+        ));
+    }
+
+    @Override
+    public Resource getCheckedItem() {
+        int position = getCheckedItemPosition();
+        return ((FileListItem.File) getListView().getItemAtPosition(position)).getPath().getResource();
+    }
+
+    @Override
+    public List<Resource> getCheckedItems() {
+        List<Integer> positions = getCheckedItemPositions();
+        List<Resource> resources = new ArrayList<>(positions.size());
+        for (int position : positions) {
+            FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
+            if (item.isFile()) {
+                resources.add(((FileListItem.File) item).getPath().getResource());
+            }
+        }
+        return resources;
+    }
+
+    @Override
+    public Loader<List<FileListItem>> onCreateLoader(int id, Bundle bundle) {
+        Activity context = getActivity();
+        FileSort sort = getSort(context);
+        boolean showHidden = Preferences.getShowHiddenFiles(context);
+        return new FilesLoader(context, directory.getResource(), sort, showHidden);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<FileListItem>> loader, List<FileListItem> data) {
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            if (!getListAdapter().isEmpty() && isResumed()) {
+                Animations.animatePreDataSetChange(getListView());
+            }
+            getListAdapter().setItems(data);
+            if (getListAdapter().isEmpty()) {
+                overrideEmptyText(R.string.empty);
+            }
+        }
+    }
+
+    private void overrideEmptyText(int resId) {
+        View root = getView();
+        if (root != null) {
+            ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<FileListItem>> loader) {
+        getListAdapter().setItems(Collections.<FileListItem>emptyList());
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+        if (isSortKey(key) || isShowHiddenFilesKey(key)) {
+            getLoaderManager().restartLoader(0, null, this);
+        }
+    }
 }

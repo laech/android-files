@@ -11,21 +11,21 @@ import static java.util.Arrays.asList;
 
 public final class CountTest extends FileBaseTest {
 
-  public void testCount() throws Exception {
-    tmp().createFile("1/a.txt");
-    tmp().createFile("3/4/c.txt");
+    public void testCount() throws Exception {
+        tmp().createFile("1/a.txt");
+        tmp().createFile("3/4/c.txt");
 
-    Set<File> expected = new HashSet<>(asList(
-        tmp().get(),
-        tmp().get("1"),
-        tmp().get("1/a.txt"),
-        tmp().get("3"),
-        tmp().get("3/4"),
-        tmp().get("3/4/c.txt")));
+        Set<File> expected = new HashSet<>(asList(
+                tmp().get(),
+                tmp().get("1"),
+                tmp().get("1/a.txt"),
+                tmp().get("3"),
+                tmp().get("3/4"),
+                tmp().get("3/4/c.txt")));
 
-    Count counter = new Count(asList(LocalPath.of(tmp().get())));
-    counter.execute();
+        Count counter = new Count(asList(LocalPath.of(tmp().get()).getResource()));
+        counter.execute();
 
-    assertEquals(expected.size(), counter.getCount());
-  }
+        assertEquals(expected.size(), counter.getCount());
+    }
 }

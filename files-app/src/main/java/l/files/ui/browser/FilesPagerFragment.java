@@ -16,6 +16,7 @@ import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 import l.files.ui.OpenFileRequest;
@@ -25,137 +26,142 @@ import static l.files.ui.Fragments.setArgs;
 
 public final class FilesPagerFragment extends Fragment {
 
-  private static final Logger log = Logger.get(FilesPagerFragment.class);
+    private static final Logger log = Logger.get(FilesPagerFragment.class);
 
-  private static final String ARG_INITIAL_PATH = "path";
-  private static final String ARG_INITIAL_TITLE = "title";
+    private static final String ARG_INITIAL_DIRECTORY = "directory";
+    private static final String ARG_INITIAL_TITLE = "title";
 
-  public static FilesPagerFragment create(Path path, String title) {
-    Bundle args = new Bundle(2);
-    args.putParcelable(ARG_INITIAL_PATH, path);
-    args.putString(ARG_INITIAL_TITLE, title);
-    return setArgs(new FilesPagerFragment(), args);
-  }
-
-  private Toaster toaster;
-  private Consumer<Path> fileOpener;
-  private FragmentManager manager;
-
-  @Override public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    FrameLayout layout = new FrameLayout(getActivity());
-    layout.setId(android.R.id.content);
-    return layout;
-  }
-
-  @Override public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    toaster = Toaster.get();
-    fileOpener = FileOpener.get(getActivity());
-    manager = getChildFragmentManager();
-    if (savedInstanceState == null) {
-      FilesFragment fragment = FilesFragment.create(getInitialPath());
-      manager
-          .beginTransaction()
-          .replace(android.R.id.content, fragment, FilesFragment.TAG)
-          .commit();
+    public static FilesPagerFragment create(Resource directory, String title) {
+        Bundle args = new Bundle(2);
+        args.putParcelable(ARG_INITIAL_DIRECTORY, directory);
+        args.putString(ARG_INITIAL_TITLE, title);
+        return setArgs(new FilesPagerFragment(), args);
     }
-  }
 
-  @Override public void setHasOptionsMenu(boolean hasMenu) {
-    super.setHasOptionsMenu(hasMenu);
-    FilesFragment fragment = findCurrentFragment();
-    if (fragment != null) {
-      fragment.setHasOptionsMenu(hasMenu);
+    private Toaster toaster;
+    private Consumer<Resource> fileOpener;
+    private FragmentManager manager;
+
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        FrameLayout layout = new FrameLayout(getActivity());
+        layout.setId(android.R.id.content);
+        return layout;
     }
-  }
 
-  public boolean popBackStack() {
-    try {
-      return getChildFragmentManager().popBackStackImmediate();
-    } catch (IllegalStateException e) {
-      return false;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        toaster = Toaster.get();
+        fileOpener = FileOpener.get(getActivity());
+        manager = getChildFragmentManager();
+        if (savedInstanceState == null) {
+            FilesFragment fragment = FilesFragment.create(getInitialDirectory());
+            manager
+                    .beginTransaction()
+                    .replace(android.R.id.content, fragment, FilesFragment.TAG)
+                    .commit();
+        }
     }
-  }
 
-  public boolean hasBackStack() {
-    return getChildFragmentManager().getBackStackEntryCount() > 0;
-  }
-
-  public Path getCurrentPath() {
-    FilesFragment fragment = findCurrentFragment();
-    if (fragment == null) {
-      return getInitialPath();
+    @Override
+    public void setHasOptionsMenu(boolean hasMenu) {
+        super.setHasOptionsMenu(hasMenu);
+        FilesFragment fragment = findCurrentFragment();
+        if (fragment != null) {
+            fragment.setHasOptionsMenu(hasMenu);
+        }
     }
-    return fragment.getPath();
-  }
 
-  private Path getInitialPath() {
-    return getArguments().getParcelable(ARG_INITIAL_PATH);
-  }
-
-  public void show(final OpenFileRequest request) {
-    new AsyncTask<Void, Void, ResourceStatus>() {
-      @Override protected ResourceStatus doInBackground(Void... params) {
+    public boolean popBackStack() {
         try {
-          return request.getPath().getResource().readStatus(true);
-        } catch (IOException e) {
-          log.debug(e, "%s", request);
-          return null;
+            return getChildFragmentManager().popBackStackImmediate();
+        } catch (IllegalStateException e) {
+            return false;
         }
-      }
+    }
 
-      @Override protected void onPostExecute(ResourceStatus status) {
-        super.onPostExecute(status);
-        Activity activity = getActivity();
-        if (activity != null) {
-          if (status != null) {
-            show(status);
-          } else {
-            toaster.toast(activity, R.string.failed_to_get_file_info);
-          }
+    public boolean hasBackStack() {
+        return getChildFragmentManager().getBackStackEntryCount() > 0;
+    }
+
+    public Resource getCurrentDirectory() {
+        FilesFragment fragment = findCurrentFragment();
+        if (fragment == null) {
+            return getInitialDirectory();
         }
-      }
-    }.execute();
-  }
-
-  private void show(ResourceStatus status) {
-    if (getActivity() == null) {
-      return;
+        return fragment.getDirectory();
     }
-    if (!status.isReadable()) {
-      showPermissionDenied();
-    } else if (status.isDirectory()) {
-      showDirectory(status.getPath());
-    } else {
-      showFile(status.getPath());
+
+    private Resource getInitialDirectory() {
+        return getArguments().getParcelable(ARG_INITIAL_DIRECTORY);
     }
-  }
 
-  private void showPermissionDenied() {
-    toaster.toast(getActivity(), R.string.permission_denied);
-  }
+    public void show(final OpenFileRequest request) {
+        new AsyncTask<Void, Void, ResourceStatus>() {
+            @Override
+            protected ResourceStatus doInBackground(Void... params) {
+                try {
+                    return request.getPath().getResource().readStatus(true);
+                } catch (IOException e) {
+                    log.debug(e, "%s", request);
+                    return null;
+                }
+            }
 
-  private void showDirectory(Path path) {
-    FilesFragment current = findCurrentFragment();
-    if (current != null && current.getPath().equals(path)) {
-      return;
+            @Override
+            protected void onPostExecute(ResourceStatus status) {
+                super.onPostExecute(status);
+                Activity activity = getActivity();
+                if (activity != null) {
+                    if (status != null) {
+                        show(status);
+                    } else {
+                        toaster.toast(activity, R.string.failed_to_get_file_info);
+                    }
+                }
+            }
+        }.execute();
     }
-    FilesFragment fragment = FilesFragment.create(path);
-    manager
-        .beginTransaction()
-        .replace(android.R.id.content, fragment, FilesFragment.TAG)
-        .addToBackStack(null)
-        .setBreadCrumbTitle(path.getName())
-        .setTransition(TRANSIT_FRAGMENT_OPEN)
-        .commit();
-  }
 
-  private void showFile(Path path) {
-    fileOpener.apply(path);
-  }
+    private void show(ResourceStatus status) {
+        if (getActivity() == null) {
+            return;
+        }
+        if (!status.isReadable()) {
+            showPermissionDenied();
+        } else if (status.isDirectory()) {
+            showDirectory(status.getResource());
+        } else {
+            showFile(status.getResource());
+        }
+    }
 
-  private FilesFragment findCurrentFragment() {
-    return (FilesFragment) manager.findFragmentByTag(FilesFragment.TAG);
-  }
+    private void showPermissionDenied() {
+        toaster.toast(getActivity(), R.string.permission_denied);
+    }
+
+    private void showDirectory(Resource resource) {
+        FilesFragment current = findCurrentFragment();
+        if (current != null && current.getDirectory().equals(resource)) {
+            return;
+        }
+        FilesFragment fragment = FilesFragment.create(resource);
+        manager
+                .beginTransaction()
+                .replace(android.R.id.content, fragment, FilesFragment.TAG)
+                .addToBackStack(null)
+                .setBreadCrumbTitle(resource.getName())
+                .setTransition(TRANSIT_FRAGMENT_OPEN)
+                .commit();
+    }
+
+    private void showFile(Resource resource) {
+        fileOpener.apply(resource);
+    }
+
+    private FilesFragment findCurrentFragment() {
+        return (FilesFragment) manager.findFragmentByTag(FilesFragment.TAG);
+    }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.IOException;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
 import static l.files.fs.Resource.TraversalOrder;
@@ -18,10 +17,10 @@ abstract class AbstractOperation implements FileOperation {
      */
     private static final int ERROR_LIMIT = 20;
 
-    private final Iterable<Path> paths;
+    private final Iterable<Resource> resources;
 
-    AbstractOperation(Iterable<? extends Path> paths) {
-        this.paths = ImmutableSet.copyOf(paths);
+    AbstractOperation(Iterable<? extends Resource> resources) {
+        this.resources = ImmutableSet.copyOf(resources);
     }
 
     void checkInterrupt() throws InterruptedException {
@@ -33,21 +32,25 @@ abstract class AbstractOperation implements FileOperation {
     @Override
     public void execute() throws InterruptedException {
         FailureRecorder listener = new FailureRecorder(ERROR_LIMIT);
-        for (Path path : paths) {
+        for (Resource resource : resources) {
             checkInterrupt();
-            process(path, listener);
+            process(resource, listener);
         }
         listener.throwIfNotEmpty();
     }
 
-    abstract void process(Path path, FailureRecorder listener)
+    abstract void process(Resource resource, FailureRecorder listener)
             throws InterruptedException;
 
-    protected final Resource.Stream traverse(Path path, TraversalOrder order, final FailureRecorder listener) throws IOException {
-        return path.getResource().traverse(order, new Resource.TraversalExceptionHandler() {
+    protected final Resource.Stream traverse(
+            Resource resource,
+            TraversalOrder order,
+            final FailureRecorder listener) throws IOException {
+
+        return resource.traverse(order, new Resource.TraversalExceptionHandler() {
             @Override
             public void handle(Resource resource, IOException e) {
-                listener.onFailure(resource.getPath(), e);
+                listener.onFailure(resource, e);
             }
         });
     }

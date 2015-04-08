@@ -4,7 +4,6 @@ package l.files.operations;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
 import static l.files.fs.Resource.TraversalOrder.BREATH_FIRST;
@@ -13,8 +12,8 @@ class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Iterable<? extends Path> paths) {
-        super(paths);
+    Count(Iterable<? extends Resource> resources) {
+        super(resources);
     }
 
     public int getCount() {
@@ -22,19 +21,19 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(Path path, FailureRecorder listener) throws InterruptedException {
+    void process(Resource resource, FailureRecorder listener) throws InterruptedException {
         try {
-            count(path, listener);
+            count(resource, listener);
         } catch (IOException e) {
-            listener.onFailure(path, e);
+            listener.onFailure(resource, e);
         }
     }
 
-    private void count(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
-        try (Resource.Stream resources = traverse(path, BREATH_FIRST, listener)) {
-            for (Resource resource : resources) {
+    private void count(Resource resource, FailureRecorder listener) throws IOException, InterruptedException {
+        try (Resource.Stream resources = traverse(resource, BREATH_FIRST, listener)) {
+            for (Resource child : resources) {
                 checkInterrupt();
-                onCount(resource);
+                onCount(child);
                 count.incrementAndGet();
             }
         }

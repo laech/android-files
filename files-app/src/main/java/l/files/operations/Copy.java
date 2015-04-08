@@ -7,11 +7,11 @@ import java.nio.channels.ClosedByInterruptException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 
+import static l.files.fs.Resource.Stream;
 import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
 
 final class Copy extends Paste {
@@ -22,8 +22,8 @@ final class Copy extends Paste {
     private final AtomicLong copiedByteCount = new AtomicLong();
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-    Copy(Iterable<? extends Path> sources, Path dstPath) {
-        super(sources, dstPath);
+    Copy(Iterable<? extends Resource> sources, Resource destination) {
+        super(sources, destination);
     }
 
     public int getCopiedItemCount() {
@@ -35,23 +35,21 @@ final class Copy extends Paste {
     }
 
     @Override
-    void paste(Path from, Path to, final FailureRecorder listener) throws InterruptedException {
-
-        try (Resource.Stream resources = traverse(from, PRE_ORDER, listener)) {
+    void paste(Resource from, Resource to, FailureRecorder listener) throws InterruptedException {
+        try (Stream resources = traverse(from, PRE_ORDER, listener)) {
 
             for (Resource resource : resources) {
                 checkInterrupt();
 
-                Path path = resource.getPath();
                 ResourceStatus status;
                 try {
                     status = resource.readStatus(false);
                 } catch (IOException e) {
-                    listener.onFailure(path, e);
+                    listener.onFailure(resource, e);
                     continue;
                 }
 
-                Path dst = path.replace(from, to);
+                Resource dst = resource.resolveParent(from, to);
 
                 if (status.isSymbolicLink()) {
                     copyLink(status, dst, listener);
@@ -63,7 +61,7 @@ final class Copy extends Paste {
                     copyFile(status, dst, listener);
 
                 } else {
-                    listener.onFailure(path, new IOException("Not a file or directory"));
+                    listener.onFailure(resource, new IOException("Not a file or directory"));
                 }
             }
 
@@ -73,35 +71,35 @@ final class Copy extends Paste {
 
     }
 
-    private void copyLink(ResourceStatus src, Path dst, FailureRecorder listener) {
+    private void copyLink(ResourceStatus src, Resource dst, FailureRecorder listener) {
         try {
-            dst.getResource().createSymbolicLink(src.getResource().readSymbolicLink());
+            dst.createSymbolicLink(src.getResource().readSymbolicLink());
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
             setLastModifiedDate(src, dst);
         } catch (IOException e) {
-            listener.onFailure(src.getPath(), e);
+            listener.onFailure(src.getResource(), e);
         }
     }
 
-    private void createDirectory(ResourceStatus src, Path dst, FailureRecorder listener) {
+    private void createDirectory(ResourceStatus src, Resource dst, FailureRecorder listener) {
         try {
-            dst.getResource().createDirectory();
+            dst.createDirectory();
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
             setLastModifiedDate(src, dst);
         } catch (IOException e) {
-            listener.onFailure(src.getPath(), e);
+            listener.onFailure(src.getResource(), e);
         }
     }
 
-    private void copyFile(ResourceStatus src, Path dst, FailureRecorder listener) throws InterruptedException {
+    private void copyFile(ResourceStatus src, Resource dst, FailureRecorder listener) throws InterruptedException {
         checkInterrupt();
 
         try {
 
             try (InputStream source = src.getResource().openInputStream();
-                 OutputStream sink = dst.getResource().openOutputStream()) {
+                 OutputStream sink = dst.openOutputStream()) {
                 byte[] buf = new byte[BUFFER_SIZE];
                 int n;
                 while ((n = source.read(buf)) > 0) {
@@ -121,16 +119,16 @@ final class Copy extends Paste {
             if (e instanceof ClosedByInterruptException) {
                 throw new InterruptedException();
             } else {
-                listener.onFailure(src.getPath(), e);
+                listener.onFailure(src.getResource(), e);
             }
         }
 
         setLastModifiedDate(src, dst);
     }
 
-    private void setLastModifiedDate(ResourceStatus src, Path dst) {
+    private void setLastModifiedDate(ResourceStatus src, Resource dst) {
         try {
-            dst.getResource().setLastModifiedTime(src.getLastModifiedTime());
+            dst.setLastModifiedTime(src.getLastModifiedTime());
         } catch (IOException e) {
             /*
              * Setting last modified time currently fails, see:

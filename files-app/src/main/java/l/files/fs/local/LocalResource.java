@@ -109,9 +109,9 @@ public abstract class LocalResource implements PathEntry, Resource {
         if (other.getParent() == null || other.equals(this)) {
             return true;
         }
-        if (other instanceof LocalPath) {
+        if (other instanceof LocalResource) {
             String thisPath = getFilePath();
-            String thatPath = ((LocalPath) other).getFile().getPath();
+            String thatPath = ((LocalResource) other).getFilePath();
             return thisPath.startsWith(thatPath) &&
                     thisPath.charAt(thatPath.length()) == '/';
         }
@@ -127,8 +127,8 @@ public abstract class LocalResource implements PathEntry, Resource {
     @Override
     public LocalResource resolveParent(Resource fromParent, Resource toParent) {
         checkArgument(startsWith(fromParent));
-        File parent = ((LocalPath) toParent).getFile();
-        String child = getFilePath().substring(fromParent.toString().length());
+        File parent = ((LocalResource) toParent).getFile();
+        String child = getFilePath().substring(((LocalResource) fromParent).getFilePath().length());
         return new AutoParcel_LocalResource(new File(parent, child));
     }
 
@@ -276,7 +276,7 @@ public abstract class LocalResource implements PathEntry, Resource {
     @Override
     public void createSymbolicLink(Resource target) throws IOException {
         try {
-            Unistd.symlink(((LocalResource)target).getFilePath(), getFilePath());
+            Unistd.symlink(((LocalResource) target).getFilePath(), getFilePath());
         } catch (ErrnoException e) {
             throw e.toIOException();
         }

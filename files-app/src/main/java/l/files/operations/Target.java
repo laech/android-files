@@ -3,6 +3,7 @@ package l.files.operations;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 
 /**
  * Source and destination of a file task.
@@ -29,6 +30,12 @@ public abstract class Target {
         return new AutoParcel_Target(source, destination);
     }
 
+    public static Target from(Iterable<? extends Resource> sources, Resource destination) {
+        Resource src = sources.iterator().next().getParent();
+        assert src != null;
+        return create(src.getName(), destination.getName());
+    }
+
     public static Target fromPaths(Iterable<? extends Path> sources, Path dst) {
         Path src = sources.iterator().next().getParent();
         assert src != null;
@@ -37,6 +44,12 @@ public abstract class Target {
 
     public static Target fromPaths(Iterable<? extends Path> paths) {
         Path parent = paths.iterator().next().getParent();
+        assert parent != null;
+        return create(parent.getName(), parent.getName());
+    }
+
+    public static Target from(Iterable<? extends Resource> resources) {
+        Resource parent = resources.iterator().next().getParent();
         assert parent != null;
         return create(parent.getName(), parent.getName());
     }

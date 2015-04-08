@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
+import static l.files.fs.Resource.Stream;
 import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
 
 final class Delete extends AbstractOperation {
@@ -14,8 +14,8 @@ final class Delete extends AbstractOperation {
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
 
-    Delete(Iterable<? extends Path> paths) {
-        super(paths);
+    Delete(Iterable<? extends Resource> resources) {
+        super(resources);
     }
 
     public int getDeletedItemCount() {
@@ -27,22 +27,22 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(Path path, FailureRecorder listener) throws InterruptedException {
+    void process(Resource resource, FailureRecorder listener) throws InterruptedException {
         try {
-            deleteTree(path, listener);
+            deleteTree(resource, listener);
         } catch (IOException e) {
-            listener.onFailure(path, e);
+            listener.onFailure(resource, e);
         }
     }
 
-    private void deleteTree(Path path, final FailureRecorder listener) throws IOException, InterruptedException {
-        try (Resource.Stream resources = traverse(path, POST_ORDER, listener)) {
-            for (Resource resource : resources) {
+    private void deleteTree(Resource resource, FailureRecorder listener) throws IOException, InterruptedException {
+        try (Stream resources = traverse(resource, POST_ORDER, listener)) {
+            for (Resource child : resources) {
                 checkInterrupt();
                 try {
-                    delete(resource);
+                    delete(child);
                 } catch (IOException e) {
-                    listener.onFailure(resource.getPath(), e);
+                    listener.onFailure(child, e);
                 }
             }
         }

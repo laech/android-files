@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
 
 import de.greenrobot.event.EventBus;
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
@@ -56,7 +56,7 @@ public final class OperationServiceTest extends FileBaseTest {
         CountDownListener listener = register(new CountDownListener(MOVE));
         try {
 
-            move(getContext(), singleton(LocalPath.of(src)), LocalPath.of(dst));
+            move(getContext(), singleton(LocalResource.create(src)), LocalResource.create(dst));
             listener.await();
             assertNotExists(src);
             assertExists(new File(dst, src.getName()));
@@ -72,7 +72,7 @@ public final class OperationServiceTest extends FileBaseTest {
         CountDownListener listener = register(new CountDownListener(COPY));
         try {
 
-            copy(getContext(), singleton(LocalPath.of(src)), LocalPath.of(dst));
+            copy(getContext(), singleton(LocalResource.create(src)), LocalResource.create(dst));
             listener.await();
             assertExists(src);
             assertExists(new File(dst, src.getName()));
@@ -88,7 +88,7 @@ public final class OperationServiceTest extends FileBaseTest {
         CountDownListener listener = register(new CountDownListener(DELETE));
         try {
 
-            delete(getContext(), new HashSet<>(asList(LocalPath.of(a), LocalPath.of(b))));
+            delete(getContext(), new HashSet<>(asList(LocalResource.create(a), LocalResource.create(b))));
             listener.await();
             assertNotExists(a);
             assertNotExists(b);
@@ -102,8 +102,8 @@ public final class OperationServiceTest extends FileBaseTest {
         CountDownListener listener = register(new CountDownListener(DELETE, 2));
         try {
 
-            delete(getContext(), singleton(LocalPath.of(tmp().createFile("a"))));
-            delete(getContext(), singleton(LocalPath.of(tmp().createFile("2"))));
+            delete(getContext(), singleton(LocalResource.create(tmp().createFile("a"))));
+            delete(getContext(), singleton(LocalResource.create(tmp().createFile("2"))));
             listener.await();
             assertTrue(listener.getValues().size() > 1);
             assertEquals(2, getTaskIds(listener.getValues()).size());
@@ -129,7 +129,10 @@ public final class OperationServiceTest extends FileBaseTest {
 
             long start = currentTimeMillis();
             {
-                delete(getContext(), new HashSet<>(asList(LocalPath.of(file1), LocalPath.of(file2))));
+                delete(getContext(), new HashSet<>(asList(
+                        LocalResource.create(file1),
+                        LocalResource.create(file2)
+                )));
                 listener.await();
             }
             long end = currentTimeMillis();

@@ -11,10 +11,11 @@ import de.greenrobot.event.EventBus;
 import l.files.common.app.BaseListFragment;
 import l.files.common.widget.ListViews;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.operations.Events;
 
 public abstract class BaseFileListFragment
-    extends BaseListFragment implements ListSelection<Path> {
+    extends BaseListFragment implements ListSelection<Resource> {
 
   private EventBus bus;
   private final int layoutResourceId;

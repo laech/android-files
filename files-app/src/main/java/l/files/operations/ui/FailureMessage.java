@@ -4,6 +4,7 @@ import android.os.Parcelable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 
 @AutoParcel
 abstract class FailureMessage implements Parcelable {
@@ -15,8 +16,8 @@ abstract class FailureMessage implements Parcelable {
 
     public abstract String getMessage();
 
-    public static FailureMessage create(Path path, String message) {
-        return new AutoParcel_FailureMessage(path, message);
+    public static FailureMessage create(Resource resource, String message) {
+        return new AutoParcel_FailureMessage(resource.getPath(), message);
     }
 
 }

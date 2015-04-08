@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import de.greenrobot.event.EventBus;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 
 import static l.files.operations.TaskKind.COPY;
 
@@ -13,11 +14,11 @@ final class CopyTask extends Task {
   private final Copy copy;
 
   CopyTask(int id, Clock clock, EventBus bus, Handler handler,
-           Iterable<Path> sources, Path dstPath) {
-    super(TaskId.create(id, COPY), Target.fromPaths(sources, dstPath),
+           Iterable<? extends Resource> sources, Resource destination) {
+    super(TaskId.create(id, COPY), Target.from(sources, destination),
         clock, bus, handler);
     this.size = new Size(sources);
-    this.copy = new Copy(sources, dstPath);
+    this.copy = new Copy(sources, destination);
   }
 
   @Override protected void doTask() throws FileException, InterruptedException {

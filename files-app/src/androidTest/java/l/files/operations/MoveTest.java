@@ -6,9 +6,9 @@ import com.google.common.io.Files;
 
 import java.io.File;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.write;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -65,12 +65,12 @@ public final class MoveTest extends PasteTest {
 
     @Override
     protected Move create(Iterable<String> sources, String dstDir) {
-        return new Move(Iterables.transform(sources, new Function<String, Path>() {
+        return new Move(Iterables.transform(sources, new Function<String, Resource>() {
             @Override
-            public Path apply(String s) {
-                return LocalPath.of(s);
+            public Resource apply(String s) {
+                return LocalPath.of(s).getResource();
             }
-        }), LocalPath.of(dstDir));
+        }), LocalPath.of(dstDir).getResource());
     }
 
     private Move create(File src, File dst) {

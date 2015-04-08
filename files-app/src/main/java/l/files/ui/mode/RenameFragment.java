@@ -11,7 +11,7 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.R;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
@@ -27,16 +27,16 @@ public final class RenameFragment extends FileCreationFragment {
 
     public static final String TAG = RenameFragment.class.getSimpleName();
 
-    private static final String ARG_PATH = "path";
+    private static final String ARG_RESOURCE = "resource";
 
     private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
     private LoaderCallbacks<ResourceStatus> fileCallback = new NameHighlighter();
 
-    static RenameFragment create(Path path) {
+    static RenameFragment create(Resource resource) {
         Bundle args = new Bundle(2);
-        args.putParcelable(ARG_PARENT_PATH, path.getParent());
-        args.putParcelable(ARG_PATH, path);
+        args.putParcelable(ARG_PARENT_RESOURCE, resource.getParent());
+        args.putParcelable(ARG_RESOURCE, resource);
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
         return fragment;
@@ -51,8 +51,8 @@ public final class RenameFragment extends FileCreationFragment {
     }
 
     @Override
-    protected CharSequence getError(Path target) {
-        if (getPath().equals(target)) {
+    protected CharSequence getError(Resource target) {
+        if (getResource().equals(target)) {
             return null;
         }
         return super.getError(target);
@@ -71,8 +71,8 @@ public final class RenameFragment extends FileCreationFragment {
             @Override
             protected IOException doInBackground(Void... params) {
                 try {
-                    Path dst = getParentPath().resolve(getFilename());
-                    getPath().getResource().move(dst.getResource());
+                    Resource dst = getParent().resolve(getFilename());
+                    getResource().getResource().move(dst.getResource());
                     return null;
                 } catch (IOException e) {
                     return e;
@@ -91,8 +91,8 @@ public final class RenameFragment extends FileCreationFragment {
         Events.get().post(CloseActionModeRequest.INSTANCE);
     }
 
-    private Path getPath() {
-        return getArguments().getParcelable(ARG_PATH);
+    private Resource getResource() {
+        return getArguments().getParcelable(ARG_RESOURCE);
     }
 
     class NameHighlighter implements LoaderCallbacks<ResourceStatus> {
@@ -107,7 +107,7 @@ public final class RenameFragment extends FileCreationFragment {
                 @Override
                 public ResourceStatus loadInBackground() {
                     try {
-                        return getPath().getResource().readStatus(false);
+                        return getResource().getResource().readStatus(false);
                     } catch (IOException e) {
                         return null;
                     }

@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalResource;
@@ -19,83 +18,85 @@ import static java.util.Arrays.asList;
 
 public final class CopyTest extends PasteTest {
 
-  public void testCopySummary() throws Exception {
-    File dstDir = tmp().createDir("dir");
-    File srcDir = tmp().createDir("a");
-    tmp().createFile("a/file");
+    public void testCopySummary() throws Exception {
+        File dstDir = tmp().createDir("dir");
+        File srcDir = tmp().createDir("a");
+        tmp().createFile("a/file");
 
-    Copy copy = create(asList(srcDir.getPath()), dstDir.getPath());
-    copy.execute();
+        Copy copy = create(asList(srcDir.getPath()), dstDir.getPath());
+        copy.execute();
 
-    List<File> files = asList(
-        tmp().get("a"),
-        tmp().get("a/file")
-    );
+        List<File> files = asList(
+                tmp().get("a"),
+                tmp().get("a/file")
+        );
 
-    assertEquals(getSize(files), copy.getCopiedByteCount());
-    assertEquals(files.size(), copy.getCopiedItemCount());
-  }
-
-  public long getSize(Iterable<File> files) {
-    long size = 0;
-    for (File file : files) {
-      size += file.length();
+        assertEquals(getSize(files), copy.getCopiedByteCount());
+        assertEquals(files.size(), copy.getCopiedItemCount());
     }
-    return size;
-  }
 
-  public void testCopiesSymlink() throws Exception {
-      Resource target = LocalPath.of(tmp().createFile("target")).getResource();
-      Resource link = LocalPath.of(tmp().get("link")).getResource();
-      link.createSymbolicLink(target);
+    public long getSize(Iterable<File> files) {
+        long size = 0;
+        for (File file : files) {
+            size += file.length();
+        }
+        return size;
+    }
 
-      copy(new File(link.getUri()), tmp().createDir("copied"));
+    public void testCopiesSymlink() throws Exception {
+        Resource target = LocalPath.of(tmp().createFile("target")).getResource();
+        Resource link = LocalPath.of(tmp().get("link")).getResource();
+        link.createSymbolicLink(target);
 
-      LocalResource copied = LocalPath.of(tmp().get("copied/link").getPath()).getResource();
-      assertEquals(target, copied.readSymbolicLink());
-  }
+        copy(new File(link.getUri()), tmp().createDir("copied"));
 
-  public void testCopiesDirectory() throws Exception {
-    File srcDir = tmp().createDir("a");
-    File dstDir = tmp().createDir("dst");
-    File srcFile = new File(srcDir, "test.txt");
-    File dstFile = new File(dstDir, "a/test.txt");
-    write("Testing", srcFile, UTF_8);
+        LocalResource copied = LocalPath.of(tmp().get("copied/link").getPath()).getResource();
+        assertEquals(target, copied.readSymbolicLink());
+    }
 
-    copy(srcDir, dstDir);
-    assertEquals("Testing", Files.toString(srcFile, UTF_8));
-    assertEquals("Testing", Files.toString(dstFile, UTF_8));
-  }
+    public void testCopiesDirectory() throws Exception {
+        File srcDir = tmp().createDir("a");
+        File dstDir = tmp().createDir("dst");
+        File srcFile = new File(srcDir, "test.txt");
+        File dstFile = new File(dstDir, "a/test.txt");
+        write("Testing", srcFile, UTF_8);
 
-  public void testCopiesEmptyFile() throws Exception {
-    File srcFile = tmp().createFile("empty");
-    File dstDir = tmp().createDir("dst");
+        copy(srcDir, dstDir);
+        assertEquals("Testing", Files.toString(srcFile, UTF_8));
+        assertEquals("Testing", Files.toString(dstFile, UTF_8));
+    }
 
-    copy(srcFile, dstDir);
-    assertTrue(tmp().get("dst/empty").exists());
-  }
+    public void testCopiesEmptyFile() throws Exception {
+        File srcFile = tmp().createFile("empty");
+        File dstDir = tmp().createDir("dst");
 
-  public void testCopiesFile() throws Exception {
-    File srcFile = tmp().createFile("test.txt");
-    File dstDir = tmp().createDir("dst");
-    File dstFile = new File(dstDir, "test.txt");
-    write("Testing", srcFile, UTF_8);
+        copy(srcFile, dstDir);
+        assertTrue(tmp().get("dst/empty").exists());
+    }
 
-    copy(srcFile, dstDir);
-    assertEquals("Testing", Files.toString(srcFile, UTF_8));
-    assertEquals("Testing", Files.toString(dstFile, UTF_8));
-  }
+    public void testCopiesFile() throws Exception {
+        File srcFile = tmp().createFile("test.txt");
+        File dstDir = tmp().createDir("dst");
+        File dstFile = new File(dstDir, "test.txt");
+        write("Testing", srcFile, UTF_8);
 
-  private void copy(File src, File dstDir) throws IOException, InterruptedException {
-    create(asList(src.getPath()), dstDir.getPath()).execute();
-  }
+        copy(srcFile, dstDir);
+        assertEquals("Testing", Files.toString(srcFile, UTF_8));
+        assertEquals("Testing", Files.toString(dstFile, UTF_8));
+    }
 
-  @Override
-  protected Copy create(Iterable<String> sources, String dstDir) {
-    return new Copy(Iterables.transform(sources, new Function<String, Path>() {
-      @Override public Path apply(String input) {
-        return LocalPath.of(input);
-      }
-    }), LocalPath.of(dstDir));
-  }
+    private void copy(File src, File dstDir) throws IOException, InterruptedException {
+        create(asList(src.getPath()), dstDir.getPath()).execute();
+    }
+
+    @Override
+    protected Copy create(Iterable<String> sources, String dstDir) {
+        return new Copy(Iterables.transform(sources, new Function<String, Resource>() {
+            @Override
+            public Resource apply(String input) {
+                return LocalPath.of(input).getResource();
+            }
+        }), LocalPath.of(dstDir).getResource());
+    }
+
 }
