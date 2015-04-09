@@ -12,7 +12,6 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.widget.ListViews;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.Animations;
@@ -52,8 +51,8 @@ public final class BookmarksFragment extends BaseFileListFragment
     @Override
     public void onListItemClick(ListView l, View v, int pos, long id) {
         super.onListItemClick(l, v, pos, id);
-        Path path = (Path) l.getItemAtPosition(pos);
-        getBus().post(OpenFileRequest.create(path));
+        Resource resource = (Resource) l.getItemAtPosition(pos);
+        getBus().post(OpenFileRequest.create(resource.getPath()));
     }
 
     private void addBookmarksHeader() {
