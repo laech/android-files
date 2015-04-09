@@ -27,7 +27,6 @@ import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
 import l.files.common.widget.DrawerListeners;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.operations.Events;
 import l.files.ui.browser.FilesPagerFragment;
@@ -157,7 +156,7 @@ public final class FilesActivity extends BaseActivity
     private void setViewPager(ArrayList<TabItem> items) {
         if (items.isEmpty()) {
             items = new ArrayList<>();
-            items.add(new TabItem(idGenerator.get(), directory.getPath(),
+            items.add(new TabItem(idGenerator.get(), directory,
                     FileLabels.get(getResources(), directory.getPath())));
         }
         viewPager.setAdapter(new FilesPagerAdapter(items));
@@ -394,9 +393,9 @@ public final class FilesActivity extends BaseActivity
         @Override
         public Fragment getItem(int position) {
             TabItem tab = items.get(position);
-            Path path = tab.getPath();
+            Resource resource = tab.getResource();
             String title = tab.getTitle();
-            Fragment fragment = FilesPagerFragment.create(path.getResource(), title);
+            Fragment fragment = FilesPagerFragment.create(resource, title);
             positions.put(fragment, position);
             return fragment;
         }
@@ -456,7 +455,7 @@ public final class FilesActivity extends BaseActivity
 
         void addItem(int id) {
             String title = FileLabels.get(getResources(), UserDirs.DIR_HOME.getPath());
-            items.add(new TabItem(id, UserDirs.DIR_HOME.getPath(), title));
+            items.add(new TabItem(id, UserDirs.DIR_HOME, title));
             tabs.addTab(title);
             notifyDataSetChanged();
         }
