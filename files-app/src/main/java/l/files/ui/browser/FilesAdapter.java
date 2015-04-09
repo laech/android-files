@@ -185,7 +185,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         void setTitle(FileListItem.File file) {
-            title.setText(file.getPath().getName());
+            title.setText(file.getResource().getName());
             title.setEnabled(file.getStat() != null && file.getStat().isReadable());
         }
 
@@ -229,7 +229,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
             }
             if (stat.isDirectory()
                     || file.getTargetStat().isDirectory()) {
-                return getDirectoryIcon(assets, file.getPath().getResource());
+                return getDirectoryIcon(assets, file.getResource().getResource());
             } else {
                 return getIconForFileMediaType(assets, stat.getBasicMediaType());
             }

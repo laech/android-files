@@ -20,7 +20,7 @@ public enum FileSort {
       final Collator collator = Collator.getInstance(locale);
       return new Comparator<FileListItem.File>() {
         @Override public int compare(FileListItem.File a, FileListItem.File b) {
-          return collator.compare(a.getPath().getName(), b.getPath().getName());
+          return collator.compare(a.getResource().getName(), b.getResource().getName());
         }
       };
     }
@@ -99,7 +99,7 @@ public enum FileSort {
 
     @Override public int compare(FileListItem.File a, FileListItem.File b) {
       if (a.getStat() == null && b.getStat() == null) {
-        return nameComparator.compare(a.getPath().getName(), b.getPath().getName());
+        return nameComparator.compare(a.getResource().getName(), b.getResource().getName());
       }
       if (a.getStat() == null) {
         return 1;

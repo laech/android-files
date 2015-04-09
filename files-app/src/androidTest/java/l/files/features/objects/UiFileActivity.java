@@ -450,7 +450,7 @@ public final class UiFileActivity {
     for (int i = 0; i < count; i++) {
       FileListItem item = (FileListItem) getListView().getItemAtPosition(i);
       if (item.isFile() &&
-          ((FileListItem.File) item).getPath().getName().equals(filename)) {
+          ((FileListItem.File) item).getResource().getName().equals(filename)) {
         return Optional.of(i);
       }
     }

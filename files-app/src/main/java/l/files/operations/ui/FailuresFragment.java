@@ -44,7 +44,7 @@ public final class FailuresFragment extends ListFragment {
       }
       TextView pathView = (TextView) convertView.findViewById(R.id.failure_path);
       TextView msgView = (TextView) convertView.findViewById(R.id.failure_message);
-      pathView.setText(getItem(position).getPath().toString());
+      pathView.setText(getItem(position).getResource().toString());
       msgView.setText(getItem(position).getMessage());
       return convertView;
     }

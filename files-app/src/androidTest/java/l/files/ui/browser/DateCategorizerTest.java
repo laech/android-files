@@ -9,6 +9,7 @@ import java.util.GregorianCalendar;
 import l.files.R;
 import l.files.common.testing.BaseTest;
 import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
 import static java.util.Calendar.JUNE;
@@ -119,7 +120,7 @@ public final class DateCategorizerTest extends BaseTest {
     private FileListItem.File mockStat(long time) {
         ResourceStatus stat = mock(ResourceStatus.class);
         given(stat.getLastModifiedTime()).willReturn(time);
-        return FileListItem.File.create(mock(Path.class), stat, stat);
+        return FileListItem.File.create(mock(Resource.class), stat, stat);
     }
 
     private void assertCategory(String expected, FileListItem.File... stats) {

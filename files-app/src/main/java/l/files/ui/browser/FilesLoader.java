@@ -95,7 +95,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             files.addAll(data.values());
         } else {
             for (FileListItem.File item : data.values()) {
-                if (!item.getPath().isHidden()) {
+                if (!item.getResource().isHidden()) {
                     files.add(item);
                 }
             }
@@ -157,7 +157,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
             ResourceStatus stat = resource.readStatus(false);
             ResourceStatus targetStat = readTargetStatus(stat);
-            FileListItem.File newStat = FileListItem.File.create(resource.getPath(), stat, targetStat);
+            FileListItem.File newStat = FileListItem.File.create(resource, stat, targetStat);
             FileListItem.File oldStat = data.put(resource, newStat);
             return !Objects.equals(newStat, oldStat);
 
@@ -165,7 +165,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             return data.remove(resource) != null;
 
         } catch (IOException e) {
-            data.put(resource, FileListItem.File.create(resource.getPath(), null, null));
+            data.put(resource, FileListItem.File.create(resource, null, null));
             return true;
         }
     }

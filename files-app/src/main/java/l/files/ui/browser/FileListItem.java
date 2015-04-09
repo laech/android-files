@@ -3,7 +3,7 @@ package l.files.ui.browser;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
 public abstract class FileListItem {
@@ -46,7 +46,7 @@ public abstract class FileListItem {
         File() {
         }
 
-        public abstract Path getPath();
+        public abstract Resource getResource();
 
         @Nullable
         public abstract ResourceStatus getStat();
@@ -54,10 +54,10 @@ public abstract class FileListItem {
         @Nullable
         abstract ResourceStatus _targetStat();
 
-        public static File create(Path path,
+        public static File create(Resource resource,
                                   @Nullable ResourceStatus stat,
                                   @Nullable ResourceStatus targetStat) {
-            return new AutoParcel_FileListItem_File(path, stat, targetStat);
+            return new AutoParcel_FileListItem_File(resource, stat, targetStat);
         }
 
         @Override

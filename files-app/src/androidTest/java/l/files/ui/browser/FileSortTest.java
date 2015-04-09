@@ -7,9 +7,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
-import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 import l.files.fs.local.LocalResourceStatus;
 
 import static java.util.Collections.shuffle;
@@ -29,9 +29,9 @@ abstract class FileSortTest extends FileBaseTest {
     private List<FileListItem.File> mapData(File... files) throws IOException {
         List<FileListItem.File> expected = new ArrayList<>(files.length);
         for (File file : files) {
-            Path path = LocalPath.of(file);
-            ResourceStatus stat = LocalResourceStatus.stat(path, false);
-            expected.add(FileListItem.File.create(path, stat, stat));
+            Resource resource = LocalResource.create(file);
+            ResourceStatus stat = LocalResourceStatus.stat(file, false);
+            expected.add(FileListItem.File.create(resource, stat, stat));
         }
         return expected;
     }

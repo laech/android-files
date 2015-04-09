@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 import l.files.R;
 import l.files.common.testing.BaseActivityTest;
-import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalResource;
 
 import static java.util.Arrays.asList;
@@ -49,7 +48,7 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
     }
 
     private void assertFailureView(FailureMessage msg, View view) {
-        assertEquals(msg.getPath().toString(), ((TextView) view.findViewById(R.id.failure_path)).getText());
+        assertEquals(msg.getResource().toString(), ((TextView) view.findViewById(R.id.failure_path)).getText());
         assertEquals(msg.getMessage(), ((TextView) view.findViewById(R.id.failure_message)).getText());
     }
 
