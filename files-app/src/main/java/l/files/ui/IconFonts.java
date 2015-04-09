@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import l.files.R;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
 import static android.graphics.Typeface.createFromAsset;
@@ -64,9 +63,9 @@ public final class IconFonts {
         return Icon.get(mime).backgroundResourceId;
     }
 
-    public static Typeface getDirectoryIcon(AssetManager assets, Path path) {
+    public static Typeface getDirectoryIcon(AssetManager assets, Resource resource) {
         init(assets);
-        Typeface icon = iconByDirectoryUri.get(path);
+        Typeface icon = iconByDirectoryUri.get(resource);
         if (icon != null) return icon;
         return iconDirectory;
     }

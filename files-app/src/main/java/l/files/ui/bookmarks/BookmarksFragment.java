@@ -7,9 +7,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -28,7 +25,7 @@ import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static l.files.common.widget.MultiChoiceModeListeners.compose;
 
 public final class BookmarksFragment extends BaseFileListFragment
-        implements LoaderCallbacks<List<Path>> {
+        implements LoaderCallbacks<List<Resource>> {
 
     public BookmarksFragment() {
         super(R.layout.bookmarks_fragment);
@@ -73,34 +70,29 @@ public final class BookmarksFragment extends BaseFileListFragment
     }
 
     @Override
-    public Loader<List<Path>> onCreateLoader(int i, Bundle bundle) {
+    public Loader<List<Resource>> onCreateLoader(int i, Bundle bundle) {
         return new BookmarksLoader(getActivity(), BookmarkManagerImpl.get(getActivity()));
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Path>> loader, List<Path> bookmarks) {
+    public void onLoadFinished(Loader<List<Resource>> loader, List<Resource> bookmarks) {
         Animations.animatePreDataSetChange(getListView());
         getListAdapter().setItems(bookmarks);
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Path>> loader) {
-        getListAdapter().setItems(Collections.<Path>emptyList());
+    public void onLoaderReset(Loader<List<Resource>> loader) {
+        getListAdapter().setItems(Collections.<Resource>emptyList());
     }
 
     @Override
     public Resource getCheckedItem() {
-        return ((Path) getListView().getItemAtPosition(getCheckedItemPosition())).getResource();
+        return (Resource) getListView().getItemAtPosition(getCheckedItemPosition());
     }
 
     @Override
     public List<Resource> getCheckedItems() {
-        return Lists.transform(ListViews.getCheckedItems(getListView(), Path.class), new Function<Path, Resource>() {
-            @Override
-            public Resource apply(Path input) {
-                return input.getResource();
-            }
-        });
+        return ListViews.getCheckedItems(getListView(), Resource.class);
     }
 
 }

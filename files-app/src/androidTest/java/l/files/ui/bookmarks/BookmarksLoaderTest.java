@@ -14,7 +14,6 @@ import java.util.Random;
 
 import l.files.common.testing.BaseActivityTest;
 import l.files.fs.DefaultResourceProvider;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
@@ -58,18 +57,18 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
     public void testSortsBookmarksByName() throws Exception {
         Resource resource = LocalResource.create(new File("/tmp"));
         manager.addBookmark(resource);
-        subject().initLoader().awaitOnLoadFinished(singletonList(resource.getPath()));
+        subject().initLoader().awaitOnLoadFinished(singletonList(resource));
     }
 
     public void testNotifiesBookmarkChange() throws Exception {
-        Subject subject = subject().initLoader().awaitOnLoadFinished(Collections.<Path>emptyList());
+        Subject subject = subject().initLoader().awaitOnLoadFinished(Collections.<Resource>emptyList());
 
         Resource resource = LocalResource.create(new File("/tmp"));
         manager.addBookmark(resource);
-        subject.awaitOnLoadFinished(singletonList(resource.getPath()));
+        subject.awaitOnLoadFinished(singletonList(resource));
 
         manager.removeBookmark(resource);
-        subject.awaitOnLoadFinished(Collections.<Path>emptyList());
+        subject.awaitOnLoadFinished(Collections.<Resource>emptyList());
     }
 
     private Subject subject() {
@@ -84,7 +83,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
         return new Subject(loaderId, getActivity().getLoaderManager(), listener);
     }
 
-    private static interface LoaderListener extends LoaderCallbacks<List<Path>> {
+    private static interface LoaderListener extends LoaderCallbacks<List<Resource>> {
     }
 
     private static final class Subject {
@@ -103,7 +102,7 @@ public final class BookmarksLoaderTest extends BaseActivityTest<TestActivity> {
             return this;
         }
 
-        Subject awaitOnLoadFinished(List<Path> expected) {
+        Subject awaitOnLoadFinished(List<Resource> expected) {
             verify(listener, timeout(1000)).onLoadFinished(any(BookmarksLoader.class), eq(expected));
             return this;
         }

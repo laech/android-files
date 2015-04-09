@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.operations.Events;
 import l.files.ui.OpenFileRequest;
 
@@ -27,99 +27,111 @@ import static android.view.View.VISIBLE;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
 public final class PathBarFragment extends Fragment
-    implements LoaderCallbacks<PathBarFragment.Hierarchy>, OnClickListener {
+        implements LoaderCallbacks<PathBarFragment.Hierarchy>, OnClickListener {
 
-  private Path path;
-  private ViewGroup container;
+    private Resource resource;
+    private ViewGroup container;
 
-  public void set(Path path) {
-    this.path = path;
-    if (getActivity() != null) {
-      getLoaderManager().restartLoader(0, null, this);
-    }
-  }
-
-  @Override public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.path_bar, container, false);
-  }
-
-  @Override public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-    View root = getView();
-    assert root != null;
-    container = (ViewGroup) root.findViewById(R.id.path_item_container);
-    if (path != null) {
-      getLoaderManager().restartLoader(0, null, this);
-    }
-  }
-
-  @Override public Loader<Hierarchy> onCreateLoader(int id, Bundle args) {
-    final Path path = this.path;
-    return new AsyncTaskLoader<Hierarchy>(getActivity()) {
-      @Override public Hierarchy loadInBackground() {
-        List<Path> hierarchy = new ArrayList<>();
-        for (Path p = path; p != null; p = p.getParent()) {
-          hierarchy.add(p);
+    public void set(Resource resource) {
+        this.resource = resource;
+        if (getActivity() != null) {
+            getLoaderManager().restartLoader(0, null, this);
         }
-        Collections.reverse(hierarchy);
-        return new Hierarchy(hierarchy);
-      }
-
-      @Override protected void onStartLoading() {
-        super.onStartLoading();
-        forceLoad();
-      }
-    };
-  }
-
-  @Override public void onLoadFinished(Loader<Hierarchy> loader,
-                                       Hierarchy hierarchy) {
-    updatePathBar(hierarchy);
-  }
-
-  private void updatePathBar(Hierarchy hierarchy) {
-    LayoutInflater inflater = LayoutInflater.from(getActivity());
-
-    int i = 0;
-    for (; i < hierarchy.paths.size(); i++) {
-      Path path = hierarchy.paths.get(i);
-      View view = container.getChildAt(i);
-      if (view == null) {
-        view = inflater.inflate(R.layout.path_bar_item, container, false);
-        container.addView(view);
-      }
-      view.setTag(path);
-      view.setVisibility(VISIBLE);
-      view.setOnClickListener(this);
-
-      TextView title = (TextView) view.findViewById(R.id.title);
-      title.setText(i == 0 ? Build.MODEL : path.getPath().getName());
-
-      AssetManager asset = getActivity().getAssets();
-      TextView icon = (TextView) view.findViewById(R.id.icon);
-      icon.setTypeface(getDirectoryIcon(asset, path.getPath()));
-
     }
 
-    for (; i < container.getChildCount(); i++) {
-      container.getChildAt(i).setVisibility(GONE);
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.path_bar, container, false);
     }
-  }
 
-  @Override public void onLoaderReset(Loader<Hierarchy> loader) {}
-
-  @Override public void onClick(View v) {
-    Path status = (Path) v.getTag();
-    Events.get().post(OpenFileRequest.create(status.getPath()));
-  }
-
-  static final class Hierarchy {
-    final List<Path> paths;
-
-    private Hierarchy(List<Path> paths) {
-      this.paths = paths;
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        View root = getView();
+        assert root != null;
+        container = (ViewGroup) root.findViewById(R.id.path_item_container);
+        if (resource != null) {
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
-  }
+
+    @Override
+    public Loader<Hierarchy> onCreateLoader(int id, Bundle args) {
+        final Resource resource = this.resource;
+
+        // TODO no need to use async task anymore
+        return new AsyncTaskLoader<Hierarchy>(getActivity()) {
+            @Override
+            public Hierarchy loadInBackground() {
+                List<Resource> hierarchy = new ArrayList<>();
+                for (Resource p = resource; p != null; p = p.getParent()) {
+                    hierarchy.add(p);
+                }
+                Collections.reverse(hierarchy);
+                return new Hierarchy(hierarchy);
+            }
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                forceLoad();
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Hierarchy> loader,
+                               Hierarchy hierarchy) {
+        updatePathBar(hierarchy);
+    }
+
+    private void updatePathBar(Hierarchy hierarchy) {
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+
+        int i = 0;
+        for (; i < hierarchy.resources.size(); i++) {
+            Resource resource = hierarchy.resources.get(i);
+            View view = container.getChildAt(i);
+            if (view == null) {
+                view = inflater.inflate(R.layout.path_bar_item, container, false);
+                container.addView(view);
+            }
+            view.setTag(resource);
+            view.setVisibility(VISIBLE);
+            view.setOnClickListener(this);
+
+            TextView title = (TextView) view.findViewById(R.id.title);
+            title.setText(i == 0 ? Build.MODEL : resource.getName());
+
+            AssetManager asset = getActivity().getAssets();
+            TextView icon = (TextView) view.findViewById(R.id.icon);
+            icon.setTypeface(getDirectoryIcon(asset, resource));
+
+        }
+
+        for (; i < container.getChildCount(); i++) {
+            container.getChildAt(i).setVisibility(GONE);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Hierarchy> loader) {
+    }
+
+    @Override
+    public void onClick(View v) {
+        Resource status = (Resource) v.getTag();
+        Events.get().post(OpenFileRequest.create(status.getPath()));
+    }
+
+    static final class Hierarchy {
+        final List<Resource> resources;
+
+        @SuppressWarnings("unchecked")
+        private Hierarchy(List<? extends Resource> resources) {
+            this.resources = (List<Resource>) resources;
+        }
+    }
 
 }

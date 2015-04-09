@@ -3,27 +3,23 @@ package l.files.ui.bookmarks;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.provider.bookmarks.BookmarkManager;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 
-final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
+final class BookmarksLoader extends AsyncTaskLoader<List<Resource>> {
 
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
-    private List<Path> bookmarks;
+    private List<Resource> bookmarks;
 
     BookmarksLoader(Context context, BookmarkManager manager) {
         super(context);
@@ -32,21 +28,16 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     }
 
     @Override
-    public List<Path> loadInBackground() {
+    public List<Resource> loadInBackground() {
         final Collator collator = Collator.getInstance();
-        final List<Path> paths = new ArrayList<>(Collections2.transform(manager.getBookmarks(), new Function<Resource, Path>() {
+        final List<Resource> resources = new ArrayList<>(manager.getBookmarks());
+        Collections.sort(resources, new Comparator<Resource>() {
             @Override
-            public Path apply(Resource input) {
-                return input.getPath();
-            }
-        }));
-        Collections.sort(paths, new Comparator<Path>() {
-            @Override
-            public int compare(Path a, Path b) {
+            public int compare(Resource a, Resource b) {
                 return collator.compare(a.getName(), b.getName());
             }
         });
-        return paths;
+        return resources;
     }
 
     @Override
@@ -67,7 +58,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
     }
 
     @Override
-    public void deliverResult(List<Path> data) {
+    public void deliverResult(List<Resource> data) {
         super.deliverResult(data);
         this.bookmarks = data;
     }

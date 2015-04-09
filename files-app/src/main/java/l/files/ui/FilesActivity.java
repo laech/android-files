@@ -367,7 +367,7 @@ public final class FilesActivity extends BaseActivity
             boolean show = Preferences.getShowPathBar(this);
             FragmentTransaction tx = getFragmentManager().beginTransaction();
             if (show) {
-                pathBar.set(currentPagerFragment.getCurrentDirectory().getPath());
+                pathBar.set(currentPagerFragment.getCurrentDirectory());
                 tx.show(pathBar);
             } else {
                 tx.hide(pathBar);
@@ -422,7 +422,7 @@ public final class FilesActivity extends BaseActivity
                     final boolean hasBackStack = currentPagerFragment.hasBackStack();
                     actionBar.setTitle(title);
                     actionBarDrawerToggle.setDrawerIndicatorEnabled(!hasBackStack);
-                    pathBar.set(currentPagerFragment.getCurrentDirectory().getPath());
+                    pathBar.set(currentPagerFragment.getCurrentDirectory());
                     tabs.updateTab(position, title, hasBackStack);
                 }
             });
