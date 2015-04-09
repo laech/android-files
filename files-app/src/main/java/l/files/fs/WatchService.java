@@ -20,28 +20,28 @@ import java.io.IOException;
 public interface WatchService extends Closeable {
 
     /**
-     * Starts monitoring on the given path, file systems event on the given path
-     * will be sent to the given registered listeners. Does nothing if the
-     * listener is already registered for the given path. Note that if the path
-     * is a directory, attribute change events of the directory itself will also
-     * be reported.
+     * Starts monitoring on the given resource, file systems event on the given
+     * resource will be sent to the given registered listeners. Does nothing if
+     * the listener is already registered for the given resource. Note that if
+     * the resource is a directory, attribute change events of the directory
+     * itself will also be reported.
      */
-    void register(Path path, WatchEvent.Listener listener) throws IOException;
+    void register(Resource resource, WatchEvent.Listener listener) throws IOException;
 
     /**
-     * Stops monitoring on the given path. Does nothing if the listener is not
-     * registered for the given path.
+     * Stops monitoring on the given resource. Does nothing if the listener is
+     * not registered for the given resource.
      */
-    void unregister(Path path, WatchEvent.Listener listener);
+    void unregister(Resource resource, WatchEvent.Listener listener);
 
     /**
-     * Returns true if the given path is registered.
+     * Returns true if the given resource is registered.
      */
-    boolean isRegistered(Path path);
+    boolean isRegistered(Resource resource);
 
     /**
-     * Returns true if the path can be watched, false otherwise.
+     * Returns true if the resource can be watched, false otherwise.
      */
-    boolean isWatchable(Path path);
+    boolean isWatchable(Resource resource);
 
 }

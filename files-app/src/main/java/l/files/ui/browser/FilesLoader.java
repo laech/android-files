@@ -72,7 +72,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     public List<FileListItem> loadInBackground() {
         data.clear();
         try {
-            service.register(resource.getPath(), listener);
+            service.register(resource, listener);
         } catch (IOException e) {
             logger.debug(e);
             return emptyList();
@@ -129,7 +129,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     @Override
     protected void onReset() {
         super.onReset();
-        service.unregister(resource.getPath(), listener);
+        service.unregister(resource, listener);
         data.clear();
     }
 
@@ -137,7 +137,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     protected void finalize() throws Throwable {
         super.finalize();
         if (!isReset()) {
-            service.unregister(resource.getPath(), listener);
+            service.unregister(resource, listener);
             logger.error("WatchService has not been unregistered");
         }
     }

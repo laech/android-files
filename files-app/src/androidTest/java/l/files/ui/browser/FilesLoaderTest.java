@@ -75,7 +75,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
             timeout(2, SECONDS, new Runnable() {
                 @Override
                 public void run() {
-                    assertTrue(resource.getResource().getWatcher().isRegistered(resource.getPath()));
+                    assertTrue(resource.getResource().getWatcher().isRegistered(resource));
                 }
             });
 
@@ -83,7 +83,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
             timeout(2, SECONDS, new Runnable() {
                 @Override
                 public void run() {
-                    assertFalse(resource.getResource().getWatcher().isRegistered(resource.getPath()));
+                    assertFalse(resource.getResource().getWatcher().isRegistered(resource));
                 }
             });
         }

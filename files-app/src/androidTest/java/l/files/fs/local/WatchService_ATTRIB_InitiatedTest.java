@@ -1,6 +1,6 @@
 package l.files.fs.local;
 
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.fs.WatchEvent;
 
 import static l.files.fs.WatchEvent.Kind.MODIFY;
@@ -17,54 +17,54 @@ import static org.mockito.Mockito.verify;
  */
 public class WatchService_ATTRIB_InitiatedTest extends WatchServiceBaseTest {
 
-  public void testSelfChange() throws Exception {
-    Listener listener = mock(Listener.class);
-    Path path = LocalPath.of(tmpDir());
-    service().register(path, listener);
-    try {
+    public void testSelfChange() throws Exception {
+        Listener listener = mock(Listener.class);
+        Resource resource = LocalResource.create(tmpDir());
+        service().register(resource, listener);
+        try {
 
-      assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
-      verify(listener, timeout(1000)).onEvent(WatchEvent.create(MODIFY, path.getResource()));
+            assertTrue(tmpDir().setReadable(!tmpDir().canRead()));
+            verify(listener, timeout(1000)).onEvent(WatchEvent.create(MODIFY, resource.getResource()));
 
-    } finally {
-      service().unregister(path, listener);
+        } finally {
+            service().unregister(resource, listener);
+        }
     }
-  }
 
-  public void testLastModifiedDateChange_file() {
-    testLastModifiedDateChange(FileType.FILE);
-  }
+    public void testLastModifiedDateChange_file() {
+        testLastModifiedDateChange(FileType.FILE);
+    }
 
-  public void testLastModifiedDateChange_dir() {
-    testLastModifiedDateChange(FileType.DIR);
-  }
+    public void testLastModifiedDateChange_dir() {
+        testLastModifiedDateChange(FileType.DIR);
+    }
 
-  private void testLastModifiedDateChange(FileType type) {
-    type.create(tmp().get("a"));
-    await(event(MODIFY, "a"), newLastModified("a", 2000));
-  }
+    private void testLastModifiedDateChange(FileType type) {
+        type.create(tmp().get("a"));
+        await(event(MODIFY, "a"), newLastModified("a", 2000));
+    }
 
-  public void testFileReadabilityChange() {
-    testAttrChange("fr", FileType.FILE, Permission.READ);
-  }
+    public void testFileReadabilityChange() {
+        testAttrChange("fr", FileType.FILE, Permission.READ);
+    }
 
-  public void testDirReadabilityChange() {
-    testAttrChange("dr", FileType.DIR, Permission.READ);
-  }
+    public void testDirReadabilityChange() {
+        testAttrChange("dr", FileType.DIR, Permission.READ);
+    }
 
-  public void testFileWritabilityChange() {
-    testAttrChange("fw", FileType.FILE, Permission.WRITE);
-  }
+    public void testFileWritabilityChange() {
+        testAttrChange("fw", FileType.FILE, Permission.WRITE);
+    }
 
-  public void testDirWritabilityChange() {
-    testAttrChange("dw", FileType.DIR, Permission.WRITE);
-  }
+    public void testDirWritabilityChange() {
+        testAttrChange("dw", FileType.DIR, Permission.WRITE);
+    }
 
-  private void testAttrChange(String name, FileType type, Permission perm) {
-    type.create(tmp().get(name));
+    private void testAttrChange(String name, FileType type, Permission perm) {
+        type.create(tmp().get(name));
 
-    WatchEvent event = event(MODIFY, name);
-    Runnable change = newPermission(name, perm, !perm.get(tmp().get(name)));
-    await(event, change);
-  }
+        WatchEvent event = event(MODIFY, name);
+        Runnable change = newPermission(name, perm, !perm.get(tmp().get(name)));
+        await(event, change);
+    }
 }

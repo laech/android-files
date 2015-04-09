@@ -84,7 +84,7 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     protected WatchEvent.Listener listen(File file) {
         WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
         try {
-            service().register(LocalPath.of(file), listener);
+            service().register(LocalResource.create(file), listener);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -92,7 +92,7 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     }
 
     protected void unlisten(File file, WatchEvent.Listener listener) {
-        service().unregister(LocalPath.of(file), listener);
+        service().unregister(LocalResource.create(file), listener);
     }
 
     protected Runnable newDelete(String relativePath) {
@@ -247,11 +247,11 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     }
 
     protected WatchEvent event(WatchEvent.Kind kind, String relativePath) {
-        return WatchEvent.create(kind, LocalPath.of(tmp().get(relativePath)).getResource());
+        return WatchEvent.create(kind, LocalResource.create(tmp().get(relativePath)));
     }
 
     protected WatchEvent event(WatchEvent.Kind kind, File file) {
-        return WatchEvent.create(kind, LocalPath.of(file).getResource());
+        return WatchEvent.create(kind, LocalResource.create(file));
     }
 
     static enum Permission {
