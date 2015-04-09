@@ -105,7 +105,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
-                new BookmarkMenu(BookmarkManagerImpl.get(context), directory.getPath()),
+                new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
                 new NewDirMenu(context.getFragmentManager(), directory.getResource()),
                 new PasteMenu(context, getClipboardManager(context), directory.getResource()),
                 new SortMenu(context.getFragmentManager()),
