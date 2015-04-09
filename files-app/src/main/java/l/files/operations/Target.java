@@ -2,7 +2,6 @@ package l.files.operations;
 
 
 import auto.parcel.AutoParcel;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 
 /**
@@ -34,18 +33,6 @@ public abstract class Target {
         Resource src = sources.iterator().next().getParent();
         assert src != null;
         return create(src.getName(), destination.getName());
-    }
-
-    public static Target fromPaths(Iterable<? extends Path> sources, Path dst) {
-        Path src = sources.iterator().next().getParent();
-        assert src != null;
-        return create(src.getName(), dst.getName());
-    }
-
-    public static Target fromPaths(Iterable<? extends Path> paths) {
-        Path parent = paths.iterator().next().getParent();
-        assert parent != null;
-        return create(parent.getName(), parent.getName());
     }
 
     public static Target from(Iterable<? extends Resource> resources) {
