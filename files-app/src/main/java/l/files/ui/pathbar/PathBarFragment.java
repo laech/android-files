@@ -122,7 +122,7 @@ public final class PathBarFragment extends Fragment
     @Override
     public void onClick(View v) {
         Resource status = (Resource) v.getTag();
-        Events.get().post(OpenFileRequest.create(status.getPath()));
+        Events.get().post(OpenFileRequest.create(status));
     }
 
     static final class Hierarchy {

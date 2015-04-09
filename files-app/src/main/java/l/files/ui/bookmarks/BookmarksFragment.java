@@ -52,7 +52,7 @@ public final class BookmarksFragment extends BaseFileListFragment
     public void onListItemClick(ListView l, View v, int pos, long id) {
         super.onListItemClick(l, v, pos, id);
         Resource resource = (Resource) l.getItemAtPosition(pos);
-        getBus().post(OpenFileRequest.create(resource.getPath()));
+        getBus().post(OpenFileRequest.create(resource));
     }
 
     private void addBookmarksHeader() {

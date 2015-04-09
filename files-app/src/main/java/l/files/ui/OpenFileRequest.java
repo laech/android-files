@@ -1,7 +1,7 @@
 package l.files.ui;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 
 @AutoParcel
 public abstract class OpenFileRequest {
@@ -9,10 +9,10 @@ public abstract class OpenFileRequest {
     OpenFileRequest() {
     }
 
-    public abstract Path getPath();
+    public abstract Resource getResource();
 
-    public static OpenFileRequest create(Path path) {
-        return new AutoParcel_OpenFileRequest(path);
+    public static OpenFileRequest create(Resource resource) {
+        return new AutoParcel_OpenFileRequest(resource);
     }
 
 }

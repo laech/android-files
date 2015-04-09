@@ -28,8 +28,8 @@ final class BookmarksAdapter extends StableAdapter<Resource> {
 
         Resource resource = getItem(position);
         ViewHolder holder = (ViewHolder) view.getTag();
-        holder.setTitle(FileLabels.get(res, resource.getPath()));
-        holder.setIcon(getDirectoryIcon(assets, resource.getResource()));
+        holder.setTitle(FileLabels.get(res, resource));
+        holder.setIcon(getDirectoryIcon(assets, resource));
 
         return view;
     }

@@ -157,7 +157,7 @@ public final class FilesActivity extends BaseActivity
         if (items.isEmpty()) {
             items = new ArrayList<>();
             items.add(new TabItem(idGenerator.get(), directory,
-                    FileLabels.get(getResources(), directory.getPath())));
+                    FileLabels.get(getResources(), directory)));
         }
         viewPager.setAdapter(new FilesPagerAdapter(items));
         viewPager.setOffscreenPageLimit(2);
@@ -413,7 +413,7 @@ public final class FilesActivity extends BaseActivity
         }
 
         private void updateTabTitle(final int position) {
-            final String title = FileLabels.get(getResources(), currentPagerFragment.getCurrentDirectory().getPath());
+            final String title = FileLabels.get(getResources(), currentPagerFragment.getCurrentDirectory());
             items.get(position).setTitle(title);
             handler.post(new Runnable() {
                 @Override
@@ -454,7 +454,7 @@ public final class FilesActivity extends BaseActivity
         }
 
         void addItem(int id) {
-            String title = FileLabels.get(getResources(), UserDirs.DIR_HOME.getPath());
+            String title = FileLabels.get(getResources(), UserDirs.DIR_HOME);
             items.add(new TabItem(id, UserDirs.DIR_HOME, title));
             tabs.addTab(title);
             notifyDataSetChanged();

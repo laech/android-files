@@ -15,7 +15,6 @@ import java.io.IOException;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.widget.Toaster;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
@@ -103,7 +102,7 @@ public final class FilesPagerFragment extends Fragment {
             @Override
             protected ResourceStatus doInBackground(Void... params) {
                 try {
-                    return request.getPath().getResource().readStatus(true);
+                    return request.getResource().getResource().readStatus(true);
                 } catch (IOException e) {
                     log.debug(e, "%s", request);
                     return null;
