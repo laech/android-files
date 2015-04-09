@@ -455,8 +455,8 @@ public final class FilesActivity extends BaseActivity
         }
 
         void addItem(int id) {
-            String title = FileLabels.get(getResources(), UserDirs.DIR_HOME);
-            items.add(new TabItem(id, UserDirs.DIR_HOME, title));
+            String title = FileLabels.get(getResources(), UserDirs.DIR_HOME.getPath());
+            items.add(new TabItem(id, UserDirs.DIR_HOME.getPath(), title));
             tabs.addTab(title);
             notifyDataSetChanged();
         }
