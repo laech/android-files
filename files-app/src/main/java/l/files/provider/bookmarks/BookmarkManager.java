@@ -3,38 +3,38 @@ package l.files.provider.bookmarks;
 import java.util.Collection;
 import java.util.Set;
 
-import l.files.fs.Path;
+import l.files.fs.Resource;
 
 public interface BookmarkManager {
 
-  void addBookmark(Path path);
+    void addBookmark(Resource resource);
 
-  void removeBookmark(Path path);
+    void removeBookmark(Resource resource);
 
-  void removeBookmarks(Collection<Path> bookmarks);
+    void removeBookmarks(Collection<Resource> bookmarks);
 
-  boolean hasBookmark(Path path);
+    boolean hasBookmark(Resource resource);
 
-  Set<Path> getBookmarks();
+    Set<Resource> getBookmarks();
 
-  /**
-   * Adds a listener for listening bookmark changes. Does nothing if the
-   * listener is already added.
-   */
-  void registerBookmarkChangedListener(BookmarkChangedListener listener);
-
-  /**
-   * Removes a listener from listening bookmark changes. Does nothing if the
-   * listener is not already added.
-   */
-  void unregisterBookmarkChangedListener(BookmarkChangedListener listener);
-
-  static interface BookmarkChangedListener {
     /**
-     * Called when bookmarks has been added/removed. This maybe called from
-     * different threads, including the main thread.
+     * Adds a listener for listening bookmark changes. Does nothing if the
+     * listener is already added.
      */
-    void onBookmarkChanged(BookmarkManager manager);
+    void registerBookmarkChangedListener(BookmarkChangedListener listener);
 
-  }
+    /**
+     * Removes a listener from listening bookmark changes. Does nothing if the
+     * listener is not already added.
+     */
+    void unregisterBookmarkChangedListener(BookmarkChangedListener listener);
+
+    static interface BookmarkChangedListener {
+        /**
+         * Called when bookmarks has been added/removed. This maybe called from
+         * different threads, including the main thread.
+         */
+        void onBookmarkChanged(BookmarkManager manager);
+    }
+
 }
