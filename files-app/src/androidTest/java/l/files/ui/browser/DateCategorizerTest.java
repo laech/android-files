@@ -8,7 +8,6 @@ import java.util.GregorianCalendar;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 

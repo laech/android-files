@@ -22,7 +22,7 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
         assertFalse(service().toString(), service().hasObserver(LocalResource.create(new File("/data"))));
     }
 
-    public void testUnmoniDonttorSelf() {
+    public void testUnmonitorSelf() {
         Resource dir = LocalResource.create(tmp().get());
 
         WatchEvent.Listener listener = listen(tmpDir());
@@ -52,10 +52,10 @@ public final class WatchService_UnmonitorTest extends WatchServiceBaseTest {
     }
 
     public void testUnmonitorDoesNotRemoveImmediateChildObserverThatAreMonitored() {
-        Resource dir = LocalResource.create(tmp().createDir("a"));
+        LocalResource dir = LocalResource.create(tmp().createDir("a"));
 
         WatchEvent.Listener listener = listen(tmpDir());
-        listen(new File(dir.toString()));
+        listen(dir.getFile());
         assertTrue(service().isRegistered(dir));
         assertTrue(service().hasObserver(dir));
 

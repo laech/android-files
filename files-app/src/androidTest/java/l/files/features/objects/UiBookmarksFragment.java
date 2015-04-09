@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.R;
-import l.files.fs.Path;
+import l.files.fs.Resource;
 import l.files.ui.FilesActivity;
 import l.files.ui.bookmarks.BookmarksFragment;
 
@@ -42,26 +42,26 @@ public final class UiBookmarksFragment {
         return new UiFileActivity(instrument, getActivity());
     }
 
-    public UiFileActivity selectBookmark(final Path path) throws IOException {
+    public UiFileActivity selectBookmark(final Resource resource) throws IOException {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
                 click(getListView(), new Predicate<Object>() {
                     @Override
                     public boolean apply(Object input) {
-                        return input.equals(path);
+                        return input.equals(resource);
                     }
                 });
             }
         });
 
-        if (path.getResource().readStatus(false).isDirectory()) {
-            getActivityObject().assertCurrentDirectory(path);
+        if (resource.getResource().readStatus(false).isDirectory()) {
+            getActivityObject().assertCurrentDirectory(resource);
         }
         return getActivityObject();
     }
 
-    public UiBookmarksFragment checkBookmark(final Path bookmark, final boolean checked) {
+    public UiBookmarksFragment checkBookmark(final Resource bookmark, final boolean checked) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -84,27 +84,27 @@ public final class UiBookmarksFragment {
         return this;
     }
 
-    private List<Path> getBookmarks() {
-        List<Path> paths = new ArrayList<>();
+    private List<Resource> getBookmarks() {
+        List<Resource> resources = new ArrayList<>();
         for (int i = getListView().getHeaderViewsCount(); i < getListView().getCount(); i++) {
-            paths.add((Path) getListView().getItemAtPosition(i));
+            resources.add((Resource) getListView().getItemAtPosition(i));
         }
-        return paths;
+        return resources;
     }
 
     public UiBookmarksFragment assertCurrentDirectoryBookmarked(final boolean bookmarked) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                Path path = getActivity().getCurrentPagerFragment().getCurrentDirectory().getPath();
-                List<Path> paths = getBookmarks();
-                assertEquals(paths.toString(), bookmarked, paths.contains(path));
+                Resource resource = getActivity().getCurrentPagerFragment().getCurrentDirectory();
+                List<Resource> resources = getBookmarks();
+                assertEquals(resources.toString(), bookmarked, resources.contains(resource));
             }
         });
         return this;
     }
 
-    public UiBookmarksFragment assertBookmarked(final Path bookmark, final boolean bookmarked) {
+    public UiBookmarksFragment assertBookmarked(final Resource bookmark, final boolean bookmarked) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -114,13 +114,13 @@ public final class UiBookmarksFragment {
         return this;
     }
 
-    public UiBookmarksFragment assertContainsBookmarksInOrder(final Path... paths) {
+    public UiBookmarksFragment assertContainsBookmarksInOrder(final Resource... resources) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                List<Path> expected = asList(paths);
-                List<Path> actual = new ArrayList<>();
-                for (Path bookmark : getBookmarks()) {
+                List<Resource> expected = asList(resources);
+                List<Resource> actual = new ArrayList<>();
+                for (Resource bookmark : getBookmarks()) {
                     if (expected.contains(bookmark)) {
                         actual.add(bookmark);
                     }
