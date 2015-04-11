@@ -104,7 +104,7 @@ public interface Resource extends Parcelable {
      * @throws LoopException         too many symbolic links were encountered in
      *                               resolving path
      * @throws PathTooLongException  path was too long
-     * @throws NotFoundException     a directory component in the path does not
+     * @throws NotExistException     a directory component in the path does not
      * @throws NotDirectoryException a component used as a directory in the path
      *                               is not a directory
      * @throws IOException           other failures
@@ -112,13 +112,22 @@ public interface Resource extends Parcelable {
     void createDirectory() throws IOException;
 
     /**
-     * Creates this resource and any missing parents as directories, will not
-     * error if already exists.
+     * Creates this resource and any missing parents as directories. This will
+     * throw the same exceptions as {@link #createDirectory()} except will not
+     * error if already exists as a directory.
      */
     void createDirectories() throws IOException;
 
     /**
      * Creates the underlying resource as a file.
+     *
+     * @throws AccessException       does not have permission to create
+     * @throws ExistsException       the underlying resource already exits
+     *                               (doesn't necessary mean it's a file)
+     * @throws PathTooLongException  the path of this resource is too long
+     * @throws NotExistException     one of the parent resource does not exist
+     * @throws NotDirectoryException one of the parent resource in the path is
+     *                               not a directory
      */
     void createFile() throws IOException;
 
@@ -135,6 +144,14 @@ public interface Resource extends Parcelable {
 
     /**
      * Reads the status of this resource.
+     *
+     * @throws AccessException       does not have permission to read status
+     * @throws LoopException         too many symbolic links encountered while
+     *                               traversing the path
+     * @throws PathTooLongException  path is too long
+     * @throws NotExistException     one of the resource in the path does not
+     *                               exists
+     * @throws NotDirectoryException one of the parents is not a directory
      */
     ResourceStatus readStatus(boolean followLink) throws IOException;
 

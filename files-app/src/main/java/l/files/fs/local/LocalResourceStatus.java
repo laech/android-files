@@ -140,7 +140,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
                 stat = Stat.lstat(resource.getFile().getPath());
             }
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(resource.getPath());
         }
 
         return create(resource, stat);

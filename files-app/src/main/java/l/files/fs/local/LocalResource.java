@@ -9,6 +9,7 @@ import com.google.common.collect.TreeTraverser;
 import com.google.common.net.MediaType;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,10 +22,16 @@ import java.util.Iterator;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
+import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.WatchService;
 
+import static android.system.OsConstants.O_CREAT;
+import static android.system.OsConstants.O_EXCL;
+import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.S_IRUSR;
 import static android.system.OsConstants.S_IRWXU;
+import static android.system.OsConstants.S_IWUSR;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -57,7 +64,7 @@ public abstract class LocalResource implements Resource {
         return uri;
     }
 
-    private String getFilePath() {
+    String getPath() {
         return getFile().getPath();
     }
 
@@ -84,7 +91,7 @@ public abstract class LocalResource implements Resource {
     @Nullable
     @Override
     public LocalResource getParent() {
-        if ("/".equals(getFilePath())) {
+        if ("/".equals(getPath())) {
             return null;
         } else {
             return new AutoParcel_LocalResource(getFile().getParentFile());
@@ -102,8 +109,8 @@ public abstract class LocalResource implements Resource {
             return true;
         }
         if (other instanceof LocalResource) {
-            String thisPath = getFilePath();
-            String thatPath = ((LocalResource) other).getFilePath();
+            String thisPath = getPath();
+            String thatPath = ((LocalResource) other).getPath();
             return thisPath.startsWith(thatPath) &&
                     thisPath.charAt(thatPath.length()) == '/';
         }
@@ -120,7 +127,7 @@ public abstract class LocalResource implements Resource {
     public LocalResource resolveParent(Resource fromParent, Resource toParent) {
         checkArgument(startsWith(fromParent));
         File parent = ((LocalResource) toParent).getFile();
-        String child = getFilePath().substring(((LocalResource) fromParent).getFilePath().length());
+        String child = getPath().substring(((LocalResource) fromParent).getPath().length());
         return new AutoParcel_LocalResource(new File(parent, child));
     }
 
@@ -132,7 +139,7 @@ public abstract class LocalResource implements Resource {
     @Override
     public boolean exists() {
         try {
-            Unistd.access(getFilePath(), Unistd.F_OK);
+            Unistd.access(getPath(), Unistd.F_OK);
             return true;
         } catch (ErrnoException e) {
             return false;
@@ -244,16 +251,20 @@ public abstract class LocalResource implements Resource {
     public void createDirectory() throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
-            Os.mkdir(getFilePath(), S_IRWXU);
+            Os.mkdir(getPath(), S_IRWXU);
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getFilePath());
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
 
     @Override
     public void createDirectories() throws IOException {
-        if (readStatus(false).isDirectory()) {
-            return;
+        try {
+            if (readStatus(false).isDirectory()) {
+                return;
+            }
+        } catch (NotExistException ignore) {
+            // Ignore will create
         }
         LocalResource parent = getParent();
         assert parent != null;
@@ -263,15 +274,21 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void createFile() throws IOException {
-        if (!getFile().createNewFile()) {
-            throw new IOException(); // TODO use native code to get errno
+        // Same flags and mode as java.io.File.createNewFile() on Android
+        int flags = O_RDWR | O_CREAT | O_EXCL;
+        int mode = S_IRUSR | S_IWUSR;
+        try {
+            FileDescriptor fd = Os.open(getPath(), flags, mode);
+            Os.close(fd);
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
 
     @Override
     public void createSymbolicLink(Resource target) throws IOException {
         try {
-            Unistd.symlink(((LocalResource) target).getFilePath(), getFilePath());
+            Unistd.symlink(((LocalResource) target).getPath(), getPath());
         } catch (ErrnoException e) {
             throw e.toIOException();
         }
@@ -280,7 +297,7 @@ public abstract class LocalResource implements Resource {
     @Override
     public Resource readSymbolicLink() throws IOException {
         try {
-            String link = Unistd.readlink(getFilePath());
+            String link = Unistd.readlink(getPath());
             return create(new File(link));
         } catch (ErrnoException e) {
             throw e.toIOException();
@@ -289,9 +306,9 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void move(Resource dst) throws IOException {
-        String dstPath = ((LocalResource) dst).getFilePath();
+        String dstPath = ((LocalResource) dst).getPath();
         try {
-            Stdio.rename(getFilePath(), dstPath);
+            Stdio.rename(getPath(), dstPath);
         } catch (ErrnoException e) {
             throw e.toIOException();
         }
@@ -300,7 +317,7 @@ public abstract class LocalResource implements Resource {
     @Override
     public void delete() throws IOException {
         try {
-            Stdio.remove(getFilePath());
+            Stdio.remove(getPath());
         } catch (ErrnoException e) {
             throw e.toIOException();
         }

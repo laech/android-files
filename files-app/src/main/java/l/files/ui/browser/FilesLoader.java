@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.fs.WatchEvent;
@@ -161,7 +161,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             FileListItem.File oldStat = data.put(resource, newStat);
             return !Objects.equals(newStat, oldStat);
 
-        } catch (FileNotFoundException e) {
+        } catch (NotExistException e) {
             return data.remove(resource) != null;
 
         } catch (IOException e) {
