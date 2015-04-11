@@ -77,10 +77,18 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
         }
     }
 
+    /**
+     * @deprecated listener not automatically unregistered
+     */
+    @Deprecated
     protected WatchEvent.Listener listen(String relativePath) {
         return listen(tmp().get(relativePath));
     }
 
+    /**
+     * @deprecated listener not automatically unregistered
+     */
+    @Deprecated
     protected WatchEvent.Listener listen(File file) {
         WatchEvent.Listener listener = mock(WatchEvent.Listener.class);
         try {
@@ -203,7 +211,12 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
     }
 
     protected void await(WatchEvent expected, Runnable code) {
-        await(expected, code, listen(tmpDir()));
+        WatchEvent.Listener listener = listen(tmpDir());
+        try {
+            await(expected, code, listener);
+        } finally {
+            service().unregister(LocalResource.create(tmpDir()), listener);
+        }
     }
 
     protected void await(final WatchEvent expected, Runnable code, WatchEvent.Listener listener) {
@@ -237,7 +250,6 @@ abstract class WatchServiceBaseTest extends FileBaseTest {
             throw new AssertionError(e);
         }
 
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (actual) {
             int count = actual.count(expected);
             if (count != 1) {

@@ -202,7 +202,7 @@ public abstract class LocalResource implements PathEntry, Resource {
                 if (!root.isDirectory()) {
                     return emptyList();
                 }
-                try (LocalResourceStream steam = LocalResourceStream.open(root.getPath())) {
+                try (LocalResourceStream steam = LocalResourceStream.open(root.getResource())) {
                     ArrayList<LocalPathEntry> children = new ArrayList<>();
                     for (LocalPathEntry entry : steam) {
                         children.add(entry);
@@ -219,7 +219,7 @@ public abstract class LocalResource implements PathEntry, Resource {
 
     @Override
     public Stream openDirectory() throws IOException {
-        final LocalResourceStream stream = LocalResourceStream.open(getPath());
+        final LocalResourceStream stream = LocalResourceStream.open(this);
         return new Stream() {
             @Override
             public void close() throws IOException {

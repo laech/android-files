@@ -15,12 +15,12 @@ final class LocalResourceStream implements Iterable<LocalPathEntry>, Closeable {
      * much better performance when directory is large.
      */
 
-    private final LocalPath parent;
+    private final LocalResource parent;
     private final long dir;
 
     private boolean iterated;
 
-    LocalResourceStream(LocalPath parent, long dir) {
+    LocalResourceStream(LocalResource parent, long dir) {
         this.parent = parent;
         this.dir = dir;
     }
@@ -95,9 +95,9 @@ final class LocalResourceStream implements Iterable<LocalPathEntry>, Closeable {
         }
     }
 
-    public static LocalResourceStream open(LocalPath path) throws IOException {
+    public static LocalResourceStream open(LocalResource resource) throws IOException {
         try {
-            return new LocalResourceStream(path, Dirent.opendir(path.toString()));
+            return new LocalResourceStream(resource, Dirent.opendir(resource.getFile().getPath()));
         } catch (ErrnoException e) {
             throw e.toIOException();
         }

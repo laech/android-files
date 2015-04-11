@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import java.io.File;
 
-import l.files.fs.Resource;
-
 import static l.files.fs.WatchEvent.Kind.CREATE;
 import static l.files.fs.WatchEvent.Kind.DELETE;
 
@@ -12,39 +10,7 @@ import static l.files.fs.WatchEvent.Kind.DELETE;
  *
  * @see android.os.FileObserver#MOVE_SELF
  */
-public class WatchService_MOVE_SELF_InitiatedTest
-        extends WatchServiceBaseTest {
-
-    /**
-     * When the monitored directory itself is moved, stopping monitoring on it.
-     */
-    public void testMoveSelfNoLongerMonitorSelf() {
-        listen(tmpDir());
-        Resource resource = LocalResource.create(tmp().get());
-        assertTrue(service().isRegistered(resource));
-        assertTrue(service().hasObserver(resource));
-
-        awaitMoveRootTo(helper().get("b"));
-        assertFalse(service().isRegistered(resource));
-        assertFalse(service().hasObserver(resource));
-    }
-
-    /**
-     * When the monitored directory is moved, stopping monitoring on its
-     * children.
-     */
-    public void testMoveSelfNoLongerMonitorChildren() {
-        await(event(CREATE, "a"), newCreate("a", FileType.DIR));
-        listen("a");
-
-        Resource resource = LocalResource.create(tmp().get("a"));
-        assertTrue(service().isRegistered(resource));
-        assertTrue(service().hasObserver(resource));
-
-        awaitMoveRootTo(helper().get("b"));
-        assertFalse(service().isRegistered(resource));
-        assertFalse(service().hasObserver(resource));
-    }
+public class WatchService_MOVE_SELF_InitiatedTest extends WatchServiceBaseTest {
 
     public void testMoveSelfOutAddDirWithSameName() {
         awaitMoveRootTo(helper().get("test"));

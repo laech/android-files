@@ -18,7 +18,7 @@ void Java_l_files_fs_local_Unistd_symlink(JNIEnv *env, jclass clazz, jstring jsr
 void Java_l_files_fs_local_Unistd_access(JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
   const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
   if (NULL == path) {
-    return; // TODO error handling
+    return;
   }
   int rc = TEMP_FAILURE_RETRY(access(path, mode));
   if (rc == -1) {
@@ -57,5 +57,11 @@ jstring Java_l_files_fs_local_Unistd_readlink(JNIEnv *env, jclass clazz, jstring
       free(buf);
       bufsize *= 2;
     }
+  }
+}
+
+void Java_l_files_fs_local_Unistd_close(JNIEnv *env, jclass clazz, jint fd) {
+  if (-1 == close((int)fd)) {
+    throw_errno_exception(env);
   }
 }

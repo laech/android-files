@@ -13,28 +13,30 @@ abstract class LocalPathEntry implements PathEntry {
     }
 
     @Override
-    public abstract LocalPath getPath();
+    public abstract LocalResource getResource();
 
     public abstract long getInode();
 
     public abstract boolean isDirectory();
 
     @Override
-    public LocalResource getResource() {
-        return getPath().getResource();
+    public LocalPath getPath() {
+        return getResource().getPath();
     }
 
-    public static LocalPathEntry create(LocalPath path, long inode, boolean directory) {
-        return new AutoParcel_LocalPathEntry(path, inode, directory);
+    public static LocalPathEntry create(LocalResource resource, long inode, boolean directory) {
+        return new AutoParcel_LocalPathEntry(resource, inode, directory);
     }
 
     public static LocalPathEntry stat(File file) throws IOException {
-        return read(LocalPath.of(file));
+        return read(LocalResource.create(file));
     }
 
-    public static LocalPathEntry read(LocalPath path) throws IOException {
-        LocalResourceStatus status = LocalResourceStatus.stat(path, false);
-        return create(path, status.getInode(), status.isDirectory());
+    public static LocalPathEntry read(LocalResource resource) throws IOException {
+        LocalResourceStatus status = LocalResourceStatus.stat(resource.getFile(), false);
+        return create(resource, status.getInode(), status.isDirectory());
     }
+
+    // observerable
 
 }

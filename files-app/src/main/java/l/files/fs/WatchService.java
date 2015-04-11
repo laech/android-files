@@ -17,6 +17,7 @@ import java.io.IOException;
  * already be changed, therefore a robust application should have an alternative
  * way of handling instead of reply on this fully.
  */
+@Deprecated
 public interface WatchService extends Closeable {
 
     /**
@@ -33,11 +34,6 @@ public interface WatchService extends Closeable {
      * not registered for the given resource.
      */
     void unregister(Resource resource, WatchEvent.Listener listener);
-
-    /**
-     * Returns true if the given resource is registered.
-     */
-    boolean isRegistered(Resource resource);
 
     /**
      * Returns true if the resource can be watched, false otherwise.

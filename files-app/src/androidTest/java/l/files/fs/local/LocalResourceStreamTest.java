@@ -20,11 +20,11 @@ public final class LocalResourceStreamTest extends FileBaseTest {
         File f3 = tmp().get("d");
         symlink(f1.getPath(), f3.getPath());
 
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath().getResource())) {
             List<LocalPathEntry> expected = asList(
-                    LocalPathEntry.create(tmpPath().resolve("a"), lstat(f1.getPath()).getIno(), false),
-                    LocalPathEntry.create(tmpPath().resolve("b"), lstat(f2.getPath()).getIno(), true),
-                    LocalPathEntry.create(tmpPath().resolve("d"), lstat(f3.getPath()).getIno(), false)
+                    LocalPathEntry.create(tmpPath().resolve("a").getResource(), lstat(f1.getPath()).getIno(), false),
+                    LocalPathEntry.create(tmpPath().resolve("b").getResource(), lstat(f2.getPath()).getIno(), true),
+                    LocalPathEntry.create(tmpPath().resolve("d").getResource(), lstat(f3.getPath()).getIno(), false)
             );
             List<LocalPathEntry> actual = new ArrayList<>();
             for (LocalPathEntry entry : stream) {
@@ -35,7 +35,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath().getResource())) {
             Iterator<?> iterator = stream.iterator();
             assertFalse(iterator.hasNext());
             assertFalse(iterator.hasNext());
@@ -43,7 +43,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorThrowsNoSuchElementExceptionOnEmpty() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath().getResource())) {
             stream.iterator().next();
             fail();
         } catch (NoSuchElementException e) {
@@ -52,7 +52,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorMethodCannotBeReused() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(tmpPath().getResource())) {
             stream.iterator();
             try {
                 stream.iterator();
