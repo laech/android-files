@@ -24,8 +24,8 @@ final class Inotify extends Native {
     public static final int IN_Q_OVERFLOW = 0x00004000;
     public static final int IN_IGNORED = 0x00008000;
 
-    public static final int IN_CLOSE = (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE);
-    public static final int IN_MOVE = (IN_MOVED_FROM | IN_MOVED_TO);
+    public static final int IN_CLOSE = IN_CLOSE_WRITE | IN_CLOSE_NOWRITE;
+    public static final int IN_MOVE = IN_MOVED_FROM | IN_MOVED_TO;
 
     public static final int IN_ONLYDIR = 0x01000000;
     public static final int IN_DONT_FOLLOW = 0x02000000;
@@ -37,7 +37,8 @@ final class Inotify extends Native {
     public static final int IN_NONBLOCK = OsConstants.O_NONBLOCK;
     public static final int IN_CLOEXEC = OsConstants.FD_CLOEXEC;
 
-    public static final int IN_ALL_EVENTS = (IN_ACCESS
+    public static final int IN_ALL_EVENTS
+            = IN_ACCESS
             | IN_MODIFY
             | IN_ATTRIB
             | IN_CLOSE_WRITE
@@ -48,8 +49,7 @@ final class Inotify extends Native {
             | IN_DELETE
             | IN_CREATE
             | IN_DELETE_SELF
-            | IN_MOVE_SELF
-    );
+            | IN_MOVE_SELF;
 
     private Inotify() {
     }
