@@ -19,7 +19,6 @@ import java.util.Iterator;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.PathEntry;
 import l.files.fs.Resource;
 import l.files.fs.WatchService;
 
@@ -29,7 +28,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 @AutoParcel
-public abstract class LocalResource implements PathEntry, Resource {
+public abstract class LocalResource implements Resource {
 
     LocalResource() {
     }
@@ -53,16 +52,6 @@ public abstract class LocalResource implements PathEntry, Resource {
             return URI.create(uriStr.substring(0, uriStr.length() - 1));
         }
         return uri;
-    }
-
-    @Override
-    public Resource getResource() {
-        return this;
-    }
-
-    @Override
-    public LocalPath getPath() {
-        return LocalPath.of(getFile());
     }
 
     private String getFilePath() {
@@ -134,7 +123,7 @@ public abstract class LocalResource implements PathEntry, Resource {
 
     @Override
     public LocalResourceStatus readStatus(boolean followLink) throws IOException {
-        return LocalResourceStatus.stat(getFile(), followLink);
+        return LocalResourceStatus.stat(this, followLink);
     }
 
     @Override

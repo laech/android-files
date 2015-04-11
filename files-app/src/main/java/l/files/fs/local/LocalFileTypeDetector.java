@@ -4,8 +4,6 @@ import com.google.common.net.MediaType;
 
 import java.io.IOException;
 
-import l.files.fs.ResourceStatus;
-
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
 abstract class LocalFileTypeDetector {
@@ -42,6 +40,7 @@ abstract class LocalFileTypeDetector {
         }
     }
 
-    protected abstract MediaType detectRegularFile(ResourceStatus status) throws IOException;
+    protected abstract MediaType detectRegularFile(LocalResourceStatus status)
+            throws IOException;
 
 }

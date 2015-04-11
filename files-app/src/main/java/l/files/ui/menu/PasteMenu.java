@@ -92,7 +92,7 @@ public final class PasteMenu extends OptionsMenuAction
                     if (isLoadInBackgroundCanceled()) {
                         return null;
                     }
-                    if (resource.getResource().exists()) {
+                    if (resource.exists()) {
                         exists.add(resource);
                     }
                 }

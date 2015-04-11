@@ -55,7 +55,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         this.data = new ConcurrentHashMap<>();
         this.listener = new EventListener();
         this.deliverResult = new DeliverResultRunnable();
-        this.service = resource.getResource().getWatcher();
+        this.service = resource.getWatcher();
     }
 
     @Override
@@ -77,7 +77,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             logger.debug(e);
             return emptyList();
         }
-        try (Resource.Stream resources = resource.getResource().openDirectory()) {
+        try (Resource.Stream resources = resource.openDirectory()) {
             for (Resource resource : resources) {
                 checkCancelled();
                 addData(resource);

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static java.util.Arrays.asList;
 
@@ -23,7 +23,7 @@ public final class CountTest extends FileBaseTest {
                 tmp().get("3/4"),
                 tmp().get("3/4/c.txt")));
 
-        Count counter = new Count(asList(LocalPath.of(tmp().get()).getResource()));
+        Count counter = new Count(asList(LocalResource.create(tmp().get())));
         counter.execute();
 
         assertEquals(expected.size(), counter.getCount());

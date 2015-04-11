@@ -94,7 +94,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     public void onListItemClick(ListView l, View v, int pos, long id) {
         super.onListItemClick(l, v, pos, id);
         FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
-        getBus().post(OpenFileRequest.create(item.getResource().getResource()));
+        getBus().post(OpenFileRequest.create(item.getResource()));
     }
 
     @Override
@@ -106,8 +106,8 @@ public final class FilesFragment extends BaseFileListFragment implements
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
                 new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
-                new NewDirMenu(context.getFragmentManager(), directory.getResource()),
-                new PasteMenu(context, getClipboardManager(context), directory.getResource()),
+                new NewDirMenu(context.getFragmentManager(), directory),
+                new PasteMenu(context, getClipboardManager(context), directory),
                 new SortMenu(context.getFragmentManager()),
                 new ShowHiddenFilesMenu(context)
         ));
@@ -131,7 +131,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     @Override
     public Resource getCheckedItem() {
         int position = getCheckedItemPosition();
-        return ((FileListItem.File) getListView().getItemAtPosition(position)).getResource().getResource();
+        return ((FileListItem.File) getListView().getItemAtPosition(position)).getResource();
     }
 
     @Override
@@ -141,7 +141,7 @@ public final class FilesFragment extends BaseFileListFragment implements
         for (int position : positions) {
             FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
             if (item.isFile()) {
-                resources.add(((FileListItem.File) item).getResource().getResource());
+                resources.add(((FileListItem.File) item).getResource());
             }
         }
         return resources;
@@ -152,7 +152,7 @@ public final class FilesFragment extends BaseFileListFragment implements
         Activity context = getActivity();
         FileSort sort = getSort(context);
         boolean showHidden = Preferences.getShowHiddenFiles(context);
-        return new FilesLoader(context, directory.getResource(), sort, showHidden);
+        return new FilesLoader(context, directory, sort, showHidden);
     }
 
     @Override

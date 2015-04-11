@@ -2,7 +2,9 @@ package l.files.fs;
 
 import com.google.common.net.MediaType;
 
-public interface ResourceStatus extends PathEntry {
+public interface ResourceStatus {
+
+    Resource getResource();
 
     String getName();
 

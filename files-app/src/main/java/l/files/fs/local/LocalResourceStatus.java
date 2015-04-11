@@ -2,11 +2,9 @@ package l.files.fs.local;
 
 import com.google.common.net.MediaType;
 
-import java.io.File;
 import java.io.IOException;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.Path;
 import l.files.fs.ResourceStatus;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -36,22 +34,17 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     };
 
     @Override
-    public abstract LocalPath getPath();
+    public abstract LocalResource getResource();
 
     public abstract Stat getStat();
 
-    public static LocalResourceStatus create(LocalPath path, Stat stat) {
-        return new AutoParcel_LocalResourceStatus(path, stat);
+    public static LocalResourceStatus create(LocalResource resource, Stat stat) {
+        return new AutoParcel_LocalResourceStatus(resource, stat);
     }
 
     @Override
     public String getName() {
-        return getPath().getName();
-    }
-
-    @Override
-    public LocalResource getResource() {
-        return getPath().getResource();
+        return getResource().getName();
     }
 
     @Override
@@ -71,7 +64,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
 
     private boolean access(int mode) {
         try {
-            Unistd.access(getPath().toString(), mode);
+            Unistd.access(getResource().getFile().getPath(), mode);
             return true;
         } catch (ErrnoException e) {
             return false;
@@ -136,23 +129,21 @@ public abstract class LocalResourceStatus implements ResourceStatus {
         }
     }
 
-    public static LocalResourceStatus stat(File file, boolean followLink) throws IOException {
-        return stat(LocalPath.of(file), followLink);
-    }
+    public static LocalResourceStatus stat(
+            LocalResource resource, boolean followLink) throws IOException {
 
-    public static LocalResourceStatus stat(Path path, boolean followLink) throws IOException {
-        LocalPath.check(path);
         Stat stat;
         try {
             if (followLink) {
-                stat = Stat.stat(path.toString());
+                stat = Stat.stat(resource.getFile().getPath());
             } else {
-                stat = Stat.lstat(path.toString());
+                stat = Stat.lstat(resource.getFile().getPath());
             }
         } catch (ErrnoException e) {
             throw e.toIOException();
         }
 
-        return create((LocalPath) path, stat);
+        return create(resource, stat);
     }
+
 }

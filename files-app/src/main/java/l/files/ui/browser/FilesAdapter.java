@@ -162,7 +162,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
     protected Object getItemIdObject(int position) {
         Object item = getItem(position);
         if (item instanceof ResourceStatus) {
-            return ((ResourceStatus) item).getPath();
+            return ((ResourceStatus) item).getResource();
         }
         return item;
     }
@@ -229,7 +229,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
             }
             if (stat.isDirectory()
                     || file.getTargetStat().isDirectory()) {
-                return getDirectoryIcon(assets, file.getResource().getResource());
+                return getDirectoryIcon(assets, file.getResource());
             } else {
                 return getIconForFileMediaType(assets, stat.getBasicMediaType());
             }

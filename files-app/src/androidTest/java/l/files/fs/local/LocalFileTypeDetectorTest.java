@@ -10,35 +10,35 @@ public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
     protected abstract LocalFileTypeDetector detector();
 
     public void testDetect_directory() throws Exception {
-        LocalResource dir = LocalPath.of(tmp().createDir("a")).getResource();
+        LocalResource dir = LocalResource.create(tmp().createDir("a"));
         assertEquals("inode/directory", detector().detect(dir).toString());
     }
 
     public void testDetect_file() throws Exception {
-        LocalResource file = LocalPath.of(tmp().createFile("a.txt")).getResource();
+        LocalResource file = LocalResource.create(tmp().createFile("a.txt"));
         assertEquals("text/plain", detector().detect(file).toString());
     }
 
     public void testDetect_symlinkFile() throws Exception {
-        LocalResource file = LocalPath.of(tmp().createFile("a.mp3")).getResource();
-        LocalResource link = LocalPath.of(tmp().get("b.txt")).getResource();
-        link.getResource().createSymbolicLink(file);
+        LocalResource file = LocalResource.create(tmp().createFile("a.mp3"));
+        LocalResource link = LocalResource.create(tmp().get("b.txt"));
+        link.createSymbolicLink(file);
         assertEquals("text/plain", detector().detect(link).toString());
     }
 
     public void testDetect_symlinkDirectory() throws Exception {
-        LocalResource dir = LocalPath.of(tmp().createDir("a")).getResource();
-        LocalResource link = LocalPath.of(tmp().get("b")).getResource();
-        link.getResource().createSymbolicLink(dir);
+        LocalResource dir = LocalResource.create(tmp().createDir("a"));
+        LocalResource link = LocalResource.create(tmp().get("b"));
+        link.createSymbolicLink(dir);
         assertEquals("inode/directory", detector().detect(link).toString());
     }
 
     public void testDetect_symlinkDirectoryMulti() throws Exception {
-        LocalResource dir = LocalPath.of(tmp().createDir("a")).getResource();
-        LocalResource link1 = LocalPath.of(tmp().get("b")).getResource();
-        LocalResource link2 = LocalPath.of(tmp().get("c")).getResource();
-        link1.getResource().createSymbolicLink(dir);
-        link2.getResource().createSymbolicLink(link1);
+        LocalResource dir = LocalResource.create(tmp().createDir("a"));
+        LocalResource link1 = LocalResource.create(tmp().get("b"));
+        LocalResource link2 = LocalResource.create(tmp().get("c"));
+        link1.createSymbolicLink(dir);
+        link2.createSymbolicLink(link1);
         assertEquals("inode/directory", detector().detect(link2).toString());
     }
 

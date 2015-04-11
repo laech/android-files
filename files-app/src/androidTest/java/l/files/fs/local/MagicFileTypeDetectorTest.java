@@ -19,7 +19,7 @@ public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
         write("hello world", file, UTF_8);
         assertTrue(file.setReadable(false));
         try {
-            detector().detect(LocalPath.of(file).getResource());
+            detector().detect(LocalResource.create(file));
             fail();
         } catch (IOException e) {
             // Pass
@@ -30,7 +30,7 @@ public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
         File file = new File("/proc/1/maps");
         assertExists(file);
         try {
-            detector().detect(LocalPath.of(file).getResource());
+            detector().detect(LocalResource.create(file));
             fail();
         } catch (IOException e) {
             // Pass

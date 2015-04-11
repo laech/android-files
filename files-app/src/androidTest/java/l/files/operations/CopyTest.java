@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.List;
 
 import l.files.fs.Resource;
-import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.write;
@@ -44,13 +43,13 @@ public final class CopyTest extends PasteTest {
     }
 
     public void testCopiesSymlink() throws Exception {
-        Resource target = LocalPath.of(tmp().createFile("target")).getResource();
-        Resource link = LocalPath.of(tmp().get("link")).getResource();
+        Resource target = LocalResource.create(tmp().createFile("target"));
+        Resource link = LocalResource.create(tmp().get("link"));
         link.createSymbolicLink(target);
 
         copy(new File(link.getUri()), tmp().createDir("copied"));
 
-        LocalResource copied = LocalPath.of(tmp().get("copied/link").getPath()).getResource();
+        LocalResource copied = LocalResource.create(tmp().get("copied/link"));
         assertEquals(target, copied.readSymbolicLink());
     }
 
@@ -94,9 +93,9 @@ public final class CopyTest extends PasteTest {
         return new Copy(Iterables.transform(sources, new Function<String, Resource>() {
             @Override
             public Resource apply(String input) {
-                return LocalPath.of(input).getResource();
+                return LocalResource.create(new File(input));
             }
-        }), LocalPath.of(dstDir).getResource());
+        }), LocalResource.create(new File(dstDir)));
     }
 
 }

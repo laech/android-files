@@ -369,11 +369,11 @@ final class LocalResourceObservable extends Native
         if (wd == this.wd) {
 
             if (isChildCreated(event, child)) {
-                LocalResource resource = this.resource.resolve(child);
+                LocalResource childResource = this.resource.resolve(child);
                 if (isDirectory(event)) {
-                    addWatchForDirectory(resource);
+                    addWatchForDirectory(childResource);
                 }
-                observer(resource, Kind.CREATE);
+                observer(childResource, Kind.CREATE);
 
             } else if (isChildDeleted(event, child)) {
                 removeWatch(wd);

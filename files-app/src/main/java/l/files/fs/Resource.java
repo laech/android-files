@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
  */
-public interface Resource extends PathEntry, Parcelable {
+public interface Resource extends Parcelable {
 
     /**
      * The normalized/absolute URI of this resource. Every resource has only one

@@ -4,7 +4,7 @@ import java.io.File;
 
 import l.files.fs.Resource;
 import l.files.fs.local.Files;
-import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,7 +33,7 @@ abstract class Paste extends AbstractOperation {
         }
 
         File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
-        paste(resource, LocalPath.of(to).getResource(), listener);
+        paste(resource, LocalResource.create(to), listener);
     }
 
     /**

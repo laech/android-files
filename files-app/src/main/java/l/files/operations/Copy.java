@@ -111,7 +111,7 @@ final class Copy extends Paste {
 
         } catch (IOException e) {
             try {
-                dst.getResource().delete();
+                dst.delete();
             } catch (IOException ex) {
                 logger.warn(ex, "Failed to delete path on exception %s", dst);
             }

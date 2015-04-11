@@ -7,7 +7,7 @@ import java.util.Set;
 
 import l.files.common.testing.FileBaseTest;
 import l.files.fs.Resource;
-import l.files.fs.local.LocalPath;
+import l.files.fs.local.LocalResource;
 
 import static java.util.Arrays.asList;
 
@@ -22,7 +22,7 @@ public final class DeleteTest extends FileBaseTest {
                 tmp().get("a/b")
         ));
 
-        Delete delete = create(asList(LocalPath.of(src).getResource()));
+        Delete delete = create(asList(LocalResource.create(src)));
         delete.execute();
 
         assertEquals(delete.getDeletedItemCount(), expected.size());
@@ -51,7 +51,7 @@ public final class DeleteTest extends FileBaseTest {
     public void testDeletesSymbolicLinkButNotLinkedFile() throws Exception {
         File a = tmp().createFile("a");
         File b = tmp().get("b");
-        LocalPath.of(b).getResource().createSymbolicLink(LocalPath.of(a).getResource());
+        LocalResource.create(b).createSymbolicLink(LocalResource.create(a));
         assertTrue(a.exists());
         assertTrue(b.exists());
         delete(b);
@@ -70,12 +70,12 @@ public final class DeleteTest extends FileBaseTest {
         } catch (FileException e) {
             failures = e.failures();
         }
-        assertEquals(LocalPath.of(a.getPath()).getResource(), failures.get(0).getResource());
+        assertEquals(LocalResource.create(a), failures.get(0).getResource());
         assertEquals(1, failures.size());
     }
 
     private void delete(File file) throws Exception {
-        create(asList(LocalPath.of(file).getResource())).execute();
+        create(asList(LocalResource.create(file))).execute();
     }
 
     private Delete create(Iterable<? extends Resource> resources) {

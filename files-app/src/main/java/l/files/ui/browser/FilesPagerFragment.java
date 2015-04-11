@@ -102,7 +102,7 @@ public final class FilesPagerFragment extends Fragment {
             @Override
             protected ResourceStatus doInBackground(Void... params) {
                 try {
-                    return request.getResource().getResource().readStatus(true);
+                    return request.getResource().readStatus(true);
                 } catch (IOException e) {
                     log.debug(e, "%s", request);
                     return null;

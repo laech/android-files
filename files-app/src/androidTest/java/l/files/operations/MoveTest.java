@@ -7,7 +7,6 @@ import com.google.common.io.Files;
 import java.io.File;
 
 import l.files.fs.Resource;
-import l.files.fs.local.LocalPath;
 import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.write;
@@ -22,14 +21,14 @@ public final class MoveTest extends PasteTest {
     }
 
     public void testMovesSymlink() throws Exception {
-        Resource target = LocalPath.of(tmp().createFile("target")).getResource();
-        Resource link = LocalPath.of(tmp().get("link")).getResource();
+        Resource target = LocalResource.create(tmp().createFile("target"));
+        Resource link = LocalResource.create(tmp().get("link"));
         link.createSymbolicLink(target);
 
         Move move = create(new File(link.getUri()), tmp().createDir("moved"));
         move.execute();
 
-        Resource actual = LocalPath.of(tmp().get("moved/link")).getResource().readSymbolicLink();
+        Resource actual = LocalResource.create(tmp().get("moved/link")).readSymbolicLink();
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
@@ -68,9 +67,9 @@ public final class MoveTest extends PasteTest {
         return new Move(Iterables.transform(sources, new Function<String, Resource>() {
             @Override
             public Resource apply(String s) {
-                return LocalPath.of(s).getResource();
+                return LocalResource.create(new File(s));
             }
-        }), LocalPath.of(dstDir).getResource());
+        }), LocalResource.create(new File(dstDir)));
     }
 
     private Move create(File src, File dst) {

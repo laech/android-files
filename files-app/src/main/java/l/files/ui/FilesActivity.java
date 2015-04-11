@@ -136,7 +136,7 @@ public final class FilesActivity extends BaseActivity
 
     private Resource getInitialDirectory() {
         Resource directory = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
-        return directory == null ? UserDirs.DIR_HOME.getResource() : directory;
+        return directory == null ? UserDirs.DIR_HOME : directory;
     }
 
     private void initFields(int idSeed) {

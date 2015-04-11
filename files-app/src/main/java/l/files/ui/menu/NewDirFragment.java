@@ -35,7 +35,7 @@ public final class NewDirFragment extends FileCreationFragment {
     }
 
     private void getNameSuggestion() {
-        final Resource parent = getParent().getResource();
+        final Resource parent = getParent();
         final String basename = getString(R.string.untitled_dir);
         new AsyncTask<Object, Object, String>() {
             @Override
@@ -71,7 +71,7 @@ public final class NewDirFragment extends FileCreationFragment {
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    resource.getResource().createDirectory();
+                    resource.createDirectory();
                     return true;
                 } catch (IOException e) {
                     return false;

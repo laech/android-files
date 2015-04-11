@@ -72,7 +72,7 @@ public final class RenameFragment extends FileCreationFragment {
             protected IOException doInBackground(Void... params) {
                 try {
                     Resource dst = getParent().resolve(getFilename());
-                    getResource().getResource().move(dst.getResource());
+                    getResource().move(dst);
                     return null;
                 } catch (IOException e) {
                     return e;
@@ -107,7 +107,7 @@ public final class RenameFragment extends FileCreationFragment {
                 @Override
                 public ResourceStatus loadInBackground() {
                     try {
-                        return getResource().getResource().readStatus(false);
+                        return getResource().readStatus(false);
                     } catch (IOException e) {
                         return null;
                     }

@@ -100,7 +100,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
                 tmp.createDir(name);
             }
             Resource child = resource.resolve(name);
-            ResourceStatus stat = child.getResource().readStatus(false);
+            ResourceStatus stat = child.readStatus(false);
             result.add(FileListItem.File.create(child, stat, stat));
         }
         return result;

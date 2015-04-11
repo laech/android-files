@@ -60,7 +60,7 @@ final class FileOpener implements Consumer<Resource> {
         @Override
         protected MediaType doInBackground(Void... params) {
             try {
-                return resource.getResource().detectMediaType();
+                return resource.detectMediaType();
             } catch (IOException e) {
                 log.warn(e);
                 return null;

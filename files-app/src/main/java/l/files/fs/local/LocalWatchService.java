@@ -3,12 +3,12 @@ package l.files.fs.local;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import l.files.fs.Path;
 import l.files.fs.Resource;
 import l.files.fs.UncheckedIOException;
 import l.files.fs.WatchService;
@@ -34,10 +34,10 @@ public class LocalWatchService implements WatchService, Closeable {
      * they don't change. WatchService should not allow them and their sub paths
      * to be watched.
      */
-    static final ImmutableSet<Path> IGNORED = ImmutableSet.<Path>of(
-            LocalPath.of("/sys"),
-            LocalPath.of("/proc"),
-            LocalPath.of("/dev")
+    static final ImmutableSet<Resource> IGNORED = ImmutableSet.<Resource>of(
+            LocalResource.create(new File("/sys")),
+            LocalResource.create(new File("/proc")),
+            LocalResource.create(new File("/dev"))
     );
 
     private static final LocalWatchService INSTANCE = new LocalWatchService(IGNORED) {
@@ -58,12 +58,12 @@ public class LocalWatchService implements WatchService, Closeable {
         return INSTANCE;
     }
 
-    private final Path[] ignored;
+    private final Resource[] ignored;
 
     private final Map<Listener, Closeable> observables = new HashMap<>();
 
-    LocalWatchService(Set<Path> ignored) {
-        this.ignored = ignored.toArray(new Path[ignored.size()]);
+    LocalWatchService(Set<Resource> ignored) {
+        this.ignored = ignored.toArray(new Resource[ignored.size()]);
     }
 
     @Override
@@ -99,8 +99,8 @@ public class LocalWatchService implements WatchService, Closeable {
 
     @Override
     public boolean isWatchable(Resource resource) {
-        for (Path unwatchable : ignored) {
-            if (resource.getPath().startsWith(unwatchable)) {
+        for (Resource unwatchable : ignored) {
+            if (resource.startsWith(unwatchable)) {
                 return false;
             }
         }
