@@ -98,15 +98,12 @@ public interface Resource extends Parcelable {
      * Creates this resource as a directory. Will fail if the directory already
      * exists.
      *
-     * @throws AccessException       does not have permission to create the
-     *                               directory at the given current
+     * @throws AccessException       does not have permission to create
      * @throws ExistsException       this resource already exists
-     * @throws LoopException         too many symbolic links were encountered in
-     *                               resolving path
+     * @throws LoopException         too many symbolic links were encountered
      * @throws PathTooLongException  path was too long
      * @throws NotExistException     a directory component in the path does not
-     * @throws NotDirectoryException a component used as a directory in the path
-     *                               is not a directory
+     * @throws NotDirectoryException a parent is not a directory
      * @throws IOException           other failures
      */
     void createDirectory() throws IOException;
@@ -123,17 +120,25 @@ public interface Resource extends Parcelable {
      *
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       the underlying resource already exits
-     *                               (doesn't necessary mean it's a file)
+     * @throws LoopException         too many symbolic links were encountered
      * @throws PathTooLongException  the path of this resource is too long
-     * @throws NotExistException     one of the parent resource does not exist
-     * @throws NotDirectoryException one of the parent resource in the path is
-     *                               not a directory
+     * @throws NotExistException     a parent resource does not exist
+     * @throws NotDirectoryException a parent resource is not a directory
+     * @throws IOException           other failures
      */
     void createFile() throws IOException;
 
     /**
      * Creates the underlying resource as a symbolic link to point to the given
      * location.
+     *
+     * @throws AccessException       does not have permission to create
+     * @throws ExistsException       the underlying resource already exists
+     * @throws LoopException         too many symbolic links were encountered
+     * @throws PathTooLongException  the path of this resource is too long
+     * @throws NotExistException     one of the parents does not exist
+     * @throws NotDirectoryException one of the parents is not a directory
+     * @throws IOException           other failures
      */
     void createSymbolicLink(Resource target) throws IOException;
 
@@ -146,12 +151,11 @@ public interface Resource extends Parcelable {
      * Reads the status of this resource.
      *
      * @throws AccessException       does not have permission to read status
-     * @throws LoopException         too many symbolic links encountered while
-     *                               traversing the path
+     * @throws LoopException         too many symbolic links encountered
      * @throws PathTooLongException  path is too long
-     * @throws NotExistException     one of the resource in the path does not
-     *                               exists
+     * @throws NotExistException     one of the parents does not exists
      * @throws NotDirectoryException one of the parents is not a directory
+     * @throws IOException           other failures
      */
     ResourceStatus readStatus(boolean followLink) throws IOException;
 

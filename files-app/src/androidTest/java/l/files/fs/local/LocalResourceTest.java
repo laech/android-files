@@ -71,6 +71,10 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateFile(PathTooLongException.class, createLongPath());
     }
 
+    public void test_createFile_LoopException() throws Exception {
+        expectOnCreateFile(LoopException.class, createLoop().resolve("a"));
+    }
+
     public void test_createFile_NotExistException() throws Exception {
         expectOnCreateFile(NotExistException.class, resource.resolve("a/b"));
     }
@@ -176,6 +180,60 @@ public final class LocalResourceTest extends TestCase {
             @Override
             public void run() throws Exception {
                 resource.createDirectories();
+            }
+        });
+    }
+
+    public void test_createSymbolicLink() throws Exception {
+        Resource link = resource.resolve("link");
+        link.createSymbolicLink(resource);
+        assertTrue(link.readStatus(false).isSymbolicLink());
+        assertEquals(resource, link.readSymbolicLink());
+    }
+
+    public void test_createSymbolicLink_AccessException() throws Exception {
+        assertTrue(directory.setWritable(false));
+        Resource link = resource.resolve("a");
+        expectOnCreateSymbolicLink(AccessException.class, link, resource);
+    }
+
+    public void test_createSymbolicLink_ExistsException() throws Exception {
+        Resource link = resource.resolve("a");
+        link.createFile();
+        expectOnCreateSymbolicLink(ExistsException.class, link, resource);
+    }
+
+    public void test_createSymbolicLink_LoopException() throws Exception {
+        Resource loop = createLoop();
+        Resource link = loop.resolve("a");
+        expectOnCreateSymbolicLink(LoopException.class, link, resource);
+    }
+
+    public void test_createSymbolicLink_PathTooLongException() throws Exception {
+        Resource link = createLongPath();
+        expectOnCreateSymbolicLink(PathTooLongException.class, link, resource);
+    }
+
+    public void test_createSymbolicLink_NotExistException() throws Exception {
+        Resource link = resource.resolve("a/b");
+        expectOnCreateSymbolicLink(NotExistException.class, link, resource);
+    }
+
+    public void test_createSymbolicLink_NotDirectoryException() throws Exception {
+        Resource parent = resource.resolve("parent");
+        Resource link = parent.resolve("link");
+        parent.createFile();
+        expectOnCreateSymbolicLink(NotDirectoryException.class, link, resource);
+    }
+
+    private void expectOnCreateSymbolicLink(
+            final Class<? extends Exception> clazz,
+            final Resource link,
+            final Resource target) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                link.createSymbolicLink(target);
             }
         });
     }
