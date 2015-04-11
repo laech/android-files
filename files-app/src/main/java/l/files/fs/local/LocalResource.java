@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import android.system.Os;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
@@ -22,6 +24,7 @@ import auto.parcel.AutoParcel;
 import l.files.fs.Resource;
 import l.files.fs.WatchService;
 
+import static android.system.OsConstants.S_IRWXU;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -239,14 +242,17 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void createDirectory() throws IOException {
-        if (!getFile().isDirectory() && !getFile().mkdir()) {
-            throw new IOException(); // TODO use native code to get errno
+        try {
+            // Same permission bits as java.io.File.mkdir() on Android
+            Os.mkdir(getFilePath(), S_IRWXU);
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getFilePath());
         }
     }
 
     @Override
     public void createDirectories() throws IOException {
-        if (exists()) {
+        if (readStatus(false).isDirectory()) {
             return;
         }
         LocalResource parent = getParent();

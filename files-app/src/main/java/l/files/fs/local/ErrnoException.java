@@ -1,10 +1,19 @@
 package l.files.fs.local;
 
+import android.system.OsConstants;
 import android.util.SparseArray;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
+
+import l.files.fs.AccessException;
+import l.files.fs.ExistsException;
+import l.files.fs.LoopException;
+import l.files.fs.NotDirectoryException;
+import l.files.fs.NotFoundException;
+import l.files.fs.PathTooLongException;
+import l.files.fs.ResourceException;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -189,4 +198,15 @@ final class ErrnoException extends Exception {
                 return new IOException(getMessage(), this);
         }
     }
+
+    static IOException toIOException(android.system.ErrnoException e, String path) {
+        if (e.errno == OsConstants.EACCES) return new AccessException(path, e);
+        if (e.errno == OsConstants.EEXIST) return new ExistsException(path, e);
+        if (e.errno == OsConstants.ELOOP) return new LoopException(path, e);
+        if (e.errno == OsConstants.ENAMETOOLONG) return new PathTooLongException(path, e);
+        if (e.errno == OsConstants.ENOENT) return new NotFoundException(path, e);
+        if (e.errno == OsConstants.ENOTDIR) return new NotDirectoryException(path, e);
+        return new ResourceException(path, e);
+    }
+
 }

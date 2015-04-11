@@ -97,6 +97,17 @@ public interface Resource extends Parcelable {
     /**
      * Creates this resource as a directory. Will fail if the directory already
      * exists.
+     *
+     * @throws AccessException       does not have permission to create the
+     *                               directory at the given current
+     * @throws ExistsException       this resource already exists
+     * @throws LoopException         too many symbolic links were encountered in
+     *                               resolving path
+     * @throws PathTooLongException  path was too long
+     * @throws NotFoundException     a directory component in the path does not
+     * @throws NotDirectoryException a component used as a directory in the path
+     *                               is not a directory
+     * @throws IOException           other failures
      */
     void createDirectory() throws IOException;
 
