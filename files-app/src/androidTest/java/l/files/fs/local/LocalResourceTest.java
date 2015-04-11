@@ -238,6 +238,44 @@ public final class LocalResourceTest extends TestCase {
         });
     }
 
+    public void test_readSymbolicLink_AccessException() throws Exception {
+        assertTrue(directory.setExecutable(false));
+        Resource link = resource.resolve("a");
+        expectOnReadSymbolicLink(AccessException.class, link);
+    }
+
+    public void test_readSymbolicLink_NotExistException() throws Exception {
+        Resource link = resource.resolve("a");
+        expectOnReadSymbolicLink(NotExistException.class, link);
+    }
+
+    public void test_readSymbolicLink_LoopException() throws Exception {
+        Resource loop = createLoop().resolve("a");
+        expectOnReadSymbolicLink(LoopException.class, loop);
+    }
+
+    public void test_readSymbolicLink_PathTooLongException() throws Exception {
+        expectOnReadSymbolicLink(PathTooLongException.class, createLongPath());
+    }
+
+    public void test_readSymbolicLink_NotDirectoryException() throws Exception {
+        Resource parent = resource.resolve("parent");
+        Resource link = parent.resolve("link");
+        parent.createFile();
+        expectOnReadSymbolicLink(NotDirectoryException.class, link);
+    }
+
+    private void expectOnReadSymbolicLink(
+            final Class<? extends Exception> clazz,
+            final Resource link) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                link.readSymbolicLink();
+            }
+        });
+    }
+
     public void test_readStatus_followLink() throws Exception {
         LocalResource child = resource.resolve("a");
         child.createSymbolicLink(resource);

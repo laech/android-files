@@ -144,6 +144,13 @@ public interface Resource extends Parcelable {
 
     /**
      * If this is a symbolic link, returns the target file.
+     *
+     * @throws AccessException       does not have permission to read
+     * @throws NotExistException     any resource in path does not exist
+     * @throws LoopException         too many symbolic links were encountered
+     * @throws PathTooLongException  the path of this resource is too long
+     * @throws NotDirectoryException one of the parents is not a directory
+     * @throws IOException           other failures
      */
     Resource readSymbolicLink() throws IOException;
 
