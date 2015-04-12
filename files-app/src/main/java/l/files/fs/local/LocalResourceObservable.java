@@ -331,6 +331,7 @@ final class LocalResourceObservable extends Native
     private native void observe(int fd);
 
     // Also called from native code
+    @SuppressWarnings("UnusedDeclaration")
     private void sleep() {
         try {
             Thread.sleep(200);
@@ -341,6 +342,7 @@ final class LocalResourceObservable extends Native
     }
 
     // Also called from native code
+    @SuppressWarnings("UnusedDeclaration")
     private void onEvent(int wd, int event, String child) {
         try {
             handleEvent(wd, event, child);
