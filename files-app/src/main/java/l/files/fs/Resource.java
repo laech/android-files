@@ -167,7 +167,11 @@ public interface Resource extends Parcelable {
     ResourceStatus readStatus(boolean followLink) throws IOException;
 
     /**
-     * Moves this resource tree to the given destination.
+     * Renames this resource tree to the given destination.
+     * <p/>
+     * If this resource is non directory and destination exists as non
+     * directory, destination will be replaced. If this resource is a directory
+     * and destination is an empty directory, it will be replaced.
      *
      * @throws AccessException       does not have permission to rename
      * @throws LoopException         too many symbolic links encountered
@@ -186,12 +190,18 @@ public interface Resource extends Parcelable {
      *                               of itself
      * @throws CrossDeviceException  attempt to move to a different device
      *                               (unsupported)
+     * @throws IOException           other failures
      */
     void renameTo(Resource dst) throws IOException;
 
     /**
-     * Deletes this resource. Will fail if this resource is a directory and not
-     * empty.
+     * Deletes this resource.
+     *
+     * @throws AccessException       does not have permission to delete
+     * @throws PathTooLongException  this or destination path is too long
+     * @throws NotExistException     a parent path does not exists
+     * @throws NotDirectoryException a parent path is not directory
+     * @throws NotEmptyException     this is a non empty directory
      */
     void delete() throws IOException;
 

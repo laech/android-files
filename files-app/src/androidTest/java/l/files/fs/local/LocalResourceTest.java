@@ -88,9 +88,7 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_createFile_NotDirectoryException() throws Exception {
-        Resource parent = resource.resolve("parent");
-        Resource child = parent.resolve("child");
-        parent.createFile();
+        Resource child = createChildWithNonDirectoryParent();
         expectOnCreateFile(NotDirectoryException.class, child);
     }
 
@@ -150,9 +148,7 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_createDirectory_NotDirectoryException() throws Exception {
-        Resource parent = resource.resolve("parent");
-        Resource child = parent.resolve("child");
-        parent.createFile();
+        Resource child = createChildWithNonDirectoryParent();
         expectOnCreateDirectory(NotDirectoryException.class, child);
     }
 
@@ -410,6 +406,14 @@ public final class LocalResourceTest extends TestCase {
         expectOnRenameTo(NotDirectoryException.class, src, dst);
     }
 
+    public void test_renameTo_symbolicLinkToExistingFileWillOverride() throws Exception {
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        src.createSymbolicLink(dst);
+        dst.createFile();
+        src.renameTo(dst);
+    }
+
     public void test_renameTo_AccessException() throws Exception {
         LocalResource src = resource.resolve("src");
         LocalResource dst = resource.resolve("dst");
@@ -471,6 +475,68 @@ public final class LocalResourceTest extends TestCase {
         });
     }
 
+    public void test_delete_symbolicLink() throws Exception {
+        Resource link = resource.resolve("link");
+        link.createSymbolicLink(resource);
+        assertTrue(link.exists());
+        link.delete();
+        assertFalse(link.exists());
+    }
+
+    public void test_delete_file() throws Exception {
+        Resource file = resource.resolve("file");
+        file.createFile();
+        assertTrue(file.exists());
+        file.delete();
+        assertFalse(file.exists());
+    }
+
+    public void test_delete_emptyDirectory() throws Exception {
+        Resource directory = resource.resolve("directory");
+        directory.createDirectory();
+        assertTrue(directory.exists());
+        directory.delete();
+        assertFalse(directory.exists());
+    }
+
+    public void test_delete_AccessException() throws Exception {
+        Resource file = resource.resolve("a");
+        file.createFile();
+        assertTrue(directory.setWritable(false));
+        expectOnDelete(AccessException.class, file);
+    }
+
+    public void test_delete_PathTooLongException() throws Exception {
+        Resource file = createLongPath();
+        expectOnDelete(PathTooLongException.class, file);
+    }
+
+    public void test_delete_NotExistException() throws Exception {
+        expectOnDelete(NotExistException.class, resource.resolve("a"));
+    }
+
+    public void test_delete_NotDirectoryException() throws Exception {
+        Resource child = createChildWithNonDirectoryParent();
+        expectOnDelete(NotDirectoryException.class, child);
+    }
+
+    public void test_delete_NotEmptyException() throws Exception {
+        resource.resolve("a").createDirectory();
+        expectOnDelete(NotEmptyException.class, resource);
+    }
+
+    private static void expectOnDelete(
+            final Class<? extends Exception> clazz,
+            final Resource resource) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.delete();
+            }
+        });
+    }
+
+
     private static void expect(Class<? extends Exception> clazz, Code code) throws Exception {
         try {
             code.run();
@@ -484,6 +550,13 @@ public final class LocalResourceTest extends TestCase {
 
     private static interface Code {
         void run() throws Exception;
+    }
+
+    private Resource createChildWithNonDirectoryParent() throws IOException {
+        Resource parent = resource.resolve("parent");
+        Resource child = parent.resolve("child");
+        parent.createFile();
+        return child;
     }
 
     /**
