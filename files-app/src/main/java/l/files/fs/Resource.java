@@ -47,10 +47,13 @@ public interface Resource extends Parcelable {
     /**
      * Returns a resource with the given parent replaced.
      * <p/>
-     * e.g. {@code Resource("/a/b").resolve(Resource("/a"), Resource("/c")) =
-     * Resource("/c/b")}
+     * e.g.
+     * <pre>
+     * Resource("/a/b").resolve(Resource("/a"), Resource("/c")) =
+     * Resource("/c/b")
+     * </pre>
      *
-     * @throws IllegalArgumentException if
+     * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
      */
     Resource resolveParent(Resource fromParent, Resource toParent);
 
@@ -73,6 +76,7 @@ public interface Resource extends Parcelable {
     /**
      * Returns the watch service for the underlying file system.
      */
+    @Deprecated
     WatchService getWatcher();
 
     // TODO replace WatchService
