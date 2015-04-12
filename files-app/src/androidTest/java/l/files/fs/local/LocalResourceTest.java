@@ -448,11 +448,26 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_renameTo_CrossDeviceException() throws Exception {
-        Resource src = LocalResource.create(new File("/storage/emulated/0/test-" + nanoTime()));
-        Resource dst = LocalResource.create(new File("/storage/emulated/legacy/test2-" + nanoTime()));
-        src.createFile();
+        /*
+         * This test assumes:
+         *
+         *  - /storage/emulated/0
+         *  - /storage/emulated/legacy
+         *
+         * exist on the devices and are mounted on different file systems.
+         *
+         * Meaning this test will fail if that's no true, such as when testing
+         * on the emulator.
+         */
+        String srcPath = "/storage/emulated/0/test-" + nanoTime();
+        String dstPath = "/storage/emulated/legacy/test2-" + nanoTime();
+        Resource src = LocalResource.create(new File(srcPath));
+        Resource dst = LocalResource.create(new File(dstPath));
         try {
+
+            src.createFile();
             expectOnRenameTo(CrossDeviceException.class, src, dst);
+
         } finally {
             if (src.exists()) {
                 src.delete();
@@ -536,8 +551,10 @@ public final class LocalResourceTest extends TestCase {
         });
     }
 
+    private static void expect(
+            Class<? extends Exception> clazz,
+            Code code) throws Exception {
 
-    private static void expect(Class<? extends Exception> clazz, Code code) throws Exception {
         try {
             code.run();
             fail();
@@ -546,6 +563,7 @@ public final class LocalResourceTest extends TestCase {
                 throw e;
             }
         }
+
     }
 
     private static interface Code {
