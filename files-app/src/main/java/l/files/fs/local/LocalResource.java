@@ -305,12 +305,13 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void move(Resource dst) throws IOException {
+    public void renameTo(Resource dst) throws IOException {
+        String srcPath = getPath();
         String dstPath = ((LocalResource) dst).getPath();
         try {
-            Stdio.rename(getPath(), dstPath);
-        } catch (ErrnoException e) {
-            throw e.toIOException();
+            Os.rename(srcPath, dstPath);
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, srcPath, dstPath);
         }
     }
 

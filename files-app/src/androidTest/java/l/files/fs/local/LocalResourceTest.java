@@ -9,13 +9,21 @@ import java.io.IOException;
 
 import l.files.common.testing.TempDir;
 import l.files.fs.AccessException;
+import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
+import l.files.fs.InvalidException;
+import l.files.fs.IsDirectoryException;
 import l.files.fs.LoopException;
 import l.files.fs.NotDirectoryException;
+import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
 import l.files.fs.PathTooLongException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+
+import static com.google.common.io.Files.write;
+import static java.lang.System.nanoTime;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public final class LocalResourceTest extends TestCase {
 
@@ -86,7 +94,7 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateFile(NotDirectoryException.class, child);
     }
 
-    private void expectOnCreateFile(
+    private static void expectOnCreateFile(
             final Class<? extends Exception> clazz,
             final Resource resource) throws Exception {
         expect(clazz, new Code() {
@@ -148,7 +156,7 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateDirectory(NotDirectoryException.class, child);
     }
 
-    private void expectOnCreateDirectory(
+    private static void expectOnCreateDirectory(
             final Class<? extends Exception> clazz,
             final Resource resource) throws Exception {
         expect(clazz, new Code() {
@@ -173,7 +181,7 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateDirectories(NotDirectoryException.class, child);
     }
 
-    private void expectOnCreateDirectories(
+    private static void expectOnCreateDirectories(
             final Class<? extends Exception> clazz,
             final Resource resource) throws Exception {
         expect(clazz, new Code() {
@@ -226,7 +234,7 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateSymbolicLink(NotDirectoryException.class, link, resource);
     }
 
-    private void expectOnCreateSymbolicLink(
+    private static void expectOnCreateSymbolicLink(
             final Class<? extends Exception> clazz,
             final Resource link,
             final Resource target) throws Exception {
@@ -265,7 +273,7 @@ public final class LocalResourceTest extends TestCase {
         expectOnReadSymbolicLink(NotDirectoryException.class, link);
     }
 
-    private void expectOnReadSymbolicLink(
+    private static void expectOnReadSymbolicLink(
             final Class<? extends Exception> clazz,
             final Resource link) throws Exception {
         expect(clazz, new Code() {
@@ -325,6 +333,159 @@ public final class LocalResourceTest extends TestCase {
         expectOnReadStatus(NotDirectoryException.class, child);
     }
 
+    private static void expectOnReadStatus(
+            final Class<? extends Exception> clazz,
+            final Resource resource) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.readStatus(false);
+            }
+        });
+    }
+
+    public void test_renameTo_fileToExistingFileWillOverride() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        write("src", src.getFile(), UTF_8);
+        write("dst", dst.getFile(), UTF_8);
+        src.renameTo(dst);
+        assertFalse(src.exists());
+        assertTrue(dst.exists());
+        assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
+    }
+
+    public void test_renameTo_fileToNonExistingFile() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        write("src", src.getFile(), UTF_8);
+        src.renameTo(dst);
+        assertFalse(src.exists());
+        assertTrue(dst.exists());
+        assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
+    }
+
+    public void test_renameTo_directoryToNonExistingDirectory() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        src.resolve("a").createDirectories();
+        src.renameTo(dst);
+        assertFalse(src.exists());
+        assertTrue(dst.exists());
+        assertTrue(dst.resolve("a").exists());
+    }
+
+    public void test_renameTo_directoryToExistingEmptyDirectoryWillOverride() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        dst.createDirectory();
+        src.resolve("a").createDirectories();
+        src.renameTo(dst);
+        assertFalse(src.exists());
+        assertTrue(dst.exists());
+        assertTrue(dst.resolve("a").exists());
+    }
+
+    public void test_renameTo_NotEmptyException() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        dst.resolve("a").createDirectories();
+        src.createDirectory();
+        expectOnRenameTo(NotEmptyException.class, src, dst);
+    }
+
+    public void test_renameTo_IsDirectoryException() throws Exception {
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        src.createFile();
+        dst.createDirectories();
+        expectOnRenameTo(IsDirectoryException.class, src, dst);
+    }
+
+    public void test_renameTo_NotDirectoryException() throws Exception {
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        src.createDirectory();
+        dst.createFile();
+        expectOnRenameTo(NotDirectoryException.class, src, dst);
+    }
+
+    public void test_renameTo_AccessException() throws Exception {
+        LocalResource src = resource.resolve("src");
+        LocalResource dst = resource.resolve("dst");
+        src.createFile();
+        dst.createDirectory();
+        assertTrue(dst.getFile().setWritable(false));
+        expectOnRenameTo(AccessException.class, src, dst.resolve("a"));
+    }
+
+    public void test_renameTo_LoopException() throws Exception {
+        Resource loop = createLoop();
+        expectOnRenameTo(LoopException.class, loop, loop.resolve("a"));
+    }
+
+    public void test_renameTo_PathTooLongException() throws Exception {
+        Resource child = createLongPath();
+        Resource dst = resource.resolve("c");
+        expectOnRenameTo(PathTooLongException.class, child, dst);
+    }
+
+    public void test_renameTo_NotExistException() throws Exception {
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        expectOnRenameTo(NotExistException.class, src, dst);
+    }
+
+    public void test_renameTo_InvalidException() throws Exception {
+        Resource parent = resource.resolve("parent");
+        Resource child = parent.resolve("child");
+        child.createDirectories();
+        expectOnRenameTo(InvalidException.class, parent, child);
+    }
+
+    public void test_renameTo_CrossDeviceException() throws Exception {
+        Resource src = LocalResource.create(new File("/storage/emulated/0/test-" + nanoTime()));
+        Resource dst = LocalResource.create(new File("/storage/emulated/legacy/test2-" + nanoTime()));
+        src.createFile();
+        try {
+            expectOnRenameTo(CrossDeviceException.class, src, dst);
+        } finally {
+            if (src.exists()) {
+                src.delete();
+            }
+            if (dst.exists()) {
+                dst.delete();
+            }
+        }
+    }
+
+    private static void expectOnRenameTo(
+            final Class<? extends Exception> clazz,
+            final Resource src,
+            final Resource dst) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                src.renameTo(dst);
+            }
+        });
+    }
+
+    private static void expect(Class<? extends Exception> clazz, Code code) throws Exception {
+        try {
+            code.run();
+            fail();
+        } catch (Exception e) {
+            if (!clazz.isInstance(e)) {
+                throw e;
+            }
+        }
+    }
+
+    private static interface Code {
+        void run() throws Exception;
+    }
+
     /**
      * Creates a loop and returns one of the looped resource.
      */
@@ -338,32 +499,6 @@ public final class LocalResourceTest extends TestCase {
 
     private Resource createLongPath() {
         return resource.resolve(Strings.repeat("a", 512));
-    }
-
-    private void expectOnReadStatus(
-            final Class<? extends Exception> clazz,
-            final Resource resource) throws Exception {
-        expect(clazz, new Code() {
-            @Override
-            public void run() throws Exception {
-                resource.readStatus(false);
-            }
-        });
-    }
-
-    private void expect(Class<? extends Exception> clazz, Code code) throws Exception {
-        try {
-            code.run();
-            fail();
-        } catch (Exception e) {
-            if (!clazz.isInstance(e)) {
-                throw e;
-            }
-        }
-    }
-
-    private static interface Code {
-        void run() throws Exception;
     }
 
 }

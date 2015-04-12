@@ -3,13 +3,19 @@ package l.files.fs.local;
 import android.system.OsConstants;
 import android.util.SparseArray;
 
+import com.google.common.base.Joiner;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 
 import l.files.fs.AccessException;
+import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
+import l.files.fs.InvalidException;
+import l.files.fs.IsDirectoryException;
 import l.files.fs.LoopException;
 import l.files.fs.NotDirectoryException;
+import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
 import l.files.fs.PathTooLongException;
 import l.files.fs.ResourceException;
@@ -187,24 +193,29 @@ final class ErrnoException extends Exception {
 
     @Deprecated
     IOException toIOException() {
-        return toIOException(this, null, errno);
+        return toIOException(this, errno);
     }
 
     IOException toIOException(String path) {
-        return toIOException(this, path, errno);
+        return toIOException(this, errno, path);
     }
 
-    static IOException toIOException(android.system.ErrnoException e, String path) {
-        return toIOException(e, path, e.errno);
+    static IOException toIOException(android.system.ErrnoException e, String... paths) {
+        return toIOException(e, e.errno, paths);
     }
 
-    static IOException toIOException(Exception cause, String path, int errno) {
+    static IOException toIOException(Exception cause, int errno, String... paths) {
+        String path = Joiner.on(", ").join(paths);
         if (errno == OsConstants.EACCES) return new AccessException(path, cause);
         if (errno == OsConstants.EEXIST) return new ExistsException(path, cause);
         if (errno == OsConstants.ELOOP) return new LoopException(path, cause);
         if (errno == OsConstants.ENAMETOOLONG) return new PathTooLongException(path, cause);
         if (errno == OsConstants.ENOENT) return new NotExistException(path, cause);
         if (errno == OsConstants.ENOTDIR) return new NotDirectoryException(path, cause);
+        if (errno == OsConstants.EINVAL) return new InvalidException(path, cause);
+        if (errno == OsConstants.EXDEV) return new CrossDeviceException(path, cause);
+        if (errno == OsConstants.ENOTEMPTY) return new NotEmptyException(path, cause);
+        if (errno == OsConstants.EISDIR) return new IsDirectoryException(path, cause);
         return new ResourceException(path, cause);
     }
 

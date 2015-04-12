@@ -168,8 +168,26 @@ public interface Resource extends Parcelable {
 
     /**
      * Moves this resource tree to the given destination.
+     *
+     * @throws AccessException       does not have permission to rename
+     * @throws LoopException         too many symbolic links encountered
+     * @throws PathTooLongException  this or destination path is too long
+     * @throws NotExistException     a component used as a directory in this
+     *                               path or destination path does not exist
+     * @throws NotDirectoryException a component used as a directory in this
+     *                               path or destination path is not a
+     *                               directory, or, this resource is a
+     *                               directory, and destination exists but is
+     *                               not a directory
+     * @throws NotEmptyException     destination is a non empty directory
+     * @throws IsDirectoryException  this resource is a not a directory and
+     *                               destination exists as a directory
+     * @throws InvalidException      attempt to make a directory a subdirectory
+     *                               of itself
+     * @throws CrossDeviceException  attempt to move to a different device
+     *                               (unsupported)
      */
-    void move(Resource dst) throws IOException;
+    void renameTo(Resource dst) throws IOException;
 
     /**
      * Deletes this resource. Will fail if this resource is a directory and not

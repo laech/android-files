@@ -72,7 +72,7 @@ public final class RenameFragment extends FileCreationFragment {
             protected IOException doInBackground(Void... params) {
                 try {
                     Resource dst = getParent().resolve(getFilename());
-                    getResource().move(dst);
+                    getResource().renameTo(dst);
                     return null;
                 } catch (IOException e) {
                     return e;
