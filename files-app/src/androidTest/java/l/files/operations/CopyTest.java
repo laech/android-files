@@ -12,8 +12,10 @@ import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.write;
+import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 public final class CopyTest extends PasteTest {
 
@@ -22,7 +24,7 @@ public final class CopyTest extends PasteTest {
         File srcDir = tmp().createDir("a");
         tmp().createFile("a/file");
 
-        Copy copy = create(asList(srcDir.getPath()), dstDir.getPath());
+        Copy copy = create(singletonList(srcDir.getPath()), dstDir.getPath());
         copy.execute();
 
         List<File> files = asList(
@@ -40,6 +42,24 @@ public final class CopyTest extends PasteTest {
             size += file.length();
         }
         return size;
+    }
+
+    public void testCopiesFileTimes() throws Exception {
+        Resource srcFile = LocalResource.create(tmp().createFile("a"));
+        Resource dstDir = LocalResource.create(tmp().createDir("dst"));
+        Resource dstFile = dstDir.resolve(srcFile.getName());
+
+        sleep(5);
+        copy(new File(srcFile.getUri()), new File(dstDir.getUri()));
+
+        assertEquals(
+                srcFile.readStatus(false).getAccessTime(),
+                dstFile.readStatus(false).getAccessTime()
+        );
+        assertEquals(
+                srcFile.readStatus(false).getModificationTime(),
+                dstFile.readStatus(false).getModificationTime()
+        );
     }
 
     public void testCopiesSymlink() throws Exception {
@@ -85,7 +105,7 @@ public final class CopyTest extends PasteTest {
     }
 
     private void copy(File src, File dstDir) throws IOException, InterruptedException {
-        create(asList(src.getPath()), dstDir.getPath()).execute();
+        create(singletonList(src.getPath()), dstDir.getPath()).execute();
     }
 
     @Override

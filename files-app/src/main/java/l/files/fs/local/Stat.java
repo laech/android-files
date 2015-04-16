@@ -21,28 +21,28 @@ abstract class Stat extends Native {
     public static final int S_ISGID = 0002000;
     public static final int S_ISVTX = 0001000;
 
-    public static final boolean S_ISLNK(int m) { return (((m) & S_IFMT) == S_IFLNK); }
-    public static final boolean S_ISREG(int m) { return (((m) & S_IFMT) == S_IFREG); }
-    public static final boolean S_ISDIR(int m) { return (((m) & S_IFMT) == S_IFDIR); }
-    public static final boolean S_ISCHR(int m) { return (((m) & S_IFMT) == S_IFCHR); }
-    public static final boolean S_ISBLK(int m) { return (((m) & S_IFMT) == S_IFBLK); }
-    public static final boolean S_ISFIFO(int m) { return (((m) & S_IFMT) == S_IFIFO); }
-    public static final boolean S_ISSOCK(int m) { return (((m) & S_IFMT) == S_IFSOCK); }
+    public static boolean S_ISLNK(int m) { return (((m) & S_IFMT) == S_IFLNK); }
+    public static boolean S_ISREG(int m) { return (((m) & S_IFMT) == S_IFREG); }
+    public static boolean S_ISDIR(int m) { return (((m) & S_IFMT) == S_IFDIR); }
+    public static boolean S_ISCHR(int m) { return (((m) & S_IFMT) == S_IFCHR); }
+    public static boolean S_ISBLK(int m) { return (((m) & S_IFMT) == S_IFBLK); }
+    public static boolean S_ISFIFO(int m) { return (((m) & S_IFMT) == S_IFIFO); }
+    public static boolean S_ISSOCK(int m) { return (((m) & S_IFMT) == S_IFSOCK); }
 
-    public static final int S_IRWXU =00700;
-    public static final int S_IRUSR =00400;
-    public static final int S_IWUSR =00200;
-    public static final int S_IXUSR =00100;
+    public static final int S_IRWXU = 00700;
+    public static final int S_IRUSR = 00400;
+    public static final int S_IWUSR = 00200;
+    public static final int S_IXUSR = 00100;
 
-    public static final int S_IRWXG =00070;
-    public static final int S_IRGRP =00040;
-    public static final int S_IWGRP =00020;
-    public static final int S_IXGRP =00010;
+    public static final int S_IRWXG = 00070;
+    public static final int S_IRGRP = 00040;
+    public static final int S_IWGRP = 00020;
+    public static final int S_IXGRP = 00010;
 
-    public static final int S_IRWXO =00007;
-    public static final int S_IROTH =00004;
-    public static final int S_IWOTH =00002;
-    public static final int S_IXOTH =00001;
+    public static final int S_IRWXO = 00007;
+    public static final int S_IROTH = 00004;
+    public static final int S_IWOTH = 00002;
+    public static final int S_IXOTH = 00001;
 
     Stat() {
     }
@@ -65,9 +65,15 @@ abstract class Stat extends Native {
 
     public abstract long getAtime();
 
+    public abstract int getAtimeNsec();
+
     public abstract long getMtime();
 
+    public abstract int getMtimeNsec();
+
     public abstract long getCtime();
+
+    public abstract int getCtimeNsec();
 
     public abstract long getBlksize();
 
@@ -82,8 +88,11 @@ abstract class Stat extends Native {
                               long rdev,
                               long size,
                               long atime,
+                              int atime_nsec,
                               long mtime,
+                              int mtime_nsec,
                               long ctime,
+                              int ctime_nsec,
                               long blksize,
                               long blocks) {
         return new AutoParcel_Stat(
@@ -96,8 +105,11 @@ abstract class Stat extends Native {
                 rdev,
                 size,
                 atime,
+                atime_nsec,
                 mtime,
+                mtime_nsec,
                 ctime,
+                ctime_nsec,
                 blksize,
                 blocks);
     }

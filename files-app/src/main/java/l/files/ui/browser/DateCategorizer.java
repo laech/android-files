@@ -12,6 +12,8 @@ import java.util.Map;
 
 import l.files.R;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 /**
  * Categories files by their last modified date.
  */
@@ -50,7 +52,7 @@ final class DateCategorizer implements Categorizer {
             return res.getString(R.string.__);
         }
 
-        long modified = file.getStat().getLastModifiedTime();
+        long modified = file.getStat().getModificationTime().to(MILLISECONDS);
         if (modified <= 0) {
             return res.getString(R.string.__);
         }

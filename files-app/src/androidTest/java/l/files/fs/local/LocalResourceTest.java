@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import com.google.common.base.Strings;
-
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -11,19 +9,21 @@ import l.files.common.testing.TempDir;
 import l.files.fs.AccessException;
 import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
+import l.files.fs.Instant;
 import l.files.fs.InvalidException;
 import l.files.fs.IsDirectoryException;
-import l.files.fs.LoopException;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
-import l.files.fs.PathTooLongException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
+import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
+import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static l.files.fs.Instant.EPOCH;
 
 public final class LocalResourceTest extends TestCase {
 
@@ -75,14 +75,6 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateFile(ExistsException.class, child);
     }
 
-    public void test_createFile_PathTooLongException() throws Exception {
-        expectOnCreateFile(PathTooLongException.class, createLongPath());
-    }
-
-    public void test_createFile_LoopException() throws Exception {
-        expectOnCreateFile(LoopException.class, createLoop().resolve("a"));
-    }
-
     public void test_createFile_NotExistException() throws Exception {
         expectOnCreateFile(NotExistException.class, resource.resolve("a/b"));
     }
@@ -130,16 +122,6 @@ public final class LocalResourceTest extends TestCase {
 
     public void test_createDirectory_ExistsException() throws Exception {
         expectOnCreateDirectory(ExistsException.class, resource);
-    }
-
-    public void test_createDirectory_LoopException() throws Exception {
-        Resource a = createLoop();
-        expectOnCreateDirectory(LoopException.class, a.resolve("c"));
-    }
-
-    public void test_createDirectory_PathTooLongException() throws Exception {
-        Resource dir = createLongPath();
-        expectOnCreateDirectory(PathTooLongException.class, dir);
     }
 
     public void test_createDirectory_NotFoundException() throws Exception {
@@ -207,17 +189,6 @@ public final class LocalResourceTest extends TestCase {
         expectOnCreateSymbolicLink(ExistsException.class, link, resource);
     }
 
-    public void test_createSymbolicLink_LoopException() throws Exception {
-        Resource loop = createLoop();
-        Resource link = loop.resolve("a");
-        expectOnCreateSymbolicLink(LoopException.class, link, resource);
-    }
-
-    public void test_createSymbolicLink_PathTooLongException() throws Exception {
-        Resource link = createLongPath();
-        expectOnCreateSymbolicLink(PathTooLongException.class, link, resource);
-    }
-
     public void test_createSymbolicLink_NotExistException() throws Exception {
         Resource link = resource.resolve("a/b");
         expectOnCreateSymbolicLink(NotExistException.class, link, resource);
@@ -251,15 +222,6 @@ public final class LocalResourceTest extends TestCase {
     public void test_readSymbolicLink_NotExistException() throws Exception {
         Resource link = resource.resolve("a");
         expectOnReadSymbolicLink(NotExistException.class, link);
-    }
-
-    public void test_readSymbolicLink_LoopException() throws Exception {
-        Resource loop = createLoop().resolve("a");
-        expectOnReadSymbolicLink(LoopException.class, loop);
-    }
-
-    public void test_readSymbolicLink_PathTooLongException() throws Exception {
-        expectOnReadSymbolicLink(PathTooLongException.class, createLongPath());
     }
 
     public void test_readSymbolicLink_NotDirectoryException() throws Exception {
@@ -305,16 +267,6 @@ public final class LocalResourceTest extends TestCase {
         assertTrue(directory.setReadable(false));
         assertTrue(directory.setExecutable(false));
         expectOnReadStatus(AccessException.class, child);
-    }
-
-    public void test_readStatus_LoopException() throws Exception {
-        Resource a = createLoop();
-        expectOnReadStatus(LoopException.class, a.resolve("c"));
-    }
-
-    public void test_readStatus_PathTooLongException() throws Exception {
-        Resource child = createLongPath();
-        expectOnReadStatus(PathTooLongException.class, child);
     }
 
     public void test_readStatus_NotExistException() throws Exception {
@@ -423,17 +375,6 @@ public final class LocalResourceTest extends TestCase {
         expectOnRenameTo(AccessException.class, src, dst.resolve("a"));
     }
 
-    public void test_renameTo_LoopException() throws Exception {
-        Resource loop = createLoop();
-        expectOnRenameTo(LoopException.class, loop, loop.resolve("a"));
-    }
-
-    public void test_renameTo_PathTooLongException() throws Exception {
-        Resource child = createLongPath();
-        Resource dst = resource.resolve("c");
-        expectOnRenameTo(PathTooLongException.class, child, dst);
-    }
-
     public void test_renameTo_NotExistException() throws Exception {
         Resource src = resource.resolve("src");
         Resource dst = resource.resolve("dst");
@@ -521,11 +462,6 @@ public final class LocalResourceTest extends TestCase {
         expectOnDelete(AccessException.class, file);
     }
 
-    public void test_delete_PathTooLongException() throws Exception {
-        Resource file = createLongPath();
-        expectOnDelete(PathTooLongException.class, file);
-    }
-
     public void test_delete_NotExistException() throws Exception {
         expectOnDelete(NotExistException.class, resource.resolve("a"));
     }
@@ -551,6 +487,112 @@ public final class LocalResourceTest extends TestCase {
         });
     }
 
+    public void test_setModificationTime() throws Exception {
+        Instant old = getModificationTime(resource);
+        Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
+        resource.setModificationTime(expect);
+        Instant actual = getModificationTime(resource);
+        assertEquals(expect, actual);
+    }
+
+    public void test_setModificationTime_doesNotAffectAccessTime() throws Exception {
+        Instant atime = getAccessTime(resource);
+        Instant mtime = Instant.of(1, 2);
+        sleep(3);
+        resource.setModificationTime(mtime);
+        assertNotEqual(atime, mtime);
+        assertEquals(mtime, getModificationTime(resource));
+        assertEquals(atime, getAccessTime(resource));
+    }
+
+    public void test_setModificationTime_doesNotAffectSymbolicLinkTarget() throws Exception {
+        Resource link = resource.resolve("link");
+        link.createSymbolicLink(resource);
+
+        Instant targetTime = getModificationTime(resource);
+        Instant linkTime = Instant.of(123, 456);
+
+        link.setModificationTime(linkTime);
+
+        assertEquals(linkTime, getModificationTime(link));
+        assertEquals(targetTime, getModificationTime(resource));
+        assertNotEqual(targetTime, linkTime);
+    }
+
+    public void test_setModificationTime_NotExistException() throws Exception {
+        Resource doesNotExist = resource.resolve("doesNotExist");
+        expectOnSetModificationTime(NotExistException.class, doesNotExist, EPOCH);
+    }
+
+    private Instant getModificationTime(Resource resource) throws IOException {
+        return resource.readStatus(false).getModificationTime();
+    }
+
+    private static void expectOnSetModificationTime(
+            final Class<? extends Exception> clazz,
+            final Resource resource,
+            final Instant instant) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.setModificationTime(instant);
+            }
+        });
+    }
+
+    public void test_setAccessTime() throws Exception {
+        Instant old = getAccessTime(resource);
+        Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
+        resource.setAccessTime(expect);
+        Instant actual = getAccessTime(resource);
+        assertEquals(expect, actual);
+    }
+
+    public void test_setAccessTime_doesNotAffectModificationTime() throws Exception {
+        Instant mtime = getModificationTime(resource);
+        Instant atime = Instant.of(1, 2);
+        sleep(3);
+        resource.setAccessTime(atime);
+        assertNotEqual(mtime, atime);
+        assertEquals(atime, getAccessTime(resource));
+        assertEquals(mtime, getModificationTime(resource));
+    }
+
+    public void test_setAccessTime_doesNotAffectSymbolicLinkTarget() throws Exception {
+        Resource link = resource.resolve("link");
+        link.createSymbolicLink(resource);
+
+        Instant targetTime = getAccessTime(resource);
+        Instant linkTime = Instant.of(123, 456);
+
+        link.setAccessTime(linkTime);
+
+        assertEquals(linkTime, getAccessTime(link));
+        assertEquals(targetTime, getAccessTime(resource));
+        assertNotEqual(targetTime, linkTime);
+    }
+
+    public void test_setAccessTime_NotExistException() throws Exception {
+        Resource doesNotExist = resource.resolve("doesNotExist");
+        expectOnSetAccessTime(NotExistException.class, doesNotExist, EPOCH);
+    }
+
+    private Instant getAccessTime(Resource resource) throws IOException {
+        return resource.readStatus(false).getAccessTime();
+    }
+
+    private static void expectOnSetAccessTime(
+            final Class<? extends Exception> clazz,
+            final Resource resource,
+            final Instant instant) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.setAccessTime(instant);
+            }
+        });
+    }
+
     private static void expect(
             Class<? extends Exception> clazz,
             Code code) throws Exception {
@@ -566,7 +608,7 @@ public final class LocalResourceTest extends TestCase {
 
     }
 
-    private static interface Code {
+    private interface Code {
         void run() throws Exception;
     }
 
@@ -575,21 +617,6 @@ public final class LocalResourceTest extends TestCase {
         Resource child = parent.resolve("child");
         parent.createFile();
         return child;
-    }
-
-    /**
-     * Creates a loop and returns one of the looped resource.
-     */
-    private Resource createLoop() throws IOException {
-        Resource a = resource.resolve("a");
-        Resource b = resource.resolve("b");
-        a.createSymbolicLink(b);
-        b.createSymbolicLink(a);
-        return a;
-    }
-
-    private Resource createLongPath() {
-        return resource.resolve(Strings.repeat("a", 512));
     }
 
 }

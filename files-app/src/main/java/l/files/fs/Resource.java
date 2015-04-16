@@ -15,6 +15,9 @@ import javax.annotation.Nullable;
 /**
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
+ * <p/>
+ * If the underlying resource is a symbolic link, all operations will happen on
+ * the symbolic link, not the link target resource.
  */
 public interface Resource extends Parcelable {
 
@@ -104,10 +107,8 @@ public interface Resource extends Parcelable {
      *
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       this resource already exists
-     * @throws LoopException         too many symbolic links were encountered
-     * @throws PathTooLongException  path was too long
      * @throws NotExistException     a directory component in the path does not
-     * @throws NotDirectoryException a parent is not a directory
+     * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
     void createDirectory() throws IOException;
@@ -124,10 +125,8 @@ public interface Resource extends Parcelable {
      *
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       the underlying resource already exits
-     * @throws LoopException         too many symbolic links were encountered
-     * @throws PathTooLongException  the path of this resource is too long
-     * @throws NotExistException     a parent resource does not exist
-     * @throws NotDirectoryException a parent resource is not a directory
+     * @throws NotExistException     the parent resource does not exist
+     * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
     void createFile() throws IOException;
@@ -138,10 +137,8 @@ public interface Resource extends Parcelable {
      *
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       the underlying resource already exists
-     * @throws LoopException         too many symbolic links were encountered
-     * @throws PathTooLongException  the path of this resource is too long
-     * @throws NotExistException     one of the parents does not exist
-     * @throws NotDirectoryException one of the parents is not a directory
+     * @throws NotExistException     this resource does not exist
+     * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
     void createSymbolicLink(Resource target) throws IOException;
@@ -150,10 +147,8 @@ public interface Resource extends Parcelable {
      * If this is a symbolic link, returns the target file.
      *
      * @throws AccessException       does not have permission to read
-     * @throws NotExistException     any resource in path does not exist
-     * @throws LoopException         too many symbolic links were encountered
-     * @throws PathTooLongException  the path of this resource is too long
-     * @throws NotDirectoryException one of the parents is not a directory
+     * @throws NotExistException     this resource does not exist
+     * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
     Resource readSymbolicLink() throws IOException;
@@ -161,12 +156,9 @@ public interface Resource extends Parcelable {
     /**
      * Reads the status of this resource.
      *
-     * @throws AccessException       does not have permission to read status
-     * @throws LoopException         too many symbolic links encountered
-     * @throws PathTooLongException  path is too long
-     * @throws NotExistException     one of the parents does not exists
-     * @throws NotDirectoryException one of the parents is not a directory
-     * @throws IOException           other failures
+     * @throws AccessException   does not have permission to read status
+     * @throws NotExistException this resource does not exist
+     * @throws IOException       other failures
      */
     ResourceStatus readStatus(boolean followLink) throws IOException;
 
@@ -177,39 +169,47 @@ public interface Resource extends Parcelable {
      * directory, destination will be replaced. If this resource is a directory
      * and destination is an empty directory, it will be replaced.
      *
-     * @throws AccessException       does not have permission to rename
-     * @throws LoopException         too many symbolic links encountered
-     * @throws PathTooLongException  this or destination path is too long
-     * @throws NotExistException     a component used as a directory in this
-     *                               path or destination path does not exist
-     * @throws NotDirectoryException a component used as a directory in this
-     *                               path or destination path is not a
-     *                               directory, or, this resource is a
-     *                               directory, and destination exists but is
-     *                               not a directory
-     * @throws NotEmptyException     destination is a non empty directory
-     * @throws IsDirectoryException  this resource is a not a directory and
-     *                               destination exists as a directory
-     * @throws InvalidException      attempt to make a directory a subdirectory
-     *                               of itself
-     * @throws CrossDeviceException  attempt to move to a different device
-     *                               (unsupported)
-     * @throws IOException           other failures
+     * @throws AccessException      does not have permission to rename
+     * @throws NotExistException    this resource or the parent of the
+     *                              destination does not exist
+     * @throws NotEmptyException    destination is a non empty directory
+     * @throws IsDirectoryException this resource is a not a directory and
+     *                              destination exists as a directory
+     * @throws InvalidException     attempt to make a directory a subdirectory
+     *                              of itself
+     * @throws CrossDeviceException attempt to move to a different device
+     *                              (unsupported)
+     * @throws IOException          other failures
      */
     void renameTo(Resource dst) throws IOException;
 
     /**
      * Deletes this resource.
      *
-     * @throws AccessException       does not have permission to delete
-     * @throws PathTooLongException  this or destination path is too long
-     * @throws NotExistException     a parent path does not exists
-     * @throws NotDirectoryException a parent path is not directory
-     * @throws NotEmptyException     this is a non empty directory
+     * @throws AccessException   does not have permission to delete
+     * @throws NotExistException this resource does not exist
+     * @throws NotEmptyException this is a non empty directory
+     * @throws IOException       other failures
      */
     void delete() throws IOException;
 
-    void setLastModifiedTime(long time) throws IOException;
+    /**
+     * Updates the access time for this resource.
+     *
+     * @throws AccessException   does not have permission to update
+     * @throws NotExistException this resource does not exist
+     * @throws IOException       other failures
+     */
+    void setAccessTime(Instant instant) throws IOException;
+
+    /**
+     * Updates the modification time for this resource.
+     *
+     * @throws AccessException   does not have permission to update
+     * @throws NotExistException this resource does not exist
+     * @throws IOException       other failures
+     */
+    void setModificationTime(Instant instant) throws IOException;
 
     /**
      * Detects the media type of the underlying file by reading it's content.

@@ -1,5 +1,6 @@
 package l.files.ui.browser;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
 import java.text.SimpleDateFormat;
@@ -8,6 +9,7 @@ import java.util.GregorianCalendar;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
+import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
@@ -15,6 +17,7 @@ import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -84,6 +87,7 @@ public final class DateCategorizerTest extends BaseTest {
         assertEquals(formatMonth(month2), categorizer.get(res, mockStat(month2)));
     }
 
+    @SuppressLint("SimpleDateFormat")
     private String formatMonth(Calendar calendar) {
         return new SimpleDateFormat("MMMM").format(calendar.getTime());
     }
@@ -118,7 +122,9 @@ public final class DateCategorizerTest extends BaseTest {
 
     private FileListItem.File mockStat(long time) {
         ResourceStatus stat = mock(ResourceStatus.class);
-        given(stat.getLastModifiedTime()).willReturn(time);
+        long seconds = MILLISECONDS.toSeconds(time);
+        int nanos = (int) MILLISECONDS.toNanos(time);
+        given(stat.getModificationTime()).willReturn(Instant.of(seconds, nanos));
         return FileListItem.File.create(mock(Resource.class), stat, stat);
     }
 

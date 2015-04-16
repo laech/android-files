@@ -13,11 +13,9 @@ import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
 import l.files.fs.InvalidException;
 import l.files.fs.IsDirectoryException;
-import l.files.fs.LoopException;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
-import l.files.fs.PathTooLongException;
 import l.files.fs.ResourceException;
 
 import static java.lang.reflect.Modifier.isPublic;
@@ -196,8 +194,8 @@ final class ErrnoException extends Exception {
         return toIOException(this, errno);
     }
 
-    IOException toIOException(String path) {
-        return toIOException(this, errno, path);
+    IOException toIOException(String... paths) {
+        return toIOException(this, errno, paths);
     }
 
     static IOException toIOException(android.system.ErrnoException e, String... paths) {
@@ -208,8 +206,6 @@ final class ErrnoException extends Exception {
         String path = Joiner.on(", ").join(paths);
         if (errno == OsConstants.EACCES) return new AccessException(path, cause);
         if (errno == OsConstants.EEXIST) return new ExistsException(path, cause);
-        if (errno == OsConstants.ELOOP) return new LoopException(path, cause);
-        if (errno == OsConstants.ENAMETOOLONG) return new PathTooLongException(path, cause);
         if (errno == OsConstants.ENOENT) return new NotExistException(path, cause);
         if (errno == OsConstants.ENOTDIR) return new NotDirectoryException(path, cause);
         if (errno == OsConstants.EINVAL) return new InvalidException(path, cause);

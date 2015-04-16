@@ -5,6 +5,7 @@ import com.google.common.net.MediaType;
 import java.io.IOException;
 
 import auto.parcel.AutoParcel;
+import l.files.fs.Instant;
 import l.files.fs.ResourceStatus;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
@@ -12,26 +13,11 @@ import static com.google.common.net.MediaType.OCTET_STREAM;
 @AutoParcel
 public abstract class LocalResourceStatus implements ResourceStatus {
 
-    private final Lazy<Boolean> readable = new Lazy<Boolean>() {
-        @Override
-        protected Boolean doGet() {
-            return access(Unistd.R_OK);
-        }
-    };
-
-    private final Lazy<Boolean> writable = new Lazy<Boolean>() {
-        @Override
-        protected Boolean doGet() {
-            return access(Unistd.W_OK);
-        }
-    };
-
-    private final Lazy<Boolean> executable = new Lazy<Boolean>() {
-        @Override
-        protected Boolean doGet() {
-            return access(Unistd.X_OK);
-        }
-    };
+    private Boolean readable;
+    private Boolean writable;
+    private Boolean executable;
+    private Instant atime;
+    private Instant mtime;
 
     @Override
     public abstract LocalResource getResource();
@@ -49,17 +35,26 @@ public abstract class LocalResourceStatus implements ResourceStatus {
 
     @Override
     public boolean isReadable() {
-        return readable.get();
+        if (readable == null) {
+            readable = access(Unistd.R_OK);
+        }
+        return readable;
     }
 
     @Override
     public boolean isWritable() {
-        return writable.get();
+        if (writable == null) {
+            writable = access(Unistd.W_OK);
+        }
+        return writable;
     }
 
     @Override
     public boolean isExecutable() {
-        return executable.get();
+        if (executable == null) {
+            executable = access(Unistd.X_OK);
+        }
+        return executable;
     }
 
     private boolean access(int mode) {
@@ -72,8 +67,19 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     }
 
     @Override
-    public long getLastModifiedTime() {
-        return getStat().getMtime() * 1000;
+    public Instant getAccessTime() {
+        if (atime == null) {
+            atime = Instant.of(getStat().getAtime(), getStat().getAtimeNsec());
+        }
+        return atime;
+    }
+
+    @Override
+    public Instant getModificationTime() {
+        if (mtime == null) {
+            mtime = Instant.of(getStat().getMtime(), getStat().getMtimeNsec());
+        }
+        return mtime;
     }
 
     @Override

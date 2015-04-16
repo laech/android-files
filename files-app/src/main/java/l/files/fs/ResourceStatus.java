@@ -22,7 +22,9 @@ public interface ResourceStatus {
 
     boolean isExecutable();
 
-    long getLastModifiedTime();
+    Instant getAccessTime();
+
+    Instant getModificationTime();
 
     MediaType getBasicMediaType();
 

@@ -22,6 +22,7 @@ import java.util.Iterator;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
+import l.files.fs.Instant;
 import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.WatchService;
@@ -38,7 +39,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 @AutoParcel
-public abstract class LocalResource implements Resource {
+public abstract class LocalResource extends Native implements Resource {
 
     LocalResource() {
     }
@@ -121,7 +122,6 @@ public abstract class LocalResource implements Resource {
     public LocalResource resolve(String other) {
         return create(new File(getFile(), other));
     }
-
 
     @Override
     public LocalResource resolveParent(Resource fromParent, Resource toParent) {
@@ -325,11 +325,28 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void setLastModifiedTime(long time) throws IOException {
-        if (!getFile().setLastModified(time)) {
-            throw new IOException(); // TODO use native code to get errno
+    public void setAccessTime(Instant instant) throws IOException {
+        try {
+            setAccessTime(getPath(), instant.getSeconds(), instant.getNanos());
+        } catch (ErrnoException e) {
+            throw e.toIOException(getPath());
         }
     }
+
+    private static native void setAccessTime(String path, long seconds, int nanos)
+            throws ErrnoException;
+
+    @Override
+    public void setModificationTime(Instant instant) throws IOException {
+        try {
+            setModificationTime(getPath(), instant.getSeconds(), instant.getNanos());
+        } catch (ErrnoException e) {
+            throw e.toIOException(getPath());
+        }
+    }
+
+    private static native void setModificationTime(String path, long seconds, int nanos)
+            throws ErrnoException;
 
     @Override
     public MediaType detectMediaType() throws IOException {

@@ -9,7 +9,7 @@ static jmethodID stat_create;
 
 void Java_l_files_fs_local_Stat_init(JNIEnv *env, jclass clazz) {
   stat_create = (*env)->GetStaticMethodID(env, clazz, "create",
-      "(JJIJIIJJJJJJJ)Ll/files/fs/local/Stat;");
+      "(JJIJIIJJJIJIJIJJ)Ll/files/fs/local/Stat;");
 }
 
 jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
@@ -39,8 +39,11 @@ jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
       (jlong) sb.st_rdev,
       (jlong) sb.st_size,
       (jlong) sb.st_atime,
+      (jint)  sb.st_atime_nsec,
       (jlong) sb.st_mtime,
+      (jint)  sb.st_mtime_nsec,
       (jlong) sb.st_ctime,
+      (jint)  sb.st_ctime_nsec,
       (jlong) sb.st_blksize,
       (jlong) sb.st_blocks);
 }

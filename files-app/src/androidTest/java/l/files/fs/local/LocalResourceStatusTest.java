@@ -1,5 +1,8 @@
 package l.files.fs.local;
 
+import android.system.Os;
+import android.system.StructStat;
+
 import java.io.File;
 
 import l.files.common.testing.FileBaseTest;
@@ -43,9 +46,16 @@ public final class LocalResourceStatusTest extends FileBaseTest {
         assertEquals(lstat(LocalResource.create(f).getFile().getPath()).getDev(), stat(LocalResource.create(f), false).getDevice());
     }
 
-    public void testLastModifiedTime() throws Exception {
-        LocalResourceStatus file = stat(LocalResource.create(tmp().get()), false);
-        assertEquals(tmp().get().lastModified(), file.getLastModifiedTime());
+    public void testModificationTime() throws Exception {
+        LocalResourceStatus actual = stat(LocalResource.create(tmp().get()), false);
+        StructStat expected = Os.stat(tmp().get().getPath());
+        assertEquals(expected.st_mtime, actual.getModificationTime().getSeconds());
+    }
+
+    public void testAccessTime() throws Exception {
+        LocalResourceStatus actual = stat(LocalResource.create(tmp().get()), false);
+        StructStat expected = Os.stat(tmp().get().getPath());
+        assertEquals(expected.st_atime, actual.getModificationTime().getSeconds());
     }
 
     public void testReadable() throws Exception {

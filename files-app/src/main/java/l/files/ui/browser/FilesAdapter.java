@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import l.files.R;
+import l.files.fs.Instant;
 import l.files.fs.ResourceStatus;
 import l.files.fs.local.LocalResourceStatus;
 import l.files.ui.StableAdapter;
@@ -34,6 +35,8 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.fs.Instant.EPOCH;
 import static l.files.ui.FilesApp.getBitmapCache;
 import static l.files.ui.IconFonts.getBackgroundResourceForFileMediaType;
 import static l.files.ui.IconFonts.getDefaultBackgroundResource;
@@ -127,18 +130,19 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         return new Function<ResourceStatus, CharSequence>() {
             @Override
             public CharSequence apply(ResourceStatus file) {
-                long time = file.getLastModifiedTime();
-                if (time == 0) {
+                Instant instant = file.getModificationTime();
+                if (instant.equals(EPOCH)) {
                     return context.getString(R.string.__);
                 }
-                date.setTime(time);
+                long millis = instant.to(MILLISECONDS);
+                date.setTime(millis);
                 t1.setToNow();
-                t2.set(time);
+                t2.set(millis);
                 if (t1.year == t2.year) {
                     if (t1.yearDay == t2.yearDay) {
                         return timeFormat.format(date);
                     } else {
-                        return formatDateTime(context, time, flags);
+                        return formatDateTime(context, millis, flags);
                     }
                 }
                 return dateFormat.format(date);

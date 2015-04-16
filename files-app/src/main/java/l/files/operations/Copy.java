@@ -76,7 +76,7 @@ final class Copy extends Paste {
             dst.createSymbolicLink(src.getResource().readSymbolicLink());
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
-            setLastModifiedDate(src, dst);
+            setTimes(src, dst);
         } catch (IOException e) {
             listener.onFailure(src.getResource(), e);
         }
@@ -87,7 +87,7 @@ final class Copy extends Paste {
             dst.createDirectory();
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
-            setLastModifiedDate(src, dst);
+            setTimes(src, dst);
         } catch (IOException e) {
             listener.onFailure(src.getResource(), e);
         }
@@ -123,24 +123,19 @@ final class Copy extends Paste {
             }
         }
 
-        setLastModifiedDate(src, dst);
+        setTimes(src, dst);
     }
 
-    private void setLastModifiedDate(ResourceStatus src, Resource dst) {
+    private void setTimes(ResourceStatus src, Resource dst) {
         try {
-            dst.setLastModifiedTime(src.getLastModifiedTime());
+            dst.setModificationTime(src.getModificationTime());
         } catch (IOException e) {
-            /*
-             * Setting last modified time currently fails, see:
-             *
-             * https://code.google.com/p/android/issues/detail?id=18624
-             * https://code.google.com/p/android/issues/detail?id=34691
-             * https://code.google.com/p/android/issues/detail?id=1992
-             * https://code.google.com/p/android/issues/detail?id=1699
-             * https://code.google.com/p/android/issues/detail?id=25460
-             * So comment this log out, since it always fails.
-             */
-            // logger.debug(e, "Failed to set last modified date on %s", dst);
+            logger.debug(e, "Failed to set modification time on %s", dst);
+        }
+        try {
+            dst.setAccessTime(src.getAccessTime());
+        } catch (IOException e) {
+            logger.debug(e, "Failed to set access time on %s", dst);
         }
     }
 
