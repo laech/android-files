@@ -203,6 +203,52 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
+    public void testDelete() throws Exception {
+        Resource file = dir1.resolve("file");
+        Resource dir = dir1.resolve("dir");
+        testDelete(file.createFile(), file);
+        testDelete(file.createFile(), dir1);
+        testDelete(dir.createDirectory(), dir);
+        testDelete(dir.createDirectory(), dir1);
+    }
+
+    private static void testDelete(
+            Resource target, Resource observable) throws Exception {
+        boolean file = target.readStatus(false).isRegularFile();
+        try (Recorder observer = observe(observable)) {
+            List<WatchEvent> expected = new ArrayList<>();
+            // If target is file and observing on the file itself, an IN_ATTRIB
+            // event is first sent in addition to IN_DELETE when deleting
+            if (file && target.equals(observable)) {
+                expected.add(event(MODIFY, target));
+            }
+            expected.add(event(DELETE, target));
+            observer.await(expected, newDelete(target));
+        }
+    }
+
+    public void testDeleteRecreateDirectoryWillBeObserved() throws Exception {
+        Resource dir = dir1.resolve("dir");
+        Resource file = dir.resolve("file");
+        try (Recorder observer = observe(dir1)) {
+            for (int i = 0; i < 10; i++) {
+                observer.await(CREATE, dir, newCreateDirectory(dir));
+                observer.await(
+                        asList(
+                                event(MODIFY, dir),
+                                event(MODIFY, dir),
+                                event(DELETE, dir)
+                        ),
+                        compose(
+                                newCreateFile(file),
+                                newDelete(file),
+                                newDelete(dir)
+                        )
+                );
+            }
+        }
+    }
+
     private static WatchEvent event(WatchEvent.Kind kind, Resource resource) {
         return WatchEvent.create(kind, resource);
     }
