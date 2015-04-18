@@ -61,11 +61,6 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
-    /**
-     * Directory moved into the monitored directory should be monitored for
-     * files deletions in that directory, as that will change the new
-     * directory's last modified date.
-     */
     public void testMoveDirectoryInThenDeleteFileFromIt() throws Exception {
         Resource dstDir = dir1.resolve("a");
         Resource srcDir = dir2.resolve("a").createDirectory();
@@ -76,11 +71,6 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
-    /**
-     * Directory moved into the monitored directory should be monitored for
-     * files moving into that directory, as that will change the new directory's
-     * last modified date.
-     */
     public void testMoveDirectoryInThenMoveFileIntoIt() throws Exception {
         Resource dir = dir1.resolve("a");
         Resource src1 = dir2.resolve("a").createDirectory();
@@ -91,11 +81,6 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
-    /**
-     * Directory moved into the monitored directory should be monitored for
-     * files moving out of the directory, as that will change the directory's
-     * last modified date.
-     */
     public void testMoveDirectoryInThenMoveFileOutOfIt() throws Exception {
         Resource src = dir2.resolve("a").createDirectory();
         Resource dir = dir1.resolve("a");
@@ -249,6 +234,138 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
+    public void testCreate() throws Exception {
+        Resource file = dir1.resolve("file");
+        Resource dir = dir1.resolve("dir");
+        Resource link = dir1.resolve("link");
+        testCreateFile(file, dir1);
+        testCreateDirectory(dir, dir1);
+        testCreateSymbolicLink(link, dir1, dir1);
+    }
+
+    private static void testCreateFile(
+            Resource target, Resource observable) throws Exception {
+        try (Recorder observer = observe(observable)) {
+            observer.await(CREATE, target, newCreateFile(target));
+        }
+    }
+
+    private static void testCreateDirectory(
+            Resource target, Resource observable) throws Exception {
+        try (Recorder observer = observe(observable)) {
+            observer.await(CREATE, target, newCreateDirectory(target));
+        }
+    }
+
+    private static void testCreateSymbolicLink(
+            Resource link,
+            Resource target,
+            Resource observable) throws Exception {
+        try (Recorder observer = observe(observable)) {
+            observer.await(CREATE, link, newCreateSymbolicLink(link, target));
+        }
+    }
+
+    public void testCreateDirectoryThenCreateItemsIntoIt() throws Exception {
+        Resource dir = dir1.resolve("dir");
+        try (Recorder observer = observe(dir1)) {
+            observer.await(CREATE, dir, newCreateDirectory(dir));
+            observer.await(
+                    asList(
+                            event(MODIFY, dir),
+                            event(MODIFY, dir),
+                            event(MODIFY, dir)
+                    ),
+                    compose(
+                            newCreateFile(dir.resolve("file")),
+                            newCreateDirectory(dir.resolve("dir2")),
+                            newCreateSymbolicLink(dir.resolve("link"), dir1)
+                    )
+            );
+        }
+    }
+
+    public void testCreateDirectoryThenDeleteItemsFromIt() throws Exception {
+        Resource parent = dir1.resolve("parent");
+        Resource file = parent.resolve("file");
+        Resource dir = parent.resolve("dir");
+        try (Recorder observer = observe(dir1)) {
+            observer.await(CREATE, parent, newCreateDirectory(parent));
+            observer.await(
+                    asList(
+                            event(MODIFY, parent),
+                            event(MODIFY, parent),
+                            event(MODIFY, parent),
+                            event(MODIFY, parent)
+                    ),
+                    compose(
+                            newCreateFile(file),
+                            newCreateDirectory(dir),
+                            newDelete(file),
+                            newDelete(dir)
+                    )
+            );
+        }
+    }
+
+    public void testCreateDirectoryThenMoveItemsOutOfIt() throws Exception {
+        Resource parent = dir1.resolve("parent");
+        Resource file = parent.resolve("file");
+        Resource dir = parent.resolve("dir");
+        try (Recorder observer = observe(dir1)) {
+            observer.await(CREATE, parent, newCreateDirectory(parent));
+            observer.await(
+                    asList(
+                            event(MODIFY, parent),
+                            event(MODIFY, parent),
+                            event(MODIFY, parent),
+                            event(MODIFY, parent)
+                    ),
+                    compose(
+                            newCreateFile(file),
+                            newCreateDirectory(dir),
+                            newMove(file, dir2.resolve("file")),
+                            newMove(dir, dir2.resolve("dir"))
+                    )
+            );
+        }
+    }
+
+    public void testCreateDirectoryThenMoveFileIntoIt() throws Exception {
+        Resource parent = dir1.resolve("parent");
+        Resource file = dir2.resolve("file").createFile();
+        Resource dir = dir2.resolve("dir").createDirectory();
+        try (Recorder observer = observe(dir1)) {
+            observer.await(CREATE, parent, newCreateDirectory(parent));
+            observer.await(
+                    asList(
+                            event(MODIFY, parent),
+                            event(MODIFY, parent)
+                    ),
+                    compose(
+                            newMove(file, parent.resolve("file")),
+                            newMove(dir, parent.resolve("dir"))
+                    )
+            );
+        }
+    }
+
+    public void testMultipleOperations() throws Exception {
+        Resource a = dir1.resolve("a");
+        Resource b = dir1.resolve("b");
+        Resource c = dir1.resolve("c");
+        Resource d = dir1.resolve("d");
+        try (Recorder observer = observe(dir1)) {
+            observer.await(CREATE, a, newCreateDirectory(a));
+            observer.await(CREATE, b, newCreateDirectory(b));
+            observer.await(MODIFY, a, newCreateFile(a.resolve("1")));
+            observer.await(CREATE, c, newMove(dir2.resolve("c").createFile(), c));
+            observer.await(DELETE, c, newMove(c, dir2.resolve("2")));
+            observer.await(DELETE, b, newDelete(b));
+            observer.await(CREATE, d, newCreateFile(d));
+        }
+    }
+
     private static WatchEvent event(WatchEvent.Kind kind, Resource resource) {
         return WatchEvent.create(kind, resource);
     }
@@ -300,6 +417,18 @@ public final class LocalResourceObservableTest extends TestCase {
             @Override
             public Void call() throws Exception {
                 directory.createDirectory();
+                return null;
+            }
+        };
+    }
+
+    private static Callable<Void> newCreateSymbolicLink(
+            final Resource link,
+            final Resource target) {
+        return new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                link.createSymbolicLink(target);
                 return null;
             }
         };
