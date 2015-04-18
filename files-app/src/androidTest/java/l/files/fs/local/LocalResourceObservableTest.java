@@ -43,9 +43,14 @@ public final class LocalResourceObservableTest extends TestCase {
         super.tearDown();
     }
 
-    public void testModifyFile() throws Exception {
+    public void testModifyFileObservingFromParent() throws Exception {
         Resource file = createFile(dir1.resolve("a"));
         await(dir1, appending(file, "abc"), event(MODIFY, file));
+    }
+
+    public void testModifyFileObservingFromSelf() throws Exception {
+        Resource file = createFile(dir1.resolve("a"));
+        await(file, appending(file, "abc"), event(MODIFY, file));
     }
 
     private static WatchEvent event(WatchEvent.Kind kind, Resource resource) {

@@ -395,7 +395,7 @@ final class LocalResourceObservable extends Native
                 onObserverStopped(wd);
 
             } else {
-                throw new RuntimeException(getEventName(event));
+                throw new RuntimeException(getEventName(event) + ": " + child);
             }
 
         } else {
@@ -460,7 +460,8 @@ final class LocalResourceObservable extends Native
     }
 
     private boolean isSelfModified(int mask, String child) {
-        return (child == null && 0 != (mask & IN_ATTRIB));
+        return (child == null && 0 != (mask & IN_ATTRIB)) ||
+                (child == null && 0 != (mask & IN_MODIFY));
     }
 
     private boolean isSelfDeleted(int mask, String child) {
