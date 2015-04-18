@@ -83,8 +83,8 @@ public interface Resource extends Parcelable {
     @Deprecated
     WatchService getWatcher();
 
-    // TODO replace WatchService
-    // ResourceSubscription observe(ResourceObserver observer) throws IOException;
+    // TODO
+    Closeable observe(WatchEvent.Listener observer) throws IOException;
 
     /**
      * Traverse this subtree. Accepts an error handler, if the handler does not
@@ -101,6 +101,8 @@ public interface Resource extends Parcelable {
     InputStream openInputStream() throws IOException;
 
     OutputStream openOutputStream() throws IOException;
+
+    OutputStream openOutputStream(boolean append) throws IOException;
 
     /**
      * Creates this resource as a directory. Will fail if the directory already
@@ -217,7 +219,7 @@ public interface Resource extends Parcelable {
      *
      * @throws AccessException   does not have permission to update
      * @throws NotExistException this resource does not exist
-     * @throws IOException other failures
+     * @throws IOException       other failures
      */
     void setPermissions(Set<Permission> permissions) throws IOException;
 

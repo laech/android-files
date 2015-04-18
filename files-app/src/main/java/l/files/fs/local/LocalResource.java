@@ -8,6 +8,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.TreeTraverser;
 import com.google.common.net.MediaType;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -30,6 +31,7 @@ import l.files.fs.Instant;
 import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.WatchEvent;
 import l.files.fs.WatchService;
 
 import static android.system.OsConstants.O_CREAT;
@@ -155,6 +157,11 @@ public abstract class LocalResource extends Native implements Resource {
     @Override
     public WatchService getWatcher() {
         return LocalWatchService.get();
+    }
+
+    @Override
+    public Closeable observe(WatchEvent.Listener observer) throws IOException {
+        return LocalResourceObservable.observe(this, observer);
     }
 
     @Override
@@ -298,6 +305,11 @@ public abstract class LocalResource extends Native implements Resource {
     @Override
     public OutputStream openOutputStream() throws IOException {
         return new FileOutputStream(getFile());
+    }
+
+    @Override
+    public OutputStream openOutputStream(boolean append) throws IOException {
+        return new FileOutputStream(getFile(), append);
     }
 
     @Override
