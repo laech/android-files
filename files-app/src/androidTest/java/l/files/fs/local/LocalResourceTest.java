@@ -29,6 +29,8 @@ import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.fs.Instant.EPOCH;
+import static l.files.fs.local.LocalResource.mapPermissions;
+import static l.files.fs.local.Stat.lstat;
 
 public final class LocalResourceTest extends TestCase {
 
@@ -65,6 +67,10 @@ public final class LocalResourceTest extends TestCase {
         assertEquals(expected.canRead(), status.isReadable());
         assertEquals(expected.canWrite(), status.isWritable());
         assertEquals(expected.canExecute(), status.isExecutable());
+        assertEquals(
+                mapPermissions(lstat(expected.getPath()).getMode()),
+                status.getPermissions()
+        );
     }
 
     public void test_createFile_AccessException() throws Exception {
@@ -115,6 +121,10 @@ public final class LocalResourceTest extends TestCase {
         assertEquals(expected.canRead(), status.isReadable());
         assertEquals(expected.canWrite(), status.isWritable());
         assertEquals(expected.canExecute(), status.isExecutable());
+        assertEquals(
+                mapPermissions(lstat(expected.getPath()).getMode()),
+                status.getPermissions()
+        );
     }
 
     public void test_createDirectory_AccessException() throws Exception {
