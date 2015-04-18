@@ -108,48 +108,54 @@ public interface Resource extends Parcelable {
      * Creates this resource as a directory. Will fail if the directory already
      * exists.
      *
+     * @return this
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       this resource already exists
      * @throws NotExistException     a directory component in the path does not
      * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
-    void createDirectory() throws IOException;
+    Resource createDirectory() throws IOException;
 
     /**
      * Creates this resource and any missing parents as directories. This will
      * throw the same exceptions as {@link #createDirectory()} except will not
      * error if already exists as a directory.
+     *
+     * @return this
      */
-    void createDirectories() throws IOException;
+    Resource createDirectories() throws IOException;
 
     /**
      * Creates the underlying resource as a file.
      *
+     * @return this
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       the underlying resource already exits
      * @throws NotExistException     the parent resource does not exist
      * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
-    void createFile() throws IOException;
+    Resource createFile() throws IOException;
 
     /**
      * Creates the underlying resource as a symbolic link to point to the given
      * location.
      *
+     * @return this
      * @throws AccessException       does not have permission to create
      * @throws ExistsException       the underlying resource already exists
      * @throws NotExistException     this resource does not exist
      * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures
      */
-    void createSymbolicLink(Resource target) throws IOException;
+    Resource createSymbolicLink(Resource target) throws IOException;
 
     /**
      * If this is a symbolic link, returns the target file.
      *
      * @throws AccessException       does not have permission to read
+     * @throws InvalidException      this is not a symbolic link
      * @throws NotExistException     this resource does not exist
      * @throws NotDirectoryException parent is not a directory
      * @throws IOException           other failures

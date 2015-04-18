@@ -313,20 +313,21 @@ public abstract class LocalResource extends Native implements Resource {
     }
 
     @Override
-    public void createDirectory() throws IOException {
+    public LocalResource createDirectory() throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
             Os.mkdir(getPath(), S_IRWXU);
         } catch (android.system.ErrnoException e) {
             throw ErrnoException.toIOException(e, getPath());
         }
+        return this;
     }
 
     @Override
-    public void createDirectories() throws IOException {
+    public LocalResource createDirectories() throws IOException {
         try {
             if (readStatus(false).isDirectory()) {
-                return;
+                return this;
             }
         } catch (NotExistException ignore) {
             // Ignore will create
@@ -335,10 +336,11 @@ public abstract class LocalResource extends Native implements Resource {
         assert parent != null;
         parent.createDirectories();
         createDirectory();
+        return this;
     }
 
     @Override
-    public void createFile() throws IOException {
+    public LocalResource createFile() throws IOException {
         // Same flags and mode as java.io.File.createNewFile() on Android
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
@@ -348,20 +350,22 @@ public abstract class LocalResource extends Native implements Resource {
         } catch (android.system.ErrnoException e) {
             throw ErrnoException.toIOException(e, getPath());
         }
+        return this;
     }
 
     @Override
-    public void createSymbolicLink(Resource target) throws IOException {
+    public LocalResource createSymbolicLink(Resource target) throws IOException {
         String targetPath = ((LocalResource) target).getPath();
         try {
             Unistd.symlink(targetPath, getPath());
         } catch (ErrnoException e) {
             throw e.toIOException(getPath(), targetPath);
         }
+        return this;
     }
 
     @Override
-    public Resource readSymbolicLink() throws IOException {
+    public LocalResource readSymbolicLink() throws IOException {
         try {
             String link = Unistd.readlink(getPath());
             return create(new File(link));

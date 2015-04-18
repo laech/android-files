@@ -232,6 +232,12 @@ public final class LocalResourceTest extends TestCase {
         expectOnReadSymbolicLink(AccessException.class, link);
     }
 
+    public void test_readSymbolicLink_InvalidException() throws Exception {
+        Resource notLink = resource.resolve("notLink");
+        notLink.createFile();
+        expectOnReadSymbolicLink(InvalidException.class, notLink);
+    }
+
     public void test_readSymbolicLink_NotExistException() throws Exception {
         Resource link = resource.resolve("a");
         expectOnReadSymbolicLink(NotExistException.class, link);
