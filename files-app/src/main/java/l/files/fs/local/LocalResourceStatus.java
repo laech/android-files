@@ -3,12 +3,15 @@ package l.files.fs.local;
 import com.google.common.net.MediaType;
 
 import java.io.IOException;
+import java.util.Set;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Instant;
+import l.files.fs.Permission;
 import l.files.fs.ResourceStatus;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.fs.local.LocalResource.mapPermissions;
 
 @AutoParcel
 public abstract class LocalResourceStatus implements ResourceStatus {
@@ -18,6 +21,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     private Boolean executable;
     private Instant atime;
     private Instant mtime;
+    private Set<Permission> permissions;
 
     @Override
     public abstract LocalResource getResource();
@@ -124,6 +128,14 @@ public abstract class LocalResourceStatus implements ResourceStatus {
 
     public boolean isCharacterDevice() {
         return Stat.S_ISCHR(getStat().getMode());
+    }
+
+    @Override
+    public Set<Permission> getPermissions() {
+        if (permissions == null) {
+            permissions = mapPermissions(getStat().getMode());
+        }
+        return permissions;
     }
 
     @Override

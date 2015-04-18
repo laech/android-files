@@ -4,6 +4,9 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 import l.files.common.testing.TempDir;
 import l.files.fs.AccessException;
@@ -15,10 +18,12 @@ import l.files.fs.IsDirectoryException;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
+import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
 import static android.test.MoreAsserts.assertNotEqual;
+import static com.google.common.collect.Sets.powerSet;
 import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
@@ -28,15 +33,13 @@ import static l.files.fs.Instant.EPOCH;
 public final class LocalResourceTest extends TestCase {
 
     private TempDir tmp;
-    private File directory;
     private LocalResource resource;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         tmp = TempDir.create();
-        directory = tmp.get();
-        resource = LocalResource.create(directory);
+        resource = LocalResource.create(tmp.get());
     }
 
     @Override
@@ -55,7 +58,7 @@ public final class LocalResourceTest extends TestCase {
         Resource actual = resource.resolve("a");
         actual.createFile();
 
-        File expected = new File(directory, "b");
+        File expected = new File(resource.getFile(), "b");
         assertTrue(expected.createNewFile());
 
         ResourceStatus status = actual.readStatus(false);
@@ -65,7 +68,7 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_createFile_AccessException() throws Exception {
-        assertTrue(directory.setWritable(false));
+        resource.setPermissions(Collections.<Permission>emptySet());
         expectOnCreateFile(AccessException.class, resource.resolve("a"));
     }
 
@@ -105,7 +108,7 @@ public final class LocalResourceTest extends TestCase {
         Resource actual = resource.resolve("a");
         actual.createDirectory();
 
-        File expected = new File(directory, "b");
+        File expected = new File(resource.getFile(), "b");
         assertTrue(expected.mkdir());
 
         ResourceStatus status = actual.readStatus(false);
@@ -115,8 +118,8 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_createDirectory_AccessException() throws Exception {
-        assertTrue(directory.setWritable(false));
-        final Resource dir = resource.resolve("a");
+        resource.setPermissions(Collections.<Permission>emptySet());
+        Resource dir = resource.resolve("a");
         expectOnCreateDirectory(AccessException.class, dir);
     }
 
@@ -178,7 +181,7 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_createSymbolicLink_AccessException() throws Exception {
-        assertTrue(directory.setWritable(false));
+        resource.setPermissions(Collections.<Permission>emptySet());
         Resource link = resource.resolve("a");
         expectOnCreateSymbolicLink(AccessException.class, link, resource);
     }
@@ -214,7 +217,7 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_readSymbolicLink_AccessException() throws Exception {
-        assertTrue(directory.setExecutable(false));
+        resource.setPermissions(Collections.<Permission>emptySet());
         Resource link = resource.resolve("a");
         expectOnReadSymbolicLink(AccessException.class, link);
     }
@@ -263,9 +266,8 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_readStatus_AccessException() throws Exception {
+        resource.setPermissions(Collections.<Permission>emptySet());
         Resource child = resource.resolve("a");
-        assertTrue(directory.setReadable(false));
-        assertTrue(directory.setExecutable(false));
         expectOnReadStatus(AccessException.class, child);
     }
 
@@ -458,7 +460,7 @@ public final class LocalResourceTest extends TestCase {
     public void test_delete_AccessException() throws Exception {
         Resource file = resource.resolve("a");
         file.createFile();
-        assertTrue(directory.setWritable(false));
+        resource.setPermissions(Collections.<Permission>emptySet());
         expectOnDelete(AccessException.class, file);
     }
 
@@ -591,6 +593,15 @@ public final class LocalResourceTest extends TestCase {
                 resource.setAccessTime(instant);
             }
         });
+    }
+
+    public void test_setPermissions() throws Exception {
+        Set<Permission> permissions = EnumSet.allOf(Permission.class);
+        for (Set<Permission> expected : powerSet(permissions)) {
+            resource.setPermissions(expected);
+            Set<Permission> actual = resource.readStatus(false).getPermissions();
+            assertEquals(expected, actual);
+        }
     }
 
     private static void expect(

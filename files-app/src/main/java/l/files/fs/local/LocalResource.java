@@ -17,29 +17,82 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Instant;
 import l.files.fs.NotExistException;
+import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.WatchService;
 
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
 import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.S_IRGRP;
+import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRUSR;
 import static android.system.OsConstants.S_IRWXU;
+import static android.system.OsConstants.S_IWGRP;
+import static android.system.OsConstants.S_IWOTH;
 import static android.system.OsConstants.S_IWUSR;
+import static android.system.OsConstants.S_IXGRP;
+import static android.system.OsConstants.S_IXOTH;
+import static android.system.OsConstants.S_IXUSR;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.Permission.GROUP_EXECUTE;
+import static l.files.fs.Permission.GROUP_READ;
+import static l.files.fs.Permission.GROUP_WRITE;
+import static l.files.fs.Permission.OTHERS_EXECUTE;
+import static l.files.fs.Permission.OTHERS_READ;
+import static l.files.fs.Permission.OTHERS_WRITE;
+import static l.files.fs.Permission.OWNER_EXECUTE;
+import static l.files.fs.Permission.OWNER_READ;
+import static l.files.fs.Permission.OWNER_WRITE;
 
 @AutoParcel
 public abstract class LocalResource extends Native implements Resource {
+
+    private static final Map<Permission, Integer> permissionBits
+            = createPermissionBits();
+
+    private static Map<Permission, Integer> createPermissionBits() {
+        Map<Permission, Integer> bits = new HashMap<>();
+        bits.put(OWNER_READ, S_IRUSR);
+        bits.put(OWNER_WRITE, S_IWUSR);
+        bits.put(OWNER_EXECUTE, S_IXUSR);
+        bits.put(GROUP_READ, S_IRGRP);
+        bits.put(GROUP_WRITE, S_IWGRP);
+        bits.put(GROUP_EXECUTE, S_IXGRP);
+        bits.put(OTHERS_READ, S_IROTH);
+        bits.put(OTHERS_WRITE, S_IWOTH);
+        bits.put(OTHERS_EXECUTE, S_IXOTH);
+        return unmodifiableMap(bits);
+    }
+
+    static Set<Permission> mapPermissions(int mode) {
+        Set<Permission> permissions = new HashSet<>();
+        if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
+        if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
+        if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
+        if ((mode & S_IRGRP) != 0) permissions.add(GROUP_READ);
+        if ((mode & S_IWGRP) != 0) permissions.add(GROUP_WRITE);
+        if ((mode & S_IXGRP) != 0) permissions.add(GROUP_EXECUTE);
+        if ((mode & S_IROTH) != 0) permissions.add(OTHERS_READ);
+        if ((mode & S_IWOTH) != 0) permissions.add(OTHERS_WRITE);
+        if ((mode & S_IXOTH) != 0) permissions.add(OTHERS_EXECUTE);
+        return permissions;
+    }
 
     LocalResource() {
     }
@@ -287,10 +340,11 @@ public abstract class LocalResource extends Native implements Resource {
 
     @Override
     public void createSymbolicLink(Resource target) throws IOException {
+        String targetPath = ((LocalResource) target).getPath();
         try {
-            Unistd.symlink(((LocalResource) target).getPath(), getPath());
+            Unistd.symlink(targetPath, getPath());
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(getPath(), targetPath);
         }
     }
 
@@ -300,7 +354,7 @@ public abstract class LocalResource extends Native implements Resource {
             String link = Unistd.readlink(getPath());
             return create(new File(link));
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(getPath());
         }
     }
 
@@ -320,7 +374,7 @@ public abstract class LocalResource extends Native implements Resource {
         try {
             Stdio.remove(getPath());
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(getPath());
         }
     }
 
@@ -347,6 +401,19 @@ public abstract class LocalResource extends Native implements Resource {
 
     private static native void setModificationTime(String path, long seconds, int nanos)
             throws ErrnoException;
+
+    @Override
+    public void setPermissions(Set<Permission> permissions) throws IOException {
+        int mode = 0;
+        for (Permission permission : permissions) {
+            mode |= permissionBits.get(permission);
+        }
+        try {
+            Os.chmod(getPath(), mode);
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath());
+        }
+    }
 
     @Override
     public MediaType detectMediaType() throws IOException {

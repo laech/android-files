@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -210,6 +211,15 @@ public interface Resource extends Parcelable {
      * @throws IOException       other failures
      */
     void setModificationTime(Instant instant) throws IOException;
+
+    /**
+     * Sets the permissions of this resource.
+     *
+     * @throws AccessException   does not have permission to update
+     * @throws NotExistException this resource does not exist
+     * @throws IOException other failures
+     */
+    void setPermissions(Set<Permission> permissions) throws IOException;
 
     /**
      * Detects the media type of the underlying file by reading it's content.

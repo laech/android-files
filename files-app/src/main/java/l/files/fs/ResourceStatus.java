@@ -2,6 +2,8 @@ package l.files.fs;
 
 import com.google.common.net.MediaType;
 
+import java.util.Set;
+
 public interface ResourceStatus {
 
     Resource getResource();
@@ -27,5 +29,7 @@ public interface ResourceStatus {
     Instant getModificationTime();
 
     MediaType getBasicMediaType();
+
+    Set<Permission> getPermissions();
 
 }
