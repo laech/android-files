@@ -221,7 +221,8 @@ public interface Resource extends Parcelable {
     void setModificationTime(Instant instant) throws IOException;
 
     /**
-     * Sets the permissions of this resource.
+     * Sets the permissions of this resource, this replaces the existing
+     * permissions, not add.
      *
      * @throws AccessException   does not have permission to update
      * @throws NotExistException this resource does not exist

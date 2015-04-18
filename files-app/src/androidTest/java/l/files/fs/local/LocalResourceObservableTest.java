@@ -7,17 +7,23 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.common.testing.TempDir;
+import l.files.fs.Instant;
+import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.WatchEvent;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.WatchEvent.Kind.CREATE;
 import static l.files.fs.WatchEvent.Kind.DELETE;
 import static l.files.fs.WatchEvent.Kind.MODIFY;
@@ -124,30 +130,76 @@ public final class LocalResourceObservableTest extends TestCase {
         }
     }
 
-    public void testMoveSelfDirectoryOut() throws Exception {
-        try (Recorder observer = observe(dir1)) {
-            observer.await(DELETE, dir1, newMove(dir1, dir2.resolve("a")));
-        }
-    }
-
-    public void testMoveSelfFileOut() throws Exception {
+    public void testMoveSelfOut() throws Exception {
         Resource file = dir1.resolve("file").createFile();
-        try (Recorder observer = observe(file)) {
-            observer.await(DELETE, file, newMove(file, dir2.resolve("a")));
+        Resource dir = dir1.resolve("dir").createDirectory();
+        testMoveSelfOut(file, dir2.resolve("a"));
+        testMoveSelfOut(dir, dir2.resolve("b"));
+    }
+
+    private static void testMoveSelfOut(
+            Resource src, Resource dst) throws Exception {
+        try (Recorder observer = observe(src)) {
+            observer.await(DELETE, src, newMove(src, dst));
         }
     }
 
-    public void testModifyFileObservingFromParent() throws Exception {
+    public void testModifyFileContent() throws Exception {
         Resource file = dir1.resolve("a").createFile();
-        try (Recorder observer = observe(dir1)) {
+        testModifyFileContent(file, file);
+        testModifyFileContent(file, dir1);
+    }
+
+    private static void testModifyFileContent(
+            Resource file, Resource observable) throws Exception {
+        try (Recorder observer = observe(observable)) {
             observer.await(MODIFY, file, newAppend(file, "abc"));
         }
     }
 
-    public void testModifyFileObservingFromSelf() throws Exception {
-        Resource file = dir1.resolve("a").createFile();
-        try (Recorder observer = observe(file)) {
-            observer.await(MODIFY, file, newAppend(file, "abc"));
+    public void testModifyPermissions() throws Exception {
+        Resource file = dir1.resolve("file").createFile();
+        Resource dir = dir1.resolve("directory").createDirectory();
+        testModifyPermission(file, file);
+        testModifyPermission(file, dir1);
+        testModifyPermission(dir, dir);
+        testModifyPermission(dir, dir1);
+    }
+
+    private static void testModifyPermission(
+            Resource target, Resource observable) throws Exception {
+        Set<Permission> oldPerms = target.readStatus(false).getPermissions();
+        Set<Permission> newPerms;
+        if (oldPerms.isEmpty()) {
+            newPerms = singleton(OWNER_WRITE);
+        } else {
+            newPerms = emptySet();
+        }
+        try (Recorder observer = observe(observable)) {
+            observer.await(MODIFY, target, newSetPermissions(target, newPerms));
+        }
+    }
+
+    /*
+     * Note: IN_MODIFY is fired instead of the expected IN_ATTRIB when changing
+     * the last modified time, and when changing access time both are not fired
+     * making it not untrackable.
+     */
+    public void testModifyModificationTime() throws Exception {
+        Resource file = dir1.resolve("file").createFile();
+        Resource dir = dir1.resolve("dir").createDirectory();
+        testModifyModificationTime(file, file);
+        testModifyModificationTime(file, dir1);
+        testModifyModificationTime(dir, dir);
+        testModifyModificationTime(dir, dir1);
+    }
+
+    private void testModifyModificationTime(
+            Resource target, Resource observable) throws Exception {
+        Instant old = target.readStatus(false).getModificationTime();
+        Instant t = Instant.of(old.getSeconds() - 1, old.getNanos());
+        try (Recorder observer = observe(observable)) {
+            observer.await(MODIFY, target, newSetModificationTime(target, t));
         }
     }
 
@@ -216,6 +268,30 @@ public final class LocalResourceObservableTest extends TestCase {
                 try (OutputStream out = file.openOutputStream(true)) {
                     out.write(content.toString().getBytes(UTF_8));
                 }
+                return null;
+            }
+        };
+    }
+
+    private static Callable<Void> newSetPermissions(
+            final Resource resource,
+            final Set<Permission> permissions) {
+        return new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                resource.setPermissions(permissions);
+                return null;
+            }
+        };
+    }
+
+    private static Callable<Void> newSetModificationTime(
+            final Resource resource,
+            final Instant instant) {
+        return new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                resource.setModificationTime(instant);
                 return null;
             }
         };
