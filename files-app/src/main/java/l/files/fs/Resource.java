@@ -95,8 +95,14 @@ public interface Resource extends Parcelable {
      * Traverse this subtree. Accepts an error handler, if the handler does not
      * rethrow the exception, traversal will continue.
      */
+    @Deprecated
     Stream traverse(TraversalOrder order,
                     TraversalExceptionHandler handler) throws IOException;
+
+    /**
+     * Performs a depth first traverse of this tree.
+     */
+    void traverse(ResourceVisitor visitor) throws IOException;
 
     /**
      * Opens a resource stream to iterate through the immediate children.
@@ -174,7 +180,7 @@ public interface Resource extends Parcelable {
      * @throws NotExistException this resource does not exist
      * @throws IOException       other failures
      */
-    ResourceStatus readStatus(boolean followLink) throws IOException;
+    ResourceStatus readStatus(boolean followLink) throws IOException; // TODO remove flag
 
     /**
      * Renames this resource tree to the given destination.
@@ -229,9 +235,10 @@ public interface Resource extends Parcelable {
      * Sets the permissions of this resource, this replaces the existing
      * permissions, not add.
      *
-     * @throws AccessException   does not have permission to update
-     * @throws NotExistException this resource does not exist
-     * @throws IOException       other failures
+     * @throws AccessException               does not have permission to update
+     * @throws NotExistException             this resource does not exist
+     * @throws IOException                   other failures
+     * @throws UnsupportedOperationException if this is a symbolic link
      */
     void setPermissions(Set<Permission> permissions) throws IOException;
 

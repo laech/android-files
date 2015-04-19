@@ -1,6 +1,6 @@
 package l.files.fs.local;
 
-import junit.framework.TestCase;
+import android.system.Os;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-import l.files.common.testing.TempDir;
 import l.files.fs.AccessException;
 import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
@@ -23,7 +22,6 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.collect.Sets.powerSet;
 import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
@@ -32,22 +30,14 @@ import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.local.LocalResource.mapPermissions;
 import static l.files.fs.local.Stat.lstat;
 
-public final class LocalResourceTest extends TestCase {
+public final class LocalResourceTest extends ResourceBaseTest {
 
-    private TempDir tmp;
     private LocalResource resource;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        tmp = TempDir.create();
-        resource = LocalResource.create(tmp.get());
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        tmp.delete(); // TODO change to resource deleteAll
-        super.tearDown();
+        resource = dir1();
     }
 
     public void test_createFile() throws Exception {
@@ -612,11 +602,30 @@ public final class LocalResourceTest extends TestCase {
     }
 
     public void test_setPermissions() throws Exception {
-        Set<Permission> permissions = EnumSet.allOf(Permission.class);
-        for (Set<Permission> expected : powerSet(permissions)) {
-            resource.setPermissions(expected);
-            Set<Permission> actual = resource.readStatus(false).getPermissions();
-            assertEquals(expected, actual);
+        Resource file = resource.resolve("file").createFile();
+        Set<Permission> expected = EnumSet.allOf(Permission.class);
+        Set<Permission> old = file.readStatus(false).getPermissions();
+        assertNotEqual(expected, old);
+
+        file.setPermissions(expected);
+        Set<Permission> actual = file.readStatus(false).getPermissions();
+        assertEquals(expected, actual);
+    }
+
+    public void test_setPermissions_rawBits() throws Exception {
+        int expected = Os.stat(resource.getPath()).st_mode;
+        resource.setPermissions(resource.readStatus(false).getPermissions());
+        int actual = Os.stat(resource.getPath()).st_mode;
+        assertEquals(expected, actual);
+    }
+
+    public void test_setPermissions_symbolicLinkUnsupported() throws Exception {
+        Resource link = resource.resolve("link").createSymbolicLink(resource);
+        try {
+            link.setPermissions(Collections.<Permission>emptySet());
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // Pass
         }
     }
 

@@ -31,6 +31,7 @@ import l.files.fs.Instant;
 import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.O_CREAT;
@@ -241,6 +242,11 @@ public abstract class LocalResource extends Native implements Resource {
         };
     }
 
+    @Override
+    public void traverse(ResourceVisitor visitor) throws IOException {
+        new LocalResourceTraverser(this).traverse(visitor);
+    }
+
     private static final class Traverser extends TreeTraverser<LocalPathEntry> {
 
         private final TraversalExceptionHandler handler;
@@ -409,8 +415,8 @@ public abstract class LocalResource extends Native implements Resource {
         }
     }
 
-    private static native void setModificationTime(String path, long seconds, int nanos)
-            throws ErrnoException;
+    private static native void setModificationTime(
+            String path, long seconds, int nanos) throws ErrnoException;
 
     @Override
     public void setPermissions(Set<Permission> permissions) throws IOException {
@@ -419,11 +425,17 @@ public abstract class LocalResource extends Native implements Resource {
             mode |= permissionBits.get(permission);
         }
         try {
-            Os.chmod(getPath(), mode);
-        } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            setPermissions(getPath(), mode);
+        } catch (ErrnoException e) {
+            if (e.isCausedByNoFollowLink(this)) {
+                throw new UnsupportedOperationException(getPath(), e);
+            }
+            throw e.toIOException(getPath());
         }
     }
+
+    private static native void setPermissions(String path, int mode)
+            throws ErrnoException;
 
     @Override
     public MediaType detectMediaType() throws IOException {
