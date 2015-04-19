@@ -1,30 +1,26 @@
 package l.files.fs.local;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import l.files.common.testing.FileBaseTest;
+import l.files.fs.NotDirectoryException;
 
 import static java.util.Arrays.asList;
-import static l.files.fs.local.Stat.lstat;
-import static l.files.fs.local.Unistd.symlink;
 
-public final class LocalResourceStreamTest extends FileBaseTest {
+public final class LocalResourceStreamTest extends ResourceBaseTest {
 
     public void testReturnCorrectEntries() throws Exception {
-        File f1 = tmp().createFile("a");
-        File f2 = tmp().createDir("b");
-        File f3 = tmp().get("d");
-        symlink(f1.getPath(), f3.getPath());
+        LocalResource a = dir1().resolve("a").createFile();
+        LocalResource b = dir1().resolve("b").createDirectory();
+        LocalResource c = dir1().resolve("c").createSymbolicLink(a);
 
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpResource())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(dir1())) {
             List<LocalPathEntry> expected = asList(
-                    LocalPathEntry.create(tmpResource().resolve("a"), lstat(f1.getPath()).getIno(), false),
-                    LocalPathEntry.create(tmpResource().resolve("b"), lstat(f2.getPath()).getIno(), true),
-                    LocalPathEntry.create(tmpResource().resolve("d"), lstat(f3.getPath()).getIno(), false)
+                    LocalPathEntry.create(a, a.readStatus(false).getInode(), false),
+                    LocalPathEntry.create(b, b.readStatus(false).getInode(), true),
+                    LocalPathEntry.create(c, c.readStatus(false).getInode(), false)
             );
             List<LocalPathEntry> actual = new ArrayList<>();
             for (LocalPathEntry entry : stream) {
@@ -35,7 +31,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorReturnsFalseIfNoNextElement() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpResource())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(dir1())) {
             Iterator<?> iterator = stream.iterator();
             assertFalse(iterator.hasNext());
             assertFalse(iterator.hasNext());
@@ -43,7 +39,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorThrowsNoSuchElementExceptionOnEmpty() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpResource())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(dir1())) {
             stream.iterator().next();
             fail();
         } catch (NoSuchElementException e) {
@@ -52,7 +48,7 @@ public final class LocalResourceStreamTest extends FileBaseTest {
     }
 
     public void testIteratorMethodCannotBeReused() throws Exception {
-        try (LocalResourceStream stream = LocalResourceStream.open(tmpResource())) {
+        try (LocalResourceStream stream = LocalResourceStream.open(dir1())) {
             stream.iterator();
             try {
                 stream.iterator();
@@ -63,8 +59,23 @@ public final class LocalResourceStreamTest extends FileBaseTest {
         }
     }
 
-    private LocalResource tmpResource() {
-        return LocalResource.create(tmp().get());
+    public void testFailIfNotDirectorxyIsSymbolicLink() throws Exception {
+        LocalResource dir = dir1().resolve("dir").createDirectory();
+        LocalResource link = dir1().resolve("link").createSymbolicLink(dir);
+        try (LocalResourceStream ignore = LocalResourceStream.open(link)) {
+            fail();
+        } catch (NotDirectoryException e) {
+            // Pass
+        }
+    }
+
+    public void testFailIfNotDirectoryIsFile() throws Exception {
+        LocalResource file = dir1().resolve("file").createFile();
+        try (LocalResourceStream ignore = LocalResourceStream.open(file)) {
+            fail();
+        } catch (NotDirectoryException e) {
+            // Pass
+        }
     }
 
 }

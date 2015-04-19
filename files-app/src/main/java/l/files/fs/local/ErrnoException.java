@@ -16,6 +16,7 @@ import l.files.fs.IsDirectoryException;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
+import l.files.fs.Resource;
 import l.files.fs.ResourceException;
 
 import static java.lang.reflect.Modifier.isPublic;
@@ -213,6 +214,16 @@ final class ErrnoException extends Exception {
         if (errno == OsConstants.ENOTEMPTY) return new NotEmptyException(path, cause);
         if (errno == OsConstants.EISDIR) return new IsDirectoryException(path, cause);
         return new ResourceException(path, cause);
+    }
+
+    /**
+     * If the code that caused this exception has no follow symbolic link set,
+     * this will check to see if this exception is caused by that.
+     */
+    boolean isCausedByNoFollowLink(Resource resource) throws IOException {
+        // See for example open() linux system call
+        return errno() == OsConstants.ELOOP
+                && resource.readStatus(false).isSymbolicLink();
     }
 
 }
