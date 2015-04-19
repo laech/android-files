@@ -38,6 +38,7 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static l.files.common.app.SystemServices.getClipboardManager;
+import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
@@ -182,8 +183,15 @@ public final class FilesFragment extends BaseFileListFragment implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-        if (isSortKey(key) || isShowHiddenFilesKey(key)) {
-            getLoaderManager().restartLoader(0, null, this);
+        Loader<?> _loader = getLoaderManager().getLoader(0);
+        FilesLoader loader = (FilesLoader) _loader;
+
+        if (isShowHiddenFilesKey(key)) {
+            loader.setShowHidden(getShowHiddenFiles(getActivity()));
+
+        } else if (isSortKey(key)) {
+            loader.setSort(getSort(getActivity()));
         }
     }
+
 }

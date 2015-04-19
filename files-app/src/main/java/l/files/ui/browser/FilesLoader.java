@@ -36,8 +36,9 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     private final Runnable deliverResult;
 
     private final Resource resource;
-    private final FileSort sort;
-    private final boolean showHidden;
+
+    private volatile FileSort sort;
+    private volatile boolean showHidden;
 
     private volatile boolean observing;
     private volatile Closeable observable;
@@ -57,6 +58,16 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         this.data = new ConcurrentHashMap<>();
         this.listener = new EventListener();
         this.deliverResult = new DeliverResultRunnable();
+    }
+
+    public void setSort(FileSort sort) {
+        this.sort = requireNonNull(sort, "sort");
+        startLoading();
+    }
+
+    public void setShowHidden(boolean showHidden) {
+        this.showHidden = showHidden;
+        startLoading();
     }
 
     @Override

@@ -16,7 +16,7 @@ public abstract class WatchEvent {
         return new AutoParcel_WatchEvent(kind, resource);
     }
 
-    public static enum Kind {
+    public enum Kind {
         CREATE,
         DELETE,
         MODIFY
@@ -32,7 +32,7 @@ public abstract class WatchEvent {
      * and expensive operations should be moved out of the thread to avoid
      * blocking of events to other listeners.
      */
-    public static interface Listener {
+    public interface Listener {
         void onEvent(WatchEvent event);
     }
 

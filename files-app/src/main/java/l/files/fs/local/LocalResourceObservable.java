@@ -278,7 +278,7 @@ final class LocalResourceObservable extends Native
                     observable.children.put(wd, child);
 
                 } catch (ErrnoException e) {
-                    log.warn(e);
+                    log.debug("Failed to add watch. %s: %s", e.getMessage(), child);
                 }
             }
         }
