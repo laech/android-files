@@ -18,6 +18,7 @@ import static java.util.Calendar.YEAR;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -123,7 +124,12 @@ public final class DateCategorizerTest extends BaseTest {
     private FileListItem.File mockStat(long time) {
         ResourceStatus stat = mock(ResourceStatus.class);
         long seconds = MILLISECONDS.toSeconds(time);
-        int nanos = (int) MILLISECONDS.toNanos(time);
+        int nanos = (int) MILLISECONDS.toNanos(time - SECONDS.toMillis(seconds));
+        if (nanos < 0) {
+            int delta = (int) (SECONDS.toNanos(1) + nanos);
+            nanos = delta;
+            seconds -= (delta / (double) SECONDS.toNanos(1) + 0.5);
+        }
         given(stat.getModificationTime()).willReturn(Instant.of(seconds, nanos));
         return FileListItem.File.create(mock(Resource.class), stat, stat);
     }

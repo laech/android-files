@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +20,6 @@ import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.fs.WatchEvent;
-import l.files.fs.WatchService;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
@@ -31,7 +31,6 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     private static final Logger logger = Logger.get(FilesLoader.class);
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final WatchService service;
     private final ConcurrentMap<Resource, FileListItem.File> data;
     private final EventListener listener;
     private final Runnable deliverResult;
@@ -39,6 +38,9 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     private final Resource resource;
     private final FileSort sort;
     private final boolean showHidden;
+
+    private volatile boolean observing;
+    private volatile Closeable observable;
 
     /**
      * @param resource   the resource to load files from
@@ -55,7 +57,6 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         this.data = new ConcurrentHashMap<>();
         this.listener = new EventListener();
         this.deliverResult = new DeliverResultRunnable();
-        this.service = resource.getWatcher();
     }
 
     @Override
@@ -71,12 +72,24 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     @Override
     public List<FileListItem> loadInBackground() {
         data.clear();
-        try {
-            service.register(resource, listener);
-        } catch (IOException e) {
-            logger.debug(e);
-            return emptyList();
+
+        boolean observe = false;
+        synchronized (this) {
+            if (!observing) {
+                observing = true;
+                observe = true;
+            }
         }
+
+        if (observe) {
+            try {
+                observable = resource.observe(listener);
+            } catch (IOException e) {
+                logger.warn(e);
+                // Failed to observe, continue to show static content
+            }
+        }
+
         try (Resource.Stream resources = resource.openDirectory()) {
             for (Resource resource : resources) {
                 checkCancelled();
@@ -129,16 +142,42 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     @Override
     protected void onReset() {
         super.onReset();
-        service.unregister(resource, listener);
+
+        Closeable closeable = null;
+        synchronized (this) {
+            if (observing) {
+                closeable = observable;
+                observable = null;
+                observing = false;
+            }
+        }
+
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                logger.warn(e);
+            }
+        }
+
         data.clear();
     }
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        if (!isReset()) {
-            service.unregister(resource, listener);
+
+        Closeable closeable = null;
+        synchronized (this) {
+            if (observing) {
+                closeable = observable;
+                observable = null;
+                observing = false;
+            }
+        }
+        if (closeable != null) {
             logger.error("WatchService has not been unregistered");
+            closeable.close();
         }
     }
 

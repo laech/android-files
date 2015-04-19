@@ -32,7 +32,6 @@ import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.WatchEvent;
-import l.files.fs.WatchService;
 
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
@@ -152,11 +151,6 @@ public abstract class LocalResource extends Native implements Resource {
         } else {
             return new AutoParcel_LocalResource(getFile().getParentFile());
         }
-    }
-
-    @Override
-    public WatchService getWatcher() {
-        return LocalWatchService.get();
     }
 
     @Override

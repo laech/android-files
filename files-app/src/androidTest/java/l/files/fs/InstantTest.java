@@ -72,6 +72,7 @@ public final class InstantTest extends TestCase {
         );
         List<Instant> actual = new ArrayList<>(expected);
         Collections.shuffle(actual);
+        Collections.sort(actual);
         assertEquals(expected, actual);
     }
 

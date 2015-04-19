@@ -78,12 +78,17 @@ public interface Resource extends Parcelable {
     boolean exists();
 
     /**
-     * Returns the watch service for the underlying file system.
+     * Observes on this resource for change events.
+     * <p/>
+     * If this resource is a directory, adding/removing immediate children and
+     * any changes to the content/attributes of immediate children of this
+     * directory will be notified, this is true for existing children as well as
+     * newly added items after observation started.
+     * <p/>
+     * Note that by the time a listener is notified, the target resource may
+     * have already be changed again, therefore a robust application should have
+     * an alternative way of handling instead of reply on this fully.
      */
-    @Deprecated
-    WatchService getWatcher();
-
-    // TODO
     Closeable observe(WatchEvent.Listener observer) throws IOException;
 
     /**

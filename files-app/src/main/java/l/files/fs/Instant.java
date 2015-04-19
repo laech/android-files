@@ -36,10 +36,16 @@ public abstract class Instant implements Comparable<Instant> {
      */
     public static Instant of(long seconds, int nanos) {
         if (nanos < 0) {
-            throw new IllegalArgumentException("nanos must be positive: " + nanos);
+            throw new IllegalArgumentException(
+                    "nanos must be positive" +
+                            ", seconds=" + seconds +
+                            ", nanos=" + nanos);
         }
         if (nanos > 999_999_999) {
-            throw new IllegalArgumentException("nanos must be <= 999,999,999: " + nanos);
+            throw new IllegalArgumentException(
+                    "nanos must be <= 999,999,999" +
+                            ", seconds=" + seconds +
+                            ", nanos=" + nanos);
         }
         return new AutoParcel_Instant(seconds, nanos);
     }

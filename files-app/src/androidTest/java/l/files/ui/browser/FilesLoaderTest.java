@@ -20,8 +20,6 @@ import l.files.fs.local.LocalResource;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.testing.Tests.timeout;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -118,7 +116,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
         return new Subject(loaderId, getActivity().getLoaderManager(), listener);
     }
 
-    private static interface LoaderCallback extends LoaderCallbacks<List<FileListItem>> {
+    private interface LoaderCallback extends LoaderCallbacks<List<FileListItem>> {
     }
 
     private static final class Subject implements AutoCloseable {
