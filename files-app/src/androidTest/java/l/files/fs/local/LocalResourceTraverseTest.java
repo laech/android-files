@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
+import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceVisitor;
+import l.files.fs.ResourceVisitor.ExceptionHandler;
 import l.files.fs.ResourceVisitor.Order;
 
 import static l.files.fs.ResourceVisitor.Order.POST;
@@ -20,6 +23,96 @@ import static l.files.fs.ResourceVisitor.Result.SKIP;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
 public final class LocalResourceTraverseTest extends ResourceBaseTest {
+
+    public void testTraversalContinuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
+        dir1().resolve("a").createDirectory();
+        dir1().resolve("b").createDirectory();
+
+        List<SimpleEntry<Order, LocalResource>> expected = Arrays.asList(
+                new SimpleEntry<>(PRE, dir1()),
+                new SimpleEntry<>(PRE, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1())
+        );
+
+        Recorder recorder = new Recorder() {
+            @Override
+            public Result accept(Order order, Resource res) throws IOException {
+                if (order == PRE && res.getName().equals("a")) {
+                    throw new IOException("Test");
+                }
+                return super.accept(order, res);
+            }
+        };
+        dir1().traverse(recorder, ignoreException());
+
+        checkEquals(expected, recorder.getEvents());
+    }
+
+    public void testTraversalContinuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
+        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1/i").createFile();
+        dir1().resolve("b").createDirectories();
+
+        List<SimpleEntry<Order, LocalResource>> expected = Arrays.asList(
+                new SimpleEntry<>(PRE, dir1()),
+                new SimpleEntry<>(PRE, dir1().resolve("a")),
+                new SimpleEntry<>(PRE, dir1().resolve("a/1")),
+                new SimpleEntry<>(PRE, dir1().resolve("a/1/i")),
+                new SimpleEntry<>(POST, dir1().resolve("a/1/i")),
+                new SimpleEntry<>(POST, dir1().resolve("a/1")),
+                new SimpleEntry<>(POST, dir1().resolve("a")),
+                new SimpleEntry<>(PRE, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1())
+        );
+
+        Recorder recorder = new Recorder() {
+            @Override
+            public Result accept(Order order, Resource res) throws IOException {
+                super.accept(order, res);
+                if (order == POST && res.getName().equals("1")) {
+                    throw new IOException("Test");
+                }
+                return CONTINUE;
+            }
+        };
+        dir1().traverse(recorder, ignoreException());
+
+        checkEquals(expected, recorder.getEvents());
+    }
+
+    public void testTraversalContinuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
+        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1/i").createFile();
+        dir1().resolve("a/2").createDirectories();
+        dir1().resolve("b").createDirectories();
+        dir1().resolve("a").setPermissions(Collections.<Permission>emptySet());
+
+        List<SimpleEntry<Order, LocalResource>> expected = Arrays.asList(
+                new SimpleEntry<>(PRE, dir1()),
+                new SimpleEntry<>(PRE, dir1().resolve("a")),
+                new SimpleEntry<>(POST, dir1().resolve("a")),
+                new SimpleEntry<>(PRE, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1().resolve("b")),
+                new SimpleEntry<>(POST, dir1())
+        );
+
+        Recorder recorder = new Recorder();
+        dir1().traverse(recorder, ignoreException());
+
+        checkEquals(expected, recorder.getEvents());
+    }
+
+    private static ExceptionHandler ignoreException() {
+        return new ExceptionHandler() {
+            @Override
+            public void handle(Order order, Resource resource, IOException e)
+                    throws IOException {
+                // no throw
+            }
+        };
+    }
 
     public void testTraversalOrder() throws Exception {
         dir1().resolve("a/1").createDirectories();

@@ -56,4 +56,18 @@ public interface ResourceVisitor {
         POST
     }
 
+    interface ExceptionHandler {
+
+        /**
+         * Callback method invoked when one of the resource failed to be visited
+         * or {@link ResourceVisitor#accept(Order, Resource)} throws an
+         * IOException. Any exception thrown from this method will terminate the
+         * traversal the exception itself will be propagated through, if no
+         * exception is thrown traversal will proceed.
+         */
+        void handle(Order order, Resource resource, IOException e)
+                throws IOException;
+
+    }
+
 }

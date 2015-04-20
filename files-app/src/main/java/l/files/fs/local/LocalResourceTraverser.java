@@ -11,7 +11,9 @@ import l.files.fs.NotDirectoryException;
 import l.files.fs.Resource;
 import l.files.fs.Resource.Stream;
 import l.files.fs.ResourceVisitor;
+import l.files.fs.ResourceVisitor.ExceptionHandler;
 import l.files.fs.ResourceVisitor.Result;
+import l.files.fs.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.ResourceVisitor.Order.POST;
@@ -22,21 +24,37 @@ import static l.files.fs.ResourceVisitor.Order.PRE;
  */
 final class LocalResourceTraverser {
 
-    private final Resource root;
+    private final ResourceVisitor visitor;
+    private final ExceptionHandler handler;
+    private final Deque<Node> stack;
 
-    LocalResourceTraverser(Resource root) {
-        this.root = requireNonNull(root, "root");
+    LocalResourceTraverser(Resource root,
+                           ResourceVisitor visitor,
+                           ExceptionHandler handler) {
+        requireNonNull(root, "root");
+        this.visitor = requireNonNull(visitor, "visitor");
+        this.handler = requireNonNull(handler, "handler");
+        this.stack = new ArrayDeque<>();
+        this.stack.push(new Node(root));
     }
 
-    void traverse(ResourceVisitor visitor) throws IOException {
-        Deque<Node> stack = new ArrayDeque<>();
-        stack.push(new Node(root));
+    void traverse() throws IOException {
+
         while (!stack.isEmpty()) {
+
             Node node = stack.peek();
             if (!node.visited) {
                 node.visited = true;
 
-                Result result = visitor.accept(PRE, node.resource);
+                Result result;
+                try {
+                    result = visitor.accept(PRE, node.resource);
+                } catch (IOException e) {
+                    stack.pop();
+                    handler.handle(PRE, node.resource, e);
+                    continue;
+                }
+
                 switch (result) {
                     case TERMINATE:
                         return;
@@ -44,15 +62,30 @@ final class LocalResourceTraverser {
                         stack.pop();
                         continue;
                 }
-                pushChildren(stack, node);
+
+                try {
+                    pushChildren(stack, node);
+                } catch (UncheckedIOException e) {
+                    handler.handle(PRE, node.resource, e.getCause());
+                } catch (IOException e) {
+                    handler.handle(PRE, node.resource, e);
+                }
 
             } else {
+
                 stack.pop();
-                Result result = visitor.accept(POST, node.resource);
+                Result result;
+                try {
+                    result = visitor.accept(POST, node.resource);
+                } catch (IOException e) {
+                    handler.handle(POST, node.resource, e);
+                    continue;
+                }
                 switch (result) {
                     case TERMINATE:
                         return;
                 }
+
             }
 
         }

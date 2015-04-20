@@ -13,6 +13,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.ResourceVisitor.ExceptionHandler;
+
 /**
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
@@ -100,9 +102,16 @@ public interface Resource extends Parcelable {
                     TraversalExceptionHandler handler) throws IOException;
 
     /**
-     * Performs a depth first traverse of this tree.
+     * A short cut for {@link #traverse(ResourceVisitor, ExceptionHandler)} that
+     * will terminate as soon as an error is encountered.
      */
     void traverse(ResourceVisitor visitor) throws IOException;
+
+    /**
+     * Performs a depth first traverse of this tree.
+     */
+    void traverse(ResourceVisitor visitor,
+                  ExceptionHandler handler) throws IOException;
 
     /**
      * Opens a resource stream to iterate through the immediate children.

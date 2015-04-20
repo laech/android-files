@@ -32,6 +32,8 @@ import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceVisitor;
+import l.files.fs.ResourceVisitor.ExceptionHandler;
+import l.files.fs.ResourceVisitor.Order;
 import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.O_CREAT;
@@ -244,7 +246,19 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void traverse(ResourceVisitor visitor) throws IOException {
-        new LocalResourceTraverser(this).traverse(visitor);
+        traverse(visitor, new ExceptionHandler() {
+            @Override
+            public void handle(Order order, Resource resource, IOException e)
+                    throws IOException {
+                throw e;
+            }
+        });
+    }
+
+    @Override
+    public void traverse(ResourceVisitor visitor,
+                         ExceptionHandler handler) throws IOException {
+        new LocalResourceTraverser(this, visitor, handler).traverse();
     }
 
     private static final class Traverser extends TreeTraverser<LocalPathEntry> {
