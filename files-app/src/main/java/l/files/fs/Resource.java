@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
  * are equal if their URIs are equal.
  * <p/>
  * If the underlying resource is a symbolic link, all operations will happen on
- * the symbolic link, not the link target resource.
+ * the symbolic link, not the link target resource, unless stated otherwise.
  */
 public interface Resource extends Parcelable {
 
@@ -234,6 +234,9 @@ public interface Resource extends Parcelable {
     /**
      * Sets the permissions of this resource, this replaces the existing
      * permissions, not add.
+     * <p/>
+     * If this is a symbolic link, the permission of the target resource will be
+     * changed, the permission of the link itself cannot be changed.
      *
      * @throws AccessException               does not have permission to update
      * @throws NotExistException             this resource does not exist

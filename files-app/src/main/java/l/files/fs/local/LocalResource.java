@@ -63,7 +63,7 @@ import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 
 @AutoParcel
-public abstract class LocalResource extends Native implements Resource {
+public abstract class LocalResource implements Resource {
 
     private static final Map<Permission, Integer> permissionBits
             = createPermissionBits();
@@ -425,17 +425,15 @@ public abstract class LocalResource extends Native implements Resource {
             mode |= permissionBits.get(permission);
         }
         try {
-            setPermissions(getPath(), mode);
-        } catch (ErrnoException e) {
-            if (e.isCausedByNoFollowLink(this)) {
-                throw new UnsupportedOperationException(getPath(), e);
-            }
-            throw e.toIOException(getPath());
+            /* To change permission on the link itself instead of the target:
+             *  - fchmodat(AT_FDCWD, path, mode, AT_SYMLINK_NOFOLLOW)
+             * but not implemented.
+             */
+            Os.chmod(getPath(), mode);
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
-
-    private static native void setPermissions(String path, int mode)
-            throws ErrnoException;
 
     @Override
     public MediaType detectMediaType() throws IOException {

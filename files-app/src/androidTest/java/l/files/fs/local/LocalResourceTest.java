@@ -22,6 +22,7 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 
 import static android.test.MoreAsserts.assertNotEqual;
+import static com.google.common.collect.Sets.powerSet;
 import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
@@ -602,14 +603,12 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_setPermissions() throws Exception {
-        Resource file = resource.resolve("file").createFile();
-        Set<Permission> expected = EnumSet.allOf(Permission.class);
-        Set<Permission> old = file.readStatus(false).getPermissions();
-        assertNotEqual(expected, old);
-
-        file.setPermissions(expected);
-        Set<Permission> actual = file.readStatus(false).getPermissions();
-        assertEquals(expected, actual);
+        Set<Permission> permissions = EnumSet.allOf(Permission.class);
+        for (Set<Permission> expected : powerSet(permissions)) {
+            resource.setPermissions(expected);
+            Set<Permission> actual = resource.readStatus(false).getPermissions();
+            assertEquals(expected, actual);
+        }
     }
 
     public void test_setPermissions_rawBits() throws Exception {
@@ -617,16 +616,6 @@ public final class LocalResourceTest extends ResourceBaseTest {
         resource.setPermissions(resource.readStatus(false).getPermissions());
         int actual = Os.stat(resource.getPath()).st_mode;
         assertEquals(expected, actual);
-    }
-
-    public void test_setPermissions_symbolicLinkUnsupported() throws Exception {
-        Resource link = resource.resolve("link").createSymbolicLink(resource);
-        try {
-            link.setPermissions(Collections.<Permission>emptySet());
-            fail();
-        } catch (UnsupportedOperationException e) {
-            // Pass
-        }
     }
 
     private static void expect(

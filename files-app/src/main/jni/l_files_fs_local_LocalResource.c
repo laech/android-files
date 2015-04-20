@@ -41,27 +41,3 @@ void Java_l_files_fs_local_LocalResource_setAccessTime(
     setTimes(env, jpath, times);
 
 }
-
-void Java_l_files_fs_local_LocalResource_setPermissions(
-        JNIEnv* env, jclass clazz, jstring jpath, jint mode) {
-
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return;
-    }
-
-    int fd = open(path, O_NOFOLLOW);
-    if (-1 == fd) {
-        throw_errno_exception(env);
-        return;
-    }
-
-    int result = fchmod(fd, mode);
-    close(fd);
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
-
-    if (0 != result) {
-        throw_errno_exception(env);
-    }
-
-}

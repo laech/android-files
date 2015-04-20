@@ -9,8 +9,8 @@ import java.util.EnumSet;
 import l.files.common.testing.BaseTest;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.ResourceException;
 import l.files.fs.ResourceVisitor;
-import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.createTempDir;
 import static l.files.fs.ResourceVisitor.Order.PRE;
@@ -62,8 +62,7 @@ public abstract class ResourceBaseTest extends BaseTest {
                 if (order == PRE) {
                     try {
                         resource.setPermissions(EnumSet.allOf(Permission.class));
-                    } catch (UnsupportedOperationException e) {
-                        // TODO specify type in callback to avoid this catch
+                    } catch (ResourceException ignore) {
                     }
                 } else {
                     resource.delete();
