@@ -1,78 +1,72 @@
 package l.files.operations;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.io.Files;
-
-import java.io.File;
+import java.io.Writer;
 
 import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
 
-import static com.google.common.io.Files.write;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 
 public final class MoveTest extends PasteTest {
 
-    public void testMovedCountInitialZero() {
-        Move move = create(tmp().createFile("a"), tmp().createDir("b"));
+    public void testMovedCountInitialZero() throws Exception {
+        Resource src = dir1().resolve("a").createFile();
+        Resource dstDir = dir1().resolve("b").createDirectory();
+        Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     public void testMovesSymlink() throws Exception {
-        Resource target = LocalResource.create(tmp().createFile("target"));
-        Resource link = LocalResource.create(tmp().get("link"));
-        link.createSymbolicLink(target);
+        Resource target = dir1().resolve("target").createFile();
+        Resource link = dir1().resolve("link").createSymbolicLink(target);
 
-        Move move = create(new File(link.getUri()), tmp().createDir("moved"));
+        Move move = create(link, dir1().resolve("moved").createDirectory());
         move.execute();
 
-        Resource actual = LocalResource.create(tmp().get("moved/link")).readSymbolicLink();
+        Resource actual = dir1().resolve("moved/link").readSymbolicLink();
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     public void testMovesFile() throws Exception {
-        File srcFile = tmp().createFile("a.txt");
-        File dstDir = tmp().createDir("dst");
-        File dstFile = new File(dstDir, "a.txt");
-        write("Test", srcFile, UTF_8);
-
+        Resource srcFile = dir1().resolve("a.txt").createFile();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
+        Resource dstFile = dstDir.resolve("a.txt");
+        try (Writer out = srcFile.openWriter(UTF_8)) {
+            out.write("Test");
+        }
         Move move = create(srcFile, dstDir);
         move.execute();
 
         assertFalse(srcFile.exists());
-        assertEquals(Files.toString(dstFile, UTF_8), "Test");
+        assertEquals("Test", dstFile.readString(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     public void testMovesDirectory() throws Exception {
-        File srcDir = tmp().createDir("a");
-        File dstDir = tmp().createDir("dst");
-        File srcFile = new File(srcDir, "test.txt");
-        File dstFile = new File(dstDir, "a/test.txt");
-        write("Test", srcFile, UTF_8);
+        Resource srcDir = dir1().resolve("a").createDirectory();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
+        Resource srcFile = srcDir.resolve("test.txt");
+        Resource dstFile = dstDir.resolve("a/test.txt");
+        try (Writer out = srcFile.openWriter(UTF_8)) {
+            out.write("Test");
+        }
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
         assertFalse(srcDir.exists());
-        assertEquals(Files.toString(dstFile, UTF_8), "Test");
+        assertEquals("Test", dstFile.readString(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     @Override
-    protected Move create(Iterable<String> sources, String dstDir) {
-        return new Move(Iterables.transform(sources, new Function<String, Resource>() {
-            @Override
-            public Resource apply(String s) {
-                return LocalResource.create(new File(s));
-            }
-        }), LocalResource.create(new File(dstDir)));
+    protected Move create(Iterable<Resource> sources, Resource dstDir) {
+        return new Move(sources, dstDir);
     }
 
-    private Move create(File src, File dst) {
-        return create(asList(src.getPath()), dst.getPath());
+    private Move create(Resource src, Resource dstDir) {
+        return create(singleton(src), dstDir);
     }
+
 }

@@ -4,6 +4,7 @@ import android.system.Os;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -39,6 +40,15 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_readString() throws Exception {
+        Resource file = dir1().resolve("file").createFile();
+        String expected = "a\nb\tc";
+        try (Writer writer = file.openWriter(UTF_8)) {
+            writer.write(expected);
+        }
+        assertEquals(expected, file.readString(UTF_8));
     }
 
     public void test_createFile() throws Exception {

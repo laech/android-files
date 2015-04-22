@@ -1,116 +1,123 @@
 package l.files.operations;
 
-import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import l.files.common.testing.FileBaseTest;
+import l.files.fs.Resource;
+import l.files.fs.Resource.Stream;
+import l.files.fs.local.ResourceBaseTest;
 
-import static android.test.MoreAsserts.assertEmpty;
 import static java.lang.Thread.currentThread;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
-public abstract class PasteTest extends FileBaseTest {
+public abstract class PasteTest extends ResourceBaseTest {
 
-  /**
-   * When pasting emptying directories, they should be created on the
-   * destination, even if they are empty.
-   */
-  public void testPastesEmptyDirectories() throws Exception {
-    String src = tmp().createDir("empty").getPath();
-    String dstDir = tmp().createDir("dst").getPath();
-    create(asList(src), dstDir).execute();
-    assertTrue(tmp().get("dst/empty").exists());
-  }
+    /**
+     * When pasting emptying directories, they should be created on the
+     * destination, even if they are empty.
+     */
+    public void testPastesEmptyDirectories() throws Exception {
+        Resource src = dir1().resolve("empty").createDirectory();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
+        create(singleton(src), dstDir).execute();
+        assertTrue(dir1().resolve("dst/empty").exists());
+    }
 
-  /**
-   * When pasting files into a directory with existing files with the same
-   * names, the existing files should not be overridden, new files will be
-   * pasted with new names.
-   */
-  public void testDoesNotOverrideExistingFile() throws Exception {
-    List<String> sources = asList(
-        tmp().createFile("a.txt").getPath(),
-        tmp().createFile("b.mp4").getPath()
-    );
-    tmp().createFile("1/a.txt");
-    tmp().createFile("1/b.mp4");
-    String dstDir = new File(tmp().get(), "1").getPath();
+    /**
+     * When pasting files into a directory with existing files with the same
+     * names, the existing files should not be overridden, new files will be
+     * pasted with new names.
+     */
+    public void testDoesNotOverrideExistingFile() throws Exception {
+        List<Resource> sources = Arrays.<Resource>asList(
+                dir1().resolve("a.txt").createFile(),
+                dir1().resolve("b.mp4").createFile()
+        );
+        dir1().resolve("1/a.txt").createFile();
+        dir1().resolve("1/b.mp4").createFile();
 
-    create(sources, dstDir).execute();
+        Resource dstDir = dir1().resolve("1");
 
-    assertTrue(tmp().get("1/a.txt").exists());
-    assertTrue(tmp().get("1/b.mp4").exists());
-    assertTrue(tmp().get("1/a 2.txt").exists());
-    assertTrue(tmp().get("1/b 2.mp4").exists());
-  }
+        create(sources, dstDir).execute();
 
-  /**
-   * When pasting directories into a destination with existing directories with
-   * the same names, the existing directories should not be overridden, new
-   * directories will be pasted with new names.
-   */
-  public void testDoesNotOverrideExistingDirectory() throws Exception {
-    tmp().createFile("a/1.txt");
-    tmp().createFile("a/b/2.txt");
-    tmp().createFile("a/b/3.txt");
-    tmp().createFile("b/a/1.txt");
-    List<String> sources = asList(tmp().get("a").getPath());
-    String dstDir = tmp().get("b").getPath();
+        assertTrue(dir1().resolve("1/a.txt").exists());
+        assertTrue(dir1().resolve("1/b.mp4").exists());
+        assertTrue(dir1().resolve("1/a 2.txt").exists());
+        assertTrue(dir1().resolve("1/b 2.mp4").exists());
+    }
 
-    create(sources, dstDir).execute();
+    /**
+     * When pasting directories into a destination with existing directories
+     * with the same names, the existing directories should not be overridden,
+     * new directories will be pasted with new names.
+     */
+    public void testDoesNotOverrideExistingDirectory() throws Exception {
+        dir1().resolve("a/1.txt").createFile();
+        dir1().resolve("a/b/2.txt").createFile();
+        dir1().resolve("a/b/3.txt").createFile();
+        dir1().resolve("b/a/1.txt").createFile();
+        Set<Resource> sources = Collections.<Resource>singleton(dir1().resolve("a"));
+        Resource dstDir = dir1().resolve("b");
 
-    assertTrue(tmp().get("b/a/1.txt").exists());
-    assertTrue(tmp().get("b/a 2/1.txt").exists());
-    assertTrue(tmp().get("b/a 2/b/2.txt").exists());
-    assertTrue(tmp().get("b/a 2/b/3.txt").exists());
-  }
+        create(sources, dstDir).execute();
 
-  public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
-    final List<String> sources = asList(
-        tmp().createFile("a/1.txt").getPath(),
-        tmp().createFile("a/2.txt").getPath()
-    );
-    final File dstDir = tmp().createDir("b");
+        assertTrue(dir1().resolve("b/a/1.txt").exists());
+        assertTrue(dir1().resolve("b/a 2/1.txt").exists());
+        assertTrue(dir1().resolve("b/a 2/b/2.txt").exists());
+        assertTrue(dir1().resolve("b/a 2/b/3.txt").exists());
+    }
 
-    Thread thread = new Thread(new Runnable() {
-      @Override public void run() {
-        currentThread().interrupt();
-        try {
-          create(sources, dstDir.getPath()).execute();
-          fail();
-        } catch (InterruptedException e) {
-          // Pass
-        } catch (FileException e) {
-          fail();
+    public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
+        final List<Resource> sources = Arrays.<Resource>asList(
+                dir1().resolve("a/1.txt").createFile(),
+                dir1().resolve("a/2.txt").createFile()
+        );
+        final Resource dstDir = dir1().resolve("b").createDirectory();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                currentThread().interrupt();
+                try {
+                    create(sources, dstDir).execute();
+                    fail();
+                } catch (InterruptedException e) {
+                    // Pass
+                } catch (FileException e) {
+                    fail();
+                }
+            }
+        });
+        thread.start();
+        thread.join();
+        try (Stream children = dstDir.openDirectory()) {
+            assertFalse(children.iterator().hasNext());
         }
-      }
-    });
-    thread.start();
-    thread.join();
-    assertEmpty(asList(dstDir.list()));
-  }
-
-  public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {
-    String parent = tmp().createDir("parent").getPath();
-    String child = tmp().createDir("parent/child").getPath();
-    try {
-      create(singleton(parent), child).execute();
-      fail();
-    } catch (CannotPasteIntoSelfException pass) {
-      // Pass
     }
-  }
 
-  public void testErrorOnPastingIntoSelf() throws Exception {
-    String dir = tmp().createDir("parent").getPath();
-    try {
-      create(singleton(dir), dir).execute();
-      fail();
-    } catch (CannotPasteIntoSelfException pass) {
-      // Pass
+    public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {
+        Resource parent = dir1().resolve("parent").createDirectory();
+        Resource child = dir1().resolve("parent/child").createDirectory();
+        try {
+            create(singleton(parent), child).execute();
+            fail();
+        } catch (CannotPasteIntoSelfException pass) {
+            // Pass
+        }
     }
-  }
 
-  protected abstract Paste create(Iterable<String> sources, String dstDir);
+    public void testErrorOnPastingIntoSelf() throws Exception {
+        Resource dir = dir1().resolve("parent").createDirectory();
+        try {
+            create(singleton(dir), dir).execute();
+            fail();
+        } catch (CannotPasteIntoSelfException pass) {
+            // Pass
+        }
+    }
+
+    abstract Paste create(Iterable<Resource> sources, Resource dstDir);
+
 }

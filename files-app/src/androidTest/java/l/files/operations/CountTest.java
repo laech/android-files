@@ -1,29 +1,30 @@
 package l.files.operations;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.LocalResource;
+import l.files.fs.Resource;
+import l.files.fs.local.ResourceBaseTest;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
-public final class CountTest extends FileBaseTest {
+public final class CountTest extends ResourceBaseTest {
 
     public void testCount() throws Exception {
-        tmp().createFile("1/a.txt");
-        tmp().createFile("3/4/c.txt");
+        dir1().resolve("1/a.txt").createFile();
+        dir1().resolve("3/4/c.txt").createFile();
 
-        Set<File> expected = new HashSet<>(asList(
-                tmp().get(),
-                tmp().get("1"),
-                tmp().get("1/a.txt"),
-                tmp().get("3"),
-                tmp().get("3/4"),
-                tmp().get("3/4/c.txt")));
+        Set<Resource> expected = new HashSet<Resource>(asList(
+                dir1(),
+                dir1().resolve("1"),
+                dir1().resolve("1/a.txt"),
+                dir1().resolve("3"),
+                dir1().resolve("3/4"),
+                dir1().resolve("3/4/c.txt")
+        ));
 
-        Count counter = new Count(asList(LocalResource.create(tmp().get())));
+        Count counter = new Count(singletonList(dir1()));
         counter.execute();
 
         assertEquals(expected.size(), counter.getCount());

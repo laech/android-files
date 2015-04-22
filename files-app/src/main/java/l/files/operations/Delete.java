@@ -5,11 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
+import l.files.fs.ResourceVisitor;
 
-import static l.files.fs.Resource.Stream;
-import static l.files.fs.Resource.TraversalOrder.POST_ORDER;
+import static l.files.fs.ResourceVisitor.Order.POST;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
-final class Delete extends AbstractOperation {
+final class Delete extends AbstractOperation implements ResourceVisitor {
 
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
@@ -27,25 +29,27 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(Resource resource, FailureRecorder listener) throws InterruptedException {
+    void process(Resource resource) {
         try {
-            deleteTree(resource, listener);
+            resource.traverse(this, this);
         } catch (IOException e) {
-            listener.onFailure(resource, e);
+            record(resource, e);
         }
     }
 
-    private void deleteTree(Resource resource, FailureRecorder listener) throws IOException, InterruptedException {
-        try (Stream resources = traverse(resource, POST_ORDER, listener)) {
-            for (Resource child : resources) {
-                checkInterrupt();
-                try {
-                    delete(child);
-                } catch (IOException e) {
-                    listener.onFailure(child, e);
-                }
+    @Override
+    public Result accept(Order order, Resource resource) {
+        if (isInterrupted()) {
+            return TERMINATE;
+        }
+        if (POST.equals(order)) {
+            try {
+                delete(resource);
+            } catch (IOException e) {
+                record(resource, e);
             }
         }
+        return CONTINUE;
     }
 
     private void delete(Resource resource) throws IOException {

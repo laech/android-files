@@ -3,9 +3,7 @@ package l.files.fs.local;
 import android.system.Os;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.TreeTraverser;
 import com.google.common.net.MediaType;
 
 import java.io.Closeable;
@@ -13,11 +11,16 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,10 +53,7 @@ import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 import static android.system.OsConstants.S_IXUSR;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
-import static java.util.Objects.requireNonNull;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -204,47 +204,6 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public Stream traverse(
-            TraversalOrder order,
-            TraversalExceptionHandler handler) throws IOException {
-
-        LocalPathEntry root = LocalPathEntry.stat(getFile());
-
-        Iterable<LocalPathEntry> iterable;
-        switch (order) {
-            case BREATH_FIRST:
-                iterable = new Traverser(handler).breadthFirstTraversal(root);
-                break;
-            case POST_ORDER:
-                iterable = new Traverser(handler).postOrderTraversal(root);
-                break;
-            case PRE_ORDER:
-                iterable = new Traverser(handler).preOrderTraversal(root);
-                break;
-            default:
-                throw new AssertionError(order.name());
-        }
-
-        final Iterable<Resource> resources = Iterables.transform(iterable, new Function<LocalPathEntry, Resource>() {
-            @Override
-            public Resource apply(LocalPathEntry input) {
-                return input.getResource();
-            }
-        });
-
-        return new Stream() {
-            @Override
-            public void close() throws IOException {
-            }
-
-            @Override
-            public Iterator<Resource> iterator() {
-                return resources.iterator();
-            }
-        };
-    }
-
-    @Override
     public void traverse(ResourceVisitor visitor) throws IOException {
         traverse(visitor, new ExceptionHandler() {
             @Override
@@ -259,35 +218,6 @@ public abstract class LocalResource implements Resource {
     public void traverse(ResourceVisitor visitor,
                          ExceptionHandler handler) throws IOException {
         new LocalResourceTraverser(this, visitor, handler).traverse();
-    }
-
-    private static final class Traverser extends TreeTraverser<LocalPathEntry> {
-
-        private final TraversalExceptionHandler handler;
-
-        Traverser(TraversalExceptionHandler handler) {
-            this.handler = requireNonNull(handler, "handler");
-        }
-
-        @Override
-        public Iterable<LocalPathEntry> children(LocalPathEntry root) {
-            try {
-                if (!root.isDirectory()) {
-                    return emptyList();
-                }
-                try (LocalResourceStream steam = LocalResourceStream.open(root.getResource())) {
-                    ArrayList<LocalPathEntry> children = new ArrayList<>();
-                    for (LocalPathEntry entry : steam) {
-                        children.add(entry);
-                    }
-                    children.trimToSize();
-                    return unmodifiableList(children);
-                }
-            } catch (IOException e) {
-                handler.handle(root.getResource(), e);
-                return emptyList();
-            }
-        }
     }
 
     @Override
@@ -324,6 +254,16 @@ public abstract class LocalResource implements Resource {
     @Override
     public OutputStream openOutputStream(boolean append) throws IOException {
         return new FileOutputStream(getFile(), append);
+    }
+
+    @Override
+    public Reader openReader() throws IOException {
+        return new FileReader(getPath());
+    }
+
+    @Override
+    public Writer openWriter(Charset charset) throws IOException {
+        return new FileWriter(getPath());
     }
 
     @Override
@@ -452,6 +392,23 @@ public abstract class LocalResource implements Resource {
     @Override
     public MediaType detectMediaType() throws IOException {
         return MagicFileTypeDetector.INSTANCE.detect(this);
+    }
+
+    @Override
+    public String readString(Charset charset) throws IOException {
+        return readString(charset, new StringBuilder()).toString();
+    }
+
+    @Override
+    public <T extends Appendable> T readString(Charset charset, T appendable) throws IOException {
+        try (Reader reader = openReader()) {
+            CharBuffer buffer = CharBuffer.wrap(new char[8192]);
+            int read;
+            while ((read = reader.read(buffer)) > -1) {
+                appendable.append(buffer, 0, read);
+            }
+        }
+        return appendable;
     }
 
 }

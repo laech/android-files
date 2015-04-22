@@ -8,7 +8,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -94,14 +97,6 @@ public interface Resource extends Parcelable {
     Closeable observe(WatchEvent.Listener observer) throws IOException;
 
     /**
-     * Traverse this subtree. Accepts an error handler, if the handler does not
-     * rethrow the exception, traversal will continue.
-     */
-    @Deprecated
-    Stream traverse(TraversalOrder order,
-                    TraversalExceptionHandler handler) throws IOException;
-
-    /**
      * A short cut for {@link #traverse(ResourceVisitor, ExceptionHandler)} that
      * will terminate as soon as an error is encountered.
      */
@@ -116,13 +111,19 @@ public interface Resource extends Parcelable {
     /**
      * Opens a resource stream to iterate through the immediate children.
      */
-    Stream openDirectory() throws IOException;
+    Stream openDirectory() throws IOException; // TODO callback style
 
     InputStream openInputStream() throws IOException;
 
     OutputStream openOutputStream() throws IOException;
 
     OutputStream openOutputStream(boolean append) throws IOException;
+
+    Reader openReader() throws IOException;
+
+    Writer openWriter(Charset charset) throws IOException;
+
+    // Writer openWriter(Charset charset, boolean append) throws IOException;
 
     /**
      * Creates this resource as a directory. Will fail if the directory already
@@ -259,15 +260,16 @@ public interface Resource extends Parcelable {
      */
     MediaType detectMediaType() throws IOException;
 
-    enum TraversalOrder {
-        BREATH_FIRST,
-        PRE_ORDER,
-        POST_ORDER
-    }
+    /**
+     * Reads the underlying file content as string.
+     */
+    String readString(Charset charset) throws IOException;
 
-    interface TraversalExceptionHandler {
-        void handle(Resource resource, IOException e);
-    }
+    /**
+     * Appends the underlying file content as string into the given appendable,
+     * returns the appendable.
+     */
+    <T extends Appendable> T readString(Charset charset, T appendable) throws IOException;
 
     interface Stream extends Iterable<Resource>, Closeable {
     }

@@ -5,10 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 
 import l.files.fs.Resource;
+import l.files.fs.ResourceVisitor.ExceptionHandler;
+import l.files.fs.ResourceVisitor.Order;
 
-import static l.files.fs.Resource.TraversalOrder;
+import static java.lang.Thread.currentThread;
 
-abstract class AbstractOperation implements FileOperation {
+abstract class AbstractOperation implements FileOperation, ExceptionHandler {
 
     /**
      * The amount of errors to catch before stopping. Don't want to hold an
@@ -18,15 +20,25 @@ abstract class AbstractOperation implements FileOperation {
     private static final int ERROR_LIMIT = 20;
 
     private final Iterable<Resource> resources;
+    private final FailureRecorder recorder;
 
     AbstractOperation(Iterable<? extends Resource> resources) {
         this.resources = ImmutableSet.copyOf(resources);
+        this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
 
-    void checkInterrupt() throws InterruptedException {
+    final void checkInterrupt() throws InterruptedException {
         if (Thread.interrupted()) {
             throw new InterruptedException();
         }
+    }
+
+    final boolean isInterrupted() {
+        return currentThread().isInterrupted();
+    }
+
+    final void record(Resource resource, IOException exception) {
+        recorder.onFailure(resource, exception);
     }
 
     @Override
@@ -34,25 +46,16 @@ abstract class AbstractOperation implements FileOperation {
         FailureRecorder listener = new FailureRecorder(ERROR_LIMIT);
         for (Resource resource : resources) {
             checkInterrupt();
-            process(resource, listener);
+            process(resource);
         }
         listener.throwIfNotEmpty();
     }
 
-    abstract void process(Resource resource, FailureRecorder listener)
-            throws InterruptedException;
-
-    protected final Resource.Stream traverse(
-            Resource resource,
-            TraversalOrder order,
-            final FailureRecorder listener) throws IOException {
-
-        return resource.traverse(order, new Resource.TraversalExceptionHandler() {
-            @Override
-            public void handle(Resource resource, IOException e) {
-                listener.onFailure(resource, e);
-            }
-        });
+    @Override
+    public void handle(Order order, Resource resource, IOException e) {
+        record(resource, e);
     }
+
+    abstract void process(Resource resource) throws InterruptedException;
 
 }

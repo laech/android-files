@@ -1,14 +1,16 @@
 package l.files.operations;
 
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Resource;
+import l.files.fs.ResourceVisitor;
 
-import static l.files.fs.Resource.TraversalOrder.BREATH_FIRST;
+import static l.files.fs.ResourceVisitor.Order.PRE;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
-class Count extends AbstractOperation {
+class Count extends AbstractOperation implements ResourceVisitor {
 
     private final AtomicInteger count = new AtomicInteger();
 
@@ -21,22 +23,24 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(Resource resource, FailureRecorder listener) throws InterruptedException {
+    void process(Resource resource) {
         try {
-            count(resource, listener);
+            resource.traverse(this, this);
         } catch (IOException e) {
-            listener.onFailure(resource, e);
+            record(resource, e);
         }
     }
 
-    private void count(Resource resource, FailureRecorder listener) throws IOException, InterruptedException {
-        try (Resource.Stream resources = traverse(resource, BREATH_FIRST, listener)) {
-            for (Resource child : resources) {
-                checkInterrupt();
-                onCount(child);
-                count.incrementAndGet();
-            }
+    @Override
+    public Result accept(Order order, Resource resource) throws IOException {
+        if (isInterrupted()) {
+            return TERMINATE;
         }
+        if (PRE.equals(order)) {
+            count.incrementAndGet();
+            onCount(resource);
+        }
+        return CONTINUE;
     }
 
     void onCount(Resource resource) {

@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import java.io.File;
+import java.io.IOException;
 
 import l.files.fs.Resource;
 import l.files.fs.local.Files;
@@ -18,8 +19,7 @@ abstract class Paste extends AbstractOperation {
     }
 
     @Override
-    void process(Resource resource, FailureRecorder listener)
-            throws InterruptedException {
+    void process(Resource resource) throws InterruptedException {
         checkInterrupt();
 
         File destinationFile = new File(destination.getUri());
@@ -33,7 +33,11 @@ abstract class Paste extends AbstractOperation {
         }
 
         File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
-        paste(resource, LocalResource.create(to), listener);
+        try {
+            paste(resource, LocalResource.create(to));
+        } catch (IOException e) {
+            record(resource, e);
+        }
     }
 
     /**
@@ -41,7 +45,6 @@ abstract class Paste extends AbstractOperation {
      * its content into {@code to}. If {@code from} is a directory, paste its
      * content into {@code to}.
      */
-    abstract void paste(Resource from, Resource to, FailureRecorder listener)
-            throws InterruptedException;
+    abstract void paste(Resource from, Resource to) throws IOException;
 
 }

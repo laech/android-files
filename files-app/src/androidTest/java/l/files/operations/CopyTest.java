@@ -1,56 +1,46 @@
 package l.files.operations;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.io.Files;
-
-import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
 
-import static com.google.common.io.Files.write;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.singleton;
 
 public final class CopyTest extends PasteTest {
 
     public void testCopySummary() throws Exception {
-        File dstDir = tmp().createDir("dir");
-        File srcDir = tmp().createDir("a");
-        tmp().createFile("a/file");
+        Resource dstDir = dir1().resolve("dir").createDirectory();
+        Resource srcDir = dir1().resolve("a").createDirectory();
+        Resource srcFile = dir1().resolve("a/file").createFile();
 
-        Copy copy = create(singletonList(srcDir.getPath()), dstDir.getPath());
+        Copy copy = create(singleton(srcDir), dstDir);
         copy.execute();
 
-        List<File> files = asList(
-                tmp().get("a"),
-                tmp().get("a/file")
-        );
-
-        assertEquals(getSize(files), copy.getCopiedByteCount());
-        assertEquals(files.size(), copy.getCopiedItemCount());
+        List<Resource> expected = asList(srcDir, srcFile);
+        assertEquals(getSize(expected), copy.getCopiedByteCount());
+        assertEquals(expected.size(), copy.getCopiedItemCount());
     }
 
-    public long getSize(Iterable<File> files) {
+    public long getSize(Iterable<Resource> resources) throws IOException {
         long size = 0;
-        for (File file : files) {
-            size += file.length();
+        for (Resource resource : resources) {
+            size += resource.readStatus(false).getSize();
         }
         return size;
     }
 
     public void testCopiesFileTimes() throws Exception {
-        Resource srcFile = LocalResource.create(tmp().createFile("a"));
-        Resource dstDir = LocalResource.create(tmp().createDir("dst"));
+        Resource srcFile = dir1().resolve("a").createFile();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource dstFile = dstDir.resolve(srcFile.getName());
 
         sleep(5);
-        copy(new File(srcFile.getUri()), new File(dstDir.getUri()));
+        copy(srcFile, dstDir);
 
         assertEquals(
                 srcFile.readStatus(false).getAccessTime(),
@@ -63,59 +53,58 @@ public final class CopyTest extends PasteTest {
     }
 
     public void testCopiesSymlink() throws Exception {
-        Resource target = LocalResource.create(tmp().createFile("target"));
-        Resource link = LocalResource.create(tmp().get("link"));
-        link.createSymbolicLink(target);
+        Resource target = dir1().resolve("target").createFile();
+        Resource link = dir1().resolve("link").createSymbolicLink(target);
 
-        copy(new File(link.getUri()), tmp().createDir("copied"));
+        copy(link, dir1().resolve("copied").createDirectory());
 
-        LocalResource copied = LocalResource.create(tmp().get("copied/link"));
+        Resource copied = dir1().resolve("copied/link");
         assertEquals(target, copied.readSymbolicLink());
     }
 
     public void testCopiesDirectory() throws Exception {
-        File srcDir = tmp().createDir("a");
-        File dstDir = tmp().createDir("dst");
-        File srcFile = new File(srcDir, "test.txt");
-        File dstFile = new File(dstDir, "a/test.txt");
-        write("Testing", srcFile, UTF_8);
+        Resource srcDir = dir1().resolve("a").createDirectory();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
+        Resource srcFile = srcDir.resolve("test.txt");
+        Resource dstFile = dstDir.resolve("a/test.txt");
+        try (Writer out = srcFile.openWriter(UTF_8)) {
+            out.write("Testing");
+        }
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", Files.toString(srcFile, UTF_8));
-        assertEquals("Testing", Files.toString(dstFile, UTF_8));
+        assertEquals("Testing", srcFile.readString(UTF_8));
+        assertEquals("Testing", dstFile.readString(UTF_8));
     }
 
     public void testCopiesEmptyFile() throws Exception {
-        File srcFile = tmp().createFile("empty");
-        File dstDir = tmp().createDir("dst");
+        Resource srcFile = dir1().resolve("empty").createFile();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
 
         copy(srcFile, dstDir);
-        assertTrue(tmp().get("dst/empty").exists());
+        assertTrue(dir1().resolve("dst/empty").exists());
     }
 
     public void testCopiesFile() throws Exception {
-        File srcFile = tmp().createFile("test.txt");
-        File dstDir = tmp().createDir("dst");
-        File dstFile = new File(dstDir, "test.txt");
-        write("Testing", srcFile, UTF_8);
+        Resource srcFile = dir1().resolve("test.txt").createFile();
+        Resource dstDir = dir1().resolve("dst").createDirectory();
+        Resource dstFile = dstDir.resolve("test.txt");
+        try (Writer writer = srcFile.openWriter(UTF_8)) {
+            writer.write("Testing");
+        }
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", Files.toString(srcFile, UTF_8));
-        assertEquals("Testing", Files.toString(dstFile, UTF_8));
+        assertEquals("Testing", srcFile.readString(UTF_8));
+        assertEquals("Testing", dstFile.readString(UTF_8));
     }
 
-    private void copy(File src, File dstDir) throws IOException, InterruptedException {
-        create(singletonList(src.getPath()), dstDir.getPath()).execute();
+    private void copy(Resource src, Resource dstDir)
+            throws IOException, InterruptedException {
+        create(singleton(src), dstDir).execute();
     }
 
     @Override
-    protected Copy create(Iterable<String> sources, String dstDir) {
-        return new Copy(Iterables.transform(sources, new Function<String, Resource>() {
-            @Override
-            public Resource apply(String input) {
-                return LocalResource.create(new File(input));
-            }
-        }), LocalResource.create(new File(dstDir)));
+    protected Copy create(Iterable<Resource> sources, Resource dstDir) {
+        return new Copy(sources, dstDir);
     }
 
 }

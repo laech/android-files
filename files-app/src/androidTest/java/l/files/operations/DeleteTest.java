@@ -1,57 +1,55 @@
 package l.files.operations;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import l.files.common.testing.FileBaseTest;
+import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.ResourceBaseTest;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 
-public final class DeleteTest extends FileBaseTest {
+public final class DeleteTest extends ResourceBaseTest {
 
     public void testNotifiesListener() throws Exception {
-        File src = tmp().createDir("a");
-        tmp().createFile("a/b");
+        Resource a = dir1().resolve("a").createDirectory();
+        Resource b = dir1().resolve("a/b").createFile();
 
-        Set<File> expected = new HashSet<>(asList(
-                tmp().get("a"),
-                tmp().get("a/b")
-        ));
+        Set<Resource> expected = new HashSet<>(asList(a, b));
 
-        Delete delete = create(asList(LocalResource.create(src)));
+        Delete delete = create(singletonList(a));
         delete.execute();
 
         assertEquals(delete.getDeletedItemCount(), expected.size());
     }
 
     public void testDeletesFile() throws Exception {
-        File file = tmp().createFile("a");
+        Resource file = dir1().resolve("a").createFile();
         delete(file);
         assertFalse(file.exists());
     }
 
     public void testDeletesNonEmptyDirectory() throws Exception {
-        File dir = tmp().createDir("a");
-        File file = tmp().createFile("a/child.txt");
+        Resource dir = dir1().resolve("a").createDirectory();
+        Resource file = dir1().resolve("a/child.txt").createFile();
         delete(dir);
         assertFalse(file.exists());
         assertFalse(dir.exists());
     }
 
     public void testDeletesEmptyDirectory() throws Exception {
-        File dir = tmp().createDir("a");
+        Resource dir = dir1().resolve("a").createDirectory();
         delete(dir);
         assertFalse(dir.exists());
     }
 
     public void testDeletesSymbolicLinkButNotLinkedFile() throws Exception {
-        File a = tmp().createFile("a");
-        File b = tmp().get("b");
-        LocalResource.create(b).createSymbolicLink(LocalResource.create(a));
+        Resource a = dir1().resolve("a").createFile();
+        Resource b = dir1().resolve("b").createSymbolicLink(a);
         assertTrue(a.exists());
         assertTrue(b.exists());
         delete(b);
@@ -60,8 +58,8 @@ public final class DeleteTest extends FileBaseTest {
     }
 
     public void testReturnsFailures() throws Exception {
-        File a = tmp().createFile("a");
-        assertTrue(tmp().get().setWritable(false));
+        Resource a = dir1().resolve("a").createFile();
+        dir1().setPermissions(Collections.<Permission>emptySet());
 
         List<Failure> failures = null;
         try {
@@ -70,15 +68,16 @@ public final class DeleteTest extends FileBaseTest {
         } catch (FileException e) {
             failures = e.failures();
         }
-        assertEquals(LocalResource.create(a), failures.get(0).getResource());
+        assertEquals(a, failures.get(0).getResource());
         assertEquals(1, failures.size());
     }
 
-    private void delete(File file) throws Exception {
-        create(asList(LocalResource.create(file))).execute();
+    private void delete(Resource resource) throws Exception {
+        create(singleton(resource)).execute();
     }
 
     private Delete create(Iterable<? extends Resource> resources) {
         return new Delete(resources);
     }
+
 }

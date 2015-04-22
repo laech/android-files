@@ -9,10 +9,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+import l.files.fs.ResourceVisitor;
 import l.files.logging.Logger;
 
-import static l.files.fs.Resource.Stream;
-import static l.files.fs.Resource.TraversalOrder.PRE_ORDER;
+import static l.files.fs.ResourceVisitor.Order.PRE;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
 final class Copy extends Paste {
 
@@ -35,66 +37,71 @@ final class Copy extends Paste {
     }
 
     @Override
-    void paste(Resource from, Resource to, FailureRecorder listener) throws InterruptedException {
-        try (Stream resources = traverse(from, PRE_ORDER, listener)) {
-
-            for (Resource resource : resources) {
-                checkInterrupt();
+    void paste(final Resource from, final Resource to) throws IOException {
+        from.traverse(new ResourceVisitor() {
+            @Override
+            public Result accept(Order order, Resource resource) throws IOException {
+                if (isInterrupted()) {
+                    return TERMINATE;
+                }
+                if (!PRE.equals(order)) {
+                    return CONTINUE;
+                }
 
                 ResourceStatus status;
                 try {
                     status = resource.readStatus(false);
                 } catch (IOException e) {
-                    listener.onFailure(resource, e);
-                    continue;
+                    record(resource, e);
+                    return CONTINUE;
                 }
 
                 Resource dst = resource.resolveParent(from, to);
 
                 if (status.isSymbolicLink()) {
-                    copyLink(status, dst, listener);
+                    copyLink(status, dst);
 
                 } else if (status.isDirectory()) {
-                    createDirectory(status, dst, listener);
+                    createDirectory(status, dst);
 
                 } else if (status.isRegularFile()) {
-                    copyFile(status, dst, listener);
+                    copyFile(status, dst);
 
                 } else {
-                    listener.onFailure(resource, new IOException("Not a file or directory"));
+                    record(resource, new IOException("Not a file or directory"));
                 }
+
+                return CONTINUE;
             }
-
-        } catch (IOException e) {
-            listener.onFailure(from, e);
-        }
-
+        }, this);
     }
 
-    private void copyLink(ResourceStatus src, Resource dst, FailureRecorder listener) {
+    private void copyLink(ResourceStatus src, Resource dst) {
         try {
             dst.createSymbolicLink(src.getResource().readSymbolicLink());
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
             setTimes(src, dst);
         } catch (IOException e) {
-            listener.onFailure(src.getResource(), e);
+            record(src.getResource(), e);
         }
     }
 
-    private void createDirectory(ResourceStatus src, Resource dst, FailureRecorder listener) {
+    private void createDirectory(ResourceStatus src, Resource dst) {
         try {
             dst.createDirectory();
             copiedByteCount.addAndGet(src.getSize());
             copiedItemCount.incrementAndGet();
             setTimes(src, dst);
         } catch (IOException e) {
-            listener.onFailure(src.getResource(), e);
+            record(src.getResource(), e);
         }
     }
 
-    private void copyFile(ResourceStatus src, Resource dst, FailureRecorder listener) throws InterruptedException {
-        checkInterrupt();
+    private void copyFile(ResourceStatus src, Resource dst) {
+        if (isInterrupted()) {
+            return;
+        }
 
         try {
 
@@ -117,9 +124,9 @@ final class Copy extends Paste {
             }
 
             if (e instanceof ClosedByInterruptException) {
-                throw new InterruptedException();
+                return;
             } else {
-                listener.onFailure(src.getResource(), e);
+                record(src.getResource(), e);
             }
         }
 

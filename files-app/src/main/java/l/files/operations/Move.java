@@ -1,6 +1,5 @@
 package l.files.operations;
 
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,12 +18,12 @@ final class Move extends Paste {
     }
 
     @Override
-    void paste(Resource from, Resource to, FailureRecorder listener) {
+    void paste(Resource from, Resource to) {
         try {
             from.renameTo(to);
             movedItemCount.incrementAndGet();
         } catch (IOException e) {
-            listener.onFailure(from, e);
+            record(from, e);
         }
     }
 
