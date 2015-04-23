@@ -7,33 +7,51 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.NotDirectoryException;
 import l.files.fs.Resource;
 import l.files.fs.Resource.Stream;
+import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
-import l.files.fs.ResourceVisitor.ExceptionHandler;
 import l.files.fs.ResourceVisitor.Result;
 import l.files.fs.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
-import static l.files.fs.ResourceVisitor.Order.POST;
-import static l.files.fs.ResourceVisitor.Order.PRE;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 
-/**
- * Conforms to the contract of {@link Resource#traverse(ResourceVisitor)}.
- */
 final class LocalResourceTraverser {
 
-    private final ResourceVisitor visitor;
-    private final ExceptionHandler handler;
+    private static final ResourceVisitor DEFAULT_VISITOR =
+            new ResourceVisitor() {
+                @Override
+                public Result accept(Resource resource) throws IOException {
+                    return CONTINUE;
+                }
+            };
+
+    private static final ResourceExceptionHandler DEFAULT_HANDLER =
+            new ResourceExceptionHandler() {
+                @Override
+                public void handle(Resource resource, IOException e)
+                        throws IOException {
+                    throw e;
+                }
+            };
+
+    private final ResourceVisitor pre;
+    private final ResourceVisitor post;
+    private final ResourceExceptionHandler handler;
     private final Deque<Node> stack;
 
     LocalResourceTraverser(Resource root,
-                           ResourceVisitor visitor,
-                           ExceptionHandler handler) {
+                           @Nullable ResourceVisitor pre,
+                           @Nullable ResourceVisitor post,
+                           @Nullable ResourceExceptionHandler handler) {
         requireNonNull(root, "root");
-        this.visitor = requireNonNull(visitor, "visitor");
-        this.handler = requireNonNull(handler, "handler");
+        this.pre = pre != null ? pre : DEFAULT_VISITOR;
+        this.post = post != null ? post : DEFAULT_VISITOR;
+        this.handler = handler != null ? handler : DEFAULT_HANDLER;
         this.stack = new ArrayDeque<>();
         this.stack.push(new Node(root));
     }
@@ -48,10 +66,10 @@ final class LocalResourceTraverser {
 
                 Result result;
                 try {
-                    result = visitor.accept(PRE, node.resource);
+                    result = pre.accept(node.resource);
                 } catch (IOException e) {
                     stack.pop();
-                    handler.handle(PRE, node.resource, e);
+                    handler.handle(node.resource, e);
                     continue;
                 }
 
@@ -66,9 +84,9 @@ final class LocalResourceTraverser {
                 try {
                     pushChildren(stack, node);
                 } catch (UncheckedIOException e) {
-                    handler.handle(PRE, node.resource, e.getCause());
+                    handler.handle(node.resource, e.getCause());
                 } catch (IOException e) {
-                    handler.handle(PRE, node.resource, e);
+                    handler.handle(node.resource, e);
                 }
 
             } else {
@@ -76,9 +94,9 @@ final class LocalResourceTraverser {
                 stack.pop();
                 Result result;
                 try {
-                    result = visitor.accept(POST, node.resource);
+                    result = post.accept(node.resource);
                 } catch (IOException e) {
-                    handler.handle(POST, node.resource, e);
+                    handler.handle(node.resource, e);
                     continue;
                 }
                 switch (result) {

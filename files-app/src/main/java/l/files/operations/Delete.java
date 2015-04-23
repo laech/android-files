@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import l.files.fs.Resource;
 import l.files.fs.ResourceVisitor;
 
-import static l.files.fs.ResourceVisitor.Order.POST;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -31,23 +30,21 @@ final class Delete extends AbstractOperation implements ResourceVisitor {
     @Override
     void process(Resource resource) {
         try {
-            resource.traverse(this, this);
+            postOrderTraversal(resource, this);
         } catch (IOException e) {
             record(resource, e);
         }
     }
 
     @Override
-    public Result accept(Order order, Resource resource) {
+    public Result accept(Resource resource) {
         if (isInterrupted()) {
             return TERMINATE;
         }
-        if (POST.equals(order)) {
-            try {
-                delete(resource);
-            } catch (IOException e) {
-                record(resource, e);
-            }
+        try {
+            delete(resource);
+        } catch (IOException e) {
+            record(resource, e);
         }
         return CONTINUE;
     }

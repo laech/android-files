@@ -12,7 +12,6 @@ import l.files.fs.ResourceStatus;
 import l.files.fs.ResourceVisitor;
 import l.files.logging.Logger;
 
-import static l.files.fs.ResourceVisitor.Order.PRE;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -38,14 +37,11 @@ final class Copy extends Paste {
 
     @Override
     void paste(final Resource from, final Resource to) throws IOException {
-        from.traverse(new ResourceVisitor() {
+        preOrderTraversal(from, new ResourceVisitor() {
             @Override
-            public Result accept(Order order, Resource resource) throws IOException {
+            public Result accept(Resource resource) throws IOException {
                 if (isInterrupted()) {
                     return TERMINATE;
-                }
-                if (!PRE.equals(order)) {
-                    return CONTINUE;
                 }
 
                 ResourceStatus status;
@@ -73,7 +69,7 @@ final class Copy extends Paste {
 
                 return CONTINUE;
             }
-        }, this);
+        });
     }
 
     private void copyLink(ResourceStatus src, Resource dst) {

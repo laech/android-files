@@ -13,7 +13,6 @@ import l.files.fs.ResourceException;
 import l.files.fs.ResourceVisitor;
 
 import static com.google.common.io.Files.createTempDir;
-import static l.files.fs.ResourceVisitor.Order.PRE;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 
 public abstract class ResourceBaseTest extends BaseTest {
@@ -56,20 +55,24 @@ public abstract class ResourceBaseTest extends BaseTest {
     }
 
     private static void delete(Resource resource) throws IOException {
-        resource.traverse(new ResourceVisitor() {
-            @Override
-            public Result accept(Order order, Resource resource) throws IOException {
-                if (order == PRE) {
-                    try {
-                        resource.setPermissions(EnumSet.allOf(Permission.class));
-                    } catch (ResourceException ignore) {
+        resource.traverse(
+                new ResourceVisitor() {
+                    @Override
+                    public Result accept(Resource resource) throws IOException {
+                        try {
+                            resource.setPermissions(EnumSet.allOf(Permission.class));
+                        } catch (ResourceException ignore) {
+                        }
+                        return CONTINUE;
                     }
-                } else {
-                    resource.delete();
-                }
-                return CONTINUE;
-            }
-        });
+                },
+                new ResourceVisitor() {
+                    @Override
+                    public Result accept(Resource resource) throws IOException {
+                        resource.delete();
+                        return CONTINUE;
+                    }
+                });
     }
 
 }

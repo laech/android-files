@@ -5,12 +5,14 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceVisitor.ExceptionHandler;
-import l.files.fs.ResourceVisitor.Order;
+import l.files.fs.ResourceExceptionHandler;
+import l.files.fs.ResourceVisitor;
 
 import static java.lang.Thread.currentThread;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
-abstract class AbstractOperation implements FileOperation, ExceptionHandler {
+abstract class AbstractOperation implements FileOperation {
 
     /**
      * The amount of errors to catch before stopping. Don't want to hold an
@@ -41,6 +43,37 @@ abstract class AbstractOperation implements FileOperation, ExceptionHandler {
         recorder.onFailure(resource, exception);
     }
 
+    final void preOrderTraversal(Resource resource, ResourceVisitor visitor)
+            throws IOException {
+        resource.traverse(visitor, terminateOnInterrupt(), recordOnException());
+    }
+
+    final void postOrderTraversal(Resource resource, ResourceVisitor visitor)
+            throws IOException {
+        resource.traverse(terminateOnInterrupt(), visitor, recordOnException());
+    }
+
+    private ResourceVisitor terminateOnInterrupt() {
+        return new ResourceVisitor() {
+            @Override
+            public Result accept(Resource resource) throws IOException {
+                if (isInterrupted()) {
+                    return TERMINATE;
+                }
+                return CONTINUE;
+            }
+        };
+    }
+
+    private ResourceExceptionHandler recordOnException() {
+        return new ResourceExceptionHandler() {
+            @Override
+            public void handle(Resource resource, IOException e) throws IOException {
+                record(resource, e);
+            }
+        };
+    }
+
     @Override
     public void execute() throws InterruptedException {
         FailureRecorder listener = new FailureRecorder(ERROR_LIMIT);
@@ -49,11 +82,6 @@ abstract class AbstractOperation implements FileOperation, ExceptionHandler {
             process(resource);
         }
         listener.throwIfNotEmpty();
-    }
-
-    @Override
-    public void handle(Order order, Resource resource, IOException e) {
-        record(resource, e);
     }
 
     abstract void process(Resource resource) throws InterruptedException;

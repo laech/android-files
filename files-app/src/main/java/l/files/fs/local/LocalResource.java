@@ -34,9 +34,8 @@ import l.files.fs.Instant;
 import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
-import l.files.fs.ResourceVisitor.ExceptionHandler;
-import l.files.fs.ResourceVisitor.Order;
 import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.O_CREAT;
@@ -204,10 +203,11 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void traverse(ResourceVisitor visitor) throws IOException {
-        traverse(visitor, new ExceptionHandler() {
+    public void traverse(@Nullable ResourceVisitor pre,
+                         @Nullable ResourceVisitor post) throws IOException {
+        traverse(pre, post, new ResourceExceptionHandler() {
             @Override
-            public void handle(Order order, Resource resource, IOException e)
+            public void handle(Resource resource, IOException e)
                     throws IOException {
                 throw e;
             }
@@ -215,9 +215,11 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void traverse(ResourceVisitor visitor,
-                         ExceptionHandler handler) throws IOException {
-        new LocalResourceTraverser(this, visitor, handler).traverse();
+    public void traverse(@Nullable ResourceVisitor pre,
+                         @Nullable ResourceVisitor post,
+                         @Nullable ResourceExceptionHandler handler)
+            throws IOException {
+        new LocalResourceTraverser(this, pre, post, handler).traverse();
     }
 
     @Override
@@ -402,10 +404,10 @@ public abstract class LocalResource implements Resource {
     @Override
     public <T extends Appendable> T readString(Charset charset, T appendable) throws IOException {
         try (Reader reader = openReader()) {
-            CharBuffer buffer = CharBuffer.wrap(new char[8192]);
-            int read;
-            while ((read = reader.read(buffer)) > -1) {
-                appendable.append(buffer, 0, read);
+            for (CharBuffer buffer = CharBuffer.allocate(8192);
+                 reader.read(buffer) > -1; ) {
+                buffer.flip();
+                appendable.append(buffer);
             }
         }
         return appendable;

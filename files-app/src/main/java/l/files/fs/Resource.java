@@ -16,8 +16,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import l.files.fs.ResourceVisitor.ExceptionHandler;
-
 /**
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
@@ -97,16 +95,40 @@ public interface Resource extends Parcelable {
     Closeable observe(WatchEvent.Listener observer) throws IOException;
 
     /**
-     * A short cut for {@link #traverse(ResourceVisitor, ExceptionHandler)} that
-     * will terminate as soon as an error is encountered.
+     * Performs a traversal that will terminate as soon as an error is
+     * encountered.
+     *
+     * @see #traverse(ResourceVisitor, ResourceVisitor, ResourceExceptionHandler)
      */
-    void traverse(ResourceVisitor visitor) throws IOException;
+    void traverse(@Nullable ResourceVisitor pre,
+                  @Nullable ResourceVisitor post) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.
+     * <p/>
+     * e.g. traversing the follow tree:
+     * <pre>
+     *     a
+     *    / \
+     *   b   c
+     * </pre>
+     * will generate:
+     * <pre>
+     * pre.accept(a)
+     * pre.accept(b)
+     * post.accept(b)
+     * pre.accept(c)
+     * post.accept(c)
+     * post.accept(a)
+     * </pre>
+     *
+     * @param pre     callback for pre order traversals
+     * @param post    callback for post order traversals
+     * @param handler handles any exception encountered duration traversal
      */
-    void traverse(ResourceVisitor visitor,
-                  ExceptionHandler handler) throws IOException;
+    void traverse(@Nullable ResourceVisitor pre,
+                  @Nullable ResourceVisitor post,
+                  @Nullable ResourceExceptionHandler handler) throws IOException;
 
     /**
      * Opens a resource stream to iterate through the immediate children.

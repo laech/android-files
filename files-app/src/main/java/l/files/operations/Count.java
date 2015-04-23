@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import l.files.fs.Resource;
 import l.files.fs.ResourceVisitor;
 
-import static l.files.fs.ResourceVisitor.Order.PRE;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -25,6 +24,7 @@ class Count extends AbstractOperation implements ResourceVisitor {
     @Override
     void process(Resource resource) {
         try {
+            preOrderTraversal(resource, this);
             resource.traverse(this, this);
         } catch (IOException e) {
             record(resource, e);
@@ -32,14 +32,12 @@ class Count extends AbstractOperation implements ResourceVisitor {
     }
 
     @Override
-    public Result accept(Order order, Resource resource) throws IOException {
+    public Result accept(Resource resource) throws IOException {
         if (isInterrupted()) {
             return TERMINATE;
         }
-        if (PRE.equals(order)) {
-            count.incrementAndGet();
-            onCount(resource);
-        }
+        count.incrementAndGet();
+        onCount(resource);
         return CONTINUE;
     }
 
