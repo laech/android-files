@@ -8,6 +8,7 @@ import java.util.ListIterator;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceExceptionHandler;
@@ -38,16 +39,20 @@ final class LocalResourceTraverser {
                 }
             };
 
+    private final Resource root;
+    private final LinkOption rootOption;
     private final ResourceVisitor pre;
     private final ResourceVisitor post;
     private final ResourceExceptionHandler handler;
     private final Deque<Node> stack;
 
     LocalResourceTraverser(Resource root,
+                           LinkOption option,
                            @Nullable ResourceVisitor pre,
                            @Nullable ResourceVisitor post,
                            @Nullable ResourceExceptionHandler handler) {
-        requireNonNull(root, "root");
+        this.rootOption = requireNonNull(option, "option");
+        this.root = requireNonNull(root, "root");
         this.pre = pre != null ? pre : DEFAULT_VISITOR;
         this.post = post != null ? post : DEFAULT_VISITOR;
         this.handler = handler != null ? handler : DEFAULT_HANDLER;
@@ -111,8 +116,9 @@ final class LocalResourceTraverser {
     private void pushChildren(final Deque<Node> stack, Node parent)
             throws IOException {
 
+        LinkOption option = parent.resource.equals(root) ? rootOption : NOFOLLOW;
         try {
-            List<Resource> children = parent.resource.list(NOFOLLOW);
+            List<Resource> children = parent.resource.list(option);
             ListIterator<Resource> it = children.listIterator(children.size());
             while (it.hasPrevious()) {
                 stack.push(new Node(it.previous()));

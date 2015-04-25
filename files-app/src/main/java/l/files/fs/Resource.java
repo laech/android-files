@@ -96,10 +96,9 @@ public interface Resource extends Parcelable {
     /**
      * Performs a traversal that will terminate as soon as an error is
      * encountered.
-     *
-     * @see #traverse(ResourceVisitor, ResourceVisitor, ResourceExceptionHandler)
      */
-    void traverse(@Nullable ResourceVisitor pre,
+    void traverse(LinkOption option,
+                  @Nullable ResourceVisitor pre,
                   @Nullable ResourceVisitor post) throws IOException;
 
     /**
@@ -121,11 +120,13 @@ public interface Resource extends Parcelable {
      * post.accept(a)
      * </pre>
      *
+     * @param option  applies to root only, child links are never followed
      * @param pre     callback for pre order traversals
      * @param post    callback for post order traversals
      * @param handler handles any exception encountered duration traversal
      */
-    void traverse(@Nullable ResourceVisitor pre,
+    void traverse(LinkOption option,
+                  @Nullable ResourceVisitor pre,
                   @Nullable ResourceVisitor post,
                   @Nullable ResourceExceptionHandler handler) throws IOException;
 

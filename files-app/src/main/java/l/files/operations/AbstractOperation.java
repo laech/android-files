@@ -9,6 +9,7 @@ import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
 
 import static java.lang.Thread.currentThread;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -45,12 +46,12 @@ abstract class AbstractOperation implements FileOperation {
 
     final void preOrderTraversal(Resource resource, ResourceVisitor visitor)
             throws IOException {
-        resource.traverse(visitor, terminateOnInterrupt(), recordOnException());
+        resource.traverse(NOFOLLOW, visitor, terminateOnInterrupt(), recordOnException());
     }
 
     final void postOrderTraversal(Resource resource, ResourceVisitor visitor)
             throws IOException {
-        resource.traverse(terminateOnInterrupt(), visitor, recordOnException());
+        resource.traverse(NOFOLLOW, terminateOnInterrupt(), visitor, recordOnException());
     }
 
     private ResourceVisitor terminateOnInterrupt() {

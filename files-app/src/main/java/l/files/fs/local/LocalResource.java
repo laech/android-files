@@ -221,9 +221,10 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void traverse(@Nullable ResourceVisitor pre,
+    public void traverse(LinkOption option,
+                         @Nullable ResourceVisitor pre,
                          @Nullable ResourceVisitor post) throws IOException {
-        traverse(pre, post, new ResourceExceptionHandler() {
+        traverse(option, pre, post, new ResourceExceptionHandler() {
             @Override
             public void handle(Resource resource, IOException e)
                     throws IOException {
@@ -233,11 +234,12 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void traverse(@Nullable ResourceVisitor pre,
+    public void traverse(LinkOption option,
+                         @Nullable ResourceVisitor pre,
                          @Nullable ResourceVisitor post,
                          @Nullable ResourceExceptionHandler handler)
             throws IOException {
-        new LocalResourceTraverser(this, pre, post, handler).traverse();
+        new LocalResourceTraverser(this, option, pre, post, handler).traverse();
     }
 
     @Override

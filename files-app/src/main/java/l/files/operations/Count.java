@@ -25,7 +25,6 @@ class Count extends AbstractOperation implements ResourceVisitor {
     void process(Resource resource) {
         try {
             preOrderTraversal(resource, this);
-            resource.traverse(this, this);
         } catch (IOException e) {
             record(resource, e);
         }

@@ -54,10 +54,12 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v13:21.0.3'
 
-    compile 'com.github.frankiesardo:auto-parcel:0.3'
-    apt 'com.github.frankiesardo:auto-parcel-processor:0.3'
+    compile libs.auto_parcel
+    apt libs.auto_parcel_processor
 
     provided 'com.google.code.findbugs:jsr305:3.0.0'
 
     androidTestCompile libs.mockito
+    androidTestCompile libs.auto_parcel
+    androidTestApt libs.auto_parcel_processor
 }

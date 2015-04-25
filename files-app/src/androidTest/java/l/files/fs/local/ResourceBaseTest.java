@@ -13,6 +13,7 @@ import l.files.fs.ResourceException;
 import l.files.fs.ResourceVisitor;
 
 import static com.google.common.io.Files.createTempDir;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 
 public abstract class ResourceBaseTest extends BaseTest {
@@ -56,6 +57,7 @@ public abstract class ResourceBaseTest extends BaseTest {
 
     private static void delete(Resource resource) throws IOException {
         resource.traverse(
+                NOFOLLOW,
                 new ResourceVisitor() {
                     @Override
                     public Result accept(Resource resource) throws IOException {

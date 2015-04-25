@@ -21,6 +21,8 @@ ext.libs = [:]
 libs.eventbus = 'de.greenrobot:eventbus:2.2.1'
 libs.tika = 'org.apache.tika:tika-core:1.6'
 libs.guava = 'com.google.guava:guava:18.0'
+libs.auto_parcel = 'com.github.frankiesardo:auto-parcel:0.3'
+libs.auto_parcel_processor = 'com.github.frankiesardo:auto-parcel-processor:0.3'
 
 libs.mockito = [
     'org.mockito:mockito-core:1.9.5',
