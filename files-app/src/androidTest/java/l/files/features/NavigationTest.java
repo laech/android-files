@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class NavigationTest extends BaseFilesActivityTest {
 
     // TODO test symbolic link to directory
+    // TODO test symbolic link to directory changes
 
     public void testSymbolicLinkIconDisplayed() throws Exception {
         Resource dir = resource().resolve("dir");
