@@ -32,6 +32,8 @@ import javax.annotation.Nullable;
 import auto.parcel.AutoParcel;
 import l.files.fs.ExistsException;
 import l.files.fs.Instant;
+import l.files.fs.IsDirectoryException;
+import l.files.fs.IsLinkException;
 import l.files.fs.LinkOption;
 import l.files.fs.NotExistException;
 import l.files.fs.Permission;
@@ -42,11 +44,14 @@ import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
+import static android.system.OsConstants.O_NOFOLLOW;
+import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRUSR;
 import static android.system.OsConstants.S_IRWXU;
+import static android.system.OsConstants.S_ISDIR;
 import static android.system.OsConstants.S_IWGRP;
 import static android.system.OsConstants.S_IWOTH;
 import static android.system.OsConstants.S_IWUSR;
@@ -252,8 +257,35 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public InputStream openInputStream() throws IOException {
-        return new FileInputStream(getFile());
+    public InputStream openInputStream(LinkOption option) throws IOException {
+        requireNonNull(option, "option");
+
+        int flags = O_RDONLY;
+        if (option == NOFOLLOW) {
+            flags |= O_NOFOLLOW;
+        }
+
+        try {
+
+            FileDescriptor fd = Os.open(getPath(), flags, 0);
+            // Above call allows opening directories, this check ensure this is
+            // not a directory
+            try {
+                if (S_ISDIR(Os.fstat(fd).st_mode)) {
+                    throw new IsDirectoryException(getPath());
+                }
+            } catch (Throwable e) {
+                Os.close(fd);
+                throw e;
+            }
+            return new FileInputStream(fd);
+
+        } catch (android.system.ErrnoException e) {
+            if (ErrnoException.isCausedByNoFollowLink(e, this)) {
+                throw new IsLinkException(getPath(), e);
+            }
+            throw ErrnoException.toIOException(e, getPath());
+        }
     }
 
     @Override

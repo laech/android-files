@@ -2,8 +2,11 @@ package l.files.fs.local;
 
 import android.system.Os;
 
+import com.google.common.io.ByteStreams;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -14,6 +17,9 @@ import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
 import l.files.fs.Instant;
 import l.files.fs.InvalidException;
+import l.files.fs.IsDirectoryException;
+import l.files.fs.IsLinkException;
+import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
@@ -41,6 +47,55 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_openInputStream() throws Exception {
+        LocalResource file = dir1().resolve("a").createFile();
+        String expected = "hello\nworld\n";
+        write(expected, file.getFile(), UTF_8);
+        try (InputStream in = file.openInputStream(NOFOLLOW)) {
+            String actual = new String(ByteStreams.toByteArray(in), UTF_8);
+            assertEquals(expected, actual);
+        }
+    }
+
+    public void test_openInputStream_linkFollowSuccess() throws Exception {
+        Resource target = dir1().resolve("target").createFile();
+        Resource link = dir1().resolve("link").createSymbolicLink(target);
+        link.openInputStream(FOLLOW).close();
+    }
+
+    public void test_openInputStream_IsLinkException() throws Exception {
+        final Resource target = dir1().resolve("target").createFile();
+        final Resource link = dir1().resolve("link").createSymbolicLink(target);
+        expectOnOpenInputStream(IsLinkException.class, link, NOFOLLOW);
+    }
+
+    public void test_openInputStream_IsDirectoryException() throws Exception {
+        expectOnOpenInputStream(IsDirectoryException.class, dir1(), NOFOLLOW);
+    }
+
+    public void test_openInputStream_AccessException() throws Exception {
+        Resource file = dir1().resolve("a").createFile();
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        expectOnOpenInputStream(AccessException.class, file, NOFOLLOW);
+    }
+
+    public void test_openInputStream_NotExistException() throws Exception {
+        Resource file = dir1().resolve("a");
+        expectOnOpenInputStream(NotExistException.class, file, NOFOLLOW);
+    }
+
+    private static void expectOnOpenInputStream(
+            final Class<? extends Exception> clazz,
+            final Resource resource,
+            final LinkOption option) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.openInputStream(option).close();
+            }
+        });
     }
 
     public void test_exists_true() throws Exception {

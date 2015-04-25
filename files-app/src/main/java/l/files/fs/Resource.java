@@ -132,7 +132,17 @@ public interface Resource extends Parcelable {
      */
     Stream openDirectory() throws IOException; // TODO callback style
 
-    InputStream openInputStream() throws IOException;
+    /**
+     * Opens an input stream to the underlying file.
+     *
+     * @throws AccessException      does not have permission to read
+     * @throws NotExistException    this resource does not exist
+     * @throws IsDirectoryException this resource is a directory
+     * @throws IsLinkException      option is {@link LinkOption#NOFOLLOW} and
+     *                              the underlying resource is a symbolic link
+     * @throws IOException          other failures
+     */
+    InputStream openInputStream(LinkOption option) throws IOException;
 
     OutputStream openOutputStream() throws IOException;
 

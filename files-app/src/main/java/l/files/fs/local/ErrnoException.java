@@ -219,12 +219,30 @@ final class ErrnoException extends Exception {
 
     /**
      * If the code that caused this exception has no follow symbolic link set,
-     * this will check to see if this exception is caused by that.
+     * this will check to see if this exception is caused by that. Returns false
+     * is unable to determine.
      */
-    boolean isCausedByNoFollowLink(Resource resource) throws IOException {
+    boolean isCausedByNoFollowLink(Resource resource) {
         // See for example open() linux system call
-        return errno() == OsConstants.ELOOP
-                && resource.readStatus(NOFOLLOW).isSymbolicLink();
+        return isCausedByNoFollowLink(errno, resource);
+    }
+
+    /**
+     * @see #isCausedByNoFollowLink(Resource)
+     */
+    static boolean isCausedByNoFollowLink(
+            android.system.ErrnoException e, Resource resource) {
+        return isCausedByNoFollowLink(e.errno, resource);
+    }
+
+    private static boolean isCausedByNoFollowLink(int errno, Resource res) {
+        try {
+            // See for example open() linux system call
+            return errno == OsConstants.ELOOP
+                    && res.readStatus(NOFOLLOW).isSymbolicLink();
+        } catch (IOException e) {
+            return false;
+        }
     }
 
 }

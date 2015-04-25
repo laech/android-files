@@ -33,6 +33,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
 
@@ -106,6 +107,10 @@ final class ImageDecorator {
         boolean cancel(boolean mayInterruptIfRunning);
     }
 
+    private static InputStream openInputStream(Resource res) throws IOException {
+        return res.openInputStream(FOLLOW);
+    }
+
     private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
         private final Object key;
         private final ImageView view;
@@ -139,7 +144,7 @@ final class ImageDecorator {
        * file, if an exception occurs, meaning it can't be read, let the exception
        * propagate, and return no result.
        */
-            try (InputStream in = file.getResource().openInputStream()) {
+            try (InputStream in = openInputStream(file.getResource())) {
                 //noinspection ResultOfMethodCallIgnored
                 in.read();
             } catch (IOException e) {
@@ -148,7 +153,7 @@ final class ImageDecorator {
 
             Options options = new Options();
             options.inJustDecodeBounds = true;
-            try (InputStream in = file.getResource().openInputStream()) {
+            try (InputStream in = openInputStream(file.getResource())) {
                 decodeStream(in, null, options);
             } catch (IOException e) {
                 return null;
@@ -208,7 +213,7 @@ final class ImageDecorator {
             if (isCancelled()) {
                 return null;
             }
-            try (InputStream in = file.getResource().openInputStream()) {
+            try (InputStream in = openInputStream(file.getResource())) {
                 return decodeScaledBitmap(in, size);
             } catch (Exception e) {
                 // Catch all unexpected internal errors from decoder
