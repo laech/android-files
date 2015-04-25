@@ -42,11 +42,14 @@ import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 
+import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
 import static android.system.OsConstants.O_NOFOLLOW;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
+import static android.system.OsConstants.O_TRUNC;
+import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRUSR;
@@ -289,13 +292,29 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public OutputStream openOutputStream() throws IOException {
-        return new FileOutputStream(getFile());
+    public OutputStream openOutputStream(LinkOption option) throws IOException {
+        return openOutputStream(option, false);
     }
 
     @Override
-    public OutputStream openOutputStream(boolean append) throws IOException {
-        return new FileOutputStream(getFile(), append);
+    public OutputStream openOutputStream(LinkOption option, boolean append)
+            throws IOException {
+        requireNonNull(option, "option");
+
+        // Same default flags and mode as FileOutputStream
+        int mode = S_IRUSR | S_IWUSR;
+        int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
+        if (option == NOFOLLOW) {
+            flags |= O_NOFOLLOW;
+        }
+        try {
+            return new FileOutputStream(Os.open(getPath(), flags, mode));
+        } catch (android.system.ErrnoException e) {
+            if (ErrnoException.isCausedByNoFollowLink(e, this)) {
+                throw new IsLinkException(getPath(), e);
+            }
+            throw ErrnoException.toIOException(e, getPath());
+        }
     }
 
     @Override

@@ -103,7 +103,7 @@ final class Copy extends Paste {
         try {
 
             try (InputStream source = src.getResource().openInputStream(NOFOLLOW);
-                 OutputStream sink = dst.openOutputStream()) {
+                 OutputStream sink = dst.openOutputStream(NOFOLLOW)) {
                 byte[] buf = new byte[BUFFER_SIZE];
                 int n;
                 while ((n = source.read(buf)) > 0) {

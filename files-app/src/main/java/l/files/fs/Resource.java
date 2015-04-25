@@ -144,9 +144,24 @@ public interface Resource extends Parcelable {
      */
     InputStream openInputStream(LinkOption option) throws IOException;
 
-    OutputStream openOutputStream() throws IOException;
+    /**
+     * Equivalent to {@link #openOutputStream(LinkOption, boolean)
+     * openOutputStream(option, false)}.
+     */
+    OutputStream openOutputStream(LinkOption option) throws IOException;
 
-    OutputStream openOutputStream(boolean append) throws IOException;
+    /**
+     * Opens an output stream to the underlying file.
+     *
+     * @throws AccessException      no write permission
+     * @throws NotExistException    parent resource does not exist
+     * @throws IsDirectoryException this resource is a directory
+     * @throws IsLinkException      option is {@link LinkOption#NOFOLLOW} and
+     *                              the underlying resource is a symbolic link
+     * @throws IOException          other failures
+     */
+    OutputStream openOutputStream(LinkOption option, boolean append)
+            throws IOException;
 
     Reader openReader() throws IOException;
 

@@ -417,7 +417,7 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                try (OutputStream out = file.openOutputStream(true)) {
+                try (OutputStream out = file.openOutputStream(NOFOLLOW, true)) {
                     out.write(content.toString().getBytes(UTF_8));
                 }
                 return null;

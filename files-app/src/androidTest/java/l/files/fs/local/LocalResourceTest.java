@@ -7,6 +7,7 @@ import com.google.common.io.ByteStreams;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -47,6 +48,98 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_openOutputStream_append_defaultFalse() throws Exception {
+        test_openOutputStream("a", "b", "b", new OutputStreamProvider() {
+            @Override
+            public OutputStream open(Resource resource) throws IOException {
+                return resource.openOutputStream(NOFOLLOW);
+            }
+        });
+    }
+
+    public void test_openOutputStream_append_false() throws Exception {
+        test_openOutputStream("a", "b", "b", new OutputStreamProvider() {
+            @Override
+            public OutputStream open(Resource resource) throws IOException {
+                return resource.openOutputStream(NOFOLLOW, false);
+            }
+        });
+    }
+
+    public void test_openOutputStream_append_true() throws Exception {
+        test_openOutputStream("a", "b", "ab", new OutputStreamProvider() {
+            @Override
+            public OutputStream open(Resource resource) throws IOException {
+                return resource.openOutputStream(NOFOLLOW, true);
+            }
+        });
+    }
+
+    private void test_openOutputStream(
+            String initial,
+            String write,
+            String result,
+            OutputStreamProvider provider) throws Exception {
+
+        LocalResource file = dir1().resolve("file").createFile();
+        write(initial, file.getFile(), UTF_8);
+        try (OutputStream out = provider.open(file)) {
+            out.write(write.getBytes(UTF_8));
+        }
+        assertEquals(result, file.readString(UTF_8));
+    }
+
+    private interface OutputStreamProvider {
+        OutputStream open(Resource resource) throws IOException;
+    }
+
+    public void test_openOutputStream_createWithCorrectPermission() throws Exception {
+        LocalResource expected = dir1().resolve("expected");
+        LocalResource actual = dir1().resolve("actual");
+
+        assertTrue(expected.getFile().createNewFile());
+        actual.openOutputStream(NOFOLLOW, false).close();
+
+        assertEquals(
+                Os.stat(expected.getPath()).st_mode,
+                Os.stat(actual.getPath()).st_mode
+        );
+    }
+
+    public void test_openOutputStream_AccessException() throws Exception {
+        Resource file = dir1().resolve("file").createFile();
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        expectOnOpenOutputStream(AccessException.class, file, NOFOLLOW, false);
+    }
+
+    public void test_openOutputStream_NotExistException() throws Exception {
+        Resource file = dir1().resolve("parent/file");
+        expectOnOpenOutputStream(NotExistException.class, file, NOFOLLOW, false);
+    }
+
+    public void test_openOutputStream_IsDirectoryException() throws Exception {
+        expectOnOpenOutputStream(IsDirectoryException.class, dir1(), NOFOLLOW, false);
+    }
+
+    public void test_openOutputStream_IsLinkException() throws Exception {
+        Resource target = dir1().resolve("target").createFile();
+        Resource link = dir1().resolve("link").createSymbolicLink(target);
+        expectOnOpenOutputStream(IsLinkException.class, link, NOFOLLOW, false);
+    }
+
+    private static void expectOnOpenOutputStream(
+            final Class<? extends Exception> clazz,
+            final Resource resource,
+            final LinkOption option,
+            final boolean append) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.openOutputStream(option, append).close();
+            }
+        });
     }
 
     public void test_openInputStream() throws Exception {
