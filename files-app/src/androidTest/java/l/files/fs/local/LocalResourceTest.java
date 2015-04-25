@@ -14,7 +14,6 @@ import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
 import l.files.fs.Instant;
 import l.files.fs.InvalidException;
-import l.files.fs.IsDirectoryException;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
@@ -338,103 +337,71 @@ public final class LocalResourceTest extends ResourceBaseTest {
         });
     }
 
-    public void test_renameTo_fileToExistingFileWillOverride() throws Exception {
+    public void test_moveTo_ExistsException() throws Exception {
         LocalResource src = resource.resolve("src");
         LocalResource dst = resource.resolve("dst");
         write("src", src.getFile(), UTF_8);
         write("dst", dst.getFile(), UTF_8);
-        src.renameTo(dst);
-        assertFalse(src.exists(NOFOLLOW));
+        expectOnMoveTo(ExistsException.class, src, dst);
+        assertTrue(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
+        assertEquals("src", src.readString(UTF_8));
+        assertEquals("dst", dst.readString(UTF_8));
     }
 
-    public void test_renameTo_fileToNonExistingFile() throws Exception {
+    public void test_moveTo_moveLinkNotTarget() throws Exception {
+        Resource target = resource.resolve("target").createFile();
+        Resource src = resource.resolve("src").createSymbolicLink(target);
+        Resource dst = resource.resolve("dst");
+        src.moveTo(dst);
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
+        assertTrue(target.exists(NOFOLLOW));
+        assertEquals(target, dst.readSymbolicLink());
+    }
+
+    public void test_moveTo_fileToNonExistingFile() throws Exception {
         LocalResource src = resource.resolve("src");
         LocalResource dst = resource.resolve("dst");
         write("src", src.getFile(), UTF_8);
-        src.renameTo(dst);
+        src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
     }
 
-    public void test_renameTo_directoryToNonExistingDirectory() throws Exception {
+    public void test_moveTo_directoryToNonExistingDirectory() throws Exception {
         LocalResource src = resource.resolve("src");
         LocalResource dst = resource.resolve("dst");
         src.resolve("a").createDirectories();
-        src.renameTo(dst);
+        src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertTrue(dst.resolve("a").exists(NOFOLLOW));
     }
 
-    public void test_renameTo_directoryToExistingEmptyDirectoryWillOverride() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
-        dst.createDirectory();
-        src.resolve("a").createDirectories();
-        src.renameTo(dst);
-        assertFalse(src.exists(NOFOLLOW));
-        assertTrue(dst.exists(NOFOLLOW));
-        assertTrue(dst.resolve("a").exists(NOFOLLOW));
-    }
-
-    public void test_renameTo_NotEmptyException() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
-        dst.resolve("a").createDirectories();
-        src.createDirectory();
-        expectOnRenameTo(NotEmptyException.class, src, dst);
-    }
-
-    public void test_renameTo_IsDirectoryException() throws Exception {
-        Resource src = resource.resolve("src");
-        Resource dst = resource.resolve("dst");
-        src.createFile();
-        dst.createDirectories();
-        expectOnRenameTo(IsDirectoryException.class, src, dst);
-    }
-
-    public void test_renameTo_NotDirectoryException() throws Exception {
-        Resource src = resource.resolve("src");
-        Resource dst = resource.resolve("dst");
-        src.createDirectory();
-        dst.createFile();
-        expectOnRenameTo(NotDirectoryException.class, src, dst);
-    }
-
-    public void test_renameTo_symbolicLinkToExistingFileWillOverride() throws Exception {
-        Resource src = resource.resolve("src");
-        Resource dst = resource.resolve("dst");
-        src.createSymbolicLink(dst);
-        dst.createFile();
-        src.renameTo(dst);
-    }
-
-    public void test_renameTo_AccessException() throws Exception {
+    public void test_moveTo_AccessException() throws Exception {
         LocalResource src = resource.resolve("src");
         LocalResource dst = resource.resolve("dst");
         src.createFile();
         dst.createDirectory();
         assertTrue(dst.getFile().setWritable(false));
-        expectOnRenameTo(AccessException.class, src, dst.resolve("a"));
+        expectOnMoveTo(AccessException.class, src, dst.resolve("a"));
     }
 
-    public void test_renameTo_NotExistException() throws Exception {
+    public void test_moveTo_NotExistException() throws Exception {
         Resource src = resource.resolve("src");
         Resource dst = resource.resolve("dst");
-        expectOnRenameTo(NotExistException.class, src, dst);
+        expectOnMoveTo(NotExistException.class, src, dst);
     }
 
-    public void test_renameTo_InvalidException() throws Exception {
-        Resource parent = resource.resolve("parent");
+    public void test_moveTo_InvalidException() throws Exception {
+        Resource parent = resource.resolve("parent").createDirectory();
         Resource child = parent.resolve("child");
-        child.createDirectories();
-        expectOnRenameTo(InvalidException.class, parent, child);
+        expectOnMoveTo(InvalidException.class, parent, child);
     }
 
-    public void test_renameTo_CrossDeviceException() throws Exception {
+    public void test_moveTo_CrossDeviceException() throws Exception {
         /*
          * This test assumes:
          *
@@ -453,7 +420,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         try {
 
             src.createFile();
-            expectOnRenameTo(CrossDeviceException.class, src, dst);
+            expectOnMoveTo(CrossDeviceException.class, src, dst);
 
         } finally {
             if (src.exists(NOFOLLOW)) {
@@ -465,14 +432,14 @@ public final class LocalResourceTest extends ResourceBaseTest {
         }
     }
 
-    private static void expectOnRenameTo(
+    private static void expectOnMoveTo(
             final Class<? extends Exception> clazz,
             final Resource src,
             final Resource dst) throws Exception {
         expect(clazz, new Code() {
             @Override
             public void run() throws Exception {
-                src.renameTo(dst);
+                src.moveTo(dst);
             }
         });
     }

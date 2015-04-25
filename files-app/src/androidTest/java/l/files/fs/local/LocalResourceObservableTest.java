@@ -363,7 +363,7 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                src.renameTo(dst);
+                src.moveTo(dst);
                 return null;
             }
         };

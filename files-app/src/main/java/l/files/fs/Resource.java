@@ -212,25 +212,21 @@ public interface Resource extends Parcelable {
     ResourceStatus readStatus(LinkOption option) throws IOException;
 
     /**
-     * Renames this resource tree to the given destination.
+     * Moves this resource tree to the given destination, destination must not
+     * exist.
      * <p/>
-     * If this resource is non directory and destination exists as non
-     * directory, destination will be replaced. If this resource is a directory
-     * and destination is an empty directory, it will be replaced.
+     * If this is a symbolic link, the link itself is moved, link target
+     * resource is unaffected.
      *
      * @throws AccessException      does not have permission to rename
-     * @throws NotExistException    this resource or the parent of the
-     *                              destination does not exist
-     * @throws NotEmptyException    destination is a non empty directory
-     * @throws IsDirectoryException this resource is a not a directory and
-     *                              destination exists as a directory
+     * @throws NotExistException    this resource does not exist
+     * @throws ExistsException      destination exists
      * @throws InvalidException     attempt to make a directory a subdirectory
      *                              of itself
      * @throws CrossDeviceException attempt to move to a different device
-     *                              (unsupported)
      * @throws IOException          other failures
      */
-    void renameTo(Resource dst) throws IOException;
+    void moveTo(Resource dst) throws IOException;
 
     /**
      * Deletes this resource.

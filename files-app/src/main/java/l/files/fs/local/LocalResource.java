@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
+import l.files.fs.ExistsException;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.NotExistException;
@@ -338,9 +339,16 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void renameTo(Resource dst) throws IOException {
-        String srcPath = getPath();
+    public void moveTo(Resource dst) throws IOException {
         String dstPath = ((LocalResource) dst).getPath();
+        String srcPath = getPath();
+        try {
+            // renameat2() not available on Android
+            dst.readStatus(NOFOLLOW);
+            throw new ExistsException(dstPath);
+        } catch (NotExistException e) {
+            // Okay
+        }
         try {
             Os.rename(srcPath, dstPath);
         } catch (android.system.ErrnoException e) {

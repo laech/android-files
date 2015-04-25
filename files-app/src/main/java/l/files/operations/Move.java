@@ -20,7 +20,7 @@ final class Move extends Paste {
     @Override
     void paste(Resource from, Resource to) {
         try {
-            from.renameTo(to);
+            from.moveTo(to);
             movedItemCount.incrementAndGet();
         } catch (IOException e) {
             record(from, e);
