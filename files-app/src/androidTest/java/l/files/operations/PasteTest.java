@@ -1,15 +1,16 @@
 package l.files.operations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import l.files.fs.Resource;
-import l.files.fs.Resource.Stream;
 import l.files.fs.local.ResourceBaseTest;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -93,9 +94,7 @@ public abstract class PasteTest extends ResourceBaseTest {
         });
         thread.start();
         thread.join();
-        try (Stream children = dstDir.openDirectory()) {
-            assertFalse(children.iterator().hasNext());
-        }
+        assertEquals(emptyList(), dstDir.list(NOFOLLOW, new ArrayList<>()));
     }
 
     public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {

@@ -12,6 +12,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -128,12 +130,36 @@ public interface Resource extends Parcelable {
                   @Nullable ResourceExceptionHandler handler) throws IOException;
 
     /**
-     * Opens a resource stream to iterate through the immediate children.
+     * Lists the immediate children of this resource.
+     *
+     * @throws AccessException       no permission to list
+     * @throws NotExistException     the underlying resource does not exist
+     * @throws NotDirectoryException target resource is not a directory, or if
+     *                               option is {@link LinkOption#NOFOLLOW} and
+     *                               the underlying resource is a symbolic link
+     * @throws IOException           other failures
      */
-    Stream openDirectory() throws IOException; // TODO callback style
+    void list(LinkOption option, ResourceVisitor visitor) throws IOException;
+
+    /**
+     * List the children into the given collection. Returns the collection.
+     *
+     * @see #list(LinkOption, ResourceVisitor)
+     */
+    <T extends Collection<? super Resource>> T list(LinkOption option, T collection)
+            throws IOException;
+
+    /**
+     * Returns the children.
+     *
+     * @see #list(LinkOption, ResourceVisitor)
+     */
+    List<Resource> list(LinkOption option) throws IOException;
 
     /**
      * Opens an input stream to the underlying file.
+     * <p/>
+     * TODO NotFileException?
      *
      * @throws AccessException      does not have permission to read
      * @throws NotExistException    this resource does not exist

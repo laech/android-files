@@ -4,7 +4,6 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.os.OperationCanceledException;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 import l.files.logging.Logger;
 
@@ -27,6 +27,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
 public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
@@ -103,11 +105,17 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             }
         }
 
-        try (Resource.Stream resources = resource.openDirectory()) {
-            for (Resource resource : resources) {
-                checkCancelled();
-                addData(resource);
-            }
+        try {
+            resource.list(FOLLOW, new ResourceVisitor() {
+                @Override
+                public Result accept(Resource resource) throws IOException {
+                    if (isLoadInBackgroundCanceled()) {
+                        return TERMINATE;
+                    }
+                    addData(resource);
+                    return CONTINUE;
+                }
+            });
         } catch (IOException e) {
             logger.debug(e);
             return emptyList();
@@ -191,12 +199,6 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         if (closeable != null) {
             logger.error("WatchService has not been unregistered");
             closeable.close();
-        }
-    }
-
-    private void checkCancelled() {
-        if (isLoadInBackgroundCanceled()) {
-            throw new OperationCanceledException();
         }
     }
 

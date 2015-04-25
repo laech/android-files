@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import android.system.Os;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterators;
 import com.google.common.net.MediaType;
 
 import java.io.Closeable;
@@ -21,9 +19,11 @@ import java.io.Writer;
 import java.net.URI;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,6 +74,8 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
 @AutoParcel
 public abstract class LocalResource implements Resource {
@@ -239,24 +241,34 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public Stream openDirectory() throws IOException {
-        final LocalResourceStream stream = LocalResourceStream.open(this);
-        return new Stream() {
+    public void list(LinkOption option, final ResourceVisitor visitor)
+            throws IOException {
+        LocalResourceStream.list(this, option, new LocalResourceStream.Callback() {
             @Override
-            public void close() throws IOException {
-                stream.close();
+            public boolean accept(long inode, String name, boolean directory)
+                    throws IOException {
+                return visitor.accept(resolve(name)) != TERMINATE;
             }
+        });
+    }
 
+    @Override
+    public <T extends Collection<? super Resource>> T list(
+            final LinkOption option,
+            final T collection) throws IOException {
+        list(option, new ResourceVisitor() {
             @Override
-            public Iterator<Resource> iterator() {
-                return Iterators.transform(stream.iterator(), new Function<LocalPathEntry, Resource>() {
-                    @Override
-                    public Resource apply(LocalPathEntry input) {
-                        return input.getResource();
-                    }
-                });
+            public Result accept(Resource resource) throws IOException {
+                collection.add(resource);
+                return CONTINUE;
             }
-        };
+        });
+        return collection;
+    }
+
+    @Override
+    public List<Resource> list(LinkOption option) throws IOException {
+        return list(option, new ArrayList<Resource>());
     }
 
     @Override

@@ -1,21 +1,16 @@
 package l.files.fs.local;
 
-import android.system.OsConstants;
-import android.util.Log;
-
-import com.google.common.collect.AbstractIterator;
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
 
+import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
-import l.files.fs.UncheckedIOException;
 
-final class LocalResourceStream extends Native
-        implements Iterable<LocalPathEntry>, Closeable {
+import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
-    // TODO use callback instead of iterable
+final class LocalResourceStream extends Native implements Closeable {
 
     /*
      * Design note: this basically uses <dirent.h> to read directory entries,
@@ -23,82 +18,74 @@ final class LocalResourceStream extends Native
      * much better performance when directory is large.
      */
 
+    static {
+        init();
+    }
+
     private final LocalResource parent;
     private final long dir;
+    private final Callback callback;
 
-    private boolean iterated;
-
-    LocalResourceStream(LocalResource parent, long dir) {
+    private LocalResourceStream(
+            LocalResource parent,
+            long dir,
+            Callback callback) {
         this.parent = parent;
         this.dir = dir;
-    }
-
-    @Override
-    public Iterator<LocalPathEntry> iterator() {
-        if (iterated) {
-            throw new IllegalStateException("iterator() has already been called");
-        }
-        iterated = true;
-
-        return new AbstractIterator<LocalPathEntry>() {
-            @Override
-            protected LocalPathEntry computeNext() {
-                Log.e("ABC", dir + "");
-                Dirent entry = readNext();
-                if (entry == null) {
-                    return endOfData();
-                }
-                return toEntry(entry);
-            }
-        };
-    }
-
-    private Dirent readNext() {
-        try {
-            Dirent next = Dirent.readdir(dir);
-            while (next != null && isSelfOrParent(next)) {
-                next = Dirent.readdir(dir);
-            }
-            return next;
-        } catch (ErrnoException e) {
-            throw new UncheckedIOException(e.toIOException(parent.getPath()));
-        }
-    }
-
-    private boolean isSelfOrParent(Dirent entry) {
-        return entry.getName().equals(".") || entry.getName().equals("..");
-    }
-
-    private LocalPathEntry toEntry(Dirent entry) {
-        return LocalPathEntry.create(
-                parent.resolve(entry.getName()),
-                entry.getInode(),
-                entry.getType() == Dirent.DT_DIR);
+        this.callback = callback;
     }
 
     @Override
     public void close() throws IOException {
         try {
-            Dirent.closedir(dir);
+            close(dir);
         } catch (ErrnoException e) {
             throw e.toIOException(parent.getPath());
         }
     }
 
-    public static LocalResourceStream open(LocalResource resource) throws IOException {
+    public static void list(
+            LocalResource resource,
+            LinkOption option,
+            Callback callback) throws IOException {
+
+        requireNonNull(resource, "resource");
+        requireNonNull(option, "option");
+        requireNonNull(callback, "callback");
+
         try {
-            return new LocalResourceStream(resource, open(resource.getPath()));
+            long dir = open(resource.getPath(), option == FOLLOW);
+            try (LocalResourceStream stream = new LocalResourceStream(resource, dir, callback)) {
+                stream.list(dir);
+            }
         } catch (ErrnoException e) {
-            if (e.isCausedByNoFollowLink(resource)) {
+            if (option == NOFOLLOW && e.isCausedByNoFollowLink(resource)) {
                 throw new NotDirectoryException(resource.getPath(), e);
             }
             throw e.toIOException(resource.getPath());
         }
     }
 
-    /**
-     * Open only if path is directory, will not follow symlink.
-     */
-    private static native long open(String path) throws ErrnoException;
+    @SuppressWarnings("unused") // Called from native code
+    private boolean notify(long ino, String name, boolean directory)
+            throws IOException {
+        return ".".equals(name)
+                || "..".equals(name)
+                || callback.accept(ino, name, directory);
+    }
+
+    private native void list(long dir) throws ErrnoException;
+
+    private static native long open(String path, boolean followLink)
+            throws ErrnoException;
+
+    private static native void close(long dir) throws ErrnoException;
+
+    private static native void init();
+
+    interface Callback {
+        boolean accept(long inode, String name, boolean directory)
+                throws IOException;
+    }
 
 }

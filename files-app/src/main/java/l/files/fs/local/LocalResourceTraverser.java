@@ -2,7 +2,6 @@ package l.files.fs.local;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
@@ -11,13 +10,13 @@ import javax.annotation.Nullable;
 
 import l.files.fs.NotDirectoryException;
 import l.files.fs.Resource;
-import l.files.fs.Resource.Stream;
 import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
 import l.files.fs.ResourceVisitor.Result;
 import l.files.fs.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 
 final class LocalResourceTraverser {
@@ -109,16 +108,14 @@ final class LocalResourceTraverser {
         }
     }
 
-    private void pushChildren(Deque<Node> stack, Node parent)
+    private void pushChildren(final Deque<Node> stack, Node parent)
             throws IOException {
-        try (Stream stream = parent.resource.openDirectory()) {
-            List<Node> nodes = new ArrayList<>();
-            for (Resource child : stream) {
-                nodes.add(new Node(child));
-            }
-            ListIterator<Node> it = nodes.listIterator(nodes.size());
+
+        try {
+            List<Resource> children = parent.resource.list(NOFOLLOW);
+            ListIterator<Resource> it = children.listIterator(children.size());
             while (it.hasPrevious()) {
-                stack.push(it.previous());
+                stack.push(new Node(it.previous()));
             }
         } catch (NotDirectoryException ignore) {
         }

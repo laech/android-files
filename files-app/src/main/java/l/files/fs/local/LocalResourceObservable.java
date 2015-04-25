@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import l.files.fs.LinkOption;
 import l.files.fs.Resource;
 import l.files.fs.UncheckedIOException;
 import l.files.fs.WatchEvent;
@@ -258,20 +259,22 @@ final class LocalResourceObservable extends Native
     }
 
     private static void observeChildren(
-            int fd,
-            LocalResource resource,
-            LocalResourceObservable observable) throws IOException {
+            final int fd,
+            final LocalResource resource,
+            final LocalResourceObservable observable) throws IOException {
 
-        try (LocalResourceStream stream = LocalResourceStream.open(resource)) {
-            for (LocalPathEntry entry : stream) {
+        LinkOption option = NOFOLLOW; // TODO
+        LocalResourceStream.list(resource, option, new LocalResourceStream.Callback() {
+            @Override
+            public boolean accept(long inode, String name, boolean directory) throws IOException {
                 if (observable.isClosed()) {
-                    return;
+                    return false;
                 }
-                if (!entry.isDirectory()) {
-                    continue;
+                if (!directory) {
+                    return true;
                 }
 
-                LocalResource child = entry.getResource();
+                LocalResource child = resource.resolve(name);
                 try {
 
                     String path = child.getFile().getPath();
@@ -281,8 +284,11 @@ final class LocalResourceObservable extends Native
                 } catch (ErrnoException e) {
                     log.debug("Failed to add watch. %s: %s", e.getMessage(), child);
                 }
+
+                return true;
             }
-        }
+        });
+
     }
 
     @Override

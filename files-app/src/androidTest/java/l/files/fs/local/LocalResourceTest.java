@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import l.files.fs.AccessException;
@@ -27,6 +29,7 @@ import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+import l.files.fs.ResourceVisitor;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.collect.Sets.powerSet;
@@ -34,9 +37,12 @@ import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 import static l.files.fs.local.LocalResource.mapPermissions;
 import static l.files.fs.local.Stat.lstat;
 
@@ -48,6 +54,97 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_list_earlyTermination() throws Exception {
+        final Resource a = dir1().resolve("a").createFile();
+        final Resource b = dir1().resolve("b").createFile();
+        dir1().resolve("c").createFile();
+        dir1().resolve("d").createFile();
+        final List<Resource> result = new ArrayList<>();
+        dir1().list(NOFOLLOW, new ResourceVisitor() {
+            @Override
+            public Result accept(Resource resource) throws IOException {
+                result.add(resource);
+                return resource.equals(b) ? TERMINATE : CONTINUE;
+            }
+        });
+        assertEquals(asList(a, b), result);
+    }
+
+    public void test_list_AccessException() throws Exception {
+        Resource dir = dir1().resolve("dir").createDirectory();
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        expectOnList(AccessException.class, dir, NOFOLLOW);
+    }
+
+    public void test_list_NotExistsException() throws Exception {
+        Resource dir = dir1().resolve("dir");
+        expectOnList(NotExistException.class, dir, NOFOLLOW);
+    }
+
+    public void test_list_NotDirectoryException_file() throws Exception {
+        Resource file = dir1().resolve("file").createFile();
+        expectOnList(NotDirectoryException.class, file, NOFOLLOW);
+    }
+
+    public void test_list_NotDirectoryException_link() throws Exception {
+        Resource dir = dir1().resolve("dir").createDirectory();
+        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        expectOnList(NotDirectoryException.class, link, NOFOLLOW);
+    }
+
+    public void test_list_linkFollowSuccess() throws Exception {
+        Resource dir = dir1().resolve("dir").createDirectory();
+        Resource a = dir.resolve("a").createFile();
+        Resource b = dir.resolve("b").createDirectory();
+        Resource c = dir.resolve("c").createSymbolicLink(a);
+        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        assertEquals(
+                asList(
+                        a.resolveParent(dir, link),
+                        b.resolveParent(dir, link),
+                        c.resolveParent(dir, link)
+                ),
+                link.list(FOLLOW));
+    }
+
+    public void test_list() throws Exception {
+        Resource a = dir1().resolve("a").createFile();
+        Resource b = dir1().resolve("b").createDirectory();
+        List<?> expected = asList(a, b);
+        List<?> actual = dir1().list(NOFOLLOW);
+        assertEquals(expected, actual);
+    }
+
+    public void test_list_propagatesException() throws Exception {
+        dir1().resolve("a").createFile();
+        dir1().resolve("b").createDirectory();
+        try {
+            dir1().list(NOFOLLOW, new ResourceVisitor() {
+                @Override
+                public Result accept(Resource resource) throws IOException {
+                    throw new IOException("TEST");
+                }
+            });
+            fail();
+        } catch (IOException e) {
+            if (!"TEST".equals(e.getMessage())) {
+                throw e;
+            }
+        }
+    }
+
+    private static void expectOnList(
+            final Class<? extends Exception> clazz,
+            final Resource resource,
+            final LinkOption option) throws Exception {
+        expect(clazz, new Code() {
+            @Override
+            public void run() throws Exception {
+                resource.list(option);
+            }
+        });
     }
 
     public void test_openOutputStream_append_defaultFalse() throws Exception {
