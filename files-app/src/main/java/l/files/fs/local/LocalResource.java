@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Instant;
+import l.files.fs.LinkOption;
 import l.files.fs.NotExistException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
@@ -53,6 +54,8 @@ import static android.system.OsConstants.S_IXOTH;
 import static android.system.OsConstants.S_IXUSR;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -193,11 +196,15 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public boolean exists() {
+    public boolean exists(LinkOption option) {
+        requireNonNull(option, "option");
         try {
-            Unistd.access(getPath(), Unistd.F_OK);
+            // access() follows symbolic links
+            // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
+            // so use stat here
+            readStatus(option == FOLLOW);
             return true;
-        } catch (ErrnoException e) {
+        } catch (IOException e) {
             return false;
         }
     }

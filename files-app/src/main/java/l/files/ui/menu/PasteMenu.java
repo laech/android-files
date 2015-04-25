@@ -20,6 +20,7 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.Clipboards.clear;
 import static l.files.ui.Clipboards.getResources;
 import static l.files.ui.Clipboards.isCopy;
@@ -92,7 +93,7 @@ public final class PasteMenu extends OptionsMenuAction
                     if (isLoadInBackgroundCanceled()) {
                         return null;
                     }
-                    if (resource.exists()) {
+                    if (resource.exists(NOFOLLOW)) {
                         exists.add(resource);
                     }
                 }

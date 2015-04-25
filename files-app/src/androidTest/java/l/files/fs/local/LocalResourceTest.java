@@ -29,6 +29,8 @@ import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.fs.Instant.EPOCH;
+import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.LocalResource.mapPermissions;
 import static l.files.fs.local.Stat.lstat;
 
@@ -40,6 +42,31 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_exists_true() throws Exception {
+        assertTrue(dir1().exists(NOFOLLOW));
+    }
+
+    public void test_exists_false() throws Exception {
+        assertFalse(dir1().resolve("a").exists(NOFOLLOW));
+    }
+
+    public void test_exists_false_whenUnableToDetermine() throws Exception {
+        Resource file = dir1().resolve("a").createFile();
+        assertTrue(file.exists(NOFOLLOW));
+
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        assertFalse(file.exists(FOLLOW));
+        assertFalse(file.exists(NOFOLLOW));
+    }
+
+    public void test_exists_checkLinkNotTarget() throws Exception {
+        Resource target = dir1().resolve("target");
+        Resource link = dir1().resolve("link").createSymbolicLink(target);
+        assertFalse(target.exists(NOFOLLOW));
+        assertFalse(link.exists(FOLLOW));
+        assertTrue(link.exists(NOFOLLOW));
     }
 
     public void test_readString() throws Exception {
@@ -317,8 +344,8 @@ public final class LocalResourceTest extends ResourceBaseTest {
         write("src", src.getFile(), UTF_8);
         write("dst", dst.getFile(), UTF_8);
         src.renameTo(dst);
-        assertFalse(src.exists());
-        assertTrue(dst.exists());
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
         assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
     }
 
@@ -327,8 +354,8 @@ public final class LocalResourceTest extends ResourceBaseTest {
         LocalResource dst = resource.resolve("dst");
         write("src", src.getFile(), UTF_8);
         src.renameTo(dst);
-        assertFalse(src.exists());
-        assertTrue(dst.exists());
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
         assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
     }
 
@@ -337,9 +364,9 @@ public final class LocalResourceTest extends ResourceBaseTest {
         LocalResource dst = resource.resolve("dst");
         src.resolve("a").createDirectories();
         src.renameTo(dst);
-        assertFalse(src.exists());
-        assertTrue(dst.exists());
-        assertTrue(dst.resolve("a").exists());
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
+        assertTrue(dst.resolve("a").exists(NOFOLLOW));
     }
 
     public void test_renameTo_directoryToExistingEmptyDirectoryWillOverride() throws Exception {
@@ -348,9 +375,9 @@ public final class LocalResourceTest extends ResourceBaseTest {
         dst.createDirectory();
         src.resolve("a").createDirectories();
         src.renameTo(dst);
-        assertFalse(src.exists());
-        assertTrue(dst.exists());
-        assertTrue(dst.resolve("a").exists());
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.exists(NOFOLLOW));
+        assertTrue(dst.resolve("a").exists(NOFOLLOW));
     }
 
     public void test_renameTo_NotEmptyException() throws Exception {
@@ -429,10 +456,10 @@ public final class LocalResourceTest extends ResourceBaseTest {
             expectOnRenameTo(CrossDeviceException.class, src, dst);
 
         } finally {
-            if (src.exists()) {
+            if (src.exists(NOFOLLOW)) {
                 src.delete();
             }
-            if (dst.exists()) {
+            if (dst.exists(NOFOLLOW)) {
                 dst.delete();
             }
         }
@@ -453,25 +480,25 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_delete_symbolicLink() throws Exception {
         Resource link = resource.resolve("link");
         link.createSymbolicLink(resource);
-        assertTrue(link.exists());
+        assertTrue(link.exists(NOFOLLOW));
         link.delete();
-        assertFalse(link.exists());
+        assertFalse(link.exists(NOFOLLOW));
     }
 
     public void test_delete_file() throws Exception {
         Resource file = resource.resolve("file");
         file.createFile();
-        assertTrue(file.exists());
+        assertTrue(file.exists(NOFOLLOW));
         file.delete();
-        assertFalse(file.exists());
+        assertFalse(file.exists(NOFOLLOW));
     }
 
     public void test_delete_emptyDirectory() throws Exception {
         Resource directory = resource.resolve("directory");
         directory.createDirectory();
-        assertTrue(directory.exists());
+        assertTrue(directory.exists(NOFOLLOW));
         directory.delete();
-        assertFalse(directory.exists());
+        assertFalse(directory.exists(NOFOLLOW));
     }
 
     public void test_delete_AccessException() throws Exception {

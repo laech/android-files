@@ -10,6 +10,7 @@ import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class CopyTest extends PasteTest {
 
@@ -81,7 +82,7 @@ public final class CopyTest extends PasteTest {
         Resource dstDir = dir1().resolve("dst").createDirectory();
 
         copy(srcFile, dstDir);
-        assertTrue(dir1().resolve("dst/empty").exists());
+        assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
     }
 
     public void testCopiesFile() throws Exception {

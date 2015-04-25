@@ -19,9 +19,6 @@ import javax.annotation.Nullable;
 /**
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
- * <p/>
- * If the underlying resource is a symbolic link, all operations will happen on
- * the symbolic link, not the link target resource, unless stated otherwise.
  */
 public interface Resource extends Parcelable {
 
@@ -75,10 +72,10 @@ public interface Resource extends Parcelable {
     boolean isHidden();
 
     /**
-     * Returns true if this resource exists, returns false if this resource does
-     * not exist or failed to determine existence.
+     * Returns true if exists, returns false if does not exist or failed to
+     * determine existence.
      */
-    boolean exists();
+    boolean exists(LinkOption option);
 
     /**
      * Observes on this resource for change events.

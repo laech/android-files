@@ -19,6 +19,7 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static java.lang.System.identityHashCode;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileCreationFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
@@ -114,7 +115,7 @@ public abstract class FileCreationFragment extends DialogFragment
             return new AsyncTaskLoader<Existence>(getActivity()) {
                 @Override
                 public Existence loadInBackground() {
-                    return new Existence(resource, resource.exists());
+                    return new Existence(resource, resource.exists(NOFOLLOW));
                 }
 
                 @Override

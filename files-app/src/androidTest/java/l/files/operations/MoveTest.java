@@ -6,6 +6,7 @@ import l.files.fs.Resource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singleton;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MoveTest extends PasteTest {
 
@@ -38,7 +39,7 @@ public final class MoveTest extends PasteTest {
         Move move = create(srcFile, dstDir);
         move.execute();
 
-        assertFalse(srcFile.exists());
+        assertFalse(srcFile.exists(NOFOLLOW));
         assertEquals("Test", dstFile.readString(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
@@ -55,7 +56,7 @@ public final class MoveTest extends PasteTest {
         Move move = create(srcDir, dstDir);
         move.execute();
 
-        assertFalse(srcDir.exists());
+        assertFalse(srcDir.exists(NOFOLLOW));
         assertEquals("Test", dstFile.readString(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }

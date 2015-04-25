@@ -14,6 +14,7 @@ import l.files.ui.FileCreationFragment;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NewDirFragment extends FileCreationFragment {
 
@@ -41,7 +42,7 @@ public final class NewDirFragment extends FileCreationFragment {
             @Override
             protected String doInBackground(Object... params) {
                 Resource resource = parent.resolve(basename);
-                for (int i = 2; resource.exists(); i++) {
+                for (int i = 2; resource.exists(NOFOLLOW); i++) {
                     resource = parent.resolve(basename + " " + i);
                 }
                 return resource.getName();

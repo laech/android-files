@@ -11,6 +11,7 @@ import l.files.fs.local.ResourceBaseTest;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.singleton;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class PasteTest extends ResourceBaseTest {
 
@@ -22,7 +23,7 @@ public abstract class PasteTest extends ResourceBaseTest {
         Resource src = dir1().resolve("empty").createDirectory();
         Resource dstDir = dir1().resolve("dst").createDirectory();
         create(singleton(src), dstDir).execute();
-        assertTrue(dir1().resolve("dst/empty").exists());
+        assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
     }
 
     /**
@@ -42,10 +43,10 @@ public abstract class PasteTest extends ResourceBaseTest {
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().resolve("1/a.txt").exists());
-        assertTrue(dir1().resolve("1/b.mp4").exists());
-        assertTrue(dir1().resolve("1/a 2.txt").exists());
-        assertTrue(dir1().resolve("1/b 2.mp4").exists());
+        assertTrue(dir1().resolve("1/a.txt").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("1/b.mp4").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("1/a 2.txt").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("1/b 2.mp4").exists(NOFOLLOW));
     }
 
     /**
@@ -63,10 +64,10 @@ public abstract class PasteTest extends ResourceBaseTest {
 
         create(sources, dstDir).execute();
 
-        assertTrue(dir1().resolve("b/a/1.txt").exists());
-        assertTrue(dir1().resolve("b/a 2/1.txt").exists());
-        assertTrue(dir1().resolve("b/a 2/b/2.txt").exists());
-        assertTrue(dir1().resolve("b/a 2/b/3.txt").exists());
+        assertTrue(dir1().resolve("b/a/1.txt").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("b/a 2/1.txt").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("b/a 2/b/2.txt").exists(NOFOLLOW));
+        assertTrue(dir1().resolve("b/a 2/b/3.txt").exists(NOFOLLOW));
     }
 
     public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
