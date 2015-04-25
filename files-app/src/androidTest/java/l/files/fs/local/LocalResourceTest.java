@@ -20,12 +20,11 @@ import l.files.fs.CrossDeviceException;
 import l.files.fs.ExistsException;
 import l.files.fs.Instant;
 import l.files.fs.InvalidException;
-import l.files.fs.IsDirectoryException;
-import l.files.fs.IsLinkException;
 import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.NotEmptyException;
 import l.files.fs.NotExistException;
+import l.files.fs.NotFileException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
@@ -216,14 +215,14 @@ public final class LocalResourceTest extends ResourceBaseTest {
         expectOnOpenOutputStream(NotExistException.class, file, NOFOLLOW, false);
     }
 
-    public void test_openOutputStream_IsDirectoryException() throws Exception {
-        expectOnOpenOutputStream(IsDirectoryException.class, dir1(), NOFOLLOW, false);
+    public void test_openOutputStream_NotFileException_directory() throws Exception {
+        expectOnOpenOutputStream(NotFileException.class, dir1(), NOFOLLOW, false);
     }
 
-    public void test_openOutputStream_IsLinkException() throws Exception {
+    public void test_openOutputStream_NotFileException_link() throws Exception {
         Resource target = dir1().resolve("target").createFile();
         Resource link = dir1().resolve("link").createSymbolicLink(target);
-        expectOnOpenOutputStream(IsLinkException.class, link, NOFOLLOW, false);
+        expectOnOpenOutputStream(NotFileException.class, link, NOFOLLOW, false);
     }
 
     private static void expectOnOpenOutputStream(
@@ -255,14 +254,14 @@ public final class LocalResourceTest extends ResourceBaseTest {
         link.openInputStream(FOLLOW).close();
     }
 
-    public void test_openInputStream_IsLinkException() throws Exception {
+    public void test_openInputStream_NotFileException_link() throws Exception {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createSymbolicLink(target);
-        expectOnOpenInputStream(IsLinkException.class, link, NOFOLLOW);
+        expectOnOpenInputStream(NotFileException.class, link, NOFOLLOW);
     }
 
-    public void test_openInputStream_IsDirectoryException() throws Exception {
-        expectOnOpenInputStream(IsDirectoryException.class, dir1(), NOFOLLOW);
+    public void test_openInputStream_NotFileException_directory() throws Exception {
+        expectOnOpenInputStream(NotFileException.class, dir1(), NOFOLLOW);
     }
 
     public void test_openInputStream_AccessException() throws Exception {

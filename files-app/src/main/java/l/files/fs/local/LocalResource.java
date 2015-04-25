@@ -32,16 +32,16 @@ import javax.annotation.Nullable;
 import auto.parcel.AutoParcel;
 import l.files.fs.ExistsException;
 import l.files.fs.Instant;
-import l.files.fs.IsDirectoryException;
-import l.files.fs.IsLinkException;
 import l.files.fs.LinkOption;
 import l.files.fs.NotExistException;
+import l.files.fs.NotFileException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 
+import static android.system.OsConstants.EISDIR;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
@@ -287,7 +287,7 @@ public abstract class LocalResource implements Resource {
             // not a directory
             try {
                 if (S_ISDIR(Os.fstat(fd).st_mode)) {
-                    throw new IsDirectoryException(getPath());
+                    throw new NotFileException(getPath());
                 }
             } catch (Throwable e) {
                 Os.close(fd);
@@ -297,7 +297,7 @@ public abstract class LocalResource implements Resource {
 
         } catch (android.system.ErrnoException e) {
             if (ErrnoException.isCausedByNoFollowLink(e, this)) {
-                throw new IsLinkException(getPath(), e);
+                throw new NotFileException(getPath(), e);
             }
             throw ErrnoException.toIOException(e, getPath());
         }
@@ -323,7 +323,10 @@ public abstract class LocalResource implements Resource {
             return new FileOutputStream(Os.open(getPath(), flags, mode));
         } catch (android.system.ErrnoException e) {
             if (ErrnoException.isCausedByNoFollowLink(e, this)) {
-                throw new IsLinkException(getPath(), e);
+                throw new NotFileException(getPath(), e);
+            }
+            if (e.errno == EISDIR) {
+                throw new NotFileException(getPath(), e);
             }
             throw ErrnoException.toIOException(e, getPath());
         }

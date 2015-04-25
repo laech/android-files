@@ -159,14 +159,13 @@ public interface Resource extends Parcelable {
     /**
      * Opens an input stream to the underlying file.
      * <p/>
-     * TODO NotFileException?
      *
-     * @throws AccessException      does not have permission to read
-     * @throws NotExistException    this resource does not exist
-     * @throws IsDirectoryException this resource is a directory
-     * @throws IsLinkException      option is {@link LinkOption#NOFOLLOW} and
-     *                              the underlying resource is a symbolic link
-     * @throws IOException          other failures
+     * @throws AccessException   does not have permission to read
+     * @throws NotExistException this resource does not exist
+     * @throws NotFileException  this resource is not a file, or option is
+     *                           {@link LinkOption#NOFOLLOW} and the underlying
+     *                           resource is a symbolic link
+     * @throws IOException       other failures
      */
     InputStream openInputStream(LinkOption option) throws IOException;
 
@@ -179,12 +178,12 @@ public interface Resource extends Parcelable {
     /**
      * Opens an output stream to the underlying file.
      *
-     * @throws AccessException      no write permission
-     * @throws NotExistException    parent resource does not exist
-     * @throws IsDirectoryException this resource is a directory
-     * @throws IsLinkException      option is {@link LinkOption#NOFOLLOW} and
-     *                              the underlying resource is a symbolic link
-     * @throws IOException          other failures
+     * @throws AccessException   no write permission
+     * @throws NotExistException parent resource does not exist
+     * @throws NotFileException  this resource is a directory, or option is
+     *                           {@link LinkOption#NOFOLLOW} and the underlying
+     *                           resource is a symbolic link
+     * @throws IOException       other failures
      */
     OutputStream openOutputStream(LinkOption option, boolean append)
             throws IOException;
@@ -338,8 +337,5 @@ public interface Resource extends Parcelable {
     <T extends Appendable> T readString(LinkOption option,
                                         Charset charset,
                                         T appendable) throws IOException;
-
-    interface Stream extends Iterable<Resource>, Closeable {
-    }
 
 }
