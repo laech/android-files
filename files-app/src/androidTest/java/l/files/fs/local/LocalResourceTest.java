@@ -88,7 +88,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
         }
-        assertEquals(result, file.readString(UTF_8));
+        assertEquals(result, file.readString(NOFOLLOW, UTF_8));
     }
 
     private interface OutputStreamProvider {
@@ -219,10 +219,10 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_readString() throws Exception {
         Resource file = dir1().resolve("file").createFile();
         String expected = "a\nb\tc";
-        try (Writer writer = file.openWriter(UTF_8)) {
+        try (Writer writer = file.openWriter(NOFOLLOW, UTF_8)) {
             writer.write(expected);
         }
-        assertEquals(expected, file.readString(UTF_8));
+        assertEquals(expected, file.readString(NOFOLLOW, UTF_8));
     }
 
     public void test_createFile() throws Exception {
@@ -493,8 +493,8 @@ public final class LocalResourceTest extends ResourceBaseTest {
         expectOnMoveTo(ExistsException.class, src, dst);
         assertTrue(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", src.readString(UTF_8));
-        assertEquals("dst", dst.readString(UTF_8));
+        assertEquals("src", src.readString(NOFOLLOW, UTF_8));
+        assertEquals("dst", dst.readString(NOFOLLOW, UTF_8));
     }
 
     public void test_moveTo_moveLinkNotTarget() throws Exception {

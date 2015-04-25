@@ -11,11 +11,11 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
@@ -318,13 +318,13 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public Reader openReader() throws IOException {
-        return new FileReader(getPath());
+    public Reader openReader(LinkOption option, Charset charset) throws IOException {
+        return new InputStreamReader(openInputStream(option), charset);
     }
 
     @Override
-    public Writer openWriter(Charset charset) throws IOException {
-        return new FileWriter(getPath());
+    public Writer openWriter(LinkOption option, Charset charset) throws IOException {
+        return new OutputStreamWriter(openOutputStream(option), charset);
     }
 
     @Override
@@ -463,13 +463,18 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public String readString(Charset charset) throws IOException {
-        return readString(charset, new StringBuilder()).toString();
+    public String readString(LinkOption option, Charset charset)
+            throws IOException {
+        return readString(option, charset, new StringBuilder()).toString();
     }
 
     @Override
-    public <T extends Appendable> T readString(Charset charset, T appendable) throws IOException {
-        try (Reader reader = openReader()) {
+    public <T extends Appendable> T readString(
+            LinkOption option,
+            Charset charset,
+            T appendable) throws IOException {
+
+        try (Reader reader = openReader(option, charset)) {
             for (CharBuffer buffer = CharBuffer.allocate(8192);
                  reader.read(buffer) > -1; ) {
                 buffer.flip();

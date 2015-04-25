@@ -68,13 +68,13 @@ public final class CopyTest extends PasteTest {
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource srcFile = srcDir.resolve("test.txt");
         Resource dstFile = dstDir.resolve("a/test.txt");
-        try (Writer out = srcFile.openWriter(UTF_8)) {
+        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
             out.write("Testing");
         }
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", srcFile.readString(UTF_8));
-        assertEquals("Testing", dstFile.readString(UTF_8));
+        assertEquals("Testing", srcFile.readString(NOFOLLOW, UTF_8));
+        assertEquals("Testing", dstFile.readString(NOFOLLOW, UTF_8));
     }
 
     public void testCopiesEmptyFile() throws Exception {
@@ -89,13 +89,13 @@ public final class CopyTest extends PasteTest {
         Resource srcFile = dir1().resolve("test.txt").createFile();
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource dstFile = dstDir.resolve("test.txt");
-        try (Writer writer = srcFile.openWriter(UTF_8)) {
+        try (Writer writer = srcFile.openWriter(NOFOLLOW, UTF_8)) {
             writer.write("Testing");
         }
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", srcFile.readString(UTF_8));
-        assertEquals("Testing", dstFile.readString(UTF_8));
+        assertEquals("Testing", srcFile.readString(NOFOLLOW, UTF_8));
+        assertEquals("Testing", dstFile.readString(NOFOLLOW, UTF_8));
     }
 
     private void copy(Resource src, Resource dstDir)

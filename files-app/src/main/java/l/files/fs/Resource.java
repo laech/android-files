@@ -163,9 +163,9 @@ public interface Resource extends Parcelable {
     OutputStream openOutputStream(LinkOption option, boolean append)
             throws IOException;
 
-    Reader openReader() throws IOException;
+    Reader openReader(LinkOption option, Charset charset) throws IOException;
 
-    Writer openWriter(Charset charset) throws IOException;
+    Writer openWriter(LinkOption option, Charset charset) throws IOException;
 
     // Writer openWriter(Charset charset, boolean append) throws IOException;
 
@@ -303,13 +303,15 @@ public interface Resource extends Parcelable {
     /**
      * Reads the underlying file content as string.
      */
-    String readString(Charset charset) throws IOException;
+    String readString(LinkOption option, Charset charset) throws IOException;
 
     /**
      * Appends the underlying file content as string into the given appendable,
      * returns the appendable.
      */
-    <T extends Appendable> T readString(Charset charset, T appendable) throws IOException;
+    <T extends Appendable> T readString(LinkOption option,
+                                        Charset charset,
+                                        T appendable) throws IOException;
 
     interface Stream extends Iterable<Resource>, Closeable {
     }

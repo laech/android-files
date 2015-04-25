@@ -33,14 +33,14 @@ public final class MoveTest extends PasteTest {
         Resource srcFile = dir1().resolve("a.txt").createFile();
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource dstFile = dstDir.resolve("a.txt");
-        try (Writer out = srcFile.openWriter(UTF_8)) {
+        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
             out.write("Test");
         }
         Move move = create(srcFile, dstDir);
         move.execute();
 
         assertFalse(srcFile.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readString(UTF_8));
+        assertEquals("Test", dstFile.readString(NOFOLLOW, UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
@@ -49,7 +49,7 @@ public final class MoveTest extends PasteTest {
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource srcFile = srcDir.resolve("test.txt");
         Resource dstFile = dstDir.resolve("a/test.txt");
-        try (Writer out = srcFile.openWriter(UTF_8)) {
+        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
             out.write("Test");
         }
 
@@ -57,7 +57,7 @@ public final class MoveTest extends PasteTest {
         move.execute();
 
         assertFalse(srcDir.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readString(UTF_8));
+        assertEquals("Test", dstFile.readString(NOFOLLOW, UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
