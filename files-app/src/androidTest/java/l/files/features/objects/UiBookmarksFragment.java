@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class UiBookmarksFragment {
 
@@ -55,7 +56,7 @@ public final class UiBookmarksFragment {
             }
         });
 
-        if (resource.readStatus(false).isDirectory()) {
+        if (resource.readStatus(NOFOLLOW).isDirectory()) {
             getActivityObject().assertCurrentDirectory(resource);
         }
         return getActivityObject();

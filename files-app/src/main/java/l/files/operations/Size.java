@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
+
 final class Size extends Count {
 
     private final AtomicLong size = new AtomicLong();
@@ -21,7 +23,7 @@ final class Size extends Count {
     void onCount(Resource resource) {
         super.onCount(resource);
         try {
-            size.addAndGet(resource.readStatus(false).getSize());
+            size.addAndGet(resource.readStatus(NOFOLLOW).getSize());
         } catch (IOException e) {
             // Ignore count
         }

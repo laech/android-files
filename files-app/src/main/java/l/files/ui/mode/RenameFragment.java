@@ -22,6 +22,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.System.identityHashCode;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class RenameFragment extends FileCreationFragment {
 
@@ -107,7 +108,7 @@ public final class RenameFragment extends FileCreationFragment {
                 @Override
                 public ResourceStatus loadInBackground() {
                     try {
-                        return getResource().readStatus(false);
+                        return getResource().readStatus(NOFOLLOW);
                     } catch (IOException e) {
                         return null;
                     }

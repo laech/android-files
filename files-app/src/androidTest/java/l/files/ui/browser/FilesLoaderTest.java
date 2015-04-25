@@ -20,6 +20,7 @@ import l.files.fs.local.LocalResource;
 import l.files.test.TestActivity;
 
 import static android.app.LoaderManager.LoaderCallbacks;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -98,7 +99,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
                 tmp.createDir(name);
             }
             Resource child = resource.resolve(name);
-            ResourceStatus stat = child.readStatus(false);
+            ResourceStatus stat = child.readStatus(NOFOLLOW);
             result.add(FileListItem.File.create(child, stat, stat));
         }
         return result;

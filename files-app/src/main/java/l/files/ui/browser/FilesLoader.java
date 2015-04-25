@@ -25,6 +25,8 @@ import l.files.logging.Logger;
 import static android.os.Looper.getMainLooper;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
@@ -205,7 +207,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     private boolean addData(Resource resource) {
         try {
 
-            ResourceStatus stat = resource.readStatus(false);
+            ResourceStatus stat = resource.readStatus(NOFOLLOW);
             ResourceStatus targetStat = readTargetStatus(stat);
             FileListItem.File newStat = FileListItem.File.create(resource, stat, targetStat);
             FileListItem.File oldStat = data.put(resource, newStat);
@@ -223,7 +225,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     private ResourceStatus readTargetStatus(ResourceStatus status) {
         if (status.isSymbolicLink()) {
             try {
-                return status.getResource().readStatus(true);
+                return status.getResource().readStatus(FOLLOW);
             } catch (IOException e) {
                 logger.debug(e);
             }

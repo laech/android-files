@@ -20,6 +20,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.WatchEvent.Kind.CREATE;
 import static l.files.fs.WatchEvent.Kind.DELETE;
@@ -129,7 +130,7 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
 
     private static void testModifyPermission(
             Resource target, Resource observable) throws Exception {
-        Set<Permission> oldPerms = target.readStatus(false).getPermissions();
+        Set<Permission> oldPerms = target.readStatus(NOFOLLOW).getPermissions();
         Set<Permission> newPerms;
         if (oldPerms.isEmpty()) {
             newPerms = singleton(OWNER_WRITE);
@@ -157,7 +158,7 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
 
     private void testModifyModificationTime(
             Resource target, Resource observable) throws Exception {
-        Instant old = target.readStatus(false).getModificationTime();
+        Instant old = target.readStatus(NOFOLLOW).getModificationTime();
         Instant t = Instant.of(old.getSeconds() - 1, old.getNanos());
         try (Recorder observer = observe(observable)) {
             observer.await(MODIFY, target, newSetModificationTime(target, t));
@@ -175,7 +176,7 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
 
     private static void testDelete(
             Resource target, Resource observable) throws Exception {
-        boolean file = target.readStatus(false).isRegularFile();
+        boolean file = target.readStatus(NOFOLLOW).isRegularFile();
         try (Recorder observer = observe(observable)) {
             List<WatchEvent> expected = new ArrayList<>();
             // If target is file and observing on the file itself, an IN_ATTRIB

@@ -7,10 +7,13 @@ import java.util.Set;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Instant;
+import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.ResourceStatus;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
+import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.LocalResource.mapPermissions;
 
 @AutoParcel
@@ -148,14 +151,16 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     }
 
     public static LocalResourceStatus stat(
-            LocalResource resource, boolean followLink) throws IOException {
+            LocalResource resource,
+            LinkOption option) throws IOException {
 
+        requireNonNull(option, "option");
         Stat stat;
         try {
-            if (followLink) {
-                stat = Stat.stat(resource.getFile().getPath());
+            if (option == FOLLOW) {
+                stat = Stat.stat(resource.getPath());
             } else {
-                stat = Stat.lstat(resource.getFile().getPath());
+                stat = Stat.lstat(resource.getPath());
             }
         } catch (ErrnoException e) {
             throw e.toIOException(resource.getPath());

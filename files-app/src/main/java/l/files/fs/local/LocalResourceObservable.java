@@ -20,6 +20,7 @@ import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.UncaughtExceptionHandler;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.WatchEvent.Kind;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
@@ -176,7 +177,7 @@ final class LocalResourceObservable extends Native
             LocalResource resource,
             WatchEvent.Listener observer) throws IOException {
 
-        boolean directory = resource.readStatus(false).isDirectory();
+        boolean directory = resource.readStatus(NOFOLLOW).isDirectory();
 
         int fd = inotifyInit();
         int wd = inotifyAddWatchWillCloseOnError(fd, resource);

@@ -5,6 +5,7 @@ import com.google.common.net.MediaType;
 import java.io.IOException;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.fs.LinkOption.FOLLOW;
 
 abstract class LocalFileTypeDetector {
 
@@ -20,7 +21,7 @@ abstract class LocalFileTypeDetector {
      * content type of the target file.
      */
     public MediaType detect(LocalResource resource) throws IOException {
-        return detect(resource.readStatus(true));
+        return detect(resource.readStatus(FOLLOW)); // TODO option as param?
     }
 
     /**

@@ -209,7 +209,7 @@ public interface Resource extends Parcelable {
      * @throws NotExistException this resource does not exist
      * @throws IOException       other failures
      */
-    ResourceStatus readStatus(boolean followLink) throws IOException; // TODO remove flag
+    ResourceStatus readStatus(LinkOption option) throws IOException;
 
     /**
      * Renames this resource tree to the given destination.

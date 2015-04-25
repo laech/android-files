@@ -12,6 +12,7 @@ import l.files.fs.ResourceStatus;
 import l.files.fs.ResourceVisitor;
 import l.files.logging.Logger;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -46,7 +47,7 @@ final class Copy extends Paste {
 
                 ResourceStatus status;
                 try {
-                    status = resource.readStatus(false);
+                    status = resource.readStatus(NOFOLLOW);
                 } catch (IOException e) {
                     record(resource, e);
                     return CONTINUE;

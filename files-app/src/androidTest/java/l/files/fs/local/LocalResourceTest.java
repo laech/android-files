@@ -81,7 +81,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_createFile() throws Exception {
         Resource file = resource.resolve("a");
         file.createFile();
-        assertTrue(file.readStatus(false).isRegularFile());
+        assertTrue(file.readStatus(NOFOLLOW).isRegularFile());
     }
 
     public void test_createFile_correctPermissions() throws Exception {
@@ -91,7 +91,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         File expected = new File(resource.getFile(), "b");
         assertTrue(expected.createNewFile());
 
-        ResourceStatus status = actual.readStatus(false);
+        ResourceStatus status = actual.readStatus(NOFOLLOW);
         assertEquals(expected.canRead(), status.isReadable());
         assertEquals(expected.canWrite(), status.isWritable());
         assertEquals(expected.canExecute(), status.isExecutable());
@@ -135,7 +135,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_createDirectory() throws Exception {
         Resource dir = resource.resolve("a");
         dir.createDirectory();
-        assertTrue(dir.readStatus(false).isDirectory());
+        assertTrue(dir.readStatus(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectory_correctPermissions() throws Exception {
@@ -145,7 +145,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         File expected = new File(resource.getFile(), "b");
         assertTrue(expected.mkdir());
 
-        ResourceStatus status = actual.readStatus(false);
+        ResourceStatus status = actual.readStatus(NOFOLLOW);
         assertEquals(expected.canRead(), status.isReadable());
         assertEquals(expected.canWrite(), status.isWritable());
         assertEquals(expected.canExecute(), status.isExecutable());
@@ -188,9 +188,9 @@ public final class LocalResourceTest extends ResourceBaseTest {
 
     public void test_createDirectories() throws Exception {
         resource.resolve("a/b/c").createDirectories();
-        assertTrue(resource.resolve("a/b/c").readStatus(false).isDirectory());
-        assertTrue(resource.resolve("a/b").readStatus(false).isDirectory());
-        assertTrue(resource.resolve("a/").readStatus(false).isDirectory());
+        assertTrue(resource.resolve("a/b/c").readStatus(NOFOLLOW).isDirectory());
+        assertTrue(resource.resolve("a/b").readStatus(NOFOLLOW).isDirectory());
+        assertTrue(resource.resolve("a/").readStatus(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectories_NotDirectoryException() throws Exception {
@@ -214,7 +214,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_createSymbolicLink() throws Exception {
         Resource link = resource.resolve("link");
         link.createSymbolicLink(resource);
-        assertTrue(link.readStatus(false).isSymbolicLink());
+        assertTrue(link.readStatus(NOFOLLOW).isSymbolicLink());
         assertEquals(resource, link.readSymbolicLink());
     }
 
@@ -293,20 +293,20 @@ public final class LocalResourceTest extends ResourceBaseTest {
         LocalResource child = resource.resolve("a");
         child.createSymbolicLink(resource);
 
-        LocalResourceStatus status = child.readStatus(true);
+        LocalResourceStatus status = child.readStatus(FOLLOW);
         assertTrue(status.isDirectory());
         assertFalse(status.isSymbolicLink());
-        assertEquals(resource.readStatus(false).getInode(), status.getInode());
+        assertEquals(resource.readStatus(NOFOLLOW).getInode(), status.getInode());
     }
 
     public void test_readStatus_noFollowLink() throws Exception {
         LocalResource child = resource.resolve("a");
         child.createSymbolicLink(resource);
 
-        LocalResourceStatus status = child.readStatus(false);
+        LocalResourceStatus status = child.readStatus(NOFOLLOW);
         assertTrue(status.isSymbolicLink());
         assertFalse(status.isDirectory());
-        assertTrue(resource.readStatus(false).getInode() != status.getInode());
+        assertTrue(resource.readStatus(NOFOLLOW).getInode() != status.getInode());
     }
 
     public void test_readStatus_AccessException() throws Exception {
@@ -333,7 +333,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         expect(clazz, new Code() {
             @Override
             public void run() throws Exception {
-                resource.readStatus(false);
+                resource.readStatus(NOFOLLOW);
             }
         });
     }
@@ -571,7 +571,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     private Instant getModificationTime(Resource resource) throws IOException {
-        return resource.readStatus(false).getModificationTime();
+        return resource.readStatus(NOFOLLOW).getModificationTime();
     }
 
     private static void expectOnSetModificationTime(
@@ -624,7 +624,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     private Instant getAccessTime(Resource resource) throws IOException {
-        return resource.readStatus(false).getAccessTime();
+        return resource.readStatus(NOFOLLOW).getAccessTime();
     }
 
     private static void expectOnSetAccessTime(
@@ -643,14 +643,14 @@ public final class LocalResourceTest extends ResourceBaseTest {
         Set<Permission> permissions = EnumSet.allOf(Permission.class);
         for (Set<Permission> expected : powerSet(permissions)) {
             resource.setPermissions(expected);
-            Set<Permission> actual = resource.readStatus(false).getPermissions();
+            Set<Permission> actual = resource.readStatus(NOFOLLOW).getPermissions();
             assertEquals(expected, actual);
         }
     }
 
     public void test_setPermissions_rawBits() throws Exception {
         int expected = Os.stat(resource.getPath()).st_mode;
-        resource.setPermissions(resource.readStatus(false).getPermissions());
+        resource.setPermissions(resource.readStatus(NOFOLLOW).getPermissions());
         int actual = Os.stat(resource.getPath()).st_mode;
         assertEquals(expected, actual);
     }

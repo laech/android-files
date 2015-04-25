@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import l.files.fs.NotDirectoryException;
 
 import static java.util.Arrays.asList;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class LocalResourceStreamTest extends ResourceBaseTest {
 
@@ -18,9 +19,9 @@ public final class LocalResourceStreamTest extends ResourceBaseTest {
 
         try (LocalResourceStream stream = LocalResourceStream.open(dir1())) {
             List<LocalPathEntry> expected = asList(
-                    LocalPathEntry.create(a, a.readStatus(false).getInode(), false),
-                    LocalPathEntry.create(b, b.readStatus(false).getInode(), true),
-                    LocalPathEntry.create(c, c.readStatus(false).getInode(), false)
+                    LocalPathEntry.create(a, a.readStatus(NOFOLLOW).getInode(), false),
+                    LocalPathEntry.create(b, b.readStatus(NOFOLLOW).getInode(), true),
+                    LocalPathEntry.create(c, c.readStatus(NOFOLLOW).getInode(), false)
             );
             List<LocalPathEntry> actual = new ArrayList<>();
             for (LocalPathEntry entry : stream) {

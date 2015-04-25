@@ -21,6 +21,7 @@ import l.files.logging.Logger;
 import l.files.ui.OpenFileRequest;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.Fragments.setArgs;
 
 public final class FilesPagerFragment extends Fragment {
@@ -102,7 +103,7 @@ public final class FilesPagerFragment extends Fragment {
             @Override
             protected ResourceStatus doInBackground(Void... params) {
                 try {
-                    return request.getResource().readStatus(true);
+                    return request.getResource().readStatus(FOLLOW);
                 } catch (IOException e) {
                     log.debug(e, "%s", request);
                     return null;

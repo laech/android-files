@@ -30,7 +30,7 @@ public final class CopyTest extends PasteTest {
     public long getSize(Iterable<Resource> resources) throws IOException {
         long size = 0;
         for (Resource resource : resources) {
-            size += resource.readStatus(false).getSize();
+            size += resource.readStatus(NOFOLLOW).getSize();
         }
         return size;
     }
@@ -44,12 +44,12 @@ public final class CopyTest extends PasteTest {
         copy(srcFile, dstDir);
 
         assertEquals(
-                srcFile.readStatus(false).getAccessTime(),
-                dstFile.readStatus(false).getAccessTime()
+                srcFile.readStatus(NOFOLLOW).getAccessTime(),
+                dstFile.readStatus(NOFOLLOW).getAccessTime()
         );
         assertEquals(
-                srcFile.readStatus(false).getModificationTime(),
-                dstFile.readStatus(false).getModificationTime()
+                srcFile.readStatus(NOFOLLOW).getModificationTime(),
+                dstFile.readStatus(NOFOLLOW).getModificationTime()
         );
     }
 

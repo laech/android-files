@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import l.files.fs.Resource;
 import l.files.fs.ResourceVisitor;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
@@ -50,7 +51,7 @@ final class Delete extends AbstractOperation implements ResourceVisitor {
     }
 
     private void delete(Resource resource) throws IOException {
-        long size = resource.readStatus(false).getSize();
+        long size = resource.readStatus(NOFOLLOW).getSize();
         resource.delete();
         deletedByteCount.addAndGet(size);
         deletedItemCount.incrementAndGet();

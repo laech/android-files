@@ -21,6 +21,7 @@ import l.files.fs.ResourceException;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 @SuppressWarnings("UnusedDeclaration")
 final class ErrnoException extends Exception {
@@ -223,7 +224,7 @@ final class ErrnoException extends Exception {
     boolean isCausedByNoFollowLink(Resource resource) throws IOException {
         // See for example open() linux system call
         return errno() == OsConstants.ELOOP
-                && resource.readStatus(false).isSymbolicLink();
+                && resource.readStatus(NOFOLLOW).isSymbolicLink();
     }
 
 }

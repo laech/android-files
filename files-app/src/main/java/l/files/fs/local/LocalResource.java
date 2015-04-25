@@ -55,7 +55,7 @@ import static android.system.OsConstants.S_IXUSR;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -191,8 +191,8 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public LocalResourceStatus readStatus(boolean followLink) throws IOException {
-        return LocalResourceStatus.stat(this, followLink);
+    public LocalResourceStatus readStatus(LinkOption option) throws IOException {
+        return LocalResourceStatus.stat(this, option);
     }
 
     @Override
@@ -202,7 +202,7 @@ public abstract class LocalResource implements Resource {
             // access() follows symbolic links
             // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
             // so use stat here
-            readStatus(option == FOLLOW);
+            readStatus(option);
             return true;
         } catch (IOException e) {
             return false;
@@ -289,7 +289,7 @@ public abstract class LocalResource implements Resource {
     @Override
     public LocalResource createDirectories() throws IOException {
         try {
-            if (readStatus(false).isDirectory()) {
+            if (readStatus(NOFOLLOW).isDirectory()) {
                 return this;
             }
         } catch (NotExistException ignore) {

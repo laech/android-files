@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import auto.parcel.AutoParcel;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
+
 @AutoParcel
 abstract class LocalPathEntry {
 
@@ -26,7 +28,7 @@ abstract class LocalPathEntry {
     }
 
     public static LocalPathEntry read(LocalResource resource) throws IOException {
-        LocalResourceStatus status = LocalResourceStatus.stat(resource, false);
+        LocalResourceStatus status = LocalResourceStatus.stat(resource, NOFOLLOW);
         return create(resource, status.getInode(), status.isDirectory());
     }
 
