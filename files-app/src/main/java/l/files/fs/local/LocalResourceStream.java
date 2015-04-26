@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
+import l.files.fs.Resource;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -22,12 +23,12 @@ final class LocalResourceStream extends Native implements Closeable {
         init();
     }
 
-    private final LocalResource parent;
+    private final Resource parent;
     private final long dir;
     private final Callback callback;
 
     private LocalResourceStream(
-            LocalResource parent,
+            Resource parent,
             long dir,
             Callback callback) {
         this.parent = parent;
@@ -45,7 +46,7 @@ final class LocalResourceStream extends Native implements Closeable {
     }
 
     public static void list(
-            LocalResource resource,
+            Resource resource,
             LinkOption option,
             Callback callback) throws IOException {
 

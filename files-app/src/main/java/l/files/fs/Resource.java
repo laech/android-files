@@ -35,6 +35,12 @@ public interface Resource extends Parcelable {
     URI getUri();
 
     /**
+     * Gets the path of this resource. The returned path is only valid within
+     * the context of the underlying file system.
+     */
+    String getPath();
+
+    /**
      * Gets the name of this resource, or empty if this is the root resource.
      */
     String getName();

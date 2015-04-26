@@ -136,7 +136,8 @@ public abstract class LocalResource implements Resource {
         return uri;
     }
 
-    String getPath() {
+    @Override
+    public String getPath() {
         return getFile().getPath();
     }
 
