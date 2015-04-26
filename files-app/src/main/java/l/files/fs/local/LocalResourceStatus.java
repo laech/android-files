@@ -20,18 +20,10 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     private Instant mtime;
     private Set<Permission> permissions;
 
-    @Override
-    public abstract LocalResource getResource();
-
     public abstract Stat getStat();
 
-    public static LocalResourceStatus create(LocalResource resource, Stat stat) {
-        return new AutoParcel_LocalResourceStatus(resource, stat);
-    }
-
-    @Override
-    public String getName() {
-        return getResource().getName();
+    public static LocalResourceStatus create(Stat stat) {
+        return new AutoParcel_LocalResourceStatus(stat);
     }
 
     @Override
@@ -122,7 +114,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
             throw e.toIOException(resource.getPath());
         }
 
-        return create(resource, stat);
+        return create(stat);
     }
 
 }

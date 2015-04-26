@@ -135,12 +135,13 @@ public final class RenameFragment extends FileCreationFragment {
             if (stat == null || !getFilename().isEmpty()) {
                 return;
             }
+            Resource resource = getResource();
             EditText field = getFilenameField();
-            field.setText(stat.getName());
+            field.setText(resource.getName());
             if (stat.isDirectory()) {
                 field.selectAll();
             } else {
-                field.setSelection(0, getNameWithoutExtension(stat.getName()).length());
+                field.setSelection(0, getNameWithoutExtension(resource.getName()).length());
             }
         }
     }

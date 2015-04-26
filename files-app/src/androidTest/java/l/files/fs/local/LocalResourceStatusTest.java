@@ -60,11 +60,6 @@ public final class LocalResourceStatusTest extends FileBaseTest {
         assertEquals(expected.st_atime, actual.getModificationTime().getSeconds());
     }
 
-    public void testName() throws Exception {
-        File file = tmp().createFile("a");
-        assertEquals(file.getName(), stat(LocalResource.create(file), NOFOLLOW).getName());
-    }
-
     public void testSize() throws Exception {
         File file = tmp().createFile("a");
         write("hello world", file, UTF_8);

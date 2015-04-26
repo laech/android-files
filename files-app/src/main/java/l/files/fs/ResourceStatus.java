@@ -4,10 +4,6 @@ import java.util.Set;
 
 public interface ResourceStatus {
 
-    Resource getResource();
-
-    String getName();
-
     long getSize();
 
     boolean isRegularFile();

@@ -528,24 +528,19 @@ public final class LocalResourceTest extends ResourceBaseTest {
 
     public void test_readStatus_followLink() throws Exception {
         Resource child = resource.resolve("a").createSymbolicLink(resource);
-        ResourceStatus status = child.readStatus(FOLLOW);
-        assertTrue(status.isDirectory());
-        assertFalse(status.isSymbolicLink());
-        assertEquals(
-                ((LocalResourceStatus) resource.readStatus(NOFOLLOW)).getInode(),
-                ((LocalResourceStatus) status).getInode());
+        ResourceStatus expected = resource.readStatus(NOFOLLOW);
+        ResourceStatus actual = child.readStatus(FOLLOW);
+        assertTrue(actual.isDirectory());
+        assertFalse(actual.isSymbolicLink());
+        assertEquals(expected, actual);
     }
 
     public void test_readStatus_noFollowLink() throws Exception {
-        Resource child = resource.resolve("a");
-        child.createSymbolicLink(resource);
-
-        ResourceStatus status = child.readStatus(NOFOLLOW);
-        assertTrue(status.isSymbolicLink());
-        assertFalse(status.isDirectory());
-        assertNotEqual(
-                ((LocalResourceStatus) resource.readStatus(NOFOLLOW)).getInode(),
-                ((LocalResourceStatus) status).getInode());
+        Resource child = resource.resolve("a").createSymbolicLink(resource);
+        ResourceStatus actual = child.readStatus(NOFOLLOW);
+        assertTrue(actual.isSymbolicLink());
+        assertFalse(actual.isDirectory());
+        assertNotEqual(resource.readStatus(NOFOLLOW), actual);
     }
 
     public void test_readStatus_AccessException() throws Exception {

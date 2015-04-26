@@ -164,9 +164,9 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
     @Override
     protected Object getItemIdObject(int position) {
-        Object item = getItem(position);
-        if (item instanceof ResourceStatus) {
-            return ((ResourceStatus) item).getResource();
+        FileListItem item = getItem(position);
+        if (item instanceof FileListItem.File) {
+            return ((FileListItem.File) item).getResource();
         }
         return item;
     }
