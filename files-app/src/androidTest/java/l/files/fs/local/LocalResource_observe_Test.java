@@ -56,9 +56,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     public void testObserveOnLinkFollow() throws Exception {
         Resource dir = dir1().resolve("dir").createDirectory();
         Resource link = dir1().resolve("link").createSymbolicLink(dir);
-        Resource file = link.resolve("file");
+        Resource child = link.resolve("dir").createDirectory();
         try (Recorder observer = observe(link, FOLLOW)) {
-            observer.await(CREATE, file, newCreateFile(file));
+            observer.await(MODIFY, child, newCreateFile(child.resolve("a")));
         }
     }
 

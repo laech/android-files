@@ -182,7 +182,7 @@ final class LocalResourceObservable extends Native
         requireNonNull(option, "option");
         requireNonNull(observer, "observer");
 
-        boolean directory = resource.readStatus(NOFOLLOW).isDirectory();
+        boolean directory = resource.readStatus(option).isDirectory();
 
         int fd = inotifyInit(resource);
         int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
@@ -220,7 +220,7 @@ final class LocalResourceObservable extends Native
         }
 
         try {
-            observeChildren(fd, resource, observable);
+            observeChildren(fd, resource, option, observable);
         } catch (UncheckedIOException | IOException e) {
             log.warn(e);
         }
@@ -271,9 +271,9 @@ final class LocalResourceObservable extends Native
     private static void observeChildren(
             final int fd,
             final LocalResource resource,
+            final LinkOption option,
             final LocalResourceObservable observable) throws IOException {
 
-        LinkOption option = NOFOLLOW; // TODO
         LocalResourceStream.list(resource, option, new LocalResourceStream.Callback() {
             @Override
             public boolean accept(long inode, String name, boolean directory) throws IOException {
