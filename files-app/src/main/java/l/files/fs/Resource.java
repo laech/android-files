@@ -226,7 +226,7 @@ public interface Resource extends Parcelable {
 
     Writer openWriter(LinkOption option, Charset charset) throws IOException;
 
-    // Writer openWriter(Charset charset, boolean append) throws IOException;
+    Writer openWriter(LinkOption option, Charset charset, boolean append) throws IOException;
 
     /**
      * Creates this resource as a directory. Will fail if the directory already

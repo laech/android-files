@@ -1,17 +1,19 @@
 package l.files.features;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 
 import l.files.common.base.Consumer;
+import l.files.fs.Instant;
 import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.ResourceStatus;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.io.Files.append;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static l.files.fs.Instant.EPOCH;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
@@ -19,8 +21,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
     // TODO test symbolic link to directory changes
 
     public void testSymbolicLinkIconDisplayed() throws Exception {
-        Resource dir = resource().resolve("dir");
-        Resource link = resource().resolve("link");
+        Resource dir = directory().resolve("dir");
+        Resource link = directory().resolve("link");
         dir.createDirectory();
         link.createSymbolicLink(dir);
 
@@ -30,12 +32,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void testCanNavigateIntoSymlinkDirectory() throws Exception {
-        Resource dir = resource().resolve("dir");
-        dir.createDirectory();
+        Resource dir = directory().resolve("dir").createDirectory();
         dir.resolve("a").createDirectory();
 
-        Resource link = resource().resolve("link");
-        link.createSymbolicLink(dir);
+        Resource link = directory().resolve("link").createSymbolicLink(dir);
         Resource linkChild = link.resolve("a");
 
         screen()
@@ -44,18 +44,18 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(linkChild);
     }
 
-    public void testPressActionBarUpIndicatorWillGoBack() {
-        File dir = dir().createDir("a");
+    public void testPressActionBarUpIndicatorWillGoBack() throws Exception {
+        Resource dir = directory().resolve("dir").createDirectory();
         screen()
                 .selectItem(dir)
                 .assertCurrentDirectory(dir)
                 .pressActionBarUpIndicator()
-                .assertCurrentDirectory(dir.getParentFile());
+                .assertCurrentDirectory(dir.getParent());
     }
 
-    public void testActionBarTitleShowsNameOfDirectory() {
+    public void testActionBarTitleShowsNameOfDirectory() throws Exception {
         screen()
-                .selectItem(dir().createDir("a"))
+                .selectItem(directory().resolve("a").createDirectory())
                 .assertActionBarTitle("a");
     }
 
@@ -63,30 +63,30 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertActionBarUpIndicatorIsVisible(false);
     }
 
-    public void testActionBarShowsUpIndicatorWhenThereIsBackStack() {
+    public void testActionBarShowsUpIndicatorWhenThereIsBackStack() throws Exception {
         screen()
-                .selectItem(dir().createDir("a"))
+                .selectItem(directory().resolve("dir").createDirectory())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
-    public void testActionBarHidesUpIndicatorWhenThereIsNoBackStackToGoBackTo() {
+    public void testActionBarHidesUpIndicatorWhenThereIsNoBackStackToGoBackTo() throws Exception {
         screen()
-                .selectItem(dir().createDir("a"))
+                .selectItem(directory().resolve("dir").createDirectory())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
 
-    public void testLongPressBackWillClearBackStack() {
+    public void testLongPressBackWillClearBackStack() throws Exception {
         screen()
-                .selectItem(dir().createDir("a"))
-                .selectItem(dir().createDir("a/b"))
-                .selectItem(dir().createDir("a/b/c"))
+                .selectItem(directory().resolve("a").createDirectory())
+                .selectItem(directory().resolve("a/b").createDirectory())
+                .selectItem(directory().resolve("a/b/c").createDirectory())
                 .longPressBack()
-                .assertCurrentDirectory(dir().get());
+                .assertCurrentDirectory(directory());
     }
 
-    public void testOpenNewDirectoryWillCloseOpenedDrawer() {
-        Resource dir = LocalResource.create(dir().createDir("a"));
+    public void testOpenNewDirectoryWillCloseOpenedDrawer() throws Exception {
+        Resource dir = directory().resolve("a").createDirectory();
         screen()
                 .openBookmarksDrawer()
                 .getActivityObject()
@@ -94,31 +94,34 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertDrawerIsOpened(false);
     }
 
-    public void testObservesOnCurrentDirectoryAndShowsNewlyAddedFiles() {
-        screen().assertListViewContains(dir().createDir("a"), true);
+    public void testObservesOnCurrentDirectoryAndShowsNewlyAddedFiles() throws Exception {
+        Resource dir = directory().resolve("a").createDirectory();
+        screen().assertListViewContains(dir, true);
     }
 
-    public void testObservesOnCurrentDirectoryAndHidesDeletedFiles() {
-        File file = dir().createFile("a");
-        screen()
-                .assertListViewContains(file, true)
-                .assertListViewContains(delete(file), false);
+    public void testObservesOnCurrentDirectoryAndHidesDeletedFiles() throws Exception {
+        Resource file = directory().resolve("a").createFile();
+        screen().assertListViewContains(file, true);
+        file.delete();
+        screen().assertListViewContains(file, false);
     }
 
     public void testUpdatesViewOnChildDirectoryModified() throws Exception {
-        testUpdatesDateViewOnChildModified(dir().createDir("a"));
+        Resource dir = directory().resolve("a").createDirectory();
+        testUpdatesDateViewOnChildModified(dir);
     }
 
     public void testUpdatesViewOnChildFileModified() throws Exception {
-        testUpdatesDateViewOnChildModified(dir().createFile("a"));
-        testUpdatesSizeViewOnChildModified(dir().createFile("a"));
+        Resource file = directory().resolve("a").createFile();
+        testUpdatesDateViewOnChildModified(file);
+        testUpdatesSizeViewOnChildModified(file);
     }
 
-    private void testUpdatesSizeViewOnChildModified(File f) throws IOException {
-        assertTrue(f.setLastModified(0));
+    private void testUpdatesSizeViewOnChildModified(Resource resource) throws IOException {
+        resource.setModificationTime(NOFOLLOW, EPOCH);
 
         final CharSequence[] size = {null};
-        screen().assertFileSizeView(f, new Consumer<CharSequence>() {
+        screen().assertFileSizeView(resource, new Consumer<CharSequence>() {
             @Override
             public void apply(CharSequence input) {
                 assertFalse(isNullOrEmpty(input.toString()));
@@ -126,9 +129,9 @@ public final class NavigationTest extends BaseFilesActivityTest {
             }
         });
 
-        modify(f);
+        modify(resource);
 
-        screen().assertFileSizeView(f, new Consumer<CharSequence>() {
+        screen().assertFileSizeView(resource, new Consumer<CharSequence>() {
             @Override
             public void apply(CharSequence input) {
                 assertNotEqual(size[0], input);
@@ -136,11 +139,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    private void testUpdatesDateViewOnChildModified(File f) throws IOException {
-        assertTrue(f.setLastModified(0));
+    private void testUpdatesDateViewOnChildModified(Resource resource) throws IOException {
+        resource.setModificationTime(NOFOLLOW, EPOCH);
 
         final CharSequence[] date = {null};
-        screen().assertFileModifiedDateView(f, new Consumer<CharSequence>() {
+        screen().assertFileModifiedDateView(resource, new Consumer<CharSequence>() {
             @Override
             public void apply(CharSequence input) {
                 assertFalse(isNullOrEmpty(input.toString()));
@@ -148,9 +151,9 @@ public final class NavigationTest extends BaseFilesActivityTest {
             }
         });
 
-        modify(f);
+        modify(resource);
 
-        screen().assertFileModifiedDateView(f, new Consumer<CharSequence>() {
+        screen().assertFileModifiedDateView(resource, new Consumer<CharSequence>() {
             @Override
             public void apply(CharSequence input) {
                 assertNotEqual(date[0], input);
@@ -158,20 +161,19 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    private File delete(File file) {
-        assertTrue(file.delete());
-        return file;
+    private Resource modify(Resource resource) throws IOException {
+        ResourceStatus status = resource.readStatus(NOFOLLOW);
+        Instant lastModifiedBefore = status.getModificationTime();
+        if (status.isDirectory()) {
+            resource.resolve(String.valueOf(System.nanoTime())).createDirectory();
+        } else {
+            try (Writer writer = resource.openWriter(NOFOLLOW, UTF_8, true)) {
+                writer.write("test");
+            }
+        }
+        Instant lastModifiedAfter = resource.readStatus(NOFOLLOW).getModificationTime();
+        assertNotEqual(lastModifiedBefore, lastModifiedAfter);
+        return resource;
     }
 
-    private File modify(File file) throws IOException {
-        long lastModifiedBefore = file.lastModified();
-        if (file.isDirectory()) {
-            assertTrue(new File(file, String.valueOf(System.nanoTime())).mkdir());
-        } else {
-            append("test", file, UTF_8);
-        }
-        long lastModifiedAfter = file.lastModified();
-        assertNotEqual(lastModifiedBefore, lastModifiedAfter);
-        return file;
-    }
 }

@@ -387,7 +387,12 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public Writer openWriter(LinkOption option, Charset charset) throws IOException {
-        return new OutputStreamWriter(openOutputStream(option), charset);
+        return openWriter(option, charset, false);
+    }
+
+    @Override
+    public Writer openWriter(LinkOption option, Charset charset, boolean append) throws IOException {
+        return new OutputStreamWriter(openOutputStream(option, append), charset);
     }
 
     @Override

@@ -335,7 +335,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertListViewContains(final File item, final boolean contains) {
+    public UiFileActivity assertListViewContains(final Resource item, final boolean contains) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -345,22 +345,26 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertFileModifiedDateView(final File file, final Consumer<CharSequence> assertion) {
+    public UiFileActivity assertFileModifiedDateView(
+            final Resource resource,
+            final Consumer<CharSequence> assertion) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                CharSequence actual = getFileModifiedView(file).getText();
+                CharSequence actual = getFileModifiedView(resource).getText();
                 assertion.apply(actual);
             }
         });
         return this;
     }
 
-    public UiFileActivity assertFileSizeView(final File file, final Consumer<CharSequence> assertion) {
+    public UiFileActivity assertFileSizeView(
+            final Resource resource,
+            final Consumer<CharSequence> assertion) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                CharSequence actual = getFileSizeView(file).getText();
+                CharSequence actual = getFileSizeView(resource).getText();
                 assertion.apply(actual);
             }
         });
@@ -408,20 +412,16 @@ public final class UiFileActivity {
         return this;
     }
 
-    private TextView getFileModifiedView(File file) {
-        return (TextView) getView(file).findViewById(R.id.date);
+    private TextView getFileModifiedView(Resource resource) {
+        return (TextView) getView(resource).findViewById(R.id.date);
     }
 
-    private TextView getFileSizeView(File file) {
-        return (TextView) getView(file).findViewById(R.id.size);
+    private TextView getFileSizeView(Resource resource) {
+        return (TextView) getView(resource).findViewById(R.id.size);
     }
 
     private View getView(Resource resource) {
         return getView(resource.getName());
-    }
-
-    private View getView(File file) {
-        return getView(file.getName());
     }
 
     private View getView(String name) {

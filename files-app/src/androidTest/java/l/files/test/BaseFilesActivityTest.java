@@ -38,11 +38,12 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
         return new UiFileActivity(getInstrumentation(), getActivity());
     }
 
+    @Deprecated
     protected final TempDir dir() {
         return dir;
     }
 
-    protected final Resource resource() {
+    protected final Resource directory() {
         return LocalResource.create(dir.get());
     }
 
