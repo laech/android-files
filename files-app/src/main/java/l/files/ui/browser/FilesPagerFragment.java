@@ -116,7 +116,7 @@ public final class FilesPagerFragment extends Fragment {
                 Activity activity = getActivity();
                 if (activity != null) {
                     if (status != null) {
-                        show(status);
+                        show(request.getResource(), status);
                     } else {
                         toaster.toast(activity, R.string.failed_to_get_file_info);
                     }
@@ -125,16 +125,16 @@ public final class FilesPagerFragment extends Fragment {
         }.execute();
     }
 
-    private void show(ResourceStatus status) {
+    private void show(Resource resource, ResourceStatus status) {
         if (getActivity() == null) {
             return;
         }
         if (!status.isReadable()) {
             showPermissionDenied();
         } else if (status.isDirectory()) {
-            showDirectory(status.getResource());
+            showDirectory(resource);
         } else {
-            showFile(status.getResource());
+            showFile(resource);
         }
     }
 

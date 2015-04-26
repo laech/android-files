@@ -210,7 +210,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         try {
 
             ResourceStatus stat = resource.readStatus(NOFOLLOW);
-            ResourceStatus targetStat = readTargetStatus(stat);
+            ResourceStatus targetStat = readTargetStatus(resource, stat);
             FileListItem.File newStat = FileListItem.File.create(resource, stat, targetStat);
             FileListItem.File oldStat = data.put(resource, newStat);
             return !Objects.equals(newStat, oldStat);
@@ -224,10 +224,10 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
         }
     }
 
-    private ResourceStatus readTargetStatus(ResourceStatus status) {
+    private ResourceStatus readTargetStatus(Resource resource, ResourceStatus status) {
         if (status.isSymbolicLink()) {
             try {
-                return status.getResource().readStatus(FOLLOW);
+                return resource.readStatus(FOLLOW);
             } catch (IOException e) {
                 logger.debug(e);
             }
