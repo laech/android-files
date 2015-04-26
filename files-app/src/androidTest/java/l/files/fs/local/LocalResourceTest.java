@@ -1,6 +1,7 @@
 package l.files.fs.local;
 
 import android.system.Os;
+import android.system.StructStat;
 
 import com.google.common.io.ByteStreams;
 
@@ -53,6 +54,44 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_readStatus_symbolicLink() throws Exception {
+        Resource file = dir1().resolve("file").createFile();
+        Resource link = dir1().resolve("link").createSymbolicLink(file);
+        assertFalse(file.readStatus(NOFOLLOW).isSymbolicLink());
+        assertFalse(link.readStatus(FOLLOW).isSymbolicLink());
+        assertTrue(link.readStatus(NOFOLLOW).isSymbolicLink());
+        assertEquals(file.readStatus(NOFOLLOW), link.readStatus(FOLLOW));
+    }
+
+    public void test_readStatus_modificationTime() throws Exception {
+        ResourceStatus actual = dir1().readStatus(NOFOLLOW);
+        StructStat expected = Os.stat(dir1().getPath());
+        assertEquals(expected.st_mtime, actual.getModificationTime().getSeconds());
+    }
+
+    public void test_readStatus_accessTime() throws Exception {
+        ResourceStatus actual = dir1().readStatus(NOFOLLOW);
+        StructStat expected = Os.stat(dir1().getPath());
+        assertEquals(expected.st_atime, actual.getAccessTime().getSeconds());
+    }
+
+    public void test_readStatus_size() throws Exception {
+        Resource file = dir1().resolve("file").createFile();
+        file.writeString(NOFOLLOW, UTF_8, "hello world");
+        long expected = Os.stat(file.getPath()).st_size;
+        long actual = file.readStatus(NOFOLLOW).getSize();
+        assertEquals(expected, actual);
+    }
+
+    public void test_readStatus_isDirectory() throws Exception {
+        assertTrue(dir1().readStatus(NOFOLLOW).isDirectory());
+    }
+
+    public void test_readStatus_isRegularFile() throws Exception {
+        Resource dir = dir1().resolve("dir").createFile();
+        assertTrue(dir.readStatus(NOFOLLOW).isRegularFile());
     }
 
     public void test_getHierarchy_single() throws Exception {
