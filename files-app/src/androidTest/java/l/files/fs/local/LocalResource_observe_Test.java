@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.Instant;
+import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.WatchEvent;
@@ -20,14 +21,45 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.WatchEvent.Kind.CREATE;
 import static l.files.fs.WatchEvent.Kind.DELETE;
 import static l.files.fs.WatchEvent.Kind.MODIFY;
-import static l.files.fs.local.LocalResourceObservableTest.Recorder.observe;
+import static l.files.fs.local.LocalResource_observe_Test.Recorder.observe;
 
-public final class LocalResourceObservableTest extends ResourceBaseTest {
+/**
+ * @see Resource#observe(LinkOption, WatchEvent.Listener)
+ */
+public final class LocalResource_observe_Test extends ResourceBaseTest {
+
+    public void testObserveOnLinkNoFollow() throws Exception {
+        Resource dir = dir1().resolve("dir").createDirectory();
+        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource file = link.resolve("file");
+        try (Recorder observer = observe(link, NOFOLLOW)) {
+            // No follow, can observe the link
+            observer.await(MODIFY, link, newSetModificationTime(link, Instant.of(1, 1)));
+            // But not the child content
+            try {
+                observer.await(CREATE, file, newCreateFile(file));
+            } catch (AssertionError e) {
+                assertTrue(observer.actual.isEmpty());
+                return;
+            }
+            fail();
+        }
+    }
+
+    public void testObserveOnLinkFollow() throws Exception {
+        Resource dir = dir1().resolve("dir").createDirectory();
+        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource file = link.resolve("file");
+        try (Recorder observer = observe(link, FOLLOW)) {
+            observer.await(CREATE, file, newCreateFile(file));
+        }
+    }
 
     public void testMoveDirectoryInThenAddFileIntoIt() throws Exception {
         Resource dst = dir1().resolve("a");
@@ -457,8 +489,12 @@ public final class LocalResourceObservableTest extends ResourceBaseTest {
         private volatile CountDownLatch success;
 
         static Recorder observe(Resource observable) throws IOException {
+            return observe(observable, NOFOLLOW);
+        }
+
+        static Recorder observe(Resource observable, LinkOption option) throws IOException {
             Recorder observer = new Recorder();
-            observer.subscription = observable.observe(observer);
+            observer.subscription = observable.observe(option, observer);
             return observer;
         }
 

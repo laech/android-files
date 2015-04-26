@@ -95,8 +95,7 @@ final class LocalResourceObservable extends Native
      * Mask to use for root resource.
      */
     private static final int ROOT_MASK
-            = IN_DONT_FOLLOW
-            | IN_EXCL_UNLINK
+            = IN_EXCL_UNLINK
             | IN_ATTRIB
             | IN_CREATE
             | IN_DELETE
@@ -176,12 +175,17 @@ final class LocalResourceObservable extends Native
 
     public static Closeable observe(
             LocalResource resource,
+            LinkOption option,
             WatchEvent.Listener observer) throws IOException {
+
+        requireNonNull(resource, "resource");
+        requireNonNull(option, "option");
+        requireNonNull(observer, "observer");
 
         boolean directory = resource.readStatus(NOFOLLOW).isDirectory();
 
-        int fd = inotifyInit();
-        int wd = inotifyAddWatchWillCloseOnError(fd, resource);
+        int fd = inotifyInit(resource);
+        int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
 
         LocalResourceObservable observable =
                 new LocalResourceObservable(fd, wd, resource, observer);
@@ -224,21 +228,27 @@ final class LocalResourceObservable extends Native
         return observable;
     }
 
-    private static int inotifyInit() throws IOException {
+    private static int inotifyInit(LocalResource resource) throws IOException {
         try {
             return Inotify.init1(IN_NONBLOCK);
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(resource.getPath());
         }
     }
 
     private static int inotifyAddWatchWillCloseOnError(
-            int fd, LocalResource resource) throws IOException {
+            int fd,
+            LocalResource resource,
+            LinkOption option) throws IOException {
 
         try {
 
+            int mask = ROOT_MASK;
+            if (option == NOFOLLOW) {
+                mask |= IN_DONT_FOLLOW;
+            }
             String path = resource.getFile().getPath();
-            return Inotify.addWatch(fd, path, ROOT_MASK);
+            return Inotify.addWatch(fd, path, mask);
 
         } catch (ErrnoException e) {
             try {
@@ -246,7 +256,7 @@ final class LocalResourceObservable extends Native
             } catch (ErrnoException ee) {
                 e.addSuppressed(ee);
             }
-            throw e.toIOException();
+            throw e.toIOException(resource.getPath());
 
         } catch (Throwable e) {
             try {
@@ -316,7 +326,7 @@ final class LocalResourceObservable extends Native
         try {
             Unistd.close(fd);
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(resource.getPath());
         }
     }
 

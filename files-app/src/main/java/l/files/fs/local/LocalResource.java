@@ -170,8 +170,8 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public Closeable observe(WatchEvent.Listener observer) throws IOException {
-        return LocalResourceObservable.observe(this, observer);
+    public Closeable observe(LinkOption option, WatchEvent.Listener observer) throws IOException {
+        return LocalResourceObservable.observe(this, option, observer);
     }
 
     @Override

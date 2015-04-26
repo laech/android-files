@@ -90,8 +90,12 @@ public interface Resource extends Parcelable {
      * Note that by the time a listener is notified, the target resource may
      * have already be changed again, therefore a robust application should have
      * an alternative way of handling instead of reply on this fully.
+     *
+     * @param option if option is {@link LinkOption#NOFOLLOW} and this resource
+     *               is a link, observe on the link instead of the link target
      */
-    Closeable observe(WatchEvent.Listener observer) throws IOException;
+    Closeable observe(LinkOption option, WatchEvent.Listener observer)
+            throws IOException;
 
     /**
      * Performs a traversal that will terminate as soon as an error is

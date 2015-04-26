@@ -98,7 +98,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
 
         if (observe) {
             try {
-                observable = resource.observe(listener);
+                observable = resource.observe(FOLLOW, listener);
             } catch (IOException e) {
                 logger.warn(e);
                 // Failed to observe, continue to show static content
