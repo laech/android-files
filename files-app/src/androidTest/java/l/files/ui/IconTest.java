@@ -12,6 +12,7 @@ public final class IconTest extends TestCase {
   public void test() throws Exception {
     File dir = new File(getExternalStorageDirectory(), "test");
     assertTrue(dir.exists() || dir.mkdir());
+    createFile(new File(dir, ".nomedia"));
     createFile(new File(dir, "html.html"));
     createFile(new File(dir, "mp3.mp3"));
     createFile(new File(dir, "mp4.mp4"));
