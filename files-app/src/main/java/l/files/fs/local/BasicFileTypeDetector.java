@@ -4,6 +4,8 @@ import android.webkit.MimeTypeMap;
 
 import com.google.common.net.MediaType;
 
+import java.io.IOException;
+
 import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
@@ -15,9 +17,12 @@ final class BasicFileTypeDetector extends LocalFileTypeDetector {
     }
 
     @Override
-    protected MediaType detectRegularFile(LocalResourceStatus status) {
+    protected MediaType detectRegularFile(
+            LocalResource resource,
+            LocalResourceStatus status) throws IOException {
+
         MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        String ext = getFileExtension(status.getName());
+        String ext = getFileExtension(resource.getName());
         String type = typeMap.getMimeTypeFromExtension(ext);
         if (type == null) {
             return OCTET_STREAM;
@@ -28,5 +33,4 @@ final class BasicFileTypeDetector extends LocalFileTypeDetector {
             return OCTET_STREAM;
         }
     }
-
 }

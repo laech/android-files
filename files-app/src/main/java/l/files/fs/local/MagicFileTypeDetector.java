@@ -5,10 +5,11 @@ import com.google.common.net.MediaType;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TaggedIOException;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.fs.LinkOption.FOLLOW;
 
 final class MagicFileTypeDetector extends LocalFileTypeDetector {
 
@@ -22,13 +23,15 @@ final class MagicFileTypeDetector extends LocalFileTypeDetector {
     }
 
     @Override
-    protected MediaType detectRegularFile(LocalResourceStatus status)
-            throws IOException {
+    protected MediaType detectRegularFile(
+            LocalResource resource,
+            LocalResourceStatus status) throws IOException {
 
         try {
 
-            File file = status.getResource().getFile();
-            return MediaType.parse(TikaHolder.tika.detect(file));
+            try (InputStream in = resource.openInputStream(FOLLOW)) {
+                return MediaType.parse(TikaHolder.tika.detect(in));
+            }
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {

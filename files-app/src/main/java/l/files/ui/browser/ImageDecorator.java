@@ -56,11 +56,11 @@ final class ImageDecorator {
         this.cache = requireNonNull(cache, "cache");
     }
 
-    public void decorate(ImageView view, ResourceStatus file) {
-        Object key = buildCacheKey(file);
+    public void decorate(ImageView view, Resource resource, ResourceStatus status) {
+        Object key = buildCacheKey(resource);
 
         Task task = (Task) view.getTag(R.id.image_decorator_task);
-        if (task != null && task.getResource().equals(file.getResource()))
+        if (task != null && task.getResource().equals(resource))
             return;
         if (task != null) task.cancel(true);
 
@@ -68,7 +68,7 @@ final class ImageDecorator {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
 
-        if (!file.isReadable() || !file.isRegularFile()) return;
+        if (!status.isReadable() || !status.isRegularFile()) return;
         if (errors.contains(key)) return;
         if (setCachedBitmap(view, key)) return;
 
@@ -76,9 +76,9 @@ final class ImageDecorator {
         if (size != null) {
             view.setVisibility(VISIBLE);
             view.setImageDrawable(newPlaceholder(size));
-            new DecodeImage(key, view, file, size).executeOnExecutor(SERIAL_EXECUTOR);
+            new DecodeImage(key, view, resource, size).executeOnExecutor(SERIAL_EXECUTOR);
         } else {
-            new DecodeSize(key, view, file).executeOnExecutor(THREAD_POOL_EXECUTOR);
+            new DecodeSize(key, view, resource).executeOnExecutor(THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -92,15 +92,15 @@ final class ImageDecorator {
         return false;
     }
 
-    private Object buildCacheKey(ResourceStatus file) {
-        return file.getResource().getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
+    private Object buildCacheKey(Resource resource) {
+        return resource.getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
     }
 
     private SizedColorDrawable newPlaceholder(ScaledSize size) {
         return new SizedColorDrawable(TRANSPARENT, size.scaledWidth, size.scaledHeight);
     }
 
-    private static interface Task {
+    private interface Task {
 
         Resource getResource();
 
@@ -114,12 +114,12 @@ final class ImageDecorator {
     private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
         private final Object key;
         private final ImageView view;
-        private final ResourceStatus file;
+        private final Resource resource;
 
-        DecodeSize(Object key, ImageView view, ResourceStatus file) {
+        DecodeSize(Object key, ImageView view, Resource resource) {
             this.key = key;
             this.view = view;
-            this.file = file;
+            this.resource = resource;
         }
 
         @Override
@@ -144,7 +144,7 @@ final class ImageDecorator {
        * file, if an exception occurs, meaning it can't be read, let the exception
        * propagate, and return no result.
        */
-            try (InputStream in = openInputStream(file.getResource())) {
+            try (InputStream in = openInputStream(resource)) {
                 //noinspection ResultOfMethodCallIgnored
                 in.read();
             } catch (IOException e) {
@@ -153,7 +153,7 @@ final class ImageDecorator {
 
             Options options = new Options();
             options.inJustDecodeBounds = true;
-            try (InputStream in = openInputStream(file.getResource())) {
+            try (InputStream in = openInputStream(resource)) {
                 decodeStream(in, null, options);
             } catch (IOException e) {
                 return null;
@@ -178,27 +178,27 @@ final class ImageDecorator {
                     view.setTag(R.id.image_decorator_task, null);
                     view.setImageDrawable(newPlaceholder(size));
                     view.setVisibility(VISIBLE);
-                    new DecodeImage(key, view, file, size).executeOnExecutor(SERIAL_EXECUTOR);
+                    new DecodeImage(key, view, resource, size).executeOnExecutor(SERIAL_EXECUTOR);
                 }
             }
         }
 
         @Override
         public Resource getResource() {
-            return file.getResource();
+            return resource;
         }
     }
 
     private final class DecodeImage extends AsyncTask<Void, Void, Bitmap> implements Task {
         private final Object key;
         private final ImageView view;
-        private final ResourceStatus file;
+        private final Resource resource;
         private final ScaledSize size;
 
-        DecodeImage(Object key, ImageView view, ResourceStatus file, ScaledSize size) {
+        DecodeImage(Object key, ImageView view, Resource resource, ScaledSize size) {
             this.key = key;
             this.view = view;
-            this.file = file;
+            this.resource = resource;
             this.size = size;
         }
 
@@ -213,7 +213,7 @@ final class ImageDecorator {
             if (isCancelled()) {
                 return null;
             }
-            try (InputStream in = openInputStream(file.getResource())) {
+            try (InputStream in = openInputStream(resource)) {
                 return decodeScaledBitmap(in, size);
             } catch (Exception e) {
                 // Catch all unexpected internal errors from decoder
@@ -258,7 +258,7 @@ final class ImageDecorator {
 
         @Override
         public Resource getResource() {
-            return file.getResource();
+            return resource;
         }
     }
 }

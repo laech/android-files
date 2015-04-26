@@ -12,6 +12,7 @@ import static java.util.Collections.singletonList;
 public final class CountTest extends ResourceBaseTest {
 
     public void testCount() throws Exception {
+        dir1().resolve("1").createDirectory();
         dir1().resolve("1/a.txt").createFile();
         dir1().resolve("3/4/c.txt").createFile();
 

@@ -37,6 +37,7 @@ public abstract class PasteTest extends ResourceBaseTest {
                 dir1().resolve("a.txt").createFile(),
                 dir1().resolve("b.mp4").createFile()
         );
+        dir1().resolve("1").createDirectory();
         dir1().resolve("1/a.txt").createFile();
         dir1().resolve("1/b.mp4").createFile();
 
@@ -56,6 +57,9 @@ public abstract class PasteTest extends ResourceBaseTest {
      * new directories will be pasted with new names.
      */
     public void testDoesNotOverrideExistingDirectory() throws Exception {
+        dir1().resolve("a").createDirectory();
+        dir1().resolve("a/b").createDirectory();
+        dir1().resolve("b").createDirectory();
         dir1().resolve("a/1.txt").createFile();
         dir1().resolve("a/b/2.txt").createFile();
         dir1().resolve("a/b/3.txt").createFile();
