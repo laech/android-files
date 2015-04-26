@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -32,7 +31,6 @@ import l.files.fs.ResourceVisitor;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.collect.Sets.powerSet;
-import static com.google.common.io.Files.write;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -47,7 +45,7 @@ import static l.files.fs.local.Stat.lstat;
 
 public final class LocalResourceTest extends ResourceBaseTest {
 
-    private LocalResource resource;
+    private Resource resource;
 
     @Override
     protected void setUp() throws Exception {
@@ -179,8 +177,8 @@ public final class LocalResourceTest extends ResourceBaseTest {
             String result,
             OutputStreamProvider provider) throws Exception {
 
-        LocalResource file = dir1().resolve("file").createFile();
-        write(initial, file.getFile(), UTF_8);
+        Resource file = dir1().resolve("file").createFile();
+        file.writeString(NOFOLLOW, UTF_8, initial);
         try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
         }
@@ -192,10 +190,10 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_openOutputStream_createWithCorrectPermission() throws Exception {
-        LocalResource expected = dir1().resolve("expected");
-        LocalResource actual = dir1().resolve("actual");
+        Resource expected = dir1().resolve("expected");
+        Resource actual = dir1().resolve("actual");
 
-        assertTrue(expected.getFile().createNewFile());
+        assertTrue(new File(expected.getUri()).createNewFile());
         actual.openOutputStream(NOFOLLOW, false).close();
 
         assertEquals(
@@ -239,9 +237,9 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_openInputStream() throws Exception {
-        LocalResource file = dir1().resolve("a").createFile();
+        Resource file = dir1().resolve("a").createFile();
         String expected = "hello\nworld\n";
-        write(expected, file.getFile(), UTF_8);
+        file.writeString(NOFOLLOW, UTF_8, expected);
         try (InputStream in = file.openInputStream(NOFOLLOW)) {
             String actual = new String(ByteStreams.toByteArray(in), UTF_8);
             assertEquals(expected, actual);
@@ -315,9 +313,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_readString() throws Exception {
         Resource file = dir1().resolve("file").createFile();
         String expected = "a\nb\tc";
-        try (Writer writer = file.openWriter(NOFOLLOW, UTF_8)) {
-            writer.write(expected);
-        }
+        file.writeString(NOFOLLOW, UTF_8, expected);
         assertEquals(expected, file.readString(NOFOLLOW, UTF_8));
     }
 
@@ -331,7 +327,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         Resource actual = resource.resolve("a");
         actual.createFile();
 
-        File expected = new File(resource.getFile(), "b");
+        File expected = new File(resource.getPath(), "b");
         assertTrue(expected.createNewFile());
 
         ResourceStatus status = actual.readStatus(NOFOLLOW);
@@ -385,7 +381,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
         Resource actual = resource.resolve("a");
         actual.createDirectory();
 
-        File expected = new File(resource.getFile(), "b");
+        File expected = new File(resource.getPath(), "b");
         assertTrue(expected.mkdir());
 
         ResourceStatus status = actual.readStatus(NOFOLLOW);
@@ -533,23 +529,25 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_readStatus_followLink() throws Exception {
-        LocalResource child = resource.resolve("a");
-        child.createSymbolicLink(resource);
-
-        LocalResourceStatus status = child.readStatus(FOLLOW);
+        Resource child = resource.resolve("a").createSymbolicLink(resource);
+        ResourceStatus status = child.readStatus(FOLLOW);
         assertTrue(status.isDirectory());
         assertFalse(status.isSymbolicLink());
-        assertEquals(resource.readStatus(NOFOLLOW).getInode(), status.getInode());
+        assertEquals(
+                ((LocalResourceStatus) resource.readStatus(NOFOLLOW)).getInode(),
+                ((LocalResourceStatus) status).getInode());
     }
 
     public void test_readStatus_noFollowLink() throws Exception {
-        LocalResource child = resource.resolve("a");
+        Resource child = resource.resolve("a");
         child.createSymbolicLink(resource);
 
-        LocalResourceStatus status = child.readStatus(NOFOLLOW);
+        ResourceStatus status = child.readStatus(NOFOLLOW);
         assertTrue(status.isSymbolicLink());
         assertFalse(status.isDirectory());
-        assertTrue(resource.readStatus(NOFOLLOW).getInode() != status.getInode());
+        assertNotEqual(
+                ((LocalResourceStatus) resource.readStatus(NOFOLLOW)).getInode(),
+                ((LocalResourceStatus) status).getInode());
     }
 
     public void test_readStatus_AccessException() throws Exception {
@@ -582,10 +580,10 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_moveTo_ExistsException() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
-        write("src", src.getFile(), UTF_8);
-        write("dst", dst.getFile(), UTF_8);
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        src.writeString(NOFOLLOW, UTF_8, "src");
+        dst.writeString(NOFOLLOW, UTF_8, "dst");
         expectOnMoveTo(ExistsException.class, src, dst);
         assertTrue(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
@@ -605,18 +603,18 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_moveTo_fileToNonExistingFile() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
-        write("src", src.getFile(), UTF_8);
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
+        src.writeString(NOFOLLOW, UTF_8, "src");
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", com.google.common.io.Files.toString(dst.getFile(), UTF_8));
+        assertEquals("src", dst.readString(NOFOLLOW, UTF_8));
     }
 
     public void test_moveTo_directoryToNonExistingDirectory() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
+        Resource src = resource.resolve("src");
+        Resource dst = resource.resolve("dst");
         src.resolve("a").createDirectories();
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
@@ -625,11 +623,9 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_moveTo_AccessException() throws Exception {
-        LocalResource src = resource.resolve("src");
-        LocalResource dst = resource.resolve("dst");
-        src.createFile();
-        dst.createDirectory();
-        assertTrue(dst.getFile().setWritable(false));
+        Resource src = resource.resolve("src").createFile();
+        Resource dst = resource.resolve("dst").createDirectory();
+        dst.setPermissions(Collections.<Permission>emptySet());
         expectOnMoveTo(AccessException.class, src, dst.resolve("a"));
     }
 

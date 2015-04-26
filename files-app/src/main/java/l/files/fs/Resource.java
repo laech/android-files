@@ -349,4 +349,10 @@ public interface Resource extends Parcelable {
                                         Charset charset,
                                         T appendable) throws IOException;
 
+    /**
+     * Overrides the content of this resource with the given content.
+     */
+    void writeString(LinkOption option, Charset charset, CharSequence content)
+            throws IOException;
+
 }

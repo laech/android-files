@@ -18,17 +18,17 @@ import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 
 public abstract class ResourceBaseTest extends BaseTest {
 
-    private LocalResource dir1;
-    private LocalResource dir2;
+    private Resource dir1;
+    private Resource dir2;
 
-    protected final LocalResource dir1() {
+    protected final Resource dir1() {
         if (dir1 == null) {
             dir1 = LocalResource.create(createTempDir());
         }
         return dir1;
     }
 
-    protected final LocalResource dir2() {
+    protected final Resource dir2() {
         if (dir2 == null) {
             dir2 = LocalResource.create(createTempDir());
         }

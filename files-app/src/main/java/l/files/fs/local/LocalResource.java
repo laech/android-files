@@ -136,6 +136,12 @@ public abstract class LocalResource implements Resource {
         return uri;
     }
 
+    private static void checkLocalResource(Resource resource) {
+        if (!(resource instanceof LocalResource)) {
+            throw new IllegalArgumentException(resource.toString());
+        }
+    }
+
     @Override
     public String getPath() {
         return getFile().getPath();
@@ -183,7 +189,7 @@ public abstract class LocalResource implements Resource {
         }
         if (other instanceof LocalResource) {
             String thisPath = getPath();
-            String thatPath = ((LocalResource) other).getPath();
+            String thatPath = other.getPath();
             return thisPath.startsWith(thatPath) &&
                     thisPath.charAt(thatPath.length()) == '/';
         }
@@ -197,9 +203,11 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public LocalResource resolveParent(Resource fromParent, Resource toParent) {
+        checkLocalResource(fromParent);
+        checkLocalResource(toParent);
         checkArgument(startsWith(fromParent));
         File parent = ((LocalResource) toParent).getFile();
-        String child = getPath().substring(((LocalResource) fromParent).getPath().length());
+        String child = getPath().substring(fromParent.getPath().length());
         return new AutoParcel_LocalResource(new File(parent, child));
     }
 
@@ -389,7 +397,8 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public LocalResource createSymbolicLink(Resource target) throws IOException {
-        String targetPath = ((LocalResource) target).getPath();
+        checkLocalResource(target);
+        String targetPath = target.getPath();
         try {
             Unistd.symlink(targetPath, getPath());
         } catch (ErrnoException e) {
@@ -410,7 +419,9 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void moveTo(Resource dst) throws IOException {
-        String dstPath = ((LocalResource) dst).getPath();
+        checkLocalResource(dst);
+
+        String dstPath = dst.getPath();
         String srcPath = getPath();
         try {
             // renameat2() not available on Android
@@ -517,6 +528,16 @@ public abstract class LocalResource implements Resource {
             }
         }
         return appendable;
+    }
+
+    @Override
+    public void writeString(
+            LinkOption option,
+            Charset charset,
+            CharSequence content) throws IOException {
+        try (Writer writer = openWriter(option, charset)) {
+            writer.write(content.toString());
+        }
     }
 
 }
