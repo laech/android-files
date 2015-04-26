@@ -21,17 +21,20 @@ abstract class LocalFileTypeDetector {
      * content type of the target file.
      */
     public MediaType detect(LocalResource resource) throws IOException {
-        return detect(resource.readStatus(FOLLOW)); // TODO option as param?
+        return detect(resource, resource.readStatus(FOLLOW)); // TODO option as param?
     }
 
     /**
      * Detects the content type of a file, use an existing status as hint.
      */
-    public MediaType detect(LocalResourceStatus status) throws IOException {
+    public MediaType detect(
+            LocalResource resource,
+            LocalResourceStatus status) throws IOException {
+
         if (status.isSymbolicLink()) {
-            return detect(status.getResource());
+            return detect(resource);
         } else {
-            if (status.isRegularFile()) return detectRegularFile(status);
+            if (status.isRegularFile()) return detectRegularFile(resource, status);
             if (status.isFifo()) return INODE_FIFO;
             if (status.isSocket()) return INODE_SOCKET;
             if (status.isDirectory()) return INODE_DIRECTORY;
@@ -41,7 +44,9 @@ abstract class LocalFileTypeDetector {
         }
     }
 
-    protected abstract MediaType detectRegularFile(LocalResourceStatus status)
-            throws IOException;
+    protected abstract MediaType detectRegularFile(
+            LocalResource resource,
+            LocalResourceStatus status
+    ) throws IOException;
 
 }

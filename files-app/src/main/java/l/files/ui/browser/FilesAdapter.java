@@ -278,7 +278,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
                 preview.setImageDrawable(null);
                 preview.setVisibility(GONE);
             } else {
-                imageDecorator.decorate(preview, file.getStat());
+                imageDecorator.decorate(preview, file.getResource(), file.getStat());
             }
         }
 

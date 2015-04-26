@@ -144,7 +144,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     @Override
     public MediaType getBasicMediaType() {
         try {
-            return BasicFileTypeDetector.INSTANCE.detect(this);
+            return BasicFileTypeDetector.INSTANCE.detect(getResource(), this);
         } catch (IOException e) {
             return OCTET_STREAM;
         }

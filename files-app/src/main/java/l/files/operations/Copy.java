@@ -40,32 +40,32 @@ final class Copy extends Paste {
     void paste(final Resource from, final Resource to) throws IOException {
         preOrderTraversal(from, new ResourceVisitor() {
             @Override
-            public Result accept(Resource resource) throws IOException {
+            public Result accept(Resource src) throws IOException {
                 if (isInterrupted()) {
                     return TERMINATE;
                 }
 
                 ResourceStatus status;
                 try {
-                    status = resource.readStatus(NOFOLLOW);
+                    status = src.readStatus(NOFOLLOW);
                 } catch (IOException e) {
-                    record(resource, e);
+                    record(src, e);
                     return CONTINUE;
                 }
 
-                Resource dst = resource.resolveParent(from, to);
+                Resource dst = src.resolveParent(from, to);
 
                 if (status.isSymbolicLink()) {
-                    copyLink(status, dst);
+                    copyLink(src, status, dst);
 
                 } else if (status.isDirectory()) {
-                    createDirectory(status, dst);
+                    createDirectory(src, status, dst);
 
                 } else if (status.isRegularFile()) {
-                    copyFile(status, dst);
+                    copyFile(src, status, dst);
 
                 } else {
-                    record(resource, new IOException("Not a file or directory"));
+                    record(src, new IOException("Not a file or directory"));
                 }
 
                 return CONTINUE;
@@ -73,36 +73,36 @@ final class Copy extends Paste {
         });
     }
 
-    private void copyLink(ResourceStatus src, Resource dst) {
+    private void copyLink(Resource src, ResourceStatus status, Resource dst) {
         try {
-            dst.createSymbolicLink(src.getResource().readSymbolicLink());
-            copiedByteCount.addAndGet(src.getSize());
+            dst.createSymbolicLink(src.readSymbolicLink());
+            copiedByteCount.addAndGet(status.getSize());
             copiedItemCount.incrementAndGet();
-            setTimes(src, dst);
+            setTimes(status, dst);
         } catch (IOException e) {
-            record(src.getResource(), e);
+            record(src, e);
         }
     }
 
-    private void createDirectory(ResourceStatus src, Resource dst) {
+    private void createDirectory(Resource src, ResourceStatus status, Resource dst) {
         try {
             dst.createDirectory();
-            copiedByteCount.addAndGet(src.getSize());
+            copiedByteCount.addAndGet(status.getSize());
             copiedItemCount.incrementAndGet();
-            setTimes(src, dst);
+            setTimes(status, dst);
         } catch (IOException e) {
-            record(src.getResource(), e);
+            record(src, e);
         }
     }
 
-    private void copyFile(ResourceStatus src, Resource dst) {
+    private void copyFile(Resource src, ResourceStatus status, Resource dst) {
         if (isInterrupted()) {
             return;
         }
 
         try {
 
-            try (InputStream source = src.getResource().openInputStream(NOFOLLOW);
+            try (InputStream source = src.openInputStream(NOFOLLOW);
                  OutputStream sink = dst.openOutputStream(NOFOLLOW)) {
                 byte[] buf = new byte[BUFFER_SIZE];
                 int n;
@@ -123,11 +123,11 @@ final class Copy extends Paste {
             if (e instanceof ClosedByInterruptException) {
                 return;
             } else {
-                record(src.getResource(), e);
+                record(src, e);
             }
         }
 
-        setTimes(src, dst);
+        setTimes(status, dst);
     }
 
     private void setTimes(ResourceStatus src, Resource dst) {
