@@ -64,6 +64,7 @@ import static android.system.OsConstants.S_IXUSR;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
@@ -434,28 +435,44 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public void setAccessTime(Instant instant) throws IOException {
+    public void setAccessTime(LinkOption option, Instant instant)
+            throws IOException {
+        requireNonNull(option, "option");
+        requireNonNull(instant, "instant");
         try {
-            setAccessTime(getPath(), instant.getSeconds(), instant.getNanos());
+            long seconds = instant.getSeconds();
+            int nanos = instant.getNanos();
+            boolean followLink = option == FOLLOW;
+            setAccessTime(getPath(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
             throw e.toIOException(getPath());
         }
     }
 
-    private static native void setAccessTime(String path, long seconds, int nanos)
-            throws ErrnoException;
+    private static native void setAccessTime(
+            String path, long seconds, int nanos, boolean followLink
+    ) throws ErrnoException;
 
     @Override
-    public void setModificationTime(Instant instant) throws IOException {
+    public void setModificationTime(
+            LinkOption option,
+            Instant instant) throws IOException {
+
+        requireNonNull(option, "option");
+        requireNonNull(instant, "instant");
         try {
-            setModificationTime(getPath(), instant.getSeconds(), instant.getNanos());
+            long seconds = instant.getSeconds();
+            int nanos = instant.getNanos();
+            boolean followLink = option == FOLLOW;
+            setModificationTime(getPath(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
             throw e.toIOException(getPath());
         }
     }
 
     private static native void setModificationTime(
-            String path, long seconds, int nanos) throws ErrnoException;
+            String path, long seconds, int nanos, boolean followLink
+    ) throws ErrnoException;
 
     @Override
     public void setPermissions(Set<Permission> permissions) throws IOException {

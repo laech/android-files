@@ -745,107 +745,138 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_setModificationTime() throws Exception {
-        Instant old = getModificationTime(resource);
+        Instant old = getModificationTime(resource, NOFOLLOW);
         Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
-        resource.setModificationTime(expect);
-        Instant actual = getModificationTime(resource);
+        resource.setModificationTime(NOFOLLOW, expect);
+        Instant actual = getModificationTime(resource, NOFOLLOW);
         assertEquals(expect, actual);
     }
 
     public void test_setModificationTime_doesNotAffectAccessTime() throws Exception {
-        Instant atime = getAccessTime(resource);
+        Instant atime = getAccessTime(resource, NOFOLLOW);
         Instant mtime = Instant.of(1, 2);
         sleep(3);
-        resource.setModificationTime(mtime);
+        resource.setModificationTime(NOFOLLOW, mtime);
         assertNotEqual(atime, mtime);
-        assertEquals(mtime, getModificationTime(resource));
-        assertEquals(atime, getAccessTime(resource));
+        assertEquals(mtime, getModificationTime(resource, NOFOLLOW));
+        assertEquals(atime, getAccessTime(resource, NOFOLLOW));
     }
 
-    public void test_setModificationTime_doesNotAffectSymbolicLinkTarget() throws Exception {
-        Resource link = resource.resolve("link");
-        link.createSymbolicLink(resource);
+    public void test_setModificationTime_linkFollow() throws Exception {
+        Resource file = resource.resolve("file").createFile();
+        Resource link = resource.resolve("link").createSymbolicLink(file);
 
-        Instant targetTime = getModificationTime(resource);
+        Instant fileTime = Instant.of(123, 456);
+        Instant linkTime = getModificationTime(link, NOFOLLOW);
+        link.setModificationTime(FOLLOW, fileTime);
+
+        assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
+        assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
+        assertNotEqual(fileTime, linkTime);
+    }
+
+    public void test_setModificationTime_linkNoFollow() throws Exception {
+        Resource file = resource.resolve("file").createFile();
+        Resource link = resource.resolve("link").createSymbolicLink(file);
+
+        Instant fileTime = getModificationTime(file, NOFOLLOW);
         Instant linkTime = Instant.of(123, 456);
 
-        link.setModificationTime(linkTime);
+        link.setModificationTime(NOFOLLOW, linkTime);
 
-        assertEquals(linkTime, getModificationTime(link));
-        assertEquals(targetTime, getModificationTime(resource));
-        assertNotEqual(targetTime, linkTime);
+        assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
+        assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
+        assertNotEqual(fileTime, linkTime);
     }
 
     public void test_setModificationTime_NotExistException() throws Exception {
         Resource doesNotExist = resource.resolve("doesNotExist");
-        expectOnSetModificationTime(NotExistException.class, doesNotExist, EPOCH);
+        expectOnSetModificationTime(NotExistException.class, doesNotExist, NOFOLLOW, EPOCH);
     }
 
-    private Instant getModificationTime(Resource resource) throws IOException {
-        return resource.readStatus(NOFOLLOW).getModificationTime();
+    private Instant getModificationTime(
+            Resource resource,
+            LinkOption option) throws IOException {
+        return resource.readStatus(option).getModificationTime();
     }
 
     private static void expectOnSetModificationTime(
             final Class<? extends Exception> clazz,
             final Resource resource,
+            final LinkOption option,
             final Instant instant) throws Exception {
         expect(clazz, new Code() {
             @Override
             public void run() throws Exception {
-                resource.setModificationTime(instant);
+                resource.setModificationTime(option, instant);
             }
         });
     }
 
     public void test_setAccessTime() throws Exception {
-        Instant old = getAccessTime(resource);
+        Instant old = getAccessTime(resource, NOFOLLOW);
         Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
-        resource.setAccessTime(expect);
-        Instant actual = getAccessTime(resource);
+        resource.setAccessTime(NOFOLLOW, expect);
+        Instant actual = getAccessTime(resource, NOFOLLOW);
         assertEquals(expect, actual);
     }
 
     public void test_setAccessTime_doesNotAffectModificationTime() throws Exception {
-        Instant mtime = getModificationTime(resource);
+        Instant mtime = getModificationTime(resource, NOFOLLOW);
         Instant atime = Instant.of(1, 2);
         sleep(3);
-        resource.setAccessTime(atime);
+        resource.setAccessTime(NOFOLLOW, atime);
         assertNotEqual(mtime, atime);
-        assertEquals(atime, getAccessTime(resource));
-        assertEquals(mtime, getModificationTime(resource));
+        assertEquals(atime, getAccessTime(resource, NOFOLLOW));
+        assertEquals(mtime, getModificationTime(resource, NOFOLLOW));
     }
 
-    public void test_setAccessTime_doesNotAffectSymbolicLinkTarget() throws Exception {
-        Resource link = resource.resolve("link");
-        link.createSymbolicLink(resource);
+    public void test_setAccessTime_linkNoFollow() throws Exception {
+        Resource link = dir1().resolve("link").createSymbolicLink(dir1());
 
-        Instant targetTime = getAccessTime(resource);
+        Instant targetTime = getAccessTime(dir1(), NOFOLLOW);
         Instant linkTime = Instant.of(123, 456);
 
-        link.setAccessTime(linkTime);
+        link.setAccessTime(NOFOLLOW, linkTime);
 
-        assertEquals(linkTime, getAccessTime(link));
-        assertEquals(targetTime, getAccessTime(resource));
+        assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
+        assertEquals(targetTime, getAccessTime(dir1(), NOFOLLOW));
         assertNotEqual(targetTime, linkTime);
+    }
+
+    public void test_setAccessTime_linkFollow() throws Exception {
+        Resource link = dir1().resolve("link").createSymbolicLink(dir1());
+
+        Instant linkTime = getAccessTime(dir1(), NOFOLLOW);
+        Instant fileTime = Instant.of(123, 456);
+
+        link.setAccessTime(FOLLOW, fileTime);
+
+        assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
+        assertEquals(fileTime, getAccessTime(dir1(), NOFOLLOW));
+        assertNotEqual(fileTime, linkTime);
     }
 
     public void test_setAccessTime_NotExistException() throws Exception {
         Resource doesNotExist = resource.resolve("doesNotExist");
-        expectOnSetAccessTime(NotExistException.class, doesNotExist, EPOCH);
+        expectOnSetAccessTime(NotExistException.class, doesNotExist, NOFOLLOW, EPOCH);
     }
 
-    private Instant getAccessTime(Resource resource) throws IOException {
-        return resource.readStatus(NOFOLLOW).getAccessTime();
+    private Instant getAccessTime(
+            Resource resource,
+            LinkOption option) throws IOException {
+        return resource.readStatus(option).getAccessTime();
     }
 
     private static void expectOnSetAccessTime(
             final Class<? extends Exception> clazz,
             final Resource resource,
+            final LinkOption option,
             final Instant instant) throws Exception {
         expect(clazz, new Code() {
             @Override
             public void run() throws Exception {
-                resource.setAccessTime(instant);
+                resource.setAccessTime(option, instant);
             }
         });
     }

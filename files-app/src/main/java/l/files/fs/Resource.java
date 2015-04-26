@@ -300,7 +300,7 @@ public interface Resource extends Parcelable {
      * @throws NotExistException this resource does not exist
      * @throws IOException       other failures
      */
-    void setAccessTime(Instant instant) throws IOException;
+    void setAccessTime(LinkOption option, Instant instant) throws IOException;
 
     /**
      * Updates the modification time for this resource.
@@ -309,7 +309,7 @@ public interface Resource extends Parcelable {
      * @throws NotExistException this resource does not exist
      * @throws IOException       other failures
      */
-    void setModificationTime(Instant instant) throws IOException;
+    void setModificationTime(LinkOption option, Instant instant) throws IOException;
 
     /**
      * Sets the permissions of this resource, this replaces the existing

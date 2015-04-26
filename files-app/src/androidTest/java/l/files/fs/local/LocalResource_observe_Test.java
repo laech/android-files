@@ -40,7 +40,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
         Resource file = link.resolve("file");
         try (Recorder observer = observe(link, NOFOLLOW)) {
             // No follow, can observe the link
-            observer.await(MODIFY, link, newSetModificationTime(link, Instant.of(1, 1)));
+            observer.await(MODIFY, link,
+                    newSetModificationTime(link, NOFOLLOW, Instant.of(1, 1)));
             // But not the child content
             try {
                 observer.await(CREATE, file, newCreateFile(file));
@@ -193,7 +194,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
         Instant old = target.readStatus(NOFOLLOW).getModificationTime();
         Instant t = Instant.of(old.getSeconds() - 1, old.getNanos());
         try (Recorder observer = observe(observable)) {
-            observer.await(MODIFY, target, newSetModificationTime(target, t));
+            observer.await(MODIFY, target,
+                    newSetModificationTime(target, NOFOLLOW, t));
         }
     }
 
@@ -471,11 +473,12 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     private static Callable<Void> newSetModificationTime(
             final Resource resource,
+            final LinkOption option,
             final Instant instant) {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                resource.setModificationTime(instant);
+                resource.setModificationTime(option, instant);
                 return null;
             }
         };
