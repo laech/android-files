@@ -190,13 +190,13 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
         void setTitle(FileListItem.File file) {
             title.setText(file.getResource().getName());
-            title.setEnabled(file.getStat() != null && file.getStat().isReadable());
+            title.setEnabled(file.getStat() != null && file.isReadable());
         }
 
         void setIcon(FileListItem.File file) {
             Context context = icon.getContext();
             AssetManager assets = context.getAssets();
-            icon.setEnabled(file.getTargetStat() != null && file.getTargetStat().isReadable());
+            icon.setEnabled(file.getTargetStat() != null && file.isReadable());
             if (file.getTargetStat() != null && setLocalIcon(icon, file.getTargetStat())) {
                 icon.setTypeface(SANS_SERIF, BOLD);
             } else {
@@ -256,7 +256,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
                 date.setText("");
                 date.setVisibility(GONE);
             } else {
-                date.setEnabled(stat.isReadable());
+                date.setEnabled(file.isReadable());
                 date.setText(dateFormatter.apply(stat));
             }
         }
@@ -267,7 +267,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
                 size.setText("");
                 size.setVisibility(GONE);
             } else {
-                size.setEnabled(stat.isReadable());
+                size.setEnabled(file.isReadable());
                 size.setText(stat.isDirectory() ? "" : formatShortFileSize(size.getContext(), stat.getSize()));
                 size.setVisibility(stat.isRegularFile() ? VISIBLE : GONE);
             }
@@ -287,7 +287,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
             if (stat == null || !stat.isSymbolicLink()) {
                 symlink.setVisibility(GONE);
             } else {
-                symlink.setEnabled(stat.isReadable());
+                symlink.setEnabled(file.isReadable());
                 symlink.setVisibility(VISIBLE);
             }
         }

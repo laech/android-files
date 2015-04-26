@@ -60,22 +60,6 @@ public final class LocalResourceStatusTest extends FileBaseTest {
         assertEquals(expected.st_atime, actual.getModificationTime().getSeconds());
     }
 
-    public void testReadable() throws Exception {
-        File file = tmp().createFile("a");
-        assertTrue(file.setReadable(false));
-        assertFalse(stat(LocalResource.create(file), NOFOLLOW).isReadable());
-        assertTrue(file.setReadable(true));
-        assertTrue(stat(LocalResource.create(file), NOFOLLOW).isReadable());
-    }
-
-    public void testWritable() throws Exception {
-        File file = tmp().createFile("a");
-        assertTrue(file.setWritable(false));
-        assertFalse(stat(LocalResource.create(file), NOFOLLOW).isWritable());
-        assertTrue(file.setWritable(true));
-        assertTrue(stat(LocalResource.create(file), NOFOLLOW).isWritable());
-    }
-
     public void testName() throws Exception {
         File file = tmp().createFile("a");
         assertEquals(file.getName(), stat(LocalResource.create(file), NOFOLLOW).getName());

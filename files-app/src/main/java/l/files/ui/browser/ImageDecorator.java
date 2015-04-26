@@ -68,7 +68,7 @@ final class ImageDecorator {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
 
-        if (!status.isReadable() || !status.isRegularFile()) return;
+        if (!resource.isReadable() || !status.isRegularFile()) return;
         if (errors.contains(key)) return;
         if (setCachedBitmap(view, key)) return;
 

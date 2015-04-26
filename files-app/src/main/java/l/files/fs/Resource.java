@@ -86,6 +86,24 @@ public interface Resource extends Parcelable {
     boolean exists(LinkOption option);
 
     /**
+     * Returns true if this resource is readable, return false if this resource
+     * is not readable or failed to determine.
+     */
+    boolean isReadable();
+
+    /**
+     * Returns true if this resource is writable, return false if this resource
+     * is not writable or failed to determine.
+     */
+    boolean isWritable();
+
+    /**
+     * Returns true if this resource is executable, return false if this
+     * resource is not executable or failed to determine.
+     */
+    boolean isExecutable();
+
+    /**
      * Observes on this resource for change events.
      * <p/>
      * If this resource is a directory, adding/removing immediate children and

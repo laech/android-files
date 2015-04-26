@@ -19,9 +19,6 @@ import static l.files.fs.local.LocalResource.mapPermissions;
 @AutoParcel
 public abstract class LocalResourceStatus implements ResourceStatus {
 
-    private Boolean readable;
-    private Boolean writable;
-    private Boolean executable;
     private Instant atime;
     private Instant mtime;
     private Set<Permission> permissions;
@@ -38,39 +35,6 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     @Override
     public String getName() {
         return getResource().getName();
-    }
-
-    @Override
-    public boolean isReadable() {
-        if (readable == null) {
-            readable = access(Unistd.R_OK);
-        }
-        return readable;
-    }
-
-    @Override
-    public boolean isWritable() {
-        if (writable == null) {
-            writable = access(Unistd.W_OK);
-        }
-        return writable;
-    }
-
-    @Override
-    public boolean isExecutable() {
-        if (executable == null) {
-            executable = access(Unistd.X_OK);
-        }
-        return executable;
-    }
-
-    private boolean access(int mode) {
-        try {
-            Unistd.access(getResource().getFile().getPath(), mode);
-            return true;
-        } catch (ErrnoException e) {
-            return false;
-        }
     }
 
     @Override

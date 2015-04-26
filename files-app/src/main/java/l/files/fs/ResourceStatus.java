@@ -18,12 +18,6 @@ public interface ResourceStatus {
 
     boolean isSymbolicLink();
 
-    boolean isReadable();
-
-    boolean isWritable();
-
-    boolean isExecutable();
-
     Instant getAccessTime();
 
     Instant getModificationTime();

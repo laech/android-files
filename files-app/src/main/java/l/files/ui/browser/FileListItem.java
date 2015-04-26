@@ -43,7 +43,32 @@ public abstract class FileListItem {
     @AutoParcel
     public static abstract class File extends FileListItem {
 
+        private Boolean readable;
+        private Boolean writable;
+        private Boolean executable;
+
         File() {
+        }
+
+        public boolean isReadable() {
+            if (readable == null) {
+                readable = getResource().isReadable();
+            }
+            return readable;
+        }
+
+        public boolean isWritable() {
+            if (writable == null) {
+                writable = getResource().isWritable();
+            }
+            return writable;
+        }
+
+        public boolean isExecutable() {
+            if (executable == null) {
+                executable = getResource().isExecutable();
+            }
+            return executable;
         }
 
         public abstract Resource getResource();

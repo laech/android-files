@@ -42,6 +42,7 @@ import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.EISDIR;
+import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
@@ -61,6 +62,8 @@ import static android.system.OsConstants.S_IWUSR;
 import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 import static android.system.OsConstants.S_IXUSR;
+import static android.system.OsConstants.W_OK;
+import static android.system.OsConstants.X_OK;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
@@ -226,6 +229,30 @@ public abstract class LocalResource implements Resource {
             readStatus(option);
             return true;
         } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isReadable() {
+        return access(F_OK);
+    }
+
+    @Override
+    public boolean isWritable() {
+        return access(W_OK);
+    }
+
+    @Override
+    public boolean isExecutable() {
+        return access(X_OK);
+    }
+
+    private boolean access(int mode) {
+        try {
+            Os.access(getPath(), mode);
+            return true;
+        } catch (android.system.ErrnoException e) {
             return false;
         }
     }

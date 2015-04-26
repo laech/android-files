@@ -330,13 +330,12 @@ public final class LocalResourceTest extends ResourceBaseTest {
         File expected = new File(resource.getPath(), "b");
         assertTrue(expected.createNewFile());
 
-        ResourceStatus status = actual.readStatus(NOFOLLOW);
-        assertEquals(expected.canRead(), status.isReadable());
-        assertEquals(expected.canWrite(), status.isWritable());
-        assertEquals(expected.canExecute(), status.isExecutable());
+        assertEquals(expected.canRead(), actual.isReadable());
+        assertEquals(expected.canWrite(), actual.isWritable());
+        assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
                 mapPermissions(lstat(expected.getPath()).getMode()),
-                status.getPermissions()
+                actual.readStatus(NOFOLLOW).getPermissions()
         );
     }
 
@@ -384,13 +383,12 @@ public final class LocalResourceTest extends ResourceBaseTest {
         File expected = new File(resource.getPath(), "b");
         assertTrue(expected.mkdir());
 
-        ResourceStatus status = actual.readStatus(NOFOLLOW);
-        assertEquals(expected.canRead(), status.isReadable());
-        assertEquals(expected.canWrite(), status.isWritable());
-        assertEquals(expected.canExecute(), status.isExecutable());
+        assertEquals(expected.canRead(), actual.isReadable());
+        assertEquals(expected.canWrite(), actual.isWritable());
+        assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
                 mapPermissions(lstat(expected.getPath()).getMode()),
-                status.getPermissions()
+                actual.readStatus(NOFOLLOW).getPermissions()
         );
     }
 
