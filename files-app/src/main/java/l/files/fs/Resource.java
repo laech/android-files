@@ -85,28 +85,29 @@ public interface Resource extends Parcelable {
     boolean isHidden();
 
     /**
-     * Returns true if exists, returns false if does not exist or failed to
-     * determine existence.
+     * Returns true if exists, returns false if does not exist.
+     *
+     * @throws IOException failed to determine existence
      */
-    boolean exists(LinkOption option);
+    boolean exists(LinkOption option) throws IOException;
 
     /**
      * Returns true if this resource is readable, return false if this resource
      * is not readable or failed to determine.
      */
-    boolean isReadable();
+    boolean isReadable(); // TODO throws IOException;
 
     /**
      * Returns true if this resource is writable, return false if this resource
      * is not writable or failed to determine.
      */
-    boolean isWritable();
+    boolean isWritable(); // TODO throws IOException;
 
     /**
      * Returns true if this resource is executable, return false if this
      * resource is not executable or failed to determine.
      */
-    boolean isExecutable();
+    boolean isExecutable(); // TODO throws IOException;
 
     /**
      * Observes on this resource for change events.

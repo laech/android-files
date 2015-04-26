@@ -229,7 +229,7 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public boolean exists(LinkOption option) {
+    public boolean exists(LinkOption option) throws IOException {
         requireNonNull(option, "option");
         try {
             // access() follows symbolic links
@@ -237,7 +237,7 @@ public abstract class LocalResource implements Resource {
             // so use stat here
             readStatus(option);
             return true;
-        } catch (IOException e) {
+        } catch (NotExistException e) {
             return false;
         }
     }

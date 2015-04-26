@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
 import java.util.Set;
 
 import l.files.common.app.OptionsMenuAction;
@@ -93,8 +94,12 @@ public final class PasteMenu extends OptionsMenuAction
                     if (isLoadInBackgroundCanceled()) {
                         return null;
                     }
-                    if (resource.exists(NOFOLLOW)) {
-                        exists.add(resource);
+                    try {
+                        if (resource.exists(NOFOLLOW)) {
+                            exists.add(resource);
+                        }
+                    } catch (IOException e) {
+                        // Ignore this resource
                     }
                 }
                 return new ResourceExistence(resources, exists);

@@ -348,16 +348,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_exists_false() throws Exception {
         assertFalse(dir1().resolve("a").exists(NOFOLLOW));
     }
-
-    public void test_exists_false_whenUnableToDetermine() throws Exception {
-        Resource file = dir1().resolve("a").createFile();
-        assertTrue(file.exists(NOFOLLOW));
-
-        dir1().setPermissions(Collections.<Permission>emptySet());
-        assertFalse(file.exists(FOLLOW));
-        assertFalse(file.exists(NOFOLLOW));
-    }
-
+    
     public void test_exists_checkLinkNotTarget() throws Exception {
         Resource target = dir1().resolve("target");
         Resource link = dir1().resolve("link").createSymbolicLink(target);

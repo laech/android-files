@@ -12,6 +12,10 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.io.IOException;
+
+import javax.annotation.Nullable;
+
 import l.files.R;
 import l.files.fs.Resource;
 
@@ -115,7 +119,11 @@ public abstract class FileCreationFragment extends DialogFragment
             return new AsyncTaskLoader<Existence>(getActivity()) {
                 @Override
                 public Existence loadInBackground() {
-                    return new Existence(resource, resource.exists(NOFOLLOW));
+                    try {
+                        return new Existence(resource, resource.exists(NOFOLLOW));
+                    } catch (IOException e) {
+                        return null;
+                    }
                 }
 
                 @Override
@@ -137,7 +145,10 @@ public abstract class FileCreationFragment extends DialogFragment
         public void onLoaderReset(Loader<Existence> loader) {
         }
 
-        private void onCheckFinished(Existence existence) {
+        private void onCheckFinished(@Nullable Existence existence) {
+            if (existence == null) {
+                return;
+            }
             Button ok = getOkButton();
             if (existence.exists) {
                 editText.setError(getError(existence.resource));

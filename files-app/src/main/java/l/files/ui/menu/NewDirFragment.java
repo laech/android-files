@@ -42,8 +42,12 @@ public final class NewDirFragment extends FileCreationFragment {
             @Override
             protected String doInBackground(Object... params) {
                 Resource resource = parent.resolve(basename);
-                for (int i = 2; resource.exists(NOFOLLOW); i++) {
-                    resource = parent.resolve(basename + " " + i);
+                try {
+                    for (int i = 2; resource.exists(NOFOLLOW); i++) {
+                        resource = parent.resolve(basename + " " + i);
+                    }
+                } catch (IOException e) {
+                    return "";
                 }
                 return resource.getName();
             }
