@@ -1,10 +1,17 @@
 package l.files.ui.browser;
 
+import com.google.common.net.MediaType;
+
+import java.io.IOException;
+
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
+import l.files.fs.BasicDetector;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
+
+import static com.google.common.net.MediaType.OCTET_STREAM;
 
 public abstract class FileListItem {
 
@@ -50,6 +57,8 @@ public abstract class FileListItem {
         File() {
         }
 
+        // TODO don't do the following in the main thread
+
         public boolean isReadable() {
             if (readable == null) {
                 readable = getResource().isReadable();
@@ -69,6 +78,14 @@ public abstract class FileListItem {
                 executable = getResource().isExecutable();
             }
             return executable;
+        }
+
+        public MediaType getBasicMediaType() {
+            try {
+                return BasicDetector.INSTANCE.detect(getResource());
+            } catch (IOException e) {
+                return OCTET_STREAM;
+            }
         }
 
         public abstract Resource getResource();

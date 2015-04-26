@@ -1,13 +1,14 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import l.files.common.testing.FileBaseTest;
+import l.files.fs.local.LocalResource;
 
-public abstract class LocalFileTypeDetectorTest extends FileBaseTest {
+public abstract class AbstractDetectorTest extends FileBaseTest {
 
     /**
      * The detector to be tested, using the given file system.
      */
-    protected abstract LocalFileTypeDetector detector();
+    protected abstract AbstractDetector detector();
 
     public void testDetect_directory() throws Exception {
         LocalResource dir = LocalResource.create(tmp().createDir("a"));

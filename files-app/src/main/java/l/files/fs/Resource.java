@@ -2,8 +2,6 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
-import com.google.common.net.MediaType;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -357,11 +355,6 @@ public interface Resource extends Parcelable {
      * @throws UnsupportedOperationException if this is a symbolic link
      */
     void setPermissions(Set<Permission> permissions) throws IOException;
-
-    /**
-     * Detects the media type of the underlying file by reading it's content.
-     */
-    MediaType detectMediaType() throws IOException;
 
     /**
      * Reads the underlying file content as string.

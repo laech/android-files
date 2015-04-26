@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import com.google.common.net.MediaType;
-
 import java.util.Set;
 
 public interface ResourceStatus {
@@ -18,11 +16,17 @@ public interface ResourceStatus {
 
     boolean isSymbolicLink();
 
+    boolean isFifo();
+
+    boolean isSocket();
+
+    boolean isBlockDevice();
+
+    boolean isCharacterDevice();
+
     Instant getAccessTime();
 
     Instant getModificationTime();
-
-    MediaType getBasicMediaType();
 
     Set<Permission> getPermissions();
 

@@ -14,6 +14,7 @@ import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.os.AsyncTaskExecutor;
 import l.files.common.widget.Toaster;
+import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
 import l.files.logging.Logger;
 
@@ -60,7 +61,7 @@ final class FileOpener implements Consumer<Resource> {
         @Override
         protected MediaType doInBackground(Void... params) {
             try {
-                return resource.detectMediaType();
+                return MagicDetector.INSTANCE.detect(resource);
             } catch (IOException e) {
                 log.warn(e);
                 return null;

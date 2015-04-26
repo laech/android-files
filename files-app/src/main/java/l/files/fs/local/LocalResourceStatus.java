@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import com.google.common.net.MediaType;
-
 import java.io.IOException;
 import java.util.Set;
 
@@ -11,7 +9,6 @@ import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.ResourceStatus;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.LocalResource.mapPermissions;
@@ -81,18 +78,22 @@ public abstract class LocalResourceStatus implements ResourceStatus {
         return getStat().getIno();
     }
 
+    @Override
     public boolean isFifo() {
         return Stat.S_ISFIFO(getStat().getMode());
     }
 
+    @Override
     public boolean isSocket() {
         return Stat.S_ISSOCK(getStat().getMode());
     }
 
+    @Override
     public boolean isBlockDevice() {
         return Stat.S_ISBLK(getStat().getMode());
     }
 
+    @Override
     public boolean isCharacterDevice() {
         return Stat.S_ISCHR(getStat().getMode());
     }
@@ -103,15 +104,6 @@ public abstract class LocalResourceStatus implements ResourceStatus {
             permissions = mapPermissions(getStat().getMode());
         }
         return permissions;
-    }
-
-    @Override
-    public MediaType getBasicMediaType() {
-        try {
-            return BasicFileTypeDetector.INSTANCE.detect(getResource(), this);
-        } catch (IOException e) {
-            return OCTET_STREAM;
-        }
     }
 
     public static LocalResourceStatus stat(

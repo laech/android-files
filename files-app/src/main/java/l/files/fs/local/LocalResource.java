@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import android.system.Os;
 
-import com.google.common.net.MediaType;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -534,11 +532,6 @@ public abstract class LocalResource implements Resource {
         } catch (android.system.ErrnoException e) {
             throw ErrnoException.toIOException(e, getPath());
         }
-    }
-
-    @Override
-    public MediaType detectMediaType() throws IOException {
-        return MagicFileTypeDetector.INSTANCE.detect(this);
     }
 
     @Override

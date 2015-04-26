@@ -1,4 +1,4 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import com.google.common.net.MediaType;
 
@@ -7,7 +7,7 @@ import java.io.IOException;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
-abstract class LocalFileTypeDetector {
+public abstract class AbstractDetector implements ResourceTypeDetector {
 
     // Media types for file types, kept consistent with the linux "file" command
     private static final MediaType INODE_DIRECTORY = MediaType.parse("inode/directory");
@@ -16,25 +16,19 @@ abstract class LocalFileTypeDetector {
     private static final MediaType INODE_FIFO = MediaType.parse("inode/fifo");
     private static final MediaType INODE_SOCKET = MediaType.parse("inode/socket");
 
-    /**
-     * Detects the content type of a file, if the file is a link returns the
-     * content type of the target file.
-     */
-    public MediaType detect(LocalResource resource) throws IOException {
-        return detect(resource, resource.readStatus(FOLLOW)); // TODO option as param?
+    @Override
+    public MediaType detect(Resource resource) throws IOException {
+        return detect(resource, resource.readStatus(FOLLOW));
     }
 
-    /**
-     * Detects the content type of a file, use an existing status as hint.
-     */
+    @Override
     public MediaType detect(
-            LocalResource resource,
-            LocalResourceStatus status) throws IOException {
+            Resource resource, ResourceStatus status) throws IOException {
 
         if (status.isSymbolicLink()) {
             return detect(resource);
         } else {
-            if (status.isRegularFile()) return detectRegularFile(resource, status);
+            if (status.isRegularFile()) return detectFile(resource, status);
             if (status.isFifo()) return INODE_FIFO;
             if (status.isSocket()) return INODE_SOCKET;
             if (status.isDirectory()) return INODE_DIRECTORY;
@@ -44,9 +38,7 @@ abstract class LocalFileTypeDetector {
         }
     }
 
-    protected abstract MediaType detectRegularFile(
-            LocalResource resource,
-            LocalResourceStatus status
-    ) throws IOException;
+    protected abstract MediaType detectFile(
+            Resource resource, ResourceStatus status) throws IOException;
 
 }

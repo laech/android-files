@@ -1,4 +1,4 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import com.google.common.net.MediaType;
 
@@ -11,21 +11,23 @@ import java.io.InputStream;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
-final class MagicFileTypeDetector extends LocalFileTypeDetector {
+/**
+ * Detects the media type of the underlying file by reading it's header.
+ */
+public final class MagicDetector extends AbstractDetector {
 
     private static final class TikaHolder {
         static final Tika tika = new Tika();
     }
 
-    public static final MagicFileTypeDetector INSTANCE = new MagicFileTypeDetector();
+    public static final MagicDetector INSTANCE = new MagicDetector();
 
-    private MagicFileTypeDetector() {
+    private MagicDetector() {
     }
 
     @Override
-    protected MediaType detectRegularFile(
-            LocalResource resource,
-            LocalResourceStatus status) throws IOException {
+    protected MediaType detectFile(
+            Resource resource, ResourceStatus status) throws IOException {
 
         try {
 

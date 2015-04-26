@@ -71,21 +71,4 @@ public final class LocalResourceStatusTest extends FileBaseTest {
         assertEquals(file.length(), stat(LocalResource.create(file), NOFOLLOW).getSize());
     }
 
-    public void testBasicMediaType() throws Exception {
-        File file = tmp().createFile("a.txt");
-        assertEquals("text/plain", stat(LocalResource.create(file), NOFOLLOW).getBasicMediaType().toString());
-    }
-
-    public void testBasicMediaTypeOfUnreadableLinkTargetShouldNotCrash() throws Exception {
-        File file = tmp().createFile("a/a.txt");
-        File parent = file.getParentFile();
-        File link = tmp().get("link");
-        LocalResource.create(link).createSymbolicLink(LocalResource.create(file));
-
-        assertTrue(parent.setReadable(false));
-        assertTrue(parent.setExecutable(false));
-
-        assertEquals("application/octet-stream", stat(LocalResource.create(link), NOFOLLOW).getBasicMediaType().toString());
-    }
-
 }

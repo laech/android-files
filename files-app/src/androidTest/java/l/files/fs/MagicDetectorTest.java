@@ -1,17 +1,19 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import java.io.File;
 import java.io.IOException;
+
+import l.files.fs.local.LocalResource;
 
 import static com.google.common.io.Files.write;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
 
-public final class MagicFileTypeDetectorTest extends LocalFileTypeDetectorTest {
+public final class MagicDetectorTest extends AbstractDetectorTest {
 
     @Override
-    protected LocalFileTypeDetector detector() {
-        return MagicFileTypeDetector.INSTANCE;
+    protected AbstractDetector detector() {
+        return MagicDetector.INSTANCE;
     }
 
     public void testDetect_returnsOctetStreamForUnreadable() throws Exception {

@@ -235,7 +235,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
                     || file.getTargetStat().isDirectory()) {
                 return getDirectoryIcon(assets, file.getResource());
             } else {
-                return getIconForFileMediaType(assets, stat.getBasicMediaType());
+                return getIconForFileMediaType(assets, file.getBasicMediaType());
             }
         }
 
@@ -246,7 +246,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
                     || file.getTargetStat().isDirectory()) {
                 return getDefaultBackgroundResource();
             } else {
-                return getBackgroundResourceForFileMediaType(stat.getBasicMediaType());
+                return getBackgroundResourceForFileMediaType(file.getBasicMediaType());
             }
         }
 
