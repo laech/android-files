@@ -442,9 +442,9 @@ public abstract class LocalResource implements Resource {
         checkLocalResource(target);
         String targetPath = target.getPath();
         try {
-            Unistd.symlink(targetPath, getPath());
-        } catch (ErrnoException e) {
-            throw e.toIOException(getPath(), targetPath);
+            Os.symlink(targetPath, getPath());
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath(), targetPath);
         }
         return this;
     }
@@ -452,10 +452,10 @@ public abstract class LocalResource implements Resource {
     @Override
     public LocalResource readSymbolicLink() throws IOException {
         try {
-            String link = Unistd.readlink(getPath());
+            String link = Os.readlink(getPath());
             return create(new File(link));
-        } catch (ErrnoException e) {
-            throw e.toIOException(getPath());
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
 
