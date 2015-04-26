@@ -396,6 +396,12 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
+    public Resource createFiles() throws IOException {
+        getParent().createDirectories();
+        return createFile();
+    }
+
+    @Override
     public LocalResource createSymbolicLink(Resource target) throws IOException {
         checkLocalResource(target);
         String targetPath = target.getPath();

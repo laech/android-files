@@ -1,11 +1,8 @@
 package l.files.operations;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.local.ResourceBaseTest;
 
@@ -56,21 +53,6 @@ public final class DeleteTest extends ResourceBaseTest {
         delete(b);
         assertFalse(b.exists(NOFOLLOW));
         assertTrue(a.exists(NOFOLLOW));
-    }
-
-    public void testReturnsFailures() throws Exception {
-        Resource a = dir1().resolve("a").createFile();
-        dir1().setPermissions(Collections.<Permission>emptySet());
-
-        List<Failure> failures = null;
-        try {
-            delete(a);
-            fail();
-        } catch (FileException e) {
-            failures = e.failures();
-        }
-        assertEquals(a, failures.get(0).getResource());
-        assertEquals(1, failures.size());
     }
 
     private void delete(Resource resource) throws Exception {

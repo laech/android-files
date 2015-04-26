@@ -1,7 +1,6 @@
 package l.files.operations;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +9,7 @@ import l.files.fs.Resource;
 import l.files.fs.local.ResourceBaseTest;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -33,7 +33,7 @@ public abstract class PasteTest extends ResourceBaseTest {
      * pasted with new names.
      */
     public void testDoesNotOverrideExistingFile() throws Exception {
-        List<Resource> sources = Arrays.<Resource>asList(
+        List<Resource> sources = asList(
                 dir1().resolve("a.txt").createFile(),
                 dir1().resolve("b.mp4").createFile()
         );
@@ -57,14 +57,11 @@ public abstract class PasteTest extends ResourceBaseTest {
      * new directories will be pasted with new names.
      */
     public void testDoesNotOverrideExistingDirectory() throws Exception {
-        dir1().resolve("a").createDirectory();
-        dir1().resolve("a/b").createDirectory();
-        dir1().resolve("b").createDirectory();
-        dir1().resolve("a/1.txt").createFile();
-        dir1().resolve("a/b/2.txt").createFile();
-        dir1().resolve("a/b/3.txt").createFile();
-        dir1().resolve("b/a/1.txt").createFile();
-        Set<Resource> sources = Collections.<Resource>singleton(dir1().resolve("a"));
+        dir1().resolve("a/1.txt").createFiles();
+        dir1().resolve("a/b/2.txt").createFiles();
+        dir1().resolve("a/b/3.txt").createFiles();
+        dir1().resolve("b/a/1.txt").createFiles();
+        Set<Resource> sources = Collections.singleton(dir1().resolve("a"));
         Resource dstDir = dir1().resolve("b");
 
         create(sources, dstDir).execute();
@@ -76,9 +73,9 @@ public abstract class PasteTest extends ResourceBaseTest {
     }
 
     public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final List<Resource> sources = Arrays.<Resource>asList(
-                dir1().resolve("a/1.txt").createFile(),
-                dir1().resolve("a/2.txt").createFile()
+        final List<Resource> sources = asList(
+                dir1().resolve("a/1.txt").createFiles(),
+                dir1().resolve("a/2.txt").createFiles()
         );
         final Resource dstDir = dir1().resolve("b").createDirectory();
 

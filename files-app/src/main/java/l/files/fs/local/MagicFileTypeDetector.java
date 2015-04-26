@@ -30,7 +30,8 @@ final class MagicFileTypeDetector extends LocalFileTypeDetector {
         try {
 
             try (InputStream in = resource.openInputStream(FOLLOW)) {
-                return MediaType.parse(TikaHolder.tika.detect(in));
+                String result = TikaHolder.tika.detect(in, resource.getName());
+                return MediaType.parse(result);
             }
 
         } catch (TaggedIOException e) {
