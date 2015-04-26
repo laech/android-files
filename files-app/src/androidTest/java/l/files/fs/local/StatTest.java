@@ -1,18 +1,11 @@
 package l.files.fs.local;
 
-import com.google.common.base.Function;
-
-import java.io.File;
-import java.io.IOException;
-
-import l.files.common.testing.FileBaseTest;
+import android.system.Os;
+import android.system.StructStat;
 
 import static android.system.OsConstants.ENOENT;
-import static com.google.common.io.Files.write;
-import static java.lang.System.currentTimeMillis;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
-public final class StatTest extends FileBaseTest {
+public final class StatTest extends ResourceBaseTest {
 
     public void testException() {
         try {
@@ -24,50 +17,25 @@ public final class StatTest extends FileBaseTest {
     }
 
     public void testStat() throws Exception {
-        testStatFile(new Function<File, Stat>() {
-            @Override
-            public Stat apply(File input) {
-                try {
-                    return Stat.stat(input.getAbsolutePath());
-                } catch (ErrnoException e) {
-                    throw new AssertionError(e);
-                }
-            }
-        });
+        String path = dir1().resolve("link").createSymbolicLink(dir2()).getPath();
+        checkEquals(Os.stat(path), Stat.stat(path));
+        checkEquals(Os.lstat(path), Stat.lstat(path));
     }
 
-    public void testLstat() throws Exception {
-        testStatFile(new Function<File, Stat>() {
-            @Override
-            public Stat apply(File input) {
-                try {
-                    return Stat.lstat(input.getAbsolutePath());
-                } catch (ErrnoException e) {
-                    throw new AssertionError(e);
-                }
-            }
-        });
+    private static void checkEquals(StructStat expected, Stat actual) {
+        assertEquals(expected.st_mtime, actual.getMtime());
+        assertEquals(expected.st_atime, actual.getAtime());
+        assertEquals(expected.st_ctime, actual.getCtime());
+        assertEquals(expected.st_blksize, actual.getBlksize());
+        assertEquals(expected.st_blocks, actual.getBlocks());
+        assertEquals(expected.st_dev, actual.getDev());
+        assertEquals(expected.st_gid, actual.getGid());
+        assertEquals(expected.st_mode, actual.getMode());
+        assertEquals(expected.st_uid, actual.getUid());
+        assertEquals(expected.st_ino, actual.getIno());
+        assertEquals(expected.st_nlink, actual.getNlink());
+        assertEquals(expected.st_rdev, actual.getRdev());
+        assertEquals(expected.st_size, actual.getSize());
     }
 
-    private void testStatFile(Function<File, Stat> fn) throws IOException {
-        long start = currentTimeMillis() / 1000;
-        File file = tmp().createFile("test");
-        write("hello", file, UTF_8);
-        long end = currentTimeMillis() / 1000;
-
-        Stat stat = fn.apply(file);
-
-        assertNotNull(stat);
-        assertEquals(file.length(), stat.getSize());
-        assertEquals(1, stat.getNlink());
-        assertTrue(stat.getAtime() >= start);
-        assertTrue(stat.getCtime() >= start);
-        assertTrue(stat.getMtime() >= start);
-        assertTrue(stat.getAtime() >= end);
-        assertTrue(stat.getCtime() >= end);
-        assertTrue(stat.getMtime() >= end);
-        assertTrue(stat.getIno() > 0);
-
-        // TODO more tests when there are more supporting test functions
-    }
 }
