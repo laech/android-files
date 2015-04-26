@@ -50,6 +50,13 @@ public interface Resource extends Parcelable {
     Resource getParent();
 
     /**
+     * Gets the resource hierarchy of this resource.
+     * <p/>
+     * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
+     */
+    List<Resource> getHierarchy();
+
+    /**
      * Resolves the given name/path relative to this resource.
      */
     Resource resolve(String other);

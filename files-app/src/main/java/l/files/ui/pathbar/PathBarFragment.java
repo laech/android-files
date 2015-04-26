@@ -1,8 +1,6 @@
 package l.files.ui.pathbar;
 
 import android.app.Fragment;
-import android.content.AsyncTaskLoader;
-import android.content.Loader;
 import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import l.files.R;
@@ -20,23 +16,20 @@ import l.files.fs.Resource;
 import l.files.operations.Events;
 import l.files.ui.OpenFileRequest;
 
-import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.View.GONE;
 import static android.view.View.OnClickListener;
 import static android.view.View.VISIBLE;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
 public final class PathBarFragment extends Fragment
-        implements LoaderCallbacks<PathBarFragment.Hierarchy>, OnClickListener {
+        implements OnClickListener {
 
     private Resource resource;
     private ViewGroup container;
 
     public void set(Resource resource) {
         this.resource = resource;
-        if (getActivity() != null) {
-            getLoaderManager().restartLoader(0, null, this);
-        }
+        updatePathBar(resource.getHierarchy());
     }
 
     @Override
@@ -52,46 +45,16 @@ public final class PathBarFragment extends Fragment
         assert root != null;
         container = (ViewGroup) root.findViewById(R.id.path_item_container);
         if (resource != null) {
-            getLoaderManager().restartLoader(0, null, this);
+            updatePathBar(resource.getHierarchy());
         }
     }
 
-    @Override
-    public Loader<Hierarchy> onCreateLoader(int id, Bundle args) {
-        final Resource resource = this.resource;
-
-        // TODO no need to use async task anymore
-        return new AsyncTaskLoader<Hierarchy>(getActivity()) {
-            @Override
-            public Hierarchy loadInBackground() {
-                List<Resource> hierarchy = new ArrayList<>();
-                for (Resource p = resource; p != null; p = p.getParent()) {
-                    hierarchy.add(p);
-                }
-                Collections.reverse(hierarchy);
-                return new Hierarchy(hierarchy);
-            }
-
-            @Override
-            protected void onStartLoading() {
-                super.onStartLoading();
-                forceLoad();
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Hierarchy> loader,
-                               Hierarchy hierarchy) {
-        updatePathBar(hierarchy);
-    }
-
-    private void updatePathBar(Hierarchy hierarchy) {
+    private void updatePathBar(List<Resource> hierarchy) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
 
         int i = 0;
-        for (; i < hierarchy.resources.size(); i++) {
-            Resource resource = hierarchy.resources.get(i);
+        for (; i < hierarchy.size(); i++) {
+            Resource resource = hierarchy.get(i);
             View view = container.getChildAt(i);
             if (view == null) {
                 view = inflater.inflate(R.layout.path_bar_item, container, false);
@@ -116,22 +79,9 @@ public final class PathBarFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<Hierarchy> loader) {
-    }
-
-    @Override
     public void onClick(View v) {
         Resource status = (Resource) v.getTag();
         Events.get().post(OpenFileRequest.create(status));
-    }
-
-    static final class Hierarchy {
-        final List<Resource> resources;
-
-        @SuppressWarnings("unchecked")
-        private Hierarchy(List<? extends Resource> resources) {
-            this.resources = (List<Resource>) resources;
-        }
     }
 
 }

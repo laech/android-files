@@ -19,6 +19,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -176,6 +177,16 @@ public abstract class LocalResource implements Resource {
         } else {
             return new AutoParcel_LocalResource(getFile().getParentFile());
         }
+    }
+
+    @Override
+    public List<Resource> getHierarchy() {
+        List<Resource> hierarchy = new ArrayList<>();
+        for (Resource p = this; p != null; p = p.getParent()) {
+            hierarchy.add(p);
+        }
+        Collections.reverse(hierarchy);
+        return hierarchy;
     }
 
     @Override

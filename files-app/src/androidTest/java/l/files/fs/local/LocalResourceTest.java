@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -51,6 +53,21 @@ public final class LocalResourceTest extends ResourceBaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         resource = dir1();
+    }
+
+    public void test_getHierarchy_single() throws Exception {
+        Resource a = LocalResource.create(new File("/"));
+        assertEquals(singletonList(a), a.getHierarchy());
+    }
+
+    public void test_getHierarchy_multi() throws Exception {
+        Resource a = LocalResource.create(new File("/a/b"));
+        List<Resource> expected = Arrays.<Resource>asList(
+                LocalResource.create(new File("/")),
+                LocalResource.create(new File("/a")),
+                LocalResource.create(new File("/a/b"))
+        );
+        assertEquals(expected, a.getHierarchy());
     }
 
     public void test_list_earlyTermination() throws Exception {
