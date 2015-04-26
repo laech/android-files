@@ -17,9 +17,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
-    // TODO test symbolic link to directory
-    // TODO test symbolic link to directory changes
-
     public void testSymbolicLinkIconDisplayed() throws Exception {
         Resource dir = directory().resolve("dir");
         Resource link = directory().resolve("link");
@@ -37,11 +34,22 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
         Resource link = directory().resolve("link").createSymbolicLink(dir);
         Resource linkChild = link.resolve("a");
-
         screen()
                 .selectItem(link)
                 .selectItem(linkChild)
                 .assertCurrentDirectory(linkChild);
+    }
+
+    public void testCanSeeChangesInSymlinkDirectory() throws Exception {
+        Resource dir = directory().resolve("dir").createDirectory();
+        Resource link = directory().resolve("link").createSymbolicLink(dir);
+        screen().selectItem(link)
+                .assertCurrentDirectory(link);
+
+        Resource child = link.resolve("child").createDirectory();
+        screen().selectItem(child)
+                .assertCurrentDirectory(child);
+
     }
 
     public void testPressActionBarUpIndicatorWillGoBack() throws Exception {
