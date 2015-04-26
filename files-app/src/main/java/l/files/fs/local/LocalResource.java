@@ -482,9 +482,9 @@ public abstract class LocalResource implements Resource {
     @Override
     public void delete() throws IOException {
         try {
-            Stdio.remove(getPath());
-        } catch (ErrnoException e) {
-            throw e.toIOException(getPath());
+            Os.remove(getPath());
+        } catch (android.system.ErrnoException e) {
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
 
