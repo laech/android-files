@@ -2,12 +2,13 @@ package l.files.fs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 
 import l.files.fs.local.LocalResource;
 
-import static com.google.common.io.Files.write;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
 
@@ -17,11 +18,11 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
     }
 
     public void testDetect_returnsOctetStreamForUnreadable() throws Exception {
-        File file = tmp().createFile("a.txt");
-        write("hello world", file, UTF_8);
-        assertTrue(file.setReadable(false));
+        Resource file = dir1().resolve("a.txt").createFile();
+        file.writeString(NOFOLLOW, UTF_8, "hello world");
+        file.setPermissions(Collections.<Permission>emptySet());
         try {
-            detector().detect(LocalResource.create(file));
+            detector().detect(file);
             fail();
         } catch (IOException e) {
             // Pass

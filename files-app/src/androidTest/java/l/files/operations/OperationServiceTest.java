@@ -3,7 +3,6 @@ package l.files.operations;
 import android.content.ComponentName;
 import android.content.Intent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,15 +10,14 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import de.greenrobot.event.EventBus;
-import l.files.common.testing.FileBaseTest;
-import l.files.fs.local.LocalResource;
+import l.files.fs.Resource;
+import l.files.fs.local.ResourceBaseTest;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.testing.Tests.assertExists;
-import static l.files.common.testing.Tests.assertNotExists;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.operations.OperationService.ACTION_CANCEL;
 import static l.files.operations.OperationService.EXTRA_TASK_ID;
 import static l.files.operations.OperationService.copy;
@@ -32,7 +30,7 @@ import static l.files.operations.TaskKind.MOVE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class OperationServiceTest extends FileBaseTest {
+public final class OperationServiceTest extends ResourceBaseTest {
 
     public void testCancelIntent() throws Exception {
         Intent intent = newCancelIntent(getContext(), 101);
@@ -51,15 +49,15 @@ public final class OperationServiceTest extends FileBaseTest {
     }
 
     public void testMovesFile() throws Exception {
-        File src = tmp().createFile("a");
-        File dst = tmp().createDir("dst");
+        Resource src = dir1().resolve("a").createFile();
+        Resource dst = dir1().resolve("dst").createDirectory();
         CountDownListener listener = register(new CountDownListener(MOVE));
         try {
 
-            move(getContext(), singleton(LocalResource.create(src)), LocalResource.create(dst));
+            move(getContext(), singleton(src), dst);
             listener.await();
-            assertNotExists(src);
-            assertExists(new File(dst, src.getName()));
+            assertFalse(src.exists(NOFOLLOW));
+            assertTrue(dst.resolve(src.getName()).exists(NOFOLLOW));
 
         } finally {
             unregister(listener);
@@ -67,15 +65,15 @@ public final class OperationServiceTest extends FileBaseTest {
     }
 
     public void testCopiesFile() throws Exception {
-        File src = tmp().createFile("a");
-        File dst = tmp().createDir("dst");
+        Resource src = dir1().resolve("a").createFile();
+        Resource dst = dir1().resolve("dst").createDirectory();
         CountDownListener listener = register(new CountDownListener(COPY));
         try {
 
-            copy(getContext(), singleton(LocalResource.create(src)), LocalResource.create(dst));
+            copy(getContext(), singleton(src), dst);
             listener.await();
-            assertExists(src);
-            assertExists(new File(dst, src.getName()));
+            assertTrue(src.exists(NOFOLLOW));
+            assertTrue(dst.resolve(src.getName()).exists(NOFOLLOW));
 
         } finally {
             unregister(listener);
@@ -83,15 +81,15 @@ public final class OperationServiceTest extends FileBaseTest {
     }
 
     public void testDeletesFiles() throws Exception {
-        File a = tmp().createFile("a");
-        File b = tmp().createFile("b/c");
+        Resource a = dir1().resolve("a").createFiles();
+        Resource b = dir1().resolve("b/c").createFiles();
         CountDownListener listener = register(new CountDownListener(DELETE));
         try {
 
-            delete(getContext(), new HashSet<>(asList(LocalResource.create(a), LocalResource.create(b))));
+            delete(getContext(), new HashSet<>(asList(a, b)));
             listener.await();
-            assertNotExists(a);
-            assertNotExists(b);
+            assertFalse(a.exists(NOFOLLOW));
+            assertFalse(b.exists(NOFOLLOW));
 
         } finally {
             unregister(listener);
@@ -102,8 +100,8 @@ public final class OperationServiceTest extends FileBaseTest {
         CountDownListener listener = register(new CountDownListener(DELETE, 2));
         try {
 
-            delete(getContext(), singleton(LocalResource.create(tmp().createFile("a"))));
-            delete(getContext(), singleton(LocalResource.create(tmp().createFile("2"))));
+            delete(getContext(), singleton(dir1().resolve("a").createFile()));
+            delete(getContext(), singleton(dir1().resolve("2").createFile()));
             listener.await();
             assertTrue(listener.getValues().size() > 1);
             assertEquals(2, getTaskIds(listener.getValues()).size());
@@ -122,17 +120,14 @@ public final class OperationServiceTest extends FileBaseTest {
     }
 
     public void testTaskStartTimeIsCorrect() throws Exception {
-        File file1 = tmp().createFile("a");
-        File file2 = tmp().createFile("b");
+        Resource file1 = dir1().resolve("a").createFile();
+        Resource file2 = dir1().resolve("b").createFile();
         CountDownListener listener = register(new CountDownListener(DELETE));
         try {
 
             long start = currentTimeMillis();
             {
-                delete(getContext(), new HashSet<>(asList(
-                        LocalResource.create(file1),
-                        LocalResource.create(file2)
-                )));
+                delete(getContext(), new HashSet<>(asList(file1, file2)));
                 listener.await();
             }
             long end = currentTimeMillis();
