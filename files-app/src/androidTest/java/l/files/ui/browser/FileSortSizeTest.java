@@ -1,53 +1,50 @@
 package l.files.ui.browser;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Locale;
 
+import l.files.fs.Resource;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class FileSortSizeTest extends FileSortTest {
 
     public void testSortsFilesBySize() throws Exception {
-        File smaller = createFile("a", "short content");
-        File larger = createFile("b", "longer content...........");
+        Resource smaller = createFile("a", "short content");
+        Resource larger = createFile("b", "longer content...........");
         testSortMatches(FileSort.SIZE.newComparator(Locale.getDefault()), larger, smaller);
     }
 
     public void testSortsFilesByNameIfSizesEqual() throws Exception {
-        File a = createFile("a", "content a");
-        File b = createFile("b", "content b");
+        Resource a = createFile("a", "content a");
+        Resource b = createFile("b", "content b");
         testSortMatches(FileSort.SIZE.newComparator(Locale.getDefault()), a, b);
     }
 
     public void testSortsDirsByNameIfSizesEqual() throws Exception {
-        File a = tmp().createDir("a");
-        File b = tmp().createDir("b");
+        Resource a = dir1().resolve("a").createDirectory();
+        Resource b = dir1().resolve("b").createDirectory();
         testSortMatches(FileSort.SIZE.newComparator(Locale.getDefault()), a, b);
     }
 
     public void testSortsDirLast() throws Exception {
-        File f1 = tmp().createFile("a");
-        File d1 = tmp().createDir("b");
-        File f2 = tmp().createFile("c");
+        Resource f1 = dir1().resolve("a").createFile();
+        Resource d1 = dir1().resolve("b").createDirectory();
+        Resource f2 = dir1().resolve("c").createFile();
         testSortMatches(FileSort.SIZE.newComparator(Locale.getDefault()), f1, f2, d1);
     }
 
     public void testSortsDirByName() throws Exception {
-        File b = tmp().createDir("b");
-        File a = tmp().createDir("a");
+        Resource b = dir1().resolve("b").createDirectory();
+        Resource a = dir1().resolve("a").createDirectory();
         testSortMatches(FileSort.SIZE.newComparator(Locale.getDefault()), a, b);
     }
 
-    private File createFile(String name, String content) {
-        File file = tmp().createFile(name);
-        try (OutputStream out = new FileOutputStream(file)) {
-            out.write(content.getBytes(UTF_8));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+    private Resource createFile(String name, String content) throws IOException {
+        Resource file = dir1().resolve(name).createFile();
+        file.writeString(NOFOLLOW, UTF_8, content);
         return file;
     }
+
 }

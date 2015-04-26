@@ -6,19 +6,19 @@ import static java.util.Locale.SIMPLIFIED_CHINESE;
 
 public final class FileSortNameTest extends FileSortTest {
 
-  public void testIgnoresCase() throws Exception {
-    testSortMatches(FileSort.NAME.newComparator(Locale.getDefault()),
-        tmp().createFile("a"),
-        tmp().createDir("A"),
-        tmp().createFile("b")
-    );
-  }
+    public void testIgnoresCase() throws Exception {
+        testSortMatches(FileSort.NAME.newComparator(Locale.getDefault()),
+                dir1().resolve("a").createFile(),
+                dir1().resolve("A").createDirectory(),
+                dir1().resolve("b").createFile()
+        );
+    }
 
-  public void testLocaleSensitive() throws Exception {
-    testSortMatches(FileSort.NAME.newComparator(SIMPLIFIED_CHINESE),
-        tmp().createFile("爱"), // Starts with 'a'
-        tmp().createFile("你好"), // Starts with 'n'
-        tmp().createFile("知道") // Starts with 'z'
-    );
-  }
+    public void testLocaleSensitive() throws Exception {
+        testSortMatches(FileSort.NAME.newComparator(SIMPLIFIED_CHINESE),
+                dir1().resolve("爱").createFile(), // Starts with 'a'
+                dir1().resolve("你好").createFile(), // Starts with 'n'
+                dir1().resolve("知道").createFile() // Starts with 'z'
+        );
+    }
 }

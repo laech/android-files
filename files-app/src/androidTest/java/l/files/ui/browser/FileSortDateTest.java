@@ -1,34 +1,42 @@
 package l.files.ui.browser;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
+
+import l.files.fs.Instant;
+import l.files.fs.Resource;
+
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class FileSortDateTest extends FileSortTest {
 
-  public void testSortByDateDesc() throws Exception {
-    testSortMatches(FileSort.MODIFIED.newComparator(Locale.getDefault()),
-        createDirLastModified("b", 3000),
-        createFileLastModified("a", 2000),
-        createDirLastModified("c", 1000));
-  }
+    public void testSortByDateDesc() throws Exception {
+        testSortMatches(FileSort.MODIFIED.newComparator(Locale.getDefault()),
+                createDirModified("b", Instant.of(135, 79)),
+                createFileModified("a", Instant.of(24, 680)),
+                createDirModified("c", Instant.of(1234, 4321)));
+    }
 
-  public void testSortByNameIfDatesEqual() throws Exception {
-    testSortMatches(FileSort.MODIFIED.newComparator(Locale.getDefault()),
-        createFileLastModified("a", 1),
-        createDirLastModified("b", 1),
-        createFileLastModified("c", 1));
-  }
+    public void testSortByNameIfDatesEqual() throws Exception {
+        testSortMatches(FileSort.MODIFIED.newComparator(Locale.getDefault()),
+                createFileModified("a", Instant.of(1, 1)),
+                createDirModified("b", Instant.of(1, 1)),
+                createFileModified("c", Instant.of(1, 1)));
+    }
 
-  private File createFileLastModified(String name, long modified) {
-    return setLastModified(tmp().createFile(name), modified);
-  }
+    private Resource createFileModified(String name, Instant instant) throws IOException {
+        Resource file = dir1().resolve(name).createFile();
+        return setModified(file, instant);
+    }
 
-  private File createDirLastModified(String name, long modified) {
-    return setLastModified(tmp().createDir(name), modified);
-  }
+    private Resource createDirModified(String name, Instant instant) throws IOException {
+        Resource dir = dir1().resolve(name).createDirectory();
+        return setModified(dir, instant);
+    }
 
-  private File setLastModified(File file, final long modified) {
-    assertTrue(file.setLastModified(modified));
-    return file;
-  }
+    private Resource setModified(Resource resource, Instant instant) throws IOException {
+        resource.setModificationTime(NOFOLLOW, instant);
+        return resource;
+    }
+
 }
