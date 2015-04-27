@@ -40,6 +40,7 @@ import l.files.fs.ResourceExceptionHandler;
 import l.files.fs.ResourceVisitor;
 import l.files.fs.WatchEvent;
 
+import static android.system.OsConstants.EACCES;
 import static android.system.OsConstants.EISDIR;
 import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_APPEND;
@@ -243,26 +244,29 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public boolean isReadable() {
+    public boolean isReadable() throws IOException {
         return access(F_OK);
     }
 
     @Override
-    public boolean isWritable() {
+    public boolean isWritable() throws IOException {
         return access(W_OK);
     }
 
     @Override
-    public boolean isExecutable() {
+    public boolean isExecutable() throws IOException {
         return access(X_OK);
     }
 
-    private boolean access(int mode) {
+    private boolean access(int mode) throws IOException {
         try {
             Os.access(getPath(), mode);
             return true;
         } catch (android.system.ErrnoException e) {
-            return false;
+            if (e.errno == EACCES) {
+                return false;
+            }
+            throw ErrnoException.toIOException(e, getPath());
         }
     }
 
@@ -438,7 +442,10 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public Resource createFiles() throws IOException {
-        getParent().createDirectories();
+        Resource parent = getParent();
+        if (parent != null) {
+            parent.createDirectories();
+        }
         return createFile();
     }
 

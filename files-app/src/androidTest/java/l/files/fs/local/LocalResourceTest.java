@@ -56,6 +56,33 @@ public final class LocalResourceTest extends ResourceBaseTest {
         resource = dir1();
     }
 
+    public void test_isReadable_true() throws Exception {
+        assertTrue(dir1().isReadable());
+    }
+
+    public void test_isReadable_false() throws Exception {
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        assertTrue(dir1().isReadable());
+    }
+
+    public void test_isWritable_true() throws Exception {
+        assertTrue(dir1().isWritable());
+    }
+
+    public void test_isWritable_false() throws Exception {
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        assertFalse(dir1().isWritable());
+    }
+
+    public void test_isExecutable_true() throws Exception {
+        assertTrue(dir1().isExecutable());
+    }
+
+    public void test_isExecutable_false() throws Exception {
+        dir1().setPermissions(Collections.<Permission>emptySet());
+        assertFalse(dir1().isExecutable());
+    }
+
     public void test_readStatus_symbolicLink() throws Exception {
         Resource file = dir1().resolve("file").createFile();
         Resource link = dir1().resolve("link").createSymbolicLink(file);
@@ -348,7 +375,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     public void test_exists_false() throws Exception {
         assertFalse(dir1().resolve("a").exists(NOFOLLOW));
     }
-    
+
     public void test_exists_checkLinkNotTarget() throws Exception {
         Resource target = dir1().resolve("target");
         Resource link = dir1().resolve("link").createSymbolicLink(target);

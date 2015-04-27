@@ -129,12 +129,20 @@ public final class FilesPagerFragment extends Fragment {
         if (getActivity() == null) {
             return;
         }
-        if (!resource.isReadable()) { // TODO Check in background
+        if (!isReadable(resource)) { // TODO Check in background
             showPermissionDenied();
         } else if (status.isDirectory()) {
             showDirectory(resource);
         } else {
             showFile(resource);
+        }
+    }
+
+    private boolean isReadable(Resource resource) {
+        try {
+            return resource.isReadable();
+        } catch (IOException e) {
+            return false;
         }
     }
 

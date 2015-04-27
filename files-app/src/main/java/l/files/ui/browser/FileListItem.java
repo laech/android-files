@@ -51,8 +51,6 @@ public abstract class FileListItem {
     public static abstract class File extends FileListItem {
 
         private Boolean readable;
-        private Boolean writable;
-        private Boolean executable;
 
         File() {
         }
@@ -61,23 +59,13 @@ public abstract class FileListItem {
 
         public boolean isReadable() {
             if (readable == null) {
-                readable = getResource().isReadable();
+                try {
+                    readable = getResource().isReadable();
+                } catch (IOException e) {
+                    readable = false;
+                }
             }
             return readable;
-        }
-
-        public boolean isWritable() {
-            if (writable == null) {
-                writable = getResource().isWritable();
-            }
-            return writable;
-        }
-
-        public boolean isExecutable() {
-            if (executable == null) {
-                executable = getResource().isExecutable();
-            }
-            return executable;
         }
 
         public MediaType getBasicMediaType() {

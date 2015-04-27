@@ -92,22 +92,25 @@ public interface Resource extends Parcelable {
     boolean exists(LinkOption option) throws IOException;
 
     /**
-     * Returns true if this resource is readable, return false if this resource
-     * is not readable or failed to determine.
+     * Returns true if this resource is readable, return false if not.
+     *
+     * @throws IOException failed to determine
      */
-    boolean isReadable(); // TODO throws IOException;
+    boolean isReadable() throws IOException;
 
     /**
-     * Returns true if this resource is writable, return false if this resource
-     * is not writable or failed to determine.
+     * Returns true if this resource is writable, return false if not.
+     *
+     * @throws IOException failed to determine
      */
-    boolean isWritable(); // TODO throws IOException;
+    boolean isWritable() throws IOException;
 
     /**
-     * Returns true if this resource is executable, return false if this
-     * resource is not executable or failed to determine.
+     * Returns true if this resource is executable, return false if not.
+     *
+     * @throws IOException failed to determine
      */
-    boolean isExecutable(); // TODO throws IOException;
+    boolean isExecutable() throws IOException;
 
     /**
      * Observes on this resource for change events.

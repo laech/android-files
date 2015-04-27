@@ -68,7 +68,7 @@ final class ImageDecorator {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
 
-        if (!resource.isReadable() || !status.isRegularFile()) return;
+        if (!isReadable(resource) || !status.isRegularFile()) return;
         if (errors.contains(key)) return;
         if (setCachedBitmap(view, key)) return;
 
@@ -79,6 +79,14 @@ final class ImageDecorator {
             new DecodeImage(key, view, resource, size).executeOnExecutor(SERIAL_EXECUTOR);
         } else {
             new DecodeSize(key, view, resource).executeOnExecutor(THREAD_POOL_EXECUTOR);
+        }
+    }
+
+    private boolean isReadable(Resource resource){
+        try {
+            return resource.isReadable();
+        } catch (IOException e) {
+            return false;
         }
     }
 
