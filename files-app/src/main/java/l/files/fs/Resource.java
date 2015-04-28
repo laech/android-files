@@ -93,6 +93,9 @@ public interface Resource extends Parcelable {
 
     /**
      * Returns true if this resource is readable, return false if not.
+     * <p/>
+     * If this is a symbolic link, returns the result for the link target, not
+     * the link itself.
      *
      * @throws IOException failed to determine
      */
@@ -100,6 +103,9 @@ public interface Resource extends Parcelable {
 
     /**
      * Returns true if this resource is writable, return false if not.
+     * <p/>
+     * If this is a symbolic link, returns the result for the link target, not
+     * the link itself.
      *
      * @throws IOException failed to determine
      */
@@ -107,6 +113,9 @@ public interface Resource extends Parcelable {
 
     /**
      * Returns true if this resource is executable, return false if not.
+     * <p/>
+     * If this is a symbolic link, returns the result for the link target, not
+     * the link itself.
      *
      * @throws IOException failed to determine
      */
