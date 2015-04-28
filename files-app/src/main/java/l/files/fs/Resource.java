@@ -368,6 +368,14 @@ public interface Resource extends Parcelable {
     void setPermissions(Set<Permission> permissions) throws IOException;
 
     /**
+     * Removes the given permissions from this resource's existing permissions.
+     * <p/>
+     * If this is a symbolic link, the permission of the target resource will be
+     * changed, the permission of the link itself cannot be changed.
+     */
+    void removePermissions(Set<Permission> permissions) throws IOException;
+
+    /**
      * Reads the underlying file content as string.
      */
     String readString(LinkOption option, Charset charset) throws IOException;

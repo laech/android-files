@@ -42,7 +42,6 @@ import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.EACCES;
 import static android.system.OsConstants.EISDIR;
-import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
@@ -51,6 +50,7 @@ import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.O_TRUNC;
 import static android.system.OsConstants.O_WRONLY;
+import static android.system.OsConstants.R_OK;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRUSR;
@@ -66,6 +66,7 @@ import static android.system.OsConstants.W_OK;
 import static android.system.OsConstants.X_OK;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -112,7 +113,7 @@ public abstract class LocalResource implements Resource {
         if ((mode & S_IROTH) != 0) permissions.add(OTHERS_READ);
         if ((mode & S_IWOTH) != 0) permissions.add(OTHERS_WRITE);
         if ((mode & S_IXOTH) != 0) permissions.add(OTHERS_EXECUTE);
-        return permissions;
+        return unmodifiableSet(permissions);
     }
 
     LocalResource() {
@@ -245,7 +246,7 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public boolean isReadable() throws IOException {
-        return access(F_OK);
+        return access(R_OK);
     }
 
     @Override
@@ -555,6 +556,14 @@ public abstract class LocalResource implements Resource {
         } catch (android.system.ErrnoException e) {
             throw ErrnoException.toIOException(e, getPath());
         }
+    }
+
+    @Override
+    public void removePermissions(Set<Permission> permissions) throws IOException {
+        Set<Permission> existing = readStatus(FOLLOW).getPermissions();
+        Set<Permission> perms = new HashSet<>(existing);
+        perms.removeAll(permissions);
+        setPermissions(perms);
     }
 
     @Override

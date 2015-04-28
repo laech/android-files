@@ -2,6 +2,7 @@ package l.files.features.objects;
 
 import android.app.ActionBar;
 import android.app.Instrumentation;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ import static android.view.Gravity.START;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.features.objects.Instrumentations.await;
@@ -230,7 +232,8 @@ public final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertTrue(!activity.getActionBarDrawerToggle().isDrawerIndicatorEnabled());
+                ActionBarDrawerToggle t = activity.getActionBarDrawerToggle();
+                assertTrue(!t.isDrawerIndicatorEnabled());
             }
         });
     }
@@ -293,7 +296,8 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertTabHighlightedAt(final int position, final boolean highlighted) {
+    public UiFileActivity assertTabHighlightedAt(
+            final int position, final boolean highlighted) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -307,7 +311,8 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertTabBackIndicatorVisibleAt(final int position, final boolean visible) {
+    public UiFileActivity assertTabBackIndicatorVisibleAt(
+            final int position, final boolean visible) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -375,10 +380,10 @@ public final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                ActionBar actionBar = activity.getActionBar();
+                ActionBar bar = activity.getActionBar();
                 //noinspection ConstantConditions
-                int showTitle = actionBar.getDisplayOptions() & DISPLAY_SHOW_TITLE;
-                int showCustom = actionBar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM;
+                int showTitle = bar.getDisplayOptions() & DISPLAY_SHOW_TITLE;
+                int showCustom = bar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM;
                 if (visible) {
                     assertEquals(0, showTitle);
                     assertNotEqual(0, showCustom);
@@ -402,11 +407,13 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertActionBarUpIndicatorIsVisible(final boolean visible) {
+    public UiFileActivity assertActionBarUpIndicatorIsVisible(
+            final boolean visible) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(visible, !activity.getActionBarDrawerToggle().isDrawerIndicatorEnabled());
+                ActionBarDrawerToggle t = activity.getActionBarDrawerToggle();
+                assertEquals(visible, !t.isDrawerIndicatorEnabled());
             }
         });
         return this;
@@ -418,6 +425,14 @@ public final class UiFileActivity {
 
     private TextView getFileSizeView(Resource resource) {
         return (TextView) getView(resource).findViewById(R.id.size);
+    }
+
+    private TextView getFileIconView(Resource resource) {
+        return (TextView) getView(resource).findViewById(R.id.icon);
+    }
+
+    private TextView getFileTitleView(Resource resource) {
+        return (TextView) getView(resource).findViewById(R.id.title);
     }
 
     private View getView(Resource resource) {
@@ -499,7 +514,8 @@ public final class UiFileActivity {
     /**
      * Asserts whether the given item is currently checked.
      */
-    public UiFileActivity assertChecked(final File file, final boolean checked) {
+    public UiFileActivity assertChecked(
+            final File file, final boolean checked) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -527,13 +543,16 @@ public final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(checked, activity.getMenu().findItem(R.id.bookmark).isChecked());
+                MenuItem item = activity.getMenu().findItem(R.id.bookmark);
+                assertEquals(checked, item.isChecked());
             }
         });
         return this;
     }
 
-    public UiFileActivity assertSymbolicLinkIconDisplayed(final Resource resource, final boolean displayed) {
+    public UiFileActivity assertSymbolicLinkIconDisplayed(
+            final Resource resource,
+            final boolean displayed) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -552,10 +571,23 @@ public final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(openLocked, LOCK_MODE_LOCKED_OPEN == activity.getDrawerLayout().getDrawerLockMode(START));
+                int mode = activity.getDrawerLayout().getDrawerLockMode(START);
+                assertEquals(openLocked, LOCK_MODE_LOCKED_OPEN == mode);
             }
         });
         return this;
     }
 
+    public UiFileActivity assertDisabled(final Resource resource) {
+        awaitOnMainThread(instrument, new Runnable() {
+            @Override
+            public void run() {
+                assertFalse(getFileIconView(resource).isEnabled());
+                assertFalse(getFileSizeView(resource).isEnabled());
+                assertFalse(getFileTitleView(resource).isEnabled());
+                assertFalse(getFileModifiedView(resource).isEnabled());
+            }
+        });
+        return this;
+    }
 }

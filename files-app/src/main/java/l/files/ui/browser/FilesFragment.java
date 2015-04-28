@@ -22,6 +22,7 @@ import l.files.ui.Animations;
 import l.files.ui.BaseFileListFragment;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.Preferences;
+import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.BookmarkMenu;
 import l.files.ui.menu.NewDirMenu;
 import l.files.ui.menu.PasteMenu;
@@ -42,9 +43,10 @@ import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
+import static l.files.ui.browser.IOExceptions.getFailureMessage;
 
-public final class FilesFragment extends BaseFileListFragment implements
-        LoaderCallbacks<List<FileListItem>>, OnSharedPreferenceChangeListener {
+public final class FilesFragment extends BaseFileListFragment
+        implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener {
 
     // TODO implement progress
 
@@ -149,7 +151,7 @@ public final class FilesFragment extends BaseFileListFragment implements
     }
 
     @Override
-    public Loader<List<FileListItem>> onCreateLoader(int id, Bundle bundle) {
+    public Loader<Result> onCreateLoader(int id, Bundle bundle) {
         Activity context = getActivity();
         FileSort sort = getSort(context);
         boolean showHidden = Preferences.getShowHiddenFiles(context);
@@ -157,13 +159,15 @@ public final class FilesFragment extends BaseFileListFragment implements
     }
 
     @Override
-    public void onLoadFinished(Loader<List<FileListItem>> loader, List<FileListItem> data) {
+    public void onLoadFinished(Loader<Result> loader, Result data) {
         if (getActivity() != null && !getActivity().isFinishing()) {
             if (!getListAdapter().isEmpty() && isResumed()) {
                 Animations.animatePreDataSetChange(getListView());
             }
-            getListAdapter().setItems(data);
-            if (getListAdapter().isEmpty()) {
+            getListAdapter().setItems(data.getItems());
+            if (data.getException() != null) {
+                overrideEmptyText(getFailureMessage(data.getException()));
+            } else {
                 overrideEmptyText(R.string.empty);
             }
         }
@@ -176,8 +180,15 @@ public final class FilesFragment extends BaseFileListFragment implements
         }
     }
 
+    private void overrideEmptyText(String text) {
+        View root = getView();
+        if (root != null) {
+            ((TextView) root.findViewById(android.R.id.empty)).setText(text);
+        }
+    }
+
     @Override
-    public void onLoaderReset(Loader<List<FileListItem>> loader) {
+    public void onLoaderReset(Loader<Result> loader) {
         getListAdapter().setItems(Collections.<FileListItem>emptyList());
     }
 

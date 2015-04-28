@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,10 +37,14 @@ import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.EnumSet.allOf;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 import static l.files.fs.local.LocalResource.mapPermissions;
@@ -61,8 +65,8 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_isReadable_false() throws Exception {
-        dir1().setPermissions(Collections.<Permission>emptySet());
-        assertTrue(dir1().isReadable());
+        dir1().removePermissions(Permission.allRead());
+        assertFalse(dir1().isReadable());
     }
 
     public void test_isWritable_true() throws Exception {
@@ -70,7 +74,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_isWritable_false() throws Exception {
-        dir1().setPermissions(Collections.<Permission>emptySet());
+        dir1().removePermissions(Permission.allWrite());
         assertFalse(dir1().isWritable());
     }
 
@@ -79,8 +83,18 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_isExecutable_false() throws Exception {
-        dir1().setPermissions(Collections.<Permission>emptySet());
+        dir1().removePermissions(Permission.allExecute());
         assertFalse(dir1().isExecutable());
+    }
+
+    public void test_readStatus_permissions_unmodifiable() throws Exception {
+        Set<Permission> permissions = dir1().readStatus(NOFOLLOW).getPermissions();
+        try {
+            permissions.clear();
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // Pass
+        }
     }
 
     public void test_readStatus_symbolicLink() throws Exception {
@@ -945,8 +959,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
     }
 
     public void test_setPermissions() throws Exception {
-        Set<Permission> permissions = EnumSet.allOf(Permission.class);
-        for (Set<Permission> expected : powerSet(permissions)) {
+        for (Set<Permission> expected : powerSet(allOf(Permission.class))) {
             resource.setPermissions(expected);
             Set<Permission> actual = resource.readStatus(NOFOLLOW).getPermissions();
             assertEquals(expected, actual);
@@ -958,6 +971,31 @@ public final class LocalResourceTest extends ResourceBaseTest {
         resource.setPermissions(resource.readStatus(NOFOLLOW).getPermissions());
         int actual = Os.stat(resource.getPath()).st_mode;
         assertEquals(expected, actual);
+    }
+
+    public void test_removePermissions() throws Exception {
+        Set<Permission> all = unmodifiableSet(allOf(Permission.class));
+        for (Set<Permission> permissions : powerSet(all)) {
+            dir1().setPermissions(all);
+            dir1().removePermissions(permissions);
+
+            Set<Permission> actual = dir1().readStatus(FOLLOW).getPermissions();
+            Set<Permission> expected = new HashSet<>(all);
+            expected.removeAll(permissions);
+            assertEquals(expected, actual);
+        }
+    }
+
+    public void test_removePermissions_changeTargetNotLink() throws Exception {
+        Permission perm = OWNER_READ;
+        Resource link = dir1().resolve("link").createSymbolicLink(dir1());
+        assertTrue(link.readStatus(FOLLOW).getPermissions().contains(perm));
+        assertTrue(link.readStatus(NOFOLLOW).getPermissions().contains(perm));
+
+        link.removePermissions(singleton(perm));
+
+        assertFalse(link.readStatus(FOLLOW).getPermissions().contains(perm));
+        assertTrue(link.readStatus(NOFOLLOW).getPermissions().contains(perm));
     }
 
     private static void expect(

@@ -18,7 +18,7 @@ import l.files.fs.ResourceException;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-final class ErrnoException extends Exception {
+public final class ErrnoException extends Exception {
 
     private static final long serialVersionUID = -1307818020659380579L;
 

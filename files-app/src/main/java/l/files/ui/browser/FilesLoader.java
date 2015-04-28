@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +17,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.Nullable;
+
+import auto.parcel.AutoParcel;
 import l.files.fs.NotExistException;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
@@ -23,14 +28,13 @@ import l.files.fs.WatchEvent;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.ResourceVisitor.Result.CONTINUE;
 import static l.files.fs.ResourceVisitor.Result.TERMINATE;
 
-public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
+public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Logger logger = Logger.get(FilesLoader.class);
     private static final Handler handler = new Handler(getMainLooper());
@@ -85,7 +89,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
     }
 
     @Override
-    public List<FileListItem> loadInBackground() {
+    public Result loadInBackground() {
         data.clear();
 
         boolean observe = false;
@@ -100,8 +104,8 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             try {
                 observable = resource.observe(FOLLOW, listener);
             } catch (IOException e) {
-                logger.warn(e);
-                // Failed to observe, continue to show static content
+                logger.debug(e);
+                return Result.of(e);
             }
         }
 
@@ -118,12 +122,13 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             });
         } catch (IOException e) {
             logger.debug(e);
-            return emptyList();
+            return Result.of(e);
         }
+
         return buildResult();
     }
 
-    private List<FileListItem> buildResult() {
+    private Result buildResult() {
         List<FileListItem.File> files = new ArrayList<>(data.size());
         if (showHidden) {
             files.addAll(data.values());
@@ -157,7 +162,7 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             preCategory = category;
         }
 
-        return result;
+        return Result.of(result);
     }
 
     @Override
@@ -267,4 +272,26 @@ public final class FilesLoader extends AsyncTaskLoader<List<FileListItem>> {
             deliverResult(buildResult());
         }
     }
+
+    @AutoParcel
+    static abstract class Result {
+        Result() {
+        }
+
+        abstract List<FileListItem> getItems();
+
+        @Nullable
+        abstract IOException getException();
+
+        static Result of(IOException exception) {
+            return new AutoParcel_FilesLoader_Result(
+                    Collections.<FileListItem>emptyList(), exception);
+        }
+
+        static Result of(List<? extends FileListItem> result) {
+            return new AutoParcel_FilesLoader_Result(
+                    ImmutableList.copyOf(result), null);
+        }
+    }
+
 }

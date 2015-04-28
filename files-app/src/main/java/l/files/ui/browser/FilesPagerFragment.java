@@ -9,20 +9,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.common.widget.Toaster;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.logging.Logger;
 import l.files.ui.OpenFileRequest;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
+import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.Fragments.setArgs;
+import static l.files.ui.browser.IOExceptions.getFailureMessage;
 
 public final class FilesPagerFragment extends Fragment {
 
@@ -38,7 +40,6 @@ public final class FilesPagerFragment extends Fragment {
         return setArgs(new FilesPagerFragment(), args);
     }
 
-    private Toaster toaster;
     private Consumer<Resource> fileOpener;
     private FragmentManager manager;
 
@@ -53,7 +54,6 @@ public final class FilesPagerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        toaster = Toaster.get();
         fileOpener = FileOpener.get(getActivity());
         manager = getChildFragmentManager();
         if (savedInstanceState == null) {
@@ -99,26 +99,27 @@ public final class FilesPagerFragment extends Fragment {
     }
 
     public void show(final OpenFileRequest request) {
-        new AsyncTask<Void, Void, ResourceStatus>() {
+        new AsyncTask<Void, Void, Object>() {
             @Override
-            protected ResourceStatus doInBackground(Void... params) {
+            protected Object doInBackground(Void... params) {
                 try {
                     return request.getResource().readStatus(FOLLOW);
                 } catch (IOException e) {
                     log.debug(e, "%s", request);
-                    return null;
+                    return e;
                 }
             }
 
             @Override
-            protected void onPostExecute(ResourceStatus status) {
-                super.onPostExecute(status);
+            protected void onPostExecute(Object result) {
+                super.onPostExecute(result);
                 Activity activity = getActivity();
                 if (activity != null) {
-                    if (status != null) {
-                        show(request.getResource(), status);
+                    if (result instanceof ResourceStatus) {
+                        show(request.getResource(), (ResourceStatus) result);
                     } else {
-                        toaster.toast(activity, R.string.failed_to_get_file_info);
+                        String msg = getFailureMessage((IOException) result);
+                        Toast.makeText(activity, msg, LENGTH_SHORT).show();
                     }
                 }
             }
@@ -147,7 +148,7 @@ public final class FilesPagerFragment extends Fragment {
     }
 
     private void showPermissionDenied() {
-        toaster.toast(getActivity(), R.string.permission_denied);
+        Toast.makeText(getActivity(), R.string.permission_denied, LENGTH_SHORT).show();
     }
 
     private void showDirectory(Resource resource) {

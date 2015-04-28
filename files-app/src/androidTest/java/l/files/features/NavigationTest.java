@@ -5,6 +5,7 @@ import java.io.Writer;
 
 import l.files.common.base.Consumer;
 import l.files.fs.Instant;
+import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.test.BaseFilesActivityTest;
@@ -16,6 +17,12 @@ import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
+
+    public void testDirectoryViewIsDisabledIfNoReadPermission() throws Exception {
+        Resource dir = directory().resolve("dir").createDirectory();
+        dir.removePermissions(Permission.allRead());
+        screen().assertDisabled(dir);
+    }
 
     public void testSymbolicLinkIconDisplayed() throws Exception {
         Resource dir = directory().resolve("dir");

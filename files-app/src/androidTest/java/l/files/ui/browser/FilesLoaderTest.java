@@ -3,7 +3,6 @@ package l.files.ui.browser;
 import android.app.LoaderManager;
 import android.os.Bundle;
 
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -18,6 +17,7 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceStatus;
 import l.files.fs.local.LocalResource;
 import l.files.test.TestActivity;
+import l.files.ui.browser.FilesLoader.Result;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
@@ -52,18 +53,16 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
     }
 
     public void testLoadFiles() throws Exception {
-        List<FileListItem.File> expected = createFiles("a", "b");
+        Result expected = createFiles("a", "b");
         try (Subject subject = subject()) {
             subject.initLoader().awaitOnLoadFinished(expected);
         }
     }
 
     public void testMonitorsDirectoryChanges() throws Exception {
-        List<FileListItem.File> expected = new ArrayList<>(createFiles("1", "2"));
         try (Subject subject = subject()) {
-            subject.initLoader().awaitOnLoadFinished(expected);
-            expected.addAll(createFiles("3", "4", "5", "6"));
-            subject.awaitOnLoadFinished(expected);
+            subject.initLoader().awaitOnLoadFinished(createFiles("1", "2"));
+            subject.awaitOnLoadFinished(createFiles("1", "2", "3", "4", "5", "6"));
         }
     }
 
@@ -89,7 +88,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
 //        }
 //    }
 
-    private List<FileListItem.File> createFiles(String... names) throws IOException {
+    private Result createFiles(String... names) throws IOException {
         List<FileListItem.File> result = new ArrayList<>();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
@@ -102,7 +101,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
             ResourceStatus stat = child.readStatus(NOFOLLOW);
             result.add(FileListItem.File.create(child, stat, stat));
         }
-        return result;
+        return Result.of(result);
     }
 
     Subject subject() {
@@ -117,7 +116,7 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
         return new Subject(loaderId, getActivity().getLoaderManager(), listener);
     }
 
-    private interface LoaderCallback extends LoaderCallbacks<List<FileListItem>> {
+    private interface LoaderCallback extends LoaderCallbacks<Result> {
     }
 
     private static final class Subject implements AutoCloseable {
@@ -132,9 +131,9 @@ public final class FilesLoaderTest extends BaseActivityTest<TestActivity> {
         }
 
         @SuppressWarnings("unchecked")
-        Subject awaitOnLoadFinished(List<?> expected) {
-            verify(listener, Mockito.timeout(2000))
-                    .onLoadFinished(any(FilesLoader.class), (List<FileListItem>) eq(expected));
+        Subject awaitOnLoadFinished(Result expected) {
+            verify(listener, timeout(2000))
+                    .onLoadFinished(any(FilesLoader.class), eq(expected));
             return this;
         }
 
