@@ -12,9 +12,9 @@ public final class FileSortDateTest extends FileSortTest {
 
     public void testSortByDateDesc() throws Exception {
         testSortMatches(FileSort.MODIFIED.newComparator(Locale.getDefault()),
-                createDirModified("b", Instant.of(135, 79)),
-                createFileModified("a", Instant.of(24, 680)),
-                createDirModified("c", Instant.of(1234, 4321)));
+                createDirModified("b", Instant.of(1, 3)),
+                createFileModified("a", Instant.of(1, 2)),
+                createDirModified("c", Instant.of(1, 1)));
     }
 
     public void testSortByNameIfDatesEqual() throws Exception {
