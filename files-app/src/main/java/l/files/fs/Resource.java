@@ -20,7 +20,9 @@ import javax.annotation.Nullable;
  * Represents a file system resource, such as a file or directory. Two resources
  * are equal if their URIs are equal.
  */
-public interface Resource extends Parcelable {
+public interface Resource extends Parcelable
+{
+    // TODO cleanup exceptions
 
     /**
      * The normalized/absolute URI of this resource. Every resource has only one
@@ -70,7 +72,8 @@ public interface Resource extends Parcelable {
      * Resource("/c/b")
      * </pre>
      *
-     * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
+     * @throws IllegalArgumentException
+     *         if {@code !this.startsWith(fromParent)}
      */
     Resource resolveParent(Resource fromParent, Resource toParent);
 
@@ -84,11 +87,6 @@ public interface Resource extends Parcelable {
      */
     boolean isHidden();
 
-    /**
-     * Returns true if exists, returns false if does not exist.
-     *
-     * @throws IOException failed to determine existence
-     */
     boolean exists(LinkOption option) throws IOException;
 
     /**
@@ -96,8 +94,6 @@ public interface Resource extends Parcelable {
      * <p/>
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
-     *
-     * @throws IOException failed to determine
      */
     boolean isReadable() throws IOException;
 
@@ -106,8 +102,6 @@ public interface Resource extends Parcelable {
      * <p/>
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
-     *
-     * @throws IOException failed to determine
      */
     boolean isWritable() throws IOException;
 
@@ -116,8 +110,6 @@ public interface Resource extends Parcelable {
      * <p/>
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
-     *
-     * @throws IOException failed to determine
      */
     boolean isExecutable() throws IOException;
 
@@ -133,8 +125,9 @@ public interface Resource extends Parcelable {
      * have already be changed again, therefore a robust application should have
      * an alternative way of handling instead of reply on this fully.
      *
-     * @param option if option is {@link LinkOption#NOFOLLOW} and this resource
-     *               is a link, observe on the link instead of the link target
+     * @param option
+     *         if option is {@link LinkOption#NOFOLLOW} and this resource
+     *         is a link, observe on the link instead of the link target
      */
     Closeable observe(LinkOption option, WatchEvent.Listener observer)
             throws IOException;
@@ -143,9 +136,10 @@ public interface Resource extends Parcelable {
      * Performs a traversal that will terminate as soon as an error is
      * encountered.
      */
-    void traverse(LinkOption option,
-                  @Nullable ResourceVisitor pre,
-                  @Nullable ResourceVisitor post) throws IOException;
+    void traverse(
+            LinkOption option,
+            @Nullable ResourceVisitor pre,
+            @Nullable ResourceVisitor post) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.
@@ -166,53 +160,50 @@ public interface Resource extends Parcelable {
      * post.accept(a)
      * </pre>
      *
-     * @param option  applies to root only, child links are never followed
-     * @param pre     callback for pre order traversals
-     * @param post    callback for post order traversals
-     * @param handler handles any exception encountered duration traversal
+     * @param option
+     *         applies to root only, child links are never followed
+     * @param pre
+     *         callback for pre order traversals
+     * @param post
+     *         callback for post order traversals
+     * @param handler
+     *         handles any exception encountered duration traversal
      */
-    void traverse(LinkOption option,
-                  @Nullable ResourceVisitor pre,
-                  @Nullable ResourceVisitor post,
-                  @Nullable ResourceExceptionHandler handler) throws IOException;
+    void traverse(
+            LinkOption option,
+            @Nullable ResourceVisitor pre,
+            @Nullable ResourceVisitor post,
+            @Nullable ResourceExceptionHandler handler) throws IOException;
 
     /**
      * Lists the immediate children of this resource.
      *
-     * @throws AccessException       no permission to list
-     * @throws NotExistException     the underlying resource does not exist
-     * @throws NotDirectoryException target resource is not a directory, or if
-     *                               option is {@link LinkOption#NOFOLLOW} and
-     *                               the underlying resource is a symbolic link
-     * @throws IOException           other failures
+     * @throws AccessException
+     * @throws NotExistException
+     * @throws NotDirectoryException
+     *         target resource is not a directory, or if
+     *         option is {@link LinkOption#NOFOLLOW} and
+     *         the underlying resource is a symbolic link
      */
     void list(LinkOption option, ResourceVisitor visitor) throws IOException;
 
     /**
      * List the children into the given collection. Returns the collection.
-     *
-     * @see #list(LinkOption, ResourceVisitor)
      */
-    <T extends Collection<? super Resource>> T list(LinkOption option, T collection)
-            throws IOException;
+    <T extends Collection<? super Resource>> T list(
+            LinkOption option, T collection) throws IOException;
 
-    /**
-     * Returns the children.
-     *
-     * @see #list(LinkOption, ResourceVisitor)
-     */
     List<Resource> list(LinkOption option) throws IOException;
 
     /**
      * Opens an input stream to the underlying file.
-     * <p/>
      *
-     * @throws AccessException   does not have permission to read
-     * @throws NotExistException this resource does not exist
-     * @throws NotFileException  this resource is not a file, or option is
-     *                           {@link LinkOption#NOFOLLOW} and the underlying
-     *                           resource is a symbolic link
-     * @throws IOException       other failures
+     * @throws AccessException
+     * @throws NotExistException
+     * @throws NotFileException
+     *         this resource is not a file, or option is
+     *         {@link LinkOption#NOFOLLOW} and the underlying
+     *         resource is a symbolic link
      */
     InputStream openInputStream(LinkOption option) throws IOException;
 
@@ -225,12 +216,12 @@ public interface Resource extends Parcelable {
     /**
      * Opens an output stream to the underlying file.
      *
-     * @throws AccessException   no write permission
-     * @throws NotExistException parent resource does not exist
-     * @throws NotFileException  this resource is a directory, or option is
-     *                           {@link LinkOption#NOFOLLOW} and the underlying
-     *                           resource is a symbolic link
-     * @throws IOException       other failures
+     * @throws AccessException
+     * @throws NotExistException
+     * @throws NotFileException
+     *         this resource is a directory, or option is
+     *         {@link LinkOption#NOFOLLOW} and the underlying
+     *         resource is a symbolic link
      */
     OutputStream openOutputStream(LinkOption option, boolean append)
             throws IOException;
@@ -239,18 +230,21 @@ public interface Resource extends Parcelable {
 
     Writer openWriter(LinkOption option, Charset charset) throws IOException;
 
-    Writer openWriter(LinkOption option, Charset charset, boolean append) throws IOException;
+    Writer openWriter(LinkOption option, Charset charset, boolean append)
+            throws IOException;
 
     /**
      * Creates this resource as a directory. Will fail if the directory already
      * exists.
      *
      * @return this
-     * @throws AccessException       does not have permission to create
-     * @throws ExistsException       this resource already exists
-     * @throws NotExistException     a directory component in the path does not
-     * @throws NotDirectoryException parent is not a directory
-     * @throws IOException           other failures
+     * @throws AccessException
+     * @throws ExistsException
+     *         this resource already exists
+     * @throws NotExistException
+     *         a directory component in the path does not
+     * @throws NotDirectoryException
+     *         parent is not a directory
      */
     Resource createDirectory() throws IOException;
 
@@ -267,11 +261,13 @@ public interface Resource extends Parcelable {
      * Creates the underlying resource as a file.
      *
      * @return this
-     * @throws AccessException       does not have permission to create
-     * @throws ExistsException       the underlying resource already exits
-     * @throws NotExistException     the parent resource does not exist
-     * @throws NotDirectoryException parent is not a directory
-     * @throws IOException           other failures
+     * @throws AccessException
+     * @throws ExistsException
+     *         the underlying resource already exits
+     * @throws NotExistException
+     *         the parent resource does not exist
+     * @throws NotDirectoryException
+     *         parent is not a directory
      */
     Resource createFile() throws IOException;
 
@@ -289,31 +285,35 @@ public interface Resource extends Parcelable {
      * location.
      *
      * @return this
-     * @throws AccessException       does not have permission to create
-     * @throws ExistsException       the underlying resource already exists
-     * @throws NotExistException     this resource does not exist
-     * @throws NotDirectoryException parent is not a directory
-     * @throws IOException           other failures
+     * @throws AccessException
+     * @throws ExistsException
+     *         the underlying resource already exists
+     * @throws NotExistException
+     *         parent does not exist
+     * @throws NotDirectoryException
+     *         parent is not a directory
      */
     Resource createSymbolicLink(Resource target) throws IOException;
 
     /**
      * If this is a symbolic link, returns the target file.
      *
-     * @throws AccessException       does not have permission to read
-     * @throws InvalidException      this is not a symbolic link
-     * @throws NotExistException     this resource does not exist
-     * @throws NotDirectoryException parent is not a directory
-     * @throws IOException           other failures
+     * @throws AccessException
+     * @throws InvalidException
+     *         this is not a symbolic link
+     * @throws NotExistException
+     *         this resource does not exist
+     * @throws NotDirectoryException
+     *         parent is not a directory
      */
     Resource readSymbolicLink() throws IOException;
 
     /**
      * Reads the status of this resource.
      *
-     * @throws AccessException   does not have permission to read status
-     * @throws NotExistException this resource does not exist
-     * @throws IOException       other failures
+     * @throws AccessException
+     * @throws NotExistException
+     *         this resource does not exist
      */
     ResourceStatus readStatus(LinkOption option) throws IOException;
 
@@ -324,43 +324,50 @@ public interface Resource extends Parcelable {
      * If this is a symbolic link, the link itself is moved, link target
      * resource is unaffected.
      *
-     * @throws AccessException      does not have permission to rename
-     * @throws NotExistException    this resource does not exist
-     * @throws ExistsException      destination exists
-     * @throws InvalidException     attempt to make a directory a subdirectory
-     *                              of itself
-     * @throws CrossDeviceException attempt to move to a different device
-     * @throws IOException          other failures
+     * @throws AccessException
+     * @throws NotExistException
+     *         this resource does not exist
+     * @throws ExistsException
+     *         destination exists
+     * @throws InvalidException
+     *         attempt to make a directory a subdirectory of itself
+     * @throws CrossDeviceException
+     *         attempt to move to a different device
      */
     void moveTo(Resource dst) throws IOException;
 
     /**
      * Deletes this resource.
      *
-     * @throws AccessException   does not have permission to delete
-     * @throws NotExistException this resource does not exist
-     * @throws NotEmptyException this is a non empty directory
-     * @throws IOException       other failures
+     * @throws AccessException
+     *         does not have permission to delete
+     * @throws NotExistException
+     *         this resource does not exist
+     * @throws NotEmptyException
+     *         this is a non empty directory
      */
     void delete() throws IOException;
 
     /**
      * Updates the access time for this resource.
      *
-     * @throws AccessException   does not have permission to update
-     * @throws NotExistException this resource does not exist
-     * @throws IOException       other failures
+     * @throws AccessException
+     *         does not have permission to update
+     * @throws NotExistException
+     *         this resource does not exist
      */
     void setAccessTime(LinkOption option, Instant instant) throws IOException;
 
     /**
      * Updates the modification time for this resource.
      *
-     * @throws AccessException   does not have permission to update
-     * @throws NotExistException this resource does not exist
-     * @throws IOException       other failures
+     * @throws AccessException
+     *         does not have permission to update
+     * @throws NotExistException
+     *         this resource does not exist
      */
-    void setModificationTime(LinkOption option, Instant instant) throws IOException;
+    void setModificationTime(LinkOption option, Instant instant)
+            throws IOException;
 
     /**
      * Sets the permissions of this resource, this replaces the existing
@@ -369,10 +376,8 @@ public interface Resource extends Parcelable {
      * If this is a symbolic link, the permission of the target resource will be
      * changed, the permission of the link itself cannot be changed.
      *
-     * @throws AccessException               does not have permission to update
-     * @throws NotExistException             this resource does not exist
-     * @throws IOException                   other failures
-     * @throws UnsupportedOperationException if this is a symbolic link
+     * @throws AccessException
+     * @throws NotExistException
      */
     void setPermissions(Set<Permission> permissions) throws IOException;
 
@@ -394,8 +399,8 @@ public interface Resource extends Parcelable {
      * returns the appendable.
      */
     <T extends Appendable> T readString(LinkOption option,
-                                        Charset charset,
-                                        T appendable) throws IOException;
+            Charset charset,
+            T appendable) throws IOException;
 
     /**
      * Overrides the content of this resource with the given content.
