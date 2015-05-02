@@ -7,27 +7,28 @@ import auto.parcel.AutoParcel;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.LocalResource.mapPermissions;
 
 @AutoParcel
-public abstract class LocalResourceStatus implements ResourceStatus {
+public abstract class LocalStat implements Stat
+{
 
     private Instant atime;
     private Instant mtime;
     private Set<Permission> permissions;
 
-    public abstract Stat getStat();
+    public abstract l.files.fs.local.Stat getStat();
 
-    public static LocalResourceStatus create(Stat stat) {
-        return new AutoParcel_LocalResourceStatus(stat);
+    public static LocalStat create(l.files.fs.local.Stat stat) {
+        return new AutoParcel_LocalStat(stat);
     }
 
     @Override
-    public Instant getAccessTime() {
+    public Instant accessTime() {
         if (atime == null) {
             atime = Instant.of(getStat().getAtime(), getStat().getAtimeNsec());
         }
@@ -35,7 +36,7 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     }
 
     @Override
-    public Instant getModificationTime() {
+    public Instant modificationTime() {
         if (mtime == null) {
             mtime = Instant.of(getStat().getMtime(), getStat().getMtimeNsec());
         }
@@ -43,23 +44,23 @@ public abstract class LocalResourceStatus implements ResourceStatus {
     }
 
     @Override
-    public long getSize() {
+    public long size() {
         return getStat().getSize();
     }
 
     @Override
     public boolean isSymbolicLink() {
-        return Stat.S_ISLNK(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISLNK(getStat().getMode());
     }
 
     @Override
     public boolean isRegularFile() {
-        return Stat.S_ISREG(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISREG(getStat().getMode());
     }
 
     @Override
     public boolean isDirectory() {
-        return Stat.S_ISDIR(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISDIR(getStat().getMode());
     }
 
     public long getDevice() {
@@ -72,46 +73,46 @@ public abstract class LocalResourceStatus implements ResourceStatus {
 
     @Override
     public boolean isFifo() {
-        return Stat.S_ISFIFO(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISFIFO(getStat().getMode());
     }
 
     @Override
     public boolean isSocket() {
-        return Stat.S_ISSOCK(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISSOCK(getStat().getMode());
     }
 
     @Override
     public boolean isBlockDevice() {
-        return Stat.S_ISBLK(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISBLK(getStat().getMode());
     }
 
     @Override
     public boolean isCharacterDevice() {
-        return Stat.S_ISCHR(getStat().getMode());
+        return l.files.fs.local.Stat.S_ISCHR(getStat().getMode());
     }
 
     @Override
-    public Set<Permission> getPermissions() {
+    public Set<Permission> permissions() {
         if (permissions == null) {
             permissions = mapPermissions(getStat().getMode());
         }
         return permissions;
     }
 
-    public static LocalResourceStatus stat(
+    public static LocalStat stat(
             LocalResource resource,
             LinkOption option) throws IOException {
 
         requireNonNull(option, "option");
-        Stat stat;
+        l.files.fs.local.Stat stat;
         try {
             if (option == FOLLOW) {
-                stat = Stat.stat(resource.getPath());
+                stat = l.files.fs.local.Stat.stat(resource.path());
             } else {
-                stat = Stat.lstat(resource.getPath());
+                stat = l.files.fs.local.Stat.lstat(resource.path());
             }
         } catch (ErrnoException e) {
-            throw e.toIOException(resource.getPath());
+            throw e.toIOException(resource.path());
         }
 
         return create(stat);

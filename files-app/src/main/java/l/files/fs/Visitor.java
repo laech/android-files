@@ -2,15 +2,15 @@ package l.files.fs;
 
 import java.io.IOException;
 
-public interface ResourceVisitor {
-
+public interface Visitor
+{
     /**
      * Callback method when traversing a resource subtree.
      */
     Result accept(Resource resource) throws IOException;
 
-    enum Result {
-
+    enum Result
+    {
         /**
          * Continue traversing.
          */
@@ -26,5 +26,4 @@ public interface ResourceVisitor {
          */
         SKIP
     }
-
 }

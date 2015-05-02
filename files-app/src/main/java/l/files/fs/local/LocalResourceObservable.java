@@ -182,7 +182,7 @@ final class LocalResourceObservable extends Native
         requireNonNull(option, "option");
         requireNonNull(observer, "observer");
 
-        boolean directory = resource.readStatus(option).isDirectory();
+        boolean directory = resource.stat(option).isDirectory();
 
         int fd = inotifyInit(resource);
         int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
@@ -232,7 +232,7 @@ final class LocalResourceObservable extends Native
         try {
             return Inotify.init1(IN_NONBLOCK);
         } catch (ErrnoException e) {
-            throw e.toIOException(resource.getPath());
+            throw e.toIOException(resource.path());
         }
     }
 
@@ -256,7 +256,7 @@ final class LocalResourceObservable extends Native
             } catch (ErrnoException ee) {
                 e.addSuppressed(ee);
             }
-            throw e.toIOException(resource.getPath());
+            throw e.toIOException(resource.path());
 
         } catch (Throwable e) {
             try {
@@ -326,7 +326,7 @@ final class LocalResourceObservable extends Native
         try {
             Unistd.close(fd);
         } catch (ErrnoException e) {
-            throw e.toIOException(resource.getPath());
+            throw e.toIOException(resource.path());
         }
     }
 

@@ -18,8 +18,8 @@ import java.util.Date;
 
 import l.files.R;
 import l.files.fs.Instant;
-import l.files.fs.ResourceStatus;
-import l.files.fs.local.LocalResourceStatus;
+import l.files.fs.Stat;
+import l.files.fs.local.LocalStat;
 import l.files.ui.StableAdapter;
 
 import static android.graphics.Typeface.BOLD;
@@ -48,7 +48,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
 
     // TODO decorator for symlink and others
 
-    private final Function<ResourceStatus, CharSequence> dateFormatter;
+    private final Function<Stat, CharSequence> dateFormatter;
     private final ImageDecorator imageDecorator;
 
     FilesAdapter(Context context, int maxThumbnailWidth, int maxThumbnailHeight) {
@@ -120,17 +120,17 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         return view;
     }
 
-    private static Function<ResourceStatus, CharSequence> newDateFormatter(final Context context) {
+    private static Function<Stat, CharSequence> newDateFormatter(final Context context) {
         final DateFormat dateFormat = getDateFormat(context);
         final DateFormat timeFormat = getTimeFormat(context);
         final Date date = new Date();
         final Time t1 = new Time();
         final Time t2 = new Time();
         final int flags = FORMAT_SHOW_DATE | FORMAT_ABBREV_MONTH | FORMAT_NO_YEAR;
-        return new Function<ResourceStatus, CharSequence>() {
+        return new Function<Stat, CharSequence>() {
             @Override
-            public CharSequence apply(ResourceStatus file) {
-                Instant instant = file.getModificationTime();
+            public CharSequence apply(Stat file) {
+                Instant instant = file.modificationTime();
                 if (instant.equals(EPOCH)) {
                     return context.getString(R.string.__);
                 }
@@ -189,7 +189,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         void setTitle(FileListItem.File file) {
-            title.setText(file.getResource().getName());
+            title.setText(file.getResource().name());
             title.setEnabled(file.getStat() != null && file.isReadable());
         }
 
@@ -206,10 +206,10 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
             icon.setBackgroundResource(getIconBackgroundResource(file));
         }
 
-        boolean setLocalIcon(TextView icon, ResourceStatus status) {
-            if (status instanceof LocalResourceStatus) {
+        boolean setLocalIcon(TextView icon, Stat stat) {
+            if (stat instanceof LocalStat) {
                 // Sets single character type consistent with ls command
-                LocalResourceStatus local = (LocalResourceStatus) status;
+                LocalStat local = (LocalStat) stat;
                 if (local.isBlockDevice()) {
                     icon.setText("B");
                 } else if (local.isCharacterDevice()) {
@@ -227,7 +227,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         private Typeface getIcon(FileListItem.File file, AssetManager assets) {
-            ResourceStatus stat = file.getStat();
+            Stat stat = file.getStat();
             if (stat == null) {
                 return getDefaultFileIcon(assets);
             }
@@ -240,7 +240,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         private int getIconBackgroundResource(FileListItem.File file) {
-            ResourceStatus stat = file.getStat();
+            Stat stat = file.getStat();
             if (stat == null
                     || stat.isDirectory()
                     || file.getTargetStat().isDirectory()) {
@@ -251,7 +251,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         void setDate(FileListItem.File file) {
-            ResourceStatus stat = file.getStat();
+            Stat stat = file.getStat();
             if (stat == null) {
                 date.setText("");
                 date.setVisibility(GONE);
@@ -262,13 +262,13 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         void setSize(FileListItem.File file) {
-            ResourceStatus stat = file.getStat();
+            Stat stat = file.getStat();
             if (stat == null) {
                 size.setText("");
                 size.setVisibility(GONE);
             } else {
                 size.setEnabled(file.isReadable());
-                size.setText(stat.isDirectory() ? "" : formatShortFileSize(size.getContext(), stat.getSize()));
+                size.setText(stat.isDirectory() ? "" : formatShortFileSize(size.getContext(), stat.size()));
                 size.setVisibility(stat.isRegularFile() ? VISIBLE : GONE);
             }
         }
@@ -283,7 +283,7 @@ final class FilesAdapter extends StableAdapter<FileListItem> {
         }
 
         void setSymlink(FileListItem.File file) {
-            ResourceStatus stat = file.getStat();
+            Stat stat = file.getStat();
             if (stat == null || !stat.isSymbolicLink()) {
                 symlink.setVisibility(GONE);
             } else {

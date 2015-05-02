@@ -5,13 +5,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Visitor;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
-final class Delete extends AbstractOperation implements ResourceVisitor {
+final class Delete extends AbstractOperation implements Visitor
+{
 
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
@@ -51,7 +52,7 @@ final class Delete extends AbstractOperation implements ResourceVisitor {
     }
 
     private void delete(Resource resource) throws IOException {
-        long size = resource.readStatus(NOFOLLOW).getSize();
+        long size = resource.stat(NOFOLLOW).size();
         resource.delete();
         deletedByteCount.addAndGet(size);
         deletedItemCount.incrementAndGet();

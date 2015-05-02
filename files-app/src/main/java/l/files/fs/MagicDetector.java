@@ -27,12 +27,12 @@ public final class MagicDetector extends AbstractDetector {
 
     @Override
     protected MediaType detectFile(
-            Resource resource, ResourceStatus status) throws IOException {
+            Resource resource, Stat stat) throws IOException {
 
         try {
 
-            try (InputStream in = resource.openInputStream(FOLLOW)) {
-                String result = TikaHolder.tika.detect(in, resource.getName());
+            try (InputStream in = resource.input(FOLLOW)) {
+                String result = TikaHolder.tika.detect(in, resource.name());
                 return MediaType.parse(result);
             }
 

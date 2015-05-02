@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 import l.files.fs.local.ResourceBaseTest;
 
 import static java.util.Collections.shuffle;
@@ -27,7 +27,7 @@ abstract class FileSortTest extends ResourceBaseTest {
     private List<FileListItem.File> mapData(Resource... resources) throws IOException {
         List<FileListItem.File> expected = new ArrayList<>(resources.length);
         for (Resource resource : resources) {
-            ResourceStatus stat = resource.readStatus(NOFOLLOW);
+            Stat stat = resource.stat(NOFOLLOW);
             expected.add(FileListItem.File.create(resource, stat, stat));
         }
         return expected;

@@ -57,7 +57,7 @@ public final class OperationServiceTest extends ResourceBaseTest {
             move(getContext(), singleton(src), dst);
             listener.await();
             assertFalse(src.exists(NOFOLLOW));
-            assertTrue(dst.resolve(src.getName()).exists(NOFOLLOW));
+            assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
 
         } finally {
             unregister(listener);
@@ -73,7 +73,7 @@ public final class OperationServiceTest extends ResourceBaseTest {
             copy(getContext(), singleton(src), dst);
             listener.await();
             assertTrue(src.exists(NOFOLLOW));
-            assertTrue(dst.resolve(src.getName()).exists(NOFOLLOW));
+            assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
 
         } finally {
             unregister(listener);

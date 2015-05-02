@@ -113,7 +113,7 @@ public final class UiFileActivity {
     }
 
     public UiFileActivity selectItem(final Resource resource) {
-        return selectItem(new File(resource.getUri()));
+        return selectItem(new File(resource.uri()));
     }
 
     public UiFileActivity selectItem(final File file) {
@@ -344,7 +344,7 @@ public final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(contains, findItemPosition(item.getName()).isPresent());
+                assertEquals(contains, findItemPosition(item.name()).isPresent());
             }
         });
         return this;
@@ -436,7 +436,7 @@ public final class UiFileActivity {
     }
 
     private View getView(Resource resource) {
-        return getView(resource.getName());
+        return getView(resource.name());
     }
 
     private View getView(String name) {
@@ -496,7 +496,7 @@ public final class UiFileActivity {
         for (int i = 0; i < count; i++) {
             FileListItem item = (FileListItem) getListView().getItemAtPosition(i);
             if (item.isFile() &&
-                    ((FileListItem.File) item).getResource().getName().equals(filename)) {
+                    ((FileListItem.File) item).getResource().name().equals(filename)) {
                 return Optional.of(i);
             }
         }

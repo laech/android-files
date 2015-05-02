@@ -2,9 +2,9 @@ package l.files.fs;
 
 import java.util.Set;
 
-public interface ResourceStatus {
-
-    long getSize();
+public interface Stat
+{
+    long size();
 
     boolean isRegularFile();
 
@@ -20,10 +20,9 @@ public interface ResourceStatus {
 
     boolean isCharacterDevice();
 
-    Instant getAccessTime();
+    Instant accessTime();
 
-    Instant getModificationTime();
+    Instant modificationTime();
 
-    Set<Permission> getPermissions();
-
+    Set<Permission> permissions();
 }

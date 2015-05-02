@@ -80,7 +80,7 @@ public final class ErrnoException extends Exception {
         try {
             // See for example open() linux system call
             return errno == OsConstants.ELOOP
-                    && res.readStatus(NOFOLLOW).isSymbolicLink();
+                    && res.stat(NOFOLLOW).isSymbolicLink();
         } catch (IOException e) {
             return false;
         }

@@ -7,7 +7,8 @@ import java.io.IOException;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
-public abstract class AbstractDetector implements ResourceTypeDetector {
+public abstract class AbstractDetector implements Detector
+{
 
     // Media types for file types, kept consistent with the linux "file" command
     private static final MediaType INODE_DIRECTORY = MediaType.parse("inode/directory");
@@ -18,27 +19,27 @@ public abstract class AbstractDetector implements ResourceTypeDetector {
 
     @Override
     public MediaType detect(Resource resource) throws IOException {
-        return detect(resource, resource.readStatus(FOLLOW));
+        return detect(resource, resource.stat(FOLLOW));
     }
 
     @Override
     public MediaType detect(
-            Resource resource, ResourceStatus status) throws IOException {
+            Resource resource, Stat stat) throws IOException {
 
-        if (status.isSymbolicLink()) {
+        if (stat.isSymbolicLink()) {
             return detect(resource);
         } else {
-            if (status.isRegularFile()) return detectFile(resource, status);
-            if (status.isFifo()) return INODE_FIFO;
-            if (status.isSocket()) return INODE_SOCKET;
-            if (status.isDirectory()) return INODE_DIRECTORY;
-            if (status.isBlockDevice()) return INODE_BLOCKDEVICE;
-            if (status.isCharacterDevice()) return INODE_CHARDEVICE;
+            if (stat.isRegularFile()) return detectFile(resource, stat);
+            if (stat.isFifo()) return INODE_FIFO;
+            if (stat.isSocket()) return INODE_SOCKET;
+            if (stat.isDirectory()) return INODE_DIRECTORY;
+            if (stat.isBlockDevice()) return INODE_BLOCKDEVICE;
+            if (stat.isCharacterDevice()) return INODE_CHARDEVICE;
             return OCTET_STREAM;
         }
     }
 
     protected abstract MediaType detectFile(
-            Resource resource, ResourceStatus status) throws IOException;
+            Resource resource, Stat stat) throws IOException;
 
 }

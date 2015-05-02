@@ -18,10 +18,10 @@ public final class SizeTest extends ResourceBaseTest {
         size.execute();
 
         long expected
-                = a.readStatus(NOFOLLOW).getSize()
-                + b.readStatus(NOFOLLOW).getSize()
-                + c.readStatus(NOFOLLOW).getSize()
-                + d.readStatus(NOFOLLOW).getSize();
+                = a.stat(NOFOLLOW).size()
+                + b.stat(NOFOLLOW).size()
+                + c.stat(NOFOLLOW).size()
+                + d.stat(NOFOLLOW).size();
         assertEquals(expected, size.getSize());
     }
 

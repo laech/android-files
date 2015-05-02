@@ -30,7 +30,7 @@ public final class CopyTest extends PasteTest {
     public long getSize(Iterable<Resource> resources) throws IOException {
         long size = 0;
         for (Resource resource : resources) {
-            size += resource.readStatus(NOFOLLOW).getSize();
+            size += resource.stat(NOFOLLOW).size();
         }
         return size;
     }
@@ -38,29 +38,29 @@ public final class CopyTest extends PasteTest {
     public void testCopiesFileTimes() throws Exception {
         Resource srcFile = dir1().resolve("a").createFile();
         Resource dstDir = dir1().resolve("dst").createDirectory();
-        Resource dstFile = dstDir.resolve(srcFile.getName());
+        Resource dstFile = dstDir.resolve(srcFile.name());
 
         sleep(5);
         copy(srcFile, dstDir);
 
         assertEquals(
-                srcFile.readStatus(NOFOLLOW).getAccessTime(),
-                dstFile.readStatus(NOFOLLOW).getAccessTime()
+                srcFile.stat(NOFOLLOW).accessTime(),
+                dstFile.stat(NOFOLLOW).accessTime()
         );
         assertEquals(
-                srcFile.readStatus(NOFOLLOW).getModificationTime(),
-                dstFile.readStatus(NOFOLLOW).getModificationTime()
+                srcFile.stat(NOFOLLOW).modificationTime(),
+                dstFile.stat(NOFOLLOW).modificationTime()
         );
     }
 
     public void testCopiesSymlink() throws Exception {
         Resource target = dir1().resolve("target").createFile();
-        Resource link = dir1().resolve("link").createSymbolicLink(target);
+        Resource link = dir1().resolve("link").createLink(target);
 
         copy(link, dir1().resolve("copied").createDirectory());
 
         Resource copied = dir1().resolve("copied/link");
-        assertEquals(target, copied.readSymbolicLink());
+        assertEquals(target, copied.readLink());
     }
 
     public void testCopiesDirectory() throws Exception {
@@ -68,7 +68,7 @@ public final class CopyTest extends PasteTest {
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource srcFile = srcDir.resolve("test.txt");
         Resource dstFile = dstDir.resolve("a/test.txt");
-        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
+        try (Writer out = srcFile.writer(NOFOLLOW, UTF_8)) {
             out.write("Testing");
         }
 
@@ -89,7 +89,7 @@ public final class CopyTest extends PasteTest {
         Resource srcFile = dir1().resolve("test.txt").createFile();
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource dstFile = dstDir.resolve("test.txt");
-        try (Writer writer = srcFile.openWriter(NOFOLLOW, UTF_8)) {
+        try (Writer writer = srcFile.writer(NOFOLLOW, UTF_8)) {
             writer.write("Testing");
         }
 

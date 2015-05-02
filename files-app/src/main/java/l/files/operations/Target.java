@@ -30,15 +30,15 @@ public abstract class Target {
     }
 
     public static Target from(Iterable<? extends Resource> sources, Resource destination) {
-        Resource src = sources.iterator().next().getParent();
+        Resource src = sources.iterator().next().parent();
         assert src != null;
-        return create(src.getName(), destination.getName());
+        return create(src.name(), destination.name());
     }
 
     public static Target from(Iterable<? extends Resource> resources) {
-        Resource parent = resources.iterator().next().getParent();
+        Resource parent = resources.iterator().next().parent();
         assert parent != null;
-        return create(parent.getName(), parent.getName());
+        return create(parent.name(), parent.name());
     }
 
 }

@@ -52,7 +52,7 @@ final class DateCategorizer implements Categorizer {
             return res.getString(R.string.__);
         }
 
-        long modified = file.getStat().getModificationTime().to(MILLISECONDS);
+        long modified = file.getStat().modificationTime().to(MILLISECONDS);
         if (modified <= 0) {
             return res.getString(R.string.__);
         }

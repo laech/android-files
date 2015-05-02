@@ -16,7 +16,7 @@ import java.io.IOException;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 import l.files.logging.Logger;
 import l.files.ui.OpenFileRequest;
 
@@ -103,7 +103,7 @@ public final class FilesPagerFragment extends Fragment {
             @Override
             protected Object doInBackground(Void... params) {
                 try {
-                    return request.getResource().readStatus(FOLLOW);
+                    return request.getResource().stat(FOLLOW);
                 } catch (IOException e) {
                     log.debug(e, "%s", request);
                     return e;
@@ -115,8 +115,8 @@ public final class FilesPagerFragment extends Fragment {
                 super.onPostExecute(result);
                 Activity activity = getActivity();
                 if (activity != null) {
-                    if (result instanceof ResourceStatus) {
-                        show(request.getResource(), (ResourceStatus) result);
+                    if (result instanceof Stat) {
+                        show(request.getResource(), (Stat) result);
                     } else {
                         String msg = getFailureMessage((IOException) result);
                         Toast.makeText(activity, msg, LENGTH_SHORT).show();
@@ -126,13 +126,13 @@ public final class FilesPagerFragment extends Fragment {
         }.execute();
     }
 
-    private void show(Resource resource, ResourceStatus status) {
+    private void show(Resource resource, Stat stat) {
         if (getActivity() == null) {
             return;
         }
         if (!isReadable(resource)) { // TODO Check in background
             showPermissionDenied();
-        } else if (status.isDirectory()) {
+        } else if (stat.isDirectory()) {
             showDirectory(resource);
         } else {
             showFile(resource);
@@ -141,7 +141,7 @@ public final class FilesPagerFragment extends Fragment {
 
     private boolean isReadable(Resource resource) {
         try {
-            return resource.isReadable();
+            return resource.readable();
         } catch (IOException e) {
             return false;
         }
@@ -161,7 +161,7 @@ public final class FilesPagerFragment extends Fragment {
                 .beginTransaction()
                 .replace(android.R.id.content, fragment, FilesFragment.TAG)
                 .addToBackStack(null)
-                .setBreadCrumbTitle(resource.getName())
+                .setBreadCrumbTitle(resource.name())
                 .setTransition(TRANSIT_FRAGMENT_OPEN)
                 .commit();
     }

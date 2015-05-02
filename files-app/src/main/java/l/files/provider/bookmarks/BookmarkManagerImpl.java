@@ -128,7 +128,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
         return new HashSet<>(transform(bookmarks, new Function<Resource, String>() {
             @Override
             public String apply(Resource input) {
-                return input.getUri().toString();
+                return input.uri().toString();
             }
         }));
     }

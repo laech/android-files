@@ -34,7 +34,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Resource>> {
         Collections.sort(resources, new Comparator<Resource>() {
             @Override
             public int compare(Resource a, Resource b) {
-                return collator.compare(a.getName(), b.getName());
+                return collator.compare(a.name(), b.name());
             }
         });
         return resources;

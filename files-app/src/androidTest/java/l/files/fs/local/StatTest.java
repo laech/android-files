@@ -17,7 +17,7 @@ public final class StatTest extends ResourceBaseTest {
     }
 
     public void testStat() throws Exception {
-        String path = dir1().resolve("link").createSymbolicLink(dir2()).getPath();
+        String path = dir1().resolve("link").createLink(dir2()).path();
         checkEquals(Os.stat(path), Stat.stat(path));
         checkEquals(Os.lstat(path), Stat.lstat(path));
     }

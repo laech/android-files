@@ -32,7 +32,7 @@ final class SizeCategorizer implements Categorizer {
     if (file.getStat().isDirectory()) {
       return res.getString(R.string.__);
     }
-    long size = file.getStat().getSize();
+    long size = file.getStat().size();
     for (Group group : GROUPS) {
       if (size >= group.minSize) {
         return res.getString(group.label);

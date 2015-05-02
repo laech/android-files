@@ -7,7 +7,7 @@ import l.files.common.base.Consumer;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -25,10 +25,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void testSymbolicLinkIconDisplayed() throws Exception {
-        Resource dir = directory().resolve("dir");
-        Resource link = directory().resolve("link");
-        dir.createDirectory();
-        link.createSymbolicLink(dir);
+        Resource dir = directory().resolve("dir").createDirectory();
+        Resource link = directory().resolve("link").createLink(dir);
 
         screen()
                 .assertSymbolicLinkIconDisplayed(dir, false)
@@ -39,7 +37,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Resource dir = directory().resolve("dir").createDirectory();
         dir.resolve("a").createDirectory();
 
-        Resource link = directory().resolve("link").createSymbolicLink(dir);
+        Resource link = directory().resolve("link").createLink(dir);
         Resource linkChild = link.resolve("a");
         screen()
                 .selectItem(link)
@@ -49,7 +47,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void testCanSeeChangesInSymlinkDirectory() throws Exception {
         Resource dir = directory().resolve("dir").createDirectory();
-        Resource link = directory().resolve("link").createSymbolicLink(dir);
+        Resource link = directory().resolve("link").createLink(dir);
         screen().selectItem(link)
                 .assertCurrentDirectory(link);
 
@@ -65,7 +63,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .selectItem(dir)
                 .assertCurrentDirectory(dir)
                 .pressActionBarUpIndicator()
-                .assertCurrentDirectory(dir.getParent());
+                .assertCurrentDirectory(dir.parent());
     }
 
     public void testActionBarTitleShowsNameOfDirectory() throws Exception {
@@ -177,16 +175,16 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     private Resource modify(Resource resource) throws IOException {
-        ResourceStatus status = resource.readStatus(NOFOLLOW);
-        Instant lastModifiedBefore = status.getModificationTime();
-        if (status.isDirectory()) {
+        Stat stat = resource.stat(NOFOLLOW);
+        Instant lastModifiedBefore = stat.modificationTime();
+        if (stat.isDirectory()) {
             resource.resolve(String.valueOf(System.nanoTime())).createDirectory();
         } else {
-            try (Writer writer = resource.openWriter(NOFOLLOW, UTF_8, true)) {
+            try (Writer writer = resource.writer(NOFOLLOW, UTF_8, true)) {
                 writer.write("test");
             }
         }
-        Instant lastModifiedAfter = resource.readStatus(NOFOLLOW).getModificationTime();
+        Instant lastModifiedAfter = resource.stat(NOFOLLOW).modificationTime();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);
         return resource;
     }

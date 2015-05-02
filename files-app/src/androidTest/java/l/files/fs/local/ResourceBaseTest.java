@@ -10,11 +10,11 @@ import l.files.common.testing.BaseTest;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.ResourceException;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Visitor;
 
 import static com.google.common.io.Files.createTempDir;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.CONTINUE;
 
 public abstract class ResourceBaseTest extends BaseTest {
 
@@ -58,7 +58,7 @@ public abstract class ResourceBaseTest extends BaseTest {
     private static void delete(Resource resource) throws IOException {
         resource.traverse(
                 NOFOLLOW,
-                new ResourceVisitor() {
+                new Visitor() {
                     @Override
                     public Result accept(Resource resource) throws IOException {
                         try {
@@ -68,7 +68,7 @@ public abstract class ResourceBaseTest extends BaseTest {
                         return CONTINUE;
                     }
                 },
-                new ResourceVisitor() {
+                new Visitor() {
                     @Override
                     public Result accept(Resource resource) throws IOException {
                         resource.delete();

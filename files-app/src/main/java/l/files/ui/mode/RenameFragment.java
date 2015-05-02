@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
 import l.files.ui.FileCreationFragment;
@@ -32,11 +32,11 @@ public final class RenameFragment extends FileCreationFragment {
 
     private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
-    private LoaderCallbacks<ResourceStatus> fileCallback = new NameHighlighter();
+    private LoaderCallbacks<Stat> fileCallback = new NameHighlighter();
 
     static RenameFragment create(Resource resource) {
         Bundle args = new Bundle(2);
-        args.putParcelable(ARG_PARENT_RESOURCE, resource.getParent());
+        args.putParcelable(ARG_PARENT_RESOURCE, resource.parent());
         args.putParcelable(ARG_RESOURCE, resource);
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
@@ -96,19 +96,19 @@ public final class RenameFragment extends FileCreationFragment {
         return getArguments().getParcelable(ARG_RESOURCE);
     }
 
-    class NameHighlighter implements LoaderCallbacks<ResourceStatus> {
+    class NameHighlighter implements LoaderCallbacks<Stat> {
 
         @Override
-        public Loader<ResourceStatus> onCreateLoader(int id, Bundle bundle) {
+        public Loader<Stat> onCreateLoader(int id, Bundle bundle) {
             return onCreateFileLoader();
         }
 
-        private Loader<ResourceStatus> onCreateFileLoader() {
-            return new AsyncTaskLoader<ResourceStatus>(getActivity()) {
+        private Loader<Stat> onCreateFileLoader() {
+            return new AsyncTaskLoader<Stat>(getActivity()) {
                 @Override
-                public ResourceStatus loadInBackground() {
+                public Stat loadInBackground() {
                     try {
-                        return getResource().readStatus(NOFOLLOW);
+                        return getResource().stat(NOFOLLOW);
                     } catch (IOException e) {
                         return null;
                     }
@@ -123,25 +123,25 @@ public final class RenameFragment extends FileCreationFragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<ResourceStatus> loader, ResourceStatus stat) {
+        public void onLoadFinished(Loader<Stat> loader, Stat stat) {
             onFileLoaded(stat);
         }
 
         @Override
-        public void onLoaderReset(Loader<ResourceStatus> loader) {
+        public void onLoaderReset(Loader<Stat> loader) {
         }
 
-        private void onFileLoaded(ResourceStatus stat) {
+        private void onFileLoaded(Stat stat) {
             if (stat == null || !getFilename().isEmpty()) {
                 return;
             }
             Resource resource = getResource();
             EditText field = getFilenameField();
-            field.setText(resource.getName());
+            field.setText(resource.name());
             if (stat.isDirectory()) {
                 field.selectAll();
             } else {
-                field.setSelection(0, getNameWithoutExtension(resource.getName()).length());
+                field.setSelection(0, getNameWithoutExtension(resource.name()).length());
             }
         }
     }

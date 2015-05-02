@@ -20,7 +20,7 @@ import java.util.Set;
 import l.files.R;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 import l.files.logging.Logger;
 import l.files.ui.util.ScaledSize;
 
@@ -56,7 +56,7 @@ final class ImageDecorator {
         this.cache = requireNonNull(cache, "cache");
     }
 
-    public void decorate(ImageView view, Resource resource, ResourceStatus status) {
+    public void decorate(ImageView view, Resource resource, Stat stat) {
         Object key = buildCacheKey(resource);
 
         Task task = (Task) view.getTag(R.id.image_decorator_task);
@@ -68,7 +68,7 @@ final class ImageDecorator {
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
 
-        if (!isReadable(resource) || !status.isRegularFile()) return;
+        if (!isReadable(resource) || !stat.isRegularFile()) return;
         if (errors.contains(key)) return;
         if (setCachedBitmap(view, key)) return;
 
@@ -84,7 +84,7 @@ final class ImageDecorator {
 
     private boolean isReadable(Resource resource){
         try {
-            return resource.isReadable();
+            return resource.readable();
         } catch (IOException e) {
             return false;
         }
@@ -101,7 +101,7 @@ final class ImageDecorator {
     }
 
     private Object buildCacheKey(Resource resource) {
-        return resource.getUri() + "?bounds=" + maxWidth + "x" + maxHeight;
+        return resource.uri() + "?bounds=" + maxWidth + "x" + maxHeight;
     }
 
     private SizedColorDrawable newPlaceholder(ScaledSize size) {
@@ -116,7 +116,7 @@ final class ImageDecorator {
     }
 
     private static InputStream openInputStream(Resource res) throws IOException {
-        return res.openInputStream(FOLLOW);
+        return res.input(FOLLOW);
     }
 
     private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {

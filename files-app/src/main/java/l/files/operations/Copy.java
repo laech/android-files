@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Stat;
+import l.files.fs.Visitor;
 import l.files.logging.Logger;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
 final class Copy extends Paste {
 
@@ -38,16 +38,16 @@ final class Copy extends Paste {
 
     @Override
     void paste(final Resource from, final Resource to) throws IOException {
-        preOrderTraversal(from, new ResourceVisitor() {
+        preOrderTraversal(from, new Visitor() {
             @Override
             public Result accept(Resource src) throws IOException {
                 if (isInterrupted()) {
                     return TERMINATE;
                 }
 
-                ResourceStatus status;
+                Stat stat;
                 try {
-                    status = src.readStatus(NOFOLLOW);
+                    stat = src.stat(NOFOLLOW);
                 } catch (IOException e) {
                     record(src, e);
                     return CONTINUE;
@@ -55,14 +55,14 @@ final class Copy extends Paste {
 
                 Resource dst = src.resolveParent(from, to);
 
-                if (status.isSymbolicLink()) {
-                    copyLink(src, status, dst);
+                if (stat.isSymbolicLink()) {
+                    copyLink(src, stat, dst);
 
-                } else if (status.isDirectory()) {
-                    createDirectory(src, status, dst);
+                } else if (stat.isDirectory()) {
+                    createDirectory(src, stat, dst);
 
-                } else if (status.isRegularFile()) {
-                    copyFile(src, status, dst);
+                } else if (stat.isRegularFile()) {
+                    copyFile(src, stat, dst);
 
                 } else {
                     record(src, new IOException("Not a file or directory"));
@@ -73,37 +73,37 @@ final class Copy extends Paste {
         });
     }
 
-    private void copyLink(Resource src, ResourceStatus status, Resource dst) {
+    private void copyLink(Resource src, Stat stat, Resource dst) {
         try {
-            dst.createSymbolicLink(src.readSymbolicLink());
-            copiedByteCount.addAndGet(status.getSize());
+            dst.createLink(src.readLink());
+            copiedByteCount.addAndGet(stat.size());
             copiedItemCount.incrementAndGet();
-            setTimes(status, dst);
+            setTimes(stat, dst);
         } catch (IOException e) {
             record(src, e);
         }
     }
 
-    private void createDirectory(Resource src, ResourceStatus status, Resource dst) {
+    private void createDirectory(Resource src, Stat stat, Resource dst) {
         try {
             dst.createDirectory();
-            copiedByteCount.addAndGet(status.getSize());
+            copiedByteCount.addAndGet(stat.size());
             copiedItemCount.incrementAndGet();
-            setTimes(status, dst);
+            setTimes(stat, dst);
         } catch (IOException e) {
             record(src, e);
         }
     }
 
-    private void copyFile(Resource src, ResourceStatus status, Resource dst) {
+    private void copyFile(Resource src, Stat stat, Resource dst) {
         if (isInterrupted()) {
             return;
         }
 
         try {
 
-            try (InputStream source = src.openInputStream(NOFOLLOW);
-                 OutputStream sink = dst.openOutputStream(NOFOLLOW)) {
+            try (InputStream source = src.input(NOFOLLOW);
+                 OutputStream sink = dst.output(NOFOLLOW)) {
                 byte[] buf = new byte[BUFFER_SIZE];
                 int n;
                 while ((n = source.read(buf)) > 0) {
@@ -127,17 +127,17 @@ final class Copy extends Paste {
             }
         }
 
-        setTimes(status, dst);
+        setTimes(stat, dst);
     }
 
-    private void setTimes(ResourceStatus src, Resource dst) {
+    private void setTimes(Stat src, Resource dst) {
         try {
-            dst.setModificationTime(NOFOLLOW, src.getModificationTime());
+            dst.setModificationTime(NOFOLLOW, src.modificationTime());
         } catch (IOException e) {
             logger.debug(e, "Failed to set modification time on %s", dst);
         }
         try {
-            dst.setAccessTime(NOFOLLOW, src.getAccessTime());
+            dst.setAccessTime(NOFOLLOW, src.accessTime());
         } catch (IOException e) {
             logger.debug(e, "Failed to set access time on %s", dst);
         }

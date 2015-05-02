@@ -10,7 +10,7 @@ import java.util.Locale;
 
 import l.files.R;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -23,7 +23,7 @@ public enum FileSort {
             return new Comparator<FileListItem.File>() {
                 @Override
                 public int compare(FileListItem.File a, FileListItem.File b) {
-                    return collator.compare(a.getResource().getName(), b.getResource().getName());
+                    return collator.compare(a.getResource().name(), b.getResource().name());
                 }
             };
         }
@@ -40,13 +40,13 @@ public enum FileSort {
             return new NullableFileStatComparator(locale) {
                 @Override
                 protected int compareNotNull(
-                        Resource a, ResourceStatus aStatus,
-                        Resource b, ResourceStatus bStatus
+                        Resource a, Stat aStat,
+                        Resource b, Stat bStat
                 ) {
-                    int result = bStatus.getModificationTime().compareTo(
-                            aStatus.getModificationTime());
+                    int result = bStat.modificationTime().compareTo(
+                            aStat.modificationTime());
                     if (result == 0) {
-                        result = nameComparator.compare(a.getName(), b.getName());
+                        result = nameComparator.compare(a.name(), b.name());
                     }
                     return result;
                 }
@@ -65,21 +65,21 @@ public enum FileSort {
             return new NullableFileStatComparator(locale) {
                 @Override
                 protected int compareNotNull(
-                        Resource a, ResourceStatus aStatus,
-                        Resource b, ResourceStatus bStatus
+                        Resource a, Stat aStat,
+                        Resource b, Stat bStat
                 ) {
-                    if (aStatus.isDirectory() && bStatus.isDirectory()) {
-                        return nameComparator.compare(a.getName(), b.getName());
+                    if (aStat.isDirectory() && bStat.isDirectory()) {
+                        return nameComparator.compare(a.name(), b.name());
                     }
-                    if (aStatus.isDirectory()) {
+                    if (aStat.isDirectory()) {
                         return 1;
                     }
-                    if (bStatus.isDirectory()) {
+                    if (bStat.isDirectory()) {
                         return -1;
                     }
-                    int compare = Longs.compare(bStatus.getSize(), aStatus.getSize());
+                    int compare = Longs.compare(bStat.size(), aStat.size());
                     if (compare == 0) {
-                        return nameComparator.compare(a.getName(), b.getName());
+                        return nameComparator.compare(a.name(), b.name());
                     }
                     return compare;
                 }
@@ -117,7 +117,7 @@ public enum FileSort {
         @Override
         public int compare(FileListItem.File a, FileListItem.File b) {
             if (a.getStat() == null && b.getStat() == null) {
-                return nameComparator.compare(a.getResource().getName(), b.getResource().getName());
+                return nameComparator.compare(a.getResource().name(), b.getResource().name());
             }
             if (a.getStat() == null) {
                 return 1;
@@ -132,7 +132,7 @@ public enum FileSort {
         }
 
         protected abstract int compareNotNull(
-                Resource a, ResourceStatus aStatus,
-                Resource b, ResourceStatus bStatus);
+                Resource a, Stat aStat,
+                Resource b, Stat bStat);
     }
 }

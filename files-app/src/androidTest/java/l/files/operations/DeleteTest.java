@@ -47,7 +47,7 @@ public final class DeleteTest extends ResourceBaseTest {
 
     public void testDeletesSymbolicLinkButNotLinkedFile() throws Exception {
         Resource a = dir1().resolve("a").createFile();
-        Resource b = dir1().resolve("b").createSymbolicLink(a);
+        Resource b = dir1().resolve("b").createLink(a);
         assertTrue(a.exists(NOFOLLOW));
         assertTrue(b.exists(NOFOLLOW));
         delete(b);

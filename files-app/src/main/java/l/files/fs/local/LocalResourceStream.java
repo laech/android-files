@@ -41,7 +41,7 @@ final class LocalResourceStream extends Native implements Closeable {
         try {
             close(dir);
         } catch (ErrnoException e) {
-            throw e.toIOException(parent.getPath());
+            throw e.toIOException(parent.path());
         }
     }
 
@@ -55,15 +55,15 @@ final class LocalResourceStream extends Native implements Closeable {
         requireNonNull(callback, "callback");
 
         try {
-            long dir = open(resource.getPath(), option == FOLLOW);
+            long dir = open(resource.path(), option == FOLLOW);
             try (LocalResourceStream stream = new LocalResourceStream(resource, dir, callback)) {
                 stream.list(dir);
             }
         } catch (ErrnoException e) {
             if (option == NOFOLLOW && e.isCausedByNoFollowLink(resource)) {
-                throw new NotDirectoryException(resource.getPath(), e);
+                throw new NotDirectoryException(resource.path(), e);
             }
-            throw e.toIOException(resource.getPath());
+            throw e.toIOException(resource.path());
         }
     }
 

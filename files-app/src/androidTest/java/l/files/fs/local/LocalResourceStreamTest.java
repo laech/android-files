@@ -21,7 +21,7 @@ public final class LocalResourceStreamTest extends ResourceBaseTest {
     public void testReturnCorrectEntries() throws Exception {
         Resource a = dir1().resolve("a").createFile();
         Resource b = dir1().resolve("b").createDirectory();
-        Resource c = dir1().resolve("c").createSymbolicLink(a);
+        Resource c = dir1().resolve("c").createLink(a);
 
         List<Map<Object, Object>> actual = list(dir1());
         List<Map<Object, Object>> expected = asList(map(a), map(b), map(c));
@@ -41,8 +41,8 @@ public final class LocalResourceStreamTest extends ResourceBaseTest {
     }
 
     private Map<Object, Object> map(Resource resource) throws Exception {
-        StructStat stat = Os.lstat(resource.getPath());
-        return map(stat.st_ino, resource.getName(), S_ISDIR(stat.st_mode));
+        StructStat stat = Os.lstat(resource.path());
+        return map(stat.st_ino, resource.name(), S_ISDIR(stat.st_mode));
     }
 
     private Map<Object, Object> map(long inode, String name, boolean directory) {

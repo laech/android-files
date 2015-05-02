@@ -5,13 +5,13 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceExceptionHandler;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.ExceptionHandler;
+import l.files.fs.Visitor;
 
 import static java.lang.Thread.currentThread;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
 abstract class AbstractOperation implements FileOperation {
 
@@ -44,18 +44,18 @@ abstract class AbstractOperation implements FileOperation {
         recorder.onFailure(resource, exception);
     }
 
-    final void preOrderTraversal(Resource resource, ResourceVisitor visitor)
+    final void preOrderTraversal(Resource resource, Visitor visitor)
             throws IOException {
         resource.traverse(NOFOLLOW, visitor, terminateOnInterrupt(), recordOnException());
     }
 
-    final void postOrderTraversal(Resource resource, ResourceVisitor visitor)
+    final void postOrderTraversal(Resource resource, Visitor visitor)
             throws IOException {
         resource.traverse(NOFOLLOW, terminateOnInterrupt(), visitor, recordOnException());
     }
 
-    private ResourceVisitor terminateOnInterrupt() {
-        return new ResourceVisitor() {
+    private Visitor terminateOnInterrupt() {
+        return new Visitor() {
             @Override
             public Result accept(Resource resource) throws IOException {
                 if (isInterrupted()) {
@@ -66,8 +66,8 @@ abstract class AbstractOperation implements FileOperation {
         };
     }
 
-    private ResourceExceptionHandler recordOnException() {
-        return new ResourceExceptionHandler() {
+    private ExceptionHandler recordOnException() {
+        return new ExceptionHandler() {
             @Override
             public void handle(Resource resource, IOException e) throws IOException {
                 record(resource, e);

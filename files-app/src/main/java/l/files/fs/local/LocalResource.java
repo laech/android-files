@@ -36,8 +36,8 @@ import l.files.fs.NotExistException;
 import l.files.fs.NotFileException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceExceptionHandler;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.ExceptionHandler;
+import l.files.fs.Visitor;
 import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.EACCES;
@@ -79,8 +79,8 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
 @AutoParcel
 public abstract class LocalResource implements Resource {
@@ -147,34 +147,34 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public String getPath() {
+    public String path() {
         return getFile().getPath();
     }
 
     @Override
     public String toString() {
-        return getUri().toString();
+        return uri().toString();
     }
 
     @Override
-    public URI getUri() {
+    public URI uri() {
         return sanitizedUri(getFile());
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return getFile().getName();
     }
 
     @Override
-    public boolean isHidden() {
+    public boolean hidden() {
         return getFile().isHidden();
     }
 
     @Nullable
     @Override
-    public LocalResource getParent() {
-        if ("/".equals(getPath())) {
+    public LocalResource parent() {
+        if ("/".equals(path())) {
             return null;
         } else {
             return new AutoParcel_LocalResource(getFile().getParentFile());
@@ -182,9 +182,9 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public List<Resource> getHierarchy() {
+    public List<Resource> hierarchy() {
         List<Resource> hierarchy = new ArrayList<>();
-        for (Resource p = this; p != null; p = p.getParent()) {
+        for (Resource p = this; p != null; p = p.parent()) {
             hierarchy.add(p);
         }
         Collections.reverse(hierarchy);
@@ -198,12 +198,12 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public boolean startsWith(Resource other) {
-        if (other.getParent() == null || other.equals(this)) {
+        if (other.parent() == null || other.equals(this)) {
             return true;
         }
         if (other instanceof LocalResource) {
-            String thisPath = getPath();
-            String thatPath = other.getPath();
+            String thisPath = path();
+            String thatPath = other.path();
             return thisPath.startsWith(thatPath) &&
                     thisPath.charAt(thatPath.length()) == '/';
         }
@@ -221,13 +221,13 @@ public abstract class LocalResource implements Resource {
         checkLocalResource(toParent);
         checkArgument(startsWith(fromParent));
         File parent = ((LocalResource) toParent).getFile();
-        String child = getPath().substring(fromParent.getPath().length());
+        String child = path().substring(fromParent.path().length());
         return new AutoParcel_LocalResource(new File(parent, child));
     }
 
     @Override
-    public LocalResourceStatus readStatus(LinkOption option) throws IOException {
-        return LocalResourceStatus.stat(this, option);
+    public LocalStat stat(LinkOption option) throws IOException {
+        return LocalStat.stat(this, option);
     }
 
     @Override
@@ -237,7 +237,7 @@ public abstract class LocalResource implements Resource {
             // access() follows symbolic links
             // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
             // so use stat here
-            readStatus(option);
+            stat(option);
             return true;
         } catch (NotExistException e) {
             return false;
@@ -245,40 +245,42 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public boolean isReadable() throws IOException {
+    public boolean readable() throws IOException {
         return access(R_OK);
     }
 
     @Override
-    public boolean isWritable() throws IOException {
+    public boolean writable() throws IOException {
         return access(W_OK);
     }
 
     @Override
-    public boolean isExecutable() throws IOException {
+    public boolean executable() throws IOException {
         return access(X_OK);
     }
 
     private boolean access(int mode) throws IOException {
         try {
-            Os.access(getPath(), mode);
+            Os.access(path(), mode);
             return true;
         } catch (android.system.ErrnoException e) {
             if (e.errno == EACCES) {
                 return false;
             }
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
     @Override
     public void traverse(LinkOption option,
-                         @Nullable ResourceVisitor pre,
-                         @Nullable ResourceVisitor post) throws IOException {
-        traverse(option, pre, post, new ResourceExceptionHandler() {
+                         @Nullable Visitor pre,
+                         @Nullable Visitor post) throws IOException {
+        traverse(option, pre, post, new ExceptionHandler()
+        {
             @Override
             public void handle(Resource resource, IOException e)
-                    throws IOException {
+                    throws IOException
+            {
                 throw e;
             }
         });
@@ -286,20 +288,22 @@ public abstract class LocalResource implements Resource {
 
     @Override
     public void traverse(LinkOption option,
-                         @Nullable ResourceVisitor pre,
-                         @Nullable ResourceVisitor post,
-                         @Nullable ResourceExceptionHandler handler)
+                         @Nullable Visitor pre,
+                         @Nullable Visitor post,
+                         @Nullable ExceptionHandler handler)
             throws IOException {
         new LocalResourceTraverser(this, option, pre, post, handler).traverse();
     }
 
     @Override
-    public void list(LinkOption option, final ResourceVisitor visitor)
+    public void list(LinkOption option, final Visitor visitor)
             throws IOException {
-        LocalResourceStream.list(this, option, new LocalResourceStream.Callback() {
+        LocalResourceStream.list(this, option, new LocalResourceStream.Callback()
+        {
             @Override
             public boolean accept(long inode, String name, boolean directory)
-                    throws IOException {
+                    throws IOException
+            {
                 return visitor.accept(resolve(name)) != TERMINATE;
             }
         });
@@ -309,7 +313,7 @@ public abstract class LocalResource implements Resource {
     public <T extends Collection<? super Resource>> T list(
             final LinkOption option,
             final T collection) throws IOException {
-        list(option, new ResourceVisitor() {
+        list(option, new Visitor() {
             @Override
             public Result accept(Resource resource) throws IOException {
                 collection.add(resource);
@@ -325,7 +329,7 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public InputStream openInputStream(LinkOption option) throws IOException {
+    public InputStream input(LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
         int flags = O_RDONLY;
@@ -335,12 +339,12 @@ public abstract class LocalResource implements Resource {
 
         try {
 
-            FileDescriptor fd = Os.open(getPath(), flags, 0);
+            FileDescriptor fd = Os.open(path(), flags, 0);
             // Above call allows opening directories, this check ensure this is
             // not a directory
             try {
                 if (S_ISDIR(Os.fstat(fd).st_mode)) {
-                    throw new NotFileException(getPath());
+                    throw new NotFileException(path());
                 }
             } catch (Throwable e) {
                 Os.close(fd);
@@ -350,19 +354,19 @@ public abstract class LocalResource implements Resource {
 
         } catch (android.system.ErrnoException e) {
             if (ErrnoException.isCausedByNoFollowLink(e, this)) {
-                throw new NotFileException(getPath(), e);
+                throw new NotFileException(path(), e);
             }
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
     @Override
-    public OutputStream openOutputStream(LinkOption option) throws IOException {
-        return openOutputStream(option, false);
+    public OutputStream output(LinkOption option) throws IOException {
+        return output(option, false);
     }
 
     @Override
-    public OutputStream openOutputStream(LinkOption option, boolean append)
+    public OutputStream output(LinkOption option, boolean append)
             throws IOException {
         requireNonNull(option, "option");
 
@@ -373,40 +377,40 @@ public abstract class LocalResource implements Resource {
             flags |= O_NOFOLLOW;
         }
         try {
-            return new FileOutputStream(Os.open(getPath(), flags, mode));
+            return new FileOutputStream(Os.open(path(), flags, mode));
         } catch (android.system.ErrnoException e) {
             if (ErrnoException.isCausedByNoFollowLink(e, this)) {
-                throw new NotFileException(getPath(), e);
+                throw new NotFileException(path(), e);
             }
             if (e.errno == EISDIR) {
-                throw new NotFileException(getPath(), e);
+                throw new NotFileException(path(), e);
             }
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
     @Override
-    public Reader openReader(LinkOption option, Charset charset) throws IOException {
-        return new InputStreamReader(openInputStream(option), charset);
+    public Reader reader(LinkOption option, Charset charset) throws IOException {
+        return new InputStreamReader(input(option), charset);
     }
 
     @Override
-    public Writer openWriter(LinkOption option, Charset charset) throws IOException {
-        return openWriter(option, charset, false);
+    public Writer writer(LinkOption option, Charset charset) throws IOException {
+        return writer(option, charset, false);
     }
 
     @Override
-    public Writer openWriter(LinkOption option, Charset charset, boolean append) throws IOException {
-        return new OutputStreamWriter(openOutputStream(option, append), charset);
+    public Writer writer(LinkOption option, Charset charset, boolean append) throws IOException {
+        return new OutputStreamWriter(output(option, append), charset);
     }
 
     @Override
     public LocalResource createDirectory() throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
-            Os.mkdir(getPath(), S_IRWXU);
+            Os.mkdir(path(), S_IRWXU);
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
         return this;
     }
@@ -414,15 +418,16 @@ public abstract class LocalResource implements Resource {
     @Override
     public LocalResource createDirectories() throws IOException {
         try {
-            if (readStatus(NOFOLLOW).isDirectory()) {
+            if (stat(NOFOLLOW).isDirectory()) {
                 return this;
             }
         } catch (NotExistException ignore) {
             // Ignore will create
         }
-        LocalResource parent = getParent();
-        assert parent != null;
-        parent.createDirectories();
+        Resource parent = parent();
+        if (parent != null) {
+            parent.createDirectories();
+        }
         createDirectory();
         return this;
     }
@@ -433,17 +438,17 @@ public abstract class LocalResource implements Resource {
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
         try {
-            FileDescriptor fd = Os.open(getPath(), flags, mode);
+            FileDescriptor fd = Os.open(path(), flags, mode);
             Os.close(fd);
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
         return this;
     }
 
     @Override
     public Resource createFiles() throws IOException {
-        Resource parent = getParent();
+        Resource parent = parent();
         if (parent != null) {
             parent.createDirectories();
         }
@@ -451,24 +456,24 @@ public abstract class LocalResource implements Resource {
     }
 
     @Override
-    public LocalResource createSymbolicLink(Resource target) throws IOException {
+    public LocalResource createLink(Resource target) throws IOException {
         checkLocalResource(target);
-        String targetPath = target.getPath();
+        String targetPath = target.path();
         try {
-            Os.symlink(targetPath, getPath());
+            Os.symlink(targetPath, path());
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath(), targetPath);
+            throw ErrnoException.toIOException(e, path(), targetPath);
         }
         return this;
     }
 
     @Override
-    public LocalResource readSymbolicLink() throws IOException {
+    public LocalResource readLink() throws IOException {
         try {
-            String link = Os.readlink(getPath());
+            String link = Os.readlink(path());
             return create(new File(link));
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
@@ -476,11 +481,11 @@ public abstract class LocalResource implements Resource {
     public void moveTo(Resource dst) throws IOException {
         checkLocalResource(dst);
 
-        String dstPath = dst.getPath();
-        String srcPath = getPath();
+        String dstPath = dst.path();
+        String srcPath = path();
         try {
             // renameat2() not available on Android
-            dst.readStatus(NOFOLLOW);
+            dst.stat(NOFOLLOW);
             throw new ExistsException(dstPath);
         } catch (NotExistException e) {
             // Okay
@@ -495,9 +500,9 @@ public abstract class LocalResource implements Resource {
     @Override
     public void delete() throws IOException {
         try {
-            Os.remove(getPath());
+            Os.remove(path());
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
@@ -510,9 +515,9 @@ public abstract class LocalResource implements Resource {
             long seconds = instant.getSeconds();
             int nanos = instant.getNanos();
             boolean followLink = option == FOLLOW;
-            setAccessTime(getPath(), seconds, nanos, followLink);
+            setAccessTime(path(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw e.toIOException(getPath());
+            throw e.toIOException(path());
         }
     }
 
@@ -531,9 +536,9 @@ public abstract class LocalResource implements Resource {
             long seconds = instant.getSeconds();
             int nanos = instant.getNanos();
             boolean followLink = option == FOLLOW;
-            setModificationTime(getPath(), seconds, nanos, followLink);
+            setModificationTime(path(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw e.toIOException(getPath());
+            throw e.toIOException(path());
         }
     }
 
@@ -552,15 +557,15 @@ public abstract class LocalResource implements Resource {
              *  - fchmodat(AT_FDCWD, path, mode, AT_SYMLINK_NOFOLLOW)
              * but not implemented.
              */
-            Os.chmod(getPath(), mode);
+            Os.chmod(path(), mode);
         } catch (android.system.ErrnoException e) {
-            throw ErrnoException.toIOException(e, getPath());
+            throw ErrnoException.toIOException(e, path());
         }
     }
 
     @Override
     public void removePermissions(Set<Permission> permissions) throws IOException {
-        Set<Permission> existing = readStatus(FOLLOW).getPermissions();
+        Set<Permission> existing = stat(FOLLOW).permissions();
         Set<Permission> perms = new HashSet<>(existing);
         perms.removeAll(permissions);
         setPermissions(perms);
@@ -578,7 +583,7 @@ public abstract class LocalResource implements Resource {
             Charset charset,
             T appendable) throws IOException {
 
-        try (Reader reader = openReader(option, charset)) {
+        try (Reader reader = reader(option, charset)) {
             for (CharBuffer buffer = CharBuffer.allocate(8192);
                  reader.read(buffer) > -1; ) {
                 buffer.flip();
@@ -593,7 +598,7 @@ public abstract class LocalResource implements Resource {
             LinkOption option,
             Charset charset,
             CharSequence content) throws IOException {
-        try (Writer writer = openWriter(option, charset)) {
+        try (Writer writer = writer(option, charset)) {
             writer.write(content.toString());
         }
     }

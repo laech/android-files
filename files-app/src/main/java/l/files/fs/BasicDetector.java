@@ -21,10 +21,10 @@ public final class BasicDetector extends AbstractDetector {
 
     @Override
     protected MediaType detectFile(
-            Resource resource, ResourceStatus status) throws IOException {
+            Resource resource, Stat stat) throws IOException {
 
         MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        String ext = getFileExtension(resource.getName());
+        String ext = getFileExtension(resource.name());
         String type = typeMap.getMimeTypeFromExtension(ext);
         if (type == null) {
             return OCTET_STREAM;

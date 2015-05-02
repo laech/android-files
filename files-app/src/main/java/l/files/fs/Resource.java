@@ -32,31 +32,31 @@ public interface Resource extends Parcelable
      * for implementations of this interface, as that's two representations for
      * the resource.
      */
-    URI getUri();
+    URI uri();
 
     /**
      * Gets the path of this resource. The returned path is only valid within
      * the context of the underlying file system.
      */
-    String getPath();
+    String path();
 
     /**
      * Gets the name of this resource, or empty if this is the root resource.
      */
-    String getName();
+    String name();
 
     /**
      * Gets the parent resource, returns null if this is the root resource.
      */
     @Nullable
-    Resource getParent();
+    Resource parent();
 
     /**
      * Gets the resource hierarchy of this resource.
      * <p/>
      * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
      */
-    List<Resource> getHierarchy();
+    List<Resource> hierarchy();
 
     /**
      * Resolves the given name/path relative to this resource.
@@ -85,7 +85,7 @@ public interface Resource extends Parcelable
     /**
      * True if this resource is considered a hidden resource.
      */
-    boolean isHidden();
+    boolean hidden();
 
     boolean exists(LinkOption option) throws IOException;
 
@@ -95,7 +95,7 @@ public interface Resource extends Parcelable
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
      */
-    boolean isReadable() throws IOException;
+    boolean readable() throws IOException;
 
     /**
      * Returns true if this resource is writable, return false if not.
@@ -103,7 +103,7 @@ public interface Resource extends Parcelable
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
      */
-    boolean isWritable() throws IOException;
+    boolean writable() throws IOException;
 
     /**
      * Returns true if this resource is executable, return false if not.
@@ -111,7 +111,7 @@ public interface Resource extends Parcelable
      * If this is a symbolic link, returns the result for the link target, not
      * the link itself.
      */
-    boolean isExecutable() throws IOException;
+    boolean executable() throws IOException;
 
     /**
      * Observes on this resource for change events.
@@ -126,8 +126,8 @@ public interface Resource extends Parcelable
      * an alternative way of handling instead of reply on this fully.
      *
      * @param option
-     *         if option is {@link LinkOption#NOFOLLOW} and this resource
-     *         is a link, observe on the link instead of the link target
+     *         if option is {@link LinkOption#NOFOLLOW} and this resource is a
+     *         link, observe on the link instead of the link target
      */
     Closeable observe(LinkOption option, WatchEvent.Listener observer)
             throws IOException;
@@ -138,8 +138,8 @@ public interface Resource extends Parcelable
      */
     void traverse(
             LinkOption option,
-            @Nullable ResourceVisitor pre,
-            @Nullable ResourceVisitor post) throws IOException;
+            @Nullable Visitor pre,
+            @Nullable Visitor post) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.
@@ -171,9 +171,9 @@ public interface Resource extends Parcelable
      */
     void traverse(
             LinkOption option,
-            @Nullable ResourceVisitor pre,
-            @Nullable ResourceVisitor post,
-            @Nullable ResourceExceptionHandler handler) throws IOException;
+            @Nullable Visitor pre,
+            @Nullable Visitor post,
+            @Nullable ExceptionHandler handler) throws IOException;
 
     /**
      * Lists the immediate children of this resource.
@@ -181,11 +181,11 @@ public interface Resource extends Parcelable
      * @throws AccessException
      * @throws NotExistException
      * @throws NotDirectoryException
-     *         target resource is not a directory, or if
-     *         option is {@link LinkOption#NOFOLLOW} and
-     *         the underlying resource is a symbolic link
+     *         target resource is not a directory, or if option is {@link
+     *         LinkOption#NOFOLLOW} and the underlying resource is a symbolic
+     *         link
      */
-    void list(LinkOption option, ResourceVisitor visitor) throws IOException;
+    void list(LinkOption option, Visitor visitor) throws IOException;
 
     /**
      * List the children into the given collection. Returns the collection.
@@ -201,17 +201,17 @@ public interface Resource extends Parcelable
      * @throws AccessException
      * @throws NotExistException
      * @throws NotFileException
-     *         this resource is not a file, or option is
-     *         {@link LinkOption#NOFOLLOW} and the underlying
-     *         resource is a symbolic link
+     *         this resource is not a file, or option is {@link
+     *         LinkOption#NOFOLLOW} and the underlying resource is a symbolic
+     *         link
      */
-    InputStream openInputStream(LinkOption option) throws IOException;
+    InputStream input(LinkOption option) throws IOException;
 
     /**
-     * Equivalent to {@link #openOutputStream(LinkOption, boolean)
-     * openOutputStream(option, false)}.
+     * Equivalent to {@link #output(LinkOption, boolean) writer(option,
+     * false)}.
      */
-    OutputStream openOutputStream(LinkOption option) throws IOException;
+    OutputStream output(LinkOption option) throws IOException;
 
     /**
      * Opens an output stream to the underlying file.
@@ -219,18 +219,17 @@ public interface Resource extends Parcelable
      * @throws AccessException
      * @throws NotExistException
      * @throws NotFileException
-     *         this resource is a directory, or option is
-     *         {@link LinkOption#NOFOLLOW} and the underlying
-     *         resource is a symbolic link
+     *         this resource is a directory, or option is {@link
+     *         LinkOption#NOFOLLOW} and the underlying resource is a symbolic
+     *         link
      */
-    OutputStream openOutputStream(LinkOption option, boolean append)
-            throws IOException;
+    OutputStream output(LinkOption option, boolean append) throws IOException;
 
-    Reader openReader(LinkOption option, Charset charset) throws IOException;
+    Reader reader(LinkOption option, Charset charset) throws IOException;
 
-    Writer openWriter(LinkOption option, Charset charset) throws IOException;
+    Writer writer(LinkOption option, Charset charset) throws IOException;
 
-    Writer openWriter(LinkOption option, Charset charset, boolean append)
+    Writer writer(LinkOption option, Charset charset, boolean append)
             throws IOException;
 
     /**
@@ -281,7 +280,7 @@ public interface Resource extends Parcelable
     Resource createFiles() throws IOException;
 
     /**
-     * Creates the underlying resource as a symbolic link to point to the given
+     * Creates the underlying resource as a link to point to the given
      * location.
      *
      * @return this
@@ -293,10 +292,10 @@ public interface Resource extends Parcelable
      * @throws NotDirectoryException
      *         parent is not a directory
      */
-    Resource createSymbolicLink(Resource target) throws IOException;
+    Resource createLink(Resource target) throws IOException;
 
     /**
-     * If this is a symbolic link, returns the target file.
+     * If this is a link, returns the target resource.
      *
      * @throws AccessException
      * @throws InvalidException
@@ -306,7 +305,7 @@ public interface Resource extends Parcelable
      * @throws NotDirectoryException
      *         parent is not a directory
      */
-    Resource readSymbolicLink() throws IOException;
+    Resource readLink() throws IOException;
 
     /**
      * Reads the status of this resource.
@@ -315,7 +314,7 @@ public interface Resource extends Parcelable
      * @throws NotExistException
      *         this resource does not exist
      */
-    ResourceStatus readStatus(LinkOption option) throws IOException;
+    Stat stat(LinkOption option) throws IOException;
 
     /**
      * Moves this resource tree to the given destination, destination must not

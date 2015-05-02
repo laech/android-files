@@ -92,7 +92,7 @@ final class FileOpener implements Consumer<Resource> {
 
         private void showFile(MediaType media) throws ActivityNotFoundException {
             context.startActivity(new Intent(ACTION_VIEW)
-                    .setDataAndType(Uri.parse(resource.getUri().toString()), media.toString()));
+                    .setDataAndType(Uri.parse(resource.uri().toString()), media.toString()));
         }
 
         private void debug(MediaType media) {

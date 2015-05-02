@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import auto.parcel.AutoParcel;
 import l.files.fs.BasicDetector;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
@@ -60,7 +60,7 @@ public abstract class FileListItem {
         public boolean isReadable() {
             if (readable == null) {
                 try {
-                    readable = getResource().isReadable();
+                    readable = getResource().readable();
                 } catch (IOException e) {
                     readable = false;
                 }
@@ -79,14 +79,14 @@ public abstract class FileListItem {
         public abstract Resource getResource();
 
         @Nullable
-        public abstract ResourceStatus getStat();
+        public abstract Stat getStat();
 
         @Nullable
-        abstract ResourceStatus _targetStat();
+        abstract Stat _targetStat();
 
         public static File create(Resource resource,
-                                  @Nullable ResourceStatus stat,
-                                  @Nullable ResourceStatus targetStat) {
+                                  @Nullable Stat stat,
+                                  @Nullable Stat targetStat) {
             return new AutoParcel_FileListItem_File(resource, stat, targetStat);
         }
 
@@ -100,7 +100,7 @@ public abstract class FileListItem {
          * file, if not available, returns the status of the link.
          */
         @Nullable
-        public ResourceStatus getTargetStat() {
+        public Stat getTargetStat() {
             return _targetStat() != null ? _targetStat() : getStat();
         }
     }

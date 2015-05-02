@@ -22,8 +22,8 @@ abstract class Paste extends AbstractOperation {
     void process(Resource resource) throws InterruptedException {
         checkInterrupt();
 
-        File destinationFile = new File(destination.getUri());
-        File fromFile = new File(resource.getUri());
+        File destinationFile = new File(destination.uri());
+        File fromFile = new File(resource.uri());
         if (destination.equals(resource) || destination.startsWith(resource)) {
             // TODO prevent this from UI
             throw new CannotPasteIntoSelfException(

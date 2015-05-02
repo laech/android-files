@@ -29,7 +29,7 @@ public final class PathBarFragment extends Fragment
 
     public void set(Resource resource) {
         this.resource = resource;
-        updatePathBar(resource.getHierarchy());
+        updatePathBar(resource.hierarchy());
     }
 
     @Override
@@ -45,7 +45,7 @@ public final class PathBarFragment extends Fragment
         assert root != null;
         container = (ViewGroup) root.findViewById(R.id.path_item_container);
         if (resource != null) {
-            updatePathBar(resource.getHierarchy());
+            updatePathBar(resource.hierarchy());
         }
     }
 
@@ -65,7 +65,7 @@ public final class PathBarFragment extends Fragment
             view.setOnClickListener(this);
 
             TextView title = (TextView) view.findViewById(R.id.title);
-            title.setText(i == 0 ? Build.MODEL : resource.getName());
+            title.setText(i == 0 ? Build.MODEL : resource.name());
 
             AssetManager asset = getActivity().getAssets();
             TextView icon = (TextView) view.findViewById(R.id.icon);

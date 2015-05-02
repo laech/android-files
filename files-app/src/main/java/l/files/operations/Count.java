@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Resource;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Visitor;
 
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
-class Count extends AbstractOperation implements ResourceVisitor {
+class Count extends AbstractOperation implements Visitor
+{
 
     private final AtomicInteger count = new AtomicInteger();
 

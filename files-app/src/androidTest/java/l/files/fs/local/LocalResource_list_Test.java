@@ -12,20 +12,20 @@ import auto.parcel.AutoParcel;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceExceptionHandler;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.ExceptionHandler;
+import l.files.fs.Visitor;
 
 import static java.util.Arrays.asList;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.SKIP;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.SKIP;
+import static l.files.fs.Visitor.Result.TERMINATE;
 import static l.files.fs.local.LocalResource_list_Test.TraversalOrder.POST;
 import static l.files.fs.local.LocalResource_list_Test.TraversalOrder.PRE;
 
 /**
- * @see LocalResource#list(LinkOption, ResourceVisitor)
+ * @see LocalResource#list(LinkOption, Visitor)
  * @see LocalResource#list(LinkOption, Collection)
  * @see LocalResource#list(LinkOption)
  */
@@ -33,7 +33,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
     public void test_traverse_noFollowLink() throws Exception {
         Resource dir = dir1().resolve("dir").createDirectory();
-        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource link = dir1().resolve("link").createLink(dir);
         link.resolve("a").createFile();
         link.resolve("b").createFile();
 
@@ -51,8 +51,8 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
         dir1().resolve("dir/a").createFile();
         dir1().resolve("dir/b").createDirectory();
         dir1().resolve("dir/b/1").createFile();
-        dir1().resolve("dir/c").createSymbolicLink(dir1().resolve("dir/b"));
-        dir1().resolve("link").createSymbolicLink(dir1().resolve("dir"));
+        dir1().resolve("dir/c").createLink(dir1().resolve("dir/b"));
+        dir1().resolve("link").createLink(dir1().resolve("dir"));
 
         Recorder recorder = new Recorder();
         dir1().resolve("link").traverse(
@@ -78,7 +78,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
     public void test_traverse_followLink() throws Exception {
         Resource dir = dir1().resolve("dir").createDirectory();
-        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource link = dir1().resolve("link").createLink(dir);
         Resource a = link.resolve("a").createFile();
 
         Recorder recorder = new Recorder();
@@ -105,8 +105,8 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            ResourceVisitor.Result acceptPre(Resource resource) throws IOException {
-                if (resource.getName().equals("a")) {
+            Visitor.Result acceptPre(Resource resource) throws IOException {
+                if (resource.name().equals("a")) {
                     throw new IOException("Test");
                 }
                 return super.acceptPre(resource);
@@ -142,9 +142,9 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            ResourceVisitor.Result acceptPost(Resource resource) throws IOException {
+            Visitor.Result acceptPost(Resource resource) throws IOException {
                 super.acceptPost(resource);
-                if (resource.getName().equals("1")) {
+                if (resource.name().equals("1")) {
                     throw new IOException("Test");
                 }
                 return CONTINUE;
@@ -187,8 +187,8 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
         checkEquals(expected, recorder.getEvents());
     }
 
-    private static ResourceExceptionHandler ignoreException() {
-        return new ResourceExceptionHandler() {
+    private static ExceptionHandler ignoreException() {
+        return new ExceptionHandler() {
             @Override
             public void handle(Resource resource, IOException e)
                     throws IOException {
@@ -244,9 +244,9 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            ResourceVisitor.Result acceptPre(Resource resource) throws IOException {
+            Visitor.Result acceptPre(Resource resource) throws IOException {
                 super.acceptPre(resource);
-                if (resource.getName().equals("a")) {
+                if (resource.name().equals("a")) {
                     return SKIP;
                 }
                 return CONTINUE;
@@ -275,9 +275,9 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            ResourceVisitor.Result acceptPre(Resource resource) throws IOException {
+            Visitor.Result acceptPre(Resource resource) throws IOException {
                 super.acceptPre(resource);
-                if (resource.getName().equals("a")) {
+                if (resource.name().equals("a")) {
                     return TERMINATE;
                 }
                 return CONTINUE;
@@ -311,35 +311,35 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
             return events;
         }
 
-        private final ResourceVisitor pre = new ResourceVisitor() {
+        private final Visitor pre = new Visitor() {
             @Override
             public Result accept(Resource resource) throws IOException {
                 return acceptPre(resource);
             }
         };
 
-        ResourceVisitor.Result acceptPre(Resource resource) throws IOException {
+        Visitor.Result acceptPre(Resource resource) throws IOException {
             events.add(TraversalEvent.of(PRE, resource));
             return CONTINUE;
         }
 
-        ResourceVisitor getPreVisitor() {
+        Visitor getPreVisitor() {
             return pre;
         }
 
-        private final ResourceVisitor post = new ResourceVisitor() {
+        private final Visitor post = new Visitor() {
             @Override
             public Result accept(Resource resource) throws IOException {
                 return acceptPost(resource);
             }
         };
 
-        ResourceVisitor.Result acceptPost(Resource resource) throws IOException {
+        Visitor.Result acceptPost(Resource resource) throws IOException {
             events.add(TraversalEvent.of(POST, resource));
             return CONTINUE;
         }
 
-        ResourceVisitor getPostVisitor() {
+        Visitor getPostVisitor() {
             return post;
         }
 

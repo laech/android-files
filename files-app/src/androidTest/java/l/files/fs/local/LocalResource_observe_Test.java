@@ -36,7 +36,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     public void testObserveOnLinkNoFollow() throws Exception {
         Resource dir = dir1().resolve("dir").createDirectory();
-        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource link = dir1().resolve("link").createLink(dir);
         Resource file = link.resolve("file");
         try (Recorder observer = observe(link, NOFOLLOW)) {
             // No follow, can observe the link
@@ -55,7 +55,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     public void testObserveOnLinkFollow() throws Exception {
         Resource dir = dir1().resolve("dir").createDirectory();
-        Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        Resource link = dir1().resolve("link").createLink(dir);
         Resource child = link.resolve("dir").createDirectory();
         try (Recorder observer = observe(link, FOLLOW)) {
             observer.await(MODIFY, child, newCreateFile(child.resolve("a")));
@@ -163,7 +163,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     private static void testModifyPermission(
             Resource target, Resource observable) throws Exception {
-        Set<Permission> oldPerms = target.readStatus(NOFOLLOW).getPermissions();
+        Set<Permission> oldPerms = target.stat(NOFOLLOW).permissions();
         Set<Permission> newPerms;
         if (oldPerms.isEmpty()) {
             newPerms = singleton(OWNER_WRITE);
@@ -191,7 +191,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     private void testModifyModificationTime(
             Resource target, Resource observable) throws Exception {
-        Instant old = target.readStatus(NOFOLLOW).getModificationTime();
+        Instant old = target.stat(NOFOLLOW).modificationTime();
         Instant t = Instant.of(old.getSeconds() - 1, old.getNanos());
         try (Recorder observer = observe(observable)) {
             observer.await(MODIFY, target,
@@ -210,7 +210,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     private static void testDelete(
             Resource target, Resource observable) throws Exception {
-        boolean file = target.readStatus(NOFOLLOW).isRegularFile();
+        boolean file = target.stat(NOFOLLOW).isRegularFile();
         try (Recorder observer = observe(observable)) {
             List<WatchEvent> expected = new ArrayList<>();
             // If target is file and observing on the file itself, an IN_ATTRIB
@@ -439,7 +439,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                link.createSymbolicLink(target);
+                link.createLink(target);
                 return null;
             }
         };
@@ -451,7 +451,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                try (OutputStream out = file.openOutputStream(NOFOLLOW, true)) {
+                try (OutputStream out = file.output(NOFOLLOW, true)) {
                     out.write(content.toString().getBytes(UTF_8));
                 }
                 return null;

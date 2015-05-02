@@ -23,7 +23,7 @@ final class Size extends Count {
     void onCount(Resource resource) {
         super.onCount(resource);
         try {
-            size.addAndGet(resource.readStatus(NOFOLLOW).getSize());
+            size.addAndGet(resource.stat(NOFOLLOW).size());
         } catch (IOException e) {
             // Ignore count
         }

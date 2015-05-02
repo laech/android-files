@@ -17,7 +17,7 @@ public final class FileLabels {
     public static String get(Resources res, Resource resource) {
         if (DIR_HOME.equals(resource)) return res.getString(R.string.home);
         if (DIR_ROOT.equals(resource)) return Build.MODEL;
-        return resource.getName();
+        return resource.name();
     }
 
 }

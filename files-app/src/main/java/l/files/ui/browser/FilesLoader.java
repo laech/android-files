@@ -22,8 +22,8 @@ import javax.annotation.Nullable;
 import auto.parcel.AutoParcel;
 import l.files.fs.NotExistException;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Stat;
+import l.files.fs.Visitor;
 import l.files.fs.WatchEvent;
 import l.files.logging.Logger;
 
@@ -31,8 +31,8 @@ import static android.os.Looper.getMainLooper;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
@@ -110,7 +110,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
 
         try {
-            resource.list(FOLLOW, new ResourceVisitor() {
+            resource.list(FOLLOW, new Visitor() {
                 @Override
                 public Result accept(Resource resource) throws IOException {
                     if (isLoadInBackgroundCanceled()) {
@@ -134,7 +134,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             files.addAll(data.values());
         } else {
             for (FileListItem.File item : data.values()) {
-                if (!item.getResource().isHidden()) {
+                if (!item.getResource().hidden()) {
                     files.add(item);
                 }
             }
@@ -214,8 +214,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private boolean addData(Resource resource) {
         try {
 
-            ResourceStatus stat = resource.readStatus(NOFOLLOW);
-            ResourceStatus targetStat = readTargetStatus(resource, stat);
+            Stat stat = resource.stat(NOFOLLOW);
+            Stat targetStat = readTargetStatus(resource, stat);
             FileListItem.File newStat = FileListItem.File.create(resource, stat, targetStat);
             FileListItem.File oldStat = data.put(resource, newStat);
             return !Objects.equals(newStat, oldStat);
@@ -229,15 +229,15 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
     }
 
-    private ResourceStatus readTargetStatus(Resource resource, ResourceStatus status) {
-        if (status.isSymbolicLink()) {
+    private Stat readTargetStatus(Resource resource, Stat stat) {
+        if (stat.isSymbolicLink()) {
             try {
-                return resource.readStatus(FOLLOW);
+                return resource.stat(FOLLOW);
             } catch (IOException e) {
                 logger.debug(e);
             }
         }
-        return status;
+        return stat;
     }
 
     final class EventListener implements WatchEvent.Listener {

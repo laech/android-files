@@ -19,12 +19,12 @@ public final class MoveTest extends PasteTest {
 
     public void testMovesSymlink() throws Exception {
         Resource target = dir1().resolve("target").createFile();
-        Resource link = dir1().resolve("link").createSymbolicLink(target);
+        Resource link = dir1().resolve("link").createLink(target);
 
         Move move = create(link, dir1().resolve("moved").createDirectory());
         move.execute();
 
-        Resource actual = dir1().resolve("moved/link").readSymbolicLink();
+        Resource actual = dir1().resolve("moved/link").readLink();
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
@@ -33,7 +33,7 @@ public final class MoveTest extends PasteTest {
         Resource srcFile = dir1().resolve("a.txt").createFile();
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource dstFile = dstDir.resolve("a.txt");
-        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
+        try (Writer out = srcFile.writer(NOFOLLOW, UTF_8)) {
             out.write("Test");
         }
         Move move = create(srcFile, dstDir);
@@ -49,7 +49,7 @@ public final class MoveTest extends PasteTest {
         Resource dstDir = dir1().resolve("dst").createDirectory();
         Resource srcFile = srcDir.resolve("test.txt");
         Resource dstFile = dstDir.resolve("a/test.txt");
-        try (Writer out = srcFile.openWriter(NOFOLLOW, UTF_8)) {
+        try (Writer out = srcFile.writer(NOFOLLOW, UTF_8)) {
             out.write("Test");
         }
 

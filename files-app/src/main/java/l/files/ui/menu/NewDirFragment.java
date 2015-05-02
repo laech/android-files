@@ -49,7 +49,7 @@ public final class NewDirFragment extends FileCreationFragment {
                 } catch (IOException e) {
                     return "";
                 }
-                return resource.getName();
+                return resource.name();
             }
 
             @Override

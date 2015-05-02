@@ -11,7 +11,7 @@ import l.files.R;
 import l.files.common.testing.BaseTest;
 import l.files.fs.Instant;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
+import l.files.fs.Stat;
 
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
@@ -122,7 +122,7 @@ public final class DateCategorizerTest extends BaseTest {
     }
 
     private FileListItem.File mockStat(long time) {
-        ResourceStatus stat = mock(ResourceStatus.class);
+        Stat stat = mock(Stat.class);
         long seconds = MILLISECONDS.toSeconds(time);
         int nanos = (int) MILLISECONDS.toNanos(time - SECONDS.toMillis(seconds));
         if (nanos < 0) {
@@ -130,7 +130,7 @@ public final class DateCategorizerTest extends BaseTest {
             nanos = delta;
             seconds -= (delta / (double) SECONDS.toNanos(1) + 0.5);
         }
-        given(stat.getModificationTime()).willReturn(Instant.of(seconds, nanos));
+        given(stat.modificationTime()).willReturn(Instant.of(seconds, nanos));
         return FileListItem.File.create(mock(Resource.class), stat, stat);
     }
 

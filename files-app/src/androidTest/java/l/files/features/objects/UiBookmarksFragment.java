@@ -56,7 +56,7 @@ public final class UiBookmarksFragment {
             }
         });
 
-        if (resource.readStatus(NOFOLLOW).isDirectory()) {
+        if (resource.stat(NOFOLLOW).isDirectory()) {
             getActivityObject().assertCurrentDirectory(resource);
         }
         return getActivityObject();

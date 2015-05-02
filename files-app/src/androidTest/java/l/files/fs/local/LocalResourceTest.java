@@ -3,8 +3,6 @@ package l.files.fs.local;
 import android.system.Os;
 import android.system.StructStat;
 
-import com.google.common.io.ByteStreams;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +26,8 @@ import l.files.fs.NotExistException;
 import l.files.fs.NotFileException;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceStatus;
-import l.files.fs.ResourceVisitor;
+import l.files.fs.Stat;
+import l.files.fs.Visitor;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static com.google.common.collect.Sets.powerSet;
@@ -46,8 +44,8 @@ import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.ResourceVisitor.Result.CONTINUE;
-import static l.files.fs.ResourceVisitor.Result.TERMINATE;
+import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.Visitor.Result.TERMINATE;
 import static l.files.fs.local.LocalResource.mapPermissions;
 import static l.files.fs.local.Stat.lstat;
 
@@ -55,40 +53,40 @@ public final class LocalResourceTest extends ResourceBaseTest
 {
     public void test_isReadable_true() throws Exception
     {
-        assertTrue(dir1().isReadable());
+        assertTrue(dir1().readable());
     }
 
     public void test_isReadable_false() throws Exception
     {
         dir1().removePermissions(Permission.allRead());
-        assertFalse(dir1().isReadable());
+        assertFalse(dir1().readable());
     }
 
     public void test_isWritable_true() throws Exception
     {
-        assertTrue(dir1().isWritable());
+        assertTrue(dir1().writable());
     }
 
     public void test_isWritable_false() throws Exception
     {
         dir1().removePermissions(Permission.allWrite());
-        assertFalse(dir1().isWritable());
+        assertFalse(dir1().writable());
     }
 
     public void test_isExecutable_true() throws Exception
     {
-        assertTrue(dir1().isExecutable());
+        assertTrue(dir1().executable());
     }
 
     public void test_isExecutable_false() throws Exception
     {
         dir1().removePermissions(Permission.allExecute());
-        assertFalse(dir1().isExecutable());
+        assertFalse(dir1().executable());
     }
 
     public void test_readStatus_permissions_unmodifiable() throws Exception
     {
-        final Set<Permission> perms = dir1().readStatus(NOFOLLOW).getPermissions();
+        final Set<Permission> perms = dir1().stat(NOFOLLOW).permissions();
         try
         {
             perms.clear();
@@ -103,52 +101,52 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_readStatus_symbolicLink() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(file);
-        assertFalse(file.readStatus(NOFOLLOW).isSymbolicLink());
-        assertFalse(link.readStatus(FOLLOW).isSymbolicLink());
-        assertTrue(link.readStatus(NOFOLLOW).isSymbolicLink());
-        assertEquals(file.readStatus(NOFOLLOW), link.readStatus(FOLLOW));
+        final Resource link = dir1().resolve("link").createLink(file);
+        assertFalse(file.stat(NOFOLLOW).isSymbolicLink());
+        assertFalse(link.stat(FOLLOW).isSymbolicLink());
+        assertTrue(link.stat(NOFOLLOW).isSymbolicLink());
+        assertEquals(file.stat(NOFOLLOW), link.stat(FOLLOW));
     }
 
     public void test_readStatus_modificationTime() throws Exception
     {
-        final ResourceStatus status = dir1().readStatus(NOFOLLOW);
-        final long actual = status.getModificationTime().getSeconds();
-        final long expected = Os.stat(dir1().getPath()).st_atime;
+        final Stat stat = dir1().stat(NOFOLLOW);
+        final long actual = stat.modificationTime().getSeconds();
+        final long expected = Os.stat(dir1().path()).st_atime;
         assertEquals(expected, actual);
     }
 
     public void test_readStatus_accessTime() throws Exception
     {
-        final ResourceStatus actual = dir1().readStatus(NOFOLLOW);
-        final StructStat expected = Os.stat(dir1().getPath());
-        assertEquals(expected.st_atime, actual.getAccessTime().getSeconds());
+        final Stat actual = dir1().stat(NOFOLLOW);
+        final StructStat expected = Os.stat(dir1().path());
+        assertEquals(expected.st_atime, actual.accessTime().getSeconds());
     }
 
     public void test_readStatus_size() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
         file.writeString(NOFOLLOW, UTF_8, "hello world");
-        final long expected = Os.stat(file.getPath()).st_size;
-        final long actual = file.readStatus(NOFOLLOW).getSize();
+        final long expected = Os.stat(file.path()).st_size;
+        final long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
     }
 
     public void test_readStatus_isDirectory() throws Exception
     {
-        assertTrue(dir1().readStatus(NOFOLLOW).isDirectory());
+        assertTrue(dir1().stat(NOFOLLOW).isDirectory());
     }
 
     public void test_readStatus_isRegularFile() throws Exception
     {
         final Resource dir = dir1().resolve("dir").createFile();
-        assertTrue(dir.readStatus(NOFOLLOW).isRegularFile());
+        assertTrue(dir.stat(NOFOLLOW).isRegularFile());
     }
 
     public void test_getHierarchy_single() throws Exception
     {
         final Resource a = LocalResource.create(new File("/"));
-        assertEquals(singletonList(a), a.getHierarchy());
+        assertEquals(singletonList(a), a.hierarchy());
     }
 
     public void test_getHierarchy_multi() throws Exception
@@ -159,7 +157,7 @@ public final class LocalResourceTest extends ResourceBaseTest
                 LocalResource.create(new File("/a")),
                 LocalResource.create(new File("/a/b"))
         );
-        assertEquals(expected, a.getHierarchy());
+        assertEquals(expected, a.hierarchy());
     }
 
     public void test_list_earlyTermination() throws Exception
@@ -169,7 +167,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         dir1().resolve("c").createFile();
         dir1().resolve("d").createFile();
         final List<Resource> result = new ArrayList<>();
-        dir1().list(NOFOLLOW, new ResourceVisitor()
+        dir1().list(NOFOLLOW, new Visitor()
         {
             @Override
             public Result accept(final Resource resource) throws IOException
@@ -203,7 +201,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_list_NotDirectoryException_link() throws Exception
     {
         final Resource dir = dir1().resolve("dir").createDirectory();
-        final Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        final Resource link = dir1().resolve("link").createLink(dir);
         expectOnList(NotDirectoryException.class, link, NOFOLLOW);
     }
 
@@ -212,8 +210,8 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource dir = dir1().resolve("dir").createDirectory();
         final Resource a = dir.resolve("a").createFile();
         final Resource b = dir.resolve("b").createDirectory();
-        final Resource c = dir.resolve("c").createSymbolicLink(a);
-        final Resource link = dir1().resolve("link").createSymbolicLink(dir);
+        final Resource c = dir.resolve("c").createLink(a);
+        final Resource link = dir1().resolve("link").createLink(dir);
 
         final List<Resource> expected = asList(
                 a.resolveParent(dir, link),
@@ -240,7 +238,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         dir1().resolve("b").createDirectory();
         try
         {
-            dir1().list(NOFOLLOW, new ResourceVisitor()
+            dir1().list(NOFOLLOW, new Visitor()
             {
                 @Override
                 public Result accept(final Resource res) throws IOException
@@ -281,7 +279,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public OutputStream open(final Resource res) throws IOException
             {
-                return res.openOutputStream(NOFOLLOW);
+                return res.output(NOFOLLOW);
             }
         });
     }
@@ -293,7 +291,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public OutputStream open(final Resource res) throws IOException
             {
-                return res.openOutputStream(NOFOLLOW, false);
+                return res.output(NOFOLLOW, false);
             }
         });
     }
@@ -305,7 +303,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public OutputStream open(final Resource res) throws IOException
             {
-                return res.openOutputStream(NOFOLLOW, true);
+                return res.output(NOFOLLOW, true);
             }
         });
     }
@@ -337,12 +335,12 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource expected = dir1().resolve("expected");
         final Resource actual = dir1().resolve("actual");
 
-        assertTrue(new File(expected.getUri()).createNewFile());
-        actual.openOutputStream(NOFOLLOW, false).close();
+        assertTrue(new File(expected.uri()).createNewFile());
+        actual.output(NOFOLLOW, false).close();
 
         assertEquals(
-                Os.stat(expected.getPath()).st_mode,
-                Os.stat(actual.getPath()).st_mode
+                Os.stat(expected.path()).st_mode,
+                Os.stat(actual.path()).st_mode
         );
     }
 
@@ -370,7 +368,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_openOutputStream_NotFileException_link() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(target);
+        final Resource link = dir1().resolve("link").createLink(target);
         expectOnOpenOutputStream(NotFileException.class, link, NOFOLLOW, false);
     }
 
@@ -385,7 +383,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                resource.openOutputStream(option, append).close();
+                resource.output(option, append).close();
             }
         });
     }
@@ -395,7 +393,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource file = dir1().resolve("a").createFile();
         final String expected = "hello\nworld\n";
         file.writeString(NOFOLLOW, UTF_8, expected);
-        try (final InputStream in = file.openInputStream(NOFOLLOW))
+        try (final InputStream in = file.input(NOFOLLOW))
         {
             final String actual = new String(toByteArray(in), UTF_8);
             assertEquals(expected, actual);
@@ -405,14 +403,14 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_openInputStream_linkFollowSuccess() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(target);
-        link.openInputStream(FOLLOW).close();
+        final Resource link = dir1().resolve("link").createLink(target);
+        link.input(FOLLOW).close();
     }
 
     public void test_openInputStream_NotFileException_link() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(target);
+        final Resource link = dir1().resolve("link").createLink(target);
         expectOnOpenInputStream(NotFileException.class, link, NOFOLLOW);
     }
 
@@ -445,7 +443,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                resource.openInputStream(option).close();
+                resource.input(option).close();
             }
         });
     }
@@ -463,7 +461,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_exists_checkLinkNotTarget() throws Exception
     {
         final Resource target = dir1().resolve("target");
-        final Resource link = dir1().resolve("link").createSymbolicLink(target);
+        final Resource link = dir1().resolve("link").createLink(target);
         assertFalse(target.exists(NOFOLLOW));
         assertFalse(link.exists(FOLLOW));
         assertTrue(link.exists(NOFOLLOW));
@@ -481,7 +479,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Resource file = dir1().resolve("a");
         file.createFile();
-        assertTrue(file.readStatus(NOFOLLOW).isRegularFile());
+        assertTrue(file.stat(NOFOLLOW).isRegularFile());
     }
 
     public void test_createFile_correctPermissions() throws Exception
@@ -489,15 +487,15 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource actual = dir1().resolve("a");
         actual.createFile();
 
-        final File expected = new File(dir1().getPath(), "b");
+        final File expected = new File(dir1().path(), "b");
         assertTrue(expected.createNewFile());
 
-        assertEquals(expected.canRead(), actual.isReadable());
-        assertEquals(expected.canWrite(), actual.isWritable());
-        assertEquals(expected.canExecute(), actual.isExecutable());
+        assertEquals(expected.canRead(), actual.readable());
+        assertEquals(expected.canWrite(), actual.writable());
+        assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
                 mapPermissions(lstat(expected.getPath()).getMode()),
-                actual.readStatus(NOFOLLOW).getPermissions()
+                actual.stat(NOFOLLOW).permissions()
         );
     }
 
@@ -543,7 +541,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Resource dir = dir1().resolve("a");
         dir.createDirectory();
-        assertTrue(dir.readStatus(NOFOLLOW).isDirectory());
+        assertTrue(dir.stat(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectory_correctPermissions() throws Exception
@@ -551,15 +549,15 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource actual = dir1().resolve("a");
         actual.createDirectory();
 
-        final File expected = new File(dir1().getPath(), "b");
+        final File expected = new File(dir1().path(), "b");
         assertTrue(expected.mkdir());
 
-        assertEquals(expected.canRead(), actual.isReadable());
-        assertEquals(expected.canWrite(), actual.isWritable());
-        assertEquals(expected.canExecute(), actual.isExecutable());
+        assertEquals(expected.canRead(), actual.readable());
+        assertEquals(expected.canWrite(), actual.writable());
+        assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
                 mapPermissions(lstat(expected.getPath()).getMode()),
-                actual.readStatus(NOFOLLOW).getPermissions()
+                actual.stat(NOFOLLOW).permissions()
         );
     }
 
@@ -604,9 +602,9 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_createDirectories() throws Exception
     {
         dir1().resolve("a/b/c").createDirectories();
-        assertTrue(dir1().resolve("a/b/c").readStatus(NOFOLLOW).isDirectory());
-        assertTrue(dir1().resolve("a/b").readStatus(NOFOLLOW).isDirectory());
-        assertTrue(dir1().resolve("a/").readStatus(NOFOLLOW).isDirectory());
+        assertTrue(dir1().resolve("a/b/c").stat(NOFOLLOW).isDirectory());
+        assertTrue(dir1().resolve("a/b").stat(NOFOLLOW).isDirectory());
+        assertTrue(dir1().resolve("a/").stat(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectories_NotDirectoryException() throws Exception
@@ -633,10 +631,9 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_createSymbolicLink() throws Exception
     {
-        final Resource link = dir1().resolve("link");
-        link.createSymbolicLink(dir1());
-        assertTrue(link.readStatus(NOFOLLOW).isSymbolicLink());
-        assertEquals(dir1(), link.readSymbolicLink());
+        final Resource link = dir1().resolve("link").createLink(dir1());
+        assertTrue(link.stat(NOFOLLOW).isSymbolicLink());
+        assertEquals(dir1(), link.readLink());
     }
 
     public void test_createSymbolicLink_AccessException() throws Exception
@@ -677,7 +674,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                link.createSymbolicLink(target);
+                link.createLink(target);
             }
         });
     }
@@ -719,16 +716,16 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                link.readSymbolicLink();
+                link.readLink();
             }
         });
     }
 
     public void test_readStatus_followLink() throws Exception
     {
-        final Resource child = dir1().resolve("a").createSymbolicLink(dir1());
-        final ResourceStatus expected = dir1().readStatus(NOFOLLOW);
-        final ResourceStatus actual = child.readStatus(FOLLOW);
+        final Resource child = dir1().resolve("a").createLink(dir1());
+        final Stat expected = dir1().stat(NOFOLLOW);
+        final Stat actual = child.stat(FOLLOW);
         assertTrue(actual.isDirectory());
         assertFalse(actual.isSymbolicLink());
         assertEquals(expected, actual);
@@ -736,11 +733,11 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_readStatus_noFollowLink() throws Exception
     {
-        final Resource child = dir1().resolve("a").createSymbolicLink(dir1());
-        final ResourceStatus actual = child.readStatus(NOFOLLOW);
+        final Resource child = dir1().resolve("a").createLink(dir1());
+        final Stat actual = child.stat(NOFOLLOW);
         assertTrue(actual.isSymbolicLink());
         assertFalse(actual.isDirectory());
-        assertNotEqual(dir1().readStatus(NOFOLLOW), actual);
+        assertNotEqual(dir1().stat(NOFOLLOW), actual);
     }
 
     public void test_readStatus_AccessException() throws Exception
@@ -773,7 +770,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                resource.readStatus(NOFOLLOW);
+                resource.stat(NOFOLLOW);
             }
         });
     }
@@ -794,13 +791,13 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_moveTo_moveLinkNotTarget() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
-        final Resource src = dir1().resolve("src").createSymbolicLink(target);
+        final Resource src = dir1().resolve("src").createLink(target);
         final Resource dst = dir1().resolve("dst");
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertTrue(target.exists(NOFOLLOW));
-        assertEquals(target, dst.readSymbolicLink());
+        assertEquals(target, dst.readLink());
     }
 
     public void test_moveTo_fileToNonExistingFile() throws Exception
@@ -914,7 +911,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_delete_symbolicLink() throws Exception
     {
         final Resource link = dir1().resolve("link");
-        link.createSymbolicLink(dir1());
+        link.createLink(dir1());
         assertTrue(link.exists(NOFOLLOW));
         link.delete();
         assertFalse(link.exists(NOFOLLOW));
@@ -1001,7 +998,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setModificationTime_linkFollow() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(file);
+        final Resource link = dir1().resolve("link").createLink(file);
 
         final Instant fileTime = Instant.of(123, 456);
         final Instant linkTime = getModificationTime(link, NOFOLLOW);
@@ -1015,7 +1012,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setModificationTime_linkNoFollow() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
-        final Resource link = dir1().resolve("link").createSymbolicLink(file);
+        final Resource link = dir1().resolve("link").createLink(file);
 
         final Instant fileTime = getModificationTime(file, NOFOLLOW);
         final Instant linkTime = Instant.of(123, 456);
@@ -1038,7 +1035,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             final Resource resource,
             final LinkOption option) throws IOException
     {
-        return resource.readStatus(option).getModificationTime();
+        return resource.stat(option).modificationTime();
     }
 
     private static void expectOnSetModificationTime(
@@ -1080,7 +1077,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_setAccessTime_linkNoFollow() throws Exception
     {
-        final Resource link = dir1().resolve("link").createSymbolicLink(dir1());
+        final Resource link = dir1().resolve("link").createLink(dir1());
 
         final Instant targetTime = getAccessTime(dir1(), NOFOLLOW);
         final Instant linkTime = Instant.of(123, 456);
@@ -1094,7 +1091,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_setAccessTime_linkFollow() throws Exception
     {
-        final Resource link = dir1().resolve("link").createSymbolicLink(dir1());
+        final Resource link = dir1().resolve("link").createLink(dir1());
 
         final Instant linkTime = getAccessTime(dir1(), NOFOLLOW);
         final Instant fileTime = Instant.of(123, 456);
@@ -1117,7 +1114,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             final Resource resource,
             final LinkOption option) throws IOException
     {
-        return resource.readStatus(option).getAccessTime();
+        return resource.stat(option).accessTime();
     }
 
     private static void expectOnSetAccessTime(
@@ -1141,15 +1138,15 @@ public final class LocalResourceTest extends ResourceBaseTest
         for (final Set<Permission> expected : powerSet(allOf(Permission.class)))
         {
             dir1().setPermissions(expected);
-            assertEquals(expected, dir1().readStatus(NOFOLLOW).getPermissions());
+            assertEquals(expected, dir1().stat(NOFOLLOW).permissions());
         }
     }
 
     public void test_setPermissions_rawBits() throws Exception
     {
-        final int expected = Os.stat(dir1().getPath()).st_mode;
-        dir1().setPermissions(dir1().readStatus(NOFOLLOW).getPermissions());
-        final int actual = Os.stat(dir1().getPath()).st_mode;
+        final int expected = Os.stat(dir1().path()).st_mode;
+        dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
+        final int actual = Os.stat(dir1().path()).st_mode;
         assertEquals(expected, actual);
     }
 
@@ -1161,7 +1158,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             dir1().setPermissions(all);
             dir1().removePermissions(permissions);
 
-            final Set<Permission> actual = dir1().readStatus(FOLLOW).getPermissions();
+            final Set<Permission> actual = dir1().stat(FOLLOW).permissions();
             final Set<Permission> expected = new HashSet<>(all);
             expected.removeAll(permissions);
             assertEquals(expected, actual);
@@ -1171,14 +1168,14 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_removePermissions_changeTargetNotLink() throws Exception
     {
         final Permission perm = OWNER_READ;
-        final Resource link = dir1().resolve("link").createSymbolicLink(dir1());
-        assertTrue(link.readStatus(FOLLOW).getPermissions().contains(perm));
-        assertTrue(link.readStatus(NOFOLLOW).getPermissions().contains(perm));
+        final Resource link = dir1().resolve("link").createLink(dir1());
+        assertTrue(link.stat(FOLLOW).permissions().contains(perm));
+        assertTrue(link.stat(NOFOLLOW).permissions().contains(perm));
 
         link.removePermissions(singleton(perm));
 
-        assertFalse(link.readStatus(FOLLOW).getPermissions().contains(perm));
-        assertTrue(link.readStatus(NOFOLLOW).getPermissions().contains(perm));
+        assertFalse(link.stat(FOLLOW).permissions().contains(perm));
+        assertTrue(link.stat(NOFOLLOW).permissions().contains(perm));
     }
 
     private static void expect(
