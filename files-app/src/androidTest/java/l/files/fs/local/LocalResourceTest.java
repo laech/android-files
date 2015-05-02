@@ -85,7 +85,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertFalse(dir1().executable());
     }
 
-    public void test_readStatus_permissions_unmodifiable() throws Exception
+    public void test_stat_permissions_unmodifiable() throws Exception
     {
         final Set<Permission> perms = dir1().stat(NOFOLLOW).permissions();
         try
@@ -99,7 +99,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         }
     }
 
-    public void test_readStatus_symbolicLink() throws Exception
+    public void test_stat_symbolicLink() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
         final Resource link = dir1().resolve("link").createLink(file);
@@ -109,7 +109,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(file.stat(NOFOLLOW), link.stat(FOLLOW));
     }
 
-    public void test_readStatus_modificationTime() throws Exception
+    public void test_stat_modificationTime() throws Exception
     {
         final Stat stat = dir1().stat(NOFOLLOW);
         final long actual = stat.modificationTime().getSeconds();
@@ -117,14 +117,14 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected, actual);
     }
 
-    public void test_readStatus_accessTime() throws Exception
+    public void test_stat_accessTime() throws Exception
     {
         final Stat actual = dir1().stat(NOFOLLOW);
         final StructStat expected = Os.stat(dir1().path());
         assertEquals(expected.st_atime, actual.accessTime().getSeconds());
     }
 
-    public void test_readStatus_size() throws Exception
+    public void test_stat_size() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
         file.writeString(NOFOLLOW, UTF_8, "hello world");
@@ -133,12 +133,12 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected, actual);
     }
 
-    public void test_readStatus_isDirectory() throws Exception
+    public void test_stat_isDirectory() throws Exception
     {
         assertTrue(dir1().stat(NOFOLLOW).isDirectory());
     }
 
-    public void test_readStatus_isRegularFile() throws Exception
+    public void test_stat_isRegularFile() throws Exception
     {
         final Resource dir = dir1().resolve("dir").createFile();
         assertTrue(dir.stat(NOFOLLOW).isRegularFile());
@@ -720,7 +720,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_readStatus_followLink() throws Exception
+    public void test_stat_followLink() throws Exception
     {
         final Resource child = dir1().resolve("a").createLink(dir1());
         final Stat expected = dir1().stat(NOFOLLOW);
@@ -730,7 +730,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected, actual);
     }
 
-    public void test_readStatus_noFollowLink() throws Exception
+    public void test_stat_noFollowLink() throws Exception
     {
         final Resource child = dir1().resolve("a").createLink(dir1());
         final Stat actual = child.stat(NOFOLLOW);
@@ -739,20 +739,20 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertNotEqual(dir1().stat(NOFOLLOW), actual);
     }
 
-    public void test_readStatus_AccessDenied() throws Exception
+    public void test_stat_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
         final Resource child = dir1().resolve("a");
         expectOnReadStatus(AccessDenied.class, child);
     }
 
-    public void test_readStatus_NotExistException() throws Exception
+    public void test_stat_NotExistException() throws Exception
     {
         final Resource child = dir1().resolve("a/b");
         expectOnReadStatus(NotExist.class, child);
     }
 
-    public void test_readStatus_NotDirectoryException() throws Exception
+    public void test_stat_NotDirectoryException() throws Exception
     {
         final Resource parent = dir1().resolve("a");
         final Resource child = parent.resolve("b");
