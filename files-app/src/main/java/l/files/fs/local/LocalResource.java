@@ -35,10 +35,10 @@ import l.files.fs.LinkOption;
 import l.files.fs.NotExist;
 import l.files.fs.NotFile;
 import l.files.fs.NotLink;
+import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Visitor;
-import l.files.fs.WatchEvent;
 
 import static android.system.OsConstants.EACCES;
 import static android.system.OsConstants.EINVAL;
@@ -85,7 +85,7 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
 
 @AutoParcel
-public abstract class LocalResource implements Resource
+public abstract class LocalResource extends Native implements Resource
 {
     private static final Map<Permission, Integer> permissionBits =
             permissionsToBits();
@@ -215,7 +215,7 @@ public abstract class LocalResource implements Resource
     @Override
     public Closeable observe(
             final LinkOption option,
-            final WatchEvent.Listener observer) throws IOException
+            final Observer observer) throws IOException
     {
         return LocalResourceObservable.observe(this, option, observer);
     }

@@ -11,17 +11,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import l.files.fs.Event;
 import l.files.fs.LinkOption;
+import l.files.fs.Observer;
 import l.files.fs.Resource;
-import l.files.fs.WatchEvent;
+import l.files.fs.local.LocalResourceStream.Callback;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.UncaughtExceptionHandler;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.Event.CREATE;
+import static l.files.fs.Event.DELETE;
+import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.WatchEvent.Kind;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
 import static l.files.fs.local.Inotify.IN_CLOSE_NOWRITE;
@@ -42,9 +46,11 @@ import static l.files.fs.local.Inotify.IN_ONLYDIR;
 import static l.files.fs.local.Inotify.IN_OPEN;
 import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
+import static l.files.fs.local.Inotify.addWatch;
 
 final class LocalResourceObservable extends Native
-        implements Runnable, Closeable {
+        implements Runnable, Closeable
+{
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -118,7 +124,8 @@ final class LocalResourceObservable extends Native
             | IN_MOVED_FROM
             | IN_MOVED_TO;
 
-    static {
+    static
+    {
         init();
     }
 
@@ -130,27 +137,27 @@ final class LocalResourceObservable extends Native
     private final int fd;
 
     /**
-     * The watch descriptor of {@link #resource}.
+     * The watch descriptor of {@link #root}.
      */
-    private final int wd;
+    private final int rootWd;
 
     /**
      * The root resource being watched.
      */
-    private final LocalResource resource;
+    private final LocalResource root;
 
     /**
-     * If {@link #resource} is a directory, its immediate child directories will
+     * If {@link #root} is a directory, its immediate child directories will
      * also be watched since creation of resources inside a child directory will
      * update the child directory's attributes, and that update won't be
      * reported by other events. This is a map of watch descriptors to the child
-     * directories being watched, and it will be updated as directories are
+     * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final Map<Integer, Resource> children;
+    private final Map<Integer, String> childDirectories;
 
     // TODO use weak reference
-    private final WatchEvent.Listener observer;
+    private final Observer observer;
 
     /**
      * Background thread that polls for events.
@@ -159,48 +166,55 @@ final class LocalResourceObservable extends Native
 
     private final AtomicBoolean closed;
 
-    LocalResourceObservable(int fd,
-                            int wd,
-                            LocalResource resource,
-                            WatchEvent.Listener observer) {
+    LocalResourceObservable(
+            final int fd,
+            final int rootWd,
+            final LocalResource root,
+            final Observer observer)
+    {
         this.fd = fd;
-        this.wd = wd;
-        this.resource = requireNonNull(resource, "resource");
+        this.rootWd = rootWd;
+        this.root = requireNonNull(root, "root");
         this.observer = requireNonNull(observer, "observer");
-        this.children = new ConcurrentHashMap<>();
+        this.childDirectories = new ConcurrentHashMap<>();
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
     }
 
     public static Closeable observe(
-            LocalResource resource,
-            LinkOption option,
-            WatchEvent.Listener observer) throws IOException {
+            final LocalResource resource,
+            final LinkOption option,
+            final Observer observer) throws IOException
+    {
 
-        requireNonNull(resource, "resource");
+        requireNonNull(resource, "root");
         requireNonNull(option, "option");
         requireNonNull(observer, "observer");
 
-        boolean directory = resource.stat(option).isDirectory();
+        final boolean directory = resource.stat(option).isDirectory();
 
-        int fd = inotifyInit(resource);
-        int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
+        final int fd = inotifyInit(resource);
+        final int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
 
-        LocalResourceObservable observable =
+        final LocalResourceObservable observable =
                 new LocalResourceObservable(fd, wd, resource, observer);
 
         /* Using a new thread seems to be much quicker than using a thread pool
          * executor, didn't investigate why, just a reminder here to check the
          * performance if this is to be changed to a pool.
          */
-        Thread thread = new Thread(observable);
+        final Thread thread = new Thread(observable);
         thread.setName(observable.toString());
-        thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+        thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler()
+        {
             @Override
-            public void uncaughtException(Thread thread, final Throwable e) {
-                handler.post(new Runnable() {
+            public void uncaughtException(final Thread thread, final Throwable e)
+            {
+                handler.post(new Runnable()
+                {
                     @Override
-                    public void run() {
+                    public void run()
+                    {
                         throw Throwables.propagate(e);
                     }
                 });
@@ -214,53 +228,68 @@ final class LocalResourceObservable extends Native
          */
         thread.start();
 
-        if (!directory) {
+        if (!directory)
+        {
             return observable;
         }
 
-        try {
+        try
+        {
             observeChildren(fd, resource, option, observable);
-        } catch (IOException e) {
+        }
+        catch (final IOException e)
+        {
             log.warn(e);
         }
 
         return observable;
     }
 
-    private static int inotifyInit(LocalResource resource) throws IOException {
-        try {
+    private static int inotifyInit(final LocalResource resource) throws IOException
+    {
+        try
+        {
             return Inotify.init1(IN_NONBLOCK);
-        } catch (ErrnoException e) {
+        }
+        catch (final ErrnoException e)
+        {
             throw e.toIOException(resource.path());
         }
     }
 
     private static int inotifyAddWatchWillCloseOnError(
-            int fd,
-            LocalResource resource,
-            LinkOption option) throws IOException {
+            final int fd,
+            final LocalResource resource,
+            final LinkOption opt) throws IOException
+    {
 
-        try {
-
-            int mask = ROOT_MASK;
-            if (option == NOFOLLOW) {
-                mask |= IN_DONT_FOLLOW;
-            }
-            String path = resource.file().getPath();
-            return Inotify.addWatch(fd, path, mask);
-
-        } catch (ErrnoException e) {
-            try {
+        try
+        {
+            final int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
+            final String path = resource.file().getPath();
+            return addWatch(fd, path, mask);
+        }
+        catch (final ErrnoException e)
+        {
+            try
+            {
                 Unistd.close(fd);
-            } catch (ErrnoException ee) {
+            }
+            catch (final ErrnoException ee)
+            {
                 e.addSuppressed(ee);
             }
             throw e.toIOException(resource.path());
 
-        } catch (Throwable e) {
-            try {
+        }
+        catch (final Throwable e)
+        {
+            try
+            {
                 Unistd.close(fd);
-            } catch (ErrnoException ee) {
+            }
+            catch (final ErrnoException ee)
+            {
                 e.addSuppressed(ee);
             }
             throw e;
@@ -271,27 +300,36 @@ final class LocalResourceObservable extends Native
             final int fd,
             final LocalResource resource,
             final LinkOption option,
-            final LocalResourceObservable observable) throws IOException {
+            final LocalResourceObservable observable) throws IOException
+    {
 
-        LocalResourceStream.list(resource, option, new LocalResourceStream.Callback() {
+        LocalResourceStream.list(resource, option, new Callback()
+        {
             @Override
-            public boolean accept(long inode, String name, boolean directory) throws IOException {
-                if (observable.isClosed()) {
+            public boolean accept(
+                    final long inode,
+                    final String name,
+                    final boolean directory) throws IOException
+            {
+                if (observable.isClosed())
+                {
                     return false;
                 }
-                if (!directory) {
+                if (!directory)
+                {
                     return true;
                 }
 
-                LocalResource child = resource.resolve(name);
-                try {
-
-                    String path = child.file().getPath();
-                    int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
-                    observable.children.put(wd, child);
-
-                } catch (ErrnoException e) {
-                    log.debug("Failed to add watch. %s: %s", e.getMessage(), child);
+                try
+                {
+                    final String path = resource.path() + "/" + name;
+                    final int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
+                    observable.childDirectories.put(wd, name);
+                }
+                catch (final ErrnoException e)
+                {
+                    log.debug("Failed to add watch. %s: %s",
+                            e.getMessage(), name);
                 }
 
                 return true;
@@ -301,45 +339,59 @@ final class LocalResourceObservable extends Native
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return getClass().getSimpleName()
-                + "{fd=" + fd + ",wd=" + wd + ",resource=" + resource + "}";
+                + "{fd=" + fd + ",wd=" + rootWd + ",root=" + root + "}";
     }
 
     // Also called from native code
-    private boolean isClosed() {
+    private boolean isClosed()
+    {
         return closed.get();
     }
 
     @Override
-    public void close() throws IOException {
-        if (!closed.compareAndSet(false, true)) {
+    public void close() throws IOException
+    {
+        if (!closed.compareAndSet(false, true))
+        {
             return;
         }
 
-        Thread t = thread.get();
-        if (t != null) {
+        final Thread t = thread.get();
+        if (t != null)
+        {
             t.interrupt();
         }
 
-        try {
+        try
+        {
             Unistd.close(fd);
-        } catch (ErrnoException e) {
-            throw e.toIOException(resource.path());
+        }
+        catch (final ErrnoException e)
+        {
+            throw e.toIOException(root.path());
         }
     }
 
     @Override
-    public void run() {
-        try {
+    public void run()
+    {
+        try
+        {
             thread.set(currentThread());
             observe(fd);
-        } catch (Throwable e) {
-            if (!isClosed()) {
+        }
+        catch (final Throwable e)
+        {
+            if (!isClosed())
+            {
                 throw e;
             }
         }
-        if (!isClosed()) {
+        if (!isClosed())
+        {
             throw new IllegalStateException("Abnormal termination.");
         }
     }
@@ -348,10 +400,14 @@ final class LocalResourceObservable extends Native
 
     // Also called from native code
     @SuppressWarnings("UnusedDeclaration")
-    private void sleep() {
-        try {
+    private void sleep()
+    {
+        try
+        {
             Thread.sleep(200);
-        } catch (InterruptedException e) {
+        }
+        catch (final InterruptedException e)
+        {
             currentThread().interrupt();
             // Interrupt from close()
         }
@@ -359,133 +415,170 @@ final class LocalResourceObservable extends Native
 
     // Also called from native code
     @SuppressWarnings("UnusedDeclaration")
-    private void onEvent(int wd, int event, String child) {
-        try {
+    private void onEvent(final int wd, final int event, final String child)
+    {
+        try
+        {
             handleEvent(wd, event, child);
-        } catch (final Throwable e) {
-            try {
+        }
+        catch (final Throwable e)
+        {
+            try
+            {
                 close();
-            } catch (Throwable ee) {
+            }
+            catch (final Throwable ee)
+            {
                 e.addSuppressed(ee);
             }
-            handler.post(new Runnable() {
+            handler.post(new Runnable()
+            {
                 @Override
-                public void run() {
+                public void run()
+                {
                     throw Throwables.propagate(e);
                 }
             });
         }
     }
 
-    private void handleEvent(int wd, int event, String child) {
+    private void handleEvent(final int wd, final int event, final String child)
+    {
         log(wd, event, child);
 
-        if (isClosed()) {
+        if (isClosed())
+        {
             return;
         }
 
-        if (wd == this.wd) {
+        if (wd == rootWd)
+        {
 
-            if (isChildCreated(event, child)) {
-                LocalResource childResource = this.resource.resolve(child);
-                if (isDirectory(event)) {
-                    addWatchForDirectory(childResource);
+            if (isChildCreated(event, child))
+            {
+                if (isDirectory(event))
+                {
+                    addWatchForDirectory(child);
                 }
-                observer(childResource, Kind.CREATE);
-
-            } else if (isChildDeleted(event, child)) {
+                observer(CREATE, child);
+            }
+            else if (isChildDeleted(event, child))
+            {
                 removeWatch(wd);
-                observer(resource.resolve(child), Kind.DELETE);
-
-            } else if (isSelfDeleted(event, child)) {
+                observer(DELETE, child);
+            }
+            else if (isSelfDeleted(event, child))
+            {
                 removeWatch(wd);
-                observer(resource, Kind.DELETE);
-
-            } else if (isChildModified(event, child)) {
-                observer(resource.resolve(child), Kind.MODIFY);
-
-            } else if (isSelfModified(event, child)) {
-                observer(resource, Kind.MODIFY);
-
-            } else if (isObserverStopped(event)) {
+                observer(DELETE, null);
+            }
+            else if (isChildModified(event, child))
+            {
+                observer(MODIFY, child);
+            }
+            else if (isSelfModified(event, child))
+            {
+                observer(MODIFY, null);
+            }
+            else if (isObserverStopped(event))
+            {
                 onObserverStopped(wd);
-
-            } else {
+            }
+            else
+            {
                 throw new RuntimeException(getEventName(event) + ": " + child);
             }
 
-        } else {
-
-            if (isObserverStopped(event)) {
+        }
+        else
+        {
+            if (isObserverStopped(event))
+            {
                 onObserverStopped(wd);
-
-            } else {
-                Resource resource = children.get(wd);
-                if (resource != null) {
-                    observer(resource, Kind.MODIFY);
+            }
+            else
+            {
+                final String childDirectory = childDirectories.get(wd);
+                if (childDirectory != null)
+                {
+                    observer(MODIFY, childDirectory);
                 }
             }
-
         }
     }
 
-    private void observer(Resource resource, Kind kind) {
-        observer.onEvent(WatchEvent.create(kind, resource));
+    private void observer(final Event kind, final String name)
+    {
+        observer.onEvent(kind, name);
     }
 
-    private void addWatchForDirectory(LocalResource directory) {
-        try {
-            String path = directory.file().getPath();
-            int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
-            children.put(wd, directory);
-        } catch (ErrnoException e) {
-            log.warn(e, "Failed to add watch %s", directory);
+    private void addWatchForDirectory(final String name)
+    {
+        try
+        {
+            final String path = root.path() + "/" + name;
+            final int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
+            childDirectories.put(wd, name);
+        }
+        catch (final ErrnoException e)
+        {
+            log.warn(e, "Failed to add watch %s", name);
         }
     }
 
-    private void removeWatch(int wd) {
-        children.remove(wd);
+    private void removeWatch(final int wd)
+    {
+        childDirectories.remove(wd);
     }
 
-    private boolean isDirectory(int event) {
+    private boolean isDirectory(final int event)
+    {
         return 0 != (event & IN_ISDIR);
     }
 
-    private void onObserverStopped(int wd) {
-        children.remove(wd);
+    private void onObserverStopped(final int wd)
+    {
+        childDirectories.remove(wd);
     }
 
-    private boolean isObserverStopped(int event) {
+    private boolean isObserverStopped(final int event)
+    {
         return 0 != (event & IN_IGNORED);
     }
 
-    private boolean isChildCreated(int mask, String child) {
+    private boolean isChildCreated(final int mask, final String child)
+    {
         return (child != null && 0 != (mask & IN_CREATE)) ||
                 (child != null && 0 != (mask & IN_MOVED_TO));
     }
 
-    private boolean isChildModified(int mask, String child) {
+    private boolean isChildModified(final int mask, final String child)
+    {
         return (child != null && 0 != (mask & IN_ATTRIB)) ||
                 (child != null && 0 != (mask & IN_MODIFY)) ||
                 (child != null && 0 != (mask & IN_CLOSE_WRITE));
     }
 
-    private boolean isChildDeleted(int event, String child) {
+    private boolean isChildDeleted(final int event, final String child)
+    {
         return (child != null && 0 != (event & IN_MOVED_FROM)) ||
                 (child != null && 0 != (event & IN_DELETE));
     }
 
-    private boolean isSelfModified(int mask, String child) {
+    private boolean isSelfModified(final int mask, final String child)
+    {
         return (child == null && 0 != (mask & IN_ATTRIB)) ||
                 (child == null && 0 != (mask & IN_MODIFY));
     }
 
-    private boolean isSelfDeleted(int mask, String child) {
+    private boolean isSelfDeleted(final int mask, final String child)
+    {
         return (child == null && 0 != (mask & IN_DELETE_SELF)) ||
                 (child == null && 0 != (mask & IN_MOVE_SELF));
     }
 
-    private String getEventName(int event) {
+    private String getEventName(final int event)
+    {
         if (0 != (event & IN_OPEN)) return "IN_OPEN";
         if (0 != (event & IN_ACCESS)) return "IN_ACCESS";
         if (0 != (event & IN_ATTRIB)) return "IN_ATTRIB";
@@ -504,15 +597,28 @@ final class LocalResourceObservable extends Native
         return "UNKNOWN";
     }
 
-    private void log(int wd, int event, String child) {
-        Resource resource;
-        if (wd == this.wd) {
-            resource = this.resource;
-        } else {
-            resource = children.get(wd);
+    private void log(final int wd, final int event, final String child)
+    {
+        if (!log.isVerboseEnabled())
+        {
+            return;
         }
-        log.verbose("fd=%s, wd=%s, event=%s, parent=%s, child=%s",
-                fd, wd, getEventName(event), resource, child);
+
+        final Resource resource;
+        if (wd == rootWd)
+        {
+            resource = root;
+        }
+        else
+        {
+            resource = root.resolve(childDirectories.get(wd));
+        }
+
+        log.verbose("fd=" + fd +
+                ", wd=" + wd +
+                ", event=" + getEventName(event) +
+                ", parent=" + resource +
+                ", child=" + child);
     }
 
 }

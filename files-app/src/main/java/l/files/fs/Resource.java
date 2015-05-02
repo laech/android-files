@@ -127,7 +127,7 @@ public interface Resource extends Parcelable
      *         if option is {@link LinkOption#NOFOLLOW} and this resource is a
      *         link, observe on the link instead of the link target
      */
-    Closeable observe(LinkOption option, WatchEvent.Listener observer)
+    Closeable observe(LinkOption option, Observer observer)
             throws IOException;
 
     /**
