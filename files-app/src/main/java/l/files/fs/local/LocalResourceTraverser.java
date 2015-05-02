@@ -8,13 +8,12 @@ import java.util.ListIterator;
 
 import javax.annotation.Nullable;
 
+import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
 import l.files.fs.NotDirectoryException;
 import l.files.fs.Resource;
-import l.files.fs.ExceptionHandler;
 import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
-import l.files.fs.UncheckedIOException;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -87,8 +86,6 @@ final class LocalResourceTraverser {
 
                 try {
                     pushChildren(stack, node);
-                } catch (UncheckedIOException e) {
-                    handler.handle(node.resource, e.getCause());
                 } catch (IOException e) {
                     handler.handle(node.resource, e);
                 }

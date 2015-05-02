@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import l.files.fs.LinkOption;
 import l.files.fs.Resource;
-import l.files.fs.UncheckedIOException;
 import l.files.fs.WatchEvent;
 import l.files.logging.Logger;
 
@@ -221,7 +220,7 @@ final class LocalResourceObservable extends Native
 
         try {
             observeChildren(fd, resource, option, observable);
-        } catch (UncheckedIOException | IOException e) {
+        } catch (IOException e) {
             log.warn(e);
         }
 
