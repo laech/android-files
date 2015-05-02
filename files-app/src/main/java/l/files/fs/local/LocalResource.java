@@ -628,8 +628,8 @@ public abstract class LocalResource implements Resource
         requireNonNull(instant, "instant");
         try
         {
-            final long seconds = instant.getSeconds();
-            final int nanos = instant.getNanos();
+            final long seconds = instant.seconds();
+            final int nanos = instant.nanos();
             final boolean followLink = option == FOLLOW;
             setAccessTime(path(), seconds, nanos, followLink);
         }
@@ -655,8 +655,8 @@ public abstract class LocalResource implements Resource
         requireNonNull(instant, "instant");
         try
         {
-            final long seconds = instant.getSeconds();
-            final int nanos = instant.getNanos();
+            final long seconds = instant.seconds();
+            final int nanos = instant.nanos();
             final boolean followLink = option == FOLLOW;
             setModificationTime(path(), seconds, nanos, followLink);
         }

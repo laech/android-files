@@ -9,7 +9,6 @@ import static l.files.fs.LinkOption.FOLLOW;
 
 public abstract class AbstractDetector implements Detector
 {
-
     // Media types for file types, kept consistent with the linux "file" command
     private static final MediaType INODE_DIRECTORY = MediaType.parse("inode/directory");
     private static final MediaType INODE_BLOCKDEVICE = MediaType.parse("inode/blockdevice");
@@ -18,17 +17,21 @@ public abstract class AbstractDetector implements Detector
     private static final MediaType INODE_SOCKET = MediaType.parse("inode/socket");
 
     @Override
-    public MediaType detect(Resource resource) throws IOException {
+    public MediaType detect(final Resource resource) throws IOException
+    {
         return detect(resource, resource.stat(FOLLOW));
     }
 
     @Override
-    public MediaType detect(
-            Resource resource, Stat stat) throws IOException {
-
-        if (stat.isSymbolicLink()) {
+    public MediaType detect(final Resource resource, final Stat stat)
+            throws IOException
+    {
+        if (stat.isSymbolicLink())
+        {
             return detect(resource);
-        } else {
+        }
+        else
+        {
             if (stat.isRegularFile()) return detectFile(resource, stat);
             if (stat.isFifo()) return INODE_FIFO;
             if (stat.isSocket()) return INODE_SOCKET;
@@ -39,7 +42,6 @@ public abstract class AbstractDetector implements Detector
         }
     }
 
-    protected abstract MediaType detectFile(
-            Resource resource, Stat stat) throws IOException;
-
+    protected abstract MediaType detectFile(Resource resource, Stat stat)
+            throws IOException;
 }

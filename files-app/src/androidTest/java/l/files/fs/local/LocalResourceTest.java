@@ -112,7 +112,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_stat_modificationTime() throws Exception
     {
         final Stat stat = dir1().stat(NOFOLLOW);
-        final long actual = stat.modificationTime().getSeconds();
+        final long actual = stat.modificationTime().seconds();
         final long expected = Os.stat(dir1().path()).st_atime;
         assertEquals(expected, actual);
     }
@@ -121,7 +121,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Stat actual = dir1().stat(NOFOLLOW);
         final StructStat expected = Os.stat(dir1().path());
-        assertEquals(expected.st_atime, actual.accessTime().getSeconds());
+        assertEquals(expected.st_atime, actual.accessTime().seconds());
     }
 
     public void test_stat_size() throws Exception
@@ -976,7 +976,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setModificationTime() throws Exception
     {
         final Instant old = getModificationTime(dir1(), NOFOLLOW);
-        final Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
+        final Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
         dir1().setModificationTime(NOFOLLOW, expect);
         final Instant actual = getModificationTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);
@@ -1056,7 +1056,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setAccessTime() throws Exception
     {
         final Instant old = getAccessTime(dir1(), NOFOLLOW);
-        final Instant expect = Instant.of(old.getSeconds() + 101, old.getNanos() - 1);
+        final Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
         dir1().setAccessTime(NOFOLLOW, expect);
         final Instant actual = getAccessTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);

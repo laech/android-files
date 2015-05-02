@@ -10,32 +10,41 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class MagicDetectorTest extends AbstractDetectorTest {
-
+public final class MagicDetectorTest extends AbstractDetectorTest
+{
     @Override
-    protected AbstractDetector detector() {
+    protected AbstractDetector detector()
+    {
         return MagicDetector.INSTANCE;
     }
 
-    public void testDetect_returnsOctetStreamForUnreadable() throws Exception {
-        Resource file = dir1().resolve("a.txt").createFile();
+    public void testDetect_returnsOctetStreamForUnreadable() throws Exception
+    {
+        final Resource file = dir1().resolve("a.txt").createFile();
         file.writeString(NOFOLLOW, UTF_8, "hello world");
         file.setPermissions(Collections.<Permission>emptySet());
-        try {
+        try
+        {
             detector().detect(file);
             fail();
-        } catch (IOException e) {
+        }
+        catch (final IOException e)
+        {
             // Pass
         }
     }
 
-    public void testDetect_returnsOctetStreamForSpecialFile() throws Exception {
-        File file = new File("/proc/1/maps");
+    public void testDetect_returnsOctetStreamForSpecialFile() throws Exception
+    {
+        final File file = new File("/proc/1/maps");
         assertExists(file);
-        try {
+        try
+        {
             detector().detect(LocalResource.create(file));
             fail();
-        } catch (IOException e) {
+        }
+        catch (final IOException e)
+        {
             // Pass
         }
     }

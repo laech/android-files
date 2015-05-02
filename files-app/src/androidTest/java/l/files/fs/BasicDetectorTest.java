@@ -1,10 +1,10 @@
 package l.files.fs;
 
-public final class BasicDetectorTest extends AbstractDetectorTest {
-
+public final class BasicDetectorTest extends AbstractDetectorTest
+{
     @Override
-    protected AbstractDetector detector() {
+    protected AbstractDetector detector()
+    {
         return BasicDetector.INSTANCE;
     }
-
 }
