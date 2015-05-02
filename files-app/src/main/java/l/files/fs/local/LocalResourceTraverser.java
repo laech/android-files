@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
-import l.files.fs.NotDirectoryException;
+import l.files.fs.NotDirectory;
 import l.files.fs.Resource;
 import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
@@ -120,7 +120,7 @@ final class LocalResourceTraverser {
             while (it.hasPrevious()) {
                 stack.push(new Node(it.previous()));
             }
-        } catch (NotDirectoryException ignore) {
+        } catch (NotDirectory ignore) {
         }
     }
 

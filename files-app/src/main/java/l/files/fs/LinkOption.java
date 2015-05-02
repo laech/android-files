@@ -5,8 +5,8 @@ package l.files.fs;
  * resource. This applies to the resource itself, not its parents, parent
  * symlinks are always followed.
  */
-public enum LinkOption {
-
+public enum LinkOption
+{
     /**
      * Follow symbolic link.
      */
@@ -16,5 +16,4 @@ public enum LinkOption {
      * Do not follow symbolic link.
      */
     NOFOLLOW
-
 }

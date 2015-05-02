@@ -11,7 +11,7 @@ import l.files.fs.Stat;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.local.LocalResource.mapPermissions;
+import static l.files.fs.local.LocalResource.permissionsFromMode;
 
 @AutoParcel
 public abstract class LocalStat implements Stat
@@ -94,7 +94,7 @@ public abstract class LocalStat implements Stat
     @Override
     public Set<Permission> permissions() {
         if (permissions == null) {
-            permissions = mapPermissions(getStat().getMode());
+            permissions = permissionsFromMode(getStat().getMode());
         }
         return permissions;
     }

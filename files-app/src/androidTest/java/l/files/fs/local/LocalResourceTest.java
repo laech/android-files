@@ -14,16 +14,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.AccessException;
-import l.files.fs.CrossDeviceException;
-import l.files.fs.ExistsException;
+import l.files.fs.AccessDenied;
+import l.files.fs.UnsupportedOperation;
+import l.files.fs.AlreadyExists;
 import l.files.fs.Instant;
-import l.files.fs.InvalidException;
+import l.files.fs.InvalidOperation;
 import l.files.fs.LinkOption;
-import l.files.fs.NotDirectoryException;
-import l.files.fs.NotEmptyException;
-import l.files.fs.NotExistException;
-import l.files.fs.NotFileException;
+import l.files.fs.NotDirectory;
+import l.files.fs.DirectoryNotEmpty;
+import l.files.fs.NotExist;
+import l.files.fs.NotFile;
+import l.files.fs.NotLink;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -46,7 +47,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
-import static l.files.fs.local.LocalResource.mapPermissions;
+import static l.files.fs.local.LocalResource.permissionsFromMode;
 import static l.files.fs.local.Stat.lstat;
 
 public final class LocalResourceTest extends ResourceBaseTest
@@ -179,30 +180,30 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(asList(a, b), result);
     }
 
-    public void test_list_AccessException() throws Exception
+    public void test_list_AccessDenied() throws Exception
     {
         final Resource dir = dir1().resolve("dir").createDirectory();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnList(AccessException.class, dir, NOFOLLOW);
+        expectOnList(AccessDenied.class, dir, NOFOLLOW);
     }
 
     public void test_list_NotExistsException() throws Exception
     {
         final Resource dir = dir1().resolve("dir");
-        expectOnList(NotExistException.class, dir, NOFOLLOW);
+        expectOnList(NotExist.class, dir, NOFOLLOW);
     }
 
     public void test_list_NotDirectoryException_file() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
-        expectOnList(NotDirectoryException.class, file, NOFOLLOW);
+        expectOnList(NotDirectory.class, file, NOFOLLOW);
     }
 
     public void test_list_NotDirectoryException_link() throws Exception
     {
         final Resource dir = dir1().resolve("dir").createDirectory();
         final Resource link = dir1().resolve("link").createLink(dir);
-        expectOnList(NotDirectoryException.class, link, NOFOLLOW);
+        expectOnList(NotDirectory.class, link, NOFOLLOW);
     }
 
     public void test_list_linkFollowSuccess() throws Exception
@@ -344,32 +345,30 @@ public final class LocalResourceTest extends ResourceBaseTest
         );
     }
 
-    public void test_openOutputStream_AccessException() throws Exception
+    public void test_openOutputStream_AccessDenied() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnOpenOutputStream(AccessException.class, file, NOFOLLOW, false);
+        expectOnOpenOutputStream(AccessDenied.class, file, NOFOLLOW, false);
     }
 
     public void test_openOutputStream_NotExistException() throws Exception
     {
         final Resource file = dir1().resolve("parent/file");
-        expectOnOpenOutputStream(
-                NotExistException.class, file, NOFOLLOW, false);
+        expectOnOpenOutputStream(NotExist.class, file, NOFOLLOW, false);
     }
 
     public void test_openOutputStream_NotFileException_directory()
             throws Exception
     {
-        expectOnOpenOutputStream(
-                NotFileException.class, dir1(), NOFOLLOW, false);
+        expectOnOpenOutputStream(NotFile.class, dir1(), NOFOLLOW, false);
     }
 
     public void test_openOutputStream_NotFileException_link() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createLink(target);
-        expectOnOpenOutputStream(NotFileException.class, link, NOFOLLOW, false);
+        expectOnOpenOutputStream(NotFile.class, link, NOFOLLOW, false);
     }
 
     private static void expectOnOpenOutputStream(
@@ -411,26 +410,26 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createLink(target);
-        expectOnOpenInputStream(NotFileException.class, link, NOFOLLOW);
+        expectOnOpenInputStream(NotFile.class, link, NOFOLLOW);
     }
 
     public void test_openInputStream_NotFileException_directory()
             throws Exception
     {
-        expectOnOpenInputStream(NotFileException.class, dir1(), NOFOLLOW);
+        expectOnOpenInputStream(NotFile.class, dir1(), NOFOLLOW);
     }
 
-    public void test_openInputStream_AccessException() throws Exception
+    public void test_openInputStream_AccessDenied() throws Exception
     {
         final Resource file = dir1().resolve("a").createFile();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnOpenInputStream(AccessException.class, file, NOFOLLOW);
+        expectOnOpenInputStream(AccessDenied.class, file, NOFOLLOW);
     }
 
     public void test_openInputStream_NotExistException() throws Exception
     {
         final Resource file = dir1().resolve("a");
-        expectOnOpenInputStream(NotExistException.class, file, NOFOLLOW);
+        expectOnOpenInputStream(NotExist.class, file, NOFOLLOW);
     }
 
     private static void expectOnOpenInputStream(
@@ -494,33 +493,33 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected.canWrite(), actual.writable());
         assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
-                mapPermissions(lstat(expected.getPath()).getMode()),
+                permissionsFromMode(lstat(expected.getPath()).getMode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
 
-    public void test_createFile_AccessException() throws Exception
+    public void test_createFile_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnCreateFile(AccessException.class, dir1().resolve("a"));
+        expectOnCreateFile(AccessDenied.class, dir1().resolve("a"));
     }
 
-    public void test_createFile_ExistsException() throws Exception
+    public void test_createFile_AlreadyExists() throws Exception
     {
         final Resource child = dir1().resolve("a");
         child.createFile();
-        expectOnCreateFile(ExistsException.class, child);
+        expectOnCreateFile(AlreadyExists.class, child);
     }
 
     public void test_createFile_NotExistException() throws Exception
     {
-        expectOnCreateFile(NotExistException.class, dir1().resolve("a/b"));
+        expectOnCreateFile(NotExist.class, dir1().resolve("a/b"));
     }
 
     public void test_createFile_NotDirectoryException() throws Exception
     {
         final Resource child = createChildWithNonDirectoryParent();
-        expectOnCreateFile(NotDirectoryException.class, child);
+        expectOnCreateFile(NotDirectory.class, child);
     }
 
     private static void expectOnCreateFile(
@@ -556,33 +555,33 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected.canWrite(), actual.writable());
         assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
-                mapPermissions(lstat(expected.getPath()).getMode()),
+                permissionsFromMode(lstat(expected.getPath()).getMode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
 
-    public void test_createDirectory_AccessException() throws Exception
+    public void test_createDirectory_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
         final Resource dir = dir1().resolve("a");
-        expectOnCreateDirectory(AccessException.class, dir);
+        expectOnCreateDirectory(AccessDenied.class, dir);
     }
 
-    public void test_createDirectory_ExistsException() throws Exception
+    public void test_createDirectory_AlreadyExists() throws Exception
     {
-        expectOnCreateDirectory(ExistsException.class, dir1());
+        expectOnCreateDirectory(AlreadyExists.class, dir1());
     }
 
     public void test_createDirectory_NotFoundException() throws Exception
     {
         final Resource dir = dir1().resolve("a/b");
-        expectOnCreateDirectory(NotExistException.class, dir);
+        expectOnCreateDirectory(NotExist.class, dir);
     }
 
     public void test_createDirectory_NotDirectoryException() throws Exception
     {
         final Resource child = createChildWithNonDirectoryParent();
-        expectOnCreateDirectory(NotDirectoryException.class, child);
+        expectOnCreateDirectory(NotDirectory.class, child);
     }
 
     private static void expectOnCreateDirectory(
@@ -612,7 +611,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource parent = dir1().resolve("a");
         final Resource child = parent.resolve("b");
         parent.createFile();
-        expectOnCreateDirectories(NotDirectoryException.class, child);
+        expectOnCreateDirectories(NotDirectory.class, child);
     }
 
     private static void expectOnCreateDirectories(
@@ -636,24 +635,24 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(dir1(), link.readLink());
     }
 
-    public void test_createSymbolicLink_AccessException() throws Exception
+    public void test_createSymbolicLink_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
         final Resource link = dir1().resolve("a");
-        expectOnCreateSymbolicLink(AccessException.class, link, dir1());
+        expectOnCreateSymbolicLink(AccessDenied.class, link, dir1());
     }
 
-    public void test_createSymbolicLink_ExistsException() throws Exception
+    public void test_createSymbolicLink_AlreadyExists() throws Exception
     {
         final Resource link = dir1().resolve("a");
         link.createFile();
-        expectOnCreateSymbolicLink(ExistsException.class, link, dir1());
+        expectOnCreateSymbolicLink(AlreadyExists.class, link, dir1());
     }
 
     public void test_createSymbolicLink_NotExistException() throws Exception
     {
         final Resource link = dir1().resolve("a/b");
-        expectOnCreateSymbolicLink(NotExistException.class, link, dir1());
+        expectOnCreateSymbolicLink(NotExist.class, link, dir1());
     }
 
     public void test_createSymbolicLink_NotDirectoryException() throws Exception
@@ -661,7 +660,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource parent = dir1().resolve("parent");
         final Resource link = parent.resolve("link");
         parent.createFile();
-        expectOnCreateSymbolicLink(NotDirectoryException.class, link, dir1());
+        expectOnCreateSymbolicLink(NotDirectory.class, link, dir1());
     }
 
     private static void expectOnCreateSymbolicLink(
@@ -679,24 +678,24 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_readSymbolicLink_AccessException() throws Exception
+    public void test_readSymbolicLink_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
         final Resource link = dir1().resolve("a");
-        expectOnReadSymbolicLink(AccessException.class, link);
+        expectOnReadSymbolicLink(AccessDenied.class, link);
     }
 
-    public void test_readSymbolicLink_InvalidException() throws Exception
+    public void test_readSymbolicLink_NotLinkException() throws Exception
     {
         final Resource notLink = dir1().resolve("notLink");
         notLink.createFile();
-        expectOnReadSymbolicLink(InvalidException.class, notLink);
+        expectOnReadSymbolicLink(NotLink.class, notLink);
     }
 
     public void test_readSymbolicLink_NotExistException() throws Exception
     {
         final Resource link = dir1().resolve("a");
-        expectOnReadSymbolicLink(NotExistException.class, link);
+        expectOnReadSymbolicLink(NotExist.class, link);
     }
 
     public void test_readSymbolicLink_NotDirectoryException() throws Exception
@@ -704,7 +703,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource parent = dir1().resolve("parent");
         final Resource link = parent.resolve("link");
         parent.createFile();
-        expectOnReadSymbolicLink(NotDirectoryException.class, link);
+        expectOnReadSymbolicLink(NotDirectory.class, link);
     }
 
     private static void expectOnReadSymbolicLink(
@@ -740,17 +739,17 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertNotEqual(dir1().stat(NOFOLLOW), actual);
     }
 
-    public void test_readStatus_AccessException() throws Exception
+    public void test_readStatus_AccessDenied() throws Exception
     {
         dir1().setPermissions(Collections.<Permission>emptySet());
         final Resource child = dir1().resolve("a");
-        expectOnReadStatus(AccessException.class, child);
+        expectOnReadStatus(AccessDenied.class, child);
     }
 
     public void test_readStatus_NotExistException() throws Exception
     {
         final Resource child = dir1().resolve("a/b");
-        expectOnReadStatus(NotExistException.class, child);
+        expectOnReadStatus(NotExist.class, child);
     }
 
     public void test_readStatus_NotDirectoryException() throws Exception
@@ -758,7 +757,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Resource parent = dir1().resolve("a");
         final Resource child = parent.resolve("b");
         parent.createFile();
-        expectOnReadStatus(NotDirectoryException.class, child);
+        expectOnReadStatus(NotDirectory.class, child);
     }
 
     private static void expectOnReadStatus(
@@ -775,13 +774,13 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_moveTo_ExistsException() throws Exception
+    public void test_moveTo_AlreadyExists() throws Exception
     {
         final Resource src = dir1().resolve("src");
         final Resource dst = dir1().resolve("dst");
         src.writeString(NOFOLLOW, UTF_8, "src");
         dst.writeString(NOFOLLOW, UTF_8, "dst");
-        expectOnMoveTo(ExistsException.class, src, dst);
+        expectOnMoveTo(AlreadyExists.class, src, dst);
         assertTrue(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
         assertEquals("src", src.readString(NOFOLLOW, UTF_8));
@@ -822,29 +821,29 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertTrue(dst.resolve("a").exists(NOFOLLOW));
     }
 
-    public void test_moveTo_AccessException() throws Exception
+    public void test_moveTo_AccessDenied() throws Exception
     {
         final Resource src = dir1().resolve("src").createFile();
         final Resource dst = dir1().resolve("dst").createDirectory();
         dst.setPermissions(Collections.<Permission>emptySet());
-        expectOnMoveTo(AccessException.class, src, dst.resolve("a"));
+        expectOnMoveTo(AccessDenied.class, src, dst.resolve("a"));
     }
 
     public void test_moveTo_NotExistException() throws Exception
     {
         final Resource src = dir1().resolve("src");
         final Resource dst = dir1().resolve("dst");
-        expectOnMoveTo(NotExistException.class, src, dst);
+        expectOnMoveTo(NotExist.class, src, dst);
     }
 
-    public void test_moveTo_InvalidException() throws Exception
+    public void test_moveTo_InvalidOperation() throws Exception
     {
         final Resource parent = dir1().resolve("parent").createDirectory();
         final Resource child = parent.resolve("child");
-        expectOnMoveTo(InvalidException.class, parent, child);
+        expectOnMoveTo(InvalidOperation.class, parent, child);
     }
 
-    public void test_moveTo_CrossDeviceException() throws Exception
+    public void test_moveTo_UnsupportedOperation() throws Exception
     {
         /*
          * This test assumes:
@@ -864,7 +863,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         try
         {
             src.createFile();
-            expectOnMoveTo(CrossDeviceException.class, src, dst);
+            expectOnMoveTo(UnsupportedOperation.class, src, dst);
         }
         finally
         {
@@ -935,29 +934,29 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertFalse(directory.exists(NOFOLLOW));
     }
 
-    public void test_delete_AccessException() throws Exception
+    public void test_delete_AccessDenied() throws Exception
     {
         final Resource file = dir1().resolve("a");
         file.createFile();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnDelete(AccessException.class, file);
+        expectOnDelete(AccessDenied.class, file);
     }
 
     public void test_delete_NotExistException() throws Exception
     {
-        expectOnDelete(NotExistException.class, dir1().resolve("a"));
+        expectOnDelete(NotExist.class, dir1().resolve("a"));
     }
 
     public void test_delete_NotDirectoryException() throws Exception
     {
         final Resource child = createChildWithNonDirectoryParent();
-        expectOnDelete(NotDirectoryException.class, child);
+        expectOnDelete(NotDirectory.class, child);
     }
 
     public void test_delete_NotEmptyException() throws Exception
     {
         dir1().resolve("a").createDirectory();
-        expectOnDelete(NotEmptyException.class, dir1());
+        expectOnDelete(DirectoryNotEmpty.class, dir1());
     }
 
     private static void expectOnDelete(
@@ -1027,7 +1026,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setModificationTime_NotExistException() throws Exception
     {
         final Resource doesNotExist = dir1().resolve("doesNotExist");
-        final Class<NotExistException> expected = NotExistException.class;
+        final Class<NotExist> expected = NotExist.class;
         expectOnSetModificationTime(expected, doesNotExist, NOFOLLOW, EPOCH);
     }
 
@@ -1106,8 +1105,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_setAccessTime_NotExistException() throws Exception
     {
         final Resource doesNotExist = dir1().resolve("doesNotExist");
-        expectOnSetAccessTime(
-                NotExistException.class, doesNotExist, NOFOLLOW, EPOCH);
+        expectOnSetAccessTime(NotExist.class, doesNotExist, NOFOLLOW, EPOCH);
     }
 
     private Instant getAccessTime(

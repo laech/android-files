@@ -6,13 +6,13 @@ import com.google.common.base.Joiner;
 
 import java.io.IOException;
 
-import l.files.fs.AccessException;
-import l.files.fs.CrossDeviceException;
-import l.files.fs.ExistsException;
-import l.files.fs.InvalidException;
-import l.files.fs.NotDirectoryException;
-import l.files.fs.NotEmptyException;
-import l.files.fs.NotExistException;
+import l.files.fs.AccessDenied;
+import l.files.fs.UnsupportedOperation;
+import l.files.fs.AlreadyExists;
+import l.files.fs.InvalidOperation;
+import l.files.fs.NotDirectory;
+import l.files.fs.DirectoryNotEmpty;
+import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.ResourceException;
 
@@ -48,13 +48,13 @@ public final class ErrnoException extends Exception {
 
     static IOException toIOException(Exception cause, int errno, String... paths) {
         String path = Joiner.on(", ").join(paths);
-        if (errno == OsConstants.EACCES) return new AccessException(path, cause);
-        if (errno == OsConstants.EEXIST) return new ExistsException(path, cause);
-        if (errno == OsConstants.ENOENT) return new NotExistException(path, cause);
-        if (errno == OsConstants.ENOTDIR) return new NotDirectoryException(path, cause);
-        if (errno == OsConstants.EINVAL) return new InvalidException(path, cause);
-        if (errno == OsConstants.EXDEV) return new CrossDeviceException(path, cause);
-        if (errno == OsConstants.ENOTEMPTY) return new NotEmptyException(path, cause);
+        if (errno == OsConstants.EACCES) return new AccessDenied(path, cause);
+        if (errno == OsConstants.EEXIST) return new AlreadyExists(path, cause);
+        if (errno == OsConstants.ENOENT) return new NotExist(path, cause);
+        if (errno == OsConstants.ENOTDIR) return new NotDirectory(path, cause);
+        if (errno == OsConstants.EINVAL) return new InvalidOperation(path, cause);
+        if (errno == OsConstants.EXDEV) return new UnsupportedOperation(path, cause);
+        if (errno == OsConstants.ENOTEMPTY) return new DirectoryNotEmpty(path, cause);
         return new ResourceException(path, cause);
     }
 

@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import l.files.fs.LinkOption;
-import l.files.fs.NotDirectoryException;
+import l.files.fs.NotDirectory;
 import l.files.fs.Resource;
 
 import static java.util.Objects.requireNonNull;
@@ -61,7 +61,7 @@ final class LocalResourceStream extends Native implements Closeable {
             }
         } catch (ErrnoException e) {
             if (option == NOFOLLOW && e.isCausedByNoFollowLink(resource)) {
-                throw new NotDirectoryException(resource.path(), e);
+                throw new NotDirectory(resource.path(), e);
             }
             throw e.toIOException(resource.path());
         }

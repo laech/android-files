@@ -246,7 +246,7 @@ final class LocalResourceObservable extends Native
             if (option == NOFOLLOW) {
                 mask |= IN_DONT_FOLLOW;
             }
-            String path = resource.getFile().getPath();
+            String path = resource.file().getPath();
             return Inotify.addWatch(fd, path, mask);
 
         } catch (ErrnoException e) {
@@ -286,7 +286,7 @@ final class LocalResourceObservable extends Native
                 LocalResource child = resource.resolve(name);
                 try {
 
-                    String path = child.getFile().getPath();
+                    String path = child.file().getPath();
                     int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
                     observable.children.put(wd, child);
 
@@ -435,7 +435,7 @@ final class LocalResourceObservable extends Native
 
     private void addWatchForDirectory(LocalResource directory) {
         try {
-            String path = directory.getFile().getPath();
+            String path = directory.file().getPath();
             int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
             children.put(wd, directory);
         } catch (ErrnoException e) {

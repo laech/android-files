@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.NotExistException;
+import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
@@ -220,7 +220,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             FileListItem.File oldStat = data.put(resource, newStat);
             return !Objects.equals(newStat, oldStat);
 
-        } catch (NotExistException e) {
+        } catch (NotExist e) {
             return data.remove(resource) != null;
 
         } catch (IOException e) {
