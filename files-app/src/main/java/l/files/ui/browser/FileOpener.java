@@ -12,90 +12,105 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.common.os.AsyncTaskExecutor;
-import l.files.common.widget.Toaster;
+import l.files.common.base.Either;
 import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
-import l.files.logging.Logger;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
+import static l.files.ui.browser.IOExceptions.getFailureMessage;
 
-final class FileOpener implements Consumer<Resource> {
+final class FileOpener implements Consumer<Resource>
+{
 
-    private static final Logger log = Logger.get(FileOpener.class);
-
-    public static FileOpener get(Context context) {
-        return new FileOpener(
-                context, Toaster.get(), AsyncTaskExecutor.DEFAULT);
+    public static FileOpener get(final Context context)
+    {
+        return new FileOpener(context);
     }
 
     private final Context context;
-    private final Toaster toaster;
-    private final AsyncTaskExecutor executor;
 
-    FileOpener(
-            Context context,
-            Toaster toaster,
-            AsyncTaskExecutor executor) {
+    FileOpener(final Context context)
+    {
         this.context = requireNonNull(context, "context");
-        this.toaster = requireNonNull(toaster, "toaster");
-        this.executor = requireNonNull(executor, "executor");
     }
 
     @Override
-    public void apply(Resource resource) {
-        executor.execute(new ShowFileTask(resource));
+    public void apply(final Resource resource)
+    {
+        new ShowFileTask(resource).execute();
     }
 
-    class ShowFileTask extends AsyncTask<Void, Void, MediaType> {
+    class ShowFileTask extends AsyncTask<Void, Void, Either<MediaType, IOException>>
+    {
         private final Resource resource;
 
-        ShowFileTask(Resource resource) {
+        ShowFileTask(final Resource resource)
+        {
             this.resource = resource;
         }
 
         @Override
-        protected MediaType doInBackground(Void... params) {
-            try {
-                return MagicDetector.INSTANCE.detect(resource);
-            } catch (IOException e) {
-                log.warn(e);
-                return null;
+        protected Either<MediaType, IOException> doInBackground(
+                final Void... params)
+        {
+            try
+            {
+                final MediaType result = MagicDetector.INSTANCE.detect(resource);
+                return Either.left(result);
+            }
+            catch (final IOException e)
+            {
+                return Either.right(e);
             }
         }
 
         @Override
-        protected void onPostExecute(MediaType media) {
-            if (media == null) {
-                showFailedToGetFileInfo();
+        protected void onPostExecute(final Either<MediaType, IOException> result)
+        {
+            final MediaType media = result.left();
+            final IOException exception = result.right();
+            if (exception != null)
+            {
+                showException(exception);
                 return;
             }
-            try {
+            try
+            {
                 showFile(media);
-            } catch (ActivityNotFoundException e) {
+            }
+            catch (final ActivityNotFoundException e)
+            {
                 showActivityNotFound();
             }
             debug(media);
         }
 
-        public void showFailedToGetFileInfo() {
-            toaster.toast(context, R.string.failed_to_get_file_info);
+        public void showException(final IOException exception)
+        {
+            final String msg = getFailureMessage(exception);
+            makeText(context, msg, LENGTH_SHORT).show();
         }
 
-        private void showActivityNotFound() {
-            toaster.toast(context, R.string.no_app_to_open_file);
+        private void showActivityNotFound()
+        {
+            final int msg = R.string.no_app_to_open_file;
+            makeText(context, msg, LENGTH_SHORT).show();
         }
 
-        private void showFile(MediaType media) throws ActivityNotFoundException {
+        private void showFile(final MediaType media)
+                throws ActivityNotFoundException
+        {
+            final Uri uri = Uri.parse(resource.uri().toString());
             context.startActivity(new Intent(ACTION_VIEW)
-                    .setDataAndType(Uri.parse(resource.uri().toString()), media.toString()));
+                    .setDataAndType(uri, media.toString()));
         }
 
-        private void debug(MediaType media) {
+        private void debug(final MediaType media)
+        {
             if (DEBUG)
                 makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
         }
