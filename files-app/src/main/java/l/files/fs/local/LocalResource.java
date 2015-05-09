@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
 import android.system.Os;
 
 import java.io.Closeable;
@@ -83,6 +84,8 @@ import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
+import static l.files.fs.local.ErrnoExceptions.isCausedByNoFollowLink;
+import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 @AutoParcel
 public abstract class LocalResource extends Native implements Resource
@@ -303,13 +306,13 @@ public abstract class LocalResource extends Native implements Resource
             Os.access(path(), mode);
             return true;
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
             if (e.errno == EACCES)
             {
                 return false;
             }
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 
@@ -407,13 +410,13 @@ public abstract class LocalResource extends Native implements Resource
             return new FileInputStream(fd);
 
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            if (ErrnoException.isCausedByNoFollowLink(e, this))
+            if (isCausedByNoFollowLink(e, this))
             {
                 throw new NotFile(path(), e);
             }
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 
@@ -440,9 +443,9 @@ public abstract class LocalResource extends Native implements Resource
         {
             return new FileOutputStream(Os.open(path(), flags, mode));
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            if (ErrnoException.isCausedByNoFollowLink(e, this))
+            if (isCausedByNoFollowLink(e, this))
             {
                 throw new NotFile(path(), e);
             }
@@ -450,7 +453,7 @@ public abstract class LocalResource extends Native implements Resource
             {
                 throw new NotFile(path(), e);
             }
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 
@@ -487,9 +490,9 @@ public abstract class LocalResource extends Native implements Resource
             // Same permission bits as java.io.File.mkdir() on Android
             Os.mkdir(path(), S_IRWXU);
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
         return this;
     }
@@ -528,9 +531,9 @@ public abstract class LocalResource extends Native implements Resource
             final FileDescriptor fd = Os.open(path(), flags, mode);
             Os.close(fd);
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
         return this;
     }
@@ -555,9 +558,9 @@ public abstract class LocalResource extends Native implements Resource
         {
             Os.symlink(targetPath, path());
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, path(), targetPath);
+            throw toIOException(e, path(), targetPath);
         }
         return this;
     }
@@ -570,13 +573,13 @@ public abstract class LocalResource extends Native implements Resource
             final String link = Os.readlink(path());
             return create(new File(link));
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
             if (e.errno == EINVAL)
             {
                 throw new NotLink(path());
             }
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 
@@ -601,9 +604,9 @@ public abstract class LocalResource extends Native implements Resource
         {
             Os.rename(srcPath, dstPath);
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, srcPath, dstPath);
+            throw toIOException(e, srcPath, dstPath);
         }
     }
 
@@ -614,9 +617,9 @@ public abstract class LocalResource extends Native implements Resource
         {
             Os.remove(path());
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 
@@ -635,7 +638,7 @@ public abstract class LocalResource extends Native implements Resource
         }
         catch (final ErrnoException e)
         {
-            throw e.toIOException(path());
+            throw toIOException(e, path());
         }
     }
 
@@ -662,7 +665,7 @@ public abstract class LocalResource extends Native implements Resource
         }
         catch (final ErrnoException e)
         {
-            throw e.toIOException(path());
+            throw toIOException(e, path());
         }
     }
 
@@ -689,9 +692,9 @@ public abstract class LocalResource extends Native implements Resource
              */
             Os.chmod(path(), mode);
         }
-        catch (final android.system.ErrnoException e)
+        catch (final ErrnoException e)
         {
-            throw ErrnoException.toIOException(e, path());
+            throw toIOException(e, path());
         }
     }
 

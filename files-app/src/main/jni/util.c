@@ -4,19 +4,17 @@
 #include <errno.h>
 
 void throw_errno_exception(JNIEnv *env) {
-  jclass clazz = (*env)->FindClass(env, "l/files/fs/local/ErrnoException");
+  jclass clazz = (*env)->FindClass(env, "android/system/ErrnoException");
   if (NULL == clazz) {
     return;
   }
 
-  jmethodID constructor = (*env)->GetMethodID(env, clazz, "<init>", "(ILjava/lang/String;)V");
+  jmethodID constructor = (*env)->GetMethodID(env, clazz, "<init>", "(Ljava/lang/String;I)V");
   if (NULL == constructor) {
     return;
   }
 
-  jint err = errno;
-  jstring msg = (*env)->NewStringUTF(env, strerror(errno));
-  jobject exception = (*env)->NewObject(env, clazz, constructor, err, msg);
+  jobject exception = (*env)->NewObject(env, clazz, constructor, NULL, errno);
   if (NULL == exception) {
     return;
   }

@@ -1,6 +1,7 @@
 package l.files.fs.local;
 
 import android.os.Handler;
+import android.system.ErrnoException;
 
 import com.google.common.base.Throwables;
 
@@ -26,6 +27,7 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.local.ErrnoExceptions.toIOException;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
 import static l.files.fs.local.Inotify.IN_CLOSE_NOWRITE;
@@ -253,7 +255,7 @@ final class LocalResourceObservable extends Native
         }
         catch (final ErrnoException e)
         {
-            throw e.toIOException(resource.path());
+            throw toIOException(e, resource.path());
         }
     }
 
@@ -279,7 +281,7 @@ final class LocalResourceObservable extends Native
             {
                 e.addSuppressed(ee);
             }
-            throw e.toIOException(resource.path());
+            throw toIOException(e, resource.path());
 
         }
         catch (final Throwable e)
@@ -328,8 +330,7 @@ final class LocalResourceObservable extends Native
                 }
                 catch (final ErrnoException e)
                 {
-                    log.debug("Failed to add watch. %s: %s",
-                            e.getMessage(), name);
+                    log.debug(e, "Failed to add watch. %s", name);
                 }
 
                 return true;
@@ -371,7 +372,7 @@ final class LocalResourceObservable extends Native
         }
         catch (final ErrnoException e)
         {
-            throw e.toIOException(root.path());
+            throw toIOException(e, root.path());
         }
     }
 

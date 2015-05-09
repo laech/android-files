@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import auto.parcel.AutoParcel;
+import android.system.ErrnoException;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
@@ -18,6 +19,7 @@ import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_ISSOCK;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.local.ErrnoExceptions.toIOException;
 import static l.files.fs.local.LocalResource.permissionsFromMode;
 
 @AutoParcel
@@ -138,7 +140,7 @@ abstract class LocalStat implements Stat
         }
         catch (final ErrnoException e)
         {
-            throw e.toIOException(resource.path());
+            throw toIOException(e, resource.path());
         }
 
         return create(stat);

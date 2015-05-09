@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 
@@ -17,7 +18,7 @@ public final class StatTest extends ResourceBaseTest
         }
         catch (final ErrnoException e)
         {
-            assertEquals(ENOENT, e.errno());
+            assertEquals(ENOENT, e.errno);
         }
     }
 

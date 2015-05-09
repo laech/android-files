@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
+
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html">unistd.h</a>
  */

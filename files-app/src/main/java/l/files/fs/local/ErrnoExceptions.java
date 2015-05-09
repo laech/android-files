@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
+
 import com.google.common.base.Joiner;
 
 import java.io.IOException;
@@ -24,28 +26,14 @@ import static android.system.OsConstants.ENOTEMPTY;
 import static android.system.OsConstants.EXDEV;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class ErrnoException extends Exception
+public final class ErrnoExceptions
 {
-    private final int errno;
-
-    public ErrnoException(final int errno, final String msg)
+    private ErrnoExceptions()
     {
-        super(msg);
-        this.errno = errno;
-    }
-
-    public int errno()
-    {
-        return errno;
-    }
-
-    IOException toIOException(final String... paths)
-    {
-        return toIOException(this, errno, paths);
     }
 
     static IOException toIOException(
-            final android.system.ErrnoException e,
+            final ErrnoException e,
             final String... paths)
     {
         return toIOException(e, e.errno, paths);
@@ -72,17 +60,8 @@ public final class ErrnoException extends Exception
      * this will check to see if this exception is caused by that. Returns false
      * is unable to determine.
      */
-    boolean isCausedByNoFollowLink(final Resource resource)
-    {
-        // See for example open() linux system call
-        return isCausedByNoFollowLink(errno, resource);
-    }
-
-    /**
-     * @see #isCausedByNoFollowLink(Resource)
-     */
     static boolean isCausedByNoFollowLink(
-            final android.system.ErrnoException e,
+            final ErrnoException e,
             final Resource resource)
     {
         return isCausedByNoFollowLink(e.errno, resource);

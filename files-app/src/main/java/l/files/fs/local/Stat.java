@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
 import auto.parcel.AutoParcel;
 
 /**
