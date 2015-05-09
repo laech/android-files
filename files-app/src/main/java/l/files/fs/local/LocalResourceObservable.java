@@ -487,7 +487,7 @@ final class LocalResourceObservable extends Native
             }
             else
             {
-                throw new RuntimeException(getEventName(event) + ": " + child);
+                throw new RuntimeException(eventName(event) + ": " + child);
             }
 
         }
@@ -578,7 +578,7 @@ final class LocalResourceObservable extends Native
                 (child == null && 0 != (mask & IN_MOVE_SELF));
     }
 
-    private String getEventName(final int event)
+    private String eventName(final int event)
     {
         if (0 != (event & IN_OPEN)) return "IN_OPEN";
         if (0 != (event & IN_ACCESS)) return "IN_ACCESS";
@@ -617,7 +617,7 @@ final class LocalResourceObservable extends Native
 
         log.verbose("fd=" + fd +
                 ", wd=" + wd +
-                ", event=" + getEventName(event) +
+                ", event=" + eventName(event) +
                 ", parent=" + resource +
                 ", child=" + child);
     }
