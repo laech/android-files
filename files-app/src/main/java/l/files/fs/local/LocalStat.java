@@ -21,16 +21,16 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.LocalResource.permissionsFromMode;
 
 @AutoParcel
-public abstract class LocalStat implements Stat
+abstract class LocalStat implements Stat
 {
 
     private Instant atime;
     private Instant mtime;
     private Set<Permission> permissions;
 
-    public abstract l.files.fs.local.Stat stat();
+    abstract l.files.fs.local.Stat stat();
 
-    public static LocalStat create(final l.files.fs.local.Stat stat)
+    static LocalStat create(final l.files.fs.local.Stat stat)
     {
         return new AutoParcel_LocalStat(stat);
     }
@@ -118,7 +118,7 @@ public abstract class LocalStat implements Stat
         return permissions;
     }
 
-    public static LocalStat stat(
+    static LocalStat stat(
             final LocalResource resource,
             final LinkOption option) throws IOException
     {
