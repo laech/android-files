@@ -19,24 +19,28 @@ import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
-final class LocalResourceTraverser {
+final class LocalResourceTraverser
+{
 
-    private static final Visitor DEFAULT_VISITOR =
-            new Visitor() {
-                @Override
-                public Result accept(Resource resource) throws IOException {
-                    return CONTINUE;
-                }
-            };
+    private static final Visitor DEFAULT_VISITOR = new Visitor()
+    {
+        @Override
+        public Result accept(final Resource resource) throws IOException
+        {
+            return CONTINUE;
+        }
+    };
 
-    private static final ExceptionHandler DEFAULT_HANDLER =
-            new ExceptionHandler() {
-                @Override
-                public void handle(Resource resource, IOException e)
-                        throws IOException {
-                    throw e;
-                }
-            };
+    private static final ExceptionHandler DEFAULT_HANDLER = new ExceptionHandler()
+    {
+        @Override
+        public void handle(
+                final Resource resource,
+                final IOException e) throws IOException
+        {
+            throw e;
+        }
+    };
 
     private final Resource root;
     private final LinkOption rootOption;
@@ -45,11 +49,13 @@ final class LocalResourceTraverser {
     private final ExceptionHandler handler;
     private final Deque<Node> stack;
 
-    LocalResourceTraverser(Resource root,
-                           LinkOption option,
-                           @Nullable Visitor pre,
-                           @Nullable Visitor post,
-                           @Nullable ExceptionHandler handler) {
+    LocalResourceTraverser(
+            final Resource root,
+            final LinkOption option,
+            @Nullable final Visitor pre,
+            @Nullable final Visitor post,
+            @Nullable final ExceptionHandler handler)
+    {
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
         this.pre = pre != null ? pre : DEFAULT_VISITOR;
@@ -59,24 +65,29 @@ final class LocalResourceTraverser {
         this.stack.push(new Node(root));
     }
 
-    void traverse() throws IOException {
-
-        while (!stack.isEmpty()) {
-
-            Node node = stack.peek();
-            if (!node.visited) {
+    void traverse() throws IOException
+    {
+        while (!stack.isEmpty())
+        {
+            final Node node = stack.peek();
+            if (!node.visited)
+            {
                 node.visited = true;
 
-                Result result;
-                try {
+                final Result result;
+                try
+                {
                     result = pre.accept(node.resource);
-                } catch (IOException e) {
+                }
+                catch (final IOException e)
+                {
                     stack.pop();
                     handler.handle(node.resource, e);
                     continue;
                 }
 
-                switch (result) {
+                switch (result)
+                {
                     case TERMINATE:
                         return;
                     case SKIP:
@@ -84,51 +95,64 @@ final class LocalResourceTraverser {
                         continue;
                 }
 
-                try {
+                try
+                {
                     pushChildren(stack, node);
-                } catch (IOException e) {
+                }
+                catch (final IOException e)
+                {
                     handler.handle(node.resource, e);
                 }
-
-            } else {
-
+            }
+            else
+            {
                 stack.pop();
-                Result result;
-                try {
+                final Result result;
+                try
+                {
                     result = post.accept(node.resource);
-                } catch (IOException e) {
+                }
+                catch (final IOException e)
+                {
                     handler.handle(node.resource, e);
                     continue;
                 }
-                switch (result) {
+                switch (result)
+                {
                     case TERMINATE:
                         return;
                 }
-
             }
-
         }
     }
 
-    private void pushChildren(final Deque<Node> stack, Node parent)
-            throws IOException {
+    private void pushChildren(final Deque<Node> stack, final Node parent)
+            throws IOException
+    {
 
-        LinkOption option = parent.resource.equals(root) ? rootOption : NOFOLLOW;
-        try {
-            List<Resource> children = parent.resource.list(option);
-            ListIterator<Resource> it = children.listIterator(children.size());
-            while (it.hasPrevious()) {
+        final LinkOption option =
+                parent.resource.equals(root) ? rootOption : NOFOLLOW;
+        try
+        {
+            final List<Resource> children = parent.resource.list(option);
+            final ListIterator<Resource> it = children.listIterator(children.size());
+            while (it.hasPrevious())
+            {
                 stack.push(new Node(it.previous()));
             }
-        } catch (NotDirectory ignore) {
+        }
+        catch (final NotDirectory ignore)
+        {
         }
     }
 
-    private static final class Node {
+    private static final class Node
+    {
         final Resource resource;
         boolean visited;
 
-        private Node(Resource resource) {
+        private Node(final Resource resource)
+        {
             this.resource = requireNonNull(resource, "resource");
         }
     }

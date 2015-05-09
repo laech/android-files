@@ -7,94 +7,63 @@ import auto.parcel.AutoParcel;
  */
 @AutoParcel
 @SuppressWarnings("OctalInteger")
-abstract class Stat extends Native {
+abstract class Stat extends Native
+{
 
-    public static final int S_IFMT = 00170000;
-    public static final int S_IFSOCK = 0140000;
-    public static final int S_IFLNK = 0120000;
-    public static final int S_IFREG = 0100000;
-    public static final int S_IFBLK = 0060000;
-    public static final int S_IFDIR = 0040000;
-    public static final int S_IFCHR = 0020000;
-    public static final int S_IFIFO = 0010000;
-    public static final int S_ISUID = 0004000;
-    public static final int S_ISGID = 0002000;
-    public static final int S_ISVTX = 0001000;
-
-    public static boolean S_ISLNK(int m) { return (((m) & S_IFMT) == S_IFLNK); }
-    public static boolean S_ISREG(int m) { return (((m) & S_IFMT) == S_IFREG); }
-    public static boolean S_ISDIR(int m) { return (((m) & S_IFMT) == S_IFDIR); }
-    public static boolean S_ISCHR(int m) { return (((m) & S_IFMT) == S_IFCHR); }
-    public static boolean S_ISBLK(int m) { return (((m) & S_IFMT) == S_IFBLK); }
-    public static boolean S_ISFIFO(int m) { return (((m) & S_IFMT) == S_IFIFO); }
-    public static boolean S_ISSOCK(int m) { return (((m) & S_IFMT) == S_IFSOCK); }
-
-    public static final int S_IRWXU = 00700;
-    public static final int S_IRUSR = 00400;
-    public static final int S_IWUSR = 00200;
-    public static final int S_IXUSR = 00100;
-
-    public static final int S_IRWXG = 00070;
-    public static final int S_IRGRP = 00040;
-    public static final int S_IWGRP = 00020;
-    public static final int S_IXGRP = 00010;
-
-    public static final int S_IRWXO = 00007;
-    public static final int S_IROTH = 00004;
-    public static final int S_IWOTH = 00002;
-    public static final int S_IXOTH = 00001;
-
-    Stat() {
+    Stat()
+    {
     }
 
-    public abstract long getDev();
+    public abstract long dev();
 
-    public abstract long getIno();
+    public abstract long ino();
 
-    public abstract int getMode();
+    public abstract int mode();
 
-    public abstract long getNlink();
+    public abstract long nlink();
 
-    public abstract int getUid();
+    public abstract int uid();
 
-    public abstract int getGid();
+    public abstract int gid();
 
-    public abstract long getRdev();
+    public abstract long rdev();
 
-    public abstract long getSize();
+    public abstract long size();
 
-    public abstract long getAtime();
+    public abstract long atime();
 
-    public abstract int getAtimeNsec();
+    public abstract int atime_nsec();
 
-    public abstract long getMtime();
+    public abstract long mtime();
 
-    public abstract int getMtimeNsec();
+    public abstract int mtime_nsec();
 
-    public abstract long getCtime();
+    public abstract long ctime();
 
-    public abstract int getCtimeNsec();
+    public abstract int ctime_nsec();
 
-    public abstract long getBlksize();
+    public abstract long blksize();
 
-    public abstract long getBlocks();
+    public abstract long blocks();
 
-    public static Stat create(long dev,
-                              long ino,
-                              int mode,
-                              long nlink,
-                              int uid,
-                              int gid,
-                              long rdev,
-                              long size,
-                              long atime,
-                              int atime_nsec,
-                              long mtime,
-                              int mtime_nsec,
-                              long ctime,
-                              int ctime_nsec,
-                              long blksize,
-                              long blocks) {
+    public static Stat create(
+            final long dev,
+            final long ino,
+            final int mode,
+            final long nlink,
+            final int uid,
+            final int gid,
+            final long rdev,
+            final long size,
+            final long atime,
+            final int atime_nsec,
+            final long mtime,
+            final int mtime_nsec,
+            final long ctime,
+            final int ctime_nsec,
+            final long blksize,
+            final long blocks)
+    {
         return new AutoParcel_Stat(
                 dev,
                 ino,
@@ -114,7 +83,8 @@ abstract class Stat extends Native {
                 blocks);
     }
 
-    static {
+    static
+    {
         init();
     }
 

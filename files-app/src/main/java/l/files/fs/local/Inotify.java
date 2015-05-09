@@ -5,7 +5,8 @@ import android.system.OsConstants;
 /**
  * @see <a href="http://man7.org/linux/man-pages/man7/inotify.7.html">inotify</a>
  */
-final class Inotify extends Native {
+final class Inotify extends Native
+{
 
     public static final int IN_ACCESS = 0x00000001;
     public static final int IN_MODIFY = 0x00000002;
@@ -51,7 +52,8 @@ final class Inotify extends Native {
             | IN_DELETE_SELF
             | IN_MOVE_SELF;
 
-    private Inotify() {
+    private Inotify()
+    {
     }
 
     /**

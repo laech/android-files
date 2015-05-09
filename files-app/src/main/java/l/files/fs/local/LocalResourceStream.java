@@ -11,15 +11,17 @@ import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-final class LocalResourceStream extends Native implements Closeable {
+final class LocalResourceStream extends Native implements Closeable
+{
 
     /*
      * Design note: this basically uses <dirent.h> to read directory entries,
-     * returning simple DirectoryStream.Entry without using stat/lstat will yield
-     * much better performance when directory is large.
+     * returning simple DirectoryStream.Entry without using stat/lstat will
+     * yield much better performance when directory is large.
      */
 
-    static {
+    static
+    {
         init();
     }
 
@@ -28,39 +30,50 @@ final class LocalResourceStream extends Native implements Closeable {
     private final Callback callback;
 
     private LocalResourceStream(
-            Resource parent,
-            long dir,
-            Callback callback) {
+            final Resource parent,
+            final long dir,
+            final Callback callback)
+    {
         this.parent = parent;
         this.dir = dir;
         this.callback = callback;
     }
 
     @Override
-    public void close() throws IOException {
-        try {
+    public void close() throws IOException
+    {
+        try
+        {
             close(dir);
-        } catch (ErrnoException e) {
+        }
+        catch (final ErrnoException e)
+        {
             throw e.toIOException(parent.path());
         }
     }
 
     public static void list(
-            Resource resource,
-            LinkOption option,
-            Callback callback) throws IOException {
-
+            final Resource resource,
+            final LinkOption option,
+            final Callback callback) throws IOException
+    {
         requireNonNull(resource, "resource");
         requireNonNull(option, "option");
         requireNonNull(callback, "callback");
 
-        try {
-            long dir = open(resource.path(), option == FOLLOW);
-            try (LocalResourceStream stream = new LocalResourceStream(resource, dir, callback)) {
+        try
+        {
+            final long dir = open(resource.path(), option == FOLLOW);
+            try (LocalResourceStream stream =
+                         new LocalResourceStream(resource, dir, callback))
+            {
                 stream.list(dir);
             }
-        } catch (ErrnoException e) {
-            if (option == NOFOLLOW && e.isCausedByNoFollowLink(resource)) {
+        }
+        catch (final ErrnoException e)
+        {
+            if (option == NOFOLLOW && e.isCausedByNoFollowLink(resource))
+            {
                 throw new NotDirectory(resource.path(), e);
             }
             throw e.toIOException(resource.path());
@@ -68,8 +81,11 @@ final class LocalResourceStream extends Native implements Closeable {
     }
 
     @SuppressWarnings("unused") // Called from native code
-    private boolean notify(long ino, String name, boolean directory)
-            throws IOException {
+    private boolean notify(
+            final long ino,
+            final String name,
+            final boolean directory) throws IOException
+    {
         return ".".equals(name)
                 || "..".equals(name)
                 || callback.accept(ino, name, directory);
@@ -84,7 +100,8 @@ final class LocalResourceStream extends Native implements Closeable {
 
     private static native void init();
 
-    interface Callback {
+    interface Callback
+    {
         boolean accept(long inode, String name, boolean directory)
                 throws IOException;
     }

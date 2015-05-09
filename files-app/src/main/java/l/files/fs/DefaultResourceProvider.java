@@ -5,12 +5,14 @@ import java.net.URI;
 
 import l.files.fs.local.LocalResource;
 
-public enum DefaultResourceProvider implements ResourceProvider {
+public enum DefaultResourceProvider implements ResourceProvider
+{
 
     INSTANCE;
 
     @Override
-    public Resource get(URI uri) {
+    public Resource get(final URI uri)
+    {
         return LocalResource.create(new File(uri));
     }
 

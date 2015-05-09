@@ -6,20 +6,24 @@ import auto.parcel.AutoParcel;
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/grp.h.html">grp.h</a>
  */
 @AutoParcel
-abstract class Group extends Native {
+abstract class Group extends Native
+{
 
-    Group() {
+    Group()
+    {
     }
 
     public abstract String getName();
 
     public abstract int getGid();
 
-    public static Group create(String name, int gid) {
+    public static Group create(final String name, final int gid)
+    {
         return new AutoParcel_Group(name, gid);
     }
 
-    static {
+    static
+    {
         init();
     }
 

@@ -10,11 +10,14 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.Integer.parseInt;
 
 @Deprecated
-public final class Files {
+public final class Files
+{
 
-    private static final Pattern NAME_WITH_NUMBER_SUFFIX = Pattern.compile("(.*?\\s+)(\\d+)");
+    private static final Pattern NAME_WITH_NUMBER_SUFFIX =
+            Pattern.compile("(.*?\\s+)(\\d+)");
 
-    private Files() {
+    private Files()
+    {
     }
 
     /**
@@ -23,38 +26,51 @@ public final class Files {
      * extension if it's {@link File#isFile()}) until the returned file
      * represents a nonexistent file.
      */
-    public static File getNonExistentDestinationFile(File source, File dstDir) {
-
+    public static File getNonExistentDestinationFile(
+            final File source,
+            final File dstDir)
+    {
         String base;
         String last;
 
-        if (source.isDirectory()) {
+        if (source.isDirectory())
+        {
             base = source.getName();
             last = "";
-        } else {
-            String name = source.getName();
+        }
+        else
+        {
+            final String name = source.getName();
             base = getNameWithoutExtension(name);
             last = getFileExtension(name);
-            if (!isNullOrEmpty(last)) {
+            if (!isNullOrEmpty(last))
+            {
                 last = "." + last;
             }
         }
 
         File dst;
-        while ((dst = new File(dstDir, base + last)).exists()) {
+        while ((dst = new File(dstDir, base + last)).exists())
+        {
             base = increment(base);
         }
 
         return dst;
     }
 
-    private static String increment(String base) {
-        Matcher matcher = NAME_WITH_NUMBER_SUFFIX.matcher(base);
-        if (matcher.matches()) {
+    private static String increment(final String base)
+    {
+        final Matcher matcher = NAME_WITH_NUMBER_SUFFIX.matcher(base);
+        if (matcher.matches())
+        {
             return matcher.group(1) + (parseInt(matcher.group(2)) + 1);
-        } else if (base.equals("")) {
+        }
+        else if (base.equals(""))
+        {
             return "2";
-        } else {
+        }
+        else
+        {
             return base + " 2";
         }
     }

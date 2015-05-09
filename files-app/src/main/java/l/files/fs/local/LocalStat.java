@@ -9,6 +9,13 @@ import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
+import static android.system.OsConstants.S_ISBLK;
+import static android.system.OsConstants.S_ISCHR;
+import static android.system.OsConstants.S_ISDIR;
+import static android.system.OsConstants.S_ISFIFO;
+import static android.system.OsConstants.S_ISLNK;
+import static android.system.OsConstants.S_ISREG;
+import static android.system.OsConstants.S_ISSOCK;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.LocalResource.permissionsFromMode;
@@ -21,97 +28,116 @@ public abstract class LocalStat implements Stat
     private Instant mtime;
     private Set<Permission> permissions;
 
-    public abstract l.files.fs.local.Stat getStat();
+    public abstract l.files.fs.local.Stat stat();
 
-    public static LocalStat create(l.files.fs.local.Stat stat) {
+    public static LocalStat create(final l.files.fs.local.Stat stat)
+    {
         return new AutoParcel_LocalStat(stat);
     }
 
     @Override
-    public Instant accessTime() {
-        if (atime == null) {
-            atime = Instant.of(getStat().getAtime(), getStat().getAtimeNsec());
+    public Instant accessTime()
+    {
+        if (atime == null)
+        {
+            atime = Instant.of(stat().atime(), stat().atime_nsec());
         }
         return atime;
     }
 
     @Override
-    public Instant modificationTime() {
-        if (mtime == null) {
-            mtime = Instant.of(getStat().getMtime(), getStat().getMtimeNsec());
+    public Instant modificationTime()
+    {
+        if (mtime == null)
+        {
+            mtime = Instant.of(stat().mtime(), stat().mtime_nsec());
         }
         return mtime;
     }
 
     @Override
-    public long size() {
-        return getStat().getSize();
+    public long size()
+    {
+        return stat().size();
     }
 
     @Override
-    public boolean isSymbolicLink() {
-        return l.files.fs.local.Stat.S_ISLNK(getStat().getMode());
+    public boolean isSymbolicLink()
+    {
+        return S_ISLNK(stat().mode());
     }
 
     @Override
-    public boolean isRegularFile() {
-        return l.files.fs.local.Stat.S_ISREG(getStat().getMode());
+    public boolean isRegularFile()
+    {
+        return S_ISREG(stat().mode());
     }
 
     @Override
-    public boolean isDirectory() {
-        return l.files.fs.local.Stat.S_ISDIR(getStat().getMode());
+    public boolean isDirectory()
+    {
+        return S_ISDIR(stat().mode());
     }
 
-    public long getDevice() {
-        return getStat().getDev();
-    }
-
-    public long getInode() {
-        return getStat().getIno();
-    }
-
-    @Override
-    public boolean isFifo() {
-        return l.files.fs.local.Stat.S_ISFIFO(getStat().getMode());
+    public long inode()
+    {
+        return stat().ino();
     }
 
     @Override
-    public boolean isSocket() {
-        return l.files.fs.local.Stat.S_ISSOCK(getStat().getMode());
+    public boolean isFifo()
+    {
+        return S_ISFIFO(stat().mode());
     }
 
     @Override
-    public boolean isBlockDevice() {
-        return l.files.fs.local.Stat.S_ISBLK(getStat().getMode());
+    public boolean isSocket()
+    {
+        return S_ISSOCK(stat().mode());
     }
 
     @Override
-    public boolean isCharacterDevice() {
-        return l.files.fs.local.Stat.S_ISCHR(getStat().getMode());
+    public boolean isBlockDevice()
+    {
+        return S_ISBLK(stat().mode());
     }
 
     @Override
-    public Set<Permission> permissions() {
-        if (permissions == null) {
-            permissions = permissionsFromMode(getStat().getMode());
+    public boolean isCharacterDevice()
+    {
+        return S_ISCHR(stat().mode());
+    }
+
+    @Override
+    public Set<Permission> permissions()
+    {
+        if (permissions == null)
+        {
+            permissions = permissionsFromMode(stat().mode());
         }
         return permissions;
     }
 
     public static LocalStat stat(
-            LocalResource resource,
-            LinkOption option) throws IOException {
-
+            final LocalResource resource,
+            final LinkOption option) throws IOException
+    {
         requireNonNull(option, "option");
-        l.files.fs.local.Stat stat;
-        try {
-            if (option == FOLLOW) {
+
+        final l.files.fs.local.Stat stat;
+        try
+        {
+            if (option == FOLLOW)
+            {
                 stat = l.files.fs.local.Stat.stat(resource.path());
-            } else {
+            }
+            else
+            {
                 stat = l.files.fs.local.Stat.lstat(resource.path());
             }
-        } catch (ErrnoException e) {
+        }
+        catch (final ErrnoException e)
+        {
             throw e.toIOException(resource.path());
         }
 

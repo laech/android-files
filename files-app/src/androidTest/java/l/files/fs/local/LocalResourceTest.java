@@ -493,7 +493,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected.canWrite(), actual.writable());
         assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath()).getMode()),
+                permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
@@ -555,7 +555,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(expected.canWrite(), actual.writable());
         assertEquals(expected.canExecute(), actual.executable());
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath()).getMode()),
+                permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }

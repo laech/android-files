@@ -6,9 +6,11 @@ import auto.parcel.AutoParcel;
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/pwd.h.html">pwd.h</a>
  */
 @AutoParcel
-abstract class Passwd extends Native {
+abstract class Passwd extends Native
+{
 
-    Passwd() {
+    Passwd()
+    {
     }
 
     public abstract String getName();
@@ -21,11 +23,18 @@ abstract class Passwd extends Native {
 
     public abstract String getShell();
 
-    public static Passwd create(String name, int uid, int gid, String dir, String shell) {
+    public static Passwd create(
+            final String name,
+            final int uid,
+            final int gid,
+            final String dir,
+            final String shell)
+    {
         return new AutoParcel_Passwd(name, uid, gid, dir, shell);
     }
 
-    static {
+    static
+    {
         init();
     }
 
