@@ -22,6 +22,7 @@ import l.files.ui.Animations;
 import l.files.ui.BaseFileListFragment;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.Preferences;
+import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.BookmarkMenu;
 import l.files.ui.menu.NewDirMenu;
@@ -46,7 +47,8 @@ import static l.files.ui.Preferences.isSortKey;
 import static l.files.ui.browser.IOExceptions.getFailureMessage;
 
 public final class FilesFragment extends BaseFileListFragment
-        implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener {
+        implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener
+{
 
     // TODO implement progress
 
@@ -54,33 +56,38 @@ public final class FilesFragment extends BaseFileListFragment
 
     private static final String ARG_DIRECTORY = "directory";
 
-    public static FilesFragment create(Resource directory) {
-        Bundle bundle = new Bundle(1);
+    public static FilesFragment create(final Resource directory)
+    {
+        final Bundle bundle = new Bundle(1);
         bundle.putParcelable(ARG_DIRECTORY, directory);
 
-        FilesFragment browser = new FilesFragment();
+        final FilesFragment browser = new FilesFragment();
         browser.setArguments(bundle);
         return browser;
     }
 
     private Resource directory;
 
-    public FilesFragment() {
+    public FilesFragment()
+    {
         super(R.layout.files_fragment);
     }
 
-    public Resource getDirectory() {
+    public Resource directory()
+    {
         return directory;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState)
+    {
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
 
         setupListView();
         setupOptionsMenu();
+        setHasOptionsMenu(true);
         setListAdapter(FilesAdapter.get(getActivity()));
 
         getLoaderManager().initLoader(0, null, this);
@@ -88,25 +95,34 @@ public final class FilesFragment extends BaseFileListFragment
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
         Preferences.unregister(getActivity(), this);
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int pos, long id) {
-        super.onListItemClick(l, v, pos, id);
-        FileListItem.File item = (FileListItem.File) l.getItemAtPosition(pos);
+    public void onListItemClick(
+            final ListView list,
+            final View view,
+            final int pos,
+            final long id)
+    {
+        super.onListItemClick(list, view, pos, id);
+        final File item = (File)
+                list.getItemAtPosition(pos);
         getBus().post(OpenFileRequest.create(item.getResource()));
     }
 
     @Override
-    public FilesAdapter getListAdapter() {
+    public FilesAdapter getListAdapter()
+    {
         return (FilesAdapter) super.getListAdapter();
     }
 
-    private void setupOptionsMenu() {
-        Activity context = getActivity();
+    private void setupOptionsMenu()
+    {
+        final Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
                 new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
                 new NewDirMenu(context.getFragmentManager(), directory),
@@ -116,7 +132,8 @@ public final class FilesFragment extends BaseFileListFragment
         ));
     }
 
-    private void setupListView() {
+    private void setupListView()
+    {
         final Activity context = getActivity();
         final ClipboardManager clipboard = getClipboardManager(context);
         final ListView list = getListView();
@@ -124,85 +141,107 @@ public final class FilesFragment extends BaseFileListFragment
         list.setMultiChoiceModeListener(MultiChoiceModeListeners.compose(
                 new CountSelectedItemsAction(this),
                 new SelectAllAction(list),
-                new CutAction(context, clipboard, this),
-                new CopyAction(context, clipboard, this),
+                new CutAction(clipboard, this),
+                new CopyAction(clipboard, this),
                 new DeleteAction(context, this),
                 new RenameAction(context.getFragmentManager(), this)
         ));
     }
 
     @Override
-    public Resource getCheckedItem() {
-        int position = getCheckedItemPosition();
-        return ((FileListItem.File) getListView().getItemAtPosition(position)).getResource();
+    public Resource getCheckedItem()
+    {
+        final int position = getCheckedItemPosition();
+        return ((File) getListView().getItemAtPosition(position)).getResource();
     }
 
     @Override
-    public List<Resource> getCheckedItems() {
-        List<Integer> positions = getCheckedItemPositions();
-        List<Resource> resources = new ArrayList<>(positions.size());
-        for (int position : positions) {
-            FileListItem item = (FileListItem) getListView().getItemAtPosition(position);
-            if (item.isFile()) {
-                resources.add(((FileListItem.File) item).getResource());
+    public List<Resource> getCheckedItems()
+    {
+        final List<Integer> positions = getCheckedItemPositions();
+        final List<Resource> resources = new ArrayList<>(positions.size());
+        for (final int position : positions)
+        {
+            final FileListItem item = (FileListItem) getListView()
+                    .getItemAtPosition(position);
+            if (item.isFile())
+            {
+                resources.add(((File) item).getResource());
             }
         }
         return resources;
     }
 
     @Override
-    public Loader<Result> onCreateLoader(int id, Bundle bundle) {
-        Activity context = getActivity();
-        FileSort sort = getSort(context);
-        boolean showHidden = Preferences.getShowHiddenFiles(context);
+    public Loader<Result> onCreateLoader(final int id, final Bundle bundle)
+    {
+        final Activity context = getActivity();
+        final FileSort sort = getSort(context);
+        final boolean showHidden = Preferences.getShowHiddenFiles(context);
         return new FilesLoader(context, directory, sort, showHidden);
     }
 
     @Override
-    public void onLoadFinished(Loader<Result> loader, Result data) {
-        if (getActivity() != null && !getActivity().isFinishing()) {
-            if (!getListAdapter().isEmpty() && isResumed()) {
+    public void onLoadFinished(final Loader<Result> loader, final Result data)
+    {
+        if (getActivity() != null && !getActivity().isFinishing())
+        {
+            if (!getListAdapter().isEmpty() && isResumed())
+            {
                 Animations.animatePreDataSetChange(getListView());
             }
             getListAdapter().setItems(data.getItems());
-            if (data.getException() != null) {
+            if (data.getException() != null)
+            {
                 overrideEmptyText(getFailureMessage(data.getException()));
-            } else {
+            }
+            else
+            {
                 overrideEmptyText(R.string.empty);
             }
         }
     }
 
-    private void overrideEmptyText(int resId) {
-        View root = getView();
-        if (root != null) {
+    private void overrideEmptyText(final int resId)
+    {
+        final View root = getView();
+        if (root != null)
+        {
             ((TextView) root.findViewById(android.R.id.empty)).setText(resId);
         }
     }
 
-    private void overrideEmptyText(String text) {
-        View root = getView();
-        if (root != null) {
+    private void overrideEmptyText(final String text)
+    {
+        final View root = getView();
+        if (root != null)
+        {
             ((TextView) root.findViewById(android.R.id.empty)).setText(text);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<Result> loader) {
+    public void onLoaderReset(final Loader<Result> loader)
+    {
         getListAdapter().setItems(Collections.<FileListItem>emptyList());
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-        Loader<?> _loader = getLoaderManager().getLoader(0);
-        FilesLoader loader = (FilesLoader) _loader;
+    public void onSharedPreferenceChanged(
+            final SharedPreferences pref,
+            final String key)
+    {
+        final Loader<?> _loader = getLoaderManager().getLoader(0);
+        final FilesLoader loader = (FilesLoader) _loader;
 
-        if (isShowHiddenFilesKey(key)) {
+        if (isShowHiddenFilesKey(key))
+        {
             loader.setShowHidden(getShowHiddenFiles(getActivity()));
 
-        } else if (isSortKey(key)) {
+        }
+        else if (isSortKey(key))
+        {
             loader.setSort(getSort(getActivity()));
         }
     }
-
 }

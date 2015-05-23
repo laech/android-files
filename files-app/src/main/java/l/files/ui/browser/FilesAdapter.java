@@ -38,8 +38,6 @@ import static android.view.View.VISIBLE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.ui.FilesApp.getBitmapCache;
-import static l.files.ui.IconFonts.getBackgroundResourceForFileMediaType;
-import static l.files.ui.IconFonts.getDefaultBackgroundResource;
 import static l.files.ui.IconFonts.getDefaultFileIcon;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 import static l.files.ui.IconFonts.getIconForFileMediaType;
@@ -260,7 +258,6 @@ final class FilesAdapter extends StableAdapter<FileListItem>
                 icon.setText(R.string.ic_font_char);
                 icon.setTypeface(getIcon(file, assets));
             }
-            icon.setBackgroundResource(getIconBackgroundResource(file));
         }
 
         boolean setLocalIcon(final TextView icon, final Stat stat)
@@ -304,22 +301,6 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             else
             {
                 return getIconForFileMediaType(assets, file.getBasicMediaType());
-            }
-        }
-
-        private int getIconBackgroundResource(final File file)
-        {
-            final Stat stat = file.getStat();
-            if (stat == null
-                    || stat.isDirectory()
-                    || file.getTargetStat().isDirectory())
-            {
-                return getDefaultBackgroundResource();
-            }
-            else
-            {
-                return getBackgroundResourceForFileMediaType(
-                        file.getBasicMediaType());
             }
         }
 

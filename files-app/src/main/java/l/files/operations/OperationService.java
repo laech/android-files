@@ -133,7 +133,7 @@ public final class OperationService extends Service {
         // it less likely to be destroy, the notification will be replaced with ones
         // from operations-ui
         startForeground(startId, new Notification.Builder(this)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .build());
 
         Task task = newTask(data, startId, bus, handler);

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout
-  android:id="@+id/drawer_layout"
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
-
-  <LinearLayout
+    android:id="@+id/drawer_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <l.files.common.widget.ViewPager
-      android:id="@+id/pager"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <fragment
+            android:id="@+id/path_bar_fragment"
+            android:name="l.files.ui.pathbar.PathBarFragment"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"/>
+
+    </LinearLayout>
 
     <fragment
-      android:id="@+id/path_bar_fragment"
-      android:name="l.files.ui.pathbar.PathBarFragment"
-      android:layout_width="match_parent"
-      android:layout_height="?android:attr/actionBarSize"/>
-
-  </LinearLayout>
-
-  <fragment
-    android:id="@+id/bookmarks_fragment"
-    android:name="l.files.ui.bookmarks.BookmarksFragment"
-    android:layout_width="280dp"
-    android:layout_height="match_parent"
-    android:layout_gravity="start"/>
+        android:id="@+id/bookmarks_fragment"
+        android:name="l.files.ui.bookmarks.BookmarksFragment"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"/>
 
 </android.support.v4.widget.DrawerLayout>

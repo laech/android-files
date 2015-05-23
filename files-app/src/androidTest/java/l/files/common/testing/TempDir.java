@@ -4,8 +4,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.System.nanoTime;
 import static junit.framework.Assert.assertFalse;
@@ -36,13 +34,6 @@ public final class TempDir {
    */
   public void delete() {
     delete(dir);
-  }
-
-  /**
-   * Creates the root directory if it doesn't exists.
-   */
-  public void createRoot() {
-    assertTrue(get().isDirectory() || get().mkdirs());
   }
 
   private void delete(File file) {
@@ -84,37 +75,6 @@ public final class TempDir {
     return new File(get(), path);
   }
 
-  @Deprecated
-  public List<File> newFiles(String... names) {
-    List<File> files = new ArrayList<>(names.length);
-    for (String name : names) {
-      files.add(newFile(name));
-    }
-    return files;
-  }
-
-  @Deprecated
-  public File newFile() {
-    return newFile(String.valueOf(nanoTime()));
-  }
-
-  /**
-   * @deprecated use {@link #createDir(String)} instead
-   */
-  @Deprecated
-  public File newFile(String name) {
-    final File file = new File(dir, name);
-    final File parent = file.getParentFile();
-    assertTrue(parent.exists() || parent.mkdirs());
-    try {
-      assertTrue(file.createNewFile() || file.isFile());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    assertTrue(file.isFile());
-    return file;
-  }
-
   /**
    * Creates a new file and any of it's parents at the given path relative to
    * the root directory.
@@ -129,21 +89,6 @@ public final class TempDir {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Deprecated
-  public File newDirectory() {
-    return newDirectory(String.valueOf(nanoTime()));
-  }
-
-  /**
-   * @deprecated use {@link #createDir(String)}
-   */
-  @Deprecated
-  public File newDirectory(String name) {
-    final File file = new File(dir, name);
-    assertTrue(file.mkdirs() || file.isDirectory());
-    return file;
   }
 
   /**

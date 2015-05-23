@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="file_type_pdf">#F44336</color>
-  <color name="file_type_audio">#FF9800</color>
-  <color name="file_type_document">#2196F3</color>
-  <color name="file_type_archive">#FFC107</color>
-  <color name="file_type_video">#E91E63</color>
-  <color name="file_type_image">#2196F3</color>
+  <color name="windowBackground">#efefef</color>
 </resources>

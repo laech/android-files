@@ -5,33 +5,35 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 
+import l.files.R;
 import l.files.common.widget.MultiChoiceModeAction;
 
-import static android.view.Menu.NONE;
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 import static java.util.Objects.requireNonNull;
-import static l.files.common.content.res.Styles.getDrawable;
 
-public final class SelectAllAction extends MultiChoiceModeAction {
+public final class SelectAllAction extends MultiChoiceModeAction
+{
+    private final AbsListView list;
 
-  private final AbsListView list;
-
-  public SelectAllAction(AbsListView list) {
-    super(android.R.id.selectAll);
-    this.list = requireNonNull(list, "list");
-  }
-
-  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    menu.add(NONE, id(), NONE, android.R.string.selectAll)
-        .setIcon(getDrawable(android.R.attr.actionModeSelectAllDrawable, list))
-        .setShowAsAction(SHOW_AS_ACTION_IF_ROOM);
-    return true;
-  }
-
-  @Override protected void onItemSelected(ActionMode mode, MenuItem item) {
-    int count = list.getCount();
-    for (int i = count - 1; i >= 0; --i) {
-      list.setItemChecked(i, true);
+    public SelectAllAction(final AbsListView list)
+    {
+        super(android.R.id.selectAll);
+        this.list = requireNonNull(list, "list");
     }
-  }
+
+    @Override
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
+    {
+        mode.getMenuInflater().inflate(R.menu.select_all, menu);
+        return true;
+    }
+
+    @Override
+    protected void onItemSelected(final ActionMode mode, final MenuItem item)
+    {
+        final int count = list.getCount();
+        for (int i = count - 1; i >= 0; --i)
+        {
+            list.setItemChecked(i, true);
+        }
+    }
 }

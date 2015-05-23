@@ -1,42 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-  package="l.files"
-  xmlns:android="http://schemas.android.com/apk/res/android">
+    package="l.files"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-  <application
-    android:name=".ui.FilesApp"
-    android:allowBackup="true"
-    android:icon="@drawable/ic_launcher"
-    android:label="@string/app_name">
+    <application
+        android:name=".ui.FilesApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme">
 
-    <activity
-      android:name=".ui.FilesActivity"
-      android:launchMode="singleTask">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-    </activity>
+        <activity
+            android:name=".ui.browser.FilesActivity"
+            android:documentLaunchMode="intoExisting">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
-    <activity
-      android:name=".operations.ui.FailuresActivity"
-      android:exported="false"/>
+        <activity
+            android:name=".operations.ui.FailuresActivity"
+            android:exported="false"/>
 
-    <service
-      android:name=".operations.OperationService"
-      android:exported="false">
-      <intent-filter>
-        <!--
-          When error occurs, the app crashes, but notification will still be
-          there, this allows the service to be started again when user attempts
-          to cancel the notification and have it removed.
-         -->
-        <action android:name="l.files.operations.CANCEL"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-      </intent-filter>
-    </service>
+        <service
+            android:name=".operations.OperationService"
+            android:exported="false">
+            <intent-filter>
+                <!--
+                  When error occurs, the app crashes, but notification will still be
+                  there, this allows the service to be started again when user attempts
+                  to cancel the notification and have it removed.
+                 -->
+                <action android:name="l.files.operations.CANCEL"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
 
-  </application>
+    </application>
 </manifest>

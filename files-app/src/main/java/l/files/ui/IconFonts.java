@@ -10,12 +10,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import l.files.R;
 import l.files.fs.Resource;
 
 import static android.graphics.Typeface.createFromAsset;
+import static l.files.ui.UserDirs.DIR_ALARMS;
+import static l.files.ui.UserDirs.DIR_ANDROID;
+import static l.files.ui.UserDirs.DIR_DCIM;
+import static l.files.ui.UserDirs.DIR_DOWNLOADS;
+import static l.files.ui.UserDirs.DIR_HOME;
+import static l.files.ui.UserDirs.DIR_MOVIES;
+import static l.files.ui.UserDirs.DIR_MUSIC;
+import static l.files.ui.UserDirs.DIR_NOTIFICATIONS;
+import static l.files.ui.UserDirs.DIR_PICTURES;
+import static l.files.ui.UserDirs.DIR_PODCASTS;
+import static l.files.ui.UserDirs.DIR_RINGTONES;
+import static l.files.ui.UserDirs.DIR_ROOT;
 
-public final class IconFonts {
+public final class IconFonts
+{
 
     private static Typeface iconDirectory;
     private static Map<Resource, Typeface> iconByDirectoryUri;
@@ -29,48 +41,19 @@ public final class IconFonts {
     private static Typeface iconPdf;
     private static Set<String> archiveSubtypes;
 
-    private enum Icon {
-        PDF(R.drawable.file_circle_pdf),
-        AUDIO(R.drawable.file_circle_audio),
-        VIDEO(R.drawable.file_circle_video),
-        IMAGE(R.drawable.file_circle_image),
-        ARCHIVE(R.drawable.file_circle_archive),
-        DOCUMENT(R.drawable.file_circle_document),
-        DEFAULT(R.drawable.file_circle);
-
-        final int backgroundResourceId;
-
-        Icon(int backgroundResourceId) {
-            this.backgroundResourceId = backgroundResourceId;
-        }
-
-        static Icon get(MediaType mime) {
-            if (mime.subtype().equals("pdf")) return Icon.PDF;
-            if (mime.type().equals("audio")) return Icon.AUDIO;
-            if (mime.type().equals("video")) return Icon.VIDEO;
-            if (mime.type().equals("image")) return Icon.IMAGE;
-            if (mime.type().equals("text")) return Icon.DOCUMENT;
-            if (archiveSubtypes.contains(mime.subtype())) return Icon.ARCHIVE;
-            return Icon.DEFAULT;
-        }
-    }
-
-    public static int getDefaultBackgroundResource() {
-        return Icon.DEFAULT.backgroundResourceId;
-    }
-
-    public static int getBackgroundResourceForFileMediaType(MediaType mime) {
-        return Icon.get(mime).backgroundResourceId;
-    }
-
-    public static Typeface getDirectoryIcon(AssetManager assets, Resource resource) {
+    public static Typeface getDirectoryIcon(
+            final AssetManager assets,
+            final Resource resource)
+    {
         init(assets);
-        Typeface icon = iconByDirectoryUri.get(resource);
-        if (icon != null) return icon;
-        return iconDirectory;
+        final Typeface icon = iconByDirectoryUri.get(resource);
+        return (icon != null) ? icon : iconDirectory;
     }
 
-    public static Typeface getIconForFileMediaType(AssetManager assets, MediaType mime) {
+    public static Typeface getIconForFileMediaType(
+            final AssetManager assets,
+            final MediaType mime)
+    {
         init(assets);
         if (mime == null) return iconFile;
         if (mime.subtype().equals("pdf")) return iconPdf;
@@ -82,13 +65,16 @@ public final class IconFonts {
         return iconFile;
     }
 
-    public static Typeface getDefaultFileIcon(AssetManager assets) {
+    public static Typeface getDefaultFileIcon(final AssetManager assets)
+    {
         init(assets);
         return iconFile;
     }
 
-    private static void init(AssetManager assets) {
-        if (iconByDirectoryUri != null) {
+    private static void init(final AssetManager assets)
+    {
+        if (iconByDirectoryUri != null)
+        {
             return;
         }
 
@@ -112,22 +98,23 @@ public final class IconFonts {
         iconDirectory = createFromAsset(assets, "ic_dir.ttf");
         iconFile = createFromAsset(assets, "ic_file.ttf");
         iconByDirectoryUri = ImmutableMap.<Resource, Typeface>builder()
-                .put(UserDirs.DIR_ROOT, createFromAsset(assets, "ic_dir_device.ttf"))
-                .put(UserDirs.DIR_HOME, createFromAsset(assets, "ic_dir_home.ttf"))
-                .put(UserDirs.DIR_DCIM, createFromAsset(assets, "ic_dir_dcim.ttf"))
-                .put(UserDirs.DIR_MUSIC, createFromAsset(assets, "ic_dir_music.ttf"))
-                .put(UserDirs.DIR_ALARMS, createFromAsset(assets, "ic_dir_alarms.ttf"))
-                .put(UserDirs.DIR_MOVIES, createFromAsset(assets, "ic_dir_movies.ttf"))
-                .put(UserDirs.DIR_ANDROID, createFromAsset(assets, "ic_dir_android.ttf"))
-                .put(UserDirs.DIR_PICTURES, createFromAsset(assets, "ic_dir_pictures.ttf"))
-                .put(UserDirs.DIR_PODCASTS, createFromAsset(assets, "ic_dir_podcasts.ttf"))
-                .put(UserDirs.DIR_DOWNLOADS, createFromAsset(assets, "ic_dir_download.ttf"))
-                .put(UserDirs.DIR_RINGTONES, createFromAsset(assets, "ic_dir_ringtones.ttf"))
-                .put(UserDirs.DIR_NOTIFICATIONS, createFromAsset(assets, "ic_dir_notifications.ttf"))
+                .put(DIR_ROOT, createFromAsset(assets, "ic_dir_device.ttf"))
+                .put(DIR_HOME, createFromAsset(assets, "ic_dir_home.ttf"))
+                .put(DIR_DCIM, createFromAsset(assets, "ic_dir_dcim.ttf"))
+                .put(DIR_MUSIC, createFromAsset(assets, "ic_dir_music.ttf"))
+                .put(DIR_ALARMS, createFromAsset(assets, "ic_dir_alarms.ttf"))
+                .put(DIR_MOVIES, createFromAsset(assets, "ic_dir_movies.ttf"))
+                .put(DIR_ANDROID, createFromAsset(assets, "ic_dir_android.ttf"))
+                .put(DIR_PICTURES, createFromAsset(assets, "ic_dir_pictures.ttf"))
+                .put(DIR_PODCASTS, createFromAsset(assets, "ic_dir_podcasts.ttf"))
+                .put(DIR_DOWNLOADS, createFromAsset(assets, "ic_dir_download.ttf"))
+                .put(DIR_RINGTONES, createFromAsset(assets, "ic_dir_ringtones.ttf"))
+                .put(DIR_NOTIFICATIONS, createFromAsset(assets, "ic_dir_notifications.ttf"))
                 .build();
     }
 
-    private IconFonts() {
+    private IconFonts()
+    {
     }
 
 }

@@ -1,8 +1,6 @@
 package l.files.features.objects;
 
-import android.app.ActionBar;
 import android.app.Instrumentation;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -21,12 +19,9 @@ import l.files.fs.local.LocalResource;
 import l.files.ui.FilesActivity;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FileListItem;
-import l.files.ui.browser.FilesPagerFragment;
+import l.files.ui.browser.FilesFragment;
 
-import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
-import static android.app.ActionBar.DISPLAY_SHOW_TITLE;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
-import static android.test.MoreAsserts.assertNotEqual;
 import static android.view.Gravity.START;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -38,73 +33,98 @@ import static l.files.features.objects.Instrumentations.await;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 import static l.files.test.Mocks.mockMenuItem;
 
-public final class UiFileActivity {
+public final class UiFileActivity
+{
 
     private final Instrumentation instrument;
     private final FilesActivity activity;
 
-    public UiFileActivity(Instrumentation in, FilesActivity activity) {
-        this.instrument = in;
+    public UiFileActivity(
+            final Instrumentation instrumentation,
+            final FilesActivity activity)
+    {
+        this.instrument = instrumentation;
         this.activity = activity;
     }
 
-    public UiFileActivity bookmark() {
+    public UiFileActivity bookmark()
+    {
         assertBookmarkMenuChecked(false);
-        await(instrument, new Runnable() {
+        await(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
+            public void run()
+            {
+                assertTrue(instrument.invokeMenuActionSync(
+                        activity, R.id.bookmark, 0));
             }
         });
         return this;
     }
 
-    public UiFileActivity unbookmark() {
+    public UiFileActivity unbookmark()
+    {
         assertBookmarkMenuChecked(true);
-        await(instrument, new Runnable() {
+        await(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertTrue(instrument.invokeMenuActionSync(activity, R.id.bookmark, 0));
+            public void run()
+            {
+                assertTrue(instrument.invokeMenuActionSync(
+                        activity, R.id.bookmark, 0));
             }
         });
         return this;
     }
 
-    public UiFileActivity check(final File file, final boolean checked) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity check(final File file, final boolean checked)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                getListView().setItemChecked(findItemPositionOrThrow(file.getName()), checked);
+            public void run()
+            {
+                getListView().setItemChecked(
+                        findItemPositionOrThrow(file.getName()), checked);
             }
         });
         return this;
     }
 
-    public UiNewFolder newFolder() {
-        await(instrument, new Runnable() {
+    public UiNewFolder newFolder()
+    {
+        await(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_dir, 0));
+            public void run()
+            {
+                assertTrue(instrument.invokeMenuActionSync(
+                        activity, R.id.new_dir, 0));
             }
         });
         return new UiNewFolder(instrument, activity);
     }
 
-    public UiRename rename() {
+    public UiRename rename()
+    {
         selectActionModeAction(R.id.rename);
         return new UiRename(instrument, activity);
     }
 
-    public UiFileActivity copy() {
+    public UiFileActivity copy()
+    {
         selectActionModeAction(android.R.id.copy);
         waitForActionModeToFinish();
         return this;
     }
 
-    public UiFileActivity paste() {
-        await(instrument, new Runnable() {
+    public UiFileActivity paste()
+    {
+        await(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertTrue(instrument.invokeMenuActionSync(
                         activity, android.R.id.paste, 0));
             }
@@ -112,72 +132,40 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity selectItem(final Resource resource) {
+    public UiFileActivity selectItem(final Resource resource)
+    {
         return selectItem(new File(resource.uri()));
     }
 
-    public UiFileActivity selectItem(final File file) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity selectItem(final File file)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                ListView list = getListView();
-                int position = findItemPositionOrThrow(file.getName());
-                int firstVisiblePosition = list.getFirstVisiblePosition();
-                int viewPosition = position - firstVisiblePosition;
-                View view = list.getChildAt(viewPosition);
+            public void run()
+            {
+                final ListView list = getListView();
+                final int position = findItemPositionOrThrow(file.getName());
+                final int firstVisiblePosition = list.getFirstVisiblePosition();
+                final int viewPosition = position - firstVisiblePosition;
+                final View view = list.getChildAt(viewPosition);
                 assertTrue(list.performItemClick(view, viewPosition, position));
             }
         });
-        if (file.isDirectory()) {
+        if (file.isDirectory())
+        {
             assertCurrentDirectory(file);
         }
         return this;
     }
 
-    public UiFileActivity selectPage(final int position) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiBookmarksFragment openBookmarksDrawer()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                activity.getViewPager().setCurrentItem(position, false);
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity selectTabAt(final int position) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(activity.getViewPagerTabBar().getTabAt(position).getRootView().performClick());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity openNewTab() {
-        await(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(instrument.invokeMenuActionSync(activity, R.id.new_tab, 0));
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity closeCurrentTab() {
-        await(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertTrue(instrument.invokeMenuActionSync(activity, R.id.close_tab, 0));
-            }
-        });
-        return this;
-    }
-
-    public UiBookmarksFragment openBookmarksDrawer() {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
+            public void run()
+            {
                 activity.getDrawerLayout().openDrawer(START);
             }
         });
@@ -186,165 +174,136 @@ public final class UiFileActivity {
                 .getFragmentManager().findFragmentById(R.id.bookmarks_fragment));
     }
 
-    public UiFileActivity assertDrawerIsOpened(final boolean opened) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertDrawerIsOpened(final boolean opened)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertEquals(opened, activity.getDrawerLayout().isDrawerOpen(START));
+            public void run()
+            {
+                assertEquals(
+                        opened,
+                        activity.getDrawerLayout().isDrawerOpen(START));
             }
         });
         return this;
     }
 
-    public UiFileActivity pressBack() {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity pressBack()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 activity.onBackPressed();
             }
         });
         return this;
     }
 
-    public UiFileActivity longPressBack() {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity longPressBack()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertTrue(activity.onKeyLongPress(KeyEvent.KEYCODE_BACK, null));
             }
         });
         return this;
     }
 
-    public UiFileActivity pressActionBarUpIndicator() {
+    public UiFileActivity pressActionBarUpIndicator()
+    {
         waitForUpIndicatorToAppear();
-        awaitOnMainThread(instrument, new Runnable() {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                MenuItem item = mockMenuItem(android.R.id.home);
+            public void run()
+            {
+                final MenuItem item = mockMenuItem(android.R.id.home);
                 assertTrue(activity.onOptionsItemSelected(item));
             }
         });
         return this;
     }
 
-    public void waitForUpIndicatorToAppear() {
-        awaitOnMainThread(instrument, new Runnable() {
+    public void waitForUpIndicatorToAppear()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                ActionBarDrawerToggle t = activity.getActionBarDrawerToggle();
-                assertTrue(!t.isDrawerIndicatorEnabled());
+            public void run()
+            {
+                assertTrue(
+                        !activity.getActionBarDrawerToggle()
+                                .isDrawerIndicatorEnabled());
             }
         });
     }
 
-    public UiFileActivity assertCanRename(boolean can) {
+    public UiFileActivity assertCanRename(final boolean can)
+    {
         assertEquals(can, getRenameMenuItem().isEnabled());
         return this;
     }
 
-    public UiFileActivity assertCanPaste(final boolean can) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertCanPaste(final boolean can)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 activity.closeOptionsMenu();
                 activity.openOptionsMenu();
             }
         });
-        awaitOnMainThread(instrument, new Runnable() {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertEquals(can, getPasteMenuItem().isEnabled());
             }
         });
         return this;
     }
 
-    public UiFileActivity assertTabCount(final int count) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertCurrentDirectory(final Resource expected)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertEquals(count, activity.getViewPagerTabBar().getTabCount());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertCurrentDirectory(final Resource expected) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                FilesPagerFragment fragment = activity.getCurrentPagerFragment();
-                Resource actual = fragment.getCurrentDirectory();
+            public void run()
+            {
+                final FilesFragment fragment = activity.fragment();
+                final Resource actual = fragment.directory();
                 assertEquals(expected, actual);
             }
         });
         return this;
     }
 
-    public UiFileActivity assertCurrentDirectory(File dir) {
+    public UiFileActivity assertCurrentDirectory(final File dir)
+    {
         return assertCurrentDirectory(LocalResource.create(dir));
     }
 
-    public UiFileActivity assertSelectedTabPosition(final int position) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertListViewContains(
+            final Resource item,
+            final boolean contains)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                assertEquals(position, activity.getViewPager().getCurrentItem());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertTabHighlightedAt(
-            final int position, final boolean highlighted) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(highlighted, activity
-                        .getViewPagerTabBar()
-                        .getTabAt(position)
-                        .getRootView()
-                        .isSelected());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertTabBackIndicatorVisibleAt(
-            final int position, final boolean visible) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(visible, (VISIBLE == activity
-                        .getViewPagerTabBar()
-                        .getTabAt(position)
-                        .getBackIndicatorView()
-                        .getVisibility()));
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertTabTitleAt(final int position, final String title) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(title, activity
-                        .getViewPagerTabBar()
-                        .getTabAt(position)
-                        .getTitleView()
-                        .getText());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertListViewContains(final Resource item, final boolean contains) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(contains, findItemPosition(item.name()).isPresent());
+            public void run()
+            {
+                assertEquals(
+                        contains,
+                        findItemPosition(item.name()).isPresent());
             }
         });
         return this;
@@ -352,12 +311,14 @@ public final class UiFileActivity {
 
     public UiFileActivity assertFileModifiedDateView(
             final Resource resource,
-            final Consumer<CharSequence> assertion) {
-        awaitOnMainThread(instrument, new Runnable() {
+            final Consumer<CharSequence> assertion)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                CharSequence actual = getFileModifiedView(resource).getText();
-                assertion.apply(actual);
+            public void run()
+            {
+                assertion.apply(getFileModifiedView(resource).getText());
             }
         });
         return this;
@@ -365,41 +326,27 @@ public final class UiFileActivity {
 
     public UiFileActivity assertFileSizeView(
             final Resource resource,
-            final Consumer<CharSequence> assertion) {
-        awaitOnMainThread(instrument, new Runnable() {
+            final Consumer<CharSequence> assertion)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                CharSequence actual = getFileSizeView(resource).getText();
+            public void run()
+            {
+                final CharSequence actual = getFileSizeView(resource).getText();
                 assertion.apply(actual);
             }
         });
         return this;
     }
 
-    public UiFileActivity assertTabBarIsVisible(final boolean visible) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertActionBarTitle(final String title)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                ActionBar bar = activity.getActionBar();
-                //noinspection ConstantConditions
-                int showTitle = bar.getDisplayOptions() & DISPLAY_SHOW_TITLE;
-                int showCustom = bar.getDisplayOptions() & DISPLAY_SHOW_CUSTOM;
-                if (visible) {
-                    assertEquals(0, showTitle);
-                    assertNotEqual(0, showCustom);
-                } else {
-                    assertNotEqual(0, showTitle);
-                    assertEquals(0, showCustom);
-                }
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertActionBarTitle(final String title) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
+            public void run()
+            {
                 //noinspection ConstantConditions
                 assertEquals(title, activity.getActionBar().getTitle());
             }
@@ -408,65 +355,81 @@ public final class UiFileActivity {
     }
 
     public UiFileActivity assertActionBarUpIndicatorIsVisible(
-            final boolean visible) {
-        awaitOnMainThread(instrument, new Runnable() {
+            final boolean visible)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                ActionBarDrawerToggle t = activity.getActionBarDrawerToggle();
-                assertEquals(visible, !t.isDrawerIndicatorEnabled());
+            public void run()
+            {
+                assertEquals(
+                        visible,
+                        !activity.getActionBarDrawerToggle()
+                                .isDrawerIndicatorEnabled());
             }
         });
         return this;
     }
 
-    private TextView getFileModifiedView(Resource resource) {
+    private TextView getFileModifiedView(final Resource resource)
+    {
         return (TextView) getView(resource).findViewById(R.id.date);
     }
 
-    private TextView getFileSizeView(Resource resource) {
+    private TextView getFileSizeView(final Resource resource)
+    {
         return (TextView) getView(resource).findViewById(R.id.size);
     }
 
-    private TextView getFileIconView(Resource resource) {
+    private TextView getFileIconView(final Resource resource)
+    {
         return (TextView) getView(resource).findViewById(R.id.icon);
     }
 
-    private TextView getFileTitleView(Resource resource) {
+    private TextView getFileTitleView(final Resource resource)
+    {
         return (TextView) getView(resource).findViewById(R.id.title);
     }
 
-    private View getView(Resource resource) {
+    private View getView(final Resource resource)
+    {
         return getView(resource.name());
     }
 
-    private View getView(String name) {
-        ListView list = getListView();
-        int index = findItemPositionOrThrow(name);
+    private View getView(final String name)
+    {
+        final ListView list = getListView();
+        final int index = findItemPositionOrThrow(name);
         return list.getChildAt(index - list.getFirstVisiblePosition());
     }
 
-    private ListView getListView() {
-        //noinspection ConstantConditions
+    private ListView getListView()
+    {
         return (ListView) activity
-                .getCurrentPagerFragment()
+                .fragment()
                 .getView()
                 .findViewById(android.R.id.list);
     }
 
-    private MenuItem getRenameMenuItem() {
+    private MenuItem getRenameMenuItem()
+    {
         return activity.getCurrentActionMode().getMenu().findItem(R.id.rename);
     }
 
-    private MenuItem getPasteMenuItem() {
+    private MenuItem getPasteMenuItem()
+    {
         return activity.getMenu().findItem(android.R.id.paste);
     }
 
-    void selectActionModeAction(final int id) {
-        awaitOnMainThread(instrument, new Runnable() {
+    void selectActionModeAction(final int id)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                ActionMode mode = activity.getCurrentActionMode();
-                MenuItem item = mode.getMenu().findItem(id);
+            public void run()
+            {
+                final ActionMode mode = activity.getCurrentActionMode();
+                final MenuItem item = mode.getMenu().findItem(id);
                 assertTrue(activity
                         .getCurrentActionModeCallback()
                         .onActionItemClicked(mode, item));
@@ -474,29 +437,40 @@ public final class UiFileActivity {
         });
     }
 
-    void waitForActionModeToFinish() {
-        awaitOnMainThread(instrument, new Runnable() {
+    void waitForActionModeToFinish()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertNull(activity.getCurrentActionMode());
             }
         });
     }
 
-    private int findItemPositionOrThrow(String filename) {
-        Optional<Integer> position = findItemPosition(filename);
-        if (position.isPresent()) {
+    private int findItemPositionOrThrow(final String filename)
+    {
+        final Optional<Integer> position = findItemPosition(filename);
+        if (position.isPresent())
+        {
             return position.get();
         }
         throw new AssertionError("No file with name: " + filename);
     }
 
-    private Optional<Integer> findItemPosition(String filename) {
-        int count = getListView().getCount();
-        for (int i = 0; i < count; i++) {
-            FileListItem item = (FileListItem) getListView().getItemAtPosition(i);
+    private Optional<Integer> findItemPosition(final String filename)
+    {
+        final int count = getListView().getCount();
+        for (int i = 0; i < count; i++)
+        {
+            final FileListItem item = (FileListItem)
+                    getListView().getItemAtPosition(i);
+
             if (item.isFile() &&
-                    ((FileListItem.File) item).getResource().name().equals(filename)) {
+                    ((FileListItem.File) item).getResource().name()
+                            .equals(filename))
+            {
                 return Optional.of(i);
             }
         }
@@ -506,7 +480,8 @@ public final class UiFileActivity {
     /**
      * Clicks the "Select All" action item.
      */
-    public UiFileActivity selectAll() {
+    public UiFileActivity selectAll()
+    {
         selectActionModeAction(android.R.id.selectAll);
         return this;
     }
@@ -515,11 +490,14 @@ public final class UiFileActivity {
      * Asserts whether the given item is currently checked.
      */
     public UiFileActivity assertChecked(
-            final File file, final boolean checked) {
-        awaitOnMainThread(instrument, new Runnable() {
+            final File file, final boolean checked)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                int position = findItemPositionOrThrow(file.getName());
+            public void run()
+            {
+                final int position = findItemPositionOrThrow(file.getName());
                 assertEquals(checked, getListView().isItemChecked(position));
             }
         });
@@ -529,21 +507,27 @@ public final class UiFileActivity {
     /**
      * Asserts whether the activity currently in an action mode.
      */
-    public UiFileActivity assertActionModePresent(final boolean present) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertActionModePresent(final boolean present)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertEquals(present, activity.getCurrentActionMode() != null);
             }
         });
         return this;
     }
 
-    public UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertBookmarkMenuChecked(final boolean checked)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                MenuItem item = activity.getMenu().findItem(R.id.bookmark);
+            public void run()
+            {
+                final MenuItem item = activity.getMenu().findItem(R.id.bookmark);
                 assertEquals(checked, item.isChecked());
             }
         });
@@ -552,14 +536,20 @@ public final class UiFileActivity {
 
     public UiFileActivity assertSymbolicLinkIconDisplayed(
             final Resource resource,
-            final boolean displayed) {
-        awaitOnMainThread(instrument, new Runnable() {
+            final boolean displayed)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                View view = getView(resource).findViewById(R.id.symlink);
-                if (displayed) {
+            public void run()
+            {
+                final View view = getView(resource).findViewById(R.id.symlink);
+                if (displayed)
+                {
                     assertEquals(VISIBLE, view.getVisibility());
-                } else {
+                }
+                else
+                {
                     assertEquals(GONE, view.getVisibility());
                 }
             }
@@ -567,21 +557,30 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertBookmarksSidebarIsOpenLocked(final boolean openLocked) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertBookmarksSidebarIsOpenLocked(
+            final boolean openLocked)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
-                int mode = activity.getDrawerLayout().getDrawerLockMode(START);
-                assertEquals(openLocked, LOCK_MODE_LOCKED_OPEN == mode);
+            public void run()
+            {
+                assertEquals(
+                        openLocked,
+                        LOCK_MODE_LOCKED_OPEN == activity.getDrawerLayout()
+                                .getDrawerLockMode(START));
             }
         });
         return this;
     }
 
-    public UiFileActivity assertDisabled(final Resource resource) {
-        awaitOnMainThread(instrument, new Runnable() {
+    public UiFileActivity assertDisabled(final Resource resource)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 assertFalse(getFileIconView(resource).isEnabled());
                 assertFalse(getFileSizeView(resource).isEnabled());
                 assertFalse(getFileTitleView(resource).isEnabled());
