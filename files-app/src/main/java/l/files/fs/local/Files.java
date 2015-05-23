@@ -43,6 +43,12 @@ public final class Files
             final String name = source.getName();
             base = getNameWithoutExtension(name);
             last = getFileExtension(name);
+
+            if (base.isEmpty())
+            {
+                base = name;
+                last = "";
+            }
             if (!isNullOrEmpty(last))
             {
                 last = "." + last;
