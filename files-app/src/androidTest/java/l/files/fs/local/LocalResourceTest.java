@@ -4,6 +4,9 @@ import android.system.Os;
 import android.system.StructStat;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,19 +18,19 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.fs.AccessDenied;
-import l.files.fs.UnsupportedOperation;
 import l.files.fs.AlreadyExists;
+import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.Instant;
 import l.files.fs.InvalidOperation;
 import l.files.fs.LinkOption;
 import l.files.fs.NotDirectory;
-import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.NotExist;
 import l.files.fs.NotFile;
 import l.files.fs.NotLink;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.UnsupportedOperation;
 import l.files.fs.Visitor;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -273,9 +276,9 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_openOutputStream_append_defaultFalse() throws Exception
+    public void test_output_append_defaultFalse() throws Exception
     {
-        test_openOutputStream("a", "b", "b", new OutputStreamProvider()
+        test_output("a", "b", "b", new OutputProvider()
         {
             @Override
             public OutputStream open(final Resource res) throws IOException
@@ -285,9 +288,9 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_openOutputStream_append_false() throws Exception
+    public void test_output_append_false() throws Exception
     {
-        test_openOutputStream("a", "b", "b", new OutputStreamProvider()
+        test_output("a", "b", "b", new OutputProvider()
         {
             @Override
             public OutputStream open(final Resource res) throws IOException
@@ -297,9 +300,9 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_openOutputStream_append_true() throws Exception
+    public void test_output_append_true() throws Exception
     {
-        test_openOutputStream("a", "b", "ab", new OutputStreamProvider()
+        test_output("a", "b", "ab", new OutputProvider()
         {
             @Override
             public OutputStream open(final Resource res) throws IOException
@@ -309,11 +312,11 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    private void test_openOutputStream(
+    private void test_output(
             final String initial,
             final String write,
             final String result,
-            final OutputStreamProvider provider) throws Exception
+            final OutputProvider provider) throws Exception
     {
 
         final Resource file = dir1().resolve("file").createFile();
@@ -325,12 +328,12 @@ public final class LocalResourceTest extends ResourceBaseTest
         assertEquals(result, file.readString(NOFOLLOW, UTF_8));
     }
 
-    private interface OutputStreamProvider
+    private interface OutputProvider
     {
         OutputStream open(Resource resource) throws IOException;
     }
 
-    public void test_openOutputStream_createWithCorrectPermission()
+    public void test_output_createWithCorrectPermission()
             throws Exception
     {
         final Resource expected = dir1().resolve("expected");
@@ -345,33 +348,54 @@ public final class LocalResourceTest extends ResourceBaseTest
         );
     }
 
-    public void test_openOutputStream_AccessDenied() throws Exception
+    public void test_output_AccessDenied() throws Exception
     {
         final Resource file = dir1().resolve("file").createFile();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnOpenOutputStream(AccessDenied.class, file, NOFOLLOW, false);
+        expectOnOutput(AccessDenied.class, file, NOFOLLOW, false);
     }
 
-    public void test_openOutputStream_NotExistException() throws Exception
+    public void test_output_NotExistException() throws Exception
     {
         final Resource file = dir1().resolve("parent/file");
-        expectOnOpenOutputStream(NotExist.class, file, NOFOLLOW, false);
+        expectOnOutput(NotExist.class, file, NOFOLLOW, false);
     }
 
-    public void test_openOutputStream_NotFileException_directory()
+    public void test_output_NotFileException_directory()
             throws Exception
     {
-        expectOnOpenOutputStream(NotFile.class, dir1(), NOFOLLOW, false);
+        expectOnOutput(NotFile.class, dir1(), NOFOLLOW, false);
     }
 
-    public void test_openOutputStream_NotFileException_link() throws Exception
+    public void test_output_NotFileException_link() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createLink(target);
-        expectOnOpenOutputStream(NotFile.class, link, NOFOLLOW, false);
+        expectOnOutput(NotFile.class, link, NOFOLLOW, false);
     }
 
-    private static void expectOnOpenOutputStream(
+    public void test_output_cannotUseAfterClose() throws Exception
+    {
+        final Resource file = dir1().resolve("a").createFile();
+        try (final OutputStream out = file.output(NOFOLLOW))
+        {
+            final FileDescriptor fd = ((FileOutputStream) out).getFD();
+
+            out.write(1);
+            out.close();
+            try
+            {
+                new FileOutputStream(fd).write(1);
+                fail();
+            }
+            catch (final IOException e)
+            {
+                // Pass
+            }
+        }
+    }
+
+    private static void expectOnOutput(
             final Class<? extends Exception> clazz,
             final Resource resource,
             final LinkOption option,
@@ -387,7 +411,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         });
     }
 
-    public void test_openInputStream() throws Exception
+    public void test_input() throws Exception
     {
         final Resource file = dir1().resolve("a").createFile();
         final String expected = "hello\nworld\n";
@@ -399,40 +423,61 @@ public final class LocalResourceTest extends ResourceBaseTest
         }
     }
 
-    public void test_openInputStream_linkFollowSuccess() throws Exception
+    public void test_input_linkFollowSuccess() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createLink(target);
         link.input(FOLLOW).close();
     }
 
-    public void test_openInputStream_NotFileException_link() throws Exception
+    public void test_input_NotFileException_link() throws Exception
     {
         final Resource target = dir1().resolve("target").createFile();
         final Resource link = dir1().resolve("link").createLink(target);
-        expectOnOpenInputStream(NotFile.class, link, NOFOLLOW);
+        expectOnInput(NotFile.class, link, NOFOLLOW);
     }
 
-    public void test_openInputStream_NotFileException_directory()
+    public void test_input_NotFileException_directory()
             throws Exception
     {
-        expectOnOpenInputStream(NotFile.class, dir1(), NOFOLLOW);
+        expectOnInput(NotFile.class, dir1(), NOFOLLOW);
     }
 
-    public void test_openInputStream_AccessDenied() throws Exception
+    public void test_input_AccessDenied() throws Exception
     {
         final Resource file = dir1().resolve("a").createFile();
         dir1().setPermissions(Collections.<Permission>emptySet());
-        expectOnOpenInputStream(AccessDenied.class, file, NOFOLLOW);
+        expectOnInput(AccessDenied.class, file, NOFOLLOW);
     }
 
-    public void test_openInputStream_NotExistException() throws Exception
+    public void test_input_NotExistException() throws Exception
     {
         final Resource file = dir1().resolve("a");
-        expectOnOpenInputStream(NotExist.class, file, NOFOLLOW);
+        expectOnInput(NotExist.class, file, NOFOLLOW);
     }
 
-    private static void expectOnOpenInputStream(
+    public void test_input_cannotUseAfterClose() throws Exception
+    {
+        final Resource file = dir1().resolve("a").createFile();
+        try (final InputStream in = file.input(NOFOLLOW))
+        {
+            final FileDescriptor fd = ((FileInputStream) in).getFD();
+
+            in.read();
+            in.close();
+            try
+            {
+                new FileInputStream(fd).read();
+                fail();
+            }
+            catch (final IOException e)
+            {
+                // Pass
+            }
+        }
+    }
+
+    private static void expectOnInput(
             final Class<? extends Exception> clazz,
             final Resource resource,
             final LinkOption option) throws Exception

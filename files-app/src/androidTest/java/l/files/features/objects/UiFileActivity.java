@@ -16,9 +16,9 @@ import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
-import l.files.ui.FilesActivity;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FileListItem;
+import l.files.ui.browser.FilesActivity;
 import l.files.ui.browser.FilesFragment;
 
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;

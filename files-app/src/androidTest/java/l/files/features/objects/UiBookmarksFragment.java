@@ -10,8 +10,8 @@ import java.util.List;
 
 import l.files.R;
 import l.files.fs.Resource;
-import l.files.ui.FilesActivity;
 import l.files.ui.bookmarks.BookmarksFragment;
+import l.files.ui.browser.FilesActivity;
 
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;

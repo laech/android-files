@@ -9,45 +9,53 @@ import l.files.common.testing.TempDir;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
-import l.files.ui.FilesActivity;
+import l.files.ui.browser.FilesActivity;
 
-import static l.files.ui.FilesActivity.EXTRA_DIRECTORY;
+import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 
-public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
+public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity>
+{
 
     private TempDir dir;
 
-    public BaseFilesActivityTest() {
+    public BaseFilesActivityTest()
+    {
         super(FilesActivity.class);
     }
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() throws Exception
+    {
         super.setUp();
         dir = TempDir.create();
         setActivityIntent(newIntent(dir.get()));
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() throws Exception
+    {
         super.tearDown();
         dir.delete();
     }
 
-    protected final UiFileActivity screen() {
+    protected final UiFileActivity screen()
+    {
         return new UiFileActivity(getInstrumentation(), getActivity());
     }
 
     @Deprecated
-    protected final TempDir dir() {
+    protected final TempDir dir()
+    {
         return dir;
     }
 
-    protected final Resource directory() {
+    protected final Resource directory()
+    {
         return LocalResource.create(dir.get());
     }
 
-    private Intent newIntent(File dir) {
+    private Intent newIntent(final File dir)
+    {
         return new Intent().putExtra(EXTRA_DIRECTORY, LocalResource.create(dir));
     }
 }

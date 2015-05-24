@@ -407,7 +407,22 @@ public abstract class LocalResource extends Native implements Resource
                 Os.close(fd);
                 throw e;
             }
-            return new FileInputStream(fd);
+            return new FileInputStream(fd)
+            {
+                @Override
+                public void close() throws IOException
+                {
+                    try
+                    {
+                        super.close();
+                    }
+                    finally
+                    {
+
+                        closeQuietly(fd);
+                    }
+                }
+            };
 
         }
         catch (final ErrnoException e)
@@ -417,6 +432,18 @@ public abstract class LocalResource extends Native implements Resource
                 throw new NotFile(path(), e);
             }
             throw toIOException(e, path());
+        }
+    }
+
+    private void closeQuietly(final FileDescriptor fd)
+    {
+        try
+        {
+            Os.close(fd);
+        }
+        catch (ErrnoException e)
+        {
+            // Ignore
         }
     }
 
@@ -441,7 +468,22 @@ public abstract class LocalResource extends Native implements Resource
                 | (option == NOFOLLOW ? O_NOFOLLOW : 0);
         try
         {
-            return new FileOutputStream(Os.open(path(), flags, mode));
+            final FileDescriptor fd = Os.open(path(), flags, mode);
+            return new FileOutputStream(fd)
+            {
+                @Override
+                public void close() throws IOException
+                {
+                    try
+                    {
+                        super.close();
+                    }
+                    finally
+                    {
+                        closeQuietly(fd);
+                    }
+                }
+            };
         }
         catch (final ErrnoException e)
         {
