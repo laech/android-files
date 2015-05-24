@@ -15,7 +15,7 @@ final class IOExceptions
     static String getFailureMessage(final IOException exception)
     {
         final Throwable cause = exception.getCause();
-        if (cause instanceof android.system.ErrnoException)
+        if (cause instanceof ErrnoException)
         {
             // TODO use message instead of name
             return OsConstants.errnoName(((ErrnoException) cause).errno);

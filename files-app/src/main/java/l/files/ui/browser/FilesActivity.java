@@ -165,7 +165,6 @@ public final class FilesActivity extends BaseActivity
 
     private void setDrawer()
     {
-        drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
         drawerLayout.setDrawerListener(
                 DrawerListeners.compose(actionBarDrawerToggle, drawerListener));
     }
