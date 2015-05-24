@@ -3,11 +3,12 @@ package l.files.ui;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.AsyncTaskLoader;
-import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Loader;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputFilter.LengthFilter;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,108 +27,131 @@ import static java.lang.System.identityHashCode;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class FileCreationFragment extends DialogFragment
-        implements DialogInterface.OnClickListener {
+        implements OnClickListener
+{
 
     public static final String ARG_PARENT_RESOURCE = "parent";
 
     private static final int LOADER_CHECKER =
             identityHashCode(FileCreationFragment.class);
 
-    private LoaderCallbacks<Existence> checkerCallback = new CheckerCallback();
+    private final LoaderCallbacks<Existence> checkerCallback =
+            new CheckerCallback();
+
     private EditText editText;
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getDialog().getWindow().setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-    }
-
-    @Override
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        if (getFilename().isEmpty()) {
+
+        if (editText == null)
+        {
+            editText = (EditText) getDialog().findViewById(android.R.id.text1);
+            editText.setFilters(new InputFilter[]{new LengthFilter(255)});
+            editText.addTextChangedListener(new FileTextWatcher());
+        }
+
+        if (getFilename().isEmpty())
+        {
             getOkButton().setEnabled(false);
-        } else {
+        }
+        else
+        {
             restartChecker();
         }
+
+        getDialog().getWindow()
+                .setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     @Override
-    public AlertDialog onCreateDialog(Bundle savedInstanceState) {
-        editText = createEditText();
+    public AlertDialog onCreateDialog(final Bundle savedInstanceState)
+    {
         return new AlertDialog.Builder(getActivity())
                 .setTitle(getTitleResourceId())
-                .setView(editText)
+                .setView(R.layout.file_name)
                 .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
     }
 
-    protected CharSequence getError(Resource target) {
+    protected CharSequence getError(final Resource target)
+    {
         return getString(R.string.name_exists);
     }
 
     protected abstract int getTitleResourceId();
 
-    private EditText createEditText() {
-        final EditText text = new EditText(getActivity());
-        text.setId(android.R.id.text1);
-        text.setFilters(new InputFilter[]{new InputFilter.LengthFilter(255)});
-        text.setSingleLine();
-        text.addTextChangedListener(new FileTextWatcher());
-        return text;
-    }
-
     @Override
-    public AlertDialog getDialog() {
+    public AlertDialog getDialog()
+    {
         return (AlertDialog) super.getDialog();
     }
 
-    private void restartChecker() {
+    private void restartChecker()
+    {
         getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
     }
 
-    protected Resource getParent() {
+    protected Resource getParent()
+    {
         return getArguments().getParcelable(ARG_PARENT_RESOURCE);
     }
 
-    protected String getFilename() {
+    protected String getFilename()
+    {
         return editText.getText().toString();
     }
 
-    protected EditText getFilenameField() {
+    protected EditText getFilenameField()
+    {
         return editText;
     }
 
-    private Button getOkButton() {
+    private Button getOkButton()
+    {
         return getDialog().getButton(BUTTON_POSITIVE);
     }
 
 
-    class CheckerCallback implements LoaderCallbacks<Existence> {
+    class CheckerCallback implements LoaderCallbacks<Existence>
+    {
 
         @Override
-        public Loader<Existence> onCreateLoader(int id, Bundle bundle) {
-            if (id == LOADER_CHECKER) {
+        public Loader<Existence> onCreateLoader(
+                final int id,
+                final Bundle bundle)
+        {
+            if (id == LOADER_CHECKER)
+            {
                 return newChecker();
             }
             return null;
         }
 
-        private Loader<Existence> newChecker() {
+        private Loader<Existence> newChecker()
+        {
             final Resource resource = getParent().resolve(getFilename());
-            return new AsyncTaskLoader<Existence>(getActivity()) {
+            return new AsyncTaskLoader<Existence>(getActivity())
+            {
                 @Override
-                public Existence loadInBackground() {
-                    try {
-                        return new Existence(resource, resource.exists(NOFOLLOW));
-                    } catch (IOException e) {
+                public Existence loadInBackground()
+                {
+                    try
+                    {
+                        final boolean exists = resource.exists(NOFOLLOW);
+                        return new Existence(resource, exists);
+                    }
+                    catch (final IOException e)
+                    {
                         return null;
                     }
                 }
 
                 @Override
-                protected void onStartLoading() {
+                protected void onStartLoading()
+                {
                     super.onStartLoading();
                     forceLoad();
                 }
@@ -135,60 +159,85 @@ public abstract class FileCreationFragment extends DialogFragment
         }
 
         @Override
-        public void onLoadFinished(Loader<Existence> loader, Existence existence) {
-            if (loader.getId() == LOADER_CHECKER) {
+        public void onLoadFinished(
+                final Loader<Existence> loader,
+                final Existence existence)
+        {
+            if (loader.getId() == LOADER_CHECKER)
+            {
                 onCheckFinished(existence);
             }
         }
 
         @Override
-        public void onLoaderReset(Loader<Existence> loader) {
+        public void onLoaderReset(final Loader<Existence> loader)
+        {
         }
 
-        private void onCheckFinished(@Nullable Existence existence) {
-            if (existence == null) {
+        private void onCheckFinished(@Nullable final Existence existence)
+        {
+            if (existence == null)
+            {
                 return;
             }
-            Button ok = getOkButton();
-            if (existence.exists) {
+            final Button ok = getOkButton();
+            if (existence.exists)
+            {
                 editText.setError(getError(existence.resource));
                 ok.setEnabled(false);
-            } else {
+            }
+            else
+            {
                 editText.setError(null);
                 ok.setEnabled(true);
             }
         }
     }
 
-    private static final class Existence {
+    private static final class Existence
+    {
         final Resource resource;
         final boolean exists;
 
-        Existence(Resource resource, boolean exists) {
+        Existence(final Resource resource, final boolean exists)
+        {
             this.resource = resource;
             this.exists = exists;
         }
     }
 
-    class FileTextWatcher implements TextWatcher {
+    class FileTextWatcher implements TextWatcher
+    {
 
         @Override
         public void onTextChanged(
-                CharSequence s, int start, int before, int count) {
-            if (getFilename().isEmpty()) {
+                final CharSequence s,
+                final int start,
+                final int before,
+                final int count)
+        {
+            if (getFilename().isEmpty())
+            {
                 getOkButton().setEnabled(false);
-            } else {
+            }
+            else
+            {
                 restartChecker();
             }
         }
 
         @Override
         public void beforeTextChanged(
-                CharSequence s, int start, int count, int after) {
+                final CharSequence s,
+                final int start,
+                final int count,
+                final int after)
+        {
         }
 
         @Override
-        public void afterTextChanged(Editable s) {
+        public void afterTextChanged(final Editable s)
+        {
         }
     }
 }
