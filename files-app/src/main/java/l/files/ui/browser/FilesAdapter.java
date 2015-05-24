@@ -198,8 +198,10 @@ final class FilesAdapter extends StableAdapter<FileListItem>
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
 
+        // Left padding + icon + icon padding + end padding - borders - extra
+        final int pad = 16 + 32 + 16 + 16 - 2 - 4;
         final int width = metrics.widthPixels
-                - (int) (applyDimension(COMPLEX_UNIT_DIP, 90, metrics) + 0.5f);
+                - (int) (applyDimension(COMPLEX_UNIT_DIP, pad, metrics) + 0.5f);
 
         final int height = (int) (metrics.heightPixels * 0.6f);
 
