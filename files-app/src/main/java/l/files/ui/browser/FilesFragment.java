@@ -44,7 +44,7 @@ import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
-import static l.files.ui.browser.IOExceptions.getFailureMessage;
+import static l.files.ui.IOExceptions.message;
 
 public final class FilesFragment extends BaseFileListFragment
         implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener
@@ -193,7 +193,7 @@ public final class FilesFragment extends BaseFileListFragment
             getListAdapter().setItems(data.getItems());
             if (data.getException() != null)
             {
-                overrideEmptyText(getFailureMessage(data.getException()));
+                overrideEmptyText(message(data.getException()));
             }
             else
             {

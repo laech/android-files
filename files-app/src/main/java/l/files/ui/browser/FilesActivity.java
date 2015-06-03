@@ -50,7 +50,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.UserDirs.DIR_HOME;
-import static l.files.ui.browser.IOExceptions.getFailureMessage;
+import static l.files.ui.IOExceptions.message;
 
 public final class FilesActivity extends BaseActivity
         implements OnSharedPreferenceChangeListener, OnBackStackChangedListener
@@ -383,7 +383,7 @@ public final class FilesActivity extends BaseActivity
                     }
                     else
                     {
-                        final String msg = getFailureMessage((IOException) result);
+                        final String msg = message((IOException) result);
                         makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
                     }
                 }

@@ -3,59 +3,101 @@ package l.files.features;
 import android.widget.EditText;
 
 import l.files.R;
+import l.files.common.base.Consumer;
 import l.files.features.objects.UiNewFolder;
 import l.files.test.BaseFilesActivityTest;
 
-public final class NewFolderTest extends BaseFilesActivityTest {
+public final class NewFolderTest extends BaseFilesActivityTest
+{
+    public void test_shows_error_message_when_failed_to_create()
+    {
+        fail("Not implemented");
+    }
 
-  public void testCreatesFolderWithNameSpecified() {
-    screen()
-        .newFolder()
-        .setFilename("a")
-        .ok()
-        .selectItem(dir().get("a"));
-  }
+    public void test_creates_folder_with_name_specified()
+    {
+        screen()
+                .newFolder()
+                .setFilename("a")
+                .ok()
+                .selectItem(directory().resolve("a"));
+    }
 
-  public void testShowsDialogWithInitialNameSuggestion() {
-    screen()
-        .newFolder()
-        .assertFilename(string(R.string.untitled_dir));
-  }
+    public void test_name_field_has_initial_name_suggestion()
+    {
+        screen()
+                .newFolder()
+                .assertFilename(string(R.string.untitled_dir));
+    }
 
-  public void testShowsDialogWithNewNameSuggestionIfInitialNamesAreTaken() {
-    dir().createFile(string(R.string.untitled_dir));
-    dir().createFile(string(R.string.untitled_dir) + " " + 2);
+    public void test_name_field_has_new_name_suggestion_if_initial_names_are_taken()
+            throws Exception
+    {
+        directory().resolve(string(R.string.untitled_dir)).createFile();
+        directory().resolve(string(R.string.untitled_dir) + " " + 2).createFile();
 
-    screen()
-        .newFolder()
-        .assertFilename(string(R.string.untitled_dir) + " " + 3);
-  }
+        screen()
+                .newFolder()
+                .assertFilename(string(R.string.untitled_dir) + " " + 3);
+    }
 
-  public void testCanNotCreateIfFolderWithSpecifiedNameAlreadyExists() {
-    dir().createFile("a");
-    screen()
-        .newFolder()
-        .setFilename("a")
-        .assertError(string(R.string.name_exists))
-        .assertOkButtonEnabled(false)
-        .setFilename("b")
-        .assertError(null)
-        .assertOkButtonEnabled(true);
-  }
+    public void test_can_not_create_if_folder_with_specified_name_already_exists()
+            throws Exception
+    {
+        directory().resolve("a").createFile();
+        screen()
+                .newFolder()
+                .setFilename("a")
+                .assertError(string(R.string.name_exists))
+                .assertOkButtonEnabled(false)
+                .setFilename("b")
+                .assertError(null)
+                .assertOkButtonEnabled(true);
+    }
 
-  public void testEditTextIsConstructedCorrectly() throws Throwable {
-    final UiNewFolder dialog = screen().newFolder();
-    runTestOnUiThread(new Runnable() {
-      @Override public void run() {
-        EditText edit = dialog.filename();
-        assertEquals(1, edit.getMaxLines());
-        assertEquals(0, edit.getSelectionStart());
-        assertEquals(edit.getText().length(), edit.getSelectionEnd());
-      }
-    });
-  }
+    public void test_name_field_is_limited_to_one_line() throws Throwable
+    {
+        checkNameField(new Consumer<EditText>()
+        {
+            @Override
+            public void apply(final EditText input)
+            {
+                assertEquals(1, input.getMaxLines());
+            }
+        });
+    }
 
-  private String string(int id) {
-    return getActivity().getString(id);
-  }
+    public void test_name_field_has_all_text_selected() throws Throwable
+    {
+        checkNameField(new Consumer<EditText>()
+        {
+            @Override
+            public void apply(final EditText input)
+            {
+                assertEquals(0, input.getSelectionStart());
+                assertEquals(input.getText().length(), input.getSelectionEnd());
+            }
+        });
+    }
+
+    private void checkNameField(final Consumer<EditText> assertion)
+            throws Throwable
+    {
+
+        final UiNewFolder dialog = screen().newFolder();
+        runTestOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                assertion.apply(dialog.filename());
+            }
+        });
+    }
+
+    private String string(final int id)
+    {
+        return getActivity().getString(id);
+    }
+
 }

@@ -1,18 +1,18 @@
-package l.files.ui.browser;
+package l.files.ui;
 
 import android.system.ErrnoException;
 import android.system.OsConstants;
 
 import java.io.IOException;
 
-final class IOExceptions
+public final class IOExceptions
 {
 
     private IOExceptions()
     {
     }
 
-    static String getFailureMessage(final IOException exception)
+    public static String message(final IOException exception)
     {
         final Throwable cause = exception.getCause();
         if (cause instanceof ErrnoException)

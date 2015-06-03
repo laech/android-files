@@ -15,48 +15,61 @@ import l.files.ui.FileCreationFragment;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.IOExceptions.message;
 
-public final class NewDirFragment extends FileCreationFragment {
+public final class NewDirFragment extends FileCreationFragment
+{
 
     public static final String TAG = NewDirFragment.class.getSimpleName();
 
-    static NewDirFragment create(Resource resource) {
-        Bundle bundle = new Bundle(1);
+    static NewDirFragment create(final Resource resource)
+    {
+        final Bundle bundle = new Bundle(1);
         bundle.putParcelable(ARG_PARENT_RESOURCE, resource);
 
-        NewDirFragment fragment = new NewDirFragment();
+        final NewDirFragment fragment = new NewDirFragment();
         fragment.setArguments(bundle);
         return fragment;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState)
+    {
         super.onActivityCreated(savedInstanceState);
         getNameSuggestion();
     }
 
-    private void getNameSuggestion() {
+    private void getNameSuggestion()
+    {
         final Resource parent = getParent();
         final String basename = getString(R.string.untitled_dir);
-        new AsyncTask<Object, Object, String>() {
+        new AsyncTask<Object, Object, String>()
+        {
             @Override
-            protected String doInBackground(Object... params) {
+            protected String doInBackground(final Object... params)
+            {
                 Resource resource = parent.resolve(basename);
-                try {
-                    for (int i = 2; resource.exists(NOFOLLOW); i++) {
+                try
+                {
+                    for (int i = 2; resource.exists(NOFOLLOW); i++)
+                    {
                         resource = parent.resolve(basename + " " + i);
                     }
-                } catch (IOException e) {
+                }
+                catch (final IOException e)
+                {
                     return "";
                 }
                 return resource.name();
             }
 
             @Override
-            protected void onPostExecute(String name) {
+            protected void onPostExecute(final String name)
+            {
                 super.onPostExecute(name);
-                EditText field = getFilenameField();
-                if (field.getText().length() == 0) {
+                final EditText field = getFilenameField();
+                if (field.getText().length() == 0)
+                {
                     field.setText(name);
                     field.selectAll();
                 }
@@ -65,36 +78,46 @@ public final class NewDirFragment extends FileCreationFragment {
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
+    public void onClick(final DialogInterface dialog, final int which)
+    {
         createDirectory();
     }
 
-    private void createDirectory() {
+    private void createDirectory()
+    {
         final Activity context = getActivity();
         final Resource resource = getParent().resolve(getFilename());
-        new AsyncTask<Void, Void, Boolean>() {
+        new AsyncTask<Void, Void, IOException>()
+        {
             @Override
-            protected Boolean doInBackground(Void... params) {
-                try {
+            protected IOException doInBackground(final Void... params)
+            {
+                try
+                {
                     resource.createDirectory();
-                    return true;
-                } catch (IOException e) {
-                    return false;
+                    return null;
+                }
+                catch (final IOException e)
+                {
+                    return e;
                 }
             }
 
             @Override
-            protected void onPostExecute(Boolean success) {
-                super.onPostExecute(success);
-                if (!success) {
-                    makeText(context, R.string.mkdir_failed, LENGTH_SHORT).show();
+            protected void onPostExecute(final IOException e)
+            {
+                super.onPostExecute(e);
+                if (e != null)
+                {
+                    makeText(context, message(e), LENGTH_SHORT).show();
                 }
             }
         }.execute();
     }
 
     @Override
-    protected int getTitleResourceId() {
+    protected int getTitleResourceId()
+    {
         return R.string.new_dir;
     }
 }

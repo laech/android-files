@@ -21,7 +21,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.ui.browser.IOExceptions.getFailureMessage;
+import static l.files.ui.IOExceptions.message;
 
 final class FileOpener implements Consumer<Resource>
 {
@@ -91,7 +91,7 @@ final class FileOpener implements Consumer<Resource>
 
         public void showException(final IOException exception)
         {
-            final String msg = getFailureMessage(exception);
+            final String msg = message(exception);
             makeText(context, msg, LENGTH_SHORT).show();
         }
 
