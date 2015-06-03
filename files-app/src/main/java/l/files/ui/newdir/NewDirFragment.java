@@ -8,16 +8,23 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
 
-import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Resource;
-import l.files.operations.Events;
 import l.files.ui.FileCreationFragment;
 import l.files.ui.Toaster;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.functions.Actions;
+import rx.functions.Func1;
+import rx.subscriptions.Subscriptions;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.IOExceptions.message;
+import static rx.Observable.just;
+import static rx.android.app.AppObservable.bindFragment;
+import static rx.schedulers.Schedulers.io;
 
 public final class NewDirFragment extends FileCreationFragment
 {
@@ -33,99 +40,131 @@ public final class NewDirFragment extends FileCreationFragment
         return fragment;
     }
 
-    private EventBus bus;
-
     @VisibleForTesting
     public Consumer<String> toaster;
+
+    private Subscription suggestion = Subscriptions.empty();
+    private Subscription creation = Subscriptions.empty();
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        suggestion.unsubscribe();
+        creation.unsubscribe();
+    }
 
     @Override
     public void onActivityCreated(final Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
         toaster = new Toaster(getActivity());
-        bus = Events.get();
-        bus.register(this);
-
-        requestNameSuggestion();
+        suggestName();
     }
 
-    private void requestNameSuggestion()
+    private void suggestName()
     {
         final String name = getString(R.string.untitled_dir);
         final Resource base = parent().resolve(name);
-        bus.post(Suggestion.Request.basedOn(base));
+        suggestion = bindFragment(this, just(base))
+                .subscribeOn(io())
+                .map(new SuggestName())
+                .subscribe(new SetName());
     }
 
-    public void onEventBackgroundThread(final Suggestion.Request request)
+    private static class SuggestName implements Func1<Resource, Resource>
     {
-        final String baseName = request.base().name();
-        final Resource parent = request.base().parent();
-        assert parent != null;
-
-        Resource resource = request.base();
-        try
+        @Override
+        public Resource call(final Resource base)
         {
-            for (int i = 2; resource.exists(NOFOLLOW); i++)
+            final String baseName = base.name();
+            final Resource parent = base.parent();
+            assert parent != null;
+            Resource resource = base;
+            try
             {
-                resource = parent.resolve(baseName + " " + i);
+                for (int i = 2; resource.exists(NOFOLLOW); i++)
+                {
+                    resource = parent.resolve(baseName + " " + i);
+                }
+                return resource;
+            }
+            catch (final IOException e)
+            {
+                throw new RuntimeException(e);
             }
         }
-        catch (final IOException e)
+    }
+
+    private class SetName extends Subscriber<Resource>
+    {
+        @Override
+        public void onCompleted()
         {
-            bus.post(Suggestion.Failure.causedBy(e));
         }
 
-        bus.post(Suggestion.Completion.suggest(resource));
-    }
-
-    public void onEventMainThread(final Suggestion.Completion completion)
-    {
-        setFilename(completion.suggestion().name());
-    }
-
-    public void onEventMainThread(final Suggestion.Failure failure)
-    {
-        setFilename("");
-    }
-
-    private void setFilename(final String name)
-    {
-        final EditText field = getFilenameField();
-        final boolean hasNoBeenChangedByUser = field.getText().length() == 0;
-        if (hasNoBeenChangedByUser)
+        @Override
+        public void onError(final Throwable e)
         {
-            field.setText(name);
-            field.selectAll();
+            set("");
+        }
+
+        @Override
+        public void onNext(final Resource resource)
+        {
+            set(resource.name());
+        }
+
+        private void set(final String name)
+        {
+            final EditText field = getFilenameField();
+            final boolean notChanged = field.getText().length() == 0;
+            if (notChanged)
+            {
+                field.setText(name);
+                field.selectAll();
+            }
         }
     }
 
     @Override
     public void onClick(final DialogInterface dialog, final int which)
     {
-        requestCreationDir();
+        createDir(parent().resolve(getFilename()));
     }
 
-    private void requestCreationDir()
+    private void createDir(final Resource dir)
     {
-        final Resource dir = parent().resolve(getFilename());
-        bus.post(Creation.Request.target(dir));
+        creation = bindFragment(this, just(dir))
+                .subscribeOn(io())
+                .map(new CreateDir())
+                .subscribe(Actions.empty(), new CreateFailed());
     }
 
-    public void onEventBackgroundThread(final Creation.Request request)
+    private static class CreateDir implements Func1<Resource, Resource>
     {
-        try
+        @Override
+        public Resource call(final Resource dir)
         {
-            request.dir().createDirectory();
-        }
-        catch (final IOException e)
-        {
-            bus.post(Creation.Failure.causedBy(e));
+            try
+            {
+                dir.createDirectory();
+                return dir;
+            }
+            catch (final IOException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public void onEventMainThread(final Creation.Failure failure)
+    private class CreateFailed implements Action1<Throwable>
     {
-        toaster.apply(message(failure.cause()));
+        @Override
+        public void call(final Throwable throwable)
+        {
+            toaster.apply(message((IOException) throwable.getCause()));
+        }
     }
 
     @Override
