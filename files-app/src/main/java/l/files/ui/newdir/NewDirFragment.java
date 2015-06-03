@@ -4,15 +4,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.EditText;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.io.IOException;
 
 import l.files.R;
-import l.files.common.base.Consumer;
 import l.files.fs.Resource;
 import l.files.ui.FileCreationFragment;
-import l.files.ui.Toaster;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -40,9 +36,6 @@ public final class NewDirFragment extends FileCreationFragment
         return fragment;
     }
 
-    @VisibleForTesting
-    public Consumer<String> toaster;
-
     private Subscription suggestion = Subscriptions.empty();
     private Subscription creation = Subscriptions.empty();
 
@@ -58,7 +51,6 @@ public final class NewDirFragment extends FileCreationFragment
     public void onActivityCreated(final Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-        toaster = new Toaster(getActivity());
         suggestName();
     }
 
@@ -72,7 +64,7 @@ public final class NewDirFragment extends FileCreationFragment
                 .subscribe(new SetName());
     }
 
-    private static class SuggestName implements Func1<Resource, Resource>
+    private static final class SuggestName implements Func1<Resource, Resource>
     {
         @Override
         public Resource call(final Resource base)
@@ -96,7 +88,7 @@ public final class NewDirFragment extends FileCreationFragment
         }
     }
 
-    private class SetName extends Subscriber<Resource>
+    private final class SetName extends Subscriber<Resource>
     {
         @Override
         public void onCompleted()
@@ -137,19 +129,18 @@ public final class NewDirFragment extends FileCreationFragment
     {
         creation = bindFragment(this, just(dir))
                 .subscribeOn(io())
-                .map(new CreateDir())
+                .doOnNext(new CreateDir())
                 .subscribe(Actions.empty(), new CreateFailed());
     }
 
-    private static class CreateDir implements Func1<Resource, Resource>
+    private static final class CreateDir implements Action1<Resource>
     {
         @Override
-        public Resource call(final Resource dir)
+        public void call(final Resource dir)
         {
             try
             {
                 dir.createDirectory();
-                return dir;
             }
             catch (final IOException e)
             {
@@ -158,7 +149,7 @@ public final class NewDirFragment extends FileCreationFragment
         }
     }
 
-    private class CreateFailed implements Action1<Throwable>
+    private final class CreateFailed implements Action1<Throwable>
     {
         @Override
         public void call(final Throwable throwable)

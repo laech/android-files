@@ -1,77 +1,97 @@
 package l.files.features;
 
-import java.io.File;
-
 import l.files.R;
+import l.files.common.base.Executable;
 import l.files.features.objects.UiRename;
+import l.files.fs.Permission;
+import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.testing.Tests.assertExists;
-import static l.files.common.testing.Tests.assertNotExists;
 import static l.files.common.testing.Tests.timeout;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class RenameTest extends BaseFilesActivityTest {
+public final class RenameTest extends BaseFilesActivityTest
+{
 
-  public void testRenamesFile() throws Throwable {
-    final File from = dir().createFile("a");
-    final File to = new File(dir().get(), "abc");
-    assertFalse(to.exists());
+    public void test_shows_error_when_failed_to_rename() throws Exception
+    {
+        final Resource file = directory().resolve("a").createFile();
+        directory().removePermissions(Permission.write());
+        rename(file)
+                .setFilename("abc")
+                .okExpectingFailure("Permission denied");
+    }
 
-    rename(from).setFilename(to.getName()).ok();
+    public void test_renames_file_to_specified_name() throws Throwable
+    {
+        final Resource from = directory().resolve("a").createFile();
+        final Resource to = directory().resolve("abc");
 
-    timeout(1, SECONDS, new Runnable() {
-      @Override
-      public void run() {
-        assertNotExists(from);
-        assertExists(to);
-      }
-    });
-  }
+        rename(from).setFilename(to.name()).ok();
 
-  public void testHighlightsFileBaseNameInDialog() {
-    File file = dir().createFile("abc.txt");
-    rename(file).assertFilenameSelection("abc");
-  }
+        timeout(1, SECONDS, new Executable()
+        {
+            @Override
+            public void execute() throws Exception
+            {
+                assertFalse(from.exists(NOFOLLOW));
+                assertTrue(to.exists(NOFOLLOW));
+            }
+        });
+    }
 
-  public void testUsesFilenameAsDefaultText() {
-    File file = dir().createFile("a");
-    rename(file).assertFilename(file.getName());
-  }
+    public void test_highlights_file_base_name_in_dialog() throws Exception
+    {
+        final Resource file = directory().resolve("abc.txt").createFile();
+        rename(file).assertSelection("abc");
+    }
 
-  public void testDisablesOkButtonWithNoErrorInitiallyBecauseWeUseSourceFilenameAsSuggestion() {
-    rename(dir().createDir("a"))
-        .assertOkButtonEnabled(false)
-        .assertHasNoError();
-  }
+    public void test_uses_filename_as_default_text() throws Exception
+    {
+        final Resource file = directory().resolve("a").createFile();
+        rename(file).assertFilename(file.name());
+    }
 
-  public void testCanNotRenameIfNewNameExists() {
-    dir().createFile("abc");
-    rename(dir().createFile("a"))
+    public void test_disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
+            throws Exception
+    {
+        rename(directory().resolve("a").createDirectory())
+                .assertOkButtonEnabled(false)
+                .assertHasNoError();
+    }
 
-        .setFilename("abc")
-        .assertOkButtonEnabled(false)
-        .assertHasError(R.string.name_exists)
+    public void test_cannot_rename_if_new_name_exists() throws Exception
+    {
+        directory().resolve("abc").createFile();
+        rename(directory().resolve("a").createFile())
 
-        .setFilename("ab")
-        .assertOkButtonEnabled(true)
-        .assertHasNoError();
-  }
+                .setFilename("abc")
+                .assertOkButtonEnabled(false)
+                .assertHasError(R.string.name_exists)
 
-  public void testRenameButtonIsDisableIfThereAreMoreThanOneFileChecked() {
-    File f1 = dir().createDir("dir");
-    File f2 = dir().createFile("a");
+                .setFilename("ab")
+                .assertOkButtonEnabled(true)
+                .assertHasNoError();
+    }
 
-    screen()
-        .check(f1, true)
-        .check(f2, true)
-        .assertCanRename(false)
+    public void test_rename_button_is_disable_if_there_are_more_than_one_file_checked()
+            throws Exception
+    {
+        final Resource f1 = directory().resolve("dir").createDirectory();
+        final Resource f2 = directory().resolve("a").createFile();
 
-        .check(f1, false)
-        .assertCanRename(true);
-  }
+        screen()
+                .check(f1, true)
+                .check(f2, true)
+                .assertCanRename(false)
 
-  private UiRename rename(File file) {
-    return screen().check(file, true).rename();
-  }
+                .check(f1, false)
+                .assertCanRename(true);
+    }
+
+    private UiRename rename(final Resource resource)
+    {
+        return screen().check(resource, true).rename();
+    }
 }

@@ -1,4 +1,4 @@
-package l.files.ui.mode;
+package l.files.ui.rename;
 
 import android.app.FragmentManager;
 import android.view.ActionMode;
@@ -14,20 +14,26 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 
-public final class RenameAction extends MultiChoiceModeAction {
+public final class RenameAction extends MultiChoiceModeAction
+{
 
     private final ListSelection<Resource> provider;
     private final FragmentManager manager;
 
     @SuppressWarnings("unchecked")
-    public RenameAction(FragmentManager manager, ListSelection<? extends Resource> provider) {
+    public RenameAction(
+            final FragmentManager manager,
+            final ListSelection<? extends Resource> provider)
+    {
         super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
-        this.provider = (ListSelection<Resource>) requireNonNull(provider, "provider");
+        this.provider = (ListSelection<Resource>)
+                requireNonNull(provider, "provider");
     }
 
     @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
+    {
         menu.add(NONE, id(), NONE, R.string.rename)
                 .setShowAsAction(SHOW_AS_ACTION_NEVER);
         return true;
@@ -35,16 +41,22 @@ public final class RenameAction extends MultiChoiceModeAction {
 
     @Override
     public void onItemCheckedStateChanged(
-            ActionMode mode, int position, long id, boolean checked) {
-        MenuItem item = mode.getMenu().findItem(R.id.rename);
-        if (item != null) {
+            final ActionMode mode,
+            final int position,
+            final long id,
+            final boolean checked)
+    {
+        final MenuItem item = mode.getMenu().findItem(R.id.rename);
+        if (item != null)
+        {
             item.setEnabled(provider.getCheckedItemCount() == 1);
         }
     }
 
     @Override
-    protected void onItemSelected(ActionMode mode, MenuItem item) {
-        Resource resource = provider.getCheckedItem();
+    protected void onItemSelected(final ActionMode mode, final MenuItem item)
+    {
+        final Resource resource = provider.getCheckedItem();
         RenameFragment.create(resource).show(manager, RenameFragment.TAG);
     }
 }

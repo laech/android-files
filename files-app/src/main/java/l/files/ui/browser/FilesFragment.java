@@ -32,7 +32,7 @@ import l.files.ui.mode.CopyAction;
 import l.files.ui.mode.CountSelectedItemsAction;
 import l.files.ui.mode.CutAction;
 import l.files.ui.mode.DeleteAction;
-import l.files.ui.mode.RenameAction;
+import l.files.ui.rename.RenameAction;
 import l.files.ui.mode.SelectAllAction;
 import l.files.ui.newdir.NewDirMenu;
 

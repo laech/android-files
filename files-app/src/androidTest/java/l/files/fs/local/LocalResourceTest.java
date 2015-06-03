@@ -62,7 +62,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_isReadable_false() throws Exception
     {
-        dir1().removePermissions(Permission.allRead());
+        dir1().removePermissions(Permission.read());
         assertFalse(dir1().readable());
     }
 
@@ -73,7 +73,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_isWritable_false() throws Exception
     {
-        dir1().removePermissions(Permission.allWrite());
+        dir1().removePermissions(Permission.write());
         assertFalse(dir1().writable());
     }
 
@@ -84,7 +84,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
     public void test_isExecutable_false() throws Exception
     {
-        dir1().removePermissions(Permission.allExecute());
+        dir1().removePermissions(Permission.execute());
         assertFalse(dir1().executable());
     }
 

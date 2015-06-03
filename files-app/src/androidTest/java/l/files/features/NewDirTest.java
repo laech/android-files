@@ -13,7 +13,7 @@ public final class NewDirTest extends BaseFilesActivityTest
     public void test_shows_error_message_when_failed_to_create()
             throws Exception
     {
-        directory().removePermissions(Permission.allWrite());
+        directory().removePermissions(Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -96,7 +96,7 @@ public final class NewDirTest extends BaseFilesActivityTest
             @Override
             public void run()
             {
-                assertion.apply(dialog.filename());
+                assertion.apply(dialog.editText());
             }
         });
     }

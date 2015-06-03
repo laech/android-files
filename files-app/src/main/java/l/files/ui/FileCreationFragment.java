@@ -13,11 +13,14 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.IOException;
 
 import javax.annotation.Nullable;
 
 import l.files.R;
+import l.files.common.base.Consumer;
 import l.files.fs.Resource;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -39,6 +42,16 @@ public abstract class FileCreationFragment extends DialogFragment
             new CheckerCallback();
 
     private EditText editText;
+
+    @VisibleForTesting
+    public Consumer<String> toaster;
+
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        toaster = new Toaster(getActivity());
+    }
 
     @Override
     public void onStart()

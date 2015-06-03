@@ -20,7 +20,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void testDirectoryViewIsDisabledIfNoReadPermission() throws Exception {
         Resource dir = directory().resolve("dir").createDirectory();
-        dir.removePermissions(Permission.allRead());
+        dir.removePermissions(Permission.read());
         screen().assertDisabled(dir);
     }
 

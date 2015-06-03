@@ -79,13 +79,18 @@ public final class UiFileActivity
 
     public UiFileActivity check(final File file, final boolean checked)
     {
+        return check(LocalResource.create(file), checked);
+    }
+
+    public UiFileActivity check(final Resource resource, final boolean checked)
+    {
         awaitOnMainThread(instrument, new Runnable()
         {
             @Override
             public void run()
             {
                 getListView().setItemChecked(
-                        findItemPositionOrThrow(file.getName()), checked);
+                        findItemPositionOrThrow(resource.name()), checked);
             }
         });
         return this;

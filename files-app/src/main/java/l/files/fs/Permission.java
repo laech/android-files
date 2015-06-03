@@ -15,17 +15,17 @@ public enum Permission
     OTHERS_WRITE,
     OTHERS_EXECUTE;
 
-    public static Set<Permission> allRead()
+    public static Set<Permission> read()
     {
         return EnumSet.of(OWNER_READ, GROUP_READ, OTHERS_READ);
     }
 
-    public static Set<Permission> allWrite()
+    public static Set<Permission> write()
     {
         return EnumSet.of(OWNER_WRITE, GROUP_WRITE, OTHERS_WRITE);
     }
 
-    public static Set<Permission> allExecute()
+    public static Set<Permission> execute()
     {
         return EnumSet.of(OWNER_EXECUTE, GROUP_EXECUTE, OTHERS_EXECUTE);
     }
