@@ -82,4 +82,6 @@ public final class ErrnoExceptions
         }
     }
 
+    public static native String strerror(int errno);
+
 }

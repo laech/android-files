@@ -1,9 +1,10 @@
 package l.files.ui;
 
 import android.system.ErrnoException;
-import android.system.OsConstants;
 
 import java.io.IOException;
+
+import static l.files.fs.local.ErrnoExceptions.strerror;
 
 public final class IOExceptions
 {
@@ -17,8 +18,7 @@ public final class IOExceptions
         final Throwable cause = exception.getCause();
         if (cause instanceof ErrnoException)
         {
-            // TODO use message instead of name
-            return OsConstants.errnoName(((ErrnoException) cause).errno);
+            return strerror(((ErrnoException) cause).errno);
         }
         return exception.getMessage();
     }

@@ -1,25 +1,32 @@
 package l.files.features.objects;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.app.Instrumentation;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import l.files.common.base.Consumer;
 import l.files.ui.browser.FilesActivity;
-import l.files.ui.menu.NewDirFragment;
+import l.files.ui.newdir.NewDirFragment;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static junit.framework.Assert.assertEquals;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-public class UiNewFolder
+public final class UiNewDir
 {
 
     private final Instrumentation instrument;
     private final FilesActivity activity;
 
-    public UiNewFolder(
+    public UiNewDir(
             final Instrumentation instrument,
             final FilesActivity activity)
     {
@@ -27,7 +34,7 @@ public class UiNewFolder
         this.activity = activity;
     }
 
-    public UiNewFolder setFilename(final String name)
+    public UiNewDir setFilename(final String name)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
@@ -47,12 +54,12 @@ public class UiNewFolder
 
     private AlertDialog dialog()
     {
-        return (AlertDialog) fragment().getDialog();
+        return fragment().getDialog();
     }
 
-    private DialogFragment fragment()
+    private NewDirFragment fragment()
     {
-        return (DialogFragment) activity.getFragmentManager()
+        return (NewDirFragment) activity.getFragmentManager()
                 .findFragmentByTag(NewDirFragment.TAG);
     }
 
@@ -69,12 +76,53 @@ public class UiNewFolder
         return new UiFileActivity(instrument, activity);
     }
 
+    public UiFileActivity okExpectingFailure(final String message)
+    {
+        @SuppressWarnings("unchecked")
+        final Consumer<String>[] original = new Consumer[1];
+
+        @SuppressWarnings("unchecked")
+        final Consumer<String> consumer = mock(Consumer.class);
+        doAnswer(new Answer<Void>()
+        {
+            @Override
+            public Void answer(final InvocationOnMock i) throws Throwable
+            {
+                original[0].apply((String) i.getArguments()[0]);
+                return null;
+            }
+        }).when(consumer).apply(anyString());
+
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                original[0] = fragment().toaster;
+                fragment().toaster = consumer;
+            }
+        });
+
+        ok();
+
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                verify(consumer).apply(message);
+            }
+        });
+
+        return new UiFileActivity(instrument, activity);
+    }
+
     private Button okButton()
     {
         return dialog().getButton(BUTTON_POSITIVE);
     }
 
-    public UiNewFolder assertFilename(final String name)
+    public UiNewDir assertFilename(final String name)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
@@ -87,7 +135,7 @@ public class UiNewFolder
         return this;
     }
 
-    public UiNewFolder assertError(final CharSequence error)
+    public UiNewDir assertError(final CharSequence error)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
@@ -100,7 +148,7 @@ public class UiNewFolder
         return this;
     }
 
-    public UiNewFolder assertOkButtonEnabled(final boolean enabled)
+    public UiNewDir assertOkButtonEnabled(final boolean enabled)
     {
         awaitOnMainThread(instrument, new Runnable()
         {

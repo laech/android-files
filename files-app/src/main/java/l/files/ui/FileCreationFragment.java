@@ -94,7 +94,7 @@ public abstract class FileCreationFragment extends DialogFragment
         getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
     }
 
-    protected Resource getParent()
+    protected Resource parent()
     {
         return getArguments().getParcelable(ARG_PARENT_RESOURCE);
     }
@@ -132,7 +132,7 @@ public abstract class FileCreationFragment extends DialogFragment
 
         private Loader<Existence> newChecker()
         {
-            final Resource resource = getParent().resolve(getFilename());
+            final Resource resource = parent().resolve(getFilename());
             return new AsyncTaskLoader<Existence>(getActivity())
             {
                 @Override

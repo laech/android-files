@@ -91,7 +91,7 @@ public final class UiFileActivity
         return this;
     }
 
-    public UiNewFolder newFolder()
+    public UiNewDir newFolder()
     {
         await(instrument, new Runnable()
         {
@@ -102,7 +102,7 @@ public final class UiFileActivity
                         activity, R.id.new_dir, 0));
             }
         });
-        return new UiNewFolder(instrument, activity);
+        return new UiNewDir(instrument, activity);
     }
 
     public UiRename rename()

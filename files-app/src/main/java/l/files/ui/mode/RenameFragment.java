@@ -24,7 +24,8 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 import static java.lang.System.identityHashCode;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class RenameFragment extends FileCreationFragment {
+public final class RenameFragment extends FileCreationFragment
+{
 
     public static final String TAG = RenameFragment.class.getSimpleName();
 
@@ -32,59 +33,73 @@ public final class RenameFragment extends FileCreationFragment {
 
     private static final int LOADER_FILE = identityHashCode(RenameFragment.class);
 
-    private LoaderCallbacks<Stat> fileCallback = new NameHighlighter();
+    private final LoaderCallbacks<Stat> fileCallback = new NameHighlighter();
 
-    static RenameFragment create(Resource resource) {
-        Bundle args = new Bundle(2);
+    static RenameFragment create(final Resource resource)
+    {
+        final Bundle args = new Bundle(2);
         args.putParcelable(ARG_PARENT_RESOURCE, resource.parent());
         args.putParcelable(ARG_RESOURCE, resource);
-        RenameFragment fragment = new RenameFragment();
+        final RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        if (getFilename().isEmpty()) {
+        if (getFilename().isEmpty())
+        {
             getLoaderManager().restartLoader(LOADER_FILE, null, fileCallback);
         }
     }
 
     @Override
-    protected CharSequence getError(Resource target) {
-        if (getResource().equals(target)) {
+    protected CharSequence getError(final Resource target)
+    {
+        if (getResource().equals(target))
+        {
             return null;
         }
         return super.getError(target);
     }
 
     @Override
-    protected int getTitleResourceId() {
+    protected int getTitleResourceId()
+    {
         return R.string.rename;
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
+    public void onClick(final DialogInterface dialog, final int which)
+    {
         final Context context = getActivity();
-        new AsyncTask<Void, Void, IOException>() {
+        new AsyncTask<Void, Void, IOException>()
+        {
 
             @Override
-            protected IOException doInBackground(Void... params) {
-                try {
-                    Resource dst = getParent().resolve(getFilename());
+            protected IOException doInBackground(final Void... params)
+            {
+                try
+                {
+                    final Resource dst = parent().resolve(getFilename());
                     getResource().moveTo(dst);
                     return null;
-                } catch (IOException e) {
+                }
+                catch (final IOException e)
+                {
                     return e;
                 }
             }
 
             @Override
-            protected void onPostExecute(IOException e) {
+            protected void onPostExecute(final IOException e)
+            {
                 super.onPostExecute(e);
-                if (e != null) {
-                    String message = context.getString(R.string.failed_to_rename_file_x, e.getMessage());
+                if (e != null)
+                {
+                    final String message = context.getString(R.string.failed_to_rename_file_x, e.getMessage());
                     makeText(context, message, LENGTH_SHORT).show();
                 }
             }
@@ -92,30 +107,40 @@ public final class RenameFragment extends FileCreationFragment {
         Events.get().post(CloseActionModeRequest.INSTANCE);
     }
 
-    private Resource getResource() {
+    private Resource getResource()
+    {
         return getArguments().getParcelable(ARG_RESOURCE);
     }
 
-    class NameHighlighter implements LoaderCallbacks<Stat> {
+    class NameHighlighter implements LoaderCallbacks<Stat>
+    {
 
         @Override
-        public Loader<Stat> onCreateLoader(int id, Bundle bundle) {
+        public Loader<Stat> onCreateLoader(final int id, final Bundle bundle)
+        {
             return onCreateFileLoader();
         }
 
-        private Loader<Stat> onCreateFileLoader() {
-            return new AsyncTaskLoader<Stat>(getActivity()) {
+        private Loader<Stat> onCreateFileLoader()
+        {
+            return new AsyncTaskLoader<Stat>(getActivity())
+            {
                 @Override
-                public Stat loadInBackground() {
-                    try {
+                public Stat loadInBackground()
+                {
+                    try
+                    {
                         return getResource().stat(NOFOLLOW);
-                    } catch (IOException e) {
+                    }
+                    catch (final IOException e)
+                    {
                         return null;
                     }
                 }
 
                 @Override
-                protected void onStartLoading() {
+                protected void onStartLoading()
+                {
                     super.onStartLoading();
                     forceLoad();
                 }
@@ -123,24 +148,31 @@ public final class RenameFragment extends FileCreationFragment {
         }
 
         @Override
-        public void onLoadFinished(Loader<Stat> loader, Stat stat) {
+        public void onLoadFinished(final Loader<Stat> loader, final Stat stat)
+        {
             onFileLoaded(stat);
         }
 
         @Override
-        public void onLoaderReset(Loader<Stat> loader) {
+        public void onLoaderReset(final Loader<Stat> loader)
+        {
         }
 
-        private void onFileLoaded(Stat stat) {
-            if (stat == null || !getFilename().isEmpty()) {
+        private void onFileLoaded(final Stat stat)
+        {
+            if (stat == null || !getFilename().isEmpty())
+            {
                 return;
             }
-            Resource resource = getResource();
-            EditText field = getFilenameField();
+            final Resource resource = getResource();
+            final EditText field = getFilenameField();
             field.setText(resource.name());
-            if (stat.isDirectory()) {
+            if (stat.isDirectory())
+            {
                 field.selectAll();
-            } else {
+            }
+            else
+            {
                 field.setSelection(0, getNameWithoutExtension(resource.name()).length());
             }
         }

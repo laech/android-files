@@ -25,7 +25,6 @@ import l.files.ui.Preferences;
 import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.BookmarkMenu;
-import l.files.ui.menu.NewDirMenu;
 import l.files.ui.menu.PasteMenu;
 import l.files.ui.menu.ShowHiddenFilesMenu;
 import l.files.ui.menu.SortMenu;
@@ -35,16 +34,17 @@ import l.files.ui.mode.CutAction;
 import l.files.ui.mode.DeleteAction;
 import l.files.ui.mode.RenameAction;
 import l.files.ui.mode.SelectAllAction;
+import l.files.ui.newdir.NewDirMenu;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static l.files.common.app.SystemServices.getClipboardManager;
+import static l.files.ui.IOExceptions.message;
 import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
-import static l.files.ui.IOExceptions.message;
 
 public final class FilesFragment extends BaseFileListFragment
         implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener

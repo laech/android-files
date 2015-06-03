@@ -4,14 +4,20 @@ import android.widget.EditText;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.features.objects.UiNewFolder;
+import l.files.features.objects.UiNewDir;
+import l.files.fs.Permission;
 import l.files.test.BaseFilesActivityTest;
 
-public final class NewFolderTest extends BaseFilesActivityTest
+public final class NewDirTest extends BaseFilesActivityTest
 {
     public void test_shows_error_message_when_failed_to_create()
+            throws Exception
     {
-        fail("Not implemented");
+        directory().removePermissions(Permission.allWrite());
+        screen()
+                .newFolder()
+                .setFilename("a")
+                .okExpectingFailure("Permission denied");
     }
 
     public void test_creates_folder_with_name_specified()
@@ -84,7 +90,7 @@ public final class NewFolderTest extends BaseFilesActivityTest
             throws Throwable
     {
 
-        final UiNewFolder dialog = screen().newFolder();
+        final UiNewDir dialog = screen().newFolder();
         runTestOnUiThread(new Runnable()
         {
             @Override
