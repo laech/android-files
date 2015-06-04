@@ -1,19 +1,19 @@
 buildscript {
 
-  repositories {
-    jcenter()
-  }
+    repositories {
+        jcenter()
+    }
 
-  dependencies {
-    classpath 'com.android.tools.build:gradle:1.1.0'
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-  }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+    }
 }
 
 allprojects {
-  repositories {
-    jcenter()
-  }
+    repositories {
+        jcenter()
+    }
 }
 
 ext.libs = [:]
@@ -25,7 +25,7 @@ libs.auto_parcel = 'com.github.frankiesardo:auto-parcel:0.3'
 libs.auto_parcel_processor = 'com.github.frankiesardo:auto-parcel-processor:0.3'
 
 libs.mockito = [
-    'org.mockito:mockito-core:1.9.5',
-    'com.google.dexmaker:dexmaker:1.0',
-    'com.google.dexmaker:dexmaker-mockito:1.0'
+        'org.mockito:mockito-core:1.10.19',
+        'com.google.dexmaker:dexmaker:1.2',
+        'com.google.dexmaker:dexmaker-mockito:1.2'
 ]
