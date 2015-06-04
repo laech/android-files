@@ -27,6 +27,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.features.objects.Instrumentations.await;
@@ -89,7 +90,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                getListView().setItemChecked(
+                listView().setItemChecked(
                         findItemPositionOrThrow(resource.name()), checked);
             }
         });
@@ -149,7 +150,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                final ListView list = getListView();
+                final ListView list = listView();
                 final int position = findItemPositionOrThrow(file.getName());
                 final int firstVisiblePosition = list.getFirstVisiblePosition();
                 final int viewPosition = position - firstVisiblePosition;
@@ -251,7 +252,7 @@ public final class UiFileActivity
 
     public UiFileActivity assertCanRename(final boolean can)
     {
-        assertEquals(can, getRenameMenuItem().isEnabled());
+        assertEquals(can, renameMenu().isEnabled());
         return this;
     }
 
@@ -271,7 +272,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertEquals(can, getPasteMenuItem().isEnabled());
+                assertEquals(can, pasteMenu().isEnabled());
             }
         });
         return this;
@@ -314,7 +315,7 @@ public final class UiFileActivity
         return this;
     }
 
-    public UiFileActivity assertFileModifiedDateView(
+    public UiFileActivity assertSummaryView(
             final Resource resource,
             final Consumer<CharSequence> assertion)
     {
@@ -323,23 +324,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertion.apply(getFileModifiedView(resource).getText());
-            }
-        });
-        return this;
-    }
-
-    public UiFileActivity assertFileSizeView(
-            final Resource resource,
-            final Consumer<CharSequence> assertion)
-    {
-        awaitOnMainThread(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                final CharSequence actual = getFileSizeView(resource).getText();
-                assertion.apply(actual);
+                assertion.apply(summaryView(resource).getText());
             }
         });
         return this;
@@ -376,39 +361,36 @@ public final class UiFileActivity
         return this;
     }
 
-    private TextView getFileModifiedView(final Resource resource)
+    private TextView summaryView(final Resource resource)
     {
-        return (TextView) getView(resource).findViewById(R.id.date);
+        return (TextView) view(resource).findViewById(R.id.summary);
     }
 
-    private TextView getFileSizeView(final Resource resource)
+    private TextView iconView(final Resource resource)
     {
-        return (TextView) getView(resource).findViewById(R.id.size);
+        return (TextView) view(resource).findViewById(R.id.icon);
     }
 
-    private TextView getFileIconView(final Resource resource)
+    private TextView titleView(final Resource resource)
     {
-        return (TextView) getView(resource).findViewById(R.id.icon);
+        return (TextView) view(resource).findViewById(R.id.title);
     }
 
-    private TextView getFileTitleView(final Resource resource)
+    private View view(final Resource resource)
     {
-        return (TextView) getView(resource).findViewById(R.id.title);
+        final View view = view(resource.name());
+        assertNotNull(view);
+        return view;
     }
 
-    private View getView(final Resource resource)
+    private View view(final String name)
     {
-        return getView(resource.name());
-    }
-
-    private View getView(final String name)
-    {
-        final ListView list = getListView();
+        final ListView list = listView();
         final int index = findItemPositionOrThrow(name);
         return list.getChildAt(index - list.getFirstVisiblePosition());
     }
 
-    private ListView getListView()
+    private ListView listView()
     {
         return (ListView) activity
                 .fragment()
@@ -416,12 +398,12 @@ public final class UiFileActivity
                 .findViewById(android.R.id.list);
     }
 
-    private MenuItem getRenameMenuItem()
+    private MenuItem renameMenu()
     {
         return activity.getCurrentActionMode().getMenu().findItem(R.id.rename);
     }
 
-    private MenuItem getPasteMenuItem()
+    private MenuItem pasteMenu()
     {
         return activity.getMenu().findItem(android.R.id.paste);
     }
@@ -466,11 +448,11 @@ public final class UiFileActivity
 
     private Optional<Integer> findItemPosition(final String filename)
     {
-        final int count = getListView().getCount();
+        final int count = listView().getCount();
         for (int i = 0; i < count; i++)
         {
             final FileListItem item = (FileListItem)
-                    getListView().getItemAtPosition(i);
+                    listView().getItemAtPosition(i);
 
             if (item.isFile() &&
                     ((FileListItem.File) item).getResource().name()
@@ -503,7 +485,7 @@ public final class UiFileActivity
             public void run()
             {
                 final int position = findItemPositionOrThrow(file.getName());
-                assertEquals(checked, getListView().isItemChecked(position));
+                assertEquals(checked, listView().isItemChecked(position));
             }
         });
         return this;
@@ -548,7 +530,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                final View view = getView(resource).findViewById(R.id.symlink);
+                final View view = view(resource).findViewById(R.id.symlink);
                 if (displayed)
                 {
                     assertEquals(VISIBLE, view.getVisibility());
@@ -586,10 +568,9 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertFalse(getFileIconView(resource).isEnabled());
-                assertFalse(getFileSizeView(resource).isEnabled());
-                assertFalse(getFileTitleView(resource).isEnabled());
-                assertFalse(getFileModifiedView(resource).isEnabled());
+                assertFalse(iconView(resource).isEnabled());
+                assertFalse(titleView(resource).isEnabled());
+                assertFalse(summaryView(resource).isEnabled());
             }
         });
         return this;

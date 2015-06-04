@@ -120,8 +120,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
         holder.setTitle(file);
         holder.setIcon(file);
         holder.setSymlink(file);
-        holder.setDate(file);
-        holder.setSize(file);
+        holder.setSummary(file);
         holder.setPreview(file);
 
         return view;
@@ -168,11 +167,6 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             public CharSequence apply(final Stat file)
             {
                 final Instant instant = file.modificationTime();
-                if (instant.equals(EPOCH))
-                {
-                    return context.getString(R.string.__);
-                }
-
                 final long millis = instant.to(MILLISECONDS);
                 date.setTime(millis);
                 t1.setToNow();
@@ -220,8 +214,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
     {
         final TextView icon;
         final TextView title;
-        final TextView date;
-        final TextView size;
+        final TextView summary;
         final TextView symlink;
         final ImageView preview;
 
@@ -229,8 +222,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
         {
             icon = (TextView) root.findViewById(R.id.icon);
             title = (TextView) root.findViewById(R.id.title);
-            date = (TextView) root.findViewById(R.id.date);
-            size = (TextView) root.findViewById(R.id.size);
+            summary = (TextView) root.findViewById(R.id.summary);
             symlink = (TextView) root.findViewById(R.id.symlink);
             preview = (ImageView) root.findViewById(R.id.preview);
         }
@@ -303,36 +295,39 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             }
         }
 
-        void setDate(final File file)
+        void setSummary(final File file)
         {
             final Stat stat = file.getStat();
             if (stat == null)
             {
-                date.setText("");
-                date.setVisibility(GONE);
+                summary.setText("");
+                summary.setVisibility(GONE);
             }
             else
             {
-                date.setEnabled(file.isReadable());
-                date.setText(dateFormatter.apply(stat));
-            }
-        }
-
-        void setSize(final File file)
-        {
-            final Stat stat = file.getStat();
-            if (stat == null)
-            {
-                size.setText("");
-                size.setVisibility(GONE);
-            }
-            else
-            {
-                size.setEnabled(file.isReadable());
-                size.setText(stat.isDirectory()
-                        ? ""
-                        : formatShortFileSize(size.getContext(), stat.size()));
-                size.setVisibility(stat.isRegularFile() ? VISIBLE : GONE);
+                summary.setVisibility(VISIBLE);
+                summary.setEnabled(file.isReadable());
+                final CharSequence date = dateFormatter.apply(stat);
+                final CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
+                final boolean hasDate = stat.modificationTime().to(MILLISECONDS) > 0;
+                final boolean isFile = stat.isRegularFile();
+                if (hasDate && isFile)
+                {
+                    final Context context = summary.getContext();
+                    summary.setText(context.getString(R.string.x_dot_y, date, size));
+                }
+                else if (hasDate)
+                {
+                    summary.setText(date);
+                }
+                else if (isFile)
+                {
+                    summary.setText(size);
+                }
+                else
+                {
+                    summary.setVisibility(GONE);
+                }
             }
         }
 

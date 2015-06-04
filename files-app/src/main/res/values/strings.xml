@@ -1,130 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Files</string>
-  <string name="empty">Empty</string>
-  <string name="not_a_directory">Not a directory</string>
-  <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
-  <string name="permission_denied">Permission denied</string>
-  <string name="no_app_to_open_file">No application can open this file</string>
-  <string name="delete">Delete</string>
-  <string name="home">Home</string>
-  <string name="settings">Settings</string>
-  <string name="view">View</string>
-  <string name="show_hidden_files">Show hidden files</string>
-  <string name="show_path_bar">Show path bar</string>
-  <string name="send_feedback">Send feedback</string>
-  <string name="about">About</string>
-  <string name="bookmarks">Bookmarks</string>
-  <string name="bookmark">Bookmark</string>
-  <string name="device">Device</string>
-  <string name="new_dir">New folder</string>
-  <string name="sort_by">Sort</string>
-  <plurals name="confirm_delete_question">
-    <item quantity="one">Delete this item permanently?</item>
-    <item quantity="other">Delete these %s items permanently?</item>
-  </plurals>
-  <string name="untitled_dir">Untitled Folder</string>
-  <string name="mkdir_failed">Failed to create folder.</string>
-  <string name="name_exists">This name is already taken.</string>
-  <string name="rename">Rename</string>
-  <string name="failed_to_rename_file_x">Failed to rename file.\n%s</string>
-  <string name="new_tab">New tab</string>
-  <string name="close_tab">Close tab</string>
-  <string name="conflicts_activity_label">Resolve conflicts</string>
+    <string name="app_name">Files</string>
+    <string name="empty">Empty</string>
+    <string name="not_a_directory">Not a directory</string>
+    <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="no_app_to_open_file">No application can open this file</string>
+    <string name="delete">Delete</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="view">View</string>
+    <string name="show_hidden_files">Show hidden files</string>
+    <string name="show_path_bar">Show path bar</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="about">About</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="device">Device</string>
+    <string name="new_dir">New folder</string>
+    <string name="sort_by">Sort</string>
+    <plurals name="confirm_delete_question">
+        <item quantity="one">Delete this item permanently?</item>
+        <item quantity="other">Delete these %s items permanently?</item>
+    </plurals>
+    <string name="untitled_dir">Untitled Folder</string>
+    <string name="mkdir_failed">Failed to create folder.</string>
+    <string name="name_exists">This name is already taken.</string>
+    <string name="rename">Rename</string>
+    <string name="failed_to_rename_file_x">Failed to rename file.\n%s</string>
+    <string name="new_tab">New tab</string>
+    <string name="close_tab">Close tab</string>
+    <string name="conflicts_activity_label">Resolve conflicts</string>
 
-  <plurals name="replace_dest_files">
-    <item quantity="one">Replace destination item</item>
-    <item quantity="other">Replace destination items</item>
-  </plurals>
+    <plurals name="replace_dest_files">
+        <item quantity="one">Replace destination item</item>
+        <item quantity="other">Replace destination items</item>
+    </plurals>
 
-  <plurals name="skip_files">
-    <item quantity="one">Skip this item</item>
-    <item quantity="other">Skip these items</item>
-  </plurals>
+    <plurals name="skip_files">
+        <item quantity="one">Skip this item</item>
+        <item quantity="other">Skip these items</item>
+    </plurals>
 
-  <string name="keep_all">Keep all, rename new items</string>
-  <string name="let_me_choose">Let me choose</string>
+    <string name="keep_all">Keep all, rename new items</string>
+    <string name="let_me_choose">Let me choose</string>
 
-  <plurals name="conflicts_summary_html">
-    <item quantity="one"><![CDATA[<b>%1$s</b> already has <b>%2$s</b>]]></item>
-    <item quantity="other"><![CDATA[<b>%1$s</b> already has %3$s items with the same names (such as <b>%2$s</b>)]]></item>
-  </plurals>
+    <plurals name="conflicts_summary_html">
+        <item quantity="one"><![CDATA[<b>%1$s</b> already has <b>%2$s</b>]]></item>
+        <item quantity="other"><![CDATA[<b>%1$s</b> already has %3$s items with the same names (such as <b>%2$s</b>)]]></item>
+    </plurals>
 
-  <!--
-    The character of all icon fonts in assets folder,
-    created at http://icomoon.io/app/ with the "IcoMoon - Free" icon set
-   -->
-  <string name="ic_font_char">0</string>
+    <!--
+      The character of all icon fonts in assets folder,
+      created at http://icomoon.io/app/ with the "IcoMoon - Free" icon set
+     -->
+    <string name="ic_font_char">0</string>
 
-  <string name="failed_to_get_file_info">Failed to get file information</string>
+    <string name="failed_to_get_file_info">Failed to get file information</string>
 
-  <string name="name">Name</string>
-  <string name="date_modified">Date modified</string>
-  <string name="size">Size</string>
+    <string name="name">Name</string>
+    <string name="date_modified">Date modified</string>
+    <string name="size">Size</string>
 
-  <string name="today">Today</string>
-  <string name="yesterday">Yesterday</string>
-  <string name="previous_7_days">Previous 7 days</string>
-  <string name="previous_30_days">Previous 30 days</string>
-  <string name="unknown">Unknown</string>
-  
-  <string name="_10gb_or_more">&gt;= 10GB</string>
-  <string name="_1gb_to_10gb">1GB — 10GB</string>
-  <string name="_100mb_to_1gb">100MB — 1GB</string>
-  <string name="_1mb_to_100mb">1MB — 100MB</string>
-  <string name="_1kb_to_1mb">1KB — 1MB</string>
-  <string name="less_than_1kb">&lt; 1KB</string>
-  <string name="__">——</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="previous_7_days">Previous 7 days</string>
+    <string name="previous_30_days">Previous 30 days</string>
+    <string name="unknown">Unknown</string>
+
+    <string name="_10gb_or_more">&gt;= 10GB</string>
+    <string name="_1gb_to_10gb">1GB — 10GB</string>
+    <string name="_100mb_to_1gb">100MB — 1GB</string>
+    <string name="_1mb_to_100mb">1MB — 100MB</string>
+    <string name="_1kb_to_1mb">1KB — 1MB</string>
+    <string name="less_than_1kb">&lt; 1KB</string>
+    <string name="__">——</string>
+    <string name="x_dot_y">%1$s ・ %2$s</string>
 
 
+    <string name="pending">Pending</string>
+    <string name="remain_count_x_size_x">Remaining: %1$,d (%2$s)</string>
 
-  <string name="pending">Pending</string>
-  <string name="remain_count_x_size_x">Remaining: %1$,d (%2$s)</string>
+    <plurals name="preparing_delete_x_items_from_x">
+        <item quantity="one">Preparing to delete %1$,d item from %2$s</item>
+        <item quantity="other">Preparing to delete %1$,d items from %2$s</item>
+    </plurals>
+    <plurals name="deleting_x_items_from_x">
+        <item quantity="one">Deleting %1$,d item from %2$s</item>
+        <item quantity="other">Deleting %1$,d items from %2$s</item>
+    </plurals>
 
-  <plurals name="preparing_delete_x_items_from_x">
-    <item quantity="one">Preparing to delete %1$,d item from %2$s</item>
-    <item quantity="other">Preparing to delete %1$,d items from %2$s</item>
-  </plurals>
-  <plurals name="deleting_x_items_from_x">
-    <item quantity="one">Deleting %1$,d item from %2$s</item>
-    <item quantity="other">Deleting %1$,d items from %2$s</item>
-  </plurals>
+    <plurals name="preparing_to_copy_x_items_to_x">
+        <item quantity="one">Preparing to copy %1$,d item to %2$s</item>
+        <item quantity="other">Preparing to copy %1$,d items to %2$s</item>
+    </plurals>
+    <plurals name="preparing_to_move_x_items">
+        <item quantity="zero">Preparing to move</item>
+        <item quantity="one">Preparing to move %,d item</item>
+        <item quantity="other">Preparing to move %,d items</item>
+    </plurals>
 
-  <plurals name="preparing_to_copy_x_items_to_x">
-    <item quantity="one">Preparing to copy %1$,d item to %2$s</item>
-    <item quantity="other">Preparing to copy %1$,d items to %2$s</item>
-  </plurals>
-  <plurals name="preparing_to_move_x_items">
-    <item quantity="zero">Preparing to move</item>
-    <item quantity="one">Preparing to move %,d item</item>
-    <item quantity="other">Preparing to move %,d items</item>
-  </plurals>
+    <plurals name="copying_x_items_to_x">
+        <item quantity="one">Copying %1$,d item to %2$s</item>
+        <item quantity="other">Copying %1$,d items to %2$s</item>
+    </plurals>
+    <plurals name="moving_x_items_to_x">
+        <item quantity="one">Moving %1$,d item to %2$s</item>
+        <item quantity="other">Moving %1$,d items to %2$s</item>
+    </plurals>
 
-  <plurals name="copying_x_items_to_x">
-    <item quantity="one">Copying %1$,d item to %2$s</item>
-    <item quantity="other">Copying %1$,d items to %2$s</item>
-  </plurals>
-  <plurals name="moving_x_items_to_x">
-    <item quantity="one">Moving %1$,d item to %2$s</item>
-    <item quantity="other">Moving %1$,d items to %2$s</item>
-  </plurals>
+    <string name="cleaning_up">Cleaning up</string>
+    <string name="x_of_x_size">%1$s of %2$s</string>
+    <string name="x_countdown">-%s</string>
 
-  <string name="cleaning_up">Cleaning up</string>
-  <string name="x_of_x_size">%1$s of %2$s</string>
-  <string name="x_countdown">-%s</string>
-
-  <plurals name="fail_to_copy">
-    <item quantity="one">Failed to copy file</item>
-    <item quantity="other">Failed to copy files</item>
-  </plurals>
-  <plurals name="fail_to_move">
-    <item quantity="one">Failed to move file</item>
-    <item quantity="other">Failed to move files</item>
-  </plurals>
-  <plurals name="fail_to_delete">
-    <item quantity="one">Failed to delete file</item>
-    <item quantity="other">Failed to delete files</item>
-  </plurals>
+    <plurals name="fail_to_copy">
+        <item quantity="one">Failed to copy file</item>
+        <item quantity="other">Failed to copy files</item>
+    </plurals>
+    <plurals name="fail_to_move">
+        <item quantity="one">Failed to move file</item>
+        <item quantity="other">Failed to move files</item>
+    </plurals>
+    <plurals name="fail_to_delete">
+        <item quantity="one">Failed to delete file</item>
+        <item quantity="other">Failed to delete files</item>
+    </plurals>
 
 </resources>
