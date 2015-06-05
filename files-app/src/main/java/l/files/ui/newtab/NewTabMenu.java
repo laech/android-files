@@ -1,4 +1,4 @@
-package l.files.ui.menu;
+package l.files.ui.newtab;
 
 import android.content.Context;
 import android.content.Intent;

@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.app.FragmentManager.OnBackStackChangedListener;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -33,13 +32,11 @@ import l.files.ui.Preferences;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
-import l.files.ui.menu.NewTabMenu;
+import l.files.ui.newtab.NewTabMenu;
 import l.files.ui.menu.ShowPathBarMenu;
 import l.files.ui.pathbar.PathBarFragment;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static android.content.Intent.ACTION_MAIN;
-import static android.content.Intent.CATEGORY_HOME;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
@@ -49,8 +46,8 @@ import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.IOExceptions.message;
+import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity
         implements OnSharedPreferenceChangeListener, OnBackStackChangedListener
@@ -190,18 +187,10 @@ public final class FilesActivity extends BaseActivity
         {
             closeSidebar();
         }
-        else if (!getFragmentManager().popBackStackImmediate())
+        else
         {
-            // Simulate home button press instead of finishing, so that
-            // recent document list don't contain an extra instance of this
-            // activity every time this activity finishes
-            goHome();
+            super.onBackPressed();
         }
-    }
-
-    private void goHome()
-    {
-        startActivity(new Intent(ACTION_MAIN).addCategory(CATEGORY_HOME));
     }
 
     @Override

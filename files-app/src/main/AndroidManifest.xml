@@ -13,8 +13,7 @@
         android:theme="@style/Theme">
 
         <activity
-            android:name=".ui.browser.FilesActivity"
-            android:documentLaunchMode="intoExisting">
+            android:name=".ui.browser.FilesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
