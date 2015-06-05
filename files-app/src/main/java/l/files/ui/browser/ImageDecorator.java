@@ -6,10 +6,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.graphics.pdf.PdfRenderer;
 import android.os.AsyncTask;
+import android.os.ParcelFileDescriptor;
+import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -24,11 +28,21 @@ import l.files.fs.Stat;
 import l.files.logging.Logger;
 import l.files.ui.util.ScaledSize;
 
+import static android.R.integer.config_shortAnimTime;
+import static android.content.ContentResolver.SCHEME_FILE;
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.BitmapFactory.Options;
 import static android.graphics.BitmapFactory.decodeStream;
 import static android.graphics.Color.TRANSPARENT;
+import static android.graphics.Color.WHITE;
+import static android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY;
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+import static android.os.ParcelFileDescriptor.open;
+import static android.util.TypedValue.COMPLEX_UNIT_PT;
+import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -37,7 +51,8 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
 
-final class ImageDecorator {
+final class ImageDecorator
+{
 
     private static final Logger logger = Logger.get(ImageDecorator.class);
 
@@ -48,7 +63,11 @@ final class ImageDecorator {
     private final int maxWidth;
     private final int maxHeight;
 
-    ImageDecorator(LruCache<Object, Bitmap> cache, int maxWidth, int maxHeight) {
+    ImageDecorator(
+            final LruCache<Object, Bitmap> cache,
+            final int maxWidth,
+            final int maxHeight)
+    {
         checkArgument(maxWidth > 0);
         checkArgument(maxHeight > 0);
         this.maxWidth = maxWidth;
@@ -56,11 +75,15 @@ final class ImageDecorator {
         this.cache = requireNonNull(cache, "cache");
     }
 
-    public void decorate(ImageView view, Resource resource, Stat stat) {
-        Object key = buildCacheKey(resource);
+    public void decorate(
+            final ImageView view,
+            final Resource resource,
+            final Stat stat)
+    {
+        final Object key = buildCacheKey(resource);
 
-        Task task = (Task) view.getTag(R.id.image_decorator_task);
-        if (task != null && task.getResource().equals(resource))
+        final Task task = (Task) view.getTag(R.id.image_decorator_task);
+        if (task != null && task.resource().equals(resource))
             return;
         if (task != null) task.cancel(true);
 
@@ -72,27 +95,43 @@ final class ImageDecorator {
         if (errors.contains(key)) return;
         if (setCachedBitmap(view, key)) return;
 
-        ScaledSize size = sizes.get(key);
-        if (size != null) {
+        final ScaledSize size = sizes.get(key);
+        if (size != null)
+        {
             view.setVisibility(VISIBLE);
             view.setImageDrawable(newPlaceholder(size));
-            new DecodeImage(key, view, resource, size).executeOnExecutor(SERIAL_EXECUTOR);
-        } else {
-            new DecodeSize(key, view, resource).executeOnExecutor(THREAD_POOL_EXECUTOR);
+            new DecodeImage(key, view, resource, size)
+                    .executeOnExecutor(SERIAL_EXECUTOR);
+        }
+        else if (isPdf(resource))
+        {
+            new DecodePdf(key, view, resource)
+                    .executeOnExecutor(SERIAL_EXECUTOR);
+        }
+        else
+        {
+            new DecodeSize(key, view, resource)
+                    .executeOnExecutor(THREAD_POOL_EXECUTOR);
         }
     }
 
-    private boolean isReadable(Resource resource){
-        try {
+    private boolean isReadable(final Resource resource)
+    {
+        try
+        {
             return resource.readable();
-        } catch (IOException e) {
+        }
+        catch (final IOException e)
+        {
             return false;
         }
     }
 
-    private boolean setCachedBitmap(ImageView image, Object key) {
-        Bitmap bitmap = cache.get(key);
-        if (bitmap != null) {
+    private boolean setCachedBitmap(final ImageView image, final Object key)
+    {
+        final Bitmap bitmap = cache.get(key);
+        if (bitmap != null)
+        {
             image.setImageBitmap(bitmap);
             image.setVisibility(VISIBLE);
             return true;
@@ -100,173 +139,320 @@ final class ImageDecorator {
         return false;
     }
 
-    private Object buildCacheKey(Resource resource) {
+    private Object buildCacheKey(final Resource resource)
+    {
         return resource.uri() + "?bounds=" + maxWidth + "x" + maxHeight;
     }
 
-    private SizedColorDrawable newPlaceholder(ScaledSize size) {
-        return new SizedColorDrawable(TRANSPARENT, size.scaledWidth, size.scaledHeight);
+    private SizedColorDrawable newPlaceholder(final ScaledSize size)
+    {
+        return new SizedColorDrawable(
+                TRANSPARENT,
+                size.scaledWidth,
+                size.scaledHeight);
     }
 
-    private interface Task {
+    private interface Task
+    {
 
-        Resource getResource();
+        Resource resource();
 
         boolean cancel(boolean mayInterruptIfRunning);
+
     }
 
-    private static InputStream openInputStream(Resource res) throws IOException {
+    private static InputStream input(final Resource res) throws IOException
+    {
         return res.input(FOLLOW);
     }
 
-    private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize> implements Task {
+    private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize>
+            implements Task
+    {
         private final Object key;
         private final ImageView view;
         private final Resource resource;
 
-        DecodeSize(Object key, ImageView view, Resource resource) {
+        DecodeSize(
+                final Object key,
+                final ImageView view,
+                final Resource resource)
+        {
             this.key = key;
             this.view = view;
             this.resource = resource;
         }
 
         @Override
-        protected void onPreExecute() {
+        protected void onPreExecute()
+        {
             super.onPreExecute();
             view.setTag(R.id.image_decorator_task, this);
         }
 
         @Override
-        protected ScaledSize doInBackground(Void... params) {
-            if (isCancelled()) {
+        protected ScaledSize doInBackground(final Void... params)
+        {
+            if (isCancelled())
+            {
                 return null;
             }
 
-      /* Some files are protected by more than just permission attributes, a file
-       * with readable bits set doesn't mean it will be readable, they are also
-       * being protected by other means, e.g. /proc/1/maps. Attempt to read those
-       * files with BitmapFactory will cause the native code to catch and ignore
-       * the exception and loop forever, see
-       * https://github.com/android/platform_frameworks_base/blob/master/core/jni/android/graphics/CreateJavaOutputStreamAdaptor.cpp
-       * This code here is a workaround for that, attempt to read one byte off the
-       * file, if an exception occurs, meaning it can't be read, let the exception
-       * propagate, and return no result.
-       */
-            try (InputStream in = openInputStream(resource)) {
-                //noinspection ResultOfMethodCallIgnored
-                in.read();
-            } catch (IOException e) {
-                return null;
-            }
-
-            Options options = new Options();
+            final Options options = new Options();
             options.inJustDecodeBounds = true;
-            try (InputStream in = openInputStream(resource)) {
+            try (InputStream in = input(resource))
+            {
                 decodeStream(in, null, options);
-            } catch (IOException e) {
+            }
+            catch (final IOException e)
+            {
                 return null;
             }
-            if (options.outWidth > 0 && options.outHeight > 0) {
-                return scaleSize(options.outWidth, options.outHeight, maxWidth, maxHeight);
+
+            if (options.outWidth > 0 && options.outHeight > 0)
+            {
+                return scaleSize(
+                        options.outWidth,
+                        options.outHeight,
+                        maxWidth,
+                        maxHeight);
             }
+
             return null;
         }
 
         @Override
-        protected void onPostExecute(ScaledSize size) {
+        protected void onPostExecute(final ScaledSize size)
+        {
             super.onPostExecute(size);
-            if (size == null) {
+            if (size == null)
+            {
                 errors.add(key);
-                if (view.getTag(R.id.image_decorator_task) == this) {
+                if (view.getTag(R.id.image_decorator_task) == this)
+                {
                     view.setTag(R.id.image_decorator_task, null);
                 }
-            } else {
+            }
+            else
+            {
                 sizes.put(key, size);
-                if (view.getTag(R.id.image_decorator_task) == this) {
+                if (view.getTag(R.id.image_decorator_task) == this)
+                {
                     view.setTag(R.id.image_decorator_task, null);
                     view.setImageDrawable(newPlaceholder(size));
                     view.setVisibility(VISIBLE);
-                    new DecodeImage(key, view, resource, size).executeOnExecutor(SERIAL_EXECUTOR);
+                    new DecodeImage(key, view, resource, size)
+                            .executeOnExecutor(SERIAL_EXECUTOR);
                 }
             }
         }
 
         @Override
-        public Resource getResource() {
+        public Resource resource()
+        {
             return resource;
         }
     }
 
-    private final class DecodeImage extends AsyncTask<Void, Void, Bitmap> implements Task {
-        private final Object key;
-        private final ImageView view;
-        private final Resource resource;
-        private final ScaledSize size;
+    private abstract class DecodeBase
+            extends AsyncTask<Void, ScaledSize, Bitmap> implements Task
+    {
+        final Object key;
+        final ImageView view;
+        final Resource resource;
 
-        DecodeImage(Object key, ImageView view, Resource resource, ScaledSize size) {
+        DecodeBase(
+                final Object key,
+                final ImageView view,
+                final Resource resource)
+        {
             this.key = key;
             this.view = view;
             this.resource = resource;
-            this.size = size;
         }
 
         @Override
-        protected void onPreExecute() {
+        protected void onPreExecute()
+        {
             super.onPreExecute();
             view.setTag(R.id.image_decorator_task, this);
         }
 
         @Override
-        protected Bitmap doInBackground(Void... params) {
-            if (isCancelled()) {
+        protected Bitmap doInBackground(final Void... params)
+        {
+            if (isCancelled())
+            {
                 return null;
             }
-            try (InputStream in = openInputStream(resource)) {
-                return decodeScaledBitmap(in, size);
-            } catch (Exception e) {
+
+            try
+            {
+                return decode();
+            }
+            catch (final Exception e)
+            {
                 // Catch all unexpected internal errors from decoder
+                // Include those that aren't declared
                 logger.warn(e);
                 return null;
             }
         }
 
+        protected abstract Bitmap decode() throws Exception;
+
         @Override
-        protected void onPostExecute(Bitmap bitmap) {
+        protected void onProgressUpdate(final ScaledSize... values)
+        {
+            super.onProgressUpdate(values);
+            final ScaledSize size = values[0];
+            if (sizes.put(key, size) == null)
+            {
+                view.setImageDrawable(newPlaceholder(size));
+                view.setVisibility(VISIBLE);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final Bitmap bitmap)
+        {
             super.onPostExecute(bitmap);
-            if (bitmap == null) {
+            if (bitmap == null)
+            {
                 onFailed();
-            } else {
+            }
+            else
+            {
                 onSuccess(bitmap);
             }
         }
 
-        private void onFailed() {
+        private void onFailed()
+        {
             errors.add(key);
             sizes.remove(key);
-            if (view.getTag(R.id.image_decorator_task) == this) {
+            if (view.getTag(R.id.image_decorator_task) == this)
+            {
                 view.setVisibility(GONE);
                 view.setTag(R.id.image_decorator_task, null);
             }
         }
 
-        private void onSuccess(Bitmap bitmap) {
-            if (view.getTag(R.id.image_decorator_task) == this) {
+        private void onSuccess(final Bitmap bitmap)
+        {
+            if (view.getTag(R.id.image_decorator_task) == this)
+            {
                 view.setTag(R.id.image_decorator_task, null);
-                Resources res = view.getResources();
-                TransitionDrawable drawable = new TransitionDrawable(new Drawable[]{
-                        new ColorDrawable(TRANSPARENT),
-                        new BitmapDrawable(res, bitmap)});
+                final Resources res = view.getResources();
+                final TransitionDrawable drawable =
+                        new TransitionDrawable(new Drawable[]{
+                                new ColorDrawable(TRANSPARENT),
+                                new BitmapDrawable(res, bitmap)
+                        });
                 view.setImageDrawable(drawable);
-                int duration = res.getInteger(android.R.integer.config_shortAnimTime);
-                drawable.startTransition(duration);
                 view.setVisibility(VISIBLE);
+                drawable.startTransition(res.getInteger(config_shortAnimTime));
             }
             cache.put(key, bitmap);
         }
 
         @Override
-        public Resource getResource() {
+        public Resource resource()
+        {
             return resource;
         }
     }
+
+    private final class DecodeImage extends DecodeBase
+    {
+        private final ScaledSize size;
+
+        DecodeImage(
+                final Object key,
+                final ImageView view,
+                final Resource resource,
+                final ScaledSize size)
+        {
+            super(key, view, resource);
+            this.size = size;
+        }
+
+        @Override
+        protected Bitmap decode() throws Exception
+        {
+            try (InputStream in = input(resource))
+            {
+                return decodeScaledBitmap(in, size);
+            }
+        }
+    }
+
+    private boolean isPdf(final Resource resource)
+    {
+        return SCHEME_FILE.equals(resource.uri().getScheme())
+                && resource.name().endsWith(".pdf"); // TODO
+    }
+
+    private final class DecodePdf extends DecodeBase
+    {
+        DecodePdf(
+                final Object key,
+                final ImageView view,
+                final Resource resource)
+        {
+            super(key, view, resource);
+        }
+
+        @Override
+        protected Bitmap decode() throws Exception
+        {
+            final File file = new File(resource.uri());
+            try (final ParcelFileDescriptor fd = open(file, MODE_READ_ONLY);
+                 final PdfRenderer renderer = new PdfRenderer(fd))
+            {
+                if (renderer.getPageCount() > 0)
+                {
+                    try (final PdfRenderer.Page page = renderer.openPage(0))
+                    {
+                        return render(page);
+                    }
+                }
+            }
+            return null;
+        }
+
+        private Bitmap render(final PdfRenderer.Page page)
+        {
+            final ScaledSize size = sizeOf(page);
+            publishProgress(size);
+
+            final Bitmap bitmap = bitmap(size);
+            page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
+            return bitmap;
+        }
+
+        private ScaledSize sizeOf(final PdfRenderer.Page page)
+        {
+            final int width = pointToPixel(page.getWidth());
+            final int height = pointToPixel(page.getHeight());
+            return scaleSize(width, height, maxWidth, maxHeight);
+        }
+
+        private int pointToPixel(final int points)
+        {
+            final DisplayMetrics m = view.getResources().getDisplayMetrics();
+            return (int) applyDimension(COMPLEX_UNIT_PT, points, m);
+        }
+
+        private Bitmap bitmap(final ScaledSize size)
+        {
+            final Bitmap bitmap = createBitmap(
+                    size.scaledWidth, size.scaledHeight, ARGB_8888);
+            // Without this PDFs with no background color will have window
+            // background shown through
+            bitmap.eraseColor(WHITE);
+            return bitmap;
+        }
+    }
+
 }
