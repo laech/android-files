@@ -17,9 +17,11 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 /**
  * Categories files by their last modified date.
  */
-final class DateCategorizer implements Categorizer {
+final class DateCategorizer implements Categorizer
+{
 
-    private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+    private static final long MILLIS_PER_MINUTE = 60 * 1000;
+    private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
 
     @SuppressLint("SimpleDateFormat")
     private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
@@ -32,7 +34,8 @@ final class DateCategorizer implements Categorizer {
     private final long startOf7Days;
     private final long startOf30Days;
 
-    public DateCategorizer(long now) {
+    public DateCategorizer(final long now)
+    {
         timestamp.setTimeInMillis(now);
         timestamp.set(Calendar.HOUR_OF_DAY, 0);
         timestamp.set(Calendar.MINUTE, 0);
@@ -47,44 +50,36 @@ final class DateCategorizer implements Categorizer {
     }
 
     @Override
-    public String get(Resources res, FileListItem.File file) {
-        if (file.getStat() == null) {
+    public String get(final Resources res, final FileListItem.File file)
+    {
+        if (file.getStat() == null)
+        {
             return res.getString(R.string.__);
         }
 
-        long modified = file.getStat().modificationTime().to(MILLISECONDS);
-        if (modified <= 0) {
-            return res.getString(R.string.__);
-        }
-        if (modified >= startOfTomorrow) {
-            return res.getString(R.string.unknown);
-        }
-        if (modified >= startOfToday) {
-            return res.getString(R.string.today);
-        }
-        if (modified >= startOfYesterday) {
-            return res.getString(R.string.yesterday);
-        }
-        if (modified >= startOf7Days) {
-            return res.getString(R.string.previous_7_days);
-        }
-        if (modified >= startOf30Days) {
-            return res.getString(R.string.previous_30_days);
-        }
+        final long t = file.getStat().modificationTime().to(MILLISECONDS);
+        if (t < MILLIS_PER_MINUTE) return res.getString(R.string.__);
+        if (t >= startOfTomorrow) return res.getString(R.string.unknown);
+        if (t >= startOfToday) return res.getString(R.string.today);
+        if (t >= startOfYesterday) return res.getString(R.string.yesterday);
+        if (t >= startOf7Days) return res.getString(R.string.previous_7_days);
+        if (t >= startOf30Days) return res.getString(R.string.previous_30_days);
 
         timestamp.setTimeInMillis(startOfToday);
-        int currentYear = timestamp.get(Calendar.YEAR);
+        final int currentYear = timestamp.get(Calendar.YEAR);
 
-        timestamp.setTimeInMillis(modified);
-        int thatYear = timestamp.get(Calendar.YEAR);
+        timestamp.setTimeInMillis(t);
+        final int thatYear = timestamp.get(Calendar.YEAR);
 
-        if (currentYear != thatYear) {
+        if (currentYear != thatYear)
+        {
             return String.valueOf(thatYear);
         }
 
-        int month = timestamp.get(Calendar.MONTH);
+        final int month = timestamp.get(Calendar.MONTH);
         String format = monthCache.get(month);
-        if (format == null) {
+        if (format == null)
+        {
             format = monthFormat.format(timestamp.getTime());
             monthCache.put(month, format);
         }

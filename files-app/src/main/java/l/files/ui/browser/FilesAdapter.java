@@ -36,7 +36,7 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.fs.Instant.EPOCH;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.ui.FilesApp.getBitmapCache;
 import static l.files.ui.IconFonts.getDefaultFileIcon;
 import static l.files.ui.IconFonts.getDirectoryIcon;
@@ -309,7 +309,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
                 summary.setEnabled(file.isReadable());
                 final CharSequence date = dateFormatter.apply(stat);
                 final CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
-                final boolean hasDate = stat.modificationTime().to(MILLISECONDS) > 0;
+                final boolean hasDate = stat.modificationTime().to(MINUTES) > 0;
                 final boolean isFile = stat.isRegularFile();
                 if (hasDate && isFile)
                 {
