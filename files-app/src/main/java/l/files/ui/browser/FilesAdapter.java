@@ -205,7 +205,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
         final FileListItem item = getItem(position);
         if (item instanceof File)
         {
-            return ((File) item).getResource();
+            return ((File) item).resource();
         }
         return item;
     }
@@ -229,18 +229,18 @@ final class FilesAdapter extends StableAdapter<FileListItem>
 
         void setTitle(final File file)
         {
-            title.setText(file.getResource().name());
-            title.setEnabled(file.getStat() != null && file.isReadable());
+            title.setText(file.resource().name());
+            title.setEnabled(file.stat() != null && file.isReadable());
         }
 
         void setIcon(final File file)
         {
             final Context context = icon.getContext();
             final AssetManager assets = context.getAssets();
-            icon.setEnabled(file.getTargetStat() != null && file.isReadable());
+            icon.setEnabled(file.targetStat() != null && file.isReadable());
 
-            if (file.getTargetStat() != null
-                    && setLocalIcon(icon, file.getTargetStat()))
+            if (file.targetStat() != null
+                    && setLocalIcon(icon, file.targetStat()))
             {
                 icon.setTypeface(SANS_SERIF, BOLD);
             }
@@ -280,24 +280,24 @@ final class FilesAdapter extends StableAdapter<FileListItem>
                 final File file,
                 final AssetManager assets)
         {
-            final Stat stat = file.getStat();
+            final Stat stat = file.stat();
             if (stat == null)
             {
                 return getDefaultFileIcon(assets);
             }
-            if (stat.isDirectory() || file.getTargetStat().isDirectory())
+            if (stat.isDirectory() || file.targetStat().isDirectory())
             {
-                return getDirectoryIcon(assets, file.getResource());
+                return getDirectoryIcon(assets, file.resource());
             }
             else
             {
-                return getIconForFileMediaType(assets, file.getBasicMediaType());
+                return getIconForFileMediaType(assets, file.basicMediaType());
             }
         }
 
         void setSummary(final File file)
         {
-            final Stat stat = file.getStat();
+            final Stat stat = file.stat();
             if (stat == null)
             {
                 summary.setText("");
@@ -333,7 +333,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
 
         void setPreview(final File file)
         {
-            if (file.getStat() == null)
+            if (file.stat() == null)
             {
                 preview.setImageDrawable(null);
                 preview.setVisibility(GONE);
@@ -341,13 +341,13 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             else
             {
                 imageDecorator.decorate(
-                        preview, file.getResource(), file.getStat());
+                        preview, file.resource(), file.stat());
             }
         }
 
         void setSymlink(final File file)
         {
-            final Stat stat = file.getStat();
+            final Stat stat = file.stat();
             if (stat == null || !stat.isSymbolicLink())
             {
                 symlink.setVisibility(GONE);

@@ -13,85 +13,107 @@ import l.files.fs.Stat;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
-public abstract class FileListItem {
+public abstract class FileListItem
+{
 
-    FileListItem() {
+    FileListItem()
+    {
     }
 
     public abstract boolean isFile();
 
-    public boolean isHeader() {
+    public boolean isHeader()
+    {
         return !isFile();
     }
 
     @AutoParcel
-    public static abstract class Header extends FileListItem {
+    public static abstract class Header extends FileListItem
+    {
 
-        Header() {
+        Header()
+        {
         }
 
-        public abstract String getHeader();
+        public abstract String header();
 
-        public static Header create(String header) {
+        public static Header create(final String header)
+        {
             return new AutoParcel_FileListItem_Header(header);
         }
 
         @Override
-        public boolean isFile() {
+        public boolean isFile()
+        {
             return false;
         }
 
         @Override
-        public String toString() {
-            return getHeader();
+        public String toString()
+        {
+            return header();
         }
     }
 
     @AutoParcel
-    public static abstract class File extends FileListItem {
+    public static abstract class File extends FileListItem
+    {
 
         private Boolean readable;
 
-        File() {
+        File()
+        {
         }
 
         // TODO don't do the following in the main thread
 
-        public boolean isReadable() {
-            if (readable == null) {
-                try {
-                    readable = getResource().readable();
-                } catch (IOException e) {
+        public boolean isReadable()
+        {
+            if (readable == null)
+            {
+                try
+                {
+                    readable = resource().readable();
+                }
+                catch (final IOException e)
+                {
                     readable = false;
                 }
             }
             return readable;
         }
 
-        public MediaType getBasicMediaType() {
-            try {
-                return BasicDetector.INSTANCE.detect(getResource());
-            } catch (IOException e) {
+        public MediaType basicMediaType()
+        {
+            try
+            {
+                return BasicDetector.INSTANCE.detect(resource());
+            }
+            catch (final IOException e)
+            {
                 return OCTET_STREAM;
             }
         }
 
-        public abstract Resource getResource();
+        public abstract Resource resource();
 
         @Nullable
-        public abstract Stat getStat();
+        public abstract Stat stat(); // TODO
 
         @Nullable
         abstract Stat _targetStat();
 
-        public static File create(Resource resource,
-                                  @Nullable Stat stat,
-                                  @Nullable Stat targetStat) {
+        public static File create(
+                final Resource resource,
+                @Nullable final Stat stat,
+                @Nullable final Stat targetStat)
+        {
             return new AutoParcel_FileListItem_File(resource, stat, targetStat);
         }
 
         @Override
-        public boolean isFile() {
+        public boolean isFile()
+        {
             return true;
         }
 
@@ -100,8 +122,9 @@ public abstract class FileListItem {
          * file, if not available, returns the status of the link.
          */
         @Nullable
-        public Stat getTargetStat() {
-            return _targetStat() != null ? _targetStat() : getStat();
+        public Stat targetStat()
+        {
+            return _targetStat() != null ? _targetStat() : stat();
         }
     }
 

@@ -52,12 +52,12 @@ final class DateCategorizer implements Categorizer
     @Override
     public String get(final Resources res, final FileListItem.File file)
     {
-        if (file.getStat() == null)
+        if (file.stat() == null)
         {
             return res.getString(R.string.__);
         }
 
-        final long t = file.getStat().modificationTime().to(MILLISECONDS);
+        final long t = file.stat().modificationTime().to(MILLISECONDS);
         if (t < MILLIS_PER_MINUTE) return res.getString(R.string.__);
         if (t >= startOfTomorrow) return res.getString(R.string.unknown);
         if (t >= startOfToday) return res.getString(R.string.today);

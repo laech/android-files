@@ -455,7 +455,7 @@ public final class UiFileActivity
                     listView().getItemAtPosition(i);
 
             if (item.isFile() &&
-                    ((FileListItem.File) item).getResource().name()
+                    ((FileListItem.File) item).resource().name()
                             .equals(filename))
             {
                 return Optional.of(i);

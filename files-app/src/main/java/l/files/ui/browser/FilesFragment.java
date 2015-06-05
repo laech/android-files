@@ -111,7 +111,7 @@ public final class FilesFragment extends BaseFileListFragment
         super.onListItemClick(list, view, pos, id);
         final File item = (File)
                 list.getItemAtPosition(pos);
-        getBus().post(OpenFileRequest.create(item.getResource()));
+        getBus().post(OpenFileRequest.create(item.resource()));
     }
 
     @Override
@@ -152,7 +152,7 @@ public final class FilesFragment extends BaseFileListFragment
     public Resource getCheckedItem()
     {
         final int position = getCheckedItemPosition();
-        return ((File) getListView().getItemAtPosition(position)).getResource();
+        return ((File) getListView().getItemAtPosition(position)).resource();
     }
 
     @Override
@@ -166,7 +166,7 @@ public final class FilesFragment extends BaseFileListFragment
                     .getItemAtPosition(position);
             if (item.isFile())
             {
-                resources.add(((File) item).getResource());
+                resources.add(((File) item).resource());
             }
         }
         return resources;
