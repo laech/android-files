@@ -176,26 +176,6 @@ final class ImageDecorator
                 return null;
             }
 
-      /* Some files are protected by more than just permission attributes, a file
-       * with readable bits set doesn't mean it will be readable, they are also
-       * being protected by other means, e.g. /proc/1/maps. Attempt to read those
-       * files with BitmapFactory will cause the native code to catch and ignore
-       * the exception and loop forever, see
-       * https://github.com/android/platform_frameworks_base/blob/master/core/jni/android/graphics/CreateJavaOutputStreamAdaptor.cpp
-       * This code here is a workaround for that, attempt to read one byte off the
-       * file, if an exception occurs, meaning it can't be read, let the exception
-       * propagate, and return no result.
-       */
-            try (InputStream in = input(resource))
-            {
-                //noinspection ResultOfMethodCallIgnored
-                in.read();
-            }
-            catch (final IOException e)
-            {
-                return null;
-            }
-
             final Options options = new Options();
             options.inJustDecodeBounds = true;
             try (InputStream in = input(resource))
