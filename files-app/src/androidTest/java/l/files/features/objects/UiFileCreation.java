@@ -185,14 +185,14 @@ public abstract class UiFileCreation<T extends UiFileCreation>
                 .findFragmentByTag(tag);
     }
 
-    public T assertFilename(final String name)
+    public T assertFilename(final CharSequence name)
     {
         awaitOnMainThread(in, new Runnable()
         {
             @Override
             public void run()
             {
-                assertEquals(name, filename());
+                assertEquals(name.toString(), filename());
             }
 
         });

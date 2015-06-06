@@ -106,7 +106,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
         Recorder recorder = new Recorder() {
             @Override
             Visitor.Result acceptPre(Resource resource) throws IOException {
-                if (resource.name().equals("a")) {
+                if (resource.name().toString().equals("a")) {
                     throw new IOException("Test");
                 }
                 return super.acceptPre(resource);
@@ -144,7 +144,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
             @Override
             Visitor.Result acceptPost(Resource resource) throws IOException {
                 super.acceptPost(resource);
-                if (resource.name().equals("1")) {
+                if (resource.name().toString().equals("1")) {
                     throw new IOException("Test");
                 }
                 return CONTINUE;
@@ -246,7 +246,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
             @Override
             Visitor.Result acceptPre(Resource resource) throws IOException {
                 super.acceptPre(resource);
-                if (resource.name().equals("a")) {
+                if (resource.name().toString().equals("a")) {
                     return SKIP;
                 }
                 return CONTINUE;
@@ -277,7 +277,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
             @Override
             Visitor.Result acceptPre(Resource resource) throws IOException {
                 super.acceptPre(resource);
-                if (resource.name().equals("a")) {
+                if (resource.name().toString().equals("a")) {
                     return TERMINATE;
                 }
                 return CONTINUE;

@@ -91,7 +91,7 @@ public final class UiFileActivity
             public void run()
             {
                 listView().setItemChecked(
-                        findItemPositionOrThrow(resource.name()), checked);
+                        findItemPositionOrThrow(resource), checked);
             }
         });
         return this;
@@ -309,7 +309,7 @@ public final class UiFileActivity
             {
                 assertEquals(
                         contains,
-                        findItemPosition(item.name()).isPresent());
+                        findItemPosition(item).isPresent());
             }
         });
         return this;
@@ -378,7 +378,7 @@ public final class UiFileActivity
 
     private View view(final Resource resource)
     {
-        final View view = view(resource.name());
+        final View view = view(resource.name().toString());
         assertNotNull(view);
         return view;
     }
@@ -436,6 +436,11 @@ public final class UiFileActivity
         });
     }
 
+    private int findItemPositionOrThrow(final Resource resource)
+    {
+        return findItemPositionOrThrow(resource.name().toString());
+    }
+
     private int findItemPositionOrThrow(final String filename)
     {
         final Optional<Integer> position = findItemPosition(filename);
@@ -444,6 +449,11 @@ public final class UiFileActivity
             return position.get();
         }
         throw new AssertionError("No file with name: " + filename);
+    }
+
+    private Optional<Integer> findItemPosition(final Resource resource)
+    {
+        return findItemPosition(resource.name().toString());
     }
 
     private Optional<Integer> findItemPosition(final String filename)
@@ -455,7 +465,7 @@ public final class UiFileActivity
                     listView().getItemAtPosition(i);
 
             if (item.isFile() &&
-                    ((FileListItem.File) item).resource().name()
+                    ((FileListItem.File) item).resource().name().toString()
                             .equals(filename))
             {
                 return Optional.of(i);

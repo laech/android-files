@@ -20,7 +20,6 @@ import rx.functions.Actions;
 import rx.functions.Func1;
 import rx.subscriptions.Subscriptions;
 
-import static com.google.common.io.Files.getNameWithoutExtension;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.IOExceptions.message;
 import static rx.Observable.just;
@@ -125,8 +124,7 @@ public final class RenameFragment extends FileCreationFragment
             }
             else
             {
-                field.setSelection(
-                        0, getNameWithoutExtension(resource.name()).length());
+                field.setSelection(0, resource.name().base().length());
             }
         }
     }

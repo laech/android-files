@@ -2,6 +2,8 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
+import com.google.common.base.Optional;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,11 +12,16 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.Collator;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import auto.parcel.AutoParcel;
 
 /**
  * Represents a file system resource, such as a file or directory. Two resources
@@ -41,7 +48,7 @@ public interface Resource extends Parcelable
     /**
      * Gets the name of this resource, or empty if this is the root resource.
      */
-    String name();
+    Name name();
 
     /**
      * Gets the parent resource, returns null if this is the root resource.
@@ -60,6 +67,11 @@ public interface Resource extends Parcelable
      * Resolves the given name/path relative to this resource.
      */
     Resource resolve(String other);
+
+    /**
+     * Resolves a child with the given name.
+     */
+    Resource resolve(Name other);
 
     /**
      * Returns a resource with the given parent replaced.
@@ -356,4 +368,122 @@ public interface Resource extends Parcelable
     void writeString(LinkOption option, Charset charset, CharSequence content)
             throws IOException;
 
+    @AutoParcel
+    abstract class Name implements CharSequence
+    {
+        Name()
+        {
+        }
+
+        abstract String value();
+
+        public static Name of(final String name)
+        {
+            return new AutoParcel_Resource_Name(name);
+        }
+
+        public static Name empty()
+        {
+            return of("");
+        }
+
+        /**
+         * Locale sensitive name comparator.
+         */
+        public static Comparator<Name> comparator(final Locale locale)
+        {
+            final Collator collator = Collator.getInstance(locale);
+            return new Comparator<Name>()
+            {
+                @Override
+                public int compare(final Name a, final Name b)
+                {
+                    return collator.compare(a.toString(), b.toString());
+                }
+            };
+        }
+
+        private Optional<Integer> indexOfExtSeparator()
+        {
+            final int i = value().lastIndexOf('.');
+            return (i == -1 || i == 0 || i == length() - 1)
+                    ? Optional.<Integer>absent()
+                    : Optional.of(i);
+        }
+
+        /**
+         * The name part without extension.
+         * <pre>
+         *  base.ext  ->  base
+         *  base      ->  base
+         *  base.     ->  base.
+         * .base.ext  -> .base
+         * .base      -> .base
+         * .base.     -> .base.
+         * .          -> .
+         * ..         -> ..
+         * </pre>
+         */
+        public String base()
+        {
+            final Optional<Integer> i = indexOfExtSeparator();
+            return i.isPresent()
+                    ? value().substring(0, i.get())
+                    : value();
+        }
+
+        /**
+         * The extension part without base name.
+         * <pre>
+         *  base.ext  ->  ext
+         * .base.ext  ->  ext
+         *  base      ->  ""
+         *  base.     ->  ""
+         * .base      ->  ""
+         * .base.     ->  ""
+         * .          ->  ""
+         * ..         ->  ""
+         * </pre>
+         */
+        public String ext()
+        {
+            final Optional<Integer> i = indexOfExtSeparator();
+            return i.isPresent()
+                    ? value().substring(i.get() + 1)
+                    : "";
+        }
+
+        /**
+         * {@link #ext()} with a leading dot if it's not empty.
+         */
+        public String dotExt()
+        {
+            final String ext = ext();
+            return ext.isEmpty() ? ext : "." + ext;
+        }
+
+        @Override
+        public int length()
+        {
+            return value().length();
+        }
+
+        @Override
+        public char charAt(final int index)
+        {
+            return value().charAt(index);
+        }
+
+        @Override
+        public CharSequence subSequence(final int start, final int end)
+        {
+            return value().subSequence(start, end);
+        }
+
+        @Override
+        public String toString()
+        {
+            return value();
+        }
+    }
 }

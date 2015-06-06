@@ -4,9 +4,8 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.io.Files.getFileExtension;
-import static com.google.common.io.Files.getNameWithoutExtension;
+import l.files.fs.Resource;
+
 import static java.lang.Integer.parseInt;
 
 @Deprecated
@@ -31,7 +30,7 @@ public final class Files
             final File dstDir)
     {
         String base;
-        String last;
+        final String last;
 
         if (source.isDirectory())
         {
@@ -40,19 +39,9 @@ public final class Files
         }
         else
         {
-            final String name = source.getName();
-            base = getNameWithoutExtension(name);
-            last = getFileExtension(name);
-
-            if (base.isEmpty())
-            {
-                base = name;
-                last = "";
-            }
-            if (!isNullOrEmpty(last))
-            {
-                last = "." + last;
-            }
+            final Resource resource = LocalResource.create(source);
+            base = resource.name().base();
+            last = resource.name().dotExt();
         }
 
         File dst;

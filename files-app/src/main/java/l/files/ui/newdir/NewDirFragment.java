@@ -69,7 +69,7 @@ public final class NewDirFragment extends FileCreationFragment
         @Override
         public Resource call(final Resource base)
         {
-            final String baseName = base.name();
+            final String baseName = base.name().toString();
             final Resource parent = base.parent();
             assert parent != null;
             Resource resource = base;
@@ -104,7 +104,7 @@ public final class NewDirFragment extends FileCreationFragment
         @Override
         public void onNext(final Resource resource)
         {
-            set(resource.name());
+            set(resource.name().toString());
         }
 
         private void set(final String name)

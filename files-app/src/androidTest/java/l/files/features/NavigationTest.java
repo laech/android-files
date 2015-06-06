@@ -285,16 +285,16 @@ public final class NavigationTest extends BaseFilesActivityTest
     private void testUpdatesDateViewOnChildModified(final Resource resource)
             throws IOException
     {
-        resource.setModificationTime(NOFOLLOW, Instant.of(1, 1));
+        resource.setModificationTime(NOFOLLOW, Instant.of(100000, 1));
 
-        final CharSequence[] date = {null};
+        final String[] date = {null};
         screen().assertSummaryView(resource, new Consumer<CharSequence>()
         {
             @Override
             public void apply(final CharSequence input)
             {
                 assertFalse(isNullOrEmpty(input.toString()));
-                date[0] = input;
+                date[0] = input.toString();
             }
         });
 
@@ -305,7 +305,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             @Override
             public void apply(final CharSequence input)
             {
-                assertNotEqual(date[0], input);
+                assertNotEqual(date[0], input.toString());
             }
         });
     }

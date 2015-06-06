@@ -274,16 +274,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             final Stat stat = resource.stat(NOFOLLOW);
             final Stat targetStat = readTargetStatus(resource, stat);
             final File newStat = File.create(resource, stat, targetStat);
-            final File oldStat = data.put(resource.name(), newStat);
+            final File oldStat = data.put(resource.name().toString(), newStat);
             return !Objects.equals(newStat, oldStat);
         }
         catch (final NotExist e)
         {
-            return data.remove(resource.name()) != null;
+            return data.remove(resource.name().toString()) != null;
         }
         catch (final IOException e)
         {
-            data.put(resource.name(), File.create(resource, null, null));
+            data.put(
+                    resource.name().toString(),
+                    File.create(resource, null, null));
             return true;
         }
     }

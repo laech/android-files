@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import l.files.R;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.fs.Resource;
@@ -38,7 +40,6 @@ import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY;
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
-import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.open;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
@@ -100,19 +101,23 @@ final class ImageDecorator
         {
             view.setVisibility(VISIBLE);
             view.setImageDrawable(newPlaceholder(size));
-            new DecodeImage(key, view, resource, size)
-                    .executeOnExecutor(SERIAL_EXECUTOR);
         }
-        else if (isPdf(resource))
-        {
-            new DecodePdf(key, view, resource)
-                    .executeOnExecutor(SERIAL_EXECUTOR);
-        }
-        else
-        {
-            new DecodeSize(key, view, resource)
-                    .executeOnExecutor(THREAD_POOL_EXECUTOR);
-        }
+
+        // Disabled.
+        // PdfRenderer has a bug will cause native crash in constructor, to
+        // test this, enable this, then copy a few files that are not PDFs,
+        // rename them to have .pdf extension, rotate screen a few times, then
+        // copy some of those PDFs to create more PDFs - then it will crash.
+//        if (isPdf(resource))
+//        {
+//            new DecodePdf(key, view, resource)
+//                    .executeOnExecutor(SERIAL_EXECUTOR);
+//        }
+//        else
+//        {
+        new DecodeImage(key, view, resource, size)
+                .executeOnExecutor(SERIAL_EXECUTOR);
+//        }
     }
 
     private boolean isReadable(final Resource resource)
@@ -166,94 +171,6 @@ final class ImageDecorator
         return res.input(FOLLOW);
     }
 
-    private final class DecodeSize extends AsyncTask<Void, Void, ScaledSize>
-            implements Task
-    {
-        private final Object key;
-        private final ImageView view;
-        private final Resource resource;
-
-        DecodeSize(
-                final Object key,
-                final ImageView view,
-                final Resource resource)
-        {
-            this.key = key;
-            this.view = view;
-            this.resource = resource;
-        }
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            view.setTag(R.id.image_decorator_task, this);
-        }
-
-        @Override
-        protected ScaledSize doInBackground(final Void... params)
-        {
-            if (isCancelled())
-            {
-                return null;
-            }
-
-            final Options options = new Options();
-            options.inJustDecodeBounds = true;
-            try (InputStream in = input(resource))
-            {
-                decodeStream(in, null, options);
-            }
-            catch (final IOException e)
-            {
-                return null;
-            }
-
-            if (options.outWidth > 0 && options.outHeight > 0)
-            {
-                return scaleSize(
-                        options.outWidth,
-                        options.outHeight,
-                        maxWidth,
-                        maxHeight);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final ScaledSize size)
-        {
-            super.onPostExecute(size);
-            if (size == null)
-            {
-                errors.add(key);
-                if (view.getTag(R.id.image_decorator_task) == this)
-                {
-                    view.setTag(R.id.image_decorator_task, null);
-                }
-            }
-            else
-            {
-                sizes.put(key, size);
-                if (view.getTag(R.id.image_decorator_task) == this)
-                {
-                    view.setTag(R.id.image_decorator_task, null);
-                    view.setImageDrawable(newPlaceholder(size));
-                    view.setVisibility(VISIBLE);
-                    new DecodeImage(key, view, resource, size)
-                            .executeOnExecutor(SERIAL_EXECUTOR);
-                }
-            }
-        }
-
-        @Override
-        public Resource resource()
-        {
-            return resource;
-        }
-    }
-
     private abstract class DecodeBase
             extends AsyncTask<Void, ScaledSize, Bitmap> implements Task
     {
@@ -279,6 +196,19 @@ final class ImageDecorator
         }
 
         @Override
+        protected void onProgressUpdate(final ScaledSize... values)
+        {
+            super.onProgressUpdate(values);
+            final ScaledSize size = values[0];
+            sizes.put(key, size);
+            if (view.getTag(R.id.image_decorator_task) == this)
+            {
+                view.setImageDrawable(newPlaceholder(size));
+                view.setVisibility(VISIBLE);
+            }
+        }
+
+        @Override
         protected Bitmap doInBackground(final Void... params)
         {
             if (isCancelled())
@@ -294,24 +224,12 @@ final class ImageDecorator
             {
                 // Catch all unexpected internal errors from decoder
                 // Include those that aren't declared
-                logger.warn(e);
+                logger.warn(e, "Failed to decode %s", resource);
                 return null;
             }
         }
 
         protected abstract Bitmap decode() throws Exception;
-
-        @Override
-        protected void onProgressUpdate(final ScaledSize... values)
-        {
-            super.onProgressUpdate(values);
-            final ScaledSize size = values[0];
-            if (sizes.put(key, size) == null)
-            {
-                view.setImageDrawable(newPlaceholder(size));
-                view.setVisibility(VISIBLE);
-            }
-        }
 
         @Override
         protected void onPostExecute(final Bitmap bitmap)
@@ -365,32 +283,73 @@ final class ImageDecorator
 
     private final class DecodeImage extends DecodeBase
     {
-        private final ScaledSize size;
+        private final ScaledSize cachedSize;
 
         DecodeImage(
                 final Object key,
                 final ImageView view,
                 final Resource resource,
-                final ScaledSize size)
+                @Nullable final ScaledSize cachedSize)
         {
             super(key, view, resource);
-            this.size = size;
+            this.cachedSize = cachedSize;
         }
 
         @Override
         protected Bitmap decode() throws Exception
         {
+            final ScaledSize size =
+                    cachedSize == null
+                            ? decodeSize()
+                            : cachedSize;
+
+            if (size == null)
+            {
+                return null;
+            }
+
+            if (cachedSize == null)
+            {
+                publishProgress(size);
+            }
+
             try (InputStream in = input(resource))
             {
                 return decodeScaledBitmap(in, size);
             }
+        }
+
+        private ScaledSize decodeSize()
+        {
+            final Options options = new Options();
+            options.inJustDecodeBounds = true;
+            try (InputStream in = input(resource))
+            {
+                decodeStream(in, null, options);
+            }
+            catch (final IOException e)
+            {
+//                logger.warn(e);
+                return null;
+            }
+
+            if (options.outWidth <= 0 || options.outHeight <= 0)
+            {
+                return null;
+            }
+
+            return scaleSize(
+                    options.outWidth,
+                    options.outHeight,
+                    maxWidth,
+                    maxHeight);
         }
     }
 
     private boolean isPdf(final Resource resource)
     {
         return SCHEME_FILE.equals(resource.uri().getScheme())
-                && resource.name().endsWith(".pdf"); // TODO
+                && resource.name().ext().equalsIgnoreCase("pdf"); // TODO
     }
 
     private final class DecodePdf extends DecodeBase

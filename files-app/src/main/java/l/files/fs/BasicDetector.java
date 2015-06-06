@@ -6,7 +6,6 @@ import com.google.common.net.MediaType;
 
 import java.io.IOException;
 
-import static com.google.common.io.Files.getFileExtension;
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
 /**
@@ -25,7 +24,7 @@ public final class BasicDetector extends AbstractDetector
             throws IOException
     {
         final MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        final String ext = getFileExtension(resource.name());
+        final String ext = resource.name().ext();
         final String type = typeMap.getMimeTypeFromExtension(ext);
         if (type == null)
         {

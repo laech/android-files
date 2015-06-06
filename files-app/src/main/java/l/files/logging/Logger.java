@@ -80,10 +80,10 @@ public final class Logger
 
     public void debug(final Throwable e, final String format, final Object arg)
     {
-        if (isLoggable(tag, DEBUG))
-        {
+//        if (isLoggable(tag, DEBUG))
+//        {
             Log.d(tag, format(format, arg), e);
-        }
+//        }
     }
 
     public void debug(final String message)
@@ -117,65 +117,65 @@ public final class Logger
             final Object arg3,
             final Object arg4)
     {
-        if (isLoggable(tag, DEBUG))
-        {
+//        if (isLoggable(tag, DEBUG))
+//        {
             Log.d(tag, format(format, arg1, arg2, arg3, arg4));
-        }
+//        }
     }
 
     public void debug(final Throwable e)
     {
-        if (isLoggable(tag, DEBUG))
-        {
+//        if (isLoggable(tag, DEBUG))
+//        {
             Log.d(tag, e.getMessage(), e);
-        }
+//        }
     }
 
     public void warn(final Throwable err, final String format, final Object arg)
     {
-        if (isLoggable(tag, WARN))
-        {
+//        if (isLoggable(tag, WARN))
+//        {
             Log.w(tag, format(format, arg), err);
-        }
+//        }
     }
 
     public void warn(final Throwable err)
     {
-        if (isLoggable(tag, WARN))
-        {
+//        if (isLoggable(tag, WARN))
+//        {
             Log.w(tag, err);
-        }
+//        }
     }
 
     public void warn(final String message)
     {
-        if (isLoggable(tag, WARN))
-        {
+//        if (isLoggable(tag, WARN))
+//        {
             Log.w(tag, message);
-        }
+//        }
     }
 
     public void error(final Throwable e)
     {
-        if (isLoggable(tag, ERROR))
-        {
+//        if (isLoggable(tag, ERROR))
+//        {
             Log.e(tag, e.getMessage(), e);
-        }
+//        }
     }
 
     public void error(final Throwable e, final String format, final Object arg)
     {
-        if (isLoggable(tag, ERROR))
-        {
+//        if (isLoggable(tag, ERROR))
+//        {
             Log.e(tag, format(format, arg), e);
-        }
+//        }
     }
 
     public void error(final String message)
     {
-        if (isLoggable(tag, ERROR))
-        {
+//        if (isLoggable(tag, ERROR))
+//        {
             Log.e(tag, message);
-        }
+//        }
     }
 }

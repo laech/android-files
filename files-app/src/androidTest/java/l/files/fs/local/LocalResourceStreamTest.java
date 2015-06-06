@@ -42,7 +42,7 @@ public final class LocalResourceStreamTest extends ResourceBaseTest {
 
     private Map<Object, Object> map(Resource resource) throws Exception {
         StructStat stat = Os.lstat(resource.path());
-        return map(stat.st_ino, resource.name(), S_ISDIR(stat.st_mode));
+        return map(stat.st_ino, resource.name().toString(), S_ISDIR(stat.st_mode));
     }
 
     private Map<Object, Object> map(long inode, String name, boolean directory) {

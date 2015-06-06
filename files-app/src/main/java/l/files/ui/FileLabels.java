@@ -9,15 +9,18 @@ import l.files.fs.Resource;
 import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.UserDirs.DIR_ROOT;
 
-public final class FileLabels {
+public final class FileLabels
+{
 
-    private FileLabels() {
+    private FileLabels()
+    {
     }
 
-    public static String get(Resources res, Resource resource) {
+    public static String get(final Resources res, final Resource resource)
+    {
         if (DIR_HOME.equals(resource)) return res.getString(R.string.home);
         if (DIR_ROOT.equals(resource)) return Build.MODEL;
-        return resource.name();
+        return resource.name().toString();
     }
 
 }

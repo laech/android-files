@@ -178,9 +178,9 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
-    public String name()
+    public Name name()
     {
-        return file().getName();
+        return Name.of(file().getName());
     }
 
     @Override
@@ -242,6 +242,12 @@ public abstract class LocalResource extends Native implements Resource
     public LocalResource resolve(final String other)
     {
         return create(new File(file(), other));
+    }
+
+    @Override
+    public Resource resolve(final Name other)
+    {
+        return resolve(other.toString());
     }
 
     @Override
