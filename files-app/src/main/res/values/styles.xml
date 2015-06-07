@@ -8,10 +8,15 @@
         <item name="android:windowBackground">@color/windowBackground</item>
         <item name="android:navigationBarColor">?android:colorPrimaryDark</item>
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
+        <item name="android:actionDropDownStyle">@style/ActionDropDownStyle</item>
     </style>
 
     <style name="ActionBarStyle" parent="android:Widget.Material.ActionBar.Solid">
         <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="ActionDropDownStyle" parent="android:Widget.Material.Spinner">
+        <item name="android:background">@null</item>
     </style>
 
 </resources>

@@ -115,7 +115,7 @@ public final class FilesActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(final int position, final long itemId)
     {
-        show(OpenFileRequest.create(hierarchy.getItem(position)));
+        onEventMainThread(OpenFileRequest.create(hierarchy.getItem(position)));
         return true;
     }
 
@@ -209,7 +209,7 @@ public final class FilesActivity extends BaseActivity
     private void updateNavigationMode(final Resource dir)
     {
         hierarchy.set(dir);
-        getActionBar().setSelectedNavigationItem(hierarchy.getCount() - 1);
+        getActionBar().setSelectedNavigationItem(hierarchy.indexOf(dir));
     }
 
     @Override
