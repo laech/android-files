@@ -1,8 +1,8 @@
 package l.files.ui.browser;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.FragmentManager.OnBackStackChangedListener;
-import android.app.FragmentTransaction;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,16 +28,13 @@ import l.files.operations.Events;
 import l.files.ui.CloseActionModeRequest;
 import l.files.ui.FileLabels;
 import l.files.ui.OpenFileRequest;
-import l.files.ui.Preferences;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.newtab.NewTabMenu;
-import l.files.ui.menu.ShowPathBarMenu;
-import l.files.ui.pathbar.PathBarFragment;
 
+import static android.app.ActionBar.NAVIGATION_MODE_LIST;
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
-import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
@@ -50,7 +47,7 @@ import static l.files.ui.IOExceptions.message;
 import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity
-        implements OnSharedPreferenceChangeListener, OnBackStackChangedListener
+        implements OnBackStackChangedListener, OnNavigationListener
 {
 
     private static final Logger log = Logger.get(FilesActivity.class);
@@ -67,7 +64,7 @@ public final class FilesActivity extends BaseActivity
     DrawerLayout drawerLayout;
     DrawerListener drawerListener;
 
-    private PathBarFragment pathBar;
+    private HierarchyAdapter hierarchy;
 
     @Override
     protected void onCreate(final Bundle state)
@@ -75,17 +72,23 @@ public final class FilesActivity extends BaseActivity
         super.onCreate(state);
         setContentView(R.layout.files_activity);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        hierarchy = new HierarchyAdapter();
+
+        final ActionBar actionBar = getActionBar();
+        assert actionBar != null;
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(NAVIGATION_MODE_LIST);
+        actionBar.setListNavigationCallbacks(hierarchy, this);
+        updateNavigationMode(getInitialDirectory());
+
         initFields();
         setDrawer();
-        setPathBar();
         setOptionsMenu(OptionsMenus.compose(
                 new ActionBarDrawerToggleAction(actionBarDrawerToggle),
                 new GoBackOnHomePressedAction(this),
                 new NewTabMenu(this),
-                new ShowPathBarMenu(this),
                 new AboutMenu(this)));
-        Preferences.register(this, this);
         getFragmentManager().addOnBackStackChangedListener(this);
 
         if (state == null)
@@ -109,21 +112,16 @@ public final class FilesActivity extends BaseActivity
         });
     }
 
-    private void setPathBar()
+    @Override
+    public boolean onNavigationItemSelected(final int position, final long itemId)
     {
-        if (!Preferences.getShowPathBar(this))
-        {
-            getFragmentManager()
-                    .beginTransaction()
-                    .hide(pathBar)
-                    .commit();
-        }
+        show(OpenFileRequest.create(hierarchy.getItem(position)));
+        return true;
     }
 
     @Override
     protected void onDestroy()
     {
-        Preferences.unregister(this, this);
         getFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
     }
@@ -154,8 +152,6 @@ public final class FilesActivity extends BaseActivity
         directory = getInitialDirectory();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerListener = new DrawerListener();
-        pathBar = (PathBarFragment) getFragmentManager()
-                .findFragmentById(R.id.path_bar_fragment);
         actionBarDrawerToggle = new ActionBarDrawerToggle(
                 this, drawerLayout, 0, 0);
     }
@@ -207,6 +203,13 @@ public final class FilesActivity extends BaseActivity
         setTitle(label);
         actionBarDrawerToggle.setDrawerIndicatorEnabled(
                 getFragmentManager().getBackStackEntryCount() == 0);
+        updateNavigationMode(fragment.directory());
+    }
+
+    private void updateNavigationMode(final Resource dir)
+    {
+        hierarchy.set(dir);
+        getActionBar().setSelectedNavigationItem(hierarchy.getCount() - 1);
     }
 
     @Override
@@ -319,26 +322,6 @@ public final class FilesActivity extends BaseActivity
         else
         {
             runnable.run();
-        }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(final SharedPreferences pref, final String key)
-    {
-        if (Preferences.isShowPathBarKey(key))
-        {
-            final boolean show = Preferences.getShowPathBar(this);
-            final FragmentTransaction tx = getFragmentManager().beginTransaction();
-            if (show)
-            {
-                pathBar.set(fragment().directory());
-                tx.show(pathBar);
-            }
-            else
-            {
-                tx.hide(pathBar);
-            }
-            tx.commit();
         }
     }
 

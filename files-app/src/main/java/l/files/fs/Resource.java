@@ -56,6 +56,8 @@ public interface Resource extends Parcelable
     @Nullable
     Resource parent();
 
+    boolean isRoot();
+
     /**
      * Gets the resource hierarchy of this resource.
      * <p/>

@@ -5,25 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical">
-
-        <FrameLayout
-            android:id="@+id/content"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-
-        <fragment
-            android:id="@+id/path_bar_fragment"
-            android:name="l.files.ui.pathbar.PathBarFragment"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"/>
-
-    </LinearLayout>
+        android:layout_height="match_parent"/>
 
     <fragment
         android:id="@+id/bookmarks_fragment"

@@ -193,7 +193,7 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public LocalResource parent()
     {
-        if ("/".equals(path()))
+        if (isRoot())
         {
             return null;
         }
@@ -201,6 +201,12 @@ public abstract class LocalResource extends Native implements Resource
         {
             return new AutoParcel_LocalResource(file().getParentFile());
         }
+    }
+
+    @Override
+    public boolean isRoot()
+    {
+        return "/".equals(path());
     }
 
     @Override
