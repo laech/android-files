@@ -19,6 +19,11 @@ import l.files.fs.Resource;
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
+import static com.google.common.net.MediaType.ANY_AUDIO_TYPE;
+import static com.google.common.net.MediaType.ANY_IMAGE_TYPE;
+import static com.google.common.net.MediaType.ANY_TEXT_TYPE;
+import static com.google.common.net.MediaType.ANY_VIDEO_TYPE;
+import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.ui.IOExceptions.message;
@@ -44,7 +49,8 @@ final class FileOpener implements Consumer<Resource>
         new ShowFileTask(resource).execute();
     }
 
-    class ShowFileTask extends AsyncTask<Void, Void, Either<MediaType, IOException>>
+    class ShowFileTask
+            extends AsyncTask<Void, Void, Either<MediaType, IOException>>
     {
         private final Resource resource;
 
@@ -59,8 +65,7 @@ final class FileOpener implements Consumer<Resource>
         {
             try
             {
-                final MediaType result = MagicDetector.INSTANCE.detect(resource);
-                return Either.left(result);
+                return Either.left(MagicDetector.INSTANCE.detect(resource));
             }
             catch (final IOException e)
             {
@@ -69,7 +74,8 @@ final class FileOpener implements Consumer<Resource>
         }
 
         @Override
-        protected void onPostExecute(final Either<MediaType, IOException> result)
+        protected void onPostExecute(
+                final Either<MediaType, IOException> result)
         {
             final MediaType media = result.left();
             final IOException exception = result.right();
@@ -78,15 +84,11 @@ final class FileOpener implements Consumer<Resource>
                 showException(exception);
                 return;
             }
-            try
-            {
-                showFile(media);
-            }
-            catch (final ActivityNotFoundException e)
+
+            if (!showFile(media) && !showFile(generalize(media)))
             {
                 showActivityNotFound();
             }
-            debug(media);
         }
 
         public void showException(final IOException exception)
@@ -101,12 +103,56 @@ final class FileOpener implements Consumer<Resource>
             makeText(context, msg, LENGTH_SHORT).show();
         }
 
-        private void showFile(final MediaType media)
-                throws ActivityNotFoundException
+        private boolean showFile(final MediaType media)
         {
+            debug(media);
+
             final Uri uri = Uri.parse(resource.uri().toString());
-            context.startActivity(new Intent(ACTION_VIEW)
-                    .setDataAndType(uri, media.toString()));
+            try
+            {
+                final Intent intent = new Intent(ACTION_VIEW);
+                intent.setDataAndType(uri, media.toString());
+                context.startActivity(intent);
+                return true;
+            }
+            catch (final ActivityNotFoundException e)
+            {
+                return false;
+            }
+        }
+
+        private MediaType generalize(final MediaType media)
+        {
+            switch (media.type().toLowerCase(ENGLISH))
+            {
+                case "text":
+                    return ANY_TEXT_TYPE;
+
+                case "image":
+                    return ANY_IMAGE_TYPE;
+
+                case "audio":
+                    return ANY_AUDIO_TYPE;
+
+                case "video":
+                    return ANY_VIDEO_TYPE;
+
+                case "application":
+                {
+                    final String subtype = media.subtype().toLowerCase(ENGLISH);
+                    if (subtype.contains("json") || subtype.contains("xml"))
+                    {
+                        return ANY_TEXT_TYPE;
+                    }
+                    switch (subtype)
+                    {
+                        case "javascript":
+                        case "x-sh":
+                            return ANY_TEXT_TYPE;
+                    }
+                }
+            }
+            return media;
         }
 
         private void debug(final MediaType media)
