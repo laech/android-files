@@ -1,86 +1,141 @@
 package l.files.features;
 
-import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class FileOperationTest extends BaseFilesActivityTest {
+public final class FileOperationTest extends BaseFilesActivityTest
+{
 
-  public void testCopy() throws Exception {
-    File a = dir().createFile("a");
-    File b = dir().createFile("b");
-    File c = dir().createDir("c");
-    File d = dir().createDir("d");
+    // TODO cut/delete tests
 
-    screen()
-        .check(a, true)
-        .check(b, true)
-        .check(c, true)
-        .copy()
-        .selectItem(d)
-        .paste();
+    public void test_copies_files() throws Exception
+    {
+        final Resource a = directory().resolve("a").createFile();
+        final Resource d = directory().resolve("d").createDirectory();
 
-    String msg = Arrays.toString(dir().get().list()) +
-        ":" + Arrays.toString(d.list());
-    assertTrue(msg, waitFor(new File(dir().get(), "d/a"), 5, SECONDS));
-    assertTrue(msg, waitFor(new File(dir().get(), "d/b"), 5, SECONDS));
-    assertTrue(msg, waitFor(new File(dir().get(), "d/c"), 5, SECONDS));
-  }
+        screen()
+                .check(a, true)
+                .copy()
+                .selectItem(d)
+                .paste();
 
-    private boolean waitFor(File file, int time, TimeUnit unit) throws InterruptedException {
-        long end = currentTimeMillis() + unit.toMillis(time);
-        while (currentTimeMillis() < end) {
-            if (file.exists()) {
+        assertTrue(waitFor(directory().resolve("d/a"), 5, SECONDS));
+    }
+
+    public void test_copies_empty_directory() throws Exception
+    {
+        final Resource c = directory().resolve("c").createDirectory();
+        final Resource d = directory().resolve("d").createDirectory();
+
+        screen()
+                .check(c, true)
+                .copy()
+                .selectItem(d)
+                .paste();
+
+        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+    }
+
+    public void test_copies_full_directory() throws Exception
+    {
+        final Resource d = directory().resolve("d").createDirectory();
+        final Resource c = directory().resolve("c").createDirectory();
+        c.resolve("a").createFile();
+        c.resolve("b").createDirectory();
+        c.resolve("c").createLink(c.resolve("a"));
+
+        screen()
+                .check(c, true)
+                .copy()
+                .selectItem(d)
+                .paste();
+
+        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+    }
+
+    public void test_copies_link() throws Exception
+    {
+        final Resource d = directory().resolve("d").createDirectory();
+        final Resource c = directory().resolve("c").createLink(directory());
+
+        screen()
+                .check(c, true)
+                .copy()
+                .selectItem(d)
+                .paste();
+
+        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+    }
+
+    private boolean waitFor(
+            final Resource resource,
+            final int time,
+            final TimeUnit unit) throws InterruptedException, IOException
+    {
+        final long end = currentTimeMillis() + unit.toMillis(time);
+        while (currentTimeMillis() < end)
+        {
+            if (resource.exists(NOFOLLOW))
+            {
                 return true;
             }
-            Thread.sleep(20);
+            sleep(20);
         }
         return false;
     }
 
-    public void testPasteMenuIsDisabledInsideFolderBeingCopied() throws Exception {
-    File dir = dir().createDir("dir");
+    public void test_paste_menu_is_disabled_inside_folder_being_copied()
+            throws Exception
+    {
+        final Resource dir = directory().resolve("dir").createDirectory();
 
-    screen()
-        .check(dir, true)
-        .copy()
-        .assertCanPaste(true)
-        .selectItem(dir)
-        .assertCanPaste(false)
-        .pressBack()
-        .assertCanPaste(true);
-  }
+        screen()
+                .check(dir, true)
+                .copy()
+                .assertCanPaste(true)
+                .selectItem(dir)
+                .assertCanPaste(false)
+                .pressBack()
+                .assertCanPaste(true);
+    }
 
-  public void testPasteMenuIsDisabledIfFilesDontExist() throws Exception {
-    File dir = dir().createDir("dir");
+    public void test_paste_menu_is_disabled_if_files_do_not_exist()
+            throws Exception
+    {
+        final Resource dir = directory().resolve("dir").createDirectory();
 
-    screen()
-        .check(dir, true)
-        .copy()
-        .assertCanPaste(true);
+        screen()
+                .check(dir, true)
+                .copy()
+                .assertCanPaste(true);
 
-    assertTrue(dir.delete());
+        dir.delete();
 
-    screen().assertCanPaste(false);
-  }
+        screen().assertCanPaste(false);
+    }
 
-  public void testPasteMenuIsEnabledIfSomeFilesDontExistSomeExist() throws Exception {
-    File dir = dir().createDir("dir1");
-    dir().createDir("dir2");
+    public void test_paste_menu_is_enabled_if_some_files_do_not_exist_some_exist()
+            throws Exception
+    {
+        final Resource dir = directory().resolve("dir1").createDirectory();
+        directory().resolve("dir2").createDirectory();
 
-    screen()
-        .check(dir, true)
-        .copy()
-        .assertCanPaste(true);
+        screen()
+                .check(dir, true)
+                .copy()
+                .assertCanPaste(true);
 
-    assertTrue(dir.delete());
+        dir.delete();
 
-    screen().assertCanPaste(true);
-  }
+        screen().assertCanPaste(true);
+    }
 
 }
