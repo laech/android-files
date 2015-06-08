@@ -87,7 +87,7 @@ abstract class AbstractOperation implements FileOperation
         };
     }
 
-    private ExceptionHandler recordOnException()
+    protected final ExceptionHandler recordOnException()
     {
         return new ExceptionHandler()
         {
