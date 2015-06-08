@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+
 import java.util.Objects;
 
 import l.files.fs.Resource;
@@ -16,23 +16,25 @@ import l.files.ui.FileLabels;
 
 import static android.R.id.icon;
 import static android.R.id.title;
-import static java.util.Collections.reverse;
 import static l.files.R.layout.files_activity_title;
 import static l.files.R.layout.files_activity_title_item;
 import static l.files.ui.IconFonts.getDirectoryIcon;
 
 final class HierarchyAdapter extends BaseAdapter
 {
-    private final List<Resource> hierarchy = new ArrayList<>();
+    private ImmutableList<Resource> hierarchy = ImmutableList.of();
     private Resource directory;
 
     void set(final Resource dir)
     {
         directory = dir;
-        hierarchy.clear();
-        hierarchy.addAll(dir.hierarchy());
-        reverse(hierarchy);
+        hierarchy = ImmutableList.copyOf(dir.hierarchy()).reverse();
         notifyDataSetChanged();
+    }
+
+    ImmutableList<Resource> get()
+    {
+        return hierarchy;
     }
 
     int indexOf(final Resource dir)

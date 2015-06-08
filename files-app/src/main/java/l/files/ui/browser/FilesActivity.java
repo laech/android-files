@@ -14,6 +14,8 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
@@ -65,6 +67,11 @@ public final class FilesActivity extends BaseActivity
     DrawerListener drawerListener;
 
     private HierarchyAdapter hierarchy;
+
+    public ImmutableList<Resource> hierarchy()
+    {
+        return hierarchy.get();
+    }
 
     @Override
     protected void onCreate(final Bundle state)

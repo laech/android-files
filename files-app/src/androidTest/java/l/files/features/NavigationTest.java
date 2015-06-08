@@ -34,6 +34,27 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class NavigationTest extends BaseFilesActivityTest
 {
 
+    public void test_can_navigate_through_title_list_drop_down()
+            throws Exception
+    {
+        final Resource parent = directory().parent();
+        screen()
+                .selectFromNavigationMode(parent)
+                .assertNavigationModeHierarchy(parent);
+    }
+
+    public void test_updates_navigation_list_when_going_into_a_new_dir()
+            throws Exception
+    {
+        final Resource dir = directory().resolve("dir").createDirectory();
+        screen().selectItem(dir).assertNavigationModeHierarchy(dir);
+    }
+
+    public void test_shows_initial_navigation_list() throws Exception
+    {
+        screen().assertNavigationModeHierarchy(directory());
+    }
+
     public void test_shows_size_only_if_unable_to_determine_modified_date()
             throws Exception
     {

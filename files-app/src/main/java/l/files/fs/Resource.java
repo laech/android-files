@@ -3,6 +3,7 @@ package l.files.fs;
 import android.os.Parcelable;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -63,7 +64,7 @@ public interface Resource extends Parcelable
      * <p/>
      * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
      */
-    List<Resource> hierarchy();
+    ImmutableList<Resource> hierarchy();
 
     /**
      * Resolves the given name/path relative to this resource.

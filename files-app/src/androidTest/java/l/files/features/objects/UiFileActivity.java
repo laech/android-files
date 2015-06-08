@@ -1,5 +1,6 @@
 package l.files.features.objects;
 
+import android.app.ActionBar;
 import android.app.Instrumentation;
 import android.view.ActionMode;
 import android.view.KeyEvent;
@@ -11,11 +12,13 @@ import android.widget.TextView;
 import com.google.common.base.Optional;
 
 import java.io.File;
+import java.util.List;
 
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
+import l.files.ui.FileLabels;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FileListItem;
 import l.files.ui.browser.FilesActivity;
@@ -133,6 +136,20 @@ public final class UiFileActivity
             {
                 assertTrue(instrument.invokeMenuActionSync(
                         activity, android.R.id.paste, 0));
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity selectFromNavigationMode(final Resource dir)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                final int position = activity.hierarchy().indexOf(dir);
+                activity.onNavigationItemSelected(position, position);
             }
         });
         return this;
@@ -337,11 +354,22 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                //noinspection ConstantConditions
-                assertEquals(title, activity.getActionBar().getTitle());
+                final int index = actionBar().getSelectedNavigationIndex();
+                final Resource res = activity.hierarchy().get(index);
+                assertEquals(title, label(res));
             }
         });
         return this;
+    }
+
+    private String label(final Resource res)
+    {
+        return FileLabels.get(activity.getResources(), res);
+    }
+
+    private ActionBar actionBar()
+    {
+        return activity.getActionBar();
     }
 
     public UiFileActivity assertActionBarUpIndicatorIsVisible(
@@ -585,4 +613,23 @@ public final class UiFileActivity
         });
         return this;
     }
+
+    public UiFileActivity assertNavigationModeHierarchy(final Resource dir)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                final List<Resource> expected = dir.hierarchy().reverse();
+                final List<Resource> actual = activity.hierarchy();
+                assertEquals(expected, actual);
+                assertEquals(
+                        expected.indexOf(dir),
+                        actionBar().getSelectedNavigationIndex());
+            }
+        });
+        return this;
+    }
+
 }

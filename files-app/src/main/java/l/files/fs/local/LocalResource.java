@@ -3,6 +3,8 @@ package l.files.fs.local;
 import android.system.ErrnoException;
 import android.system.Os;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -67,7 +69,6 @@ import static android.system.OsConstants.S_IXUSR;
 import static android.system.OsConstants.W_OK;
 import static android.system.OsConstants.X_OK;
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
@@ -210,15 +211,14 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
-    public List<Resource> hierarchy()
+    public ImmutableList<Resource> hierarchy()
     {
-        final List<Resource> hierarchy = new ArrayList<>();
+        final ImmutableList.Builder<Resource> b = ImmutableList.builder();
         for (Resource p = this; p != null; p = p.parent())
         {
-            hierarchy.add(p);
+            b.add(p);
         }
-        reverse(hierarchy);
-        return hierarchy;
+        return b.build().reverse();
     }
 
     @Override
