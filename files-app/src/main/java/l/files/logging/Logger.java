@@ -2,8 +2,11 @@ package l.files.logging;
 
 import android.util.Log;
 
+import java.util.Objects;
+
 import static android.util.Log.DEBUG;
 import static android.util.Log.ERROR;
+import static android.util.Log.VERBOSE;
 import static android.util.Log.WARN;
 import static android.util.Log.isLoggable;
 import static java.lang.String.format;
@@ -24,7 +27,26 @@ public final class Logger
 
     public boolean isVerboseEnabled()
     {
-        return Log.isLoggable(tag, Log.VERBOSE);
+//        return true;
+        return isLoggable(tag, VERBOSE);
+    }
+
+    public boolean isDebugEnabled()
+    {
+//        return true;
+        return isLoggable(tag, DEBUG);
+    }
+
+    public boolean isWarnEnabled()
+    {
+//        return true;
+        return isLoggable(tag, WARN);
+    }
+
+    public boolean isErrorEnabled()
+    {
+//        return true;
+        return isLoggable(tag, ERROR);
     }
 
     public void verbose(final Object msg)
@@ -78,17 +100,30 @@ public final class Logger
         }
     }
 
-    public void debug(final Throwable e, final String format, final Object arg)
+    public void debug(final Throwable e)
     {
-//        if (isLoggable(tag, DEBUG))
-//        {
-            Log.d(tag, format(format, arg), e);
-//        }
+        debug(e, "");
     }
 
-    public void debug(final String message)
+    public void debug(final Throwable e, final Object message)
     {
-        debug(message, null);
+        debug(e, "%s", message);
+    }
+
+    public void debug(
+            final Throwable e,
+            final String format,
+            final Object arg)
+    {
+        if (isDebugEnabled())
+        {
+            Log.d(tag, format(format, arg), e);
+        }
+    }
+
+    public void debug(final Object message)
+    {
+        debug("%s", message);
     }
 
     public void debug(final String format, final Object arg)
@@ -96,7 +131,10 @@ public final class Logger
         debug(format, arg, null);
     }
 
-    public void debug(final String format, final Object arg1, final Object arg2)
+    public void debug(
+            final String format,
+            final Object arg1,
+            final Object arg2)
     {
         debug(format, arg1, arg2, null);
     }
@@ -117,65 +155,67 @@ public final class Logger
             final Object arg3,
             final Object arg4)
     {
-//        if (isLoggable(tag, DEBUG))
-//        {
+        if (isDebugEnabled())
+        {
             Log.d(tag, format(format, arg1, arg2, arg3, arg4));
-//        }
+        }
     }
 
-    public void debug(final Throwable e)
+    public void warn(final Throwable e)
     {
-//        if (isLoggable(tag, DEBUG))
-//        {
-            Log.d(tag, e.getMessage(), e);
-//        }
+        warn(e, "");
     }
 
-    public void warn(final Throwable err, final String format, final Object arg)
+    public void warn(final Throwable e, final Object message)
     {
-//        if (isLoggable(tag, WARN))
-//        {
+        warn(e, "%s", message);
+    }
+
+    public void warn(
+            final Throwable err,
+            final String format,
+            final Object arg)
+    {
+        if (isWarnEnabled())
+        {
             Log.w(tag, format(format, arg), err);
-//        }
-    }
-
-    public void warn(final Throwable err)
-    {
-//        if (isLoggable(tag, WARN))
-//        {
-            Log.w(tag, err);
-//        }
+        }
     }
 
     public void warn(final String message)
     {
-//        if (isLoggable(tag, WARN))
-//        {
+        if (isWarnEnabled())
+        {
             Log.w(tag, message);
-//        }
+        }
     }
 
     public void error(final Throwable e)
     {
-//        if (isLoggable(tag, ERROR))
-//        {
-            Log.e(tag, e.getMessage(), e);
-//        }
+        error(e, "");
     }
 
-    public void error(final Throwable e, final String format, final Object arg)
+    public void error(final Throwable e, final Object message)
     {
-//        if (isLoggable(tag, ERROR))
-//        {
+        error(e, "%s", message);
+    }
+
+    public void error(
+            final Throwable e,
+            final String format,
+            final Object arg)
+    {
+        if (isErrorEnabled())
+        {
             Log.e(tag, format(format, arg), e);
-//        }
+        }
     }
 
-    public void error(final String message)
+    public void error(final Object message)
     {
-//        if (isLoggable(tag, ERROR))
-//        {
-            Log.e(tag, message);
-//        }
+        if (isErrorEnabled())
+        {
+            Log.e(tag, Objects.toString(message));
+        }
     }
 }
