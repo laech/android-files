@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import l.files.R;
+import l.files.fs.Stat;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -52,12 +53,13 @@ final class DateCategorizer implements Categorizer
     @Override
     public String get(final Resources res, final FileListItem.File file)
     {
-        if (file.stat() == null)
+        final Stat stat = file.stat();
+        if (stat == null)
         {
             return res.getString(R.string.__);
         }
 
-        final long t = file.stat().modificationTime().to(MILLISECONDS);
+        final long t = stat.modificationTime().to(MILLISECONDS);
         if (t < MILLIS_PER_MINUTE) return res.getString(R.string.__);
         if (t >= startOfTomorrow) return res.getString(R.string.unknown);
         if (t >= startOfToday) return res.getString(R.string.today);

@@ -3,6 +3,8 @@ package l.files.fs;
 import java.util.EnumSet;
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
+
 public enum Permission
 {
     OWNER_READ,
@@ -14,6 +16,11 @@ public enum Permission
     OTHERS_READ,
     OTHERS_WRITE,
     OTHERS_EXECUTE;
+
+    public static Set<Permission> none()
+    {
+        return emptySet();
+    }
 
     public static Set<Permission> read()
     {

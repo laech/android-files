@@ -190,10 +190,10 @@ public final class FilesFragment extends BaseFileListFragment
             {
                 Animations.animatePreDataSetChange(getListView());
             }
-            getListAdapter().setItems(data.getItems());
-            if (data.getException() != null)
+            getListAdapter().setItems(data.items());
+            if (data.exception() != null)
             {
-                overrideEmptyText(message(data.getException()));
+                overrideEmptyText(message(data.exception()));
             }
             else
             {

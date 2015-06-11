@@ -5,17 +5,18 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.Nullable;
 
@@ -28,9 +29,15 @@ import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
 import l.files.ui.browser.FileListItem.File;
+import l.files.ui.browser.FileListItem.Header;
 
 import static android.os.Looper.getMainLooper;
+import static java.lang.System.nanoTime;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
@@ -42,8 +49,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<String, File> data;
-    private final EventListener listener;
-    private final Runnable deliverResult;
 
     private final Resource root;
 
@@ -52,6 +57,80 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 
     private volatile boolean observing;
     private volatile Closeable observable;
+
+    private final ScheduledExecutorService executor;
+
+    private final Set<String> childrenPendingUpdates;
+
+    private final Runnable childrenPendingUpdatesRun = new Runnable()
+    {
+        long lastUpdateNanoTime = nanoTime();
+
+        @Override
+        public void run()
+        {
+            /* Don't update if last update was less than a second ago,
+             * this avoid updating too frequently due to resources in the
+             * current directory being changed frequently by other processes,
+             * but since user triggered operation are usually seconds apart,
+             * those actions will still be updated instantly.
+             */
+            final long now = nanoTime();
+            if (now - lastUpdateNanoTime < SECONDS.toNanos(1))
+            {
+                return;
+            }
+
+            final String[] children;
+            synchronized (FilesLoader.this)
+            {
+                if (childrenPendingUpdates.isEmpty())
+                {
+                    return;
+                }
+                children = new String[childrenPendingUpdates.size()];
+                childrenPendingUpdates.toArray(children);
+                childrenPendingUpdates.clear();
+            }
+
+            lastUpdateNanoTime = now;
+
+            boolean changed = false;
+            for (final String child : children)
+            {
+                changed |= update(child);
+            }
+
+            if (changed)
+            {
+                final Result result = buildResult();
+                handler.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        deliverResult(result);
+                    }
+                });
+            }
+        }
+    };
+
+
+    private final Observer listener = new Observer()
+    {
+        @Override
+        public void onEvent(final Event event, final String child)
+        {
+            if (child != null)
+            {
+                synchronized (FilesLoader.this)
+                {
+                    childrenPendingUpdates.add(child);
+                }
+            }
+        }
+    };
 
     /**
      * @param root
@@ -73,8 +152,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         this.sort = requireNonNull(sort, "sort");
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
-        this.listener = new EventListener();
-        this.deliverResult = new DeliverResultRunnable();
+        this.childrenPendingUpdates = new HashSet<>();
+        this.executor = newSingleThreadScheduledExecutor();
     }
 
     public void setSort(final FileSort sort)
@@ -129,6 +208,9 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
                 logger.debug(e);
                 return Result.of(e);
             }
+
+            executor.scheduleWithFixedDelay(
+                    childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
         }
 
         try
@@ -142,7 +224,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
                     {
                         return TERMINATE;
                     }
-                    addData(resource);
+                    update(resource);
                     return CONTINUE;
                 }
             });
@@ -183,26 +265,28 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         for (int i = 0; i < files.size(); i++)
         {
             final File stat = files.get(i);
+
+            // TODO make this fast O(n) to O(logN)
             final String category = categorizer.get(res, stat);
             if (i == 0)
             {
                 if (category != null)
                 {
-                    result.add(FileListItem.Header.create(category));
+                    result.add(Header.of(category));
                 }
             }
             else
             {
                 if (!Objects.equals(preCategory, category))
                 {
-                    result.add(FileListItem.Header.create(category));
+                    result.add(Header.of(category));
                 }
             }
             result.add(stat);
             preCategory = category;
         }
 
-        return Result.of(result);
+        return Result.of(unmodifiableList(result));
     }
 
     @Override
@@ -223,6 +307,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 
         if (closeable != null)
         {
+            executor.shutdownNow();
             try
             {
                 closeable.close();
@@ -253,7 +338,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         }
         if (closeable != null)
         {
-            logger.error("WatchService has not been unregistered");
+            logger.error("Has not been unregistered");
+            executor.shutdownNow();
             closeable.close();
         }
     }
@@ -262,12 +348,12 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean addData(final String child)
+    private boolean update(final String child)
     {
-        return addData(root.resolve(child));
+        return update(root.resolve(child));
     }
 
-    private boolean addData(final Resource resource)
+    private boolean update(final Resource resource)
     {
         try
         {
@@ -306,50 +392,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         return stat;
     }
 
-    // TODO delay with batch update instead of updating for every event
-    // to avoid the case of too many events coming in at the same time
-    final class EventListener implements Observer
-    {
-        @Override
-        public void onEvent(final Event event, @Nullable final String child)
-        {
-            final boolean isChild = child != null;
-            switch (event)
-            {
-                case CREATE:
-                case MODIFY:
-                    if (isChild && addData(child))
-                    {
-                        redeliverResult();
-                    }
-                    break;
-                case DELETE:
-                    if (isChild && data.remove(child) != null)
-                    {
-                        redeliverResult();
-                    }
-                    break;
-                default:
-                    throw new AssertionError(event);
-            }
-        }
-    }
-
-    private void redeliverResult()
-    {
-        handler.removeCallbacks(deliverResult);
-        handler.postDelayed(deliverResult, 100);
-    }
-
-    final class DeliverResultRunnable implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            deliverResult(buildResult());
-        }
-    }
-
     @AutoParcel
     static abstract class Result
     {
@@ -357,21 +399,20 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         {
         }
 
-        abstract List<FileListItem> getItems();
+        abstract List<FileListItem> items();
 
         @Nullable
-        abstract IOException getException();
+        abstract IOException exception();
 
-        static Result of(final IOException exception)
+        private static Result of(final IOException exception)
         {
             return new AutoParcel_FilesLoader_Result(
                     Collections.<FileListItem>emptyList(), exception);
         }
 
-        static Result of(final List<? extends FileListItem> result)
+        private static Result of(final List<FileListItem> result)
         {
-            return new AutoParcel_FilesLoader_Result(
-                    ImmutableList.copyOf(result), null);
+            return new AutoParcel_FilesLoader_Result(result, null);
         }
     }
 

@@ -95,7 +95,7 @@ public abstract class PasteTest extends ResourceBaseTest {
         });
         thread.start();
         thread.join();
-        assertEquals(emptyList(), dstDir.list(NOFOLLOW, new ArrayList<>()));
+        assertEquals(emptyList(), dstDir.list(NOFOLLOW));
     }
 
     public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {

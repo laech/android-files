@@ -266,7 +266,7 @@ public interface Resource extends Parcelable
 
     /**
      * Creates this resource as a file and creates any missing parents. This
-     * will throw the same exceptions as {@link #createDirectory()} except will
+     * will throw the same exceptions as {@link #createFile()} except will
      * not error if already exists.
      *
      * @return this

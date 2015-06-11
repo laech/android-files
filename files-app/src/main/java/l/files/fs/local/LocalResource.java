@@ -595,6 +595,18 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public Resource createFiles() throws IOException
     {
+        try
+        {
+            if (stat(NOFOLLOW).isRegularFile())
+            {
+                return this;
+            }
+        }
+        catch (final NotExist ignore)
+        {
+            // Ignore will create
+        }
+
         final Resource parent = parent();
         if (parent != null)
         {

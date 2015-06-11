@@ -37,7 +37,7 @@ public abstract class FileListItem
 
         public abstract String header();
 
-        public static Header create(final String header)
+        public static Header of(final String header)
         {
             return new AutoParcel_FileListItem_Header(header);
         }

@@ -445,7 +445,10 @@ final class LocalResourceObservable extends Native
 
     private void handleEvent(final int wd, final int event, final String child)
     {
-        log(wd, event, child);
+        // Disable to avoid getting called on large number of events,
+        // even just calling isVerboseEnabled has some overhead,
+        // enable when needed for debugging
+        // log(wd, event, child);
 
         if (isClosed())
         {
@@ -523,7 +526,7 @@ final class LocalResourceObservable extends Native
         }
         catch (final ErrnoException e)
         {
-            log.warn(e, "Failed to add watch %s", name);
+            log.debug(e, "Failed to add watch %s", name);
         }
     }
 

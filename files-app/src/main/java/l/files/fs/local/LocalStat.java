@@ -1,15 +1,17 @@
 package l.files.fs.local;
 
+import android.system.ErrnoException;
+
 import java.io.IOException;
 import java.util.Set;
 
 import auto.parcel.AutoParcel;
-import android.system.ErrnoException;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
+import static android.system.OsConstants.EAGAIN;
 import static android.system.OsConstants.S_ISBLK;
 import static android.system.OsConstants.S_ISCHR;
 import static android.system.OsConstants.S_ISDIR;
@@ -126,23 +128,28 @@ abstract class LocalStat implements Stat
     {
         requireNonNull(option, "option");
 
-        final l.files.fs.local.Stat stat;
-        try
+        l.files.fs.local.Stat stat = null;
+        while (stat == null)
         {
-            if (option == FOLLOW)
+            try
             {
-                stat = l.files.fs.local.Stat.stat(resource.path());
+                if (option == FOLLOW)
+                {
+                    stat = l.files.fs.local.Stat.stat(resource.path());
+                }
+                else
+                {
+                    stat = l.files.fs.local.Stat.lstat(resource.path());
+                }
             }
-            else
+            catch (final ErrnoException e)
             {
-                stat = l.files.fs.local.Stat.lstat(resource.path());
+                if (e.errno != EAGAIN)
+                {
+                    throw toIOException(e, resource.path());
+                }
             }
         }
-        catch (final ErrnoException e)
-        {
-            throw toIOException(e, resource.path());
-        }
-
         return create(stat);
     }
 

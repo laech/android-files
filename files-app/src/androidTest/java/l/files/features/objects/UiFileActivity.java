@@ -2,6 +2,7 @@ package l.files.features.objects;
 
 import android.app.ActionBar;
 import android.app.Instrumentation;
+import android.util.Pair;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -9,14 +10,22 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 import l.files.fs.local.LocalResource;
 import l.files.ui.FileLabels;
 import l.files.ui.bookmarks.BookmarksFragment;
@@ -28,6 +37,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.view.Gravity.START;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static java.util.Collections.sort;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -35,6 +45,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.features.objects.Instrumentations.await;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.test.Mocks.mockMenuItem;
 
 public final class UiFileActivity
@@ -632,4 +643,113 @@ public final class UiFileActivity
         return this;
     }
 
+    public UiFileActivity assertListViewContainsChildrenOf(final Resource dir)
+            throws IOException
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                assertEquals(
+                        childrenStatsSortedByPath(dir),
+                        listViewStatsSortedByPath());
+            }
+        });
+        return this;
+    }
+
+    private List<Pair<Resource, Stat>> childrenStatsSortedByPath(final Resource dir)
+    {
+        try
+        {
+            final List<Resource> children = sortResourcesByPath(dir.list(NOFOLLOW));
+            return stat(children);
+        }
+        catch (final IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Pair<Resource, Stat>> stat(final List<Resource> resources)
+            throws IOException
+    {
+        return Lists.transform(resources,
+                new Function<Resource, Pair<Resource, Stat>>()
+                {
+                    @Override
+                    public Pair<Resource, Stat> apply(final Resource input)
+                    {
+                        try
+                        {
+                            return Pair.create(input, input.stat(NOFOLLOW));
+                        }
+                        catch (final IOException e)
+                        {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+    }
+
+    private List<Resource> sortResourcesByPath(final List<Resource> resources)
+    {
+        sort(resources, new Comparator<Resource>()
+        {
+            @Override
+            public int compare(final Resource a, final Resource b)
+            {
+                return a.path().compareTo(b.path());
+            }
+        });
+        return resources;
+    }
+
+    private List<Pair<Resource, Stat>> listViewStatsSortedByPath()
+    {
+        final List<FileListItem.File> items = sortFilesByPath(listViewItems());
+        return stats(items);
+    }
+
+    private List<Pair<Resource, Stat>> stats(final List<FileListItem.File> items)
+    {
+        final ImmutableList.Builder<Pair<Resource, Stat>> b = ImmutableList.builder();
+        for (final FileListItem.File item : items)
+        {
+            b.add(Pair.create(item.resource(), item.stat()));
+        }
+        return b.build();
+    }
+
+    private List<FileListItem.File> sortFilesByPath(
+            final List<FileListItem.File> items)
+    {
+        Collections.sort(items, new Comparator<FileListItem.File>()
+        {
+            @Override
+            public int compare(
+                    final FileListItem.File a,
+                    final FileListItem.File b)
+            {
+                return a.resource().path().compareTo(b.resource().path());
+            }
+        });
+        return items;
+    }
+
+    private List<FileListItem.File> listViewItems()
+    {
+        final ListView view = listView();
+        final List<FileListItem.File> items = new ArrayList<>(view.getCount());
+        for (int i = 0; i < view.getCount(); i++)
+        {
+            final FileListItem item = (FileListItem) view.getItemAtPosition(i);
+            if (item.isFile())
+            {
+                items.add(((FileListItem.File) item));
+            }
+        }
+        return items;
+    }
 }
