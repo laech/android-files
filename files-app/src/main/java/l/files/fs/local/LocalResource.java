@@ -144,6 +144,12 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
+    public String toString()
+    {
+        return file().getPath();
+    }
+
+    @Override
     public String path()
     {
         return file().getPath();
@@ -439,7 +445,7 @@ public abstract class LocalResource extends Native implements Resource
         {
             Os.close(fd);
         }
-        catch (ErrnoException e)
+        catch (final ErrnoException e)
         {
             // Ignore
         }
