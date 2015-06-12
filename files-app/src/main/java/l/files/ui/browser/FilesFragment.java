@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -32,12 +34,14 @@ import l.files.ui.mode.CopyAction;
 import l.files.ui.mode.CountSelectedItemsAction;
 import l.files.ui.mode.CutAction;
 import l.files.ui.mode.DeleteAction;
-import l.files.ui.rename.RenameAction;
 import l.files.ui.mode.SelectAllAction;
 import l.files.ui.newdir.NewDirMenu;
+import l.files.ui.rename.RenameAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static android.widget.AbsListView.CHOICE_MODE_MULTIPLE_MODAL;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.ui.IOExceptions.message;
@@ -67,6 +71,37 @@ public final class FilesFragment extends BaseFileListFragment
     }
 
     private Resource directory;
+    private ProgressBar progress;
+
+    private final Handler handler = new Handler();
+    private final Runnable checkProgress = new Runnable()
+    {
+        @Override
+        public void run()
+        {
+            final Activity activity = getActivity();
+            if (activity == null
+                    || activity.isFinishing()
+                    || activity.isDestroyed()
+                    || isRemoving()
+                    || isDetached())
+            {
+                return;
+            }
+
+            final FilesLoader loader = filesLoader();
+            if (loader != null)
+            {
+                final int current = loader.approximateChildLoaded();
+                progress.setProgress(current);
+                progress.setIndeterminate(current == 0);
+//                progress.setRotationY(current == 0 ? 180 : 0);
+                progress.setMax(loader.approximateChildTotal());
+                progress.setVisibility(VISIBLE);
+            }
+            handler.postDelayed(this, 50);
+        }
+    };
 
     public FilesFragment()
     {
@@ -84,12 +119,14 @@ public final class FilesFragment extends BaseFileListFragment
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
+        progress = (ProgressBar) getView().findViewById(android.R.id.progress);
 
         setupListView();
         setupOptionsMenu();
         setHasOptionsMenu(true);
         setListAdapter(FilesAdapter.get(getActivity()));
 
+        handler.postDelayed(checkProgress, 500);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
     }
@@ -199,6 +236,9 @@ public final class FilesFragment extends BaseFileListFragment
             {
                 overrideEmptyText(R.string.empty);
             }
+
+            handler.removeCallbacks(checkProgress);
+            progress.setVisibility(GONE);
         }
     }
 
@@ -231,17 +271,20 @@ public final class FilesFragment extends BaseFileListFragment
             final SharedPreferences pref,
             final String key)
     {
-        final Loader<?> _loader = getLoaderManager().getLoader(0);
-        final FilesLoader loader = (FilesLoader) _loader;
 
         if (isShowHiddenFilesKey(key))
         {
-            loader.setShowHidden(getShowHiddenFiles(getActivity()));
-
+            filesLoader().setShowHidden(getShowHiddenFiles(getActivity()));
         }
         else if (isSortKey(key))
         {
-            loader.setSort(getSort(getActivity()));
+            filesLoader().setSort(getSort(getActivity()));
         }
+    }
+
+    private FilesLoader filesLoader()
+    {
+        final Loader<?> _loader = getLoaderManager().getLoader(0);
+        return (FilesLoader) _loader;
     }
 }

@@ -25,19 +25,11 @@ import javax.annotation.Nullable;
 import auto.parcel.AutoParcel;
 
 /**
- * Represents a file system resource, such as a file or directory. Two resources
- * are equal if their URIs are equal.
+ * Represents a file system resource, such as a file or directory.
  */
 public interface Resource extends Parcelable
 {
-    /**
-     * The normalized/absolute URI of this resource. Every resource has only one
-     * path and one uri representation, regardless whether or not it exists on
-     * the file system. For example, a traditional file URI for a directory may
-     * or may not end with a "/" depending on its existence, this is disallowed
-     * for implementations of this interface, as that's two representations for
-     * the resource.
-     */
+
     URI uri();
 
     /**
@@ -143,6 +135,9 @@ public interface Resource extends Parcelable
      *         link, observe on the link instead of the link target
      */
     Closeable observe(LinkOption option, Observer observer)
+            throws IOException;
+
+    Closeable observe(LinkOption option, Observer observer, Visitor visitor)
             throws IOException;
 
     /**
@@ -266,8 +261,8 @@ public interface Resource extends Parcelable
 
     /**
      * Creates this resource as a file and creates any missing parents. This
-     * will throw the same exceptions as {@link #createFile()} except will
-     * not error if already exists.
+     * will throw the same exceptions as {@link #createFile()} except will not
+     * error if already exists.
      *
      * @return this
      */

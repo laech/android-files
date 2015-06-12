@@ -132,24 +132,7 @@ public abstract class LocalResource extends Native implements Resource
 
     public static LocalResource create(final File file)
     {
-        return new AutoParcel_LocalResource(new File(sanitizedUri(file)));
-    }
-
-    private static URI sanitizedUri(final File file)
-    {
-        /*
-         * Don't return File.toURI as it will append a "/" to the end of the URI
-         * depending on whether or not the file is a directory, that means two
-         * calls to the method before and after the directory is deleted will
-         * create two URIs that are not equal.
-         */
-        final URI uri = file.toURI().normalize();
-        final String uriStr = uri.toString();
-        if (!"/".equals(uri.getRawPath()) && uriStr.endsWith("/"))
-        {
-            return URI.create(uriStr.substring(0, uriStr.length() - 1));
-        }
-        return uri;
+        return new AutoParcel_LocalResource(file);
     }
 
     private static void ensureIsLocalResource(final Resource resource)
@@ -167,15 +150,9 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
-    public String toString()
-    {
-        return uri().toString();
-    }
-
-    @Override
     public URI uri()
     {
-        return sanitizedUri(file());
+        return file().toURI();
     }
 
     @Override
@@ -226,7 +203,16 @@ public abstract class LocalResource extends Native implements Resource
             final LinkOption option,
             final Observer observer) throws IOException
     {
-        return LocalResourceObservable.observe(this, option, observer);
+        return LocalResourceObservable.observe(this, option, observer, null);
+    }
+
+    @Override
+    public Closeable observe(
+            final LinkOption option,
+            final Observer observer,
+            final Visitor visitor) throws IOException
+    {
+        return LocalResourceObservable.observe(this, option, observer, visitor);
     }
 
     @Override

@@ -4,6 +4,9 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.os.OperationCanceledException;
+
+import com.google.common.base.Stopwatch;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +45,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 {
@@ -69,6 +72,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         @Override
         public void run()
         {
+            // TODO rethrow exception on main thread
             /* Don't update if last update was less than a second ago,
              * this avoid updating too frequently due to resources in the
              * current directory being changed frequently by other processes,
@@ -132,6 +136,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         }
     };
 
+    private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
+
     /**
      * @param root
      *         the resource to load files from
@@ -154,6 +160,16 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         this.data = new ConcurrentHashMap<>();
         this.childrenPendingUpdates = new HashSet<>();
         this.executor = newSingleThreadScheduledExecutor();
+    }
+
+    public int approximateChildTotal()
+    {
+        return approximateChildTotal.get();
+    }
+
+    public int approximateChildLoaded()
+    {
+        return data.size();
     }
 
     public void setSort(final FileSort sort)
@@ -197,37 +213,19 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             }
         }
 
-        if (observe)
-        {
-            try
-            {
-                observable = root.observe(FOLLOW, listener);
-            }
-            catch (final IOException e)
-            {
-                logger.debug(e);
-                return Result.of(e);
-            }
-
-            executor.scheduleWithFixedDelay(
-                    childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
-        }
-
+        final List<Resource> children;
         try
         {
-            root.list(FOLLOW, new Visitor()
+            if (observe)
             {
-                @Override
-                public Result accept(final Resource resource) throws IOException
-                {
-                    if (isLoadInBackgroundCanceled())
-                    {
-                        return TERMINATE;
-                    }
-                    update(resource);
-                    return CONTINUE;
-                }
-            });
+                children = observe();
+                executor.scheduleWithFixedDelay(
+                        childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
+            }
+            else
+            {
+                children = visit();
+            }
         }
         catch (final IOException e)
         {
@@ -235,11 +233,65 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             return Result.of(e);
         }
 
+        update(children);
         return buildResult();
+    }
+
+    private List<Resource> observe() throws IOException
+    {
+        final Stopwatch watch = Stopwatch.createStarted();
+        final List<Resource> children = new ArrayList<>();
+        observable = root.observe(FOLLOW, listener, collectInto(children));
+        logger.debug("observe took %s", watch);
+        return children;
+    }
+
+    private List<Resource> visit() throws IOException
+    {
+        final Stopwatch watch = Stopwatch.createStarted();
+        final List<Resource> children = new ArrayList<>();
+        root.list(FOLLOW, collectInto(children));
+        logger.debug("visit took %s", watch);
+        return children;
+    }
+
+    private Visitor collectInto(final List<Resource> children)
+    {
+        return new Visitor()
+        {
+            @Override
+            public Result accept(final Resource resource) throws IOException
+            {
+                checkCancel();
+                approximateChildTotal.incrementAndGet();
+                children.add(resource);
+                return CONTINUE;
+            }
+        };
+    }
+
+    private void update(final List<Resource> children)
+    {
+        final Stopwatch watch = Stopwatch.createStarted();
+        for (final Resource child : children)
+        {
+            checkCancel();
+            update(child);
+        }
+        logger.debug("update took %s", watch);
+    }
+
+    private void checkCancel()
+    {
+        if (isLoadInBackgroundCanceled())
+        {
+            throw new OperationCanceledException();
+        }
     }
 
     private Result buildResult()
     {
+        final Stopwatch watch = Stopwatch.createStarted();
         final List<File> files = new ArrayList<>(data.size());
         if (showHidden)
         {
@@ -285,7 +337,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             result.add(stat);
             preCategory = category;
         }
-
+        logger.debug("build result took %s", watch);
         return Result.of(unmodifiableList(result));
     }
 

@@ -12,10 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.Nullable;
+
 import l.files.fs.Event;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
+import l.files.fs.Visitor;
 import l.files.fs.local.LocalResourceStream.Callback;
 import l.files.logging.Logger;
 
@@ -186,7 +189,9 @@ final class LocalResourceObservable extends Native
     public static Closeable observe(
             final LocalResource resource,
             final LinkOption option,
-            final Observer observer) throws IOException
+            final Observer observer,
+            @Nullable
+            final Visitor visitor) throws IOException
     {
 
         requireNonNull(resource, "root");
@@ -237,7 +242,7 @@ final class LocalResourceObservable extends Native
 
         try
         {
-            observeChildren(fd, resource, option, observable);
+            observeChildren(fd, resource, option, observable, visitor);
         }
         catch (final IOException e)
         {
@@ -302,7 +307,9 @@ final class LocalResourceObservable extends Native
             final int fd,
             final LocalResource resource,
             final LinkOption option,
-            final LocalResourceObservable observable) throws IOException
+            final LocalResourceObservable observable,
+            @Nullable
+            final Visitor visitor) throws IOException
     {
 
         LocalResourceStream.list(resource, option, new Callback()
@@ -317,6 +324,12 @@ final class LocalResourceObservable extends Native
                 {
                     return false;
                 }
+
+                if (visitor != null)
+                {
+                    visitor.accept(resource.resolve(name));
+                }
+
                 if (!directory)
                 {
                     return true;

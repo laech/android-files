@@ -20,4 +20,13 @@
         android:layout_centerInParent="true"
         android:paddingBottom="?android:actionBarSize"/>
 
+    <ProgressBar
+        android:id="@android:id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingBottom="?android:actionBarSize"
+        android:visibility="gone"/>
+
 </RelativeLayout>
