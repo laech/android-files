@@ -67,19 +67,27 @@ final class ImageDecorator
             final Resource resource,
             final Stat stat)
     {
-        final Object key = buildCacheKey(resource);
-
         final Task task = (Task) view.getTag(R.id.image_decorator_task);
-        if (task != null && task.getResource().equals(resource)) return;
+        if (task != null && task.resource().equals(resource)) return;
         if (task != null) task.cancel(true);
 
         view.setImageDrawable(null);
         view.setVisibility(GONE);
         view.setTag(R.id.image_decorator_task, null);
 
-        if (!isReadable(resource) || !stat.isRegularFile()) return;
-        if (errors.contains(key)) return;
-        if (setCachedBitmap(view, key)) return;
+        if (stat.size() == 0
+                || !stat.isRegularFile()
+                || !isReadable(resource))
+        {
+            return;
+        }
+
+        final Object key = buildCacheKey(resource);
+        if (errors.contains(key)
+                || setCachedBitmap(view, key))
+        {
+            return;
+        }
 
         final ScaledSize size = sizes.get(key);
         if (size != null)
@@ -122,7 +130,8 @@ final class ImageDecorator
 
     private Object buildCacheKey(final Resource resource)
     {
-        return resource.uri() + "?bounds=" + maxWidth + "x" + maxHeight;
+        return resource.scheme() + "://" + resource.path()
+                + "?bounds=" + maxWidth + "x" + maxHeight;
     }
 
     private SizedColorDrawable newPlaceholder(final ScaledSize size)
@@ -134,7 +143,7 @@ final class ImageDecorator
     private interface Task
     {
 
-        Resource getResource();
+        Resource resource();
 
         boolean cancel(boolean mayInterruptIfRunning);
     }
@@ -171,6 +180,7 @@ final class ImageDecorator
         @Override
         protected ScaledSize doInBackground(final Void... params)
         {
+            logger.debug("decode size %s", resource);
             if (isCancelled())
             {
                 return null;
@@ -224,7 +234,7 @@ final class ImageDecorator
         }
 
         @Override
-        public Resource getResource()
+        public Resource resource()
         {
             return resource;
         }
@@ -260,6 +270,7 @@ final class ImageDecorator
         @Override
         protected Bitmap doInBackground(final Void... params)
         {
+            logger.debug("decode image %s", resource);
             if (isCancelled())
             {
                 return null;
@@ -320,7 +331,7 @@ final class ImageDecorator
         }
 
         @Override
-        public Resource getResource()
+        public Resource resource()
         {
             return resource;
         }

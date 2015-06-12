@@ -150,6 +150,12 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
+    public String scheme()
+    {
+        return "file";
+    }
+
+    @Override
     public String path()
     {
         return file().getPath();
