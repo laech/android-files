@@ -95,11 +95,10 @@ public final class FilesFragment extends BaseFileListFragment
                 final int current = loader.approximateChildLoaded();
                 progress.setProgress(current);
                 progress.setIndeterminate(current == 0);
-//                progress.setRotationY(current == 0 ? 180 : 0);
                 progress.setMax(loader.approximateChildTotal());
                 progress.setVisibility(VISIBLE);
             }
-            handler.postDelayed(this, 50);
+            handler.postDelayed(this, 10);
         }
     };
 
