@@ -10,6 +10,8 @@ import android.os.AsyncTask;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import com.google.common.base.Stopwatch;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.util.Bitmaps.decodeScaledBitmap;
 import static l.files.ui.util.Bitmaps.scaleSize;
@@ -82,7 +85,7 @@ final class ImageDecorator
             return;
         }
 
-        final Object key = buildCacheKey(resource);
+        final Object key = buildCacheKey(resource, stat);
         if (errors.contains(key)
                 || setCachedBitmap(view, key))
         {
@@ -128,10 +131,13 @@ final class ImageDecorator
         return false;
     }
 
-    private Object buildCacheKey(final Resource resource)
+    private Object buildCacheKey(
+            final Resource resource,
+            final Stat stat)
     {
         return resource.scheme() + "://" + resource.path()
-                + "?bounds=" + maxWidth + "x" + maxHeight;
+                + "?bounds=" + maxWidth + "x" + maxHeight
+                + "&mtime=" + stat.modificationTime().to(MILLISECONDS);
     }
 
     private SizedColorDrawable newPlaceholder(final ScaledSize size)
@@ -180,12 +186,12 @@ final class ImageDecorator
         @Override
         protected ScaledSize doInBackground(final Void... params)
         {
-            logger.debug("decode size %s", resource);
             if (isCancelled())
             {
                 return null;
             }
 
+            final Stopwatch watch = Stopwatch.createStarted();
             final Options options = new Options();
             options.inJustDecodeBounds = true;
             try (InputStream in = input(resource))
@@ -196,6 +202,7 @@ final class ImageDecorator
             {
                 return null;
             }
+            logger.debug("decode size took %s for %s", watch, resource);
             if (options.outWidth > 0 && options.outHeight > 0)
             {
                 return scaleSize(
@@ -270,11 +277,12 @@ final class ImageDecorator
         @Override
         protected Bitmap doInBackground(final Void... params)
         {
-            logger.debug("decode image %s", resource);
             if (isCancelled())
             {
                 return null;
             }
+
+            final Stopwatch watch = Stopwatch.createStarted();
             try (InputStream in = input(resource))
             {
                 return decodeScaledBitmap(in, size);
@@ -284,6 +292,10 @@ final class ImageDecorator
                 // Catch all unexpected internal errors from decoder
                 logger.warn(e);
                 return null;
+            }
+            finally
+            {
+                logger.debug("decode image took %s for %s", watch, resource);
             }
         }
 
