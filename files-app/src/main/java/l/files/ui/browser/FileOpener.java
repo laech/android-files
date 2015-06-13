@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.net.MediaType;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import l.files.common.base.Consumer;
 import l.files.common.base.Either;
 import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
+import l.files.logging.Logger;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -30,6 +32,7 @@ import static l.files.ui.IOExceptions.message;
 
 final class FileOpener implements Consumer<Resource>
 {
+    private static final Logger log = Logger.get(FileOpener.class);
 
     public static FileOpener get(final Context context)
     {
@@ -65,7 +68,10 @@ final class FileOpener implements Consumer<Resource>
         {
             try
             {
-                return Either.left(MagicDetector.INSTANCE.detect(resource));
+                final Stopwatch watch = Stopwatch.createStarted();
+                final MediaType media = MagicDetector.INSTANCE.detect(resource);
+                log.debug("detect took %s", watch);
+                return Either.left(media);
             }
             catch (final IOException e)
             {
