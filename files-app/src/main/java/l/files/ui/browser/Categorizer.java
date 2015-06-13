@@ -2,22 +2,38 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 
+import l.files.ui.browser.FileListItem.File;
+
 /**
  * Provides category information for items in cursors.
  */
-interface Categorizer {
+interface Categorizer
+{
+    int NULL_CATEGORY = Integer.MIN_VALUE;
 
-  /**
-   * Always return null categories.
-   */
-  Categorizer NULL = new Categorizer() {
-    @Override public String get(Resources res, FileListItem.File file) {
-      return null;
-    }
-  };
+    /**
+     * Always return null categories.
+     */
+    Categorizer NULL = new Categorizer()
+    {
+        @Override
+        public int id(final File file)
+        {
+            return NULL_CATEGORY;
+        }
 
-  /**
-   * @return the category for displaying purposes, or null
-   */
-  String get(Resources res, FileListItem.File file);
+        @Override
+        public String label(
+                final File file,
+                final Resources res,
+                final int id)
+        {
+            return null;
+        }
+    };
+
+    int id(File file);
+
+    String label(File file, Resources res, int id);
+
 }

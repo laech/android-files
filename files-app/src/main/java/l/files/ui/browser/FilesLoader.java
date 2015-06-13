@@ -45,6 +45,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.ui.browser.Categorizer.NULL_CATEGORY;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 {
@@ -313,25 +314,25 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 
         final Categorizer categorizer = sort.newCategorizer();
         final Resources res = getContext().getResources();
-        String preCategory = null;
+        int preCategory = NULL_CATEGORY;
         for (int i = 0; i < files.size(); i++)
         {
             final File stat = files.get(i);
 
-            // TODO make this fast O(n) to O(logN)
-            final String category = categorizer.get(res, stat);
+            // TODO make this from O(n) to O(logN)ish
+            final int category = categorizer.id(stat);
             if (i == 0)
             {
-                if (category != null)
+                if (category != NULL_CATEGORY)
                 {
-                    result.add(Header.of(category));
+                    result.add(Header.of(categorizer.label(stat, res, category)));
                 }
             }
             else
             {
-                if (!Objects.equals(preCategory, category))
+                if (preCategory != category)
                 {
-                    result.add(Header.of(category));
+                    result.add(Header.of(categorizer.label(stat, res, category)));
                 }
             }
             result.add(stat);

@@ -124,6 +124,8 @@ public abstract class LocalResource extends Native implements Resource
         return unmodifiableSet(permissions);
     }
 
+    private Name name;
+
     LocalResource()
     {
     }
@@ -170,13 +172,17 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public Name name()
     {
-        return Name.of(file().getName());
+        if (name == null)
+        {
+            name = Name.of(file().getName());
+        }
+        return name;
     }
 
     @Override
     public boolean hidden()
     {
-        return file().isHidden();
+        return name().length() > 0 && name().charAt(0) == '.';
     }
 
     @Nullable

@@ -12,7 +12,11 @@ import java.util.Map;
 
 import l.files.R;
 import l.files.fs.Stat;
+import l.files.ui.browser.FileListItem.File;
 
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.YEAR;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -20,9 +24,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 final class DateCategorizer implements Categorizer
 {
-
     private static final long MILLIS_PER_MINUTE = 60 * 1000;
     private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
+    private static final int ID_YEAR = -1;
+    private static final int ID_MONTH = -2;
 
     @SuppressLint("SimpleDateFormat")
     private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
@@ -51,40 +56,59 @@ final class DateCategorizer implements Categorizer
     }
 
     @Override
-    public String get(final Resources res, final FileListItem.File file)
+    public int id(final File file)
     {
         final Stat stat = file.stat();
         if (stat == null)
         {
-            return res.getString(R.string.__);
+            return R.string.__;
         }
 
         final long t = stat.modificationTime().to(MILLISECONDS);
-        if (t < MILLIS_PER_MINUTE) return res.getString(R.string.__);
-        if (t >= startOfTomorrow) return res.getString(R.string.unknown);
-        if (t >= startOfToday) return res.getString(R.string.today);
-        if (t >= startOfYesterday) return res.getString(R.string.yesterday);
-        if (t >= startOf7Days) return res.getString(R.string.previous_7_days);
-        if (t >= startOf30Days) return res.getString(R.string.previous_30_days);
+        if (t < MILLIS_PER_MINUTE) return R.string.__;
+        if (t >= startOfTomorrow) return R.string.unknown;
+        if (t >= startOfToday) return R.string.today;
+        if (t >= startOfYesterday) return R.string.yesterday;
+        if (t >= startOf7Days) return R.string.previous_7_days;
+        if (t >= startOf30Days) return R.string.previous_30_days;
 
         timestamp.setTimeInMillis(startOfToday);
-        final int currentYear = timestamp.get(Calendar.YEAR);
+        final int currentYear = timestamp.get(YEAR);
 
         timestamp.setTimeInMillis(t);
-        final int thatYear = timestamp.get(Calendar.YEAR);
+        final int thatYear = timestamp.get(YEAR);
 
         if (currentYear != thatYear)
         {
-            return String.valueOf(thatYear);
+            return ID_YEAR;
+        }
+        return ID_MONTH;
+    }
+
+    @Override
+    public String label(final File file, final Resources res, final int id)
+    {
+        if (id == ID_YEAR)
+        {
+            final Stat stat = requireNonNull(file.stat());
+            timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
+            return String.valueOf(timestamp.get(YEAR));
         }
 
-        final int month = timestamp.get(Calendar.MONTH);
-        String format = monthCache.get(month);
-        if (format == null)
+        if (id == ID_MONTH)
         {
-            format = monthFormat.format(timestamp.getTime());
-            monthCache.put(month, format);
+            final Stat stat = requireNonNull(file.stat());
+            timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
+            final int month = timestamp.get(MONTH);
+            String format = monthCache.get(month);
+            if (format == null)
+            {
+                format = monthFormat.format(timestamp.getTime());
+                monthCache.put(month, format);
+            }
+            return format;
         }
-        return format;
+
+        return res.getString(id);
     }
 }

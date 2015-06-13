@@ -11,7 +11,6 @@ import l.files.ui.browser.FileListItem.File;
  */
 final class SizeCategorizer implements Categorizer
 {
-
     private static final long ZERO = 0;
     private static final long KB_1 = 1024;
     private static final long MB_1 = KB_1 * 1024;
@@ -30,17 +29,17 @@ final class SizeCategorizer implements Categorizer
             };
 
     @Override
-    public String get(final Resources res, final File file)
+    public int id(final File file)
     {
         final Stat stat = file.stat();
         if (stat == null)
         {
-            return res.getString(R.string.__);
+            return R.string.__;
         }
 
         if (stat.isDirectory())
         {
-            return res.getString(R.string.__);
+            return R.string.__;
         }
 
         final long size = stat.size();
@@ -48,10 +47,23 @@ final class SizeCategorizer implements Categorizer
         {
             if (size >= group.minSize)
             {
-                return res.getString(group.label);
+                return group.label;
             }
         }
-        return null;
+        return -1;
+    }
+
+    @Override
+    public String label(
+            final File file,
+            final Resources res,
+            final int id)
+    {
+        if (id == -1)
+        {
+            return null;
+        }
+        return res.getString(id);
     }
 
     private static class Group
