@@ -6,6 +6,7 @@ import java.util.Collections;
 
 import l.files.fs.local.LocalResource;
 
+import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -18,7 +19,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest
         return MagicDetector.INSTANCE;
     }
 
-    public void testDetect_returnsOctetStreamForUnreadable() throws Exception
+    public void test_detects_unreadable_file_as_octet_stream() throws Exception
     {
         final Resource file = dir1().resolve("a.txt").createFile();
         file.writeString(NOFOLLOW, UTF_8, "hello world");
@@ -34,7 +35,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest
         }
     }
 
-    public void testDetect_returnsOctetStreamForSpecialFile() throws Exception
+    public void test_detects_special_file_as_octet_stream() throws Exception
     {
         final File file = new File("/proc/1/maps");
         assertExists(file);
@@ -47,5 +48,11 @@ public final class MagicDetectorTest extends AbstractDetectorTest
         {
             // Pass
         }
+    }
+
+    public void test_detects_content_only_not_file_name() throws Exception
+    {
+        final Resource file = dir1().resolve("a.txt").createFile();
+        assertEquals(OCTET_STREAM, detector().detect(file));
     }
 }

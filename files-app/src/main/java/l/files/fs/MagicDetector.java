@@ -35,9 +35,7 @@ public final class MagicDetector extends AbstractDetector
         {
             try (InputStream in = resource.input(FOLLOW))
             {
-                final String name = resource.name().toString();
-                final String result = TikaHolder.tika.detect(in, name);
-                return MediaType.parse(result);
+                return MediaType.parse(TikaHolder.tika.detect(in));
             }
         }
         catch (final TaggedIOException e)
