@@ -114,9 +114,15 @@ public final class DateCategorizerTest extends BaseTest
 
     private void assertShowMonthOnly(final Calendar month)
     {
+        final String actual = label(mockStat(month));
         final String expected = formatMonth(month);
-        final String actual = categorizer.get(res, mockStat(month));
         assertEquals(expected, actual);
+    }
+
+    private String label(final File file)
+    {
+        final int id = categorizer.id(file);
+        return categorizer.label(file, res, id);
     }
 
     public void testModifiedYearsAgo()
@@ -140,7 +146,7 @@ public final class DateCategorizerTest extends BaseTest
     private void assertShowYearOnly(final Calendar year)
     {
         final String expected = String.valueOf(year.get(YEAR));
-        final String actual = categorizer.get(res, mockStat(year));
+        final String actual = label(mockStat(year));
         assertEquals(expected, actual);
     }
 
@@ -182,7 +188,7 @@ public final class DateCategorizerTest extends BaseTest
     {
         for (final File file : stats)
         {
-            assertEquals(file.toString(), expected, categorizer.get(res, file));
+            assertEquals(file.toString(), expected, label(file));
         }
     }
 
