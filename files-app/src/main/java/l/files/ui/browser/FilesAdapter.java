@@ -21,6 +21,7 @@ import l.files.fs.Instant;
 import l.files.fs.Stat;
 import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.File;
+import l.files.ui.preview.Preview;
 
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
@@ -45,7 +46,7 @@ import static l.files.ui.IconFonts.getIconForFileMediaType;
 final class FilesAdapter extends StableAdapter<FileListItem>
 {
     private final Function<Stat, CharSequence> dateFormatter;
-    private final ImageDecorator imageDecorator;
+    private final Preview imageDecorator;
 
     FilesAdapter(
             final Context context,
@@ -53,7 +54,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             final int maxThumbnailHeight)
     {
         this.dateFormatter = newDateFormatter(context);
-        this.imageDecorator = new ImageDecorator(
+        this.imageDecorator = new Preview(
                 getBitmapCache(context), maxThumbnailWidth, maxThumbnailHeight);
     }
 
@@ -340,7 +341,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             }
             else
             {
-                imageDecorator.decorate(
+                imageDecorator.set(
                         preview, file.resource(), file.stat());
             }
         }

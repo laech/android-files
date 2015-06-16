@@ -273,7 +273,7 @@ final class LocalResourceObservable extends Native
         try
         {
             final int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            final String path = resource.file().getPath();
+            final String path = resource._file().getPath();
             return addWatch(fd, path, mask);
         }
         catch (final ErrnoException e)

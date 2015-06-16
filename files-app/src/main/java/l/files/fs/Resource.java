@@ -6,6 +6,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,6 +42,8 @@ public interface Resource extends Parcelable
      * e.g. "file" for local file system.
      */
     String scheme();
+
+    Optional<File> file();
 
     /**
      * Gets the path of this resource. The returned path is only valid within

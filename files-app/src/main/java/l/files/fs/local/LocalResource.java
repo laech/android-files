@@ -3,6 +3,7 @@ package l.files.fs.local;
 import android.system.ErrnoException;
 import android.system.Os;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 import java.io.Closeable;
@@ -130,7 +131,13 @@ public abstract class LocalResource extends Native implements Resource
     {
     }
 
-    abstract File file();
+    abstract File _file();
+
+    @Override
+    public Optional<File> file()
+    {
+        return Optional.of(_file());
+    }
 
     public static LocalResource create(final File file)
     {
@@ -148,7 +155,7 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public String toString()
     {
-        return file().getPath();
+        return _file().getPath();
     }
 
     @Override
@@ -160,13 +167,13 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public String path()
     {
-        return file().getPath();
+        return _file().getPath();
     }
 
     @Override
     public URI uri()
     {
-        return file().toURI();
+        return _file().toURI();
     }
 
     @Override
@@ -174,7 +181,7 @@ public abstract class LocalResource extends Native implements Resource
     {
         if (name == null)
         {
-            name = Name.of(file().getName());
+            name = Name.of(_file().getName());
         }
         return name;
     }
@@ -195,7 +202,7 @@ public abstract class LocalResource extends Native implements Resource
         }
         else
         {
-            return new AutoParcel_LocalResource(file().getParentFile());
+            return new AutoParcel_LocalResource(_file().getParentFile());
         }
     }
 
@@ -251,7 +258,7 @@ public abstract class LocalResource extends Native implements Resource
     @Override
     public LocalResource resolve(final String other)
     {
-        return create(new File(file(), other));
+        return create(new File(_file(), other));
     }
 
     @Override
@@ -268,7 +275,7 @@ public abstract class LocalResource extends Native implements Resource
         ensureIsLocalResource(fromParent);
         ensureIsLocalResource(toParent);
         checkArgument(startsWith(fromParent));
-        final File parent = ((LocalResource) toParent).file();
+        final File parent = ((LocalResource) toParent)._file();
         final String child = path().substring(fromParent.path().length());
         return new AutoParcel_LocalResource(new File(parent, child));
     }
