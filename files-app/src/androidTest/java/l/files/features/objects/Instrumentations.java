@@ -132,9 +132,16 @@ public final class Instrumentations
             }
             catch (final AssertionError e)
             {
-                error = e;
+                if (error == null)
+                {
+                    error = e;
+                }
+                else
+                {
+                    error.addSuppressed(e);
+                }
             }
-            sleep(5);
+            sleep(500);
         }
 
         if (error == null)

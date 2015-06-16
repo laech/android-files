@@ -37,7 +37,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.view.Gravity.START;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static java.util.Collections.sort;
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -65,30 +65,14 @@ public final class UiFileActivity
     public UiFileActivity bookmark()
     {
         assertBookmarkMenuChecked(false);
-        await(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                assertTrue(instrument.invokeMenuActionSync(
-                        activity, R.id.bookmark, 0));
-            }
-        });
+        selectMenuAction(R.id.bookmark);
         return this;
     }
 
     public UiFileActivity unbookmark()
     {
         assertBookmarkMenuChecked(true);
-        await(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                assertTrue(instrument.invokeMenuActionSync(
-                        activity, R.id.bookmark, 0));
-            }
-        });
+        selectMenuAction(R.id.bookmark);
         return this;
     }
 
@@ -113,15 +97,7 @@ public final class UiFileActivity
 
     public UiNewDir newFolder()
     {
-        await(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                assertTrue(instrument.invokeMenuActionSync(
-                        activity, R.id.new_dir, 0));
-            }
-        });
+        selectMenuAction(R.id.new_dir);
         return new UiNewDir(instrument, activity);
     }
 
@@ -140,16 +116,14 @@ public final class UiFileActivity
 
     public UiFileActivity paste()
     {
-        await(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                assertTrue(instrument.invokeMenuActionSync(
-                        activity, android.R.id.paste, 0));
-            }
-        });
+        selectMenuAction(android.R.id.paste);
         return this;
+    }
+
+    public UiSort sort()
+    {
+        selectMenuAction(R.id.sort_by);
+        return new UiSort(instrument, activity);
     }
 
     public UiFileActivity selectFromNavigationMode(final Resource dir)
@@ -447,6 +421,18 @@ public final class UiFileActivity
         return activity.getMenu().findItem(android.R.id.paste);
     }
 
+    void selectMenuAction(final int id)
+    {
+        await(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                assertTrue(instrument.invokeMenuActionSync(activity, id, 0));
+            }
+        });
+    }
+
     void selectActionModeAction(final int id)
     {
         awaitOnMainThread(instrument, new Runnable()
@@ -695,7 +681,7 @@ public final class UiFileActivity
 
     private List<Resource> sortResourcesByPath(final List<Resource> resources)
     {
-        sort(resources, new Comparator<Resource>()
+        Collections.sort(resources, new Comparator<Resource>()
         {
             @Override
             public int compare(final Resource a, final Resource b)
@@ -751,5 +737,24 @@ public final class UiFileActivity
             }
         }
         return items;
+    }
+
+    public UiFileActivity assertItemsDisplayed(
+            final Resource... expected)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                final List<Resource> actual = new ArrayList<>();
+                for (final FileListItem.File item : listViewItems())
+                {
+                    actual.add(item.resource());
+                }
+                assertEquals(asList(expected), actual);
+            }
+        });
+        return this;
     }
 }

@@ -58,6 +58,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 
     private volatile FileSort sort;
     private volatile boolean showHidden;
+    private volatile boolean forceReload;
 
     private volatile boolean observing;
     private volatile Closeable observable;
@@ -81,7 +82,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
              * those actions will still be updated instantly.
              */
             final long now = nanoTime();
-            if (now - lastUpdateNanoTime < SECONDS.toNanos(1))
+            if (!forceReload && now - lastUpdateNanoTime < SECONDS.toNanos(1))
             {
                 return;
             }
@@ -89,7 +90,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             final String[] children;
             synchronized (FilesLoader.this)
             {
-                if (childrenPendingUpdates.isEmpty())
+                if (!forceReload && childrenPendingUpdates.isEmpty())
                 {
                     return;
                 }
@@ -106,7 +107,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
                 changed |= update(child);
             }
 
-            if (changed)
+            if (changed || forceReload)
             {
                 final Result result = buildResult();
                 handler.post(new Runnable()
@@ -118,6 +119,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
                     }
                 });
             }
+
+            forceReload = false;
         }
     };
 
@@ -176,13 +179,13 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
     public void setSort(final FileSort sort)
     {
         this.sort = requireNonNull(sort, "sort");
-        startLoading();
+        this.forceReload = true;
     }
 
     public void setShowHidden(final boolean showHidden)
     {
         this.showHidden = showHidden;
-        startLoading();
+        this.forceReload = true;
     }
 
     @Override
@@ -192,10 +195,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         if (data.isEmpty())
         {
             forceLoad();
-        }
-        else
-        {
-            deliverResult(buildResult());
         }
     }
 
