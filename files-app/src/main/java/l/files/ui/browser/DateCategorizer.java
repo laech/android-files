@@ -10,6 +10,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import auto.parcel.AutoParcel;
 import l.files.R;
 import l.files.fs.Stat;
 import l.files.ui.browser.FileListItem.File;
@@ -22,12 +23,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 /**
  * Categories files by their last modified date.
  */
-final class DateCategorizer implements Categorizer
+final class DateCategorizer extends BaseCategorizer
 {
     private static final long MILLIS_PER_MINUTE = 60 * 1000;
     private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
-    private static final int ID_YEAR = -1;
-    private static final int ID_MONTH = -2;
 
     @SuppressLint("SimpleDateFormat")
     private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
@@ -56,7 +55,7 @@ final class DateCategorizer implements Categorizer
     }
 
     @Override
-    public int id(final File file)
+    public Object id(final File file)
     {
         final Stat stat = file.stat();
         if (stat == null)
@@ -66,7 +65,7 @@ final class DateCategorizer implements Categorizer
 
         final long t = stat.modificationTime().to(MILLISECONDS);
         if (t < MILLIS_PER_MINUTE) return R.string.__;
-        if (t >= startOfTomorrow) return R.string.unknown;
+        if (t >= startOfTomorrow) return R.string.future_yo;
         if (t >= startOfToday) return R.string.today;
         if (t >= startOfYesterday) return R.string.yesterday;
         if (t >= startOf7Days) return R.string.previous_7_days;
@@ -80,22 +79,22 @@ final class DateCategorizer implements Categorizer
 
         if (currentYear != thatYear)
         {
-            return ID_YEAR;
+            return Year.of(thatYear);
         }
-        return ID_MONTH;
+        return Month.of(timestamp.get(MONTH));
     }
 
     @Override
-    public String label(final File file, final Resources res, final int id)
+    public String label(final File file, final Resources res, final Object id)
     {
-        if (id == ID_YEAR)
+        if (id instanceof Year)
         {
             final Stat stat = requireNonNull(file.stat());
             timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
             return String.valueOf(timestamp.get(YEAR));
         }
 
-        if (id == ID_MONTH)
+        if (id instanceof Month)
         {
             final Stat stat = requireNonNull(file.stat());
             timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
@@ -109,6 +108,28 @@ final class DateCategorizer implements Categorizer
             return format;
         }
 
-        return res.getString(id);
+        return res.getString((int) id);
+    }
+
+    @AutoParcel
+    static abstract class Year
+    {
+        abstract int value();
+
+        static Year of(final int value)
+        {
+            return new AutoParcel_DateCategorizer_Year(value);
+        }
+    }
+
+    @AutoParcel
+    static abstract class Month
+    {
+        abstract int value();
+
+        static Month of(final int value)
+        {
+            return new AutoParcel_DateCategorizer_Month(value);
+        }
     }
 }

@@ -16,6 +16,19 @@ import static l.files.fs.Instant.EPOCH;
 
 public final class InstantTest extends TestCase
 {
+    public void test_ofMillis_rolls_negative() throws Exception
+    {
+        assertEquals(Instant.of(-1, 0), Instant.ofMillis(-1000));
+        assertEquals(Instant.of(-1, 901_000_000), Instant.ofMillis(-99));
+    }
+
+    public void test_ofMillis() throws Exception
+    {
+        assertEquals(Instant.of(0, 123_000_000), Instant.ofMillis(123));
+        assertEquals(Instant.of(1, 1_000_000),
+                Instant.ofMillis(SECONDS.toMillis(1) + 1));
+    }
+
     public void test_of() throws Exception
     {
         final Instant instant = Instant.of(1, 2);

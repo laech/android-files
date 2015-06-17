@@ -2,6 +2,9 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 
+import java.util.Collections;
+import java.util.List;
+
 import l.files.ui.browser.FileListItem.File;
 
 /**
@@ -9,31 +12,38 @@ import l.files.ui.browser.FileListItem.File;
  */
 interface Categorizer
 {
-    int NULL_CATEGORY = Integer.MIN_VALUE;
-
     /**
      * Always return null categories.
      */
     Categorizer NULL = new Categorizer()
     {
         @Override
-        public int id(final File file)
+        public Object id(final File file)
         {
-            return NULL_CATEGORY;
+            return null;
         }
 
         @Override
         public String label(
                 final File file,
                 final Resources res,
-                final int id)
+                final Object id)
         {
             return null;
         }
+
+        @Override
+        public List<FileListItem> categorize(
+                final Resources res,
+                final List<File> items)
+        {
+            return Collections.<FileListItem>unmodifiableList(items);
+        }
     };
 
-    int id(File file);
+    Object id(File file);
 
-    String label(File file, Resources res, int id);
+    String label(File file, Resources res, Object id);
 
+    List<FileListItem> categorize(Resources res, List<File> items);
 }

@@ -36,6 +36,8 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static java.text.DateFormat.MEDIUM;
+import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.ui.FilesApp.getBitmapCache;
@@ -152,11 +154,12 @@ final class FilesAdapter extends StableAdapter<FileListItem>
     private static Function<Stat, CharSequence> newDateFormatter(
             final Context context)
     {
+        final DateFormat futureFormat = getDateTimeInstance(MEDIUM, MEDIUM);
         final DateFormat dateFormat = getDateFormat(context);
         final DateFormat timeFormat = getTimeFormat(context);
         final Date date = new Date();
-        final Time t1 = new Time();
-        final Time t2 = new Time();
+        final Time currentTime = new Time();
+        final Time thatTime = new Time();
         final int flags
                 = FORMAT_SHOW_DATE
                 | FORMAT_ABBREV_MONTH
@@ -170,11 +173,15 @@ final class FilesAdapter extends StableAdapter<FileListItem>
                 final Instant instant = file.modificationTime();
                 final long millis = instant.to(MILLISECONDS);
                 date.setTime(millis);
-                t1.setToNow();
-                t2.set(millis);
-                if (t1.year == t2.year)
+                currentTime.setToNow();
+                thatTime.set(millis);
+                if (currentTime.before(thatTime))
                 {
-                    if (t1.yearDay == t2.yearDay)
+                    return futureFormat.format(date);
+                }
+                if (currentTime.year == thatTime.year)
+                {
+                    if (currentTime.yearDay == thatTime.yearDay)
                     {
                         return timeFormat.format(date);
                     }

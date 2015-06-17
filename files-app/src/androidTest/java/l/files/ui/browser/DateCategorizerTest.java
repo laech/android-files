@@ -3,23 +3,28 @@ package l.files.ui.browser;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
+import com.google.common.base.Function;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
 import l.files.fs.Instant;
 import l.files.fs.Resource;
+import l.files.fs.Resource.Name;
 import l.files.fs.Stat;
 import l.files.ui.browser.FileListItem.File;
+import l.files.ui.browser.FileListItem.Header;
 
+import static com.google.common.collect.Lists.transform;
+import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
 import static java.util.Calendar.YEAR;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -39,8 +44,109 @@ public final class DateCategorizerTest extends BaseTest
         now = Calendar.getInstance();
         now.setTimeInMillis(millis(midnight));
         now.add(Calendar.HOUR_OF_DAY, 8);
-        res = mock(Resources.class);
+        res = getContext().getResources();
         categorizer = new DateCategorizer(now.getTimeInMillis());
+    }
+
+
+    public void test_categorize_with_header() throws Exception
+    {
+        final File future1 = file(addDaysToMidnight(2));
+        final File future2 = file(addDaysToMidnight(1));
+        final File today1 = file(addDaysToMidnight(0) + 1);
+        final File today2 = file(addDaysToMidnight(0));
+        final File yesterday1 = file(addDaysToMidnight(-1) + 10);
+        final File yesterday2 = file(addDaysToMidnight(-1));
+        final File prev7Days1 = file(addDaysToMidnight(-2));
+        final File prev7Days2 = file(addDaysToMidnight(-3));
+        final File prev30Days1 = file(addDaysToMidnight(-10));
+        final File prev30Days2 = file(addDaysToMidnight(-12));
+        final File prevMonth1 = file(addDaysToMidnight(-31));
+        final File prevMonth2 = file(addDaysToMidnight(-31 * 2));
+        final File prevMonth3 = file(addDaysToMidnight(-31 * 3));
+        final File prevYear1 = file(addDaysToMidnight(-365));
+        final File prevYear2 = file(addDaysToMidnight(-365 * 2));
+
+        final List<FileListItem> expected = asList(
+                header(R.string.future_yo),
+                future1,
+                future2,
+                header(R.string.today),
+                today1,
+                today2,
+                header(R.string.yesterday),
+                yesterday1,
+                yesterday2,
+                header(R.string.previous_7_days),
+                prev7Days1,
+                prev7Days2,
+                header(R.string.previous_30_days),
+                prev30Days1,
+                prev30Days2,
+                header(formatMonth(addDaysToMidnight(-31))),
+                prevMonth1,
+                header(formatMonth(addDaysToMidnight(-31 * 2))),
+                prevMonth2,
+                header(formatMonth(addDaysToMidnight(-31 * 3))),
+                prevMonth3,
+                header("2013"),
+                prevYear1,
+                header("2012"),
+                prevYear2
+        );
+
+        final List<FileListItem> actual = categorizer.categorize(res, asList(
+                future1,
+                future2,
+                today1,
+                today2,
+                yesterday1,
+                yesterday2,
+                prev7Days1,
+                prev7Days2,
+                prev30Days1,
+                prev30Days2,
+                prevMonth1,
+                prevMonth2,
+                prevMonth3,
+                prevYear1,
+                prevYear2));
+
+        assertEquals(
+                transform(expected, name()),
+                transform(actual, name()));
+    }
+
+    private Function<FileListItem, String> name()
+    {
+        return new Function<FileListItem, String>()
+        {
+            @Override
+            public String apply(final FileListItem input)
+            {
+                return input.isHeader()
+                        ? ((Header) input).header()
+                        : ((File) input).resource().name().toString();
+            }
+        };
+    }
+
+    private long addDaysToMidnight(final int days)
+    {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(midnight.getTimeInMillis());
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        return calendar.getTimeInMillis();
+    }
+
+    private Header header(final int stringId)
+    {
+        return header(res.getString(stringId));
+    }
+
+    private Header header(final String string)
+    {
+        return Header.of(string);
     }
 
     private long millis(final Calendar calendar)
@@ -50,44 +156,39 @@ public final class DateCategorizerTest extends BaseTest
 
     public void testModifiedToday() throws Exception
     {
-        final String today = "today";
-        given(res.getString(R.string.today)).willReturn(today);
-        assertCategory(today, mockStat(midnight), mockStat(now));
+        assertCategory(
+                res.getString(R.string.today),
+                file(midnight),
+                file(now));
     }
 
     public void testModifiedYesterday() throws Exception
     {
-        final String yesterday = "yesterday";
-        given(res.getString(R.string.yesterday)).willReturn(yesterday);
         assertCategory(
-                yesterday,
-                mockStat(millis(midnight) - 1),
-                mockStat(millis(midnight) - HOURS.toMillis(6)),
-                mockStat(millis(midnight) - DAYS.toMillis(1))
+                res.getString(R.string.yesterday),
+                file(millis(midnight) - 1),
+                file(millis(midnight) - HOURS.toMillis(6)),
+                file(millis(midnight) - DAYS.toMillis(1))
         );
     }
 
     public void testModified7Days()
     {
-        final String days7 = "7days";
-        given(res.getString(R.string.previous_7_days)).willReturn(days7);
         assertCategory(
-                days7,
-                mockStat(millis(midnight) - DAYS.toMillis(1) - 1),
-                mockStat(millis(midnight) - DAYS.toMillis(2)),
-                mockStat(millis(midnight) - DAYS.toMillis(7))
+                res.getString(R.string.previous_7_days),
+                file(millis(midnight) - DAYS.toMillis(1) - 1),
+                file(millis(midnight) - DAYS.toMillis(2)),
+                file(millis(midnight) - DAYS.toMillis(7))
         );
     }
 
     public void testModified30Days()
     {
-        final String days30 = "30days";
-        given(res.getString(R.string.previous_30_days)).willReturn(days30);
         assertCategory(
-                days30,
-                mockStat(millis(midnight) - DAYS.toMillis(7) - 1),
-                mockStat(millis(midnight) - DAYS.toMillis(16)),
-                mockStat(millis(midnight) - DAYS.toMillis(30))
+                res.getString(R.string.previous_30_days),
+                file(millis(midnight) - DAYS.toMillis(7) - 1),
+                file(millis(midnight) - DAYS.toMillis(16)),
+                file(millis(midnight) - DAYS.toMillis(30))
         );
     }
 
@@ -106,6 +207,13 @@ public final class DateCategorizerTest extends BaseTest
         return DAYS.toMillis(31);
     }
 
+    private String formatMonth(final long time)
+    {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time);
+        return formatMonth(calendar);
+    }
+
     @SuppressLint("SimpleDateFormat")
     private String formatMonth(final Calendar calendar)
     {
@@ -114,14 +222,14 @@ public final class DateCategorizerTest extends BaseTest
 
     private void assertShowMonthOnly(final Calendar month)
     {
-        final String actual = label(mockStat(month));
+        final String actual = label(file(month));
         final String expected = formatMonth(month);
         assertEquals(expected, actual);
     }
 
     private String label(final File file)
     {
-        final int id = categorizer.id(file);
+        final Object id = categorizer.id(file);
         return categorizer.label(file, res, id);
     }
 
@@ -146,42 +254,34 @@ public final class DateCategorizerTest extends BaseTest
     private void assertShowYearOnly(final Calendar year)
     {
         final String expected = String.valueOf(year.get(YEAR));
-        final String actual = label(mockStat(year));
+        final String actual = label(file(year));
         assertEquals(expected, actual);
     }
 
     public void testModifiedUnknownFuture()
     {
-        final String unknown = "unknown";
-        given(res.getString(R.string.unknown)).willReturn(unknown);
-        assertCategory(unknown, mockStat(millis(midnight) + DAYS.toMillis(1)));
+        assertCategory(
+                res.getString(R.string.future_yo),
+                file(millis(midnight) + DAYS.toMillis(1)));
     }
 
     public void testModifiedUnknownPast()
     {
-        final String unknown = "unknown";
-        given(res.getString(R.string.__)).willReturn(unknown);
-        assertCategory(unknown, mockStat(-1L), mockStat(0L));
+        assertCategory(res.getString(R.string.__), file(-1L), file(0L));
     }
 
-    private File mockStat(final Calendar time)
+    private File file(final Calendar time)
     {
-        return mockStat(time.getTimeInMillis());
+        return file(time.getTimeInMillis());
     }
 
-    private File mockStat(final long time)
+    private File file(final long time)
     {
         final Stat stat = mock(Stat.class);
-        long seconds = MILLISECONDS.toSeconds(time);
-        int nanos = (int) MILLISECONDS.toNanos(time - SECONDS.toMillis(seconds));
-        if (nanos < 0)
-        {
-            final int delta = (int) (SECONDS.toNanos(1) + nanos);
-            nanos = delta;
-            seconds -= (delta / (double) SECONDS.toNanos(1) + 0.5);
-        }
-        given(stat.modificationTime()).willReturn(Instant.of(seconds, nanos));
-        return File.create(mock(Resource.class), stat, stat);
+        final Resource res = mock(Resource.class);
+        given(res.name()).willReturn(Name.of(String.valueOf(time)));
+        given(stat.modificationTime()).willReturn(Instant.ofMillis(time));
+        return File.create(res, stat, stat);
     }
 
     private void assertCategory(final String expected, final File... stats)

@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import auto.parcel.AutoParcel;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -28,6 +29,19 @@ public abstract class Instant implements Comparable<Instant>
      * The number of nanoseconds since {@link #seconds()}.
      */
     public abstract int nanos();
+
+    public static Instant ofMillis(final long time)
+    {
+        long seconds = MILLISECONDS.toSeconds(time);
+        int nanos = (int) MILLISECONDS.toNanos(time - SECONDS.toMillis(seconds));
+        if (nanos < 0)
+        {
+            final int delta = (int) (SECONDS.toNanos(1) + nanos);
+            nanos = delta;
+            seconds -= (delta / (double) SECONDS.toNanos(1) + 0.5);
+        }
+        return of(seconds, nanos);
+    }
 
     /**
      * @param seconds

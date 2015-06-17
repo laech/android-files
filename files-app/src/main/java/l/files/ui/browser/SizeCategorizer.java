@@ -9,7 +9,7 @@ import l.files.ui.browser.FileListItem.File;
 /**
  * Categorizes by file size (descending order).
  */
-final class SizeCategorizer implements Categorizer
+final class SizeCategorizer extends BaseCategorizer
 {
     private static final long ZERO = 0;
     private static final long KB_1 = 1024;
@@ -29,7 +29,7 @@ final class SizeCategorizer implements Categorizer
             };
 
     @Override
-    public int id(final File file)
+    public Object id(final File file)
     {
         final Stat stat = file.stat();
         if (stat == null)
@@ -57,13 +57,14 @@ final class SizeCategorizer implements Categorizer
     public String label(
             final File file,
             final Resources res,
-            final int id)
+            final Object id)
     {
-        if (id == -1)
+        final int value = (int) id;
+        if (value == -1)
         {
             return null;
         }
-        return res.getString(id);
+        return res.getString(value);
     }
 
     private static class Group

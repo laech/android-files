@@ -27,6 +27,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.text.DateFormat.MEDIUM;
+import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -71,6 +73,27 @@ public final class NavigationTest extends BaseFilesActivityTest
             public void apply(final CharSequence actual)
             {
                 assertEquals(expected, actual);
+            }
+        });
+    }
+
+    public void test_shows_full_time_for_future_file() throws Exception
+    {
+        final Resource file = directory().resolve("file").createFile();
+        final long future = currentTimeMillis() + 1000;
+        file.setModificationTime(NOFOLLOW, Instant.ofMillis(future));
+
+        final String date = getDateTimeInstance(MEDIUM, MEDIUM)
+                .format(new Date(future));
+
+        screen().assertSummaryView(file, new Consumer<CharSequence>()
+        {
+            @Override
+            public void apply(final CharSequence actual)
+            {
+                assertTrue(
+                        actual.toString(),
+                        actual.toString().startsWith(date));
             }
         });
     }

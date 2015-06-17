@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
@@ -33,11 +32,9 @@ import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
 import l.files.ui.browser.FileListItem.File;
-import l.files.ui.browser.FileListItem.Header;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.System.nanoTime;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -45,7 +42,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.ui.browser.Categorizer.NULL_CATEGORY;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 {
@@ -309,36 +305,11 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         }
         Collections.sort(files, sort.newComparator(Locale.getDefault()));
 
-        final List<FileListItem> result = new ArrayList<>(files.size() + 6);
+        final List<FileListItem> result = sort.newCategorizer()
+                .categorize(getContext().getResources(), files);
 
-        final Categorizer categorizer = sort.newCategorizer();
-        final Resources res = getContext().getResources();
-        int preCategory = NULL_CATEGORY;
-        for (int i = 0; i < files.size(); i++)
-        {
-            final File stat = files.get(i);
-
-            // TODO make this from O(n) to O(logN)ish
-            final int category = categorizer.id(stat);
-            if (i == 0)
-            {
-                if (category != NULL_CATEGORY)
-                {
-                    result.add(Header.of(categorizer.label(stat, res, category)));
-                }
-            }
-            else
-            {
-                if (preCategory != category)
-                {
-                    result.add(Header.of(categorizer.label(stat, res, category)));
-                }
-            }
-            result.add(stat);
-            preCategory = category;
-        }
         logger.debug("build result took %s", watch);
-        return Result.of(unmodifiableList(result));
+        return Result.of(result);
     }
 
     @Override
