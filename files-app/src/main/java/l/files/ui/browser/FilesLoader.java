@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
@@ -45,7 +46,7 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 {
-    private static final Logger logger = Logger.get(FilesLoader.class);
+    private static final Logger log = Logger.get(FilesLoader.class);
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<String, File> data;
@@ -225,7 +226,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         }
         catch (final IOException e)
         {
-            logger.debug(e);
+            log.debug(e);
             return Result.of(e);
         }
 
@@ -238,7 +239,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         final Stopwatch watch = Stopwatch.createStarted();
         final List<Resource> children = new ArrayList<>();
         observable = root.observe(FOLLOW, listener, collectInto(children));
-        logger.debug("observe took %s", watch);
+        log.debug("observe took %s", watch);
         return children;
     }
 
@@ -247,7 +248,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         final Stopwatch watch = Stopwatch.createStarted();
         final List<Resource> children = new ArrayList<>();
         root.list(FOLLOW, collectInto(children));
-        logger.debug("visit took %s", watch);
+        log.debug("visit took %s", watch);
         return children;
     }
 
@@ -274,7 +275,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             checkCancel();
             update(child);
         }
-        logger.debug("update took %s", watch);
+        log.debug("update took %s", watch);
     }
 
     private void checkCancel()
@@ -303,12 +304,10 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
                 }
             }
         }
-        Collections.sort(files, sort.newComparator(Locale.getDefault()));
-
-        final List<FileListItem> result = sort.newCategorizer()
-                .categorize(getContext().getResources(), files);
-
-        logger.debug("build result took %s", watch);
+        final Resources res = getContext().getResources();
+        final Locale locale = Locale.getDefault();
+        final List<FileListItem> result = sort.sort(files, res, locale);
+        log.debug("build result took %s", watch);
         return Result.of(result);
     }
 
@@ -337,7 +336,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             }
             catch (final IOException e)
             {
-                logger.warn(e);
+                log.warn(e);
             }
         }
 
@@ -361,7 +360,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         }
         if (closeable != null)
         {
-            logger.error("Has not been unregistered");
+            log.error("Has not been unregistered");
             executor.shutdownNow();
             closeable.close();
         }
@@ -409,7 +408,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             }
             catch (final IOException e)
             {
-                logger.debug(e);
+                log.debug(e);
             }
         }
         return stat;
