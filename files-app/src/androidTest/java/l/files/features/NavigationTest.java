@@ -92,7 +92,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             public void apply(final CharSequence actual)
             {
                 assertTrue(
-                        actual.toString(),
+                        format("\"%s\".startsWith(\"%s\")", actual, date),
                         actual.toString().startsWith(date));
             }
         });
