@@ -20,9 +20,9 @@ public interface Stat
 
     boolean isCharacterDevice();
 
-    Instant accessTime();
+    Instant accessed();
 
-    Instant modificationTime();
+    Instant modified();
 
     Set<Permission> permissions();
 }

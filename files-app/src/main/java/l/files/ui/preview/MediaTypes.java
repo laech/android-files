@@ -68,6 +68,6 @@ final class MediaTypes
     private static String key(final Resource res, final Stat stat)
     {
         return res.scheme() + "://" + res.path()
-                + "?mtime=" + stat.modificationTime().to(MILLISECONDS);
+                + "?mtime=" + stat.modified().to(MILLISECONDS);
     }
 }

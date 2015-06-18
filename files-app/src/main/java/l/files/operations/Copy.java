@@ -167,7 +167,7 @@ final class Copy extends Paste
     {
         try
         {
-            dst.setModificationTime(NOFOLLOW, src.modificationTime());
+            dst.setModified(NOFOLLOW, src.modified());
         }
         catch (final IOException e)
         {
@@ -176,7 +176,7 @@ final class Copy extends Paste
 
         try
         {
-            dst.setAccessTime(NOFOLLOW, src.accessTime());
+            dst.setAccessed(NOFOLLOW, src.accessed());
         }
         catch (final IOException e)
         {

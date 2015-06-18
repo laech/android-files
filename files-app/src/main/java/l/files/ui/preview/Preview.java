@@ -70,7 +70,7 @@ public final class Preview
     {
         return res.scheme() + "://" + res.path()
                 + "?bounds=" + maxWidth + "x" + maxHeight
-                + "&mtime=" + stat.modificationTime().to(MILLISECONDS);
+                + "&mtime=" + stat.modified().to(MILLISECONDS);
     }
 
     static SizedColorDrawable newPlaceholder(final ScaledSize size)

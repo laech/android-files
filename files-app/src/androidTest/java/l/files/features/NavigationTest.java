@@ -61,7 +61,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         final Resource file = directory().resolve("file").createFile();
-        file.setModificationTime(NOFOLLOW, EPOCH);
+        file.setModified(NOFOLLOW, EPOCH);
 
         final long size = file.stat(NOFOLLOW).size();
         final Context c = getActivity();
@@ -81,7 +81,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     {
         final Resource file = directory().resolve("file").createFile();
         final long future = currentTimeMillis() + 1000;
-        file.setModificationTime(NOFOLLOW, Instant.ofMillis(future));
+        file.setModified(NOFOLLOW, Instant.ofMillis(future));
 
         final String date = getDateTimeInstance(MEDIUM, MEDIUM)
                 .format(new Date(future));
@@ -152,7 +152,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             final long modifiedAt) throws Exception
     {
         final Resource d = directory().resolve("dir").createDirectory();
-        d.setModificationTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
+        d.setModified(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
         screen().assertSummaryView(d, new Consumer<CharSequence>()
         {
             @Override
@@ -301,7 +301,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     private void testUpdatesSizeViewOnChildModified(final Resource resource)
             throws IOException
     {
-        resource.setModificationTime(NOFOLLOW, EPOCH);
+        resource.setModified(NOFOLLOW, EPOCH);
 
         final CharSequence[] size = {null};
         screen().assertSummaryView(resource, new Consumer<CharSequence>()
@@ -329,7 +329,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     private void testUpdatesDateViewOnChildModified(final Resource resource)
             throws IOException
     {
-        resource.setModificationTime(NOFOLLOW, Instant.of(100000, 1));
+        resource.setModified(NOFOLLOW, Instant.of(100000, 1));
 
         final String[] date = {null};
         screen().assertSummaryView(resource, new Consumer<CharSequence>()
@@ -357,7 +357,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     private Resource modify(final Resource resource) throws IOException
     {
         final Stat stat = resource.stat(NOFOLLOW);
-        final Instant lastModifiedBefore = stat.modificationTime();
+        final Instant lastModifiedBefore = stat.modified();
         if (stat.isDirectory())
         {
             resource.resolve(String.valueOf(nanoTime())).createDirectory();
@@ -369,7 +369,7 @@ public final class NavigationTest extends BaseFilesActivityTest
                 writer.write("test");
             }
         }
-        final Instant lastModifiedAfter = resource.stat(NOFOLLOW).modificationTime();
+        final Instant lastModifiedAfter = resource.stat(NOFOLLOW).modified();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);
         return resource;
     }

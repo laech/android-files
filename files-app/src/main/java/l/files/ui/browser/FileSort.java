@@ -117,8 +117,8 @@ public enum FileSort
                                 final File a, final Stat aStat,
                                 final File b, final Stat bStat)
                         {
-                            final Instant aTime = aStat.modificationTime();
-                            final Instant bTime = bStat.modificationTime();
+                            final Instant aTime = aStat.modified();
+                            final Instant bTime = bStat.modified();
                             final int result = bTime.compareTo(aTime);
                             if (result == 0)
                             {

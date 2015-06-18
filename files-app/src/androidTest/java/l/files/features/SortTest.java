@@ -37,7 +37,7 @@ public final class SortTest extends BaseFilesActivityTest
         {
             writer.write(content);
         }
-        file.setModificationTime(NOFOLLOW, modified);
+        file.setModified(NOFOLLOW, modified);
         return file;
     }
 }

@@ -170,7 +170,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             @Override
             public CharSequence apply(final Stat file)
             {
-                final Instant instant = file.modificationTime();
+                final Instant instant = file.modified();
                 final long millis = instant.to(MILLISECONDS);
                 date.setTime(millis);
                 currentTime.setToNow();
@@ -317,7 +317,7 @@ final class FilesAdapter extends StableAdapter<FileListItem>
                 summary.setEnabled(file.isReadable());
                 final CharSequence date = dateFormatter.apply(stat);
                 final CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
-                final boolean hasDate = stat.modificationTime().to(MINUTES) > 0;
+                final boolean hasDate = stat.modified().to(MINUTES) > 0;
                 final boolean isFile = stat.isRegularFile();
                 if (hasDate && isFile)
                 {

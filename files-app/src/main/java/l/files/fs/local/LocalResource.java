@@ -701,7 +701,7 @@ public abstract class LocalResource extends Native implements Resource
     }
 
     @Override
-    public void setAccessTime(final LinkOption option, final Instant instant)
+    public void setAccessed(final LinkOption option, final Instant instant)
             throws IOException
     {
         requireNonNull(option, "option");
@@ -726,7 +726,7 @@ public abstract class LocalResource extends Native implements Resource
             boolean followLink) throws ErrnoException;
 
     @Override
-    public void setModificationTime(
+    public void setModified(
             final LinkOption option,
             final Instant instant) throws IOException
     {

@@ -63,7 +63,7 @@ final class DateCategorizer extends BaseCategorizer
             return R.string.__;
         }
 
-        final long t = stat.modificationTime().to(MILLISECONDS);
+        final long t = stat.modified().to(MILLISECONDS);
         if (t < MILLIS_PER_MINUTE) return R.string.__;
         if (t >= startOfTomorrow) return R.string.future_yo;
         if (t >= startOfToday) return R.string.today;
@@ -90,14 +90,14 @@ final class DateCategorizer extends BaseCategorizer
         if (id instanceof Year)
         {
             final Stat stat = requireNonNull(file.stat());
-            timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
+            timestamp.setTimeInMillis(stat.modified().to(MILLISECONDS));
             return String.valueOf(timestamp.get(YEAR));
         }
 
         if (id instanceof Month)
         {
             final Stat stat = requireNonNull(file.stat());
-            timestamp.setTimeInMillis(stat.modificationTime().to(MILLISECONDS));
+            timestamp.setTimeInMillis(stat.modified().to(MILLISECONDS));
             final int month = timestamp.get(MONTH);
             String format = monthCache.get(month);
             if (format == null)

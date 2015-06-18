@@ -40,7 +40,7 @@ abstract class LocalStat implements Stat
     }
 
     @Override
-    public Instant accessTime()
+    public Instant accessed()
     {
         if (atime == null)
         {
@@ -50,7 +50,7 @@ abstract class LocalStat implements Stat
     }
 
     @Override
-    public Instant modificationTime()
+    public Instant modified()
     {
         if (mtime == null)
         {

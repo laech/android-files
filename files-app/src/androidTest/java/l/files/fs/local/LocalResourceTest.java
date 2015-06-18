@@ -115,7 +115,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     public void test_stat_modificationTime() throws Exception
     {
         final Stat stat = dir1().stat(NOFOLLOW);
-        final long actual = stat.modificationTime().seconds();
+        final long actual = stat.modified().seconds();
         final long expected = Os.stat(dir1().path()).st_atime;
         assertEquals(expected, actual);
     }
@@ -124,7 +124,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Stat actual = dir1().stat(NOFOLLOW);
         final StructStat expected = Os.stat(dir1().path());
-        assertEquals(expected.st_atime, actual.accessTime().seconds());
+        assertEquals(expected.st_atime, actual.accessed().seconds());
     }
 
     public void test_stat_size() throws Exception
@@ -1022,7 +1022,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Instant old = getModificationTime(dir1(), NOFOLLOW);
         final Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
-        dir1().setModificationTime(NOFOLLOW, expect);
+        dir1().setModified(NOFOLLOW, expect);
         final Instant actual = getModificationTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);
     }
@@ -1033,7 +1033,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Instant atime = getAccessTime(dir1(), NOFOLLOW);
         final Instant mtime = Instant.of(1, 2);
         sleep(3);
-        dir1().setModificationTime(NOFOLLOW, mtime);
+        dir1().setModified(NOFOLLOW, mtime);
         assertNotEqual(atime, mtime);
         assertEquals(mtime, getModificationTime(dir1(), NOFOLLOW));
         assertEquals(atime, getAccessTime(dir1(), NOFOLLOW));
@@ -1046,7 +1046,7 @@ public final class LocalResourceTest extends ResourceBaseTest
 
         final Instant fileTime = Instant.of(123, 456);
         final Instant linkTime = getModificationTime(link, NOFOLLOW);
-        link.setModificationTime(FOLLOW, fileTime);
+        link.setModified(FOLLOW, fileTime);
 
         assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
         assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
@@ -1061,7 +1061,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Instant fileTime = getModificationTime(file, NOFOLLOW);
         final Instant linkTime = Instant.of(123, 456);
 
-        link.setModificationTime(NOFOLLOW, linkTime);
+        link.setModified(NOFOLLOW, linkTime);
 
         assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
         assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
@@ -1079,7 +1079,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             final Resource resource,
             final LinkOption option) throws IOException
     {
-        return resource.stat(option).modificationTime();
+        return resource.stat(option).modified();
     }
 
     private static void expectOnSetModificationTime(
@@ -1093,7 +1093,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                resource.setModificationTime(option, instant);
+                resource.setModified(option, instant);
             }
         });
     }
@@ -1102,7 +1102,7 @@ public final class LocalResourceTest extends ResourceBaseTest
     {
         final Instant old = getAccessTime(dir1(), NOFOLLOW);
         final Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
-        dir1().setAccessTime(NOFOLLOW, expect);
+        dir1().setAccessed(NOFOLLOW, expect);
         final Instant actual = getAccessTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);
     }
@@ -1113,7 +1113,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Instant mtime = getModificationTime(dir1(), NOFOLLOW);
         final Instant atime = Instant.of(1, 2);
         sleep(3);
-        dir1().setAccessTime(NOFOLLOW, atime);
+        dir1().setAccessed(NOFOLLOW, atime);
         assertNotEqual(mtime, atime);
         assertEquals(atime, getAccessTime(dir1(), NOFOLLOW));
         assertEquals(mtime, getModificationTime(dir1(), NOFOLLOW));
@@ -1126,7 +1126,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Instant targetTime = getAccessTime(dir1(), NOFOLLOW);
         final Instant linkTime = Instant.of(123, 456);
 
-        link.setAccessTime(NOFOLLOW, linkTime);
+        link.setAccessed(NOFOLLOW, linkTime);
 
         assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
         assertEquals(targetTime, getAccessTime(dir1(), NOFOLLOW));
@@ -1140,7 +1140,7 @@ public final class LocalResourceTest extends ResourceBaseTest
         final Instant linkTime = getAccessTime(dir1(), NOFOLLOW);
         final Instant fileTime = Instant.of(123, 456);
 
-        link.setAccessTime(FOLLOW, fileTime);
+        link.setAccessed(FOLLOW, fileTime);
 
         assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
         assertEquals(fileTime, getAccessTime(dir1(), NOFOLLOW));
@@ -1157,7 +1157,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             final Resource resource,
             final LinkOption option) throws IOException
     {
-        return resource.stat(option).accessTime();
+        return resource.stat(option).accessed();
     }
 
     private static void expectOnSetAccessTime(
@@ -1171,7 +1171,7 @@ public final class LocalResourceTest extends ResourceBaseTest
             @Override
             public void run() throws Exception
             {
-                resource.setAccessTime(option, instant);
+                resource.setAccessed(option, instant);
             }
         });
     }

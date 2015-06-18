@@ -232,7 +232,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest
             final Resource target,
             final Resource observable) throws Exception
     {
-        final Instant old = target.stat(NOFOLLOW).modificationTime();
+        final Instant old = target.stat(NOFOLLOW).modified();
         final Instant t = Instant.of(old.seconds() - 1, old.nanos());
         try (Recorder observer = observe(observable))
         {
@@ -577,7 +577,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest
             @Override
             public Void call() throws Exception
             {
-                resource.setModificationTime(option, instant);
+                resource.setModified(option, instant);
                 return null;
             }
         };

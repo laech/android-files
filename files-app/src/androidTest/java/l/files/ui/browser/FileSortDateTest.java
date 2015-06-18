@@ -35,7 +35,7 @@ public final class FileSortDateTest extends FileSortTest {
     }
 
     private Resource setModified(Resource resource, Instant instant) throws IOException {
-        resource.setModificationTime(NOFOLLOW, instant);
+        resource.setModified(NOFOLLOW, instant);
         return resource;
     }
 
