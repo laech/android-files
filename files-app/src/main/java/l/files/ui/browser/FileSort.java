@@ -36,6 +36,7 @@ public enum FileSort
                         @Override
                         public int compare(final File a, final File b)
                         {
+                            // TODO use CollationKey
                             return comparator.compare(
                                     a.resource().name(),
                                     b.resource().name());
