@@ -67,7 +67,7 @@
     <string name="yesterday">Yesterday</string>
     <string name="previous_7_days">Previous 7 days</string>
     <string name="previous_30_days">Previous 30 days</string>
-    <string name="future_yo">Future yo!</string>
+    <string name="future">Future</string>
 
     <string name="_10gb_or_more">&gt;= 10GB</string>
     <string name="_1gb_to_10gb">1GB — 10GB</string>

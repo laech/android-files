@@ -65,7 +65,7 @@ final class DateCategorizer extends BaseCategorizer
 
         final long t = stat.modified().to(MILLISECONDS);
         if (t < MILLIS_PER_MINUTE) return R.string.__;
-        if (t >= startOfTomorrow) return R.string.future_yo;
+        if (t >= startOfTomorrow) return R.string.future;
         if (t >= startOfToday) return R.string.today;
         if (t >= startOfYesterday) return R.string.yesterday;
         if (t >= startOf7Days) return R.string.previous_7_days;

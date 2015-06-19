@@ -68,7 +68,7 @@ public final class DateCategorizerTest extends BaseTest
         final File prevYear2 = file(addDaysToMidnight(-365 * 2));
 
         final List<FileListItem> expected = asList(
-                header(R.string.future_yo),
+                header(R.string.future),
                 future1,
                 future2,
                 header(R.string.today),
@@ -261,7 +261,7 @@ public final class DateCategorizerTest extends BaseTest
     public void testModifiedUnknownFuture()
     {
         assertCategory(
-                res.getString(R.string.future_yo),
+                res.getString(R.string.future),
                 file(millis(midnight) + DAYS.toMillis(1)));
     }
 
