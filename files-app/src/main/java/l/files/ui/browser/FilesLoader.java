@@ -10,11 +10,11 @@ import com.google.common.base.Stopwatch;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,8 +50,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<String, File> data;
-
     private final Resource root;
+    private final Collator collator;
 
     private volatile FileSort sort;
     private volatile boolean showHidden;
@@ -139,24 +139,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
 
     private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
 
-    /**
-     * @param root
-     *         the resource to load files from
-     * @param sort
-     *         the comparator for sorting results
-     * @param showHidden
-     *         whether to show hidden files
-     */
     public FilesLoader(
             final Context context,
             final Resource root,
             final FileSort sort,
+            final Collator collator,
             final boolean showHidden)
     {
         super(context);
 
         this.root = requireNonNull(root, "root");
         this.sort = requireNonNull(sort, "sort");
+        this.collator = requireNonNull(collator, "collator");
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
         this.childrenPendingUpdates = new HashSet<>();
@@ -311,8 +305,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
             }
         }
         final Resources res = getContext().getResources();
-        final Locale locale = Locale.getDefault();
-        final List<FileListItem> result = sort.sort(files, res, locale);
+        final List<FileListItem> result = sort.sort(files, res);
         log.debug("build result took %s", watch);
         return Result.of(result);
     }
@@ -387,7 +380,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         {
             final Stat stat = resource.stat(NOFOLLOW);
             final Stat targetStat = readTargetStatus(resource, stat);
-            final File newStat = File.create(resource, stat, targetStat);
+            final File newStat = File.create(resource, stat, targetStat, collator);
             final File oldStat = data.put(resource.name().toString(), newStat);
             return !Objects.equals(newStat, oldStat);
         }
@@ -399,7 +392,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         {
             data.put(
                     resource.name().toString(),
-                    File.create(resource, null, null));
+                    File.create(resource, null, null, collator));
             return true;
         }
     }

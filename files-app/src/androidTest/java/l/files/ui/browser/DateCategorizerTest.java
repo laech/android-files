@@ -5,6 +5,7 @@ import android.content.res.Resources;
 
 import com.google.common.base.Function;
 
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -35,6 +36,7 @@ public final class DateCategorizerTest extends BaseTest
     private Calendar midnight;
     private Calendar now;
     private DateCategorizer categorizer;
+    private Collator collator;
 
     @Override
     protected void setUp() throws Exception
@@ -46,6 +48,7 @@ public final class DateCategorizerTest extends BaseTest
         now.add(Calendar.HOUR_OF_DAY, 8);
         res = getContext().getResources();
         categorizer = new DateCategorizer(now.getTimeInMillis());
+        collator = Collator.getInstance();
     }
 
 
@@ -281,7 +284,7 @@ public final class DateCategorizerTest extends BaseTest
         final Resource res = mock(Resource.class);
         given(res.name()).willReturn(Name.of(String.valueOf(time)));
         given(stat.modified()).willReturn(Instant.ofMillis(time));
-        return File.create(res, stat, stat);
+        return File.create(res, stat, stat, collator);
     }
 
     private void assertCategory(final String expected, final File... stats)

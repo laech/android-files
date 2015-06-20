@@ -15,6 +15,21 @@ import static l.files.ui.browser.FileSort.SIZE;
 
 public final class SortTest extends BaseFilesActivityTest
 {
+    public void test_updates_list_on_sort_option_change_on_back() throws Exception
+    {
+        final Resource a = directory().resolve("a").createDirectory();
+        final Resource aa = createFile("aa", "aa", Instant.of(1, 1), a);
+        final Resource ab = createFile("ab", "ab", Instant.of(2, 1), a);
+        final Resource b = createFile("b", "b", Instant.of(1, 1));
+        final Resource c = createFile("c", "c", Instant.of(6, 1));
+        screen()
+                .sort().by(NAME).assertItemsDisplayed(a, b, c)
+                .selectItem(a)
+                .sort().by(NAME).assertItemsDisplayed(aa, ab)
+                .sort().by(MODIFIED).assertItemsDisplayed(ab, aa)
+                .pressBack().assertItemsDisplayed(a, b, c);
+    }
+
     public void test_updates_list_on_sort_option_change() throws Exception
     {
         final Resource a = createFile("a", "a", Instant.of(1, 1));
@@ -32,7 +47,16 @@ public final class SortTest extends BaseFilesActivityTest
             final String content,
             final Instant modified) throws IOException
     {
-        final Resource file = directory().resolve(name).createFile();
+        return createFile(name, content, modified, directory());
+    }
+
+    private Resource createFile(
+            final String name,
+            final String content,
+            final Instant modified,
+            final Resource dir) throws IOException
+    {
+        final Resource file = dir.resolve(name).createFile();
         try (Writer writer = file.writer(NOFOLLOW, UTF_8))
         {
             writer.write(content);

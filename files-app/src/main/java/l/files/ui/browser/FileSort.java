@@ -4,23 +4,17 @@ import android.content.res.Resources;
 
 import com.google.common.primitives.Longs;
 
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
-import auto.parcel.AutoParcel;
 import l.files.R;
 import l.files.fs.Instant;
-import l.files.fs.Resource.Name;
 import l.files.fs.Stat;
 import l.files.ui.browser.FileListItem.File;
 
 import static java.lang.System.currentTimeMillis;
-import static java.util.Collections.unmodifiableList;
 
 public enum FileSort
 {
@@ -28,24 +22,20 @@ public enum FileSort
     NAME(R.string.name)
             {
                 @Override
-                public Comparator<File> newComparator(final Locale locale)
+                public Comparator<File> comparator()
                 {
-                    final Comparator<Name> comparator = Name.comparator(locale);
                     return new Comparator<File>()
                     {
                         @Override
                         public int compare(final File a, final File b)
                         {
-                            // TODO use CollationKey
-                            return comparator.compare(
-                                    a.resource().name(),
-                                    b.resource().name());
+                            return a.compareTo(b);
                         }
                     };
                 }
 
                 @Override
-                public Categorizer newCategorizer()
+                public Categorizer categorizer()
                 {
                     return Categorizer.NULL;
                 }
@@ -53,65 +43,20 @@ public enum FileSort
                 @Override
                 public List<FileListItem> sort(
                         final List<File> items,
-                        final Resources res,
-                        final Locale locale)
+                        final Resources res)
                 {
-                    final Collator collator = Collator.getInstance(locale);
-                    final List<FileKey> keys = sort(items, collator);
-                    return files(keys);
-                }
-
-                private List<FileKey> sort(
-                        final List<File> items,
-                        final Collator collator)
-                {
-                    final List<FileKey> keys = new ArrayList<>(items.size());
-                    for (final File item : items)
-                    {
-                        final String name = item.resource().name().toString();
-                        final CollationKey key = collator.getCollationKey(name);
-                        keys.add(new FileKey(key, item));
-                    }
-                    Collections.sort(keys);
-                    return keys;
-                }
-
-                private List<FileListItem> files(final List<FileKey> keys)
-                {
-                    final List<FileListItem> result = new ArrayList<>(keys.size());
-                    for (final FileKey key : keys)
-                    {
-                        result.add(key.file);
-                    }
-                    return unmodifiableList(result);
-                }
-
-                @AutoParcel
-                final class FileKey implements Comparable<FileKey>
-                {
-                    final CollationKey key;
-                    final File file;
-
-                    FileKey(final CollationKey key, final File file)
-                    {
-                        this.key = key;
-                        this.file = file;
-                    }
-
-                    @Override
-                    public int compareTo(final FileKey that)
-                    {
-                        return key.compareTo(that.key);
-                    }
+                    final List<File> result = new ArrayList<>(items);
+                    Collections.sort(result);
+                    return Collections.<FileListItem>unmodifiableList(result);
                 }
             },
 
     MODIFIED(R.string.date_modified)
             {
                 @Override
-                public Comparator<File> newComparator(final Locale locale)
+                public Comparator<File> comparator()
                 {
-                    return new NullableFileStatComparator(locale)
+                    return new StatComparator()
                     {
                         @Override
                         protected int compareNotNull(
@@ -123,7 +68,7 @@ public enum FileSort
                             final int result = bTime.compareTo(aTime);
                             if (result == 0)
                             {
-                                return nameComparator.compare(a, b);
+                                return a.compareTo(b);
                             }
                             return result;
                         }
@@ -131,7 +76,7 @@ public enum FileSort
                 }
 
                 @Override
-                public Categorizer newCategorizer()
+                public Categorizer categorizer()
                 {
                     return new DateCategorizer(currentTimeMillis());
                 }
@@ -140,9 +85,9 @@ public enum FileSort
     SIZE(R.string.size)
             {
                 @Override
-                public Comparator<File> newComparator(final Locale locale)
+                public Comparator<File> comparator()
                 {
-                    return new NullableFileStatComparator(locale)
+                    return new StatComparator()
                     {
                         @Override
                         protected int compareNotNull(
@@ -151,7 +96,7 @@ public enum FileSort
                         {
                             if (aStat.isDirectory() && bStat.isDirectory())
                             {
-                                return nameComparator.compare(a, b);
+                                return a.compareTo(b);
                             }
 
                             if (aStat.isDirectory()) return 1;
@@ -160,7 +105,7 @@ public enum FileSort
                             final int result = Longs.compare(bStat.size(), aStat.size());
                             if (result == 0)
                             {
-                                return nameComparator.compare(a, b);
+                                return a.compareTo(b);
                             }
                             return result;
                         }
@@ -168,7 +113,7 @@ public enum FileSort
                 }
 
                 @Override
-                public Categorizer newCategorizer()
+                public Categorizer categorizer()
                 {
                     return new SizeCategorizer();
                 }
@@ -186,39 +131,25 @@ public enum FileSort
         return res.getString(labelId);
     }
 
-    public abstract Comparator<File> newComparator(Locale locale);
+    abstract Comparator<File> comparator();
 
-    public abstract Categorizer newCategorizer();
+    abstract Categorizer categorizer();
 
     public List<FileListItem> sort(
-            final List<File> unsorted,
-            final Resources res,
-            final Locale locale)
+            final List<File> items,
+            final Resources res)
     {
-        final List<File> sorted = new ArrayList<>(unsorted);
-        Collections.sort(sorted, newComparator(locale));
-        return newCategorizer().categorize(res, sorted);
+        final List<File> sorted = new ArrayList<>(items);
+        Collections.sort(sorted, comparator());
+        return categorizer().categorize(res, sorted);
     }
 
-    private static abstract class NullableFileStatComparator
-            implements Comparator<File>
+    private static abstract class StatComparator implements Comparator<File>
     {
-
-        protected final Comparator<File> nameComparator;
-
-        NullableFileStatComparator(final Locale locale)
-        {
-            nameComparator = NAME.newComparator(locale);
-        }
-
         @Override
         public int compare(final File a, final File b)
         {
-            if (a.stat() == null && b.stat() == null)
-            {
-                return nameComparator.compare(a, b);
-            }
-
+            if (a.stat() == null && b.stat() == null) return a.compareTo(b);
             if (a.stat() == null) return 1;
             if (b.stat() == null) return -1;
 

@@ -3,6 +3,8 @@ package l.files.ui.browser;
 import com.google.common.net.MediaType;
 
 import java.io.IOException;
+import java.text.CollationKey;
+import java.text.Collator;
 
 import javax.annotation.Nullable;
 
@@ -56,7 +58,7 @@ public abstract class FileListItem
     }
 
     @AutoParcel
-    public static abstract class File extends FileListItem
+    public static abstract class File extends FileListItem implements Comparable<File>
     {
 
         private Boolean readable;
@@ -103,12 +105,17 @@ public abstract class FileListItem
         @Nullable
         abstract Stat _targetStat();
 
+        public abstract CollationKey collationKey();
+
         public static File create(
                 final Resource resource,
                 @Nullable final Stat stat,
-                @Nullable final Stat targetStat)
+                @Nullable final Stat targetStat,
+                final Collator collator)
         {
-            return new AutoParcel_FileListItem_File(resource, stat, targetStat);
+            final String name = resource.name().toString();
+            final CollationKey key = collator.getCollationKey(name);
+            return new AutoParcel_FileListItem_File(resource, stat, targetStat, key);
         }
 
         @Override
@@ -125,6 +132,13 @@ public abstract class FileListItem
         public Stat targetStat()
         {
             return _targetStat() != null ? _targetStat() : stat();
+        }
+
+        @Override
+        @SuppressWarnings("NullableProblems")
+        public int compareTo(final File another)
+        {
+            return collationKey().compareTo(another.collationKey());
         }
     }
 

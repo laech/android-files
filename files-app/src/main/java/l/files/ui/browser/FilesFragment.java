@@ -11,9 +11,11 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import l.files.R;
 import l.files.common.app.OptionsMenus;
@@ -211,8 +213,9 @@ public final class FilesFragment extends BaseFileListFragment
     {
         final Activity context = getActivity();
         final FileSort sort = getSort(context);
+        final Collator collator = Collator.getInstance(Locale.getDefault());
         final boolean showHidden = Preferences.getShowHiddenFiles(context);
-        return new FilesLoader(context, directory, sort, showHidden);
+        return new FilesLoader(context, directory, sort, collator, showHidden);
     }
 
     @Override
