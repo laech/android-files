@@ -191,7 +191,13 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
         super.onStartLoading();
         if (data.isEmpty())
         {
+            log.debug("forceLoad");
             forceLoad();
+        }
+        else
+        {
+            forceReload = true;
+            log.debug("forceReload");
         }
     }
 

@@ -54,8 +54,6 @@ public final class FilesFragment extends BaseFileListFragment
         implements LoaderCallbacks<Result>, OnSharedPreferenceChangeListener
 {
 
-    // TODO implement progress
-
     public static final String TAG = FilesFragment.class.getSimpleName();
 
     private static final String ARG_DIRECTORY = "directory";
