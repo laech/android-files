@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.open;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -11,7 +11,6 @@ import com.google.common.net.MediaType;
 
 import java.io.IOException;
 
-import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.base.Either;
 import l.files.fs.MagicDetector;
@@ -24,13 +23,14 @@ import static android.widget.Toast.makeText;
 import static com.google.common.net.MediaType.ANY_AUDIO_TYPE;
 import static com.google.common.net.MediaType.ANY_IMAGE_TYPE;
 import static com.google.common.net.MediaType.ANY_TEXT_TYPE;
+import static com.google.common.net.MediaType.ANY_TYPE;
 import static com.google.common.net.MediaType.ANY_VIDEO_TYPE;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
 import static l.files.ui.IOExceptions.message;
 
-final class FileOpener implements Consumer<Resource>
+public final class FileOpener implements Consumer<Resource>
 {
     private static final Logger log = Logger.get(FileOpener.class);
 
@@ -93,19 +93,13 @@ final class FileOpener implements Consumer<Resource>
 
             if (!showFile(media) && !showFile(generalize(media)))
             {
-                showActivityNotFound();
+                showFile(ANY_TYPE);
             }
         }
 
         public void showException(final IOException exception)
         {
             final String msg = message(exception);
-            makeText(context, msg, LENGTH_SHORT).show();
-        }
-
-        private void showActivityNotFound()
-        {
-            final int msg = R.string.no_app_to_open_file;
             makeText(context, msg, LENGTH_SHORT).show();
         }
 

@@ -34,6 +34,7 @@ import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.newtab.NewTabMenu;
+import l.files.ui.open.FileOpener;
 
 import static android.app.ActionBar.NAVIGATION_MODE_LIST;
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;

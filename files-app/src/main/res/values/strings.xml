@@ -6,7 +6,6 @@
     <string name="not_a_directory">Not a directory</string>
     <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
     <string name="permission_denied">Permission denied</string>
-    <string name="no_app_to_open_file">No application can open this file</string>
     <string name="delete">Delete</string>
     <string name="home">Home</string>
     <string name="settings">Settings</string>
