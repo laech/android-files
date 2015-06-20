@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.util.Objects;
 
+import l.files.BuildConfig;
+
 import static android.util.Log.DEBUG;
 import static android.util.Log.ERROR;
 import static android.util.Log.VERBOSE;
@@ -17,7 +19,7 @@ public final class Logger
 
     private Logger(final String tag)
     {
-        this.tag = tag;
+        this.tag = "blah-" + tag;
     }
 
     public static Logger get(final Class<?> target)
@@ -27,26 +29,22 @@ public final class Logger
 
     public boolean isVerboseEnabled()
     {
-//        return true;
-        return isLoggable(tag, VERBOSE);
+        return BuildConfig.DEBUG && isLoggable(tag, VERBOSE);
     }
 
     public boolean isDebugEnabled()
     {
-//        return true;
-        return isLoggable(tag, DEBUG);
+        return BuildConfig.DEBUG && isLoggable(tag, DEBUG);
     }
 
     public boolean isWarnEnabled()
     {
-//        return true;
-        return isLoggable(tag, WARN);
+        return BuildConfig.DEBUG && isLoggable(tag, WARN);
     }
 
     public boolean isErrorEnabled()
     {
-//        return true;
-        return isLoggable(tag, ERROR);
+        return BuildConfig.DEBUG && isLoggable(tag, ERROR);
     }
 
     public void verbose(final Object msg)
