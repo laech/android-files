@@ -1,9 +1,7 @@
 package l.files.ui.browser;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -19,6 +17,7 @@ import java.util.Date;
 import l.files.R;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
+import l.files.ui.Icons;
 import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.File;
 import l.files.ui.preview.Preview;
@@ -41,9 +40,9 @@ import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.ui.FilesApp.getBitmapCache;
-import static l.files.ui.IconFonts.getDefaultFileIcon;
-import static l.files.ui.IconFonts.getDirectoryIcon;
-import static l.files.ui.IconFonts.getIconForFileMediaType;
+import static l.files.ui.Icons.defaultFileIconStringId;
+import static l.files.ui.Icons.directoryIconStringId;
+import static l.files.ui.Icons.fileIconStringId;
 
 final class FilesAdapter extends StableAdapter<FileListItem>
 {
@@ -243,8 +242,6 @@ final class FilesAdapter extends StableAdapter<FileListItem>
 
         void setIcon(final File file)
         {
-            final Context context = icon.getContext();
-            final AssetManager assets = context.getAssets();
             icon.setEnabled(file.targetStat() != null && file.isReadable());
 
             if (file.targetStat() != null
@@ -254,8 +251,8 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             }
             else
             {
-                icon.setText(R.string.ic_font_char);
-                icon.setTypeface(getIcon(file, assets));
+                icon.setText(iconTextId(file));
+                icon.setTypeface(Icons.font(icon.getResources().getAssets()));
             }
         }
 
@@ -284,22 +281,21 @@ final class FilesAdapter extends StableAdapter<FileListItem>
             return true;
         }
 
-        private Typeface getIcon(
-                final File file,
-                final AssetManager assets)
+        private int iconTextId(final File file)
         {
-            final Stat stat = file.stat();
+            final Stat stat = file.targetStat();
             if (stat == null)
             {
-                return getDefaultFileIcon(assets);
+                return defaultFileIconStringId();
             }
-            if (stat.isDirectory() || file.targetStat().isDirectory())
+
+            if (stat.isDirectory())
             {
-                return getDirectoryIcon(assets, file.resource());
+                return directoryIconStringId(file.resource());
             }
             else
             {
-                return getIconForFileMediaType(assets, file.basicMediaType());
+                return fileIconStringId(file.basicMediaType());
             }
         }
 

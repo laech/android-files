@@ -50,11 +50,21 @@
         <item quantity="other"><![CDATA[<b>%1$s</b> already has %3$s items with the same names (such as <b>%2$s</b>)]]></item>
     </plurals>
 
-    <!--
-      The character of all icon fonts in assets folder,
-      created at http://icomoon.io/app/ with the "IcoMoon - Free" icon set
-     -->
-    <string name="ic_font_char">0</string>
+    <!-- See http://icomoon.io/app/ with the "IcoMoon - Free" icon set -->
+    <string name="ic_dir">\ue92f</string>
+    <string name="ic_dir_device">\ue963</string>
+    <string name="ic_dir_home">\ue900</string>
+    <string name="ic_dir_download">\ue933</string>
+    <string name="ic_dir_video">\ue914</string>
+    <string name="ic_dir_music">\ue911</string>
+    <string name="ic_dir_image">\ue90e</string>
+    <string name="ic_file">\ue924</string>
+    <string name="ic_file_archive">\ue92b</string>
+    <string name="ic_file_music">\ue928</string>
+    <string name="ic_file_image">\ue927</string>
+    <string name="ic_file_pdf">\ueada</string>
+    <string name="ic_file_text">\ue926</string>
+    <string name="ic_file_video">\ue92a</string>
 
     <string name="failed_to_get_file_info">Failed to get file information</string>
 

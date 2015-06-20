@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:minHeight="72dp"
-    android:orientation="horizontal"
     android:padding="16dp">
 
     <RelativeLayout
@@ -14,13 +13,12 @@
 
         <TextView
             android:id="@+id/icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="13dp"
             android:layout_marginStart="3dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
-            android:text="@string/ic_font_char"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"/>
 
@@ -30,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginStart="14dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             android:text="➥"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"/>
@@ -41,6 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="56dp"
         android:orientation="vertical">
 
         <TextView
@@ -71,4 +70,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

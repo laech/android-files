@@ -13,12 +13,12 @@ import java.util.Objects;
 
 import l.files.fs.Resource;
 import l.files.ui.FileLabels;
+import l.files.ui.Icons;
 
 import static android.R.id.icon;
 import static android.R.id.title;
 import static l.files.R.layout.files_activity_title;
 import static l.files.R.layout.files_activity_title_item;
-import static l.files.ui.IconFonts.getDirectoryIcon;
 
 final class HierarchyAdapter extends BaseAdapter
 {
@@ -104,7 +104,8 @@ final class HierarchyAdapter extends BaseAdapter
 
         final AssetManager assets = parent.getContext().getAssets();
         final TextView iconView = (TextView) view.findViewById(icon);
-        iconView.setTypeface(getDirectoryIcon(assets, res));
+        iconView.setText(Icons.directoryIconStringId(res));
+        iconView.setTypeface(Icons.font(assets));
         iconView.setEnabled(enabled);
 
         final TextView titleView = (TextView) view.findViewById(title);

@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="18dp"
-        android:text="@string/ic_font_char"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="20sp"/>
 
