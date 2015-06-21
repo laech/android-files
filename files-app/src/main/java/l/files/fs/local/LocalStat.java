@@ -32,7 +32,7 @@ abstract class LocalStat implements Stat
     private Instant mtime;
     private Set<Permission> permissions;
 
-    abstract l.files.fs.local.Stat stat();
+    public abstract l.files.fs.local.Stat stat();
 
     static LocalStat create(final l.files.fs.local.Stat stat)
     {

@@ -80,7 +80,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_shows_full_time_for_future_file() throws Exception
     {
         final Resource file = directory().resolve("file").createFile();
-        final long future = currentTimeMillis() + 1000;
+        final long future = currentTimeMillis() + 100000;
         file.setModified(NOFOLLOW, Instant.ofMillis(future));
 
         final String date = getDateTimeInstance(MEDIUM, MEDIUM)

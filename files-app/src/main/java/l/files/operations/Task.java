@@ -36,7 +36,12 @@ abstract class Task {
 
     private volatile TaskState state;
 
-    Task(TaskId id, Target target, Clock clock, EventBus bus, Handler handler) {
+    public Task(
+            final TaskId id,
+            final Target target,
+            final Clock clock,
+            final EventBus bus,
+            final Handler handler) {
         this.id = requireNonNull(id, "id");
         this.target = requireNonNull(target, "target");
         this.clock = requireNonNull(clock, "clock");
@@ -44,14 +49,14 @@ abstract class Task {
         this.handler = requireNonNull(handler, "handler");
     }
 
-    Future<?> execute(ExecutorService executor) {
+    public Future<?> execute(final ExecutorService executor) {
         onPending();
         return executor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
                     onRunning();
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     throwToMainThread(e);
                     throw e;
                 } finally {
@@ -87,13 +92,13 @@ abstract class Task {
             handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
             doTask();
             state = ((TaskState.Running) state).success(clock.read());
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // Cancelled, let it finish
             // Use success as the state, may add a cancel state in future if needed
             state = ((TaskState.Running) state).success(clock.read());
-        } catch (FileException e) {
+        } catch (final FileException e) {
             state = ((TaskState.Running) state).failed(clock.read(), e.failures());
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             state = ((TaskState.Running) state).failed(clock.read(), Collections.<Failure>emptyList());
             throw e;
         }
@@ -108,7 +113,7 @@ abstract class Task {
 
     protected abstract TaskState.Running running(TaskState.Running state);
 
-    final void notifyProgress(TaskState state) {
+    final void notifyProgress(final TaskState state) {
         bus.post(state);
     }
 

@@ -110,7 +110,7 @@ public abstract class LocalResource extends Native implements Resource
         return unmodifiableMap(bits);
     }
 
-    static Set<Permission> permissionsFromMode(final int mode)
+    public static Set<Permission> permissionsFromMode(final int mode)
     {
         final Set<Permission> permissions = new HashSet<>();
         if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);

@@ -2,15 +2,24 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
+
+    signingConfigs {
+        release {
+            keyAlias 'files'
+            storeFile file('/Users/l/Downloads/files.keystore')
+//            storePassword System.console().readLine("\nKeystore password: ")
+//            keyPassword System.console().readLine("\nKey password: ")
+        }
+    }
+
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
-
     defaultConfig {
         applicationId 'l.files'
         minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
-        versionName '1.0'
+        versionName '1.0 beta'
         ndk {
             moduleName 'files'
             ldLibs 'log'
@@ -26,12 +35,24 @@ android {
         abortOnError false
     }
 
-//    buildTypes {
-//        debug {
-//            testCoverageEnabled = true
-//        }
-//    }
-
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix '.debug'
+            minifyEnabled true
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+            proguardFile 'proguard-rules.pro'
+            testProguardFile getDefaultProguardFile('proguard-android.txt')
+            testProguardFile 'proguard-rules.pro'
+            testProguardFile 'proguard-rules-test.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+            proguardFile 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
     // Remove files from third party jars that causes 'duplicate files' build issues
     packagingOptions {
         exclude 'META-INF/services/javax.annotation.processing.Processor'

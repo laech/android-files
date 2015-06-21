@@ -19,7 +19,18 @@ public final class Logger
 
     private Logger(final String tag)
     {
-        this.tag = "blah-" + tag;
+        this.tag = trim(tag);
+    }
+
+    private String trim(final String tag)
+    {
+        // Log.isLoggable has 23 characters limit
+        String trimmed = "blah-" + tag;
+        if (trimmed.length() > 23)
+        {
+            trimmed = trimmed.substring(0, 23);
+        }
+        return trimmed;
     }
 
     public static Logger get(final Class<?> target)

@@ -131,9 +131,9 @@ public enum FileSort
         return res.getString(labelId);
     }
 
-    abstract Comparator<File> comparator();
+    public abstract Comparator<File> comparator();
 
-    abstract Categorizer categorizer();
+    public abstract Categorizer categorizer();
 
     public List<FileListItem> sort(
             final List<File> items,
