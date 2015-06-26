@@ -17,6 +17,11 @@ public enum Permission
     OTHERS_WRITE,
     OTHERS_EXECUTE;
 
+    public static Set<Permission> all()
+    {
+        return EnumSet.allOf(Permission.class);
+    }
+
     public static Set<Permission> none()
     {
         return emptySet();

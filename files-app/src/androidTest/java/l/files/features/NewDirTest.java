@@ -13,7 +13,7 @@ public final class NewDirTest extends BaseFilesActivityTest
     public void test_shows_error_message_when_failed_to_create()
             throws Exception
     {
-        directory().removePermissions(Permission.write());
+        dir().removePermissions(Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -26,7 +26,7 @@ public final class NewDirTest extends BaseFilesActivityTest
                 .newFolder()
                 .setFilename("a")
                 .ok()
-                .click(directory().resolve("a"));
+                .click(dir().resolve("a"));
     }
 
     public void test_name_field_has_initial_name_suggestion()
@@ -39,8 +39,8 @@ public final class NewDirTest extends BaseFilesActivityTest
     public void test_name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception
     {
-        directory().resolve(string(R.string.untitled_dir)).createFile();
-        directory().resolve(string(R.string.untitled_dir) + " " + 2).createFile();
+        dir().resolve(string(R.string.untitled_dir)).createFile();
+        dir().resolve(string(R.string.untitled_dir) + " " + 2).createFile();
 
         screen()
                 .newFolder()
@@ -50,7 +50,7 @@ public final class NewDirTest extends BaseFilesActivityTest
     public void test_can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception
     {
-        directory().resolve("a").createFile();
+        dir().resolve("a").createFile();
         screen()
                 .newFolder()
                 .setFilename("a")

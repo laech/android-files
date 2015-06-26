@@ -17,7 +17,7 @@ public final class SortTest extends BaseFilesActivityTest
 {
     public void test_updates_list_on_sort_option_change_on_back() throws Exception
     {
-        final Resource a = directory().resolve("a").createDirectory();
+        final Resource a = dir().resolve("a").createDirectory();
         final Resource aa = createFile("aa", "aa", Instant.of(1, 1), a);
         final Resource ab = createFile("ab", "ab", Instant.of(2, 1), a);
         final Resource b = createFile("b", "b", Instant.of(1, 1));
@@ -47,7 +47,7 @@ public final class SortTest extends BaseFilesActivityTest
             final String content,
             final Instant modified) throws IOException
     {
-        return createFile(name, content, modified, directory());
+        return createFile(name, content, modified, dir());
     }
 
     private Resource createFile(

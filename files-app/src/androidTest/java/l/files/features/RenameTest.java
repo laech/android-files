@@ -16,8 +16,8 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_shows_error_when_failed_to_rename() throws Exception
     {
-        final Resource file = directory().resolve("a").createFile();
-        directory().removePermissions(Permission.write());
+        final Resource file = dir().resolve("a").createFile();
+        dir().removePermissions(Permission.write());
         rename(file)
                 .setFilename("abc")
                 .okExpectingFailure("Permission denied");
@@ -25,8 +25,8 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_renames_file_to_specified_name() throws Throwable
     {
-        final Resource from = directory().resolve("a").createFile();
-        final Resource to = directory().resolve("abc");
+        final Resource from = dir().resolve("a").createFile();
+        final Resource to = dir().resolve("abc");
 
         rename(from).setFilename(to.name()).ok();
 
@@ -43,28 +43,28 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_highlights_file_base_name_in_dialog() throws Exception
     {
-        final Resource file = directory().resolve("abc.txt").createFile();
+        final Resource file = dir().resolve("abc.txt").createFile();
         rename(file).assertSelection("abc");
     }
 
     public void test_uses_filename_as_default_text() throws Exception
     {
-        final Resource file = directory().resolve("a").createFile();
+        final Resource file = dir().resolve("a").createFile();
         rename(file).assertFilename(file.name());
     }
 
     public void test_disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
             throws Exception
     {
-        rename(directory().resolve("a").createDirectory())
+        rename(dir().resolve("a").createDirectory())
                 .assertOkButtonEnabled(false)
                 .assertHasNoError();
     }
 
     public void test_cannot_rename_if_new_name_exists() throws Exception
     {
-        directory().resolve("abc").createFile();
-        rename(directory().resolve("a").createFile())
+        dir().resolve("abc").createFile();
+        rename(dir().resolve("a").createFile())
 
                 .setFilename("abc")
                 .assertOkButtonEnabled(false)
@@ -78,8 +78,8 @@ public final class RenameTest extends BaseFilesActivityTest
     public void test_rename_button_is_disable_if_there_are_more_than_one_file_checked()
             throws Exception
     {
-        final Resource f1 = directory().resolve("dir").createDirectory();
-        final Resource f2 = directory().resolve("a").createFile();
+        final Resource f1 = dir().resolve("dir").createDirectory();
+        final Resource f2 = dir().resolve("a").createFile();
 
         screen()
                 .toggleSelection(f1)

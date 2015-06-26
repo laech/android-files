@@ -7,8 +7,8 @@ public final class BookmarksTest extends BaseFilesActivityTest
 {
     public void test_click_on_bookmark_opens_directory() throws Exception
     {
-        final Resource a = directory().resolve("a").createDirectory();
-        final Resource b = directory().resolve("b").createDirectory();
+        final Resource a = dir().resolve("a").createDirectory();
+        final Resource b = dir().resolve("b").createDirectory();
         screen()
                 .click(a)
                 .assertCurrentDirectory(a)
@@ -28,7 +28,7 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_bookmarks_sidebar_locked_on_bookmarks_action_mode() throws Exception
     {
-        final Resource a = directory().resolve("a").createDirectory();
+        final Resource a = dir().resolve("a").createDirectory();
 
         screen()
                 .click(a)
@@ -41,9 +41,9 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_delete_bookmarks_from_sidebar() throws Exception
     {
-        final Resource a = directory().resolve("a").createDirectory();
-        final Resource b = directory().resolve("b").createDirectory();
-        final Resource c = directory().resolve("c").createDirectory();
+        final Resource a = dir().resolve("a").createDirectory();
+        final Resource b = dir().resolve("b").createDirectory();
+        final Resource c = dir().resolve("c").createDirectory();
 
         screen()
 
@@ -68,7 +68,7 @@ public final class BookmarksTest extends BaseFilesActivityTest
     public void test_bookmark_appears_in_sidebar() throws Exception
     {
         screen()
-                .click(directory().resolve("a").createDirectory())
+                .click(dir().resolve("a").createDirectory())
                 .bookmark()
                 .openBookmarksDrawer()
                 .assertCurrentDirectoryBookmarked(true)
@@ -80,9 +80,9 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_bookmarks_are_sorted_by_name() throws Exception
     {
-        final Resource b = directory().resolve("b").createDirectory();
-        final Resource a = directory().resolve("a").createDirectory();
-        final Resource c = directory().resolve("c").createDirectory();
+        final Resource b = dir().resolve("b").createDirectory();
+        final Resource a = dir().resolve("a").createDirectory();
+        final Resource c = dir().resolve("c").createDirectory();
         screen()
                 .click(a).bookmark().pressBack()
                 .click(c).bookmark().pressBack()

@@ -42,7 +42,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_can_navigate_through_title_list_drop_down()
             throws Exception
     {
-        final Resource parent = directory().parent();
+        final Resource parent = dir().parent();
         screen()
                 .selectFromNavigationMode(parent)
                 .assertNavigationModeHierarchy(parent);
@@ -51,19 +51,19 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_updates_navigation_list_when_going_into_a_new_dir()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
         screen().click(dir).assertNavigationModeHierarchy(dir);
     }
 
     public void test_shows_initial_navigation_list() throws Exception
     {
-        screen().assertNavigationModeHierarchy(directory());
+        screen().assertNavigationModeHierarchy(dir());
     }
 
     public void test_shows_size_only_if_unable_to_determine_modified_date()
             throws Exception
     {
-        final Resource file = directory().resolve("file").createFile();
+        final Resource file = dir().resolve("file").createFile();
         file.setModified(NOFOLLOW, EPOCH);
 
         final long size = file.stat(NOFOLLOW).size();
@@ -82,7 +82,7 @@ public final class NavigationTest extends BaseFilesActivityTest
 
     public void test_shows_full_time_for_future_file() throws Exception
     {
-        final Resource file = directory().resolve("file").createFile();
+        final Resource file = dir().resolve("file").createFile();
         final long future = currentTimeMillis() + 100000;
         file.setModified(NOFOLLOW, Instant.ofMillis(future));
 
@@ -103,7 +103,7 @@ public final class NavigationTest extends BaseFilesActivityTest
 
     public void test_shows_time_and_size_for_file() throws Exception
     {
-        final Resource file = directory().resolve("file").createFile();
+        final Resource file = dir().resolve("file").createFile();
         file.writeString(NOFOLLOW, UTF_8, file.path());
 
         final Context c = getActivity();
@@ -154,7 +154,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             final String expected,
             final long modifiedAt) throws Exception
     {
-        final Resource d = directory().resolve("dir").createDirectory();
+        final Resource d = dir().resolve("dir").createDirectory();
         d.setModified(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
         screen().assertSummaryView(d, new Consumer<CharSequence>()
         {
@@ -169,15 +169,15 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_directory_view_is_disabled_if_no_read_permission()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
         dir.removePermissions(Permission.read());
         screen().assertDisabled(dir);
     }
 
     public void test_link_icon_displayed() throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
-        final Resource link = directory().resolve("link").createLink(dir);
+        final Resource dir = dir().resolve("dir").createDirectory();
+        final Resource link = dir().resolve("link").createLink(dir);
 
         screen()
                 .assertSymbolicLinkIconDisplayed(dir, false)
@@ -186,10 +186,10 @@ public final class NavigationTest extends BaseFilesActivityTest
 
     public void test_can_navigate_into_linked_directory() throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
         dir.resolve("a").createDirectory();
 
-        final Resource link = directory().resolve("link").createLink(dir);
+        final Resource link = dir().resolve("link").createLink(dir);
         final Resource linkChild = link.resolve("a");
         screen()
                 .click(link)
@@ -199,8 +199,8 @@ public final class NavigationTest extends BaseFilesActivityTest
 
     public void test_can_see_changes_in_linked_directory() throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
-        final Resource link = directory().resolve("link").createLink(dir);
+        final Resource dir = dir().resolve("dir").createDirectory();
+        final Resource link = dir().resolve("link").createLink(dir);
         screen().click(link)
                 .assertCurrentDirectory(link);
 
@@ -212,7 +212,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_press_action_bar_up_indicator_will_go_back()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
         screen()
                 .click(dir)
                 .assertCurrentDirectory(dir)
@@ -224,7 +224,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(directory().resolve("a").createDirectory())
+                .click(dir().resolve("a").createDirectory())
                 .assertActionBarTitle("a");
     }
 
@@ -237,7 +237,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(directory().resolve("dir").createDirectory())
+                .click(dir().resolve("dir").createDirectory())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
@@ -245,7 +245,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(directory().resolve("dir").createDirectory())
+                .click(dir().resolve("dir").createDirectory())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
@@ -253,17 +253,17 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_long_press_back_will_clear_back_stack() throws Exception
     {
         screen()
-                .click(directory().resolve("a").createDirectory())
-                .click(directory().resolve("a/b").createDirectory())
-                .click(directory().resolve("a/b/c").createDirectory())
+                .click(dir().resolve("a").createDirectory())
+                .click(dir().resolve("a/b").createDirectory())
+                .click(dir().resolve("a/b/c").createDirectory())
                 .longPressBack()
-                .assertCurrentDirectory(directory());
+                .assertCurrentDirectory(dir());
     }
 
     public void test_open_new_directory_will_close_opened_drawer()
             throws Exception
     {
-        final Resource dir = directory().resolve("a").createDirectory();
+        final Resource dir = dir().resolve("a").createDirectory();
         screen()
                 .openBookmarksDrawer()
                 .activityObject()
@@ -274,14 +274,14 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_observes_on_current_directory_and_shows_newly_added_files()
             throws Exception
     {
-        final Resource dir = directory().resolve("a").createDirectory();
+        final Resource dir = dir().resolve("a").createDirectory();
         screen().assertListViewContains(dir, true);
     }
 
     public void test_observes_on_current_directory_and_hides_deleted_files()
             throws Exception
     {
-        final Resource file = directory().resolve("a").createFile();
+        final Resource file = dir().resolve("a").createFile();
         screen().assertListViewContains(file, true);
         file.delete();
         screen().assertListViewContains(file, false);
@@ -290,13 +290,13 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_updates_view_on_child_directory_modified()
             throws Exception
     {
-        final Resource dir = directory().resolve("a").createDirectory();
+        final Resource dir = dir().resolve("a").createDirectory();
         testUpdatesDateViewOnChildModified(dir);
     }
 
     public void test_updates_view_on_child_file_modified() throws Exception
     {
-        final Resource file = directory().resolve("a").createFile();
+        final Resource file = dir().resolve("a").createFile();
         testUpdatesDateViewOnChildModified(file);
         testUpdatesSizeViewOnChildModified(file);
     }

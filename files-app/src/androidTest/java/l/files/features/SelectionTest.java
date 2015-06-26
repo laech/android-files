@@ -8,9 +8,9 @@ public final class SelectionTest extends BaseFilesActivityTest
 
     public void test_selects_all() throws Exception
     {
-        final Resource a = directory().resolve("a").createFile();
-        final Resource b = directory().resolve("b").createFile();
-        final Resource c = directory().resolve("c").createDirectory();
+        final Resource a = dir().resolve("a").createFile();
+        final Resource b = dir().resolve("b").createFile();
+        final Resource c = dir().resolve("c").createDirectory();
 
         screen()
                 .toggleSelection(a)
@@ -22,7 +22,7 @@ public final class SelectionTest extends BaseFilesActivityTest
 
     public void test_finishes_action_mode_on_no_selection() throws Throwable
     {
-        final Resource a = directory().resolve("a").createFile();
+        final Resource a = dir().resolve("a").createFile();
         screen()
                 .toggleSelection(a)
                 .assertActionModePresent(true)

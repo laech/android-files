@@ -18,8 +18,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
 
     public void test_copies_files() throws Exception
     {
-        final Resource a = directory().resolve("a").createFile();
-        final Resource d = directory().resolve("d").createDirectory();
+        final Resource a = dir().resolve("a").createFile();
+        final Resource d = dir().resolve("d").createDirectory();
 
         screen()
                 .toggleSelection(a)
@@ -27,13 +27,13 @@ public final class FileOperationTest extends BaseFilesActivityTest
                 .click(d)
                 .paste();
 
-        assertTrue(waitFor(directory().resolve("d/a"), 5, SECONDS));
+        assertTrue(waitFor(dir().resolve("d/a"), 5, SECONDS));
     }
 
     public void test_copies_empty_directory() throws Exception
     {
-        final Resource c = directory().resolve("c").createDirectory();
-        final Resource d = directory().resolve("d").createDirectory();
+        final Resource c = dir().resolve("c").createDirectory();
+        final Resource d = dir().resolve("d").createDirectory();
 
         screen()
                 .toggleSelection(c)
@@ -41,13 +41,13 @@ public final class FileOperationTest extends BaseFilesActivityTest
                 .click(d)
                 .paste();
 
-        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
     }
 
     public void test_copies_full_directory() throws Exception
     {
-        final Resource d = directory().resolve("d").createDirectory();
-        final Resource c = directory().resolve("c").createDirectory();
+        final Resource d = dir().resolve("d").createDirectory();
+        final Resource c = dir().resolve("c").createDirectory();
         c.resolve("a").createFile();
         c.resolve("b").createDirectory();
         c.resolve("c").createLink(c.resolve("a"));
@@ -58,13 +58,13 @@ public final class FileOperationTest extends BaseFilesActivityTest
                 .click(d)
                 .paste();
 
-        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
     }
 
     public void test_copies_link() throws Exception
     {
-        final Resource d = directory().resolve("d").createDirectory();
-        final Resource c = directory().resolve("c").createLink(directory());
+        final Resource d = dir().resolve("d").createDirectory();
+        final Resource c = dir().resolve("c").createLink(dir());
 
         screen()
                 .toggleSelection(c)
@@ -72,7 +72,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
                 .click(d)
                 .paste();
 
-        assertTrue(waitFor(directory().resolve("d/c"), 5, SECONDS));
+        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
     }
 
     private boolean waitFor(
@@ -95,7 +95,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
 
         screen()
                 .toggleSelection(dir)
@@ -110,7 +110,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_disabled_if_files_do_not_exist()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir").createDirectory();
+        final Resource dir = dir().resolve("dir").createDirectory();
 
         screen()
                 .toggleSelection(dir)
@@ -125,8 +125,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_enabled_if_some_files_do_not_exist_some_exist()
             throws Exception
     {
-        final Resource dir = directory().resolve("dir1").createDirectory();
-        directory().resolve("dir2").createDirectory();
+        final Resource dir = dir().resolve("dir1").createDirectory();
+        dir().resolve("dir2").createDirectory();
 
         screen()
                 .toggleSelection(dir)
