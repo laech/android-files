@@ -14,7 +14,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-// TODO investigate replacement from testing support lib
 public abstract class StableRecyclerViewAction<R> implements Action<R>
 {
     private final RecyclerView recycler;
@@ -60,7 +59,7 @@ public abstract class StableRecyclerViewAction<R> implements Action<R>
 
         for (int i = 0; i < adapter.getItemCount(); i++)
         {
-            recycler.scrollToPosition(i);
+            recycler.scrollBy(0, 10);
             for (int j = 0; j < recycler.getChildCount(); j++)
             {
                 final View child = recycler.getChildAt(j);

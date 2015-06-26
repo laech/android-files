@@ -8,6 +8,7 @@ import l.files.common.testing.BaseActivityTest;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.ResourceException;
 import l.files.fs.Visitor;
 import l.files.fs.local.LocalResource;
 import l.files.ui.browser.FilesActivity;
@@ -39,7 +40,10 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity>
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        dir.traverse(NOFOLLOW, setAllPermissions(), delete());
+        if (dir.exists(NOFOLLOW))
+        {
+            dir.traverse(NOFOLLOW, setAllPermissions(), delete());
+        }
     }
 
     private Visitor setAllPermissions()
@@ -49,7 +53,13 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity>
             @Override
             public Result accept(final Resource resource) throws IOException
             {
-                resource.setPermissions(Permission.all());
+                try
+                {
+                    resource.setPermissions(Permission.all());
+                }
+                catch (final ResourceException ignored)
+                {
+                }
                 return CONTINUE;
             }
         };
