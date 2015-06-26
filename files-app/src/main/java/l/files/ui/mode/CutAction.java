@@ -6,33 +6,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.R;
-import l.files.common.widget.MultiChoiceModeAction;
+import l.files.common.widget.ActionModeItem;
 import l.files.fs.Resource;
 import l.files.ui.Clipboards;
-import l.files.ui.ListSelection;
+import l.files.ui.selection.Selection;
 
 import static java.util.Objects.requireNonNull;
 
-public final class CutAction extends MultiChoiceModeAction
+public final class CutAction extends ActionModeItem
 {
 
     private final ClipboardManager manager;
-    private final ListSelection<Resource> provider;
+    private final Selection<Resource> selection;
 
-    @SuppressWarnings("unchecked")
     public CutAction(
             final ClipboardManager manager,
-            final ListSelection<? extends Resource> provider)
+            final Selection<Resource> selection)
     {
         super(android.R.id.cut);
         this.manager = requireNonNull(manager, "manager");
-        this.provider = (ListSelection<Resource>)
-                requireNonNull(provider, "provider");
+        this.selection = requireNonNull(selection, "provider");
     }
 
     @Override
     public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
     {
+        super.onCreateActionMode(mode, menu);
         mode.getMenuInflater().inflate(R.menu.cut, menu);
         return true;
     }
@@ -40,7 +39,7 @@ public final class CutAction extends MultiChoiceModeAction
     @Override
     protected void onItemSelected(final ActionMode mode, final MenuItem item)
     {
-        Clipboards.setCut(manager, provider.getCheckedItems());
+        Clipboards.setCut(manager, selection.copy());
         mode.finish();
     }
 }

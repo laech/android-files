@@ -13,6 +13,7 @@ import l.files.common.testing.BaseTest;
 import l.files.eventbus.Events;
 import l.files.fs.local.LocalResource;
 
+import static android.os.Looper.getMainLooper;
 import static com.google.common.util.concurrent.MoreExecutors.newDirectExecutorService;
 import static java.util.Arrays.asList;
 import static l.files.operations.TaskKind.COPY;
@@ -30,7 +31,7 @@ public class TaskTest extends BaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         bus = Events.failFast(new EventBus());
-        handler = new Handler();
+        handler = new Handler(getMainLooper());
     }
 
     public void testNotifiesOnCancel() throws Exception {

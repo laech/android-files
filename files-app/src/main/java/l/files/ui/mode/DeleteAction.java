@@ -9,47 +9,51 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.Collection;
-import java.util.List;
 
 import l.files.R;
-import l.files.common.widget.MultiChoiceModeAction;
+import l.files.common.widget.ActionModeItem;
 import l.files.fs.Resource;
 import l.files.operations.OperationService;
-import l.files.ui.ListSelection;
+import l.files.ui.selection.Selection;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 
-public final class DeleteAction extends MultiChoiceModeAction {
-
+public final class DeleteAction extends ActionModeItem
+{
     private final Context context;
-    private final ListSelection<Resource> supplier;
+    private final Selection<Resource> selection;
 
-    @SuppressWarnings("unchecked")
-    public DeleteAction(Context context, ListSelection<? extends Resource> supplier) {
+    public DeleteAction(final Context context, final Selection<Resource> selection)
+    {
         super(R.id.delete);
         this.context = requireNonNull(context);
-        this.supplier = (ListSelection<Resource>) requireNonNull(supplier);
+        this.selection = requireNonNull(selection);
     }
 
     @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
+    {
+        super.onCreateActionMode(mode, menu);
         menu.add(NONE, id(), NONE, R.string.delete)
                 .setShowAsAction(SHOW_AS_ACTION_NEVER);
         return true;
     }
 
     @Override
-    protected void onItemSelected(final ActionMode mode, MenuItem item) {
-        final List<Resource> resources = supplier.getCheckedItems();
+    protected void onItemSelected(final ActionMode mode, final MenuItem item)
+    {
+        final Collection<Resource> resources = selection.copy();
         new AlertDialog.Builder(context)
                 .setMessage(getConfirmMessage(resources.size()))
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.delete, new OnClickListener() {
+                .setPositiveButton(R.string.delete, new OnClickListener()
+                {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(final DialogInterface dialog, final int which)
+                    {
                         requestDelete(resources);
                         mode.finish();
                     }
@@ -57,16 +61,20 @@ public final class DeleteAction extends MultiChoiceModeAction {
                 .show();
     }
 
-    private void requestDelete(final Collection<? extends Resource> resources) {
-        AsyncTask.execute(new Runnable() {
+    private void requestDelete(final Collection<? extends Resource> resources)
+    {
+        AsyncTask.execute(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 OperationService.delete(context, resources);
             }
         });
     }
 
-    private String getConfirmMessage(int size) {
+    private String getConfirmMessage(final int size)
+    {
         return context.getResources().getQuantityString(
                 R.plurals.confirm_delete_question, size, size);
     }

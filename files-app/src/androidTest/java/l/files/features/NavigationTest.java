@@ -36,6 +36,9 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class NavigationTest extends BaseFilesActivityTest
 {
 
+    // TODO test screen rotation retains action mode
+    // TODO exist action mode clears selection
+
     public void test_can_navigate_through_title_list_drop_down()
             throws Exception
     {
@@ -49,7 +52,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         final Resource dir = directory().resolve("dir").createDirectory();
-        screen().selectItem(dir).assertNavigationModeHierarchy(dir);
+        screen().click(dir).assertNavigationModeHierarchy(dir);
     }
 
     public void test_shows_initial_navigation_list() throws Exception
@@ -189,8 +192,8 @@ public final class NavigationTest extends BaseFilesActivityTest
         final Resource link = directory().resolve("link").createLink(dir);
         final Resource linkChild = link.resolve("a");
         screen()
-                .selectItem(link)
-                .selectItem(linkChild)
+                .click(link)
+                .click(linkChild)
                 .assertCurrentDirectory(linkChild);
     }
 
@@ -198,11 +201,11 @@ public final class NavigationTest extends BaseFilesActivityTest
     {
         final Resource dir = directory().resolve("dir").createDirectory();
         final Resource link = directory().resolve("link").createLink(dir);
-        screen().selectItem(link)
+        screen().click(link)
                 .assertCurrentDirectory(link);
 
         final Resource child = link.resolve("child").createDirectory();
-        screen().selectItem(child)
+        screen().click(child)
                 .assertCurrentDirectory(child);
     }
 
@@ -211,7 +214,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     {
         final Resource dir = directory().resolve("dir").createDirectory();
         screen()
-                .selectItem(dir)
+                .click(dir)
                 .assertCurrentDirectory(dir)
                 .pressActionBarUpIndicator()
                 .assertCurrentDirectory(dir.parent());
@@ -221,7 +224,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .selectItem(directory().resolve("a").createDirectory())
+                .click(directory().resolve("a").createDirectory())
                 .assertActionBarTitle("a");
     }
 
@@ -234,7 +237,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .selectItem(directory().resolve("dir").createDirectory())
+                .click(directory().resolve("dir").createDirectory())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
@@ -242,7 +245,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .selectItem(directory().resolve("dir").createDirectory())
+                .click(directory().resolve("dir").createDirectory())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
@@ -250,9 +253,9 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_long_press_back_will_clear_back_stack() throws Exception
     {
         screen()
-                .selectItem(directory().resolve("a").createDirectory())
-                .selectItem(directory().resolve("a/b").createDirectory())
-                .selectItem(directory().resolve("a/b/c").createDirectory())
+                .click(directory().resolve("a").createDirectory())
+                .click(directory().resolve("a/b").createDirectory())
+                .click(directory().resolve("a/b/c").createDirectory())
                 .longPressBack()
                 .assertCurrentDirectory(directory());
     }
@@ -263,8 +266,8 @@ public final class NavigationTest extends BaseFilesActivityTest
         final Resource dir = directory().resolve("a").createDirectory();
         screen()
                 .openBookmarksDrawer()
-                .getActivityObject()
-                .selectItem(dir)
+                .activityObject()
+                .click(dir)
                 .assertDrawerIsOpened(false);
     }
 

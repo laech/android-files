@@ -3,30 +3,50 @@ package l.files.ui.mode;
 import android.view.ActionMode;
 import android.view.Menu;
 
-import l.files.common.widget.MultiChoiceModeListenerAdapter;
-import l.files.ui.ListSelection;
+import l.files.common.widget.ActionModeAdapter;
+import l.files.ui.selection.Selection;
 
 import static java.util.Objects.requireNonNull;
 
-public final class CountSelectedItemsAction extends MultiChoiceModeListenerAdapter {
+public final class CountSelectedItemsAction
+        extends ActionModeAdapter
+        implements Selection.Callback
+{
 
-  private final ListSelection<?> selection;
+    private final Selection<?> selection;
 
-  public CountSelectedItemsAction(ListSelection<?> selection) {
-    this.selection = requireNonNull(selection);
-  }
+    public CountSelectedItemsAction(final Selection<?> selection)
+    {
+        this.selection = requireNonNull(selection, "selector");
+    }
 
-  @Override public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    updateSelectedItemCount(mode);
-    return true;
-  }
+    @Override
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
+    {
+        super.onCreateActionMode(mode, menu);
+        updateSelectedItemCount();
+        this.selection.addWeaklyReferencedCallback(this);
+        return true;
+    }
 
-  @Override public void onItemCheckedStateChanged(
-      ActionMode mode, int position, long id, boolean checked) {
-    updateSelectedItemCount(mode);
-  }
+    @Override
+    public void onDestroyActionMode(final ActionMode mode)
+    {
+        super.onDestroyActionMode(mode);
+        this.selection.removeCallback(this);
+    }
 
-  private void updateSelectedItemCount(ActionMode mode) {
-    mode.setTitle(Integer.toString(selection.getCheckedItemCount()));
-  }
+    @Override
+    public void onSelectionChanged()
+    {
+        updateSelectedItemCount();
+    }
+
+    private void updateSelectedItemCount()
+    {
+        if (mode != null)
+        {
+            mode.setTitle(Integer.toString(selection.size()));
+        }
+    }
 }

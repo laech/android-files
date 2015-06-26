@@ -7,11 +7,9 @@ import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -24,6 +22,8 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.base.Consumer;
+import l.files.features.objects.action.Action;
+import l.files.features.objects.action.StableRecyclerViewAction;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalResource;
@@ -40,7 +40,6 @@ import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.features.objects.Instrumentations.await;
@@ -62,6 +61,18 @@ public final class UiFileActivity
         this.activity = activity;
     }
 
+    private FilesFragment fragment()
+    {
+        return (FilesFragment) activity
+                .getFragmentManager()
+                .findFragmentByTag(FilesFragment.TAG);
+    }
+
+    private Action<Boolean> clicker()
+    {
+        return StableRecyclerViewAction.willClick(fragment().recycler);
+    }
+
     public UiFileActivity bookmark()
     {
         assertBookmarkMenuChecked(false);
@@ -76,20 +87,14 @@ public final class UiFileActivity
         return this;
     }
 
-    public UiFileActivity check(final File file, final boolean checked)
-    {
-        return check(LocalResource.create(file), checked);
-    }
-
-    public UiFileActivity check(final Resource resource, final boolean checked)
+    public UiFileActivity toggleSelection(final Resource resource)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
             @Override
             public void run()
             {
-                listView().setItemChecked(
-                        findItemPositionOrThrow(resource), checked);
+                fragment().selection().toggle(resource);
             }
         });
         return this;
@@ -140,29 +145,27 @@ public final class UiFileActivity
         return this;
     }
 
-    public UiFileActivity selectItem(final Resource resource)
-    {
-        return selectItem(new File(resource.uri()));
-    }
-
-    public UiFileActivity selectItem(final File file)
+    public UiFileActivity click(final Resource resource)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
             @Override
             public void run()
             {
-                final ListView list = listView();
-                final int position = findItemPositionOrThrow(file.getName());
-                final int firstVisiblePosition = list.getFirstVisiblePosition();
-                final int viewPosition = position - firstVisiblePosition;
-                final View view = list.getChildAt(viewPosition);
-                assertTrue(list.performItemClick(view, viewPosition, position));
+                clicker().action(resource);
             }
         });
-        if (file.isDirectory())
+
+        try
         {
-            assertCurrentDirectory(file);
+            if (resource.stat(NOFOLLOW).isDirectory())
+            {
+                assertCurrentDirectory(resource);
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
         }
         return this;
     }
@@ -295,6 +298,7 @@ public final class UiFileActivity
         return this;
     }
 
+    @Deprecated
     public UiFileActivity assertCurrentDirectory(final File dir)
     {
         return assertCurrentDirectory(LocalResource.create(dir));
@@ -309,9 +313,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertEquals(
-                        contains,
-                        findItemPosition(item).isPresent());
+                assertEquals(contains, resources().contains(item));
             }
         });
         return this;
@@ -391,29 +393,14 @@ public final class UiFileActivity
 
     private View view(final Resource resource)
     {
-        final View view = view(resource.name().toString());
-        assertNotNull(view);
-        return view;
-    }
-
-    private View view(final String name)
-    {
-        final ListView list = listView();
-        final int index = findItemPositionOrThrow(name);
-        return list.getChildAt(index - list.getFirstVisiblePosition());
-    }
-
-    private ListView listView()
-    {
-        return (ListView) activity
-                .fragment()
-                .getView()
-                .findViewById(android.R.id.list);
+        return StableRecyclerViewAction
+                .willReturnView(fragment().recycler)
+                .action(resource);
     }
 
     private MenuItem renameMenu()
     {
-        return activity.getCurrentActionMode().getMenu().findItem(R.id.rename);
+        return activity.currentActionMode().getMenu().findItem(R.id.rename);
     }
 
     private MenuItem pasteMenu()
@@ -440,7 +427,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                final ActionMode mode = activity.getCurrentActionMode();
+                final ActionMode mode = activity.currentActionMode();
                 final MenuItem item = mode.getMenu().findItem(id);
                 assertTrue(activity
                         .getCurrentActionModeCallback()
@@ -456,47 +443,9 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertNull(activity.getCurrentActionMode());
+                assertNull(activity.currentActionMode());
             }
         });
-    }
-
-    private int findItemPositionOrThrow(final Resource resource)
-    {
-        return findItemPositionOrThrow(resource.name().toString());
-    }
-
-    private int findItemPositionOrThrow(final String filename)
-    {
-        final Optional<Integer> position = findItemPosition(filename);
-        if (position.isPresent())
-        {
-            return position.get();
-        }
-        throw new AssertionError("No file with name: " + filename);
-    }
-
-    private Optional<Integer> findItemPosition(final Resource resource)
-    {
-        return findItemPosition(resource.name().toString());
-    }
-
-    private Optional<Integer> findItemPosition(final String filename)
-    {
-        final int count = listView().getCount();
-        for (int i = 0; i < count; i++)
-        {
-            final FileListItem item = (FileListItem)
-                    listView().getItemAtPosition(i);
-
-            if (item.isFile() &&
-                    ((FileListItem.File) item).resource().name().toString()
-                            .equals(filename))
-            {
-                return Optional.of(i);
-            }
-        }
-        return Optional.absent();
     }
 
     /**
@@ -512,15 +461,14 @@ public final class UiFileActivity
      * Asserts whether the given item is currently checked.
      */
     public UiFileActivity assertChecked(
-            final File file, final boolean checked)
+            final Resource resource, final boolean checked)
     {
         awaitOnMainThread(instrument, new Runnable()
         {
             @Override
             public void run()
             {
-                final int position = findItemPositionOrThrow(file.getName());
-                assertEquals(checked, listView().isItemChecked(position));
+                assertEquals(checked, fragment().selection().contains(resource));
             }
         });
         return this;
@@ -536,7 +484,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertEquals(present, activity.getCurrentActionMode() != null);
+                assertEquals(present, activity.currentActionMode() != null);
             }
         });
         return this;
@@ -595,6 +543,20 @@ public final class UiFileActivity
         });
         return this;
     }
+
+    public UiFileActivity assertBookmarksSidebarIsClosed()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                assertEquals(false, activity.getDrawerLayout().isDrawerOpen(START));
+            }
+        });
+        return this;
+    }
+
 
     public UiFileActivity assertDisabled(final Resource resource)
     {
@@ -694,7 +656,7 @@ public final class UiFileActivity
 
     private List<Pair<Resource, Stat>> listViewStatsSortedByPath()
     {
-        final List<FileListItem.File> items = sortFilesByPath(listViewItems());
+        final List<FileListItem.File> items = sortFilesByPath(fileItems());
         return stats(items);
     }
 
@@ -724,19 +686,29 @@ public final class UiFileActivity
         return items;
     }
 
-    private List<FileListItem.File> listViewItems()
+    private List<FileListItem.File> fileItems()
     {
-        final ListView view = listView();
-        final List<FileListItem.File> items = new ArrayList<>(view.getCount());
-        for (int i = 0; i < view.getCount(); i++)
+        final List<FileListItem> items = fragment().items();
+        final List<FileListItem.File> files = new ArrayList<>(items.size());
+        for (final FileListItem item : items)
         {
-            final FileListItem item = (FileListItem) view.getItemAtPosition(i);
             if (item.isFile())
             {
-                items.add(((FileListItem.File) item));
+                files.add(((FileListItem.File) item));
             }
         }
-        return items;
+        return files;
+    }
+
+    private List<Resource> resources()
+    {
+        final List<FileListItem.File> items = fileItems();
+        final List<Resource> resources = new ArrayList<>(items.size());
+        for (final FileListItem.File item : items)
+        {
+            resources.add(item.resource());
+        }
+        return resources;
     }
 
     public UiFileActivity assertItemsDisplayed(
@@ -748,7 +720,7 @@ public final class UiFileActivity
             public void run()
             {
                 final List<Resource> actual = new ArrayList<>();
-                for (final FileListItem.File item : listViewItems())
+                for (final FileListItem.File item : fileItems())
                 {
                     actual.add(item.resource());
                 }
@@ -757,4 +729,5 @@ public final class UiFileActivity
         });
         return this;
     }
+
 }

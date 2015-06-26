@@ -1,55 +1,67 @@
 package l.files.ui;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
-public abstract class StableAdapter<T> extends BaseAdapter {
+public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH>
+{
+    private final Map<Object, Long> ids = new HashMap<>();
 
-  private static final Map<Object, Long> ids = new HashMap<>();
+    private List<T> items = emptyList();
 
-  private List<T> items = emptyList();
-
-  @SuppressWarnings("unchecked")
-  public void setItems(List<? extends T> items) {
-    this.items = (List<T>) requireNonNull(items);
-    notifyDataSetChanged();
-  }
-
-  @Override public boolean hasStableIds() {
-    return true;
-  }
-
-  @Override public long getItemId(int position) {
-    Object object = getItemIdObject(position);
-    Long id = ids.get(object);
-    if (id == null) {
-      id = ids.size() + 1L;
-      ids.put(object, id);
+    public StableAdapter()
+    {
+        setHasStableIds(true);
     }
-    return id;
-  }
 
-  protected abstract Object getItemIdObject(int position);
+    @SuppressWarnings("unchecked")
+    public void setItems(final List<? extends T> items)
+    {
+        this.items = (List<T>) requireNonNull(items);
+        notifyDataSetChanged();
+    }
 
-  @Override public T getItem(int position) {
-    return items.get(position);
-  }
+    public List<T> items()
+    {
+        return unmodifiableList(items);
+    }
 
-  @Override public int getCount() {
-    return items.size();
-  }
+    @Override
+    public long getItemId(final int position)
+    {
+        final Object object = getItemIdObject(position);
+        Long id = ids.get(object);
+        if (id == null)
+        {
+            id = ids.size() + 1L;
+            ids.put(object, id);
+        }
+        return id;
+    }
 
-  protected View inflate(int layout, ViewGroup parent) {
-    return LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-  }
+    @Override
+    public int getItemCount()
+    {
+        return items.size();
+    }
 
+    public boolean isEmpty()
+    {
+        return getItemCount() == 0;
+    }
+
+    public T getItem(final int position)
+    {
+        return items.get(position);
+    }
+
+    public abstract Object getItemIdObject(final int position);
 }

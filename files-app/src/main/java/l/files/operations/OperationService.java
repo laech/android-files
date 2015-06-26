@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -117,7 +118,7 @@ public final class OperationService extends Service
         super.onCreate();
         bus = Events.get();
         tasks = new HashMap<>();
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
         bus.register(this);
     }
 

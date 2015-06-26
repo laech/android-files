@@ -22,6 +22,7 @@ import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
+import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.DrawerListeners;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -50,7 +51,7 @@ import static l.files.ui.IOExceptions.message;
 import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity
-        implements OnBackStackChangedListener, OnNavigationListener
+        implements OnBackStackChangedListener, OnNavigationListener, ActionModeProvider
 {
 
     private static final Logger log = Logger.get(FilesActivity.class);
@@ -123,7 +124,7 @@ public final class FilesActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(final int position, final long itemId)
     {
-        onEventMainThread(OpenFileRequest.create(hierarchy.getItem(position)));
+        open(OpenFileRequest.create(hierarchy.getItem(position)));
         return true;
     }
 
@@ -281,7 +282,8 @@ public final class FilesActivity extends BaseActivity
         return actionBarDrawerToggle;
     }
 
-    public ActionMode getCurrentActionMode()
+    @Override
+    public ActionMode currentActionMode()
     {
         return currentActionMode;
     }
@@ -310,6 +312,11 @@ public final class FilesActivity extends BaseActivity
         {
             currentActionMode.finish();
         }
+        open(request);
+    }
+
+    private void open(final OpenFileRequest request)
+    {
         closeDrawerThenRun(new Runnable()
         {
             @Override

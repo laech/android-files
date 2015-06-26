@@ -26,7 +26,7 @@ public final class NewDirTest extends BaseFilesActivityTest
                 .newFolder()
                 .setFilename("a")
                 .ok()
-                .selectItem(directory().resolve("a"));
+                .click(directory().resolve("a"));
     }
 
     public void test_name_field_has_initial_name_suggestion()

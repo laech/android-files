@@ -1,30 +1,32 @@
 package l.files.features;
 
-import java.io.File;
-
+import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
-public final class SelectionTest extends BaseFilesActivityTest {
+public final class SelectionTest extends BaseFilesActivityTest
+{
 
-  public void testSelectsAll() throws Throwable {
-    File a = dir().createFile("a");
-    File b = dir().createFile("b");
-    File c = dir().createDir("c");
+    public void test_selects_all() throws Exception
+    {
+        final Resource a = directory().resolve("a").createFile();
+        final Resource b = directory().resolve("b").createFile();
+        final Resource c = directory().resolve("c").createDirectory();
 
-    screen()
-        .check(a, true)
-        .selectAll()
-        .assertChecked(a, true)
-        .assertChecked(b, true)
-        .assertChecked(c, true);
-  }
+        screen()
+                .toggleSelection(a)
+                .selectAll()
+                .assertChecked(a, true)
+                .assertChecked(b, true)
+                .assertChecked(c, true);
+    }
 
-  public void testFinishesActionModeOnNoSelection() throws Throwable {
-    File a = dir().createFile("a");
-    screen()
-        .check(a, true)
-        .assertActionModePresent(true)
-        .check(a, false)
-        .assertActionModePresent(false);
-  }
+    public void test_finishes_action_mode_on_no_selection() throws Throwable
+    {
+        final Resource a = directory().resolve("a").createFile();
+        screen()
+                .toggleSelection(a)
+                .assertActionModePresent(true)
+                .toggleSelection(a)
+                .assertActionModePresent(false);
+    }
 }

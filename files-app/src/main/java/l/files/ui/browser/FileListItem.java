@@ -135,7 +135,6 @@ public abstract class FileListItem
         }
 
         @Override
-        @SuppressWarnings("NullableProblems")
         public int compareTo(final File another)
         {
             return collationKey().compareTo(another.collationKey());

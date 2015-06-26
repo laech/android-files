@@ -24,7 +24,7 @@ public final class SortTest extends BaseFilesActivityTest
         final Resource c = createFile("c", "c", Instant.of(6, 1));
         screen()
                 .sort().by(NAME).assertItemsDisplayed(a, b, c)
-                .selectItem(a)
+                .click(a)
                 .sort().by(NAME).assertItemsDisplayed(aa, ab)
                 .sort().by(MODIFIED).assertItemsDisplayed(ab, aa)
                 .pressBack().assertItemsDisplayed(a, b, c);
