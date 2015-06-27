@@ -74,7 +74,8 @@ public final class BookmarkManagerImpl implements BookmarkManager
     private final SharedPreferences pref;
     private final Set<BookmarkChangedListener> listeners;
 
-    BookmarkManagerImpl(
+    @VisibleForTesting
+    public BookmarkManagerImpl(
             final ResourceProvider provider,
             final SharedPreferences pref)
     {
@@ -189,7 +190,7 @@ public final class BookmarkManagerImpl implements BookmarkManager
     }
 
     @VisibleForTesting
-    Set<Resource> loadBookmarks()
+    public Set<Resource> loadBookmarks()
     {
         return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
     }
