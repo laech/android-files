@@ -2,93 +2,91 @@ package l.files.provider.bookmarks;
 
 import android.content.SharedPreferences;
 
-import java.io.File;
+import com.google.common.collect.ImmutableSet;
 
-import l.files.common.testing.BaseTest;
 import l.files.fs.DefaultResourceProvider;
 import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.ResourceBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public final class BookmarkManagerTest extends BaseTest {
-
-    private BookmarkManager manager;
+public final class BookmarkManagerTest extends ResourceBaseTest
+{
+    private BookmarkManagerImpl manager;
     private SharedPreferences pref;
 
     @Override
-    protected void setUp() throws Exception {
+    protected void setUp() throws Exception
+    {
         super.setUp();
         pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
         manager = new BookmarkManagerImpl(DefaultResourceProvider.INSTANCE, pref);
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    protected void tearDown() throws Exception
+    {
         assertTrue(pref.edit().clear().commit());
         super.tearDown();
     }
 
-    public void testAddBookmark() throws Exception {
-        Resource p1 = LocalResource.create(new File("/a/b"));
-        Resource p2 = LocalResource.create(new File("/a/c"));
-        manager.addBookmark(p1);
-        manager.addBookmark(p2);
-        assertTrue(manager.getBookmarks().containsAll(asList(p1, p2)));
+    public void test_can_add_bookmarks() throws Exception
+    {
+        final Resource a = dir1().resolve("a").createDirectory();
+        final Resource b = dir2().resolve("b").createDirectory();
+        manager.addBookmark(a);
+        manager.addBookmark(b);
+        assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
     }
 
-    public void testRemoveBookmark() throws Exception {
-        Resource p1 = LocalResource.create(new File("/a/b"));
-        Resource p2 = LocalResource.create(new File("/1"));
-        Resource p3 = LocalResource.create(new File("/x"));
-        manager.addBookmark(p1);
-        manager.addBookmark(p2);
-        manager.addBookmark(p3);
-        manager.removeBookmark(p1);
-        manager.removeBookmark(p3);
-        assertFalse(manager.hasBookmark(p1));
-        assertTrue(manager.hasBookmark(p2));
-        assertFalse(manager.hasBookmark(p3));
+    public void test_can_remove_bookmarks() throws Exception
+    {
+        final Resource a = dir1().resolve("a").createDirectory();
+        final Resource b = dir1().resolve("b").createDirectory();
+        final Resource c = dir1().resolve("c").createDirectory();
+        manager.addBookmark(a);
+        manager.addBookmark(b);
+        manager.addBookmark(c);
+        manager.removeBookmark(a);
+        manager.removeBookmark(c);
+        assertFalse(manager.hasBookmark(a));
+        assertTrue(manager.hasBookmark(b));
+        assertFalse(manager.hasBookmark(c));
     }
 
-    public void testRemoveBookmarks() throws Exception {
-        Resource p1 = LocalResource.create(new File("/a/b"));
-        Resource p2 = LocalResource.create(new File("/1"));
-        Resource p3 = LocalResource.create(new File("/x"));
-        manager.addBookmark(p1);
-        manager.addBookmark(p2);
-        manager.addBookmark(p3);
-        manager.removeBookmarks(asList(p1, p2));
-        assertFalse(manager.hasBookmark(p1));
-        assertFalse(manager.hasBookmark(p2));
-        assertTrue(manager.hasBookmark(p3));
-    }
-
-    public void testHasBookmark() throws Exception {
-        Resource resource = LocalResource.create(new File("/a/b"));
-        assertFalse(manager.hasBookmark(resource));
-        manager.addBookmark(resource);
-        assertTrue(manager.hasBookmark(resource));
-    }
-
-    public void testNotifiesOnBookmarkChanged() throws Exception {
-        BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
+    public void test_notifies_on_bookmark_change() throws Exception
+    {
+        final BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
         manager.registerBookmarkChangedListener(listener);
-        manager.addBookmark(LocalResource.create(new File("a")));
+        manager.addBookmark(dir1());
         verify(listener).onBookmarkChanged(manager);
     }
 
-    public void testRemoveNotificationOnBookmarkChanged() throws Exception {
-        BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
+    public void test_does_not_notify_removed_listener() throws Exception
+    {
+        final BookmarkChangedListener listener = mock(BookmarkChangedListener.class);
         manager.registerBookmarkChangedListener(listener);
         manager.unregisterBookmarkChangedListener(listener);
-        manager.addBookmark(LocalResource.create(new File("a")));
+        manager.addBookmark(dir1());
         verify(listener, never()).onBookmarkChanged(manager);
+    }
+
+    public void test_removes_non_existing_bookmarks() throws Exception
+    {
+        final Resource a = dir1().resolve("a").createDirectory();
+        final Resource b = dir1().resolve("b").createDirectory();
+        manager.addBookmark(a);
+        manager.addBookmark(b);
+        assertEquals(ImmutableSet.of(a, b), manager.loadBookmarks());
+
+        a.delete();
+        assertEquals(singleton(b), manager.loadBookmarks());
     }
 
 }

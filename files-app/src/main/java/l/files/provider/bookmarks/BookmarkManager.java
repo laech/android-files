@@ -5,7 +5,8 @@ import java.util.Set;
 
 import l.files.fs.Resource;
 
-public interface BookmarkManager {
+public interface BookmarkManager
+{
 
     void addBookmark(Resource resource);
 
@@ -29,7 +30,8 @@ public interface BookmarkManager {
      */
     void unregisterBookmarkChangedListener(BookmarkChangedListener listener);
 
-    static interface BookmarkChangedListener {
+    interface BookmarkChangedListener
+    {
         /**
          * Called when bookmarks has been added/removed. This maybe called from
          * different threads, including the main thread.

@@ -6,9 +6,9 @@ import android.content.SharedPreferences;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -29,16 +29,22 @@ import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class BookmarkManagerImpl implements BookmarkManager {
+public final class BookmarkManagerImpl implements BookmarkManager
+{
 
     private static BookmarkManagerImpl instance;
 
-    public static BookmarkManagerImpl get(Context context) {
-        synchronized (BookmarkManagerImpl.class) {
-            if (instance == null) {
-                SharedPreferences pref = getDefaultSharedPreferences(context);
+    public static BookmarkManagerImpl get(final Context context)
+    {
+        synchronized (BookmarkManagerImpl.class)
+        {
+            if (instance == null)
+            {
+                final SharedPreferences pref = getDefaultSharedPreferences(context);
                 instance = new BookmarkManagerImpl(DefaultResourceProvider.INSTANCE, pref);
             }
             return instance;
@@ -58,7 +64,8 @@ public final class BookmarkManagerImpl implements BookmarkManager {
             .add(uri(DIRECTORY_DOWNLOADS))
             .build();
 
-    private static String uri(String name) {
+    private static String uri(final String name)
+    {
         return new File(getExternalStorageDirectory(), name).toURI().toString();
     }
 
@@ -67,22 +74,39 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     private final SharedPreferences pref;
     private final Set<BookmarkChangedListener> listeners;
 
-    @VisibleForTesting
-    public BookmarkManagerImpl(ResourceProvider provider, SharedPreferences pref) {
+    BookmarkManagerImpl(
+            final ResourceProvider provider,
+            final SharedPreferences pref)
+    {
         this.provider = requireNonNull(provider);
         this.pref = requireNonNull(pref);
         this.listeners = new CopyOnWriteArraySet<>();
         this.bookmarks = new CopyOnWriteArraySet<>();
     }
 
-    private Set<Resource> toPaths(Set<String> uriStrings) {
-        Set<Resource> paths = Sets.newHashSetWithExpectedSize(uriStrings.size());
-        for (String uriString : uriStrings) {
-            try {
-                URI uri = new URI(uriString);
-                Resource resource = provider.get(uri);
-                paths.add(resource);
-            } catch (URISyntaxException | IllegalArgumentException e) {
+    private Set<Resource> toPaths(final Set<String> uriStrings)
+    {
+        final Set<Resource> paths = newHashSetWithExpectedSize(uriStrings.size());
+        for (final String uriString : uriStrings)
+        {
+            try
+            {
+                final URI uri = new URI(uriString);
+                final Resource resource = provider.get(uri);
+                try
+                {
+                    if (resource.exists(NOFOLLOW))
+                    {
+                        paths.add(resource);
+                    }
+                }
+                catch (final IOException ignored)
+                {
+                    // Remove bookmarks that no longer exist
+                }
+            }
+            catch (URISyntaxException | IllegalArgumentException e)
+            {
                 logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);
             }
         }
@@ -90,78 +114,98 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     }
 
     @Override
-    public void addBookmark(Resource resource) {
+    public void addBookmark(final Resource resource)
+    {
         requireNonNull(resource, "resource");
-        if (bookmarks.add(resource)) {
+        if (bookmarks.add(resource))
+        {
             saveBookmarksAndNotify();
         }
     }
 
     @Override
-    public void removeBookmark(Resource resource) {
+    public void removeBookmark(final Resource resource)
+    {
         requireNonNull(resource, "resource");
-        if (bookmarks.remove(resource)) {
+        if (bookmarks.remove(resource))
+        {
             saveBookmarksAndNotify();
         }
     }
 
     @Override
-    public void removeBookmarks(Collection<Resource> bookmarks) {
+    public void removeBookmarks(final Collection<Resource> bookmarks)
+    {
         requireNonNull(bookmarks, "bookmarks");
-        if (this.bookmarks.removeAll(bookmarks)) {
+        if (this.bookmarks.removeAll(bookmarks))
+        {
             saveBookmarksAndNotify();
         }
     }
 
-    @VisibleForTesting
-    public boolean clearBookmarksSync() {
-        bookmarks.clear();
-        return pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).commit();
-    }
-
-    private void saveBookmarksAndNotify() {
+    private void saveBookmarksAndNotify()
+    {
         pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).apply();
         notifyListeners();
     }
 
-    private Set<String> toUriStrings(Set<? extends Resource> bookmarks) {
-        return new HashSet<>(transform(bookmarks, new Function<Resource, String>() {
+    private Set<String> toUriStrings(final Set<? extends Resource> bookmarks)
+    {
+        return new HashSet<>(transform(bookmarks, new Function<Resource, String>()
+        {
             @Override
-            public String apply(Resource input) {
+            public String apply(final Resource input)
+            {
                 return input.uri().toString();
             }
         }));
     }
 
-    private void notifyListeners() {
-        for (BookmarkChangedListener listener : listeners) {
+    private void notifyListeners()
+    {
+        for (final BookmarkChangedListener listener : listeners)
+        {
             listener.onBookmarkChanged(this);
         }
     }
 
     @Override
-    public boolean hasBookmark(Resource resource) {
+    public boolean hasBookmark(final Resource resource)
+    {
         return bookmarks.contains(resource);
     }
 
     @Override
-    public Set<Resource> getBookmarks() {
-        synchronized (this) {
-            if (bookmarks.isEmpty()) {
-                bookmarks.addAll(toPaths(pref.getStringSet(PREF_KEY, DEFAULTS)));
+    public Set<Resource> getBookmarks()
+    {
+        synchronized (this)
+        {
+            if (bookmarks.isEmpty())
+            {
+                bookmarks.addAll(loadBookmarks());
             }
         }
         return ImmutableSet.copyOf(bookmarks);
     }
 
+    @VisibleForTesting
+    Set<Resource> loadBookmarks()
+    {
+        return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
+    }
+
     @Override
-    public void registerBookmarkChangedListener(BookmarkChangedListener listener) {
+    public void registerBookmarkChangedListener(
+            final BookmarkChangedListener listener)
+    {
         requireNonNull(listener);
         listeners.add(listener);
     }
 
     @Override
-    public void unregisterBookmarkChangedListener(BookmarkChangedListener listener) {
+    public void unregisterBookmarkChangedListener(
+            final BookmarkChangedListener listener)
+    {
         requireNonNull(listener);
         listeners.remove(listener);
     }
