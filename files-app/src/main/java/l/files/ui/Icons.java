@@ -65,7 +65,7 @@ public final class Icons
     {
         if (font == null)
         {
-            font = createFromAsset(assets, "icomoon.ttf");
+            font = createFromAsset(assets, "MaterialIcons-Regular.ttf");
         }
         return font;
     }
