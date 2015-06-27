@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,8 +48,10 @@ import l.files.ui.selection.SelectionModeFragment;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static l.files.R.integer.files_list_columns;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.common.view.Views.find;
 import static l.files.ui.IOExceptions.message;
@@ -152,7 +154,8 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
 
         recycler = find(android.R.id.list, this);
         recycler.setAdapter(adapter);
-        recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recycler.setLayoutManager(new StaggeredGridLayoutManager(
+                getResources().getInteger(files_list_columns), VERTICAL));
         recycler.setItemAnimator(null);
 
         setupOptionsMenu();
@@ -223,7 +226,8 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
     @Override
     public void onLoadFinished(final Loader<Result> loader, final Result data)
     {
-        if (getActivity() != null && !getActivity().isFinishing())
+        final Activity activity = getActivity();
+        if (activity != null && !activity.isFinishing())
         {
             if (adapter.setItemsCalled && recycler.getItemAnimator() == null)
             {
@@ -267,14 +271,19 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
             final SharedPreferences pref,
             final String key)
     {
+        final Activity activity = getActivity();
+        if (activity == null)
+        {
+            return;
+        }
 
         if (isShowHiddenFilesKey(key))
         {
-            filesLoader().setShowHidden(getShowHiddenFiles(getActivity()));
+            filesLoader().setShowHidden(getShowHiddenFiles(activity));
         }
         else if (isSortKey(key))
         {
-            filesLoader().setSort(getSort(getActivity()));
+            filesLoader().setSort(getSort(activity));
         }
     }
 

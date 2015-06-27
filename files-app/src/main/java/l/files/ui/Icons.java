@@ -73,7 +73,12 @@ public final class Icons
     public static int directoryIconStringId(final Resource res)
     {
         final Integer id = iconByDirectoryUri.get(res);
-        return id != null ? id : ic_dir;
+        return id != null ? id : defaultDirectoryIconStringId();
+    }
+
+    public static int defaultDirectoryIconStringId()
+    {
+        return ic_dir;
     }
 
     public static int fileIconStringId(final MediaType mime)
@@ -84,7 +89,7 @@ public final class Icons
         if (mime.type().equalsIgnoreCase("image")) return ic_file_image;
         if (mime.type().equalsIgnoreCase("text")) return ic_file_text;
         if (archiveSubtypes.contains(mime.subtype())) return ic_file_archive;
-        return ic_file;
+        return defaultFileIconStringId();
     }
 
     public static int defaultFileIconStringId()

@@ -3,12 +3,14 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,21 +46,23 @@ import static android.text.format.DateUtils.FORMAT_NO_YEAR;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.formatDateTime;
 import static android.text.format.Formatter.formatShortFileSize;
-import static android.util.TypedValue.COMPLEX_UNIT_DIP;
-import static android.util.TypedValue.applyDimension;
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static java.text.DateFormat.MEDIUM;
 import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.R.dimen.files_item_space_horizontal;
+import static l.files.R.dimen.files_list_space;
+import static l.files.R.integer.files_list_columns;
 import static l.files.R.layout.files_item;
 import static l.files.R.layout.files_item_header;
 import static l.files.common.view.Views.find;
 import static l.files.ui.FilesApp.getBitmapCache;
+import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
-import static l.files.ui.Icons.directoryIconStringId;
 import static l.files.ui.Icons.fileIconStringId;
 
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
@@ -86,11 +90,13 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         this.selection = requireNonNull(selection, "selection");
         this.formatter = new DateFormatter(context);
 
-
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
-        final int maxThumbnailWidth = metrics.widthPixels - (int) (applyDimension(COMPLEX_UNIT_DIP, 90, metrics) + 0.5f);
-        final int maxThumbnailHeight = (int) (metrics.heightPixels * 0.6f);
+        final int columns = res.getInteger(files_list_columns);
+        final int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
+                - res.getDimension(files_item_space_horizontal) * columns * 2
+                - res.getDimension(files_list_space) * 2) / columns;
+        final int maxThumbnailHeight = metrics.heightPixels;
         this.decorator = new Preview(
                 getBitmapCache(context),
                 maxThumbnailWidth,
@@ -304,7 +310,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
             if (stat.isDirectory())
             {
-                return directoryIconStringId(file.resource());
+                return defaultDirectoryIconStringId();
             }
             else
             {
@@ -318,7 +324,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             if (stat == null)
             {
                 summary.setText("");
-                summary.setVisibility(GONE);
+                summary.setVisibility(INVISIBLE);
             }
             else
             {
@@ -343,7 +349,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 }
                 else
                 {
-                    summary.setVisibility(GONE);
+                    summary.setVisibility(INVISIBLE);
                 }
             }
         }
@@ -389,6 +395,11 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         void bind(final Header header)
         {
             title.setText(header.toString());
+            final LayoutParams params = itemView.getLayoutParams();
+            if (params instanceof StaggeredGridLayoutManager.LayoutParams)
+            {
+                ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
+            }
         }
     }
 
