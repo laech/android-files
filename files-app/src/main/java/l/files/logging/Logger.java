@@ -24,6 +24,7 @@ public final class Logger
 
     private String trim(final String tag)
     {
+        // Add a dummy prefix for easy filtering
         // Log.isLoggable has 23 characters limit
         String trimmed = "blah-" + tag;
         if (trimmed.length() > 23)
@@ -40,22 +41,22 @@ public final class Logger
 
     public boolean isVerboseEnabled()
     {
-        return BuildConfig.DEBUG && isLoggable(tag, VERBOSE);
+        return BuildConfig.DEBUG || isLoggable(tag, VERBOSE);
     }
 
     public boolean isDebugEnabled()
     {
-        return BuildConfig.DEBUG && isLoggable(tag, DEBUG);
+        return BuildConfig.DEBUG || isLoggable(tag, DEBUG);
     }
 
     public boolean isWarnEnabled()
     {
-        return BuildConfig.DEBUG && isLoggable(tag, WARN);
+        return BuildConfig.DEBUG || isLoggable(tag, WARN);
     }
 
     public boolean isErrorEnabled()
     {
-        return BuildConfig.DEBUG && isLoggable(tag, ERROR);
+        return BuildConfig.DEBUG || isLoggable(tag, ERROR);
     }
 
     public void verbose(final Object msg)

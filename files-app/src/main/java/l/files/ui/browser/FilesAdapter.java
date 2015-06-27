@@ -126,11 +126,11 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         final FileListItem item = getItem(position);
         if (item.isHeader())
         {
-            ((HeaderHolder) holder).set((Header) item);
+            ((HeaderHolder) holder).bind((Header) item);
         }
         else
         {
-            ((FileHolder) holder).set((File) item);
+            ((FileHolder) holder).bind((File) item);
         }
     }
 
@@ -204,7 +204,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
     }
 
-    final class FileHolder extends SelectionModeViewHolder<Resource>
+    final class FileHolder extends SelectionModeViewHolder<Resource, File>
     {
         private final TextView icon;
         private final TextView title;
@@ -225,25 +225,26 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
 
         @Override
-        protected Resource item(final int position)
+        protected Resource itemId(final File file)
         {
-            return ((File) getItem(position)).resource();
+            return file.resource();
         }
 
         @Override
-        protected void onClick(final View v, final Resource item)
+        protected void onClick(final View v, final File file)
         {
-            bus.post(OpenFileRequest.create(item));
+            bus.post(OpenFileRequest.create(file.resource()));
         }
 
-        void set(final File file)
+        @Override
+        public void bind(final File file)
         {
+            super.bind(file);
             setTitle(file);
             setIcon(file);
             setSymlink(file);
             setSummary(file);
             setPreview(file);
-            itemView.setActivated(selection.contains(file.resource()));
         }
 
         private void setTitle(final File file)
@@ -385,7 +386,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             title = find(android.R.id.title, this);
         }
 
-        void set(final Header header)
+        void bind(final Header header)
         {
             title.setText(header.toString());
         }

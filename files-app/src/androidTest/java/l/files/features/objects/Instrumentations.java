@@ -2,23 +2,32 @@ package l.files.features.objects;
 
 import android.app.Instrumentation;
 import android.graphics.Bitmap;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import l.files.common.base.Consumer;
+import l.files.ui.StableAdapter;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 public final class Instrumentations
 {
@@ -90,7 +99,7 @@ public final class Instrumentations
             final Instrumentation in,
             final Callable<T> callable)
     {
-        return await(in, new InstrumentCallable<>(in, callable), 5, SECONDS);
+        return await(in, new InstrumentCallable<>(in, callable), 30, SECONDS);
     }
 
     public static void awaitOnMainThread(
@@ -187,4 +196,107 @@ public final class Instrumentations
         await(in, Executors.callable(runnable), 1, SECONDS);
     }
 
+    public static void scrollToTop(
+            final Instrumentation in,
+            final RecyclerView recycler)
+    {
+        awaitOnMainThread(in, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                @SuppressWarnings("unchecked")
+                final StableAdapter<Object, ViewHolder> adapter =
+                        (StableAdapter<Object, ViewHolder>) recycler.getAdapter();
+
+                if (adapter.getItemCount() > 0)
+                {
+                    recycler.scrollToPosition(0);
+                }
+            }
+        });
+    }
+
+    public static void clickItemOnMainThread(
+            final Instrumentation in,
+            final RecyclerView recycler,
+            final Object itemId)
+    {
+        findItemOnMainThread(in, recycler, itemId, new Consumer<View>()
+        {
+            @Override
+            public void apply(final View input)
+            {
+                input.performClick();
+            }
+        });
+    }
+
+    public static void longClickItemOnMainThread(
+            final Instrumentation in,
+            final RecyclerView recycler,
+            final Object itemId)
+    {
+        findItemOnMainThread(in, recycler, itemId, new Consumer<View>()
+        {
+            @Override
+            public void apply(final View input)
+            {
+                input.performLongClick();
+            }
+        });
+    }
+
+    public static void findItemOnMainThread(
+            final Instrumentation in,
+            final RecyclerView recycler,
+            final Object itemId,
+            final Consumer<View> consumer)
+    {
+        scrollToTop(in, recycler);
+        awaitOnMainThread(in, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                find(recycler, itemId, consumer);
+            }
+        });
+    }
+
+    private static void find(
+            final RecyclerView recycler,
+            final Object itemId,
+            final Consumer<View> consumer)
+    {
+        @SuppressWarnings("unchecked")
+        final StableAdapter<Object, ViewHolder> adapter =
+                (StableAdapter<Object, ViewHolder>) recycler.getAdapter();
+
+        for (int i = 0; i < adapter.getItemCount(); i++)
+        {
+            recycler.scrollBy(0, 5);
+            for (int j = 0; j < recycler.getChildCount(); j++)
+            {
+                final View child = recycler.getChildAt(j);
+                final ViewHolder holder = recycler.getChildViewHolder(child);
+                final int position = holder.getAdapterPosition();
+                if (position == NO_POSITION)
+                {
+                    fail();
+                }
+                if (position == i)
+                {
+                    final Object thatId = adapter.getItemIdObject(position);
+                    if (Objects.equals(itemId, thatId))
+                    {
+                        consumer.apply(child);
+                        return;
+                    }
+                }
+            }
+        }
+
+        fail("Item not found: " + itemId);
+    }
 }

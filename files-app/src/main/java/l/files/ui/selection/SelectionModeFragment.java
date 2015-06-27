@@ -28,7 +28,7 @@ public abstract class SelectionModeFragment<T> extends BaseFragment
         }
     }
 
-    public Selection<T> selection()
+    protected Selection<T> selection()
     {
         return selection;
     }

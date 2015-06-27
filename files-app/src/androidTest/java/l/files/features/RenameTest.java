@@ -82,16 +82,16 @@ public final class RenameTest extends BaseFilesActivityTest
         final Resource f2 = dir().resolve("a").createFile();
 
         screen()
-                .toggleSelection(f1)
-                .toggleSelection(f2)
+                .longClick(f1)
+                .click(f2)
                 .assertCanRename(false)
 
-                .toggleSelection(f1)
+                .click(f1)
                 .assertCanRename(true);
     }
 
     private UiRename rename(final Resource resource)
     {
-        return screen().toggleSelection(resource).rename();
+        return screen().longClick(resource).rename();
     }
 }

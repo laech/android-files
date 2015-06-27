@@ -53,7 +53,7 @@ final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Ho
     @Override
     public void onBindViewHolder(final Holder holder, final int position)
     {
-        holder.set(getItem(position));
+        holder.bind(getItem(position));
     }
 
     @Override
@@ -62,7 +62,7 @@ final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Ho
         return getItem(position);
     }
 
-    final class Holder extends SelectionModeViewHolder<Resource>
+    final class Holder extends SelectionModeViewHolder<Resource, Resource>
     {
         final TextView title;
         final TextView icon;
@@ -75,16 +75,18 @@ final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Ho
             icon.setTypeface(Icons.font(itemView.getResources().getAssets()));
         }
 
-        void set(final Resource resource)
+        @Override
+        protected Resource itemId(final Resource resource)
         {
-            title.setText(FileLabels.get(title.getResources(), resource));
-            icon.setText(directoryIconStringId(resource));
+            return resource;
         }
 
         @Override
-        protected Resource item(final int position)
+        public void bind(final Resource resource)
         {
-            return getItem(position);
+            super.bind(resource);
+            title.setText(FileLabels.get(title.getResources(), resource));
+            icon.setText(directoryIconStringId(resource));
         }
 
         @Override

@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.Instrumentation;
 import android.util.Pair;
 import android.view.ActionMode;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -13,7 +12,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,28 +20,32 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.features.objects.action.Action;
-import l.files.features.objects.action.StableRecyclerViewAction;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalResource;
 import l.files.ui.FileLabels;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FileListItem;
 import l.files.ui.browser.FilesActivity;
 import l.files.ui.browser.FilesFragment;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
-import static android.view.Gravity.START;
+import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static l.files.common.view.Views.find;
 import static l.files.features.objects.Instrumentations.await;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
+import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.test.Mocks.mockMenuItem;
 
@@ -68,11 +70,6 @@ public final class UiFileActivity
                 .findFragmentByTag(FilesFragment.TAG);
     }
 
-    private Action<Boolean> clicker()
-    {
-        return StableRecyclerViewAction.willClick(fragment().recycler);
-    }
-
     public UiFileActivity bookmark()
     {
         assertBookmarkMenuChecked(false);
@@ -84,19 +81,6 @@ public final class UiFileActivity
     {
         assertBookmarkMenuChecked(true);
         selectMenuAction(R.id.bookmark);
-        return this;
-    }
-
-    public UiFileActivity toggleSelection(final Resource resource)
-    {
-        awaitOnMainThread(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                fragment().selection().toggle(resource);
-            }
-        });
         return this;
     }
 
@@ -145,28 +129,22 @@ public final class UiFileActivity
         return this;
     }
 
+    public UiFileActivity clickInto(final Resource resource)
+    {
+        click(resource);
+        assertCurrentDirectory(resource);
+        return this;
+    }
+
     public UiFileActivity click(final Resource resource)
     {
-        awaitOnMainThread(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                clicker().action(resource);
-            }
-        });
+        clickItemOnMainThread(instrument, fragment().recycler, resource);
+        return this;
+    }
 
-        try
-        {
-            if (resource.stat(NOFOLLOW).isDirectory())
-            {
-                assertCurrentDirectory(resource);
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+    public UiFileActivity longClick(final Resource resource)
+    {
+        longClickItemOnMainThread(instrument, fragment().recycler, resource);
         return this;
     }
 
@@ -207,9 +185,11 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                activity.onBackPressed();
+                // This is to wait for existing messages on the main thread
+                // queue to be cleared first
             }
         });
+        instrument.sendKeyDownUpSync(KEYCODE_BACK);
         return this;
     }
 
@@ -220,7 +200,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertTrue(activity.onKeyLongPress(KeyEvent.KEYCODE_BACK, null));
+                assertTrue(activity.onKeyLongPress(KEYCODE_BACK, null));
             }
         });
         return this;
@@ -280,6 +260,14 @@ public final class UiFileActivity
                 assertEquals(can, pasteMenu().isEnabled());
             }
         });
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                activity.closeOptionsMenu();
+            }
+        });
         return this;
     }
 
@@ -296,12 +284,6 @@ public final class UiFileActivity
             }
         });
         return this;
-    }
-
-    @Deprecated
-    public UiFileActivity assertCurrentDirectory(final File dir)
-    {
-        return assertCurrentDirectory(LocalResource.create(dir));
     }
 
     public UiFileActivity assertListViewContains(
@@ -323,12 +305,13 @@ public final class UiFileActivity
             final Resource resource,
             final Consumer<CharSequence> assertion)
     {
-        awaitOnMainThread(instrument, new Runnable()
+        findItemOnMainThread(resource, new Consumer<View>()
         {
             @Override
-            public void run()
+            public void apply(final View input)
             {
-                assertion.apply(summaryView(resource).getText());
+                final TextView summary = find(R.id.summary, input);
+                assertion.apply(summary.getText());
             }
         });
         return this;
@@ -376,26 +359,12 @@ public final class UiFileActivity
         return this;
     }
 
-    private TextView summaryView(final Resource resource)
+    private void findItemOnMainThread(
+            final Resource resource,
+            final Consumer<View> consumer)
     {
-        return (TextView) view(resource).findViewById(R.id.summary);
-    }
-
-    private TextView iconView(final Resource resource)
-    {
-        return (TextView) view(resource).findViewById(R.id.icon);
-    }
-
-    private TextView titleView(final Resource resource)
-    {
-        return (TextView) view(resource).findViewById(R.id.title);
-    }
-
-    private View view(final Resource resource)
-    {
-        return StableRecyclerViewAction
-                .willReturnView(fragment().recycler)
-                .action(resource);
+        Instrumentations.findItemOnMainThread(
+                instrument, fragment().recycler, resource, consumer);
     }
 
     private MenuItem renameMenu()
@@ -463,12 +432,12 @@ public final class UiFileActivity
     public UiFileActivity assertChecked(
             final Resource resource, final boolean checked)
     {
-        awaitOnMainThread(instrument, new Runnable()
+        findItemOnMainThread(resource, new Consumer<View>()
         {
             @Override
-            public void run()
+            public void apply(final View view)
             {
-                assertEquals(checked, fragment().selection().contains(resource));
+                assertEquals(checked, view.isActivated());
             }
         });
         return this;
@@ -485,6 +454,21 @@ public final class UiFileActivity
             public void run()
             {
                 assertEquals(present, activity.currentActionMode() != null);
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity assertActionModeTitle(final Object title)
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                final ActionMode mode = activity.currentActionMode();
+                assertNotNull(mode);
+                assertEquals(title.toString(), mode.getTitle().toString());
             }
         });
         return this;
@@ -508,12 +492,12 @@ public final class UiFileActivity
             final Resource resource,
             final boolean displayed)
     {
-        awaitOnMainThread(instrument, new Runnable()
+        findItemOnMainThread(resource, new Consumer<View>()
         {
             @Override
-            public void run()
+            public void apply(final View input)
             {
-                final View view = view(resource).findViewById(R.id.symlink);
+                final View view = input.findViewById(R.id.symlink);
                 if (displayed)
                 {
                     assertEquals(VISIBLE, view.getVisibility());
@@ -560,14 +544,14 @@ public final class UiFileActivity
 
     public UiFileActivity assertDisabled(final Resource resource)
     {
-        awaitOnMainThread(instrument, new Runnable()
+        findItemOnMainThread(resource, new Consumer<View>()
         {
             @Override
-            public void run()
+            public void apply(final View input)
             {
-                assertFalse(iconView(resource).isEnabled());
-                assertFalse(titleView(resource).isEnabled());
-                assertFalse(summaryView(resource).isEnabled());
+                assertFalse(input.findViewById(R.id.icon).isEnabled());
+                assertFalse(input.findViewById(R.id.title).isEnabled());
+                assertFalse(input.findViewById(R.id.summary).isEnabled());
             }
         });
         return this;
@@ -730,4 +714,17 @@ public final class UiFileActivity
         return this;
     }
 
+    public UiFileActivity rotate()
+    {
+        awaitOnMainThread(instrument, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+                activity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+            }
+        });
+        return this;
+    }
 }

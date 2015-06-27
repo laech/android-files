@@ -12,10 +12,10 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest
         final Resource dir1 = dir().resolve("Not bookmarked 1").createDirectory();
         final Resource dir2 = dir().resolve("Not bookmarked 2").createDirectory();
         screen()
-                .click(dir1)
+                .clickInto(dir1)
                 .assertBookmarkMenuChecked(false)
                 .pressBack()
-                .click(dir2)
+                .clickInto(dir2)
                 .assertBookmarkMenuChecked(false);
     }
 
@@ -24,7 +24,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest
     {
         final Resource dir = dir().resolve("Bookmarked").createDirectory();
         screen()
-                .click(dir)
+                .clickInto(dir)
                 .bookmark()
                 .assertBookmarkMenuChecked(true);
     }
@@ -34,7 +34,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest
     {
         final Resource dir = dir().resolve("Bookmarked then unbookmarked").createDirectory();
         screen()
-                .click(dir)
+                .clickInto(dir)
                 .bookmark()
                 .assertBookmarkMenuChecked(true)
                 .unbookmark()
@@ -47,14 +47,14 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest
         final Resource bookmarked = dir().resolve("Bookmarked").createDirectory();
         final Resource unbookmarked = dir().resolve("Bookmarked/Unbookmarked").createDirectory();
         screen()
-                .click(bookmarked)
+                .clickInto(bookmarked)
                 .bookmark()
                 .assertBookmarkMenuChecked(true)
-                .click(unbookmarked)
+                .clickInto(unbookmarked)
                 .assertBookmarkMenuChecked(false)
                 .pressBack()
                 .assertBookmarkMenuChecked(true)
-                .click(unbookmarked)
+                .clickInto(unbookmarked)
                 .assertBookmarkMenuChecked(false);
     }
 

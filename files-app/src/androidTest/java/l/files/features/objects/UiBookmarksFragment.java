@@ -1,13 +1,13 @@
 package l.files.features.objects;
 
 import android.app.Instrumentation;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import l.files.R;
-import l.files.features.objects.action.Action;
-import l.files.features.objects.action.StableRecyclerViewAction;
+import l.files.common.base.Consumer;
 import l.files.fs.Resource;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FilesActivity;
@@ -15,6 +15,9 @@ import l.files.ui.browser.FilesActivity;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
+import static l.files.features.objects.Instrumentations.findItemOnMainThread;
+import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
 
 public final class UiBookmarksFragment
 {
@@ -39,35 +42,16 @@ public final class UiBookmarksFragment
         return new UiFileActivity(instrument, activity());
     }
 
-    private Action<Boolean> clicker()
+    public UiBookmarksFragment longClick(final Resource bookmark)
     {
-        return StableRecyclerViewAction.willClick(fragment.recycler);
-    }
-
-    public UiBookmarksFragment toggleSelection(final Resource bookmark)
-    {
-        awaitOnMainThread(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                fragment.selection().toggle(bookmark);
-            }
-        });
+        longClickItemOnMainThread(instrument, fragment.recycler, bookmark);
         return this;
     }
 
-    public UiFileActivity click(final Resource bookmark)
+    public UiBookmarksFragment click(final Resource bookmark)
     {
-        awaitOnMainThread(instrument, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                clicker().action(bookmark);
-            }
-        });
-        return activityObject();
+        clickItemOnMainThread(instrument, fragment.recycler, bookmark);
+        return this;
     }
 
     public UiBookmarksFragment delete()
@@ -129,6 +113,52 @@ public final class UiBookmarksFragment
                 assertEquals(expected, actual);
             }
         });
+        return this;
+    }
+
+    public UiBookmarksFragment assertActionModePresent(final boolean present)
+    {
+        activityObject().assertActionModePresent(present);
+        return this;
+    }
+
+    public UiBookmarksFragment assertActionModeTitle(final Object title)
+    {
+        activityObject().assertActionModeTitle(title);
+        return this;
+    }
+
+    public UiBookmarksFragment rotate()
+    {
+        activityObject().rotate();
+        return this;
+    }
+
+    public UiBookmarksFragment assertChecked(
+            final Resource bookmark,
+            final boolean checked)
+    {
+        findItemOnMainThread(
+                instrument, fragment.recycler, bookmark, new Consumer<View>()
+                {
+                    @Override
+                    public void apply(final View view)
+                    {
+                        assertEquals(checked, view.isActivated());
+                    }
+                });
+        return this;
+    }
+
+    public UiBookmarksFragment assertDrawerIsOpened(final boolean opened)
+    {
+        activityObject().assertDrawerIsOpened(opened);
+        return this;
+    }
+
+    public UiBookmarksFragment pressBack()
+    {
+        activityObject().pressBack();
         return this;
     }
 }

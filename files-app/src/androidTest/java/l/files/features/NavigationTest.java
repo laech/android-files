@@ -36,8 +36,43 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class NavigationTest extends BaseFilesActivityTest
 {
 
-    // TODO test screen rotation retains action mode
-    // TODO exist action mode clears selection
+    public void test_clears_selection_on_finish_of_action_mode() throws Exception
+    {
+        final Resource a = dir().resolve("a").createFile();
+        screen()
+                .longClick(a)
+                .assertActionModePresent(true)
+                .assertChecked(a, true)
+                .assertActionModeTitle(1)
+
+                .pressBack()
+                .assertActionModePresent(false)
+                .assertChecked(a, false)
+
+                .rotate()
+                .assertActionModePresent(false)
+                .assertChecked(a, false);
+    }
+
+    public void test_maintains_action_mode_on_screen_rotation() throws Exception
+    {
+        final Resource a = dir().resolve("a").createFile();
+        final Resource b = dir().resolve("b").createFile();
+        screen()
+                .longClick(a)
+                .assertActionModePresent(true)
+                .assertActionModeTitle(1)
+
+                .rotate()
+                .assertActionModePresent(true)
+                .assertActionModeTitle(1)
+                .assertChecked(a, true)
+                .assertChecked(b, false)
+
+                .click(b)
+                .assertActionModePresent(true)
+                .assertActionModeTitle(2);
+    }
 
     public void test_can_navigate_through_title_list_drop_down()
             throws Exception
@@ -52,7 +87,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         final Resource dir = dir().resolve("dir").createDirectory();
-        screen().click(dir).assertNavigationModeHierarchy(dir);
+        screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
     public void test_shows_initial_navigation_list() throws Exception
@@ -192,8 +227,8 @@ public final class NavigationTest extends BaseFilesActivityTest
         final Resource link = dir().resolve("link").createLink(dir);
         final Resource linkChild = link.resolve("a");
         screen()
-                .click(link)
-                .click(linkChild)
+                .clickInto(link)
+                .clickInto(linkChild)
                 .assertCurrentDirectory(linkChild);
     }
 
@@ -201,11 +236,11 @@ public final class NavigationTest extends BaseFilesActivityTest
     {
         final Resource dir = dir().resolve("dir").createDirectory();
         final Resource link = dir().resolve("link").createLink(dir);
-        screen().click(link)
+        screen().clickInto(link)
                 .assertCurrentDirectory(link);
 
         final Resource child = link.resolve("child").createDirectory();
-        screen().click(child)
+        screen().clickInto(child)
                 .assertCurrentDirectory(child);
     }
 
@@ -214,7 +249,7 @@ public final class NavigationTest extends BaseFilesActivityTest
     {
         final Resource dir = dir().resolve("dir").createDirectory();
         screen()
-                .click(dir)
+                .clickInto(dir)
                 .assertCurrentDirectory(dir)
                 .pressActionBarUpIndicator()
                 .assertCurrentDirectory(dir.parent());
@@ -224,7 +259,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(dir().resolve("a").createDirectory())
+                .clickInto(dir().resolve("a").createDirectory())
                 .assertActionBarTitle("a");
     }
 
@@ -237,7 +272,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(dir().resolve("dir").createDirectory())
+                .clickInto(dir().resolve("dir").createDirectory())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
@@ -245,7 +280,7 @@ public final class NavigationTest extends BaseFilesActivityTest
             throws Exception
     {
         screen()
-                .click(dir().resolve("dir").createDirectory())
+                .clickInto(dir().resolve("dir").createDirectory())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
@@ -253,9 +288,9 @@ public final class NavigationTest extends BaseFilesActivityTest
     public void test_long_press_back_will_clear_back_stack() throws Exception
     {
         screen()
-                .click(dir().resolve("a").createDirectory())
-                .click(dir().resolve("a/b").createDirectory())
-                .click(dir().resolve("a/b/c").createDirectory())
+                .clickInto(dir().resolve("a").createDirectory())
+                .clickInto(dir().resolve("a/b").createDirectory())
+                .clickInto(dir().resolve("a/b/c").createDirectory())
                 .longPressBack()
                 .assertCurrentDirectory(dir());
     }
@@ -267,7 +302,7 @@ public final class NavigationTest extends BaseFilesActivityTest
         screen()
                 .openBookmarksDrawer()
                 .activityObject()
-                .click(dir)
+                .clickInto(dir)
                 .assertDrawerIsOpened(false);
     }
 

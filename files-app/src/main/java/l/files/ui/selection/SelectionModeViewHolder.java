@@ -6,23 +6,22 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
-import javax.annotation.Nullable;
-
 import l.files.common.view.ActionModeProvider;
 
-import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.util.Objects.requireNonNull;
 
-public abstract class SelectionModeViewHolder<T> extends ViewHolder
+public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         implements OnClickListener, OnLongClickListener, Selection.Callback
 {
-    private final Selection<T> selection;
+    private final Selection<ID> selection;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
 
+    private ITEM item;
+
     public SelectionModeViewHolder(
             final View itemView,
-            final Selection<T> selection,
+            final Selection<ID> selection,
             final ActionModeProvider actionModeProvider,
             final ActionMode.Callback actionModeCallback)
     {
@@ -35,26 +34,22 @@ public abstract class SelectionModeViewHolder<T> extends ViewHolder
         this.itemView.setOnLongClickListener(this);
     }
 
-    @Nullable
-    private T item()
+    protected abstract ID itemId(ITEM item);
+
+    public void bind(final ITEM item)
     {
-        final int position = getAdapterPosition();
-        return position == NO_POSITION ? null : item(position);
+        this.item = item;
+        setActivated(item);
     }
-
-    protected abstract T item(final int position);
-
-    protected abstract void onClick(final View v, final T item);
 
     @Override
     public final void onSelectionChanged()
     {
-        final T item = item();
-        final boolean selected = selection.contains(item);
-        if (itemView.isActivated() != selected && item != null)
+        if (item == null)
         {
-            itemView.setActivated(selected);
+            return;
         }
+        setActivated(item);
 
         final ActionMode mode = actionModeProvider.currentActionMode();
         if (mode != null && selection.isEmpty())
@@ -67,10 +62,19 @@ public abstract class SelectionModeViewHolder<T> extends ViewHolder
         }
     }
 
+    private void setActivated(final ITEM item)
+    {
+        final ID itemId = itemId(item);
+        final boolean selected = selection.contains(itemId);
+        if (itemView.isActivated() != selected && itemId != null)
+        {
+            itemView.setActivated(selected);
+        }
+    }
+
     @Override
     public final void onClick(final View v)
     {
-        final T item = item();
         if (item == null)
         {
             return;
@@ -82,18 +86,16 @@ public abstract class SelectionModeViewHolder<T> extends ViewHolder
         }
         else
         {
-            selection.toggle(item);
+            selection.toggle(itemId(item));
         }
     }
+
+    protected abstract void onClick(final View v, final ITEM item);
 
     @Override
     public final boolean onLongClick(final View v)
     {
-        final T item = item();
-        if (item != null)
-        {
-            selection.toggle(item);
-        }
+        selection.toggle(itemId(item));
         return true;
     }
 }

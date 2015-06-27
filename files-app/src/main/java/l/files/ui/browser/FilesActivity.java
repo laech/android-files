@@ -10,13 +10,13 @@ import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 
 import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;
@@ -39,6 +39,7 @@ import l.files.ui.open.FileOpener;
 
 import static android.app.ActionBar.NAVIGATION_MODE_LIST;
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
+import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
@@ -59,7 +60,6 @@ public final class FilesActivity extends BaseActivity
     public static final String EXTRA_DIRECTORY = "directory";
 
     EventBus bus;
-    Resource directory;
 
     ActionBarDrawerToggle actionBarDrawerToggle;
     ActionMode currentActionMode;
@@ -89,7 +89,6 @@ public final class FilesActivity extends BaseActivity
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(NAVIGATION_MODE_LIST);
         actionBar.setListNavigationCallbacks(hierarchy, this);
-        updateNavigationMode(getInitialDirectory());
 
         initFields();
         setDrawer();
@@ -124,7 +123,16 @@ public final class FilesActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(final int position, final long itemId)
     {
-        open(OpenFileRequest.create(hierarchy.getItem(position)));
+        log.debug("onNavigationItemSelected");
+        final Resource item = hierarchy.getItem(position);
+        if (!Objects.equals(item, fragment().directory()))
+        {
+            open(OpenFileRequest.create(item));
+        }
+        else
+        {
+            log.debug("Already show requested directory.");
+        }
         return true;
     }
 
@@ -158,7 +166,6 @@ public final class FilesActivity extends BaseActivity
     private void initFields()
     {
         bus = Events.get();
-        directory = getInitialDirectory();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerListener = new DrawerListener();
         actionBarDrawerToggle = new ActionBarDrawerToggle(
@@ -212,13 +219,8 @@ public final class FilesActivity extends BaseActivity
         setTitle(label);
         actionBarDrawerToggle.setDrawerIndicatorEnabled(
                 getFragmentManager().getBackStackEntryCount() == 0);
-        updateNavigationMode(fragment.directory());
-    }
-
-    private void updateNavigationMode(final Resource dir)
-    {
-        hierarchy.set(dir);
-        getActionBar().setSelectedNavigationItem(hierarchy.indexOf(dir));
+        hierarchy.set(fragment.directory());
+        getActionBar().setSelectedNavigationItem(hierarchy.indexOf(fragment.directory()));
     }
 
     @Override
@@ -239,6 +241,8 @@ public final class FilesActivity extends BaseActivity
     public void onActionModeFinished(final ActionMode mode)
     {
         super.onActionModeFinished(mode);
+        log.debug("onActionModeFinished");
+
         currentActionMode = null;
         currentActionModeCallback = null;
         drawerLayout.setDrawerLockMode(LOCK_MODE_UNLOCKED);
@@ -248,6 +252,8 @@ public final class FilesActivity extends BaseActivity
     public void onActionModeStarted(final ActionMode mode)
     {
         super.onActionModeStarted(mode);
+        log.debug("onActionModeStarted");
+
         currentActionMode = mode;
         if (isSidebarOpen())
         {
@@ -261,12 +267,12 @@ public final class FilesActivity extends BaseActivity
 
     private boolean isSidebarOpen()
     {
-        return drawerLayout.isDrawerOpen(Gravity.START);
+        return drawerLayout.isDrawerOpen(START);
     }
 
     private void closeSidebar()
     {
-        drawerLayout.closeDrawer(Gravity.START);
+        drawerLayout.closeDrawer(START);
     }
 
     @Override
@@ -300,6 +306,7 @@ public final class FilesActivity extends BaseActivity
 
     public void onEventMainThread(final CloseActionModeRequest request)
     {
+        log.debug("onEventMainThread(%s)", request);
         if (currentActionMode != null)
         {
             currentActionMode.finish();
@@ -308,6 +315,7 @@ public final class FilesActivity extends BaseActivity
 
     public void onEventMainThread(final OpenFileRequest request)
     {
+        log.debug("onEventMainThread(%s)", request);
         if (currentActionMode != null)
         {
             currentActionMode.finish();
@@ -317,6 +325,7 @@ public final class FilesActivity extends BaseActivity
 
     private void open(final OpenFileRequest request)
     {
+        log.debug("open(%s)", request);
         closeDrawerThenRun(new Runnable()
         {
             @Override
@@ -329,7 +338,7 @@ public final class FilesActivity extends BaseActivity
 
     private void closeDrawerThenRun(final Runnable runnable)
     {
-        if (drawerLayout.isDrawerOpen(Gravity.START))
+        if (drawerLayout.isDrawerOpen(START))
         {
             drawerListener.mRunOnClosed = runnable;
             drawerLayout.closeDrawers();

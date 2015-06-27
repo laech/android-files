@@ -3,7 +3,7 @@ package l.files.features;
 import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
-public final class SelectionTest extends BaseFilesActivityTest
+public final class SelectAllTest extends BaseFilesActivityTest
 {
 
     public void test_selects_all() throws Exception
@@ -13,7 +13,7 @@ public final class SelectionTest extends BaseFilesActivityTest
         final Resource c = dir().resolve("c").createDirectory();
 
         screen()
-                .toggleSelection(a)
+                .longClick(a)
                 .selectAll()
                 .assertChecked(a, true)
                 .assertChecked(b, true)
@@ -24,9 +24,9 @@ public final class SelectionTest extends BaseFilesActivityTest
     {
         final Resource a = dir().resolve("a").createFile();
         screen()
-                .toggleSelection(a)
+                .longClick(a)
                 .assertActionModePresent(true)
-                .toggleSelection(a)
+                .click(a)
                 .assertActionModePresent(false);
     }
 }

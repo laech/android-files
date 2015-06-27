@@ -22,7 +22,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         final Resource d = dir().resolve("d").createDirectory();
 
         screen()
-                .toggleSelection(a)
+                .longClick(a)
                 .copy()
                 .click(d)
                 .paste();
@@ -36,7 +36,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         final Resource d = dir().resolve("d").createDirectory();
 
         screen()
-                .toggleSelection(c)
+                .longClick(c)
                 .copy()
                 .click(d)
                 .paste();
@@ -53,7 +53,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         c.resolve("c").createLink(c.resolve("a"));
 
         screen()
-                .toggleSelection(c)
+                .longClick(c)
                 .copy()
                 .click(d)
                 .paste();
@@ -67,7 +67,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         final Resource c = dir().resolve("c").createLink(dir());
 
         screen()
-                .toggleSelection(c)
+                .longClick(c)
                 .copy()
                 .click(d)
                 .paste();
@@ -98,12 +98,13 @@ public final class FileOperationTest extends BaseFilesActivityTest
         final Resource dir = dir().resolve("dir").createDirectory();
 
         screen()
-                .toggleSelection(dir)
+                .longClick(dir)
                 .copy()
                 .assertCanPaste(true)
-                .click(dir)
+                .clickInto(dir)
                 .assertCanPaste(false)
                 .pressBack()
+                .assertCurrentDirectory(dir())
                 .assertCanPaste(true);
     }
 
@@ -113,7 +114,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         final Resource dir = dir().resolve("dir").createDirectory();
 
         screen()
-                .toggleSelection(dir)
+                .longClick(dir)
                 .copy()
                 .assertCanPaste(true);
 
@@ -129,7 +130,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         dir().resolve("dir2").createDirectory();
 
         screen()
-                .toggleSelection(dir)
+                .longClick(dir)
                 .copy()
                 .assertCanPaste(true);
 
