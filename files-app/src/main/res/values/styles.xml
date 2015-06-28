@@ -3,6 +3,7 @@
 
     <style name="Theme" parent="android:Theme.Material.Light">
         <item name="android:actionDropDownStyle">@style/ActionDropDownStyle</item>
+        <item name="android:windowBackground">@drawable/window_background</item>
     </style>
 
     <style name="Theme.NoActionBar" parent="Theme">
