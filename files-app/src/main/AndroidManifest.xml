@@ -12,9 +12,16 @@
         android:label="@string/app_name"
         android:theme="@style/Theme">
 
+        <!--
+            Set soft input mode to avoid an issue with CoordinatorLayout.
+            When new folder menu is clicked, keyboard is shown, cancel, space
+            previously occupied by keyboard is now blank instead of showing
+            the list items.
+        -->
         <activity
             android:name=".ui.browser.FilesActivity"
-            android:theme="@style/Theme.NoActionBar">
+            android:theme="@style/Theme.NoActionBar"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
