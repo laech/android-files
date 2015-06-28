@@ -268,9 +268,7 @@ public final class FilesActivity extends BaseActivity implements
     public void onActionModeStarted(final ActionMode mode)
     {
         super.onActionModeStarted(mode);
-        log.debug("onActionModeStarted");
 
-        currentActionMode = mode;
         if (isSidebarOpen())
         {
             drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
@@ -281,6 +279,14 @@ public final class FilesActivity extends BaseActivity implements
         }
     }
 
+    @Override
+    public ActionMode startActionMode(final ActionMode.Callback callback)
+    {
+        log.debug("startActionMode");
+        currentActionModeCallback = callback;
+        return (currentActionMode = super.startActionMode(callback));
+    }
+
     private boolean isSidebarOpen()
     {
         return drawer.isDrawerOpen(START);
@@ -289,14 +295,6 @@ public final class FilesActivity extends BaseActivity implements
     private void closeSidebar()
     {
         drawer.closeDrawer(START);
-    }
-
-    @Override
-    public ActionMode onWindowStartingActionMode(
-            final ActionMode.Callback callback)
-    {
-        currentActionModeCallback = callback;
-        return super.onWindowStartingActionMode(callback);
     }
 
     public ActionBarDrawerToggle drawerToggle()

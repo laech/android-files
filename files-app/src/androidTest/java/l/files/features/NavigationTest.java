@@ -36,6 +36,20 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class NavigationTest extends BaseFilesActivityTest
 {
 
+    public void test_can_start_action_mode_after_rotation() throws Exception
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            dir().resolve(String.valueOf(i)).createFile();
+        }
+        final Resource child = dir().list(NOFOLLOW).get(0);
+        screen()
+                .rotate()
+                .longClick(child)
+                .assertChecked(child, true)
+                .assertActionModePresent(true);
+    }
+
     public void test_clears_selection_on_finish_of_action_mode() throws Exception
     {
         final Resource a = dir().resolve("a").createFile();
