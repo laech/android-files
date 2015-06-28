@@ -71,10 +71,10 @@ dependencies {
     compile libs.eventbus
     compile libs.guava
     compile libs.tika
+    compile 'com.android.support:design:22.2.0'
     compile 'com.android.support:support-v4:22.2.0'
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:support-v13:22.2.0'
-    compile 'com.android.support:design:22.2.0'
     compile 'com.android.support:recyclerview-v7:22.2.0'
     compile 'com.android.support:cardview-v7:22.2.0'
     compile 'io.reactivex:rxjava:1.0.11'

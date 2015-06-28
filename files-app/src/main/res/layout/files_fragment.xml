@@ -9,10 +9,10 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/files_list_space"
         android:paddingEnd="@dimen/files_list_space"
-        android:scrollbars="vertical"
-        android:scrollbarStyle="outsideOverlay"/>
+        android:paddingStart="@dimen/files_list_space"
+        android:scrollbarStyle="outsideOverlay"
+        android:scrollbars="vertical"/>
 
     <TextView
         android:id="@android:id/empty"
