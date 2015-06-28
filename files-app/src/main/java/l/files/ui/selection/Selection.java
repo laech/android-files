@@ -3,7 +3,6 @@ package l.files.ui.selection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -13,7 +12,6 @@ public final class Selection<T>
 {
     private final Set<T> selection = new HashSet<>();
     private final WeakHashMap<Callback, Void> callbacks = new WeakHashMap<>();
-    private final List<Callback> pendingCallbacks = new ArrayList<>();
 
     public void addWeaklyReferencedCallback(final Callback callback)
     {
@@ -27,19 +25,9 @@ public final class Selection<T>
 
     private void notifyCallbacks()
     {
-        // Make a copy to avoid ConcurrentModificationException
-        // if a callback adds another callback when notified
-        pendingCallbacks.addAll(callbacks.keySet());
-        try
+        for (final Callback callback : new ArrayList<>(callbacks.keySet()))
         {
-            for (final Callback callback : pendingCallbacks)
-            {
-                callback.onSelectionChanged();
-            }
-        }
-        finally
-        {
-            pendingCallbacks.clear();
+            callback.onSelectionChanged();
         }
     }
 

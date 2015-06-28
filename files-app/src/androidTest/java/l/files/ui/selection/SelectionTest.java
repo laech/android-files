@@ -40,19 +40,28 @@ public final class SelectionTest extends TestCase
         assertEquals(1, selection.size());
     }
 
-    public void test_can_add_callback_while_being_notified() throws Exception
+    public void test_can_add_selection_while_being_notified() throws Exception
     {
         final boolean[] called = {false};
-        final Callback adder = new Callback()
+        final Callback callback1 = new Callback()
+        {
+            @Override
+            public void onSelectionChanged()
+            {
+                selection.addWeaklyReferencedCallback(SelectionTest.this.callback);
+            }
+        };
+        final Callback callback2 = new Callback()
         {
             @Override
             public void onSelectionChanged()
             {
                 called[0] = true;
-                selection.addWeaklyReferencedCallback(SelectionTest.this.callback);
+                selection.add(1000);
             }
         };
-        selection.addWeaklyReferencedCallback(adder);
+        selection.addWeaklyReferencedCallback(callback1);
+        selection.addWeaklyReferencedCallback(callback2);
         selection.add(1);
         assertTrue(called[0]);
     }

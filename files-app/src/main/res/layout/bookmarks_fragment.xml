@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:minHeight="48dp"
+        android:minHeight="?android:attr/actionBarSize"
         android:paddingEnd="16dp"
         android:paddingStart="18dp"
         android:text="@string/bookmarks"

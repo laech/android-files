@@ -1,6 +1,5 @@
 package l.files.features.objects;
 
-import android.app.ActionBar;
 import android.app.Instrumentation;
 import android.util.Pair;
 import android.view.ActionMode;
@@ -42,7 +41,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.common.view.Views.find;
-import static l.files.features.objects.Instrumentations.await;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
 import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
@@ -123,7 +121,7 @@ public final class UiFileActivity
             public void run()
             {
                 final int position = activity.hierarchy().indexOf(dir);
-                activity.onNavigationItemSelected(position, position);
+                activity.title().setSelection(position);
             }
         });
         return this;
@@ -155,7 +153,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                activity.getDrawerLayout().openDrawer(START);
+                activity.drawerLayout().openDrawer(START);
             }
         });
         assertDrawerIsOpened(true);
@@ -172,7 +170,7 @@ public final class UiFileActivity
             {
                 assertEquals(
                         opened,
-                        activity.getDrawerLayout().isDrawerOpen(START));
+                        activity.drawerLayout().isDrawerOpen(START));
             }
         });
         return this;
@@ -229,7 +227,7 @@ public final class UiFileActivity
             public void run()
             {
                 assertTrue(
-                        !activity.getActionBarDrawerToggle()
+                        !activity.drawerToggle()
                                 .isDrawerIndicatorEnabled());
             }
         });
@@ -243,13 +241,27 @@ public final class UiFileActivity
 
     public UiFileActivity assertCanPaste(final boolean can)
     {
+        return findOptionMenuItem(android.R.id.paste, new Consumer<MenuItem>()
+        {
+            @Override
+            public void apply(final MenuItem input)
+            {
+                assertEquals(can, input.isEnabled());
+            }
+        });
+    }
+
+    private UiFileActivity findOptionMenuItem(
+            final int id,
+            final Consumer<MenuItem> consumer)
+    {
         awaitOnMainThread(instrument, new Runnable()
         {
             @Override
             public void run()
             {
-                activity.closeOptionsMenu();
-                activity.openOptionsMenu();
+                activity.toolbar().hideOverflowMenu();
+                activity.toolbar().showOverflowMenu();
             }
         });
         awaitOnMainThread(instrument, new Runnable()
@@ -257,7 +269,9 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertEquals(can, pasteMenu().isEnabled());
+                final MenuItem item = activity.toolbar().getMenu().findItem(id);
+                assertNotNull(item);
+                consumer.apply(item);
             }
         });
         awaitOnMainThread(instrument, new Runnable()
@@ -265,7 +279,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                activity.closeOptionsMenu();
+                activity.toolbar().hideOverflowMenu();
             }
         });
         return this;
@@ -324,9 +338,9 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                final int index = actionBar().getSelectedNavigationIndex();
-                final Resource res = activity.hierarchy().get(index);
-                assertEquals(title, label(res));
+                assertEquals(
+                        title,
+                        label((Resource) activity.title().getSelectedItem()));
             }
         });
         return this;
@@ -335,11 +349,6 @@ public final class UiFileActivity
     private String label(final Resource res)
     {
         return FileLabels.get(activity.getResources(), res);
-    }
-
-    private ActionBar actionBar()
-    {
-        return activity.getActionBar();
     }
 
     public UiFileActivity assertActionBarUpIndicatorIsVisible(
@@ -352,7 +361,7 @@ public final class UiFileActivity
             {
                 assertEquals(
                         visible,
-                        !activity.getActionBarDrawerToggle()
+                        !activity.drawerToggle()
                                 .isDrawerIndicatorEnabled());
             }
         });
@@ -372,21 +381,18 @@ public final class UiFileActivity
         return activity.currentActionMode().getMenu().findItem(R.id.rename);
     }
 
-    private MenuItem pasteMenu()
+    private UiFileActivity selectMenuAction(final int id)
     {
-        return activity.getMenu().findItem(android.R.id.paste);
-    }
-
-    void selectMenuAction(final int id)
-    {
-        await(instrument, new Runnable()
+        findOptionMenuItem(id, new Consumer<MenuItem>()
         {
             @Override
-            public void run()
+            public void apply(final MenuItem item)
             {
-                assertTrue(instrument.invokeMenuActionSync(activity, id, 0));
+                assertTrue(item.isEnabled());
             }
         });
+        instrument.invokeMenuActionSync(activity, id, 0);
+        return this;
     }
 
     void selectActionModeAction(final int id)
@@ -399,7 +405,7 @@ public final class UiFileActivity
                 final ActionMode mode = activity.currentActionMode();
                 final MenuItem item = mode.getMenu().findItem(id);
                 assertTrue(activity
-                        .getCurrentActionModeCallback()
+                        .currentActionModeCallback()
                         .onActionItemClicked(mode, item));
             }
         });
@@ -476,16 +482,14 @@ public final class UiFileActivity
 
     public UiFileActivity assertBookmarkMenuChecked(final boolean checked)
     {
-        awaitOnMainThread(instrument, new Runnable()
+        return findOptionMenuItem(R.id.bookmark, new Consumer<MenuItem>()
         {
             @Override
-            public void run()
+            public void apply(final MenuItem item)
             {
-                final MenuItem item = activity.getMenu().findItem(R.id.bookmark);
                 assertEquals(checked, item.isChecked());
             }
         });
-        return this;
     }
 
     public UiFileActivity assertSymbolicLinkIconDisplayed(
@@ -521,7 +525,7 @@ public final class UiFileActivity
             {
                 assertEquals(
                         openLocked,
-                        LOCK_MODE_LOCKED_OPEN == activity.getDrawerLayout()
+                        LOCK_MODE_LOCKED_OPEN == activity.drawerLayout()
                                 .getDrawerLockMode(START));
             }
         });
@@ -535,7 +539,7 @@ public final class UiFileActivity
             @Override
             public void run()
             {
-                assertEquals(false, activity.getDrawerLayout().isDrawerOpen(START));
+                assertEquals(false, activity.drawerLayout().isDrawerOpen(START));
             }
         });
         return this;
@@ -567,9 +571,7 @@ public final class UiFileActivity
                 final List<Resource> expected = dir.hierarchy().reverse();
                 final List<Resource> actual = activity.hierarchy();
                 assertEquals(expected, actual);
-                assertEquals(
-                        expected.indexOf(dir),
-                        actionBar().getSelectedNavigationIndex());
+                assertEquals(dir, activity.title().getSelectedItem());
             }
         });
         return this;
