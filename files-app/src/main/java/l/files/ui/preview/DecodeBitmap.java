@@ -36,21 +36,28 @@ abstract class DecodeBitmap extends Decode<Bitmap>
             return null;
         }
 
-        final Stopwatch watch = Stopwatch.createStarted();
         try
         {
-            return decode();
+            final Stopwatch watch = Stopwatch.createStarted();
+            final Bitmap bitmap = decode();
+
+            if (log.isDebugEnabled())
+            {
+                log.debug("decode took %s (%sx%s) for %s",
+                        watch,
+                        bitmap.getWidth(),
+                        bitmap.getHeight(),
+                        res);
+            }
+
+            return bitmap;
         }
         catch (final Exception e)
         {
             // Catch all unexpected internal errors from decoder
             log.warn(e);
+            return null;
         }
-        finally
-        {
-            log.debug("decode took %s for %s", watch, res);
-        }
-        return null;
     }
 
     protected abstract Bitmap decode() throws Exception;

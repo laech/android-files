@@ -45,7 +45,7 @@ public final class Bitmaps
 
         final float widthRatio = maxWidth / (float) width;
         final float heightRatio = maxHeight / (float) height;
-        final float scale = min(1f, min(widthRatio, heightRatio));
+        final float scale = min(widthRatio, heightRatio);
         final int scaledWith = round(width * scale);
         final int scaledHeight = round(height * scale);
         return ScaledSize.of(width, height, scaledWith, scaledHeight, scale);

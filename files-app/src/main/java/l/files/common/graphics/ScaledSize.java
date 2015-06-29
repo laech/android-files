@@ -19,9 +19,6 @@ public abstract class ScaledSize
 
     public abstract int scaledHeight();
 
-    /**
-     * The scale of this size, between 0 and 1.
-     */
     public abstract float scale();
 
     public static ScaledSize of(
@@ -36,7 +33,6 @@ public abstract class ScaledSize
         checkArgument(scaledWidth > 0);
         checkArgument(scaledHeight > 0);
         checkArgument(scale > 0);
-        checkArgument(scale <= 1);
 
         return new AutoParcel_ScaledSize(
                 originalWidth,
