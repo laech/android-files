@@ -13,6 +13,7 @@
         android:paddingBottom="16dp"
         android:paddingEnd="@dimen/files_list_space"
         android:paddingStart="@dimen/files_list_space"
+        android:paddingTop="16dp"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"/>
 
