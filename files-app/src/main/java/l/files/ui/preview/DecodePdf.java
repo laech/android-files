@@ -8,12 +8,11 @@ import android.widget.ImageView;
 
 import com.google.common.net.MediaType;
 
-import l.files.fs.Resource;
 import l.files.common.graphics.ScaledSize;
+import l.files.fs.Resource;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
-import static android.graphics.Color.WHITE;
 import static android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.open;
@@ -74,12 +73,18 @@ final class DecodePdf extends DecodeBitmap
                 final int height = pointToPixel(page.getHeight());
                 final int width = pointToPixel(page.getWidth());
                 final ScaledSize size = scale(
-                        width, height, context.maxWidth, context.maxHeight);
+                        width,
+                        height,
+                        context.maxWidth,
+                        context.maxHeight);
+
                 publishProgress(size);
 
                 final Bitmap bitmap = createBitmap(
-                        size.scaledWidth(), size.scaledHeight(), ARGB_8888);
-                bitmap.eraseColor(WHITE);
+                        size.scaledWidth(),
+                        size.scaledHeight(),
+                        ARGB_8888);
+
                 page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
                 return bitmap;
             }
