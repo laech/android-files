@@ -21,7 +21,7 @@ import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
 import static l.files.common.graphics.Bitmaps.scale;
 
-final class DecodePdf extends BitmapTask
+final class DecodePdf extends DecodeBitmap
 {
     private DecodePdf(
             final Preview context,

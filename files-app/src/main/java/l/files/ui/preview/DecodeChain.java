@@ -20,13 +20,15 @@ import static java.util.Objects.requireNonNull;
 import static l.files.R.id.image_decorator_task;
 import static l.files.common.graphics.Bitmaps.scale;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.ui.preview.DecodeAudio.isAudio;
 import static l.files.ui.preview.DecodeImage.isImage;
 import static l.files.ui.preview.DecodePdf.isPdf;
+import static l.files.ui.preview.DecodeVideo.isVideo;
 import static l.files.ui.preview.Preview.errors;
 import static l.files.ui.preview.Preview.newPlaceholder;
 import static l.files.ui.preview.Preview.sizes;
 
-final class DecodeChain extends Task<MediaType>
+final class DecodeChain extends Decode<MediaType>
 {
     private final Stat stat;
 
@@ -47,7 +49,7 @@ final class DecodeChain extends Task<MediaType>
             final Resource res,
             final Stat stat)
     {
-        final Task task = (Task) view.getTag(image_decorator_task);
+        final Decode task = (Decode) view.getTag(image_decorator_task);
         if (task != null && task.res.equals(res)) return;
         if (task != null) task.cancel(true);
 
@@ -79,9 +81,9 @@ final class DecodeChain extends Task<MediaType>
                 new DecodeChain(context, view, res, stat, key)
                         .executeOnExecutor(THREAD_POOL_EXECUTOR);
             }
-            else if (isPdf(res, media))
+            else
             {
-                DecodePdf.run(context, view, res, key);
+                decodeNonImage(context, view, res, key, media);
             }
         }
         else
@@ -95,13 +97,34 @@ final class DecodeChain extends Task<MediaType>
                 {
                     DecodeImage.run(context, view, res, key, size);
                 }
-                else if (isPdf(res, media))
+                else
                 {
-                    DecodePdf.run(context, view, res, key);
+                    decodeNonImage(context, view, res, key, media);
                 }
             }
             // else media is null - currently there is an instance of this task
             // running, do nothing
+        }
+    }
+
+    private static void decodeNonImage(
+            final Preview context,
+            final ImageView view,
+            final Resource res,
+            final String key,
+            final MediaType media)
+    {
+        if (isPdf(res, media))
+        {
+            DecodePdf.run(context, view, res, key);
+        }
+        else if (isAudio(res, media))
+        {
+            DecodeAudio.run(context, view, res, key);
+        }
+        else if (isVideo(res, media))
+        {
+            DecodeVideo.run(context, view, res, key);
         }
     }
 
@@ -180,10 +203,7 @@ final class DecodeChain extends Task<MediaType>
         if (view.getTag(image_decorator_task) == this)
         {
             view.setTag(image_decorator_task, null);
-            if (isPdf(res, result))
-            {
-                DecodePdf.run(context, view, res, key);
-            }
+            decodeNonImage(context, view, res, key, result);
         }
     }
 }

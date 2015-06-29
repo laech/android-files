@@ -15,7 +15,7 @@ import static l.files.ui.preview.Preview.errors;
 import static l.files.ui.preview.Preview.newPlaceholder;
 import static l.files.ui.preview.Preview.sizes;
 
-abstract class Task<C> extends AsyncTask<Void, ScaledSize, C>
+abstract class Decode<C> extends AsyncTask<Void, ScaledSize, C>
 {
     final Logger log = Logger.get(getClass());
 
@@ -24,7 +24,7 @@ abstract class Task<C> extends AsyncTask<Void, ScaledSize, C>
     final Resource res;
     final String key;
 
-    Task(
+    Decode(
             final Preview context,
             final ImageView view,
             final Resource res,

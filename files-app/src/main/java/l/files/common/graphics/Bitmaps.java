@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.BitmapFactory.Options;
 import static android.graphics.BitmapFactory.decodeStream;
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
 import static java.util.Objects.requireNonNull;
@@ -19,6 +18,18 @@ public final class Bitmaps
 {
     private Bitmaps()
     {
+    }
+
+    public static ScaledSize scale(
+            final Bitmap bitmap,
+            final int maxWidth,
+            final int maxHeight)
+    {
+        return scale(
+                bitmap.getWidth(),
+                bitmap.getHeight(),
+                maxWidth,
+                maxHeight);
     }
 
     public static ScaledSize scale(

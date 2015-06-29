@@ -68,7 +68,7 @@
     <string name="ic_file_image">&#xE251;</string>
     <string name="ic_file_pdf">&#xE415;</string>
     <string name="ic_file_text">&#xE873;</string>
-    <string name="ic_file_video">&#xE02C;</string>
+    <string name="ic_file_video">&#xE04B;</string>
 
     <string name="failed_to_get_file_info">Failed to get file information</string>
 

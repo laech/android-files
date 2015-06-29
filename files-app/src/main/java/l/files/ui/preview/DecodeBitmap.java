@@ -17,9 +17,9 @@ import static android.graphics.Color.TRANSPARENT;
 import static android.view.View.VISIBLE;
 import static l.files.R.id.image_decorator_task;
 
-abstract class BitmapTask extends Task<Bitmap>
+abstract class DecodeBitmap extends Decode<Bitmap>
 {
-    BitmapTask(
+    DecodeBitmap(
             final Preview context,
             final ImageView view,
             final Resource res,

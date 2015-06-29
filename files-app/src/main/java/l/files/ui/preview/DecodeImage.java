@@ -14,7 +14,7 @@ import l.files.common.graphics.ScaledSize;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 
-final class DecodeImage extends BitmapTask
+final class DecodeImage extends DecodeBitmap
 {
     final ScaledSize size;
 
