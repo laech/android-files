@@ -10,12 +10,15 @@ import android.widget.ImageView;
 
 import com.google.common.base.Stopwatch;
 
+import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
 
 import static android.R.integer.config_shortAnimTime;
+import static android.graphics.Bitmap.createScaledBitmap;
 import static android.graphics.Color.TRANSPARENT;
 import static android.view.View.VISIBLE;
 import static l.files.R.id.image_decorator_task;
+import static l.files.common.graphics.Bitmaps.scale;
 
 abstract class DecodeBitmap extends Decode<Bitmap>
 {
@@ -39,18 +42,29 @@ abstract class DecodeBitmap extends Decode<Bitmap>
         try
         {
             final Stopwatch watch = Stopwatch.createStarted();
-            final Bitmap bitmap = decode();
+            final Bitmap original = decode();
 
-            if (log.isDebugEnabled())
+            final ScaledSize size = scale(
+                    original,
+                    context.maxWidth,
+                    context.maxHeight);
+
+            publishProgress(size);
+
+            final Bitmap scaled = createScaledBitmap(
+                    original,
+                    size.scaledWidth(),
+                    size.scaledHeight(),
+                    true);
+
+            if (original != scaled)
             {
-                log.debug("decode took %s (%sx%s) for %s",
-                        watch,
-                        bitmap.getWidth(),
-                        bitmap.getHeight(),
-                        res);
+                original.recycle();
             }
 
-            return bitmap;
+            log.debug("%s, %s", watch, res);
+
+            return scaled;
         }
         catch (final Exception e)
         {

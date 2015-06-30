@@ -47,8 +47,8 @@ abstract class Decode<C> extends AsyncTask<Void, ScaledSize, C>
     protected void onProgressUpdate(final ScaledSize... values)
     {
         super.onProgressUpdate(values);
-        sizes.put(key, values[0]);
-        if (view.getTag(image_decorator_task) == this)
+        if (sizes.put(key, values[0]) == null
+                && view.getTag(image_decorator_task) == this)
         {
             view.setVisibility(VISIBLE);
             view.setImageDrawable(newPlaceholder(values[0]));

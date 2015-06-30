@@ -6,11 +6,7 @@ import android.widget.ImageView;
 
 import javax.annotation.Nullable;
 
-import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
-
-import static android.graphics.Bitmap.createScaledBitmap;
-import static l.files.common.graphics.Bitmaps.scale;
 
 abstract class DecodeMedia extends DecodeBitmap
 {
@@ -30,32 +26,7 @@ abstract class DecodeMedia extends DecodeBitmap
         try
         {
             retriever.setDataSource(res.path());
-
-            final Bitmap original = decode(retriever);
-            if (original == null)
-            {
-                return null;
-            }
-
-            final ScaledSize size = scale(
-                    original,
-                    context.maxWidth,
-                    context.maxHeight);
-
-            publishProgress(size);
-
-            final Bitmap scaled = createScaledBitmap(
-                    original,
-                    size.scaledWidth(),
-                    size.scaledHeight(),
-                    true);
-
-            if (original != scaled)
-            {
-                original.recycle();
-            }
-
-            return scaled;
+            return decode(retriever);
         }
         finally
         {
