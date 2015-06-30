@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
-            app:elevation="3dp">
+            app:elevation="1dp">
 
             <Toolbar
                 android:id="@+id/toolbar"
