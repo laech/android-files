@@ -6,11 +6,6 @@ import java.util.Objects;
 
 import l.files.BuildConfig;
 
-import static android.util.Log.DEBUG;
-import static android.util.Log.ERROR;
-import static android.util.Log.VERBOSE;
-import static android.util.Log.WARN;
-import static android.util.Log.isLoggable;
 import static java.lang.String.format;
 
 public final class Logger
@@ -41,22 +36,22 @@ public final class Logger
 
     public boolean isVerboseEnabled()
     {
-        return BuildConfig.DEBUG || isLoggable(tag, VERBOSE);
+        return BuildConfig.DEBUG;
     }
 
     public boolean isDebugEnabled()
     {
-        return BuildConfig.DEBUG || isLoggable(tag, DEBUG);
+        return BuildConfig.DEBUG;
     }
 
     public boolean isWarnEnabled()
     {
-        return BuildConfig.DEBUG || isLoggable(tag, WARN);
+        return BuildConfig.DEBUG;
     }
 
     public boolean isErrorEnabled()
     {
-        return BuildConfig.DEBUG || isLoggable(tag, ERROR);
+        return BuildConfig.DEBUG;
     }
 
     public void verbose(final Object msg)
