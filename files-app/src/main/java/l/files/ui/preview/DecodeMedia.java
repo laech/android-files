@@ -2,21 +2,24 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.widget.ImageView;
+import android.view.View;
 
 import javax.annotation.Nullable;
 
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 
 abstract class DecodeMedia extends DecodeBitmap
 {
     DecodeMedia(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        super(context, view, res, key);
+        super(context, res, stat, view, callback, key);
     }
 
     @Override

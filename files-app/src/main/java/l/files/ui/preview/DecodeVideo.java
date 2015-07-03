@@ -2,30 +2,35 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.google.common.net.MediaType;
 
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 
 final class DecodeVideo extends DecodeMedia
 {
     DecodeVideo(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        super(context, view, res, key);
+        super(context, res, stat, view, callback, key);
     }
 
     static void run(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        new DecodeVideo(context, view, res, key)
+        new DecodeVideo(context, res, stat, view, callback, key)
                 .executeOnExecutor(SERIAL_EXECUTOR);
     }
 

@@ -1,7 +1,8 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.net.MediaType;
@@ -14,9 +15,6 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static java.util.Objects.requireNonNull;
 import static l.files.R.id.image_decorator_task;
 import static l.files.common.graphics.Bitmaps.scale;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -25,36 +23,32 @@ import static l.files.ui.preview.DecodeImage.isImage;
 import static l.files.ui.preview.DecodePdf.isPdf;
 import static l.files.ui.preview.DecodeVideo.isVideo;
 import static l.files.ui.preview.Preview.errors;
-import static l.files.ui.preview.Preview.newPlaceholder;
 import static l.files.ui.preview.Preview.sizes;
 
 final class DecodeChain extends Decode<MediaType>
 {
-    private final Stat stat;
-
-    private DecodeChain(
+    DecodeChain(
             final Preview context,
-            final ImageView view,
             final Resource res,
             final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        super(context, view, res, key);
-        this.stat = requireNonNull(stat, "stat");
+        super(context, res, stat, view, callback, key);
     }
 
     static void run(
             final Preview context,
-            final ImageView view,
             final Resource res,
-            final Stat stat)
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback)
     {
         final Decode task = (Decode) view.getTag(image_decorator_task);
         if (task != null && task.res.equals(res)) return;
         if (task != null) task.cancel(true);
 
-        view.setImageDrawable(null);
-        view.setVisibility(GONE);
         view.setTag(image_decorator_task, null);
 
         if (stat.size() == 0
@@ -65,9 +59,15 @@ final class DecodeChain extends Decode<MediaType>
         }
 
         final String key = context.key(res, stat);
-        if (errors.get(key) != null
-                || context.setCached(key, view))
+        if (errors.get(key) != null)
         {
+            return;
+        }
+
+        Bitmap cached = context.memCache.get(key);
+        if (cached != null)
+        {
+            callback.onPreviewAvailable(res, cached);
             return;
         }
 
@@ -78,28 +78,27 @@ final class DecodeChain extends Decode<MediaType>
         {
             if (media == null || isImage(media))
             {
-                new DecodeChain(context, view, res, stat, key)
+                new DecodeChain(context, res, stat, view, callback, key)
                         .executeOnExecutor(THREAD_POOL_EXECUTOR);
             }
             else
             {
-                decodeNonImage(context, view, res, key, media);
+                decodeNonImage(context, res, stat, view, callback, key, media);
             }
         }
         else
         {
-            view.setVisibility(VISIBLE);
-            view.setImageDrawable(newPlaceholder(size));
+            callback.onSizeAvailable(res, size);
 
             if (media != null)
             {
                 if (isImage(media))
                 {
-                    DecodeImage.run(context, view, res, key, size);
+                    DecodeImage.run(context, res, stat, view, callback, key, size);
                 }
                 else
                 {
-                    decodeNonImage(context, view, res, key, media);
+                    decodeNonImage(context, res, stat, view, callback, key, media);
                 }
             }
             // else media is null - currently there is an instance of this task
@@ -109,22 +108,24 @@ final class DecodeChain extends Decode<MediaType>
 
     private static void decodeNonImage(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key,
             final MediaType media)
     {
         if (isPdf(res, media))
         {
-            DecodePdf.run(context, view, res, key);
+            DecodePdf.run(context, res, stat, view, callback, key);
         }
         else if (isAudio(res, media))
         {
-            DecodeAudio.run(context, view, res, key);
+            DecodeAudio.run(context, res, stat, view, callback, key);
         }
         else if (isVideo(res, media))
         {
-            DecodeVideo.run(context, view, res, key);
+            DecodeVideo.run(context, res, stat, view, callback, key);
         }
     }
 
@@ -166,7 +167,7 @@ final class DecodeChain extends Decode<MediaType>
     protected void onProgressUpdate(final ScaledSize... values)
     {
         super.onProgressUpdate(values);
-        DecodeImage.run(context, view, res, key, values[0]);
+        DecodeImage.run(context, res, stat, view, callback, key, values[0]);
     }
 
     private ScaledSize decodeSize()
@@ -203,7 +204,7 @@ final class DecodeChain extends Decode<MediaType>
         if (view.getTag(image_decorator_task) == this)
         {
             view.setTag(image_decorator_task, null);
-            decodeNonImage(context, view, res, key, result);
+            decodeNonImage(context, res, stat, view, callback, key, result);
         }
     }
 }

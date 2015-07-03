@@ -1,16 +1,14 @@
 package l.files.ui.preview;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.LruCache;
-import android.widget.ImageView;
+import android.view.View;
 
 import l.files.common.graphics.ScaledSize;
-import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-import static android.graphics.Color.TRANSPARENT;
-import static android.view.View.VISIBLE;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -21,13 +19,14 @@ public final class Preview
     static final LruCache<String, String> errors = new LruCache<>(SIZE);
     static final LruCache<String, ScaledSize> sizes = new LruCache<>(SIZE);
 
-    private final LruCache<String, Bitmap> cache;
+    final LruCache<String, Bitmap> memCache;
 
     final int maxWidth;
     final int maxHeight;
 
     @SuppressWarnings("unchecked")
     public Preview(
+            final Context context,
             final LruCache<? super String, Bitmap> cache,
             final int maxWidth,
             final int maxHeight)
@@ -36,34 +35,18 @@ public final class Preview
         checkArgument(maxWidth > 0);
         checkArgument(maxHeight > 0);
 
-        this.cache = (LruCache<String, Bitmap>) cache;
+        this.memCache = (LruCache<String, Bitmap>) cache;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
     }
 
     public void set(
-            final ImageView view,
             final Resource res,
-            final Stat stat)
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback)
     {
-        DecodeChain.run(this, view, res, stat);
-    }
-
-    void cache(final String key, final Bitmap bitmap)
-    {
-        cache.put(key, bitmap);
-    }
-
-    boolean setCached(final String key, final ImageView image)
-    {
-        final Bitmap bitmap = cache.get(key);
-        if (bitmap != null)
-        {
-            image.setImageBitmap(bitmap);
-            image.setVisibility(VISIBLE);
-            return true;
-        }
-        return false;
+        DecodeChain.run(this, res, stat, view, callback);
     }
 
     String key(final Resource res, final Stat stat)
@@ -73,11 +56,4 @@ public final class Preview
                 + "&mtime=" + stat.modified().to(MILLISECONDS);
     }
 
-    static SizedColorDrawable newPlaceholder(final ScaledSize size)
-    {
-        return new SizedColorDrawable(
-                TRANSPARENT,
-                size.scaledWidth(),
-                size.scaledHeight());
-    }
 }

@@ -2,6 +2,11 @@ package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.Time;
@@ -20,13 +25,17 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;
+import l.files.common.graphics.ScaledSize;
+import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.common.view.ActionModeProvider;
 import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.logging.Logger;
 import l.files.ui.Icons;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.StableAdapter;
@@ -34,9 +43,12 @@ import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FileListItem.Header;
 import l.files.ui.mode.Selectable;
 import l.files.ui.preview.Preview;
+import l.files.ui.preview.PreviewCallback;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
+import static android.R.integer.config_shortAnimTime;
+import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
 import static android.text.format.DateFormat.getDateFormat;
@@ -68,6 +80,8 @@ import static l.files.ui.Icons.fileIconStringId;
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         implements Selectable
 {
+    private static final Logger log = Logger.get(FilesAdapter.class);
+
     final Preview decorator;
     final DateFormatter formatter;
     final ActionModeProvider actionModeProvider;
@@ -98,6 +112,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 - res.getDimension(files_list_space) * 2) / columns;
         final int maxThumbnailHeight = metrics.heightPixels;
         this.decorator = new Preview(
+                context,
                 getBitmapCache(context),
                 maxThumbnailWidth,
                 maxThumbnailHeight);
@@ -211,6 +226,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     final class FileHolder extends SelectionModeViewHolder<Resource, File>
+            implements PreviewCallback
     {
         private final TextView icon;
         private final TextView title;
@@ -356,14 +372,11 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
         private void setPreview(final File file)
         {
-            if (file.stat() == null)
+            preview.setImageDrawable(null);
+            preview.setVisibility(GONE);
+            if (file.stat() != null)
             {
-                preview.setImageDrawable(null);
-                preview.setVisibility(GONE);
-            }
-            else
-            {
-                decorator.set(preview, file.resource(), file.stat());
+                decorator.set(file.resource(), file.stat(), itemView, this);
             }
         }
 
@@ -378,6 +391,51 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             {
                 symlink.setEnabled(file.isReadable());
                 symlink.setVisibility(VISIBLE);
+            }
+        }
+
+        @Override
+        public void onSizeAvailable(final Resource item, final ScaledSize size)
+        {
+            log.debug("onSizeAvailable %s", item);
+            if (Objects.equals(item, itemId()))
+            {
+                preview.setVisibility(VISIBLE);
+                preview.setImageDrawable(new SizedColorDrawable(
+                        TRANSPARENT,
+                        size.scaledWidth(),
+                        size.scaledHeight()));
+            }
+        }
+
+        @Override
+        public void onPreviewAvailable(final Resource item, final Bitmap bitmap)
+        {
+            log.debug("onPreviewAvailable %s", item);
+            if (Objects.equals(item, itemId()))
+            {
+                final Resources resources = preview.getResources();
+                final TransitionDrawable drawable = new TransitionDrawable(
+                        new Drawable[]{
+                                new ColorDrawable(TRANSPARENT),
+                                new BitmapDrawable(resources, bitmap)
+                        }
+                );
+                preview.setImageDrawable(drawable);
+                final int duration = resources.getInteger(config_shortAnimTime);
+                drawable.startTransition(duration);
+                preview.setVisibility(VISIBLE);
+                // TODO use animation?
+            }
+        }
+
+        @Override
+        public void onPreviewFailed(final Resource item)
+        {
+            log.debug("onPreviewFailed %s", item);
+            if (Objects.equals(item, itemId()))
+            {
+                preview.setVisibility(GONE);
             }
         }
     }

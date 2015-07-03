@@ -4,12 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.google.common.net.MediaType;
 
 import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
@@ -22,13 +23,15 @@ import static l.files.common.graphics.Bitmaps.scale;
 
 final class DecodePdf extends DecodeBitmap
 {
-    private DecodePdf(
+    DecodePdf(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        super(context, view, res, key);
+        super(context, res, stat, view, callback, key);
     }
 
     static boolean isPdf(final Resource res, final MediaType media)
@@ -45,15 +48,17 @@ final class DecodePdf extends DecodeBitmap
 
     static void run(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
         /*
          * PdfRenderer is not thread safe, at class level, not instance level
          * https://code.google.com/p/android/issues/detail?id=93791
          */
-        new DecodePdf(context, view, res, key)
+        new DecodePdf(context, res, stat, view, callback, key)
                 .executeOnExecutor(SERIAL_EXECUTOR);
     }
 

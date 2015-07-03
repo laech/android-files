@@ -1,22 +1,15 @@
 package l.files.ui.preview;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.google.common.base.Stopwatch;
 
 import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 
-import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Bitmap.createScaledBitmap;
-import static android.graphics.Color.TRANSPARENT;
-import static android.view.View.VISIBLE;
 import static l.files.R.id.image_decorator_task;
 import static l.files.common.graphics.Bitmaps.scale;
 
@@ -24,11 +17,13 @@ abstract class DecodeBitmap extends Decode<Bitmap>
 {
     DecodeBitmap(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
-        super(context, view, res, key);
+        super(context, res, stat, view, callback, key);
     }
 
     @Override
@@ -77,23 +72,13 @@ abstract class DecodeBitmap extends Decode<Bitmap>
     protected abstract Bitmap decode() throws Exception;
 
     @Override
-    void onSuccess(final Bitmap bitmap)
+    void onSuccess(final Bitmap result)
     {
-        context.cache(key, bitmap);
+        context.memCache.put(key, result);
         if (view.getTag(image_decorator_task) == this)
         {
             view.setTag(image_decorator_task, null);
-            final Resources res = view.getResources();
-            final TransitionDrawable drawable = new TransitionDrawable(
-                    new Drawable[]{
-                            new ColorDrawable(TRANSPARENT),
-                            new BitmapDrawable(res, bitmap)
-                    }
-            );
-            view.setImageDrawable(drawable);
-            final int duration = res.getInteger(config_shortAnimTime);
-            drawable.startTransition(duration);
-            view.setVisibility(VISIBLE);
+            callback.onPreviewAvailable(res, result);
         }
     }
 }

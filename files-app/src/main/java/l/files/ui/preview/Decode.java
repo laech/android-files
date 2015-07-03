@@ -1,39 +1,42 @@
 package l.files.ui.preview;
 
 import android.os.AsyncTask;
-import android.widget.ImageView;
+import android.view.View;
 
 import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 import l.files.logging.Logger;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static java.util.Objects.requireNonNull;
 import static l.files.R.id.image_decorator_task;
 import static l.files.ui.preview.Preview.errors;
-import static l.files.ui.preview.Preview.newPlaceholder;
 import static l.files.ui.preview.Preview.sizes;
 
-abstract class Decode<C> extends AsyncTask<Void, ScaledSize, C>
+abstract class Decode<R> extends AsyncTask<Void, ScaledSize, R>
 {
     final Logger log = Logger.get(getClass());
-
     final Preview context;
-    final ImageView view;
     final Resource res;
+    final Stat stat;
+    final View view;
+    final PreviewCallback callback;
     final String key;
 
     Decode(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key)
     {
         this.context = requireNonNull(context, "context");
-        this.view = requireNonNull(view, "view");
         this.res = requireNonNull(res, "res");
+        this.stat = requireNonNull(stat, "stat");
         this.key = requireNonNull(key, "key");
+        this.view = requireNonNull(view, "view");
+        this.callback = requireNonNull(callback, "callback");
     }
 
     @Override
@@ -47,16 +50,16 @@ abstract class Decode<C> extends AsyncTask<Void, ScaledSize, C>
     protected void onProgressUpdate(final ScaledSize... values)
     {
         super.onProgressUpdate(values);
-        if (sizes.put(key, values[0]) == null
+        final ScaledSize size = values[0];
+        if (sizes.put(key, size) == null
                 && view.getTag(image_decorator_task) == this)
         {
-            view.setVisibility(VISIBLE);
-            view.setImageDrawable(newPlaceholder(values[0]));
+            callback.onSizeAvailable(res, size);
         }
     }
 
     @Override
-    protected final void onPostExecute(final C result)
+    protected final void onPostExecute(final R result)
     {
         super.onPostExecute(result);
         if (result == null)
@@ -75,12 +78,12 @@ abstract class Decode<C> extends AsyncTask<Void, ScaledSize, C>
         sizes.remove(key);
         if (view.getTag(image_decorator_task) == this)
         {
-            view.setVisibility(GONE);
             view.setTag(image_decorator_task, null);
+            callback.onPreviewFailed(res);
         }
     }
 
-    void onSuccess(final C result)
+    void onSuccess(final R result)
     {
     }
 }

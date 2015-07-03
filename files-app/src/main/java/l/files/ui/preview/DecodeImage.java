@@ -2,7 +2,7 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.google.common.net.MediaType;
 
@@ -10,6 +10,7 @@ import java.io.InputStream;
 
 import l.files.common.graphics.ScaledSize;
 import l.files.fs.Resource;
+import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.util.Objects.requireNonNull;
@@ -19,14 +20,16 @@ final class DecodeImage extends DecodeBitmap
 {
     final ScaledSize size;
 
-    private DecodeImage(
+    DecodeImage(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key,
             final ScaledSize size)
     {
-        super(context, view, res, key);
+        super(context, res, stat, view, callback, key);
         this.size = requireNonNull(size, "size");
     }
 
@@ -37,12 +40,14 @@ final class DecodeImage extends DecodeBitmap
 
     static void run(
             final Preview context,
-            final ImageView view,
             final Resource res,
+            final Stat stat,
+            final View view,
+            final PreviewCallback callback,
             final String key,
             final ScaledSize size)
     {
-        new DecodeImage(context, view, res, key, size)
+        new DecodeImage(context, res, stat, view, callback, key, size)
                 .executeOnExecutor(SERIAL_EXECUTOR);
     }
 
