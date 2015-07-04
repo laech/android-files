@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.VisibleForTesting;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.ActionMode;
@@ -156,7 +155,6 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
         recycler.setAdapter(adapter);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(
                 getResources().getInteger(files_list_columns), VERTICAL));
-        recycler.setItemAnimator(null);
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -229,12 +227,6 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
         final Activity activity = getActivity();
         if (activity != null && !activity.isFinishing())
         {
-            if (adapter.setItemsCalled && recycler.getItemAnimator() == null)
-            {
-                // First load no animation to speed up list population
-                recycler.setItemAnimator(new DefaultItemAnimator());
-            }
-
             adapter.setItems(data.items());
             //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null)
