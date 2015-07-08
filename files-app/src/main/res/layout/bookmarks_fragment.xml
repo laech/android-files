@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground"
     android:elevation="3dp"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <TextView
@@ -24,6 +25,8 @@
         android:id="@+id/bookmarks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         android:scrollbars="vertical"/>
 
 </LinearLayout>
