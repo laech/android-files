@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme" parent="android:Theme.Material.Light"/>
+    <style name="Theme" parent="android:Theme.Material.Light">
+        <item name="android:colorPrimaryDark">#e0e0e0</item>
+    </style>
 
     <style name="Theme.NoActionBar">
         <item name="android:windowActionModeOverlay">true</item>
