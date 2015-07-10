@@ -56,428 +56,326 @@ import static l.files.ui.IOExceptions.message;
 import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity implements
-        OnBackStackChangedListener,
-        ActionModeProvider,
-        OnItemSelectedListener
-{
-    private static final Logger log = Logger.get(FilesActivity.class);
+    OnBackStackChangedListener,
+    ActionModeProvider,
+    OnItemSelectedListener {
 
-    public static final String EXTRA_DIRECTORY = "directory";
+  private static final Logger log = Logger.get(FilesActivity.class);
 
-    private EventBus bus;
+  public static final String EXTRA_DIRECTORY = "directory";
 
-    private ActionBarDrawerToggle drawerToggle;
-    private ActionMode currentActionMode;
-    private ActionMode.Callback currentActionModeCallback;
+  private EventBus bus;
 
-    private DrawerLayout drawer;
-    private DrawerListener drawerListener;
+  private ActionBarDrawerToggle drawerToggle;
+  private ActionMode currentActionMode;
+  private ActionMode.Callback currentActionModeCallback;
 
-    private HierarchyAdapter hierarchy;
-    private Toolbar toolbar;
-    private Spinner title;
+  private DrawerLayout drawer;
+  private DrawerListener drawerListener;
 
-    public ImmutableList<Resource> hierarchy()
-    {
-        return hierarchy.get();
+  private HierarchyAdapter hierarchy;
+  private Toolbar toolbar;
+  private Spinner title;
+
+  public ImmutableList<Resource> hierarchy() {
+    return hierarchy.get();
+  }
+
+  public Spinner title() {
+    return title;
+  }
+
+  public Toolbar toolbar() {
+    return toolbar;
+  }
+
+  @Override protected void onCreate(Bundle state) {
+    super.onCreate(state);
+    setContentView(R.layout.files_activity);
+
+    toolbar = find(R.id.toolbar, this);
+    hierarchy = new HierarchyAdapter();
+    title = find(R.id.title, this);
+    title.setAdapter(hierarchy);
+    title.setOnItemSelectedListener(this);
+
+    bus = Events.get();
+    drawer = find(R.id.drawer_layout, this);
+    drawerListener = new DrawerListener();
+    drawerToggle = new ActionBarDrawerToggle(this, drawer, 0, 0);
+
+    drawer.setDrawerListener(DrawerListeners.compose(drawerToggle, drawerListener));
+
+    setActionBar(toolbar);
+    ActionBar actionBar = getActionBar();
+    assert actionBar != null;
+    actionBar.setDisplayHomeAsUpEnabled(true);
+    actionBar.setDisplayShowTitleEnabled(false);
+
+    setOptionsMenu(OptionsMenus.compose(
+        new ActionBarDrawerToggleAction(drawerToggle),
+        new GoBackOnHomePressedAction(this),
+        new NewTabMenu(this),
+        new AboutMenu(this)));
+
+    getFragmentManager().addOnBackStackChangedListener(this);
+
+    if (state == null) {
+      getFragmentManager()
+          .beginTransaction()
+          .replace(
+              R.id.content,
+              FilesFragment.create(initialDirectory()),
+              FilesFragment.TAG)
+          .commit();
     }
 
-    public Spinner title()
-    {
-        return title;
-    }
-
-    public Toolbar toolbar()
-    {
-        return toolbar;
-    }
-
-    @Override
-    protected void onCreate(final Bundle state)
-    {
-        super.onCreate(state);
-        setContentView(R.layout.files_activity);
-
-        toolbar = find(R.id.toolbar, this);
-        hierarchy = new HierarchyAdapter();
-        title = find(R.id.title, this);
-        title.setAdapter(hierarchy);
-        title.setOnItemSelectedListener(this);
-
-        bus = Events.get();
-        drawer = find(R.id.drawer_layout, this);
-        drawerListener = new DrawerListener();
-        drawerToggle = new ActionBarDrawerToggle(this, drawer, 0, 0);
-
-        drawer.setDrawerListener(DrawerListeners.compose(drawerToggle, drawerListener));
-
-        setActionBar(toolbar);
-        final ActionBar actionBar = getActionBar();
-        assert actionBar != null;
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-
-        setOptionsMenu(OptionsMenus.compose(
-                new ActionBarDrawerToggleAction(drawerToggle),
-                new GoBackOnHomePressedAction(this),
-                new NewTabMenu(this),
-                new AboutMenu(this)));
-
-        getFragmentManager().addOnBackStackChangedListener(this);
-
-        if (state == null)
-        {
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            R.id.content,
-                            FilesFragment.create(initialDirectory()),
-                            FilesFragment.TAG)
-                    .commit();
-        }
-
-        new Handler().post(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                updateToolBar();
-            }
-        });
-    }
-
-    @Override
-    public void onItemSelected(
-            final AdapterView<?> parent,
-            final View view,
-            final int position,
-            final long id)
-    {
-        log.debug("onItemSelected");
-        final Resource item = (Resource) parent.getAdapter().getItem(position);
-        if (!Objects.equals(item, fragment().directory()))
-        {
-            open(OpenFileRequest.create(item));
-        }
-        else
-        {
-            log.debug("Already show requested directory.");
-        }
-    }
-
-    @Override
-    public void onNothingSelected(final AdapterView<?> parent)
-    {
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        getFragmentManager().removeOnBackStackChangedListener(this);
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onPostCreate(final Bundle savedInstanceState)
-    {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(final Configuration newConfig)
-    {
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    private Resource initialDirectory()
-    {
-        final Resource dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
-        return dir == null ? DIR_HOME : dir;
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        bus.register(this);
-    }
-
-    @Override
-    protected void onPause()
-    {
-        bus.unregister(this);
-        super.onPause();
-    }
-
-    @Override
-    public void onBackPressed()
-    {
-        if (isSidebarOpen())
-        {
-            closeSidebar();
-        }
-        else
-        {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void onBackStackChanged()
-    {
+    new Handler().post(new Runnable() {
+      @Override public void run() {
         updateToolBar();
-    }
+      }
+    });
+  }
 
-    private void updateToolBar()
-    {
-        final FilesFragment fragment = fragment();
-        final int backStacks = getFragmentManager().getBackStackEntryCount();
-        drawerToggle.setDrawerIndicatorEnabled(backStacks == 0);
-        hierarchy.set(fragment.directory());
-        title.setSelection(hierarchy.indexOf(fragment().directory()));
+  @Override public void onItemSelected(
+      AdapterView<?> parent, View view, int position, long id) {
+    log.debug("onItemSelected");
+    Resource item = (Resource) parent.getAdapter().getItem(position);
+    if (!Objects.equals(item, fragment().directory())) {
+      open(OpenFileRequest.create(item));
+    } else {
+      log.debug("Already show requested directory.");
     }
+  }
 
-    @Override
-    public boolean onKeyLongPress(final int keyCode, final KeyEvent event)
-    {
-        if (keyCode == KEYCODE_BACK)
-        {
-            while (getFragmentManager().getBackStackEntryCount() > 0)
-            {
-                getFragmentManager().popBackStackImmediate();
-            }
-            return true;
+  @Override public void onNothingSelected(AdapterView<?> parent) {
+  }
+
+  @Override protected void onDestroy() {
+    getFragmentManager().removeOnBackStackChangedListener(this);
+    super.onDestroy();
+  }
+
+  @Override protected void onPostCreate(Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    drawerToggle.syncState();
+  }
+
+  @Override public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    drawerToggle.onConfigurationChanged(newConfig);
+  }
+
+  private Resource initialDirectory() {
+    Resource dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+    return dir == null ? DIR_HOME : dir;
+  }
+
+  @Override protected void onResume() {
+    super.onResume();
+    bus.register(this);
+  }
+
+  @Override protected void onPause() {
+    bus.unregister(this);
+    super.onPause();
+  }
+
+  @Override public void onBackPressed() {
+    if (isSidebarOpen()) {
+      closeSidebar();
+    } else {
+      super.onBackPressed();
+    }
+  }
+
+  @Override public void onBackStackChanged() {
+    updateToolBar();
+  }
+
+  private void updateToolBar() {
+    FilesFragment fragment = fragment();
+    int backStacks = getFragmentManager().getBackStackEntryCount();
+    drawerToggle.setDrawerIndicatorEnabled(backStacks == 0);
+    hierarchy.set(fragment.directory());
+    title.setSelection(hierarchy.indexOf(fragment().directory()));
+  }
+
+  @Override
+  public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+    if (keyCode == KEYCODE_BACK) {
+      while (getFragmentManager().getBackStackEntryCount() > 0) {
+        getFragmentManager().popBackStackImmediate();
+      }
+      return true;
+    }
+    return super.onKeyLongPress(keyCode, event);
+  }
+
+  @Override public void onActionModeFinished(ActionMode mode) {
+    super.onActionModeFinished(mode);
+    log.debug("onActionModeFinished");
+
+    currentActionMode = null;
+    currentActionModeCallback = null;
+    drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
+  }
+
+  @Override public void onActionModeStarted(ActionMode mode) {
+    super.onActionModeStarted(mode);
+
+    if (isSidebarOpen()) {
+      drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
+    } else {
+      drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+    }
+  }
+
+  @Override public ActionMode startActionMode(ActionMode.Callback callback) {
+    log.debug("startActionMode");
+    currentActionModeCallback = callback;
+    return (currentActionMode = super.startActionMode(callback));
+  }
+
+  private boolean isSidebarOpen() {
+    return drawer.isDrawerOpen(START);
+  }
+
+  private void closeSidebar() {
+    drawer.closeDrawer(START);
+  }
+
+  public ActionBarDrawerToggle drawerToggle() {
+    return drawerToggle;
+  }
+
+  @Nullable
+  @Override public ActionMode currentActionMode() {
+    return currentActionMode;
+  }
+
+  @Nullable public ActionMode.Callback currentActionModeCallback() {
+    return currentActionModeCallback;
+  }
+
+  public DrawerLayout drawerLayout() {
+    return drawer;
+  }
+
+  public void onEventMainThread(CloseActionModeRequest request) {
+    log.debug("onEventMainThread(%s)", request);
+    if (currentActionMode != null) {
+      currentActionMode.finish();
+    }
+  }
+
+  public void onEventMainThread(OpenFileRequest request) {
+    log.debug("onEventMainThread(%s)", request);
+    if (currentActionMode != null) {
+      currentActionMode.finish();
+    }
+    open(request);
+  }
+
+  private void open(final OpenFileRequest request) {
+    log.debug("open(%s)", request);
+    closeDrawerThenRun(new Runnable() {
+      @Override public void run() {
+        show(request);
+      }
+    });
+  }
+
+  private void closeDrawerThenRun(Runnable runnable) {
+    if (drawer.isDrawerOpen(START)) {
+      drawerListener.mRunOnClosed = runnable;
+      drawer.closeDrawers();
+    } else {
+      runnable.run();
+    }
+  }
+
+  private void show(final OpenFileRequest request) {
+    new AsyncTask<Void, Void, Object>() {
+      @Override protected Object doInBackground(Void... params) {
+        try {
+          return request.getResource().stat(FOLLOW);
+        } catch (IOException e) {
+          log.debug(e, "%s", request);
+          return e;
         }
-        return super.onKeyLongPress(keyCode, event);
-    }
+      }
 
-    @Override
-    public void onActionModeFinished(final ActionMode mode)
-    {
-        super.onActionModeFinished(mode);
-        log.debug("onActionModeFinished");
-
-        currentActionMode = null;
-        currentActionModeCallback = null;
-        drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
-    }
-
-    @Override
-    public void onActionModeStarted(final ActionMode mode)
-    {
-        super.onActionModeStarted(mode);
-
-        if (isSidebarOpen())
-        {
-            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
+      @Override protected void onPostExecute(Object result) {
+        super.onPostExecute(result);
+        if (!isDestroyed() && !isFinishing()) {
+          if (result instanceof Stat) {
+            show(request.getResource(), (Stat) result);
+          } else {
+            String msg = message((IOException) result);
+            makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
+          }
         }
-        else
-        {
-            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
-        }
+      }
+    }.execute();
+  }
+
+  private void show(Resource resource, Stat stat) {
+    if (!isReadable(resource)) { // TODO Check in background
+      showPermissionDenied();
+    } else if (stat.isDirectory()) {
+      showDirectory(resource);
+    } else {
+      showFile(resource);
     }
+  }
 
-    @Override
-    public ActionMode startActionMode(final ActionMode.Callback callback)
-    {
-        log.debug("startActionMode");
-        currentActionModeCallback = callback;
-        return (currentActionMode = super.startActionMode(callback));
+  private boolean isReadable(Resource resource) {
+    try {
+      return resource.readable();
+    } catch (IOException e) {
+      return false;
     }
+  }
 
-    private boolean isSidebarOpen()
-    {
-        return drawer.isDrawerOpen(START);
+  private void showPermissionDenied() {
+    makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
+  }
+
+  private void showDirectory(Resource resource) {
+    FilesFragment fragment = fragment();
+    if (fragment.directory().equals(resource)) {
+      return;
     }
+    FilesFragment f = FilesFragment.create(resource);
+    getFragmentManager()
+        .beginTransaction()
+        .replace(R.id.content, f, FilesFragment.TAG)
+        .addToBackStack(null)
+        .setBreadCrumbTitle(resource.name())
+        .setTransition(TRANSIT_FRAGMENT_OPEN)
+        .commit();
+  }
 
-    private void closeSidebar()
-    {
-        drawer.closeDrawer(START);
+  private void showFile(Resource resource) {
+    FileOpener.get(this).apply(resource);
+  }
+
+  public FilesFragment fragment() {
+    return (FilesFragment) getFragmentManager()
+        .findFragmentByTag(FilesFragment.TAG);
+  }
+
+  private static class DrawerListener extends SimpleDrawerListener {
+
+    Runnable mRunOnClosed;
+
+    @Override public void onDrawerClosed(View drawerView) {
+      super.onDrawerClosed(drawerView);
+      if (mRunOnClosed != null) {
+        mRunOnClosed.run();
+        mRunOnClosed = null;
+      }
     }
-
-    public ActionBarDrawerToggle drawerToggle()
-    {
-        return drawerToggle;
-    }
-
-    @Nullable
-    @Override
-    public ActionMode currentActionMode()
-    {
-        return currentActionMode;
-    }
-
-    @Nullable
-    public ActionMode.Callback currentActionModeCallback()
-    {
-        return currentActionModeCallback;
-    }
-
-    public DrawerLayout drawerLayout()
-    {
-        return drawer;
-    }
-
-    public void onEventMainThread(final CloseActionModeRequest request)
-    {
-        log.debug("onEventMainThread(%s)", request);
-        if (currentActionMode != null)
-        {
-            currentActionMode.finish();
-        }
-    }
-
-    public void onEventMainThread(final OpenFileRequest request)
-    {
-        log.debug("onEventMainThread(%s)", request);
-        if (currentActionMode != null)
-        {
-            currentActionMode.finish();
-        }
-        open(request);
-    }
-
-    private void open(final OpenFileRequest request)
-    {
-        log.debug("open(%s)", request);
-        closeDrawerThenRun(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                show(request);
-            }
-        });
-    }
-
-    private void closeDrawerThenRun(final Runnable runnable)
-    {
-        if (drawer.isDrawerOpen(START))
-        {
-            drawerListener.mRunOnClosed = runnable;
-            drawer.closeDrawers();
-        }
-        else
-        {
-            runnable.run();
-        }
-    }
-
-    private void show(final OpenFileRequest request)
-    {
-        new AsyncTask<Void, Void, Object>()
-        {
-            @Override
-            protected Object doInBackground(final Void... params)
-            {
-                try
-                {
-                    return request.getResource().stat(FOLLOW);
-                }
-                catch (final IOException e)
-                {
-                    log.debug(e, "%s", request);
-                    return e;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(final Object result)
-            {
-                super.onPostExecute(result);
-                if (!isDestroyed() && !isFinishing())
-                {
-                    if (result instanceof Stat)
-                    {
-                        show(request.getResource(), (Stat) result);
-                    }
-                    else
-                    {
-                        final String msg = message((IOException) result);
-                        makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
-                    }
-                }
-            }
-        }.execute();
-    }
-
-    private void show(final Resource resource, final Stat stat)
-    {
-        if (!isReadable(resource))
-        { // TODO Check in background
-            showPermissionDenied();
-        }
-        else if (stat.isDirectory())
-        {
-            showDirectory(resource);
-        }
-        else
-        {
-            showFile(resource);
-        }
-    }
-
-    private boolean isReadable(final Resource resource)
-    {
-        try
-        {
-            return resource.readable();
-        }
-        catch (final IOException e)
-        {
-            return false;
-        }
-    }
-
-    private void showPermissionDenied()
-    {
-        makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
-    }
-
-    private void showDirectory(final Resource resource)
-    {
-        final FilesFragment fragment = fragment();
-        if (fragment.directory().equals(resource))
-        {
-            return;
-        }
-        final FilesFragment f = FilesFragment.create(resource);
-        getFragmentManager()
-                .beginTransaction()
-                .replace(R.id.content, f, FilesFragment.TAG)
-                .addToBackStack(null)
-                .setBreadCrumbTitle(resource.name())
-                .setTransition(TRANSIT_FRAGMENT_OPEN)
-                .commit();
-    }
-
-    private void showFile(final Resource resource)
-    {
-        FileOpener.get(this).apply(resource);
-    }
-
-    public FilesFragment fragment()
-    {
-        return (FilesFragment) getFragmentManager()
-                .findFragmentByTag(FilesFragment.TAG);
-    }
-
-    private static class DrawerListener extends SimpleDrawerListener
-    {
-
-        Runnable mRunOnClosed;
-
-        @Override
-        public void onDrawerClosed(final View drawerView)
-        {
-            super.onDrawerClosed(drawerView);
-            if (mRunOnClosed != null)
-            {
-                mRunOnClosed.run();
-                mRunOnClosed = null;
-            }
-        }
-    }
+  }
 }
