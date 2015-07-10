@@ -37,6 +37,7 @@ public final class FilesApp extends Application {
           new ThreadPolicy.Builder()
               .detectAll()
               .penaltyDialog()
+              .penaltyLog()
               .build());
 
       StrictMode.setVmPolicy(
