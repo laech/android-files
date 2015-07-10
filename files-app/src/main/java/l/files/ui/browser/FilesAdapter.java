@@ -78,387 +78,307 @@ import static l.files.ui.Icons.defaultFileIconStringId;
 import static l.files.ui.Icons.fileIconStringId;
 
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
-        implements Selectable
-{
-    private static final Logger log = Logger.get(FilesAdapter.class);
+    implements Selectable {
 
-    final Preview decorator;
-    final DateFormatter formatter;
-    final ActionModeProvider actionModeProvider;
-    final ActionMode.Callback actionModeCallback;
-    final Selection<Resource> selection;
-    final EventBus bus;
+  private static final Logger log = Logger.get(FilesAdapter.class);
 
-    boolean setItemsCalled;
+  final Preview decorator;
+  final DateFormatter formatter;
+  final ActionModeProvider actionModeProvider;
+  final ActionMode.Callback actionModeCallback;
+  final Selection<Resource> selection;
+  final EventBus bus;
 
-    FilesAdapter(
-            final Context context,
-            final Selection<Resource> selection,
-            final ActionModeProvider actionModeProvider,
-            final ActionMode.Callback actionModeCallback,
-            final EventBus bus)
-    {
-        this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
-        this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
-        this.bus = requireNonNull(bus, "bus");
-        this.selection = requireNonNull(selection, "selection");
-        this.formatter = new DateFormatter(context);
+  boolean setItemsCalled;
 
-        final Resources res = context.getResources();
-        final DisplayMetrics metrics = res.getDisplayMetrics();
-        final int columns = res.getInteger(files_list_columns);
-        final int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
-                - res.getDimension(files_item_space_horizontal) * columns * 2
-                - res.getDimension(files_list_space) * 2) / columns;
-        final int maxThumbnailHeight = metrics.heightPixels;
-        this.decorator = new Preview(
-                context,
-                getBitmapCache(context),
-                maxThumbnailWidth,
-                maxThumbnailHeight);
+  FilesAdapter(
+      Context context,
+      Selection<Resource> selection,
+      ActionModeProvider actionModeProvider,
+      ActionMode.Callback actionModeCallback,
+      EventBus bus) {
+
+    this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
+    this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
+    this.bus = requireNonNull(bus, "bus");
+    this.selection = requireNonNull(selection, "selection");
+    this.formatter = new DateFormatter(context);
+
+    Resources res = context.getResources();
+    DisplayMetrics metrics = res.getDisplayMetrics();
+    int columns = res.getInteger(files_list_columns);
+    int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
+        - res.getDimension(files_item_space_horizontal) * columns * 2
+        - res.getDimension(files_list_space) * 2) / columns;
+    int maxThumbnailHeight = metrics.heightPixels;
+    this.decorator = new Preview(
+        context,
+        getBitmapCache(context),
+        maxThumbnailWidth,
+        maxThumbnailHeight);
+  }
+
+  @Override public void setItems(List<? extends FileListItem> items) {
+    super.setItems(items);
+    setItemsCalled = true;
+  }
+
+  @Override public int getItemViewType(int position) {
+    return getItem(position).isFile() ? 0 : 1;
+  }
+
+  @Override
+  public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    Context context = parent.getContext();
+    LayoutInflater inflater = LayoutInflater.from(context);
+    return viewType == 0
+        ? new FileHolder(inflater.inflate(files_item, parent, false))
+        : new HeaderHolder(inflater.inflate(files_item_header, parent, false));
+  }
+
+  @Override public void onBindViewHolder(ViewHolder holder, int position) {
+    FileListItem item = getItem(position);
+    if (item.isHeader()) {
+      ((HeaderHolder) holder).bind((Header) item);
+    } else {
+      ((FileHolder) holder).bind((File) item);
+    }
+  }
+
+  @Override public Object getItemIdObject(int position) {
+    FileListItem item = getItem(position);
+    if (item instanceof File) {
+      return ((File) item).resource();
+    }
+    return item;
+  }
+
+  @Override public void selectAll() {
+    List<FileListItem> items = items();
+    List<Resource> resources = new ArrayList<>(items.size());
+    for (FileListItem item : items) {
+      if (item.isFile()) {
+        resources.add(((File) item).resource());
+      }
+    }
+    selection.addAll(resources);
+  }
+
+  static class DateFormatter implements Function<Stat, CharSequence> {
+    Context context;
+    DateFormat futureFormat;
+    DateFormat dateFormat;
+    DateFormat timeFormat;
+    Date date = new Date();
+    Time currentTime = new Time();
+    Time thatTime = new Time();
+    int flags
+        = FORMAT_SHOW_DATE
+        | FORMAT_ABBREV_MONTH
+        | FORMAT_NO_YEAR;
+
+    DateFormatter(Context context) {
+      this.context = requireNonNull(context, "context");
+      this.futureFormat = getDateTimeInstance(MEDIUM, MEDIUM);
+      this.dateFormat = getDateFormat(context);
+      this.timeFormat = getTimeFormat(context);
     }
 
-    @Override
-    public void setItems(final List<? extends FileListItem> items)
-    {
-        super.setItems(items);
-        setItemsCalled = true;
+    @Override public CharSequence apply(Stat file) {
+      Instant instant = file.modified();
+      long millis = instant.to(MILLISECONDS);
+      date.setTime(millis);
+      currentTime.setToNow();
+      thatTime.set(millis);
+      if (currentTime.before(thatTime)) {
+        return futureFormat.format(date);
+      }
+      if (currentTime.year == thatTime.year) {
+        return currentTime.yearDay == thatTime.yearDay
+            ? timeFormat.format(date)
+            : formatDateTime(context, millis, flags);
+      }
+      return dateFormat.format(date);
+    }
+  }
+
+  final class FileHolder extends SelectionModeViewHolder<Resource, File>
+      implements PreviewCallback {
+
+    private final TextView icon;
+    private final TextView title;
+    private final TextView summary;
+    private final TextView symlink;
+    private final ImageView preview;
+
+    FileHolder(View itemView) {
+      super(itemView, selection, actionModeProvider, actionModeCallback);
+      this.icon = find(R.id.icon, this);
+      this.title = find(R.id.title, this);
+      this.summary = find(R.id.summary, this);
+      this.symlink = find(R.id.symlink, this);
+      this.preview = find(R.id.preview, this);
+      this.itemView.setOnClickListener(this);
+      this.itemView.setOnLongClickListener(this);
     }
 
-    @Override
-    public int getItemViewType(final int position)
-    {
-        return getItem(position).isFile() ? 0 : 1;
+    @Override protected Resource itemId(File file) {
+      return file.resource();
     }
 
-    @Override
-    public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType)
-    {
-        final Context context = parent.getContext();
-        final LayoutInflater inflater = LayoutInflater.from(context);
-        return viewType == 0
-                ? new FileHolder(inflater.inflate(files_item, parent, false))
-                : new HeaderHolder(inflater.inflate(files_item_header, parent, false));
+    @Override protected void onClick(View v, File file) {
+      bus.post(OpenFileRequest.create(file.resource()));
     }
 
-    @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position)
-    {
-        final FileListItem item = getItem(position);
-        if (item.isHeader())
-        {
-            ((HeaderHolder) holder).bind((Header) item);
-        }
-        else
-        {
-            ((FileHolder) holder).bind((File) item);
-        }
+    @Override public void bind(File file) {
+      super.bind(file);
+      setTitle(file);
+      setIcon(file);
+      setSymlink(file);
+      setSummary(file);
+      setPreview(file);
     }
 
-    @Override
-    public Object getItemIdObject(final int position)
-    {
-        final FileListItem item = getItem(position);
-        if (item instanceof File)
-        {
-            return ((File) item).resource();
-        }
-        return item;
+    private void setTitle(File file) {
+      title.setText(file.resource().name());
+      title.setEnabled(file.stat() != null && file.isReadable());
     }
 
-    @Override
-    public void selectAll()
-    {
-        final List<FileListItem> items = items();
-        final List<Resource> resources = new ArrayList<>(items.size());
-        for (final FileListItem item : items)
-        {
-            if (item.isFile())
-            {
-                resources.add(((File) item).resource());
-            }
-        }
-        selection.addAll(resources);
+    private void setIcon(File file) {
+      icon.setEnabled(file.targetStat() != null && file.isReadable());
+
+      if (file.targetStat() != null
+          && setLocalIcon(icon, file.targetStat())) {
+        icon.setTypeface(SANS_SERIF, BOLD);
+      } else {
+        icon.setText(iconTextId(file));
+        icon.setTypeface(Icons.font(icon.getResources().getAssets()));
+      }
     }
 
-    static final class DateFormatter implements Function<Stat, CharSequence>
-    {
-        final Context context;
-        final DateFormat futureFormat;
-        final DateFormat dateFormat;
-        final DateFormat timeFormat;
-        final Date date = new Date();
-        final Time currentTime = new Time();
-        final Time thatTime = new Time();
-        final int flags
-                = FORMAT_SHOW_DATE
-                | FORMAT_ABBREV_MONTH
-                | FORMAT_NO_YEAR;
-
-        DateFormatter(final Context context)
-        {
-            this.context = requireNonNull(context, "context");
-            this.futureFormat = getDateTimeInstance(MEDIUM, MEDIUM);
-            this.dateFormat = getDateFormat(context);
-            this.timeFormat = getTimeFormat(context);
-        }
-
-        @Override
-        public CharSequence apply(final Stat file)
-        {
-            final Instant instant = file.modified();
-            final long millis = instant.to(MILLISECONDS);
-            date.setTime(millis);
-            currentTime.setToNow();
-            thatTime.set(millis);
-            if (currentTime.before(thatTime))
-            {
-                return futureFormat.format(date);
-            }
-            if (currentTime.year == thatTime.year)
-            {
-                return currentTime.yearDay == thatTime.yearDay
-                        ? timeFormat.format(date)
-                        : formatDateTime(context, millis, flags);
-            }
-            return dateFormat.format(date);
-        }
+    private boolean setLocalIcon(TextView icon, Stat stat) {
+      if (stat.isBlockDevice()) {
+        icon.setText("B");
+      } else if (stat.isCharacterDevice()) {
+        icon.setText("C");
+      } else if (stat.isSocket()) {
+        icon.setText("S");
+      } else if (stat.isFifo()) {
+        icon.setText("P");
+      } else {
+        return false;
+      }
+      return true;
     }
 
-    final class FileHolder extends SelectionModeViewHolder<Resource, File>
-            implements PreviewCallback
-    {
-        private final TextView icon;
-        private final TextView title;
-        private final TextView summary;
-        private final TextView symlink;
-        private final ImageView preview;
+    private int iconTextId(File file) {
+      Stat stat = file.targetStat();
+      if (stat == null) {
+        return defaultFileIconStringId();
+      }
 
-        FileHolder(final View itemView)
-        {
-            super(itemView, selection, actionModeProvider, actionModeCallback);
-            this.icon = find(R.id.icon, this);
-            this.title = find(R.id.title, this);
-            this.summary = find(R.id.summary, this);
-            this.symlink = find(R.id.symlink, this);
-            this.preview = find(R.id.preview, this);
-            this.itemView.setOnClickListener(this);
-            this.itemView.setOnLongClickListener(this);
-        }
-
-        @Override
-        protected Resource itemId(final File file)
-        {
-            return file.resource();
-        }
-
-        @Override
-        protected void onClick(final View v, final File file)
-        {
-            bus.post(OpenFileRequest.create(file.resource()));
-        }
-
-        @Override
-        public void bind(final File file)
-        {
-            super.bind(file);
-            setTitle(file);
-            setIcon(file);
-            setSymlink(file);
-            setSummary(file);
-            setPreview(file);
-        }
-
-        private void setTitle(final File file)
-        {
-            title.setText(file.resource().name());
-            title.setEnabled(file.stat() != null && file.isReadable());
-        }
-
-        private void setIcon(final File file)
-        {
-            icon.setEnabled(file.targetStat() != null && file.isReadable());
-
-            if (file.targetStat() != null
-                    && setLocalIcon(icon, file.targetStat()))
-            {
-                icon.setTypeface(SANS_SERIF, BOLD);
-            }
-            else
-            {
-                icon.setText(iconTextId(file));
-                icon.setTypeface(Icons.font(icon.getResources().getAssets()));
-            }
-        }
-
-        private boolean setLocalIcon(final TextView icon, final Stat stat)
-        {
-            if (stat.isBlockDevice())
-            {
-                icon.setText("B");
-            }
-            else if (stat.isCharacterDevice())
-            {
-                icon.setText("C");
-            }
-            else if (stat.isSocket())
-            {
-                icon.setText("S");
-            }
-            else if (stat.isFifo())
-            {
-                icon.setText("P");
-            }
-            else
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private int iconTextId(final File file)
-        {
-            final Stat stat = file.targetStat();
-            if (stat == null)
-            {
-                return defaultFileIconStringId();
-            }
-
-            if (stat.isDirectory())
-            {
-                return defaultDirectoryIconStringId();
-            }
-            else
-            {
-                return fileIconStringId(file.basicMediaType());
-            }
-        }
-
-        private void setSummary(final File file)
-        {
-            final Stat stat = file.stat();
-            if (stat == null)
-            {
-                summary.setText("");
-                summary.setVisibility(INVISIBLE);
-            }
-            else
-            {
-                summary.setVisibility(VISIBLE);
-                summary.setEnabled(file.isReadable());
-                final CharSequence date = formatter.apply(stat);
-                final CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
-                final boolean hasDate = stat.modified().to(MINUTES) > 0;
-                final boolean isFile = stat.isRegularFile();
-                if (hasDate && isFile)
-                {
-                    final Context context = summary.getContext();
-                    summary.setText(context.getString(R.string.x_dot_y, date, size));
-                }
-                else if (hasDate)
-                {
-                    summary.setText(date);
-                }
-                else if (isFile)
-                {
-                    summary.setText(size);
-                }
-                else
-                {
-                    summary.setVisibility(INVISIBLE);
-                }
-            }
-        }
-
-        private void setPreview(final File file)
-        {
-            preview.setImageDrawable(null);
-            preview.setVisibility(GONE);
-            if (file.stat() != null)
-            {
-                decorator.set(file.resource(), file.stat(), itemView, this);
-            }
-        }
-
-        private void setSymlink(final File file)
-        {
-            final Stat stat = file.stat();
-            if (stat == null || !stat.isSymbolicLink())
-            {
-                symlink.setVisibility(GONE);
-            }
-            else
-            {
-                symlink.setEnabled(file.isReadable());
-                symlink.setVisibility(VISIBLE);
-            }
-        }
-
-        @Override
-        public void onSizeAvailable(final Resource item, final ScaledSize size)
-        {
-            log.debug("onSizeAvailable %s", item);
-            if (Objects.equals(item, itemId()))
-            {
-                preview.setVisibility(VISIBLE);
-                preview.setImageDrawable(new SizedColorDrawable(
-                        TRANSPARENT,
-                        size.scaledWidth(),
-                        size.scaledHeight()));
-            }
-        }
-
-        @Override
-        public void onPreviewAvailable(final Resource item, final Bitmap bitmap)
-        {
-            log.debug("onPreviewAvailable %s", item);
-            if (Objects.equals(item, itemId()))
-            {
-                final Resources resources = preview.getResources();
-                final TransitionDrawable drawable = new TransitionDrawable(
-                        new Drawable[]{
-                                new ColorDrawable(TRANSPARENT),
-                                new BitmapDrawable(resources, bitmap)
-                        }
-                );
-                preview.setImageDrawable(drawable);
-                final int duration = resources.getInteger(config_shortAnimTime);
-                drawable.startTransition(duration);
-                preview.setVisibility(VISIBLE);
-                // TODO use animation?
-            }
-        }
-
-        @Override
-        public void onPreviewFailed(final Resource item)
-        {
-            log.debug("onPreviewFailed %s", item);
-            if (Objects.equals(item, itemId()))
-            {
-                preview.setVisibility(GONE);
-            }
-        }
+      if (stat.isDirectory()) {
+        return defaultDirectoryIconStringId();
+      } else {
+        return fileIconStringId(file.basicMediaType());
+      }
     }
 
-    final class HeaderHolder extends ViewHolder
-    {
-        private final TextView title;
-
-        HeaderHolder(final View itemView)
-        {
-            super(itemView);
-            title = find(android.R.id.title, this);
+    private void setSummary(File file) {
+      Stat stat = file.stat();
+      if (stat == null) {
+        summary.setText("");
+        summary.setVisibility(INVISIBLE);
+      } else {
+        summary.setVisibility(VISIBLE);
+        summary.setEnabled(file.isReadable());
+        CharSequence date = formatter.apply(stat);
+        CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
+        boolean hasDate = stat.modified().to(MINUTES) > 0;
+        boolean isFile = stat.isRegularFile();
+        if (hasDate && isFile) {
+          Context context = summary.getContext();
+          summary.setText(context.getString(R.string.x_dot_y, date, size));
+        } else if (hasDate) {
+          summary.setText(date);
+        } else if (isFile) {
+          summary.setText(size);
+        } else {
+          summary.setVisibility(INVISIBLE);
         }
-
-        void bind(final Header header)
-        {
-            title.setText(header.toString());
-            final LayoutParams params = itemView.getLayoutParams();
-            if (params instanceof StaggeredGridLayoutManager.LayoutParams)
-            {
-                ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
-            }
-        }
+      }
     }
+
+    private void setPreview(File file) {
+      preview.setImageDrawable(null);
+      preview.setVisibility(GONE);
+      if (file.stat() != null) {
+        decorator.set(file.resource(), file.stat(), itemView, this);
+      }
+    }
+
+    private void setSymlink(File file) {
+      Stat stat = file.stat();
+      if (stat == null || !stat.isSymbolicLink()) {
+        symlink.setVisibility(GONE);
+      } else {
+        symlink.setEnabled(file.isReadable());
+        symlink.setVisibility(VISIBLE);
+      }
+    }
+
+    @Override public void onSizeAvailable(Resource item, ScaledSize size) {
+      log.debug("onSizeAvailable %s", item);
+      if (Objects.equals(item, itemId())) {
+        preview.setVisibility(VISIBLE);
+        preview.setImageDrawable(new SizedColorDrawable(
+            TRANSPARENT,
+            size.scaledWidth(),
+            size.scaledHeight()));
+      }
+    }
+
+    @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
+      log.debug("onPreviewAvailable %s", item);
+      if (Objects.equals(item, itemId())) {
+        Resources resources = preview.getResources();
+        TransitionDrawable drawable = new TransitionDrawable(
+            new Drawable[]{
+                new ColorDrawable(TRANSPARENT),
+                new BitmapDrawable(resources, bitmap)
+            }
+        );
+        preview.setImageDrawable(drawable);
+        int duration = resources.getInteger(config_shortAnimTime);
+        drawable.startTransition(duration);
+        preview.setVisibility(VISIBLE);
+        // TODO use animation?
+      }
+    }
+
+    @Override public void onPreviewFailed(Resource item) {
+      log.debug("onPreviewFailed %s", item);
+      if (Objects.equals(item, itemId())) {
+        preview.setVisibility(GONE);
+      }
+    }
+  }
+
+  class HeaderHolder extends ViewHolder {
+    private TextView title;
+
+    HeaderHolder(View itemView) {
+      super(itemView);
+      title = find(android.R.id.title, this);
+    }
+
+    void bind(Header header) {
+      title.setText(header.toString());
+      LayoutParams params = itemView.getLayoutParams();
+      if (params instanceof StaggeredGridLayoutManager.LayoutParams) {
+        ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
+      }
+    }
+  }
 
 }
