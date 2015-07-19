@@ -30,6 +30,7 @@ abstract class LocalStat implements Stat
 
     private Instant atime;
     private Instant mtime;
+    private Instant ctime;
     private Set<Permission> permissions;
 
     public abstract l.files.fs.local.Stat stat();
@@ -60,6 +61,28 @@ abstract class LocalStat implements Stat
     }
 
     @Override
+    public Instant atime()
+    {
+        return accessed();
+    }
+
+    @Override
+    public Instant mtime()
+    {
+        return modified();
+    }
+
+    @Override
+    public Instant ctime()
+    {
+        if (ctime == null)
+        {
+            ctime = Instant.of(stat().ctime(), stat().ctime_nsec());
+        }
+        return ctime;
+    }
+
+    @Override
     public long size()
     {
         return stat().size();
@@ -81,11 +104,6 @@ abstract class LocalStat implements Stat
     public boolean isDirectory()
     {
         return S_ISDIR(stat().mode());
-    }
-
-    public long inode()
-    {
-        return stat().ino();
     }
 
     @Override

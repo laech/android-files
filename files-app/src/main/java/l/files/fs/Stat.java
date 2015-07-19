@@ -20,9 +20,17 @@ public interface Stat
 
     boolean isCharacterDevice();
 
+    @Deprecated
     Instant accessed();
 
+    @Deprecated
     Instant modified();
+
+    Instant atime();
+
+    Instant mtime();
+
+    Instant ctime();
 
     Set<Permission> permissions();
 }

@@ -2,48 +2,31 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.view.View;
 
 import com.google.common.net.MediaType;
 
+import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-final class DecodeVideo extends DecodeMedia
-{
-    DecodeVideo(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key)
-    {
-        super(context, res, stat, view, callback, key);
-    }
+final class DecodeVideo extends DecodeMedia {
 
-    static void run(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key)
-    {
-        new DecodeVideo(context, res, stat, view, callback, key)
-                .executeOnExecutor(SERIAL_EXECUTOR);
-    }
+  DecodeVideo(
+      Resource res,
+      Stat stat,
+      Rect constraint,
+      PreviewCallback callback,
+      Preview context) {
+    super(res, stat, constraint, callback, context);
+  }
 
-    static boolean isVideo(final Resource res, final MediaType media)
-    {
-        return res.file().isPresent()
-                && media.type().equalsIgnoreCase("video");
-    }
+  static boolean isVideo(MediaType media, Resource res) {
+    return res.file().isPresent()
+        && media.type().equalsIgnoreCase("video");
+  }
 
-    @Override
-    protected Bitmap decode(final MediaMetadataRetriever retriever)
-    {
-        return retriever.getFrameAtTime();
-    }
+  @Override Bitmap decode(MediaMetadataRetriever retriever) {
+    return retriever.getFrameAtTime();
+  }
 
 }

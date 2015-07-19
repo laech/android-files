@@ -2,68 +2,63 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.view.View;
 
 import com.google.common.net.MediaType;
 
+import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.common.graphics.ScaledSize;
+import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
-import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 
-final class DecodeImage extends DecodeBitmap
-{
-    final ScaledSize size;
+final class DecodeImage extends DecodeBitmap {
 
-    DecodeImage(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key,
-            final ScaledSize size)
-    {
-        super(context, res, stat, view, callback, key);
-        this.size = requireNonNull(size, "size");
+  DecodeImage(
+      Resource res,
+      Stat stat,
+      Rect constraint,
+      PreviewCallback callback,
+      Preview context) {
+    super(res, stat, constraint, callback, context);
+  }
+
+  static boolean isImage(MediaType media) {
+    return media.type().equalsIgnoreCase("image");
+  }
+
+  @Override Result decode() throws IOException {
+    Rect size = context.getSize(res, stat, constraint);
+    if (size == null) {
+      size = context.decodeSize(res);
+      if (size != null) {
+        publishProgress(size);
+      }
     }
 
-    static boolean isImage(final MediaType media)
-    {
-        return media.type().equalsIgnoreCase("image");
+    if (isCancelled()) {
+      return null;
     }
 
-    static void run(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key,
-            final ScaledSize size)
-    {
-        new DecodeImage(context, res, stat, view, callback, key, size)
-                .executeOnExecutor(SERIAL_EXECUTOR);
+    if (size == null) {
+      return null;
     }
 
-    @Override
-    protected Bitmap decode() throws Exception
-    {
-        try (InputStream in = res.input(FOLLOW))
-        {
-            return decodeStream(in, null, options(size));
-        }
+    try (InputStream in = res.input(FOLLOW)) {
+      Bitmap bitmap = decodeStream(in, null, options(size));
+      return bitmap != null ? new Result(bitmap, size) : null;
     }
+  }
 
-    private static Options options(final ScaledSize size)
-    {
-        final Options options = new Options();
-        options.inSampleSize = (int) (1 / size.scale());
-        return options;
-    }
+  private Options options(Rect original) {
+    Rect scaled = original.scale(constraint);
+    float scale = scaled.width() / (float) original.width();
+    Options options = new Options();
+    options.inSampleSize = (int) (1 / scale);
+    return options;
+  }
+
 }

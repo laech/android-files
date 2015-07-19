@@ -2,42 +2,53 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.view.View;
+
+import com.google.common.net.MediaType;
+
+import java.io.IOException;
 
 import javax.annotation.Nullable;
 
+import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-abstract class DecodeMedia extends DecodeBitmap
-{
-    DecodeMedia(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key)
-    {
-        super(context, res, stat, view, callback, key);
+abstract class DecodeMedia extends DecodeBitmap {
+
+  DecodeMedia(
+      Resource res,
+      Stat stat,
+      Rect constraint,
+      PreviewCallback callback,
+      Preview context) {
+    super(res, stat, constraint, callback, context);
+  }
+
+  @Override Result decode() throws IOException {
+    if (isCancelled()) {
+      return null;
     }
 
-    @Override
-    protected Bitmap decode() throws Exception
-    {
-        final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try
-        {
-            retriever.setDataSource(res.path());
-            return decode(retriever);
-        }
-        finally
-        {
-            retriever.release();
-        }
-    }
+    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+    try {
+      retriever.setDataSource(res.file().get().getPath());
 
-    @Nullable
-    protected abstract Bitmap decode(MediaMetadataRetriever retriever);
+      if (isCancelled()) {
+        return null;
+      }
+
+      Bitmap bitmap = decode(retriever);
+      if (bitmap != null) {
+        Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
+        return new Result(bitmap, size);
+      }
+
+    } finally {
+      retriever.release();
+    }
+    return null;
+  }
+
+  @Nullable abstract Bitmap decode(MediaMetadataRetriever retriever);
 
 }

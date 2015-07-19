@@ -40,6 +40,7 @@ import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.newtab.NewTabMenu;
 import l.files.ui.open.FileOpener;
+import l.files.ui.preview.Preview;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
@@ -92,6 +93,7 @@ public final class FilesActivity extends BaseActivity implements
   @Override protected void onCreate(Bundle state) {
     super.onCreate(state);
     setContentView(R.layout.files_activity);
+    Preview.get(this).readCacheAsyncIfNeeded(this);
 
     toolbar = find(R.id.toolbar, this);
     hierarchy = new HierarchyAdapter();
@@ -178,6 +180,7 @@ public final class FilesActivity extends BaseActivity implements
 
   @Override protected void onPause() {
     bus.unregister(this);
+    Preview.get(this).writeCacheAsyncIfNeeded(this);
     super.onPause();
   }
 

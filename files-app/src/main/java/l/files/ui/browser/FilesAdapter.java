@@ -3,10 +3,6 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.Time;
@@ -29,7 +25,7 @@ import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;
-import l.files.common.graphics.ScaledSize;
+import l.files.common.graphics.Rect;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.common.view.ActionModeProvider;
 import l.files.fs.Instant;
@@ -42,6 +38,7 @@ import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FileListItem.Header;
 import l.files.ui.mode.Selectable;
+import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
 import l.files.ui.selection.Selection;
@@ -72,7 +69,6 @@ import static l.files.R.integer.files_list_columns;
 import static l.files.R.layout.files_item;
 import static l.files.R.layout.files_item_header;
 import static l.files.common.view.Views.find;
-import static l.files.ui.FilesApp.getBitmapCache;
 import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
 import static l.files.ui.Icons.fileIconStringId;
@@ -82,14 +78,13 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
   private static final Logger log = Logger.get(FilesAdapter.class);
 
-  final Preview decorator;
-  final DateFormatter formatter;
-  final ActionModeProvider actionModeProvider;
-  final ActionMode.Callback actionModeCallback;
-  final Selection<Resource> selection;
-  final EventBus bus;
-
-  boolean setItemsCalled;
+  private final Preview decorator;
+  private final DateFormatter formatter;
+  private final ActionModeProvider actionModeProvider;
+  private final ActionMode.Callback actionModeCallback;
+  private final Selection<Resource> selection;
+  private final EventBus bus;
+  private final Rect constraint;
 
   FilesAdapter(
       Context context,
@@ -98,10 +93,10 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       ActionMode.Callback actionModeCallback,
       EventBus bus) {
 
-    this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
-    this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
-    this.bus = requireNonNull(bus, "bus");
-    this.selection = requireNonNull(selection, "selection");
+    this.actionModeProvider = requireNonNull(actionModeProvider);
+    this.actionModeCallback = requireNonNull(actionModeCallback);
+    this.bus = requireNonNull(bus);
+    this.selection = requireNonNull(selection);
     this.formatter = new DateFormatter(context);
 
     Resources res = context.getResources();
@@ -111,16 +106,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         - res.getDimension(files_item_space_horizontal) * columns * 2
         - res.getDimension(files_list_space) * 2) / columns;
     int maxThumbnailHeight = metrics.heightPixels;
-    this.decorator = new Preview(
-        context,
-        getBitmapCache(context),
-        maxThumbnailWidth,
-        maxThumbnailHeight);
-  }
-
-  @Override public void setItems(List<? extends FileListItem> items) {
-    super.setItems(items);
-    setItemsCalled = true;
+    this.constraint = Rect.of(maxThumbnailWidth, maxThumbnailHeight);
+    this.decorator = Preview.get(context);
   }
 
   @Override public int getItemViewType(int position) {
@@ -185,7 +172,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     @Override public CharSequence apply(Stat file) {
-      Instant instant = file.modified();
+      Instant instant = file.mtime();
       long millis = instant.to(MILLISECONDS);
       date.setTime(millis);
       currentTime.setToNow();
@@ -210,6 +197,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     private final TextView summary;
     private final TextView symlink;
     private final ImageView preview;
+
+    private Decode task;
 
     FileHolder(View itemView) {
       super(itemView, selection, actionModeProvider, actionModeCallback);
@@ -294,7 +283,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         summary.setEnabled(file.isReadable());
         CharSequence date = formatter.apply(stat);
         CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
-        boolean hasDate = stat.modified().to(MINUTES) > 0;
+        boolean hasDate = stat.mtime().to(MINUTES) > 0;
         boolean isFile = stat.isRegularFile();
         if (hasDate && isFile) {
           Context context = summary.getContext();
@@ -310,11 +299,36 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     private void setPreview(File file) {
-      preview.setImageDrawable(null);
-      preview.setVisibility(GONE);
-      if (file.stat() != null) {
-        decorator.set(file.resource(), file.stat(), itemView, this);
+      if (task != null) {
+        task.cancelAll();
       }
+
+      Resource res = file.resource();
+      Stat stat = file.stat();
+      if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
+        preview.setImageDrawable(null);
+        preview.setVisibility(GONE);
+        return;
+      }
+
+      Bitmap bitmap = decorator.getBitmap(res, stat, constraint);
+      if (bitmap != null) {
+        preview.setImageBitmap(bitmap);
+        preview.setVisibility(VISIBLE);
+        return;
+      }
+
+      Rect size = decorator.getSize(res, stat, constraint);
+      if (size != null) {
+        preview.setImageDrawable(
+            new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
+        preview.setVisibility(VISIBLE);
+      } else {
+        preview.setImageDrawable(null);
+        preview.setVisibility(GONE);
+      }
+
+      task = decorator.set(res, stat, constraint, this);
     }
 
     private void setSymlink(File file) {
@@ -327,44 +341,36 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    @Override public void onSizeAvailable(Resource item, ScaledSize size) {
-      log.debug("onSizeAvailable %s", item);
+    @Override public void onSizeAvailable(Resource item, Rect size) {
+      log.verbose("onSizeAvailable %s", item);
       if (Objects.equals(item, itemId())) {
         preview.setVisibility(VISIBLE);
-        preview.setImageDrawable(new SizedColorDrawable(
-            TRANSPARENT,
-            size.scaledWidth(),
-            size.scaledHeight()));
+        preview.setImageDrawable(
+            new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
       }
     }
 
     @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
-      log.debug("onPreviewAvailable %s", item);
+      log.verbose("onPreviewAvailable %s", item);
       if (Objects.equals(item, itemId())) {
-        Resources resources = preview.getResources();
-        TransitionDrawable drawable = new TransitionDrawable(
-            new Drawable[]{
-                new ColorDrawable(TRANSPARENT),
-                new BitmapDrawable(resources, bitmap)
-            }
-        );
-        preview.setImageDrawable(drawable);
-        int duration = resources.getInteger(config_shortAnimTime);
-        drawable.startTransition(duration);
+        preview.setImageBitmap(bitmap);
         preview.setVisibility(VISIBLE);
-        // TODO use animation?
+        Resources resources = preview.getResources();
+        int duration = resources.getInteger(config_shortAnimTime);
+        preview.setAlpha(0f);
+        preview.animate().alpha(1).setDuration(duration);
       }
     }
 
     @Override public void onPreviewFailed(Resource item) {
-      log.debug("onPreviewFailed %s", item);
+      log.verbose("onPreviewFailed %s", item);
       if (Objects.equals(item, itemId())) {
         preview.setVisibility(GONE);
       }
     }
   }
 
-  class HeaderHolder extends ViewHolder {
+  final class HeaderHolder extends ViewHolder {
     private TextView title;
 
     HeaderHolder(View itemView) {

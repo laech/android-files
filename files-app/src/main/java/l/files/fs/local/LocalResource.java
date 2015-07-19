@@ -92,6 +92,8 @@ import static l.files.fs.local.ErrnoExceptions.toIOException;
 @AutoParcel
 public abstract class LocalResource extends Native implements Resource
 {
+    // TODO remove as much custom stuff as possible
+
     private static final Map<Permission, Integer> permissionBits =
             permissionsToBits();
 
@@ -581,7 +583,19 @@ public abstract class LocalResource extends Native implements Resource
         {
             parent.createDirectories();
         }
-        createDirectory();
+
+        try
+        {
+            createDirectory();
+        }
+        catch (final AlreadyExists e)
+        {
+            if (!stat(NOFOLLOW).isDirectory())
+            {
+                throw e;
+            }
+        }
+
         return this;
     }
 

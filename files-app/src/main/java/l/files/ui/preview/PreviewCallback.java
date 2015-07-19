@@ -2,16 +2,15 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import l.files.common.graphics.ScaledSize;
+import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 
-public interface PreviewCallback
-{
+public interface PreviewCallback {
 
-    void onSizeAvailable(final Resource item, ScaledSize size);
+  void onSizeAvailable(Resource item, Rect size);
 
-    void onPreviewAvailable(final Resource item, Bitmap bitmap);
+  void onPreviewAvailable(Resource item, Bitmap bitmap);
 
-    void onPreviewFailed(final Resource item);
+  void onPreviewFailed(Resource item);
 
 }

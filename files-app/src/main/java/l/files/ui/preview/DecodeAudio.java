@@ -2,55 +2,38 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
-import android.view.View;
 
 import com.google.common.net.MediaType;
 
+import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeByteArray;
 
-final class DecodeAudio extends DecodeMedia
-{
-    DecodeAudio(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key)
-    {
-        super(context, res, stat, view, callback, key);
-    }
+final class DecodeAudio extends DecodeMedia {
 
-    static void run(
-            final Preview context,
-            final Resource res,
-            final Stat stat,
-            final View view,
-            final PreviewCallback callback,
-            final String key)
-    {
-        new DecodeAudio(context, res, stat, view, callback, key)
-                .executeOnExecutor(SERIAL_EXECUTOR);
-    }
+  DecodeAudio(
+      Resource res,
+      Stat stat,
+      Rect constraint,
+      PreviewCallback callback,
+      Preview context,
+      MediaType media) {
+    super(res, stat, constraint, callback, context);
+  }
 
-    static boolean isAudio(final Resource res, final MediaType media)
-    {
-        return res.file().isPresent()
-                && media.type().equalsIgnoreCase("audio");
-    }
+  static boolean isAudio(MediaType media, Resource res) {
+    return res.file().isPresent()
+        && media.type().equalsIgnoreCase("audio");
+  }
 
-    @Override
-    protected Bitmap decode(final MediaMetadataRetriever retriever)
-    {
-        final byte[] data = retriever.getEmbeddedPicture();
-        if (data == null)
-        {
-            return null;
-        }
-        return decodeByteArray(data, 0, data.length);
+  @Override Bitmap decode(MediaMetadataRetriever retriever) {
+    byte[] data = retriever.getEmbeddedPicture();
+    if (data == null) {
+      return null;
     }
+    return decodeByteArray(data, 0, data.length);
+  }
 
 }
