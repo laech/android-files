@@ -18,7 +18,7 @@ public abstract class MemCacheTest<V, C extends MemCache<V>>
 
     cache.put(res, stat, constraint, value);
     assertEquals(value, cache.remove(res, stat, constraint).get());
-    assertNull(cache.remove(res, stat, constraint).get());
+    assertNull(cache.remove(res, stat, constraint));
     assertNull(cache.get(res, stat, constraint));
   }
 

@@ -93,7 +93,7 @@ public final class FilesActivity extends BaseActivity implements
   @Override protected void onCreate(Bundle state) {
     super.onCreate(state);
     setContentView(R.layout.files_activity);
-    Preview.get(this).readCacheAsyncIfNeeded(this);
+    Preview.get(this).readCacheAsyncIfNeeded();
 
     toolbar = find(R.id.toolbar, this);
     hierarchy = new HierarchyAdapter();
@@ -180,7 +180,7 @@ public final class FilesActivity extends BaseActivity implements
 
   @Override protected void onPause() {
     bus.unregister(this);
-    Preview.get(this).writeCacheAsyncIfNeeded(this);
+    Preview.get(this).writeCacheAsyncIfNeeded();
     super.onPause();
   }
 

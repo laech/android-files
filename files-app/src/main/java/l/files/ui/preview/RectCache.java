@@ -10,11 +10,15 @@ import l.files.common.graphics.Rect;
 
 final class RectCache extends PersistenceCache<Rect> {
 
+  RectCache(Context context) {
+    super(context);
+  }
+
   @Override String cacheFileName() {
     return "sizes";
   }
 
-  @Override Rect read(Context context, DataInput in) throws IOException {
+  @Override Rect read(DataInput in) throws IOException {
     int width = in.readInt();
     int height = in.readInt();
     return Rect.of(width, height);

@@ -10,6 +10,7 @@ import android.os.StrictMode.VmPolicy;
 import android.util.LruCache;
 
 import l.files.operations.ui.OperationsUi;
+import l.files.ui.preview.Preview;
 
 import static l.files.BuildConfig.DEBUG;
 
@@ -27,6 +28,7 @@ public final class FilesApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+    Preview.get(this).cleanupAsync();
 
     bitmapCache = createBitmapCache();
 

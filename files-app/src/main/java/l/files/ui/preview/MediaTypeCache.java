@@ -10,11 +10,15 @@ import java.io.IOException;
 
 final class MediaTypeCache extends PersistenceCache<MediaType> {
 
+  MediaTypeCache(Context context) {
+    super(context);
+  }
+
   @Override String cacheFileName() {
     return "media-types";
   }
 
-  @Override MediaType read(Context context, DataInput in) throws IOException {
+  @Override MediaType read(DataInput in) throws IOException {
     return MediaType.parse(in.readUTF());
   }
 

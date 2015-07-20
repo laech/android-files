@@ -48,23 +48,27 @@ public final class Preview {
 
   private Preview(Context context) {
     this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
-    this.sizeCache = new RectCache();
-    this.mediaTypeCache = new MediaTypeCache();
-    this.noPreviewCache = new NoPreviewCache();
+    this.sizeCache = new RectCache(context);
+    this.mediaTypeCache = new MediaTypeCache(context);
+    this.noPreviewCache = new NoPreviewCache(context);
     this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
     this.thumbnailDiskCache = new ThumbnailDiskCache(context);
   }
 
-  public void writeCacheAsyncIfNeeded(Context context) {
-    sizeCache.writeAsyncIfNeeded(context);
-    mediaTypeCache.writeAsyncIfNeeded(context);
-    noPreviewCache.writeAsyncIfNeeded(context);
+  public void writeCacheAsyncIfNeeded() {
+    sizeCache.writeAsyncIfNeeded();
+    mediaTypeCache.writeAsyncIfNeeded();
+    noPreviewCache.writeAsyncIfNeeded();
   }
 
-  public void readCacheAsyncIfNeeded(Context context) {
-    sizeCache.readAsyncIfNeeded(context);
-    mediaTypeCache.readAsyncIfNeeded(context);
-    noPreviewCache.readAsyncIfNeeded(context);
+  public void readCacheAsyncIfNeeded() {
+    sizeCache.readAsyncIfNeeded();
+    mediaTypeCache.readAsyncIfNeeded();
+    noPreviewCache.readAsyncIfNeeded();
+  }
+
+  public void cleanupAsync() {
+    thumbnailDiskCache.cleanupAsync();
   }
 
   @Nullable public Bitmap getBitmap(Resource res, Stat stat, Rect constraint) {

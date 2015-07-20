@@ -8,10 +8,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,15 +15,24 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.DirectoryNotEmpty;
+import l.files.fs.Instant;
+import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.Visitor;
+import l.files.fs.local.LocalResource;
 import l.files.logging.Logger;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.common.base.Stopwatches.startWatchIfDebug;
+import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
 
@@ -49,16 +54,53 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
    */
   private static final int DUMMY_BYTE = 0;
 
-  private final File cacheDir;
+  final Resource cacheDir;
 
   // TODO don't save anything from cache dir
 
   ThumbnailDiskCache(Context context) {
-    this.cacheDir = new File(context.getExternalCacheDir(), "thumbnails");
+    this.cacheDir = LocalResource.create(
+        context.getExternalCacheDir()).resolve("thumbnails");
   }
 
-  private File cache(Resource res, Stat stat, Rect constraint) {
-    return new File(cacheDir, res.scheme()
+  public void cleanupAsync() {
+    executor.execute(new Runnable() {
+      @Override public void run() {
+        try {
+          cleanup();
+        } catch (IOException e) {
+          log.error(e);
+        }
+      }
+    });
+  }
+
+  void cleanup() throws IOException {
+    final long now = currentTimeMillis();
+    Stopwatch watch = startWatchIfDebug();
+    cacheDir.traverse(NOFOLLOW, null, new Visitor() {
+      @Override public Result accept(Resource res) throws IOException {
+        Stat stat = res.stat(NOFOLLOW);
+        if (stat.isDirectory()) {
+          try {
+            res.delete();
+            log.debug("Deleted empty cache directory %s", res);
+          } catch (DirectoryNotEmpty ignore) {
+          }
+        } else {
+          if (MILLISECONDS.toDays(now - stat.atime().to(MILLISECONDS)) > 30) {
+            res.delete();
+            log.debug("Deleted old cache file %s", res);
+          }
+        }
+        return CONTINUE;
+      }
+    });
+    log.debug("cleanup %s", watch);
+  }
+
+  Resource cacheFile(Resource res, Stat stat, Rect constraint) {
+    return cacheDir.resolve(res.scheme()
         + "/" + res.path()
         + "_" + stat.mtime().seconds()
         + "_" + stat.mtime().nanos()
@@ -72,8 +114,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Rect constraint) throws IOException {
 
     Stopwatch watch = startWatchIfDebug();
-    File cache = cache(res, stat, constraint);
-    try (InputStream in = new BufferedInputStream(new FileInputStream(cache))) {
+    Resource cache = cacheFile(res, stat, constraint);
+    try (InputStream in = new BufferedInputStream(cache.input(NOFOLLOW))) {
       in.read(); // read DUMMY_BYTE
 
       Bitmap bitmap = decodeStream(in);
@@ -89,9 +131,14 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         return null;
       }
 
+      try {
+        cache.setAccessed(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+      } catch (IOException ignore) {
+      }
+
       return bitmap;
 
-    } catch (FileNotFoundException e) {
+    } catch (NotExist e) {
       return null;
     }
   }
@@ -103,9 +150,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Bitmap bitmap) throws IOException {
 
     Stopwatch watch = startWatchIfDebug();
-    File cache = cache(res, stat, constraint);
-    cache.getParentFile().mkdirs();
-    try (OutputStream out = new BufferedOutputStream(new FileOutputStream(cache))) {
+    Resource cache = cacheFile(res, stat, constraint);
+    cache.createFiles();
+    try (OutputStream out = new BufferedOutputStream(cache.output(NOFOLLOW))) {
       out.write(DUMMY_BYTE);
       bitmap.compress(WEBP, 90, out);
     }

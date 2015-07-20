@@ -8,11 +8,15 @@ import java.io.IOException;
 
 final class NoPreviewCache extends PersistenceCache<Boolean> {
 
+  NoPreviewCache(Context context) {
+    super(context);
+  }
+
   @Override String cacheFileName() {
     return "non-images";
   }
 
-  @Override Boolean read(Context context, DataInput in) throws IOException {
+  @Override Boolean read(DataInput in) throws IOException {
     return in.readBoolean();
   }
 

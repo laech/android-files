@@ -8,7 +8,9 @@ import java.io.IOException;
 import l.files.fs.LinkOption;
 import l.files.fs.NotDirectory;
 import l.files.fs.Resource;
+import l.files.logging.Logger;
 
+import static android.system.OsConstants.EAGAIN;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -17,6 +19,8 @@ import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 final class LocalResourceStream extends Native implements Closeable
 {
+
+    private static final Logger log = Logger.get(LocalResourceStream.class);
 
     /*
      * Design note: this basically uses <dirent.h> to read directory entries,
@@ -65,13 +69,27 @@ final class LocalResourceStream extends Native implements Closeable
         requireNonNull(option, "option");
         requireNonNull(callback, "callback");
 
-        try
-        {
-            final long dir = open(resource.path(), option == FOLLOW);
-            try (LocalResourceStream stream =
-                         new LocalResourceStream(resource, dir, callback))
-            {
-                stream.list(dir);
+        try {
+            while (true) {
+                final long dir;
+                try
+                {
+                    dir = open(resource.path(), option == FOLLOW);
+                }
+                catch (final ErrnoException e)
+                {
+                    if (e.errno == EAGAIN)
+                    {
+                        log.debug(e);
+                        continue;
+                    }
+                    throw e;
+                }
+                try (LocalResourceStream stream =
+                         new LocalResourceStream(resource, dir, callback)) {
+                    stream.list(dir);
+                }
+                break;
             }
         }
         catch (final ErrnoException e)

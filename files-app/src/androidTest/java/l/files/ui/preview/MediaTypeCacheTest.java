@@ -8,7 +8,7 @@ public final class MediaTypeCacheTest
     extends PersistenceCacheTest<MediaType, MediaTypeCache> {
 
   @Override MediaTypeCache newCache() {
-    return new MediaTypeCache();
+    return new MediaTypeCache(getTestContext());
   }
 
   @Override MediaType newValue() {

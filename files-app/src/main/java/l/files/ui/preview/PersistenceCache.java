@@ -29,7 +29,7 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static l.files.common.base.Stopwatches.startWatchIfDebug;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
@@ -38,7 +38,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
   private final Logger log = Logger.get(getClass());
 
-  private final Executor loader = newSingleThreadExecutor();
+  private final Executor loader = SERIAL_EXECUTOR;
   private final AtomicBoolean loaded = new AtomicBoolean(false);
   private final AtomicBoolean dirty = new AtomicBoolean(false);
 
@@ -59,6 +59,12 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
       };
 
+  private final File cacheDir;
+
+  PersistenceCache(Context context) {
+    this.cacheDir = context.getExternalCacheDir();
+  }
+
   @Override String key(Resource res, Stat stat, Rect constraint) {
     return res.scheme() + "_" + res.path();
   }
@@ -77,31 +83,31 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     return cache;
   }
 
-  private File cacheFile(Context context) {
-    return new File(context.getExternalCacheDir(), cacheFileName());
+  private File cacheFile() {
+    return new File(cacheDir, cacheFileName());
   }
 
   abstract String cacheFileName();
 
-  final void readAsyncIfNeeded(final Context context) {
+  final void readAsyncIfNeeded() {
     if (loaded.get()) {
       return;
     }
 
     new AsyncTask<Object, Object, Object>() {
       @Override protected Object doInBackground(Object... params) {
-        readIfNeeded(context);
+        readIfNeeded();
         return null;
       }
     }.executeOnExecutor(loader);
   }
 
-  final void readIfNeeded(Context context) {
+  final void readIfNeeded() {
     if (!loaded.compareAndSet(false, true)) {
       return;
     }
 
-    File file = cacheFile(context);
+    File file = cacheFile();
     try (DataInputStream in =
              new DataInputStream(
                  new BufferedInputStream(
@@ -116,7 +122,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
           long seconds = in.readLong();
           int nanos = in.readInt();
           Instant time = Instant.of(seconds, nanos);
-          V value = read(context, in);
+          V value = read(in);
           cache.put(key, Snapshot.of(value, time));
 
           count++;
@@ -133,27 +139,27 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     }
   }
 
-  abstract V read(Context context, DataInput in) throws IOException;
+  abstract V read(DataInput in) throws IOException;
 
-  final void writeAsyncIfNeeded(final Context context) {
+  final void writeAsyncIfNeeded() {
     if (!dirty.get()) {
       return;
     }
 
     new AsyncTask<Object, Object, Object>() {
       @Override protected Object doInBackground(Object... params) {
-        writeIfNeeded(context);
+        writeIfNeeded();
         return null;
       }
     }.executeOnExecutor(loader);
   }
 
-  final void writeIfNeeded(Context context) {
+  final void writeIfNeeded() {
     if (!dirty.compareAndSet(true, false)) {
       return;
     }
 
-    File file = cacheFile(context);
+    File file = cacheFile();
     file.getParentFile().mkdirs();
     try (DataOutputStream out =
              new DataOutputStream(

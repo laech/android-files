@@ -18,16 +18,16 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
 
     C c1 = newCache();
     c1.put(res, stat, constraint, value);
-    c1.writeIfNeeded(getTestContext());
+    c1.writeIfNeeded();
 
     C c2 = newCache();
-    c2.readIfNeeded(getTestContext());
+    c2.readIfNeeded();
     assertEquals(value, c2.get(res, stat, constraint));
     c2.remove(res, stat, constraint);
-    c2.writeIfNeeded(getTestContext());
+    c2.writeIfNeeded();
 
     C c3 = newCache();
-    c3.readIfNeeded(getTestContext());
+    c3.readIfNeeded();
     assertNull(c3.get(res, stat, constraint));
   }
 
@@ -39,11 +39,11 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
 
     C c1 = newCache();
     c1.put(res, stat, constraint, value);
-    c1.writeIfNeeded(getTestContext());
+    c1.writeIfNeeded();
 
     C c2 = newCache();
     assertNull(c2.get(res, stat, constraint));
-    c2.readIfNeeded(getTestContext());
+    c2.readIfNeeded();
     assertEquals(value, c2.get(res, stat, constraint));
   }
 
