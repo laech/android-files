@@ -133,6 +133,7 @@ public abstract class LocalResource extends Native implements Resource
     {
     }
 
+    // TODO absolute?
     abstract File _file();
 
     @Override

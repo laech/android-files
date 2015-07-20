@@ -30,6 +30,10 @@ final class DecodeImage extends DecodeBitmap {
     return media.type().equalsIgnoreCase("image");
   }
 
+  @Override DecodeImage executeOnPreferredExecutor() {
+    return (DecodeImage) executeOnExecutor(THREAD_POOL_EXECUTOR);
+  }
+
   @Override Result decode() throws IOException {
     Rect size = context.getSize(res, stat, constraint);
     if (size == null) {

@@ -32,6 +32,10 @@ final class DecodePdf extends DecodeBitmap {
     super(res, stat, constraint, callback, context);
   }
 
+  @Override DecodePdf executeOnPreferredExecutor() {
+    return (DecodePdf) executeOnExecutor(SERIAL_EXECUTOR);
+  }
+
   static boolean isPdf(MediaType media, Resource res) {
     /*
      * PdfRenderer will cause native crash sometime after opening an

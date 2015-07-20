@@ -76,11 +76,7 @@ abstract class DecodeBitmap extends Decode {
             result.originalSize.height() > scaledBitmap.getHeight();
 
     if (scaledDown) {
-      try {
-        context.putBitmapToDisk(res, stat, constraint, scaledBitmap);
-      } catch (IOException e) {
-        log.warn(e);
-      }
+      context.putBitmapToDiskAsync(res, stat, constraint, scaledBitmap);
     }
 
     return null;

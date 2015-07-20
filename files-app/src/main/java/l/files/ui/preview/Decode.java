@@ -68,11 +68,12 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         callback.onPreviewFailed(res);
         context.putPreviewable(res, stat, constraint, false);
 
-      } else if (value instanceof AsyncTask<?, ?, ?>) {
-        subs.add(((AsyncTask<Object, Object, Object>) value)
-            .executeOnExecutor(SERIAL_EXECUTOR));
+      } else if (value instanceof Decode) {
+        subs.add(((Decode) value).executeOnPreferredExecutor());
       }
     }
   }
+
+  abstract AsyncTask<Object, Object, Object> executeOnPreferredExecutor();
 
 }

@@ -31,7 +31,6 @@ import l.files.common.view.ActionModeProvider;
 import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 import l.files.ui.Icons;
 import l.files.ui.OpenFileRequest;
 import l.files.ui.StableAdapter;
@@ -75,8 +74,6 @@ import static l.files.ui.Icons.fileIconStringId;
 
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     implements Selectable {
-
-  private static final Logger log = Logger.get(FilesAdapter.class);
 
   private final Preview decorator;
   private final DateFormatter formatter;
@@ -342,7 +339,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     @Override public void onSizeAvailable(Resource item, Rect size) {
-      log.verbose("onSizeAvailable %s", item);
       if (Objects.equals(item, itemId())) {
         preview.setVisibility(VISIBLE);
         preview.setImageDrawable(
@@ -351,7 +347,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
-      log.verbose("onPreviewAvailable %s", item);
       if (Objects.equals(item, itemId())) {
         preview.setImageBitmap(bitmap);
         preview.setVisibility(VISIBLE);
@@ -363,7 +358,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     @Override public void onPreviewFailed(Resource item) {
-      log.verbose("onPreviewFailed %s", item);
       if (Objects.equals(item, itemId())) {
         preview.setVisibility(GONE);
       }

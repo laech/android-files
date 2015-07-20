@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.net.MediaType;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 
@@ -12,6 +15,7 @@ import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.common.base.Stopwatches.startWatchIfDebug;
 import static l.files.ui.preview.DecodeAudio.isAudio;
 import static l.files.ui.preview.DecodeImage.isImage;
@@ -20,6 +24,13 @@ import static l.files.ui.preview.DecodeVideo.isVideo;
 
 final class DecodeChain extends Decode {
 
+  // No need to set UncaughtExceptionHandler to terminate
+  // on exception already set by Android
+  private static final Executor executor =
+      newFixedThreadPool(5, new ThreadFactoryBuilder()
+          .setNameFormat("decode-chain-pool-thread-%d")
+          .build());
+
   DecodeChain(
       Resource res,
       Stat stat,
@@ -27,6 +38,10 @@ final class DecodeChain extends Decode {
       PreviewCallback callback,
       Preview context) {
     super(res, stat, constraint, callback, context);
+  }
+
+  @Override DecodeChain executeOnPreferredExecutor() {
+    return (DecodeChain) executeOnExecutor(executor);
   }
 
   @Nullable static Decode run(
@@ -51,9 +66,8 @@ final class DecodeChain extends Decode {
       callback.onSizeAvailable(res, size);
     }
 
-    DecodeChain task = new DecodeChain(res, stat, constraint, callback, context);
-    task.executeOnExecutor(THREAD_POOL_EXECUTOR);
-    return task;
+    return new DecodeChain(res, stat, constraint, callback, context)
+        .executeOnPreferredExecutor();
   }
 
   @Override protected Object doInBackground(Object... params) {

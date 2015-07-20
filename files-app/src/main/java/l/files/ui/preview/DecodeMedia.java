@@ -3,9 +3,10 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
-import com.google.common.net.MediaType;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +14,16 @@ import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
+import static java.util.concurrent.Executors.newFixedThreadPool;
+
 abstract class DecodeMedia extends DecodeBitmap {
+
+  // No need to set UncaughtExceptionHandler to terminate
+  // on exception already set by Android
+  private static final Executor executor =
+      newFixedThreadPool(2, new ThreadFactoryBuilder()
+          .setNameFormat("decode-media-pool-thread-%d")
+          .build());
 
   DecodeMedia(
       Resource res,
@@ -22,6 +32,10 @@ abstract class DecodeMedia extends DecodeBitmap {
       PreviewCallback callback,
       Preview context) {
     super(res, stat, constraint, callback, context);
+  }
+
+  @Override DecodeMedia executeOnPreferredExecutor() {
+    return (DecodeMedia) executeOnExecutor(executor);
   }
 
   @Override Result decode() throws IOException {

@@ -41,8 +41,8 @@ public final class Preview {
   private final PersistenceCache<Rect> sizeCache;
   private final PersistenceCache<MediaType> mediaTypeCache;
   private final PersistenceCache<Boolean> noPreviewCache;
-  private final MemCache<Bitmap> thumbnailMemCache;
-  private final Cache<Bitmap> thumbnailDiskCache;
+  private final ThumbnailMemCache thumbnailMemCache;
+  private final ThumbnailDiskCache thumbnailDiskCache;
 
   final DisplayMetrics displayMetrics;
 
@@ -80,8 +80,9 @@ public final class Preview {
     return thumbnailDiskCache.get(res, stat, constraint);
   }
 
-  void putBitmapToDisk(Resource res, Stat stat, Rect constraint, Bitmap bitmap) throws IOException {
-    thumbnailDiskCache.put(res, stat, constraint, bitmap);
+  void putBitmapToDiskAsync(
+      Resource res, Stat stat, Rect constraint, Bitmap bitmap) {
+    thumbnailDiskCache.putAsync(res, stat, constraint, bitmap);
   }
 
   @Nullable public Rect getSize(Resource res, Stat stat, Rect constraint) {

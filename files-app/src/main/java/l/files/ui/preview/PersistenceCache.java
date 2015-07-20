@@ -34,6 +34,8 @@ import static l.files.common.base.Stopwatches.startWatchIfDebug;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 
+  // TODO no action for files in cache dir
+
   private final Logger log = Logger.get(getClass());
 
   private final Executor loader = newSingleThreadExecutor();
