@@ -14,45 +14,33 @@ import static l.files.fs.LinkOption.FOLLOW;
 /**
  * Detects the media type of the underlying file by reading it's header.
  */
-public final class MagicDetector extends AbstractDetector
-{
-    private static final class TikaHolder
-    {
-        static final Tika tika = new Tika();
-    }
+public final class MagicDetector extends AbstractDetector {
 
-    public static final MagicDetector INSTANCE = new MagicDetector();
+  private static final class TikaHolder {
+    static final Tika tika = new Tika();
+  }
 
-    private MagicDetector()
-    {
-    }
+  public static final MagicDetector INSTANCE = new MagicDetector();
 
-    @Override
-    protected MediaType detectFile(final Resource resource, final Stat stat)
-            throws IOException
-    {
-        try
-        {
-            try (InputStream in = resource.input(FOLLOW))
-            {
-                return MediaType.parse(TikaHolder.tika.detect(in));
-            }
-        }
-        catch (final TaggedIOException e)
-        {
-            if (e.getCause() != null)
-            {
-                throw e.getCause();
-            }
-            else
-            {
-                throw e;
-            }
-        }
-        catch (final IllegalArgumentException e)
-        {
-            return OCTET_STREAM;
-        }
+  private MagicDetector() {
+  }
+
+  @Override
+  protected MediaType detectFile(Resource resource, Stat stat) throws IOException {
+
+    try (InputStream in = resource.input(FOLLOW)) {
+      return MediaType.parse(TikaHolder.tika.detect(in));
+
+    } catch (TaggedIOException e) {
+      if (e.getCause() != null) {
+        throw e.getCause();
+      } else {
+        throw e;
+      }
+
+    } catch (IllegalArgumentException e) {
+      return OCTET_STREAM;
     }
+  }
 
 }

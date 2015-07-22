@@ -15,130 +15,100 @@ import l.files.fs.Stat;
 
 import static com.google.common.net.MediaType.OCTET_STREAM;
 
-public abstract class FileListItem
-{
+public abstract class FileListItem {
 
-    FileListItem()
-    {
+  FileListItem() {
+  }
+
+  public abstract boolean isFile();
+
+  public boolean isHeader() {
+    return !isFile();
+  }
+
+  @AutoParcel
+  public static abstract class Header extends FileListItem {
+
+    Header() {
     }
 
-    public abstract boolean isFile();
+    public abstract String header();
 
-    public boolean isHeader()
-    {
-        return !isFile();
+    public static Header of(String header) {
+      return new AutoParcel_FileListItem_Header(header);
     }
 
-    @AutoParcel
-    public static abstract class Header extends FileListItem
-    {
-
-        Header()
-        {
-        }
-
-        public abstract String header();
-
-        public static Header of(final String header)
-        {
-            return new AutoParcel_FileListItem_Header(header);
-        }
-
-        @Override
-        public boolean isFile()
-        {
-            return false;
-        }
-
-        @Override
-        public String toString()
-        {
-            return header();
-        }
+    @Override public boolean isFile() {
+      return false;
     }
 
-    @AutoParcel
-    public static abstract class File extends FileListItem implements Comparable<File>
-    {
-
-        private Boolean readable;
-
-        File()
-        {
-        }
-
-        // TODO don't do the following in the main thread
-
-        public boolean isReadable()
-        {
-            if (readable == null)
-            {
-                try
-                {
-                    readable = resource().readable();
-                }
-                catch (final IOException e)
-                {
-                    readable = false;
-                }
-            }
-            return readable;
-        }
-
-        public MediaType basicMediaType()
-        {
-            try
-            {
-                return BasicDetector.INSTANCE.detect(resource());
-            }
-            catch (final IOException e)
-            {
-                return OCTET_STREAM;
-            }
-        }
-
-        public abstract Resource resource();
-
-        @Nullable
-        public abstract Stat stat(); // TODO
-
-        @Nullable
-        abstract Stat _targetStat();
-
-        public abstract CollationKey collationKey();
-
-        public static File create(
-                final Resource resource,
-                @Nullable final Stat stat,
-                @Nullable final Stat targetStat,
-                final Collator collator)
-        {
-            final String name = resource.name().toString();
-            final CollationKey key = collator.getCollationKey(name);
-            return new AutoParcel_FileListItem_File(resource, stat, targetStat, key);
-        }
-
-        @Override
-        public boolean isFile()
-        {
-            return true;
-        }
-
-        /**
-         * If the resource is a link, this returns the status of the target
-         * file, if not available, returns the status of the link.
-         */
-        @Nullable
-        public Stat targetStat()
-        {
-            return _targetStat() != null ? _targetStat() : stat();
-        }
-
-        @Override
-        public int compareTo(final File another)
-        {
-            return collationKey().compareTo(another.collationKey());
-        }
+    @Override public String toString() {
+      return header();
     }
+  }
+
+  @AutoParcel
+  public static abstract class File extends FileListItem implements Comparable<File> {
+
+    private Boolean readable;
+
+    File() {
+    }
+
+    // TODO don't do the following in the main thread
+
+    public boolean isReadable() {
+      if (readable == null) {
+        try {
+          readable = resource().readable();
+        } catch (IOException e) {
+          readable = false;
+        }
+      }
+      return readable;
+    }
+
+    public MediaType basicMediaType() {
+      try {
+        return BasicDetector.INSTANCE.detect(resource());
+      } catch (IOException e) {
+        return OCTET_STREAM;
+      }
+    }
+
+    public abstract Resource resource();
+
+    @Nullable public abstract Stat stat(); // TODO
+
+    @Nullable abstract Stat _targetStat();
+
+    public abstract CollationKey collationKey();
+
+    public static File create(
+        Resource resource,
+        @Nullable Stat stat,
+        @Nullable Stat targetStat,
+        Collator collator) {
+      String name = resource.name().toString();
+      CollationKey key = collator.getCollationKey(name);
+      return new AutoParcel_FileListItem_File(resource, stat, targetStat, key);
+    }
+
+    @Override public boolean isFile() {
+      return true;
+    }
+
+    /**
+     * If the resource is a link, this returns the status of the target
+     * file, if not available, returns the status of the link.
+     */
+    @Nullable public Stat targetStat() {
+      return _targetStat() != null ? _targetStat() : stat();
+    }
+
+    @Override public int compareTo(File another) {
+      return collationKey().compareTo(another.collationKey());
+    }
+  }
 
 }

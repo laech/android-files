@@ -11,32 +11,26 @@ import static com.google.common.net.MediaType.OCTET_STREAM;
 /**
  * Detects content type based on name and resource type.
  */
-public final class BasicDetector extends AbstractDetector
-{
-    public static final BasicDetector INSTANCE = new BasicDetector();
+public final class BasicDetector extends AbstractDetector {
 
-    private BasicDetector()
-    {
-    }
+  public static final BasicDetector INSTANCE = new BasicDetector();
 
-    @Override
-    protected MediaType detectFile(final Resource resource, final Stat stat)
-            throws IOException
-    {
-        final MimeTypeMap typeMap = MimeTypeMap.getSingleton();
-        final String ext = resource.name().ext();
-        final String type = typeMap.getMimeTypeFromExtension(ext);
-        if (type == null)
-        {
-            return OCTET_STREAM;
-        }
-        try
-        {
-            return MediaType.parse(type);
-        }
-        catch (final IllegalArgumentException e)
-        {
-            return OCTET_STREAM;
-        }
+  private BasicDetector() {
+  }
+
+  @Override
+  protected MediaType detectFile(Resource resource, Stat stat) throws IOException {
+    MimeTypeMap typeMap = MimeTypeMap.getSingleton();
+    String ext = resource.name().ext();
+    String type = typeMap.getMimeTypeFromExtension(ext);
+    if (type == null) {
+      return OCTET_STREAM;
     }
+    try {
+      return MediaType.parse(type);
+    } catch (IllegalArgumentException e) {
+      return OCTET_STREAM;
+    }
+  }
+
 }
