@@ -8,10 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -431,7 +427,7 @@ public final class UiFileActivity {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         List<Resource> actual = activity.hierarchy();
-        List<Resource> expected = new ArrayList<Resource>(dir.hierarchy());
+        List<Resource> expected = new ArrayList<>(dir.hierarchy());
         reverse(expected);
         assertEquals(expected, actual);
         assertEquals(dir, activity.title().getSelectedItem());
@@ -461,18 +457,13 @@ public final class UiFileActivity {
     }
   }
 
-  private List<Pair<Resource, Stat>> stat(List<Resource> resources)
-      throws IOException {
-    return Lists.transform(resources,
-        new Function<Resource, Pair<Resource, Stat>>() {
-          @Override public Pair<Resource, Stat> apply(Resource input) {
-            try {
-              return Pair.create(input, input.stat(NOFOLLOW));
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          }
-        });
+  private List<Pair<Resource, Stat>> stat(
+      List<Resource> resources) throws IOException {
+    List<Pair<Resource, Stat>> result = new ArrayList<>();
+    for (Resource resource : resources) {
+      result.add(Pair.create(resource, resource.stat(NOFOLLOW)));
+    }
+    return result;
   }
 
   private List<Resource> sortResourcesByPath(List<Resource> resources) {
@@ -490,11 +481,11 @@ public final class UiFileActivity {
   }
 
   private List<Pair<Resource, Stat>> stats(List<FileListItem.File> items) {
-    ImmutableList.Builder<Pair<Resource, Stat>> b = ImmutableList.builder();
+    List<Pair<Resource, Stat>> result = new ArrayList<>();
     for (FileListItem.File item : items) {
-      b.add(Pair.create(item.resource(), item.stat()));
+      result.add(Pair.create(item.resource(), item.stat()));
     }
-    return b.build();
+    return result;
   }
 
   private List<FileListItem.File> sortFilesByPath(

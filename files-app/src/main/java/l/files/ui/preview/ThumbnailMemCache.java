@@ -10,15 +10,16 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.content.Context.ACTIVITY_SERVICE;
-import static com.google.common.base.Preconditions.checkArgument;
 
 final class ThumbnailMemCache extends MemCache<Bitmap> {
 
   private final LruCache<String, Snapshot<Bitmap>> delegate;
 
   ThumbnailMemCache(Context context, float appMemoryPercentageToUseForCache) {
-    checkArgument(appMemoryPercentageToUseForCache > 0);
-    checkArgument(appMemoryPercentageToUseForCache < 1);
+    if (appMemoryPercentageToUseForCache <= 0 ||
+        appMemoryPercentageToUseForCache >= 1) {
+      throw new IllegalArgumentException();
+    }
 
     ActivityManager manager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
     int megabytes = manager.getMemoryClass();

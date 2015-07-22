@@ -15,8 +15,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.common.base.Function;
-
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -148,7 +146,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     selection.addAll(resources);
   }
 
-  static class DateFormatter implements Function<Stat, CharSequence> {
+  static class DateFormatter {
     Context context;
     DateFormat futureFormat;
     DateFormat dateFormat;
@@ -168,7 +166,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       this.timeFormat = getTimeFormat(context);
     }
 
-    @Override public CharSequence apply(Stat file) {
+    CharSequence apply(Stat file) {
       Instant instant = file.mtime();
       long millis = instant.to(MILLISECONDS);
       date.setTime(millis);

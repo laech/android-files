@@ -3,13 +3,13 @@ package l.files.ui;
 import android.content.res.AssetManager;
 import android.graphics.Typeface;
 
-import com.google.common.collect.ImmutableMap;
-
+import java.util.HashMap;
 import java.util.Map;
 
 import l.files.fs.Resource;
 
 import static android.graphics.Typeface.createFromAsset;
+import static java.util.Collections.unmodifiableMap;
 import static l.files.R.string.ic_dir;
 import static l.files.R.string.ic_dir_device;
 import static l.files.R.string.ic_dir_download;
@@ -36,15 +36,19 @@ public final class Icons {
   private static Typeface font;
 
   private static final Map<Resource, Integer> iconByDirectoryUri =
-      new ImmutableMap.Builder<Resource, Integer>()
-          .put(DIR_ROOT, ic_dir_device)
-          .put(DIR_HOME, ic_dir_home)
-          .put(DIR_DCIM, ic_dir_image)
-          .put(DIR_MUSIC, ic_dir_music)
-          .put(DIR_MOVIES, ic_dir_video)
-          .put(DIR_PICTURES, ic_dir_image)
-          .put(DIR_DOWNLOADS, ic_dir_download)
-          .build();
+      buildIconByDIrectoryUri();
+
+  private static Map<Resource, Integer> buildIconByDIrectoryUri() {
+    Map<Resource, Integer> icons = new HashMap<>();
+    icons.put(DIR_ROOT, ic_dir_device);
+    icons.put(DIR_HOME, ic_dir_home);
+    icons.put(DIR_DCIM, ic_dir_image);
+    icons.put(DIR_MUSIC, ic_dir_music);
+    icons.put(DIR_MOVIES, ic_dir_video);
+    icons.put(DIR_PICTURES, ic_dir_image);
+    icons.put(DIR_DOWNLOADS, ic_dir_download);
+    return unmodifiableMap(icons);
+  }
 
   private static boolean isArchive(String media) {
     return media.endsWith("/zip")

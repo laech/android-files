@@ -3,10 +3,6 @@ package l.files.provider.bookmarks;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -28,8 +24,7 @@ import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -51,14 +46,18 @@ public final class BookmarkManagerImpl implements BookmarkManager {
 
   private static final String PREF_KEY = "bookmarks";
 
-  private static final Set<String> DEFAULTS = ImmutableSet.<String>builder()
-      .add(getExternalStorageDirectory().toURI().toString())
-      .add(uri(DIRECTORY_DCIM))
-      .add(uri(DIRECTORY_MUSIC))
-      .add(uri(DIRECTORY_MOVIES))
-      .add(uri(DIRECTORY_PICTURES))
-      .add(uri(DIRECTORY_DOWNLOADS))
-      .build();
+  private static final Set<String> DEFAULTS = buildDefaults();
+
+  private static Set<String> buildDefaults() {
+    Set<String> defaults = new HashSet<>();
+    defaults.add(getExternalStorageDirectory().toURI().toString());
+    defaults.add(uri(DIRECTORY_DCIM));
+    defaults.add(uri(DIRECTORY_MUSIC));
+    defaults.add(uri(DIRECTORY_MOVIES));
+    defaults.add(uri(DIRECTORY_PICTURES));
+    defaults.add(uri(DIRECTORY_DOWNLOADS));
+    return unmodifiableSet(defaults);
+  }
 
   private static String uri(String name) {
     return new File(getExternalStorageDirectory(), name).toURI().toString();
@@ -69,7 +68,6 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
-  @VisibleForTesting
   public BookmarkManagerImpl(ResourceProvider provider, SharedPreferences pref) {
     this.provider = requireNonNull(provider);
     this.pref = requireNonNull(pref);
@@ -78,7 +76,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   }
 
   private Set<Resource> toPaths(Set<String> uriStrings) {
-    Set<Resource> paths = newHashSetWithExpectedSize(uriStrings.size());
+    Set<Resource> paths = new HashSet<>();
     for (String uriString : uriStrings) {
       try {
         URI uri = new URI(uriString);
@@ -124,11 +122,11 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   }
 
   private Set<String> toUriStrings(Set<? extends Resource> bookmarks) {
-    return new HashSet<>(transform(bookmarks, new Function<Resource, String>() {
-      @Override public String apply(Resource input) {
-        return input.uri().toString();
-      }
-    }));
+    Set<String> uris = new HashSet<>();
+    for (Resource bookmark : bookmarks) {
+      uris.add(bookmark.uri().toString());
+    }
+    return uris;
   }
 
   private void notifyListeners() {
@@ -147,10 +145,9 @@ public final class BookmarkManagerImpl implements BookmarkManager {
         bookmarks.addAll(loadBookmarks());
       }
     }
-    return ImmutableSet.copyOf(bookmarks);
+    return unmodifiableSet(new HashSet<>(bookmarks));
   }
 
-  @VisibleForTesting
   public Set<Resource> loadBookmarks() {
     return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
   }

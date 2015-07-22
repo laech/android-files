@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.concurrent.Executor;
 
@@ -25,10 +24,7 @@ final class DecodeChain extends Decode {
 
   // No need to set UncaughtExceptionHandler to terminate
   // on exception already set by Android
-  private static final Executor executor =
-      newFixedThreadPool(5, new ThreadFactoryBuilder()
-          .setNameFormat("decode-chain-pool-thread-%d")
-          .build());
+  private static final Executor executor = newFixedThreadPool(5);
 
   DecodeChain(
       Resource res,

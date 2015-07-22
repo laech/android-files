@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
@@ -20,10 +18,7 @@ abstract class DecodeMedia extends DecodeBitmap {
 
   // No need to set UncaughtExceptionHandler to terminate
   // on exception already set by Android
-  private static final Executor executor =
-      newFixedThreadPool(2, new ThreadFactoryBuilder()
-          .setNameFormat("decode-media-pool-thread-%d")
-          .build());
+  private static final Executor executor = newFixedThreadPool(2);
 
   DecodeMedia(
       Resource res,

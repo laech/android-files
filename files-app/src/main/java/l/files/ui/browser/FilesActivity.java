@@ -16,9 +16,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
 import android.widget.Toolbar;
 
-import com.google.common.collect.ImmutableList;
-
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -78,7 +77,7 @@ public final class FilesActivity extends BaseActivity implements
   private Toolbar toolbar;
   private Spinner title;
 
-  public ImmutableList<Resource> hierarchy() {
+  public List<Resource> hierarchy() {
     return hierarchy.get();
   }
 

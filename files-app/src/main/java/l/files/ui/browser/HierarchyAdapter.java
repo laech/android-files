@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.google.common.collect.ImmutableList;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import l.files.fs.Resource;
@@ -17,107 +18,88 @@ import l.files.ui.Icons;
 
 import static android.R.id.icon;
 import static android.R.id.title;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static l.files.R.layout.files_activity_title;
 import static l.files.R.layout.files_activity_title_item;
 
-final class HierarchyAdapter extends BaseAdapter
-{
-    private ImmutableList<Resource> hierarchy = ImmutableList.of();
-    private Resource directory;
+final class HierarchyAdapter extends BaseAdapter {
+  private List<Resource> hierarchy = emptyList();
+  private Resource directory;
 
-    void set(final Resource dir)
-    {
-        directory = dir;
-        hierarchy = ImmutableList.copyOf(dir.hierarchy()).reverse();
-        notifyDataSetChanged();
-    }
+  void set(Resource dir) {
+    directory = dir;
+    hierarchy = new ArrayList<>(dir.hierarchy());
+    Collections.reverse(hierarchy);
+    hierarchy = unmodifiableList(hierarchy);
+    notifyDataSetChanged();
+  }
 
-    ImmutableList<Resource> get()
-    {
-        return hierarchy;
-    }
+  List<Resource> get() {
+    return hierarchy;
+  }
 
-    int indexOf(final Resource dir)
-    {
-        return hierarchy.indexOf(dir);
-    }
+  int indexOf(Resource dir) {
+    return hierarchy.indexOf(dir);
+  }
 
-    @Override
-    public boolean areAllItemsEnabled()
-    {
-        return false;
-    }
+  @Override public boolean areAllItemsEnabled() {
+    return false;
+  }
 
-    @Override
-    public boolean isEnabled(final int position)
-    {
-        return !Objects.equals(directory, getItem(position));
-    }
+  @Override public boolean isEnabled(int position) {
+    return !Objects.equals(directory, getItem(position));
+  }
 
-    @Override
-    public int getCount()
-    {
-        return hierarchy.size();
-    }
+  @Override public int getCount() {
+    return hierarchy.size();
+  }
 
-    @Override
-    public Resource getItem(final int position)
-    {
-        return hierarchy.get(position);
-    }
+  @Override public Resource getItem(int position) {
+    return hierarchy.get(position);
+  }
 
-    @Override
-    public long getItemId(final int position)
-    {
-        return position;
-    }
+  @Override public long getItemId(int position) {
+    return position;
+  }
 
-    @Override
-    public View getView(
-            final int position,
-            final View convertView,
-            final ViewGroup parent)
-    {
-        final View view = convertView != null
-                ? convertView
-                : inflate(files_activity_title, parent);
+  @Override
+  public View getView(int position, View convertView, ViewGroup parent) {
+    View view = convertView != null
+        ? convertView
+        : inflate(files_activity_title, parent);
 
-        ((TextView) view.findViewById(title)).setText(
-                FileLabels.get(parent.getResources(), getItem(position)));
+    ((TextView) view.findViewById(title)).setText(
+        FileLabels.get(parent.getResources(), getItem(position)));
 
-        return view;
-    }
+    return view;
+  }
 
-    @Override
-    public View getDropDownView(
-            final int position,
-            final View convertView,
-            final ViewGroup parent)
-    {
-        final View view = convertView != null
-                ? convertView
-                : inflate(files_activity_title_item, parent);
+  @Override
+  public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    View view = convertView != null
+        ? convertView
+        : inflate(files_activity_title_item, parent);
 
-        final boolean enabled = isEnabled(position);
-        final Resource res = getItem(position);
-        view.setEnabled(enabled);
+    boolean enabled = isEnabled(position);
+    Resource res = getItem(position);
+    view.setEnabled(enabled);
 
-        final AssetManager assets = parent.getContext().getAssets();
-        final TextView iconView = (TextView) view.findViewById(icon);
-        iconView.setText(Icons.directoryIconStringId(res));
-        iconView.setTypeface(Icons.font(assets));
-        iconView.setEnabled(enabled);
+    AssetManager assets = parent.getContext().getAssets();
+    TextView iconView = (TextView) view.findViewById(icon);
+    iconView.setText(Icons.directoryIconStringId(res));
+    iconView.setTypeface(Icons.font(assets));
+    iconView.setEnabled(enabled);
 
-        final TextView titleView = (TextView) view.findViewById(title);
-        titleView.setText(res.isRoot() ? res.path() : res.name());
-        titleView.setEnabled(enabled);
+    TextView titleView = (TextView) view.findViewById(title);
+    titleView.setText(res.isRoot() ? res.path() : res.name());
+    titleView.setEnabled(enabled);
 
-        return view;
-    }
+    return view;
+  }
 
-    private View inflate(final int layout, final ViewGroup parent)
-    {
-        return LayoutInflater.from(parent.getContext())
-                .inflate(layout, parent, false);
-    }
+  private View inflate(int layout, ViewGroup parent) {
+    return LayoutInflater.from(parent.getContext())
+        .inflate(layout, parent, false);
+  }
 }

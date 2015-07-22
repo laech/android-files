@@ -1,8 +1,6 @@
 package l.files.fs.local;
 
-import com.google.common.io.Closer;
-
-import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
@@ -12,69 +10,66 @@ import l.files.fs.Resource;
 import l.files.fs.ResourceException;
 import l.files.fs.Visitor;
 
-import static com.google.common.io.Files.createTempDir;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
 public abstract class ResourceBaseTest extends BaseTest {
 
-    private Resource dir1;
-    private Resource dir2;
+  private Resource dir1;
+  private Resource dir2;
 
-    protected final Resource dir1() {
-        if (dir1 == null) {
-            dir1 = LocalResource.create(createTempDir());
-        }
-        return dir1;
+  protected final Resource dir1() {
+    if (dir1 == null) {
+      dir1 = LocalResource.create(createTempDir());
     }
+    return dir1;
+  }
 
-    protected final Resource dir2() {
-        if (dir2 == null) {
-            dir2 = LocalResource.create(createTempDir());
-        }
-        return dir2;
+  protected final Resource dir2() {
+    if (dir2 == null) {
+      dir2 = LocalResource.create(createTempDir());
     }
+    return dir2;
+  }
 
-    @Override
-    protected void tearDown() throws Exception {
-        try (Closer closer = Closer.create()) {
-            closer.register(deleteOnClose(dir1));
-            closer.register(deleteOnClose(dir2));
-        }
-        super.tearDown();
+  private File createTempDir() {
+    try {
+      File file = File.createTempFile("test", null);
+      assertTrue(file.delete());
+      assertTrue(file.mkdirs());
+      return file;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    private static Closeable deleteOnClose(final Resource resource) {
-        return new Closeable() {
-            @Override
-            public void close() throws IOException {
-                if (resource != null) {
-                    delete(resource);
-                }
+  @Override protected void tearDown() throws Exception {
+    delete(dir1);
+    delete(dir2);
+    super.tearDown();
+  }
+
+  private static void delete(Resource resource) throws IOException {
+    if (resource == null) {
+      return;
+    }
+    resource.traverse(
+        NOFOLLOW,
+        new Visitor() {
+          @Override public Result accept(Resource resource) throws IOException {
+            try {
+              resource.setPermissions(EnumSet.allOf(Permission.class));
+            } catch (ResourceException ignore) {
             }
-        };
-    }
-
-    private static void delete(Resource resource) throws IOException {
-        resource.traverse(
-                NOFOLLOW,
-                new Visitor() {
-                    @Override
-                    public Result accept(Resource resource) throws IOException {
-                        try {
-                            resource.setPermissions(EnumSet.allOf(Permission.class));
-                        } catch (ResourceException ignore) {
-                        }
-                        return CONTINUE;
-                    }
-                },
-                new Visitor() {
-                    @Override
-                    public Result accept(Resource resource) throws IOException {
-                        resource.delete();
-                        return CONTINUE;
-                    }
-                });
-    }
+            return CONTINUE;
+          }
+        },
+        new Visitor() {
+          @Override public Result accept(Resource resource) throws IOException {
+            resource.delete();
+            return CONTINUE;
+          }
+        });
+  }
 
 }

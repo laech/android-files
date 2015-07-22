@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,10 +37,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
   // No need to set UncaughtExceptionHandler to terminate
   // on exception already set by Android
-  private static final Executor executor =
-      newFixedThreadPool(2, new ThreadFactoryBuilder()
-          .setNameFormat("thumbnail-disk-cache-pool-thread-%d")
-          .build());
+  private static final Executor executor = newFixedThreadPool(2);
 
   /**
    * Place a dummy byte at the beginning of the cache files,
