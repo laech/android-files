@@ -7,12 +7,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.net.MediaType;
 
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
-import l.files.common.base.Either;
 import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
 import l.files.logging.Logger;
@@ -20,14 +18,9 @@ import l.files.logging.Logger;
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static com.google.common.net.MediaType.ANY_AUDIO_TYPE;
-import static com.google.common.net.MediaType.ANY_IMAGE_TYPE;
-import static com.google.common.net.MediaType.ANY_TEXT_TYPE;
-import static com.google.common.net.MediaType.ANY_TYPE;
-import static com.google.common.net.MediaType.ANY_VIDEO_TYPE;
-import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
+import static l.files.fs.Detector.ANY_TYPE;
 import static l.files.ui.IOExceptions.message;
 
 public final class FileOpener implements Consumer<Resource> {
@@ -48,36 +41,32 @@ public final class FileOpener implements Consumer<Resource> {
     new ShowFileTask(resource).execute();
   }
 
-  class ShowFileTask
-      extends AsyncTask<Void, Void, Either<MediaType, IOException>> {
+  private class ShowFileTask extends AsyncTask<Void, Void, Object> {
     private Resource resource;
 
     ShowFileTask(Resource resource) {
       this.resource = resource;
     }
 
-    @Override
-    protected Either<MediaType, IOException> doInBackground(Void... params) {
+    @Override protected Object doInBackground(Void... params) {
       try {
         Stopwatch watch = Stopwatch.createStarted();
-        MediaType media = MagicDetector.INSTANCE.detect(resource);
+        String media = MagicDetector.INSTANCE.detect(resource);
         log.debug("detect took %s", watch);
-        return Either.left(media);
+        return media;
       } catch (IOException e) {
-        return Either.right(e);
+        return e;
       }
     }
 
-    @Override
-    protected void onPostExecute(Either<MediaType, IOException> result) {
-      MediaType media = result.left();
-      IOException exception = result.right();
-      if (exception != null) {
-        showException(exception);
+    @Override protected void onPostExecute(Object result) {
+      if (result instanceof IOException) {
+        showException((IOException) result);
         return;
       }
 
-      if (!showFile(media) && !showFile(generalize(media))) {
+      if (!showFile((String) result) &&
+          !showFile(generalize((String) result))) {
         showFile(ANY_TYPE);
       }
     }
@@ -87,13 +76,13 @@ public final class FileOpener implements Consumer<Resource> {
       makeText(context, msg, LENGTH_SHORT).show();
     }
 
-    private boolean showFile(MediaType media) {
+    private boolean showFile(String media) {
       debug(media);
 
       Uri uri = Uri.parse(resource.uri().toString());
       try {
         Intent intent = new Intent(ACTION_VIEW);
-        intent.setDataAndType(uri, media.toString());
+        intent.setDataAndType(uri, media);
         context.startActivity(intent);
         return true;
       } catch (ActivityNotFoundException e) {
@@ -101,36 +90,23 @@ public final class FileOpener implements Consumer<Resource> {
       }
     }
 
-    private MediaType generalize(MediaType media) {
-      switch (media.type().toLowerCase(ENGLISH)) {
-        case "text":
-          return ANY_TEXT_TYPE;
-
-        case "image":
-          return ANY_IMAGE_TYPE;
-
-        case "audio":
-          return ANY_AUDIO_TYPE;
-
-        case "video":
-          return ANY_VIDEO_TYPE;
-
-        case "application": {
-          String subtype = media.subtype().toLowerCase(ENGLISH);
-          if (subtype.contains("json") || subtype.contains("xml")) {
-            return ANY_TEXT_TYPE;
-          }
-          switch (subtype) {
-            case "javascript":
-            case "x-sh":
-              return ANY_TEXT_TYPE;
-          }
+    private String generalize(String media) {
+      if (media.startsWith("text/")) return "text/*";
+      if (media.startsWith("image/")) return "image/*";
+      if (media.startsWith("audio/")) return "audio/*";
+      if (media.startsWith("video/")) return "video/*";
+      if (media.startsWith("application/")) {
+        if (media.contains("json") ||
+            media.contains("xml") ||
+            media.contains("javascript") ||
+            media.contains("x-sh")) {
+          return "text/*";
         }
       }
       return media;
     }
 
-    private void debug(MediaType media) {
+    private void debug(String media) {
       if (DEBUG) makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
     }
   }

@@ -6,9 +6,9 @@ import java.util.Collections;
 
 import l.files.fs.local.LocalResource;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
+import static l.files.fs.AbstractDetector.OCTET_STREAM;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {

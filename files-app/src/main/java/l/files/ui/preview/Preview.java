@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.net.MediaType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,7 @@ public final class Preview {
   }
 
   private final PersistenceCache<Rect> sizeCache;
-  private final PersistenceCache<MediaType> mediaTypeCache;
+  private final PersistenceCache<String> mediaTypeCache;
   private final PersistenceCache<Boolean> noPreviewCache;
   private final ThumbnailMemCache thumbnailMemCache;
   private final ThumbnailDiskCache thumbnailDiskCache;
@@ -100,12 +99,12 @@ public final class Preview {
     sizeCache.put(res, stat, constraint, size);
   }
 
-  @Nullable MediaType getMediaType(Resource res, Stat stat, Rect constraint) {
+  @Nullable String getMediaType(Resource res, Stat stat, Rect constraint) {
     return mediaTypeCache.get(res, stat, constraint);
   }
 
-  void putMediaType(Resource res, Stat stat, Rect constraint, MediaType value) {
-    mediaTypeCache.put(res, stat, constraint, value);
+  void putMediaType(Resource res, Stat stat, Rect constraint, String media) {
+    mediaTypeCache.put(res, stat, constraint, media);
   }
 
   public boolean isPreviewable(Resource res, Stat stat, Rect constraint) {

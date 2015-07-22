@@ -1,14 +1,12 @@
 package l.files.ui.preview;
 
-import com.google.common.net.MediaType;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import l.files.fs.Resource;
 
-final class MediaTypeCache extends PersistenceCache<MediaType> {
+final class MediaTypeCache extends PersistenceCache<String> {
 
   MediaTypeCache(Resource cacheDir) {
     super(cacheDir);
@@ -18,12 +16,12 @@ final class MediaTypeCache extends PersistenceCache<MediaType> {
     return "media-types";
   }
 
-  @Override MediaType read(DataInput in) throws IOException {
-    return MediaType.parse(in.readUTF());
+  @Override String read(DataInput in) throws IOException {
+    return in.readUTF();
   }
 
-  @Override void write(DataOutput out, MediaType value) throws IOException {
-    out.writeUTF(value.toString());
+  @Override void write(DataOutput out, String media) throws IOException {
+    out.writeUTF(media);
   }
 
 }

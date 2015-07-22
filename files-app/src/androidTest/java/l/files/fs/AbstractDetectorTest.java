@@ -17,18 +17,18 @@ public abstract class AbstractDetectorTest extends ResourceBaseTest {
 
   public void test_detects_directory_type() throws Exception {
     Resource dir = dir1().resolve("a").createDirectory();
-    assertEquals("inode/directory", detector().detect(dir).toString());
+    assertEquals("inode/directory", detector().detect(dir));
   }
 
   public void test_detects_file_type() throws Exception {
     Resource file = createTextFile("a.txt");
-    assertEquals("text/plain", detector().detect(file).toString());
+    assertEquals("text/plain", detector().detect(file));
   }
 
   public void test_detects_linked_file_type() throws Exception {
     Resource file = createTextFile("a.mp3");
     Resource link = dir1().resolve("b.txt").createLink(file);
-    assertEquals("text/plain", detector().detect(link).toString());
+    assertEquals("text/plain", detector().detect(link));
   }
 
   private Resource createTextFile(String name) throws IOException {
@@ -42,14 +42,14 @@ public abstract class AbstractDetectorTest extends ResourceBaseTest {
   public void test_detects_linked_directory_type() throws Exception {
     Resource dir = dir1().resolve("a").createDirectory();
     Resource link = dir1().resolve("b").createLink(dir);
-    assertEquals("inode/directory", detector().detect(link).toString());
+    assertEquals("inode/directory", detector().detect(link));
   }
 
   public void test_detects_multi_linked_directory_type() throws Exception {
     Resource dir = dir1().resolve("a").createDirectory();
     Resource link1 = dir1().resolve("b").createLink(dir);
     Resource link2 = dir1().resolve("c").createLink(link1);
-    assertEquals("inode/directory", detector().detect(link2).toString());
+    assertEquals("inode/directory", detector().detect(link2));
   }
 
 }

@@ -4,11 +4,8 @@ import android.content.res.AssetManager;
 import android.graphics.Typeface;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.net.MediaType;
 
 import java.util.Map;
-import java.util.Set;
 
 import l.files.fs.Resource;
 
@@ -49,16 +46,16 @@ public final class Icons {
           .put(DIR_DOWNLOADS, ic_dir_download)
           .build();
 
-  private static final Set<String> archiveSubtypes =
-      ImmutableSet.of(
-          "zip",
-          "x-gzip",
-          "x-tar",
-          "x-rar-compressed",
-          "x-ace-compressed",
-          "x-bzip2",
-          "x-compress",
-          "x-7z-compressed");
+  private static boolean isArchive(String media) {
+    return media.endsWith("/zip")
+        || media.endsWith("/x-gzip")
+        || media.endsWith("/x-tar")
+        || media.endsWith("/x-rar-compressed")
+        || media.endsWith("/x-ace-compressed")
+        || media.endsWith("/x-bzip2")
+        || media.endsWith("/x-compress")
+        || media.endsWith("/x-7z-compressed");
+  }
 
   public static Typeface font(AssetManager assets) {
     if (font == null) {
@@ -76,13 +73,13 @@ public final class Icons {
     return ic_dir;
   }
 
-  public static int fileIconStringId(MediaType mime) {
-    if (mime.subtype().equalsIgnoreCase("pdf")) return ic_file_pdf;
-    if (mime.type().equalsIgnoreCase("audio")) return ic_file_music;
-    if (mime.type().equalsIgnoreCase("video")) return ic_file_video;
-    if (mime.type().equalsIgnoreCase("image")) return ic_file_image;
-    if (mime.type().equalsIgnoreCase("text")) return ic_file_text;
-    if (archiveSubtypes.contains(mime.subtype())) return ic_file_archive;
+  public static int fileIconStringId(String media) {
+    if (media.equals("application/pdf")) return ic_file_pdf;
+    if (media.startsWith("audio/")) return ic_file_music;
+    if (media.startsWith("video/")) return ic_file_video;
+    if (media.startsWith("image/")) return ic_file_image;
+    if (media.startsWith("text/")) return ic_file_text;
+    if (isArchive(media)) return ic_file_archive;
     return defaultFileIconStringId();
   }
 

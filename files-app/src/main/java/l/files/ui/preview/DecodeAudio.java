@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
-import com.google.common.net.MediaType;
-
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -18,14 +16,12 @@ final class DecodeAudio extends DecodeMedia {
       Stat stat,
       Rect constraint,
       PreviewCallback callback,
-      Preview context,
-      MediaType media) {
+      Preview context) {
     super(res, stat, constraint, callback, context);
   }
 
-  static boolean isAudio(MediaType media, Resource res) {
-    return res.file().isPresent()
-        && media.type().equalsIgnoreCase("audio");
+  static boolean isAudio(String media, Resource res) {
+    return res.file().isPresent() && media.startsWith("audio/");
   }
 
   @Override Bitmap decode(MediaMetadataRetriever retriever) {

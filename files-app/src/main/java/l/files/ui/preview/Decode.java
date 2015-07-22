@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-import com.google.common.net.MediaType;
-
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -60,9 +58,6 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         callback.onPreviewAvailable(res, (Bitmap) value);
         context.putBitmap(res, stat, constraint, (Bitmap) value);
         context.putPreviewable(res, stat, constraint, true);
-
-      } else if (value instanceof MediaType) {
-        context.putMediaType(res, stat, constraint, (MediaType) value);
 
       } else if (value instanceof NoPreview) {
         callback.onPreviewFailed(res);

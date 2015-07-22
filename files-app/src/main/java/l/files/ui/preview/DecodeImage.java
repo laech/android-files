@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
-import com.google.common.net.MediaType;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,8 +24,8 @@ final class DecodeImage extends DecodeBitmap {
     super(res, stat, constraint, callback, context);
   }
 
-  static boolean isImage(MediaType media) {
-    return media.type().equalsIgnoreCase("image");
+  static boolean isImage(String media) {
+    return media.startsWith("image/");
   }
 
   @Override DecodeImage executeOnPreferredExecutor() {

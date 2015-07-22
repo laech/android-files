@@ -5,8 +5,6 @@ import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
 import android.util.DisplayMetrics;
 
-import com.google.common.net.MediaType;
-
 import java.io.IOException;
 
 import l.files.common.graphics.Rect;
@@ -36,7 +34,7 @@ final class DecodePdf extends DecodeBitmap {
     return (DecodePdf) executeOnExecutor(SERIAL_EXECUTOR);
   }
 
-  static boolean isPdf(MediaType media, Resource res) {
+  static boolean isPdf(String media, Resource res) {
     /*
      * PdfRenderer will cause native crash sometime after opening an
      * invalid PDF file, so need to make sure the file is a valid PDF.
@@ -45,9 +43,7 @@ final class DecodePdf extends DecodeBitmap {
      * PdfRenderer is not thread safe, at class level, not instance level
      * https://code.google.com/p/android/issues/detail?id=93791
      */
-    return res.file().isPresent() &&
-        media.type().equalsIgnoreCase("application") &&
-        media.subtype().equalsIgnoreCase("pdf");
+    return res.file().isPresent() && media.equals("application/pdf");
   }
 
   @Override Result decode() throws IOException {

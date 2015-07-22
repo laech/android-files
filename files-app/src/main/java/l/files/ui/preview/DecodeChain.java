@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.concurrent.Executor;
@@ -107,7 +106,7 @@ final class DecodeChain extends Decode {
       return null;
     }
 
-    MediaType media = checkMediaType();
+    String media = checkMediaType();
     if (media == null) {
       return null;
     }
@@ -126,7 +125,7 @@ final class DecodeChain extends Decode {
 
     } else if (isAudio(media, res)) {
       publishProgress(new DecodeAudio(
-          res, stat, constraint, callback, context, media));
+          res, stat, constraint, callback, context));
 
     } else if (isVideo(media, res)) {
       publishProgress(new DecodeVideo(
@@ -178,12 +177,12 @@ final class DecodeChain extends Decode {
     return false;
   }
 
-  private MediaType checkMediaType() {
-    MediaType media = context.getMediaType(res, stat, constraint);
+  private String checkMediaType() {
+    String media = context.getMediaType(res, stat, constraint);
     if (media == null) {
       media = decodeMedia();
       if (media != null) {
-        publishProgress(media);
+        context.putMediaType(res, stat, constraint, media);
       }
     }
     if (media == null) {
@@ -192,11 +191,11 @@ final class DecodeChain extends Decode {
     return media;
   }
 
-  private MediaType decodeMedia() {
+  private String decodeMedia() {
     try {
 
       Stopwatch watch = startWatchIfDebug();
-      MediaType media = MagicDetector.INSTANCE.detect(res);
+      String media = MagicDetector.INSTANCE.detect(res);
       log.debug("media %s %s %s", media, watch, res);
       return media;
 

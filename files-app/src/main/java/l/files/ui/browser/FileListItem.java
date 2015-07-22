@@ -1,7 +1,5 @@
 package l.files.ui.browser;
 
-import com.google.common.net.MediaType;
-
 import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
@@ -13,7 +11,7 @@ import l.files.fs.BasicDetector;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
+import static l.files.fs.Detector.OCTET_STREAM;
 
 public abstract class FileListItem {
 
@@ -68,7 +66,7 @@ public abstract class FileListItem {
       return readable;
     }
 
-    public MediaType basicMediaType() {
+    public String basicMediaType() {
       try {
         return BasicDetector.INSTANCE.detect(resource());
       } catch (IOException e) {

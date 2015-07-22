@@ -1,28 +1,25 @@
 package l.files.fs;
 
-import com.google.common.net.MediaType;
-
 import java.io.IOException;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
-public abstract class AbstractDetector implements Detector {
+abstract class AbstractDetector implements Detector {
 
   // Media types for file types, kept consistent with the linux "file" command
-  private static final MediaType INODE_DIRECTORY = MediaType.parse("inode/directory");
-  private static final MediaType INODE_BLOCKDEVICE = MediaType.parse("inode/blockdevice");
-  private static final MediaType INODE_CHARDEVICE = MediaType.parse("inode/chardevice");
-  private static final MediaType INODE_FIFO = MediaType.parse("inode/fifo");
-  private static final MediaType INODE_SOCKET = MediaType.parse("inode/socket");
+  private static final String INODE_DIRECTORY = "inode/directory";
+  private static final String INODE_BLOCKDEVICE = "inode/blockdevice";
+  private static final String INODE_CHARDEVICE = "inode/chardevice";
+  private static final String INODE_FIFO = "inode/fifo";
+  private static final String INODE_SOCKET = "inode/socket";
 
   @Override
-  public MediaType detect(Resource resource) throws IOException {
+  public String detect(Resource resource) throws IOException {
     return detect(resource, resource.stat(FOLLOW));
   }
 
   @Override
-  public MediaType detect(Resource resource, Stat stat) throws IOException {
+  public String detect(Resource resource, Stat stat) throws IOException {
     if (stat.isSymbolicLink()) {
       return detect(resource);
     } else {
@@ -36,6 +33,6 @@ public abstract class AbstractDetector implements Detector {
     }
   }
 
-  protected abstract MediaType detectFile(Resource resource, Stat stat)
-      throws IOException;
+  abstract String detectFile(Resource resource, Stat stat) throws IOException;
+
 }

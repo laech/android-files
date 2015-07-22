@@ -1,14 +1,11 @@
 package l.files.fs;
 
-import com.google.common.net.MediaType;
-
 import org.apache.tika.Tika;
 import org.apache.tika.io.TaggedIOException;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.google.common.net.MediaType.OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
 /**
@@ -25,11 +22,10 @@ public final class MagicDetector extends AbstractDetector {
   private MagicDetector() {
   }
 
-  @Override
-  protected MediaType detectFile(Resource resource, Stat stat) throws IOException {
+  @Override String detectFile(Resource resource, Stat stat) throws IOException {
 
     try (InputStream in = resource.input(FOLLOW)) {
-      return MediaType.parse(TikaHolder.tika.detect(in));
+      return TikaHolder.tika.detect(in);
 
     } catch (TaggedIOException e) {
       if (e.getCause() != null) {
@@ -37,9 +33,6 @@ public final class MagicDetector extends AbstractDetector {
       } else {
         throw e;
       }
-
-    } catch (IllegalArgumentException e) {
-      return OCTET_STREAM;
     }
   }
 
