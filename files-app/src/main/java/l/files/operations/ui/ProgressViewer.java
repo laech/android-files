@@ -2,9 +2,6 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import com.google.common.base.Optional;
-import com.google.common.primitives.Ints;
-
 import l.files.R;
 import l.files.operations.Clock;
 import l.files.operations.Progress;
@@ -36,7 +33,7 @@ abstract class ProgressViewer implements TaskStateViewer {
     if (state.getItems().isDone() || state.getBytes().isDone()) {
       return context.getString(R.string.cleaning_up);
     }
-    int total = Ints.saturatedCast(state.getItems().getTotal());
+    int total = (int) state.getItems().getTotal();
     int template = getWork(state).getProcessed() > 0
         ? getTitleRunning() : getTitlePreparing();
     return context.getResources().getQuantityString(template, total, total,
@@ -67,13 +64,13 @@ abstract class ProgressViewer implements TaskStateViewer {
   }
 
   private String getTimeRemaining(TaskState.Running state) {
-    Optional<String> formatted = formatTimeRemaining(
+    String formatted = formatTimeRemaining(
         state.getTime().getTick(),
         clock.tick(),
         getWork(state).getTotal(),
         getWork(state).getProcessed());
-    if (formatted.isPresent()) {
-      return context.getString(R.string.x_countdown, formatted.get());
+    if (formatted != null) {
+      return context.getString(R.string.x_countdown, formatted);
     }
     return "";
   }

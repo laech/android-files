@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -12,25 +11,27 @@ import static java.util.Collections.unmodifiableList;
  */
 final class FileException extends RuntimeException {
 
-    private final List<Failure> failures;
+  private final List<Failure> failures;
 
-    FileException(Collection<Failure> failures) {
-        this.failures = unmodifiableList(new ArrayList<>(failures));
-        checkArgument(!this.failures.isEmpty());
-
-        for (Failure failure : failures) {
-            addSuppressed(failure.getCause());
-        }
+  FileException(Collection<Failure> failures) {
+    this.failures = unmodifiableList(new ArrayList<>(failures));
+    if (this.failures.isEmpty()) {
+      throw new IllegalArgumentException();
     }
 
-    public static void throwIfNotEmpty(Collection<Failure> failures)
-            throws FileException {
-        if (!failures.isEmpty()) {
-            throw new FileException(failures);
-        }
+    for (Failure failure : failures) {
+      addSuppressed(failure.getCause());
     }
+  }
 
-    public List<Failure> failures() {
-        return failures;
+  public static void throwIfNotEmpty(Collection<Failure> failures)
+      throws FileException {
+    if (!failures.isEmpty()) {
+      throw new FileException(failures);
     }
+  }
+
+  public List<Failure> failures() {
+    return failures;
+  }
 }
