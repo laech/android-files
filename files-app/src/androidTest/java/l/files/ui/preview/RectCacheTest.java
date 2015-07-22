@@ -6,7 +6,7 @@ public final class RectCacheTest
     extends PersistenceCacheTest<Rect, RectCache> {
 
   @Override RectCache newCache() {
-    return new RectCache(getTestContext());
+    return new RectCache(dir2());
   }
 
   @Override Rect newValue() {

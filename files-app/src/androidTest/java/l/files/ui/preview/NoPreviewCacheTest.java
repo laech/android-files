@@ -6,7 +6,7 @@ public final class NoPreviewCacheTest
     extends PersistenceCacheTest<Boolean, NoPreviewCache> {
 
   @Override NoPreviewCache newCache() {
-    return new NoPreviewCache(getTestContext());
+    return new NoPreviewCache(dir2());
   }
 
   @Override Boolean newValue() {

@@ -86,7 +86,7 @@ public final class ThumbnailDiskCacheTest
   }
 
   @Override ThumbnailDiskCache newCache() {
-    return new ThumbnailDiskCache(getTestContext());
+    return new ThumbnailDiskCache(dir2());
   }
 
   @Override Bitmap newValue() {

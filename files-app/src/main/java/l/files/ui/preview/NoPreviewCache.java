@@ -1,15 +1,15 @@
 package l.files.ui.preview;
 
-import android.content.Context;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import l.files.fs.Resource;
+
 final class NoPreviewCache extends PersistenceCache<Boolean> {
 
-  NoPreviewCache(Context context) {
-    super(context);
+  NoPreviewCache(Resource cacheDir) {
+    super(cacheDir);
   }
 
   @Override String cacheFileName() {

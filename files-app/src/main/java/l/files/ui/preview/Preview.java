@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalResource;
 import l.files.logging.Logger;
 
 import static android.graphics.BitmapFactory.decodeStream;
@@ -45,14 +46,16 @@ public final class Preview {
   private final ThumbnailDiskCache thumbnailDiskCache;
 
   final DisplayMetrics displayMetrics;
+  final Resource cacheDir;
 
   private Preview(Context context) {
+    this.cacheDir = LocalResource.create(context.getExternalCacheDir());
     this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
-    this.sizeCache = new RectCache(context);
-    this.mediaTypeCache = new MediaTypeCache(context);
-    this.noPreviewCache = new NoPreviewCache(context);
+    this.sizeCache = new RectCache(cacheDir);
+    this.mediaTypeCache = new MediaTypeCache(cacheDir);
+    this.noPreviewCache = new NoPreviewCache(cacheDir);
     this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
-    this.thumbnailDiskCache = new ThumbnailDiskCache(context);
+    this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
   }
 
   public void writeCacheAsyncIfNeeded() {

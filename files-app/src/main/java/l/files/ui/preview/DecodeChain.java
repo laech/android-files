@@ -79,6 +79,10 @@ final class DecodeChain extends Decode {
       return null;
     }
 
+    if (checkIsCache()) {
+      return null;
+    }
+
     if (checkBitmapMemCache()) {
       return null;
     }
@@ -133,6 +137,14 @@ final class DecodeChain extends Decode {
     }
 
     return null;
+  }
+
+  private boolean checkIsCache() {
+    if (res.hierarchy().contains(context.cacheDir)) {
+      publishProgress(NoPreview.INSTANCE);
+      return true;
+    }
+    return false;
   }
 
   private boolean checkNotPreviewable() {

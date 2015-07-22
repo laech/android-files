@@ -1,6 +1,5 @@
 package l.files.ui.preview;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.LruCache;
 
@@ -13,10 +12,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -30,7 +26,9 @@ import l.files.fs.Stat;
 import l.files.logging.Logger;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
+import static java.util.Objects.requireNonNull;
 import static l.files.common.base.Stopwatches.startWatchIfDebug;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 
@@ -59,10 +57,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
       };
 
-  private final File cacheDir;
+  private final Resource cacheDir;
 
-  PersistenceCache(Context context) {
-    this.cacheDir = context.getExternalCacheDir();
+  PersistenceCache(Resource cacheDir) {
+    this.cacheDir = requireNonNull(cacheDir);
   }
 
   @Override String key(Resource res, Stat stat, Rect constraint) {
@@ -83,8 +81,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     return cache;
   }
 
-  private File cacheFile() {
-    return new File(cacheDir, cacheFileName());
+  private Resource cacheFile() {
+    return cacheDir.resolve(cacheFileName());
   }
 
   abstract String cacheFileName();
@@ -107,11 +105,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       return;
     }
 
-    File file = cacheFile();
+    Resource file = cacheFile();
     try (DataInputStream in =
              new DataInputStream(
                  new BufferedInputStream(
-                     new FileInputStream(file)))) {
+                     file.input(NOFOLLOW)))) {
 
       Stopwatch watch = startWatchIfDebug();
       int count = 0;
@@ -159,12 +157,18 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       return;
     }
 
-    File file = cacheFile();
-    file.getParentFile().mkdirs();
+    Resource file = cacheFile();
+    try {
+      file.createFiles();
+    } catch (IOException e) {
+      log.error(e);
+      return;
+    }
+
     try (DataOutputStream out =
              new DataOutputStream(
                  new BufferedOutputStream(
-                     new FileOutputStream(file)))) {
+                     file.output(NOFOLLOW)))) {
 
       Stopwatch watch = startWatchIfDebug();
       Map<String, Snapshot<V>> snapshot = cache.snapshot();

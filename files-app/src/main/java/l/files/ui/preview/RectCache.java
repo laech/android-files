@@ -1,17 +1,16 @@
 package l.files.ui.preview;
 
-import android.content.Context;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.Resource;
 
 final class RectCache extends PersistenceCache<Rect> {
 
-  RectCache(Context context) {
-    super(context);
+  RectCache(Resource cacheDir) {
+    super(cacheDir);
   }
 
   @Override String cacheFileName() {

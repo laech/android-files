@@ -1,6 +1,5 @@
 package l.files.ui.preview;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.google.common.base.Stopwatch;
@@ -21,7 +20,6 @@ import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
-import l.files.fs.local.LocalResource;
 import l.files.logging.Logger;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
@@ -56,11 +54,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
   final Resource cacheDir;
 
-  // TODO don't save anything from cache dir
-
-  ThumbnailDiskCache(Context context) {
-    this.cacheDir = LocalResource.create(
-        context.getExternalCacheDir()).resolve("thumbnails");
+  ThumbnailDiskCache(Resource cacheDir) {
+    this.cacheDir = cacheDir.resolve("thumbnails");
   }
 
   public void cleanupAsync() {

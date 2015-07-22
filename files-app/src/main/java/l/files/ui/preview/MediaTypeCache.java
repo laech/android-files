@@ -1,17 +1,17 @@
 package l.files.ui.preview;
 
-import android.content.Context;
-
 import com.google.common.net.MediaType;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import l.files.fs.Resource;
+
 final class MediaTypeCache extends PersistenceCache<MediaType> {
 
-  MediaTypeCache(Context context) {
-    super(context);
+  MediaTypeCache(Resource cacheDir) {
+    super(cacheDir);
   }
 
   @Override String cacheFileName() {
