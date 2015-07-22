@@ -34,7 +34,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
   // TODO no action for files in cache dir
 
-  private final Logger log = Logger.get(getClass());
+  final Logger log = Logger.get(getClass());
 
   private final Executor loader = SERIAL_EXECUTOR;
   private final AtomicBoolean loaded = new AtomicBoolean(false);

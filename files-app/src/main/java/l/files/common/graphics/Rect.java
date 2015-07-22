@@ -2,7 +2,6 @@ package l.files.common.graphics;
 
 import auto.parcel.AutoParcel;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
@@ -21,8 +20,9 @@ public abstract class Rect {
   }
 
   public static Rect of(int width, int height) {
-    checkArgument(width > 0);
-    checkArgument(height > 0);
+    if (width <= 0 || height <= 0) {
+      throw new IllegalArgumentException();
+    }
     return new AutoParcel_Rect(width, height);
   }
 

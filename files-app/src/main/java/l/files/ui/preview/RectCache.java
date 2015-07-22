@@ -20,7 +20,12 @@ final class RectCache extends PersistenceCache<Rect> {
   @Override Rect read(DataInput in) throws IOException {
     int width = in.readInt();
     int height = in.readInt();
-    return Rect.of(width, height);
+    try {
+      return Rect.of(width, height);
+    } catch (IllegalArgumentException e) {
+      log.warn(e);
+      return null;
+    }
   }
 
   @Override void write(DataOutput out, Rect rect) throws IOException {
