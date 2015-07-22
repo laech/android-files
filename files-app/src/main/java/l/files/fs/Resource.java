@@ -2,9 +2,6 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +38,7 @@ public interface Resource extends Parcelable {
    */
   String scheme();
 
-  Optional<File> file();
+  @Nullable File file();
 
   /**
    * Gets the path of this resource. The returned path is only valid within
@@ -66,7 +63,7 @@ public interface Resource extends Parcelable {
    * <p/>
    * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
    */
-  ImmutableList<Resource> hierarchy();
+  List<Resource> hierarchy();
 
   /**
    * Resolves the given name/path relative to this resource.
@@ -382,11 +379,9 @@ public interface Resource extends Parcelable {
       };
     }
 
-    private Optional<Integer> indexOfExtSeparator() {
+    private int indexOfExtSeparator() {
       int i = value().lastIndexOf('.');
-      return (i == -1 || i == 0 || i == length() - 1)
-          ? Optional.<Integer>absent()
-          : Optional.of(i);
+      return (i == -1 || i == 0 || i == length() - 1) ? -1 : i;
     }
 
     /**
@@ -403,10 +398,8 @@ public interface Resource extends Parcelable {
      * </pre>
      */
     public String base() {
-      Optional<Integer> i = indexOfExtSeparator();
-      return i.isPresent()
-          ? value().substring(0, i.get())
-          : value();
+      int i = indexOfExtSeparator();
+      return i != -1 ? value().substring(0, i) : value();
     }
 
     /**
@@ -423,10 +416,8 @@ public interface Resource extends Parcelable {
      * </pre>
      */
     public String ext() {
-      Optional<Integer> i = indexOfExtSeparator();
-      return i.isPresent()
-          ? value().substring(i.get() + 1)
-          : "";
+      int i = indexOfExtSeparator();
+      return i != 1 ? value().substring(i + 1) : "";
     }
 
     /**

@@ -19,7 +19,7 @@ final class DecodeVideo extends DecodeMedia {
   }
 
   static boolean isVideo(String media, Resource res) {
-    return res.file().isPresent() && media.startsWith("video/");
+    return res.file() != null && media.startsWith("video/");
   }
 
   @Override Bitmap decode(MediaMetadataRetriever retriever) {

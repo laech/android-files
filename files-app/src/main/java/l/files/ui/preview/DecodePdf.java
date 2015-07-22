@@ -43,11 +43,11 @@ final class DecodePdf extends DecodeBitmap {
      * PdfRenderer is not thread safe, at class level, not instance level
      * https://code.google.com/p/android/issues/detail?id=93791
      */
-    return res.file().isPresent() && media.equals("application/pdf");
+    return res.file() != null && media.equals("application/pdf");
   }
 
   @Override Result decode() throws IOException {
-    try (ParcelFileDescriptor fd = open(res.file().get(), MODE_READ_ONLY);
+    try (ParcelFileDescriptor fd = open(res.file(), MODE_READ_ONLY);
          PdfRenderer renderer = new PdfRenderer(fd)) {
       if (renderer.getPageCount() <= 0) {
         return null;

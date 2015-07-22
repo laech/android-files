@@ -3,9 +3,6 @@ package l.files.fs.local;
 import android.system.ErrnoException;
 import android.system.Os;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -69,7 +66,8 @@ import static android.system.OsConstants.S_IXOTH;
 import static android.system.OsConstants.S_IXUSR;
 import static android.system.OsConstants.W_OK;
 import static android.system.OsConstants.X_OK;
-import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.reverse;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
@@ -131,11 +129,7 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   // TODO absolute?
-  abstract File _file();
-
-  @Override public Optional<File> file() {
-    return Optional.of(_file());
-  }
+  @Override public abstract File file();
 
   public static LocalResource create(File file) {
     return new AutoParcel_LocalResource(file);
@@ -148,7 +142,7 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Override public String toString() {
-    return _file().getPath();
+    return file().getPath();
   }
 
   @Override public String scheme() {
@@ -156,16 +150,16 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Override public String path() {
-    return _file().getPath();
+    return file().getPath();
   }
 
   @Override public URI uri() {
-    return _file().toURI();
+    return file().toURI();
   }
 
   @Override public Name name() {
     if (name == null) {
-      name = Name.of(_file().getName());
+      name = Name.of(file().getName());
     }
     return name;
   }
@@ -179,7 +173,7 @@ public abstract class LocalResource extends Native implements Resource {
     if (isRoot()) {
       return null;
     } else {
-      return new AutoParcel_LocalResource(_file().getParentFile());
+      return new AutoParcel_LocalResource(file().getParentFile());
     }
   }
 
@@ -187,12 +181,13 @@ public abstract class LocalResource extends Native implements Resource {
     return "/".equals(path());
   }
 
-  @Override public ImmutableList<Resource> hierarchy() {
-    ImmutableList.Builder<Resource> b = ImmutableList.builder();
+  @Override public List<Resource> hierarchy() {
+    List<Resource> hierarchy = new ArrayList<>();
     for (Resource p = this; p != null; p = p.parent()) {
-      b.add(p);
+      hierarchy.add(p);
     }
-    return b.build().reverse();
+    reverse(hierarchy);
+    return unmodifiableList(hierarchy);
   }
 
   @Override public Closeable observe(
@@ -221,20 +216,21 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Override public LocalResource resolve(String other) {
-    return create(new File(_file(), other));
+    return create(new File(file(), other));
   }
 
   @Override public Resource resolve(Name other) {
     return resolve(other.toString());
   }
 
-  @Override public LocalResource resolveParent(
-      Resource fromParent,
-      Resource toParent) {
+  @Override
+  public LocalResource resolveParent(Resource fromParent, Resource toParent) {
     ensureIsLocalResource(fromParent);
     ensureIsLocalResource(toParent);
-    checkArgument(startsWith(fromParent));
-    File parent = ((LocalResource) toParent)._file();
+    if (!startsWith(fromParent)) {
+      throw new IllegalArgumentException();
+    }
+    File parent = toParent.file();
     String child = path().substring(fromParent.path().length());
     return new AutoParcel_LocalResource(new File(parent, child));
   }

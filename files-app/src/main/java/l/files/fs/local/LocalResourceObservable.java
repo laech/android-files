@@ -3,8 +3,6 @@ package l.files.fs.local;
 import android.os.Handler;
 import android.system.ErrnoException;
 
-import com.google.common.base.Throwables;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
@@ -23,7 +21,6 @@ import l.files.fs.local.LocalResourceStream.Callback;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
-import static java.lang.Thread.UncaughtExceptionHandler;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
@@ -198,27 +195,18 @@ final class LocalResourceObservable extends Native
     LocalResourceObservable observable =
         new LocalResourceObservable(fd, wd, resource, observer);
 
-        /* Using a new thread seems to be much quicker than using a thread pool
-         * executor, didn't investigate why, just a reminder here to check the
-         * performance if this is to be changed to a pool.
-         */
+    /* Using a new thread seems to be much quicker than using a thread pool
+     * executor, didn't investigate why, just a reminder here to check the
+     * performance if this is to be changed to a pool.
+     */
     Thread thread = new Thread(observable);
     thread.setName(observable.toString());
-    thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-      @Override public void uncaughtException(Thread thread, Throwable e) {
-        handler.post(new Runnable() {
-          @Override public void run() {
-            throw Throwables.propagate(e);
-          }
-        });
-      }
-    });
 
-        /*
-         * Start the thread then observe on the children directories, this
-         * allows them to happen at the same time, just need to make sure the
-         * latest one wins.
-         */
+    /*
+     * Start the thread then observe on the children directories, this
+     * allows them to happen at the same time, just need to make sure the
+     * latest one wins.
+     */
     thread.start();
 
     if (!directory) {
@@ -366,7 +354,7 @@ final class LocalResourceObservable extends Native
   private void onEvent(int wd, int event, String child) {
     try {
       handleEvent(wd, event, child);
-    } catch (Throwable e) {
+    } catch (final Exception e) {
       try {
         close();
       } catch (Throwable ee) {
@@ -374,7 +362,7 @@ final class LocalResourceObservable extends Native
       }
       handler.post(new Runnable() {
         @Override public void run() {
-          throw Throwables.propagate(e);
+          throw e;
         }
       });
     }

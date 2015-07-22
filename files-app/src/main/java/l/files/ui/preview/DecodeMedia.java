@@ -45,7 +45,7 @@ abstract class DecodeMedia extends DecodeBitmap {
 
     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
     try {
-      retriever.setDataSource(res.file().get().getPath());
+      retriever.setDataSource(res.file().getPath());
 
       if (isCancelled()) {
         return null;
