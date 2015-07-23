@@ -44,397 +44,316 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
-public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result>
-{
-    private static final Logger log = Logger.get(FilesLoader.class);
-    private static final Handler handler = new Handler(getMainLooper());
+public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
-    private final ConcurrentMap<String, File> data;
-    private final Resource root;
-    private final Collator collator;
+  private static final Logger log = Logger.get(FilesLoader.class);
+  private static final Handler handler = new Handler(getMainLooper());
 
-    private volatile FileSort sort;
-    private volatile boolean showHidden;
-    private volatile boolean forceReload;
+  private final ConcurrentMap<String, File> data;
+  private final Resource root;
+  private final Collator collator;
 
-    private volatile boolean observing;
-    private volatile Closeable observable;
+  private volatile FileSort sort;
+  private volatile boolean showHidden;
+  private volatile boolean forceReload;
 
-    private final ScheduledExecutorService executor;
+  private volatile boolean observing;
+  private volatile Closeable observable;
 
-    private final Set<String> childrenPendingUpdates;
+  private final ScheduledExecutorService executor;
 
-    private final Runnable childrenPendingUpdatesRun = new Runnable()
-    {
-        long lastUpdateNanoTime = nanoTime();
+  private final Set<String> childrenPendingUpdates;
 
-        @Override
-        public void run()
-        {
-            // TODO rethrow exception on main thread
-            /* Don't update if last update was less than a second ago,
-             * this avoid updating too frequently due to resources in the
-             * current directory being changed frequently by other processes,
-             * but since user triggered operation are usually seconds apart,
-             * those actions will still be updated instantly.
-             */
-            final long now = nanoTime();
-            if (!forceReload && now - lastUpdateNanoTime < SECONDS.toNanos(1))
-            {
-                return;
-            }
+  private final Runnable childrenPendingUpdatesRun = new Runnable() {
+    long lastUpdateNanoTime = nanoTime();
 
-            final String[] children;
-            synchronized (FilesLoader.this)
-            {
-                if (!forceReload && childrenPendingUpdates.isEmpty())
-                {
-                    return;
-                }
-                children = new String[childrenPendingUpdates.size()];
-                childrenPendingUpdates.toArray(children);
-                childrenPendingUpdates.clear();
-            }
+    @Override public void run() {
+      /*
+       * Don't update if last update was less than a second ago,
+       * this avoid updating too frequently due to resources in the
+       * current directory being changed frequently by other processes,
+       * but since user triggered operation are usually seconds apart,
+       * those actions will still be updated instantly.
+       */
+      long now = nanoTime();
+      if (!forceReload && now - lastUpdateNanoTime < SECONDS.toNanos(1)) {
+        return;
+      }
 
-            lastUpdateNanoTime = now;
-
-            boolean changed = false;
-            for (final String child : children)
-            {
-                changed |= update(child);
-            }
-
-            if (changed || forceReload)
-            {
-                final Result result = buildResult();
-                handler.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        deliverResult(result);
-                    }
-                });
-            }
-
-            forceReload = false;
+      String[] children;
+      synchronized (FilesLoader.this) {
+        if (!forceReload && childrenPendingUpdates.isEmpty()) {
+          return;
         }
+        children = new String[childrenPendingUpdates.size()];
+        childrenPendingUpdates.toArray(children);
+        childrenPendingUpdates.clear();
+      }
+
+      lastUpdateNanoTime = now;
+
+      boolean changed = false;
+      for (String child : children) {
+        changed |= update(child);
+      }
+
+      if (changed || forceReload) {
+        final Result result = buildResult();
+        handler.post(new Runnable() {
+          @Override public void run() {
+            deliverResult(result);
+          }
+        });
+      }
+
+      forceReload = false;
+    }
+  };
+
+  private final Observer listener = new Observer() {
+    @Override public void onEvent(Event event, String child) {
+      if (child != null) {
+        synchronized (FilesLoader.this) {
+          childrenPendingUpdates.add(child);
+        }
+      }
+    }
+  };
+
+  private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
+
+  public FilesLoader(
+      Context context,
+      Resource root,
+      FileSort sort,
+      Collator collator,
+      boolean showHidden) {
+    super(context);
+
+    this.root = requireNonNull(root, "root");
+    this.sort = requireNonNull(sort, "sort");
+    this.collator = requireNonNull(collator, "collator");
+    this.showHidden = showHidden;
+    this.data = new ConcurrentHashMap<>();
+    this.childrenPendingUpdates = new HashSet<>();
+    this.executor = newSingleThreadScheduledExecutor();
+  }
+
+  public int approximateChildTotal() {
+    return approximateChildTotal.get();
+  }
+
+  public int approximateChildLoaded() {
+    return data.size();
+  }
+
+  public void setSort(FileSort sort) {
+    this.sort = requireNonNull(sort, "sort");
+    this.forceReload = true;
+  }
+
+  public void setShowHidden(boolean showHidden) {
+    this.showHidden = showHidden;
+    this.forceReload = true;
+  }
+
+  @Override protected void onStartLoading() {
+    super.onStartLoading();
+    if (data.isEmpty()) {
+      log.debug("forceLoad");
+      forceLoad();
+    } else {
+      forceReload = true;
+      log.debug("forceReload");
+    }
+  }
+
+  @Override public Result loadInBackground() {
+    data.clear();
+
+    boolean observe = false;
+    synchronized (this) {
+      if (!observing) {
+        observing = true;
+        observe = true;
+      }
+    }
+
+    List<Resource> children;
+    try {
+      if (observe) {
+        children = observe();
+        executor.scheduleWithFixedDelay(
+            childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
+      } else {
+        children = visit();
+      }
+    } catch (IOException e) {
+      log.debug(e);
+      return Result.of(e);
+    }
+
+    update(children);
+    return buildResult();
+  }
+
+  private List<Resource> observe() throws IOException {
+    Stopwatch watch = Stopwatch.createStarted();
+    List<Resource> children = new ArrayList<>();
+    observable = root.observe(FOLLOW, listener, collectInto(children));
+    log.debug("observe took %s", watch);
+    return children;
+  }
+
+  private List<Resource> visit() throws IOException {
+    Stopwatch watch = Stopwatch.createStarted();
+    List<Resource> children = new ArrayList<>();
+    root.list(FOLLOW, collectInto(children));
+    log.debug("visit took %s", watch);
+    return children;
+  }
+
+  private Visitor collectInto(final List<Resource> children) {
+    return new Visitor() {
+      @Override
+      public Result accept(Resource resource) throws IOException {
+        checkCancel();
+        approximateChildTotal.incrementAndGet();
+        children.add(resource);
+        return CONTINUE;
+      }
     };
+  }
 
+  private void update(List<Resource> children) {
+    Stopwatch watch = Stopwatch.createStarted();
+    for (Resource child : children) {
+      checkCancel();
+      update(child);
+    }
+    log.debug("update took %s", watch);
+  }
 
-    private final Observer listener = new Observer()
-    {
-        @Override
-        public void onEvent(final Event event, final String child)
-        {
-            if (child != null)
-            {
-                synchronized (FilesLoader.this)
-                {
-                    childrenPendingUpdates.add(child);
-                }
-            }
+  private void checkCancel() {
+    if (isLoadInBackgroundCanceled()) {
+      throw new OperationCanceledException();
+    }
+  }
+
+  private Result buildResult() {
+    Stopwatch watch = Stopwatch.createStarted();
+    List<File> files = new ArrayList<>(data.size());
+    if (showHidden) {
+      files.addAll(data.values());
+    } else {
+      for (File item : data.values()) {
+        if (!item.resource().hidden()) {
+          files.add(item);
         }
-    };
+      }
+    }
+    Resources res = getContext().getResources();
+    List<FileListItem> result = sort.sort(files, res);
+    log.debug("build result took %s", watch);
+    return Result.of(result);
+  }
 
-    private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
+  @Override protected void onReset() {
+    super.onReset();
 
-    public FilesLoader(
-            final Context context,
-            final Resource root,
-            final FileSort sort,
-            final Collator collator,
-            final boolean showHidden)
-    {
-        super(context);
-
-        this.root = requireNonNull(root, "root");
-        this.sort = requireNonNull(sort, "sort");
-        this.collator = requireNonNull(collator, "collator");
-        this.showHidden = showHidden;
-        this.data = new ConcurrentHashMap<>();
-        this.childrenPendingUpdates = new HashSet<>();
-        this.executor = newSingleThreadScheduledExecutor();
+    Closeable closeable = null;
+    synchronized (this) {
+      if (observing) {
+        closeable = observable;
+        observable = null;
+        observing = false;
+      }
     }
 
-    public int approximateChildTotal()
-    {
-        return approximateChildTotal.get();
+    if (closeable != null) {
+      executor.shutdownNow();
+      try {
+        closeable.close();
+      } catch (IOException e) {
+        log.warn(e);
+      }
     }
 
-    public int approximateChildLoaded()
-    {
-        return data.size();
+    data.clear();
+  }
+
+  @Override protected void finalize() throws Throwable {
+    super.finalize();
+
+    Closeable closeable = null;
+    synchronized (this) {
+      if (observing) {
+        closeable = observable;
+        observable = null;
+        observing = false;
+      }
+    }
+    if (closeable != null) {
+      log.error("Has not been unregistered");
+      executor.shutdownNow();
+      closeable.close();
+    }
+  }
+
+  /**
+   * Adds the new status of the given path to the data map. Returns true if
+   * the data map is changed.
+   */
+  private boolean update(String child) {
+    return update(root.resolve(child));
+  }
+
+  private boolean update(Resource resource) {
+    try {
+      Stat stat = resource.stat(NOFOLLOW);
+      Stat targetStat = readTargetStatus(resource, stat);
+      File newStat = File.create(resource, stat, targetStat, collator);
+      File oldStat = data.put(resource.name().toString(), newStat);
+      return !Objects.equals(newStat, oldStat);
+    } catch (NotExist e) {
+      return data.remove(resource.name().toString()) != null;
+    } catch (IOException e) {
+      data.put(
+          resource.name().toString(),
+          File.create(resource, null, null, collator));
+      return true;
+    }
+  }
+
+  private Stat readTargetStatus(Resource resource, Stat stat) {
+    if (stat.isSymbolicLink()) {
+      try {
+        return resource.stat(FOLLOW);
+      } catch (IOException e) {
+        log.debug(e);
+      }
+    }
+    return stat;
+  }
+
+  @AutoParcel
+  static abstract class Result {
+    Result() {
     }
 
-    public void setSort(final FileSort sort)
-    {
-        this.sort = requireNonNull(sort, "sort");
-        this.forceReload = true;
+    abstract List<FileListItem> items();
+
+    @Nullable
+    abstract IOException exception();
+
+    private static Result of(IOException exception) {
+      return new AutoParcel_FilesLoader_Result(
+          Collections.<FileListItem>emptyList(), exception);
     }
 
-    public void setShowHidden(final boolean showHidden)
-    {
-        this.showHidden = showHidden;
-        this.forceReload = true;
+    private static Result of(List<FileListItem> result) {
+      return new AutoParcel_FilesLoader_Result(result, null);
     }
-
-    @Override
-    protected void onStartLoading()
-    {
-        super.onStartLoading();
-        if (data.isEmpty())
-        {
-            log.debug("forceLoad");
-            forceLoad();
-        }
-        else
-        {
-            forceReload = true;
-            log.debug("forceReload");
-        }
-    }
-
-    @Override
-    public Result loadInBackground()
-    {
-        data.clear();
-
-        boolean observe = false;
-        synchronized (this)
-        {
-            if (!observing)
-            {
-                observing = true;
-                observe = true;
-            }
-        }
-
-        final List<Resource> children;
-        try
-        {
-            if (observe)
-            {
-                children = observe();
-                executor.scheduleWithFixedDelay(
-                        childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
-            }
-            else
-            {
-                children = visit();
-            }
-        }
-        catch (final IOException e)
-        {
-            log.debug(e);
-            return Result.of(e);
-        }
-
-        update(children);
-        return buildResult();
-    }
-
-    private List<Resource> observe() throws IOException
-    {
-        final Stopwatch watch = Stopwatch.createStarted();
-        final List<Resource> children = new ArrayList<>();
-        observable = root.observe(FOLLOW, listener, collectInto(children));
-        log.debug("observe took %s", watch);
-        return children;
-    }
-
-    private List<Resource> visit() throws IOException
-    {
-        final Stopwatch watch = Stopwatch.createStarted();
-        final List<Resource> children = new ArrayList<>();
-        root.list(FOLLOW, collectInto(children));
-        log.debug("visit took %s", watch);
-        return children;
-    }
-
-    private Visitor collectInto(final List<Resource> children)
-    {
-        return new Visitor()
-        {
-            @Override
-            public Result accept(final Resource resource) throws IOException
-            {
-                checkCancel();
-                approximateChildTotal.incrementAndGet();
-                children.add(resource);
-                return CONTINUE;
-            }
-        };
-    }
-
-    private void update(final List<Resource> children)
-    {
-        final Stopwatch watch = Stopwatch.createStarted();
-        for (final Resource child : children)
-        {
-            checkCancel();
-            update(child);
-        }
-        log.debug("update took %s", watch);
-    }
-
-    private void checkCancel()
-    {
-        if (isLoadInBackgroundCanceled())
-        {
-            throw new OperationCanceledException();
-        }
-    }
-
-    private Result buildResult()
-    {
-        final Stopwatch watch = Stopwatch.createStarted();
-        final List<File> files = new ArrayList<>(data.size());
-        if (showHidden)
-        {
-            files.addAll(data.values());
-        }
-        else
-        {
-            for (final File item : data.values())
-            {
-                if (!item.resource().hidden())
-                {
-                    files.add(item);
-                }
-            }
-        }
-        final Resources res = getContext().getResources();
-        final List<FileListItem> result = sort.sort(files, res);
-        log.debug("build result took %s", watch);
-        return Result.of(result);
-    }
-
-    @Override
-    protected void onReset()
-    {
-        super.onReset();
-
-        Closeable closeable = null;
-        synchronized (this)
-        {
-            if (observing)
-            {
-                closeable = observable;
-                observable = null;
-                observing = false;
-            }
-        }
-
-        if (closeable != null)
-        {
-            executor.shutdownNow();
-            try
-            {
-                closeable.close();
-            }
-            catch (final IOException e)
-            {
-                log.warn(e);
-            }
-        }
-
-        data.clear();
-    }
-
-    @Override
-    protected void finalize() throws Throwable
-    {
-        super.finalize();
-
-        Closeable closeable = null;
-        synchronized (this)
-        {
-            if (observing)
-            {
-                closeable = observable;
-                observable = null;
-                observing = false;
-            }
-        }
-        if (closeable != null)
-        {
-            log.error("Has not been unregistered");
-            executor.shutdownNow();
-            closeable.close();
-        }
-    }
-
-    /**
-     * Adds the new status of the given path to the data map. Returns true if
-     * the data map is changed.
-     */
-    private boolean update(final String child)
-    {
-        return update(root.resolve(child));
-    }
-
-    private boolean update(final Resource resource)
-    {
-        try
-        {
-            final Stat stat = resource.stat(NOFOLLOW);
-            final Stat targetStat = readTargetStatus(resource, stat);
-            final File newStat = File.create(resource, stat, targetStat, collator);
-            final File oldStat = data.put(resource.name().toString(), newStat);
-            return !Objects.equals(newStat, oldStat);
-        }
-        catch (final NotExist e)
-        {
-            return data.remove(resource.name().toString()) != null;
-        }
-        catch (final IOException e)
-        {
-            data.put(
-                    resource.name().toString(),
-                    File.create(resource, null, null, collator));
-            return true;
-        }
-    }
-
-    private Stat readTargetStatus(final Resource resource, final Stat stat)
-    {
-        if (stat.isSymbolicLink())
-        {
-            try
-            {
-                return resource.stat(FOLLOW);
-            }
-            catch (final IOException e)
-            {
-                log.debug(e);
-            }
-        }
-        return stat;
-    }
-
-    @AutoParcel
-    static abstract class Result
-    {
-        Result()
-        {
-        }
-
-        abstract List<FileListItem> items();
-
-        @Nullable
-        abstract IOException exception();
-
-        private static Result of(final IOException exception)
-        {
-            return new AutoParcel_FilesLoader_Result(
-                    Collections.<FileListItem>emptyList(), exception);
-        }
-
-        private static Result of(final List<FileListItem> result)
-        {
-            return new AutoParcel_FilesLoader_Result(result, null);
-        }
-    }
+  }
 
 }
