@@ -35,15 +35,12 @@ import l.files.fs.UnsupportedOperation;
 import l.files.fs.Visitor;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static com.google.common.collect.Sets.powerSet;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.EnumSet.allOf;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -923,7 +920,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
   private Instant getModificationTime(
       Resource resource,
       LinkOption option) throws IOException {
-    return resource.stat(option).modified();
+    return resource.stat(option).mtime();
   }
 
   private static void expectOnSetModificationTime(
@@ -992,7 +989,7 @@ public final class LocalResourceTest extends ResourceBaseTest {
   private Instant getAccessTime(
       Resource resource,
       LinkOption option) throws IOException {
-    return resource.stat(option).accessed();
+    return resource.stat(option).atime();
   }
 
   private static void expectOnSetAccessTime(
@@ -1009,7 +1006,12 @@ public final class LocalResourceTest extends ResourceBaseTest {
   }
 
   public void test_setPermissions() throws Exception {
-    for (Set<Permission> expected : powerSet(allOf(Permission.class))) {
+    List<Set<Permission>> permissions = asList(
+        Permission.all(),
+        Permission.read(),
+        Permission.write(),
+        Permission.execute());
+    for (Set<Permission> expected : permissions) {
       dir1().setPermissions(expected);
       assertEquals(expected, dir1().stat(NOFOLLOW).permissions());
     }
@@ -1023,13 +1025,17 @@ public final class LocalResourceTest extends ResourceBaseTest {
   }
 
   public void test_removePermissions() throws Exception {
-    Set<Permission> all = unmodifiableSet(allOf(Permission.class));
-    for (Set<Permission> permissions : powerSet(all)) {
-      dir1().setPermissions(all);
+    List<Set<Permission>> combinations = asList(
+        Permission.all(),
+        Permission.read(),
+        Permission.write(),
+        Permission.execute());
+    for (Set<Permission> permissions : combinations) {
+      dir1().setPermissions(Permission.all());
       dir1().removePermissions(permissions);
 
       Set<Permission> actual = dir1().stat(FOLLOW).permissions();
-      Set<Permission> expected = new HashSet<>(all);
+      Set<Permission> expected = new HashSet<>(Permission.all());
       expected.removeAll(permissions);
       assertEquals(expected, actual);
     }

@@ -2,7 +2,7 @@ package l.files.ui;
 
 import android.test.InstrumentationTestCase;
 
-import com.google.common.io.ByteStreams;
+import org.apache.tika.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,57 +17,50 @@ import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public final class ManualInspectionTest extends InstrumentationTestCase
-{
+public final class ManualInspectionTest extends InstrumentationTestCase {
 
-    public void test() throws Exception
-    {
-        final File dir = new File(getExternalStorageDirectory(), "test");
-        assertTrue(dir.exists() || dir.mkdir());
-        createFile(new File(dir, ".nomedia"));
-        createFile(new File(dir, "html.html"));
-        createFile(new File(dir, "zip.zip"));
+  public void test() throws Exception {
+    File dir = new File(getExternalStorageDirectory(), "test");
+    assertTrue(dir.exists() || dir.mkdir());
+    createFile(new File(dir, ".nomedia"));
+    createFile(new File(dir, "html.html"));
+    createFile(new File(dir, "zip.zip"));
 
-        createFutureFiles(dir);
+    createFutureFiles(dir);
 
-        final List<String> resources = asList(
-                "will_scale_up.jpg",
-                "will_scale_down.jpg",
-                "test.pdf",
-                "test.mp4",
-                "test.m4a");
+    List<String> resources = asList(
+        "will_scale_up.jpg",
+        "will_scale_down.jpg",
+        "test.pdf",
+        "test.mp4",
+        "test.m4a");
 
-        for (final String res : resources)
-        {
-            final File file = new File(dir, res);
-            if (file.exists())
-            {
-                continue;
-            }
-            try (InputStream in = getInstrumentation().getContext().getAssets().open(res);
-                 OutputStream out = new FileOutputStream(file))
-            {
-                ByteStreams.copy(in, out);
-            }
-        }
-
+    for (String res : resources) {
+      File file = new File(dir, res);
+      if (file.exists()) {
+        continue;
+      }
+      try (InputStream in = getInstrumentation().getContext().getAssets().open(res);
+           OutputStream out = new FileOutputStream(file)) {
+        IOUtils.copy(in, out);
+      }
     }
 
-    private void createFutureFiles(final File dir) throws IOException
-    {
-        assertTrue(createFile(new File(dir, "future"))
-                .setLastModified(currentTimeMillis() + DAYS.toMillis(365)));
+  }
 
-        assertTrue(createFile(new File(dir, "future3"))
-                .setLastModified(currentTimeMillis() + DAYS.toMillis(2)));
+  private void createFutureFiles(File dir) throws IOException {
+    assertTrue(createFile(new File(dir, "future"))
+        .setLastModified(currentTimeMillis() + DAYS.toMillis(365)));
 
-        assertTrue(createFile(new File(dir, "future5"))
-                .setLastModified(currentTimeMillis() + SECONDS.toMillis(5)));
-    }
+    assertTrue(createFile(new File(dir, "future3"))
+        .setLastModified(currentTimeMillis() + DAYS.toMillis(2)));
 
-    private static File createFile(final File file) throws IOException
-    {
-        assertTrue(file.isFile() || file.createNewFile());
-        return file;
-    }
+    assertTrue(createFile(new File(dir, "future5"))
+        .setLastModified(currentTimeMillis() + SECONDS.toMillis(5)));
+  }
+
+  private static File createFile(File file) throws IOException {
+    assertTrue(file.isFile() || file.createNewFile());
+    return file;
+  }
 }
