@@ -2,8 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.IOException;
 
 import javax.annotation.Nullable;
@@ -13,7 +11,6 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
-import static l.files.common.base.Stopwatches.startWatchIfDebug;
 
 abstract class DecodeBitmap extends Decode {
 
@@ -31,7 +28,8 @@ abstract class DecodeBitmap extends Decode {
       return null;
     }
 
-    Stopwatch watch = startWatchIfDebug();
+    log.verbose("decode start");
+
     Result result;
     try {
       result = decode();
@@ -65,7 +63,8 @@ abstract class DecodeBitmap extends Decode {
       result.maybeScaled.recycle();
     }
 
-    log.debug("%s, %s", watch, res);
+
+    log.verbose("decode end");
 
     if (isCancelled()) {
       return null;

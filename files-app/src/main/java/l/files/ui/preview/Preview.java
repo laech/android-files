@@ -5,8 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,7 +19,6 @@ import l.files.logging.Logger;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
-import static l.files.common.base.Stopwatches.startWatchIfDebug;
 import static l.files.fs.LinkOption.FOLLOW;
 
 public final class Preview {
@@ -139,7 +136,7 @@ public final class Preview {
   }
 
   Rect decodeSize(Resource res) {
-    Stopwatch watch = startWatchIfDebug();
+    log.debug("decode size start %s", res);
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;
 
@@ -151,7 +148,7 @@ public final class Preview {
       return null;
     }
 
-    log.debug("size %s %s", watch, res);
+    log.debug("decode size end %s", res);
 
     if (options.outWidth > 0 && options.outHeight > 0) {
       return Rect.of(options.outWidth, options.outHeight);

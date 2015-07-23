@@ -6,8 +6,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.text.Collator;
@@ -198,18 +196,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
   }
 
   private List<Resource> observe() throws IOException {
-    Stopwatch watch = Stopwatch.createStarted();
+    log.verbose("observe start");
     List<Resource> children = new ArrayList<>();
     observable = root.observe(FOLLOW, listener, collectInto(children));
-    log.debug("observe took %s", watch);
+    log.verbose("observe end");
     return children;
   }
 
   private List<Resource> visit() throws IOException {
-    Stopwatch watch = Stopwatch.createStarted();
+    log.verbose("visit start");
     List<Resource> children = new ArrayList<>();
     root.list(FOLLOW, collectInto(children));
-    log.debug("visit took %s", watch);
+    log.verbose("visit end");
     return children;
   }
 
@@ -226,12 +224,12 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
   }
 
   private void update(List<Resource> children) {
-    Stopwatch watch = Stopwatch.createStarted();
+    log.verbose("update start");
     for (Resource child : children) {
       checkCancel();
       update(child);
     }
-    log.debug("update took %s", watch);
+    log.verbose("update end");
   }
 
   private void checkCancel() {
@@ -241,7 +239,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
   }
 
   private Result buildResult() {
-    Stopwatch watch = Stopwatch.createStarted();
+    log.verbose("buildResult start");
     List<File> files = new ArrayList<>(data.size());
     if (showHidden) {
       files.addAll(data.values());
@@ -254,7 +252,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
     Resources res = getContext().getResources();
     List<FileListItem> result = sort.sort(files, res);
-    log.debug("build result took %s", watch);
+    log.verbose("buildResult end");
     return Result.of(result);
   }
 

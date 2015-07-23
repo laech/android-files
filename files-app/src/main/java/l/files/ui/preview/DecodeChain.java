@@ -2,8 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import com.google.common.base.Stopwatch;
-
 import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
@@ -14,7 +12,6 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static l.files.common.base.Stopwatches.startWatchIfDebug;
 import static l.files.ui.preview.DecodeAudio.isAudio;
 import static l.files.ui.preview.DecodeImage.isImage;
 import static l.files.ui.preview.DecodePdf.isPdf;
@@ -190,9 +187,9 @@ final class DecodeChain extends Decode {
   private String decodeMedia() {
     try {
 
-      Stopwatch watch = startWatchIfDebug();
+      log.debug("decode media start %s", res);
       String media = MagicDetector.INSTANCE.detect(res);
-      log.debug("media %s %s %s", media, watch, res);
+      log.debug("decode media end %s %s", media, res);
       return media;
 
     } catch (Exception e) {

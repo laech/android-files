@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.os.AsyncTask;
 import android.util.LruCache;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInput;
@@ -27,12 +25,9 @@ import l.files.logging.Logger;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.util.Objects.requireNonNull;
-import static l.files.common.base.Stopwatches.startWatchIfDebug;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
-
-  // TODO no action for files in cache dir
 
   final Logger log = Logger.get(getClass());
 
@@ -111,7 +106,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                  new BufferedInputStream(
                      file.input(NOFOLLOW)))) {
 
-      Stopwatch watch = startWatchIfDebug();
+      log.verbose("read cache start");
       int count = 0;
       while (true) {
         try {
@@ -129,7 +124,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
           break;
         }
       }
-      log.debug("read cache %s %s entries", watch, count);
+      log.verbose("read cache end %s entries", count);
 
     } catch (FileNotFoundException ignore) {
     } catch (IOException e) {
@@ -170,7 +165,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                  new BufferedOutputStream(
                      file.output(NOFOLLOW)))) {
 
-      Stopwatch watch = startWatchIfDebug();
+      log.verbose("write cache start");
       Map<String, Snapshot<V>> snapshot = cache.snapshot();
       for (Map.Entry<String, Snapshot<V>> entry : snapshot.entrySet()) {
         out.writeUTF(entry.getKey());
@@ -178,7 +173,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         out.writeInt(entry.getValue().time().nanos());
         write(out, entry.getValue().get());
       }
-      log.debug("write cache %s %s entries", watch, snapshot.size());
+      log.verbose("write cache end %s entries", snapshot.size());
 
     } catch (IOException e) {
       log.error(e);

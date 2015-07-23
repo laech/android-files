@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
@@ -50,9 +48,9 @@ public final class FileOpener implements Consumer<Resource> {
 
     @Override protected Object doInBackground(Void... params) {
       try {
-        Stopwatch watch = Stopwatch.createStarted();
+        log.verbose("detect start");
         String media = MagicDetector.INSTANCE.detect(resource);
-        log.debug("detect took %s", watch);
+        log.verbose("detect end");
         return media;
       } catch (IOException e) {
         return e;

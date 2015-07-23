@@ -2,8 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import com.google.common.base.Stopwatch;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -27,7 +25,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.common.base.Stopwatches.startWatchIfDebug;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
@@ -68,7 +65,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
   void cleanup() throws IOException {
     final long now = currentTimeMillis();
-    Stopwatch watch = startWatchIfDebug();
+    log.verbose("cleanup start");
     cacheDir.traverse(NOFOLLOW, null, new Visitor() {
       @Override public Result accept(Resource res) throws IOException {
         Stat stat = res.stat(NOFOLLOW);
@@ -87,7 +84,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         return CONTINUE;
       }
     });
-    log.debug("cleanup %s", watch);
+    log.verbose("cleanup end");
   }
 
   Resource cacheFile(Resource res, Stat stat, Rect constraint) {
@@ -104,13 +101,13 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Stat stat,
       Rect constraint) throws IOException {
 
-    Stopwatch watch = startWatchIfDebug();
+    log.verbose("read bitmap start %s", res);
     Resource cache = cacheFile(res, stat, constraint);
     try (InputStream in = new BufferedInputStream(cache.input(NOFOLLOW))) {
       in.read(); // read DUMMY_BYTE
 
       Bitmap bitmap = decodeStream(in);
-      log.debug("read bitmap %s %s", watch, res);
+      log.verbose("read bitmap end %s", res);
 
       if (bitmap == null) {
         return null;
@@ -140,14 +137,14 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Rect constraint,
       Bitmap bitmap) throws IOException {
 
-    Stopwatch watch = startWatchIfDebug();
+    log.verbose("write start %s", res);
     Resource cache = cacheFile(res, stat, constraint);
     cache.createFiles();
     try (OutputStream out = new BufferedOutputStream(cache.output(NOFOLLOW))) {
       out.write(DUMMY_BYTE);
       bitmap.compress(WEBP, 90, out);
     }
-    log.debug("write %s %s", watch, res);
+    log.verbose("write end %s", res);
     return null;
   }
 
