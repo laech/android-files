@@ -1,8 +1,8 @@
 package l.files.ui.preview;
 
-import java.io.IOException;
+import android.support.annotation.Nullable;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;

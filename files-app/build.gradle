@@ -81,8 +81,6 @@ dependencies {
     compile libs.auto_parcel
     apt libs.auto_parcel_processor
 
-    provided 'com.google.code.findbugs:jsr305:3.0.0'
-
     androidTestCompile libs.mockito
     androidTestCompile libs.auto_parcel
     androidTestApt libs.auto_parcel_processor

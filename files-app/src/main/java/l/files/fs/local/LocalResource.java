@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -25,8 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.AlreadyExists;

@@ -1,6 +1,7 @@
 package l.files.fs.local;
 
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 
 import java.io.Closeable;
@@ -9,8 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
 
 import l.files.fs.Event;
 import l.files.fs.LinkOption;

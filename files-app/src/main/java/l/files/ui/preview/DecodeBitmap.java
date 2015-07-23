@@ -1,10 +1,9 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
-
-import javax.annotation.Nullable;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
@@ -62,7 +61,6 @@ abstract class DecodeBitmap extends Decode {
     if (result.maybeScaled != scaledBitmap) {
       result.maybeScaled.recycle();
     }
-
 
     log.verbose("decode end");
 

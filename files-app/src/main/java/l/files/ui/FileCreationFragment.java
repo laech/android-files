@@ -6,6 +6,7 @@ import android.content.AsyncTaskLoader;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Loader;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
@@ -14,8 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import java.io.IOException;
-
-import javax.annotation.Nullable;
 
 import l.files.R;
 import l.files.common.base.Consumer;

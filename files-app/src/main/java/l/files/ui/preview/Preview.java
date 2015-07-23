@@ -3,12 +3,11 @@ package l.files.ui.preview;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.annotation.Nullable;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;

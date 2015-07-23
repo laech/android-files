@@ -1,10 +1,10 @@
 package l.files.ui.browser;
 
+import android.support.annotation.Nullable;
+
 import java.io.IOException;
 import java.text.CollationKey;
 import java.text.Collator;
-
-import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.BasicDetector;

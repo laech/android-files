@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
@@ -19,8 +20,6 @@ import android.widget.Toolbar;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-
-import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 import l.files.R;

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
+import android.support.annotation.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,8 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Event;
@@ -341,8 +340,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     abstract List<FileListItem> items();
 
-    @Nullable
-    abstract IOException exception();
+    @Nullable abstract IOException exception();
 
     private static Result of(IOException exception) {
       return new AutoParcel_FilesLoader_Result(

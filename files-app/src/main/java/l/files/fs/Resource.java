@@ -1,6 +1,7 @@
 package l.files.fs;
 
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.io.Closeable;
 import java.io.File;
@@ -17,8 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 import auto.parcel.AutoParcel;
 

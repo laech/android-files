@@ -1,6 +1,6 @@
 package l.files.operations.ui;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 import static android.text.format.DateUtils.formatElapsedTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
