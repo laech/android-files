@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
@@ -25,14 +24,11 @@ import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
-import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.DrawerListeners;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 import l.files.operations.Events;
-import l.files.ui.CloseActionModeRequest;
-import l.files.ui.OpenFileRequest;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
@@ -56,8 +52,8 @@ import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity implements
     OnBackStackChangedListener,
-    ActionModeProvider,
-    OnItemSelectedListener {
+    OnItemSelectedListener,
+    OnOpenFileListener {
 
   private static final Logger log = Logger.get(FilesActivity.class);
 
@@ -66,8 +62,6 @@ public final class FilesActivity extends BaseActivity implements
   private EventBus bus;
 
   private ActionBarDrawerToggle drawerToggle;
-  private ActionMode currentActionMode;
-  private ActionMode.Callback currentActionModeCallback;
 
   private DrawerLayout drawer;
   private DrawerListener drawerListener;
@@ -142,7 +136,7 @@ public final class FilesActivity extends BaseActivity implements
     log.debug("onItemSelected");
     Resource item = (Resource) parent.getAdapter().getItem(position);
     if (!Objects.equals(item, fragment().directory())) {
-      open(OpenFileRequest.create(item));
+      open(item);
     } else {
       log.debug("Already show requested directory.");
     }
@@ -216,9 +210,6 @@ public final class FilesActivity extends BaseActivity implements
   @Override public void onActionModeFinished(ActionMode mode) {
     super.onActionModeFinished(mode);
     log.debug("onActionModeFinished");
-
-    currentActionMode = null;
-    currentActionModeCallback = null;
     drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
   }
 
@@ -234,8 +225,7 @@ public final class FilesActivity extends BaseActivity implements
 
   @Override public ActionMode startActionMode(ActionMode.Callback callback) {
     log.debug("startActionMode");
-    currentActionModeCallback = callback;
-    return (currentActionMode = super.startActionMode(callback));
+    return super.startActionMode(callback);
   }
 
   private boolean isSidebarOpen() {
@@ -250,39 +240,24 @@ public final class FilesActivity extends BaseActivity implements
     return drawerToggle;
   }
 
-  @Nullable
-  @Override public ActionMode currentActionMode() {
-    return currentActionMode;
-  }
-
-  @Nullable public ActionMode.Callback currentActionModeCallback() {
-    return currentActionModeCallback;
-  }
-
   public DrawerLayout drawerLayout() {
     return drawer;
   }
 
-  public void onEventMainThread(CloseActionModeRequest request) {
-    log.debug("onEventMainThread(%s)", request);
-    if (currentActionMode != null) {
-      currentActionMode.finish();
+  @Override public void onOpen(Resource resource) {
+    log.debug("onOpen(%s)", resource);
+    ActionMode mode = currentActionMode();
+    if (mode != null) {
+      mode.finish();
     }
+    open(resource);
   }
 
-  public void onEventMainThread(OpenFileRequest request) {
-    log.debug("onEventMainThread(%s)", request);
-    if (currentActionMode != null) {
-      currentActionMode.finish();
-    }
-    open(request);
-  }
-
-  private void open(final OpenFileRequest request) {
-    log.debug("open(%s)", request);
+  private void open(final Resource resource) {
+    log.debug("open(%s)", resource);
     closeDrawerThenRun(new Runnable() {
       @Override public void run() {
-        show(request);
+        show(resource);
       }
     });
   }
@@ -296,13 +271,13 @@ public final class FilesActivity extends BaseActivity implements
     }
   }
 
-  private void show(final OpenFileRequest request) {
+  private void show(final Resource resource) {
     new AsyncTask<Void, Void, Object>() {
       @Override protected Object doInBackground(Void... params) {
         try {
-          return request.getResource().stat(FOLLOW);
+          return resource.stat(FOLLOW);
         } catch (IOException e) {
-          log.debug(e, "%s", request);
+          log.debug(e, "%s", resource);
           return e;
         }
       }
@@ -311,7 +286,7 @@ public final class FilesActivity extends BaseActivity implements
         super.onPostExecute(result);
         if (!isDestroyed() && !isFinishing()) {
           if (result instanceof Stat) {
-            show(request.getResource(), (Stat) result);
+            show(resource, (Stat) result);
           } else {
             String msg = message((IOException) result);
             makeText(FilesActivity.this, msg, LENGTH_SHORT).show();

@@ -6,7 +6,6 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.ActionMode;
@@ -26,7 +25,6 @@ import l.files.common.app.OptionsMenus;
 import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.ActionModes;
 import l.files.fs.Resource;
-import l.files.operations.Events;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.Preferences;
 import l.files.ui.browser.FilesLoader.Result;
@@ -83,7 +81,6 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
   private FilesAdapter adapter;
   private TextView empty;
 
-  @VisibleForTesting
   public RecyclerView recycler;
 
   private final Handler handler = new Handler();
@@ -135,7 +132,7 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
         selection(),
         actionModeProvider(),
         actionModeCallback(),
-        Events.get());
+        (OnOpenFileListener) getActivity());
 
     int columns = getResources().getInteger(files_list_columns);
     recycler = find(android.R.id.list, this);
@@ -224,8 +221,8 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
     adapter.setItems(Collections.<FileListItem>emptyList());
   }
 
-  @Override public void onSharedPreferenceChanged(
-      SharedPreferences pref, String key) {
+  @Override
+  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
     Activity activity = getActivity();
     if (activity == null) {
       return;

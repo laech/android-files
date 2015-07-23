@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.graphics.Rect;
 import l.files.common.graphics.drawable.SizedColorDrawable;
@@ -30,7 +29,6 @@ import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.ui.Icons;
-import l.files.ui.OpenFileRequest;
 import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FileListItem.Header;
@@ -78,7 +76,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
   private final ActionModeProvider actionModeProvider;
   private final ActionMode.Callback actionModeCallback;
   private final Selection<Resource> selection;
-  private final EventBus bus;
+  private final OnOpenFileListener listener;
   private final Rect constraint;
 
   FilesAdapter(
@@ -86,11 +84,11 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       Selection<Resource> selection,
       ActionModeProvider actionModeProvider,
       ActionMode.Callback actionModeCallback,
-      EventBus bus) {
+      OnOpenFileListener listener) {
 
     this.actionModeProvider = requireNonNull(actionModeProvider);
     this.actionModeCallback = requireNonNull(actionModeCallback);
-    this.bus = requireNonNull(bus);
+    this.listener = requireNonNull(listener);
     this.selection = requireNonNull(selection);
     this.formatter = new DateFormatter(context);
 
@@ -211,7 +209,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     @Override protected void onClick(View v, File file) {
-      bus.post(OpenFileRequest.create(file.resource()));
+      listener.onOpen(file.resource());
     }
 
     @Override public void bind(File file) {

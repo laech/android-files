@@ -4,15 +4,15 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.ActionMode;
 import android.widget.EditText;
 
 import java.io.IOException;
 
 import l.files.R;
+import l.files.common.app.BaseActivity;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.operations.Events;
-import l.files.ui.CloseActionModeRequest;
 import l.files.ui.FileCreationFragment;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
@@ -115,7 +115,11 @@ public final class RenameFragment extends FileCreationFragment {
     Resource dst = parent().resolve(getFilename());
     rename = new Rename()
         .executeOnExecutor(THREAD_POOL_EXECUTOR, resource(), dst);
-    Events.get().post(CloseActionModeRequest.INSTANCE);
+
+    ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
+    if (mode != null) {
+      mode.finish();
+    }
   }
 
   private class Rename extends AsyncTask<Resource, Void, IOException> {
