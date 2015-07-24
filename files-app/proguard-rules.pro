@@ -19,18 +19,11 @@
 #-dontobfuscate
 -dontshrink
 
--dontwarn com.google.common.**
 -dontwarn org.apache.tika.**
--dontwarn rx.**
 
 -keeppackagenames org.apache.tika.mime
 
--keepclassmembers class * {
-    *** onEvent*(***);
-}
-
 -keepclassmembers class l.files.fs.local.LocalResourceObservable {
-    *** onEvent(...);
     *** isClosed();
     *** sleep();
 }

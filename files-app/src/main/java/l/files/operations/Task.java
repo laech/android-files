@@ -1,17 +1,15 @@
 package l.files.operations;
 
+import android.os.AsyncTask;
 import android.os.Handler;
 
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
-import de.greenrobot.event.EventBus;
+import l.files.operations.TaskState.Running;
 
-import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 
-abstract class Task {
+abstract class Task extends AsyncTask<Void, TaskState, Throwable> {
 
   private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
@@ -19,8 +17,8 @@ abstract class Task {
     @Override
     public void run() {
       if (!state.isFinished()) {
-        state = running((TaskState.Running) state);
-        notifyProgress(state);
+        state = running((Running) state);
+        callback.onUpdate(state);
         handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
       }
     }
@@ -29,77 +27,72 @@ abstract class Task {
   private final TaskId id;
   private final Target target;
   private final Clock clock;
-  private final EventBus bus;
   private final Handler handler;
+  private final Callback callback;
 
   private volatile TaskState state;
 
-  public Task(
-      TaskId id,
-      Target target,
-      Clock clock,
-      EventBus bus,
-      Handler handler) {
-    this.id = requireNonNull(id, "id");
-    this.target = requireNonNull(target, "target");
-    this.clock = requireNonNull(clock, "clock");
-    this.bus = requireNonNull(bus, "bus");
-    this.handler = requireNonNull(handler, "handler");
+  Task(TaskId id, Target target, Clock clock, Callback callback, Handler handler) {
+    this.id = requireNonNull(id);
+    this.target = requireNonNull(target);
+    this.clock = requireNonNull(clock);
+    this.handler = requireNonNull(handler);
+    this.callback = requireNonNull(callback);
   }
 
-  public Future<?> execute(ExecutorService executor) {
-    onPending();
-    return executor.submit(new Runnable() {
-      @Override public void run() {
-        try {
-          onRunning();
-        } finally {
-          onFinished();
-        }
-      }
-    });
-  }
-
-  public TaskState state() {
-    return state;
-  }
-
-  private void onPending() {
+  @Override protected void onPreExecute() {
+    super.onPreExecute();
     state = TaskState.pending(id, target, clock.read());
-    if (!currentThread().isInterrupted()) {
-      notifyProgress(state);
-    }
+    callback.onUpdate(state);
   }
 
-  private void onRunning() {
+  @Override protected Throwable doInBackground(Void... params) {
     try {
       state = ((TaskState.Pending) state).running(clock.read());
       handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
       doTask();
-      state = ((TaskState.Running) state).success(clock.read());
-    } catch (InterruptedException e) {
-      // Cancelled, let it finish
-      // Use success as the state, may add a cancel state in future if needed
-      state = ((TaskState.Running) state).success(clock.read());
-    } catch (FileException e) {
-      state = ((TaskState.Running) state).failed(clock.read(), e.failures());
-    } catch (RuntimeException e) {
-      state = ((TaskState.Running) state).failed(clock.read(), Collections.<Failure>emptyList());
-      throw e;
+      return null;
+    } catch (Throwable e) {
+      return e;
     }
   }
 
-  private void onFinished() {
+  @Override protected void onPostExecute(Throwable e) {
+    super.onPostExecute(e);
     handler.removeCallbacks(update);
-    notifyProgress(state);
+
+    if (e == null || e instanceof InterruptedException) {
+      // Cancelled, let it finish
+      // Use success as the state, may add a cancel state in future if needed
+      state = ((Running) state).success(clock.read());
+      callback.onUpdate(state);
+
+    } else if (e instanceof FileException) {
+      state = ((Running) state).failed(clock.read(), ((FileException) e).failures());
+      callback.onUpdate(state);
+
+    } else {
+      state = ((Running) state).failed(clock.read(), Collections.<Failure>emptyList());
+      callback.onUpdate(state);
+
+      if (e instanceof Error) {
+        throw (Error) e;
+
+      } else if (e instanceof RuntimeException) {
+        throw (RuntimeException) e;
+
+      } else {
+        throw new RuntimeException(e);
+      }
+    }
+
   }
 
   abstract void doTask() throws FileException, InterruptedException;
 
-  abstract TaskState.Running running(TaskState.Running state);
+  abstract Running running(Running state);
 
-  final void notifyProgress(TaskState state) {
-    bus.post(state);
+  interface Callback {
+    void onUpdate(TaskState state);
   }
-
 }

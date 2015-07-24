@@ -12,9 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import l.files.operations.Clock;
+import l.files.operations.OperationService.TaskListener;
 import l.files.operations.TaskKind;
 import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
+import l.files.operations.TaskState.Failed;
+import l.files.operations.TaskState.Pending;
+import l.files.operations.TaskState.Running;
+import l.files.operations.TaskState.Success;
 
 import static android.app.Notification.PRIORITY_LOW;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -28,7 +33,7 @@ import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
 import static l.files.operations.ui.FailuresActivity.getTitle;
 
-final class NotificationProvider {
+final class NotificationProvider implements TaskListener {
 
   private final Context context;
   private final NotificationManager manager;
@@ -54,15 +59,32 @@ final class NotificationProvider {
     return unmodifiableMap(viewers);
   }
 
-  public void onEvent(TaskState.Pending state) {
+  @Override public void onUpdate(TaskState state) {
+
+    if (state instanceof Pending) {
+      onEvent((Pending) state);
+
+    } else if (state instanceof Running) {
+      onEvent((Running) state);
+
+    } else if (state instanceof Failed) {
+      onEvent((Failed) state);
+
+    } else if (state instanceof Success) {
+      onEvent((Success) state);
+    }
+
+  }
+
+  private void onEvent(Pending state) {
     manager.notify(state.getTask().getId(), newIndeterminateNotification(state));
   }
 
-  public void onEvent(TaskState.Running state) {
+  private void onEvent(Running state) {
     manager.notify(state.getTask().getId(), newProgressNotification(state));
   }
 
-  public void onEvent(TaskState.Failed state) {
+  private void onEvent(Failed state) {
     manager.cancel(state.getTask().getId());
     if (!state.getFailures().isEmpty()) {
       // This is the last notification we will display for this task, and it
@@ -76,12 +98,12 @@ final class NotificationProvider {
     // errors, let other process handle that error, remove the notification
   }
 
-  public void onEvent(TaskState.Success state) {
+  private void onEvent(Success state) {
     manager.cancel(state.getTask().getId());
   }
 
-  public void onEvent(TaskNotFound event) {
-    manager.cancel(event.getTaskId());
+  @Override public void onNotFound(TaskNotFound notFound) {
+    manager.cancel(notFound.getTaskId());
   }
 
   private TaskStateViewer getViewer(TaskState state) {
@@ -92,7 +114,7 @@ final class NotificationProvider {
     return viewer;
   }
 
-  private Notification newIndeterminateNotification(TaskState.Pending state) {
+  private Notification newIndeterminateNotification(Pending state) {
     String title = getViewer(state).getContentTitle(state);
     return newIndeterminateNotification(state, title);
   }
@@ -104,7 +126,7 @@ final class NotificationProvider {
         .build();
   }
 
-  private Notification newProgressNotification(TaskState.Running state) {
+  private Notification newProgressNotification(Running state) {
     TaskStateViewer viewer = getViewer(state);
     if (state.getItems().isDone() || state.getBytes().isDone()) {
       return newIndeterminateNotification(state, viewer.getContentTitle(state));
@@ -138,7 +160,7 @@ final class NotificationProvider {
             newCancelPendingIntent(context, state.getTask().getId()));
   }
 
-  private Notification newFailureNotification(TaskState.Failed state) {
+  private Notification newFailureNotification(Failed state) {
     Intent intent = getFailureIntent(state);
     PendingIntent pending = getActivity(
         context, state.getTask().getId(), intent, FLAG_UPDATE_CURRENT);
@@ -150,13 +172,13 @@ final class NotificationProvider {
         .build();
   }
 
-  public Intent getFailureIntent(TaskState.Failed state) {
+  public Intent getFailureIntent(Failed state) {
     TaskStateViewer viewer = getViewer(state);
     Collection<l.files.operations.Failure> failures = state.getFailures();
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
       messages.add(FailureMessage.create(
-          failure.getResource(), failure.getCause().getMessage() + ""));
+          failure.resource(), failure.cause().getMessage() + ""));
     }
     String title = viewer.getContentTitle(state);
     return FailuresActivity.newIntent(context, title, messages);

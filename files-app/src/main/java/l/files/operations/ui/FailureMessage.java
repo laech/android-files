@@ -8,15 +8,14 @@ import l.files.fs.Resource;
 @AutoParcel
 abstract class FailureMessage implements Parcelable {
 
-    FailureMessage() {
-    }
+  FailureMessage() {}
 
-    public abstract Resource getResource();
+  public abstract Resource resource();
 
-    public abstract String getMessage();
+  public abstract String message();
 
-    public static FailureMessage create(Resource resource, String message) {
-        return new AutoParcel_FailureMessage(resource, message);
-    }
+  public static FailureMessage create(Resource resource, String message) {
+    return new AutoParcel_FailureMessage(resource, message);
+  }
 
 }

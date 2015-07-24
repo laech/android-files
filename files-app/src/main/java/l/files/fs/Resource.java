@@ -416,7 +416,7 @@ public interface Resource extends Parcelable {
      */
     public String ext() {
       int i = indexOfExtSeparator();
-      return i != 1 ? value().substring(i + 1) : "";
+      return i != -1 ? value().substring(i + 1) : "";
     }
 
     /**

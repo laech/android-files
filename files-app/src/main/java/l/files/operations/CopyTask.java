@@ -4,7 +4,6 @@ import android.os.Handler;
 
 import java.util.Collection;
 
-import de.greenrobot.event.EventBus;
 import l.files.fs.Resource;
 
 import static l.files.operations.TaskKind.COPY;
@@ -17,7 +16,7 @@ final class CopyTask extends Task {
   CopyTask(
       int id,
       Clock clock,
-      EventBus bus,
+      Callback callback,
       Handler handler,
       Collection<? extends Resource> sources,
       Resource destination) {
@@ -26,7 +25,7 @@ final class CopyTask extends Task {
         TaskId.create(id, COPY),
         Target.from(sources, destination),
         clock,
-        bus,
+        callback,
         handler);
 
     this.size = new Size(sources);

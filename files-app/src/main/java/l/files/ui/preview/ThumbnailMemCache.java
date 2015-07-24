@@ -44,4 +44,8 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
   @Override LruCache<String, Snapshot<Bitmap>> delegate() {
     return delegate;
   }
+
+  void clear() {
+    delegate().evictAll();
+  }
 }

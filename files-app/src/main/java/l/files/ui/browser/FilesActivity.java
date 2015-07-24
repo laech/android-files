@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
@@ -28,7 +27,6 @@ import l.files.common.widget.DrawerListeners;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
-import l.files.operations.Events;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
@@ -58,8 +56,6 @@ public final class FilesActivity extends BaseActivity implements
   private static final Logger log = Logger.get(FilesActivity.class);
 
   public static final String EXTRA_DIRECTORY = "directory";
-
-  private EventBus bus;
 
   private ActionBarDrawerToggle drawerToggle;
 
@@ -93,7 +89,6 @@ public final class FilesActivity extends BaseActivity implements
     title.setAdapter(hierarchy);
     title.setOnItemSelectedListener(this);
 
-    bus = Events.get();
     drawer = find(R.id.drawer_layout, this);
     drawerListener = new DrawerListener();
     drawerToggle = new ActionBarDrawerToggle(this, drawer, 0, 0);
@@ -165,13 +160,7 @@ public final class FilesActivity extends BaseActivity implements
     return dir == null ? DIR_HOME : dir;
   }
 
-  @Override protected void onResume() {
-    super.onResume();
-    bus.register(this);
-  }
-
   @Override protected void onPause() {
-    bus.unregister(this);
     Preview.get(this).writeCacheAsyncIfNeeded();
     super.onPause();
   }

@@ -4,7 +4,6 @@ import android.os.Handler;
 
 import java.util.Collection;
 
-import de.greenrobot.event.EventBus;
 import l.files.fs.Resource;
 
 import static l.files.operations.TaskKind.DELETE;
@@ -17,7 +16,7 @@ final class DeleteTask extends Task {
   DeleteTask(
       int id,
       Clock clock,
-      EventBus bus,
+      Callback callback,
       Handler handler,
       Collection<? extends Resource> resources) {
 
@@ -25,8 +24,9 @@ final class DeleteTask extends Task {
         TaskId.create(id, DELETE),
         Target.from(resources),
         clock,
-        bus,
-        handler);
+        callback,
+        handler
+    );
 
     this.count = new Size(resources);
     this.delete = new Delete(resources);

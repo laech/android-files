@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
 import l.files.fs.Resource;
 
 import static l.files.operations.TaskKind.MOVE;
@@ -20,7 +19,7 @@ final class MoveTask extends Task {
   MoveTask(
       int id,
       Clock clock,
-      EventBus bus,
+      Callback callback,
       Handler handler,
       Collection<? extends Resource> sources,
       Resource destination) {
@@ -29,8 +28,9 @@ final class MoveTask extends Task {
         TaskId.create(id, MOVE),
         Target.from(sources, destination),
         clock,
-        bus,
-        handler);
+        callback,
+        handler
+    );
 
     this.move = new Move(sources, destination);
     this.count = new Size(sources);
@@ -50,7 +50,7 @@ final class MoveTask extends Task {
 
     List<Resource> resources = new ArrayList<>();
     for (Failure failure : failures) {
-      resources.add(failure.getResource());
+      resources.add(failure.resource());
     }
     count.execute();
     copy.execute();

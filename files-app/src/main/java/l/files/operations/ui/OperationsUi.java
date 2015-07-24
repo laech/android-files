@@ -3,12 +3,13 @@ package l.files.operations.ui;
 import android.content.Context;
 
 import l.files.operations.Clock;
-import l.files.operations.Events;
+import l.files.operations.OperationService;
 
-public class OperationsUi {
+public final class OperationsUi {
 
   public void init(Context context) {
-    Events.get().register(new NotificationProvider(context, Clock.system()));
+    OperationService.addListener(
+        new NotificationProvider(context, Clock.system()));
   }
 
 }

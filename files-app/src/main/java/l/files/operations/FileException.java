@@ -20,7 +20,7 @@ final class FileException extends RuntimeException {
     }
 
     for (Failure failure : failures) {
-      addSuppressed(failure.getCause());
+      addSuppressed(failure.cause());
     }
   }
 

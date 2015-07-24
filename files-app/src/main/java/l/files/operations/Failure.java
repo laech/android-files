@@ -8,15 +8,14 @@ import l.files.fs.Resource;
 @AutoParcel
 public abstract class Failure {
 
-    Failure() {
-    }
+  Failure() {}
 
-    public abstract Resource getResource();
+  public abstract Resource resource();
 
-    public abstract IOException getCause();
+  public abstract IOException cause();
 
-    public static Failure create(Resource resource, IOException cause) {
-        return new AutoParcel_Failure(resource, cause);
-    }
+  public static Failure create(Resource resource, IOException cause) {
+    return new AutoParcel_Failure(resource, cause);
+  }
 
 }

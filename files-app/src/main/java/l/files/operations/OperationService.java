@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -14,12 +15,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
-import de.greenrobot.event.EventBus;
 import l.files.R;
 import l.files.fs.Resource;
+import l.files.operations.Task.Callback;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getService;
@@ -42,10 +44,15 @@ public final class OperationService extends Service {
   static final String EXTRA_DESTINATION = "destination";
 
   private static final ExecutorService executor = newFixedThreadPool(5);
+  private static final Set<TaskListener> listeners = new CopyOnWriteArraySet<>();
 
-  public EventBus bus;
-  private Handler handler;
-  private Map<Integer, Future<?>> tasks;
+  public static void addListener(TaskListener listener) {
+    listeners.add(listener);
+  }
+
+  public static void removeListener(TaskListener listener) {
+    listeners.remove(listener);
+  }
 
   public static void delete(
       Context context,
@@ -94,31 +101,22 @@ public final class OperationService extends Service {
         .setAction(ACTION_CANCEL).putExtra(EXTRA_TASK_ID, id);
   }
 
+  private Handler handler;
+  private Map<Integer, AsyncTask<?, ?, ?>> tasks;
+
   @Override public IBinder onBind(Intent intent) {
     return null;
   }
 
   @Override public void onCreate() {
     super.onCreate();
-    bus = Events.get();
     tasks = new HashMap<>();
     handler = new Handler(Looper.getMainLooper());
-    bus.register(this);
-  }
-
-  public void onEventMainThread(TaskState state) {
-    if (state.isFinished()) {
-      tasks.remove(state.getTask().getId());
-      if (tasks.isEmpty()) {
-        stopSelf();
-      }
-    }
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
     stopForeground(true);
-    bus.unregister(this);
   }
 
   @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -144,24 +142,39 @@ public final class OperationService extends Service {
         .setSmallIcon(R.mipmap.ic_launcher)
         .build());
 
-    Task task = newTask(data, startId, bus, handler);
-    tasks.put(startId, task.execute(executor));
+    Task task = newTask(data, startId, handler, new Callback() {
+      @Override public void onUpdate(TaskState state) {
+        if (state.isFinished()) {
+          tasks.remove(state.getTask().getId());
+          if (tasks.isEmpty()) {
+            stopSelf();
+          }
+        }
+        for (TaskListener listener : listeners) {
+          listener.onUpdate(state);
+        }
+      }
+    });
+    tasks.put(startId, task.executeOnExecutor(executor));
   }
 
-  private Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+  private Task newTask(Intent intent, int id, Handler handler, Callback callback) {
     intent.setExtrasClassLoader(getClassLoader());
     return FileAction
         .fromIntent(intent.getAction())
-        .newTask(intent, id, bus, handler);
+        .newTask(intent, id, handler, callback);
   }
 
   void cancelTask(Intent intent) {
     int startId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-    Future<?> task = tasks.remove(startId);
+    AsyncTask<?, ?, ?> task = tasks.remove(startId);
     if (task != null) {
       task.cancel(true);
     } else {
-      bus.post(TaskNotFound.create(startId));
+      TaskNotFound notFound = TaskNotFound.create(startId);
+      for (TaskListener listener : listeners) {
+        listener.onNotFound(notFound);
+      }
     }
     if (tasks.isEmpty()) {
       stopSelf();
@@ -172,27 +185,27 @@ public final class OperationService extends Service {
 
     DELETE("l.files.operations.DELETE") {
       @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, Handler handler, Callback callback) {
         List<Resource> resources = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
-        return new DeleteTask(id, Clock.system(), bus, handler, resources);
+        return new DeleteTask(id, Clock.system(), callback, handler, resources);
       }
     },
 
     COPY("l.files.operations.COPY") {
       @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, Handler handler, Callback callback) {
         List<Resource> sources = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
         Resource destination = intent.getParcelableExtra(EXTRA_DESTINATION);
-        return new CopyTask(id, Clock.system(), bus, handler, sources, destination);
+        return new CopyTask(id, Clock.system(), callback, handler, sources, destination);
       }
     },
 
     MOVE("l.files.operations.MOVE") {
       @Override
-      Task newTask(Intent intent, int id, EventBus bus, Handler handler) {
+      Task newTask(Intent intent, int id, Handler handler, Callback callback) {
         List<Resource> sources = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
         Resource destination = intent.getParcelableExtra(EXTRA_DESTINATION);
-        return new MoveTask(id, Clock.system(), bus, handler, sources, destination);
+        return new MoveTask(id, Clock.system(), callback, handler, sources, destination);
       }
     };
 
@@ -215,6 +228,15 @@ public final class OperationService extends Service {
       throw new IllegalArgumentException("Unknown action: " + action);
     }
 
-    abstract Task newTask(Intent intent, int id, EventBus bus, Handler handler);
+    abstract Task newTask(Intent intent, int id, Handler handler, Callback callback);
   }
+
+  public interface TaskListener {
+
+    void onUpdate(TaskState state);
+
+    void onNotFound(TaskNotFound notFound);
+
+  }
+
 }

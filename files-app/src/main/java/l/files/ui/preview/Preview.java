@@ -155,4 +155,8 @@ public final class Preview {
     return null;
   }
 
+  public void clearBitmapMemCache() {
+    thumbnailMemCache.clear();
+  }
+
 }

@@ -8,13 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-import de.greenrobot.event.EventBus;
 import l.files.common.testing.BaseTest;
-import l.files.eventbus.Events;
+import l.files.fs.Resource;
 import l.files.fs.local.LocalResource;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
+import l.files.operations.OperationService;
+import l.files.operations.OperationService.TaskListener;
 import l.files.operations.Target;
 import l.files.operations.TaskId;
 import l.files.operations.TaskNotFound;
@@ -22,6 +24,7 @@ import l.files.operations.TaskState;
 import l.files.operations.Time;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.ui.FailuresActivity.getFailures;
 import static l.files.operations.ui.FailuresActivity.getTitle;
@@ -34,67 +37,76 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public final class NotificationProviderTest extends BaseTest {
 
-    private TaskState.Pending base;
-    private EventBus bus;
-    private NotificationManager manager;
-    private NotificationProvider provider;
+  private TaskState.Pending base;
+  private TaskListener listener;
+  private NotificationManager manager;
+  private NotificationProvider provider;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        base = TaskState.pending(
-                TaskId.create(1, COPY), Target.NONE, Time.create(0, 0));
-        manager = mock(NotificationManager.class);
-        bus = Events.failFast(new EventBus());
-        provider = new NotificationProvider(getContext(), Clock.system(), manager);
-        bus.register(provider);
-    }
+  @Override protected void setUp() throws Exception {
+    super.setUp();
+    base = TaskState.pending(
+        TaskId.create(1, COPY), Target.NONE, Time.create(0, 0));
+    manager = mock(NotificationManager.class);
+    listener = mock(TaskListener.class);
+    provider = new NotificationProvider(getContext(), Clock.system(), manager);
+    OperationService.addListener(listener);
+  }
 
-    public void testCancelTaskNotFound() throws Exception {
-        bus.post(TaskNotFound.create(1011));
-        verify(manager).cancel(1011);
-    }
+  @Override protected void tearDown() throws Exception {
+    OperationService.removeListener(listener);
+    super.tearDown();
+  }
 
-    public void testCancelNotificationOnSuccess() {
-        bus.post(base.running(Time.create(1, 1)).success(Time.create(2, 2)));
-        verify(manager, timeout(1000)).cancel(base.getTask().getId());
-        verifyNoMoreInteractions(manager);
-    }
+  public void testCancelTaskNotFound() throws Exception {
+    provider.onNotFound(TaskNotFound.create(1011));
+    verify(manager).cancel(1011);
+  }
 
-    public void testNotifyOnProgress() {
-        bus.post(base.running(Time.create(1, 1)));
-        verify(manager, timeout(1000))
-                .notify(eq(base.getTask().getId()), notNull(Notification.class));
-        verifyNoMoreInteractions(manager);
-    }
+  public void testCancelNotificationOnSuccess() {
+    provider.onUpdate(base.running(Time.create(1, 1)).success(Time.create(2, 2)));
+    verify(manager, timeout(1000)).cancel(base.getTask().getId());
+    verifyNoMoreInteractions(manager);
+  }
 
-    public void testNotifyOnFailure() throws Exception {
-        bus.post(base.running(Time.create(1, 1)).failed(Time.create(2, 2),
-                asList(Failure.create(LocalResource.create(new File("p")), new IOException("test")))));
-        // See comment in class under test for this ID
-        int id = Integer.MAX_VALUE - base.getTask().getId();
-        verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
-    }
+  public void testNotifyOnProgress() {
+    provider.onUpdate(base.running(Time.create(1, 1)));
+    verify(manager, timeout(1000))
+        .notify(eq(base.getTask().getId()), notNull(Notification.class));
+    verifyNoMoreInteractions(manager);
+  }
 
-    public void testRemoveNotificationOnUnknownError() throws Exception {
-        bus.post(base.running(Time.create(1, 1)).failed(Time.create(2, 2),
-                Collections.<Failure>emptyList()));
-        verify(manager, timeout(1000)).cancel(base.getTask().getId());
-    }
+  public void testNotifyOnFailure() throws Exception {
+    Resource resource = LocalResource.create(new File("p"));
+    IOException err = new IOException("test");
+    List<Failure> failures = singletonList(Failure.create(resource, err));
+    provider.onUpdate(base
+        .running(Time.create(1, 1))
+        .failed(Time.create(2, 2), failures));
+    // See comment in class under test for this ID
+    int id = Integer.MAX_VALUE - base.getTask().getId();
+    verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
+  }
 
-    public void testCreateFailureIntentWithCorrectFailureData() throws Exception {
-        Intent intent = provider.getFailureIntent(base
-                .running(Time.create(1, 1))
-                .failed(Time.create(2, 2), asList(
-                        Failure.create(LocalResource.create(new File("1")), new IOException("test1")),
-                        Failure.create(LocalResource.create(new File("2")), new IOException("test2")))));
-        Collection<FailureMessage> actual = getFailures(intent);
-        Collection<FailureMessage> expected = asList(
-                FailureMessage.create(LocalResource.create(new File("1")), "test1"),
-                FailureMessage.create(LocalResource.create(new File("2")), "test2")
-        );
-        assertEquals(expected, actual);
-        assertTrue(getTitle(intent).matches(".+"));
-    }
+  public void testRemoveNotificationOnUnknownError() throws Exception {
+    provider.onUpdate(base
+        .running(Time.create(1, 1))
+        .failed(Time.create(2, 2), Collections.<Failure>emptyList()));
+    verify(manager, timeout(1000)).cancel(base.getTask().getId());
+  }
+
+  public void testCreateFailureIntentWithCorrectFailureData() throws Exception {
+    Intent intent = provider.getFailureIntent(base
+        .running(Time.create(1, 1))
+        .failed(Time.create(2, 2), asList(
+            Failure.create(LocalResource.create(new File("1")), new IOException("test1")),
+            Failure.create(LocalResource.create(new File("2")), new IOException("test2")))));
+    Collection<FailureMessage> actual = getFailures(intent);
+    Collection<FailureMessage> expected = asList(
+        FailureMessage.create(LocalResource.create(new File("1")), "test1"),
+        FailureMessage.create(LocalResource.create(new File("2")), "test2")
+    );
+    assertEquals(expected, actual);
+    assertTrue(getTitle(intent).matches(".+"));
+  }
 
 }
