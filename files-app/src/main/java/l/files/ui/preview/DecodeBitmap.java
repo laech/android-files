@@ -10,6 +10,7 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
+import static l.files.ui.preview.Preview.decodePalette;
 
 abstract class DecodeBitmap extends Decode {
 
@@ -49,6 +50,10 @@ abstract class DecodeBitmap extends Decode {
       return null;
     }
 
+    if (context.getSize(res, stat, constraint) == null) {
+      publishProgress(result.originalSize);
+    }
+
     Rect scaledSize = result.originalSize.scale(constraint);
     Bitmap scaledBitmap = createScaledBitmap(
         result.maybeScaled,
@@ -56,7 +61,11 @@ abstract class DecodeBitmap extends Decode {
         scaledSize.height(),
         true);
 
-    publishProgress(result.originalSize, scaledBitmap);
+    publishProgress(scaledBitmap);
+
+    if (context.getPalette(res, stat, constraint) == null) {
+      publishProgress(decodePalette(scaledBitmap));
+    }
 
     if (result.maybeScaled != scaledBitmap) {
       result.maybeScaled.recycle();

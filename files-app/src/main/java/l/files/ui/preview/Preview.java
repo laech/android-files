@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
+import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 
 import java.io.IOException;
@@ -23,6 +24,9 @@ import static l.files.fs.LinkOption.FOLLOW;
 public final class Preview {
 
   private static final Logger log = Logger.get(Preview.class);
+
+  static final int PALETTE_MAX_COLOR_COUNT = 24;
+
   private static Preview instance;
 
   public static Preview get(Context context) {
@@ -35,6 +39,7 @@ public final class Preview {
   }
 
   private final PersistenceCache<Rect> sizeCache;
+  private final PersistenceCache<Palette> paletteCache;
   private final PersistenceCache<String> mediaTypeCache;
   private final PersistenceCache<Boolean> noPreviewCache;
   private final ThumbnailMemCache thumbnailMemCache;
@@ -47,6 +52,7 @@ public final class Preview {
     this.cacheDir = LocalResource.create(context.getExternalCacheDir());
     this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
     this.sizeCache = new RectCache(cacheDir);
+    this.paletteCache = new PaletteCache(cacheDir);
     this.mediaTypeCache = new MediaTypeCache(cacheDir);
     this.noPreviewCache = new NoPreviewCache(cacheDir);
     this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
@@ -55,12 +61,14 @@ public final class Preview {
 
   public void writeCacheAsyncIfNeeded() {
     sizeCache.writeAsyncIfNeeded();
+    paletteCache.writeAsyncIfNeeded();
     mediaTypeCache.writeAsyncIfNeeded();
     noPreviewCache.writeAsyncIfNeeded();
   }
 
   public void readCacheAsyncIfNeeded() {
     sizeCache.readAsyncIfNeeded();
+    paletteCache.readAsyncIfNeeded();
     mediaTypeCache.readAsyncIfNeeded();
     noPreviewCache.readAsyncIfNeeded();
   }
@@ -93,6 +101,15 @@ public final class Preview {
 
   void putSize(Resource res, Stat stat, Rect constraint, Rect size) {
     sizeCache.put(res, stat, constraint, size);
+  }
+
+  @Nullable
+  public Palette getPalette(Resource res, Stat stat, Rect constraint) {
+    return paletteCache.get(res, stat, constraint);
+  }
+
+  void putPalette(Resource res, Stat stat, Rect constraint, Palette palette) {
+    paletteCache.put(res, stat, constraint, palette);
   }
 
   @Nullable String getMediaType(Resource res, Stat stat, Rect constraint) {
@@ -153,6 +170,12 @@ public final class Preview {
       return Rect.of(options.outWidth, options.outHeight);
     }
     return null;
+  }
+
+  static Palette decodePalette(Bitmap bitmap) {
+    return new Palette.Builder(bitmap)
+        .maximumColorCount(PALETTE_MAX_COLOR_COUNT)
+        .generate();
   }
 
   public void clearBitmapMemCache() {

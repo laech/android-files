@@ -15,6 +15,7 @@ import static l.files.ui.preview.DecodeAudio.isAudio;
 import static l.files.ui.preview.DecodeImage.isImage;
 import static l.files.ui.preview.DecodePdf.isPdf;
 import static l.files.ui.preview.DecodeVideo.isVideo;
+import static l.files.ui.preview.Preview.decodePalette;
 
 final class DecodeChain extends Decode {
 
@@ -162,8 +163,12 @@ final class DecodeChain extends Decode {
     } catch (Exception e) {
       log.error(e);
     }
+
     if (bitmap != null) {
       publishProgress(bitmap);
+      if (context.getPalette(res, stat, constraint) == null) {
+        publishProgress(decodePalette(bitmap));
+      }
       return true;
     }
     return false;

@@ -13,6 +13,7 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Color.WHITE;
 import static android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.open;
@@ -69,6 +70,7 @@ final class DecodePdf extends DecodeBitmap {
 
         Rect scaledSize = originalSize.scale(constraint);
         Bitmap bitmap = createBitmap(scaledSize.width(), scaledSize.height(), ARGB_8888);
+        bitmap.eraseColor(WHITE);
         page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
         return new Result(bitmap, originalSize);
       }

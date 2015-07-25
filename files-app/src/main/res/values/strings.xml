@@ -140,4 +140,6 @@
         <item quantity="other">Failed to delete files</item>
     </plurals>
 
+    <string name="link_icon">➥</string>
+
 </resources>

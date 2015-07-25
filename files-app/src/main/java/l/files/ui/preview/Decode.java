@@ -2,6 +2,7 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.support.v7.graphics.Palette;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -53,6 +54,10 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
       if (value instanceof Rect) {
         callback.onSizeAvailable(res, (Rect) value);
         context.putSize(res, stat, constraint, (Rect) value);
+
+      } else if (value instanceof Palette) {
+        callback.onPaletteAvailable(res, (Palette) value);
+        context.putPalette(res, stat, constraint, (Palette) value);
 
       } else if (value instanceof Bitmap) {
         callback.onPreviewAvailable(res, (Bitmap) value);

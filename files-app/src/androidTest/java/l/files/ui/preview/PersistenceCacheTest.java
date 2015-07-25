@@ -22,7 +22,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
 
     C c2 = newCache();
     c2.readIfNeeded();
-    assertEquals(value, c2.get(res, stat, constraint));
+    assertValueEquals(value, c2.get(res, stat, constraint));
     c2.remove(res, stat, constraint);
     c2.writeIfNeeded();
 
@@ -44,7 +44,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
     C c2 = newCache();
     assertNull(c2.get(res, stat, constraint));
     c2.readIfNeeded();
-    assertEquals(value, c2.get(res, stat, constraint));
+    assertValueEquals(value, c2.get(res, stat, constraint));
   }
 
   public void test_constraint_is_not_used_as_part_of_key() throws Exception {
@@ -52,9 +52,9 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
     Stat stat = res.stat(NOFOLLOW);
     V value = newValue();
     cache.put(res, stat, newConstraint(), value);
-    assertEquals(value, cache.get(res, stat, newConstraint()));
-    assertEquals(value, cache.get(res, stat, newConstraint()));
-    assertEquals(value, cache.get(res, stat, newConstraint()));
+    assertValueEquals(value, cache.get(res, stat, newConstraint()));
+    assertValueEquals(value, cache.get(res, stat, newConstraint()));
+    assertValueEquals(value, cache.get(res, stat, newConstraint()));
     assertNotEqual(newConstraint(), newConstraint());
   }
 

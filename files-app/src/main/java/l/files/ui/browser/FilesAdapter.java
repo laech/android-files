@@ -3,6 +3,10 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.format.Time;
@@ -39,7 +43,7 @@ import l.files.ui.preview.PreviewCallback;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
-import static android.R.integer.config_shortAnimTime;
+import static android.R.integer.config_mediumAnimTime;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
@@ -190,11 +194,15 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     private final TextView summary;
     private final TextView symlink;
     private final ImageView preview;
+    private final View container;
+
+    private final int animateDuration;
 
     private Decode task;
 
     FileHolder(View itemView) {
       super(itemView, selection, actionModeProvider, actionModeCallback);
+      this.container = find(R.id.container, this);
       this.icon = find(R.id.icon, this);
       this.title = find(R.id.title, this);
       this.summary = find(R.id.summary, this);
@@ -202,6 +210,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       this.preview = find(R.id.preview, this);
       this.itemView.setOnClickListener(this);
       this.itemView.setOnLongClickListener(this);
+      this.animateDuration = itemView.getResources()
+          .getInteger(config_mediumAnimTime);
     }
 
     @Override protected Resource itemId(File file) {
@@ -301,7 +311,15 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
         preview.setImageDrawable(null);
         preview.setVisibility(GONE);
+        container.setBackgroundColor(TRANSPARENT);
         return;
+      }
+
+      Palette palette = decorator.getPalette(res, stat, constraint);
+      if (palette != null) {
+        container.setBackgroundColor(backgroundColor(palette));
+      } else {
+        container.setBackgroundColor(TRANSPARENT);
       }
 
       Bitmap bitmap = decorator.getBitmap(res, stat, constraint);
@@ -342,14 +360,27 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
+    @Override public void onPaletteAvailable(Resource item, Palette palette) {
+      if (Objects.equals(item, itemId())) {
+        TransitionDrawable background = new TransitionDrawable(new Drawable[]{
+            new ColorDrawable(TRANSPARENT),
+            new ColorDrawable(backgroundColor(palette))
+        });
+        container.setBackground(background);
+        background.startTransition(animateDuration);
+      }
+    }
+
+    private int backgroundColor(Palette palette) {
+      return palette.getDarkVibrantColor(TRANSPARENT);
+    }
+
     @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
       if (Objects.equals(item, itemId())) {
         preview.setImageBitmap(bitmap);
         preview.setVisibility(VISIBLE);
-        Resources resources = preview.getResources();
-        int duration = resources.getInteger(config_shortAnimTime);
         preview.setAlpha(0f);
-        preview.animate().alpha(1).setDuration(duration);
+        preview.animate().alpha(1).setDuration(animateDuration);
       }
     }
 
