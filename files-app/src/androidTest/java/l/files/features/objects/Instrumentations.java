@@ -123,8 +123,9 @@ public final class Instrumentations {
       error = new AssertionError("Timed out.");
     }
 
-    takeScreenshotAndThrow(in, error);
-    return null;
+//    takeScreenshotAndThrow(in, error);
+//    return null;
+    throw error;
   }
 
   private static void takeScreenshotAndThrow(

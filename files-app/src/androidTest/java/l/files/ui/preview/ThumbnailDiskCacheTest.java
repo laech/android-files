@@ -76,6 +76,8 @@ public final class ThumbnailDiskCacheTest
   }
 
   @Override void assertValueEquals(Bitmap a, Bitmap b) {
+    assertNotNull(a);
+    assertNotNull(b);
     assertEquals(a.getWidth(), b.getWidth());
     assertEquals(a.getHeight(), b.getHeight());
     for (int i = 0; i < a.getWidth(); i++) {

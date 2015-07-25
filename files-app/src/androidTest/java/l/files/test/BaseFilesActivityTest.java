@@ -5,6 +5,7 @@ import android.content.Intent;
 import java.io.File;
 import java.io.IOException;
 
+import l.files.common.base.Provider;
 import l.files.common.testing.BaseActivityTest;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.Permission;
@@ -15,6 +16,7 @@ import l.files.fs.local.LocalResource;
 import l.files.ui.browser.FilesActivity;
 
 import static java.io.File.createTempFile;
+import static java.lang.System.currentTimeMillis;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
@@ -22,6 +24,7 @@ import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
   private Resource dir;
+  private UiFileActivity screen;
 
   public BaseFilesActivityTest() {
     super(FilesActivity.class);
@@ -31,10 +34,17 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     super.setUp();
     dir = LocalResource.create(createTempDir());
     setActivityIntent(newIntent(dir));
+    screen = new UiFileActivity(
+        getInstrumentation(),
+        new Provider<FilesActivity>() {
+          @Override public FilesActivity get() {
+            return getActivity();
+          }
+        });
   }
 
   private File createTempDir() throws IOException {
-    File file = createTempFile("tmp", null);
+    File file = createTempFile("tmp", String.valueOf(currentTimeMillis()));
     assertTrue(file.delete());
     assertTrue(file.mkdir());
     return file;
@@ -69,7 +79,8 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   }
 
   protected UiFileActivity screen() {
-    return new UiFileActivity(getInstrumentation(), getActivity());
+    getActivity();
+    return screen;
   }
 
   protected Resource dir() {

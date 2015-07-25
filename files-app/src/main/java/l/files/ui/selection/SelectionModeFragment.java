@@ -3,37 +3,83 @@ package l.files.ui.selection;
 import android.os.Bundle;
 import android.view.ActionMode;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import l.files.common.app.BaseFragment;
 import l.files.common.view.ActionModeProvider;
 
-public abstract class SelectionModeFragment<T> extends BaseFragment
-{
-    private Selection<T> selection;
+import static java.lang.System.currentTimeMillis;
+import static java.lang.System.identityHashCode;
 
-    @Override
-    public void onCreate(final Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        selection = new Selection<>();
+public abstract class SelectionModeFragment<T> extends BaseFragment {
+
+  private static final String SELECTION_ID = "selectionId";
+
+  private static final Map<Integer, State> selections = new HashMap<>();
+
+  private Integer selectionId;
+  private Selection<T> selection;
+
+  @SuppressWarnings("unchecked")
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    if (savedInstanceState == null) {
+      selection = new Selection<>();
+      selectionId = identityHashCode(selection);
+      selections.put(selectionId, new State(selection));
+
+    } else {
+      selectionId = savedInstanceState.getInt(SELECTION_ID);
+      selection = (Selection<T>) selections.get(selectionId).selection;
     }
 
-    @Override
-    public void onViewStateRestored(final Bundle savedInstanceState)
-    {
-        super.onViewStateRestored(savedInstanceState);
-        if (!selection.isEmpty())
-        {
-            actionModeProvider().startActionMode(actionModeCallback());
-        }
+    cleanSelectionStates();
+  }
+
+  private void cleanSelectionStates() {
+    long now = currentTimeMillis();
+    Iterator<Entry<Integer, State>> it = selections.entrySet().iterator();
+    while (it.hasNext()) {
+      Entry<Integer, State> entry = it.next();
+      if (entry.getKey().intValue() == selectionId ||
+          now - entry.getValue().creationTime > 10000) {
+        it.remove();
+      }
     }
+  }
 
-    protected Selection<T> selection()
-    {
-        return selection;
+  @Override public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    selections.put(selectionId, new State(selection));
+    outState.putInt(SELECTION_ID, selectionId);
+  }
+
+  @Override public void onViewStateRestored(Bundle savedInstanceState) {
+    super.onViewStateRestored(savedInstanceState);
+    if (!selection.isEmpty()) {
+      actionModeProvider().startActionMode(actionModeCallback());
     }
+  }
 
-    protected abstract ActionMode.Callback actionModeCallback();
+  protected Selection<T> selection() {
+    return selection;
+  }
 
-    protected abstract ActionModeProvider actionModeProvider();
+  protected abstract ActionMode.Callback actionModeCallback();
+
+  protected abstract ActionModeProvider actionModeProvider();
+
+  private static final class State {
+    final Selection<?> selection;
+    final long creationTime;
+
+    State(Selection<?> selection) {
+      this.selection = selection;
+      this.creationTime = currentTimeMillis();
+    }
+  }
 }
