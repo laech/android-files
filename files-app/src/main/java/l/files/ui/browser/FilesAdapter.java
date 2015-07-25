@@ -65,8 +65,8 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.R.dimen.files_item_space_horizontal;
 import static l.files.R.dimen.files_list_space;
 import static l.files.R.integer.files_list_columns;
-import static l.files.R.layout.files_item;
-import static l.files.R.layout.files_item_header;
+import static l.files.R.layout.files_grid_item;
+import static l.files.R.layout.files_grid_header;
 import static l.files.common.view.Views.find;
 import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
@@ -116,8 +116,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     Context context = parent.getContext();
     LayoutInflater inflater = LayoutInflater.from(context);
     return viewType == 0
-        ? new FileHolder(inflater.inflate(files_item, parent, false))
-        : new HeaderHolder(inflater.inflate(files_item_header, parent, false));
+        ? new FileHolder(inflater.inflate(files_grid_item, parent, false))
+        : new HeaderHolder(inflater.inflate(files_grid_header, parent, false));
   }
 
   @Override public void onBindViewHolder(ViewHolder holder, int position) {
