@@ -64,7 +64,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.R.dimen.files_item_space_horizontal;
 import static l.files.R.dimen.files_list_space;
-import static l.files.R.integer.files_list_columns;
+import static l.files.R.integer.files_grid_columns;
 import static l.files.R.layout.files_grid_item;
 import static l.files.R.layout.files_grid_header;
 import static l.files.common.view.Views.find;
@@ -98,7 +98,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     Resources res = context.getResources();
     DisplayMetrics metrics = res.getDisplayMetrics();
-    int columns = res.getInteger(files_list_columns);
+    int columns = res.getInteger(files_grid_columns);
     int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
         - res.getDimension(files_item_space_horizontal) * columns * 2
         - res.getDimension(files_list_space) * 2) / columns;

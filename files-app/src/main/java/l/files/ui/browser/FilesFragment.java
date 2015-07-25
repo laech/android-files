@@ -48,7 +48,7 @@ import static android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static l.files.R.integer.files_list_columns;
+import static l.files.R.integer.files_grid_columns;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.common.view.Views.find;
 import static l.files.ui.IOExceptions.message;
@@ -134,7 +134,7 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
         actionModeCallback(),
         (OnOpenFileListener) getActivity());
 
-    int columns = getResources().getInteger(files_list_columns);
+    int columns = getResources().getInteger(files_grid_columns);
     recycler = find(android.R.id.list, this);
     recycler.setAdapter(adapter);
     recycler.setHasFixedSize(true);
