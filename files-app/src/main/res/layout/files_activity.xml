@@ -45,7 +45,7 @@
     <fragment
         android:id="@+id/bookmarks_fragment"
         android:name="l.files.ui.bookmarks.BookmarksFragment"
-        android:layout_width="@dimen/navigation_max_width"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"/>
 
