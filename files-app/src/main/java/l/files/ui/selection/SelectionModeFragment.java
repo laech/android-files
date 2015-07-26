@@ -23,21 +23,28 @@ public abstract class SelectionModeFragment<T> extends BaseFragment {
   private Integer selectionId;
   private Selection<T> selection;
 
-  @SuppressWarnings("unchecked")
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if (savedInstanceState == null) {
+    setSelection(savedInstanceState);
+    cleanSelectionStates();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void setSelection(Bundle savedInstanceState) {
+    if (savedInstanceState != null) {
+      selectionId = savedInstanceState.getInt(SELECTION_ID);
+      State state = selections.get(selectionId);
+      if (state != null) {
+        selection = (Selection<T>) state.selection;
+      }
+    }
+
+    if (selection == null) {
       selection = new Selection<>();
       selectionId = identityHashCode(selection);
       selections.put(selectionId, new State(selection));
-
-    } else {
-      selectionId = savedInstanceState.getInt(SELECTION_ID);
-      selection = (Selection<T>) selections.get(selectionId).selection;
     }
-
-    cleanSelectionStates();
   }
 
   private void cleanSelectionStates() {
