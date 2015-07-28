@@ -3,4 +3,5 @@
     <dimen name="files_list_space">2dp</dimen>
     <dimen name="files_item_space_horizontal">4dp</dimen>
     <dimen name="files_item_space_vertical">4dp</dimen>
+    <dimen name="files_item_card_radius">2dp</dimen>
 </resources>

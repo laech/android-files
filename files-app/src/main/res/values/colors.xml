@@ -2,4 +2,5 @@
 <resources>
     <color name="activated_highlight">#aa009688</color>
     <color name="file_card_background">#505050</color>
+    <color name="file_item_text_shadow">#55000000</color>
 </resources>
