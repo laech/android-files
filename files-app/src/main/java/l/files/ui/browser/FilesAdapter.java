@@ -372,7 +372,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     private int backgroundColor(Palette palette) {
-      return palette.getMutedColor(TRANSPARENT);
+      return palette.getDarkMutedColor(TRANSPARENT);
     }
 
     @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
