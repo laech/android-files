@@ -10,7 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:padding="@dimen/files_list_space"
+        android:paddingBottom="16dp"
+        android:paddingEnd="@dimen/files_list_space"
+        android:paddingStart="@dimen/files_list_space"
+        android:paddingTop="8dp"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"/>
 
