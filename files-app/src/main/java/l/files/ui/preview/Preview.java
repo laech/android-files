@@ -33,6 +33,7 @@ public final class Preview {
     synchronized (Preview.class) {
       if (instance == null) {
         instance = new Preview(context);
+        instance.cleanupAsync();
       }
     }
     return instance;
@@ -47,8 +48,10 @@ public final class Preview {
 
   final DisplayMetrics displayMetrics;
   final Resource cacheDir;
+  final Context context;
 
   private Preview(Context context) {
+    this.context = context;
     this.cacheDir = LocalResource.create(context.getExternalCacheDir());
     this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
     this.sizeCache = new RectCache(cacheDir);
@@ -73,7 +76,7 @@ public final class Preview {
     noPreviewCache.readAsyncIfNeeded();
   }
 
-  public void cleanupAsync() {
+  private void cleanupAsync() {
     thumbnailDiskCache.cleanupAsync();
   }
 

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Instant;
+import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
@@ -126,7 +127,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       }
       log.verbose("read cache end %s entries", count);
 
-    } catch (FileNotFoundException ignore) {
+    } catch (FileNotFoundException | NotExist ignore) {
     } catch (IOException e) {
       log.error(e);
     }

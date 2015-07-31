@@ -25,6 +25,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
@@ -64,6 +65,11 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
   }
 
   void cleanup() throws IOException {
+    if (!cacheDir.exists(FOLLOW)) {
+      log.verbose("cache dir does not exists, nothing to cleanup start");
+      return;
+    }
+
     final long now = currentTimeMillis();
     log.verbose("cleanup start");
     cacheDir.traverse(NOFOLLOW, null, new Visitor() {

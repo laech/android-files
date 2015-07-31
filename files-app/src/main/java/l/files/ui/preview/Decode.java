@@ -23,7 +23,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
   final Preview context;
   final PreviewCallback callback;
 
-  private final List<AsyncTask<?, ?, ?>> subs;
+  private final List<Decode> subs;
 
   Decode(
       Resource res,
@@ -41,8 +41,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
   public void cancelAll() {
     cancel(true);
-    for (AsyncTask<?, ?, ?> sub : subs) {
-      sub.cancel(true);
+    for (Decode sub : subs) {
+      sub.cancelAll();
     }
   }
 
@@ -69,7 +69,9 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         context.putPreviewable(res, stat, constraint, false);
 
       } else if (value instanceof Decode) {
-        subs.add(((Decode) value).executeOnPreferredExecutor());
+        Decode sub = (Decode) value;
+        subs.add(sub);
+        sub.executeOnPreferredExecutor();
       }
     }
   }

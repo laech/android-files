@@ -14,7 +14,6 @@ public final class FilesApp extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
-    Preview.get(this).cleanupAsync();
 
     new OperationsUi().init(this);
 
