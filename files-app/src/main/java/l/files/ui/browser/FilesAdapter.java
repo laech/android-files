@@ -43,7 +43,7 @@ import l.files.ui.preview.PreviewCallback;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
-import static android.R.integer.config_mediumAnimTime;
+import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
@@ -65,8 +65,8 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.R.dimen.files_item_space_horizontal;
 import static l.files.R.dimen.files_list_space;
 import static l.files.R.integer.files_grid_columns;
-import static l.files.R.layout.files_grid_item;
 import static l.files.R.layout.files_grid_header;
+import static l.files.R.layout.files_grid_item;
 import static l.files.common.view.Views.find;
 import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
@@ -211,7 +211,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       this.itemView.setOnClickListener(this);
       this.itemView.setOnLongClickListener(this);
       this.animateDuration = itemView.getResources()
-          .getInteger(config_mediumAnimTime);
+          .getInteger(config_shortAnimTime);
     }
 
     @Override protected Resource itemId(File file) {

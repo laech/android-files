@@ -19,6 +19,7 @@ import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
 
+import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.System.currentTimeMillis;
@@ -66,12 +67,13 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
   void cleanup() throws IOException {
     if (!cacheDir.exists(FOLLOW)) {
-      log.verbose("cache dir does not exists, nothing to cleanup start");
+      log.verbose("cache dir does not exists, nothing to cleanup");
       return;
     }
 
+    log.verbose("cleanup");
+
     final long now = currentTimeMillis();
-    log.verbose("cleanup start");
     cacheDir.traverse(NOFOLLOW, null, new Visitor() {
       @Override public Result accept(Resource res) throws IOException {
         Stat stat = res.stat(NOFOLLOW);
@@ -90,7 +92,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         return CONTINUE;
       }
     });
-    log.verbose("cleanup end");
   }
 
   Resource cacheFile(Resource res, Stat stat, Rect constraint) {
@@ -107,13 +108,12 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Stat stat,
       Rect constraint) throws IOException {
 
-    log.verbose("read bitmap start %s", res);
+    log.verbose("read bitmap %s", res);
     Resource cache = cacheFile(res, stat, constraint);
     try (InputStream in = new BufferedInputStream(cache.input(NOFOLLOW))) {
       in.read(); // read DUMMY_BYTE
 
       Bitmap bitmap = decodeStream(in);
-      log.verbose("read bitmap end %s", res);
 
       if (bitmap == null) {
         return null;
@@ -143,14 +143,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       Rect constraint,
       Bitmap bitmap) throws IOException {
 
-    log.verbose("write start %s", res);
     Resource cache = cacheFile(res, stat, constraint);
     cache.createFiles();
     try (OutputStream out = new BufferedOutputStream(cache.output(NOFOLLOW))) {
       out.write(DUMMY_BYTE);
-      bitmap.compress(WEBP, 90, out);
+
+      /*
+       * Writing/reading JPEG is much quick than WEBP, difference in quality
+       * is not noticeable at this config. Use JPEG if image is opaque.
+       */
+      Bitmap.CompressFormat format = bitmap.hasAlpha() ? WEBP : JPEG;
+      bitmap.compress(format, 90, out);
+      log.verbose("write %s %s", format, res);
     }
-    log.verbose("write end %s", res);
     return null;
   }
 
