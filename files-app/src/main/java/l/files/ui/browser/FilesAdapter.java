@@ -102,7 +102,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
         - res.getDimension(files_item_space_horizontal) * columns * 2
         - res.getDimension(files_list_space) * 2) / columns;
-    int maxThumbnailHeight = metrics.heightPixels;
+    int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
     this.constraint = Rect.of(maxThumbnailWidth, maxThumbnailHeight);
     this.decorator = Preview.get(context);
   }
