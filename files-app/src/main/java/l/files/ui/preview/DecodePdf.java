@@ -18,6 +18,11 @@ import android.util.DisplayMetrics;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Resource;
@@ -37,6 +42,8 @@ import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
 import static java.lang.Integer.parseInt;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 
 final class DecodePdf extends DecodeBitmap {
 
@@ -61,6 +68,8 @@ final class DecodePdf extends DecodeBitmap {
    * be too big. Compressing to JPEG is also much faster than WEBP (~10x).
    */
 
+  private static final Executor requestPool = newFixedThreadPool(3);
+
   private final CancellationSignal signal = new CancellationSignal();
 
   DecodePdf(
@@ -78,7 +87,7 @@ final class DecodePdf extends DecodeBitmap {
   }
 
   @Override DecodePdf executeOnPreferredExecutor() {
-    return (DecodePdf) executeOnExecutor(SERIAL_EXECUTOR);
+    return (DecodePdf) executeOnExecutor(requestPool);
   }
 
   static boolean isPdf(String media, Resource res) {
@@ -103,6 +112,8 @@ final class DecodePdf extends DecodeBitmap {
     private static final String COLUMN_BITMAP_BYTES = "bitmapBytes";
     private static final String COLUMN_ORIGINAL_WIDTH = "originalWidth";
     private static final String COLUMN_ORIGINAL_HEIGHT = "originalHeight";
+
+    private static final ExecutorService decoder = newSingleThreadExecutor();
 
     @Nullable
     public static DecodeBitmap.Result query(
@@ -164,6 +175,9 @@ final class DecodePdf extends DecodeBitmap {
         log.verbose(
             "CancellationSignal is null, is request being restarted after crash? %s",
             uri);
+
+      } else if (signal.isCanceled()) {
+        return null;
       }
 
       File file = new File(uri.getQueryParameter(PARAM_FILE));
@@ -171,46 +185,18 @@ final class DecodePdf extends DecodeBitmap {
           parseInt(uri.getQueryParameter(PARAM_MAX_WIDTH)),
           parseInt(uri.getQueryParameter(PARAM_MAX_HEIGHT)));
 
-      try {
-        return decode(signal, file, constraint);
-      } catch (IOException e) {
-        return null;
-      }
+      return decode(file, constraint, signal);
     }
 
-    private Cursor decode(
-        CancellationSignal signal,
-        File file,
-        Rect constraint) throws IOException {
+    private Cursor decode(File file, Rect constraint, CancellationSignal signal) {
 
-      try (ParcelFileDescriptor fd = open(file, MODE_READ_ONLY);
-           PdfRenderer renderer = new PdfRenderer(fd)) {
+      Future<Result> future = decoder.submit(
+          new ReadPreview(getContext(), file, constraint, signal));
 
-        if (renderer.getPageCount() <= 0) {
-          return null;
-        }
+      try {
 
-        if (isCancelled(signal)) {
-          return null;
-        }
-
-        try (PdfRenderer.Page page = renderer.openPage(0)) {
-          Rect originalSize = Rect.of(
-              pointToPixel(page.getWidth()),
-              pointToPixel(page.getHeight())
-          );
-
-          if (isCancelled(signal)) {
-            return null;
-          }
-
-          Rect scaledSize = originalSize.scale(constraint);
-          Bitmap bitmap = createBitmap(
-              scaledSize.width(),
-              scaledSize.height(),
-              ARGB_8888);
-          bitmap.eraseColor(WHITE);
-          page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
+        Result result = future.get();
+        if (result != null) {
 
           MatrixCursor cursor = new MatrixCursor(
               new String[]{
@@ -223,22 +209,18 @@ final class DecodePdf extends DecodeBitmap {
 
           cursor
               .newRow()
-              .add(COLUMN_BITMAP_BYTES, bitmapToBytes(bitmap))
-              .add(COLUMN_ORIGINAL_WIDTH, originalSize.width())
-              .add(COLUMN_ORIGINAL_HEIGHT, originalSize.height());
+              .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.maybeScaled))
+              .add(COLUMN_ORIGINAL_WIDTH, result.originalSize.width())
+              .add(COLUMN_ORIGINAL_HEIGHT, result.originalSize.height());
 
           return cursor;
         }
+
+      } catch (InterruptedException | ExecutionException e) {
+        log.debug(e);
       }
-    }
 
-    private boolean isCancelled(CancellationSignal signal) {
-      return signal != null && signal.isCanceled();
-    }
-
-    private int pointToPixel(int point) {
-      DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-      return (int) (applyDimension(COMPLEX_UNIT_PT, point, metrics) + 0.5f);
+      return null;
     }
 
     @Override public boolean onCreate() {
@@ -274,6 +256,75 @@ final class DecodePdf extends DecodeBitmap {
         String[] selectionArgs) {
       throw new UnsupportedOperationException();
     }
+  }
+
+  private static final class ReadPreview implements Callable<Result> {
+
+    private final Context context;
+    private final File file;
+    private final Rect constraint;
+    private final CancellationSignal signal;
+
+    private ReadPreview(
+        Context context,
+        File file,
+        Rect constraint,
+        CancellationSignal signal) {
+
+      this.context = context.getApplicationContext();
+      this.file = file;
+      this.constraint = constraint;
+      this.signal = signal;
+    }
+
+    @Override public Result call() throws Exception {
+
+      if (isCancelled(signal)) {
+        return null;
+      }
+
+      try (ParcelFileDescriptor fd = open(file, MODE_READ_ONLY);
+           PdfRenderer renderer = new PdfRenderer(fd)) {
+
+        if (renderer.getPageCount() <= 0) {
+          return null;
+        }
+
+        if (isCancelled(signal)) {
+          return null;
+        }
+
+        try (PdfRenderer.Page page = renderer.openPage(0)) {
+          Rect originalSize = Rect.of(
+              pointToPixel(page.getWidth()),
+              pointToPixel(page.getHeight())
+          );
+
+          if (isCancelled(signal)) {
+            return null;
+          }
+
+          Rect scaledSize = originalSize.scale(constraint);
+          Bitmap bitmap = createBitmap(
+              scaledSize.width(),
+              scaledSize.height(),
+              ARGB_8888);
+          bitmap.eraseColor(WHITE);
+          page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
+          return new Result(bitmap, originalSize);
+        }
+      }
+    }
+
+    private int pointToPixel(int point) {
+      DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+      return (int) (applyDimension(COMPLEX_UNIT_PT, point, metrics) + 0.5f);
+    }
+
+    private boolean isCancelled(CancellationSignal signal) {
+      return signal != null && signal.isCanceled();
+    }
+
   }
 
 }
