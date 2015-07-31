@@ -32,6 +32,7 @@ import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
 import static l.files.operations.ui.FailuresActivity.getTitle;
+import static l.files.ui.IOExceptions.message;
 
 final class NotificationProvider implements TaskListener {
 
@@ -178,7 +179,7 @@ final class NotificationProvider implements TaskListener {
     ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
     for (l.files.operations.Failure failure : failures) {
       messages.add(FailureMessage.create(
-          failure.resource(), failure.cause().getMessage() + ""));
+          failure.resource(), message(failure.cause())));
     }
     String title = viewer.getContentTitle(state);
     return FailuresActivity.newIntent(context, title, messages);
