@@ -15,6 +15,7 @@ import l.files.operations.TaskState.Failed;
 import l.files.operations.TaskState.Pending;
 import l.files.operations.TaskState.Success;
 
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.Looper.getMainLooper;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -30,18 +31,27 @@ public final class TaskTest extends BaseTest {
     handler = new Handler(getMainLooper());
   }
 
-  public void testNotifiesOnCancel() throws Exception {
+  public void testNotifiesOnCancelFromInterrupt() throws Exception {
     TaskState state = last(capturedExecute(new Command() {
-      @Override public void execute() throws InterruptedException {
+      @Override public void execute(Task task) throws InterruptedException {
         throw new InterruptedException("Test");
       }
     }));
     assertTrue(state.toString(), state instanceof Success);
   }
 
+  public void testNotifiesOnCancelFromCancellingTask() throws Exception {
+    List<TaskState> states = capturedExecute(new Command() {
+      @Override public void execute(Task task) throws InterruptedException {
+        task.cancel(true);
+      }
+    });
+    assertTrue(states.toString(), last(states) instanceof Success);
+  }
+
   public void testNotifiesOnFailure() throws Throwable {
     TaskState state = last(capturedExecute(new Command() {
-      @Override public void execute() throws FileException {
+      @Override public void execute(Task task) throws FileException {
         throw new FileException(singletonList(Failure.create(
             LocalResource.create(new File("a")), new IOException("Test")
         )));
@@ -56,13 +66,13 @@ public final class TaskTest extends BaseTest {
   }
 
   public void testNotifiesOnSuccess() throws Exception {
-    TaskState state = last(capturedExecute());
-    assertTrue(state.toString(), state instanceof Success);
+    List<TaskState> states = capturedExecute();
+    assertTrue(states.toString(), last(states) instanceof Success);
   }
 
   private List<TaskState> capturedExecute() throws InterruptedException {
     return capturedExecute(new Command() {
-      @Override public void execute() {}
+      @Override public void execute(Task task) {}
     });
   }
 
@@ -75,10 +85,10 @@ public final class TaskTest extends BaseTest {
     new TestTask(handler, listener) {
       @Override
       protected void doTask() throws FileException, InterruptedException {
-        command.execute();
+        command.execute(this);
       }
-    }.execute();
-    listener.latch.await(1, SECONDS);
+    }.executeOnExecutor(THREAD_POOL_EXECUTOR);
+    assertTrue(listener.latch.await(1, SECONDS));
     return listener.states;
   }
 
@@ -104,7 +114,7 @@ public final class TaskTest extends BaseTest {
   }
 
   private interface Command {
-    void execute() throws InterruptedException, FileException;
+    void execute(Task task) throws InterruptedException, FileException;
   }
 
   private static class Listener implements Callback {

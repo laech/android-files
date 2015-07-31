@@ -9,7 +9,7 @@ import l.files.operations.TaskState.Running;
 
 import static java.util.Objects.requireNonNull;
 
-abstract class Task extends AsyncTask<Void, TaskState, Throwable> {
+abstract class Task extends AsyncTask<Void, TaskState, Void> {
 
   private static final long PROGRESS_UPDATE_DELAY_MILLIS = 1000;
 
@@ -46,46 +46,47 @@ abstract class Task extends AsyncTask<Void, TaskState, Throwable> {
     callback.onUpdate(state);
   }
 
-  @Override protected Throwable doInBackground(Void... params) {
+  @Override protected Void doInBackground(Void... params) {
     try {
+
       state = ((TaskState.Pending) state).running(clock.read());
       handler.postDelayed(update, PROGRESS_UPDATE_DELAY_MILLIS);
       doTask();
-      return null;
-    } catch (Throwable e) {
-      return e;
-    }
-  }
-
-  @Override protected void onPostExecute(Throwable e) {
-    super.onPostExecute(e);
-    handler.removeCallbacks(update);
-
-    if (e == null || e instanceof InterruptedException) {
-      // Cancelled, let it finish
-      // Use success as the state, may add a cancel state in future if needed
       state = ((Running) state).success(clock.read());
-      callback.onUpdate(state);
+      return null;
 
-    } else if (e instanceof FileException) {
-      state = ((Running) state).failed(clock.read(), ((FileException) e).failures());
-      callback.onUpdate(state);
+    } catch (Throwable e) {
 
-    } else {
-      state = ((Running) state).failed(clock.read(), Collections.<Failure>emptyList());
-      callback.onUpdate(state);
+      if (e instanceof InterruptedException) {
+        state = ((Running) state).success(clock.read());
 
-      if (e instanceof Error) {
-        throw (Error) e;
-
-      } else if (e instanceof RuntimeException) {
-        throw (RuntimeException) e;
+      } else if (e instanceof FileException) {
+        state = ((Running) state).failed(clock.read(), ((FileException) e).failures());
 
       } else {
-        throw new RuntimeException(e);
+        state = ((Running) state).failed(clock.read(), Collections.<Failure>emptyList());
+
+        if (e instanceof Error) {
+          throw (Error) e;
+
+        } else if (e instanceof RuntimeException) {
+          throw (RuntimeException) e;
+
+        } else {
+          throw new RuntimeException(e);
+        }
       }
+
+    } finally {
+      handler.removeCallbacks(update);
+      handler.post(new Runnable() {
+        @Override public void run() {
+          callback.onUpdate(state);
+        }
+      });
     }
 
+    return null;
   }
 
   abstract void doTask() throws FileException, InterruptedException;
