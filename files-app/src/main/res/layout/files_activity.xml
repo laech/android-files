@@ -18,7 +18,7 @@
             android:background="@null"
             app:elevation="0dp">
 
-            <Toolbar
+            <l.files.ui.browser.HighlightOverlayToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
@@ -31,7 +31,7 @@
                     android:layout_height="wrap_content"
                     android:background="@null"/>
 
-            </Toolbar>
+            </l.files.ui.browser.HighlightOverlayToolbar>
 
         </android.support.design.widget.AppBarLayout>
 
