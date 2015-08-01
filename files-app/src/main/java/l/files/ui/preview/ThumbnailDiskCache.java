@@ -19,7 +19,6 @@ import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
 
-import static android.graphics.Bitmap.CompressFormat.JPEG;
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.System.currentTimeMillis;
@@ -147,14 +146,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     cache.createFiles();
     try (OutputStream out = new BufferedOutputStream(cache.output(NOFOLLOW))) {
       out.write(DUMMY_BYTE);
-
-      /*
-       * Writing/reading JPEG is much quick than WEBP, difference in quality
-       * is not noticeable at this config. Use JPEG if image is opaque.
-       */
-      Bitmap.CompressFormat format = bitmap.hasAlpha() ? WEBP : JPEG;
-      bitmap.compress(format, 90, out);
-      log.verbose("write %s %s", format, res);
+      bitmap.compress(WEBP, 100, out);
+      log.verbose("write %s", res);
     }
     return null;
   }
