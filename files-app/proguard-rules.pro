@@ -23,15 +23,18 @@
 
 -keeppackagenames org.apache.tika.mime
 
+-keep class android.support.design.widget.AppBarLayout$ScrollingViewBehavior
+
 -keepclassmembers class l.files.fs.local.LocalResourceObservable {
-    *** isClosed();
-    *** sleep();
+  *** isClosed();
+  *** sleep();
+  *** onEvent(...);
 }
 
 -keepclassmembers class l.files.fs.local.LocalResourceStream {
-    *** notify(...);
+  *** notify(...);
 }
 
 -keepclassmembers class l.files.fs.local.** {
-    *** create(...);
+  *** create(...);
 }

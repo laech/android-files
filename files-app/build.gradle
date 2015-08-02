@@ -18,8 +18,8 @@ android {
         applicationId 'l.files'
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 6
-        versionName '1.2 beta'
+        versionCode 7
+        versionName '2.0 beta'
         ndk {
             moduleName 'files'
             ldLibs 'log'
