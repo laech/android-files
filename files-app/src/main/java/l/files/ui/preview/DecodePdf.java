@@ -44,6 +44,7 @@ import static java.lang.Integer.parseInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static l.files.R.string.authority_pdfpreview;
 
 final class DecodePdf extends DecodeBitmap {
 
@@ -103,8 +104,6 @@ final class DecodePdf extends DecodeBitmap {
 
     private static final Logger log = Logger.get(PdfPreviewProvider.class);
 
-    private static final String AUTHORITY = "l.files.preview.pdf";
-
     private static final String PARAM_FILE = "file";
     private static final String PARAM_MAX_WIDTH = "maxWidth";
     private static final String PARAM_MAX_HEIGHT = "maxHeight";
@@ -129,7 +128,7 @@ final class DecodePdf extends DecodeBitmap {
 
       Uri uri = new Uri.Builder()
           .scheme(SCHEME_CONTENT)
-          .authority(AUTHORITY)
+          .authority(context.getString(authority_pdfpreview))
           .appendQueryParameter(PARAM_FILE, file.getAbsolutePath())
           .appendQueryParameter(PARAM_MAX_WIDTH, String.valueOf(constraint.width()))
           .appendQueryParameter(PARAM_MAX_HEIGHT, String.valueOf(constraint.height()))

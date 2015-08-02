@@ -48,7 +48,7 @@
 
         <provider
             android:name=".ui.preview.DecodePdf$PdfPreviewProvider"
-            android:authorities="l.files.preview.pdf"
+            android:authorities="@string/authority_pdfpreview"
             android:exported="false"
             android:process=":pdfpreview"/>
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="authority_pdfpreview">l.files.debug.preview.pdf</string>
+
     <string name="app_name">Files (debug)</string>
 
 </resources>
