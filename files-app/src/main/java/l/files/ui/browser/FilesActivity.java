@@ -2,12 +2,10 @@ package l.files.ui.browser;
 
 import android.app.ActionBar;
 import android.app.FragmentManager.OnBackStackChangedListener;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.View;
@@ -23,7 +21,6 @@ import java.util.Objects;
 import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
-import l.files.common.widget.DrawerListeners;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
@@ -57,8 +54,6 @@ public final class FilesActivity extends BaseActivity implements
 
   public static final String EXTRA_DIRECTORY = "directory";
 
-  private ActionBarDrawerToggle drawerToggle;
-
   private DrawerLayout drawer;
   private DrawerListener drawerListener;
 
@@ -91,9 +86,8 @@ public final class FilesActivity extends BaseActivity implements
 
     drawer = find(R.id.drawer_layout, this);
     drawerListener = new DrawerListener();
-    drawerToggle = new ActionBarDrawerToggle(this, drawer, 0, 0);
 
-    drawer.setDrawerListener(DrawerListeners.compose(drawerToggle, drawerListener));
+    drawer.setDrawerListener(drawerListener);
 
     setActionBar(toolbar);
     ActionBar actionBar = getActionBar();
@@ -102,7 +96,7 @@ public final class FilesActivity extends BaseActivity implements
     actionBar.setDisplayShowTitleEnabled(false);
 
     setOptionsMenu(OptionsMenus.compose(
-        new ActionBarDrawerToggleAction(drawerToggle),
+        new ActionBarDrawerToggleAction(drawer, getFragmentManager()),
         new GoBackOnHomePressedAction(this),
         new NewTabMenu(this),
         new AboutMenu(this)));
@@ -145,16 +139,6 @@ public final class FilesActivity extends BaseActivity implements
     super.onDestroy();
   }
 
-  @Override protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    drawerToggle.syncState();
-  }
-
-  @Override public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    drawerToggle.onConfigurationChanged(newConfig);
-  }
-
   private Resource initialDirectory() {
     Resource dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
     return dir == null ? DIR_HOME : dir;
@@ -180,7 +164,11 @@ public final class FilesActivity extends BaseActivity implements
   private void updateToolBar() {
     FilesFragment fragment = fragment();
     int backStacks = getFragmentManager().getBackStackEntryCount();
-    drawerToggle.setDrawerIndicatorEnabled(backStacks == 0);
+    if (backStacks == 0) {
+      toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+    } else {
+      toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+    }
     hierarchy.set(fragment.directory());
     title.setSelection(hierarchy.indexOf(fragment().directory()));
   }
@@ -223,10 +211,6 @@ public final class FilesActivity extends BaseActivity implements
 
   private void closeSidebar() {
     drawer.closeDrawer(START);
-  }
-
-  public ActionBarDrawerToggle drawerToggle() {
-    return drawerToggle;
   }
 
   public DrawerLayout drawerLayout() {

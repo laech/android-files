@@ -3,7 +3,9 @@ package l.files.features.objects;
 import android.app.Fragment;
 import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
 import android.view.ActionMode;
@@ -197,7 +199,9 @@ public final class UiFileActivity {
   public void waitForUpIndicatorToAppear() {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        assertTrue(!activity().drawerToggle().isDrawerIndicatorEnabled());
+        assertBitmapEquals(
+            activity().getDrawable(R.drawable.ic_arrow_back_white_24dp),
+            activity().toolbar().getNavigationIcon());
       }
     });
   }
@@ -291,11 +295,32 @@ public final class UiFileActivity {
       final boolean visible) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        ActionBarDrawerToggle toggle = activity().drawerToggle();
-        assertEquals(visible, !toggle.isDrawerIndicatorEnabled());
+        if (visible) {
+          assertBitmapEquals(
+              activity().getDrawable(R.drawable.ic_arrow_back_white_24dp),
+              activity().toolbar().getNavigationIcon());
+        } else {
+          assertBitmapEquals(
+              activity().getDrawable(R.drawable.ic_menu_white_24dp),
+              activity().toolbar().getNavigationIcon());
+        }
       }
     });
     return this;
+  }
+
+  private static void assertBitmapEquals(Drawable expected, Drawable actual) {
+    Bitmap bitmapExpected = ((BitmapDrawable) expected).getBitmap();
+    Bitmap bitmapActual = ((BitmapDrawable) actual).getBitmap();
+    assertEquals(bitmapExpected.getWidth(), bitmapActual.getWidth());
+    assertEquals(bitmapExpected.getHeight(), bitmapActual.getHeight());
+    for (int x = 0; x < bitmapExpected.getWidth(); x++) {
+      for (int y = 0; y < bitmapExpected.getHeight(); y++) {
+        assertEquals(
+            bitmapExpected.getPixel(x, y),
+            bitmapActual.getPixel(x, y));
+      }
+    }
   }
 
   private void findItemOnMainThread(

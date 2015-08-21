@@ -10,5 +10,5 @@
     android:paddingStart="10dp"
     android:paddingTop="24dp"
     android:textAppearance="?android:attr/textAppearanceSmall"
-    android:textColor="?android:attr/colorAccent"
+    android:textColor="?android:attr/textColorTertiary"
     android:textStyle="bold"/>

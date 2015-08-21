@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginStart="16dp"
-        android:textColor="?android:attr/textColorTertiary"
+        android:textColor="?android:attr/textColorPrimaryInverse"
         android:textSize="24sp"/>
 
     <TextView
@@ -24,7 +24,7 @@
         android:layout_marginStart="72dp"
         android:ellipsize="end"
         android:singleLine="true"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?android:attr/textColorPrimaryInverse"
         android:textSize="16sp"/>
 
 </RelativeLayout>

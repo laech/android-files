@@ -1,11 +1,9 @@
 package l.files.ui.browser;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -43,6 +41,10 @@ import l.files.ui.preview.PreviewCallback;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
+import static android.R.attr.textColorPrimary;
+import static android.R.attr.textColorPrimaryInverse;
+import static android.R.attr.textColorTertiary;
+import static android.R.attr.textColorTertiaryInverse;
 import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Typeface.BOLD;
@@ -62,11 +64,13 @@ import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.R.dimen.files_item_card_inner_space;
 import static l.files.R.dimen.files_item_space_horizontal;
 import static l.files.R.dimen.files_list_space;
 import static l.files.R.integer.files_grid_columns;
 import static l.files.R.layout.files_grid_header;
 import static l.files.R.layout.files_grid_item;
+import static l.files.common.content.res.Styles.getColorStateList;
 import static l.files.common.view.Views.find;
 import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
@@ -101,6 +105,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     int columns = res.getInteger(files_grid_columns);
     int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
         - res.getDimension(files_item_space_horizontal) * columns * 2
+        - res.getDimension(files_item_card_inner_space) * columns * 2
         - res.getDimension(files_list_space) * 2) / columns;
     int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
     this.constraint = Rect.of(maxThumbnailWidth, maxThumbnailHeight);
@@ -194,24 +199,36 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     private final TextView summary;
     private final TextView symlink;
     private final ImageView preview;
-    private final View container;
+    private final View previewContainer;
+    private final View paletteContainer;
 
     private final int animateDuration;
+
+    private final ColorStateList primaryText;
+    private final ColorStateList primaryTextInverse;
+    private final ColorStateList tertiaryText;
+    private final ColorStateList tertiaryTextInverse;
 
     private Decode task;
 
     FileHolder(View itemView) {
       super(itemView, selection, actionModeProvider, actionModeCallback);
-      this.container = find(R.id.container, this);
+      this.paletteContainer = find(R.id.palette, this);
       this.icon = find(R.id.icon, this);
       this.title = find(R.id.title, this);
       this.summary = find(R.id.summary, this);
       this.symlink = find(R.id.symlink, this);
       this.preview = find(R.id.preview, this);
+      this.previewContainer = find(R.id.preview_container, this);
       this.itemView.setOnClickListener(this);
       this.itemView.setOnLongClickListener(this);
-      this.animateDuration = itemView.getResources()
-          .getInteger(config_shortAnimTime);
+      this.animateDuration = itemView.getResources().getInteger(config_shortAnimTime);
+
+      Context context = itemView.getContext();
+      this.primaryText = getColorStateList(textColorPrimary, context);
+      this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context);
+      this.tertiaryText = getColorStateList(textColorTertiary, context);
+      this.tertiaryTextInverse = getColorStateList(textColorTertiaryInverse, context);
     }
 
     @Override protected Resource itemId(File file) {
@@ -310,22 +327,22 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       Stat stat = file.stat();
       if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
         preview.setImageDrawable(null);
-        preview.setVisibility(GONE);
-        container.setBackgroundColor(TRANSPARENT);
+        previewContainer.setVisibility(GONE);
+        updatePaletteColor(TRANSPARENT);
         return;
       }
 
       Palette palette = decorator.getPalette(res, stat, constraint);
       if (palette != null) {
-        container.setBackgroundColor(backgroundColor(palette));
+        updatePaletteColor(backgroundColor(palette));
       } else {
-        container.setBackgroundColor(TRANSPARENT);
+        updatePaletteColor(TRANSPARENT);
       }
 
       Bitmap bitmap = decorator.getBitmap(res, stat, constraint);
       if (bitmap != null) {
         preview.setImageBitmap(bitmap);
-        preview.setVisibility(VISIBLE);
+        previewContainer.setVisibility(VISIBLE);
         return;
       }
 
@@ -333,13 +350,28 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       if (size != null) {
         preview.setImageDrawable(
             new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
-        preview.setVisibility(VISIBLE);
+        previewContainer.setVisibility(VISIBLE);
       } else {
         preview.setImageDrawable(null);
-        preview.setVisibility(GONE);
+        previewContainer.setVisibility(GONE);
       }
 
       task = decorator.set(res, stat, constraint, this);
+    }
+
+    private void updatePaletteColor(int color) {
+      paletteContainer.setBackgroundColor(color);
+      if (color == TRANSPARENT) {
+        title.setTextColor(primaryText);
+        icon.setTextColor(tertiaryText);
+        summary.setTextColor(tertiaryText);
+        symlink.setTextColor(tertiaryText);
+      } else {
+        title.setTextColor(primaryTextInverse);
+        icon.setTextColor(tertiaryTextInverse);
+        summary.setTextColor(tertiaryTextInverse);
+        symlink.setTextColor(tertiaryTextInverse);
+      }
     }
 
     private void setSymlink(File file) {
@@ -354,7 +386,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     @Override public void onSizeAvailable(Resource item, Rect size) {
       if (Objects.equals(item, itemId())) {
-        preview.setVisibility(VISIBLE);
+        previewContainer.setVisibility(VISIBLE);
         preview.setImageDrawable(
             new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
       }
@@ -362,19 +394,19 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     @Override public void onPaletteAvailable(Resource item, Palette palette) {
       if (Objects.equals(item, itemId())) {
-        TransitionDrawable background = new TransitionDrawable(new Drawable[]{
-            new ColorDrawable(TRANSPARENT),
-            new ColorDrawable(backgroundColor(palette))
-        });
-        container.setBackground(background);
-        background.startTransition(animateDuration);
+        int color = backgroundColor(palette);
+        updatePaletteColor(color);
+        if (color != TRANSPARENT) {
+          paletteContainer.setAlpha(0);
+          paletteContainer.animate().alpha(1).setDuration(animateDuration);
+        }
       }
     }
 
     private int backgroundColor(Palette palette) {
-      int color = palette.getDarkMutedColor(TRANSPARENT);
+      int color = palette.getDarkVibrantColor(TRANSPARENT);
       if (color == TRANSPARENT) {
-        color = palette.getDarkVibrantColor(TRANSPARENT);
+        color = palette.getDarkMutedColor(TRANSPARENT);
       }
       return color;
     }
@@ -382,7 +414,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
       if (Objects.equals(item, itemId())) {
         preview.setImageBitmap(bitmap);
-        preview.setVisibility(VISIBLE);
+        previewContainer.setVisibility(VISIBLE);
         preview.setAlpha(0f);
         preview.animate().alpha(1).setDuration(animateDuration);
       }
@@ -390,7 +422,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     @Override public void onPreviewFailed(Resource item) {
       if (Objects.equals(item, itemId())) {
-        preview.setVisibility(GONE);
+        previewContainer.setVisibility(GONE);
       }
     }
   }
