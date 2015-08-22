@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.text.format.Time;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -18,16 +17,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.FieldPosition;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import l.files.R;
 import l.files.common.graphics.Rect;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.common.view.ActionModeProvider;
-import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.ui.Icons;
@@ -54,13 +56,16 @@ import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_NO_YEAR;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.formatDateTime;
+import static android.text.format.DateUtils.formatDateRange;
 import static android.text.format.Formatter.formatShortFileSize;
 import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+import static java.lang.System.currentTimeMillis;
 import static java.text.DateFormat.MEDIUM;
 import static java.text.DateFormat.getDateTimeInstance;
+import static java.util.Calendar.DAY_OF_YEAR;
+import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -154,14 +159,23 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
   }
 
   static class DateFormatter {
-    Context context;
-    DateFormat futureFormat;
-    DateFormat dateFormat;
-    DateFormat timeFormat;
-    Date date = new Date();
-    Time currentTime = new Time();
-    Time thatTime = new Time();
-    int flags
+
+    final Context context;
+
+    final DateFormat futureFormat;
+    final DateFormat dateFormat;
+    final DateFormat timeFormat;
+
+    static final Date tempDate = new Date();
+    static final StringBuffer tempBuffer = new StringBuffer();
+    static final FieldPosition tempField = new FieldPosition(0);
+
+    final Formatter tempFormatter = new Formatter(tempBuffer, Locale.getDefault());
+
+    static final Calendar currentTime = Calendar.getInstance();
+    static final Calendar thatTime = Calendar.getInstance();
+
+    static final int flags
         = FORMAT_SHOW_DATE
         | FORMAT_ABBREV_MONTH
         | FORMAT_NO_YEAR;
@@ -173,21 +187,30 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       this.timeFormat = getTimeFormat(context);
     }
 
-    CharSequence apply(Stat file) {
-      Instant instant = file.mtime();
-      long millis = instant.to(MILLISECONDS);
-      date.setTime(millis);
-      currentTime.setToNow();
-      thatTime.set(millis);
+    String apply(Stat file) {
+      long millis = file.mtime().to(MILLISECONDS);
+
+      tempDate.setTime(millis);
+      tempField.setBeginIndex(0);
+      tempField.setEndIndex(0);
+      tempBuffer.setLength(0);
+
+      thatTime.setTimeInMillis(millis);
+      currentTime.setTimeInMillis(currentTimeMillis());
+
       if (currentTime.before(thatTime)) {
-        return futureFormat.format(date);
+        return futureFormat.format(tempDate, tempBuffer, tempField).toString();
       }
-      if (currentTime.year == thatTime.year) {
-        return currentTime.yearDay == thatTime.yearDay
-            ? timeFormat.format(date)
-            : formatDateTime(context, millis, flags);
+
+      if (currentTime.get(YEAR) == thatTime.get(YEAR)) {
+        if (currentTime.get(DAY_OF_YEAR) == thatTime.get(DAY_OF_YEAR)) {
+          return timeFormat.format(tempDate, tempBuffer, tempField).toString();
+        } else {
+          return formatDateRange(context, tempFormatter, millis, millis, flags).toString();
+        }
       }
-      return dateFormat.format(date);
+
+      return dateFormat.format(tempDate, tempBuffer, tempField).toString();
     }
   }
 
@@ -266,6 +289,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     private boolean setLocalIcon(TextView icon, Stat stat) {
+      // TODO
       if (stat.isBlockDevice()) {
         icon.setText("B");
       } else if (stat.isCharacterDevice()) {
