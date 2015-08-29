@@ -16,31 +16,36 @@ import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-abstract class FileSortTest extends ResourceBaseTest
-{
-    protected final void testSortMatches(
-            final Locale locale,
-            final Comparator<File> comparator,
-            final Resource... expectedOrder) throws IOException
-    {
-        final List<File> expected = mapData(locale, expectedOrder);
-        final ArrayList<File> actual = new ArrayList<>(expected);
-        shuffle(actual);
-        sort(actual, comparator);
-        assertEquals(expected, actual);
-    }
+abstract class FileSortTest extends ResourceBaseTest {
 
-    private List<File> mapData(
-            final Locale locale,
-            final Resource... resources) throws IOException
-    {
-        final Collator collator = Collator.getInstance(locale);
-        final List<File> expected = new ArrayList<>(resources.length);
-        for (final Resource resource : resources)
-        {
-            final Stat stat = resource.stat(NOFOLLOW);
-            expected.add(File.create(resource, stat, stat, collator));
-        }
-        return expected;
+  protected final void testSortMatches(
+      Locale locale,
+      Comparator<File> comparator,
+      Resource... expectedOrder) throws IOException {
+
+    List<File> expected = mapData(locale, expectedOrder);
+    List<File> actual = new ArrayList<>(expected);
+    shuffle(actual);
+    sort(actual, comparator);
+    assertEquals(expected, actual);
+  }
+
+  private List<File> mapData(
+      Locale locale,
+      Resource... resources) throws IOException {
+
+    Collator collator = Collator.getInstance(locale);
+    List<File> expected = new ArrayList<>(resources.length);
+    for (Resource resource : resources) {
+      Stat stat;
+      try {
+        stat = resource.stat(NOFOLLOW);
+      } catch (IOException e) {
+        stat = null;
+      }
+      expected.add(File.create(resource, stat, stat, collator));
     }
+    return expected;
+  }
+
 }

@@ -3,10 +3,10 @@ package l.files.ui.browser;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
-import java.text.CollationKey;
 import java.text.Collator;
 
 import auto.parcel.AutoParcel;
+import collation.NaturalKey;
 import l.files.fs.BasicDetector;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -80,7 +80,7 @@ public abstract class FileListItem {
 
     @Nullable abstract Stat _targetStat();
 
-    public abstract CollationKey collationKey();
+    abstract NaturalKey collationKey();
 
     public static File create(
         Resource resource,
@@ -88,7 +88,7 @@ public abstract class FileListItem {
         @Nullable Stat targetStat,
         Collator collator) {
       String name = resource.name().toString();
-      CollationKey key = collator.getCollationKey(name);
+      NaturalKey key = NaturalKey.create(collator, name);
       return new AutoParcel_FileListItem_File(resource, stat, targetStat, key);
     }
 

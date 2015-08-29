@@ -1,1 +1,1 @@
-include ':files-app'
+include ':files-app', ':collation', ':collation-benchmark'

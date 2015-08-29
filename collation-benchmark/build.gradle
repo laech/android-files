@@ -1,0 +1,9 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':collation')
+
+    def jmhVersion = '1.10.4'
+    compile 'org.openjdk.jmh:jmh-core:' + jmhVersion
+    compile 'org.openjdk.jmh:jmh-generator-annprocess:' + jmhVersion
+}
