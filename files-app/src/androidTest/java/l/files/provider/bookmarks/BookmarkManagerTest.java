@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 
 import java.util.HashSet;
 
-import l.files.fs.DefaultResourceProvider;
 import l.files.fs.Resource;
 import l.files.fs.local.ResourceBaseTest;
 
@@ -25,7 +24,7 @@ public final class BookmarkManagerTest extends ResourceBaseTest {
   protected void setUp() throws Exception {
     super.setUp();
     pref = getContext().getSharedPreferences("bookmark-test", MODE_PRIVATE);
-    manager = new BookmarkManagerImpl(DefaultResourceProvider.INSTANCE, pref);
+    manager = new BookmarkManagerImpl(pref);
   }
 
   @Override

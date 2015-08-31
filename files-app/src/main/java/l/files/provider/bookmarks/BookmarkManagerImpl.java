@@ -12,9 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.DefaultResourceProvider;
 import l.files.fs.Resource;
-import l.files.fs.ResourceProvider;
+import l.files.fs.local.LocalResource;
 import l.files.logging.Logger;
 
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -36,7 +35,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     synchronized (BookmarkManagerImpl.class) {
       if (instance == null) {
         final SharedPreferences pref = getDefaultSharedPreferences(context);
-        instance = new BookmarkManagerImpl(DefaultResourceProvider.INSTANCE, pref);
+        instance = new BookmarkManagerImpl(pref);
       }
       return instance;
     }
@@ -63,13 +62,11 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     return new File(getExternalStorageDirectory(), name).toURI().toString();
   }
 
-  private final ResourceProvider provider;
   private final Set<Resource> bookmarks;
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
-  public BookmarkManagerImpl(ResourceProvider provider, SharedPreferences pref) {
-    this.provider = requireNonNull(provider);
+  public BookmarkManagerImpl(SharedPreferences pref) {
     this.pref = requireNonNull(pref);
     this.listeners = new CopyOnWriteArraySet<>();
     this.bookmarks = new CopyOnWriteArraySet<>();
@@ -79,8 +76,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     Set<Resource> paths = new HashSet<>();
     for (String uriString : uriStrings) {
       try {
-        URI uri = new URI(uriString);
-        Resource resource = provider.get(uri);
+        Resource resource = LocalResource.create(new File(new URI(uriString)));
         try {
           if (resource.exists(NOFOLLOW)) {
             paths.add(resource);
