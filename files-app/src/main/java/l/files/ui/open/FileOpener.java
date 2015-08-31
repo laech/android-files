@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
-import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
 import l.files.logging.Logger;
 
@@ -18,7 +17,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.fs.Detector.ANY_TYPE;
+import static l.files.fs.Resource.ANY_TYPE;
 import static l.files.ui.IOExceptions.message;
 
 public final class FileOpener implements Consumer<Resource> {
@@ -49,7 +48,7 @@ public final class FileOpener implements Consumer<Resource> {
     @Override protected Object doInBackground(Void... params) {
       try {
         log.verbose("detect start");
-        String media = MagicDetector.INSTANCE.detect(resource);
+        String media = resource.detectContentMediaType();
         log.verbose("detect end");
         return media;
       } catch (IOException e) {

@@ -527,4 +527,12 @@ public abstract class LocalResource extends Native implements Resource {
     }
   }
 
+  @Override public String detectBasicMediaType() throws IOException {
+    return BasicDetector.INSTANCE.detect(this);
+  }
+
+  @Override public String detectContentMediaType() throws IOException {
+    return MagicDetector.INSTANCE.detect(this);
+  }
+
 }

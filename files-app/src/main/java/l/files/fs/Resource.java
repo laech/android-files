@@ -25,6 +25,9 @@ import auto.parcel.AutoParcel;
  */
 public interface Resource extends Parcelable {
 
+  String OCTET_STREAM = "application/octet-stream";
+  String ANY_TYPE = "*/*";
+
   URI uri();
 
   /**
@@ -309,6 +312,19 @@ public interface Resource extends Parcelable {
    * Overrides the content of this resource with the given content.
    */
   void writeString(Charset charset, CharSequence content) throws IOException;
+
+  /**
+   * Detects the content type of this resource based on its properties
+   * without reading the content of this resource.
+   * Returns {@link #OCTET_STREAM} if unknown.
+   */
+  String detectBasicMediaType() throws IOException;
+
+  /**
+   * Reads the content of this resource to determine its media type.
+   * Returns {@link #OCTET_STREAM} if unknown.
+   */
+  String detectContentMediaType() throws IOException;
 
   @AutoParcel
   abstract class Name implements CharSequence {

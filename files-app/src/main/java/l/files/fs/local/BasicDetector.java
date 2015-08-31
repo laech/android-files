@@ -1,18 +1,22 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import android.webkit.MimeTypeMap;
+
+import l.files.fs.Resource;
+
+import static l.files.fs.Resource.OCTET_STREAM;
 
 /**
  * Detects content type based on name and resource type.
  */
-public final class BasicDetector extends AbstractDetector {
+final class BasicDetector extends AbstractDetector {
 
-  public static final BasicDetector INSTANCE = new BasicDetector();
+  static final BasicDetector INSTANCE = new BasicDetector();
 
   private BasicDetector() {
   }
 
-  @Override String detectFile(Resource resource, Stat stat) {
+  @Override String detectFile(Resource resource, l.files.fs.Stat stat) {
     MimeTypeMap typeMap = MimeTypeMap.getSingleton();
     String ext = resource.name().ext();
     String type = typeMap.getMimeTypeFromExtension(ext);

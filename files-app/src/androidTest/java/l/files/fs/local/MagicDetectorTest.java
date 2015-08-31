@@ -1,14 +1,15 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
-import l.files.fs.local.LocalResource;
+import l.files.fs.Permission;
+import l.files.fs.Resource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
-import static l.files.fs.AbstractDetector.OCTET_STREAM;
+import static l.files.fs.Resource.OCTET_STREAM;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
 

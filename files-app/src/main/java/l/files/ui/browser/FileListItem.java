@@ -7,11 +7,10 @@ import java.text.Collator;
 
 import auto.parcel.AutoParcel;
 import collation.NaturalKey;
-import l.files.fs.BasicDetector;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-import static l.files.fs.Detector.OCTET_STREAM;
+import static l.files.fs.Resource.OCTET_STREAM;
 
 public abstract class FileListItem {
 
@@ -68,7 +67,7 @@ public abstract class FileListItem {
 
     public String basicMediaType() {
       try {
-        return BasicDetector.INSTANCE.detect(resource());
+        return resource().detectBasicMediaType();
       } catch (IOException e) {
         return OCTET_STREAM;
       }

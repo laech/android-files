@@ -1,10 +1,13 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import java.io.IOException;
 
-import static l.files.fs.LinkOption.FOLLOW;
+import l.files.fs.Resource;
 
-abstract class AbstractDetector implements Detector {
+import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.Resource.OCTET_STREAM;
+
+abstract class AbstractDetector {
 
   // Media types for file types, kept consistent with the linux "file" command
   private static final String INODE_DIRECTORY = "inode/directory";
@@ -13,13 +16,11 @@ abstract class AbstractDetector implements Detector {
   private static final String INODE_FIFO = "inode/fifo";
   private static final String INODE_SOCKET = "inode/socket";
 
-  @Override
-  public String detect(Resource resource) throws IOException {
+  String detect(Resource resource) throws IOException {
     return detect(resource, resource.stat(FOLLOW));
   }
 
-  @Override
-  public String detect(Resource resource, Stat stat) throws IOException {
+  String detect(Resource resource, l.files.fs.Stat stat) throws IOException {
     if (stat.isSymbolicLink()) {
       return detect(resource);
     } else {
@@ -33,6 +34,6 @@ abstract class AbstractDetector implements Detector {
     }
   }
 
-  abstract String detectFile(Resource resource, Stat stat) throws IOException;
+  abstract String detectFile(Resource resource, l.files.fs.Stat stat) throws IOException;
 
 }

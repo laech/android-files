@@ -1,9 +1,9 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import java.io.IOException;
 import java.io.Writer;
 
-import l.files.fs.local.ResourceBaseTest;
+import l.files.fs.Resource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

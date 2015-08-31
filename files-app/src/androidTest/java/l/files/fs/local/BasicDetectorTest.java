@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.local;
 
 public final class BasicDetectorTest extends AbstractDetectorTest {
 

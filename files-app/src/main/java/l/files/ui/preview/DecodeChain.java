@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.MagicDetector;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 
@@ -192,7 +191,7 @@ final class DecodeChain extends Decode {
     try {
 
       log.debug("decode media start %s", res);
-      String media = MagicDetector.INSTANCE.detect(res);
+      String media = res.detectContentMediaType();
       log.debug("decode media end %s %s", media, res);
       return media;
 
