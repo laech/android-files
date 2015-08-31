@@ -22,10 +22,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import auto.parcel.AutoParcel;
@@ -57,7 +55,6 @@ import static android.system.OsConstants.W_OK;
 import static android.system.OsConstants.X_OK;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -80,25 +77,24 @@ public abstract class LocalResource extends Native implements Resource {
 
   // TODO remove as much custom stuff as possible
 
-  private static final Map<Permission, Integer> permissionBits =
-      permissionsToBits();
+  private static final int[] PERMISSION_BITS = permissionsToBits();
 
-  private static Map<Permission, Integer> permissionsToBits() {
-    Map<Permission, Integer> bits = new HashMap<>();
-    bits.put(OWNER_READ, S_IRUSR);
-    bits.put(OWNER_WRITE, S_IWUSR);
-    bits.put(OWNER_EXECUTE, S_IXUSR);
-    bits.put(GROUP_READ, S_IRGRP);
-    bits.put(GROUP_WRITE, S_IWGRP);
-    bits.put(GROUP_EXECUTE, S_IXGRP);
-    bits.put(OTHERS_READ, S_IROTH);
-    bits.put(OTHERS_WRITE, S_IWOTH);
-    bits.put(OTHERS_EXECUTE, S_IXOTH);
-    return unmodifiableMap(bits);
+  private static int[] permissionsToBits() {
+    int[] bits = new int[9];
+    bits[OWNER_READ.ordinal()] = S_IRUSR;
+    bits[OWNER_WRITE.ordinal()] = S_IWUSR;
+    bits[OWNER_EXECUTE.ordinal()] = S_IXUSR;
+    bits[GROUP_READ.ordinal()] = S_IRGRP;
+    bits[GROUP_WRITE.ordinal()] = S_IWGRP;
+    bits[GROUP_EXECUTE.ordinal()] = S_IXGRP;
+    bits[OTHERS_READ.ordinal()] = S_IROTH;
+    bits[OTHERS_WRITE.ordinal()] = S_IWOTH;
+    bits[OTHERS_EXECUTE.ordinal()] = S_IXOTH;
+    return bits;
   }
 
   public static Set<Permission> permissionsFromMode(int mode) {
-    Set<Permission> permissions = new HashSet<>();
+    Set<Permission> permissions = new HashSet<>(9);
     if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
     if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
     if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
@@ -116,7 +112,6 @@ public abstract class LocalResource extends Native implements Resource {
   LocalResource() {
   }
 
-  // TODO absolute?
   @Override public abstract File file();
 
   public static LocalResource create(File file) {
@@ -492,7 +487,7 @@ public abstract class LocalResource extends Native implements Resource {
   public void setPermissions(Set<Permission> permissions) throws IOException {
     int mode = 0;
     for (Permission permission : permissions) {
-      mode |= permissionBits.get(permission);
+      mode |= PERMISSION_BITS[permission.ordinal()];
     }
     try {
       Os.chmod(path(), mode);
