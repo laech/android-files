@@ -2,6 +2,7 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ abstract class DecodeMedia extends DecodeBitmap {
 
     MediaMetadataRetriever retriever = new MediaMetadataRetriever();
     try {
-      retriever.setDataSource(res.file().getPath());
+      retriever.setDataSource(context.context, Uri.parse(res.uri().toString()));
 
       if (isCancelled()) {
         return null;

@@ -112,7 +112,7 @@ public abstract class LocalResource extends Native implements Resource {
   LocalResource() {
   }
 
-  @Override public abstract File file();
+  abstract File file();
 
   public static LocalResource create(File file) {
     return new AutoParcel_LocalResource(file);
@@ -213,7 +213,7 @@ public abstract class LocalResource extends Native implements Resource {
     if (!startsWith(fromParent)) {
       throw new IllegalArgumentException();
     }
-    File parent = toParent.file();
+    File parent = ((LocalResource) toParent).file();
     String child = path().substring(fromParent.path().length());
     return new AutoParcel_LocalResource(new File(parent, child));
   }

@@ -112,15 +112,15 @@ final class DecodeChain extends Decode {
       publishProgress(new DecodeImage(
           res, stat, constraint, callback, context));
 
-    } else if (isPdf(media, res)) {
+    } else if (isPdf(media)) {
       publishProgress(new DecodePdf(
           res, stat, constraint, callback, context));
 
-    } else if (isAudio(media, res)) {
+    } else if (isAudio(media)) {
       publishProgress(new DecodeAudio(
           res, stat, constraint, callback, context));
 
-    } else if (isVideo(media, res)) {
+    } else if (isVideo(media)) {
       publishProgress(new DecodeVideo(
           res, stat, constraint, callback, context));
 

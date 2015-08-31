@@ -4,7 +4,6 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,18 +25,13 @@ import auto.parcel.AutoParcel;
  */
 public interface Resource extends Parcelable {
 
-  /**
-   * @deprecated slow
-   */
-  @Deprecated URI uri();
+  URI uri();
 
   /**
    * The scheme of the file system.
    * e.g. "file" for local file system.
    */
   String scheme();
-
-  @Nullable File file();
 
   /**
    * Gets the path of this resource. The returned path is only valid within

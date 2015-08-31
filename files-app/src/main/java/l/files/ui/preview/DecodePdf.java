@@ -91,13 +91,13 @@ final class DecodePdf extends DecodeBitmap {
     return (DecodePdf) executeOnExecutor(requestPool);
   }
 
-  static boolean isPdf(String media, Resource res) {
-    return res.file() != null && media.equals("application/pdf");
+  static boolean isPdf(String media) {
+    return media.equals("application/pdf");
   }
 
   @Override Result decode() throws IOException {
     return PdfPreviewProvider.query(
-        context.context, signal, res.file(), constraint);
+        context.context, signal, res, constraint);
   }
 
   public static final class PdfPreviewProvider extends ContentProvider {
@@ -118,18 +118,22 @@ final class DecodePdf extends DecodeBitmap {
     public static DecodeBitmap.Result query(
         Context context,
         CancellationSignal signal,
-        File file,
+        Resource res,
         Rect constraint) {
 
       requireNonNull(context);
       requireNonNull(signal);
-      requireNonNull(file);
+      requireNonNull(res);
       requireNonNull(constraint);
+
+      if (!"file".equals(res.scheme())) {
+        return null;
+      }
 
       Uri uri = new Uri.Builder()
           .scheme(SCHEME_CONTENT)
           .authority(context.getString(authority_pdfpreview))
-          .appendQueryParameter(PARAM_FILE, file.getAbsolutePath())
+          .appendQueryParameter(PARAM_FILE, res.path())
           .appendQueryParameter(PARAM_MAX_WIDTH, String.valueOf(constraint.width()))
           .appendQueryParameter(PARAM_MAX_HEIGHT, String.valueOf(constraint.height()))
           .build();

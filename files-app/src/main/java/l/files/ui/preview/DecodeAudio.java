@@ -20,8 +20,8 @@ final class DecodeAudio extends DecodeMedia {
     super(res, stat, constraint, callback, context);
   }
 
-  static boolean isAudio(String media, Resource res) {
-    return res.file() != null && media.startsWith("audio/");
+  static boolean isAudio(String media) {
+    return media.startsWith("audio/");
   }
 
   @Override Bitmap decode(MediaMetadataRetriever retriever) {

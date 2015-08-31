@@ -18,8 +18,8 @@ final class DecodeVideo extends DecodeMedia {
     super(res, stat, constraint, callback, context);
   }
 
-  static boolean isVideo(String media, Resource res) {
-    return res.file() != null && media.startsWith("video/");
+  static boolean isVideo(String media) {
+    return media.startsWith("video/");
   }
 
   @Override Bitmap decode(MediaMetadataRetriever retriever) {
