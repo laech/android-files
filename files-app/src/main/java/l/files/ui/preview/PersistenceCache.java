@@ -19,14 +19,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.Instant;
-import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.util.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 
@@ -105,7 +103,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     try (DataInputStream in =
              new DataInputStream(
                  new BufferedInputStream(
-                     file.input(NOFOLLOW)))) {
+                     file.input()))) {
 
       log.verbose("read cache start");
       int count = 0;
@@ -127,7 +125,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       }
       log.verbose("read cache end %s entries", count);
 
-    } catch (FileNotFoundException | NotExist ignore) {
+    } catch (FileNotFoundException ignore) {
     } catch (IOException e) {
       log.error(e);
     }
@@ -164,7 +162,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     try (DataOutputStream out =
              new DataOutputStream(
                  new BufferedOutputStream(
-                     file.output(NOFOLLOW)))) {
+                     file.output()))) {
 
       log.verbose("write cache start");
       Map<String, Snapshot<V>> snapshot = cache.snapshot();

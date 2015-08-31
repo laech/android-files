@@ -9,7 +9,6 @@ import l.files.fs.local.LocalResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
 import static l.files.fs.AbstractDetector.OCTET_STREAM;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
 
@@ -19,7 +18,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
 
   public void test_detects_unreadable_file_as_octet_stream() throws Exception {
     Resource file = dir1().resolve("a.txt").createFile();
-    file.writeString(NOFOLLOW, UTF_8, "hello world");
+    file.writeString(UTF_8, "hello world");
     file.setPermissions(Collections.<Permission>emptySet());
     try {
       detector().detect(file);

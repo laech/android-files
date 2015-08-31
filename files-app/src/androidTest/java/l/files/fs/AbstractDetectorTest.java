@@ -6,7 +6,6 @@ import java.io.Writer;
 import l.files.fs.local.ResourceBaseTest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class AbstractDetectorTest extends ResourceBaseTest {
 
@@ -33,7 +32,7 @@ public abstract class AbstractDetectorTest extends ResourceBaseTest {
 
   private Resource createTextFile(String name) throws IOException {
     Resource file = dir1().resolve(name).createFile();
-    try (Writer writer = file.writer(NOFOLLOW, UTF_8)) {
+    try (Writer writer = file.writer(UTF_8)) {
       writer.write("hello world");
     }
     return file;

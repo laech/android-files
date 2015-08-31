@@ -133,7 +133,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
   public void test_shows_time_and_size_for_file() throws Exception {
     Resource file = dir().resolve("file").createFile();
-    file.writeString(NOFOLLOW, UTF_8, file.path());
+    file.writeString(UTF_8, file.path());
 
     Context c = getActivity();
     String date = getTimeFormat(c).format(new Date());
@@ -341,7 +341,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     if (stat.isDirectory()) {
       resource.resolve(String.valueOf(nanoTime())).createDirectory();
     } else {
-      try (Writer writer = resource.writer(NOFOLLOW, UTF_8, true)) {
+      try (Writer writer = resource.writer(UTF_8, true)) {
         writer.write("test");
       }
     }

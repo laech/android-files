@@ -10,7 +10,6 @@ import java.util.ListIterator;
 
 import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
-import l.files.fs.NotDirectory;
 import l.files.fs.Resource;
 import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
@@ -101,18 +100,15 @@ final class LocalResourceTraverser {
     }
   }
 
-  private void pushChildren(Deque<Node> stack, Node parent)
-      throws IOException {
-
-    LinkOption option =
-        parent.resource.equals(root) ? rootOption : NOFOLLOW;
-    try {
-      List<Resource> children = parent.resource.list(option);
-      ListIterator<Resource> it = children.listIterator(children.size());
-      while (it.hasPrevious()) {
-        stack.push(new Node(it.previous()));
-      }
-    } catch (NotDirectory ignore) {
+  private void pushChildren(Deque<Node> stack, Node parent) throws IOException {
+    LinkOption option = parent.resource.equals(root) ? rootOption : NOFOLLOW;
+    if (!parent.resource.stat(option).isDirectory()) {
+      return;
+    }
+    List<Resource> children = parent.resource.list(option);
+    ListIterator<Resource> it = children.listIterator(children.size());
+    while (it.hasPrevious()) {
+      stack.push(new Node(it.previous()));
     }
   }
 

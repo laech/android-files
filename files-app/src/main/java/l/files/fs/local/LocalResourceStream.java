@@ -6,15 +6,12 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import l.files.fs.LinkOption;
-import l.files.fs.NotDirectory;
 import l.files.fs.Resource;
 import l.files.logging.Logger;
 
 import static android.system.OsConstants.EAGAIN;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.local.ErrnoExceptions.isCausedByNoFollowLink;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 final class LocalResourceStream extends Native implements Closeable
@@ -94,10 +91,6 @@ final class LocalResourceStream extends Native implements Closeable
         }
         catch (final ErrnoException e)
         {
-            if (option == NOFOLLOW && isCausedByNoFollowLink(e, resource))
-            {
-                throw new NotDirectory(resource.path(), e);
-            }
             throw toIOException(e, resource.path());
         }
     }

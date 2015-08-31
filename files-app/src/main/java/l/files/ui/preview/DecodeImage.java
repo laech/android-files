@@ -11,7 +11,6 @@ import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
-import static l.files.fs.LinkOption.FOLLOW;
 
 final class DecodeImage extends DecodeBitmap {
 
@@ -49,7 +48,7 @@ final class DecodeImage extends DecodeBitmap {
       return null;
     }
 
-    try (InputStream in = res.input(FOLLOW)) {
+    try (InputStream in = res.input()) {
       Bitmap bitmap = decodeStream(in, null, options(size));
       return bitmap != null ? new Result(bitmap, size) : null;
     }

@@ -57,7 +57,7 @@ public final class SortTest extends BaseFilesActivityTest
             final Resource dir) throws IOException
     {
         final Resource file = dir.resolve(name).createFile();
-        try (Writer writer = file.writer(NOFOLLOW, UTF_8))
+        try (Writer writer = file.writer(UTF_8))
         {
             writer.write(content);
         }

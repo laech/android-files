@@ -10,7 +10,6 @@ import l.files.common.testing.BaseActivityTest;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceException;
 import l.files.fs.Visitor;
 import l.files.fs.local.LocalResource;
 import l.files.ui.browser.FilesActivity;
@@ -62,7 +61,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
       @Override public Result accept(Resource resource) throws IOException {
         try {
           resource.setPermissions(Permission.all());
-        } catch (ResourceException ignored) {
+        } catch (IOException ignored) {
         }
         return CONTINUE;
       }

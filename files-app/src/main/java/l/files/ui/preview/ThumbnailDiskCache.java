@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,9 +12,7 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.Instant;
-import l.files.fs.NotExist;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
@@ -80,7 +79,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
           try {
             res.delete();
             log.debug("Deleted empty cache directory %s", res);
-          } catch (DirectoryNotEmpty ignore) {
+          } catch (IOException ignore) {
+            // Also thrown if directory not empty
           }
         } else {
           if (MILLISECONDS.toDays(now - stat.atime().to(MILLISECONDS)) > 30) {
@@ -109,7 +109,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     log.verbose("read bitmap %s", res);
     Resource cache = cacheFile(res, stat, constraint);
-    try (InputStream in = new BufferedInputStream(cache.input(NOFOLLOW))) {
+    try (InputStream in = new BufferedInputStream(cache.input())) {
       in.read(); // read DUMMY_BYTE
 
       Bitmap bitmap = decodeStream(in);
@@ -131,7 +131,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
       return bitmap;
 
-    } catch (NotExist e) {
+    } catch (FileNotFoundException e) {
       return null;
     }
   }
@@ -144,7 +144,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     Resource cache = cacheFile(res, stat, constraint);
     cache.createFiles();
-    try (OutputStream out = new BufferedOutputStream(cache.output(NOFOLLOW))) {
+    try (OutputStream out = new BufferedOutputStream(cache.output())) {
       out.write(DUMMY_BYTE);
       bitmap.compress(WEBP, 100, out);
       log.verbose("write %s", res);

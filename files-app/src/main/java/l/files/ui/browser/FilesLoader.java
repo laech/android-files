@@ -8,6 +8,7 @@ import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import auto.parcel.AutoParcel;
 import l.files.fs.Event;
-import l.files.fs.NotExist;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -312,7 +312,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
       File newStat = File.create(resource, stat, targetStat, collator);
       File oldStat = data.put(resource.name().toString(), newStat);
       return !Objects.equals(newStat, oldStat);
-    } catch (NotExist e) {
+    } catch (FileNotFoundException e) {
       return data.remove(resource.name().toString()) != null;
     } catch (IOException e) {
       data.put(

@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,35 +29,24 @@ import java.util.Map;
 import java.util.Set;
 
 import auto.parcel.AutoParcel;
-import l.files.fs.AlreadyExists;
 import l.files.fs.ExceptionHandler;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.NotExist;
-import l.files.fs.NotFile;
-import l.files.fs.NotLink;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Visitor;
 
 import static android.system.OsConstants.EACCES;
-import static android.system.OsConstants.EINVAL;
-import static android.system.OsConstants.EISDIR;
-import static android.system.OsConstants.O_APPEND;
+import static android.system.OsConstants.EEXIST;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_EXCL;
-import static android.system.OsConstants.O_NOFOLLOW;
-import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
-import static android.system.OsConstants.O_TRUNC;
-import static android.system.OsConstants.O_WRONLY;
 import static android.system.OsConstants.R_OK;
 import static android.system.OsConstants.S_IRGRP;
 import static android.system.OsConstants.S_IROTH;
 import static android.system.OsConstants.S_IRUSR;
 import static android.system.OsConstants.S_IRWXU;
-import static android.system.OsConstants.S_ISDIR;
 import static android.system.OsConstants.S_IWGRP;
 import static android.system.OsConstants.S_IWOTH;
 import static android.system.OsConstants.S_IWUSR;
@@ -83,7 +73,6 @@ import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
-import static l.files.fs.local.ErrnoExceptions.isCausedByNoFollowLink;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 @AutoParcel
@@ -246,7 +235,7 @@ public abstract class LocalResource extends Native implements Resource {
       // so use stat here
       stat(option);
       return true;
-    } catch (NotExist e) {
+    } catch (FileNotFoundException e) {
       return false;
     }
   }
@@ -324,112 +313,43 @@ public abstract class LocalResource extends Native implements Resource {
     return list(option, new ArrayList<Resource>());
   }
 
-  @Override public InputStream input(LinkOption option) throws IOException {
-    requireNonNull(option, "option");
-
-    int flags = O_RDONLY | (option == NOFOLLOW ? O_NOFOLLOW : 0);
-    try {
-      final FileDescriptor fd = Os.open(path(), flags, 0);
-      // Above call allows opening directories, this check ensure this is
-      // not a directory
-      try {
-        if (S_ISDIR(Os.fstat(fd).st_mode)) {
-          throw new NotFile(path());
-        }
-      } catch (Throwable e) {
-        Os.close(fd);
-        throw e;
-      }
-      return new FileInputStream(fd) {
-        @Override public void close() throws IOException {
-          try {
-            super.close();
-          } finally {
-            closeQuietly(fd);
-          }
-        }
-      };
-
-    } catch (ErrnoException e) {
-      if (isCausedByNoFollowLink(e, this)) {
-        throw new NotFile(path(), e);
-      }
-      throw toIOException(e, path());
-    }
+  @Override public InputStream input() throws IOException {
+    return new FileInputStream(file());
   }
 
-  private void closeQuietly(FileDescriptor fd) {
-    try {
-      Os.close(fd);
-    } catch (ErrnoException e) {
-      // Ignore
-    }
+  @Override public OutputStream output() throws IOException {
+    return new FileOutputStream(file());
   }
 
-  @Override public OutputStream output(LinkOption option) throws IOException {
-    return output(option, false);
+  @Override public OutputStream output(boolean append) throws IOException {
+    return new FileOutputStream(file(), append);
   }
 
-  @Override public OutputStream output(
-      LinkOption option,
-      boolean append) throws IOException {
-    requireNonNull(option, "option");
-
-    // Same default flags and mode as FileOutputStream
-    int mode = S_IRUSR | S_IWUSR;
-    int flags = O_WRONLY
-        | O_CREAT
-        | (append ? O_APPEND : O_TRUNC)
-        | (option == NOFOLLOW ? O_NOFOLLOW : 0);
-    try {
-      final FileDescriptor fd = Os.open(path(), flags, mode);
-      return new FileOutputStream(fd) {
-        @Override public void close() throws IOException {
-          try {
-            super.close();
-          } finally {
-            closeQuietly(fd);
-          }
-        }
-      };
-    } catch (ErrnoException e) {
-      if (isCausedByNoFollowLink(e, this)) {
-        throw new NotFile(path(), e);
-      }
-      if (e.errno == EISDIR) {
-        throw new NotFile(path(), e);
-      }
-      throw toIOException(e, path());
-    }
+  @Override public Reader reader(Charset charset) throws IOException {
+    return new InputStreamReader(input(), charset);
   }
 
-  @Override public Reader reader(
-      LinkOption option,
-      Charset charset) throws IOException {
-    return new InputStreamReader(input(option), charset);
+  @Override public Writer writer(Charset charset) throws IOException {
+    return new OutputStreamWriter(output(), charset);
   }
 
-  @Override public Writer writer(
-      LinkOption option,
-      Charset charset) throws IOException {
-    return writer(option, charset, false);
-  }
-
-  @Override public Writer writer(
-      LinkOption option,
-      Charset charset,
-      boolean append) throws IOException {
-    return new OutputStreamWriter(output(option, append), charset);
+  @Override
+  public Writer writer(Charset charset, boolean append) throws IOException {
+    return new OutputStreamWriter(output(append), charset);
   }
 
   @Override public LocalResource createDirectory() throws IOException {
     try {
-      // Same permission bits as java.io.File.mkdir() on Android
-      Os.mkdir(path(), S_IRWXU);
+      mkdir();
     } catch (ErrnoException e) {
       throw toIOException(e, path());
     }
     return this;
+  }
+
+  private void mkdir() throws ErrnoException {
+    // Same permission bits as java.io.File.mkdir() on Android
+    Os.mkdir(path(), S_IRWXU);
   }
 
   @Override public LocalResource createDirectories() throws IOException {
@@ -437,19 +357,20 @@ public abstract class LocalResource extends Native implements Resource {
       if (stat(NOFOLLOW).isDirectory()) {
         return this;
       }
-    } catch (NotExist ignore) {
+    } catch (FileNotFoundException ignore) {
       // Ignore will create
     }
+
     Resource parent = parent();
     if (parent != null) {
       parent.createDirectories();
     }
 
     try {
-      createDirectory();
-    } catch (AlreadyExists e) {
-      if (!stat(NOFOLLOW).isDirectory()) {
-        throw e;
+      mkdir();
+    } catch (ErrnoException e) {
+      if (e.errno != EEXIST) {
+        throw toIOException(e, path());
       }
     }
 
@@ -474,7 +395,7 @@ public abstract class LocalResource extends Native implements Resource {
       if (stat(NOFOLLOW).isRegularFile()) {
         return this;
       }
-    } catch (NotExist ignore) {
+    } catch (FileNotFoundException ignore) {
       // Ignore will create
     }
 
@@ -502,25 +423,14 @@ public abstract class LocalResource extends Native implements Resource {
       String link = Os.readlink(path());
       return create(new File(link));
     } catch (ErrnoException e) {
-      if (e.errno == EINVAL) {
-        throw new NotLink(path());
-      }
       throw toIOException(e, path());
     }
   }
 
   @Override public void moveTo(Resource dst) throws IOException {
     ensureIsLocalResource(dst);
-
     String dstPath = dst.path();
     String srcPath = path();
-    try {
-      // renameat2() not available on Android
-      dst.stat(NOFOLLOW);
-      throw new AlreadyExists(dstPath);
-    } catch (NotExist e) {
-      // Okay
-    }
     try {
       Os.rename(srcPath, dstPath);
     } catch (ErrnoException e) {
@@ -536,8 +446,8 @@ public abstract class LocalResource extends Native implements Resource {
     }
   }
 
-  @Override public void setAccessed(LinkOption option, Instant instant)
-      throws IOException {
+  @Override
+  public void setAccessed(LinkOption option, Instant instant) throws IOException {
     requireNonNull(option, "option");
     requireNonNull(instant, "instant");
     try {
@@ -578,42 +488,34 @@ public abstract class LocalResource extends Native implements Resource {
       int nanos,
       boolean followLink) throws ErrnoException;
 
-  @Override public void setPermissions(Set<Permission> permissions)
-      throws IOException {
+  @Override
+  public void setPermissions(Set<Permission> permissions) throws IOException {
     int mode = 0;
     for (Permission permission : permissions) {
       mode |= permissionBits.get(permission);
     }
     try {
-            /* To change permission on the link itself instead of the target:
-             *  - fchmodat(AT_FDCWD, path, mode, AT_SYMLINK_NOFOLLOW)
-             * but not implemented.
-             */
       Os.chmod(path(), mode);
     } catch (ErrnoException e) {
       throw toIOException(e, path());
     }
   }
 
-  @Override public void removePermissions(Set<Permission> permissions)
-      throws IOException {
+  @Override
+  public void removePermissions(Set<Permission> permissions) throws IOException {
     Set<Permission> existing = stat(FOLLOW).permissions();
     Set<Permission> perms = new HashSet<>(existing);
     perms.removeAll(permissions);
     setPermissions(perms);
   }
 
-  @Override public String readString(LinkOption option, Charset charset)
-      throws IOException {
-    return readString(option, charset, new StringBuilder()).toString();
+  @Override public String readString(Charset charset) throws IOException {
+    return readString(charset, new StringBuilder()).toString();
   }
 
-  @Override public <T extends Appendable> T readString(
-      LinkOption option,
-      Charset charset,
-      T appendable) throws IOException {
-
-    try (Reader reader = reader(option, charset)) {
+  @Override
+  public <T extends Appendable> T readString(Charset charset, T appendable) throws IOException {
+    try (Reader reader = reader(charset)) {
       for (CharBuffer buffer = CharBuffer.allocate(8192);
            reader.read(buffer) > -1; ) {
         buffer.flip();
@@ -623,11 +525,9 @@ public abstract class LocalResource extends Native implements Resource {
     return appendable;
   }
 
-  @Override public void writeString(
-      LinkOption option,
-      Charset charset,
-      CharSequence content) throws IOException {
-    try (Writer writer = writer(option, charset)) {
+  @Override
+  public void writeString(Charset charset, CharSequence content) throws IOException {
+    try (Writer writer = writer(charset)) {
       writer.write(content.toString());
     }
   }

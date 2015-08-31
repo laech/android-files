@@ -19,7 +19,6 @@ import l.files.logging.Logger;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
 
 public final class Preview {
 
@@ -159,7 +158,7 @@ public final class Preview {
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;
 
-    try (InputStream in = res.input(FOLLOW)) {
+    try (InputStream in = res.input()) {
       decodeStream(in, null, options);
 
     } catch (Exception e) {

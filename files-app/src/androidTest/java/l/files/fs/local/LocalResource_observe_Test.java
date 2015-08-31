@@ -455,7 +455,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
       final CharSequence content) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
-        try (OutputStream out = file.output(NOFOLLOW, true)) {
+        try (OutputStream out = file.output(true)) {
           out.write(content.toString().getBytes(UTF_8));
         }
         return null;

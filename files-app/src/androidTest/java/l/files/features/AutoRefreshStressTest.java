@@ -114,7 +114,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest
     private void updateFileContent(final String name) throws IOException
     {
         final Resource file = dir().resolve(name).createFiles();
-        try (Writer writer = file.writer(NOFOLLOW, UTF_8))
+        try (Writer writer = file.writer(UTF_8))
         {
             writer.write(String.valueOf(new Random().nextLong()));
         }

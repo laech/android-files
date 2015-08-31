@@ -7,7 +7,6 @@ import java.util.EnumSet;
 import l.files.common.testing.BaseTest;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
-import l.files.fs.ResourceException;
 import l.files.fs.Visitor;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -59,7 +58,7 @@ public abstract class ResourceBaseTest extends BaseTest {
           @Override public Result accept(Resource resource) throws IOException {
             try {
               resource.setPermissions(EnumSet.allOf(Permission.class));
-            } catch (ResourceException ignore) {
+            } catch (IOException ignore) {
             }
             return CONTINUE;
           }

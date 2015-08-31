@@ -6,7 +6,6 @@ import java.util.Locale;
 import l.files.fs.Resource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.SIZE;
 
 public final class FileSortSizeTest extends FileSortTest
@@ -52,7 +51,7 @@ public final class FileSortSizeTest extends FileSortTest
             final String content) throws IOException
     {
         final Resource file = dir1().resolve(name).createFile();
-        file.writeString(NOFOLLOW, UTF_8, content);
+        file.writeString(UTF_8, content);
         return file;
     }
 }

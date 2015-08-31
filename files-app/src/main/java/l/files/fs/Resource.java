@@ -185,9 +185,6 @@ public interface Resource extends Parcelable {
 
   /**
    * Lists the immediate children of this resource.
-   *
-   * @throws NotDirectory target resource is not a directory, or if option is {@link
-   *                      LinkOption#NOFOLLOW} and the underlying resource is a link
    */
   void list(LinkOption option, Visitor visitor) throws IOException;
 
@@ -199,41 +196,23 @@ public interface Resource extends Parcelable {
 
   List<Resource> list(LinkOption option) throws IOException;
 
-  /**
-   * Opens an input stream to the underlying file.
-   *
-   * @throws NotFile this resource is not a file, or option is {@link
-   *                 LinkOption#NOFOLLOW} and the underlying resource is a link
-   */
-  InputStream input(LinkOption option) throws IOException;
+  InputStream input() throws IOException;
 
-  /**
-   * Equivalent to {@link #output(LinkOption, boolean) writer(option,
-   * false)}.
-   */
-  OutputStream output(LinkOption option) throws IOException;
+  OutputStream output() throws IOException;
 
-  /**
-   * Opens an output stream to the underlying file.
-   *
-   * @throws NotFile this resource is a directory, or option is {@link
-   *                 LinkOption#NOFOLLOW} and the underlying resource is a link
-   */
-  OutputStream output(LinkOption option, boolean append) throws IOException;
+  OutputStream output(boolean append) throws IOException;
 
-  Reader reader(LinkOption option, Charset charset) throws IOException;
+  Reader reader(Charset charset) throws IOException;
 
-  Writer writer(LinkOption option, Charset charset) throws IOException;
+  Writer writer(Charset charset) throws IOException;
 
-  Writer writer(LinkOption option, Charset charset, boolean append)
-      throws IOException;
+  Writer writer(Charset charset, boolean append) throws IOException;
 
   /**
    * Creates this resource as a directory. Will fail if the directory already
    * exists.
    *
    * @return this
-   * @throws AlreadyExists this resource already exists
    */
   Resource createDirectory() throws IOException;
 
@@ -250,7 +229,6 @@ public interface Resource extends Parcelable {
    * Creates the underlying resource as a file.
    *
    * @return this
-   * @throws AlreadyExists the underlying resource already exits
    */
   Resource createFile() throws IOException;
 
@@ -268,14 +246,11 @@ public interface Resource extends Parcelable {
    * location.
    *
    * @return this
-   * @throws AlreadyExists the underlying resource already exists
    */
   Resource createLink(Resource target) throws IOException;
 
   /**
    * If this is a link, returns the target resource.
-   *
-   * @throws NotLink this is not a link
    */
   Resource readLink() throws IOException;
 
@@ -290,19 +265,11 @@ public interface Resource extends Parcelable {
    * <p/>
    * If this is a link, the link itself is moved, link target resource is
    * unaffected.
-   *
-   * @throws NotExist             this resource does not exist
-   * @throws AlreadyExists        destination exists
-   * @throws InvalidOperation     attempt to make a directory a subdirectory of itself
-   * @throws UnsupportedOperation attempt to move to a different device
    */
   void moveTo(Resource dst) throws IOException;
 
   /**
-   * Deletes this resource.
-   *
-   * @throws NotExist          this resource does not exist
-   * @throws DirectoryNotEmpty this is a non empty directory
+   * Deletes this resource. Fails if this is a non-empty directory.
    */
   void delete() throws IOException;
 
@@ -336,20 +303,18 @@ public interface Resource extends Parcelable {
   /**
    * Reads the underlying file content as string.
    */
-  String readString(LinkOption option, Charset charset) throws IOException;
+  String readString(Charset charset) throws IOException;
 
   /**
    * Appends the underlying file content as string into the given appendable,
    * returns the appendable.
    */
-  <T extends Appendable> T readString(
-      LinkOption option, Charset charset, T appendable) throws IOException;
+  <T extends Appendable> T readString(Charset charset, T appendable) throws IOException;
 
   /**
    * Overrides the content of this resource with the given content.
    */
-  void writeString(LinkOption option, Charset charset, CharSequence content)
-      throws IOException;
+  void writeString(Charset charset, CharSequence content) throws IOException;
 
   @AutoParcel
   abstract class Name implements CharSequence {
