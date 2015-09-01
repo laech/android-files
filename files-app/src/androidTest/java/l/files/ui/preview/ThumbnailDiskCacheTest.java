@@ -32,12 +32,12 @@ public final class ThumbnailDiskCacheTest
     cache.cleanup();
     assertTrue(cacheFile.exists(NOFOLLOW));
 
-    cacheFile.setAccessed(NOFOLLOW, Instant.ofMillis(
+    cacheFile.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(
         currentTimeMillis() - DAYS.toMillis(29)));
     cache.cleanup();
     assertTrue(cacheFile.exists(NOFOLLOW));
 
-    cacheFile.setAccessed(NOFOLLOW, Instant.ofMillis(
+    cacheFile.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(
         currentTimeMillis() - DAYS.toMillis(31)));
     cache.cleanup();
     assertFalse(cacheFile.exists(NOFOLLOW));
@@ -55,11 +55,11 @@ public final class ThumbnailDiskCacheTest
     Resource cacheFile = cache.cacheFile(res, stat, constraint);
     Instant oldTime = Instant.ofMillis(
         currentTimeMillis() - DAYS.toMillis(99));
-    cacheFile.setAccessed(NOFOLLOW, oldTime);
-    assertEquals(oldTime, cacheFile.stat(NOFOLLOW).atime());
+    cacheFile.setLastAccessedTime(NOFOLLOW, oldTime);
+    assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastAccessedTime());
 
     cache.get(res, stat, constraint);
-    Instant newTime = cacheFile.stat(NOFOLLOW).atime();
+    Instant newTime = cacheFile.stat(NOFOLLOW).lastAccessedTime();
     assertNotEqual(oldTime, newTime);
     assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
   }

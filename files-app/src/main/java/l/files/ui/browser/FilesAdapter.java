@@ -188,7 +188,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
 
     String apply(Stat file) {
-      long millis = file.mtime().to(MILLISECONDS);
+      long millis = file.lastModifiedTime().to(MILLISECONDS);
 
       tempDate.setTime(millis);
       tempField.setBeginIndex(0);
@@ -327,7 +327,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         summary.setEnabled(file.isReadable());
         CharSequence date = formatter.apply(stat);
         CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
-        boolean hasDate = stat.mtime().to(MINUTES) > 0;
+        boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
         boolean isFile = stat.isRegularFile();
         if (hasDate && isFile) {
           Context context = summary.getContext();

@@ -76,12 +76,12 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest
         for (final Resource child : dir().list(NOFOLLOW))
         {
             final Random r = new Random();
-            child.setAccessed(NOFOLLOW, Instant.of(
-                    r.nextInt((int) (currentTimeMillis() / 1000)),
-                    r.nextInt(999999)));
-            child.setModified(NOFOLLOW, Instant.of(
-                    r.nextInt((int) (currentTimeMillis() / 1000)),
-                    r.nextInt(999999)));
+            child.setLastAccessedTime(NOFOLLOW, Instant.of(
+                r.nextInt((int) (currentTimeMillis() / 1000)),
+                r.nextInt(999999)));
+            child.setLastModifiedTime(NOFOLLOW, Instant.of(
+                r.nextInt((int) (currentTimeMillis() / 1000)),
+                r.nextInt(999999)));
         }
     }
 

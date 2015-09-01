@@ -28,9 +28,8 @@ import static l.files.fs.local.LocalResource.permissionsFromMode;
 @AutoValue
 abstract class LocalStat implements Stat {
 
-  private Instant atime;
-  private Instant mtime;
-  private Instant ctime;
+  private Instant lastAccessedTime;
+  private Instant lastModifiedTime;
   private Set<Permission> permissions;
 
   public abstract l.files.fs.local.Stat stat();
@@ -39,33 +38,18 @@ abstract class LocalStat implements Stat {
     return new AutoValue_LocalStat(stat);
   }
 
-  @Override public Instant accessed() {
-    if (atime == null) {
-      atime = Instant.of(stat().atime(), stat().atime_nsec());
+  @Override public Instant lastAccessedTime() {
+    if (lastAccessedTime == null) {
+      lastAccessedTime = Instant.of(stat().atime(), stat().atime_nsec());
     }
-    return atime;
+    return lastAccessedTime;
   }
 
-  @Override public Instant modified() {
-    if (mtime == null) {
-      mtime = Instant.of(stat().mtime(), stat().mtime_nsec());
+  @Override public Instant lastModifiedTime() {
+    if (lastModifiedTime == null) {
+      lastModifiedTime = Instant.of(stat().mtime(), stat().mtime_nsec());
     }
-    return mtime;
-  }
-
-  @Override public Instant atime() {
-    return accessed();
-  }
-
-  @Override public Instant mtime() {
-    return modified();
-  }
-
-  @Override public Instant ctime() {
-    if (ctime == null) {
-      ctime = Instant.of(stat().ctime(), stat().ctime_nsec());
-    }
-    return ctime;
+    return lastModifiedTime;
   }
 
   @Override public long size() {

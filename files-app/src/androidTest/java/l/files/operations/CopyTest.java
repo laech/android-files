@@ -65,8 +65,8 @@ public final class CopyTest extends PasteTest {
 
     Instant atime = Instant.of(123, 456);
     Instant mtime = Instant.of(100001, 101);
-    src.setAccessed(NOFOLLOW, atime);
-    src.setModified(NOFOLLOW, mtime);
+    src.setLastAccessedTime(NOFOLLOW, atime);
+    src.setLastModifiedTime(NOFOLLOW, mtime);
 
     copy(src, dir);
 
@@ -78,11 +78,11 @@ public final class CopyTest extends PasteTest {
   }
 
   private Instant mtime(Resource srcFile) throws IOException {
-    return srcFile.stat(NOFOLLOW).mtime();
+    return srcFile.stat(NOFOLLOW).lastModifiedTime();
   }
 
   private Instant atime(Resource res) throws IOException {
-    return res.stat(NOFOLLOW).atime();
+    return res.stat(NOFOLLOW).lastAccessedTime();
   }
 
   public void test_copies_link() throws Exception {

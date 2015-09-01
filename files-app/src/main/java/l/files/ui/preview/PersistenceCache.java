@@ -65,7 +65,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     Snapshot<V> old = super.put(res, stat, constraint, value);
     if (old == null
         || !old.get().equals(value)
-        || !old.time().equals(stat.mtime())) {
+        || !old.time().equals(stat.lastModifiedTime())) {
       dirty.set(true);
     }
     return old;

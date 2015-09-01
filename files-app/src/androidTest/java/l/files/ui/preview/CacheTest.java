@@ -39,7 +39,7 @@ public abstract class CacheTest<V, C extends Cache<V>>
     V value = newValue();
     cache.put(res, stat, constraint, value);
 
-    res.setModified(NOFOLLOW, Instant.ofMillis(currentTimeMillis() + 9999));
+    res.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis() + 9999));
     assertNull(cache.get(res, res.stat(NOFOLLOW), constraint));
   }
 

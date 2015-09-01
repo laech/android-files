@@ -52,7 +52,7 @@ public final class FileSortDateTest extends FileSortTest
             final Resource resource,
             final Instant instant) throws IOException
     {
-        resource.setModified(NOFOLLOW, instant);
+        resource.setLastModifiedTime(NOFOLLOW, instant);
         return resource;
     }
 

@@ -442,7 +442,7 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Override
-  public void setAccessed(LinkOption option, Instant instant) throws IOException {
+  public void setLastAccessedTime(LinkOption option, Instant instant) throws IOException {
     requireNonNull(option, "option");
     requireNonNull(instant, "instant");
     try {
@@ -461,7 +461,7 @@ public abstract class LocalResource extends Native implements Resource {
       int nanos,
       boolean followLink) throws ErrnoException;
 
-  @Override public void setModified(
+  @Override public void setLastModifiedTime(
       LinkOption option,
       Instant instant) throws IOException {
 

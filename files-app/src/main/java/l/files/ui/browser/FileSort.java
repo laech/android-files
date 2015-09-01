@@ -43,8 +43,8 @@ public enum FileSort {
         @Override protected int compareNotNull(
             File a, Stat aStat,
             File b, Stat bStat) {
-          Instant aTime = aStat.modified();
-          Instant bTime = bStat.modified();
+          Instant aTime = aStat.lastModifiedTime();
+          Instant bTime = bStat.lastModifiedTime();
           int result = bTime.compareTo(aTime);
           if (result == 0) {
             return a.compareTo(b);

@@ -126,13 +126,13 @@ final class Copy extends Paste {
 
   private void setTimes(Stat src, Resource dst) {
     try {
-      dst.setModified(NOFOLLOW, src.mtime());
+      dst.setLastModifiedTime(NOFOLLOW, src.lastModifiedTime());
     } catch (IOException e) {
       logger.debug(e, "Failed to set modification time on %s", dst);
     }
 
     try {
-      dst.setAccessed(NOFOLLOW, src.atime());
+      dst.setLastAccessedTime(NOFOLLOW, src.lastAccessedTime());
     } catch (IOException e) {
       logger.debug(e, "Failed to set access time on %s", dst);
     }

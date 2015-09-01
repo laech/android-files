@@ -83,7 +83,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             // Also thrown if directory not empty
           }
         } else {
-          if (MILLISECONDS.toDays(now - stat.atime().to(MILLISECONDS)) > 30) {
+          if (MILLISECONDS.toDays(now - stat.lastAccessedTime().to(MILLISECONDS)) > 30) {
             res.delete();
             log.debug("Deleted old cache file %s", res);
           }
@@ -96,8 +96,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
   Resource cacheFile(Resource res, Stat stat, Rect constraint) {
     return cacheDir.resolve(res.scheme()
         + "/" + res.path()
-        + "_" + stat.mtime().seconds()
-        + "_" + stat.mtime().nanos()
+        + "_" + stat.lastModifiedTime().seconds()
+        + "_" + stat.lastModifiedTime().nanos()
         + "_" + constraint.width()
         + "_" + constraint.height());
   }
@@ -125,7 +125,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
       }
 
       try {
-        cache.setAccessed(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+        cache.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
       } catch (IOException ignore) {
       }
 

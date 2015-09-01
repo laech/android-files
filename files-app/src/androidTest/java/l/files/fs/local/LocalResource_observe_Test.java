@@ -200,7 +200,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   private void testModifyModificationTime(
       Resource target,
       Resource observable) throws Exception {
-    Instant old = target.stat(NOFOLLOW).mtime();
+    Instant old = target.stat(NOFOLLOW).lastModifiedTime();
     Instant t = Instant.of(old.seconds() - 1, old.nanos());
     try (Recorder observer = observe(observable)) {
       observer.await(MODIFY, target,
@@ -481,7 +481,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
       final Instant instant) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
-        resource.setModified(option, instant);
+        resource.setLastModifiedTime(option, instant);
         return null;
       }
     };

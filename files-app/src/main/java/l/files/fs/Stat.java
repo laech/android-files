@@ -2,35 +2,28 @@ package l.files.fs;
 
 import java.util.Set;
 
-public interface Stat
-{
-    long size();
+public interface Stat {
 
-    boolean isRegularFile();
+  long size();
 
-    boolean isDirectory();
+  boolean isRegularFile();
 
-    boolean isSymbolicLink();
+  boolean isDirectory();
 
-    boolean isFifo();
+  boolean isSymbolicLink();
 
-    boolean isSocket();
+  boolean isFifo();
 
-    boolean isBlockDevice();
+  boolean isSocket();
 
-    boolean isCharacterDevice();
+  boolean isBlockDevice();
 
-    @Deprecated
-    Instant accessed();
+  boolean isCharacterDevice();
 
-    @Deprecated
-    Instant modified();
+  Instant lastAccessedTime();
 
-    Instant atime();
+  Instant lastModifiedTime();
 
-    Instant mtime();
+  Set<Permission> permissions();
 
-    Instant ctime();
-
-    Set<Permission> permissions();
 }

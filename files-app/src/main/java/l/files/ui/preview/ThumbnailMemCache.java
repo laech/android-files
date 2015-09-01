@@ -35,8 +35,8 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
   @Override String key(Resource res, Stat stat, Rect constraint) {
     return res.scheme()
         + "_" + res.path()
-        + "_" + stat.mtime().seconds()
-        + "_" + stat.mtime().nanos()
+        + "_" + stat.lastModifiedTime().seconds()
+        + "_" + stat.lastModifiedTime().nanos()
         + "_" + constraint.width()
         + "_" + constraint.height();
   }

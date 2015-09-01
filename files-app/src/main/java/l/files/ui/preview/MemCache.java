@@ -13,14 +13,14 @@ abstract class MemCache<V> extends Cache<V> {
     if (value == null) {
       return null;
     }
-    if (!value.time().equals(stat.mtime())) {
+    if (!value.time().equals(stat.lastModifiedTime())) {
       return null;
     }
     return value.get();
   }
 
   @Override Snapshot<V> put(Resource res, Stat stat, Rect constraint, V value) {
-    return delegate().put(key(res, stat, constraint), Snapshot.of(value, stat.mtime()));
+    return delegate().put(key(res, stat, constraint), Snapshot.of(value, stat.lastModifiedTime()));
   }
 
   Snapshot<V> remove(Resource res, Stat stat, Rect constraint) {

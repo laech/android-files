@@ -273,12 +273,12 @@ public interface Resource extends Parcelable {
   /**
    * Updates the access time for this resource.
    */
-  void setAccessed(LinkOption option, Instant instant) throws IOException;
+  void setLastAccessedTime(LinkOption option, Instant instant) throws IOException;
 
   /**
    * Updates the modification time for this resource.
    */
-  void setModified(LinkOption option, Instant instant) throws IOException;
+  void setLastModifiedTime(LinkOption option, Instant instant) throws IOException;
 
   /**
    * Sets the permissions of this resource, this replaces the existing

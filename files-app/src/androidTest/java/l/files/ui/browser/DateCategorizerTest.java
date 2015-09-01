@@ -252,7 +252,7 @@ public final class DateCategorizerTest extends BaseTest {
     final Stat stat = mock(Stat.class);
     final Resource res = mock(Resource.class);
     given(res.name()).willReturn(Name.of(String.valueOf(time)));
-    given(stat.mtime()).willReturn(Instant.ofMillis(time));
+    given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
     return File.create(res, stat, stat, collator);
   }
 
