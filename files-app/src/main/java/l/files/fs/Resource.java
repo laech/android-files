@@ -3,6 +3,8 @@ package l.files.fs;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,8 +19,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import auto.parcel.AutoParcel;
 
 /**
  * Represents a file system resource, such as a file or directory.
@@ -326,7 +326,7 @@ public interface Resource extends Parcelable {
    */
   String detectContentMediaType() throws IOException;
 
-  @AutoParcel
+  @AutoValue
   abstract class Name implements CharSequence {
     Name() {
     }
@@ -334,7 +334,7 @@ public interface Resource extends Parcelable {
     abstract String value();
 
     public static Name of(String name) {
-      return new AutoParcel_Resource_Name(name);
+      return new AutoValue_Resource_Name(name);
     }
 
     public static Name empty() {

@@ -2,13 +2,14 @@ package l.files.fs.local;
 
 import android.text.TextUtils;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import auto.parcel.AutoParcel;
 import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
@@ -346,7 +347,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
     PRE, POST
   }
 
-  @AutoParcel
+  @AutoValue
   static abstract class TraversalEvent {
 
     abstract TraversalOrder order();
@@ -354,7 +355,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
     abstract Resource resource();
 
     static TraversalEvent of(TraversalOrder order, Resource resource) {
-      return new AutoParcel_LocalResource_list_Test_TraversalEvent(order, resource);
+      return new AutoValue_LocalResource_list_Test_TraversalEvent(order, resource);
     }
   }
 

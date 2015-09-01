@@ -2,10 +2,11 @@ package l.files.ui.browser;
 
 import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.IOException;
 import java.text.Collator;
 
-import auto.parcel.AutoParcel;
 import collation.NaturalKey;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -23,7 +24,7 @@ public abstract class FileListItem {
     return !isFile();
   }
 
-  @AutoParcel
+  @AutoValue
   public static abstract class Header extends FileListItem {
 
     Header() {
@@ -32,7 +33,7 @@ public abstract class FileListItem {
     public abstract String header();
 
     public static Header of(String header) {
-      return new AutoParcel_FileListItem_Header(header);
+      return new AutoValue_FileListItem_Header(header);
     }
 
     @Override public boolean isFile() {
@@ -44,7 +45,7 @@ public abstract class FileListItem {
     }
   }
 
-  @AutoParcel
+  @AutoValue
   public static abstract class File extends FileListItem implements Comparable<File> {
 
     private Boolean readable;
@@ -88,7 +89,7 @@ public abstract class FileListItem {
         Collator collator) {
       String name = resource.name().toString();
       NaturalKey key = NaturalKey.create(collator, name);
-      return new AutoParcel_FileListItem_File(resource, stat, targetStat, key);
+      return new AutoValue_FileListItem_File(resource, stat, targetStat, key);
     }
 
     @Override public boolean isFile() {

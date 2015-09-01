@@ -1,19 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'provided-base'
 
 android {
 
-    signingConfigs {
-        release {
-            keyAlias 'files'
-            storeFile file('/Users/l/Downloads/files.keystore')
-//            storePassword System.console().readLine("\nKeystore password: ")
-//            keyPassword System.console().readLine("\nKey password: ")
-        }
-    }
-
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
+
     defaultConfig {
         applicationId 'l.files'
         minSdkVersion 21
@@ -50,36 +43,33 @@ android {
             minifyEnabled true
             proguardFile getDefaultProguardFile('proguard-android.txt')
             proguardFile 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
+
     // Remove files from third party jars that causes 'duplicate files' build issues
     packagingOptions {
-        exclude 'META-INF/services/javax.annotation.processing.Processor'
         exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'LICENSE.txt'
-        exclude 'LICENSE'
-        exclude 'NOTICE'
-        exclude 'asm-license.txt'
     }
+
 }
 
 dependencies {
+
     compile project(':collation')
-    compile libs.tika
+    compile 'org.apache.tika:tika-core:1.9'
     compile 'com.android.support:design:22.2.1'
     compile 'com.android.support:support-v4:22.2.1'
     compile 'com.android.support:recyclerview-v7:22.2.1'
     compile 'com.android.support:cardview-v7:22.2.1'
     compile 'com.android.support:palette-v7:22.2.1'
 
-    compile libs.auto_parcel
-    apt libs.auto_parcel_processor
+    apt 'com.google.auto.value:auto-value:1.1'
+    provided 'com.google.auto.value:auto-value:1.1'
+    provided 'javax.annotation:javax.annotation-api:1.2'
 
-    androidTestCompile libs.mockito
-    androidTestCompile libs.auto_parcel
-    androidTestApt libs.auto_parcel_processor
+    androidTestCompile 'org.mockito:mockito-core:1.10.19'
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+
 }

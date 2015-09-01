@@ -6,7 +6,8 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
+        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.2'
     }
 }
 
@@ -15,15 +16,3 @@ allprojects {
         jcenter()
     }
 }
-
-ext.libs = [:]
-
-libs.tika = 'org.apache.tika:tika-core:1.9'
-libs.auto_parcel = 'com.github.frankiesardo:auto-parcel:0.3'
-libs.auto_parcel_processor = 'com.github.frankiesardo:auto-parcel-processor:0.3'
-
-libs.mockito = [
-        'org.mockito:mockito-core:1.10.19',
-        'com.google.dexmaker:dexmaker:1.2',
-        'com.google.dexmaker:dexmaker-mockito:1.2'
-]

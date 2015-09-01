@@ -1,12 +1,12 @@
 package l.files.common.graphics;
 
-import auto.parcel.AutoParcel;
+import com.google.auto.value.AutoValue;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
 
-@AutoParcel
+@AutoValue
 public abstract class Rect {
   Rect() {
   }
@@ -23,7 +23,7 @@ public abstract class Rect {
     if (width <= 0 || height <= 0) {
       throw new IllegalArgumentException();
     }
-    return new AutoParcel_Rect(width, height);
+    return new AutoValue_Rect(width, height);
   }
 
   public Rect scale(Rect constraint) {

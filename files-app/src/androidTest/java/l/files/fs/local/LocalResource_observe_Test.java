@@ -2,6 +2,8 @@ package l.files.fs.local;
 
 import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +13,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
-import auto.parcel.AutoParcel;
 import l.files.fs.Event;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -551,14 +552,14 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     }
   }
 
-  @AutoParcel
+  @AutoValue
   static abstract class WatchEvent {
     abstract Event kind();
 
     abstract Resource resource();
 
     static WatchEvent create(Event kind, Resource resource) {
-      return new AutoParcel_LocalResource_observe_Test_WatchEvent(
+      return new AutoValue_LocalResource_observe_Test_WatchEvent(
           kind, resource
       );
     }

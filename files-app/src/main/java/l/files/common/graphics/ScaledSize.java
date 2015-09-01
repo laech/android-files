@@ -1,8 +1,8 @@
 package l.files.common.graphics;
 
-import auto.parcel.AutoParcel;
+import com.google.auto.value.AutoValue;
 
-@AutoParcel
+@AutoValue
 public abstract class ScaledSize {
   ScaledSize() {
   }
@@ -32,7 +32,7 @@ public abstract class ScaledSize {
       throw new IllegalArgumentException();
     }
 
-    return new AutoParcel_ScaledSize(
+    return new AutoValue_ScaledSize(
         originalWidth,
         originalHeight,
         scaledWidth,

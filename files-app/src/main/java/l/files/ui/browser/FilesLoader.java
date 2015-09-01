@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +24,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import auto.parcel.AutoParcel;
 import l.files.fs.Event;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
@@ -333,7 +334,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     return stat;
   }
 
-  @AutoParcel
+  @AutoValue
   static abstract class Result {
     Result() {
     }
@@ -343,12 +344,12 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     @Nullable abstract IOException exception();
 
     private static Result of(IOException exception) {
-      return new AutoParcel_FilesLoader_Result(
+      return new AutoValue_FilesLoader_Result(
           Collections.<FileListItem>emptyList(), exception);
     }
 
     private static Result of(List<FileListItem> result) {
-      return new AutoParcel_FilesLoader_Result(result, null);
+      return new AutoValue_FilesLoader_Result(result, null);
     }
   }
 

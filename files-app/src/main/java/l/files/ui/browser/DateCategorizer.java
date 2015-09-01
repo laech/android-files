@@ -3,6 +3,8 @@ package l.files.ui.browser;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
+import com.google.auto.value.AutoValue;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,7 +12,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import auto.parcel.AutoParcel;
 import l.files.R;
 import l.files.fs.Stat;
 import l.files.ui.browser.FileListItem.File;
@@ -100,21 +101,21 @@ final class DateCategorizer extends BaseCategorizer {
     return res.getString((int) id);
   }
 
-  @AutoParcel
+  @AutoValue
   static abstract class Year {
     abstract int value();
 
     static Year of(int value) {
-      return new AutoParcel_DateCategorizer_Year(value);
+      return new AutoValue_DateCategorizer_Year(value);
     }
   }
 
-  @AutoParcel
+  @AutoValue
   static abstract class Month {
     abstract int value();
 
     static Month of(int value) {
-      return new AutoParcel_DateCategorizer_Month(value);
+      return new AutoValue_DateCategorizer_Month(value);
     }
   }
 }

@@ -1,8 +1,11 @@
 package l.files.fs.local;
 
+import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 import android.system.Os;
+
+import com.google.auto.value.AutoValue;
 
 import java.io.Closeable;
 import java.io.File;
@@ -26,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import auto.parcel.AutoParcel;
 import l.files.fs.ExceptionHandler;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -72,10 +74,8 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
-@AutoParcel
+@AutoValue
 public abstract class LocalResource extends Native implements Resource {
-
-  // TODO remove as much custom stuff as possible
 
   private static final int[] PERMISSION_BITS = permissionsToBits();
 
@@ -115,7 +115,7 @@ public abstract class LocalResource extends Native implements Resource {
   abstract File file();
 
   public static LocalResource create(File file) {
-    return new AutoParcel_LocalResource(file);
+    return new AutoValue_LocalResource(file);
   }
 
   private static void ensureIsLocalResource(Resource resource) {
@@ -156,7 +156,7 @@ public abstract class LocalResource extends Native implements Resource {
     if (isRoot()) {
       return null;
     } else {
-      return new AutoParcel_LocalResource(file().getParentFile());
+      return new AutoValue_LocalResource(file().getParentFile());
     }
   }
 
@@ -215,7 +215,7 @@ public abstract class LocalResource extends Native implements Resource {
     }
     File parent = ((LocalResource) toParent).file();
     String child = path().substring(fromParent.path().length());
-    return new AutoParcel_LocalResource(new File(parent, child));
+    return new AutoValue_LocalResource(new File(parent, child));
   }
 
   @Override public LocalStat stat(LinkOption option) throws IOException {
@@ -534,5 +534,25 @@ public abstract class LocalResource extends Native implements Resource {
   @Override public String detectContentMediaType() throws IOException {
     return MagicDetector.INSTANCE.detect(this);
   }
+
+  @Override public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(path());
+  }
+
+  @Override public int describeContents() {
+    return 0;
+  }
+
+  public static final Creator<LocalResource> CREATOR = new Creator<LocalResource>() {
+
+    @Override public LocalResource createFromParcel(Parcel source) {
+      return create(new File(source.readString()));
+    }
+
+    @Override public LocalResource[] newArray(int size) {
+      return new LocalResource[size];
+    }
+
+  };
 
 }

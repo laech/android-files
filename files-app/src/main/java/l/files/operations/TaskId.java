@@ -1,19 +1,19 @@
 package l.files.operations;
 
-import auto.parcel.AutoParcel;
+import com.google.auto.value.AutoValue;
 
-@AutoParcel
+@AutoValue
 public abstract class TaskId {
 
-    TaskId() {
-    }
+  TaskId() {
+  }
 
-    public abstract int getId();
+  public abstract int getId();
 
-    public abstract TaskKind getKind();
+  public abstract TaskKind getKind();
 
-    public static TaskId create(int id, TaskKind kind) {
-        return new AutoParcel_TaskId(id, kind);
-    }
+  public static TaskId create(int id, TaskKind kind) {
+    return new AutoValue_TaskId(id, kind);
+  }
 
 }

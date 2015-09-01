@@ -1,9 +1,10 @@
 package l.files.ui.preview;
 
-import auto.parcel.AutoParcel;
+import com.google.auto.value.AutoValue;
+
 import l.files.fs.Instant;
 
-@AutoParcel
+@AutoValue
 abstract class Snapshot<V> {
 
   abstract V get();
@@ -11,6 +12,7 @@ abstract class Snapshot<V> {
   abstract Instant time();
 
   static <V> Snapshot<V> of(V value, Instant mtime) {
-    return new AutoParcel_Snapshot<>(value, mtime);
+    return new AutoValue_Snapshot<>(value, mtime);
   }
+
 }

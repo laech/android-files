@@ -1,11 +1,12 @@
 package l.files.operations;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.IOException;
 
-import auto.parcel.AutoParcel;
 import l.files.fs.Resource;
 
-@AutoParcel
+@AutoValue
 public abstract class Failure {
 
   Failure() {}
@@ -15,7 +16,7 @@ public abstract class Failure {
   public abstract IOException cause();
 
   public static Failure create(Resource resource, IOException cause) {
-    return new AutoParcel_Failure(resource, cause);
+    return new AutoValue_Failure(resource, cause);
   }
 
 }
