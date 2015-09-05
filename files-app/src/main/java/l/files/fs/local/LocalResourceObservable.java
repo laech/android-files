@@ -15,8 +15,8 @@ import l.files.fs.Event;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
+import l.files.fs.Stream;
 import l.files.fs.Visitor;
-import l.files.fs.local.LocalResourceStream.Callback;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
@@ -26,6 +26,7 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.local.Dirent.DT_DIR;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
@@ -263,34 +264,31 @@ final class LocalResourceObservable extends Native
       final LocalResourceObservable observable,
       @Nullable final Visitor visitor) throws IOException {
 
-    LocalResourceStream.list(resource, option, new Callback() {
-      @Override public boolean accept(
-          long inode,
-          String name,
-          boolean directory) throws IOException {
+    try (Stream<Dirent> stream = Dirent.stream(resource, option)) {
+      for (Dirent child : stream) {
+
         if (observable.isClosed()) {
-          return false;
+          return;
         }
 
         if (visitor != null) {
-          visitor.accept(resource.resolve(name));
+          visitor.accept(resource.resolve(child.name()));
         }
 
-        if (!directory) {
-          return true;
+        if (child.type() == DT_DIR) {
+          try {
+
+            String path = resource.path() + "/" + child.name();
+            int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
+            observable.childDirectories.put(wd, child.name());
+
+          } catch (ErrnoException e) {
+            log.debug(e, "Failed to add watch. %s", child.name());
+          }
         }
 
-        try {
-          String path = resource.path() + "/" + name;
-          int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
-          observable.childDirectories.put(wd, name);
-        } catch (ErrnoException e) {
-          log.debug(e, "Failed to add watch. %s", name);
-        }
-
-        return true;
       }
-    });
+    }
 
   }
 

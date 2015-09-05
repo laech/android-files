@@ -24,8 +24,8 @@ import java.net.URI;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +35,7 @@ import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
+import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
 import static android.system.OsConstants.EACCES;
@@ -70,8 +71,6 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 @AutoValue
@@ -279,33 +278,36 @@ public abstract class LocalResource extends Native implements Resource {
     new LocalResourceTraverser(this, option, pre, post, handler).traverse();
   }
 
-  @Override public void list(
-      final LinkOption option,
-      final Visitor visitor) throws IOException {
-    LocalResourceStream.list(this, option, new LocalResourceStream.Callback() {
-      @Override public boolean accept(
-          long inode,
-          String name,
-          boolean directory) throws IOException {
-        return visitor.accept(resolve(name)) != TERMINATE;
-      }
-    });
-  }
+  @Override
+  public Stream<Resource> list(final LinkOption option) throws IOException {
+    return new Stream<Resource>() {
 
-  @Override public <T extends Collection<? super Resource>> T list(
-      final LinkOption option,
-      final T collection) throws IOException {
-    list(option, new Visitor() {
-      @Override public Result accept(Resource resource) throws IOException {
-        collection.add(resource);
-        return CONTINUE;
-      }
-    });
-    return collection;
-  }
+      final Stream<Dirent> stream = Dirent.stream(LocalResource.this, option);
 
-  @Override public List<Resource> list(LinkOption option) throws IOException {
-    return list(option, new ArrayList<Resource>());
+      @Override public void close() throws IOException {
+        stream.close();
+      }
+
+      @Override public Iterator<Resource> iterator() {
+        return new Iterator<Resource>() {
+
+          final Iterator<Dirent> iterator = stream.iterator();
+
+          @Override public boolean hasNext() {
+            return iterator.hasNext();
+          }
+
+          @Override public Resource next() {
+            return resolve(iterator.next().name());
+          }
+
+          @Override public void remove() {
+            iterator.remove();
+          }
+
+        };
+      }
+    };
   }
 
   @Override public InputStream input() throws IOException {

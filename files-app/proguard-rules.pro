@@ -31,10 +31,6 @@
   *** onEvent(...);
 }
 
--keepclassmembers class l.files.fs.local.LocalResourceStream {
-  *** notify(...);
-}
-
 -keepclassmembers class l.files.fs.local.** {
   *** create(...);
 }

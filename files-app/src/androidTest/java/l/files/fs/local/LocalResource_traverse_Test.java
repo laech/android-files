@@ -6,7 +6,6 @@ import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,15 +21,13 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.SKIP;
 import static l.files.fs.Visitor.Result.TERMINATE;
-import static l.files.fs.local.LocalResource_list_Test.TraversalOrder.POST;
-import static l.files.fs.local.LocalResource_list_Test.TraversalOrder.PRE;
+import static l.files.fs.local.LocalResource_traverse_Test.TraversalOrder.POST;
+import static l.files.fs.local.LocalResource_traverse_Test.TraversalOrder.PRE;
 
 /**
- * @see LocalResource#list(LinkOption, Visitor)
- * @see LocalResource#list(LinkOption, Collection)
  * @see LocalResource#list(LinkOption)
  */
-public final class LocalResource_list_Test extends ResourceBaseTest {
+public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
   public void test_traverse_noFollowLink() throws Exception {
     Resource dir = dir1().resolve("dir").createDirectory();
@@ -355,7 +352,7 @@ public final class LocalResource_list_Test extends ResourceBaseTest {
     abstract Resource resource();
 
     static TraversalEvent of(TraversalOrder order, Resource resource) {
-      return new AutoValue_LocalResource_list_Test_TraversalEvent(order, resource);
+      return new AutoValue_LocalResource_traverse_Test_TraversalEvent(order, resource);
     }
   }
 

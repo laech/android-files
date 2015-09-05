@@ -13,6 +13,7 @@ import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.Stream;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -39,12 +40,15 @@ public final class NavigationTest extends BaseFilesActivityTest {
     for (int i = 0; i < 10; i++) {
       dir().resolve(String.valueOf(i)).createFile();
     }
-    Resource child = dir().list(NOFOLLOW).get(0);
-    screen()
-        .rotate()
-        .longClick(child)
-        .assertChecked(child, true)
-        .assertActionModePresent(true);
+
+    try (Stream<Resource> stream = dir().list(NOFOLLOW)) {
+      Resource child = stream.iterator().next();
+      screen()
+          .rotate()
+          .longClick(child)
+          .assertChecked(child, true)
+          .assertActionModePresent(true);
+    }
   }
 
   public void test_clears_selection_on_finish_of_action_mode() throws Exception {

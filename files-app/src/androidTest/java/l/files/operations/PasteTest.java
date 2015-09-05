@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.fs.Resource;
+import l.files.fs.Stream;
 import l.files.fs.local.ResourceBaseTest;
 
 import static java.lang.Thread.currentThread;
@@ -95,7 +96,9 @@ public abstract class PasteTest extends ResourceBaseTest {
     });
     thread.start();
     thread.join();
-    assertEquals(emptyList(), dstDir.list(NOFOLLOW));
+    try (Stream<Resource> stream = dstDir.list(NOFOLLOW)) {
+      assertFalse(stream.iterator().hasNext());
+    }
   }
 
   public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {

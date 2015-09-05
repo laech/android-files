@@ -6,7 +6,10 @@ import android.text.TextUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import l.files.fs.DirectoryNotEmpty;
+
 import static android.system.OsConstants.ENOENT;
+import static android.system.OsConstants.ENOTEMPTY;
 
 public final class ErrnoExceptions {
   private ErrnoExceptions() {
@@ -22,6 +25,9 @@ public final class ErrnoExceptions {
       FileNotFoundException e = new FileNotFoundException(message);
       e.initCause(cause);
       return e;
+    }
+    if (errno == ENOTEMPTY) {
+      return new DirectoryNotEmpty(message, cause);
     }
     return new IOException(message, cause);
   }

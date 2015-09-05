@@ -25,6 +25,7 @@ import l.files.common.base.Consumer;
 import l.files.common.base.Provider;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.Stream;
 import l.files.ui.FileLabels;
 import l.files.ui.browser.FileListItem;
 import l.files.ui.browser.FilesActivity;
@@ -499,8 +500,8 @@ public final class UiFileActivity {
   }
 
   private List<Pair<Resource, Stat>> childrenStatsSortedByPath(Resource dir) {
-    try {
-      List<Resource> children = sortResourcesByPath(dir.list(NOFOLLOW));
+    try (Stream<Resource> stream = dir.list(NOFOLLOW)) {
+      List<Resource> children = sortResourcesByPath(stream);
       return stat(children);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -516,7 +517,8 @@ public final class UiFileActivity {
     return result;
   }
 
-  private List<Resource> sortResourcesByPath(List<Resource> resources) {
+  private List<Resource> sortResourcesByPath(Stream<Resource> iterable) {
+    List<Resource> resources = iterable.to(new ArrayList<Resource>());
     Collections.sort(resources, new Comparator<Resource>() {
       @Override public int compare(Resource a, Resource b) {
         return a.path().compareTo(b.path());

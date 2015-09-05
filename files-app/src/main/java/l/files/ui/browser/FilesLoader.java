@@ -28,6 +28,7 @@ import l.files.fs.Event;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
+import l.files.fs.Stream;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
 import l.files.ui.browser.FileListItem.File;
@@ -206,18 +207,26 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
   private List<Resource> visit() throws IOException {
     log.verbose("visit start");
     List<Resource> children = new ArrayList<>();
-    root.list(FOLLOW, collectInto(children));
+    try (Stream<Resource> stream = root.list(FOLLOW)) {
+      for (Resource child : stream) {
+        checkedAdd(children, child);
+      }
+    }
     log.verbose("visit end");
     return children;
+  }
+
+  private void checkedAdd(List<Resource> children, Resource child) {
+    checkCancel();
+    approximateChildTotal.incrementAndGet();
+    children.add(child);
   }
 
   private Visitor collectInto(final List<Resource> children) {
     return new Visitor() {
       @Override
       public Result accept(Resource resource) throws IOException {
-        checkCancel();
-        approximateChildTotal.incrementAndGet();
-        children.add(resource);
+        checkedAdd(children, resource);
         return CONTINUE;
       }
     };

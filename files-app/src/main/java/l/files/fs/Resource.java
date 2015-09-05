@@ -14,7 +14,6 @@ import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.Collator;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -180,18 +179,7 @@ public interface Resource extends Parcelable {
       @Nullable Visitor post,
       @Nullable ExceptionHandler handler) throws IOException;
 
-  /**
-   * Lists the immediate children of this resource.
-   */
-  void list(LinkOption option, Visitor visitor) throws IOException;
-
-  /**
-   * List the children into the given collection. Returns the collection.
-   */
-  <T extends Collection<? super Resource>> T list(
-      LinkOption option, T collection) throws IOException;
-
-  List<Resource> list(LinkOption option) throws IOException;
+  Stream<Resource> list(LinkOption option) throws IOException;
 
   InputStream input() throws IOException;
 

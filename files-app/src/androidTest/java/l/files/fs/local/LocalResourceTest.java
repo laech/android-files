@@ -21,7 +21,7 @@ import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.fs.Visitor;
+import l.files.fs.Stream;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.Thread.sleep;
@@ -32,8 +32,6 @@ import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 import static l.files.fs.local.LocalResource.permissionsFromMode;
 import static l.files.fs.local.Stat.lstat;
 
@@ -120,22 +118,6 @@ public final class LocalResourceTest extends ResourceBaseTest {
     assertEquals(expected, a.hierarchy());
   }
 
-  public void test_list_earlyTermination() throws Exception {
-    Resource a = dir1().resolve("a").createFile();
-    final Resource b = dir1().resolve("b").createFile();
-    dir1().resolve("c").createFile();
-    dir1().resolve("d").createFile();
-    final List<Resource> result = new ArrayList<>();
-    dir1().list(NOFOLLOW, new Visitor() {
-      @Override
-      public Result accept(Resource resource) throws IOException {
-        result.add(resource);
-        return resource.equals(b) ? TERMINATE : CONTINUE;
-      }
-    });
-    assertEquals(asList(a, b), result);
-  }
-
   public void test_list_linkFollowSuccess() throws Exception {
     Resource dir = dir1().resolve("dir").createDirectory();
     Resource a = dir.resolve("a").createFile();
@@ -148,17 +130,19 @@ public final class LocalResourceTest extends ResourceBaseTest {
         b.resolveParent(dir, link),
         c.resolveParent(dir, link)
     );
-    List<Resource> actual = link.list(FOLLOW);
 
-    assertEquals(expected, actual);
+    try (Stream<Resource> actual = link.list(FOLLOW)) {
+      assertEquals(expected, actual.to(new ArrayList<>()));
+    }
   }
 
   public void test_list() throws Exception {
     Resource a = dir1().resolve("a").createFile();
     Resource b = dir1().resolve("b").createDirectory();
     List<?> expected = asList(a, b);
-    List<?> actual = dir1().list(NOFOLLOW);
-    assertEquals(expected, actual);
+    try (Stream<Resource> actual = dir1().list(NOFOLLOW)) {
+      assertEquals(expected, actual.to(new ArrayList<>()));
+    }
   }
 
   public void test_output_append_defaultFalse() throws Exception {

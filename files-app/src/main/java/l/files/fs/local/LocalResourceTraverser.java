@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
@@ -11,6 +12,7 @@ import java.util.ListIterator;
 import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
 import l.files.fs.Resource;
+import l.files.fs.Stream;
 import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
 
@@ -105,15 +107,18 @@ final class LocalResourceTraverser {
     if (!parent.resource.stat(option).isDirectory()) {
       return;
     }
-    List<Resource> children = parent.resource.list(option);
-    ListIterator<Resource> it = children.listIterator(children.size());
-    while (it.hasPrevious()) {
-      stack.push(new Node(it.previous()));
+
+    try (Stream<Resource> stream = parent.resource.list(option)) {
+      List<Resource> items = stream.to(new ArrayList<Resource>());
+      ListIterator<Resource> it = items.listIterator(items.size());
+      while (it.hasPrevious()) {
+        stack.push(new Node(it.previous()));
+      }
     }
   }
 
   private static class Node {
-    Resource resource;
+    final Resource resource;
     boolean visited;
 
     private Node(Resource resource) {

@@ -12,6 +12,7 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.Instant;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
@@ -79,8 +80,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
           try {
             res.delete();
             log.debug("Deleted empty cache directory %s", res);
-          } catch (IOException ignore) {
-            // Also thrown if directory not empty
+          } catch (DirectoryNotEmpty ignore) {
           }
         } else {
           if (MILLISECONDS.toDays(now - stat.lastAccessedTime().to(MILLISECONDS)) > 30) {
