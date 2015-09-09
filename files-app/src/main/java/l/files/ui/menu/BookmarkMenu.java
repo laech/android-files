@@ -19,7 +19,7 @@ public final class BookmarkMenu extends OptionsMenuAction {
     public BookmarkMenu(BookmarkManager bookmarks, File file) {
         super(R.id.bookmark);
         this.bookmarks = requireNonNull(bookmarks, "bookmarks");
-        this.file = requireNonNull(file, "resource");
+        this.file = requireNonNull(file, "file");
     }
 
     @Override

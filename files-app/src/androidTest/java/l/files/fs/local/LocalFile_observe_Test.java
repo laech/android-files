@@ -40,7 +40,7 @@ import static l.files.fs.local.LocalFile_observe_Test.Recorder.observe;
 public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testObserveOnLinkNoFollow() throws Exception {
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         File file = link.resolve("file");
         try (Recorder observer = observe(link, NOFOLLOW)) {
@@ -59,9 +59,9 @@ public final class LocalFile_observe_Test extends FileBaseTest {
     }
 
     public void testObserveOnLinkFollow() throws Exception {
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
-        File child = link.resolve("dir").createDirectory();
+        File child = link.resolve("dir").createDir();
         try (Recorder observer = observe(link, FOLLOW)) {
             observer.await(MODIFY, child, newCreateFile(child.resolve("a")));
         }
@@ -69,7 +69,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testMoveDirectoryInThenAddFileIntoIt() throws Exception {
         File dst = dir1().resolve("a");
-        File src = dir2().resolve("a").createDirectory();
+        File src = dir2().resolve("a").createDir();
         try (Recorder observer = observe(dir1())) {
             observer.await(CREATE, dst, newMove(src, dst));
             observer.await(MODIFY, dst, newCreateDirectory(dst.resolve("b")));
@@ -78,7 +78,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testMoveDirectoryInThenDeleteFileFromIt() throws Exception {
         File dstDir = dir1().resolve("a");
-        File srcDir = dir2().resolve("a").createDirectory();
+        File srcDir = dir2().resolve("a").createDir();
         srcDir.resolve("b").createFile();
         try (Recorder observer = observe(dir1())) {
             observer.await(CREATE, dstDir, newMove(srcDir, dstDir));
@@ -88,7 +88,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testMoveDirectoryInThenMoveFileIntoIt() throws Exception {
         File dir = dir1().resolve("a");
-        File src1 = dir2().resolve("a").createDirectory();
+        File src1 = dir2().resolve("a").createDir();
         File src2 = dir2().resolve("b").createFile();
         try (Recorder observer = observe(dir1())) {
             observer.await(CREATE, dir, newMove(src1, dir));
@@ -97,7 +97,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
     }
 
     public void testMoveDirectoryInThenMoveFileOutOfIt() throws Exception {
-        File src = dir2().resolve("a").createDirectory();
+        File src = dir2().resolve("a").createDir();
         File dir = dir1().resolve("a");
         File child = dir.resolve("b");
         try (Recorder observer = observe(dir1())) {
@@ -132,7 +132,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testMoveSelfOut() throws Exception {
         File file = dir1().resolve("file").createFile();
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         testMoveSelfOut(file, dir2().resolve("a"));
         testMoveSelfOut(dir, dir2().resolve("b"));
     }
@@ -161,7 +161,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
 
     public void testModifyPermissions() throws Exception {
         File file = dir1().resolve("file").createFile();
-        File dir = dir1().resolve("directory").createDirectory();
+        File dir = dir1().resolve("directory").createDir();
         testModifyPermission(file, file);
         testModifyPermission(file, dir1());
         testModifyPermission(dir, dir);
@@ -190,7 +190,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
      */
     public void testModifyModificationTime() throws Exception {
         File file = dir1().resolve("file").createFile();
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         testModifyModificationTime(file, file);
         testModifyModificationTime(file, dir1());
         testModifyModificationTime(dir, dir);
@@ -213,8 +213,8 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         File dir = dir1().resolve("dir");
         testDelete(file.createFile(), file);
         testDelete(file.createFile(), dir1());
-        testDelete(dir.createDirectory(), dir);
-        testDelete(dir.createDirectory(), dir1());
+        testDelete(dir.createDir(), dir);
+        testDelete(dir.createDir(), dir1());
     }
 
     private static void testDelete(
@@ -357,7 +357,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
     public void testCreateDirectoryThenMoveFileIntoIt() throws Exception {
         File parent = dir1().resolve("parent");
         File file = dir2().resolve("file").createFile();
-        File dir = dir2().resolve("dir").createDirectory();
+        File dir = dir2().resolve("dir").createDir();
         try (Recorder observer = observe(dir1())) {
             observer.await(CREATE, parent, newCreateDirectory(parent));
             observer.await(
@@ -439,7 +439,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                directory.createDirectory();
+                directory.createDir();
                 return null;
             }
         };
@@ -570,7 +570,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         abstract File resource();
 
         static WatchEvent create(Event kind, File file) {
-            return new AutoValue_LocalResource_observe_Test_WatchEvent(
+            return new AutoValue_LocalFile_observe_Test_WatchEvent(
                     kind, file
             );
         }

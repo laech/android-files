@@ -92,7 +92,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
 
     @Override
     public void addBookmark(File file) {
-        requireNonNull(file, "resource");
+        requireNonNull(file, "file");
         if (bookmarks.add(file)) {
             saveBookmarksAndNotify();
         }
@@ -100,7 +100,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
 
     @Override
     public void removeBookmark(File file) {
-        requireNonNull(file, "resource");
+        requireNonNull(file, "file");
         if (bookmarks.remove(file)) {
             saveBookmarksAndNotify();
         }

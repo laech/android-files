@@ -99,7 +99,7 @@ final class Copy extends Paste {
     }
 
     private void createDirectory(Stat stat, File dst) throws IOException {
-        dst.createDirectory();
+        dst.createDir();
         copiedByteCount.addAndGet(stat.size());
         copiedItemCount.incrementAndGet();
     }

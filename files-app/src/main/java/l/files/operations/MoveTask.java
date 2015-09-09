@@ -51,7 +51,7 @@ final class MoveTask extends Task {
 
         List<File> files = new ArrayList<>();
         for (Failure failure : failures) {
-            files.add(failure.resource());
+            files.add(failure.file());
         }
         count.execute();
         copy.execute();

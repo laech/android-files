@@ -99,7 +99,7 @@ final class LocalTraverser {
         boolean visited;
 
         private Node(File file) {
-            this.file = requireNonNull(file, "resource");
+            this.file = requireNonNull(file, "file");
         }
     }
 }

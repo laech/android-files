@@ -102,20 +102,20 @@ abstract class LocalStat implements Stat {
         return permissions;
     }
 
-    static LocalStat stat(LocalFile resource, LinkOption option) throws IOException {
+    static LocalStat stat(LocalFile file, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
         l.files.fs.local.Stat stat = null;
         while (stat == null) {
             try {
                 if (option == FOLLOW) {
-                    stat = l.files.fs.local.Stat.stat(resource.path());
+                    stat = l.files.fs.local.Stat.stat(file.path());
                 } else {
-                    stat = l.files.fs.local.Stat.lstat(resource.path());
+                    stat = l.files.fs.local.Stat.lstat(file.path());
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw toIOException(e, resource.path());
+                    throw toIOException(e, file.path());
                 }
             }
         }

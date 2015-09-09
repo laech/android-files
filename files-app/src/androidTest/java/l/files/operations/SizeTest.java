@@ -9,10 +9,10 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class SizeTest extends FileBaseTest {
 
     public void testSize() throws Exception {
-        File a = dir1().resolve("a").createDirectory();
+        File a = dir1().resolve("a").createDir();
         File b = dir1().resolve("a/b").createFile();
         File c = dir1().resolve("c").createFile();
-        File d = dir1().resolve("d").createDirectory();
+        File d = dir1().resolve("d").createDir();
 
         Size size = new Size(asList(a, b, c, d));
         size.execute();

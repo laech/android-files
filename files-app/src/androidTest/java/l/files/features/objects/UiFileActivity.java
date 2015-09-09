@@ -303,8 +303,8 @@ public final class UiFileActivity {
         return this;
     }
 
-    private String label(File res) {
-        return FileLabels.get(activity().getResources(), res);
+    private String label(File file) {
+        return FileLabels.get(activity().getResources(), file);
     }
 
     public UiFileActivity assertActionBarUpIndicatorIsVisible(
@@ -566,7 +566,7 @@ public final class UiFileActivity {
     private List<Pair<File, Stat>> stats(List<FileListItem.File> items) {
         List<Pair<File, Stat>> result = new ArrayList<>();
         for (FileListItem.File item : items) {
-            result.add(Pair.create(item.resource(), item.stat()));
+            result.add(Pair.create(item.file(), item.stat()));
         }
         return result;
     }
@@ -578,7 +578,7 @@ public final class UiFileActivity {
             public int compare(
                     FileListItem.File a,
                     FileListItem.File b) {
-                return a.resource().path().compareTo(b.resource().path());
+                return a.file().path().compareTo(b.file().path());
             }
         });
         return items;
@@ -599,7 +599,7 @@ public final class UiFileActivity {
         List<FileListItem.File> items = fileItems();
         List<File> files = new ArrayList<>(items.size());
         for (FileListItem.File item : items) {
-            files.add(item.resource());
+            files.add(item.file());
         }
         return files;
     }
@@ -610,7 +610,7 @@ public final class UiFileActivity {
             public void run() {
                 List<File> actual = new ArrayList<>();
                 for (FileListItem.File item : fileItems()) {
-                    actual.add(item.resource());
+                    actual.add(item.file());
                 }
                 assertEquals(asList(expected), actual);
             }

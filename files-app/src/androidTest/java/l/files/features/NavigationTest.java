@@ -95,7 +95,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_updates_navigation_list_when_going_into_a_new_dir() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
+        File dir = dir().resolve("dir").createDir();
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
@@ -180,7 +180,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     private void testDirectorySummary(
             final String expected, long modifiedAt) throws Exception {
-        File d = dir().resolve("dir").createDirectory();
+        File d = dir().resolve("dir").createDir();
         d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
         screen().assertSummaryView(d, new Consumer<CharSequence>() {
             @Override
@@ -191,13 +191,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_directory_view_is_disabled_if_no_read_permission() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
+        File dir = dir().resolve("dir").createDir();
         dir.removePermissions(Permission.read());
         screen().assertDisabled(dir);
     }
 
     public void test_link_icon_displayed() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
+        File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
 
         screen()
@@ -206,8 +206,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_can_navigate_into_linked_directory() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
-        dir.resolve("a").createDirectory();
+        File dir = dir().resolve("dir").createDir();
+        dir.resolve("a").createDir();
 
         File link = dir().resolve("link").createLink(dir);
         File linkChild = link.resolve("a");
@@ -218,18 +218,18 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_can_see_changes_in_linked_directory() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
+        File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
         screen().clickInto(link)
                 .assertCurrentDirectory(link);
 
-        File child = link.resolve("child").createDirectory();
+        File child = link.resolve("child").createDir();
         screen().clickInto(child)
                 .assertCurrentDirectory(child);
     }
 
     public void test_press_action_bar_up_indicator_will_go_back() throws Exception {
-        File dir = dir().resolve("dir").createDirectory();
+        File dir = dir().resolve("dir").createDir();
         screen()
                 .clickInto(dir)
                 .assertCurrentDirectory(dir)
@@ -239,7 +239,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void test_action_bar_title_shows_name_of_directory() throws Exception {
         screen()
-                .clickInto(dir().resolve("a").createDirectory())
+                .clickInto(dir().resolve("a").createDir())
                 .assertActionBarTitle("a");
     }
 
@@ -249,28 +249,28 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void test_action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
         screen()
-                .clickInto(dir().resolve("dir").createDirectory())
+                .clickInto(dir().resolve("dir").createDir())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
     public void test_action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
         screen()
-                .clickInto(dir().resolve("dir").createDirectory())
+                .clickInto(dir().resolve("dir").createDir())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
 
     public void test_long_press_back_will_clear_back_stack() throws Exception {
         screen()
-                .clickInto(dir().resolve("a").createDirectory())
-                .clickInto(dir().resolve("a/b").createDirectory())
-                .clickInto(dir().resolve("a/b/c").createDirectory())
+                .clickInto(dir().resolve("a").createDir())
+                .clickInto(dir().resolve("a/b").createDir())
+                .clickInto(dir().resolve("a/b/c").createDir())
                 .longPressBack()
                 .assertCurrentDirectory(dir());
     }
 
     public void test_open_new_directory_will_close_opened_drawer() throws Exception {
-        File dir = dir().resolve("a").createDirectory();
+        File dir = dir().resolve("a").createDir();
         screen()
                 .openBookmarksDrawer()
                 .activityObject()
@@ -279,7 +279,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_observes_on_current_directory_and_shows_newly_added_files() throws Exception {
-        File dir = dir().resolve("a").createDirectory();
+        File dir = dir().resolve("a").createDir();
         screen().assertListViewContains(dir, true);
     }
 
@@ -291,7 +291,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_updates_view_on_child_directory_modified() throws Exception {
-        File dir = dir().resolve("a").createDirectory();
+        File dir = dir().resolve("a").createDir();
         testUpdatesDateViewOnChildModified(dir);
     }
 
@@ -351,7 +351,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         Stat stat = file.stat(NOFOLLOW);
         Instant lastModifiedBefore = stat.lastModifiedTime();
         if (stat.isDirectory()) {
-            file.resolve(String.valueOf(nanoTime())).createDirectory();
+            file.resolve(String.valueOf(nanoTime())).createDir();
         } else {
             try (Writer writer = file.writer(UTF_8, true)) {
                 writer.write("test");

@@ -15,7 +15,7 @@ import static l.files.ui.browser.FileSort.SIZE;
 
 public final class SortTest extends BaseFilesActivityTest {
     public void test_updates_list_on_sort_option_change_on_back() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
+        final File a = dir().resolve("a").createDir();
         final File aa = createFile("aa", "aa", Instant.of(1, 1), a);
         final File ab = createFile("ab", "ab", Instant.of(2, 1), a);
         final File b = createFile("b", "b", Instant.of(1, 1));

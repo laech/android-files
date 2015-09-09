@@ -142,7 +142,7 @@ public final class Preview {
 
     private static boolean isReadable(File file) {
         try {
-            return file.readable();
+            return file.isReadable();
         } catch (IOException e) {
             return false;
         }
@@ -157,12 +157,12 @@ public final class Preview {
         return DecodeChain.run(res, stat, constraint, callback, this);
     }
 
-    Rect decodeSize(File res) {
-        log.debug("decode size start %s", res);
+    Rect decodeSize(File file) {
+        log.debug("decode size start %s", file);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
-        try (InputStream in = res.input()) {
+        try (InputStream in = file.input()) {
             decodeStream(in, null, options);
 
         } catch (Exception e) {
@@ -170,7 +170,7 @@ public final class Preview {
             return null;
         }
 
-        log.debug("decode size end %s", res);
+        log.debug("decode size end %s", file);
 
         if (options.outWidth > 0 && options.outHeight > 0) {
             return Rect.of(options.outWidth, options.outHeight);

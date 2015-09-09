@@ -34,9 +34,9 @@ final class DecodeImage extends DecodeBitmap {
 
     @Override
     Result decode() throws IOException {
-        Rect size = context.getSize(res, stat, constraint);
+        Rect size = context.getSize(file, stat, constraint);
         if (size == null) {
-            size = context.decodeSize(res);
+            size = context.decodeSize(file);
             if (size != null) {
                 publishProgress(size);
             }
@@ -50,7 +50,7 @@ final class DecodeImage extends DecodeBitmap {
             return null;
         }
 
-        try (InputStream in = res.input()) {
+        try (InputStream in = file.input()) {
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
         }

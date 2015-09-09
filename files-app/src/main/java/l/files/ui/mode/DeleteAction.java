@@ -55,11 +55,11 @@ public final class DeleteAction extends ActionModeItem {
                 .show();
     }
 
-    private void requestDelete(final Collection<? extends File> resources) {
+    private void requestDelete(final Collection<? extends File> files) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                OperationService.delete(context, resources);
+                OperationService.delete(context, files);
             }
         });
     }

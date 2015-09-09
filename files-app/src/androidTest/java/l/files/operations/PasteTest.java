@@ -21,8 +21,8 @@ public abstract class PasteTest extends FileBaseTest {
      * destination, even if they are empty.
      */
     public void testPastesEmptyDirectories() throws Exception {
-        File src = dir1().resolve("empty").createDirectory();
-        File dstDir = dir1().resolve("dst").createDirectory();
+        File src = dir1().resolve("empty").createDir();
+        File dstDir = dir1().resolve("dst").createDir();
         create(singleton(src), dstDir).execute();
         assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
     }
@@ -37,7 +37,7 @@ public abstract class PasteTest extends FileBaseTest {
                 dir1().resolve("a.txt").createFile(),
                 dir1().resolve("b.mp4").createFile()
         );
-        dir1().resolve("1").createDirectory();
+        dir1().resolve("1").createDir();
         dir1().resolve("1/a.txt").createFile();
         dir1().resolve("1/b.mp4").createFile();
 
@@ -77,7 +77,7 @@ public abstract class PasteTest extends FileBaseTest {
                 dir1().resolve("a/1.txt").createFiles(),
                 dir1().resolve("a/2.txt").createFiles()
         );
-        final File dstDir = dir1().resolve("b").createDirectory();
+        final File dstDir = dir1().resolve("b").createDir();
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -101,8 +101,8 @@ public abstract class PasteTest extends FileBaseTest {
     }
 
     public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {
-        File parent = dir1().resolve("parent").createDirectory();
-        File child = dir1().resolve("parent/child").createDirectory();
+        File parent = dir1().resolve("parent").createDir();
+        File child = dir1().resolve("parent/child").createDir();
         try {
             create(singleton(parent), child).execute();
             fail();
@@ -112,7 +112,7 @@ public abstract class PasteTest extends FileBaseTest {
     }
 
     public void testErrorOnPastingIntoSelf() throws Exception {
-        File dir = dir1().resolve("parent").createDirectory();
+        File dir = dir1().resolve("parent").createDir();
         try {
             create(singleton(dir), dir).execute();
             fail();

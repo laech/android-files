@@ -39,7 +39,7 @@ public final class FileSortDateTest extends FileSortTest {
     private File createDirModified(
             final String name,
             final Instant instant) throws IOException {
-        final File dir = dir1().resolve(name).createDirectory();
+        final File dir = dir1().resolve(name).createDir();
         return setModified(dir, instant);
     }
 

@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.File.Name;
-
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
@@ -18,16 +16,16 @@ import static java.util.Locale.SIMPLIFIED_CHINESE;
 public final class NameTest extends TestCase {
 
     private void testBaseDotExt(String value) {
-        Name name = Name.of(value);
+        FileName name = FileName.of(value);
         assertEquals(value, name.base() + name.dotExt());
     }
 
     private void testNameHasBase(String name, String base) {
-        assertEquals(base, Name.of(name).base());
+        assertEquals(base, FileName.of(name).base());
     }
 
     private void testNameHasExt(String name, String ext) {
-        assertEquals(ext, Name.of(name).ext());
+        assertEquals(ext, FileName.of(name).ext());
     }
 
     public void test_if_name_ends_with_a_dot_then_base_is_whole_name() {
@@ -120,20 +118,20 @@ public final class NameTest extends TestCase {
     }
 
     private void testSort(Locale locale, String... names) {
-        List<Name> expected = names(names);
-        List<Name> actual = new ArrayList<>(expected);
+        List<FileName> expected = names(names);
+        List<FileName> actual = new ArrayList<>(expected);
 
         reverse(actual);
         assertNotEqual(expected, actual);
 
-        sort(actual, Name.comparator(locale));
+        sort(actual, FileName.comparator(locale));
         assertEquals(expected, actual);
     }
 
-    private List<Name> names(String... names) {
-        List<Name> result = new ArrayList<>(names.length);
+    private List<FileName> names(String... names) {
+        List<FileName> result = new ArrayList<>(names.length);
         for (String name : names) {
-            result.add(Name.of(name));
+            result.add(FileName.of(name));
         }
         return unmodifiableList(result);
     }

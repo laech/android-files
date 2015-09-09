@@ -99,7 +99,7 @@ final class DecodePdf extends DecodeBitmap {
     @Override
     Result decode() throws IOException {
         return PdfPreviewProvider.query(
-                context.context, signal, res, constraint);
+                context.context, signal, file, constraint);
     }
 
     public static final class PdfPreviewProvider extends ContentProvider {

@@ -7,7 +7,7 @@ import l.files.fs.File;
 import static l.files.fs.File.OCTET_STREAM;
 
 /**
- * Detects content type based on name and resource type.
+ * Detects content type based on name and file type.
  */
 final class BasicDetector extends AbstractDetector {
 

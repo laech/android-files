@@ -40,7 +40,7 @@ public final class OperationService extends Service {
 
     static final String ACTION_CANCEL = "l.files.operations.CANCEL";
     static final String EXTRA_TASK_ID = "task_id";
-    static final String EXTRA_RESOURCES = "resources";
+    static final String EXTRA_FILES = "files";
     static final String EXTRA_DESTINATION = "destination";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
@@ -54,13 +54,11 @@ public final class OperationService extends Service {
         listeners.remove(listener);
     }
 
-    public static void delete(
-            Context context,
-            Collection<? extends File> resources) {
+    public static void delete(Context context, Collection<? extends File> files) {
         context.startService(
                 new Intent(context, OperationService.class)
                         .setAction(DELETE.action())
-                        .putParcelableArrayListExtra(EXTRA_RESOURCES, new ArrayList<>(resources))
+                        .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files))
         );
     }
 
@@ -87,7 +85,7 @@ public final class OperationService extends Service {
                 new Intent(context, OperationService.class)
                         .setAction(action)
                         .putExtra(EXTRA_DESTINATION, destination)
-                        .putParcelableArrayListExtra(EXTRA_RESOURCES, new ArrayList<>(sources))
+                        .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(sources))
         );
     }
 
@@ -191,7 +189,7 @@ public final class OperationService extends Service {
         DELETE("l.files.operations.DELETE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> files = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
+                List<File> files = intent.getParcelableArrayListExtra(EXTRA_FILES);
                 return new DeleteTask(id, Clock.system(), callback, handler, files);
             }
         },
@@ -199,7 +197,7 @@ public final class OperationService extends Service {
         COPY("l.files.operations.COPY") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
+                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_FILES);
                 File destination = intent.getParcelableExtra(EXTRA_DESTINATION);
                 return new CopyTask(id, Clock.system(), callback, handler, sources, destination);
             }
@@ -208,7 +206,7 @@ public final class OperationService extends Service {
         MOVE("l.files.operations.MOVE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
+                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_FILES);
                 File destination = intent.getParcelableExtra(EXTRA_DESTINATION);
                 return new MoveTask(id, Clock.system(), callback, handler, sources, destination);
             }

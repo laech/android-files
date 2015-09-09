@@ -81,13 +81,13 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        Rect size = context.getSize(res, stat, constraint);
+        Rect size = context.getSize(file, stat, constraint);
         if (size == null) {
       /*
        * Currently decoding the size is much quicker
        * than decoding anything else.
        */
-            size = context.decodeSize(res);
+            size = context.decodeSize(file);
             if (size != null) {
                 publishProgress(size);
             }
@@ -112,19 +112,19 @@ final class DecodeChain extends Decode {
 
         if (isImage(media)) {
             publishProgress(new DecodeImage(
-                    res, stat, constraint, callback, context));
+                    file, stat, constraint, callback, context));
 
         } else if (isPdf(media)) {
             publishProgress(new DecodePdf(
-                    res, stat, constraint, callback, context));
+                    file, stat, constraint, callback, context));
 
         } else if (isAudio(media)) {
             publishProgress(new DecodeAudio(
-                    res, stat, constraint, callback, context));
+                    file, stat, constraint, callback, context));
 
         } else if (isVideo(media)) {
             publishProgress(new DecodeVideo(
-                    res, stat, constraint, callback, context));
+                    file, stat, constraint, callback, context));
 
         } else {
             publishProgress(NoPreview.INSTANCE);
@@ -134,7 +134,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkIsCache() {
-        if (res.hierarchy().contains(context.cacheDir)) {
+        if (file.hierarchy().contains(context.cacheDir)) {
             publishProgress(NoPreview.INSTANCE);
             return true;
         }
@@ -142,7 +142,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkNotPreviewable() {
-        if (!context.isPreviewable(res, stat, constraint)) {
+        if (!context.isPreviewable(file, stat, constraint)) {
             publishProgress(NoPreview.INSTANCE);
             return true;
         }
@@ -150,7 +150,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkBitmapMemCache() {
-        Bitmap bitmap = context.getBitmap(res, stat, constraint);
+        Bitmap bitmap = context.getBitmap(file, stat, constraint);
         if (bitmap != null) {
             publishProgress(bitmap);
             return true;
@@ -161,14 +161,14 @@ final class DecodeChain extends Decode {
     private boolean checkBitmapDiskCache() {
         Bitmap bitmap = null;
         try {
-            bitmap = context.getBitmapFromDisk(res, stat, constraint);
+            bitmap = context.getBitmapFromDisk(file, stat, constraint);
         } catch (Exception e) {
             log.error(e);
         }
 
         if (bitmap != null) {
             publishProgress(bitmap);
-            if (context.getPalette(res, stat, constraint) == null) {
+            if (context.getPalette(file, stat, constraint) == null) {
                 publishProgress(decodePalette(bitmap));
             }
             return true;
@@ -177,11 +177,11 @@ final class DecodeChain extends Decode {
     }
 
     private String checkMediaType() {
-        String media = context.getMediaType(res, stat, constraint);
+        String media = context.getMediaType(file, stat, constraint);
         if (media == null) {
             media = decodeMedia();
             if (media != null) {
-                context.putMediaType(res, stat, constraint, media);
+                context.putMediaType(file, stat, constraint, media);
             }
         }
         if (media == null) {
@@ -193,9 +193,9 @@ final class DecodeChain extends Decode {
     private String decodeMedia() {
         try {
 
-            log.debug("decode media start %s", res);
-            String media = res.detectContentMediaType();
-            log.debug("decode media end %s %s", media, res);
+            log.debug("decode media start %s", file);
+            String media = file.detectContentMediaType();
+            log.debug("decode media end %s %s", media, file);
             return media;
 
         } catch (Exception e) {

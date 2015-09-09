@@ -34,17 +34,17 @@ public final class BookmarkManagerTest extends FileBaseTest {
     }
 
     public void test_can_add_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDirectory();
-        File b = dir2().resolve("b").createDirectory();
+        File a = dir1().resolve("a").createDir();
+        File b = dir2().resolve("b").createDir();
         manager.addBookmark(a);
         manager.addBookmark(b);
         assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
     }
 
     public void test_can_remove_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDirectory();
-        File b = dir1().resolve("b").createDirectory();
-        File c = dir1().resolve("c").createDirectory();
+        File a = dir1().resolve("a").createDir();
+        File b = dir1().resolve("b").createDir();
+        File c = dir1().resolve("c").createDir();
         manager.addBookmark(a);
         manager.addBookmark(b);
         manager.addBookmark(c);
@@ -71,8 +71,8 @@ public final class BookmarkManagerTest extends FileBaseTest {
     }
 
     public void test_removes_non_existing_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDirectory();
-        File b = dir1().resolve("b").createDirectory();
+        File a = dir1().resolve("a").createDir();
+        File b = dir1().resolve("b").createDir();
         manager.addBookmark(a);
         manager.addBookmark(b);
         assertEquals(new HashSet<>(asList(a, b)), manager.loadBookmarks());

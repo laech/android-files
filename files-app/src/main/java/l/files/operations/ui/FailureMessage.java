@@ -13,7 +13,7 @@ abstract class FailureMessage implements Parcelable {
     FailureMessage() {
     }
 
-    abstract File resource();
+    abstract File file();
 
     abstract String message();
 
@@ -28,7 +28,7 @@ abstract class FailureMessage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(resource(), 0);
+        dest.writeParcelable(file(), 0);
         dest.writeString(message());
     }
 

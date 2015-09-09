@@ -12,7 +12,7 @@ public abstract class Failure {
     Failure() {
     }
 
-    public abstract File resource();
+    public abstract File file();
 
     public abstract IOException cause();
 

@@ -37,30 +37,30 @@ import static l.files.fs.local.Stat.lstat;
 public final class LocalFileTest extends FileBaseTest {
 
     public void test_isReadable_true() throws Exception {
-        assertTrue(dir1().readable());
+        assertTrue(dir1().isReadable());
     }
 
     public void test_isReadable_false() throws Exception {
         dir1().removePermissions(Permission.read());
-        assertFalse(dir1().readable());
+        assertFalse(dir1().isReadable());
     }
 
     public void test_isWritable_true() throws Exception {
-        assertTrue(dir1().writable());
+        assertTrue(dir1().isWritable());
     }
 
     public void test_isWritable_false() throws Exception {
         dir1().removePermissions(Permission.write());
-        assertFalse(dir1().writable());
+        assertFalse(dir1().isWritable());
     }
 
     public void test_isExecutable_true() throws Exception {
-        assertTrue(dir1().executable());
+        assertTrue(dir1().isExecutable());
     }
 
     public void test_isExecutable_false() throws Exception {
         dir1().removePermissions(Permission.execute());
-        assertFalse(dir1().executable());
+        assertFalse(dir1().isExecutable());
     }
 
     public void test_stat_symbolicLink() throws Exception {
@@ -118,9 +118,9 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     public void test_list_linkFollowSuccess() throws Exception {
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         File a = dir.resolve("a").createFile();
-        File b = dir.resolve("b").createDirectory();
+        File b = dir.resolve("b").createDir();
         File c = dir.resolve("c").createLink(a);
         File link = dir1().resolve("link").createLink(dir);
 
@@ -137,7 +137,7 @@ public final class LocalFileTest extends FileBaseTest {
 
     public void test_list() throws Exception {
         File a = dir1().resolve("a").createFile();
-        File b = dir1().resolve("b").createDirectory();
+        File b = dir1().resolve("b").createDir();
         List<?> expected = asList(a, b);
         try (Stream<File> actual = dir1().list(NOFOLLOW)) {
             assertEquals(expected, actual.to(new ArrayList<>()));
@@ -147,8 +147,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_output_append_defaultFalse() throws Exception {
         test_output("a", "b", "b", new OutputProvider() {
             @Override
-            public OutputStream open(File res) throws IOException {
-                return res.output();
+            public OutputStream open(File file) throws IOException {
+                return file.output();
             }
         });
     }
@@ -156,8 +156,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_output_append_false() throws Exception {
         test_output("a", "b", "b", new OutputProvider() {
             @Override
-            public OutputStream open(File res) throws IOException {
-                return res.output(false);
+            public OutputStream open(File file) throws IOException {
+                return file.output(false);
             }
         });
     }
@@ -165,8 +165,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_output_append_true() throws Exception {
         test_output("a", "b", "ab", new OutputProvider() {
             @Override
-            public OutputStream open(File res) throws IOException {
-                return res.output(true);
+            public OutputStream open(File file) throws IOException {
+                return file.output(true);
             }
         });
     }
@@ -182,7 +182,7 @@ public final class LocalFileTest extends FileBaseTest {
         try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
         }
-        assertEquals(result, file.readString(UTF_8));
+        assertEquals(result, file.toString(UTF_8));
     }
 
     private interface OutputProvider {
@@ -266,7 +266,7 @@ public final class LocalFileTest extends FileBaseTest {
         File file = dir1().resolve("file").createFile();
         String expected = "a\nb\tc";
         file.writeString(UTF_8, expected);
-        assertEquals(expected, file.readString(UTF_8));
+        assertEquals(expected, file.toString(UTF_8));
     }
 
     public void test_createFile() throws Exception {
@@ -282,9 +282,9 @@ public final class LocalFileTest extends FileBaseTest {
         java.io.File expected = new java.io.File(dir1().path(), "b");
         assertTrue(expected.createNewFile());
 
-        assertEquals(expected.canRead(), actual.readable());
-        assertEquals(expected.canWrite(), actual.writable());
-        assertEquals(expected.canExecute(), actual.executable());
+        assertEquals(expected.canRead(), actual.isReadable());
+        assertEquals(expected.canWrite(), actual.isWritable());
+        assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
                 permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
@@ -293,20 +293,20 @@ public final class LocalFileTest extends FileBaseTest {
 
     public void test_createDirectory() throws Exception {
         File dir = dir1().resolve("a");
-        dir.createDirectory();
+        dir.createDir();
         assertTrue(dir.stat(NOFOLLOW).isDirectory());
     }
 
     public void test_createDirectory_correctPermissions() throws Exception {
         File actual = dir1().resolve("a");
-        actual.createDirectory();
+        actual.createDir();
 
         java.io.File expected = new java.io.File(dir1().path(), "b");
         assertTrue(expected.mkdir());
 
-        assertEquals(expected.canRead(), actual.readable());
-        assertEquals(expected.canWrite(), actual.writable());
-        assertEquals(expected.canExecute(), actual.executable());
+        assertEquals(expected.canRead(), actual.isReadable());
+        assertEquals(expected.canWrite(), actual.isWritable());
+        assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
                 permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
@@ -314,7 +314,7 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     public void test_createDirectories() throws Exception {
-        dir1().resolve("a/b/c").createDirectories();
+        dir1().resolve("a/b/c").createDirs();
         assertTrue(dir1().resolve("a/b/c").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().resolve("a/b").stat(NOFOLLOW).isDirectory());
         assertTrue(dir1().resolve("a/").stat(NOFOLLOW).isDirectory());
@@ -361,13 +361,13 @@ public final class LocalFileTest extends FileBaseTest {
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", dst.readString(UTF_8));
+        assertEquals("src", dst.toString(UTF_8));
     }
 
     public void test_moveTo_directoryToNonExistingDirectory() throws Exception {
         File src = dir1().resolve("src");
         File dst = dir1().resolve("dst");
-        src.resolve("a").createDirectories();
+        src.resolve("a").createDirs();
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
@@ -392,7 +392,7 @@ public final class LocalFileTest extends FileBaseTest {
 
     public void test_delete_emptyDirectory() throws Exception {
         File directory = dir1().resolve("directory");
-        directory.createDirectory();
+        directory.createDir();
         assertTrue(directory.exists(NOFOLLOW));
         directory.delete();
         assertFalse(directory.exists(NOFOLLOW));

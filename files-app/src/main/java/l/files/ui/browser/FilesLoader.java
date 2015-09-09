@@ -256,7 +256,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             files.addAll(data.values());
         } else {
             for (FileListItem.File item : data.values()) {
-                if (!item.resource().hidden()) {
+                if (!item.file().isHidden()) {
                     files.add(item);
                 }
             }

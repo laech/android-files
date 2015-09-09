@@ -97,7 +97,7 @@ final class LocalObservable extends Native
     private static final Handler handler = new Handler(getMainLooper());
 
     /**
-     * Mask to use for root resource.
+     * Mask to use for root file.
      */
     private static final int ROOT_MASK
             = IN_EXCL_UNLINK
@@ -141,13 +141,13 @@ final class LocalObservable extends Native
     private final int rootWd;
 
     /**
-     * The root resource being watched.
+     * The root file being watched.
      */
     private final LocalFile root;
 
     /**
      * If {@link #root} is a directory, its immediate child directories will
-     * also be watched since creation of resources inside a child directory will
+     * also be watched since creation of files inside a child directory will
      * update the child directory's attributes, and that update won't be
      * reported by other events. This is a map of watch descriptors to the child
      * directories name being watched, and it will be updated as directories are
@@ -177,22 +177,22 @@ final class LocalObservable extends Native
     }
 
     public static Closeable observe(
-            LocalFile resource,
+            LocalFile file,
             LinkOption option,
             Observer observer,
             Consumer<File> childrenConsumer) throws IOException {
 
-        requireNonNull(resource, "root");
+        requireNonNull(file, "root");
         requireNonNull(option, "option");
         requireNonNull(observer, "observer");
 
-        boolean directory = resource.stat(option).isDirectory();
+        boolean directory = file.stat(option).isDirectory();
 
-        int fd = inotifyInit(resource);
-        int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
+        int fd = inotifyInit(file);
+        int wd = inotifyAddWatchWillCloseOnError(fd, file, option);
 
         LocalObservable observable =
-                new LocalObservable(fd, wd, resource, observer);
+                new LocalObservable(fd, wd, file, observer);
 
     /* Using a new thread seems to be much quicker than using a thread pool
      * executor, didn't investigate why, just a reminder here to check the
@@ -213,7 +213,7 @@ final class LocalObservable extends Native
         }
 
         try {
-            observeChildren(fd, resource, option, observable, childrenConsumer);
+            observeChildren(fd, file, option, observable, childrenConsumer);
         } catch (IOException e) {
             log.warn(e);
         }
@@ -221,22 +221,20 @@ final class LocalObservable extends Native
         return observable;
     }
 
-    private static int inotifyInit(LocalFile resource) throws IOException {
+    private static int inotifyInit(LocalFile file) throws IOException {
         try {
             return Inotify.init1(IN_NONBLOCK);
         } catch (ErrnoException e) {
-            throw toIOException(e, resource.path());
+            throw toIOException(e, file.path());
         }
     }
 
     private static int inotifyAddWatchWillCloseOnError(
-            int fd,
-            LocalFile resource,
-            LinkOption opt) throws IOException {
+            int fd, LocalFile file, LinkOption opt) throws IOException {
 
         try {
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            String path = resource.file().getPath();
+            String path = file.file().getPath();
             return addWatch(fd, path, mask);
         } catch (ErrnoException e) {
             try {
@@ -244,7 +242,7 @@ final class LocalObservable extends Native
             } catch (ErrnoException ee) {
                 e.addSuppressed(ee);
             }
-            throw toIOException(e, resource.path());
+            throw toIOException(e, file.path());
 
         } catch (Throwable e) {
             try {
@@ -258,24 +256,24 @@ final class LocalObservable extends Native
 
     private static void observeChildren(
             int fd,
-            LocalFile resource,
+            LocalFile file,
             LinkOption option,
             LocalObservable observable,
             Consumer<File> childrenConsumer) throws IOException {
 
-        try (Stream<Dirent> stream = Dirent.stream(resource, option)) {
+        try (Stream<Dirent> stream = Dirent.stream(file, option)) {
             for (Dirent child : stream) {
 
                 if (observable.isClosed()) {
                     return;
                 }
 
-                childrenConsumer.apply(resource.resolve(child.name()));
+                childrenConsumer.apply(file.resolve(child.name()));
 
                 if (child.type() == DT_DIR) {
                     try {
 
-                        String path = resource.path() + "/" + child.name();
+                        String path = file.path() + "/" + child.name();
                         int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
                         observable.childDirectories.put(wd, child.name());
 

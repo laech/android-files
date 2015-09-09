@@ -8,7 +8,7 @@ public final class SelectAllTest extends BaseFilesActivityTest {
     public void test_selects_all() throws Exception {
         final File a = dir().resolve("a").createFile();
         final File b = dir().resolve("b").createFile();
-        final File c = dir().resolve("c").createDirectory();
+        final File c = dir().resolve("c").createDir();
 
         screen()
                 .longClick(a)

@@ -56,7 +56,7 @@ public final class OperationServiceTest extends FileBaseTest {
 
     public void testMovesFile() throws Exception {
         File src = dir1().resolve("a").createFile();
-        File dst = dir1().resolve("dst").createDirectory();
+        File dst = dir1().resolve("dst").createDir();
         CountDownListener listener = register(new CountDownListener(MOVE));
         try {
 
@@ -72,7 +72,7 @@ public final class OperationServiceTest extends FileBaseTest {
 
     public void testCopiesFile() throws Exception {
         File src = dir1().resolve("a").createFile();
-        File dst = dir1().resolve("dst").createDirectory();
+        File dst = dir1().resolve("dst").createDir();
         CountDownListener listener = register(new CountDownListener(COPY));
         try {
 

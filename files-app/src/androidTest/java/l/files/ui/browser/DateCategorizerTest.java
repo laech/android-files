@@ -14,7 +14,7 @@ import java.util.List;
 import l.files.R;
 import l.files.common.testing.BaseTest;
 import l.files.fs.File;
-import l.files.fs.File.Name;
+import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
 import l.files.ui.browser.FileListItem.Header;
@@ -118,7 +118,7 @@ public final class DateCategorizerTest extends BaseTest {
         for (FileListItem item : items) {
             names.add(item.isHeader()
                     ? ((Header) item).header()
-                    : ((FileListItem.File) item).resource().name().toString());
+                    : ((FileListItem.File) item).file().name().toString());
         }
         return unmodifiableList(names);
     }
@@ -250,7 +250,7 @@ public final class DateCategorizerTest extends BaseTest {
     private FileListItem.File file(final long time) {
         final Stat stat = mock(Stat.class);
         final File res = mock(File.class);
-        given(res.name()).willReturn(Name.of(String.valueOf(time)));
+        given(res.name()).willReturn(FileName.of(String.valueOf(time)));
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
         return FileListItem.File.create(res, stat, stat, collator);
     }

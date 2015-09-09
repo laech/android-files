@@ -43,7 +43,7 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
     }
 
     private void assertFailureView(FailureMessage msg, View view) {
-        assertEquals(msg.resource().toString(), ((TextView) view.findViewById(R.id.failure_path)).getText());
+        assertEquals(msg.file().toString(), ((TextView) view.findViewById(R.id.failure_path)).getText());
         assertEquals(msg.message(), ((TextView) view.findViewById(R.id.failure_message)).getText());
     }
 

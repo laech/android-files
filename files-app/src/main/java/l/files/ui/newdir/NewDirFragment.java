@@ -21,7 +21,7 @@ public final class NewDirFragment extends FileCreationFragment {
 
     static NewDirFragment create(File file) {
         Bundle bundle = new Bundle(1);
-        bundle.putParcelable(ARG_PARENT_RESOURCE, file);
+        bundle.putParcelable(ARG_PARENT_FILE, file);
 
         NewDirFragment fragment = new NewDirFragment();
         fragment.setArguments(bundle);
@@ -111,7 +111,7 @@ public final class NewDirFragment extends FileCreationFragment {
         @Override
         protected IOException doInBackground(File... params) {
             try {
-                params[0].createDirectory();
+                params[0].createDir();
                 return null;
             } catch (IOException e) {
                 return e;

@@ -51,7 +51,7 @@ abstract class DecodeBitmap extends Decode {
             return null;
         }
 
-        if (context.getSize(res, stat, constraint) == null) {
+        if (context.getSize(file, stat, constraint) == null) {
             publishProgress(result.originalSize);
         }
 
@@ -64,7 +64,7 @@ abstract class DecodeBitmap extends Decode {
 
         publishProgress(scaledBitmap);
 
-        if (context.getPalette(res, stat, constraint) == null) {
+        if (context.getPalette(file, stat, constraint) == null) {
             publishProgress(decodePalette(scaledBitmap));
         }
 
@@ -83,7 +83,7 @@ abstract class DecodeBitmap extends Decode {
                         result.originalSize.height() > scaledBitmap.getHeight();
 
         if (scaledDown) {
-            context.putBitmapToDiskAsync(res, stat, constraint, scaledBitmap);
+            context.putBitmapToDiskAsync(file, stat, constraint, scaledBitmap);
         }
 
         return null;

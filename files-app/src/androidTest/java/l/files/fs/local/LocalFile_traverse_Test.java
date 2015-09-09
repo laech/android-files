@@ -29,7 +29,7 @@ import static l.files.fs.local.LocalFile_traverse_Test.TraversalOrder.PRE;
 public final class LocalFile_traverse_Test extends FileBaseTest {
 
     public void test_traverse_noFollowLink() throws Exception {
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         link.resolve("a").createFile();
         link.resolve("b").createFile();
@@ -44,9 +44,9 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_followLink_rootOnly() throws Exception {
-        dir1().resolve("dir").createDirectory();
+        dir1().resolve("dir").createDir();
         dir1().resolve("dir/a").createFile();
-        dir1().resolve("dir/b").createDirectory();
+        dir1().resolve("dir/b").createDir();
         dir1().resolve("dir/b/1").createFile();
         dir1().resolve("dir/c").createLink(dir1().resolve("dir/b"));
         dir1().resolve("link").createLink(dir1().resolve("dir"));
@@ -70,7 +70,7 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_followLink() throws Exception {
-        File dir = dir1().resolve("dir").createDirectory();
+        File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         File a = link.resolve("a").createFile();
 
@@ -86,8 +86,8 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
-        dir1().resolve("a").createDirectory();
-        dir1().resolve("b").createDirectory();
+        dir1().resolve("a").createDir();
+        dir1().resolve("b").createDir();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -99,15 +99,15 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
         Recorder recorder = new Recorder() {
 
             @Override
-            public Result onPreVisit(File res) throws IOException {
-                if (res.name().toString().equals("a")) {
+            public Result onPreVisit(File file) throws IOException {
+                if (file.name().toString().equals("a")) {
                     throw new IOException("Test");
                 }
-                return super.onPreVisit(res);
+                return super.onPreVisit(file);
             }
 
             @Override
-            public void onException(File res, IOException e) throws IOException {
+            public void onException(File file, IOException e) throws IOException {
                 // Ignore
             }
 
@@ -118,9 +118,9 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
-        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
-        dir1().resolve("b").createDirectories();
+        dir1().resolve("b").createDirs();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -138,16 +138,16 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
         Recorder recorder = new Recorder() {
 
             @Override
-            public Result onPostVisit(File res) throws IOException {
-                super.onPostVisit(res);
-                if (res.name().toString().equals("1")) {
+            public Result onPostVisit(File file) throws IOException {
+                super.onPostVisit(file);
+                if (file.name().toString().equals("1")) {
                     throw new IOException("Test");
                 }
                 return CONTINUE;
             }
 
             @Override
-            public void onException(File res, IOException e) throws IOException {
+            public void onException(File file, IOException e) throws IOException {
                 // Ignore
             }
 
@@ -158,10 +158,10 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
-        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
-        dir1().resolve("a/2").createDirectories();
-        dir1().resolve("b").createDirectories();
+        dir1().resolve("a/2").createDirs();
+        dir1().resolve("b").createDirs();
         dir1().resolve("a").setPermissions(Collections.<Permission>emptySet());
 
         List<TraversalEvent> expected = asList(
@@ -175,7 +175,7 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            public void onException(File res, IOException e) {
+            public void onException(File file, IOException e) {
                 // Ignore
             }
         };
@@ -185,10 +185,10 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_order() throws Exception {
-        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
-        dir1().resolve("a/2").createDirectories();
-        dir1().resolve("b").createDirectories();
+        dir1().resolve("a/2").createDirs();
+        dir1().resolve("b").createDirs();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -212,10 +212,10 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traversal_skip() throws Exception {
-        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
-        dir1().resolve("a/2").createDirectories();
-        dir1().resolve("b").createDirectories();
+        dir1().resolve("a/2").createDirs();
+        dir1().resolve("b").createDirs();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -227,9 +227,9 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            public Result onPreVisit(File res) throws IOException {
-                super.onPreVisit(res);
-                if (res.name().toString().equals("a")) {
+            public Result onPreVisit(File file) throws IOException {
+                super.onPreVisit(file);
+                if (file.name().toString().equals("a")) {
                     return SKIP;
                 }
                 return CONTINUE;
@@ -240,10 +240,10 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
     }
 
     public void test_traverse_termination() throws Exception {
-        dir1().resolve("a/1").createDirectories();
+        dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
-        dir1().resolve("a/2").createDirectories();
-        dir1().resolve("b").createDirectories();
+        dir1().resolve("a/2").createDirs();
+        dir1().resolve("b").createDirs();
 
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1()),
@@ -252,9 +252,9 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
 
         Recorder recorder = new Recorder() {
             @Override
-            public Result onPreVisit(File res) throws IOException {
-                super.onPreVisit(res);
-                if (res.name().toString().equals("a")) {
+            public Result onPreVisit(File file) throws IOException {
+                super.onPreVisit(file);
+                if (file.name().toString().equals("a")) {
                     return TERMINATE;
                 }
                 return CONTINUE;
@@ -279,19 +279,19 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
         final List<TraversalEvent> events = new ArrayList<>();
 
         @Override
-        public Result onPreVisit(File res) throws IOException {
-            events.add(TraversalEvent.of(PRE, res));
+        public Result onPreVisit(File file) throws IOException {
+            events.add(TraversalEvent.of(PRE, file));
             return CONTINUE;
         }
 
         @Override
-        public Result onPostVisit(File res) throws IOException {
-            events.add(TraversalEvent.of(POST, res));
+        public Result onPostVisit(File file) throws IOException {
+            events.add(TraversalEvent.of(POST, file));
             return CONTINUE;
         }
 
         @Override
-        public void onException(File res, IOException e) throws IOException {
+        public void onException(File file, IOException e) throws IOException {
             throw e;
         }
 
@@ -309,7 +309,7 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
         abstract File resource();
 
         static TraversalEvent of(TraversalOrder order, File file) {
-            return new AutoValue_LocalResource_traverse_Test_TraversalEvent(order, file);
+            return new AutoValue_LocalFile_traverse_Test_TraversalEvent(order, file);
         }
     }
 

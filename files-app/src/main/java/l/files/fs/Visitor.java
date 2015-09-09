@@ -6,11 +6,11 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 
 public interface Visitor {
 
-    Result onPreVisit(File res) throws IOException;
+    Result onPreVisit(File file) throws IOException;
 
-    Result onPostVisit(File res) throws IOException;
+    Result onPostVisit(File file) throws IOException;
 
-    void onException(File res, IOException e) throws IOException;
+    void onException(File file, IOException e) throws IOException;
 
     enum Result {
 
@@ -34,17 +34,17 @@ public interface Visitor {
     class Base implements Visitor {
 
         @Override
-        public Result onPreVisit(File res) throws IOException {
+        public Result onPreVisit(File file) throws IOException {
             return CONTINUE;
         }
 
         @Override
-        public Result onPostVisit(File res) throws IOException {
+        public Result onPostVisit(File file) throws IOException {
             return CONTINUE;
         }
 
         @Override
-        public void onException(File res, IOException e) throws IOException {
+        public void onException(File file, IOException e) throws IOException {
             throw e;
         }
 

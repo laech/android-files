@@ -62,9 +62,9 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
         return new Visitor.Base() {
 
             @Override
-            public Result onPreVisit(File res) throws IOException {
+            public Result onPreVisit(File file) throws IOException {
                 try {
-                    res.setPermissions(Permission.all());
+                    file.setPermissions(Permission.all());
                 } catch (IOException ignored) {
                 }
                 return CONTINUE;

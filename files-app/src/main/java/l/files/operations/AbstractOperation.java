@@ -22,11 +22,11 @@ abstract class AbstractOperation implements FileOperation {
      */
     private static final int ERROR_LIMIT = 20;
 
-    private final Iterable<File> resources;
+    private final Iterable<File> files;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Collection<? extends File> resources) {
-        this.resources = unmodifiableSet(new HashSet<>(resources));
+    AbstractOperation(Collection<? extends File> files) {
+        this.files = unmodifiableSet(new HashSet<>(files));
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
 
@@ -55,25 +55,25 @@ abstract class AbstractOperation implements FileOperation {
     class OperationVisitor implements Visitor {
 
         @Override
-        public Result onPreVisit(File res) throws IOException {
+        public Result onPreVisit(File file) throws IOException {
             return isInterrupted() ? TERMINATE : CONTINUE;
         }
 
         @Override
-        public Result onPostVisit(File res) throws IOException {
+        public Result onPostVisit(File file) throws IOException {
             return isInterrupted() ? TERMINATE : CONTINUE;
         }
 
         @Override
-        public void onException(File res, IOException e) throws IOException {
-            record(res, e);
+        public void onException(File file, IOException e) throws IOException {
+            record(file, e);
         }
 
     }
 
     @Override
     public void execute() throws InterruptedException {
-        for (File file : resources) {
+        for (File file : files) {
             checkInterrupt();
             process(file);
         }

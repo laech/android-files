@@ -144,7 +144,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     public Object getItemIdObject(int position) {
         FileListItem item = getItem(position);
         if (item instanceof FileListItem.File) {
-            return ((FileListItem.File) item).resource();
+            return ((FileListItem.File) item).file();
         }
         return item;
     }
@@ -155,7 +155,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         List<File> files = new ArrayList<>(items.size());
         for (FileListItem item : items) {
             if (item.isFile()) {
-                files.add(((FileListItem.File) item).resource());
+                files.add(((FileListItem.File) item).file());
             }
         }
         selection.addAll(files);
@@ -259,12 +259,12 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
         @Override
         protected File itemId(FileListItem.File file) {
-            return file.resource();
+            return file.file();
         }
 
         @Override
         protected void onClick(View v, FileListItem.File file) {
-            listener.onOpen(file.resource());
+            listener.onOpen(file.file());
         }
 
         @Override
@@ -278,7 +278,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
 
         private void setTitle(FileListItem.File file) {
-            title.setText(file.resource().name());
+            title.setText(file.file().name());
             title.setEnabled(file.stat() != null && file.isReadable());
         }
 
@@ -353,7 +353,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 task.cancelAll();
             }
 
-            File res = file.resource();
+            File res = file.file();
             Stat stat = file.stat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
                 preview.setImageDrawable(null);

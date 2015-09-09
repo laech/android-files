@@ -48,7 +48,7 @@ public final class RenameTest extends BaseFilesActivityTest {
 
     public void test_disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
             throws Exception {
-        rename(dir().resolve("a").createDirectory())
+        rename(dir().resolve("a").createDir())
                 .assertOkButtonEnabled(false)
                 .assertHasNoError();
     }
@@ -68,7 +68,7 @@ public final class RenameTest extends BaseFilesActivityTest {
 
     public void test_rename_button_is_disable_if_there_are_more_than_one_file_checked()
             throws Exception {
-        final File f1 = dir().resolve("dir").createDirectory();
+        final File f1 = dir().resolve("dir").createDir();
         final File f2 = dir().resolve("a").createFile();
 
         screen()

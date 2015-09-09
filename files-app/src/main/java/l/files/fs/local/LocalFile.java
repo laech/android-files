@@ -1,7 +1,6 @@
 package l.files.fs.local;
 
 import android.os.Parcel;
-import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 import android.system.Os;
 
@@ -30,6 +29,7 @@ import java.util.Set;
 
 import l.files.common.base.Consumer;
 import l.files.fs.File;
+import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
@@ -105,7 +105,7 @@ public abstract class LocalFile extends Native implements File {
         return unmodifiableSet(permissions);
     }
 
-    private Name name;
+    private FileName name;
 
     LocalFile() {
     }
@@ -116,7 +116,7 @@ public abstract class LocalFile extends Native implements File {
         return new AutoValue_LocalFile(file);
     }
 
-    private static void ensureIsLocalResource(File file) {
+    private static void ensureIsLocal(File file) {
         if (!(file instanceof LocalFile)) {
             throw new IllegalArgumentException(file.toString());
         }
@@ -143,26 +143,25 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public Name name() {
+    public FileName name() {
         if (name == null) {
-            name = Name.of(file().getName());
+            name = FileName.of(file().getName());
         }
         return name;
     }
 
     @Override
-    public boolean hidden() {
+    public boolean isHidden() {
         return name().length() > 0 && name().charAt(0) == '.';
     }
 
-    @Nullable
     @Override
     public LocalFile parent() {
-        if (isRoot()) {
+        java.io.File parent = file().getParentFile();
+        if (parent == null) {
             return null;
-        } else {
-            return new AutoValue_LocalFile(file().getParentFile());
         }
+        return new AutoValue_LocalFile(parent);
     }
 
     @Override
@@ -203,14 +202,14 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public boolean startsWith(File other) {
-        ensureIsLocalResource(other);
-        if (other.parent() == null || other.equals(this)) {
+    public boolean pathStartsWith(File that) {
+        ensureIsLocal(that);
+        if (that.parent() == null || that.equals(this)) {
             return true;
         }
 
         String thisPath = path();
-        String thatPath = other.path();
+        String thatPath = that.path();
         return thisPath.startsWith(thatPath) &&
                 thisPath.charAt(thatPath.length()) == '/';
     }
@@ -221,15 +220,15 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public File resolve(Name other) {
+    public File resolve(FileName other) {
         return resolve(other.toString());
     }
 
     @Override
     public LocalFile resolveParent(File fromParent, File toParent) {
-        ensureIsLocalResource(fromParent);
-        ensureIsLocalResource(toParent);
-        if (!startsWith(fromParent)) {
+        ensureIsLocal(fromParent);
+        ensureIsLocal(toParent);
+        if (!pathStartsWith(fromParent)) {
             throw new IllegalArgumentException();
         }
         java.io.File parent = ((LocalFile) toParent).file();
@@ -257,17 +256,17 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public boolean readable() throws IOException {
+    public boolean isReadable() throws IOException {
         return accessible(R_OK);
     }
 
     @Override
-    public boolean writable() throws IOException {
+    public boolean isWritable() throws IOException {
         return accessible(W_OK);
     }
 
     @Override
-    public boolean executable() throws IOException {
+    public boolean isExecutable() throws IOException {
         return accessible(X_OK);
     }
 
@@ -356,7 +355,7 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public LocalFile createDirectory() throws IOException {
+    public LocalFile createDir() throws IOException {
         try {
             mkdir();
         } catch (ErrnoException e) {
@@ -371,7 +370,7 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public LocalFile createDirectories() throws IOException {
+    public LocalFile createDirs() throws IOException {
         try {
             if (stat(NOFOLLOW).isDirectory()) {
                 return this;
@@ -382,7 +381,7 @@ public abstract class LocalFile extends Native implements File {
 
         File parent = parent();
         if (parent != null) {
-            parent.createDirectories();
+            parent.createDirs();
         }
 
         try {
@@ -422,14 +421,14 @@ public abstract class LocalFile extends Native implements File {
 
         File parent = parent();
         if (parent != null) {
-            parent.createDirectories();
+            parent.createDirs();
         }
         return createFile();
     }
 
     @Override
     public LocalFile createLink(File target) throws IOException {
-        ensureIsLocalResource(target);
+        ensureIsLocal(target);
         String targetPath = target.path();
         try {
             Os.symlink(targetPath, path());
@@ -451,7 +450,7 @@ public abstract class LocalFile extends Native implements File {
 
     @Override
     public void moveTo(File dst) throws IOException {
-        ensureIsLocalResource(dst);
+        ensureIsLocal(dst);
         String dstPath = dst.path();
         String srcPath = path();
         try {
@@ -535,12 +534,12 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public String readString(Charset charset) throws IOException {
-        return readString(charset, new StringBuilder()).toString();
+    public String toString(Charset charset) throws IOException {
+        return toString(charset, new StringBuilder()).toString();
     }
 
     @Override
-    public <T extends Appendable> T readString(Charset charset, T appendable) throws IOException {
+    public <T extends Appendable> T toString(Charset charset, T appendable) throws IOException {
         try (Reader reader = reader(charset)) {
             for (CharBuffer buffer = CharBuffer.allocate(8192);
                  reader.read(buffer) > -1; ) {

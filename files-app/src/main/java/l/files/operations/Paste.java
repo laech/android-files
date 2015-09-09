@@ -13,8 +13,8 @@ abstract class Paste extends AbstractOperation {
 
     private final File destination;
 
-    Paste(Collection<? extends File> resources, File destination) {
-        super(resources);
+    Paste(Collection<? extends File> files, File destination) {
+        super(files);
         this.destination = requireNonNull(destination, "destination");
     }
 
@@ -24,7 +24,7 @@ abstract class Paste extends AbstractOperation {
 
         java.io.File destinationFile = new java.io.File(destination.uri());
         java.io.File fromFile = new java.io.File(file.uri());
-        if (destination.equals(file) || destination.startsWith(file)) {
+        if (destination.equals(file) || destination.pathStartsWith(file)) {
             // TODO prevent this from UI
             throw new CannotPasteIntoSelfException(
                     "Cannot paste directory " + file +

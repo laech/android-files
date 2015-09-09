@@ -23,12 +23,12 @@ public final class RenameFragment extends FileCreationFragment {
 
     public static final String TAG = RenameFragment.class.getSimpleName();
 
-    private static final String ARG_RESOURCE = "resource";
+    private static final String ARG_FILE = "file";
 
     static RenameFragment create(File file) {
         Bundle args = new Bundle(2);
-        args.putParcelable(ARG_PARENT_RESOURCE, file.parent());
-        args.putParcelable(ARG_RESOURCE, file);
+        args.putParcelable(ARG_PARENT_FILE, file.parent());
+        args.putParcelable(ARG_FILE, file);
 
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
@@ -56,14 +56,14 @@ public final class RenameFragment extends FileCreationFragment {
         highlight();
     }
 
-    private File resource() {
-        return getArguments().getParcelable(ARG_RESOURCE);
+    private File file() {
+        return getArguments().getParcelable(ARG_FILE);
     }
 
     private void highlight() {
         if (getFilename().isEmpty()) {
             highlight = new Highlight()
-                    .executeOnExecutor(THREAD_POOL_EXECUTOR, resource());
+                    .executeOnExecutor(THREAD_POOL_EXECUTOR, file());
         }
     }
 
@@ -101,7 +101,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     @Override
     protected CharSequence getError(File target) {
-        if (resource().equals(target)) {
+        if (file().equals(target)) {
             return null;
         }
         return super.getError(target);
@@ -120,7 +120,7 @@ public final class RenameFragment extends FileCreationFragment {
     private void rename() {
         File dst = parent().resolve(getFilename());
         rename = new Rename()
-                .executeOnExecutor(THREAD_POOL_EXECUTOR, resource(), dst);
+                .executeOnExecutor(THREAD_POOL_EXECUTOR, file(), dst);
 
         ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
         if (mode != null) {

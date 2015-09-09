@@ -57,17 +57,17 @@ public abstract class FileBaseTest extends BaseTest {
                 new Visitor.Base() {
 
                     @Override
-                    public Result onPreVisit(File res) throws IOException {
+                    public Result onPreVisit(File file) throws IOException {
                         try {
-                            res.setPermissions(EnumSet.allOf(Permission.class));
+                            file.setPermissions(EnumSet.allOf(Permission.class));
                         } catch (IOException ignore) {
                         }
                         return CONTINUE;
                     }
 
                     @Override
-                    public Result onPostVisit(File res) throws IOException {
-                        res.delete();
+                    public Result onPostVisit(File file) throws IOException {
+                        file.delete();
                         return CONTINUE;
                     }
 

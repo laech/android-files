@@ -29,7 +29,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public abstract class FileCreationFragment extends DialogFragment
         implements OnClickListener {
 
-    public static final String ARG_PARENT_RESOURCE = "parent";
+    public static final String ARG_PARENT_FILE = "parent";
 
     private static final int LOADER_CHECKER =
             identityHashCode(FileCreationFragment.class);
@@ -93,7 +93,7 @@ public abstract class FileCreationFragment extends DialogFragment
     }
 
     protected File parent() {
-        return getArguments().getParcelable(ARG_PARENT_RESOURCE);
+        return getArguments().getParcelable(ARG_PARENT_FILE);
     }
 
     protected String getFilename() {

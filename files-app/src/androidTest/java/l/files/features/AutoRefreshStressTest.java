@@ -22,7 +22,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
     public void _ignored_test_large_directory() throws Exception {
         final File dir = LocalFile.create(
                 new java.io.File(getExternalStorageDirectory(), "test-large-dir"))
-                .createDirectories();
+                .createDirs();
 
         int count = childCount(dir);
         while (count < 10000) {
@@ -77,13 +77,13 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
         if (dir.exists(NOFOLLOW)) {
             dir.delete();
         } else {
-            dir.createDirectory();
+            dir.createDir();
         }
     }
 
     private void updatePermissions(String name) throws IOException {
         File res = dir().resolve(name).createFiles();
-        if (res.readable()) {
+        if (res.isReadable()) {
             res.setPermissions(Permission.read());
         } else {
             res.setPermissions(Permission.none());
@@ -98,7 +98,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        File dir = dir().resolve(name).createDirectories();
+        File dir = dir().resolve(name).createDirs();
         File child = dir.resolve("child");
         if (child.exists(NOFOLLOW)) {
             child.delete();

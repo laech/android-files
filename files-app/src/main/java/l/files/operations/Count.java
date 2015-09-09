@@ -10,8 +10,8 @@ class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Collection<? extends File> resources) {
-        super(resources);
+    Count(Collection<? extends File> files) {
+        super(files);
     }
 
     public int getCount() {
@@ -23,10 +23,10 @@ class Count extends AbstractOperation {
         traverse(file, new OperationVisitor() {
 
             @Override
-            public Result onPreVisit(File res) throws IOException {
+            public Result onPreVisit(File file) throws IOException {
                 count.incrementAndGet();
-                onCount(res);
-                return super.onPreVisit(res);
+                onCount(file);
+                return super.onPreVisit(file);
             }
 
         });

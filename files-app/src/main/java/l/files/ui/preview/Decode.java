@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     final Logger log = Logger.get(getClass());
-    final File res;
+    final File file;
     final Stat stat;
     final Rect constraint;
     final Preview context;
@@ -26,12 +26,12 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     private final List<Decode> subs;
 
     Decode(
-            File res,
+            File file,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        this.res = requireNonNull(res);
+        this.file = requireNonNull(file);
         this.stat = requireNonNull(stat);
         this.constraint = requireNonNull(constraint);
         this.context = requireNonNull(context);
@@ -53,21 +53,21 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         for (Object value : values) {
 
             if (value instanceof Rect) {
-                callback.onSizeAvailable(res, (Rect) value);
-                context.putSize(res, stat, constraint, (Rect) value);
+                callback.onSizeAvailable(file, (Rect) value);
+                context.putSize(file, stat, constraint, (Rect) value);
 
             } else if (value instanceof Palette) {
-                callback.onPaletteAvailable(res, (Palette) value);
-                context.putPalette(res, stat, constraint, (Palette) value);
+                callback.onPaletteAvailable(file, (Palette) value);
+                context.putPalette(file, stat, constraint, (Palette) value);
 
             } else if (value instanceof Bitmap) {
-                callback.onPreviewAvailable(res, (Bitmap) value);
-                context.putBitmap(res, stat, constraint, (Bitmap) value);
-                context.putPreviewable(res, stat, constraint, true);
+                callback.onPreviewAvailable(file, (Bitmap) value);
+                context.putBitmap(file, stat, constraint, (Bitmap) value);
+                context.putPreviewable(file, stat, constraint, true);
 
             } else if (value instanceof NoPreview) {
-                callback.onPreviewFailed(res);
-                context.putPreviewable(res, stat, constraint, false);
+                callback.onPreviewFailed(file);
+                context.putPreviewable(file, stat, constraint, false);
 
             } else if (value instanceof Decode) {
                 Decode sub = (Decode) value;

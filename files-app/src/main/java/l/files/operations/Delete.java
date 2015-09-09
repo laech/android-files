@@ -14,8 +14,8 @@ final class Delete extends AbstractOperation {
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
 
-    Delete(Collection<? extends File> resources) {
-        super(resources);
+    Delete(Collection<? extends File> files) {
+        super(files);
     }
 
     public int getDeletedItemCount() {
@@ -31,9 +31,9 @@ final class Delete extends AbstractOperation {
         traverse(file, new OperationVisitor() {
 
             @Override
-            public Result onPostVisit(File res) throws IOException {
-                delete(res);
-                return super.onPostVisit(res);
+            public Result onPostVisit(File file) throws IOException {
+                delete(file);
+                return super.onPostVisit(file);
             }
 
         });

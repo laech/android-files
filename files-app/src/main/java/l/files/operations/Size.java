@@ -12,8 +12,8 @@ final class Size extends Count {
 
     private final AtomicLong size = new AtomicLong();
 
-    Size(Collection<? extends File> resources) {
-        super(resources);
+    Size(Collection<? extends File> files) {
+        super(files);
     }
 
     public long getSize() {

@@ -3,7 +3,7 @@ package l.files.operations;
 import com.google.auto.value.AutoValue;
 
 import l.files.fs.File;
-import l.files.fs.File.Name;
+import l.files.fs.FileName;
 
 /**
  * Source and destination of a file task.
@@ -19,18 +19,18 @@ public abstract class Target {
     /**
      * Name of the source file/directory the task is operating from.
      */
-    public abstract Name source();
+    public abstract FileName source();
 
     /**
      * Name of the destination file/directory the task is operating to.
      */
-    public abstract Name destination();
+    public abstract FileName destination();
 
     public static Target create(String source, String destination) {
-        return create(Name.of(source), Name.of(destination));
+        return create(FileName.of(source), FileName.of(destination));
     }
 
-    public static Target create(Name source, Name destination) {
+    public static Target create(FileName source, FileName destination) {
         return new AutoValue_Target(source, destination);
     }
 
@@ -40,8 +40,8 @@ public abstract class Target {
         return create(src.name(), destination.name());
     }
 
-    public static Target from(Iterable<? extends File> resources) {
-        File parent = resources.iterator().next().parent();
+    public static Target from(Iterable<? extends File> files) {
+        File parent = files.iterator().next().parent();
         assert parent != null;
         return create(parent.name(), parent.name());
     }

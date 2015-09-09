@@ -296,7 +296,7 @@ public final class FilesActivity extends BaseActivity implements
 
     private boolean isReadable(File file) {
         try {
-            return file.readable();
+            return file.isReadable();
         } catch (IOException e) {
             return false;
         }

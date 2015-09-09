@@ -19,7 +19,7 @@ public final class Clipboards {
 
     private static final String ACTION_CUT = "l.files.intent.action.CUT";
     private static final String ACTION_COPY = "l.files.intent.action.COPY";
-    private static final String EXTRA_RESOURCES = "l.files.intent.extra.RESOURCES";
+    private static final String EXTRA_FILES = "l.files.intent.extra.FILES";
 
     private Clipboards() {
     }
@@ -42,13 +42,13 @@ public final class Clipboards {
         return ACTION_COPY.equals(getAction(manager));
     }
 
-    public static Set<File> getResources(ClipboardManager manager) {
+    public static Set<File> getFiles(ClipboardManager manager) {
         Intent intent = getClipboardIntent(manager);
         if (intent == null) {
             return emptySet();
         }
         intent.setExtrasClassLoader(Clipboards.class.getClassLoader());
-        ArrayList<File> extras = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
+        ArrayList<File> extras = intent.getParcelableArrayListExtra(EXTRA_FILES);
         if (extras == null) {
             return emptySet();
         }
@@ -73,20 +73,20 @@ public final class Clipboards {
         return intent.getAction();
     }
 
-    public static void setCut(ClipboardManager manager, Collection<? extends File> resources) {
-        setClipData(manager, resources, ACTION_CUT);
+    public static void setCut(ClipboardManager manager, Collection<? extends File> files) {
+        setClipData(manager, files, ACTION_CUT);
     }
 
-    public static void setCopy(ClipboardManager manager, Collection<? extends File> resources) {
-        setClipData(manager, resources, ACTION_COPY);
+    public static void setCopy(ClipboardManager manager, Collection<? extends File> files) {
+        setClipData(manager, files, ACTION_COPY);
     }
 
     private static void setClipData(
             ClipboardManager manager,
-            Collection<? extends File> resources,
+            Collection<? extends File> files,
             String action) {
         Intent intent = new Intent(action);
-        intent.putParcelableArrayListExtra(EXTRA_RESOURCES, new ArrayList<>(resources));
+        intent.putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files));
         manager.setPrimaryClip(newIntent(null, intent));
     }
 }

@@ -68,8 +68,8 @@ public final class Icons {
         return font;
     }
 
-    public static int directoryIconStringId(File res) {
-        Integer id = iconByDirectoryUri.get(res);
+    public static int directoryIconStringId(File dir) {
+        Integer id = iconByDirectoryUri.get(dir);
         return id != null ? id : defaultDirectoryIconStringId();
     }
 

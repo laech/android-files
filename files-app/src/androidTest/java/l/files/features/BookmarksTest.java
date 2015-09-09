@@ -6,7 +6,7 @@ import l.files.test.BaseFilesActivityTest;
 public final class BookmarksTest extends BaseFilesActivityTest {
 
     public void test_clears_selection_on_finish_of_action_mode() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
+        final File a = dir().resolve("a").createDir();
         screen()
                 .clickInto(a)
                 .bookmark()
@@ -30,8 +30,8 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     }
 
     public void test_maintains_action_mode_on_screen_rotation() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
-        final File b = dir().resolve("b").createDirectory();
+        final File a = dir().resolve("a").createDir();
+        final File b = dir().resolve("b").createDir();
         screen()
                 .clickInto(a).bookmark().pressBack()
                 .clickInto(b).bookmark().pressBack()
@@ -53,8 +53,8 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     }
 
     public void test_click_on_bookmark_opens_directory() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
-        final File b = dir().resolve("b").createDirectory();
+        final File a = dir().resolve("a").createDir();
+        final File b = dir().resolve("b").createDir();
         screen()
                 .clickInto(a)
                 .assertCurrentDirectory(a)
@@ -74,7 +74,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     }
 
     public void test_bookmarks_sidebar_locked_on_bookmarks_action_mode() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
+        final File a = dir().resolve("a").createDir();
 
         screen()
                 .clickInto(a)
@@ -86,9 +86,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     }
 
     public void test_delete_bookmarks_from_sidebar() throws Exception {
-        final File a = dir().resolve("a").createDirectory();
-        final File b = dir().resolve("b").createDirectory();
-        final File c = dir().resolve("c").createDirectory();
+        final File a = dir().resolve("a").createDir();
+        final File b = dir().resolve("b").createDir();
+        final File c = dir().resolve("c").createDir();
 
         screen()
 
@@ -112,7 +112,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
     public void test_bookmark_appears_in_sidebar() throws Exception {
         screen()
-                .clickInto(dir().resolve("a").createDirectory())
+                .clickInto(dir().resolve("a").createDir())
                 .bookmark()
                 .openBookmarksDrawer()
                 .assertCurrentDirectoryBookmarked(true)
@@ -123,9 +123,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
     }
 
     public void test_bookmarks_are_sorted_by_name() throws Exception {
-        final File b = dir().resolve("b").createDirectory();
-        final File a = dir().resolve("a").createDirectory();
-        final File c = dir().resolve("c").createDirectory();
+        final File b = dir().resolve("b").createDir();
+        final File a = dir().resolve("a").createDir();
+        final File c = dir().resolve("c").createDir();
         screen()
                 .clickInto(a).bookmark().pressBack()
                 .clickInto(c).bookmark().pressBack()

@@ -18,18 +18,18 @@ final class DeleteTask extends Task {
             Clock clock,
             Callback callback,
             Handler handler,
-            Collection<? extends File> resources) {
+            Collection<? extends File> files) {
 
         super(
                 TaskId.create(id, DELETE),
-                Target.from(resources),
+                Target.from(files),
                 clock,
                 callback,
                 handler
         );
 
-        this.count = new Size(resources);
-        this.delete = new Delete(resources);
+        this.count = new Size(files);
+        this.delete = new Delete(files);
     }
 
     @Override

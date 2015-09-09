@@ -59,7 +59,7 @@ public abstract class FileListItem {
         public boolean isReadable() {
             if (readable == null) {
                 try {
-                    readable = resource().readable();
+                    readable = file().isReadable();
                 } catch (IOException e) {
                     readable = false;
                 }
@@ -69,13 +69,13 @@ public abstract class FileListItem {
 
         public String basicMediaType() {
             try {
-                return resource().detectBasicMediaType();
+                return file().detectBasicMediaType();
             } catch (IOException e) {
                 return OCTET_STREAM;
             }
         }
 
-        public abstract l.files.fs.File resource();
+        public abstract l.files.fs.File file();
 
         @Nullable
         public abstract Stat stat(); // TODO
@@ -101,7 +101,7 @@ public abstract class FileListItem {
         }
 
         /**
-         * If the resource is a link, this returns the status of the target
+         * If the file is a link, this returns the status of the target
          * file, if not available, returns the status of the link.
          */
         @Nullable

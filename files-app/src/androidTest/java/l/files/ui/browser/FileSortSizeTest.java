@@ -22,21 +22,21 @@ public final class FileSortSizeTest extends FileSortTest {
     }
 
     public void test_sorts_dirs_by_name_if_sizes_are_equal() throws Exception {
-        final File a = dir1().resolve("a").createDirectory();
-        final File b = dir1().resolve("b").createDirectory();
+        final File a = dir1().resolve("a").createDir();
+        final File b = dir1().resolve("b").createDir();
         testSortMatches(Locale.getDefault(), SIZE.comparator(), a, b);
     }
 
     public void test_sorts_dir_last() throws Exception {
         final File f1 = dir1().resolve("a").createFile();
-        final File d1 = dir1().resolve("b").createDirectory();
+        final File d1 = dir1().resolve("b").createDir();
         final File f2 = dir1().resolve("c").createFile();
         testSortMatches(Locale.getDefault(), SIZE.comparator(), f1, f2, d1);
     }
 
     public void test_sorts_dir_by_name() throws Exception {
-        final File b = dir1().resolve("b").createDirectory();
-        final File a = dir1().resolve("a").createDirectory();
+        final File b = dir1().resolve("b").createDir();
+        final File a = dir1().resolve("a").createDir();
         testSortMatches(Locale.getDefault(), SIZE.comparator(), a, b);
     }
 

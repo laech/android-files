@@ -15,7 +15,7 @@ public abstract class AbstractDetectorTest extends FileBaseTest {
     abstract AbstractDetector detector();
 
     public void test_detects_directory_type() throws Exception {
-        File dir = dir1().resolve("a").createDirectory();
+        File dir = dir1().resolve("a").createDir();
         assertEquals("inode/directory", detector().detect(dir));
     }
 
@@ -39,13 +39,13 @@ public abstract class AbstractDetectorTest extends FileBaseTest {
     }
 
     public void test_detects_linked_directory_type() throws Exception {
-        File dir = dir1().resolve("a").createDirectory();
+        File dir = dir1().resolve("a").createDir();
         File link = dir1().resolve("b").createLink(dir);
         assertEquals("inode/directory", detector().detect(link));
     }
 
     public void test_detects_multi_linked_directory_type() throws Exception {
-        File dir = dir1().resolve("a").createDirectory();
+        File dir = dir1().resolve("a").createDir();
         File link1 = dir1().resolve("b").createLink(dir);
         File link2 = dir1().resolve("c").createLink(link1);
         assertEquals("inode/directory", detector().detect(link2));

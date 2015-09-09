@@ -78,14 +78,14 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             final long now = currentTimeMillis();
 
             @Override
-            public Result onPostVisit(File res) throws IOException {
+            public Result onPostVisit(File file) throws IOException {
 
-                Stat stat = res.stat(NOFOLLOW);
+                Stat stat = file.stat(NOFOLLOW);
                 if (stat.isDirectory()) {
 
                     try {
-                        res.delete();
-                        log.debug("Deleted empty cache directory %s", res);
+                        file.delete();
+                        log.debug("Deleted empty cache directory %s", file);
                     } catch (DirectoryNotEmpty ignore) {
                     }
 
@@ -93,8 +93,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
                     long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
                     if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
-                        res.delete();
-                        log.debug("Deleted old cache file %s", res);
+                        file.delete();
+                        log.debug("Deleted old cache file %s", file);
                     }
 
                 }
@@ -105,9 +105,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         });
     }
 
-    File cacheFile(File res, Stat stat, Rect constraint) {
-        return cacheDir.resolve(res.scheme()
-                + "/" + res.path()
+    File cacheFile(File file, Stat stat, Rect constraint) {
+        return cacheDir.resolve(file.scheme()
+                + "/" + file.path()
                 + "_" + stat.lastModifiedTime().seconds()
                 + "_" + stat.lastModifiedTime().nanos()
                 + "_" + constraint.width()
@@ -115,13 +115,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     @Override
-    Bitmap get(
-            File res,
-            Stat stat,
-            Rect constraint) throws IOException {
+    Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
 
-        log.verbose("read bitmap %s", res);
-        File cache = cacheFile(res, stat, constraint);
+        log.verbose("read bitmap %s", file);
+        File cache = cacheFile(file, stat, constraint);
         try (InputStream in = new BufferedInputStream(cache.input())) {
             in.read(); // read DUMMY_BYTE
 
@@ -151,17 +148,17 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     @Override
     Snapshot<Bitmap> put(
-            File res,
+            File file,
             Stat stat,
             Rect constraint,
             Bitmap bitmap) throws IOException {
 
-        File cache = cacheFile(res, stat, constraint);
+        File cache = cacheFile(file, stat, constraint);
         cache.createFiles();
         try (OutputStream out = new BufferedOutputStream(cache.output())) {
             out.write(DUMMY_BYTE);
             bitmap.compress(WEBP, 100, out);
-            log.verbose("write %s", res);
+            log.verbose("write %s", file);
         }
         return null;
     }

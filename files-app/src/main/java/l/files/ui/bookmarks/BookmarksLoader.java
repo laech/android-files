@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 import l.files.fs.File;
-import l.files.fs.File.Name;
+import l.files.fs.FileName;
 import l.files.provider.bookmarks.BookmarkManager;
 
 import static java.util.Objects.requireNonNull;
@@ -30,7 +30,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 
     @Override
     public List<File> loadInBackground() {
-        final Comparator<Name> comparator = Name.comparator(Locale.getDefault());
+        final Comparator<FileName> comparator = FileName.comparator(Locale.getDefault());
         final List<File> files = new ArrayList<>(manager.getBookmarks());
         Collections.sort(files, new Comparator<File>() {
             @Override

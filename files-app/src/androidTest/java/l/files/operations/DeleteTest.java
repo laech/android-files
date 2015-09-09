@@ -15,7 +15,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class DeleteTest extends FileBaseTest {
 
     public void testNotifiesListener() throws Exception {
-        File a = dir1().resolve("a").createDirectory();
+        File a = dir1().resolve("a").createDir();
         File b = dir1().resolve("a/b").createFile();
 
         Set<File> expected = new HashSet<>(asList(a, b));
@@ -33,7 +33,7 @@ public final class DeleteTest extends FileBaseTest {
     }
 
     public void testDeletesNonEmptyDirectory() throws Exception {
-        File dir = dir1().resolve("a").createDirectory();
+        File dir = dir1().resolve("a").createDir();
         File file = dir1().resolve("a/child.txt").createFile();
         delete(dir);
         assertFalse(file.exists(NOFOLLOW));
@@ -41,7 +41,7 @@ public final class DeleteTest extends FileBaseTest {
     }
 
     public void testDeletesEmptyDirectory() throws Exception {
-        File dir = dir1().resolve("a").createDirectory();
+        File dir = dir1().resolve("a").createDir();
         delete(dir);
         assertFalse(dir.exists(NOFOLLOW));
     }

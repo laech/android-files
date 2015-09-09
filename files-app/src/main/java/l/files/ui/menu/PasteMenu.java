@@ -23,12 +23,12 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.Clipboards.clear;
-import static l.files.ui.Clipboards.getResources;
+import static l.files.ui.Clipboards.getFiles;
 import static l.files.ui.Clipboards.isCopy;
 import static l.files.ui.Clipboards.isCut;
 
 public final class PasteMenu extends OptionsMenuAction
-        implements LoaderCallbacks<PasteMenu.ResourceExistence> {
+        implements LoaderCallbacks<PasteMenu.FileExistence> {
 
     private final File destination;
     private final ClipboardManager manager;
@@ -64,9 +64,9 @@ public final class PasteMenu extends OptionsMenuAction
         }
 
         item.setEnabled(Clipboards.hasClip(manager));
-        final Set<File> files = Clipboards.getResources(manager);
+        final Set<File> files = Clipboards.getFiles(manager);
         for (File file : files) {
-            if (this.destination.startsWith(file)) {
+            if (this.destination.pathStartsWith(file)) {
                 // Can't paste into itself
                 item.setEnabled(false);
                 return;
@@ -79,19 +79,19 @@ public final class PasteMenu extends OptionsMenuAction
     @Override
     protected void onItemSelected(MenuItem item) {
         if (isCopy(manager)) {
-            OperationService.copy(context, getResources(manager), destination);
+            OperationService.copy(context, getFiles(manager), destination);
         } else if (isCut(manager)) {
-            OperationService.move(context, getResources(manager), destination);
+            OperationService.move(context, getFiles(manager), destination);
             clear(manager);
         }
     }
 
     @Override
-    public Loader<ResourceExistence> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<ResourceExistence>(context) {
+    public Loader<FileExistence> onCreateLoader(int id, Bundle args) {
+        return new AsyncTaskLoader<FileExistence>(context) {
             @Override
-            public ResourceExistence loadInBackground() {
-                Set<File> files = Clipboards.getResources(manager);
+            public FileExistence loadInBackground() {
+                Set<File> files = Clipboards.getFiles(manager);
                 Set<File> exists = new HashSet<>();
                 for (File file : files) {
                     if (isLoadInBackgroundCanceled()) {
@@ -102,10 +102,10 @@ public final class PasteMenu extends OptionsMenuAction
                             exists.add(file);
                         }
                     } catch (IOException e) {
-                        // Ignore this resource
+                        // Ignore this file
                     }
                 }
-                return new ResourceExistence(files, exists);
+                return new FileExistence(files, exists);
             }
 
             @Override
@@ -117,25 +117,25 @@ public final class PasteMenu extends OptionsMenuAction
     }
 
     @Override
-    public void onLoadFinished(Loader<ResourceExistence> loader, ResourceExistence data) {
+    public void onLoadFinished(Loader<FileExistence> loader, FileExistence data) {
         if (menu == null) {
             return;
         }
         MenuItem item = menu.findItem(id());
-        if (item != null && data.originals.equals(getResources(manager))) {
+        if (item != null && data.originals.equals(getFiles(manager))) {
             item.setEnabled(!data.exists.isEmpty());
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<ResourceExistence> loader) {
+    public void onLoaderReset(Loader<FileExistence> loader) {
     }
 
-    static final class ResourceExistence {
+    static final class FileExistence {
         final Set<File> originals;
         final Set<File> exists;
 
-        private ResourceExistence(Set<File> originals, Set<File> exists) {
+        private FileExistence(Set<File> originals, Set<File> exists) {
             this.originals = originals;
             this.exists = exists;
         }
