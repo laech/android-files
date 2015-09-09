@@ -43,7 +43,7 @@ abstract class Dirent extends Native {
     return new AutoValue_Dirent(inode, type, name);
   }
 
-  static Stream<Dirent> stream(LocalResource res, LinkOption option) throws IOException {
+  static Stream<Dirent> stream(LocalFile res, LinkOption option) throws IOException {
 
     final long dir;
     try {

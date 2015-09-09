@@ -6,7 +6,7 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.common.widget.ActionModeItem;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.provider.bookmarks.BookmarkManager;
 import l.files.ui.selection.Selection;
 
@@ -16,11 +16,11 @@ import static java.util.Objects.requireNonNull;
 final class DeleteAction extends ActionModeItem
 {
     private final BookmarkManager bookmarks;
-    private final Selection<Resource> selections;
+    private final Selection<File> selections;
 
     DeleteAction(
             final BookmarkManager bookmarks,
-            final Selection<Resource> selections)
+            final Selection<File> selections)
     {
         super(R.id.delete_selected_bookmarks);
         this.bookmarks = requireNonNull(bookmarks, "bookmarks");

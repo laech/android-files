@@ -6,7 +6,7 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.content.Context.ACTIVITY_SERVICE;
@@ -32,7 +32,7 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     };
   }
 
-  @Override String key(Resource res, Stat stat, Rect constraint) {
+  @Override String key(File res, Stat stat, Rect constraint) {
     return res.scheme()
         + "_" + res.path()
         + "_" + stat.lastModifiedTime().seconds()

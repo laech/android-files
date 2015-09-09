@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.common.widget.ActionModeItem;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.ui.Clipboards;
 import l.files.ui.selection.Selection;
 
@@ -17,11 +17,11 @@ public final class CutAction extends ActionModeItem
 {
 
     private final ClipboardManager manager;
-    private final Selection<Resource> selection;
+    private final Selection<File> selection;
 
     public CutAction(
             final ClipboardManager manager,
-            final Selection<Resource> selection)
+            final Selection<File> selection)
     {
         super(android.R.id.cut);
         this.manager = requireNonNull(manager, "manager");

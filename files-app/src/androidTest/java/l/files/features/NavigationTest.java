@@ -9,9 +9,9 @@ import java.util.Date;
 
 import l.files.R;
 import l.files.common.base.Consumer;
+import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.test.BaseFilesActivityTest;
@@ -41,8 +41,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
       dir().resolve(String.valueOf(i)).createFile();
     }
 
-    try (Stream<Resource> stream = dir().list(NOFOLLOW)) {
-      Resource child = stream.iterator().next();
+    try (Stream<File> stream = dir().list(NOFOLLOW)) {
+      File child = stream.iterator().next();
       screen()
           .rotate()
           .longClick(child)
@@ -52,7 +52,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_clears_selection_on_finish_of_action_mode() throws Exception {
-    Resource a = dir().resolve("a").createFile();
+    File a = dir().resolve("a").createFile();
     screen()
         .longClick(a)
         .assertActionModePresent(true)
@@ -69,8 +69,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_maintains_action_mode_on_screen_rotation() throws Exception {
-    Resource a = dir().resolve("a").createFile();
-    Resource b = dir().resolve("b").createFile();
+    File a = dir().resolve("a").createFile();
+    File b = dir().resolve("b").createFile();
     screen()
         .longClick(a)
         .assertActionModePresent(true)
@@ -88,14 +88,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_can_navigate_through_title_list_drop_down() throws Exception {
-    Resource parent = dir().parent();
+    File parent = dir().parent();
     screen()
         .selectFromNavigationMode(parent)
         .assertNavigationModeHierarchy(parent);
   }
 
   public void test_updates_navigation_list_when_going_into_a_new_dir() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
+    File dir = dir().resolve("dir").createDirectory();
     screen().clickInto(dir).assertNavigationModeHierarchy(dir);
   }
 
@@ -104,7 +104,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_shows_size_only_if_unable_to_determine_modified_date() throws Exception {
-    Resource file = dir().resolve("file").createFile();
+    File file = dir().resolve("file").createFile();
     file.setLastModifiedTime(NOFOLLOW, EPOCH);
 
     long size = file.stat(NOFOLLOW).size();
@@ -119,7 +119,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_shows_full_time_for_future_file() throws Exception {
-    Resource file = dir().resolve("file").createFile();
+    File file = dir().resolve("file").createFile();
     long future = currentTimeMillis() + 100000;
     file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(future));
 
@@ -136,7 +136,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_shows_time_and_size_for_file() throws Exception {
-    Resource file = dir().resolve("file").createFile();
+    File file = dir().resolve("file").createFile();
     file.writeString(UTF_8, file.path());
 
     Context c = getActivity();
@@ -177,7 +177,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
   private void testDirectorySummary(
       final String expected, long modifiedAt) throws Exception {
-    Resource d = dir().resolve("dir").createDirectory();
+    File d = dir().resolve("dir").createDirectory();
     d.setLastModifiedTime(NOFOLLOW, Instant.of(modifiedAt / 1000, 0));
     screen().assertSummaryView(d, new Consumer<CharSequence>() {
       @Override public void apply(CharSequence actual) {
@@ -187,14 +187,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_directory_view_is_disabled_if_no_read_permission() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
+    File dir = dir().resolve("dir").createDirectory();
     dir.removePermissions(Permission.read());
     screen().assertDisabled(dir);
   }
 
   public void test_link_icon_displayed() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
-    Resource link = dir().resolve("link").createLink(dir);
+    File dir = dir().resolve("dir").createDirectory();
+    File link = dir().resolve("link").createLink(dir);
 
     screen()
         .assertSymbolicLinkIconDisplayed(dir, false)
@@ -202,11 +202,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_can_navigate_into_linked_directory() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
+    File dir = dir().resolve("dir").createDirectory();
     dir.resolve("a").createDirectory();
 
-    Resource link = dir().resolve("link").createLink(dir);
-    Resource linkChild = link.resolve("a");
+    File link = dir().resolve("link").createLink(dir);
+    File linkChild = link.resolve("a");
     screen()
         .clickInto(link)
         .clickInto(linkChild)
@@ -214,18 +214,18 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_can_see_changes_in_linked_directory() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
-    Resource link = dir().resolve("link").createLink(dir);
+    File dir = dir().resolve("dir").createDirectory();
+    File link = dir().resolve("link").createLink(dir);
     screen().clickInto(link)
         .assertCurrentDirectory(link);
 
-    Resource child = link.resolve("child").createDirectory();
+    File child = link.resolve("child").createDirectory();
     screen().clickInto(child)
         .assertCurrentDirectory(child);
   }
 
   public void test_press_action_bar_up_indicator_will_go_back() throws Exception {
-    Resource dir = dir().resolve("dir").createDirectory();
+    File dir = dir().resolve("dir").createDirectory();
     screen()
         .clickInto(dir)
         .assertCurrentDirectory(dir)
@@ -266,7 +266,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_open_new_directory_will_close_opened_drawer() throws Exception {
-    Resource dir = dir().resolve("a").createDirectory();
+    File dir = dir().resolve("a").createDirectory();
     screen()
         .openBookmarksDrawer()
         .activityObject()
@@ -275,83 +275,83 @@ public final class NavigationTest extends BaseFilesActivityTest {
   }
 
   public void test_observes_on_current_directory_and_shows_newly_added_files() throws Exception {
-    Resource dir = dir().resolve("a").createDirectory();
+    File dir = dir().resolve("a").createDirectory();
     screen().assertListViewContains(dir, true);
   }
 
   public void test_observes_on_current_directory_and_hides_deleted_files() throws Exception {
-    Resource file = dir().resolve("a").createFile();
+    File file = dir().resolve("a").createFile();
     screen().assertListViewContains(file, true);
     file.delete();
     screen().assertListViewContains(file, false);
   }
 
   public void test_updates_view_on_child_directory_modified() throws Exception {
-    Resource dir = dir().resolve("a").createDirectory();
+    File dir = dir().resolve("a").createDirectory();
     testUpdatesDateViewOnChildModified(dir);
   }
 
   public void test_updates_view_on_child_file_modified() throws Exception {
-    Resource file = dir().resolve("a").createFile();
+    File file = dir().resolve("a").createFile();
     testUpdatesDateViewOnChildModified(file);
     testUpdatesSizeViewOnChildModified(file);
   }
 
-  private void testUpdatesSizeViewOnChildModified(Resource resource)
+  private void testUpdatesSizeViewOnChildModified(File file)
       throws IOException {
-    resource.setLastModifiedTime(NOFOLLOW, EPOCH);
+    file.setLastModifiedTime(NOFOLLOW, EPOCH);
 
     final CharSequence[] size = {null};
-    screen().assertSummaryView(resource, new Consumer<CharSequence>() {
+    screen().assertSummaryView(file, new Consumer<CharSequence>() {
       @Override public void apply(CharSequence input) {
         assertFalse(isEmpty(input.toString()));
         size[0] = input;
       }
     });
 
-    modify(resource);
+    modify(file);
 
-    screen().assertSummaryView(resource, new Consumer<CharSequence>() {
+    screen().assertSummaryView(file, new Consumer<CharSequence>() {
       @Override public void apply(CharSequence input) {
         assertNotEqual(size[0], input);
       }
     });
   }
 
-  private void testUpdatesDateViewOnChildModified(Resource resource)
+  private void testUpdatesDateViewOnChildModified(File file)
       throws IOException {
-    resource.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1));
+    file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1));
 
     final String[] date = {null};
-    screen().assertSummaryView(resource, new Consumer<CharSequence>() {
+    screen().assertSummaryView(file, new Consumer<CharSequence>() {
       @Override public void apply(CharSequence input) {
         assertFalse(isEmpty(input.toString()));
         date[0] = input.toString();
       }
     });
 
-    modify(resource);
+    modify(file);
 
-    screen().assertSummaryView(resource, new Consumer<CharSequence>() {
+    screen().assertSummaryView(file, new Consumer<CharSequence>() {
       @Override public void apply(CharSequence input) {
         assertNotEqual(date[0], input.toString());
       }
     });
   }
 
-  private Resource modify(Resource resource) throws IOException {
-    Stat stat = resource.stat(NOFOLLOW);
+  private File modify(File file) throws IOException {
+    Stat stat = file.stat(NOFOLLOW);
     Instant lastModifiedBefore = stat.lastModifiedTime();
     if (stat.isDirectory()) {
-      resource.resolve(String.valueOf(nanoTime())).createDirectory();
+      file.resolve(String.valueOf(nanoTime())).createDirectory();
     } else {
-      try (Writer writer = resource.writer(UTF_8, true)) {
+      try (Writer writer = file.writer(UTF_8, true)) {
         writer.write("test");
       }
     }
-    Instant lastModifiedAfter = resource.stat(NOFOLLOW).lastModifiedTime();
+    Instant lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime();
     assertNotEqual(lastModifiedBefore, lastModifiedAfter);
-    return resource;
+    return file;
   }
 
 }

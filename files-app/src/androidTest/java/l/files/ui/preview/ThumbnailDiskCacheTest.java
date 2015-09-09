@@ -3,8 +3,8 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -18,12 +18,12 @@ public final class ThumbnailDiskCacheTest
     extends CacheTest<Bitmap, ThumbnailDiskCache> {
 
   public void test_cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     Bitmap value = newValue();
 
-    Resource cacheFile = cache.cacheFile(res, stat, constraint);
+    File cacheFile = cache.cacheFile(res, stat, constraint);
     assertFalse(cacheFile.exists(NOFOLLOW));
 
     cache.put(res, stat, constraint, value);
@@ -45,14 +45,14 @@ public final class ThumbnailDiskCacheTest
   }
 
   public void test_updates_access_time_on_read() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     Bitmap value = newValue();
 
     cache.put(res, stat, constraint, value);
 
-    Resource cacheFile = cache.cacheFile(res, stat, constraint);
+    File cacheFile = cache.cacheFile(res, stat, constraint);
     Instant oldTime = Instant.ofMillis(
         currentTimeMillis() - DAYS.toMillis(99));
     cacheFile.setLastAccessedTime(NOFOLLOW, oldTime);
@@ -65,7 +65,7 @@ public final class ThumbnailDiskCacheTest
   }
 
   public void test_constraint_is_used_as_part_of_key() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     Bitmap value = newValue();

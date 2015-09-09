@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.common.widget.ActionModeItem;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.ui.selection.Selection;
 
 import static android.view.Menu.NONE;
@@ -18,12 +18,12 @@ public final class RenameAction extends ActionModeItem
         implements Selection.Callback
 {
 
-    private final Selection<Resource> selection;
+    private final Selection<File> selection;
     private final FragmentManager manager;
 
     public RenameAction(
             final FragmentManager manager,
-            final Selection<Resource> selection)
+            final Selection<File> selection)
     {
         super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
@@ -65,7 +65,7 @@ public final class RenameAction extends ActionModeItem
     @Override
     protected void onItemSelected(final ActionMode mode, final MenuItem item)
     {
-        final Resource resource = selection.copy().iterator().next();
-        RenameFragment.create(resource).show(manager, RenameFragment.TAG);
+        final File file = selection.copy().iterator().next();
+        RenameFragment.create(file).show(manager, RenameFragment.TAG);
     }
 }

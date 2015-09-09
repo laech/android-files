@@ -14,11 +14,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.Event;
+import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -32,17 +32,17 @@ import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.LocalResource_observe_Test.Recorder.observe;
+import static l.files.fs.local.LocalFile_observe_Test.Recorder.observe;
 
 /**
- * @see Resource#observe(LinkOption, Observer)
+ * @see File#observe(LinkOption, Observer)
  */
-public final class LocalResource_observe_Test extends ResourceBaseTest {
+public final class LocalFile_observe_Test extends FileBaseTest {
 
   public void testObserveOnLinkNoFollow() throws Exception {
-    Resource dir = dir1().resolve("dir").createDirectory();
-    Resource link = dir1().resolve("link").createLink(dir);
-    Resource file = link.resolve("file");
+    File dir = dir1().resolve("dir").createDirectory();
+    File link = dir1().resolve("link").createLink(dir);
+    File file = link.resolve("file");
     try (Recorder observer = observe(link, NOFOLLOW)) {
       // No follow, can observe the link
       observer.await(MODIFY, link,
@@ -59,17 +59,17 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testObserveOnLinkFollow() throws Exception {
-    Resource dir = dir1().resolve("dir").createDirectory();
-    Resource link = dir1().resolve("link").createLink(dir);
-    Resource child = link.resolve("dir").createDirectory();
+    File dir = dir1().resolve("dir").createDirectory();
+    File link = dir1().resolve("link").createLink(dir);
+    File child = link.resolve("dir").createDirectory();
     try (Recorder observer = observe(link, FOLLOW)) {
       observer.await(MODIFY, child, newCreateFile(child.resolve("a")));
     }
   }
 
   public void testMoveDirectoryInThenAddFileIntoIt() throws Exception {
-    Resource dst = dir1().resolve("a");
-    Resource src = dir2().resolve("a").createDirectory();
+    File dst = dir1().resolve("a");
+    File src = dir2().resolve("a").createDirectory();
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dst, newMove(src, dst));
       observer.await(MODIFY, dst, newCreateDirectory(dst.resolve("b")));
@@ -77,8 +77,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testMoveDirectoryInThenDeleteFileFromIt() throws Exception {
-    Resource dstDir = dir1().resolve("a");
-    Resource srcDir = dir2().resolve("a").createDirectory();
+    File dstDir = dir1().resolve("a");
+    File srcDir = dir2().resolve("a").createDirectory();
     srcDir.resolve("b").createFile();
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dstDir, newMove(srcDir, dstDir));
@@ -87,9 +87,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testMoveDirectoryInThenMoveFileIntoIt() throws Exception {
-    Resource dir = dir1().resolve("a");
-    Resource src1 = dir2().resolve("a").createDirectory();
-    Resource src2 = dir2().resolve("b").createFile();
+    File dir = dir1().resolve("a");
+    File src1 = dir2().resolve("a").createDirectory();
+    File src2 = dir2().resolve("b").createFile();
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dir, newMove(src1, dir));
       observer.await(MODIFY, dir, newMove(src2, dir.resolve("b")));
@@ -97,9 +97,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testMoveDirectoryInThenMoveFileOutOfIt() throws Exception {
-    Resource src = dir2().resolve("a").createDirectory();
-    Resource dir = dir1().resolve("a");
-    Resource child = dir.resolve("b");
+    File src = dir2().resolve("a").createDirectory();
+    File dir = dir1().resolve("a");
+    File child = dir.resolve("b");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dir, newMove(src, dir));
       observer.await(
@@ -116,52 +116,52 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testMoveFileIn() throws Exception {
-    Resource src = dir2().resolve("a").createFile();
-    Resource dst = dir1().resolve("b");
+    File src = dir2().resolve("a").createFile();
+    File dst = dir1().resolve("b");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dst, newMove(src, dst));
     }
   }
 
   public void testMoveFileOut() throws Exception {
-    Resource file = dir1().resolve("a").createFile();
+    File file = dir1().resolve("a").createFile();
     try (Recorder observer = observe(dir1())) {
       observer.await(DELETE, file, newMove(file, dir2().resolve("a")));
     }
   }
 
   public void testMoveSelfOut() throws Exception {
-    Resource file = dir1().resolve("file").createFile();
-    Resource dir = dir1().resolve("dir").createDirectory();
+    File file = dir1().resolve("file").createFile();
+    File dir = dir1().resolve("dir").createDirectory();
     testMoveSelfOut(file, dir2().resolve("a"));
     testMoveSelfOut(dir, dir2().resolve("b"));
   }
 
   private static void testMoveSelfOut(
-      Resource src,
-      Resource dst) throws Exception {
+      File src,
+      File dst) throws Exception {
     try (Recorder observer = observe(src)) {
       observer.await(DELETE, src, newMove(src, dst));
     }
   }
 
   public void testModifyFileContent() throws Exception {
-    Resource file = dir1().resolve("a").createFile();
+    File file = dir1().resolve("a").createFile();
     testModifyFileContent(file, file);
     testModifyFileContent(file, dir1());
   }
 
   private static void testModifyFileContent(
-      Resource file,
-      Resource observable) throws Exception {
+      File file,
+      File observable) throws Exception {
     try (Recorder observer = observe(observable)) {
       observer.await(MODIFY, file, newAppend(file, "abc"));
     }
   }
 
   public void testModifyPermissions() throws Exception {
-    Resource file = dir1().resolve("file").createFile();
-    Resource dir = dir1().resolve("directory").createDirectory();
+    File file = dir1().resolve("file").createFile();
+    File dir = dir1().resolve("directory").createDirectory();
     testModifyPermission(file, file);
     testModifyPermission(file, dir1());
     testModifyPermission(dir, dir);
@@ -169,8 +169,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private static void testModifyPermission(
-      Resource target,
-      Resource observable) throws Exception {
+      File target,
+      File observable) throws Exception {
     Set<Permission> oldPerms = target.stat(NOFOLLOW).permissions();
     Set<Permission> newPerms;
     if (oldPerms.isEmpty()) {
@@ -189,8 +189,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
    * making it not untrackable.
    */
   public void testModifyModificationTime() throws Exception {
-    Resource file = dir1().resolve("file").createFile();
-    Resource dir = dir1().resolve("dir").createDirectory();
+    File file = dir1().resolve("file").createFile();
+    File dir = dir1().resolve("dir").createDirectory();
     testModifyModificationTime(file, file);
     testModifyModificationTime(file, dir1());
     testModifyModificationTime(dir, dir);
@@ -198,8 +198,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private void testModifyModificationTime(
-      Resource target,
-      Resource observable) throws Exception {
+      File target,
+      File observable) throws Exception {
     Instant old = target.stat(NOFOLLOW).lastModifiedTime();
     Instant t = Instant.of(old.seconds() - 1, old.nanos());
     try (Recorder observer = observe(observable)) {
@@ -209,8 +209,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testDelete() throws Exception {
-    Resource file = dir1().resolve("file");
-    Resource dir = dir1().resolve("dir");
+    File file = dir1().resolve("file");
+    File dir = dir1().resolve("dir");
     testDelete(file.createFile(), file);
     testDelete(file.createFile(), dir1());
     testDelete(dir.createDirectory(), dir);
@@ -218,8 +218,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private static void testDelete(
-      Resource target,
-      Resource observable) throws Exception {
+      File target,
+      File observable) throws Exception {
     boolean file = target.stat(NOFOLLOW).isRegularFile();
     try (Recorder observer = observe(observable)) {
       List<WatchEvent> expected = new ArrayList<>();
@@ -234,8 +234,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testDeleteRecreateDirectoryWillBeObserved() throws Exception {
-    Resource dir = dir1().resolve("dir");
-    Resource file = dir.resolve("file");
+    File dir = dir1().resolve("dir");
+    File file = dir.resolve("file");
     try (Recorder observer = observe(dir1())) {
       for (int i = 0; i < 10; i++) {
         observer.await(CREATE, dir, newCreateDirectory(dir));
@@ -256,41 +256,41 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testCreate() throws Exception {
-    Resource file = dir1().resolve("file");
-    Resource dir = dir1().resolve("dir");
-    Resource link = dir1().resolve("link");
+    File file = dir1().resolve("file");
+    File dir = dir1().resolve("dir");
+    File link = dir1().resolve("link");
     testCreateFile(file, dir1());
     testCreateDirectory(dir, dir1());
     testCreateSymbolicLink(link, dir1(), dir1());
   }
 
   private static void testCreateFile(
-      Resource target,
-      Resource observable) throws Exception {
+      File target,
+      File observable) throws Exception {
     try (Recorder observer = observe(observable)) {
       observer.await(CREATE, target, newCreateFile(target));
     }
   }
 
   private static void testCreateDirectory(
-      Resource target,
-      Resource observable) throws Exception {
+      File target,
+      File observable) throws Exception {
     try (Recorder observer = observe(observable)) {
       observer.await(CREATE, target, newCreateDirectory(target));
     }
   }
 
   private static void testCreateSymbolicLink(
-      Resource link,
-      Resource target,
-      Resource observable) throws Exception {
+      File link,
+      File target,
+      File observable) throws Exception {
     try (Recorder observer = observe(observable)) {
       observer.await(CREATE, link, newCreateSymbolicLink(link, target));
     }
   }
 
   public void testCreateDirectoryThenCreateItemsIntoIt() throws Exception {
-    Resource dir = dir1().resolve("dir");
+    File dir = dir1().resolve("dir");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, dir, newCreateDirectory(dir));
       observer.await(
@@ -309,9 +309,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testCreateDirectoryThenDeleteItemsFromIt() throws Exception {
-    Resource parent = dir1().resolve("parent");
-    Resource file = parent.resolve("file");
-    Resource dir = parent.resolve("dir");
+    File parent = dir1().resolve("parent");
+    File file = parent.resolve("file");
+    File dir = parent.resolve("dir");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, parent, newCreateDirectory(parent));
       observer.await(
@@ -332,9 +332,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testCreateDirectoryThenMoveItemsOutOfIt() throws Exception {
-    Resource parent = dir1().resolve("parent");
-    Resource file = parent.resolve("file");
-    Resource dir = parent.resolve("dir");
+    File parent = dir1().resolve("parent");
+    File file = parent.resolve("file");
+    File dir = parent.resolve("dir");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, parent, newCreateDirectory(parent));
       observer.await(
@@ -355,9 +355,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testCreateDirectoryThenMoveFileIntoIt() throws Exception {
-    Resource parent = dir1().resolve("parent");
-    Resource file = dir2().resolve("file").createFile();
-    Resource dir = dir2().resolve("dir").createDirectory();
+    File parent = dir1().resolve("parent");
+    File file = dir2().resolve("file").createFile();
+    File dir = dir2().resolve("dir").createDirectory();
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, parent, newCreateDirectory(parent));
       observer.await(
@@ -374,10 +374,10 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   public void testMultipleOperations() throws Exception {
-    Resource a = dir1().resolve("a");
-    Resource b = dir1().resolve("b");
-    Resource c = dir1().resolve("c");
-    Resource d = dir1().resolve("d");
+    File a = dir1().resolve("a");
+    File b = dir1().resolve("b");
+    File c = dir1().resolve("c");
+    File d = dir1().resolve("d");
     try (Recorder observer = observe(dir1())) {
       observer.await(CREATE, a, newCreateDirectory(a));
       observer.await(CREATE, b, newCreateDirectory(b));
@@ -389,8 +389,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     }
   }
 
-  private static WatchEvent event(Event kind, Resource resource) {
-    return WatchEvent.create(kind, resource);
+  private static WatchEvent event(Event kind, File file) {
+    return WatchEvent.create(kind, file);
   }
 
   private static Callable<Void> compose(final Callable<?>... callables) {
@@ -404,7 +404,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     };
   }
 
-  private static Callable<Void> newMove(final Resource src, final Resource dst) {
+  private static Callable<Void> newMove(final File src, final File dst) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
         src.moveTo(dst);
@@ -413,16 +413,16 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     };
   }
 
-  private static Callable<Void> newDelete(final Resource resource) {
+  private static Callable<Void> newDelete(final File file) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
-        resource.delete();
+        file.delete();
         return null;
       }
     };
   }
 
-  private static Callable<Void> newCreateFile(final Resource file) {
+  private static Callable<Void> newCreateFile(final File file) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
         file.createFile();
@@ -431,7 +431,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     };
   }
 
-  private static Callable<Void> newCreateDirectory(final Resource directory) {
+  private static Callable<Void> newCreateDirectory(final File directory) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
         directory.createDirectory();
@@ -441,8 +441,8 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private static Callable<Void> newCreateSymbolicLink(
-      final Resource link,
-      final Resource target) {
+      final File link,
+      final File target) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
         link.createLink(target);
@@ -452,7 +452,7 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private static Callable<Void> newAppend(
-      final Resource file,
+      final File file,
       final CharSequence content) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
@@ -465,23 +465,23 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   }
 
   private static Callable<Void> newSetPermissions(
-      final Resource resource,
+      final File file,
       final Set<Permission> permissions) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
-        resource.setPermissions(permissions);
+        file.setPermissions(permissions);
         return null;
       }
     };
   }
 
   private static Callable<Void> newSetModificationTime(
-      final Resource resource,
+      final File file,
       final LinkOption option,
       final Instant instant) {
     return new Callable<Void>() {
       @Override public Void call() throws Exception {
-        resource.setLastModifiedTime(option, instant);
+        file.setLastModifiedTime(option, instant);
         return null;
       }
     };
@@ -489,22 +489,22 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
   static class Recorder implements Observer, Closeable {
 
-    private Resource resource;
+    private File file;
     private Closeable subscription;
     private volatile List<WatchEvent> expected;
     private volatile List<WatchEvent> actual;
     private volatile CountDownLatch success;
 
-    Recorder(Resource resource) {
-      this.resource = resource;
+    Recorder(File file) {
+      this.file = file;
     }
 
-    static Recorder observe(Resource observable) throws IOException {
+    static Recorder observe(File observable) throws IOException {
       return observe(observable, NOFOLLOW);
     }
 
     static Recorder observe(
-        Resource observable,
+        File observable,
         LinkOption option) throws IOException {
       Recorder observer = new Recorder(observable);
       observer.subscription = observable.observe(option, observer);
@@ -516,9 +516,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
     }
 
     @Override public void onEvent(Event event, @Nullable String child) {
-      Resource target = child == null
-          ? resource
-          : resource.resolve(child);
+      File target = child == null
+          ? file
+          : file.resolve(child);
       actual.add(WatchEvent.create(event, target));
       if (expected.equals(actual)) {
         success.countDown();
@@ -527,9 +527,9 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
 
     void await(
         Event kind,
-        Resource resource,
+        File file,
         Callable<?> action) throws Exception {
-      await(WatchEvent.create(kind, resource), action);
+      await(WatchEvent.create(kind, file), action);
     }
 
     void await(
@@ -556,11 +556,11 @@ public final class LocalResource_observe_Test extends ResourceBaseTest {
   static abstract class WatchEvent {
     abstract Event kind();
 
-    abstract Resource resource();
+    abstract File resource();
 
-    static WatchEvent create(Event kind, Resource resource) {
+    static WatchEvent create(Event kind, File file) {
       return new AutoValue_LocalResource_observe_Test_WatchEvent(
-          kind, resource
+          kind, file
       );
     }
   }

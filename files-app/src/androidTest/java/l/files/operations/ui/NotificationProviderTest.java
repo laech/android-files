@@ -4,15 +4,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import l.files.common.testing.BaseTest;
-import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.File;
+import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
 import l.files.operations.OperationService;
@@ -76,9 +75,9 @@ public final class NotificationProviderTest extends BaseTest {
   }
 
   public void testNotifyOnFailure() throws Exception {
-    Resource resource = LocalResource.create(new File("p"));
+    File file = LocalFile.create(new java.io.File("p"));
     IOException err = new IOException("test");
-    List<Failure> failures = singletonList(Failure.create(resource, err));
+    List<Failure> failures = singletonList(Failure.create(file, err));
     provider.onUpdate(base
         .running(Time.create(1, 1))
         .failed(Time.create(2, 2), failures));
@@ -98,12 +97,12 @@ public final class NotificationProviderTest extends BaseTest {
     Intent intent = provider.getFailureIntent(base
         .running(Time.create(1, 1))
         .failed(Time.create(2, 2), asList(
-            Failure.create(LocalResource.create(new File("1")), new IOException("test1")),
-            Failure.create(LocalResource.create(new File("2")), new IOException("test2")))));
+            Failure.create(LocalFile.create(new java.io.File("1")), new IOException("test1")),
+            Failure.create(LocalFile.create(new java.io.File("2")), new IOException("test2")))));
     Collection<FailureMessage> actual = getFailures(intent);
     Collection<FailureMessage> expected = asList(
-        FailureMessage.create(LocalResource.create(new File("1")), "test1"),
-        FailureMessage.create(LocalResource.create(new File("2")), "test2")
+        FailureMessage.create(LocalFile.create(new java.io.File("1")), "test1"),
+        FailureMessage.create(LocalFile.create(new java.io.File("2")), "test2")
     );
     assertEquals(expected, actual);
     assertTrue(getTitle(intent).matches(".+"));

@@ -8,7 +8,6 @@ import android.system.Os;
 import com.google.auto.value.AutoValue;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,11 +29,11 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.common.base.Consumer;
+import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
@@ -74,7 +73,7 @@ import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 @AutoValue
-public abstract class LocalResource extends Native implements Resource {
+public abstract class LocalFile extends Native implements File {
 
   private static final int[] PERMISSION_BITS = permissionsToBits();
 
@@ -108,18 +107,18 @@ public abstract class LocalResource extends Native implements Resource {
 
   private Name name;
 
-  LocalResource() {
+  LocalFile() {
   }
 
-  abstract File file();
+  abstract java.io.File file();
 
-  public static LocalResource create(File file) {
-    return new AutoValue_LocalResource(file);
+  public static LocalFile create(java.io.File file) {
+    return new AutoValue_LocalFile(file);
   }
 
-  private static void ensureIsLocalResource(Resource resource) {
-    if (!(resource instanceof LocalResource)) {
-      throw new IllegalArgumentException(resource.toString());
+  private static void ensureIsLocalResource(File file) {
+    if (!(file instanceof LocalFile)) {
+      throw new IllegalArgumentException(file.toString());
     }
   }
 
@@ -151,11 +150,11 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Nullable
-  @Override public LocalResource parent() {
+  @Override public LocalFile parent() {
     if (isRoot()) {
       return null;
     } else {
-      return new AutoValue_LocalResource(file().getParentFile());
+      return new AutoValue_LocalFile(file().getParentFile());
     }
   }
 
@@ -163,9 +162,9 @@ public abstract class LocalResource extends Native implements Resource {
     return "/".equals(path());
   }
 
-  @Override public List<Resource> hierarchy() {
-    List<Resource> hierarchy = new ArrayList<>();
-    for (Resource p = this; p != null; p = p.parent()) {
+  @Override public List<File> hierarchy() {
+    List<File> hierarchy = new ArrayList<>();
+    for (File p = this; p != null; p = p.parent()) {
       hierarchy.add(p);
     }
     reverse(hierarchy);
@@ -175,8 +174,8 @@ public abstract class LocalResource extends Native implements Resource {
   @Override public Closeable observe(LinkOption option, Observer observer)
       throws IOException {
 
-    return observe(option, observer, new Consumer<Resource>() {
-      @Override public void apply(Resource input) {}
+    return observe(option, observer, new Consumer<File>() {
+      @Override public void apply(File input) {}
     });
 
   }
@@ -184,13 +183,13 @@ public abstract class LocalResource extends Native implements Resource {
   @Override public Closeable observe(
       LinkOption option,
       Observer observer,
-      Consumer<Resource> childrenConsumer) throws IOException {
+      Consumer<File> childrenConsumer) throws IOException {
 
-    return LocalResourceObservable.observe(
+    return LocalObservable.observe(
         this, option, observer, childrenConsumer);
   }
 
-  @Override public boolean startsWith(Resource other) {
+  @Override public boolean startsWith(File other) {
     ensureIsLocalResource(other);
     if (other.parent() == null || other.equals(this)) {
       return true;
@@ -202,24 +201,24 @@ public abstract class LocalResource extends Native implements Resource {
         thisPath.charAt(thatPath.length()) == '/';
   }
 
-  @Override public LocalResource resolve(String other) {
-    return create(new File(file(), other));
+  @Override public LocalFile resolve(String other) {
+    return create(new java.io.File(file(), other));
   }
 
-  @Override public Resource resolve(Name other) {
+  @Override public File resolve(Name other) {
     return resolve(other.toString());
   }
 
   @Override
-  public LocalResource resolveParent(Resource fromParent, Resource toParent) {
+  public LocalFile resolveParent(File fromParent, File toParent) {
     ensureIsLocalResource(fromParent);
     ensureIsLocalResource(toParent);
     if (!startsWith(fromParent)) {
       throw new IllegalArgumentException();
     }
-    File parent = ((LocalResource) toParent).file();
+    java.io.File parent = ((LocalFile) toParent).file();
     String child = path().substring(fromParent.path().length());
-    return new AutoValue_LocalResource(new File(parent, child));
+    return new AutoValue_LocalFile(new java.io.File(parent, child));
   }
 
   @Override public LocalStat stat(LinkOption option) throws IOException {
@@ -265,21 +264,21 @@ public abstract class LocalResource extends Native implements Resource {
 
   @Override
   public void traverse(LinkOption option, Visitor visitor) throws IOException {
-    new LocalResourceTraverser(this, option, visitor).traverse();
+    new LocalTraverser(this, option, visitor).traverse();
   }
 
   @Override
-  public Stream<Resource> list(final LinkOption option) throws IOException {
-    return new Stream<Resource>() {
+  public Stream<File> list(final LinkOption option) throws IOException {
+    return new Stream<File>() {
 
-      final Stream<Dirent> stream = Dirent.stream(LocalResource.this, option);
+      final Stream<Dirent> stream = Dirent.stream(LocalFile.this, option);
 
       @Override public void close() throws IOException {
         stream.close();
       }
 
-      @Override public Iterator<Resource> iterator() {
-        return new Iterator<Resource>() {
+      @Override public Iterator<File> iterator() {
+        return new Iterator<File>() {
 
           final Iterator<Dirent> iterator = stream.iterator();
 
@@ -287,7 +286,7 @@ public abstract class LocalResource extends Native implements Resource {
             return iterator.hasNext();
           }
 
-          @Override public Resource next() {
+          @Override public File next() {
             return resolve(iterator.next().name());
           }
 
@@ -325,7 +324,7 @@ public abstract class LocalResource extends Native implements Resource {
     return new OutputStreamWriter(output(append), charset);
   }
 
-  @Override public LocalResource createDirectory() throws IOException {
+  @Override public LocalFile createDirectory() throws IOException {
     try {
       mkdir();
     } catch (ErrnoException e) {
@@ -339,7 +338,7 @@ public abstract class LocalResource extends Native implements Resource {
     Os.mkdir(path(), S_IRWXU);
   }
 
-  @Override public LocalResource createDirectories() throws IOException {
+  @Override public LocalFile createDirectories() throws IOException {
     try {
       if (stat(NOFOLLOW).isDirectory()) {
         return this;
@@ -348,7 +347,7 @@ public abstract class LocalResource extends Native implements Resource {
       // Ignore will create
     }
 
-    Resource parent = parent();
+    File parent = parent();
     if (parent != null) {
       parent.createDirectories();
     }
@@ -364,7 +363,7 @@ public abstract class LocalResource extends Native implements Resource {
     return this;
   }
 
-  @Override public LocalResource createFile() throws IOException {
+  @Override public LocalFile createFile() throws IOException {
     // Same flags and mode as java.io.File.createNewFile() on Android
     int flags = O_RDWR | O_CREAT | O_EXCL;
     int mode = S_IRUSR | S_IWUSR;
@@ -377,7 +376,7 @@ public abstract class LocalResource extends Native implements Resource {
     return this;
   }
 
-  @Override public Resource createFiles() throws IOException {
+  @Override public File createFiles() throws IOException {
     try {
       if (stat(NOFOLLOW).isRegularFile()) {
         return this;
@@ -386,7 +385,7 @@ public abstract class LocalResource extends Native implements Resource {
       // Ignore will create
     }
 
-    Resource parent = parent();
+    File parent = parent();
     if (parent != null) {
       parent.createDirectories();
     }
@@ -394,7 +393,7 @@ public abstract class LocalResource extends Native implements Resource {
   }
 
   @Override
-  public LocalResource createLink(Resource target) throws IOException {
+  public LocalFile createLink(File target) throws IOException {
     ensureIsLocalResource(target);
     String targetPath = target.path();
     try {
@@ -405,16 +404,16 @@ public abstract class LocalResource extends Native implements Resource {
     return this;
   }
 
-  @Override public LocalResource readLink() throws IOException {
+  @Override public LocalFile readLink() throws IOException {
     try {
       String link = Os.readlink(path());
-      return create(new File(link));
+      return create(new java.io.File(link));
     } catch (ErrnoException e) {
       throw toIOException(e, path());
     }
   }
 
-  @Override public void moveTo(Resource dst) throws IOException {
+  @Override public void moveTo(File dst) throws IOException {
     ensureIsLocalResource(dst);
     String dstPath = dst.path();
     String srcPath = path();
@@ -535,14 +534,14 @@ public abstract class LocalResource extends Native implements Resource {
     return 0;
   }
 
-  public static final Creator<LocalResource> CREATOR = new Creator<LocalResource>() {
+  public static final Creator<LocalFile> CREATOR = new Creator<LocalFile>() {
 
-    @Override public LocalResource createFromParcel(Parcel source) {
-      return create(new File(source.readString()));
+    @Override public LocalFile createFromParcel(Parcel source) {
+      return create(new java.io.File(source.readString()));
     }
 
-    @Override public LocalResource[] newArray(int size) {
-      return new LocalResource[size];
+    @Override public LocalFile[] newArray(int size) {
+      return new LocalFile[size];
     }
 
   };

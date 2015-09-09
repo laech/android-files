@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 final class FailureRecorder {
 
@@ -16,12 +16,12 @@ final class FailureRecorder {
         this.failures = new ArrayList<>();
     }
 
-    public void onFailure(Resource resource, IOException failure)
+    public void onFailure(File file, IOException failure)
             throws FileException {
         if (failures.size() > limit) {
             throw new FileException(failures);
         }
-        failures.add(Failure.create(resource, failure));
+        failures.add(Failure.create(file, failure));
     }
 
     void throwIfNotEmpty() {

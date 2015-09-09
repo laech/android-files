@@ -10,13 +10,13 @@ import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static l.files.ui.preview.Preview.PALETTE_MAX_COLOR_COUNT;
 
 final class PaletteCache extends PersistenceCache<Palette> {
 
-  PaletteCache(Resource cacheDir) {
+  PaletteCache(File cacheDir) {
     super(cacheDir);
   }
 

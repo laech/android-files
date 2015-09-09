@@ -21,7 +21,7 @@ import java.util.Objects;
 import l.files.R;
 import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 import l.files.ui.menu.AboutMenu;
@@ -61,7 +61,7 @@ public final class FilesActivity extends BaseActivity implements
   private Toolbar toolbar;
   private Spinner title;
 
-  public List<Resource> hierarchy() {
+  public List<File> hierarchy() {
     return hierarchy.get();
   }
 
@@ -123,7 +123,7 @@ public final class FilesActivity extends BaseActivity implements
   @Override public void onItemSelected(
       AdapterView<?> parent, View view, int position, long id) {
     log.debug("onItemSelected");
-    Resource item = (Resource) parent.getAdapter().getItem(position);
+    File item = (File) parent.getAdapter().getItem(position);
     if (!Objects.equals(item, fragment().directory())) {
       open(item);
     } else {
@@ -139,8 +139,8 @@ public final class FilesActivity extends BaseActivity implements
     super.onDestroy();
   }
 
-  private Resource initialDirectory() {
-    Resource dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+  private File initialDirectory() {
+    File dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
     return dir == null ? DIR_HOME : dir;
   }
 
@@ -217,20 +217,20 @@ public final class FilesActivity extends BaseActivity implements
     return drawer;
   }
 
-  @Override public void onOpen(Resource resource) {
-    log.debug("onOpen(%s)", resource);
+  @Override public void onOpen(File file) {
+    log.debug("onOpen(%s)", file);
     ActionMode mode = currentActionMode();
     if (mode != null) {
       mode.finish();
     }
-    open(resource);
+    open(file);
   }
 
-  private void open(final Resource resource) {
-    log.debug("open(%s)", resource);
+  private void open(final File file) {
+    log.debug("open(%s)", file);
     closeDrawerThenRun(new Runnable() {
       @Override public void run() {
-        show(resource);
+        show(file);
       }
     });
   }
@@ -244,13 +244,13 @@ public final class FilesActivity extends BaseActivity implements
     }
   }
 
-  private void show(final Resource resource) {
+  private void show(final File file) {
     new AsyncTask<Void, Void, Object>() {
       @Override protected Object doInBackground(Void... params) {
         try {
-          return resource.stat(FOLLOW);
+          return file.stat(FOLLOW);
         } catch (IOException e) {
-          log.debug(e, "%s", resource);
+          log.debug(e, "%s", file);
           return e;
         }
       }
@@ -259,7 +259,7 @@ public final class FilesActivity extends BaseActivity implements
         super.onPostExecute(result);
         if (!isDestroyed() && !isFinishing()) {
           if (result instanceof Stat) {
-            show(resource, (Stat) result);
+            show(file, (Stat) result);
           } else {
             String msg = message((IOException) result);
             makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
@@ -269,19 +269,19 @@ public final class FilesActivity extends BaseActivity implements
     }.execute();
   }
 
-  private void show(Resource resource, Stat stat) {
-    if (!isReadable(resource)) { // TODO Check in background
+  private void show(File file, Stat stat) {
+    if (!isReadable(file)) { // TODO Check in background
       showPermissionDenied();
     } else if (stat.isDirectory()) {
-      showDirectory(resource);
+      showDirectory(file);
     } else {
-      showFile(resource);
+      showFile(file);
     }
   }
 
-  private boolean isReadable(Resource resource) {
+  private boolean isReadable(File file) {
     try {
-      return resource.readable();
+      return file.readable();
     } catch (IOException e) {
       return false;
     }
@@ -291,23 +291,23 @@ public final class FilesActivity extends BaseActivity implements
     makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
   }
 
-  private void showDirectory(Resource resource) {
+  private void showDirectory(File file) {
     FilesFragment fragment = fragment();
-    if (fragment.directory().equals(resource)) {
+    if (fragment.directory().equals(file)) {
       return;
     }
-    FilesFragment f = FilesFragment.create(resource);
+    FilesFragment f = FilesFragment.create(file);
     getFragmentManager()
         .beginTransaction()
         .replace(R.id.content, f, FilesFragment.TAG)
         .addToBackStack(null)
-        .setBreadCrumbTitle(resource.name())
+        .setBreadCrumbTitle(file.name())
         .setTransition(TRANSIT_FRAGMENT_OPEN)
         .commit();
   }
 
-  private void showFile(Resource resource) {
-    FileOpener.get(this).apply(resource);
+  private void showFile(File file) {
+    FileOpener.get(this).apply(file);
   }
 
   public FilesFragment fragment() {

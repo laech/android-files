@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
   final Logger log = Logger.get(getClass());
-  final Resource res;
+  final File res;
   final Stat stat;
   final Rect constraint;
   final Preview context;
@@ -26,7 +26,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
   private final List<Decode> subs;
 
   Decode(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

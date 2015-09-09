@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.common.app.OptionsMenuAction;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.operations.OperationService;
 import l.files.ui.Clipboards;
 
@@ -30,7 +30,7 @@ import static l.files.ui.Clipboards.isCut;
 public final class PasteMenu extends OptionsMenuAction
     implements LoaderCallbacks<PasteMenu.ResourceExistence> {
 
-  private final Resource destination;
+  private final File destination;
   private final ClipboardManager manager;
   private final Activity context;
 
@@ -39,7 +39,7 @@ public final class PasteMenu extends OptionsMenuAction
   public PasteMenu(
       Activity context,
       ClipboardManager manager,
-      Resource destination) {
+      File destination) {
     super(android.R.id.paste);
     this.context = requireNonNull(context, "context");
     this.manager = requireNonNull(manager, "manager");
@@ -62,9 +62,9 @@ public final class PasteMenu extends OptionsMenuAction
     }
 
     item.setEnabled(Clipboards.hasClip(manager));
-    final Set<Resource> resources = Clipboards.getResources(manager);
-    for (Resource resource : resources) {
-      if (this.destination.startsWith(resource)) {
+    final Set<File> files = Clipboards.getResources(manager);
+    for (File file : files) {
+      if (this.destination.startsWith(file)) {
         // Can't paste into itself
         item.setEnabled(false);
         return;
@@ -87,21 +87,21 @@ public final class PasteMenu extends OptionsMenuAction
   public Loader<ResourceExistence> onCreateLoader(int id, Bundle args) {
     return new AsyncTaskLoader<ResourceExistence>(context) {
       @Override public ResourceExistence loadInBackground() {
-        Set<Resource> resources = Clipboards.getResources(manager);
-        Set<Resource> exists = new HashSet<>();
-        for (Resource resource : resources) {
+        Set<File> files = Clipboards.getResources(manager);
+        Set<File> exists = new HashSet<>();
+        for (File file : files) {
           if (isLoadInBackgroundCanceled()) {
             return null;
           }
           try {
-            if (resource.exists(NOFOLLOW)) {
-              exists.add(resource);
+            if (file.exists(NOFOLLOW)) {
+              exists.add(file);
             }
           } catch (IOException e) {
             // Ignore this resource
           }
         }
-        return new ResourceExistence(resources, exists);
+        return new ResourceExistence(files, exists);
       }
 
       @Override protected void onStartLoading() {
@@ -126,10 +126,10 @@ public final class PasteMenu extends OptionsMenuAction
   }
 
   static final class ResourceExistence {
-    final Set<Resource> originals;
-    final Set<Resource> exists;
+    final Set<File> originals;
+    final Set<File> exists;
 
-    private ResourceExistence(Set<Resource> originals, Set<Resource> exists) {
+    private ResourceExistence(Set<File> originals, Set<File> exists) {
       this.originals = originals;
       this.exists = exists;
     }

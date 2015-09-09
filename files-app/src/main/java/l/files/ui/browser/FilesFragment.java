@@ -24,7 +24,7 @@ import l.files.R;
 import l.files.common.app.OptionsMenus;
 import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.ActionModes;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.Preferences;
 import l.files.ui.browser.FilesLoader.Result;
@@ -57,7 +57,7 @@ import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
 
-public final class FilesFragment extends SelectionModeFragment<Resource>
+public final class FilesFragment extends SelectionModeFragment<File>
     implements
     LoaderCallbacks<Result>,
     OnSharedPreferenceChangeListener,
@@ -67,7 +67,7 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
 
   private static final String ARG_DIRECTORY = "directory";
 
-  public static FilesFragment create(Resource directory) {
+  public static FilesFragment create(File directory) {
     Bundle bundle = new Bundle(1);
     bundle.putParcelable(ARG_DIRECTORY, directory);
 
@@ -76,7 +76,7 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
     return browser;
   }
 
-  private Resource directory;
+  private File directory;
   private ProgressBar progress;
   private FilesAdapter adapter;
   private TextView empty;
@@ -108,7 +108,7 @@ public final class FilesFragment extends SelectionModeFragment<Resource>
     }
   };
 
-  public Resource directory() {
+  public File directory() {
     return directory;
   }
 

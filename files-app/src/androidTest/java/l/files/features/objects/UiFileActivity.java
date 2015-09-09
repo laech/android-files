@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.common.base.Provider;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.ui.FileLabels;
@@ -121,7 +121,7 @@ public final class UiFileActivity {
     return new UiSort(this);
   }
 
-  public UiFileActivity selectFromNavigationMode(final Resource dir) {
+  public UiFileActivity selectFromNavigationMode(final File dir) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         int position = activity().hierarchy().indexOf(dir);
@@ -131,19 +131,19 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity clickInto(Resource resource) {
-    click(resource);
-    assertCurrentDirectory(resource);
+  public UiFileActivity clickInto(File file) {
+    click(file);
+    assertCurrentDirectory(file);
     return this;
   }
 
-  public UiFileActivity click(Resource resource) {
-    clickItemOnMainThread(instrument, recycler(), resource);
+  public UiFileActivity click(File file) {
+    clickItemOnMainThread(instrument, recycler(), file);
     return this;
   }
 
-  public UiFileActivity longClick(Resource resource) {
-    longClickItemOnMainThread(instrument, recycler(), resource);
+  public UiFileActivity longClick(File file) {
+    longClickItemOnMainThread(instrument, recycler(), file);
     return this;
   }
 
@@ -244,12 +244,12 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertCurrentDirectory(final Resource expected) {
+  public UiFileActivity assertCurrentDirectory(final File expected) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         FilesFragment fragment = activity().fragment();
         assertNotNull(fragment);
-        Resource actual = fragment.directory();
+        File actual = fragment.directory();
         assertEquals(expected, actual);
       }
     });
@@ -257,7 +257,7 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity assertListViewContains(
-      final Resource item,
+      final File item,
       final boolean contains) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
@@ -268,9 +268,9 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity assertSummaryView(
-      final Resource resource,
+      final File file,
       final Consumer<CharSequence> assertion) {
-    findItemOnMainThread(resource, new Consumer<View>() {
+    findItemOnMainThread(file, new Consumer<View>() {
       @Override public void apply(View input) {
         TextView summary = find(R.id.summary, input);
         assertion.apply(summary.getText());
@@ -282,13 +282,13 @@ public final class UiFileActivity {
   public UiFileActivity assertActionBarTitle(final String title) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        assertEquals(title, label((Resource) activity().title().getSelectedItem()));
+        assertEquals(title, label((File) activity().title().getSelectedItem()));
       }
     });
     return this;
   }
 
-  private String label(Resource res) {
+  private String label(File res) {
     return FileLabels.get(activity().getResources(), res);
   }
 
@@ -325,10 +325,10 @@ public final class UiFileActivity {
   }
 
   private void findItemOnMainThread(
-      Resource resource,
+      File file,
       Consumer<View> consumer) {
     Instrumentations.findItemOnMainThread(
-        instrument, recycler(), resource, consumer);
+        instrument, recycler(), file, consumer);
   }
 
   private RecyclerView recycler() {
@@ -385,8 +385,8 @@ public final class UiFileActivity {
    * Asserts whether the given item is currently checked.
    */
   public UiFileActivity assertChecked(
-      Resource resource, final boolean checked) {
-    findItemOnMainThread(resource, new Consumer<View>() {
+      File file, final boolean checked) {
+    findItemOnMainThread(file, new Consumer<View>() {
       @Override public void apply(View view) {
         assertEquals(checked, view.isActivated());
       }
@@ -426,9 +426,9 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity assertSymbolicLinkIconDisplayed(
-      Resource resource,
+      File file,
       final boolean displayed) {
-    findItemOnMainThread(resource, new Consumer<View>() {
+    findItemOnMainThread(file, new Consumer<View>() {
       @Override public void apply(View input) {
         View view = input.findViewById(R.id.symlink);
         if (displayed) {
@@ -463,8 +463,8 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertDisabled(Resource resource) {
-    findItemOnMainThread(resource, new Consumer<View>() {
+  public UiFileActivity assertDisabled(File file) {
+    findItemOnMainThread(file, new Consumer<View>() {
       @Override public void apply(View input) {
         assertFalse(input.findViewById(R.id.icon).isEnabled());
         assertFalse(input.findViewById(R.id.title).isEnabled());
@@ -474,11 +474,11 @@ public final class UiFileActivity {
     return this;
   }
 
-  public UiFileActivity assertNavigationModeHierarchy(final Resource dir) {
+  public UiFileActivity assertNavigationModeHierarchy(final File dir) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        List<Resource> actual = activity().hierarchy();
-        List<Resource> expected = new ArrayList<>(dir.hierarchy());
+        List<File> actual = activity().hierarchy();
+        List<File> expected = new ArrayList<>(dir.hierarchy());
         reverse(expected);
         assertEquals(expected, actual);
         assertEquals(dir, activity().title().getSelectedItem());
@@ -488,7 +488,7 @@ public final class UiFileActivity {
   }
 
   public UiFileActivity assertListViewContainsChildrenOf(
-      final Resource dir) throws IOException {
+      final File dir) throws IOException {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
         assertEquals(
@@ -499,41 +499,41 @@ public final class UiFileActivity {
     return this;
   }
 
-  private List<Pair<Resource, Stat>> childrenStatsSortedByPath(Resource dir) {
-    try (Stream<Resource> stream = dir.list(NOFOLLOW)) {
-      List<Resource> children = sortResourcesByPath(stream);
+  private List<Pair<File, Stat>> childrenStatsSortedByPath(File dir) {
+    try (Stream<File> stream = dir.list(NOFOLLOW)) {
+      List<File> children = sortResourcesByPath(stream);
       return stat(children);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private List<Pair<Resource, Stat>> stat(
-      List<Resource> resources) throws IOException {
-    List<Pair<Resource, Stat>> result = new ArrayList<>();
-    for (Resource resource : resources) {
-      result.add(Pair.create(resource, resource.stat(NOFOLLOW)));
+  private List<Pair<File, Stat>> stat(
+      List<File> files) throws IOException {
+    List<Pair<File, Stat>> result = new ArrayList<>();
+    for (File file : files) {
+      result.add(Pair.create(file, file.stat(NOFOLLOW)));
     }
     return result;
   }
 
-  private List<Resource> sortResourcesByPath(Stream<Resource> iterable) {
-    List<Resource> resources = iterable.to(new ArrayList<Resource>());
-    Collections.sort(resources, new Comparator<Resource>() {
-      @Override public int compare(Resource a, Resource b) {
+  private List<File> sortResourcesByPath(Stream<File> iterable) {
+    List<File> files = iterable.to(new ArrayList<File>());
+    Collections.sort(files, new Comparator<File>() {
+      @Override public int compare(File a, File b) {
         return a.path().compareTo(b.path());
       }
     });
-    return resources;
+    return files;
   }
 
-  private List<Pair<Resource, Stat>> listViewStatsSortedByPath() {
+  private List<Pair<File, Stat>> listViewStatsSortedByPath() {
     List<FileListItem.File> items = sortFilesByPath(fileItems());
     return stats(items);
   }
 
-  private List<Pair<Resource, Stat>> stats(List<FileListItem.File> items) {
-    List<Pair<Resource, Stat>> result = new ArrayList<>();
+  private List<Pair<File, Stat>> stats(List<FileListItem.File> items) {
+    List<Pair<File, Stat>> result = new ArrayList<>();
     for (FileListItem.File item : items) {
       result.add(Pair.create(item.resource(), item.stat()));
     }
@@ -563,19 +563,19 @@ public final class UiFileActivity {
     return files;
   }
 
-  private List<Resource> resources() {
+  private List<File> resources() {
     List<FileListItem.File> items = fileItems();
-    List<Resource> resources = new ArrayList<>(items.size());
+    List<File> files = new ArrayList<>(items.size());
     for (FileListItem.File item : items) {
-      resources.add(item.resource());
+      files.add(item.resource());
     }
-    return resources;
+    return files;
   }
 
-  public UiFileActivity assertItemsDisplayed(final Resource... expected) {
+  public UiFileActivity assertItemsDisplayed(final File... expected) {
     awaitOnMainThread(instrument, new Runnable() {
       @Override public void run() {
-        List<Resource> actual = new ArrayList<>();
+        List<File> actual = new ArrayList<>();
         for (FileListItem.File item : fileItems()) {
           actual.add(item.resource());
         }

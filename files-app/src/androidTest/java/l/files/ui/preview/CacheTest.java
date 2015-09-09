@@ -3,16 +3,16 @@ package l.files.ui.preview;
 import java.util.Random;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.fs.local.ResourceBaseTest;
+import l.files.fs.local.FileBaseTest;
 
 import static java.lang.System.currentTimeMillis;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class CacheTest<V, C extends Cache<V>>
-    extends ResourceBaseTest {
+    extends FileBaseTest {
 
   C cache;
   Random random;
@@ -24,7 +24,7 @@ public abstract class CacheTest<V, C extends Cache<V>>
   }
 
   public void test_gets_what_has_put_in() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     V value = newValue();
@@ -33,7 +33,7 @@ public abstract class CacheTest<V, C extends Cache<V>>
   }
 
   public void test_gets_null_when_time_changes() throws Exception {
-    Resource res = dir1().resolve("a").createFile();
+    File res = dir1().resolve("a").createFile();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     V value = newValue();

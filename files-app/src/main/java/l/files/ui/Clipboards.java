@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static android.content.ClipData.newIntent;
 import static android.content.ClipData.newPlainText;
@@ -42,13 +42,13 @@ public final class Clipboards {
     return ACTION_COPY.equals(getAction(manager));
   }
 
-  public static Set<Resource> getResources(ClipboardManager manager) {
+  public static Set<File> getResources(ClipboardManager manager) {
     Intent intent = getClipboardIntent(manager);
     if (intent == null) {
       return emptySet();
     }
     intent.setExtrasClassLoader(Clipboards.class.getClassLoader());
-    ArrayList<Resource> extras = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
+    ArrayList<File> extras = intent.getParcelableArrayListExtra(EXTRA_RESOURCES);
     if (extras == null) {
       return emptySet();
     }
@@ -73,17 +73,17 @@ public final class Clipboards {
     return intent.getAction();
   }
 
-  public static void setCut(ClipboardManager manager, Collection<? extends Resource> resources) {
+  public static void setCut(ClipboardManager manager, Collection<? extends File> resources) {
     setClipData(manager, resources, ACTION_CUT);
   }
 
-  public static void setCopy(ClipboardManager manager, Collection<? extends Resource> resources) {
+  public static void setCopy(ClipboardManager manager, Collection<? extends File> resources) {
     setClipData(manager, resources, ACTION_COPY);
   }
 
   private static void setClipData(
       ClipboardManager manager,
-      Collection<? extends Resource> resources,
+      Collection<? extends File> resources,
       String action) {
     Intent intent = new Intent(action);
     intent.putParcelableArrayListExtra(EXTRA_RESOURCES, new ArrayList<>(resources));

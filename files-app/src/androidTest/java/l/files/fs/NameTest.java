@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.Resource.Name;
+import l.files.fs.File.Name;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Collections.reverse;

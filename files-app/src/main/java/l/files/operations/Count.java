@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 class Count extends AbstractOperation {
 
   private final AtomicInteger count = new AtomicInteger();
 
-  Count(Collection<? extends Resource> resources) {
+  Count(Collection<? extends File> resources) {
     super(resources);
   }
 
@@ -18,10 +18,10 @@ class Count extends AbstractOperation {
     return count.get();
   }
 
-  @Override void process(Resource resource) {
-    traverse(resource, new OperationVisitor() {
+  @Override void process(File file) {
+    traverse(file, new OperationVisitor() {
 
-      @Override public Result onPreVisit(Resource res) throws IOException {
+      @Override public Result onPreVisit(File res) throws IOException {
         count.incrementAndGet();
         onCount(res);
         return super.onPreVisit(res);
@@ -30,7 +30,7 @@ class Count extends AbstractOperation {
     });
   }
 
-  void onCount(Resource resource) {
+  void onCount(File file) {
   }
 
 }

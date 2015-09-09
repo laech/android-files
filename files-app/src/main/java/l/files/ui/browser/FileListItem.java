@@ -8,10 +8,9 @@ import java.io.IOException;
 import java.text.Collator;
 
 import collation.NaturalKey;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 
-import static l.files.fs.Resource.OCTET_STREAM;
+import static l.files.fs.File.OCTET_STREAM;
 
 public abstract class FileListItem {
 
@@ -74,7 +73,7 @@ public abstract class FileListItem {
       }
     }
 
-    public abstract Resource resource();
+    public abstract l.files.fs.File resource();
 
     @Nullable public abstract Stat stat(); // TODO
 
@@ -83,13 +82,13 @@ public abstract class FileListItem {
     abstract NaturalKey collationKey();
 
     public static File create(
-        Resource resource,
+        l.files.fs.File file,
         @Nullable Stat stat,
         @Nullable Stat targetStat,
         Collator collator) {
-      String name = resource.name().toString();
+      String name = file.name().toString();
       NaturalKey key = NaturalKey.create(collator, name);
-      return new AutoValue_FileListItem_File(resource, stat, targetStat, key);
+      return new AutoValue_FileListItem_File(file, stat, targetStat, key);
     }
 
     @Override public boolean isFile() {

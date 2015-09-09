@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.os.Build;
 
 import l.files.R;
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static l.files.ui.UserDirs.DIR_HOME;
 import static l.files.ui.UserDirs.DIR_ROOT;
@@ -16,11 +16,11 @@ public final class FileLabels
     {
     }
 
-    public static String get(final Resources res, final Resource resource)
+    public static String get(final Resources res, final File file)
     {
-        if (DIR_HOME.equals(resource)) return res.getString(R.string.home);
-        if (DIR_ROOT.equals(resource)) return Build.MODEL;
-        return resource.name().toString();
+        if (DIR_HOME.equals(file)) return res.getString(R.string.home);
+        if (DIR_ROOT.equals(file)) return Build.MODEL;
+        return file.name().toString();
     }
 
 }

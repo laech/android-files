@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -23,7 +23,7 @@ final class DecodeChain extends Decode {
   private static final Executor executor = newFixedThreadPool(5);
 
   DecodeChain(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,
@@ -36,7 +36,7 @@ final class DecodeChain extends Decode {
   }
 
   @Nullable static Decode run(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

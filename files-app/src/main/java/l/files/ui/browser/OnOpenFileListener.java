@@ -1,9 +1,9 @@
 package l.files.ui.browser;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 public interface OnOpenFileListener {
 
-  void onOpen(Resource res);
+  void onOpen(File res);
 
 }

@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 import l.files.logging.Logger;
 
 import static android.graphics.BitmapFactory.decodeStream;
@@ -46,12 +46,12 @@ public final class Preview {
   private final ThumbnailDiskCache thumbnailDiskCache;
 
   final DisplayMetrics displayMetrics;
-  final Resource cacheDir;
+  final File cacheDir;
   final Context context;
 
   private Preview(Context context) {
     this.context = context;
-    this.cacheDir = LocalResource.create(context.getExternalCacheDir());
+    this.cacheDir = LocalFile.create(context.getExternalCacheDir());
     this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
     this.sizeCache = new RectCache(cacheDir);
     this.paletteCache = new PaletteCache(cacheDir);
@@ -79,57 +79,57 @@ public final class Preview {
     thumbnailDiskCache.cleanupAsync();
   }
 
-  @Nullable public Bitmap getBitmap(Resource res, Stat stat, Rect constraint) {
+  @Nullable public Bitmap getBitmap(File res, Stat stat, Rect constraint) {
     return thumbnailMemCache.get(res, stat, constraint);
   }
 
-  void putBitmap(Resource res, Stat stat, Rect constraint, Bitmap bitmap) {
+  void putBitmap(File res, Stat stat, Rect constraint, Bitmap bitmap) {
     thumbnailMemCache.put(res, stat, constraint, bitmap);
   }
 
   @Nullable
-  Bitmap getBitmapFromDisk(Resource res, Stat stat, Rect constraint) throws IOException {
+  Bitmap getBitmapFromDisk(File res, Stat stat, Rect constraint) throws IOException {
     return thumbnailDiskCache.get(res, stat, constraint);
   }
 
   void putBitmapToDiskAsync(
-      Resource res, Stat stat, Rect constraint, Bitmap bitmap) {
+      File res, Stat stat, Rect constraint, Bitmap bitmap) {
     thumbnailDiskCache.putAsync(res, stat, constraint, bitmap);
   }
 
-  @Nullable public Rect getSize(Resource res, Stat stat, Rect constraint) {
+  @Nullable public Rect getSize(File res, Stat stat, Rect constraint) {
     return sizeCache.get(res, stat, constraint);
   }
 
-  void putSize(Resource res, Stat stat, Rect constraint, Rect size) {
+  void putSize(File res, Stat stat, Rect constraint, Rect size) {
     sizeCache.put(res, stat, constraint, size);
   }
 
   @Nullable
-  public Palette getPalette(Resource res, Stat stat, Rect constraint) {
+  public Palette getPalette(File res, Stat stat, Rect constraint) {
     return paletteCache.get(res, stat, constraint);
   }
 
-  void putPalette(Resource res, Stat stat, Rect constraint, Palette palette) {
+  void putPalette(File res, Stat stat, Rect constraint, Palette palette) {
     paletteCache.put(res, stat, constraint, palette);
   }
 
-  @Nullable String getMediaType(Resource res, Stat stat, Rect constraint) {
+  @Nullable String getMediaType(File res, Stat stat, Rect constraint) {
     return mediaTypeCache.get(res, stat, constraint);
   }
 
-  void putMediaType(Resource res, Stat stat, Rect constraint, String media) {
+  void putMediaType(File res, Stat stat, Rect constraint, String media) {
     mediaTypeCache.put(res, stat, constraint, media);
   }
 
-  public boolean isPreviewable(Resource res, Stat stat, Rect constraint) {
+  public boolean isPreviewable(File res, Stat stat, Rect constraint) {
     return stat.size() > 0
         && stat.isRegularFile()
         && isReadable(res)
         && !TRUE.equals(noPreviewCache.get(res, stat, constraint));
   }
 
-  void putPreviewable(Resource res, Stat stat, Rect constraint, boolean previewable) {
+  void putPreviewable(File res, Stat stat, Rect constraint, boolean previewable) {
     if (previewable) {
       noPreviewCache.remove(res, stat, constraint);
     } else {
@@ -137,23 +137,23 @@ public final class Preview {
     }
   }
 
-  private static boolean isReadable(Resource resource) {
+  private static boolean isReadable(File file) {
     try {
-      return resource.readable();
+      return file.readable();
     } catch (IOException e) {
       return false;
     }
   }
 
   @Nullable public Decode set(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback) {
     return DecodeChain.run(res, stat, constraint, callback, this);
   }
 
-  Rect decodeSize(Resource res) {
+  Rect decodeSize(File res) {
     log.debug("decode size start %s", res);
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;

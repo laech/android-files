@@ -5,19 +5,19 @@ import android.os.Parcelable;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 @AutoValue
 abstract class FailureMessage implements Parcelable {
 
   FailureMessage() {}
 
-  abstract Resource resource();
+  abstract File resource();
 
   abstract String message();
 
-  static FailureMessage create(Resource resource, String message) {
-    return new AutoValue_FailureMessage(resource, message);
+  static FailureMessage create(File file, String message) {
+    return new AutoValue_FailureMessage(file, message);
   }
 
   @Override public int describeContents() {
@@ -32,9 +32,9 @@ abstract class FailureMessage implements Parcelable {
   public static final Creator<FailureMessage> CREATOR = new Creator<FailureMessage>() {
 
     @Override public FailureMessage createFromParcel(Parcel source) {
-      Resource resource = source.readParcelable(FailureMessage.class.getClassLoader());
+      File file = source.readParcelable(FailureMessage.class.getClassLoader());
       String message = source.readString();
-      return create(resource, message);
+      return create(file, message);
     }
 
     @Override public FailureMessage[] newArray(int size) {

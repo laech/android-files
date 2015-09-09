@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import l.files.R;
 import l.files.common.view.ActionModeProvider;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.ui.FileLabels;
 import l.files.ui.Icons;
 import l.files.ui.StableAdapter;
@@ -20,15 +20,15 @@ import static java.util.Objects.requireNonNull;
 import static l.files.common.view.Views.find;
 import static l.files.ui.Icons.directoryIconStringId;
 
-final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Holder> {
+final class BookmarksAdapter extends StableAdapter<File, BookmarksAdapter.Holder> {
 
   private final ActionModeProvider actionModeProvider;
   private final ActionMode.Callback actionModeCallback;
-  private final Selection<Resource> selection;
+  private final Selection<File> selection;
   private final OnOpenFileListener listener;
 
   BookmarksAdapter(
-      Selection<Resource> selection,
+      Selection<File> selection,
       ActionModeProvider actionModeProvider,
       ActionMode.Callback actionModeCallback,
       OnOpenFileListener listener) {
@@ -48,11 +48,11 @@ final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Ho
     holder.bind(getItem(position));
   }
 
-  @Override public Resource getItemIdObject(int position) {
+  @Override public File getItemIdObject(int position) {
     return getItem(position);
   }
 
-  class Holder extends SelectionModeViewHolder<Resource, Resource> {
+  class Holder extends SelectionModeViewHolder<File, File> {
     TextView title;
     TextView icon;
 
@@ -63,17 +63,17 @@ final class BookmarksAdapter extends StableAdapter<Resource, BookmarksAdapter.Ho
       icon.setTypeface(Icons.font(itemView.getResources().getAssets()));
     }
 
-    @Override protected Resource itemId(Resource resource) {
-      return resource;
+    @Override protected File itemId(File file) {
+      return file;
     }
 
-    @Override public void bind(Resource resource) {
-      super.bind(resource);
-      title.setText(FileLabels.get(title.getResources(), resource));
-      icon.setText(directoryIconStringId(resource));
+    @Override public void bind(File file) {
+      super.bind(file);
+      title.setText(FileLabels.get(title.getResources(), file));
+      icon.setText(directoryIconStringId(file));
     }
 
-    @Override protected void onClick(View v, Resource item) {
+    @Override protected void onClick(View v, File item) {
       listener.onOpen(item);
     }
   }

@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.ui.FileLabels;
 import l.files.ui.Icons;
 
@@ -24,10 +24,10 @@ import static l.files.R.layout.files_activity_title;
 import static l.files.R.layout.files_activity_title_item;
 
 final class HierarchyAdapter extends BaseAdapter {
-  private List<Resource> hierarchy = emptyList();
-  private Resource directory;
+  private List<File> hierarchy = emptyList();
+  private File directory;
 
-  void set(Resource dir) {
+  void set(File dir) {
     directory = dir;
     hierarchy = new ArrayList<>(dir.hierarchy());
     Collections.reverse(hierarchy);
@@ -35,11 +35,11 @@ final class HierarchyAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
-  List<Resource> get() {
+  List<File> get() {
     return hierarchy;
   }
 
-  int indexOf(Resource dir) {
+  int indexOf(File dir) {
     return hierarchy.indexOf(dir);
   }
 
@@ -55,7 +55,7 @@ final class HierarchyAdapter extends BaseAdapter {
     return hierarchy.size();
   }
 
-  @Override public Resource getItem(int position) {
+  @Override public File getItem(int position) {
     return hierarchy.get(position);
   }
 
@@ -82,7 +82,7 @@ final class HierarchyAdapter extends BaseAdapter {
         : inflate(files_activity_title_item, parent);
 
     boolean enabled = isEnabled(position);
-    Resource res = getItem(position);
+    File res = getItem(position);
     view.setEnabled(enabled);
 
     AssetManager assets = parent.getContext().getAssets();

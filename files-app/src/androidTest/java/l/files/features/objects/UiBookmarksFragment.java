@@ -7,7 +7,7 @@ import java.util.List;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FilesActivity;
 
@@ -35,7 +35,7 @@ public final class UiBookmarksFragment {
     return context;
   }
 
-  public UiBookmarksFragment longClick(Resource bookmark) {
+  public UiBookmarksFragment longClick(File bookmark) {
     longClickItemOnMainThread(context.instrumentation(), fragment().recycler, bookmark);
     return this;
   }
@@ -47,7 +47,7 @@ public final class UiBookmarksFragment {
         .findFragmentById(R.id.bookmarks_fragment);
   }
 
-  public UiBookmarksFragment click(Resource bookmark) {
+  public UiBookmarksFragment click(File bookmark) {
     clickItemOnMainThread(context.instrumentation(), fragment().recycler, bookmark);
     return this;
   }
@@ -63,8 +63,8 @@ public final class UiBookmarksFragment {
       final boolean bookmarked) {
     awaitOnMainThread(context.instrumentation(), new Runnable() {
       @Override public void run() {
-        Resource dir = activity().fragment().directory();
-        List<Resource> all = fragment().bookmarks();
+        File dir = activity().fragment().directory();
+        List<File> all = fragment().bookmarks();
         assertEquals(all.toString(), bookmarked, all.contains(dir));
       }
     });
@@ -72,7 +72,7 @@ public final class UiBookmarksFragment {
   }
 
   public UiBookmarksFragment assertBookmarked(
-      final Resource bookmark,
+      final File bookmark,
       final boolean bookmarked) {
     awaitOnMainThread(context.instrumentation(), new Runnable() {
       @Override public void run() {
@@ -83,12 +83,12 @@ public final class UiBookmarksFragment {
   }
 
   public UiBookmarksFragment assertContainsBookmarksInOrder(
-      final Resource... bookmarks) {
+      final File... bookmarks) {
     awaitOnMainThread(context.instrumentation(), new Runnable() {
       @Override public void run() {
-        List<Resource> expected = asList(bookmarks);
-        List<Resource> actual = new ArrayList<>();
-        for (Resource bookmark : fragment().bookmarks()) {
+        List<File> expected = asList(bookmarks);
+        List<File> actual = new ArrayList<>();
+        for (File bookmark : fragment().bookmarks()) {
           if (expected.contains(bookmark)) {
             actual.add(bookmark);
           }
@@ -115,7 +115,7 @@ public final class UiBookmarksFragment {
   }
 
   public UiBookmarksFragment assertChecked(
-      Resource bookmark, final boolean checked) {
+      File bookmark, final boolean checked) {
     findItemOnMainThread(
         context.instrumentation(), fragment().recycler, bookmark, new Consumer<View>() {
           @Override public void apply(View view) {

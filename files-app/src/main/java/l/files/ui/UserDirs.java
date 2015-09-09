@@ -2,10 +2,8 @@ package l.files.ui;
 
 import android.os.Environment;
 
-import java.io.File;
-
-import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.File;
+import l.files.fs.local.LocalFile;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -16,17 +14,17 @@ public final class UserDirs
     {
     }
 
-    public static final Resource DIR_ROOT = LocalResource.create(new File("/"));
-    public static final Resource DIR_HOME = LocalResource.create(getExternalStorageDirectory());
-    public static final Resource DIR_DCIM = dir(Environment.DIRECTORY_DCIM);
-    public static final Resource DIR_DOWNLOADS = dir(Environment.DIRECTORY_DOWNLOADS);
-    public static final Resource DIR_MOVIES = dir(Environment.DIRECTORY_MOVIES);
-    public static final Resource DIR_MUSIC = dir(Environment.DIRECTORY_MUSIC);
-    public static final Resource DIR_PICTURES = dir(Environment.DIRECTORY_PICTURES);
+    public static final File DIR_ROOT = LocalFile.create(new java.io.File("/"));
+    public static final File DIR_HOME = LocalFile.create(getExternalStorageDirectory());
+    public static final File DIR_DCIM = dir(Environment.DIRECTORY_DCIM);
+    public static final File DIR_DOWNLOADS = dir(Environment.DIRECTORY_DOWNLOADS);
+    public static final File DIR_MOVIES = dir(Environment.DIRECTORY_MOVIES);
+    public static final File DIR_MUSIC = dir(Environment.DIRECTORY_MUSIC);
+    public static final File DIR_PICTURES = dir(Environment.DIRECTORY_PICTURES);
 
-    private static Resource dir(final String type)
+    private static File dir(final String type)
     {
-        return LocalResource.create(getExternalStoragePublicDirectory(type));
+        return LocalFile.create(getExternalStoragePublicDirectory(type));
     }
 
 }

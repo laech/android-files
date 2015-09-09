@@ -8,14 +8,14 @@ static jmethodID method_onEvent;
 static jmethodID method_isClosed;
 static jmethodID method_sleep;
 
-void Java_l_files_fs_local_LocalResourceObservable_init(JNIEnv* env, jclass clazz) {
+void Java_l_files_fs_local_LocalObservable_init(JNIEnv* env, jclass clazz) {
     method_onEvent = (*env)->GetMethodID(env, clazz, "onEvent", "(IILjava/lang/String;)V");
     method_isClosed = (*env)->GetMethodID(env, clazz, "isClosed", "()Z");
     method_sleep = (*env)->GetMethodID(env, clazz, "sleep", "()V");
 }
 
 
-void Java_l_files_fs_local_LocalResourceObservable_observe(
+void Java_l_files_fs_local_LocalObservable_observe(
         JNIEnv* env, jobject object, jint fd) {
 
     int BUF_SIZE = 1024;

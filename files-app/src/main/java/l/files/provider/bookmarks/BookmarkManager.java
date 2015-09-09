@@ -3,20 +3,20 @@ package l.files.provider.bookmarks;
 import java.util.Collection;
 import java.util.Set;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 public interface BookmarkManager
 {
 
-    void addBookmark(Resource resource);
+    void addBookmark(File file);
 
-    void removeBookmark(Resource resource);
+    void removeBookmark(File file);
 
-    void removeBookmarks(Collection<Resource> bookmarks);
+    void removeBookmarks(Collection<File> bookmarks);
 
-    boolean hasBookmark(Resource resource);
+    boolean hasBookmark(File file);
 
-    Set<Resource> getBookmarks();
+    Set<File> getBookmarks();
 
     /**
      * Adds a listener for listening bookmark changes. Does nothing if the

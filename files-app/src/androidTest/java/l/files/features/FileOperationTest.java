@@ -3,7 +3,7 @@ package l.files.features;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.lang.System.currentTimeMillis;
@@ -18,8 +18,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
 
     public void test_copies_files() throws Exception
     {
-        final Resource a = dir().resolve("a").createFile();
-        final Resource d = dir().resolve("d").createDirectory();
+        final File a = dir().resolve("a").createFile();
+        final File d = dir().resolve("d").createDirectory();
 
         screen()
                 .longClick(a)
@@ -32,8 +32,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
 
     public void test_copies_empty_directory() throws Exception
     {
-        final Resource c = dir().resolve("c").createDirectory();
-        final Resource d = dir().resolve("d").createDirectory();
+        final File c = dir().resolve("c").createDirectory();
+        final File d = dir().resolve("d").createDirectory();
 
         screen()
                 .longClick(c)
@@ -46,8 +46,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
 
     public void test_copies_full_directory() throws Exception
     {
-        final Resource d = dir().resolve("d").createDirectory();
-        final Resource c = dir().resolve("c").createDirectory();
+        final File d = dir().resolve("d").createDirectory();
+        final File c = dir().resolve("c").createDirectory();
         c.resolve("a").createFile();
         c.resolve("b").createDirectory();
         c.resolve("c").createLink(c.resolve("a"));
@@ -63,8 +63,8 @@ public final class FileOperationTest extends BaseFilesActivityTest
 
     public void test_copies_link() throws Exception
     {
-        final Resource d = dir().resolve("d").createDirectory();
-        final Resource c = dir().resolve("c").createLink(dir());
+        final File d = dir().resolve("d").createDirectory();
+        final File c = dir().resolve("c").createLink(dir());
 
         screen()
                 .longClick(c)
@@ -76,14 +76,14 @@ public final class FileOperationTest extends BaseFilesActivityTest
     }
 
     private boolean waitFor(
-            final Resource resource,
+            final File file,
             final int time,
             final TimeUnit unit) throws InterruptedException, IOException
     {
         final long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end)
         {
-            if (resource.exists(NOFOLLOW))
+            if (file.exists(NOFOLLOW))
             {
                 return true;
             }
@@ -95,7 +95,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception
     {
-        final Resource dir = dir().resolve("dir").createDirectory();
+        final File dir = dir().resolve("dir").createDirectory();
 
         screen()
                 .longClick(dir)
@@ -111,7 +111,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_disabled_if_files_do_not_exist()
             throws Exception
     {
-        final Resource dir = dir().resolve("dir").createDirectory();
+        final File dir = dir().resolve("dir").createDirectory();
 
         screen()
                 .longClick(dir)
@@ -126,7 +126,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     public void test_paste_menu_is_enabled_if_some_files_do_not_exist_some_exist()
             throws Exception
     {
-        final Resource dir = dir().resolve("dir1").createDirectory();
+        final File dir = dir().resolve("dir1").createDirectory();
         dir().resolve("dir2").createDirectory();
 
         screen()

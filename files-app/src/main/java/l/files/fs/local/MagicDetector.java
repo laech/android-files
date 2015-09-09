@@ -6,7 +6,7 @@ import org.apache.tika.io.TaggedIOException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 /**
  * Detects the media type of the underlying file by reading it's header.
@@ -23,9 +23,9 @@ final class MagicDetector extends AbstractDetector {
   }
 
   @Override
-  String detectFile(Resource resource, l.files.fs.Stat stat) throws IOException {
+  String detectFile(File file, l.files.fs.Stat stat) throws IOException {
 
-    try (InputStream in = resource.input()) {
+    try (InputStream in = file.input()) {
       return TikaHolder.tika.detect(in);
 
     } catch (TaggedIOException e) {

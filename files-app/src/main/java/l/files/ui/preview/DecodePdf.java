@@ -16,7 +16,6 @@ import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -25,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
@@ -74,7 +73,7 @@ final class DecodePdf extends DecodeBitmap {
   private final CancellationSignal signal = new CancellationSignal();
 
   DecodePdf(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,
@@ -118,7 +117,7 @@ final class DecodePdf extends DecodeBitmap {
     public static DecodeBitmap.Result query(
         Context context,
         CancellationSignal signal,
-        Resource res,
+        File res,
         Rect constraint) {
 
       requireNonNull(context);
@@ -183,7 +182,7 @@ final class DecodePdf extends DecodeBitmap {
         return null;
       }
 
-      File file = new File(uri.getQueryParameter(PARAM_FILE));
+      java.io.File file = new java.io.File(uri.getQueryParameter(PARAM_FILE));
       Rect constraint = Rect.of(
           parseInt(uri.getQueryParameter(PARAM_MAX_WIDTH)),
           parseInt(uri.getQueryParameter(PARAM_MAX_HEIGHT)));
@@ -191,7 +190,7 @@ final class DecodePdf extends DecodeBitmap {
       return decode(file, constraint, signal);
     }
 
-    private Cursor decode(File file, Rect constraint, CancellationSignal signal) {
+    private Cursor decode(java.io.File file, Rect constraint, CancellationSignal signal) {
 
       Future<Result> future = decoder.submit(
           new ReadPreview(getContext(), file, constraint, signal));
@@ -264,13 +263,13 @@ final class DecodePdf extends DecodeBitmap {
   private static final class ReadPreview implements Callable<Result> {
 
     private final Context context;
-    private final File file;
+    private final java.io.File file;
     private final Rect constraint;
     private final CancellationSignal signal;
 
     private ReadPreview(
         Context context,
-        File file,
+        java.io.File file,
         Rect constraint,
         CancellationSignal signal) {
 

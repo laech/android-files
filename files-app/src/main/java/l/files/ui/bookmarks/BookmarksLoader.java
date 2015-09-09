@@ -9,19 +9,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.Resource;
-import l.files.fs.Resource.Name;
+import l.files.fs.File;
+import l.files.fs.File.Name;
 import l.files.provider.bookmarks.BookmarkManager;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 
-final class BookmarksLoader extends AsyncTaskLoader<List<Resource>>
+final class BookmarksLoader extends AsyncTaskLoader<List<File>>
 {
 
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
-    private List<Resource> bookmarks;
+    private List<File> bookmarks;
 
     BookmarksLoader(final Context context, final BookmarkManager manager)
     {
@@ -31,19 +31,19 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Resource>>
     }
 
     @Override
-    public List<Resource> loadInBackground()
+    public List<File> loadInBackground()
     {
         final Comparator<Name> comparator = Name.comparator(Locale.getDefault());
-        final List<Resource> resources = new ArrayList<>(manager.getBookmarks());
-        Collections.sort(resources, new Comparator<Resource>()
+        final List<File> files = new ArrayList<>(manager.getBookmarks());
+        Collections.sort(files, new Comparator<File>()
         {
             @Override
-            public int compare(final Resource a, final Resource b)
+            public int compare(final File a, final File b)
             {
                 return comparator.compare(a.name(), b.name());
             }
         });
-        return resources;
+        return files;
     }
 
     @Override
@@ -69,7 +69,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Resource>>
     }
 
     @Override
-    public void deliverResult(final List<Resource> data)
+    public void deliverResult(final List<File> data)
     {
         super.deliverResult(data);
         this.bookmarks = data;

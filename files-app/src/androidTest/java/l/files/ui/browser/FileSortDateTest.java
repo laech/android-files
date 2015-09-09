@@ -3,8 +3,8 @@ package l.files.ui.browser;
 import java.io.IOException;
 import java.util.Locale;
 
+import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.fs.Resource;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
@@ -32,28 +32,28 @@ public final class FileSortDateTest extends FileSortTest
                 createFileModified("c", Instant.of(1, 1)));
     }
 
-    private Resource createFileModified(
+    private File createFileModified(
             final String name,
             final Instant instant) throws IOException
     {
-        final Resource file = dir1().resolve(name).createFile();
+        final File file = dir1().resolve(name).createFile();
         return setModified(file, instant);
     }
 
-    private Resource createDirModified(
+    private File createDirModified(
             final String name,
             final Instant instant) throws IOException
     {
-        final Resource dir = dir1().resolve(name).createDirectory();
+        final File dir = dir1().resolve(name).createDirectory();
         return setModified(dir, instant);
     }
 
-    private Resource setModified(
-            final Resource resource,
+    private File setModified(
+            final File file,
             final Instant instant) throws IOException
     {
-        resource.setLastModifiedTime(NOFOLLOW, instant);
-        return resource;
+        file.setLastModifiedTime(NOFOLLOW, instant);
+        return file;
     }
 
 }

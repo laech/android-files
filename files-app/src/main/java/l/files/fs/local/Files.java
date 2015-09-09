@@ -1,10 +1,9 @@
 package l.files.fs.local;
 
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static java.lang.Integer.parseInt;
 
@@ -22,12 +21,12 @@ public final class Files
     /**
      * Returns a file at {@code dstDir} with the name of {@code source}, if such
      * file exists, append a number at the end of the file name (and before the
-     * extension if it's {@link File#isFile()}) until the returned file
+     * extension if it's {@link java.io.File#isFile()}) until the returned file
      * represents a nonexistent file.
      */
-    public static File getNonExistentDestinationFile(
-            final File source,
-            final File dstDir)
+    public static java.io.File getNonExistentDestinationFile(
+            final java.io.File source,
+            final java.io.File dstDir)
     {
         String base;
         final String last;
@@ -39,13 +38,13 @@ public final class Files
         }
         else
         {
-            final Resource resource = LocalResource.create(source);
-            base = resource.name().base();
-            last = resource.name().dotExt();
+            final File file = LocalFile.create(source);
+            base = file.name().base();
+            last = file.name().dotExt();
         }
 
-        File dst;
-        while ((dst = new File(dstDir, base + last)).exists())
+        java.io.File dst;
+        while ((dst = new java.io.File(dstDir, base + last)).exists())
         {
             base = increment(base);
         }

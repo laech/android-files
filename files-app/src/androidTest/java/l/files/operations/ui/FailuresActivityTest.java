@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 import l.files.R;
 import l.files.common.testing.BaseActivityTest;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 
 import static java.util.Arrays.asList;
 import static l.files.operations.ui.FailuresActivity.EXTRA_FAILURES;
@@ -31,8 +31,8 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
   }
 
   public void testSetsFailuresFromIntent() {
-    FailureMessage f1 = FailureMessage.create(LocalResource.create(new File("1")), "test1");
-    FailureMessage f2 = FailureMessage.create(LocalResource.create(new File("2")), "test2");
+    FailureMessage f1 = FailureMessage.create(LocalFile.create(new File("1")), "test1");
+    FailureMessage f2 = FailureMessage.create(LocalFile.create(new File("2")), "test2");
     setActivityIntent(newIntent().putParcelableArrayListExtra(EXTRA_FAILURES, new ArrayList<>(asList(f1, f2))));
 
     ListView list = (ListView) getActivity().findViewById(android.R.id.list);

@@ -13,8 +13,8 @@ import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.DirectoryNotEmpty;
+import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.logging.Logger;
@@ -46,9 +46,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
    */
   private static final int DUMMY_BYTE = 0;
 
-  final Resource cacheDir;
+  final File cacheDir;
 
-  ThumbnailDiskCache(Resource cacheDir) {
+  ThumbnailDiskCache(File cacheDir) {
     this.cacheDir = cacheDir.resolve("thumbnails");
   }
 
@@ -76,7 +76,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
       final long now = currentTimeMillis();
 
-      @Override public Result onPostVisit(Resource res) throws IOException {
+      @Override public Result onPostVisit(File res) throws IOException {
 
         Stat stat = res.stat(NOFOLLOW);
         if (stat.isDirectory()) {
@@ -103,7 +103,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     });
   }
 
-  Resource cacheFile(Resource res, Stat stat, Rect constraint) {
+  File cacheFile(File res, Stat stat, Rect constraint) {
     return cacheDir.resolve(res.scheme()
         + "/" + res.path()
         + "_" + stat.lastModifiedTime().seconds()
@@ -113,12 +113,12 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
   }
 
   @Override Bitmap get(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint) throws IOException {
 
     log.verbose("read bitmap %s", res);
-    Resource cache = cacheFile(res, stat, constraint);
+    File cache = cacheFile(res, stat, constraint);
     try (InputStream in = new BufferedInputStream(cache.input())) {
       in.read(); // read DUMMY_BYTE
 
@@ -147,12 +147,12 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
   }
 
   @Override Snapshot<Bitmap> put(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       Bitmap bitmap) throws IOException {
 
-    Resource cache = cacheFile(res, stat, constraint);
+    File cache = cacheFile(res, stat, constraint);
     cache.createFiles();
     try (OutputStream out = new BufferedOutputStream(cache.output())) {
       out.write(DUMMY_BYTE);
@@ -162,19 +162,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     return null;
   }
 
-  public void putAsync(Resource res, Stat stat, Rect constraint, Bitmap bitmap) {
+  public void putAsync(File res, Stat stat, Rect constraint, Bitmap bitmap) {
     executor.execute(new WriteBitmap(
         res, stat, constraint, new WeakReference<>(bitmap)));
   }
 
   private final class WriteBitmap implements Runnable {
-    private final Resource res;
+    private final File res;
     private final Stat stat;
     private final Rect constraint;
     private final WeakReference<Bitmap> ref;
 
     private WriteBitmap(
-        Resource res,
+        File res,
         Stat stat,
         Rect constraint,
         WeakReference<Bitmap> ref) {

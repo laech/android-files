@@ -1,6 +1,6 @@
 package l.files.features;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.test.BaseFilesActivityTest;
 
 public final class BookmarksTest extends BaseFilesActivityTest
@@ -8,7 +8,7 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_clears_selection_on_finish_of_action_mode() throws Exception
     {
-        final Resource a = dir().resolve("a").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
         screen()
                 .clickInto(a)
                 .bookmark()
@@ -33,8 +33,8 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_maintains_action_mode_on_screen_rotation() throws Exception
     {
-        final Resource a = dir().resolve("a").createDirectory();
-        final Resource b = dir().resolve("b").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
+        final File b = dir().resolve("b").createDirectory();
         screen()
                 .clickInto(a).bookmark().pressBack()
                 .clickInto(b).bookmark().pressBack()
@@ -57,8 +57,8 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_click_on_bookmark_opens_directory() throws Exception
     {
-        final Resource a = dir().resolve("a").createDirectory();
-        final Resource b = dir().resolve("b").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
+        final File b = dir().resolve("b").createDirectory();
         screen()
                 .clickInto(a)
                 .assertCurrentDirectory(a)
@@ -79,7 +79,7 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_bookmarks_sidebar_locked_on_bookmarks_action_mode() throws Exception
     {
-        final Resource a = dir().resolve("a").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
 
         screen()
                 .clickInto(a)
@@ -92,9 +92,9 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_delete_bookmarks_from_sidebar() throws Exception
     {
-        final Resource a = dir().resolve("a").createDirectory();
-        final Resource b = dir().resolve("b").createDirectory();
-        final Resource c = dir().resolve("c").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
+        final File b = dir().resolve("b").createDirectory();
+        final File c = dir().resolve("c").createDirectory();
 
         screen()
 
@@ -131,9 +131,9 @@ public final class BookmarksTest extends BaseFilesActivityTest
 
     public void test_bookmarks_are_sorted_by_name() throws Exception
     {
-        final Resource b = dir().resolve("b").createDirectory();
-        final Resource a = dir().resolve("a").createDirectory();
-        final Resource c = dir().resolve("c").createDirectory();
+        final File b = dir().resolve("b").createDirectory();
+        final File a = dir().resolve("a").createDirectory();
+        final File c = dir().resolve("c").createDirectory();
         screen()
                 .clickInto(a).bookmark().pressBack()
                 .clickInto(c).bookmark().pressBack()

@@ -3,7 +3,6 @@ package l.files.provider.bookmarks;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.Resource;
-import l.files.fs.local.LocalResource;
+import l.files.fs.File;
+import l.files.fs.local.LocalFile;
 import l.files.logging.Logger;
 
 import static android.os.Environment.DIRECTORY_DCIM;
@@ -59,10 +58,10 @@ public final class BookmarkManagerImpl implements BookmarkManager {
   }
 
   private static String uri(String name) {
-    return new File(getExternalStorageDirectory(), name).toURI().toString();
+    return new java.io.File(getExternalStorageDirectory(), name).toURI().toString();
   }
 
-  private final Set<Resource> bookmarks;
+  private final Set<File> bookmarks;
   private final SharedPreferences pref;
   private final Set<BookmarkChangedListener> listeners;
 
@@ -72,14 +71,14 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     this.bookmarks = new CopyOnWriteArraySet<>();
   }
 
-  private Set<Resource> toPaths(Set<String> uriStrings) {
-    Set<Resource> paths = new HashSet<>();
+  private Set<File> toPaths(Set<String> uriStrings) {
+    Set<File> paths = new HashSet<>();
     for (String uriString : uriStrings) {
       try {
-        Resource resource = LocalResource.create(new File(new URI(uriString)));
+        File file = LocalFile.create(new java.io.File(new URI(uriString)));
         try {
-          if (resource.exists(NOFOLLOW)) {
-            paths.add(resource);
+          if (file.exists(NOFOLLOW)) {
+            paths.add(file);
           }
         } catch (IOException ignored) {
           // Remove bookmarks that no longer exist
@@ -91,21 +90,21 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     return paths;
   }
 
-  @Override public void addBookmark(Resource resource) {
-    requireNonNull(resource, "resource");
-    if (bookmarks.add(resource)) {
+  @Override public void addBookmark(File file) {
+    requireNonNull(file, "resource");
+    if (bookmarks.add(file)) {
       saveBookmarksAndNotify();
     }
   }
 
-  @Override public void removeBookmark(Resource resource) {
-    requireNonNull(resource, "resource");
-    if (bookmarks.remove(resource)) {
+  @Override public void removeBookmark(File file) {
+    requireNonNull(file, "resource");
+    if (bookmarks.remove(file)) {
       saveBookmarksAndNotify();
     }
   }
 
-  @Override public void removeBookmarks(Collection<Resource> bookmarks) {
+  @Override public void removeBookmarks(Collection<File> bookmarks) {
     requireNonNull(bookmarks, "bookmarks");
     if (this.bookmarks.removeAll(bookmarks)) {
       saveBookmarksAndNotify();
@@ -117,9 +116,9 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     notifyListeners();
   }
 
-  private Set<String> toUriStrings(Set<? extends Resource> bookmarks) {
+  private Set<String> toUriStrings(Set<? extends File> bookmarks) {
     Set<String> uris = new HashSet<>();
-    for (Resource bookmark : bookmarks) {
+    for (File bookmark : bookmarks) {
       uris.add(bookmark.uri().toString());
     }
     return uris;
@@ -131,11 +130,11 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     }
   }
 
-  @Override public boolean hasBookmark(Resource resource) {
-    return bookmarks.contains(resource);
+  @Override public boolean hasBookmark(File file) {
+    return bookmarks.contains(file);
   }
 
-  @Override public Set<Resource> getBookmarks() {
+  @Override public Set<File> getBookmarks() {
     synchronized (this) {
       if (bookmarks.isEmpty()) {
         bookmarks.addAll(loadBookmarks());
@@ -144,7 +143,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
     return unmodifiableSet(new HashSet<>(bookmarks));
   }
 
-  public Set<Resource> loadBookmarks() {
+  public Set<File> loadBookmarks() {
     return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
   }
 

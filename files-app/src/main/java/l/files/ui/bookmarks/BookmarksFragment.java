@@ -15,7 +15,7 @@ import java.util.List;
 import l.files.R;
 import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.ActionModes;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.provider.bookmarks.BookmarkManagerImpl;
 import l.files.ui.browser.OnOpenFileListener;
 import l.files.ui.mode.ClearSelectionOnDestroyActionMode;
@@ -26,13 +26,13 @@ import static android.app.LoaderManager.LoaderCallbacks;
 import static l.files.common.view.Views.find;
 
 public final class BookmarksFragment
-    extends SelectionModeFragment<Resource>
-    implements LoaderCallbacks<List<Resource>> {
+    extends SelectionModeFragment<File>
+    implements LoaderCallbacks<List<File>> {
 
   public RecyclerView recycler;
   private BookmarksAdapter adapter;
 
-  public List<Resource> bookmarks() {
+  public List<File> bookmarks() {
     return adapter.items();
   }
 
@@ -70,18 +70,18 @@ public final class BookmarksFragment
   }
 
   @Override
-  public Loader<List<Resource>> onCreateLoader(int id, Bundle bundle) {
+  public Loader<List<File>> onCreateLoader(int id, Bundle bundle) {
     return new BookmarksLoader(
         getActivity(),
         BookmarkManagerImpl.get(getActivity()));
   }
 
   @Override public void onLoadFinished(
-      Loader<List<Resource>> loader, List<Resource> bookmarks) {
+      Loader<List<File>> loader, List<File> bookmarks) {
     adapter.setItems(bookmarks);
   }
 
-  @Override public void onLoaderReset(Loader<List<Resource>> loader) {
-    adapter.setItems(Collections.<Resource>emptyList());
+  @Override public void onLoaderReset(Loader<List<File>> loader) {
+    adapter.setItems(Collections.<File>emptyList());
   }
 }

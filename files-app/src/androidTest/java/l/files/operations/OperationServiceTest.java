@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.fs.Resource;
-import l.files.fs.local.ResourceBaseTest;
+import l.files.fs.File;
+import l.files.fs.local.FileBaseTest;
 import l.files.operations.OperationService.TaskListener;
 
 import static java.lang.System.currentTimeMillis;
@@ -30,7 +30,7 @@ import static l.files.operations.TaskKind.MOVE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class OperationServiceTest extends ResourceBaseTest {
+public final class OperationServiceTest extends FileBaseTest {
 
   public void testCancelIntent() throws Exception {
     Intent intent = newCancelIntent(getContext(), 101);
@@ -55,8 +55,8 @@ public final class OperationServiceTest extends ResourceBaseTest {
   }
 
   public void testMovesFile() throws Exception {
-    Resource src = dir1().resolve("a").createFile();
-    Resource dst = dir1().resolve("dst").createDirectory();
+    File src = dir1().resolve("a").createFile();
+    File dst = dir1().resolve("dst").createDirectory();
     CountDownListener listener = register(new CountDownListener(MOVE));
     try {
 
@@ -71,8 +71,8 @@ public final class OperationServiceTest extends ResourceBaseTest {
   }
 
   public void testCopiesFile() throws Exception {
-    Resource src = dir1().resolve("a").createFile();
-    Resource dst = dir1().resolve("dst").createDirectory();
+    File src = dir1().resolve("a").createFile();
+    File dst = dir1().resolve("dst").createDirectory();
     CountDownListener listener = register(new CountDownListener(COPY));
     try {
 
@@ -87,8 +87,8 @@ public final class OperationServiceTest extends ResourceBaseTest {
   }
 
   public void testDeletesFiles() throws Exception {
-    Resource a = dir1().resolve("a").createFiles();
-    Resource b = dir1().resolve("b/c").createFiles();
+    File a = dir1().resolve("a").createFiles();
+    File b = dir1().resolve("b/c").createFiles();
     CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 
@@ -126,8 +126,8 @@ public final class OperationServiceTest extends ResourceBaseTest {
   }
 
   public void testTaskStartTimeIsCorrect() throws Exception {
-    Resource file1 = dir1().resolve("a").createFile();
-    Resource file2 = dir1().resolve("b").createFile();
+    File file1 = dir1().resolve("a").createFile();
+    File file2 = dir1().resolve("b").createFile();
     CountDownListener listener = register(new CountDownListener(DELETE));
     try {
 

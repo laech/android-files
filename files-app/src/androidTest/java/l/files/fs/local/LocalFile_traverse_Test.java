@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import l.files.fs.File;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 import l.files.fs.Visitor;
 
 import static java.util.Arrays.asList;
@@ -20,17 +20,17 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.SKIP;
 import static l.files.fs.Visitor.Result.TERMINATE;
-import static l.files.fs.local.LocalResource_traverse_Test.TraversalOrder.POST;
-import static l.files.fs.local.LocalResource_traverse_Test.TraversalOrder.PRE;
+import static l.files.fs.local.LocalFile_traverse_Test.TraversalOrder.POST;
+import static l.files.fs.local.LocalFile_traverse_Test.TraversalOrder.PRE;
 
 /**
- * @see LocalResource#list(LinkOption)
+ * @see LocalFile#list(LinkOption)
  */
-public final class LocalResource_traverse_Test extends ResourceBaseTest {
+public final class LocalFile_traverse_Test extends FileBaseTest {
 
   public void test_traverse_noFollowLink() throws Exception {
-    Resource dir = dir1().resolve("dir").createDirectory();
-    Resource link = dir1().resolve("link").createLink(dir);
+    File dir = dir1().resolve("dir").createDirectory();
+    File link = dir1().resolve("link").createLink(dir);
     link.resolve("a").createFile();
     link.resolve("b").createFile();
 
@@ -70,9 +70,9 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
   }
 
   public void test_traverse_followLink() throws Exception {
-    Resource dir = dir1().resolve("dir").createDirectory();
-    Resource link = dir1().resolve("link").createLink(dir);
-    Resource a = link.resolve("a").createFile();
+    File dir = dir1().resolve("dir").createDirectory();
+    File link = dir1().resolve("link").createLink(dir);
+    File a = link.resolve("a").createFile();
 
     Recorder recorder = new Recorder();
     link.traverse(FOLLOW, recorder);
@@ -98,7 +98,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
     Recorder recorder = new Recorder() {
 
-      @Override public Result onPreVisit(Resource res) throws IOException {
+      @Override public Result onPreVisit(File res) throws IOException {
         if (res.name().toString().equals("a")) {
           throw new IOException("Test");
         }
@@ -106,7 +106,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
       }
 
       @Override
-      public void onException(Resource res, IOException e) throws IOException {
+      public void onException(File res, IOException e) throws IOException {
         // Ignore
       }
 
@@ -136,7 +136,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
     Recorder recorder = new Recorder() {
 
-      @Override public Result onPostVisit(Resource res) throws IOException {
+      @Override public Result onPostVisit(File res) throws IOException {
         super.onPostVisit(res);
         if (res.name().toString().equals("1")) {
           throw new IOException("Test");
@@ -145,7 +145,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
       }
 
       @Override
-      public void onException(Resource res, IOException e) throws IOException {
+      public void onException(File res, IOException e) throws IOException {
         // Ignore
       }
 
@@ -173,7 +173,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
     Recorder recorder = new Recorder() {
       @Override
-      public void onException(Resource res, IOException e) {
+      public void onException(File res, IOException e) {
         // Ignore
       }
     };
@@ -224,7 +224,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override public Result onPreVisit(Resource res) throws IOException {
+      @Override public Result onPreVisit(File res) throws IOException {
         super.onPreVisit(res);
         if (res.name().toString().equals("a")) {
           return SKIP;
@@ -248,7 +248,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override public Result onPreVisit(Resource res) throws IOException {
+      @Override public Result onPreVisit(File res) throws IOException {
         super.onPreVisit(res);
         if (res.name().toString().equals("a")) {
           return TERMINATE;
@@ -274,18 +274,18 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
     final List<TraversalEvent> events = new ArrayList<>();
 
-    @Override public Result onPreVisit(Resource res) throws IOException {
+    @Override public Result onPreVisit(File res) throws IOException {
       events.add(TraversalEvent.of(PRE, res));
       return CONTINUE;
     }
 
-    @Override public Result onPostVisit(Resource res) throws IOException {
+    @Override public Result onPostVisit(File res) throws IOException {
       events.add(TraversalEvent.of(POST, res));
       return CONTINUE;
     }
 
     @Override
-    public void onException(Resource res, IOException e) throws IOException {
+    public void onException(File res, IOException e) throws IOException {
       throw e;
     }
 
@@ -300,10 +300,10 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
 
     abstract TraversalOrder order();
 
-    abstract Resource resource();
+    abstract File resource();
 
-    static TraversalEvent of(TraversalOrder order, Resource resource) {
-      return new AutoValue_LocalResource_traverse_Test_TraversalEvent(order, resource);
+    static TraversalEvent of(TraversalOrder order, File file) {
+      return new AutoValue_LocalResource_traverse_Test_TraversalEvent(order, file);
     }
   }
 

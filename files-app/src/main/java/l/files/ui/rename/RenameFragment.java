@@ -11,7 +11,7 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.common.app.BaseActivity;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.ui.FileCreationFragment;
 
@@ -25,10 +25,10 @@ public final class RenameFragment extends FileCreationFragment {
 
   private static final String ARG_RESOURCE = "resource";
 
-  static RenameFragment create(Resource resource) {
+  static RenameFragment create(File file) {
     Bundle args = new Bundle(2);
-    args.putParcelable(ARG_PARENT_RESOURCE, resource.parent());
-    args.putParcelable(ARG_RESOURCE, resource);
+    args.putParcelable(ARG_PARENT_RESOURCE, file.parent());
+    args.putParcelable(ARG_RESOURCE, file);
 
     RenameFragment fragment = new RenameFragment();
     fragment.setArguments(args);
@@ -54,7 +54,7 @@ public final class RenameFragment extends FileCreationFragment {
     highlight();
   }
 
-  private Resource resource() {
+  private File resource() {
     return getArguments().getParcelable(ARG_RESOURCE);
   }
 
@@ -65,38 +65,38 @@ public final class RenameFragment extends FileCreationFragment {
     }
   }
 
-  private class Highlight extends AsyncTask<Resource, Void, Pair<Resource, Stat>> {
+  private class Highlight extends AsyncTask<File, Void, Pair<File, Stat>> {
 
     @Override
-    protected Pair<Resource, Stat> doInBackground(Resource... params) {
-      Resource resource = params[0];
+    protected Pair<File, Stat> doInBackground(File... params) {
+      File file = params[0];
       try {
-        return Pair.create(resource, resource.stat(NOFOLLOW));
+        return Pair.create(file, file.stat(NOFOLLOW));
       } catch (IOException e) {
         return null;
       }
     }
 
-    @Override protected void onPostExecute(Pair<Resource, Stat> pair) {
+    @Override protected void onPostExecute(Pair<File, Stat> pair) {
       super.onPostExecute(pair);
       if (pair != null) {
-        Resource resource = pair.first;
+        File file = pair.first;
         Stat stat = pair.second;
         EditText field = getFilenameField();
         if (!getFilename().isEmpty()) {
           return;
         }
-        field.setText(resource.name());
+        field.setText(file.name());
         if (stat.isDirectory()) {
           field.selectAll();
         } else {
-          field.setSelection(0, resource.name().base().length());
+          field.setSelection(0, file.name().base().length());
         }
       }
     }
   }
 
-  @Override protected CharSequence getError(Resource target) {
+  @Override protected CharSequence getError(File target) {
     if (resource().equals(target)) {
       return null;
     }
@@ -112,7 +112,7 @@ public final class RenameFragment extends FileCreationFragment {
   }
 
   private void rename() {
-    Resource dst = parent().resolve(getFilename());
+    File dst = parent().resolve(getFilename());
     rename = new Rename()
         .executeOnExecutor(THREAD_POOL_EXECUTOR, resource(), dst);
 
@@ -122,11 +122,11 @@ public final class RenameFragment extends FileCreationFragment {
     }
   }
 
-  private class Rename extends AsyncTask<Resource, Void, IOException> {
+  private class Rename extends AsyncTask<File, Void, IOException> {
 
-    @Override protected IOException doInBackground(Resource... params) {
-      Resource src = params[0];
-      Resource dst = params[1];
+    @Override protected IOException doInBackground(File... params) {
+      File src = params[0];
+      File dst = params[1];
       try {
         src.moveTo(dst);
         return null;

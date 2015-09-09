@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Visitor;
 
 import static java.lang.Thread.currentThread;
@@ -22,10 +22,10 @@ abstract class AbstractOperation implements FileOperation {
    */
   private static final int ERROR_LIMIT = 20;
 
-  private final Iterable<Resource> resources;
+  private final Iterable<File> resources;
   private final FailureRecorder recorder;
 
-  AbstractOperation(Collection<? extends Resource> resources) {
+  AbstractOperation(Collection<? extends File> resources) {
     this.resources = unmodifiableSet(new HashSet<>(resources));
     this.recorder = new FailureRecorder(ERROR_LIMIT);
   }
@@ -40,43 +40,43 @@ abstract class AbstractOperation implements FileOperation {
     return currentThread().isInterrupted();
   }
 
-  final void record(Resource resource, final IOException exception) {
-    recorder.onFailure(resource, exception);
+  final void record(File file, final IOException exception) {
+    recorder.onFailure(file, exception);
   }
 
-  final void traverse(Resource resource, OperationVisitor visitor) {
+  final void traverse(File file, OperationVisitor visitor) {
     try {
-      resource.traverse(NOFOLLOW, visitor);
+      file.traverse(NOFOLLOW, visitor);
     } catch (IOException e) {
-      record(resource, e);
+      record(file, e);
     }
   }
 
   class OperationVisitor implements Visitor {
 
-    @Override public Result onPreVisit(Resource res) throws IOException {
+    @Override public Result onPreVisit(File res) throws IOException {
       return isInterrupted() ? TERMINATE : CONTINUE;
     }
 
-    @Override public Result onPostVisit(Resource res) throws IOException {
+    @Override public Result onPostVisit(File res) throws IOException {
       return isInterrupted() ? TERMINATE : CONTINUE;
     }
 
     @Override
-    public void onException(Resource res, IOException e) throws IOException {
+    public void onException(File res, IOException e) throws IOException {
       record(res, e);
     }
 
   }
 
   @Override public void execute() throws InterruptedException {
-    for (Resource resource : resources) {
+    for (File file : resources) {
       checkInterrupt();
-      process(resource);
+      process(file);
     }
     recorder.throwIfNotEmpty();
   }
 
-  abstract void process(Resource resource) throws InterruptedException;
+  abstract void process(File file) throws InterruptedException;
 
 }

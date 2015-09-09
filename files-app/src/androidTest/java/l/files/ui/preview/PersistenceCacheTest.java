@@ -1,7 +1,7 @@
 package l.files.ui.preview;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.test.MoreAsserts.assertNotEqual;
@@ -11,7 +11,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
     extends MemCacheTest<V, C> {
 
   public void test_removed_item_will_not_be_persisted() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     V value = newValue();
@@ -32,7 +32,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
   }
 
   public void test_reads_persisted_cache_from_put() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     V value = newValue();
@@ -48,7 +48,7 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
   }
 
   public void test_constraint_is_not_used_as_part_of_key() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     V value = newValue();
     cache.put(res, stat, newConstraint(), value);

@@ -26,7 +26,7 @@ void setTimes(
 
 }
 
-void Java_l_files_fs_local_LocalResource_setModificationTime(
+void Java_l_files_fs_local_LocalFile_setModificationTime(
         JNIEnv* env,
         jclass clazz,
         jstring jpath,
@@ -43,7 +43,7 @@ void Java_l_files_fs_local_LocalResource_setModificationTime(
 
 }
 
-void Java_l_files_fs_local_LocalResource_setAccessTime(
+void Java_l_files_fs_local_LocalFile_setAccessTime(
         JNIEnv* env,
         jclass clazz,
         jstring jpath,

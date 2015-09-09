@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import java.io.IOException;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
@@ -15,7 +15,7 @@ import static l.files.ui.preview.Preview.decodePalette;
 abstract class DecodeBitmap extends Decode {
 
   DecodeBitmap(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

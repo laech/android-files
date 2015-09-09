@@ -9,7 +9,7 @@ import android.os.AsyncTask;
 import java.io.IOException;
 
 import l.files.common.base.Consumer;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.logging.Logger;
 
 import static android.content.Intent.ACTION_VIEW;
@@ -17,10 +17,10 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.fs.Resource.ANY_TYPE;
+import static l.files.fs.File.ANY_TYPE;
 import static l.files.ui.IOExceptions.message;
 
-public final class FileOpener implements Consumer<Resource> {
+public final class FileOpener implements Consumer<File> {
 
   private static final Logger log = Logger.get(FileOpener.class);
 
@@ -34,21 +34,21 @@ public final class FileOpener implements Consumer<Resource> {
     this.context = requireNonNull(context, "context");
   }
 
-  @Override public void apply(Resource resource) {
-    new ShowFileTask(resource).execute();
+  @Override public void apply(File file) {
+    new ShowFileTask(file).execute();
   }
 
   private class ShowFileTask extends AsyncTask<Void, Void, Object> {
-    private Resource resource;
+    private File file;
 
-    ShowFileTask(Resource resource) {
-      this.resource = resource;
+    ShowFileTask(File file) {
+      this.file = file;
     }
 
     @Override protected Object doInBackground(Void... params) {
       try {
         log.verbose("detect start");
-        String media = resource.detectContentMediaType();
+        String media = file.detectContentMediaType();
         log.verbose("detect end");
         return media;
       } catch (IOException e) {
@@ -76,7 +76,7 @@ public final class FileOpener implements Consumer<Resource> {
     private boolean showFile(String media) {
       debug(media);
 
-      Uri uri = Uri.parse(resource.uri().toString());
+      Uri uri = Uri.parse(file.uri().toString());
       try {
         Intent intent = new Intent(ACTION_VIEW);
         intent.setDataAndType(uri, media);

@@ -5,7 +5,7 @@ import android.view.MenuItem;
 
 import l.files.R;
 import l.files.common.app.OptionsMenuAction;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.provider.bookmarks.BookmarkManager;
 
 import static android.view.Menu.NONE;
@@ -14,12 +14,12 @@ import static java.util.Objects.requireNonNull;
 public final class BookmarkMenu extends OptionsMenuAction {
 
     private final BookmarkManager bookmarks;
-    private final Resource resource;
+    private final File file;
 
-    public BookmarkMenu(BookmarkManager bookmarks, Resource resource) {
+    public BookmarkMenu(BookmarkManager bookmarks, File file) {
         super(R.id.bookmark);
         this.bookmarks = requireNonNull(bookmarks, "bookmarks");
-        this.resource = requireNonNull(resource, "resource");
+        this.file = requireNonNull(file, "resource");
     }
 
     @Override
@@ -33,7 +33,7 @@ public final class BookmarkMenu extends OptionsMenuAction {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(id());
         if (item != null) {
-            item.setChecked(bookmarks.hasBookmark(resource));
+            item.setChecked(bookmarks.hasBookmark(file));
         }
     }
 
@@ -42,9 +42,9 @@ public final class BookmarkMenu extends OptionsMenuAction {
         final boolean checked = item.isChecked();
         item.setChecked(!checked);
         if (checked) {
-            bookmarks.removeBookmark(resource);
+            bookmarks.removeBookmark(file);
         } else {
-            bookmarks.addBookmark(resource);
+            bookmarks.addBookmark(file);
         }
     }
 

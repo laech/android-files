@@ -6,7 +6,7 @@ import android.system.StructStat;
 
 import static android.system.OsConstants.ENOENT;
 
-public final class StatTest extends ResourceBaseTest
+public final class StatTest extends FileBaseTest
 {
 
     public void testException()

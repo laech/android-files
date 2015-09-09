@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 import java.io.File;
 
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 
 import static java.util.Arrays.asList;
 
@@ -21,8 +21,8 @@ public final class TargetTest extends TestCase
     public void testFromSource() throws Exception
     {
         final Target target = Target.from(asList(
-                LocalResource.create(new File("/0/a/b")),
-                LocalResource.create(new File("/0/a/c"))
+                LocalFile.create(new File("/0/a/b")),
+                LocalFile.create(new File("/0/a/c"))
         ));
         assertEquals("a", target.source().toString());
         assertEquals("a", target.destination().toString());
@@ -32,10 +32,10 @@ public final class TargetTest extends TestCase
     {
         final Target target = Target.from(
                 asList(
-                        LocalResource.create(new File("/0/a/b")),
-                        LocalResource.create(new File("/0/a/c"))
+                        LocalFile.create(new File("/0/a/b")),
+                        LocalFile.create(new File("/0/a/c"))
                 ),
-                LocalResource.create(new File("/a/b/c/d"))
+                LocalFile.create(new File("/a/b/c/d"))
         );
         assertEquals("a", target.source().toString());
         assertEquals("d", target.destination().toString());

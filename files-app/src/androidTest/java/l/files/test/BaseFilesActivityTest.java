@@ -2,16 +2,15 @@ package l.files.test;
 
 import android.content.Intent;
 
-import java.io.File;
 import java.io.IOException;
 
 import l.files.common.base.Provider;
 import l.files.common.testing.BaseActivityTest;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Visitor;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 import l.files.ui.browser.FilesActivity;
 
 import static java.io.File.createTempFile;
@@ -22,7 +21,7 @@ import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
 
 public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
-  private Resource dir;
+  private File dir;
   private UiFileActivity screen;
 
   public BaseFilesActivityTest() {
@@ -31,7 +30,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
 
   @Override protected void setUp() throws Exception {
     super.setUp();
-    dir = LocalResource.create(createTempDir());
+    dir = LocalFile.create(createTempDir());
     setActivityIntent(newIntent(dir));
     screen = new UiFileActivity(
         getInstrumentation(),
@@ -42,8 +41,8 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
         });
   }
 
-  private File createTempDir() throws IOException {
-    File file = createTempFile("tmp", String.valueOf(currentTimeMillis()));
+  private java.io.File createTempDir() throws IOException {
+    java.io.File file = createTempFile("tmp", String.valueOf(currentTimeMillis()));
     assertTrue(file.delete());
     assertTrue(file.mkdir());
     return file;
@@ -59,7 +58,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   private Visitor delete() {
     return new Visitor.Base() {
 
-      @Override public Result onPreVisit(Resource res) throws IOException {
+      @Override public Result onPreVisit(File res) throws IOException {
         try {
           res.setPermissions(Permission.all());
         } catch (IOException ignored) {
@@ -68,8 +67,8 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
       }
 
       @Override
-      public Result onPostVisit(Resource resource) throws IOException {
-        resource.delete();
+      public Result onPostVisit(File file) throws IOException {
+        file.delete();
         return CONTINUE;
       }
 
@@ -81,11 +80,11 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     return screen;
   }
 
-  protected Resource dir() {
+  protected File dir() {
     return dir;
   }
 
-  private Intent newIntent(Resource dir) {
+  private Intent newIntent(File dir) {
     return new Intent().putExtra(EXTRA_DIRECTORY, dir);
   }
 }

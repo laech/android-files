@@ -12,9 +12,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import l.files.common.base.Consumer;
 import l.files.fs.Event;
+import l.files.fs.File;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
-import l.files.fs.Resource;
 import l.files.fs.Stream;
 import l.files.logging.Logger;
 
@@ -49,7 +49,7 @@ import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
 import static l.files.fs.local.Inotify.addWatch;
 
-final class LocalResourceObservable extends Native
+final class LocalObservable extends Native
     implements Runnable, Closeable {
 
     /*
@@ -92,7 +92,7 @@ final class LocalResourceObservable extends Native
      * will be required and they are of a limited resource.
      */
 
-  private static final Logger log = Logger.get(LocalResourceObservable.class);
+  private static final Logger log = Logger.get(LocalObservable.class);
 
   private static final Handler handler = new Handler(getMainLooper());
 
@@ -143,7 +143,7 @@ final class LocalResourceObservable extends Native
   /**
    * The root resource being watched.
    */
-  private final LocalResource root;
+  private final LocalFile root;
 
   /**
    * If {@link #root} is a directory, its immediate child directories will
@@ -165,8 +165,8 @@ final class LocalResourceObservable extends Native
 
   private final AtomicBoolean closed;
 
-  LocalResourceObservable(
-      int fd, int rootWd, LocalResource root, Observer observer) {
+  LocalObservable(
+      int fd, int rootWd, LocalFile root, Observer observer) {
     this.fd = fd;
     this.rootWd = rootWd;
     this.root = requireNonNull(root, "root");
@@ -177,10 +177,10 @@ final class LocalResourceObservable extends Native
   }
 
   public static Closeable observe(
-      LocalResource resource,
+      LocalFile resource,
       LinkOption option,
       Observer observer,
-      Consumer<Resource> childrenConsumer) throws IOException {
+      Consumer<File> childrenConsumer) throws IOException {
 
     requireNonNull(resource, "root");
     requireNonNull(option, "option");
@@ -191,8 +191,8 @@ final class LocalResourceObservable extends Native
     int fd = inotifyInit(resource);
     int wd = inotifyAddWatchWillCloseOnError(fd, resource, option);
 
-    LocalResourceObservable observable =
-        new LocalResourceObservable(fd, wd, resource, observer);
+    LocalObservable observable =
+        new LocalObservable(fd, wd, resource, observer);
 
     /* Using a new thread seems to be much quicker than using a thread pool
      * executor, didn't investigate why, just a reminder here to check the
@@ -221,7 +221,7 @@ final class LocalResourceObservable extends Native
     return observable;
   }
 
-  private static int inotifyInit(LocalResource resource) throws IOException {
+  private static int inotifyInit(LocalFile resource) throws IOException {
     try {
       return Inotify.init1(IN_NONBLOCK);
     } catch (ErrnoException e) {
@@ -231,7 +231,7 @@ final class LocalResourceObservable extends Native
 
   private static int inotifyAddWatchWillCloseOnError(
       int fd,
-      LocalResource resource,
+      LocalFile resource,
       LinkOption opt) throws IOException {
 
     try {
@@ -258,10 +258,10 @@ final class LocalResourceObservable extends Native
 
   private static void observeChildren(
       int fd,
-      LocalResource resource,
+      LocalFile resource,
       LinkOption option,
-      LocalResourceObservable observable,
-      Consumer<Resource> childrenConsumer) throws IOException {
+      LocalObservable observable,
+      Consumer<File> childrenConsumer) throws IOException {
 
     try (Stream<Dirent> stream = Dirent.stream(resource, option)) {
       for (Dirent child : stream) {
@@ -493,17 +493,17 @@ final class LocalResourceObservable extends Native
       return;
     }
 
-    Resource resource;
+    File file;
     if (wd == rootWd) {
-      resource = root;
+      file = root;
     } else {
-      resource = root.resolve(childDirectories.get(wd));
+      file = root.resolve(childDirectories.get(wd));
     }
 
     log.verbose("fd=" + fd +
         ", wd=" + wd +
         ", event=" + eventName(event) +
-        ", parent=" + resource +
+        ", parent=" + file +
         ", child=" + child);
   }
 

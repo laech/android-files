@@ -7,8 +7,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
+import l.files.fs.File;
 import l.files.fs.LinkOption;
-import l.files.fs.Resource;
 import l.files.fs.Stream;
 import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
@@ -16,14 +16,14 @@ import l.files.fs.Visitor.Result;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-final class LocalResourceTraverser {
+final class LocalTraverser {
 
-  private final Resource root;
+  private final File root;
   private final LinkOption rootOption;
   private final Visitor visitor;
   private final Deque<Node> stack;
 
-  LocalResourceTraverser(Resource root, LinkOption option, Visitor visitor) {
+  LocalTraverser(File root, LinkOption option, Visitor visitor) {
     this.rootOption = requireNonNull(option, "option");
     this.root = requireNonNull(root, "root");
     this.visitor = requireNonNull(visitor);
@@ -39,10 +39,10 @@ final class LocalResourceTraverser {
 
         Result result;
         try {
-          result = visitor.onPreVisit(node.resource);
+          result = visitor.onPreVisit(node.file);
         } catch (IOException e) {
           stack.pop();
-          visitor.onException(node.resource, e);
+          visitor.onException(node.file, e);
           continue;
         }
 
@@ -57,7 +57,7 @@ final class LocalResourceTraverser {
         try {
           pushChildren(stack, node);
         } catch (IOException e) {
-          visitor.onException(node.resource, e);
+          visitor.onException(node.file, e);
         }
 
       } else {
@@ -65,9 +65,9 @@ final class LocalResourceTraverser {
         stack.pop();
         Result result;
         try {
-          result = visitor.onPostVisit(node.resource);
+          result = visitor.onPostVisit(node.file);
         } catch (IOException e) {
-          visitor.onException(node.resource, e);
+          visitor.onException(node.file, e);
           continue;
         }
         switch (result) {
@@ -80,14 +80,14 @@ final class LocalResourceTraverser {
   }
 
   private void pushChildren(Deque<Node> stack, Node parent) throws IOException {
-    LinkOption option = parent.resource.equals(root) ? rootOption : NOFOLLOW;
-    if (!parent.resource.stat(option).isDirectory()) {
+    LinkOption option = parent.file.equals(root) ? rootOption : NOFOLLOW;
+    if (!parent.file.stat(option).isDirectory()) {
       return;
     }
 
-    try (Stream<Resource> stream = parent.resource.list(option)) {
-      List<Resource> items = stream.to(new ArrayList<Resource>());
-      ListIterator<Resource> it = items.listIterator(items.size());
+    try (Stream<File> stream = parent.file.list(option)) {
+      List<File> items = stream.to(new ArrayList<File>());
+      ListIterator<File> it = items.listIterator(items.size());
       while (it.hasPrevious()) {
         stack.push(new Node(it.previous()));
       }
@@ -95,11 +95,11 @@ final class LocalResourceTraverser {
   }
 
   private static class Node {
-    final Resource resource;
+    final File file;
     boolean visited;
 
-    private Node(Resource resource) {
-      this.resource = requireNonNull(resource, "resource");
+    private Node(File file) {
+      this.file = requireNonNull(file, "resource");
     }
   }
 }

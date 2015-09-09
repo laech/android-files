@@ -26,12 +26,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.common.base.Consumer;
 import l.files.fs.Event;
+import l.files.fs.File;
 import l.files.fs.Observer;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.logging.Logger;
-import l.files.ui.browser.FileListItem.File;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.System.nanoTime;
@@ -47,8 +46,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
   private static final Logger log = Logger.get(FilesLoader.class);
   private static final Handler handler = new Handler(getMainLooper());
 
-  private final ConcurrentMap<String, File> data;
-  private final Resource root;
+  private final ConcurrentMap<String, FileListItem.File> data;
+  private final File root;
   private final Collator collator;
 
   private volatile FileSort sort;
@@ -122,7 +121,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
   public FilesLoader(
       Context context,
-      Resource root,
+      File root,
       FileSort sort,
       Collator collator,
       boolean showHidden) {
@@ -177,7 +176,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
       }
     }
 
-    List<Resource> children;
+    List<File> children;
     try {
       if (observe) {
         children = observe();
@@ -195,19 +194,19 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     return buildResult();
   }
 
-  private List<Resource> observe() throws IOException {
+  private List<File> observe() throws IOException {
     log.verbose("observe start");
-    List<Resource> children = new ArrayList<>();
+    List<File> children = new ArrayList<>();
     observable = root.observe(FOLLOW, listener, collectInto(children));
     log.verbose("observe end");
     return children;
   }
 
-  private List<Resource> visit() throws IOException {
+  private List<File> visit() throws IOException {
     log.verbose("visit start");
-    List<Resource> children = new ArrayList<>();
-    try (Stream<Resource> stream = root.list(FOLLOW)) {
-      for (Resource child : stream) {
+    List<File> children = new ArrayList<>();
+    try (Stream<File> stream = root.list(FOLLOW)) {
+      for (File child : stream) {
         checkedAdd(children, child);
       }
     }
@@ -215,23 +214,23 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     return children;
   }
 
-  private void checkedAdd(List<Resource> children, Resource child) {
+  private void checkedAdd(List<File> children, File child) {
     checkCancel();
     approximateChildTotal.incrementAndGet();
     children.add(child);
   }
 
-  private Consumer<Resource> collectInto(final List<Resource> children) {
-    return new Consumer<Resource>() {
-      @Override public void apply(Resource child) {
+  private Consumer<File> collectInto(final List<File> children) {
+    return new Consumer<File>() {
+      @Override public void apply(File child) {
         checkedAdd(children, child);
       }
     };
   }
 
-  private void update(List<Resource> children) {
+  private void update(List<File> children) {
     log.verbose("update start");
-    for (Resource child : children) {
+    for (File child : children) {
       checkCancel();
       update(child);
     }
@@ -246,11 +245,11 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
   private Result buildResult() {
     log.verbose("buildResult start");
-    List<File> files = new ArrayList<>(data.size());
+    List<FileListItem.File> files = new ArrayList<>(data.size());
     if (showHidden) {
       files.addAll(data.values());
     } else {
-      for (File item : data.values()) {
+      for (FileListItem.File item : data.values()) {
         if (!item.resource().hidden()) {
           files.add(item);
         }
@@ -312,27 +311,27 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     return update(root.resolve(child));
   }
 
-  private boolean update(Resource resource) {
+  private boolean update(File file) {
     try {
-      Stat stat = resource.stat(NOFOLLOW);
-      Stat targetStat = readTargetStatus(resource, stat);
-      File newStat = File.create(resource, stat, targetStat, collator);
-      File oldStat = data.put(resource.name().toString(), newStat);
+      Stat stat = file.stat(NOFOLLOW);
+      Stat targetStat = readTargetStatus(file, stat);
+      FileListItem.File newStat = FileListItem.File.create(file, stat, targetStat, collator);
+      FileListItem.File oldStat = data.put(file.name().toString(), newStat);
       return !Objects.equals(newStat, oldStat);
     } catch (FileNotFoundException e) {
-      return data.remove(resource.name().toString()) != null;
+      return data.remove(file.name().toString()) != null;
     } catch (IOException e) {
       data.put(
-          resource.name().toString(),
-          File.create(resource, null, null, collator));
+          file.name().toString(),
+          FileListItem.File.create(file, null, null, collator));
       return true;
     }
   }
 
-  private Stat readTargetStatus(Resource resource, Stat stat) {
+  private Stat readTargetStatus(File file, Stat stat) {
     if (stat.isSymbolicLink()) {
       try {
-        return resource.stat(FOLLOW);
+        return file.stat(FOLLOW);
       } catch (IOException e) {
         log.debug(e);
       }

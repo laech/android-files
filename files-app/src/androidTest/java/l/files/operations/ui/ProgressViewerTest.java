@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.common.testing.BaseTest;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
 import l.files.operations.Progress;
@@ -86,8 +86,8 @@ public abstract class ProgressViewerTest extends BaseTest {
 
   public void testGetContentTitle_Failed() throws Exception {
     TaskState.Failed state = running.failed(Time.create(2, 2), asList(
-        Failure.create(LocalResource.create(new File("a")), new IOException("1")),
-        Failure.create(LocalResource.create(new File("b")), new IOException("2"))
+        Failure.create(LocalFile.create(new File("a")), new IOException("1")),
+        Failure.create(LocalFile.create(new File("b")), new IOException("2"))
     ));
     String expected = res.getQuantityString(getTitleFailed(), 2);
     String actual = viewer.getContentTitle(state);

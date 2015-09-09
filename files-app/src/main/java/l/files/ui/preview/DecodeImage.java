@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
@@ -15,7 +15,7 @@ import static android.graphics.BitmapFactory.decodeStream;
 final class DecodeImage extends DecodeBitmap {
 
   DecodeImage(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

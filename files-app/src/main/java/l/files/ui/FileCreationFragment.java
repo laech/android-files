@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import l.files.R;
 import l.files.common.base.Consumer;
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
@@ -74,7 +74,7 @@ public abstract class FileCreationFragment extends DialogFragment
         .create();
   }
 
-  protected CharSequence getError(Resource target) {
+  protected CharSequence getError(File target) {
     return getString(R.string.name_exists);
   }
 
@@ -88,7 +88,7 @@ public abstract class FileCreationFragment extends DialogFragment
     getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
   }
 
-  protected Resource parent() {
+  protected File parent() {
     return getArguments().getParcelable(ARG_PARENT_RESOURCE);
   }
 
@@ -114,12 +114,12 @@ public abstract class FileCreationFragment extends DialogFragment
     }
 
     private Loader<Existence> newChecker() {
-      final Resource resource = parent().resolve(getFilename());
+      final File file = parent().resolve(getFilename());
       return new AsyncTaskLoader<Existence>(getActivity()) {
         @Override public Existence loadInBackground() {
           try {
-            boolean exists = resource.exists(NOFOLLOW);
-            return new Existence(resource, exists);
+            boolean exists = file.exists(NOFOLLOW);
+            return new Existence(file, exists);
           } catch (IOException e) {
             return null;
           }
@@ -148,7 +148,7 @@ public abstract class FileCreationFragment extends DialogFragment
       }
       Button ok = getOkButton();
       if (existence.exists) {
-        editText.setError(getError(existence.resource));
+        editText.setError(getError(existence.file));
         ok.setEnabled(false);
       } else {
         editText.setError(null);
@@ -158,11 +158,11 @@ public abstract class FileCreationFragment extends DialogFragment
   }
 
   private static class Existence {
-    Resource resource;
+    File file;
     boolean exists;
 
-    Existence(Resource resource, boolean exists) {
-      this.resource = resource;
+    Existence(File file, boolean exists) {
+      this.file = file;
       this.exists = exists;
     }
   }

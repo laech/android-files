@@ -3,8 +3,8 @@ package l.files.features;
 import l.files.R;
 import l.files.common.base.Executable;
 import l.files.features.objects.UiRename;
+import l.files.fs.File;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -16,7 +16,7 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_shows_error_when_failed_to_rename() throws Exception
     {
-        final Resource file = dir().resolve("a").createFile();
+        final File file = dir().resolve("a").createFile();
         dir().removePermissions(Permission.write());
         rename(file)
                 .setFilename("abc")
@@ -25,8 +25,8 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_renames_file_to_specified_name() throws Throwable
     {
-        final Resource from = dir().resolve("a").createFile();
-        final Resource to = dir().resolve("abc");
+        final File from = dir().resolve("a").createFile();
+        final File to = dir().resolve("abc");
 
         rename(from).setFilename(to.name()).ok();
 
@@ -43,13 +43,13 @@ public final class RenameTest extends BaseFilesActivityTest
 
     public void test_highlights_file_base_name_in_dialog() throws Exception
     {
-        final Resource file = dir().resolve("abc.txt").createFile();
+        final File file = dir().resolve("abc.txt").createFile();
         rename(file).assertSelection("abc");
     }
 
     public void test_uses_filename_as_default_text() throws Exception
     {
-        final Resource file = dir().resolve("a").createFile();
+        final File file = dir().resolve("a").createFile();
         rename(file).assertFilename(file.name());
     }
 
@@ -78,8 +78,8 @@ public final class RenameTest extends BaseFilesActivityTest
     public void test_rename_button_is_disable_if_there_are_more_than_one_file_checked()
             throws Exception
     {
-        final Resource f1 = dir().resolve("dir").createDirectory();
-        final Resource f2 = dir().resolve("a").createFile();
+        final File f1 = dir().resolve("dir").createDirectory();
+        final File f2 = dir().resolve("a").createFile();
 
         screen()
                 .longClick(f1)
@@ -90,8 +90,8 @@ public final class RenameTest extends BaseFilesActivityTest
                 .assertCanRename(true);
     }
 
-    private UiRename rename(final Resource resource)
+    private UiRename rename(final File file)
     {
-        return screen().longClick(resource).rename();
+        return screen().longClick(file).rename();
     }
 }

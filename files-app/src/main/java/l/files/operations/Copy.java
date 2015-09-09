@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
@@ -22,7 +22,7 @@ final class Copy extends Paste {
   private final AtomicLong copiedByteCount = new AtomicLong();
   private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-  Copy(Collection<? extends Resource> sources, Resource destination) {
+  Copy(Collection<? extends File> sources, File destination) {
     super(sources, destination);
   }
 
@@ -35,16 +35,16 @@ final class Copy extends Paste {
   }
 
   @Override
-  void paste(final Resource from, final Resource to) throws IOException {
+  void paste(final File from, final File to) throws IOException {
 
     from.traverse(NOFOLLOW, new OperationVisitor() {
 
-      @Override public Result onPreVisit(Resource src) throws IOException {
+      @Override public Result onPreVisit(File src) throws IOException {
         copyItems(src, from, to);
         return super.onPreVisit(src);
       }
 
-      @Override public Result onPostVisit(Resource src) throws IOException {
+      @Override public Result onPostVisit(File src) throws IOException {
         updateDirectoryTimestamps(src, from, to);
         return super.onPostVisit(src);
       }
@@ -54,12 +54,12 @@ final class Copy extends Paste {
   }
 
   private void copyItems(
-      Resource src,
-      Resource fromParent,
-      Resource toParent) throws IOException {
+      File src,
+      File fromParent,
+      File toParent) throws IOException {
 
     Stat stat = src.stat(NOFOLLOW);
-    Resource dst = src.resolveParent(fromParent, toParent);
+    File dst = src.resolveParent(fromParent, toParent);
 
     if (stat.isSymbolicLink()) {
       copyLink(src, stat, dst);
@@ -77,32 +77,32 @@ final class Copy extends Paste {
   }
 
   private void updateDirectoryTimestamps(
-      Resource src,
-      Resource fromParent,
-      Resource toParent) throws IOException {
+      File src,
+      File fromParent,
+      File toParent) throws IOException {
 
     Stat stat = src.stat(NOFOLLOW);
-    Resource dst = src.resolveParent(fromParent, toParent);
+    File dst = src.resolveParent(fromParent, toParent);
     if (stat.isDirectory()) {
       setTimes(stat, dst);
     }
 
   }
 
-  private void copyLink(Resource src, Stat stat, Resource dst) throws IOException {
+  private void copyLink(File src, Stat stat, File dst) throws IOException {
     dst.createLink(src.readLink());
     copiedByteCount.addAndGet(stat.size());
     copiedItemCount.incrementAndGet();
     setTimes(stat, dst);
   }
 
-  private void createDirectory(Stat stat, Resource dst) throws IOException {
+  private void createDirectory(Stat stat, File dst) throws IOException {
     dst.createDirectory();
     copiedByteCount.addAndGet(stat.size());
     copiedItemCount.incrementAndGet();
   }
 
-  private void copyFile(Resource src, Stat stat, Resource dst) throws IOException {
+  private void copyFile(File src, Stat stat, File dst) throws IOException {
     if (isInterrupted()) return;
 
     try (InputStream source = src.input();
@@ -129,7 +129,7 @@ final class Copy extends Paste {
     }
   }
 
-  private void setTimes(Stat src, Resource dst) {
+  private void setTimes(Stat src, File dst) {
     try {
       dst.setLastModifiedTime(NOFOLLOW, src.lastModifiedTime());
     } catch (IOException e) {

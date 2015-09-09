@@ -6,7 +6,7 @@ import android.graphics.Typeface;
 import java.util.HashMap;
 import java.util.Map;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static android.graphics.Typeface.createFromAsset;
 import static java.util.Collections.unmodifiableMap;
@@ -35,11 +35,11 @@ import static l.files.ui.UserDirs.DIR_ROOT;
 public final class Icons {
   private static Typeface font;
 
-  private static final Map<Resource, Integer> iconByDirectoryUri =
+  private static final Map<File, Integer> iconByDirectoryUri =
       buildIconByDIrectoryUri();
 
-  private static Map<Resource, Integer> buildIconByDIrectoryUri() {
-    Map<Resource, Integer> icons = new HashMap<>();
+  private static Map<File, Integer> buildIconByDIrectoryUri() {
+    Map<File, Integer> icons = new HashMap<>();
     icons.put(DIR_ROOT, ic_dir_device);
     icons.put(DIR_HOME, ic_dir_home);
     icons.put(DIR_DCIM, ic_dir_image);
@@ -68,7 +68,7 @@ public final class Icons {
     return font;
   }
 
-  public static int directoryIconStringId(Resource res) {
+  public static int directoryIconStringId(File res) {
     Integer id = iconByDirectoryUri.get(res);
     return id != null ? id : defaultDirectoryIconStringId();
   }

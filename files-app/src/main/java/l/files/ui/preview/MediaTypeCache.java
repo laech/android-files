@@ -4,11 +4,11 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 final class MediaTypeCache extends PersistenceCache<String> {
 
-  MediaTypeCache(Resource cacheDir) {
+  MediaTypeCache(File cacheDir) {
     super(cacheDir);
   }
 

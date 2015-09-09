@@ -1,15 +1,14 @@
 package l.files.features;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Random;
 
+import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
-import l.files.fs.Resource;
 import l.files.fs.Stream;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 import l.files.test.BaseFilesActivityTest;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -21,8 +20,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public final class AutoRefreshStressTest extends BaseFilesActivityTest {
 
   public void _ignored_test_large_directory() throws Exception {
-    final Resource dir = LocalResource.create(
-        new File(getExternalStorageDirectory(), "test-large-dir"))
+    final File dir = LocalFile.create(
+        new java.io.File(getExternalStorageDirectory(), "test-large-dir"))
         .createDirectories();
 
     int count = childCount(dir);
@@ -32,10 +31,10 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
     }
   }
 
-  private int childCount(final Resource dir) throws IOException {
-    try (Stream<Resource> stream = dir.list(NOFOLLOW)) {
+  private int childCount(final File dir) throws IOException {
+    try (Stream<File> stream = dir.list(NOFOLLOW)) {
       int count = 0;
-      for (Resource ignored : stream) {
+      for (File ignored : stream) {
         count++;
       }
       return count;
@@ -60,8 +59,8 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
   }
 
   private void updateAttributes() throws IOException {
-    try (Stream<Resource> stream = dir().list(NOFOLLOW)) {
-      for (Resource child : stream) {
+    try (Stream<File> stream = dir().list(NOFOLLOW)) {
+      for (File child : stream) {
         Random r = new Random();
         child.setLastAccessedTime(NOFOLLOW, Instant.of(
             r.nextInt((int) (currentTimeMillis() / 1000)),
@@ -74,7 +73,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
   }
 
   private void updateDirectory(String name) throws IOException {
-    Resource dir = dir().resolve(name);
+    File dir = dir().resolve(name);
     if (dir.exists(NOFOLLOW)) {
       dir.delete();
     } else {
@@ -83,7 +82,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
   }
 
   private void updatePermissions(String name) throws IOException {
-    Resource res = dir().resolve(name).createFiles();
+    File res = dir().resolve(name).createFiles();
     if (res.readable()) {
       res.setPermissions(Permission.read());
     } else {
@@ -92,15 +91,15 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
   }
 
   private void updateFileContent(String name) throws IOException {
-    Resource file = dir().resolve(name).createFiles();
+    File file = dir().resolve(name).createFiles();
     try (Writer writer = file.writer(UTF_8)) {
       writer.write(String.valueOf(new Random().nextLong()));
     }
   }
 
   private void updateDirectoryChild(String name) throws IOException {
-    Resource dir = dir().resolve(name).createDirectories();
-    Resource child = dir.resolve("child");
+    File dir = dir().resolve(name).createDirectories();
+    File child = dir.resolve("child");
     if (child.exists(NOFOLLOW)) {
       child.delete();
     } else {
@@ -109,7 +108,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
   }
 
   private void updateLink(String name) throws IOException {
-    Resource link = dir().resolve(name);
+    File link = dir().resolve(name);
     if (link.exists(NOFOLLOW)) {
       link.delete();
     }

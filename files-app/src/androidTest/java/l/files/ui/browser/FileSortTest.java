@@ -7,43 +7,42 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.fs.local.ResourceBaseTest;
-import l.files.ui.browser.FileListItem.File;
+import l.files.fs.local.FileBaseTest;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-abstract class FileSortTest extends ResourceBaseTest {
+abstract class FileSortTest extends FileBaseTest {
 
   protected final void testSortMatches(
       Locale locale,
-      Comparator<File> comparator,
-      Resource... expectedOrder) throws IOException {
+      Comparator<FileListItem.File> comparator,
+      File... expectedOrder) throws IOException {
 
-    List<File> expected = mapData(locale, expectedOrder);
-    List<File> actual = new ArrayList<>(expected);
+    List<FileListItem.File> expected = mapData(locale, expectedOrder);
+    List<FileListItem.File> actual = new ArrayList<>(expected);
     shuffle(actual);
     sort(actual, comparator);
     assertEquals(expected, actual);
   }
 
-  private List<File> mapData(
+  private List<FileListItem.File> mapData(
       Locale locale,
-      Resource... resources) throws IOException {
+      File... files) throws IOException {
 
     Collator collator = Collator.getInstance(locale);
-    List<File> expected = new ArrayList<>(resources.length);
-    for (Resource resource : resources) {
+    List<FileListItem.File> expected = new ArrayList<>(files.length);
+    for (File file : files) {
       Stat stat;
       try {
-        stat = resource.stat(NOFOLLOW);
+        stat = file.stat(NOFOLLOW);
       } catch (IOException e) {
         stat = null;
       }
-      expected.add(File.create(resource, stat, stat, collator));
+      expected.add(FileListItem.File.create(file, stat, stat, collator));
     }
     return expected;
   }

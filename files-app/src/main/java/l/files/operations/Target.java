@@ -2,8 +2,8 @@ package l.files.operations;
 
 import com.google.auto.value.AutoValue;
 
-import l.files.fs.Resource;
-import l.files.fs.Resource.Name;
+import l.files.fs.File;
+import l.files.fs.File.Name;
 
 /**
  * Source and destination of a file task.
@@ -34,14 +34,14 @@ public abstract class Target {
     return new AutoValue_Target(source, destination);
   }
 
-  public static Target from(Iterable<? extends Resource> sources, Resource destination) {
-    Resource src = sources.iterator().next().parent();
+  public static Target from(Iterable<? extends File> sources, File destination) {
+    File src = sources.iterator().next().parent();
     assert src != null;
     return create(src.name(), destination.name());
   }
 
-  public static Target from(Iterable<? extends Resource> resources) {
-    Resource parent = resources.iterator().next().parent();
+  public static Target from(Iterable<? extends File> resources) {
+    File parent = resources.iterator().next().parent();
     assert parent != null;
     return create(parent.name(), parent.name());
   }

@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import l.files.R;
 import l.files.common.widget.ActionModeItem;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.operations.OperationService;
 import l.files.ui.selection.Selection;
 
@@ -24,9 +24,9 @@ import static java.util.Objects.requireNonNull;
 public final class DeleteAction extends ActionModeItem
 {
     private final Context context;
-    private final Selection<Resource> selection;
+    private final Selection<File> selection;
 
-    public DeleteAction(final Context context, final Selection<Resource> selection)
+    public DeleteAction(final Context context, final Selection<File> selection)
     {
         super(R.id.delete);
         this.context = requireNonNull(context);
@@ -45,23 +45,23 @@ public final class DeleteAction extends ActionModeItem
     @Override
     protected void onItemSelected(final ActionMode mode, final MenuItem item)
     {
-        final Collection<Resource> resources = selection.copy();
+        final Collection<File> files = selection.copy();
         new AlertDialog.Builder(context)
-                .setMessage(getConfirmMessage(resources.size()))
+                .setMessage(getConfirmMessage(files.size()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.delete, new OnClickListener()
                 {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which)
                     {
-                        requestDelete(resources);
+                        requestDelete(files);
                         mode.finish();
                     }
                 })
                 .show();
     }
 
-    private void requestDelete(final Collection<? extends Resource> resources)
+    private void requestDelete(final Collection<? extends File> resources)
     {
         AsyncTask.execute(new Runnable()
         {

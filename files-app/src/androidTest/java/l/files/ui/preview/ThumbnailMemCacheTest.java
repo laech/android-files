@@ -3,7 +3,7 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -13,7 +13,7 @@ public final class ThumbnailMemCacheTest
     extends MemCacheTest<Bitmap, ThumbnailMemCache> {
 
   public void test_constraint_is_used_as_part_of_key() throws Exception {
-    Resource res = dir1();
+    File res = dir1();
     Stat stat = res.stat(NOFOLLOW);
     Rect constraint = newConstraint();
     Bitmap value = newValue();

@@ -4,8 +4,8 @@ import android.content.SharedPreferences;
 
 import java.util.HashSet;
 
-import l.files.fs.Resource;
-import l.files.fs.local.ResourceBaseTest;
+import l.files.fs.File;
+import l.files.fs.local.FileBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public final class BookmarkManagerTest extends ResourceBaseTest {
+public final class BookmarkManagerTest extends FileBaseTest {
 
   private BookmarkManagerImpl manager;
   private SharedPreferences pref;
@@ -34,17 +34,17 @@ public final class BookmarkManagerTest extends ResourceBaseTest {
   }
 
   public void test_can_add_bookmarks() throws Exception {
-    Resource a = dir1().resolve("a").createDirectory();
-    Resource b = dir2().resolve("b").createDirectory();
+    File a = dir1().resolve("a").createDirectory();
+    File b = dir2().resolve("b").createDirectory();
     manager.addBookmark(a);
     manager.addBookmark(b);
     assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
   }
 
   public void test_can_remove_bookmarks() throws Exception {
-    Resource a = dir1().resolve("a").createDirectory();
-    Resource b = dir1().resolve("b").createDirectory();
-    Resource c = dir1().resolve("c").createDirectory();
+    File a = dir1().resolve("a").createDirectory();
+    File b = dir1().resolve("b").createDirectory();
+    File c = dir1().resolve("c").createDirectory();
     manager.addBookmark(a);
     manager.addBookmark(b);
     manager.addBookmark(c);
@@ -71,8 +71,8 @@ public final class BookmarkManagerTest extends ResourceBaseTest {
   }
 
   public void test_removes_non_existing_bookmarks() throws Exception {
-    Resource a = dir1().resolve("a").createDirectory();
-    Resource b = dir1().resolve("b").createDirectory();
+    File a = dir1().resolve("a").createDirectory();
+    File b = dir1().resolve("b").createDirectory();
     manager.addBookmark(a);
     manager.addBookmark(b);
     assertEquals(new HashSet<>(asList(a, b)), manager.loadBookmarks());

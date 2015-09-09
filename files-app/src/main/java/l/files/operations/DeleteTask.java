@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import java.util.Collection;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static l.files.operations.TaskKind.DELETE;
 
@@ -18,7 +18,7 @@ final class DeleteTask extends Task {
       Clock clock,
       Callback callback,
       Handler handler,
-      Collection<? extends Resource> resources) {
+      Collection<? extends File> resources) {
 
     super(
         TaskId.create(id, DELETE),

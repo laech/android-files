@@ -24,7 +24,7 @@ import l.files.common.base.Consumer;
 /**
  * Represents a file system resource, such as a file or directory.
  */
-public interface Resource extends Parcelable {
+public interface File extends Parcelable {
 
   String OCTET_STREAM = "application/octet-stream";
   String ANY_TYPE = "*/*";
@@ -51,7 +51,7 @@ public interface Resource extends Parcelable {
   /**
    * Gets the parent resource, returns null if this is the root resource.
    */
-  @Nullable Resource parent();
+  @Nullable File parent();
 
   boolean isRoot();
 
@@ -60,17 +60,17 @@ public interface Resource extends Parcelable {
    * <p/>
    * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
    */
-  List<Resource> hierarchy();
+  List<File> hierarchy();
 
   /**
    * Resolves the given name/path relative to this resource.
    */
-  Resource resolve(String other);
+  File resolve(String other);
 
   /**
    * Resolves a child with the given name.
    */
-  Resource resolve(Name other);
+  File resolve(Name other);
 
   /**
    * Returns a resource with the given parent replaced.
@@ -83,12 +83,12 @@ public interface Resource extends Parcelable {
    *
    * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
    */
-  Resource resolveParent(Resource fromParent, Resource toParent);
+  File resolveParent(File fromParent, File toParent);
 
   /**
    * True if this resource is equal to or a descendant of the given resource.
    */
-  boolean startsWith(Resource prefix);
+  boolean startsWith(File prefix);
 
   /**
    * True if this resource is considered a hidden resource.
@@ -141,7 +141,7 @@ public interface Resource extends Parcelable {
   Closeable observe(
       LinkOption option,
       Observer observer,
-      Consumer<Resource> childrenConsumer) throws IOException;
+      Consumer<File> childrenConsumer) throws IOException;
 
   /**
    * Performs a depth first traverse of this tree.
@@ -166,7 +166,7 @@ public interface Resource extends Parcelable {
    */
   void traverse(LinkOption option, Visitor visitor) throws IOException;
 
-  Stream<Resource> list(LinkOption option) throws IOException;
+  Stream<File> list(LinkOption option) throws IOException;
 
   InputStream input() throws IOException;
 
@@ -186,7 +186,7 @@ public interface Resource extends Parcelable {
    *
    * @return this
    */
-  Resource createDirectory() throws IOException;
+  File createDirectory() throws IOException;
 
   /**
    * Creates this resource and any missing parents as directories. This will
@@ -195,14 +195,14 @@ public interface Resource extends Parcelable {
    *
    * @return this
    */
-  Resource createDirectories() throws IOException;
+  File createDirectories() throws IOException;
 
   /**
    * Creates the underlying resource as a file.
    *
    * @return this
    */
-  Resource createFile() throws IOException;
+  File createFile() throws IOException;
 
   /**
    * Creates this resource as a file and creates any missing parents. This
@@ -211,7 +211,7 @@ public interface Resource extends Parcelable {
    *
    * @return this
    */
-  Resource createFiles() throws IOException;
+  File createFiles() throws IOException;
 
   /**
    * Creates the underlying resource as a link to point to the given
@@ -219,12 +219,12 @@ public interface Resource extends Parcelable {
    *
    * @return this
    */
-  Resource createLink(Resource target) throws IOException;
+  File createLink(File target) throws IOException;
 
   /**
    * If this is a link, returns the target resource.
    */
-  Resource readLink() throws IOException;
+  File readLink() throws IOException;
 
   /**
    * Reads the status of this resource.
@@ -238,7 +238,7 @@ public interface Resource extends Parcelable {
    * If this is a link, the link itself is moved, link target resource is
    * unaffected.
    */
-  void moveTo(Resource dst) throws IOException;
+  void moveTo(File dst) throws IOException;
 
   /**
    * Deletes this resource. Fails if this is a non-empty directory.

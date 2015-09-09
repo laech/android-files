@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -12,7 +12,7 @@ final class Size extends Count {
 
   private final AtomicLong size = new AtomicLong();
 
-  Size(Collection<? extends Resource> resources) {
+  Size(Collection<? extends File> resources) {
     super(resources);
   }
 
@@ -20,10 +20,10 @@ final class Size extends Count {
     return size.get();
   }
 
-  @Override void onCount(Resource resource) {
-    super.onCount(resource);
+  @Override void onCount(File file) {
+    super.onCount(file);
     try {
-      size.addAndGet(resource.stat(NOFOLLOW).size());
+      size.addAndGet(file.stat(NOFOLLOW).size());
     } catch (IOException e) {
       // Ignore count
     }

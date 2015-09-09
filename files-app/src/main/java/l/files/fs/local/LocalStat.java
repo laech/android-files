@@ -23,7 +23,7 @@ import static android.system.OsConstants.S_ISSOCK;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
-import static l.files.fs.local.LocalResource.permissionsFromMode;
+import static l.files.fs.local.LocalFile.permissionsFromMode;
 
 @AutoValue
 abstract class LocalStat implements Stat {
@@ -91,7 +91,7 @@ abstract class LocalStat implements Stat {
     return permissions;
   }
 
-  static LocalStat stat(LocalResource resource, LinkOption option) throws IOException {
+  static LocalStat stat(LocalFile resource, LinkOption option) throws IOException {
     requireNonNull(option, "option");
 
     l.files.fs.local.Stat stat = null;

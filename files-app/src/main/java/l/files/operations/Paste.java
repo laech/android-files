@@ -1,42 +1,41 @@
 package l.files.operations;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.local.Files;
-import l.files.fs.local.LocalResource;
+import l.files.fs.local.LocalFile;
 
 import static java.util.Objects.requireNonNull;
 
 abstract class Paste extends AbstractOperation {
 
-  private final Resource destination;
+  private final File destination;
 
-  Paste(Collection<? extends Resource> resources, Resource destination) {
+  Paste(Collection<? extends File> resources, File destination) {
     super(resources);
     this.destination = requireNonNull(destination, "destination");
   }
 
-  @Override void process(Resource resource) throws InterruptedException {
+  @Override void process(File file) throws InterruptedException {
     checkInterrupt();
 
-    File destinationFile = new File(destination.uri());
-    File fromFile = new File(resource.uri());
-    if (destination.equals(resource) || destination.startsWith(resource)) {
+    java.io.File destinationFile = new java.io.File(destination.uri());
+    java.io.File fromFile = new java.io.File(file.uri());
+    if (destination.equals(file) || destination.startsWith(file)) {
       // TODO prevent this from UI
       throw new CannotPasteIntoSelfException(
-          "Cannot paste directory " + resource +
+          "Cannot paste directory " + file +
               " into its own sub directory " + destination
       );
     }
 
-    File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
+    java.io.File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
     try {
-      paste(resource, LocalResource.create(to));
+      paste(file, LocalFile.create(to));
     } catch (IOException e) {
-      record(resource, e);
+      record(file, e);
     }
   }
 
@@ -45,6 +44,6 @@ abstract class Paste extends AbstractOperation {
    * its content into {@code to}. If {@code from} is a directory, paste its
    * content into {@code to}.
    */
-  abstract void paste(Resource from, Resource to) throws IOException;
+  abstract void paste(File from, File to) throws IOException;
 
 }

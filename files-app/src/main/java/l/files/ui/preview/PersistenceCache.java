@@ -18,8 +18,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.common.graphics.Rect;
+import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.logging.Logger;
 
@@ -51,17 +51,17 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
       };
 
-  private final Resource cacheDir;
+  private final File cacheDir;
 
-  PersistenceCache(Resource cacheDir) {
+  PersistenceCache(File cacheDir) {
     this.cacheDir = requireNonNull(cacheDir);
   }
 
-  @Override String key(Resource res, Stat stat, Rect constraint) {
+  @Override String key(File res, Stat stat, Rect constraint) {
     return res.scheme() + "_" + res.path();
   }
 
-  @Override Snapshot<V> put(Resource res, Stat stat, Rect constraint, V value) {
+  @Override Snapshot<V> put(File res, Stat stat, Rect constraint, V value) {
     Snapshot<V> old = super.put(res, stat, constraint, value);
     if (old == null
         || !old.get().equals(value)
@@ -75,7 +75,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     return cache;
   }
 
-  private Resource cacheFile() {
+  private File cacheFile() {
     return cacheDir.resolve(cacheFileName());
   }
 
@@ -99,7 +99,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       return;
     }
 
-    Resource file = cacheFile();
+    File file = cacheFile();
     try (DataInputStream in =
              new DataInputStream(
                  new BufferedInputStream(
@@ -151,7 +151,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
       return;
     }
 
-    Resource file = cacheFile();
+    File file = cacheFile();
     try {
       file.createFiles();
     } catch (IOException e) {

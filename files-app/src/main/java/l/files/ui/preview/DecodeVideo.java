@@ -4,13 +4,13 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 final class DecodeVideo extends DecodeMedia {
 
   DecodeVideo(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

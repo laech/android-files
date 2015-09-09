@@ -30,11 +30,10 @@ import l.files.R;
 import l.files.common.graphics.Rect;
 import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.common.view.ActionModeProvider;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.ui.Icons;
 import l.files.ui.StableAdapter;
-import l.files.ui.browser.FileListItem.File;
 import l.files.ui.browser.FileListItem.Header;
 import l.files.ui.mode.Selectable;
 import l.files.ui.preview.Decode;
@@ -88,13 +87,13 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
   private final DateFormatter formatter;
   private final ActionModeProvider actionModeProvider;
   private final ActionMode.Callback actionModeCallback;
-  private final Selection<Resource> selection;
+  private final Selection<File> selection;
   private final OnOpenFileListener listener;
   private final Rect constraint;
 
   FilesAdapter(
       Context context,
-      Selection<Resource> selection,
+      Selection<File> selection,
       ActionModeProvider actionModeProvider,
       ActionMode.Callback actionModeCallback,
       OnOpenFileListener listener) {
@@ -135,27 +134,27 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     if (item.isHeader()) {
       ((HeaderHolder) holder).bind((Header) item);
     } else {
-      ((FileHolder) holder).bind((File) item);
+      ((FileHolder) holder).bind((FileListItem.File) item);
     }
   }
 
   @Override public Object getItemIdObject(int position) {
     FileListItem item = getItem(position);
-    if (item instanceof File) {
-      return ((File) item).resource();
+    if (item instanceof FileListItem.File) {
+      return ((FileListItem.File) item).resource();
     }
     return item;
   }
 
   @Override public void selectAll() {
     List<FileListItem> items = items();
-    List<Resource> resources = new ArrayList<>(items.size());
+    List<File> files = new ArrayList<>(items.size());
     for (FileListItem item : items) {
       if (item.isFile()) {
-        resources.add(((File) item).resource());
+        files.add(((FileListItem.File) item).resource());
       }
     }
-    selection.addAll(resources);
+    selection.addAll(files);
   }
 
   static class DateFormatter {
@@ -214,7 +213,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
     }
   }
 
-  final class FileHolder extends SelectionModeViewHolder<Resource, File>
+  final class FileHolder extends SelectionModeViewHolder<File, FileListItem.File>
       implements PreviewCallback {
 
     private final TextView icon;
@@ -254,15 +253,15 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       this.tertiaryTextInverse = getColorStateList(textColorTertiaryInverse, context);
     }
 
-    @Override protected Resource itemId(File file) {
+    @Override protected File itemId(FileListItem.File file) {
       return file.resource();
     }
 
-    @Override protected void onClick(View v, File file) {
+    @Override protected void onClick(View v, FileListItem.File file) {
       listener.onOpen(file.resource());
     }
 
-    @Override public void bind(File file) {
+    @Override public void bind(FileListItem.File file) {
       super.bind(file);
       setTitle(file);
       setIcon(file);
@@ -271,12 +270,12 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       setPreview(file);
     }
 
-    private void setTitle(File file) {
+    private void setTitle(FileListItem.File file) {
       title.setText(file.resource().name());
       title.setEnabled(file.stat() != null && file.isReadable());
     }
 
-    private void setIcon(File file) {
+    private void setIcon(FileListItem.File file) {
       icon.setEnabled(file.targetStat() != null && file.isReadable());
 
       if (file.targetStat() != null
@@ -304,7 +303,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       return true;
     }
 
-    private int iconTextId(File file) {
+    private int iconTextId(FileListItem.File file) {
       Stat stat = file.targetStat();
       if (stat == null) {
         return defaultFileIconStringId();
@@ -317,7 +316,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    private void setSummary(File file) {
+    private void setSummary(FileListItem.File file) {
       Stat stat = file.stat();
       if (stat == null) {
         summary.setText("");
@@ -342,12 +341,12 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    private void setPreview(File file) {
+    private void setPreview(FileListItem.File file) {
       if (task != null) {
         task.cancelAll();
       }
 
-      Resource res = file.resource();
+      File res = file.resource();
       Stat stat = file.stat();
       if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
         preview.setImageDrawable(null);
@@ -398,7 +397,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    private void setSymlink(File file) {
+    private void setSymlink(FileListItem.File file) {
       Stat stat = file.stat();
       if (stat == null || !stat.isSymbolicLink()) {
         symlink.setVisibility(GONE);
@@ -408,7 +407,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    @Override public void onSizeAvailable(Resource item, Rect size) {
+    @Override public void onSizeAvailable(File item, Rect size) {
       if (Objects.equals(item, itemId())) {
         previewContainer.setVisibility(VISIBLE);
         preview.setImageDrawable(
@@ -416,7 +415,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    @Override public void onPaletteAvailable(Resource item, Palette palette) {
+    @Override public void onPaletteAvailable(File item, Palette palette) {
       if (Objects.equals(item, itemId())) {
         int color = backgroundColor(palette);
         updatePaletteColor(color);
@@ -435,7 +434,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       return color;
     }
 
-    @Override public void onPreviewAvailable(Resource item, Bitmap bitmap) {
+    @Override public void onPreviewAvailable(File item, Bitmap bitmap) {
       if (Objects.equals(item, itemId())) {
         preview.setImageBitmap(bitmap);
         previewContainer.setVisibility(VISIBLE);
@@ -444,7 +443,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
       }
     }
 
-    @Override public void onPreviewFailed(Resource item) {
+    @Override public void onPreviewFailed(File item) {
       if (Objects.equals(item, itemId())) {
         previewContainer.setVisibility(GONE);
       }

@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeByteArray;
@@ -12,7 +12,7 @@ import static android.graphics.BitmapFactory.decodeByteArray;
 final class DecodeAudio extends DecodeMedia {
 
   DecodeAudio(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,

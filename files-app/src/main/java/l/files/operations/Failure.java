@@ -4,19 +4,19 @@ import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
 
-import l.files.fs.Resource;
+import l.files.fs.File;
 
 @AutoValue
 public abstract class Failure {
 
   Failure() {}
 
-  public abstract Resource resource();
+  public abstract File resource();
 
   public abstract IOException cause();
 
-  public static Failure create(Resource resource, IOException cause) {
-    return new AutoValue_Failure(resource, cause);
+  public static Failure create(File file, IOException cause) {
+    return new AutoValue_Failure(file, cause);
   }
 
 }

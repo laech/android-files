@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 import l.files.common.graphics.Rect;
-import l.files.fs.Resource;
+import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -21,7 +21,7 @@ abstract class DecodeMedia extends DecodeBitmap {
   private static final Executor executor = newFixedThreadPool(2);
 
   DecodeMedia(
-      Resource res,
+      File res,
       Stat stat,
       Rect constraint,
       PreviewCallback callback,
