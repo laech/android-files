@@ -10,23 +10,24 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Size extends Count {
 
-  private final AtomicLong size = new AtomicLong();
+    private final AtomicLong size = new AtomicLong();
 
-  Size(Collection<? extends File> resources) {
-    super(resources);
-  }
-
-  public long getSize() {
-    return size.get();
-  }
-
-  @Override void onCount(File file) {
-    super.onCount(file);
-    try {
-      size.addAndGet(file.stat(NOFOLLOW).size());
-    } catch (IOException e) {
-      // Ignore count
+    Size(Collection<? extends File> resources) {
+        super(resources);
     }
-  }
+
+    public long getSize() {
+        return size.get();
+    }
+
+    @Override
+    void onCount(File file) {
+        super.onCount(file);
+        try {
+            size.addAndGet(file.stat(NOFOLLOW).size());
+        } catch (IOException e) {
+            // Ignore count
+        }
+    }
 
 }

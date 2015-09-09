@@ -14,90 +14,92 @@ import static l.files.ui.preview.Preview.decodePalette;
 
 abstract class DecodeBitmap extends Decode {
 
-  DecodeBitmap(
-      File res,
-      Stat stat,
-      Rect constraint,
-      PreviewCallback callback,
-      Preview context) {
-    super(res, stat, constraint, callback, context);
-  }
-
-  @Override protected Void doInBackground(Object... params) {
-    if (isCancelled()) {
-      return null;
+    DecodeBitmap(
+            File res,
+            Stat stat,
+            Rect constraint,
+            PreviewCallback callback,
+            Preview context) {
+        super(res, stat, constraint, callback, context);
     }
 
-    log.verbose("decode start");
+    @Override
+    protected Void doInBackground(Object... params) {
+        if (isCancelled()) {
+            return null;
+        }
 
-    Result result;
-    try {
-      result = decode();
-    } catch (Exception e) {
-      log.warn(e);
-      return null;
+        log.verbose("decode start");
+
+        Result result;
+        try {
+            result = decode();
+        } catch (Exception e) {
+            log.warn(e);
+            return null;
+        }
+
+        if (isCancelled()) {
+            if (result != null) {
+                result.maybeScaled.recycle();
+            }
+            return null;
+        }
+
+        if (result == null) {
+            publishProgress(NoPreview.INSTANCE);
+            return null;
+        }
+
+        if (context.getSize(res, stat, constraint) == null) {
+            publishProgress(result.originalSize);
+        }
+
+        Rect scaledSize = result.originalSize.scale(constraint);
+        Bitmap scaledBitmap = createScaledBitmap(
+                result.maybeScaled,
+                scaledSize.width(),
+                scaledSize.height(),
+                true);
+
+        publishProgress(scaledBitmap);
+
+        if (context.getPalette(res, stat, constraint) == null) {
+            publishProgress(decodePalette(scaledBitmap));
+        }
+
+        if (result.maybeScaled != scaledBitmap) {
+            result.maybeScaled.recycle();
+        }
+
+        log.verbose("decode end");
+
+        if (isCancelled()) {
+            return null;
+        }
+
+        boolean scaledDown =
+                result.originalSize.width() > scaledBitmap.getWidth() ||
+                        result.originalSize.height() > scaledBitmap.getHeight();
+
+        if (scaledDown) {
+            context.putBitmapToDiskAsync(res, stat, constraint, scaledBitmap);
+        }
+
+        return null;
     }
 
-    if (isCancelled()) {
-      if (result != null) {
-        result.maybeScaled.recycle();
-      }
-      return null;
+    @Nullable
+    abstract Result decode() throws IOException;
+
+    static final class Result {
+        final Bitmap maybeScaled;
+        final Rect originalSize;
+
+        Result(Bitmap maybeScaled, Rect originalSize) {
+            this.maybeScaled = maybeScaled;
+            this.originalSize = originalSize;
+        }
     }
-
-    if (result == null) {
-      publishProgress(NoPreview.INSTANCE);
-      return null;
-    }
-
-    if (context.getSize(res, stat, constraint) == null) {
-      publishProgress(result.originalSize);
-    }
-
-    Rect scaledSize = result.originalSize.scale(constraint);
-    Bitmap scaledBitmap = createScaledBitmap(
-        result.maybeScaled,
-        scaledSize.width(),
-        scaledSize.height(),
-        true);
-
-    publishProgress(scaledBitmap);
-
-    if (context.getPalette(res, stat, constraint) == null) {
-      publishProgress(decodePalette(scaledBitmap));
-    }
-
-    if (result.maybeScaled != scaledBitmap) {
-      result.maybeScaled.recycle();
-    }
-
-    log.verbose("decode end");
-
-    if (isCancelled()) {
-      return null;
-    }
-
-    boolean scaledDown =
-        result.originalSize.width() > scaledBitmap.getWidth() ||
-            result.originalSize.height() > scaledBitmap.getHeight();
-
-    if (scaledDown) {
-      context.putBitmapToDiskAsync(res, stat, constraint, scaledBitmap);
-    }
-
-    return null;
-  }
-
-  @Nullable abstract Result decode() throws IOException;
-
-  static final class Result {
-    final Bitmap maybeScaled;
-    final Rect originalSize;
-
-    Result(Bitmap maybeScaled, Rect originalSize) {
-      this.maybeScaled = maybeScaled;
-      this.originalSize = originalSize;
-    }
-  }
 
 }

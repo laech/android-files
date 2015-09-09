@@ -7,9 +7,9 @@ import l.files.operations.OperationService;
 
 public final class OperationsUi {
 
-  public void init(Context context) {
-    OperationService.addListener(
-        new NotificationProvider(context, Clock.system()));
-  }
+    public void init(Context context) {
+        OperationService.addListener(
+                new NotificationProvider(context, Clock.system()));
+    }
 
 }

@@ -6,15 +6,16 @@ import android.view.MotionEvent;
 
 public final class ViewPager extends android.support.v4.view.ViewPager {
 
-  public ViewPager(Context context) {
-    super(context);
-  }
+    public ViewPager(Context context) {
+        super(context);
+    }
 
-  public ViewPager(Context context, AttributeSet attrs) {
-    super(context, attrs);
-  }
+    public ViewPager(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-  @Override public boolean onInterceptTouchEvent(MotionEvent ev) {
-    return isEnabled() && super.onInterceptTouchEvent(ev);
-  }
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return isEnabled() && super.onInterceptTouchEvent(ev);
+    }
 }

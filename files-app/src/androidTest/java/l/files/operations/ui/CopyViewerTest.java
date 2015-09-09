@@ -9,24 +9,29 @@ import l.files.operations.TaskState;
 
 public final class CopyViewerTest extends ProgressViewerTest {
 
-  @Override protected CopyViewer create(Context context, Clock clock) {
-    return new CopyViewer(context, clock);
-  }
+    @Override
+    protected CopyViewer create(Context context, Clock clock) {
+        return new CopyViewer(context, clock);
+    }
 
-  @Override protected TaskState.Running setProgress(
-      TaskState.Running state, Progress progress) {
-    return state.running(state.getItems(), progress);
-  }
+    @Override
+    protected TaskState.Running setProgress(
+            TaskState.Running state, Progress progress) {
+        return state.running(state.getItems(), progress);
+    }
 
-  @Override protected int getTitlePreparing() {
-    return R.plurals.preparing_to_copy_x_items_to_x;
-  }
+    @Override
+    protected int getTitlePreparing() {
+        return R.plurals.preparing_to_copy_x_items_to_x;
+    }
 
-  @Override protected int getTitleRunning() {
-    return R.plurals.copying_x_items_to_x;
-  }
+    @Override
+    protected int getTitleRunning() {
+        return R.plurals.copying_x_items_to_x;
+    }
 
-  @Override protected int getTitleFailed() {
-    return R.plurals.fail_to_copy;
-  }
+    @Override
+    protected int getTitleFailed() {
+        return R.plurals.fail_to_copy;
+    }
 }

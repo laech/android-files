@@ -8,10 +8,8 @@ import l.files.fs.local.LocalFile;
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
-public final class UserDirs
-{
-    private UserDirs()
-    {
+public final class UserDirs {
+    private UserDirs() {
     }
 
     public static final File DIR_ROOT = LocalFile.create(new java.io.File("/"));
@@ -22,8 +20,7 @@ public final class UserDirs
     public static final File DIR_MUSIC = dir(Environment.DIRECTORY_MUSIC);
     public static final File DIR_PICTURES = dir(Environment.DIRECTORY_PICTURES);
 
-    private static File dir(final String type)
-    {
+    private static File dir(final String type) {
         return LocalFile.create(getExternalStoragePublicDirectory(type));
     }
 

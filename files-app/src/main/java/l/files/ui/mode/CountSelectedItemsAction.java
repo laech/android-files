@@ -10,19 +10,16 @@ import static java.util.Objects.requireNonNull;
 
 public final class CountSelectedItemsAction
         extends ActionModeAdapter
-        implements Selection.Callback
-{
+        implements Selection.Callback {
 
     private final Selection<?> selection;
 
-    public CountSelectedItemsAction(final Selection<?> selection)
-    {
+    public CountSelectedItemsAction(final Selection<?> selection) {
         this.selection = requireNonNull(selection, "selector");
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
-    {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
         super.onCreateActionMode(mode, menu);
         updateSelectedItemCount();
         this.selection.addWeaklyReferencedCallback(this);
@@ -30,22 +27,18 @@ public final class CountSelectedItemsAction
     }
 
     @Override
-    public void onDestroyActionMode(final ActionMode mode)
-    {
+    public void onDestroyActionMode(final ActionMode mode) {
         super.onDestroyActionMode(mode);
         this.selection.removeCallback(this);
     }
 
     @Override
-    public void onSelectionChanged()
-    {
+    public void onSelectionChanged() {
         updateSelectedItemCount();
     }
 
-    private void updateSelectedItemCount()
-    {
-        if (mode != null)
-        {
+    private void updateSelectedItemCount() {
+        if (mode != null) {
             mode.setTitle(Integer.toString(selection.size()));
         }
     }

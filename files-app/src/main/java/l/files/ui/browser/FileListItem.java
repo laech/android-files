@@ -14,98 +14,105 @@ import static l.files.fs.File.OCTET_STREAM;
 
 public abstract class FileListItem {
 
-  FileListItem() {
-  }
-
-  public abstract boolean isFile();
-
-  public boolean isHeader() {
-    return !isFile();
-  }
-
-  @AutoValue
-  public static abstract class Header extends FileListItem {
-
-    Header() {
+    FileListItem() {
     }
 
-    public abstract String header();
+    public abstract boolean isFile();
 
-    public static Header of(String header) {
-      return new AutoValue_FileListItem_Header(header);
+    public boolean isHeader() {
+        return !isFile();
     }
 
-    @Override public boolean isFile() {
-      return false;
-    }
+    @AutoValue
+    public static abstract class Header extends FileListItem {
 
-    @Override public String toString() {
-      return header();
-    }
-  }
-
-  @AutoValue
-  public static abstract class File extends FileListItem implements Comparable<File> {
-
-    private Boolean readable;
-
-    File() {
-    }
-
-    // TODO don't do the following in the main thread
-
-    public boolean isReadable() {
-      if (readable == null) {
-        try {
-          readable = resource().readable();
-        } catch (IOException e) {
-          readable = false;
+        Header() {
         }
-      }
-      return readable;
+
+        public abstract String header();
+
+        public static Header of(String header) {
+            return new AutoValue_FileListItem_Header(header);
+        }
+
+        @Override
+        public boolean isFile() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return header();
+        }
     }
 
-    public String basicMediaType() {
-      try {
-        return resource().detectBasicMediaType();
-      } catch (IOException e) {
-        return OCTET_STREAM;
-      }
+    @AutoValue
+    public static abstract class File extends FileListItem implements Comparable<File> {
+
+        private Boolean readable;
+
+        File() {
+        }
+
+        // TODO don't do the following in the main thread
+
+        public boolean isReadable() {
+            if (readable == null) {
+                try {
+                    readable = resource().readable();
+                } catch (IOException e) {
+                    readable = false;
+                }
+            }
+            return readable;
+        }
+
+        public String basicMediaType() {
+            try {
+                return resource().detectBasicMediaType();
+            } catch (IOException e) {
+                return OCTET_STREAM;
+            }
+        }
+
+        public abstract l.files.fs.File resource();
+
+        @Nullable
+        public abstract Stat stat(); // TODO
+
+        @Nullable
+        abstract Stat _targetStat();
+
+        abstract NaturalKey collationKey();
+
+        public static File create(
+                l.files.fs.File file,
+                @Nullable Stat stat,
+                @Nullable Stat targetStat,
+                Collator collator) {
+            String name = file.name().toString();
+            NaturalKey key = NaturalKey.create(collator, name);
+            return new AutoValue_FileListItem_File(file, stat, targetStat, key);
+        }
+
+        @Override
+        public boolean isFile() {
+            return true;
+        }
+
+        /**
+         * If the resource is a link, this returns the status of the target
+         * file, if not available, returns the status of the link.
+         */
+        @Nullable
+        public Stat targetStat() {
+            return _targetStat() != null ? _targetStat() : stat();
+        }
+
+        @Override
+        public int compareTo(File another) {
+            return collationKey().compareTo(another.collationKey());
+        }
     }
-
-    public abstract l.files.fs.File resource();
-
-    @Nullable public abstract Stat stat(); // TODO
-
-    @Nullable abstract Stat _targetStat();
-
-    abstract NaturalKey collationKey();
-
-    public static File create(
-        l.files.fs.File file,
-        @Nullable Stat stat,
-        @Nullable Stat targetStat,
-        Collator collator) {
-      String name = file.name().toString();
-      NaturalKey key = NaturalKey.create(collator, name);
-      return new AutoValue_FileListItem_File(file, stat, targetStat, key);
-    }
-
-    @Override public boolean isFile() {
-      return true;
-    }
-
-    /**
-     * If the resource is a link, this returns the status of the target
-     * file, if not available, returns the status of the link.
-     */
-    @Nullable public Stat targetStat() {
-      return _targetStat() != null ? _targetStat() : stat();
-    }
-
-    @Override public int compareTo(File another) {
-      return collationKey().compareTo(another.collationKey());
-    }
-  }
 
 }

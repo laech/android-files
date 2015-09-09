@@ -23,163 +23,163 @@ import static org.mockito.Mockito.verify;
 
 public abstract class UiFileCreation<T extends UiFileCreation> {
 
-  private final UiFileActivity context;
-  private final String tag;
+    private final UiFileActivity context;
+    private final String tag;
 
-  public UiFileCreation(UiFileActivity context, String tag) {
-    requireNonNull(context);
-    requireNonNull(tag);
-    this.context = context;
-    this.tag = tag;
-  }
-
-  @SuppressWarnings("unchecked")
-  private T self() {
-    return (T) this;
-  }
-
-  public T setFilename(final CharSequence name) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        editText().setText(name);
-      }
-    });
-    return self();
-  }
-
-  public UiFileActivity ok() {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick());
-      }
-    });
-    return context;
-  }
-
-  public UiFileActivity okExpectingFailure(final String message) {
-    @SuppressWarnings("unchecked")
-    final Consumer<String>[] original = new Consumer[1];
+    public UiFileCreation(UiFileActivity context, String tag) {
+        requireNonNull(context);
+        requireNonNull(tag);
+        this.context = context;
+        this.tag = tag;
+    }
 
     @SuppressWarnings("unchecked")
-    final Consumer<String> consumer = mock(Consumer.class);
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(final InvocationOnMock i) throws Throwable {
-        original[0].apply((String) i.getArguments()[0]);
-        return null;
-      }
-    }).when(consumer).apply(anyString());
+    private T self() {
+        return (T) this;
+    }
 
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        original[0] = fragment().toaster;
-        fragment().toaster = consumer;
-      }
-    });
+    public T setFilename(final CharSequence name) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                editText().setText(name);
+            }
+        });
+        return self();
+    }
 
-    ok();
+    public UiFileActivity ok() {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(dialog().getButton(BUTTON_POSITIVE).performClick());
+            }
+        });
+        return context;
+    }
 
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        verify(consumer).apply(message);
-      }
-    });
+    public UiFileActivity okExpectingFailure(final String message) {
+        @SuppressWarnings("unchecked")
+        final Consumer<String>[] original = new Consumer[1];
 
-    return context;
-  }
+        @SuppressWarnings("unchecked")
+        final Consumer<String> consumer = mock(Consumer.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(final InvocationOnMock i) throws Throwable {
+                original[0].apply((String) i.getArguments()[0]);
+                return null;
+            }
+        }).when(consumer).apply(anyString());
 
-  public T assertOkButtonEnabled(final boolean enabled) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        FileCreationFragment fragment = fragment();
-        assertNotNull(fragment);
-        assertEquals(
-            enabled,
-            dialog().getButton(BUTTON_POSITIVE).isEnabled());
-      }
-    });
-    return self();
-  }
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                original[0] = fragment().toaster;
+                fragment().toaster = consumer;
+            }
+        });
 
-  public T assertHasError(final int resId, final Object... args) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertEquals(
-            context.activity().getString(resId, args),
-            editText().getError());
-      }
-    });
-    return self();
-  }
+        ok();
 
-  public T assertHasNoError() {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertNull(editText().getError());
-      }
-    });
-    return self();
-  }
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                verify(consumer).apply(message);
+            }
+        });
 
-  public T assertError(final CharSequence error) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertEquals(error, editText().getError());
-      }
-    });
-    return self();
-  }
+        return context;
+    }
 
-  public EditText editText() {
-    return (EditText) dialog().findViewById(android.R.id.text1);
-  }
+    public T assertOkButtonEnabled(final boolean enabled) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                FileCreationFragment fragment = fragment();
+                assertNotNull(fragment);
+                assertEquals(
+                        enabled,
+                        dialog().getButton(BUTTON_POSITIVE).isEnabled());
+            }
+        });
+        return self();
+    }
 
-  private AlertDialog dialog() {
-    return fragment().getDialog();
-  }
+    public T assertHasError(final int resId, final Object... args) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(
+                        context.activity().getString(resId, args),
+                        editText().getError());
+            }
+        });
+        return self();
+    }
 
-  private FileCreationFragment fragment() {
-    return (FileCreationFragment) context.activity().getFragmentManager()
-        .findFragmentByTag(tag);
-  }
+    public T assertHasNoError() {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertNull(editText().getError());
+            }
+        });
+        return self();
+    }
 
-  public T assertFilename(final CharSequence name) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertEquals(name.toString(), filename());
-      }
+    public T assertError(final CharSequence error) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(error, editText().getError());
+            }
+        });
+        return self();
+    }
 
-    });
-    return self();
-  }
+    public EditText editText() {
+        return (EditText) dialog().findViewById(android.R.id.text1);
+    }
 
-  private String filename() {
-    return editText().getText().toString();
-  }
+    private AlertDialog dialog() {
+        return fragment().getDialog();
+    }
 
-  public T assertSelection(final String selection) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        assertEquals(selection, selection());
-      }
-    });
-    return self();
-  }
+    private FileCreationFragment fragment() {
+        return (FileCreationFragment) context.activity().getFragmentManager()
+                .findFragmentByTag(tag);
+    }
 
-  private String selection() {
-    EditText text = editText();
-    return text.getText().toString().substring(
-        text.getSelectionStart(),
-        text.getSelectionEnd());
-  }
+    public T assertFilename(final CharSequence name) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(name.toString(), filename());
+            }
+
+        });
+        return self();
+    }
+
+    private String filename() {
+        return editText().getText().toString();
+    }
+
+    public T assertSelection(final String selection) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(selection, selection());
+            }
+        });
+        return self();
+    }
+
+    private String selection() {
+        EditText text = editText();
+        return text.getText().toString().substring(
+                text.getSelectionStart(),
+                text.getSelectionEnd());
+    }
 }

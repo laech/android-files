@@ -26,371 +26,377 @@ import l.files.common.base.Consumer;
  */
 public interface File extends Parcelable {
 
-  String OCTET_STREAM = "application/octet-stream";
-  String ANY_TYPE = "*/*";
+    String OCTET_STREAM = "application/octet-stream";
+    String ANY_TYPE = "*/*";
 
-  URI uri();
-
-  /**
-   * The scheme of the file system.
-   * e.g. "file" for local file system.
-   */
-  String scheme();
-
-  /**
-   * Gets the path of this resource. The returned path is only valid within
-   * the context of the underlying file system.
-   */
-  String path();
-
-  /**
-   * Gets the name of this resource, or empty if this is the root resource.
-   */
-  Name name();
-
-  /**
-   * Gets the parent resource, returns null if this is the root resource.
-   */
-  @Nullable File parent();
-
-  boolean isRoot();
-
-  /**
-   * Gets the resource hierarchy of this resource.
-   * <p/>
-   * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
-   */
-  List<File> hierarchy();
-
-  /**
-   * Resolves the given name/path relative to this resource.
-   */
-  File resolve(String other);
-
-  /**
-   * Resolves a child with the given name.
-   */
-  File resolve(Name other);
-
-  /**
-   * Returns a resource with the given parent replaced.
-   * <p/>
-   * e.g.
-   * <pre>
-   * Resource("/a/b").resolve(Resource("/a"), Resource("/c")) =
-   * Resource("/c/b")
-   * </pre>
-   *
-   * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
-   */
-  File resolveParent(File fromParent, File toParent);
-
-  /**
-   * True if this resource is equal to or a descendant of the given resource.
-   */
-  boolean startsWith(File prefix);
-
-  /**
-   * True if this resource is considered a hidden resource.
-   */
-  boolean hidden();
-
-  boolean exists(LinkOption option) throws IOException;
-
-  /**
-   * Returns true if this resource is readable, return false if not.
-   * <p/>
-   * If this is a link, returns the result for the link target, not the link
-   * itself.
-   */
-  boolean readable() throws IOException;
-
-  /**
-   * Returns true if this resource is writable, return false if not.
-   * <p/>
-   * If this is a link, returns the result for the link target, not the link
-   * itself.
-   */
-  boolean writable() throws IOException;
-
-  /**
-   * Returns true if this resource is executable, return false if not.
-   * <p/>
-   * If this is a link, returns the result for the link target, not the link
-   * itself.
-   */
-  boolean executable() throws IOException;
-
-  /**
-   * Observes on this resource for change events.
-   * <p/>
-   * If this resource is a directory, adding/removing immediate children and
-   * any changes to the content/attributes of immediate children of this
-   * directory will be notified, this is true for existing children as well as
-   * newly added items after observation started.
-   * <p/>
-   * Note that by the time a listener is notified, the target resource may
-   * have already be changed again, therefore a robust application should have
-   * an alternative way of handling instead of reply on this fully.
-   *
-   * @param option if option is {@link LinkOption#NOFOLLOW} and this resource is a
-   *               link, observe on the link instead of the link target
-   */
-  Closeable observe(LinkOption option, Observer observer) throws IOException;
-
-  Closeable observe(
-      LinkOption option,
-      Observer observer,
-      Consumer<File> childrenConsumer) throws IOException;
-
-  /**
-   * Performs a depth first traverse of this tree.
-   * <p/>
-   * e.g. traversing the follow tree:
-   * <pre>
-   *     a
-   *    / \
-   *   b   c
-   * </pre>
-   * will generate:
-   * <pre>
-   * visitor.onPreVisit(a)
-   * visitor.onPreVisit(b)
-   * visitor.onPost(b)
-   * visitor.onPreVisit(c)
-   * visitor.onPost(c)
-   * visitor.onPost(a)
-   * </pre>
-   *
-   * @param option  applies to root only, child links are never followed
-   */
-  void traverse(LinkOption option, Visitor visitor) throws IOException;
-
-  Stream<File> list(LinkOption option) throws IOException;
-
-  InputStream input() throws IOException;
-
-  OutputStream output() throws IOException;
-
-  OutputStream output(boolean append) throws IOException;
-
-  Reader reader(Charset charset) throws IOException;
-
-  Writer writer(Charset charset) throws IOException;
-
-  Writer writer(Charset charset, boolean append) throws IOException;
-
-  /**
-   * Creates this resource as a directory. Will fail if the directory already
-   * exists.
-   *
-   * @return this
-   */
-  File createDirectory() throws IOException;
-
-  /**
-   * Creates this resource and any missing parents as directories. This will
-   * throw the same exceptions as {@link #createDirectory()} except will not
-   * error if already exists as a directory.
-   *
-   * @return this
-   */
-  File createDirectories() throws IOException;
-
-  /**
-   * Creates the underlying resource as a file.
-   *
-   * @return this
-   */
-  File createFile() throws IOException;
-
-  /**
-   * Creates this resource as a file and creates any missing parents. This
-   * will throw the same exceptions as {@link #createFile()} except will not
-   * error if already exists.
-   *
-   * @return this
-   */
-  File createFiles() throws IOException;
-
-  /**
-   * Creates the underlying resource as a link to point to the given
-   * location.
-   *
-   * @return this
-   */
-  File createLink(File target) throws IOException;
-
-  /**
-   * If this is a link, returns the target resource.
-   */
-  File readLink() throws IOException;
-
-  /**
-   * Reads the status of this resource.
-   */
-  Stat stat(LinkOption option) throws IOException;
-
-  /**
-   * Moves this resource tree to the given destination, destination must not
-   * exist.
-   * <p/>
-   * If this is a link, the link itself is moved, link target resource is
-   * unaffected.
-   */
-  void moveTo(File dst) throws IOException;
-
-  /**
-   * Deletes this resource. Fails if this is a non-empty directory.
-   */
-  void delete() throws IOException;
-
-  /**
-   * Updates the access time for this resource.
-   */
-  void setLastAccessedTime(LinkOption option, Instant instant) throws IOException;
-
-  /**
-   * Updates the modification time for this resource.
-   */
-  void setLastModifiedTime(LinkOption option, Instant instant) throws IOException;
-
-  /**
-   * Sets the permissions of this resource, this replaces the existing
-   * permissions, not add.
-   * <p/>
-   * If this is a link, the permission of the target resource will be changed,
-   * the permission of the link itself cannot be changed.
-   */
-  void setPermissions(Set<Permission> permissions) throws IOException;
-
-  /**
-   * Removes the given permissions from this resource's existing permissions.
-   * <p/>
-   * If this is a link, the permission of the target resource will be changed,
-   * the permission of the link itself cannot be changed.
-   */
-  void removePermissions(Set<Permission> permissions) throws IOException;
-
-  /**
-   * Reads the underlying file content as string.
-   */
-  String readString(Charset charset) throws IOException;
-
-  /**
-   * Appends the underlying file content as string into the given appendable,
-   * returns the appendable.
-   */
-  <T extends Appendable> T readString(Charset charset, T appendable) throws IOException;
-
-  /**
-   * Overrides the content of this resource with the given content.
-   */
-  void writeString(Charset charset, CharSequence content) throws IOException;
-
-  /**
-   * Detects the content type of this resource based on its properties
-   * without reading the content of this resource.
-   * Returns {@link #OCTET_STREAM} if unknown.
-   */
-  String detectBasicMediaType() throws IOException;
-
-  /**
-   * Reads the content of this resource to determine its media type.
-   * Returns {@link #OCTET_STREAM} if unknown.
-   */
-  String detectContentMediaType() throws IOException;
-
-  @AutoValue
-  abstract class Name implements CharSequence {
-    Name() {
-    }
-
-    abstract String value();
-
-    public static Name of(String name) {
-      return new AutoValue_Resource_Name(name);
-    }
-
-    public static Name empty() {
-      return of("");
-    }
+    URI uri();
 
     /**
-     * Locale sensitive name comparator.
+     * The scheme of the file system.
+     * e.g. "file" for local file system.
      */
-    public static Comparator<Name> comparator(Locale locale) {
-      final Collator collator = Collator.getInstance(locale);
-      return new Comparator<Name>() {
-        @Override public int compare(Name a, Name b) {
-          return collator.compare(a.toString(), b.toString());
+    String scheme();
+
+    /**
+     * Gets the path of this resource. The returned path is only valid within
+     * the context of the underlying file system.
+     */
+    String path();
+
+    /**
+     * Gets the name of this resource, or empty if this is the root resource.
+     */
+    Name name();
+
+    /**
+     * Gets the parent resource, returns null if this is the root resource.
+     */
+    @Nullable
+    File parent();
+
+    boolean isRoot();
+
+    /**
+     * Gets the resource hierarchy of this resource.
+     * <p/>
+     * e.g. {@code "/a/b" -> ["/", "/a", "/a/b"]}
+     */
+    List<File> hierarchy();
+
+    /**
+     * Resolves the given name/path relative to this resource.
+     */
+    File resolve(String other);
+
+    /**
+     * Resolves a child with the given name.
+     */
+    File resolve(Name other);
+
+    /**
+     * Returns a resource with the given parent replaced.
+     * <p/>
+     * e.g.
+     * <pre>
+     * Resource("/a/b").resolve(Resource("/a"), Resource("/c")) =
+     * Resource("/c/b")
+     * </pre>
+     *
+     * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
+     */
+    File resolveParent(File fromParent, File toParent);
+
+    /**
+     * True if this resource is equal to or a descendant of the given resource.
+     */
+    boolean startsWith(File prefix);
+
+    /**
+     * True if this resource is considered a hidden resource.
+     */
+    boolean hidden();
+
+    boolean exists(LinkOption option) throws IOException;
+
+    /**
+     * Returns true if this resource is readable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
+    boolean readable() throws IOException;
+
+    /**
+     * Returns true if this resource is writable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
+    boolean writable() throws IOException;
+
+    /**
+     * Returns true if this resource is executable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
+    boolean executable() throws IOException;
+
+    /**
+     * Observes on this resource for change events.
+     * <p/>
+     * If this resource is a directory, adding/removing immediate children and
+     * any changes to the content/attributes of immediate children of this
+     * directory will be notified, this is true for existing children as well as
+     * newly added items after observation started.
+     * <p/>
+     * Note that by the time a listener is notified, the target resource may
+     * have already be changed again, therefore a robust application should have
+     * an alternative way of handling instead of reply on this fully.
+     *
+     * @param option if option is {@link LinkOption#NOFOLLOW} and this resource is a
+     *               link, observe on the link instead of the link target
+     */
+    Closeable observe(LinkOption option, Observer observer) throws IOException;
+
+    Closeable observe(
+            LinkOption option,
+            Observer observer,
+            Consumer<File> childrenConsumer) throws IOException;
+
+    /**
+     * Performs a depth first traverse of this tree.
+     * <p/>
+     * e.g. traversing the follow tree:
+     * <pre>
+     *     a
+     *    / \
+     *   b   c
+     * </pre>
+     * will generate:
+     * <pre>
+     * visitor.onPreVisit(a)
+     * visitor.onPreVisit(b)
+     * visitor.onPost(b)
+     * visitor.onPreVisit(c)
+     * visitor.onPost(c)
+     * visitor.onPost(a)
+     * </pre>
+     *
+     * @param option applies to root only, child links are never followed
+     */
+    void traverse(LinkOption option, Visitor visitor) throws IOException;
+
+    Stream<File> list(LinkOption option) throws IOException;
+
+    InputStream input() throws IOException;
+
+    OutputStream output() throws IOException;
+
+    OutputStream output(boolean append) throws IOException;
+
+    Reader reader(Charset charset) throws IOException;
+
+    Writer writer(Charset charset) throws IOException;
+
+    Writer writer(Charset charset, boolean append) throws IOException;
+
+    /**
+     * Creates this resource as a directory. Will fail if the directory already
+     * exists.
+     *
+     * @return this
+     */
+    File createDirectory() throws IOException;
+
+    /**
+     * Creates this resource and any missing parents as directories. This will
+     * throw the same exceptions as {@link #createDirectory()} except will not
+     * error if already exists as a directory.
+     *
+     * @return this
+     */
+    File createDirectories() throws IOException;
+
+    /**
+     * Creates the underlying resource as a file.
+     *
+     * @return this
+     */
+    File createFile() throws IOException;
+
+    /**
+     * Creates this resource as a file and creates any missing parents. This
+     * will throw the same exceptions as {@link #createFile()} except will not
+     * error if already exists.
+     *
+     * @return this
+     */
+    File createFiles() throws IOException;
+
+    /**
+     * Creates the underlying resource as a link to point to the given
+     * location.
+     *
+     * @return this
+     */
+    File createLink(File target) throws IOException;
+
+    /**
+     * If this is a link, returns the target resource.
+     */
+    File readLink() throws IOException;
+
+    /**
+     * Reads the status of this resource.
+     */
+    Stat stat(LinkOption option) throws IOException;
+
+    /**
+     * Moves this resource tree to the given destination, destination must not
+     * exist.
+     * <p/>
+     * If this is a link, the link itself is moved, link target resource is
+     * unaffected.
+     */
+    void moveTo(File dst) throws IOException;
+
+    /**
+     * Deletes this resource. Fails if this is a non-empty directory.
+     */
+    void delete() throws IOException;
+
+    /**
+     * Updates the access time for this resource.
+     */
+    void setLastAccessedTime(LinkOption option, Instant instant) throws IOException;
+
+    /**
+     * Updates the modification time for this resource.
+     */
+    void setLastModifiedTime(LinkOption option, Instant instant) throws IOException;
+
+    /**
+     * Sets the permissions of this resource, this replaces the existing
+     * permissions, not add.
+     * <p/>
+     * If this is a link, the permission of the target resource will be changed,
+     * the permission of the link itself cannot be changed.
+     */
+    void setPermissions(Set<Permission> permissions) throws IOException;
+
+    /**
+     * Removes the given permissions from this resource's existing permissions.
+     * <p/>
+     * If this is a link, the permission of the target resource will be changed,
+     * the permission of the link itself cannot be changed.
+     */
+    void removePermissions(Set<Permission> permissions) throws IOException;
+
+    /**
+     * Reads the underlying file content as string.
+     */
+    String readString(Charset charset) throws IOException;
+
+    /**
+     * Appends the underlying file content as string into the given appendable,
+     * returns the appendable.
+     */
+    <T extends Appendable> T readString(Charset charset, T appendable) throws IOException;
+
+    /**
+     * Overrides the content of this resource with the given content.
+     */
+    void writeString(Charset charset, CharSequence content) throws IOException;
+
+    /**
+     * Detects the content type of this resource based on its properties
+     * without reading the content of this resource.
+     * Returns {@link #OCTET_STREAM} if unknown.
+     */
+    String detectBasicMediaType() throws IOException;
+
+    /**
+     * Reads the content of this resource to determine its media type.
+     * Returns {@link #OCTET_STREAM} if unknown.
+     */
+    String detectContentMediaType() throws IOException;
+
+    @AutoValue
+    abstract class Name implements CharSequence {
+        Name() {
         }
-      };
-    }
 
-    private int indexOfExtSeparator() {
-      int i = value().lastIndexOf('.');
-      return (i == -1 || i == 0 || i == length() - 1) ? -1 : i;
-    }
+        abstract String value();
 
-    /**
-     * The name part without extension.
-     * <pre>
-     *  base.ext  ->  base
-     *  base      ->  base
-     *  base.     ->  base.
-     * .base.ext  -> .base
-     * .base      -> .base
-     * .base.     -> .base.
-     * .          -> .
-     * ..         -> ..
-     * </pre>
-     */
-    public String base() {
-      int i = indexOfExtSeparator();
-      return i != -1 ? value().substring(0, i) : value();
-    }
+        public static Name of(String name) {
+            return new AutoValue_Resource_Name(name);
+        }
 
-    /**
-     * The extension part without base name.
-     * <pre>
-     *  base.ext  ->  ext
-     * .base.ext  ->  ext
-     *  base      ->  ""
-     *  base.     ->  ""
-     * .base      ->  ""
-     * .base.     ->  ""
-     * .          ->  ""
-     * ..         ->  ""
-     * </pre>
-     */
-    public String ext() {
-      int i = indexOfExtSeparator();
-      return i != -1 ? value().substring(i + 1) : "";
-    }
+        public static Name empty() {
+            return of("");
+        }
 
-    /**
-     * {@link #ext()} with a leading dot if it's not empty.
-     */
-    public String dotExt() {
-      String ext = ext();
-      return ext.isEmpty() ? ext : "." + ext;
-    }
+        /**
+         * Locale sensitive name comparator.
+         */
+        public static Comparator<Name> comparator(Locale locale) {
+            final Collator collator = Collator.getInstance(locale);
+            return new Comparator<Name>() {
+                @Override
+                public int compare(Name a, Name b) {
+                    return collator.compare(a.toString(), b.toString());
+                }
+            };
+        }
 
-    @Override public int length() {
-      return value().length();
-    }
+        private int indexOfExtSeparator() {
+            int i = value().lastIndexOf('.');
+            return (i == -1 || i == 0 || i == length() - 1) ? -1 : i;
+        }
 
-    @Override public char charAt(int index) {
-      return value().charAt(index);
-    }
+        /**
+         * The name part without extension.
+         * <pre>
+         *  base.ext  ->  base
+         *  base      ->  base
+         *  base.     ->  base.
+         * .base.ext  -> .base
+         * .base      -> .base
+         * .base.     -> .base.
+         * .          -> .
+         * ..         -> ..
+         * </pre>
+         */
+        public String base() {
+            int i = indexOfExtSeparator();
+            return i != -1 ? value().substring(0, i) : value();
+        }
 
-    @Override public CharSequence subSequence(int start, int end) {
-      return value().subSequence(start, end);
-    }
+        /**
+         * The extension part without base name.
+         * <pre>
+         *  base.ext  ->  ext
+         * .base.ext  ->  ext
+         *  base      ->  ""
+         *  base.     ->  ""
+         * .base      ->  ""
+         * .base.     ->  ""
+         * .          ->  ""
+         * ..         ->  ""
+         * </pre>
+         */
+        public String ext() {
+            int i = indexOfExtSeparator();
+            return i != -1 ? value().substring(i + 1) : "";
+        }
 
-    @Override public String toString() {
-      return value();
+        /**
+         * {@link #ext()} with a leading dot if it's not empty.
+         */
+        public String dotExt() {
+            String ext = ext();
+            return ext.isEmpty() ? ext : "." + ext;
+        }
+
+        @Override
+        public int length() {
+            return value().length();
+        }
+
+        @Override
+        public char charAt(int index) {
+            return value().charAt(index);
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return value().subSequence(start, end);
+        }
+
+        @Override
+        public String toString() {
+            return value();
+        }
     }
-  }
 }

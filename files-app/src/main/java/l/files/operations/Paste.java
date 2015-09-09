@@ -11,39 +11,40 @@ import static java.util.Objects.requireNonNull;
 
 abstract class Paste extends AbstractOperation {
 
-  private final File destination;
+    private final File destination;
 
-  Paste(Collection<? extends File> resources, File destination) {
-    super(resources);
-    this.destination = requireNonNull(destination, "destination");
-  }
-
-  @Override void process(File file) throws InterruptedException {
-    checkInterrupt();
-
-    java.io.File destinationFile = new java.io.File(destination.uri());
-    java.io.File fromFile = new java.io.File(file.uri());
-    if (destination.equals(file) || destination.startsWith(file)) {
-      // TODO prevent this from UI
-      throw new CannotPasteIntoSelfException(
-          "Cannot paste directory " + file +
-              " into its own sub directory " + destination
-      );
+    Paste(Collection<? extends File> resources, File destination) {
+        super(resources);
+        this.destination = requireNonNull(destination, "destination");
     }
 
-    java.io.File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
-    try {
-      paste(file, LocalFile.create(to));
-    } catch (IOException e) {
-      record(file, e);
-    }
-  }
+    @Override
+    void process(File file) throws InterruptedException {
+        checkInterrupt();
 
-  /**
-   * Pastes the source to the destination. If {@code from} is a file, write
-   * its content into {@code to}. If {@code from} is a directory, paste its
-   * content into {@code to}.
-   */
-  abstract void paste(File from, File to) throws IOException;
+        java.io.File destinationFile = new java.io.File(destination.uri());
+        java.io.File fromFile = new java.io.File(file.uri());
+        if (destination.equals(file) || destination.startsWith(file)) {
+            // TODO prevent this from UI
+            throw new CannotPasteIntoSelfException(
+                    "Cannot paste directory " + file +
+                            " into its own sub directory " + destination
+            );
+        }
+
+        java.io.File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
+        try {
+            paste(file, LocalFile.create(to));
+        } catch (IOException e) {
+            record(file, e);
+        }
+    }
+
+    /**
+     * Pastes the source to the destination. If {@code from} is a file, write
+     * its content into {@code to}. If {@code from} is a directory, paste its
+     * content into {@code to}.
+     */
+    abstract void paste(File from, File to) throws IOException;
 
 }

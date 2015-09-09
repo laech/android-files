@@ -6,31 +6,24 @@ import android.system.StructStat;
 
 import static android.system.OsConstants.ENOENT;
 
-public final class StatTest extends FileBaseTest
-{
+public final class StatTest extends FileBaseTest {
 
-    public void testException()
-    {
-        try
-        {
+    public void testException() {
+        try {
             Stat.stat("/not/exist");
             fail();
-        }
-        catch (final ErrnoException e)
-        {
+        } catch (final ErrnoException e) {
             assertEquals(ENOENT, e.errno);
         }
     }
 
-    public void testStat() throws Exception
-    {
+    public void testStat() throws Exception {
         final String path = dir1().resolve("link").createLink(dir2()).path();
         checkEquals(Os.stat(path), Stat.stat(path));
         checkEquals(Os.lstat(path), Stat.lstat(path));
     }
 
-    private static void checkEquals(final StructStat expected, final Stat actual)
-    {
+    private static void checkEquals(final StructStat expected, final Stat actual) {
         assertEquals(expected.st_mtime, actual.mtime());
         assertEquals(expected.st_atime, actual.atime());
         assertEquals(expected.st_ctime, actual.ctime());

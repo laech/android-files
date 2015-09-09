@@ -11,13 +11,11 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class FileOperationTest extends BaseFilesActivityTest
-{
+public final class FileOperationTest extends BaseFilesActivityTest {
 
     // TODO cut/delete tests
 
-    public void test_copies_files() throws Exception
-    {
+    public void test_copies_files() throws Exception {
         final File a = dir().resolve("a").createFile();
         final File d = dir().resolve("d").createDirectory();
 
@@ -30,8 +28,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         assertTrue(waitFor(dir().resolve("d/a"), 5, SECONDS));
     }
 
-    public void test_copies_empty_directory() throws Exception
-    {
+    public void test_copies_empty_directory() throws Exception {
         final File c = dir().resolve("c").createDirectory();
         final File d = dir().resolve("d").createDirectory();
 
@@ -44,8 +41,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
     }
 
-    public void test_copies_full_directory() throws Exception
-    {
+    public void test_copies_full_directory() throws Exception {
         final File d = dir().resolve("d").createDirectory();
         final File c = dir().resolve("c").createDirectory();
         c.resolve("a").createFile();
@@ -61,8 +57,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
         assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
     }
 
-    public void test_copies_link() throws Exception
-    {
+    public void test_copies_link() throws Exception {
         final File d = dir().resolve("d").createDirectory();
         final File c = dir().resolve("c").createLink(dir());
 
@@ -78,13 +73,10 @@ public final class FileOperationTest extends BaseFilesActivityTest
     private boolean waitFor(
             final File file,
             final int time,
-            final TimeUnit unit) throws InterruptedException, IOException
-    {
+            final TimeUnit unit) throws InterruptedException, IOException {
         final long end = currentTimeMillis() + unit.toMillis(time);
-        while (currentTimeMillis() < end)
-        {
-            if (file.exists(NOFOLLOW))
-            {
+        while (currentTimeMillis() < end) {
+            if (file.exists(NOFOLLOW)) {
                 return true;
             }
             sleep(20);
@@ -93,8 +85,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     }
 
     public void test_paste_menu_is_disabled_inside_folder_being_copied()
-            throws Exception
-    {
+            throws Exception {
         final File dir = dir().resolve("dir").createDirectory();
 
         screen()
@@ -109,8 +100,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     }
 
     public void test_paste_menu_is_disabled_if_files_do_not_exist()
-            throws Exception
-    {
+            throws Exception {
         final File dir = dir().resolve("dir").createDirectory();
 
         screen()
@@ -124,8 +114,7 @@ public final class FileOperationTest extends BaseFilesActivityTest
     }
 
     public void test_paste_menu_is_enabled_if_some_files_do_not_exist_some_exist()
-            throws Exception
-    {
+            throws Exception {
         final File dir = dir().resolve("dir1").createDirectory();
         dir().resolve("dir2").createDirectory();
 

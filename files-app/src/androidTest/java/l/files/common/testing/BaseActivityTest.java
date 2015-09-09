@@ -5,13 +5,14 @@ import android.test.ActivityInstrumentationTestCase2;
 
 public class BaseActivityTest<T extends Activity> extends ActivityInstrumentationTestCase2<T> {
 
-  public BaseActivityTest(Class<T> activityClass) {
-    super(activityClass);
-  }
+    public BaseActivityTest(Class<T> activityClass) {
+        super(activityClass);
+    }
 
-  @Override protected void setUp() throws Exception {
-    super.setUp();
-    Dexmaker.setup(this);
-  }
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        Dexmaker.setup(this);
+    }
 
 }

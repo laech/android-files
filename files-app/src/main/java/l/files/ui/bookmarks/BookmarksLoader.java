@@ -16,30 +16,25 @@ import l.files.provider.bookmarks.BookmarkManager;
 import static java.util.Objects.requireNonNull;
 import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
 
-final class BookmarksLoader extends AsyncTaskLoader<List<File>>
-{
+final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
     private List<File> bookmarks;
 
-    BookmarksLoader(final Context context, final BookmarkManager manager)
-    {
+    BookmarksLoader(final Context context, final BookmarkManager manager) {
         super(context);
         this.manager = requireNonNull(manager);
         this.listener = new BookmarkListener();
     }
 
     @Override
-    public List<File> loadInBackground()
-    {
+    public List<File> loadInBackground() {
         final Comparator<Name> comparator = Name.comparator(Locale.getDefault());
         final List<File> files = new ArrayList<>(manager.getBookmarks());
-        Collections.sort(files, new Comparator<File>()
-        {
+        Collections.sort(files, new Comparator<File>() {
             @Override
-            public int compare(final File a, final File b)
-            {
+            public int compare(final File a, final File b) {
                 return comparator.compare(a.name(), b.name());
             }
         });
@@ -47,39 +42,31 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>>
     }
 
     @Override
-    protected void onStartLoading()
-    {
+    protected void onStartLoading() {
         super.onStartLoading();
-        if (bookmarks == null)
-        {
+        if (bookmarks == null) {
             manager.registerBookmarkChangedListener(listener);
             forceLoad();
-        }
-        else
-        {
+        } else {
             deliverResult(bookmarks);
         }
     }
 
     @Override
-    protected void onReset()
-    {
+    protected void onReset() {
         super.onReset();
         manager.unregisterBookmarkChangedListener(listener);
     }
 
     @Override
-    public void deliverResult(final List<File> data)
-    {
+    public void deliverResult(final List<File> data) {
         super.deliverResult(data);
         this.bookmarks = data;
     }
 
-    private final class BookmarkListener implements BookmarkChangedListener
-    {
+    private final class BookmarkListener implements BookmarkChangedListener {
         @Override
-        public void onBookmarkChanged(final BookmarkManager manager)
-        {
+        public void onBookmarkChanged(final BookmarkManager manager) {
             forceLoad();
         }
     }

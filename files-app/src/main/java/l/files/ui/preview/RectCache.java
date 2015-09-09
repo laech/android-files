@@ -9,28 +9,31 @@ import l.files.fs.File;
 
 final class RectCache extends PersistenceCache<Rect> {
 
-  RectCache(File cacheDir) {
-    super(cacheDir);
-  }
-
-  @Override String cacheFileName() {
-    return "sizes";
-  }
-
-  @Override Rect read(DataInput in) throws IOException {
-    int width = in.readInt();
-    int height = in.readInt();
-    try {
-      return Rect.of(width, height);
-    } catch (IllegalArgumentException e) {
-      log.warn(e);
-      return null;
+    RectCache(File cacheDir) {
+        super(cacheDir);
     }
-  }
 
-  @Override void write(DataOutput out, Rect rect) throws IOException {
-    out.writeInt(rect.width());
-    out.writeInt(rect.height());
-  }
+    @Override
+    String cacheFileName() {
+        return "sizes";
+    }
+
+    @Override
+    Rect read(DataInput in) throws IOException {
+        int width = in.readInt();
+        int height = in.readInt();
+        try {
+            return Rect.of(width, height);
+        } catch (IllegalArgumentException e) {
+            log.warn(e);
+            return null;
+        }
+    }
+
+    @Override
+    void write(DataOutput out, Rect rect) throws IOException {
+        out.writeInt(rect.width());
+        out.writeInt(rect.height());
+    }
 
 }

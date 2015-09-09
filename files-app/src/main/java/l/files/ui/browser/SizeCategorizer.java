@@ -9,8 +9,7 @@ import l.files.ui.browser.FileListItem.File;
 /**
  * Categorizes by file size (descending order).
  */
-final class SizeCategorizer extends BaseCategorizer
-{
+final class SizeCategorizer extends BaseCategorizer {
     private static final long ZERO = 0;
     private static final long KB_1 = 1024;
     private static final long MB_1 = KB_1 * 1024;
@@ -29,24 +28,19 @@ final class SizeCategorizer extends BaseCategorizer
             };
 
     @Override
-    public Object id(final File file)
-    {
+    public Object id(final File file) {
         final Stat stat = file.stat();
-        if (stat == null)
-        {
+        if (stat == null) {
             return R.string.__;
         }
 
-        if (stat.isDirectory())
-        {
+        if (stat.isDirectory()) {
             return R.string.__;
         }
 
         final long size = stat.size();
-        for (final Group group : GROUPS)
-        {
-            if (size >= group.minSize)
-            {
+        for (final Group group : GROUPS) {
+            if (size >= group.minSize) {
                 return group.label;
             }
         }
@@ -57,23 +51,19 @@ final class SizeCategorizer extends BaseCategorizer
     public String label(
             final File file,
             final Resources res,
-            final Object id)
-    {
+            final Object id) {
         final int value = (int) id;
-        if (value == -1)
-        {
+        if (value == -1) {
             return null;
         }
         return res.getString(value);
     }
 
-    private static class Group
-    {
+    private static class Group {
         final long minSize;
         final int label;
 
-        Group(final long minSize, final int label)
-        {
+        Group(final long minSize, final int label) {
             this.minSize = minSize;
             this.label = label;
         }

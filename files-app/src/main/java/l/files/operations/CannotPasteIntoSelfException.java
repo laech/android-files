@@ -6,7 +6,7 @@ package l.files.operations;
  */
 class CannotPasteIntoSelfException extends IllegalArgumentException {
 
-  public CannotPasteIntoSelfException(String detailMessage) {
-    super(detailMessage);
-  }
+    public CannotPasteIntoSelfException(String detailMessage) {
+        super(detailMessage);
+    }
 }

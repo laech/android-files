@@ -22,166 +22,170 @@ import static java.util.Objects.requireNonNull;
 
 public final class Preview {
 
-  private static final Logger log = Logger.get(Preview.class);
+    private static final Logger log = Logger.get(Preview.class);
 
-  static final int PALETTE_MAX_COLOR_COUNT = 24;
+    static final int PALETTE_MAX_COLOR_COUNT = 24;
 
-  private static Preview instance;
+    private static Preview instance;
 
-  public static Preview get(Context context) {
-    synchronized (Preview.class) {
-      if (instance == null) {
-        instance = new Preview(context);
-        instance.cleanupAsync();
-      }
-    }
-    return instance;
-  }
-
-  private final PersistenceCache<Rect> sizeCache;
-  private final PersistenceCache<Palette> paletteCache;
-  private final PersistenceCache<String> mediaTypeCache;
-  private final PersistenceCache<Boolean> noPreviewCache;
-  private final ThumbnailMemCache thumbnailMemCache;
-  private final ThumbnailDiskCache thumbnailDiskCache;
-
-  final DisplayMetrics displayMetrics;
-  final File cacheDir;
-  final Context context;
-
-  private Preview(Context context) {
-    this.context = context;
-    this.cacheDir = LocalFile.create(context.getExternalCacheDir());
-    this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
-    this.sizeCache = new RectCache(cacheDir);
-    this.paletteCache = new PaletteCache(cacheDir);
-    this.mediaTypeCache = new MediaTypeCache(cacheDir);
-    this.noPreviewCache = new NoPreviewCache(cacheDir);
-    this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
-    this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
-  }
-
-  public void writeCacheAsyncIfNeeded() {
-    sizeCache.writeAsyncIfNeeded();
-    paletteCache.writeAsyncIfNeeded();
-    mediaTypeCache.writeAsyncIfNeeded();
-    noPreviewCache.writeAsyncIfNeeded();
-  }
-
-  public void readCacheAsyncIfNeeded() {
-    sizeCache.readAsyncIfNeeded();
-    paletteCache.readAsyncIfNeeded();
-    mediaTypeCache.readAsyncIfNeeded();
-    noPreviewCache.readAsyncIfNeeded();
-  }
-
-  private void cleanupAsync() {
-    thumbnailDiskCache.cleanupAsync();
-  }
-
-  @Nullable public Bitmap getBitmap(File res, Stat stat, Rect constraint) {
-    return thumbnailMemCache.get(res, stat, constraint);
-  }
-
-  void putBitmap(File res, Stat stat, Rect constraint, Bitmap bitmap) {
-    thumbnailMemCache.put(res, stat, constraint, bitmap);
-  }
-
-  @Nullable
-  Bitmap getBitmapFromDisk(File res, Stat stat, Rect constraint) throws IOException {
-    return thumbnailDiskCache.get(res, stat, constraint);
-  }
-
-  void putBitmapToDiskAsync(
-      File res, Stat stat, Rect constraint, Bitmap bitmap) {
-    thumbnailDiskCache.putAsync(res, stat, constraint, bitmap);
-  }
-
-  @Nullable public Rect getSize(File res, Stat stat, Rect constraint) {
-    return sizeCache.get(res, stat, constraint);
-  }
-
-  void putSize(File res, Stat stat, Rect constraint, Rect size) {
-    sizeCache.put(res, stat, constraint, size);
-  }
-
-  @Nullable
-  public Palette getPalette(File res, Stat stat, Rect constraint) {
-    return paletteCache.get(res, stat, constraint);
-  }
-
-  void putPalette(File res, Stat stat, Rect constraint, Palette palette) {
-    paletteCache.put(res, stat, constraint, palette);
-  }
-
-  @Nullable String getMediaType(File res, Stat stat, Rect constraint) {
-    return mediaTypeCache.get(res, stat, constraint);
-  }
-
-  void putMediaType(File res, Stat stat, Rect constraint, String media) {
-    mediaTypeCache.put(res, stat, constraint, media);
-  }
-
-  public boolean isPreviewable(File res, Stat stat, Rect constraint) {
-    return stat.size() > 0
-        && stat.isRegularFile()
-        && isReadable(res)
-        && !TRUE.equals(noPreviewCache.get(res, stat, constraint));
-  }
-
-  void putPreviewable(File res, Stat stat, Rect constraint, boolean previewable) {
-    if (previewable) {
-      noPreviewCache.remove(res, stat, constraint);
-    } else {
-      noPreviewCache.put(res, stat, constraint, true);
-    }
-  }
-
-  private static boolean isReadable(File file) {
-    try {
-      return file.readable();
-    } catch (IOException e) {
-      return false;
-    }
-  }
-
-  @Nullable public Decode set(
-      File res,
-      Stat stat,
-      Rect constraint,
-      PreviewCallback callback) {
-    return DecodeChain.run(res, stat, constraint, callback, this);
-  }
-
-  Rect decodeSize(File res) {
-    log.debug("decode size start %s", res);
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inJustDecodeBounds = true;
-
-    try (InputStream in = res.input()) {
-      decodeStream(in, null, options);
-
-    } catch (Exception e) {
-      log.warn(e);
-      return null;
+    public static Preview get(Context context) {
+        synchronized (Preview.class) {
+            if (instance == null) {
+                instance = new Preview(context);
+                instance.cleanupAsync();
+            }
+        }
+        return instance;
     }
 
-    log.debug("decode size end %s", res);
+    private final PersistenceCache<Rect> sizeCache;
+    private final PersistenceCache<Palette> paletteCache;
+    private final PersistenceCache<String> mediaTypeCache;
+    private final PersistenceCache<Boolean> noPreviewCache;
+    private final ThumbnailMemCache thumbnailMemCache;
+    private final ThumbnailDiskCache thumbnailDiskCache;
 
-    if (options.outWidth > 0 && options.outHeight > 0) {
-      return Rect.of(options.outWidth, options.outHeight);
+    final DisplayMetrics displayMetrics;
+    final File cacheDir;
+    final Context context;
+
+    private Preview(Context context) {
+        this.context = context;
+        this.cacheDir = LocalFile.create(context.getExternalCacheDir());
+        this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
+        this.sizeCache = new RectCache(cacheDir);
+        this.paletteCache = new PaletteCache(cacheDir);
+        this.mediaTypeCache = new MediaTypeCache(cacheDir);
+        this.noPreviewCache = new NoPreviewCache(cacheDir);
+        this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
+        this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
     }
-    return null;
-  }
 
-  static Palette decodePalette(Bitmap bitmap) {
-    return new Palette.Builder(bitmap)
-        .maximumColorCount(PALETTE_MAX_COLOR_COUNT)
-        .generate();
-  }
+    public void writeCacheAsyncIfNeeded() {
+        sizeCache.writeAsyncIfNeeded();
+        paletteCache.writeAsyncIfNeeded();
+        mediaTypeCache.writeAsyncIfNeeded();
+        noPreviewCache.writeAsyncIfNeeded();
+    }
 
-  public void clearBitmapMemCache() {
-    thumbnailMemCache.clear();
-  }
+    public void readCacheAsyncIfNeeded() {
+        sizeCache.readAsyncIfNeeded();
+        paletteCache.readAsyncIfNeeded();
+        mediaTypeCache.readAsyncIfNeeded();
+        noPreviewCache.readAsyncIfNeeded();
+    }
+
+    private void cleanupAsync() {
+        thumbnailDiskCache.cleanupAsync();
+    }
+
+    @Nullable
+    public Bitmap getBitmap(File res, Stat stat, Rect constraint) {
+        return thumbnailMemCache.get(res, stat, constraint);
+    }
+
+    void putBitmap(File res, Stat stat, Rect constraint, Bitmap bitmap) {
+        thumbnailMemCache.put(res, stat, constraint, bitmap);
+    }
+
+    @Nullable
+    Bitmap getBitmapFromDisk(File res, Stat stat, Rect constraint) throws IOException {
+        return thumbnailDiskCache.get(res, stat, constraint);
+    }
+
+    void putBitmapToDiskAsync(
+            File res, Stat stat, Rect constraint, Bitmap bitmap) {
+        thumbnailDiskCache.putAsync(res, stat, constraint, bitmap);
+    }
+
+    @Nullable
+    public Rect getSize(File res, Stat stat, Rect constraint) {
+        return sizeCache.get(res, stat, constraint);
+    }
+
+    void putSize(File res, Stat stat, Rect constraint, Rect size) {
+        sizeCache.put(res, stat, constraint, size);
+    }
+
+    @Nullable
+    public Palette getPalette(File res, Stat stat, Rect constraint) {
+        return paletteCache.get(res, stat, constraint);
+    }
+
+    void putPalette(File res, Stat stat, Rect constraint, Palette palette) {
+        paletteCache.put(res, stat, constraint, palette);
+    }
+
+    @Nullable
+    String getMediaType(File res, Stat stat, Rect constraint) {
+        return mediaTypeCache.get(res, stat, constraint);
+    }
+
+    void putMediaType(File res, Stat stat, Rect constraint, String media) {
+        mediaTypeCache.put(res, stat, constraint, media);
+    }
+
+    public boolean isPreviewable(File res, Stat stat, Rect constraint) {
+        return stat.size() > 0
+                && stat.isRegularFile()
+                && isReadable(res)
+                && !TRUE.equals(noPreviewCache.get(res, stat, constraint));
+    }
+
+    void putPreviewable(File res, Stat stat, Rect constraint, boolean previewable) {
+        if (previewable) {
+            noPreviewCache.remove(res, stat, constraint);
+        } else {
+            noPreviewCache.put(res, stat, constraint, true);
+        }
+    }
+
+    private static boolean isReadable(File file) {
+        try {
+            return file.readable();
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Nullable
+    public Decode set(
+            File res,
+            Stat stat,
+            Rect constraint,
+            PreviewCallback callback) {
+        return DecodeChain.run(res, stat, constraint, callback, this);
+    }
+
+    Rect decodeSize(File res) {
+        log.debug("decode size start %s", res);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+
+        try (InputStream in = res.input()) {
+            decodeStream(in, null, options);
+
+        } catch (Exception e) {
+            log.warn(e);
+            return null;
+        }
+
+        log.debug("decode size end %s", res);
+
+        if (options.outWidth > 0 && options.outHeight > 0) {
+            return Rect.of(options.outWidth, options.outHeight);
+        }
+        return null;
+    }
+
+    static Palette decodePalette(Bitmap bitmap) {
+        return new Palette.Builder(bitmap)
+                .maximumColorCount(PALETTE_MAX_COLOR_COUNT)
+                .generate();
+    }
+
+    public void clearBitmapMemCache() {
+        thumbnailMemCache.clear();
+    }
 
 }

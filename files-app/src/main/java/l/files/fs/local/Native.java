@@ -1,9 +1,7 @@
 package l.files.fs.local;
 
-class Native
-{
-    static
-    {
+class Native {
+    static {
         System.loadLibrary("files");
     }
 }

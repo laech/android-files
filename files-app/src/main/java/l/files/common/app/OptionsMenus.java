@@ -2,15 +2,16 @@ package l.files.common.app;
 
 public final class OptionsMenus {
 
-  public static final OptionsMenu EMPTY = new OptionsMenuAdapter();
+    public static final OptionsMenu EMPTY = new OptionsMenuAdapter();
 
-  private OptionsMenus() {}
+    private OptionsMenus() {
+    }
 
-  public static OptionsMenu nullToEmpty(OptionsMenu menu) {
-    return menu == null ? EMPTY : menu;
-  }
+    public static OptionsMenu nullToEmpty(OptionsMenu menu) {
+        return menu == null ? EMPTY : menu;
+    }
 
-  public static OptionsMenu compose(OptionsMenu... menus) {
-    return new CompositeMenu(menus);
-  }
+    public static OptionsMenu compose(OptionsMenu... menus) {
+        return new CompositeMenu(menus);
+    }
 }

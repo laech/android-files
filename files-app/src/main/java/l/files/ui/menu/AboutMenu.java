@@ -17,21 +17,23 @@ import static java.util.Objects.requireNonNull;
 
 public final class AboutMenu extends OptionsMenuAction {
 
-  private final Context context;
+    private final Context context;
 
-  public AboutMenu(Context context) {
-    super(R.id.about);
-    this.context = requireNonNull(context, "context");
-  }
+    public AboutMenu(Context context) {
+        super(R.id.about);
+        this.context = requireNonNull(context, "context");
+    }
 
-  @Override public void onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    menu.add(NONE, id(), CATEGORY_SECONDARY, R.string.about)
-        .setShowAsAction(SHOW_AS_ACTION_NEVER);
-  }
+    @Override
+    public void onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add(NONE, id(), CATEGORY_SECONDARY, R.string.about)
+                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+    }
 
-  @Override protected void onItemSelected(MenuItem item) {
-    Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
-    context.startActivity(new Intent(ACTION_VIEW, uri));
-  }
+    @Override
+    protected void onItemSelected(MenuItem item) {
+        Uri uri = Uri.parse("market://details?id=" + context.getPackageName());
+        context.startActivity(new Intent(ACTION_VIEW, uri));
+    }
 }

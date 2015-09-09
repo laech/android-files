@@ -1,6 +1,5 @@
 package l.files.ui.mode;
 
-public interface Selectable
-{
+public interface Selectable {
     void selectAll();
 }

@@ -11,11 +11,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.common.testing.Tests.timeout;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class RenameTest extends BaseFilesActivityTest
-{
+public final class RenameTest extends BaseFilesActivityTest {
 
-    public void test_shows_error_when_failed_to_rename() throws Exception
-    {
+    public void test_shows_error_when_failed_to_rename() throws Exception {
         final File file = dir().resolve("a").createFile();
         dir().removePermissions(Permission.write());
         rename(file)
@@ -23,46 +21,39 @@ public final class RenameTest extends BaseFilesActivityTest
                 .okExpectingFailure("Permission denied");
     }
 
-    public void test_renames_file_to_specified_name() throws Throwable
-    {
+    public void test_renames_file_to_specified_name() throws Throwable {
         final File from = dir().resolve("a").createFile();
         final File to = dir().resolve("abc");
 
         rename(from).setFilename(to.name()).ok();
 
-        timeout(1, SECONDS, new Executable()
-        {
+        timeout(1, SECONDS, new Executable() {
             @Override
-            public void execute() throws Exception
-            {
+            public void execute() throws Exception {
                 assertFalse(from.exists(NOFOLLOW));
                 assertTrue(to.exists(NOFOLLOW));
             }
         });
     }
 
-    public void test_highlights_file_base_name_in_dialog() throws Exception
-    {
+    public void test_highlights_file_base_name_in_dialog() throws Exception {
         final File file = dir().resolve("abc.txt").createFile();
         rename(file).assertSelection("abc");
     }
 
-    public void test_uses_filename_as_default_text() throws Exception
-    {
+    public void test_uses_filename_as_default_text() throws Exception {
         final File file = dir().resolve("a").createFile();
         rename(file).assertFilename(file.name());
     }
 
     public void test_disables_ok_button_with_no_error_initially_because_we_use_source_filename_as_suggestion()
-            throws Exception
-    {
+            throws Exception {
         rename(dir().resolve("a").createDirectory())
                 .assertOkButtonEnabled(false)
                 .assertHasNoError();
     }
 
-    public void test_cannot_rename_if_new_name_exists() throws Exception
-    {
+    public void test_cannot_rename_if_new_name_exists() throws Exception {
         dir().resolve("abc").createFile();
         rename(dir().resolve("a").createFile())
 
@@ -76,8 +67,7 @@ public final class RenameTest extends BaseFilesActivityTest
     }
 
     public void test_rename_button_is_disable_if_there_are_more_than_one_file_checked()
-            throws Exception
-    {
+            throws Exception {
         final File f1 = dir().resolve("dir").createDirectory();
         final File f2 = dir().resolve("a").createFile();
 
@@ -90,8 +80,7 @@ public final class RenameTest extends BaseFilesActivityTest
                 .assertCanRename(true);
     }
 
-    private UiRename rename(final File file)
-    {
+    private UiRename rename(final File file) {
         return screen().longClick(file).rename();
     }
 }

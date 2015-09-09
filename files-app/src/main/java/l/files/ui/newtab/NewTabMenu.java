@@ -18,27 +18,23 @@ import static java.util.Objects.requireNonNull;
 /**
  * Menu to open a new tab to view files.
  */
-public final class NewTabMenu extends OptionsMenuAction
-{
+public final class NewTabMenu extends OptionsMenuAction {
     private final Context context;
 
-    public NewTabMenu(final Context context)
-    {
+    public NewTabMenu(final Context context) {
         super(R.id.new_tab);
         this.context = requireNonNull(context, "context");
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu)
-    {
+    public void onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(NONE, id(), NONE, R.string.new_tab)
                 .setShowAsAction(SHOW_AS_ACTION_NEVER);
     }
 
     @Override
-    protected void onItemSelected(final MenuItem item)
-    {
+    protected void onItemSelected(final MenuItem item) {
         final int flags
                 = FLAG_ACTIVITY_NEW_DOCUMENT
                 | FLAG_ACTIVITY_MULTIPLE_TASK;

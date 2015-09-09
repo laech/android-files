@@ -8,29 +8,31 @@ import l.files.fs.File;
 
 class Count extends AbstractOperation {
 
-  private final AtomicInteger count = new AtomicInteger();
+    private final AtomicInteger count = new AtomicInteger();
 
-  Count(Collection<? extends File> resources) {
-    super(resources);
-  }
+    Count(Collection<? extends File> resources) {
+        super(resources);
+    }
 
-  public int getCount() {
-    return count.get();
-  }
+    public int getCount() {
+        return count.get();
+    }
 
-  @Override void process(File file) {
-    traverse(file, new OperationVisitor() {
+    @Override
+    void process(File file) {
+        traverse(file, new OperationVisitor() {
 
-      @Override public Result onPreVisit(File res) throws IOException {
-        count.incrementAndGet();
-        onCount(res);
-        return super.onPreVisit(res);
-      }
+            @Override
+            public Result onPreVisit(File res) throws IOException {
+                count.incrementAndGet();
+                onCount(res);
+                return super.onPreVisit(res);
+            }
 
-    });
-  }
+        });
+    }
 
-  void onCount(File file) {
-  }
+    void onCount(File file) {
+    }
 
 }

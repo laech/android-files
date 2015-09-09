@@ -13,32 +13,28 @@ import l.files.ui.selection.Selection;
 
 import static java.util.Objects.requireNonNull;
 
-public final class CutAction extends ActionModeItem
-{
+public final class CutAction extends ActionModeItem {
 
     private final ClipboardManager manager;
     private final Selection<File> selection;
 
     public CutAction(
             final ClipboardManager manager,
-            final Selection<File> selection)
-    {
+            final Selection<File> selection) {
         super(android.R.id.cut);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "provider");
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
-    {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
         super.onCreateActionMode(mode, menu);
         mode.getMenuInflater().inflate(R.menu.cut, menu);
         return true;
     }
 
     @Override
-    protected void onItemSelected(final ActionMode mode, final MenuItem item)
-    {
+    protected void onItemSelected(final ActionMode mode, final MenuItem item) {
         Clipboards.setCut(manager, selection.copy());
         mode.finish();
     }

@@ -46,285 +46,301 @@ import static l.files.ui.IOExceptions.message;
 import static l.files.ui.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity implements
-    OnBackStackChangedListener,
-    OnItemSelectedListener,
-    OnOpenFileListener {
+        OnBackStackChangedListener,
+        OnItemSelectedListener,
+        OnOpenFileListener {
 
-  private static final Logger log = Logger.get(FilesActivity.class);
+    private static final Logger log = Logger.get(FilesActivity.class);
 
-  public static final String EXTRA_DIRECTORY = "directory";
+    public static final String EXTRA_DIRECTORY = "directory";
 
-  private DrawerLayout drawer;
-  private DrawerListener drawerListener;
+    private DrawerLayout drawer;
+    private DrawerListener drawerListener;
 
-  private HierarchyAdapter hierarchy;
-  private Toolbar toolbar;
-  private Spinner title;
+    private HierarchyAdapter hierarchy;
+    private Toolbar toolbar;
+    private Spinner title;
 
-  public List<File> hierarchy() {
-    return hierarchy.get();
-  }
-
-  public Spinner title() {
-    return title;
-  }
-
-  public Toolbar toolbar() {
-    return toolbar;
-  }
-
-  @Override protected void onCreate(Bundle state) {
-    super.onCreate(state);
-    setContentView(R.layout.files_activity);
-    Preview.get(this).readCacheAsyncIfNeeded();
-
-    toolbar = find(R.id.toolbar, this);
-    hierarchy = new HierarchyAdapter();
-    title = find(R.id.title, this);
-    title.setAdapter(hierarchy);
-    title.setOnItemSelectedListener(this);
-
-    drawer = find(R.id.drawer_layout, this);
-    drawerListener = new DrawerListener();
-
-    drawer.setDrawerListener(drawerListener);
-
-    setActionBar(toolbar);
-    ActionBar actionBar = getActionBar();
-    assert actionBar != null;
-    actionBar.setDisplayHomeAsUpEnabled(true);
-    actionBar.setDisplayShowTitleEnabled(false);
-
-    setOptionsMenu(OptionsMenus.compose(
-        new ActionBarDrawerToggleAction(drawer, getFragmentManager()),
-        new GoBackOnHomePressedAction(this),
-        new NewTabMenu(this),
-        new AboutMenu(this)));
-
-    getFragmentManager().addOnBackStackChangedListener(this);
-
-    if (state == null) {
-      getFragmentManager()
-          .beginTransaction()
-          .replace(
-              R.id.content,
-              FilesFragment.create(initialDirectory()),
-              FilesFragment.TAG)
-          .commit();
+    public List<File> hierarchy() {
+        return hierarchy.get();
     }
 
-    new Handler().post(new Runnable() {
-      @Override public void run() {
+    public Spinner title() {
+        return title;
+    }
+
+    public Toolbar toolbar() {
+        return toolbar;
+    }
+
+    @Override
+    protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        setContentView(R.layout.files_activity);
+        Preview.get(this).readCacheAsyncIfNeeded();
+
+        toolbar = find(R.id.toolbar, this);
+        hierarchy = new HierarchyAdapter();
+        title = find(R.id.title, this);
+        title.setAdapter(hierarchy);
+        title.setOnItemSelectedListener(this);
+
+        drawer = find(R.id.drawer_layout, this);
+        drawerListener = new DrawerListener();
+
+        drawer.setDrawerListener(drawerListener);
+
+        setActionBar(toolbar);
+        ActionBar actionBar = getActionBar();
+        assert actionBar != null;
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(false);
+
+        setOptionsMenu(OptionsMenus.compose(
+                new ActionBarDrawerToggleAction(drawer, getFragmentManager()),
+                new GoBackOnHomePressedAction(this),
+                new NewTabMenu(this),
+                new AboutMenu(this)));
+
+        getFragmentManager().addOnBackStackChangedListener(this);
+
+        if (state == null) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(
+                            R.id.content,
+                            FilesFragment.create(initialDirectory()),
+                            FilesFragment.TAG)
+                    .commit();
+        }
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                updateToolBar();
+            }
+        });
+    }
+
+    @Override
+    public void onItemSelected(
+            AdapterView<?> parent, View view, int position, long id) {
+        log.debug("onItemSelected");
+        File item = (File) parent.getAdapter().getItem(position);
+        if (!Objects.equals(item, fragment().directory())) {
+            open(item);
+        } else {
+            log.debug("Already show requested directory.");
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
+    @Override
+    protected void onDestroy() {
+        getFragmentManager().removeOnBackStackChangedListener(this);
+        super.onDestroy();
+    }
+
+    private File initialDirectory() {
+        File dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+        return dir == null ? DIR_HOME : dir;
+    }
+
+    @Override
+    protected void onPause() {
+        Preview.get(this).writeCacheAsyncIfNeeded();
+        super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSidebarOpen()) {
+            closeSidebar();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onBackStackChanged() {
         updateToolBar();
-      }
-    });
-  }
-
-  @Override public void onItemSelected(
-      AdapterView<?> parent, View view, int position, long id) {
-    log.debug("onItemSelected");
-    File item = (File) parent.getAdapter().getItem(position);
-    if (!Objects.equals(item, fragment().directory())) {
-      open(item);
-    } else {
-      log.debug("Already show requested directory.");
     }
-  }
 
-  @Override public void onNothingSelected(AdapterView<?> parent) {
-  }
-
-  @Override protected void onDestroy() {
-    getFragmentManager().removeOnBackStackChangedListener(this);
-    super.onDestroy();
-  }
-
-  private File initialDirectory() {
-    File dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
-    return dir == null ? DIR_HOME : dir;
-  }
-
-  @Override protected void onPause() {
-    Preview.get(this).writeCacheAsyncIfNeeded();
-    super.onPause();
-  }
-
-  @Override public void onBackPressed() {
-    if (isSidebarOpen()) {
-      closeSidebar();
-    } else {
-      super.onBackPressed();
+    private void updateToolBar() {
+        FilesFragment fragment = fragment();
+        int backStacks = getFragmentManager().getBackStackEntryCount();
+        if (backStacks == 0) {
+            toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+        } else {
+            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+        }
+        hierarchy.set(fragment.directory());
+        title.setSelection(hierarchy.indexOf(fragment().directory()));
     }
-  }
 
-  @Override public void onBackStackChanged() {
-    updateToolBar();
-  }
-
-  private void updateToolBar() {
-    FilesFragment fragment = fragment();
-    int backStacks = getFragmentManager().getBackStackEntryCount();
-    if (backStacks == 0) {
-      toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
-    } else {
-      toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KEYCODE_BACK) {
+            while (getFragmentManager().getBackStackEntryCount() > 0) {
+                getFragmentManager().popBackStackImmediate();
+            }
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
     }
-    hierarchy.set(fragment.directory());
-    title.setSelection(hierarchy.indexOf(fragment().directory()));
-  }
 
-  @Override
-  public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-    if (keyCode == KEYCODE_BACK) {
-      while (getFragmentManager().getBackStackEntryCount() > 0) {
-        getFragmentManager().popBackStackImmediate();
-      }
-      return true;
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
+        super.onActionModeFinished(mode);
+        log.debug("onActionModeFinished");
+        drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
     }
-    return super.onKeyLongPress(keyCode, event);
-  }
 
-  @Override public void onActionModeFinished(ActionMode mode) {
-    super.onActionModeFinished(mode);
-    log.debug("onActionModeFinished");
-    drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
-  }
+    @Override
+    public void onActionModeStarted(ActionMode mode) {
+        super.onActionModeStarted(mode);
 
-  @Override public void onActionModeStarted(ActionMode mode) {
-    super.onActionModeStarted(mode);
-
-    if (isSidebarOpen()) {
-      drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
-    } else {
-      drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+        if (isSidebarOpen()) {
+            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
+        } else {
+            drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
+        }
     }
-  }
 
-  @Override public ActionMode startActionMode(ActionMode.Callback callback) {
-    log.debug("startActionMode");
-    return super.startActionMode(callback);
-  }
-
-  private boolean isSidebarOpen() {
-    return drawer.isDrawerOpen(START);
-  }
-
-  private void closeSidebar() {
-    drawer.closeDrawer(START);
-  }
-
-  public DrawerLayout drawerLayout() {
-    return drawer;
-  }
-
-  @Override public void onOpen(File file) {
-    log.debug("onOpen(%s)", file);
-    ActionMode mode = currentActionMode();
-    if (mode != null) {
-      mode.finish();
+    @Override
+    public ActionMode startActionMode(ActionMode.Callback callback) {
+        log.debug("startActionMode");
+        return super.startActionMode(callback);
     }
-    open(file);
-  }
 
-  private void open(final File file) {
-    log.debug("open(%s)", file);
-    closeDrawerThenRun(new Runnable() {
-      @Override public void run() {
-        show(file);
-      }
-    });
-  }
-
-  private void closeDrawerThenRun(Runnable runnable) {
-    if (drawer.isDrawerOpen(START)) {
-      drawerListener.mRunOnClosed = runnable;
-      drawer.closeDrawers();
-    } else {
-      runnable.run();
+    private boolean isSidebarOpen() {
+        return drawer.isDrawerOpen(START);
     }
-  }
 
-  private void show(final File file) {
-    new AsyncTask<Void, Void, Object>() {
-      @Override protected Object doInBackground(Void... params) {
+    private void closeSidebar() {
+        drawer.closeDrawer(START);
+    }
+
+    public DrawerLayout drawerLayout() {
+        return drawer;
+    }
+
+    @Override
+    public void onOpen(File file) {
+        log.debug("onOpen(%s)", file);
+        ActionMode mode = currentActionMode();
+        if (mode != null) {
+            mode.finish();
+        }
+        open(file);
+    }
+
+    private void open(final File file) {
+        log.debug("open(%s)", file);
+        closeDrawerThenRun(new Runnable() {
+            @Override
+            public void run() {
+                show(file);
+            }
+        });
+    }
+
+    private void closeDrawerThenRun(Runnable runnable) {
+        if (drawer.isDrawerOpen(START)) {
+            drawerListener.mRunOnClosed = runnable;
+            drawer.closeDrawers();
+        } else {
+            runnable.run();
+        }
+    }
+
+    private void show(final File file) {
+        new AsyncTask<Void, Void, Object>() {
+            @Override
+            protected Object doInBackground(Void... params) {
+                try {
+                    return file.stat(FOLLOW);
+                } catch (IOException e) {
+                    log.debug(e, "%s", file);
+                    return e;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                super.onPostExecute(result);
+                if (!isDestroyed() && !isFinishing()) {
+                    if (result instanceof Stat) {
+                        show(file, (Stat) result);
+                    } else {
+                        String msg = message((IOException) result);
+                        makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }.execute();
+    }
+
+    private void show(File file, Stat stat) {
+        if (!isReadable(file)) { // TODO Check in background
+            showPermissionDenied();
+        } else if (stat.isDirectory()) {
+            showDirectory(file);
+        } else {
+            showFile(file);
+        }
+    }
+
+    private boolean isReadable(File file) {
         try {
-          return file.stat(FOLLOW);
+            return file.readable();
         } catch (IOException e) {
-          log.debug(e, "%s", file);
-          return e;
+            return false;
         }
-      }
+    }
 
-      @Override protected void onPostExecute(Object result) {
-        super.onPostExecute(result);
-        if (!isDestroyed() && !isFinishing()) {
-          if (result instanceof Stat) {
-            show(file, (Stat) result);
-          } else {
-            String msg = message((IOException) result);
-            makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
-          }
+    private void showPermissionDenied() {
+        makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
+    }
+
+    private void showDirectory(File file) {
+        FilesFragment fragment = fragment();
+        if (fragment.directory().equals(file)) {
+            return;
         }
-      }
-    }.execute();
-  }
-
-  private void show(File file, Stat stat) {
-    if (!isReadable(file)) { // TODO Check in background
-      showPermissionDenied();
-    } else if (stat.isDirectory()) {
-      showDirectory(file);
-    } else {
-      showFile(file);
+        FilesFragment f = FilesFragment.create(file);
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content, f, FilesFragment.TAG)
+                .addToBackStack(null)
+                .setBreadCrumbTitle(file.name())
+                .setTransition(TRANSIT_FRAGMENT_OPEN)
+                .commit();
     }
-  }
 
-  private boolean isReadable(File file) {
-    try {
-      return file.readable();
-    } catch (IOException e) {
-      return false;
+    private void showFile(File file) {
+        FileOpener.get(this).apply(file);
     }
-  }
 
-  private void showPermissionDenied() {
-    makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
-  }
-
-  private void showDirectory(File file) {
-    FilesFragment fragment = fragment();
-    if (fragment.directory().equals(file)) {
-      return;
+    public FilesFragment fragment() {
+        return (FilesFragment) getFragmentManager()
+                .findFragmentByTag(FilesFragment.TAG);
     }
-    FilesFragment f = FilesFragment.create(file);
-    getFragmentManager()
-        .beginTransaction()
-        .replace(R.id.content, f, FilesFragment.TAG)
-        .addToBackStack(null)
-        .setBreadCrumbTitle(file.name())
-        .setTransition(TRANSIT_FRAGMENT_OPEN)
-        .commit();
-  }
 
-  private void showFile(File file) {
-    FileOpener.get(this).apply(file);
-  }
+    private static class DrawerListener extends SimpleDrawerListener {
 
-  public FilesFragment fragment() {
-    return (FilesFragment) getFragmentManager()
-        .findFragmentByTag(FilesFragment.TAG);
-  }
+        Runnable mRunOnClosed;
 
-  private static class DrawerListener extends SimpleDrawerListener {
-
-    Runnable mRunOnClosed;
-
-    @Override public void onDrawerClosed(View drawerView) {
-      super.onDrawerClosed(drawerView);
-      if (mRunOnClosed != null) {
-        mRunOnClosed.run();
-        mRunOnClosed = null;
-      }
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            super.onDrawerClosed(drawerView);
+            if (mRunOnClosed != null) {
+                mRunOnClosed.run();
+                mRunOnClosed = null;
+            }
+        }
     }
-  }
 }

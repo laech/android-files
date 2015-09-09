@@ -8,27 +8,29 @@ import l.files.fs.Stat;
 
 abstract class MemCache<V> extends Cache<V> {
 
-  @Override V get(File res, Stat stat, Rect constraint) {
-    Snapshot<V> value = delegate().get(key(res, stat, constraint));
-    if (value == null) {
-      return null;
+    @Override
+    V get(File res, Stat stat, Rect constraint) {
+        Snapshot<V> value = delegate().get(key(res, stat, constraint));
+        if (value == null) {
+            return null;
+        }
+        if (!value.time().equals(stat.lastModifiedTime())) {
+            return null;
+        }
+        return value.get();
     }
-    if (!value.time().equals(stat.lastModifiedTime())) {
-      return null;
+
+    @Override
+    Snapshot<V> put(File res, Stat stat, Rect constraint, V value) {
+        return delegate().put(key(res, stat, constraint), Snapshot.of(value, stat.lastModifiedTime()));
     }
-    return value.get();
-  }
 
-  @Override Snapshot<V> put(File res, Stat stat, Rect constraint, V value) {
-    return delegate().put(key(res, stat, constraint), Snapshot.of(value, stat.lastModifiedTime()));
-  }
+    Snapshot<V> remove(File res, Stat stat, Rect constraint) {
+        return delegate().remove(key(res, stat, constraint));
+    }
 
-  Snapshot<V> remove(File res, Stat stat, Rect constraint) {
-    return delegate().remove(key(res, stat, constraint));
-  }
+    abstract String key(File res, Stat stat, Rect constraint);
 
-  abstract String key(File res, Stat stat, Rect constraint);
-
-  abstract LruCache<String, Snapshot<V>> delegate();
+    abstract LruCache<String, Snapshot<V>> delegate();
 
 }

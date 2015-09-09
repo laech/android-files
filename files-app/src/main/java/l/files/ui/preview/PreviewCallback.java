@@ -8,12 +8,12 @@ import l.files.fs.File;
 
 public interface PreviewCallback {
 
-  void onSizeAvailable(File item, Rect size);
+    void onSizeAvailable(File item, Rect size);
 
-  void onPaletteAvailable(File item, Palette palette);
+    void onPaletteAvailable(File item, Palette palette);
 
-  void onPreviewAvailable(File item, Bitmap bitmap);
+    void onPreviewAvailable(File item, Bitmap bitmap);
 
-  void onPreviewFailed(File item);
+    void onPreviewFailed(File item);
 
 }

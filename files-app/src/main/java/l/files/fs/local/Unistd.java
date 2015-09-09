@@ -5,11 +5,9 @@ import android.system.ErrnoException;
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/unistd.h.html">unistd.h</a>
  */
-final class Unistd extends Native
-{
+final class Unistd extends Native {
 
-    private Unistd()
-    {
+    private Unistd() {
     }
 
     /**

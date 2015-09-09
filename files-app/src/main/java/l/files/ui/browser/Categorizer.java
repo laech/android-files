@@ -10,16 +10,13 @@ import l.files.ui.browser.FileListItem.File;
 /**
  * Provides category information for items in cursors.
  */
-interface Categorizer
-{
+interface Categorizer {
     /**
      * Always return null categories.
      */
-    Categorizer NULL = new Categorizer()
-    {
+    Categorizer NULL = new Categorizer() {
         @Override
-        public Object id(final File file)
-        {
+        public Object id(final File file) {
             return null;
         }
 
@@ -27,16 +24,14 @@ interface Categorizer
         public String label(
                 final File file,
                 final Resources res,
-                final Object id)
-        {
+                final Object id) {
             return null;
         }
 
         @Override
         public List<FileListItem> categorize(
                 final Resources res,
-                final List<File> items)
-        {
+                final List<File> items) {
             return Collections.<FileListItem>unmodifiableList(items);
         }
     };

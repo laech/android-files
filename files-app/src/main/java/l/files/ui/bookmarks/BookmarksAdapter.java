@@ -22,59 +22,65 @@ import static l.files.ui.Icons.directoryIconStringId;
 
 final class BookmarksAdapter extends StableAdapter<File, BookmarksAdapter.Holder> {
 
-  private final ActionModeProvider actionModeProvider;
-  private final ActionMode.Callback actionModeCallback;
-  private final Selection<File> selection;
-  private final OnOpenFileListener listener;
+    private final ActionModeProvider actionModeProvider;
+    private final ActionMode.Callback actionModeCallback;
+    private final Selection<File> selection;
+    private final OnOpenFileListener listener;
 
-  BookmarksAdapter(
-      Selection<File> selection,
-      ActionModeProvider actionModeProvider,
-      ActionMode.Callback actionModeCallback,
-      OnOpenFileListener listener) {
-    this.listener = requireNonNull(listener, "listener");
-    this.selection = requireNonNull(selection, "selection");
-    this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
-    this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
-  }
-
-  @Override public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-    LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-    View view = inflater.inflate(R.layout.bookmark_item, parent, false);
-    return new Holder(view);
-  }
-
-  @Override public void onBindViewHolder(Holder holder, int position) {
-    holder.bind(getItem(position));
-  }
-
-  @Override public File getItemIdObject(int position) {
-    return getItem(position);
-  }
-
-  class Holder extends SelectionModeViewHolder<File, File> {
-    TextView title;
-    TextView icon;
-
-    Holder(View itemView) {
-      super(itemView, selection, actionModeProvider, actionModeCallback);
-      title = find(android.R.id.title, this);
-      icon = find(android.R.id.icon, this);
-      icon.setTypeface(Icons.font(itemView.getResources().getAssets()));
+    BookmarksAdapter(
+            Selection<File> selection,
+            ActionModeProvider actionModeProvider,
+            ActionMode.Callback actionModeCallback,
+            OnOpenFileListener listener) {
+        this.listener = requireNonNull(listener, "listener");
+        this.selection = requireNonNull(selection, "selection");
+        this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
+        this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
     }
 
-    @Override protected File itemId(File file) {
-      return file;
+    @Override
+    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(R.layout.bookmark_item, parent, false);
+        return new Holder(view);
     }
 
-    @Override public void bind(File file) {
-      super.bind(file);
-      title.setText(FileLabels.get(title.getResources(), file));
-      icon.setText(directoryIconStringId(file));
+    @Override
+    public void onBindViewHolder(Holder holder, int position) {
+        holder.bind(getItem(position));
     }
 
-    @Override protected void onClick(View v, File item) {
-      listener.onOpen(item);
+    @Override
+    public File getItemIdObject(int position) {
+        return getItem(position);
     }
-  }
+
+    class Holder extends SelectionModeViewHolder<File, File> {
+        TextView title;
+        TextView icon;
+
+        Holder(View itemView) {
+            super(itemView, selection, actionModeProvider, actionModeCallback);
+            title = find(android.R.id.title, this);
+            icon = find(android.R.id.icon, this);
+            icon.setTypeface(Icons.font(itemView.getResources().getAssets()));
+        }
+
+        @Override
+        protected File itemId(File file) {
+            return file;
+        }
+
+        @Override
+        public void bind(File file) {
+            super.bind(file);
+            title.setText(FileLabels.get(title.getResources(), file));
+            icon.setText(directoryIconStringId(file));
+        }
+
+        @Override
+        protected void onClick(View v, File item) {
+            listener.onOpen(item);
+        }
+    }
 }

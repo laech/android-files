@@ -10,13 +10,13 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class TaskNotFound {
 
-  TaskNotFound() {
-  }
+    TaskNotFound() {
+    }
 
-  public abstract int getTaskId();
+    public abstract int getTaskId();
 
-  public static TaskNotFound create(int id) {
-    return new AutoValue_TaskNotFound(id);
-  }
+    public static TaskNotFound create(int id) {
+        return new AutoValue_TaskNotFound(id);
+    }
 
 }

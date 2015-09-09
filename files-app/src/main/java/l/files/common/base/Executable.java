@@ -1,6 +1,5 @@
 package l.files.common.base;
 
-public interface Executable
-{
+public interface Executable {
     void execute() throws Exception;
 }

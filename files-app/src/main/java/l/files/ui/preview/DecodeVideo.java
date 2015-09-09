@@ -9,21 +9,22 @@ import l.files.fs.Stat;
 
 final class DecodeVideo extends DecodeMedia {
 
-  DecodeVideo(
-      File res,
-      Stat stat,
-      Rect constraint,
-      PreviewCallback callback,
-      Preview context) {
-    super(res, stat, constraint, callback, context);
-  }
+    DecodeVideo(
+            File res,
+            Stat stat,
+            Rect constraint,
+            PreviewCallback callback,
+            Preview context) {
+        super(res, stat, constraint, callback, context);
+    }
 
-  static boolean isVideo(String media) {
-    return media.startsWith("video/");
-  }
+    static boolean isVideo(String media) {
+        return media.startsWith("video/");
+    }
 
-  @Override Bitmap decode(MediaMetadataRetriever retriever) {
-    return retriever.getFrameAtTime();
-  }
+    @Override
+    Bitmap decode(MediaMetadataRetriever retriever) {
+        return retriever.getFrameAtTime();
+    }
 
 }

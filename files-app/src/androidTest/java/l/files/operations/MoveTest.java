@@ -11,63 +11,64 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class MoveTest extends PasteTest {
 
-  public void testMovedCountInitialZero() throws Exception {
-    File src = dir1().resolve("a").createFile();
-    File dstDir = dir1().resolve("b").createDirectory();
-    Move move = create(src, dstDir);
-    assertEquals(move.getMovedItemCount(), 0);
-  }
-
-  public void testMovesSymlink() throws Exception {
-    File target = dir1().resolve("target").createFile();
-    File link = dir1().resolve("link").createLink(target);
-
-    Move move = create(link, dir1().resolve("moved").createDirectory());
-    move.execute();
-
-    File actual = dir1().resolve("moved/link").readLink();
-    assertEquals(target, actual);
-    assertEquals(1, move.getMovedItemCount());
-  }
-
-  public void testMovesFile() throws Exception {
-    File srcFile = dir1().resolve("a.txt").createFile();
-    File dstDir = dir1().resolve("dst").createDirectory();
-    File dstFile = dstDir.resolve("a.txt");
-    try (Writer out = srcFile.writer(UTF_8)) {
-      out.write("Test");
-    }
-    Move move = create(srcFile, dstDir);
-    move.execute();
-
-    assertFalse(srcFile.exists(NOFOLLOW));
-    assertEquals("Test", dstFile.readString(UTF_8));
-    assertEquals(move.getMovedItemCount(), 1);
-  }
-
-  public void testMovesDirectory() throws Exception {
-    File srcDir = dir1().resolve("a").createDirectory();
-    File dstDir = dir1().resolve("dst").createDirectory();
-    File srcFile = srcDir.resolve("test.txt");
-    File dstFile = dstDir.resolve("a/test.txt");
-    try (Writer out = srcFile.writer(UTF_8)) {
-      out.write("Test");
+    public void testMovedCountInitialZero() throws Exception {
+        File src = dir1().resolve("a").createFile();
+        File dstDir = dir1().resolve("b").createDirectory();
+        Move move = create(src, dstDir);
+        assertEquals(move.getMovedItemCount(), 0);
     }
 
-    Move move = create(srcDir, dstDir);
-    move.execute();
+    public void testMovesSymlink() throws Exception {
+        File target = dir1().resolve("target").createFile();
+        File link = dir1().resolve("link").createLink(target);
 
-    assertFalse(srcDir.exists(NOFOLLOW));
-    assertEquals("Test", dstFile.readString(UTF_8));
-    assertEquals(move.getMovedItemCount(), 1);
-  }
+        Move move = create(link, dir1().resolve("moved").createDirectory());
+        move.execute();
 
-  @Override Move create(Collection<File> sources, File dstDir) {
-    return new Move(sources, dstDir);
-  }
+        File actual = dir1().resolve("moved/link").readLink();
+        assertEquals(target, actual);
+        assertEquals(1, move.getMovedItemCount());
+    }
 
-  private Move create(File src, File dstDir) {
-    return create(singleton(src), dstDir);
-  }
+    public void testMovesFile() throws Exception {
+        File srcFile = dir1().resolve("a.txt").createFile();
+        File dstDir = dir1().resolve("dst").createDirectory();
+        File dstFile = dstDir.resolve("a.txt");
+        try (Writer out = srcFile.writer(UTF_8)) {
+            out.write("Test");
+        }
+        Move move = create(srcFile, dstDir);
+        move.execute();
+
+        assertFalse(srcFile.exists(NOFOLLOW));
+        assertEquals("Test", dstFile.readString(UTF_8));
+        assertEquals(move.getMovedItemCount(), 1);
+    }
+
+    public void testMovesDirectory() throws Exception {
+        File srcDir = dir1().resolve("a").createDirectory();
+        File dstDir = dir1().resolve("dst").createDirectory();
+        File srcFile = srcDir.resolve("test.txt");
+        File dstFile = dstDir.resolve("a/test.txt");
+        try (Writer out = srcFile.writer(UTF_8)) {
+            out.write("Test");
+        }
+
+        Move move = create(srcDir, dstDir);
+        move.execute();
+
+        assertFalse(srcDir.exists(NOFOLLOW));
+        assertEquals("Test", dstFile.readString(UTF_8));
+        assertEquals(move.getMovedItemCount(), 1);
+    }
+
+    @Override
+    Move create(Collection<File> sources, File dstDir) {
+        return new Move(sources, dstDir);
+    }
+
+    private Move create(File src, File dstDir) {
+        return create(singleton(src), dstDir);
+    }
 
 }

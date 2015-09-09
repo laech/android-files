@@ -14,52 +14,54 @@ import static android.graphics.BitmapFactory.decodeStream;
 
 final class DecodeImage extends DecodeBitmap {
 
-  DecodeImage(
-      File res,
-      Stat stat,
-      Rect constraint,
-      PreviewCallback callback,
-      Preview context) {
-    super(res, stat, constraint, callback, context);
-  }
-
-  static boolean isImage(String media) {
-    return media.startsWith("image/");
-  }
-
-  @Override DecodeImage executeOnPreferredExecutor() {
-    return (DecodeImage) executeOnExecutor(THREAD_POOL_EXECUTOR);
-  }
-
-  @Override Result decode() throws IOException {
-    Rect size = context.getSize(res, stat, constraint);
-    if (size == null) {
-      size = context.decodeSize(res);
-      if (size != null) {
-        publishProgress(size);
-      }
+    DecodeImage(
+            File res,
+            Stat stat,
+            Rect constraint,
+            PreviewCallback callback,
+            Preview context) {
+        super(res, stat, constraint, callback, context);
     }
 
-    if (isCancelled()) {
-      return null;
+    static boolean isImage(String media) {
+        return media.startsWith("image/");
     }
 
-    if (size == null) {
-      return null;
+    @Override
+    DecodeImage executeOnPreferredExecutor() {
+        return (DecodeImage) executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
-    try (InputStream in = res.input()) {
-      Bitmap bitmap = decodeStream(in, null, options(size));
-      return bitmap != null ? new Result(bitmap, size) : null;
-    }
-  }
+    @Override
+    Result decode() throws IOException {
+        Rect size = context.getSize(res, stat, constraint);
+        if (size == null) {
+            size = context.decodeSize(res);
+            if (size != null) {
+                publishProgress(size);
+            }
+        }
 
-  private Options options(Rect original) {
-    Rect scaled = original.scale(constraint);
-    float scale = scaled.width() / (float) original.width();
-    Options options = new Options();
-    options.inSampleSize = (int) (1 / scale);
-    return options;
-  }
+        if (isCancelled()) {
+            return null;
+        }
+
+        if (size == null) {
+            return null;
+        }
+
+        try (InputStream in = res.input()) {
+            Bitmap bitmap = decodeStream(in, null, options(size));
+            return bitmap != null ? new Result(bitmap, size) : null;
+        }
+    }
+
+    private Options options(Rect original) {
+        Rect scaled = original.scale(constraint);
+        float scale = scaled.width() / (float) original.width();
+        Options options = new Options();
+        options.inSampleSize = (int) (1 / scale);
+        return options;
+    }
 
 }

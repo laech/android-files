@@ -12,44 +12,44 @@ import static junit.framework.Assert.fail;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 
 public final class UiSort {
-  
-  private final UiFileActivity context;
 
-  public UiSort(UiFileActivity context) {
-    requireNonNull(context);
-    this.context = context;
-  }
+    private final UiFileActivity context;
 
-  public UiFileActivity by(final FileSort sort) {
-    awaitOnMainThread(context.instrumentation(), new Runnable() {
-      @Override
-      public void run() {
-        ListView list = listView();
-        for (int i = 0; i < list.getChildCount(); i++) {
-          FileSort that = (FileSort) list.getItemAtPosition(i);
-          if (that == sort) {
-            list.performItemClick(list.getChildAt(i), i, i);
-            return;
-          }
-        }
-        fail();
-      }
-    });
-    return context;
-  }
+    public UiSort(UiFileActivity context) {
+        requireNonNull(context);
+        this.context = context;
+    }
 
-  private ListView listView() {
-    return (ListView) dialog().findViewById(android.R.id.list);
-  }
+    public UiFileActivity by(final FileSort sort) {
+        awaitOnMainThread(context.instrumentation(), new Runnable() {
+            @Override
+            public void run() {
+                ListView list = listView();
+                for (int i = 0; i < list.getChildCount(); i++) {
+                    FileSort that = (FileSort) list.getItemAtPosition(i);
+                    if (that == sort) {
+                        list.performItemClick(list.getChildAt(i), i, i);
+                        return;
+                    }
+                }
+                fail();
+            }
+        });
+        return context;
+    }
 
-  private Dialog dialog() {
-    SortDialog fragment = (SortDialog) context
-        .activity()
-        .getFragmentManager()
-        .findFragmentByTag(SortDialog.FRAGMENT_TAG);
-    assertNotNull(fragment);
-    Dialog dialog = fragment.getDialog();
-    assertNotNull(dialog);
-    return dialog;
-  }
+    private ListView listView() {
+        return (ListView) dialog().findViewById(android.R.id.list);
+    }
+
+    private Dialog dialog() {
+        SortDialog fragment = (SortDialog) context
+                .activity()
+                .getFragmentManager()
+                .findFragmentByTag(SortDialog.FRAGMENT_TAG);
+        assertNotNull(fragment);
+        Dialog dialog = fragment.getDialog();
+        assertNotNull(dialog);
+        return dialog;
+    }
 }

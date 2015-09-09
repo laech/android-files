@@ -7,24 +7,26 @@ import android.view.MenuItem;
 
 public class BaseListFragment extends ListFragment {
 
-  private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
+    private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 
-  public final void setOptionsMenu(OptionsMenu menu) {
-    optionsMenu = OptionsMenus.nullToEmpty(menu);
-  }
+    public final void setOptionsMenu(OptionsMenu menu) {
+        optionsMenu = OptionsMenus.nullToEmpty(menu);
+    }
 
-  @Override
-  public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    super.onCreateOptionsMenu(menu, inflater);
-    optionsMenu.onCreateOptionsMenu(menu);
-  }
+    @Override
+    public final void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        optionsMenu.onCreateOptionsMenu(menu);
+    }
 
-  @Override public final void onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    optionsMenu.onPrepareOptionsMenu(menu);
-  }
+    @Override
+    public final void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        optionsMenu.onPrepareOptionsMenu(menu);
+    }
 
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    return optionsMenu.onOptionsItemSelected(item);
-  }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return optionsMenu.onOptionsItemSelected(item);
+    }
 }

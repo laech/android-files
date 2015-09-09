@@ -12,21 +12,21 @@ import android.view.MenuItem;
  * exists outside of an activity or fragment.
  */
 public interface OptionsMenu {
-  /**
-   * @see Activity#onCreateOptionsMenu(Menu)
-   * @see Fragment#onCreateOptionsMenu(Menu, MenuInflater)
-   */
-  void onCreateOptionsMenu(Menu menu);
+    /**
+     * @see Activity#onCreateOptionsMenu(Menu)
+     * @see Fragment#onCreateOptionsMenu(Menu, MenuInflater)
+     */
+    void onCreateOptionsMenu(Menu menu);
 
-  /**
-   * @see Activity#onPrepareOptionsMenu(Menu)
-   * @see Fragment#onPrepareOptionsMenu(Menu)
-   */
-  void onPrepareOptionsMenu(Menu menu);
+    /**
+     * @see Activity#onPrepareOptionsMenu(Menu)
+     * @see Fragment#onPrepareOptionsMenu(Menu)
+     */
+    void onPrepareOptionsMenu(Menu menu);
 
-  /**
-   * @see Activity#onOptionsItemSelected(MenuItem)
-   * @see Fragment#onOptionsItemSelected(MenuItem)
-   */
-  boolean onOptionsItemSelected(MenuItem item);
+    /**
+     * @see Activity#onOptionsItemSelected(MenuItem)
+     * @see Fragment#onOptionsItemSelected(MenuItem)
+     */
+    boolean onOptionsItemSelected(MenuItem item);
 }

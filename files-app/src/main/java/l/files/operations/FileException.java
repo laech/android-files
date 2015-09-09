@@ -11,27 +11,27 @@ import static java.util.Collections.unmodifiableList;
  */
 final class FileException extends RuntimeException {
 
-  private final List<Failure> failures;
+    private final List<Failure> failures;
 
-  FileException(Collection<Failure> failures) {
-    this.failures = unmodifiableList(new ArrayList<>(failures));
-    if (this.failures.isEmpty()) {
-      throw new IllegalArgumentException();
+    FileException(Collection<Failure> failures) {
+        this.failures = unmodifiableList(new ArrayList<>(failures));
+        if (this.failures.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
+        for (Failure failure : failures) {
+            addSuppressed(failure.cause());
+        }
     }
 
-    for (Failure failure : failures) {
-      addSuppressed(failure.cause());
+    public static void throwIfNotEmpty(Collection<Failure> failures)
+            throws FileException {
+        if (!failures.isEmpty()) {
+            throw new FileException(failures);
+        }
     }
-  }
 
-  public static void throwIfNotEmpty(Collection<Failure> failures)
-      throws FileException {
-    if (!failures.isEmpty()) {
-      throw new FileException(failures);
+    public List<Failure> failures() {
+        return failures;
     }
-  }
-
-  public List<Failure> failures() {
-    return failures;
-  }
 }

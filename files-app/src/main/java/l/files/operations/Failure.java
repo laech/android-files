@@ -9,14 +9,15 @@ import l.files.fs.File;
 @AutoValue
 public abstract class Failure {
 
-  Failure() {}
+    Failure() {
+    }
 
-  public abstract File resource();
+    public abstract File resource();
 
-  public abstract IOException cause();
+    public abstract IOException cause();
 
-  public static Failure create(File file, IOException cause) {
-    return new AutoValue_Failure(file, cause);
-  }
+    public static Failure create(File file, IOException cause) {
+        return new AutoValue_Failure(file, cause);
+    }
 
 }

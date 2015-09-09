@@ -9,11 +9,9 @@ import l.files.fs.Instant;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
 
-public final class FileSortDateTest extends FileSortTest
-{
+public final class FileSortDateTest extends FileSortTest {
 
-    public void test_sort_by_date_desc() throws Exception
-    {
+    public void test_sort_by_date_desc() throws Exception {
         testSortMatches(
                 Locale.getDefault(),
                 MODIFIED.comparator(),
@@ -22,8 +20,7 @@ public final class FileSortDateTest extends FileSortTest
                 createDirModified("c", Instant.of(1, 1)));
     }
 
-    public void test_sort_by_name_if_dates_are_equal() throws Exception
-    {
+    public void test_sort_by_name_if_dates_are_equal() throws Exception {
         testSortMatches(
                 Locale.getDefault(),
                 MODIFIED.comparator(),
@@ -34,24 +31,21 @@ public final class FileSortDateTest extends FileSortTest
 
     private File createFileModified(
             final String name,
-            final Instant instant) throws IOException
-    {
+            final Instant instant) throws IOException {
         final File file = dir1().resolve(name).createFile();
         return setModified(file, instant);
     }
 
     private File createDirModified(
             final String name,
-            final Instant instant) throws IOException
-    {
+            final Instant instant) throws IOException {
         final File dir = dir1().resolve(name).createDirectory();
         return setModified(dir, instant);
     }
 
     private File setModified(
             final File file,
-            final Instant instant) throws IOException
-    {
+            final Instant instant) throws IOException {
         file.setLastModifiedTime(NOFOLLOW, instant);
         return file;
     }

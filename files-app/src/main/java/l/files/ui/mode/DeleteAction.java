@@ -21,21 +21,18 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 
-public final class DeleteAction extends ActionModeItem
-{
+public final class DeleteAction extends ActionModeItem {
     private final Context context;
     private final Selection<File> selection;
 
-    public DeleteAction(final Context context, final Selection<File> selection)
-    {
+    public DeleteAction(final Context context, final Selection<File> selection) {
         super(R.id.delete);
         this.context = requireNonNull(context);
         this.selection = requireNonNull(selection);
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu)
-    {
+    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
         super.onCreateActionMode(mode, menu);
         menu.add(NONE, id(), NONE, R.string.delete)
                 .setShowAsAction(SHOW_AS_ACTION_NEVER);
@@ -43,17 +40,14 @@ public final class DeleteAction extends ActionModeItem
     }
 
     @Override
-    protected void onItemSelected(final ActionMode mode, final MenuItem item)
-    {
+    protected void onItemSelected(final ActionMode mode, final MenuItem item) {
         final Collection<File> files = selection.copy();
         new AlertDialog.Builder(context)
                 .setMessage(getConfirmMessage(files.size()))
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(R.string.delete, new OnClickListener()
-                {
+                .setPositiveButton(R.string.delete, new OnClickListener() {
                     @Override
-                    public void onClick(final DialogInterface dialog, final int which)
-                    {
+                    public void onClick(final DialogInterface dialog, final int which) {
                         requestDelete(files);
                         mode.finish();
                     }
@@ -61,20 +55,16 @@ public final class DeleteAction extends ActionModeItem
                 .show();
     }
 
-    private void requestDelete(final Collection<? extends File> resources)
-    {
-        AsyncTask.execute(new Runnable()
-        {
+    private void requestDelete(final Collection<? extends File> resources) {
+        AsyncTask.execute(new Runnable() {
             @Override
-            public void run()
-            {
+            public void run() {
                 OperationService.delete(context, resources);
             }
         });
     }
 
-    private String getConfirmMessage(final int size)
-    {
+    private String getConfirmMessage(final int size) {
         return context.getResources().getQuantityString(
                 R.plurals.confirm_delete_question, size, size);
     }

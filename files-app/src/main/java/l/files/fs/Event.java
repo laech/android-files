@@ -1,7 +1,6 @@
 package l.files.fs;
 
-public enum Event
-{
+public enum Event {
     CREATE,
     DELETE,
     MODIFY

@@ -4,26 +4,26 @@ import java.util.Set;
 
 public interface Stat {
 
-  long size();
+    long size();
 
-  boolean isRegularFile();
+    boolean isRegularFile();
 
-  boolean isDirectory();
+    boolean isDirectory();
 
-  boolean isSymbolicLink();
+    boolean isSymbolicLink();
 
-  boolean isFifo();
+    boolean isFifo();
 
-  boolean isSocket();
+    boolean isSocket();
 
-  boolean isBlockDevice();
+    boolean isBlockDevice();
 
-  boolean isCharacterDevice();
+    boolean isCharacterDevice();
 
-  Instant lastAccessedTime();
+    Instant lastAccessedTime();
 
-  Instant lastModifiedTime();
+    Instant lastModifiedTime();
 
-  Set<Permission> permissions();
+    Set<Permission> permissions();
 
 }

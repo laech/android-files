@@ -9,14 +9,15 @@ import static java.util.Objects.requireNonNull;
 
 public final class GoBackOnHomePressedAction extends OptionsMenuAction {
 
-  private final Activity activity;
+    private final Activity activity;
 
-  public GoBackOnHomePressedAction(Activity activity) {
-    super(android.R.id.home);
-    this.activity = requireNonNull(activity, "activity");
-  }
+    public GoBackOnHomePressedAction(Activity activity) {
+        super(android.R.id.home);
+        this.activity = requireNonNull(activity, "activity");
+    }
 
-  @Override protected void onItemSelected(MenuItem item) {
-    activity.onBackPressed();
-  }
+    @Override
+    protected void onItemSelected(MenuItem item) {
+        activity.onBackPressed();
+    }
 }

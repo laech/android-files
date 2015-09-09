@@ -3,11 +3,9 @@ package l.files.features;
 import l.files.fs.File;
 import l.files.test.BaseFilesActivityTest;
 
-public final class SelectAllTest extends BaseFilesActivityTest
-{
+public final class SelectAllTest extends BaseFilesActivityTest {
 
-    public void test_selects_all() throws Exception
-    {
+    public void test_selects_all() throws Exception {
         final File a = dir().resolve("a").createFile();
         final File b = dir().resolve("b").createFile();
         final File c = dir().resolve("c").createDirectory();
@@ -20,8 +18,7 @@ public final class SelectAllTest extends BaseFilesActivityTest
                 .assertChecked(c, true);
     }
 
-    public void test_finishes_action_mode_on_no_selection() throws Throwable
-    {
+    public void test_finishes_action_mode_on_no_selection() throws Throwable {
         final File a = dir().resolve("a").createFile();
         screen()
                 .longClick(a)

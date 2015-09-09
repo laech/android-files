@@ -8,10 +8,10 @@ import java.io.IOException;
  */
 interface FileOperation {
 
-  /**
-   * @throws InterruptedException if the thread was interrupted
-   * @throws FileException        if any file failed to be operated on
-   */
-  void execute() throws FileException, InterruptedException, IOException;
+    /**
+     * @throws InterruptedException if the thread was interrupted
+     * @throws FileException        if any file failed to be operated on
+     */
+    void execute() throws FileException, InterruptedException, IOException;
 
 }

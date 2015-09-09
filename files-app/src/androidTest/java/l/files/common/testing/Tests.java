@@ -10,10 +10,8 @@ import static java.lang.Thread.sleep;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-public final class Tests
-{
-    private Tests()
-    {
+public final class Tests {
+    private Tests() {
     }
 
     /**
@@ -24,38 +22,28 @@ public final class Tests
     public static void timeout(
             final long time,
             final TimeUnit unit,
-            final Executable assertion) throws Exception
-    {
+            final Executable assertion) throws Exception {
         final long millis = unit.toMillis(time);
         final long start = currentTimeMillis();
-        while (true)
-        {
-            try
-            {
+        while (true) {
+            try {
                 assertion.execute();
                 return;
-            }
-            catch (final AssertionError e)
-            {
-                if (currentTimeMillis() - start > millis)
-                {
+            } catch (final AssertionError e) {
+                if (currentTimeMillis() - start > millis) {
                     throw e;
-                }
-                else
-                {
+                } else {
                     sleep(5);
                 }
             }
         }
     }
 
-    public static void assertExists(final File file)
-    {
+    public static void assertExists(final File file) {
         assertTrue(file + " to exist", file.exists());
     }
 
-    public static void assertNotExists(final File file)
-    {
+    public static void assertNotExists(final File file) {
         assertFalse(file + " to not exist", file.exists());
     }
 }

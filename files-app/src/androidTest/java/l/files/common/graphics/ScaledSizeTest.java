@@ -2,10 +2,8 @@ package l.files.common.graphics;
 
 import junit.framework.TestCase;
 
-public final class ScaledSizeTest extends TestCase
-{
-    public void test_properties_return_original_value() throws Exception
-    {
+public final class ScaledSizeTest extends TestCase {
+    public void test_properties_return_original_value() throws Exception {
         final int originalWidth = 1;
         final int originalHeight = 2;
         final int scaledWidth = 3;

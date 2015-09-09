@@ -5,8 +5,9 @@ import android.view.ActionMode;
 
 public interface ActionModeProvider {
 
-  @Nullable ActionMode currentActionMode();
+    @Nullable
+    ActionMode currentActionMode();
 
-  ActionMode startActionMode(ActionMode.Callback callback);
+    ActionMode startActionMode(ActionMode.Callback callback);
 
 }

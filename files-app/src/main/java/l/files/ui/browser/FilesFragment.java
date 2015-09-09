@@ -58,185 +58,194 @@ import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
 
 public final class FilesFragment extends SelectionModeFragment<File>
-    implements
-    LoaderCallbacks<Result>,
-    OnSharedPreferenceChangeListener,
-    Selectable {
+        implements
+        LoaderCallbacks<Result>,
+        OnSharedPreferenceChangeListener,
+        Selectable {
 
-  public static final String TAG = FilesFragment.class.getSimpleName();
+    public static final String TAG = FilesFragment.class.getSimpleName();
 
-  private static final String ARG_DIRECTORY = "directory";
+    private static final String ARG_DIRECTORY = "directory";
 
-  public static FilesFragment create(File directory) {
-    Bundle bundle = new Bundle(1);
-    bundle.putParcelable(ARG_DIRECTORY, directory);
+    public static FilesFragment create(File directory) {
+        Bundle bundle = new Bundle(1);
+        bundle.putParcelable(ARG_DIRECTORY, directory);
 
-    FilesFragment browser = new FilesFragment();
-    browser.setArguments(bundle);
-    return browser;
-  }
+        FilesFragment browser = new FilesFragment();
+        browser.setArguments(bundle);
+        return browser;
+    }
 
-  private File directory;
-  private ProgressBar progress;
-  private FilesAdapter adapter;
-  private TextView empty;
+    private File directory;
+    private ProgressBar progress;
+    private FilesAdapter adapter;
+    private TextView empty;
 
-  public RecyclerView recycler;
+    public RecyclerView recycler;
 
-  private final Handler handler = new Handler();
-  private final Runnable checkProgress = new Runnable() {
+    private final Handler handler = new Handler();
+    private final Runnable checkProgress = new Runnable() {
+        @Override
+        public void run() {
+            Activity activity = getActivity();
+            if (activity == null
+                    || activity.isFinishing()
+                    || activity.isDestroyed()
+                    || isRemoving()
+                    || isDetached()) {
+                return;
+            }
+
+            FilesLoader loader = filesLoader();
+            if (loader != null) {
+                int current = loader.approximateChildLoaded();
+                progress.setProgress(current);
+                progress.setIndeterminate(current == 0);
+                progress.setMax(loader.approximateChildTotal());
+                progress.setVisibility(VISIBLE);
+            }
+            handler.postDelayed(this, 10);
+        }
+    };
+
+    public File directory() {
+        return directory;
+    }
+
+    public List<FileListItem> items() {
+        return adapter.items();
+    }
+
     @Override
-    public void run() {
-      Activity activity = getActivity();
-      if (activity == null
-          || activity.isFinishing()
-          || activity.isDestroyed()
-          || isRemoving()
-          || isDetached()) {
-        return;
-      }
-
-      FilesLoader loader = filesLoader();
-      if (loader != null) {
-        int current = loader.approximateChildLoaded();
-        progress.setProgress(current);
-        progress.setIndeterminate(current == 0);
-        progress.setMax(loader.approximateChildTotal());
-        progress.setVisibility(VISIBLE);
-      }
-      handler.postDelayed(this, 10);
-    }
-  };
-
-  public File directory() {
-    return directory;
-  }
-
-  public List<FileListItem> items() {
-    return adapter.items();
-  }
-
-  @Override public View onCreateView(
-      LayoutInflater inflater, ViewGroup container, Bundle state) {
-    return inflater.inflate(R.layout.files_fragment, container, false);
-  }
-
-  @Override public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
-
-    directory = getArguments().getParcelable(ARG_DIRECTORY);
-    empty = find(android.R.id.empty, this);
-    progress = find(android.R.id.progress, this);
-    adapter = new FilesAdapter(
-        getActivity(),
-        selection(),
-        actionModeProvider(),
-        actionModeCallback(),
-        (OnOpenFileListener) getActivity());
-
-    int columns = getResources().getInteger(files_grid_columns);
-    recycler = find(android.R.id.list, this);
-    recycler.setAdapter(adapter);
-    recycler.setHasFixedSize(true);
-    recycler.setItemViewCacheSize(columns * 3);
-    recycler.setLayoutManager(new StaggeredGridLayoutManager(columns, VERTICAL));
-
-    setupOptionsMenu();
-    setHasOptionsMenu(true);
-
-    handler.postDelayed(checkProgress, 500);
-    getLoaderManager().initLoader(0, null, this);
-    Preferences.register(getActivity(), this);
-  }
-
-  @Override public void onDestroy() {
-    super.onDestroy();
-    Preferences.unregister(getActivity(), this);
-  }
-
-  private void setupOptionsMenu() {
-    Activity context = getActivity();
-    setOptionsMenu(OptionsMenus.compose(
-        new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
-        new NewDirMenu(context.getFragmentManager(), directory),
-        new PasteMenu(context, getClipboardManager(context), directory),
-        new SortMenu(context.getFragmentManager()),
-        new ShowHiddenFilesMenu(context)
-    ));
-  }
-
-  @Override public void selectAll() {
-    adapter.selectAll();
-  }
-
-  @Override protected ActionMode.Callback actionModeCallback() {
-    Activity context = getActivity();
-    ClipboardManager clipboard = getClipboardManager(context);
-    return ActionModes.compose(
-        new CountSelectedItemsAction(selection()),
-        new ClearSelectionOnDestroyActionMode(selection()),
-        new SelectAllAction(this),
-        new CutAction(clipboard, selection()),
-        new CopyAction(clipboard, selection()),
-        new DeleteAction(context, selection()),
-        new RenameAction(context.getFragmentManager(), selection())
-    );
-  }
-
-  @Override protected ActionModeProvider actionModeProvider() {
-    return (ActionModeProvider) getActivity();
-  }
-
-  @Override public Loader<Result> onCreateLoader(int id, Bundle bundle) {
-    Activity context = getActivity();
-    FileSort sort = getSort(context);
-    Collator collator = Collator.getInstance(Locale.getDefault());
-    boolean showHidden = Preferences.getShowHiddenFiles(context);
-    return new FilesLoader(context, directory, sort, collator, showHidden);
-  }
-
-  @Override public void onLoadFinished(Loader<Result> loader, Result data) {
-    Activity activity = getActivity();
-    if (activity != null && !activity.isFinishing()) {
-      adapter.setItems(data.items());
-      //noinspection ThrowableResultOfMethodCallIgnored
-      if (data.exception() != null) {
-        empty.setText(message(data.exception()));
-      } else {
-        empty.setText(R.string.empty);
-      }
-
-      handler.removeCallbacks(checkProgress);
-      progress.setVisibility(GONE);
-
-      if (adapter.isEmpty()) {
-        empty.setVisibility(VISIBLE);
-      } else {
-        empty.setVisibility(GONE);
-      }
-    }
-  }
-
-  @Override public void onLoaderReset(Loader<Result> loader) {
-    adapter.setItems(Collections.<FileListItem>emptyList());
-  }
-
-  @Override
-  public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-    Activity activity = getActivity();
-    if (activity == null) {
-      return;
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle state) {
+        return inflater.inflate(R.layout.files_fragment, container, false);
     }
 
-    if (isShowHiddenFilesKey(key)) {
-      filesLoader().setShowHidden(getShowHiddenFiles(activity));
-    } else if (isSortKey(key)) {
-      filesLoader().setSort(getSort(activity));
-    }
-  }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-  private FilesLoader filesLoader() {
-    Loader<?> _loader = getLoaderManager().getLoader(0);
-    return (FilesLoader) _loader;
-  }
+        directory = getArguments().getParcelable(ARG_DIRECTORY);
+        empty = find(android.R.id.empty, this);
+        progress = find(android.R.id.progress, this);
+        adapter = new FilesAdapter(
+                getActivity(),
+                selection(),
+                actionModeProvider(),
+                actionModeCallback(),
+                (OnOpenFileListener) getActivity());
+
+        int columns = getResources().getInteger(files_grid_columns);
+        recycler = find(android.R.id.list, this);
+        recycler.setAdapter(adapter);
+        recycler.setHasFixedSize(true);
+        recycler.setItemViewCacheSize(columns * 3);
+        recycler.setLayoutManager(new StaggeredGridLayoutManager(columns, VERTICAL));
+
+        setupOptionsMenu();
+        setHasOptionsMenu(true);
+
+        handler.postDelayed(checkProgress, 500);
+        getLoaderManager().initLoader(0, null, this);
+        Preferences.register(getActivity(), this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Preferences.unregister(getActivity(), this);
+    }
+
+    private void setupOptionsMenu() {
+        Activity context = getActivity();
+        setOptionsMenu(OptionsMenus.compose(
+                new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
+                new NewDirMenu(context.getFragmentManager(), directory),
+                new PasteMenu(context, getClipboardManager(context), directory),
+                new SortMenu(context.getFragmentManager()),
+                new ShowHiddenFilesMenu(context)
+        ));
+    }
+
+    @Override
+    public void selectAll() {
+        adapter.selectAll();
+    }
+
+    @Override
+    protected ActionMode.Callback actionModeCallback() {
+        Activity context = getActivity();
+        ClipboardManager clipboard = getClipboardManager(context);
+        return ActionModes.compose(
+                new CountSelectedItemsAction(selection()),
+                new ClearSelectionOnDestroyActionMode(selection()),
+                new SelectAllAction(this),
+                new CutAction(clipboard, selection()),
+                new CopyAction(clipboard, selection()),
+                new DeleteAction(context, selection()),
+                new RenameAction(context.getFragmentManager(), selection())
+        );
+    }
+
+    @Override
+    protected ActionModeProvider actionModeProvider() {
+        return (ActionModeProvider) getActivity();
+    }
+
+    @Override
+    public Loader<Result> onCreateLoader(int id, Bundle bundle) {
+        Activity context = getActivity();
+        FileSort sort = getSort(context);
+        Collator collator = Collator.getInstance(Locale.getDefault());
+        boolean showHidden = Preferences.getShowHiddenFiles(context);
+        return new FilesLoader(context, directory, sort, collator, showHidden);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Result> loader, Result data) {
+        Activity activity = getActivity();
+        if (activity != null && !activity.isFinishing()) {
+            adapter.setItems(data.items());
+            //noinspection ThrowableResultOfMethodCallIgnored
+            if (data.exception() != null) {
+                empty.setText(message(data.exception()));
+            } else {
+                empty.setText(R.string.empty);
+            }
+
+            handler.removeCallbacks(checkProgress);
+            progress.setVisibility(GONE);
+
+            if (adapter.isEmpty()) {
+                empty.setVisibility(VISIBLE);
+            } else {
+                empty.setVisibility(GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Result> loader) {
+        adapter.setItems(Collections.<FileListItem>emptyList());
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        if (isShowHiddenFilesKey(key)) {
+            filesLoader().setShowHidden(getShowHiddenFiles(activity));
+        } else if (isSortKey(key)) {
+            filesLoader().setSort(getSort(activity));
+        }
+    }
+
+    private FilesLoader filesLoader() {
+        Loader<?> _loader = getLoaderManager().getLoader(0);
+        return (FilesLoader) _loader;
+    }
 }

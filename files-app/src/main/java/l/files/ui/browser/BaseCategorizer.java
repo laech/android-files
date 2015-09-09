@@ -11,31 +11,23 @@ import l.files.ui.browser.FileListItem.Header;
 
 import static java.util.Collections.unmodifiableList;
 
-abstract class BaseCategorizer implements Categorizer
-{
+abstract class BaseCategorizer implements Categorizer {
     @Override
     public List<FileListItem> categorize(
             final Resources res,
-            final List<File> items)
-    {
+            final List<File> items) {
         final List<FileListItem> result = new ArrayList<>(items.size() + 10);
 
         Object preCategory = null;
-        for (int i = 0; i < items.size(); i++)
-        {
+        for (int i = 0; i < items.size(); i++) {
             final File stat = items.get(i);
             final Object category = id(stat);
-            if (i == 0)
-            {
-                if (category != null)
-                {
+            if (i == 0) {
+                if (category != null) {
                     result.add(Header.of(label(stat, res, category)));
                 }
-            }
-            else
-            {
-                if (!Objects.equals(preCategory, category))
-                {
+            } else {
+                if (!Objects.equals(preCategory, category)) {
                     result.add(Header.of(label(stat, res, category)));
                 }
             }

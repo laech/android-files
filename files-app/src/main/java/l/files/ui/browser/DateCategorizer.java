@@ -25,97 +25,99 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * Categories files by their last modified date.
  */
 final class DateCategorizer extends BaseCategorizer {
-  private static final long MILLIS_PER_MINUTE = 60 * 1000;
-  private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
+    private static final long MILLIS_PER_MINUTE = 60 * 1000;
+    private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
 
-  @SuppressLint("SimpleDateFormat")
-  private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
-  private final Map<Integer, String> monthCache = new HashMap<>();
+    @SuppressLint("SimpleDateFormat")
+    private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
+    private final Map<Integer, String> monthCache = new HashMap<>();
 
-  private final Calendar timestamp = new GregorianCalendar();
-  private final long startOfToday;
-  private final long startOfTomorrow;
-  private final long startOfYesterday;
-  private final long startOf7Days;
-  private final long startOf30Days;
+    private final Calendar timestamp = new GregorianCalendar();
+    private final long startOfToday;
+    private final long startOfTomorrow;
+    private final long startOfYesterday;
+    private final long startOf7Days;
+    private final long startOf30Days;
 
-  public DateCategorizer(long now) {
-    timestamp.setTimeInMillis(now);
-    timestamp.set(Calendar.HOUR_OF_DAY, 0);
-    timestamp.set(Calendar.MINUTE, 0);
-    timestamp.set(Calendar.SECOND, 0);
-    timestamp.set(Calendar.MILLISECOND, 0);
+    public DateCategorizer(long now) {
+        timestamp.setTimeInMillis(now);
+        timestamp.set(Calendar.HOUR_OF_DAY, 0);
+        timestamp.set(Calendar.MINUTE, 0);
+        timestamp.set(Calendar.SECOND, 0);
+        timestamp.set(Calendar.MILLISECOND, 0);
 
-    startOfToday = timestamp.getTimeInMillis();
-    startOfTomorrow = startOfToday + MILLIS_PER_DAY;
-    startOfYesterday = startOfToday - MILLIS_PER_DAY;
-    startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
-    startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
-  }
-
-  @Override public Object id(File file) {
-    Stat stat = file.stat();
-    if (stat == null) {
-      return R.string.__;
+        startOfToday = timestamp.getTimeInMillis();
+        startOfTomorrow = startOfToday + MILLIS_PER_DAY;
+        startOfYesterday = startOfToday - MILLIS_PER_DAY;
+        startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
+        startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
     }
 
-    long t = stat.lastModifiedTime().to(MILLISECONDS);
-    if (t < MILLIS_PER_MINUTE) return R.string.__;
-    if (t >= startOfTomorrow) return R.string.future;
-    if (t >= startOfToday) return R.string.today;
-    if (t >= startOfYesterday) return R.string.yesterday;
-    if (t >= startOf7Days) return R.string.previous_7_days;
-    if (t >= startOf30Days) return R.string.previous_30_days;
+    @Override
+    public Object id(File file) {
+        Stat stat = file.stat();
+        if (stat == null) {
+            return R.string.__;
+        }
 
-    timestamp.setTimeInMillis(startOfToday);
-    int currentYear = timestamp.get(YEAR);
+        long t = stat.lastModifiedTime().to(MILLISECONDS);
+        if (t < MILLIS_PER_MINUTE) return R.string.__;
+        if (t >= startOfTomorrow) return R.string.future;
+        if (t >= startOfToday) return R.string.today;
+        if (t >= startOfYesterday) return R.string.yesterday;
+        if (t >= startOf7Days) return R.string.previous_7_days;
+        if (t >= startOf30Days) return R.string.previous_30_days;
 
-    timestamp.setTimeInMillis(t);
-    int thatYear = timestamp.get(YEAR);
+        timestamp.setTimeInMillis(startOfToday);
+        int currentYear = timestamp.get(YEAR);
 
-    if (currentYear != thatYear) {
-      return Year.of(thatYear);
-    }
-    return Month.of(timestamp.get(MONTH));
-  }
+        timestamp.setTimeInMillis(t);
+        int thatYear = timestamp.get(YEAR);
 
-  @Override public String label(File file, Resources res, Object id) {
-    if (id instanceof Year) {
-      Stat stat = requireNonNull(file.stat());
-      timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
-      return String.valueOf(timestamp.get(YEAR));
-    }
-
-    if (id instanceof Month) {
-      Stat stat = requireNonNull(file.stat());
-      timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
-      int month = timestamp.get(MONTH);
-      String format = monthCache.get(month);
-      if (format == null) {
-        format = monthFormat.format(timestamp.getTime());
-        monthCache.put(month, format);
-      }
-      return format;
+        if (currentYear != thatYear) {
+            return Year.of(thatYear);
+        }
+        return Month.of(timestamp.get(MONTH));
     }
 
-    return res.getString((int) id);
-  }
+    @Override
+    public String label(File file, Resources res, Object id) {
+        if (id instanceof Year) {
+            Stat stat = requireNonNull(file.stat());
+            timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
+            return String.valueOf(timestamp.get(YEAR));
+        }
 
-  @AutoValue
-  static abstract class Year {
-    abstract int value();
+        if (id instanceof Month) {
+            Stat stat = requireNonNull(file.stat());
+            timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
+            int month = timestamp.get(MONTH);
+            String format = monthCache.get(month);
+            if (format == null) {
+                format = monthFormat.format(timestamp.getTime());
+                monthCache.put(month, format);
+            }
+            return format;
+        }
 
-    static Year of(int value) {
-      return new AutoValue_DateCategorizer_Year(value);
+        return res.getString((int) id);
     }
-  }
 
-  @AutoValue
-  static abstract class Month {
-    abstract int value();
+    @AutoValue
+    static abstract class Year {
+        abstract int value();
 
-    static Month of(int value) {
-      return new AutoValue_DateCategorizer_Month(value);
+        static Year of(int value) {
+            return new AutoValue_DateCategorizer_Year(value);
+        }
     }
-  }
+
+    @AutoValue
+    static abstract class Month {
+        abstract int value();
+
+        static Month of(int value) {
+            return new AutoValue_DateCategorizer_Month(value);
+        }
+    }
 }

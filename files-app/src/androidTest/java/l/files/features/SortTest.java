@@ -13,10 +13,8 @@ import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FileSort.NAME;
 import static l.files.ui.browser.FileSort.SIZE;
 
-public final class SortTest extends BaseFilesActivityTest
-{
-    public void test_updates_list_on_sort_option_change_on_back() throws Exception
-    {
+public final class SortTest extends BaseFilesActivityTest {
+    public void test_updates_list_on_sort_option_change_on_back() throws Exception {
         final File a = dir().resolve("a").createDirectory();
         final File aa = createFile("aa", "aa", Instant.of(1, 1), a);
         final File ab = createFile("ab", "ab", Instant.of(2, 1), a);
@@ -30,8 +28,7 @@ public final class SortTest extends BaseFilesActivityTest
                 .pressBack().assertItemsDisplayed(a, b, c);
     }
 
-    public void test_updates_list_on_sort_option_change() throws Exception
-    {
+    public void test_updates_list_on_sort_option_change() throws Exception {
         final File a = createFile("a", "a", Instant.of(1, 1));
         final File b = createFile("b", "bbb", Instant.of(1, 2));
         final File c = createFile("c", "cc", Instant.of(1, 3));
@@ -45,8 +42,7 @@ public final class SortTest extends BaseFilesActivityTest
     private File createFile(
             final String name,
             final String content,
-            final Instant modified) throws IOException
-    {
+            final Instant modified) throws IOException {
         return createFile(name, content, modified, dir());
     }
 
@@ -54,11 +50,9 @@ public final class SortTest extends BaseFilesActivityTest
             final String name,
             final String content,
             final Instant modified,
-            final File dir) throws IOException
-    {
+            final File dir) throws IOException {
         final File file = dir.resolve(name).createFile();
-        try (Writer writer = file.writer(UTF_8))
-        {
+        try (Writer writer = file.writer(UTF_8)) {
             writer.write(content);
         }
         file.setLastModifiedTime(NOFOLLOW, modified);

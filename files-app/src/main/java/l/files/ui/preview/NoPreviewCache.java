@@ -8,20 +8,23 @@ import l.files.fs.File;
 
 final class NoPreviewCache extends PersistenceCache<Boolean> {
 
-  NoPreviewCache(File cacheDir) {
-    super(cacheDir);
-  }
+    NoPreviewCache(File cacheDir) {
+        super(cacheDir);
+    }
 
-  @Override String cacheFileName() {
-    return "non-images";
-  }
+    @Override
+    String cacheFileName() {
+        return "non-images";
+    }
 
-  @Override Boolean read(DataInput in) throws IOException {
-    return in.readBoolean();
-  }
+    @Override
+    Boolean read(DataInput in) throws IOException {
+        return in.readBoolean();
+    }
 
-  @Override void write(DataOutput out, Boolean value) throws IOException {
-    out.writeBoolean(value);
-  }
+    @Override
+    void write(DataOutput out, Boolean value) throws IOException {
+        out.writeBoolean(value);
+    }
 
 }

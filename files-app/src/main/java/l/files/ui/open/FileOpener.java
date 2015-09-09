@@ -22,89 +22,92 @@ import static l.files.ui.IOExceptions.message;
 
 public final class FileOpener implements Consumer<File> {
 
-  private static final Logger log = Logger.get(FileOpener.class);
+    private static final Logger log = Logger.get(FileOpener.class);
 
-  public static FileOpener get(Context context) {
-    return new FileOpener(context);
-  }
-
-  private Context context;
-
-  FileOpener(Context context) {
-    this.context = requireNonNull(context, "context");
-  }
-
-  @Override public void apply(File file) {
-    new ShowFileTask(file).execute();
-  }
-
-  private class ShowFileTask extends AsyncTask<Void, Void, Object> {
-    private File file;
-
-    ShowFileTask(File file) {
-      this.file = file;
+    public static FileOpener get(Context context) {
+        return new FileOpener(context);
     }
 
-    @Override protected Object doInBackground(Void... params) {
-      try {
-        log.verbose("detect start");
-        String media = file.detectContentMediaType();
-        log.verbose("detect end");
-        return media;
-      } catch (IOException e) {
-        return e;
-      }
+    private Context context;
+
+    FileOpener(Context context) {
+        this.context = requireNonNull(context, "context");
     }
 
-    @Override protected void onPostExecute(Object result) {
-      if (result instanceof IOException) {
-        showException((IOException) result);
-        return;
-      }
-
-      if (!showFile((String) result) &&
-          !showFile(generalize((String) result))) {
-        showFile(ANY_TYPE);
-      }
+    @Override
+    public void apply(File file) {
+        new ShowFileTask(file).execute();
     }
 
-    public void showException(IOException exception) {
-      String msg = message(exception);
-      makeText(context, msg, LENGTH_SHORT).show();
-    }
+    private class ShowFileTask extends AsyncTask<Void, Void, Object> {
+        private File file;
 
-    private boolean showFile(String media) {
-      debug(media);
-
-      Uri uri = Uri.parse(file.uri().toString());
-      try {
-        Intent intent = new Intent(ACTION_VIEW);
-        intent.setDataAndType(uri, media);
-        context.startActivity(intent);
-        return true;
-      } catch (ActivityNotFoundException e) {
-        return false;
-      }
-    }
-
-    private String generalize(String media) {
-      if (media.startsWith("text/")) return "text/*";
-      if (media.startsWith("image/")) return "image/*";
-      if (media.startsWith("audio/")) return "audio/*";
-      if (media.startsWith("video/")) return "video/*";
-      if (media.startsWith("application/")) {
-        if (media.contains("json") ||
-            media.contains("xml") ||
-            media.contains("javascript") ||
-            media.contains("x-sh")) {
-          return "text/*";
+        ShowFileTask(File file) {
+            this.file = file;
         }
-      }
-      return media;
-    }
 
-    private void debug(String media) {
-      if (DEBUG) makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
+        @Override
+        protected Object doInBackground(Void... params) {
+            try {
+                log.verbose("detect start");
+                String media = file.detectContentMediaType();
+                log.verbose("detect end");
+                return media;
+            } catch (IOException e) {
+                return e;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            if (result instanceof IOException) {
+                showException((IOException) result);
+                return;
+            }
+
+            if (!showFile((String) result) &&
+                    !showFile(generalize((String) result))) {
+                showFile(ANY_TYPE);
+            }
+        }
+
+        public void showException(IOException exception) {
+            String msg = message(exception);
+            makeText(context, msg, LENGTH_SHORT).show();
+        }
+
+        private boolean showFile(String media) {
+            debug(media);
+
+            Uri uri = Uri.parse(file.uri().toString());
+            try {
+                Intent intent = new Intent(ACTION_VIEW);
+                intent.setDataAndType(uri, media);
+                context.startActivity(intent);
+                return true;
+            } catch (ActivityNotFoundException e) {
+                return false;
+            }
+        }
+
+        private String generalize(String media) {
+            if (media.startsWith("text/")) return "text/*";
+            if (media.startsWith("image/")) return "image/*";
+            if (media.startsWith("audio/")) return "audio/*";
+            if (media.startsWith("video/")) return "video/*";
+            if (media.startsWith("application/")) {
+                if (media.contains("json") ||
+                        media.contains("xml") ||
+                        media.contains("javascript") ||
+                        media.contains("x-sh")) {
+                    return "text/*";
+                }
+            }
+            return media;
+        }
+
+        private void debug(String media) {
+            if (DEBUG) makeText(context, "[DEBUG] " + media, LENGTH_SHORT).show();
+        }
     }
-  }
 }

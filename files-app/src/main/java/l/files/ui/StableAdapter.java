@@ -11,36 +11,30 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
-public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH>
-{
+public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH> {
     private final Map<Object, Long> ids = new HashMap<>();
 
     private List<T> items = emptyList();
 
-    public StableAdapter()
-    {
+    public StableAdapter() {
         setHasStableIds(true);
     }
 
     @SuppressWarnings("unchecked")
-    public void setItems(final List<? extends T> items)
-    {
+    public void setItems(final List<? extends T> items) {
         this.items = (List<T>) requireNonNull(items);
         notifyDataSetChanged();
     }
 
-    public List<T> items()
-    {
+    public List<T> items() {
         return unmodifiableList(items);
     }
 
     @Override
-    public long getItemId(final int position)
-    {
+    public long getItemId(final int position) {
         final Object object = getItemIdObject(position);
         Long id = ids.get(object);
-        if (id == null)
-        {
+        if (id == null) {
             id = ids.size() + 1L;
             ids.put(object, id);
         }
@@ -48,18 +42,15 @@ public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH
     }
 
     @Override
-    public int getItemCount()
-    {
+    public int getItemCount() {
         return items.size();
     }
 
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return getItemCount() == 0;
     }
 
-    public T getItem(final int position)
-    {
+    public T getItem(final int position) {
         return items.get(position);
     }
 

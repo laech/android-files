@@ -13,20 +13,22 @@ import static java.util.Objects.requireNonNull;
 
 public final class SortMenu extends OptionsMenuAction {
 
-  private final FragmentManager manager;
+    private final FragmentManager manager;
 
-  public SortMenu(FragmentManager manager) {
-    super(R.id.sort_by);
-    this.manager = requireNonNull(manager);
-  }
+    public SortMenu(FragmentManager manager) {
+        super(R.id.sort_by);
+        this.manager = requireNonNull(manager);
+    }
 
-  @Override public void onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
-    menu.add(NONE, id(), NONE, R.string.sort_by)
-        .setShowAsAction(SHOW_AS_ACTION_NEVER);
-  }
+    @Override
+    public void onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add(NONE, id(), NONE, R.string.sort_by)
+                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+    }
 
-  @Override protected void onItemSelected(MenuItem item) {
-    new SortDialog().show(manager, SortDialog.FRAGMENT_TAG);
-  }
+    @Override
+    protected void onItemSelected(MenuItem item) {
+        new SortDialog().show(manager, SortDialog.FRAGMENT_TAG);
+    }
 }
