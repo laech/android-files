@@ -24,12 +24,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import l.files.common.base.Consumer;
 import l.files.fs.Event;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
-import l.files.fs.Visitor;
 import l.files.logging.Logger;
 import l.files.ui.browser.FileListItem.File;
 
@@ -41,7 +41,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
@@ -222,12 +221,10 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     children.add(child);
   }
 
-  private Visitor collectInto(final List<Resource> children) {
-    return new Visitor() {
-      @Override
-      public Result accept(Resource resource) throws IOException {
-        checkedAdd(children, resource);
-        return CONTINUE;
+  private Consumer<Resource> collectInto(final List<Resource> children) {
+    return new Consumer<Resource>() {
+      @Override public void apply(Resource child) {
+        checkedAdd(children, child);
       }
     };
   }

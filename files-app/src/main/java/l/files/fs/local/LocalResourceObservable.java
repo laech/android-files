@@ -1,7 +1,6 @@
 package l.files.fs.local;
 
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 
 import java.io.Closeable;
@@ -11,12 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import l.files.common.base.Consumer;
 import l.files.fs.Event;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Resource;
 import l.files.fs.Stream;
-import l.files.fs.Visitor;
 import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
@@ -181,7 +180,7 @@ final class LocalResourceObservable extends Native
       LocalResource resource,
       LinkOption option,
       Observer observer,
-      @Nullable Visitor visitor) throws IOException {
+      Consumer<Resource> childrenConsumer) throws IOException {
 
     requireNonNull(resource, "root");
     requireNonNull(option, "option");
@@ -214,7 +213,7 @@ final class LocalResourceObservable extends Native
     }
 
     try {
-      observeChildren(fd, resource, option, observable, visitor);
+      observeChildren(fd, resource, option, observable, childrenConsumer);
     } catch (IOException e) {
       log.warn(e);
     }
@@ -258,11 +257,11 @@ final class LocalResourceObservable extends Native
   }
 
   private static void observeChildren(
-      final int fd,
-      final LocalResource resource,
-      final LinkOption option,
-      final LocalResourceObservable observable,
-      @Nullable final Visitor visitor) throws IOException {
+      int fd,
+      LocalResource resource,
+      LinkOption option,
+      LocalResourceObservable observable,
+      Consumer<Resource> childrenConsumer) throws IOException {
 
     try (Stream<Dirent> stream = Dirent.stream(resource, option)) {
       for (Dirent child : stream) {
@@ -271,9 +270,7 @@ final class LocalResourceObservable extends Native
           return;
         }
 
-        if (visitor != null) {
-          visitor.accept(resource.resolve(child.name()));
-        }
+        childrenConsumer.apply(resource.resolve(child.name()));
 
         if (child.type() == DT_DIR) {
           try {

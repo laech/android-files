@@ -54,20 +54,21 @@ public abstract class ResourceBaseTest extends BaseTest {
     }
     resource.traverse(
         NOFOLLOW,
-        new Visitor() {
-          @Override public Result accept(Resource resource) throws IOException {
+        new Visitor.Base() {
+
+          @Override public Result onPreVisit(Resource res) throws IOException {
             try {
-              resource.setPermissions(EnumSet.allOf(Permission.class));
+              res.setPermissions(EnumSet.allOf(Permission.class));
             } catch (IOException ignore) {
             }
             return CONTINUE;
           }
-        },
-        new Visitor() {
-          @Override public Result accept(Resource resource) throws IOException {
-            resource.delete();
+
+          @Override public Result onPostVisit(Resource res) throws IOException {
+            res.delete();
             return CONTINUE;
           }
+
         });
   }
 

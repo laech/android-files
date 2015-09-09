@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import l.files.common.base.Consumer;
+
 /**
  * Represents a file system resource, such as a file or directory.
  */
@@ -134,20 +136,12 @@ public interface Resource extends Parcelable {
    * @param option if option is {@link LinkOption#NOFOLLOW} and this resource is a
    *               link, observe on the link instead of the link target
    */
-  Closeable observe(LinkOption option, Observer observer)
-      throws IOException;
+  Closeable observe(LinkOption option, Observer observer) throws IOException;
 
-  Closeable observe(LinkOption option, Observer observer, Visitor visitor)
-      throws IOException;
-
-  /**
-   * Performs a traversal that will terminate as soon as an error is
-   * encountered.
-   */
-  void traverse(
+  Closeable observe(
       LinkOption option,
-      @Nullable Visitor pre,
-      @Nullable Visitor post) throws IOException;
+      Observer observer,
+      Consumer<Resource> childrenConsumer) throws IOException;
 
   /**
    * Performs a depth first traverse of this tree.
@@ -160,24 +154,17 @@ public interface Resource extends Parcelable {
    * </pre>
    * will generate:
    * <pre>
-   * pre.accept(a)
-   * pre.accept(b)
-   * post.accept(b)
-   * pre.accept(c)
-   * post.accept(c)
-   * post.accept(a)
+   * visitor.onPreVisit(a)
+   * visitor.onPreVisit(b)
+   * visitor.onPost(b)
+   * visitor.onPreVisit(c)
+   * visitor.onPost(c)
+   * visitor.onPost(a)
    * </pre>
    *
    * @param option  applies to root only, child links are never followed
-   * @param pre     callback for pre order traversals
-   * @param post    callback for post order traversals
-   * @param handler handles any exception encountered duration traversal
    */
-  void traverse(
-      LinkOption option,
-      @Nullable Visitor pre,
-      @Nullable Visitor post,
-      @Nullable ExceptionHandler handler) throws IOException;
+  void traverse(LinkOption option, Visitor visitor) throws IOException;
 
   Stream<Resource> list(LinkOption option) throws IOException;
 

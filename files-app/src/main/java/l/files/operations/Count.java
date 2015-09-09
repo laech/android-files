@@ -5,12 +5,8 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Resource;
-import l.files.fs.Visitor;
 
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
-
-class Count extends AbstractOperation implements Visitor {
+class Count extends AbstractOperation {
 
   private final AtomicInteger count = new AtomicInteger();
 
@@ -23,20 +19,15 @@ class Count extends AbstractOperation implements Visitor {
   }
 
   @Override void process(Resource resource) {
-    try {
-      preOrderTraversal(resource, this);
-    } catch (IOException e) {
-      record(resource, e);
-    }
-  }
+    traverse(resource, new OperationVisitor() {
 
-  @Override public Result accept(Resource resource) throws IOException {
-    if (isInterrupted()) {
-      return TERMINATE;
-    }
-    count.incrementAndGet();
-    onCount(resource);
-    return CONTINUE;
+      @Override public Result onPreVisit(Resource res) throws IOException {
+        count.incrementAndGet();
+        onCount(res);
+        return super.onPreVisit(res);
+      }
+
+    });
   }
 
   void onCount(Resource resource) {

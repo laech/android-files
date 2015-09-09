@@ -52,28 +52,27 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
   @Override protected void tearDown() throws Exception {
     super.tearDown();
     if (dir.exists(NOFOLLOW)) {
-      dir.traverse(NOFOLLOW, setAllPermissions(), delete());
+      dir.traverse(NOFOLLOW, delete());
     }
   }
 
-  private Visitor setAllPermissions() {
-    return new Visitor() {
-      @Override public Result accept(Resource resource) throws IOException {
+  private Visitor delete() {
+    return new Visitor.Base() {
+
+      @Override public Result onPreVisit(Resource res) throws IOException {
         try {
-          resource.setPermissions(Permission.all());
+          res.setPermissions(Permission.all());
         } catch (IOException ignored) {
         }
         return CONTINUE;
       }
-    };
-  }
 
-  private Visitor delete() {
-    return new Visitor() {
-      @Override public Result accept(Resource resource) throws IOException {
+      @Override
+      public Result onPostVisit(Resource resource) throws IOException {
         resource.delete();
         return CONTINUE;
       }
+
     };
   }
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import l.files.fs.ExceptionHandler;
 import l.files.fs.Resource;
 import l.files.fs.Visitor;
 
@@ -45,45 +44,29 @@ abstract class AbstractOperation implements FileOperation {
     recorder.onFailure(resource, exception);
   }
 
-  final void preOrderTraversal(
-      Resource resource, Visitor visitor) throws IOException {
-    resource.traverse(
-        NOFOLLOW,
-        visitor,
-        terminateOnInterrupt(),
-        recordOnException());
+  final void traverse(Resource resource, OperationVisitor visitor) {
+    try {
+      resource.traverse(NOFOLLOW, visitor);
+    } catch (IOException e) {
+      record(resource, e);
+    }
   }
 
-  final void postOrderTraversal(
-      Resource resource, Visitor visitor) throws IOException {
-    resource.traverse(
-        NOFOLLOW,
-        terminateOnInterrupt(),
-        visitor,
-        recordOnException());
-  }
+  class OperationVisitor implements Visitor {
 
-  private Visitor terminateOnInterrupt() {
-    return new Visitor() {
-      @Override
-      public Result accept(final Resource resource) throws IOException {
-        if (isInterrupted()) {
-          return TERMINATE;
-        }
-        return CONTINUE;
-      }
-    };
-  }
+    @Override public Result onPreVisit(Resource res) throws IOException {
+      return isInterrupted() ? TERMINATE : CONTINUE;
+    }
 
-  protected final ExceptionHandler recordOnException() {
-    return new ExceptionHandler() {
-      @Override
-      public void handle(
-          final Resource resource,
-          final IOException e) throws IOException {
-        record(resource, e);
-      }
-    };
+    @Override public Result onPostVisit(Resource res) throws IOException {
+      return isInterrupted() ? TERMINATE : CONTINUE;
+    }
+
+    @Override
+    public void onException(Resource res, IOException e) throws IOException {
+      record(res, e);
+    }
+
   }
 
   @Override public void execute() throws InterruptedException {

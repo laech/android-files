@@ -6,13 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
-import l.files.fs.Visitor;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 
-final class Delete extends AbstractOperation implements Visitor {
+final class Delete extends AbstractOperation {
 
   private final AtomicInteger deletedItemCount = new AtomicInteger();
   private final AtomicLong deletedByteCount = new AtomicLong();
@@ -30,23 +27,14 @@ final class Delete extends AbstractOperation implements Visitor {
   }
 
   @Override void process(Resource resource) {
-    try {
-      postOrderTraversal(resource, this);
-    } catch (IOException e) {
-      record(resource, e);
-    }
-  }
+    traverse(resource, new OperationVisitor() {
 
-  @Override public Result accept(Resource resource) {
-    if (isInterrupted()) {
-      return TERMINATE;
-    }
-    try {
-      delete(resource);
-    } catch (IOException e) {
-      record(resource, e);
-    }
-    return CONTINUE;
+      @Override public Result onPostVisit(Resource res) throws IOException {
+        delete(res);
+        return super.onPostVisit(res);
+      }
+
+    });
   }
 
   private void delete(Resource resource) throws IOException {

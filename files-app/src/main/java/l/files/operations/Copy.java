@@ -10,12 +10,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.Resource;
 import l.files.fs.Stat;
-import l.files.fs.Visitor;
 import l.files.logging.Logger;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 
 final class Copy extends Paste {
 
@@ -37,51 +34,59 @@ final class Copy extends Paste {
     return copiedByteCount.get();
   }
 
-  @Override void paste(Resource from, Resource to) throws IOException {
-    from.traverse(
-        NOFOLLOW,
-        copyItems(from, to),
-        updateDirectoryTimestamps(from, to),
-        recordOnException());
+  @Override
+  void paste(final Resource from, final Resource to) throws IOException {
+
+    from.traverse(NOFOLLOW, new OperationVisitor() {
+
+      @Override public Result onPreVisit(Resource src) throws IOException {
+        copyItems(src, from, to);
+        return super.onPreVisit(src);
+      }
+
+      @Override public Result onPostVisit(Resource src) throws IOException {
+        updateDirectoryTimestamps(src, from, to);
+        return super.onPostVisit(src);
+      }
+
+    });
+
   }
 
-  private Visitor copyItems(final Resource from, final Resource to) {
-    return new Visitor() {
-      @Override public Result accept(Resource src) throws IOException {
-        if (isInterrupted()) return TERMINATE;
+  private void copyItems(
+      Resource src,
+      Resource fromParent,
+      Resource toParent) throws IOException {
 
-        Stat stat = src.stat(NOFOLLOW);
-        Resource dst = src.resolveParent(from, to);
+    Stat stat = src.stat(NOFOLLOW);
+    Resource dst = src.resolveParent(fromParent, toParent);
 
-        if (stat.isSymbolicLink()) {
-          copyLink(src, stat, dst);
-        } else if (stat.isDirectory()) {
-          createDirectory(stat, dst);
-        } else if (stat.isRegularFile()) {
-          copyFile(src, stat, dst);
-        } else {
-          throw new IOException("Not file or directory");
-        }
+    if (stat.isSymbolicLink()) {
+      copyLink(src, stat, dst);
 
-        return CONTINUE;
-      }
-    };
+    } else if (stat.isDirectory()) {
+      createDirectory(stat, dst);
+
+    } else if (stat.isRegularFile()) {
+      copyFile(src, stat, dst);
+
+    } else {
+      throw new IOException("Not file or directory");
+    }
+
   }
 
-  private Visitor updateDirectoryTimestamps(final Resource from, final Resource to) {
-    return new Visitor() {
-      @Override public Result accept(Resource src) throws IOException {
-        if (isInterrupted()) return TERMINATE;
+  private void updateDirectoryTimestamps(
+      Resource src,
+      Resource fromParent,
+      Resource toParent) throws IOException {
 
-        Stat stat = src.stat(NOFOLLOW);
-        Resource dst = src.resolveParent(from, to);
-        if (stat.isDirectory()) {
-          setTimes(stat, dst);
-        }
+    Stat stat = src.stat(NOFOLLOW);
+    Resource dst = src.resolveParent(fromParent, toParent);
+    if (stat.isDirectory()) {
+      setTimes(stat, dst);
+    }
 
-        return CONTINUE;
-      }
-    };
   }
 
   private void copyLink(Resource src, Stat stat, Resource dst) throws IOException {

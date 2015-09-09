@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import l.files.fs.ExceptionHandler;
+import l.files.common.base.Consumer;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
@@ -172,17 +172,22 @@ public abstract class LocalResource extends Native implements Resource {
     return unmodifiableList(hierarchy);
   }
 
-  @Override public Closeable observe(
-      LinkOption option,
-      Observer observer) throws IOException {
-    return LocalResourceObservable.observe(this, option, observer, null);
+  @Override public Closeable observe(LinkOption option, Observer observer)
+      throws IOException {
+
+    return observe(option, observer, new Consumer<Resource>() {
+      @Override public void apply(Resource input) {}
+    });
+
   }
 
   @Override public Closeable observe(
       LinkOption option,
       Observer observer,
-      Visitor visitor) throws IOException {
-    return LocalResourceObservable.observe(this, option, observer, visitor);
+      Consumer<Resource> childrenConsumer) throws IOException {
+
+    return LocalResourceObservable.observe(
+        this, option, observer, childrenConsumer);
   }
 
   @Override public boolean startsWith(Resource other) {
@@ -258,24 +263,9 @@ public abstract class LocalResource extends Native implements Resource {
     }
   }
 
-  @Override public void traverse(
-      LinkOption option,
-      @Nullable Visitor pre,
-      @Nullable Visitor post) throws IOException {
-    traverse(option, pre, post, new ExceptionHandler() {
-      @Override public void handle(Resource resource, IOException e)
-          throws IOException {
-        throw e;
-      }
-    });
-  }
-
-  @Override public void traverse(
-      LinkOption option,
-      @Nullable Visitor pre,
-      @Nullable Visitor post,
-      @Nullable ExceptionHandler handler) throws IOException {
-    new LocalResourceTraverser(this, option, pre, post, handler).traverse();
+  @Override
+  public void traverse(LinkOption option, Visitor visitor) throws IOException {
+    new LocalResourceTraverser(this, option, visitor).traverse();
   }
 
   @Override

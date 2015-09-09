@@ -72,24 +72,34 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     log.verbose("cleanup");
 
-    final long now = currentTimeMillis();
-    cacheDir.traverse(NOFOLLOW, null, new Visitor() {
-      @Override public Result accept(Resource res) throws IOException {
+    cacheDir.traverse(NOFOLLOW, new Visitor.Base() {
+
+      final long now = currentTimeMillis();
+
+      @Override public Result onPostVisit(Resource res) throws IOException {
+
         Stat stat = res.stat(NOFOLLOW);
         if (stat.isDirectory()) {
+
           try {
             res.delete();
             log.debug("Deleted empty cache directory %s", res);
           } catch (DirectoryNotEmpty ignore) {
           }
+
         } else {
-          if (MILLISECONDS.toDays(now - stat.lastAccessedTime().to(MILLISECONDS)) > 30) {
+
+          long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
+          if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
             res.delete();
             log.debug("Deleted old cache file %s", res);
           }
+
         }
+
         return CONTINUE;
       }
+
     });
   }
 

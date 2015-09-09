@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.fs.ExceptionHandler;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Resource;
@@ -36,12 +35,12 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     link.resolve("b").createFile();
 
     Recorder recorder = new Recorder();
-    link.traverse(NOFOLLOW, recorder.getPreVisitor(), recorder.getPostVisitor());
+    link.traverse(NOFOLLOW, recorder);
     List<TraversalEvent> expected = asList(
         TraversalEvent.of(PRE, link),
         TraversalEvent.of(POST, link)
     );
-    checkEquals(expected, recorder.getEvents());
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_followLink_rootOnly() throws Exception {
@@ -53,11 +52,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     dir1().resolve("link").createLink(dir1().resolve("dir"));
 
     Recorder recorder = new Recorder();
-    dir1().resolve("link").traverse(
-        FOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor()
-    );
+    dir1().resolve("link").traverse(FOLLOW, recorder);
     List<TraversalEvent> expected = asList(
         TraversalEvent.of(PRE, dir1().resolve("link")),
         TraversalEvent.of(PRE, dir1().resolve("link/a")),
@@ -71,7 +66,7 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
         TraversalEvent.of(POST, dir1().resolve("link/c")),
         TraversalEvent.of(POST, dir1().resolve("link"))
     );
-    checkEquals(expected, recorder.getEvents());
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_followLink() throws Exception {
@@ -80,14 +75,14 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     Resource a = link.resolve("a").createFile();
 
     Recorder recorder = new Recorder();
-    link.traverse(FOLLOW, recorder.getPreVisitor(), recorder.getPostVisitor());
+    link.traverse(FOLLOW, recorder);
     List<TraversalEvent> expected = asList(
         TraversalEvent.of(PRE, link),
         TraversalEvent.of(PRE, a),
         TraversalEvent.of(POST, a),
         TraversalEvent.of(POST, link)
     );
-    checkEquals(expected, recorder.getEvents());
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
@@ -102,21 +97,23 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override Visitor.Result acceptPre(Resource resource) throws IOException {
-        if (resource.name().toString().equals("a")) {
+
+      @Override public Result onPreVisit(Resource res) throws IOException {
+        if (res.name().toString().equals("a")) {
           throw new IOException("Test");
         }
-        return super.acceptPre(resource);
+        return super.onPreVisit(res);
       }
-    };
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor(),
-        ignoreException()
-    );
 
-    checkEquals(expected, recorder.getEvents());
+      @Override
+      public void onException(Resource res, IOException e) throws IOException {
+        // Ignore
+      }
+
+    };
+    dir1().traverse(NOFOLLOW, recorder);
+
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
@@ -138,23 +135,24 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override
-      Visitor.Result acceptPost(Resource resource) throws IOException {
-        super.acceptPost(resource);
-        if (resource.name().toString().equals("1")) {
+
+      @Override public Result onPostVisit(Resource res) throws IOException {
+        super.onPostVisit(res);
+        if (res.name().toString().equals("1")) {
           throw new IOException("Test");
         }
         return CONTINUE;
       }
-    };
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor(),
-        ignoreException()
-    );
 
-    checkEquals(expected, recorder.getEvents());
+      @Override
+      public void onException(Resource res, IOException e) throws IOException {
+        // Ignore
+      }
+
+    };
+    dir1().traverse(NOFOLLOW, recorder);
+
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
@@ -173,25 +171,15 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
         TraversalEvent.of(POST, dir1())
     );
 
-    Recorder recorder = new Recorder();
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor(),
-        ignoreException()
-    );
-
-    checkEquals(expected, recorder.getEvents());
-  }
-
-  private static ExceptionHandler ignoreException() {
-    return new ExceptionHandler() {
+    Recorder recorder = new Recorder() {
       @Override
-      public void handle(Resource resource, IOException e)
-          throws IOException {
-        // no throw
+      public void onException(Resource res, IOException e) {
+        // Ignore
       }
     };
+    dir1().traverse(NOFOLLOW, recorder);
+
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_order() throws Exception {
@@ -216,13 +204,9 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder();
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor()
-    );
+    dir1().traverse(NOFOLLOW, recorder);
 
-    checkEquals(expected, recorder.getEvents());
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traversal_skip() throws Exception {
@@ -240,22 +224,16 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override Visitor.Result acceptPre(Resource resource) throws IOException {
-        super.acceptPre(resource);
-        if (resource.name().toString().equals("a")) {
+      @Override public Result onPreVisit(Resource res) throws IOException {
+        super.onPreVisit(res);
+        if (res.name().toString().equals("a")) {
           return SKIP;
         }
         return CONTINUE;
       }
     };
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor()
-    );
-
-    checkEquals(expected, recorder.getEvents());
-
+    dir1().traverse(NOFOLLOW, recorder);
+    checkEquals(expected, recorder.events);
   }
 
   public void test_traverse_termination() throws Exception {
@@ -270,22 +248,16 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     );
 
     Recorder recorder = new Recorder() {
-      @Override Visitor.Result acceptPre(Resource resource) throws IOException {
-        super.acceptPre(resource);
-        if (resource.name().toString().equals("a")) {
+      @Override public Result onPreVisit(Resource res) throws IOException {
+        super.onPreVisit(res);
+        if (res.name().toString().equals("a")) {
           return TERMINATE;
         }
         return CONTINUE;
       }
     };
-    dir1().traverse(
-        NOFOLLOW,
-        recorder.getPreVisitor(),
-        recorder.getPostVisitor()
-    );
-
-    checkEquals(expected, recorder.getEvents());
-
+    dir1().traverse(NOFOLLOW, recorder);
+    checkEquals(expected, recorder.events);
   }
 
   private static void checkEquals(
@@ -298,44 +270,23 @@ public final class LocalResource_traverse_Test extends ResourceBaseTest {
     }
   }
 
-  private static class Recorder {
+  private static class Recorder implements Visitor {
 
-    private final List<TraversalEvent> events = new ArrayList<>();
+    final List<TraversalEvent> events = new ArrayList<>();
 
-    List<TraversalEvent> getEvents() {
-      return events;
-    }
-
-    private final Visitor pre = new Visitor() {
-      @Override
-      public Result accept(Resource resource) throws IOException {
-        return acceptPre(resource);
-      }
-    };
-
-    Visitor.Result acceptPre(Resource resource) throws IOException {
-      events.add(TraversalEvent.of(PRE, resource));
+    @Override public Result onPreVisit(Resource res) throws IOException {
+      events.add(TraversalEvent.of(PRE, res));
       return CONTINUE;
     }
 
-    Visitor getPreVisitor() {
-      return pre;
-    }
-
-    private final Visitor post = new Visitor() {
-      @Override
-      public Result accept(Resource resource) throws IOException {
-        return acceptPost(resource);
-      }
-    };
-
-    Visitor.Result acceptPost(Resource resource) throws IOException {
-      events.add(TraversalEvent.of(POST, resource));
+    @Override public Result onPostVisit(Resource res) throws IOException {
+      events.add(TraversalEvent.of(POST, res));
       return CONTINUE;
     }
 
-    Visitor getPostVisitor() {
-      return post;
+    @Override
+    public void onException(Resource res, IOException e) throws IOException {
+      throw e;
     }
 
   }
