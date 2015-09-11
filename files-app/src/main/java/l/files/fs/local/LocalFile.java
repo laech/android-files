@@ -15,19 +15,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.net.URI;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import l.files.common.base.Consumer;
+import l.files.fs.BaseFile;
 import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Instant;
@@ -55,8 +51,6 @@ import static android.system.OsConstants.S_IXOTH;
 import static android.system.OsConstants.S_IXUSR;
 import static android.system.OsConstants.W_OK;
 import static android.system.OsConstants.X_OK;
-import static java.util.Collections.reverse;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -73,7 +67,7 @@ import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 @AutoValue
-public abstract class LocalFile extends Native implements File {
+public abstract class LocalFile extends BaseFile {
 
     private static final int[] PERMISSION_BITS = permissionsToBits();
 
@@ -110,6 +104,10 @@ public abstract class LocalFile extends Native implements File {
     LocalFile() {
     }
 
+    static {
+        Native.load();
+    }
+
     abstract java.io.File file();
 
     public static LocalFile create(java.io.File file) {
@@ -120,11 +118,6 @@ public abstract class LocalFile extends Native implements File {
         if (!(file instanceof LocalFile)) {
             throw new IllegalArgumentException(file.toString());
         }
-    }
-
-    @Override
-    public String toString() {
-        return file().getPath();
     }
 
     @Override
@@ -170,28 +163,6 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public List<File> hierarchy() {
-        List<File> hierarchy = new ArrayList<>();
-        for (File p = this; p != null; p = p.parent()) {
-            hierarchy.add(p);
-        }
-        reverse(hierarchy);
-        return unmodifiableList(hierarchy);
-    }
-
-    @Override
-    public Closeable observe(LinkOption option, Observer observer)
-            throws IOException {
-
-        return observe(option, observer, new Consumer<File>() {
-            @Override
-            public void apply(File input) {
-            }
-        });
-
-    }
-
-    @Override
     public Closeable observe(
             LinkOption option,
             Observer observer,
@@ -217,11 +188,6 @@ public abstract class LocalFile extends Native implements File {
     @Override
     public LocalFile resolve(String other) {
         return create(new java.io.File(file(), other));
-    }
-
-    @Override
-    public File resolve(FileName other) {
-        return resolve(other.toString());
     }
 
     @Override
@@ -330,11 +296,6 @@ public abstract class LocalFile extends Native implements File {
     }
 
     @Override
-    public OutputStream output() throws IOException {
-        return new FileOutputStream(file());
-    }
-
-    @Override
     public OutputStream output(boolean append) throws IOException {
         return new FileOutputStream(file(), append);
     }
@@ -342,16 +303,6 @@ public abstract class LocalFile extends Native implements File {
     @Override
     public Reader reader(Charset charset) throws IOException {
         return new InputStreamReader(input(), charset);
-    }
-
-    @Override
-    public Writer writer(Charset charset) throws IOException {
-        return new OutputStreamWriter(output(), charset);
-    }
-
-    @Override
-    public Writer writer(Charset charset, boolean append) throws IOException {
-        return new OutputStreamWriter(output(append), charset);
     }
 
     @Override
@@ -522,38 +473,6 @@ public abstract class LocalFile extends Native implements File {
             Os.chmod(path(), mode);
         } catch (ErrnoException e) {
             throw toIOException(e, path());
-        }
-    }
-
-    @Override
-    public void removePermissions(Set<Permission> permissions) throws IOException {
-        Set<Permission> existing = stat(FOLLOW).permissions();
-        Set<Permission> perms = new HashSet<>(existing);
-        perms.removeAll(permissions);
-        setPermissions(perms);
-    }
-
-    @Override
-    public String toString(Charset charset) throws IOException {
-        return toString(charset, new StringBuilder()).toString();
-    }
-
-    @Override
-    public <T extends Appendable> T toString(Charset charset, T appendable) throws IOException {
-        try (Reader reader = reader(charset)) {
-            for (CharBuffer buffer = CharBuffer.allocate(8192);
-                 reader.read(buffer) > -1; ) {
-                buffer.flip();
-                appendable.append(buffer);
-            }
-        }
-        return appendable;
-    }
-
-    @Override
-    public void writeString(Charset charset, CharSequence content) throws IOException {
-        try (Writer writer = writer(charset)) {
-            writer.write(content.toString());
         }
     }
 
