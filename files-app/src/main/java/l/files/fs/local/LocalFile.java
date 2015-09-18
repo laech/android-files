@@ -13,11 +13,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -301,11 +298,6 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public Reader reader(Charset charset) throws IOException {
-        return new InputStreamReader(input(), charset);
-    }
-
-    @Override
     public LocalFile createDir() throws IOException {
         try {
             mkdir();
@@ -348,16 +340,20 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile createFile() throws IOException {
-        // Same flags and mode as java.io.File.createNewFile() on Android
-        int flags = O_RDWR | O_CREAT | O_EXCL;
-        int mode = S_IRUSR | S_IWUSR;
         try {
-            FileDescriptor fd = Os.open(path(), flags, mode);
-            Os.close(fd);
+            createFileNative();
         } catch (ErrnoException e) {
             throw toIOException(e, path());
         }
         return this;
+    }
+
+    private void createFileNative() throws ErrnoException {
+        // Same flags and mode as java.io.File.createNewFile() on Android
+        int flags = O_RDWR | O_CREAT | O_EXCL;
+        int mode = S_IRUSR | S_IWUSR;
+        FileDescriptor fd = Os.open(path(), flags, mode);
+        Os.close(fd);
     }
 
     @Override
@@ -374,7 +370,16 @@ public abstract class LocalFile extends BaseFile {
         if (parent != null) {
             parent.createDirs();
         }
-        return createFile();
+
+        try {
+            createFileNative();
+        } catch (ErrnoException e) {
+            if (e.errno != EEXIST) {
+                throw toIOException(e, path());
+            }
+        }
+
+        return this;
     }
 
     @Override
@@ -441,9 +446,7 @@ public abstract class LocalFile extends BaseFile {
             boolean followLink) throws ErrnoException;
 
     @Override
-    public void setLastModifiedTime(
-            LinkOption option,
-            Instant instant) throws IOException {
+    public void setLastModifiedTime(LinkOption option, Instant instant) throws IOException {
 
         requireNonNull(option, "option");
         requireNonNull(instant, "instant");

@@ -2,6 +2,7 @@ package l.files.fs;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -50,6 +51,11 @@ public abstract class BaseFile implements File {
     @Override
     public File resolve(FileName other) {
         return resolve(other.toString());
+    }
+
+    @Override
+    public Reader reader(Charset charset) throws IOException {
+        return new InputStreamReader(input(), charset);
     }
 
     @Override
