@@ -44,7 +44,7 @@ public final class FileSortSizeTest extends FileSortTest {
             final String name,
             final String content) throws IOException {
         final File file = dir1().resolve(name).createFile();
-        file.writeString(UTF_8, content);
+        file.append(content, UTF_8);
         return file;
     }
 }

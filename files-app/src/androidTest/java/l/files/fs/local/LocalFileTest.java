@@ -87,7 +87,7 @@ public final class LocalFileTest extends FileBaseTest {
 
     public void test_stat_size() throws Exception {
         File file = dir1().resolve("file").createFile();
-        file.writeString(UTF_8, "hello world");
+        file.append("hello world", UTF_8);
         long expected = Os.stat(file.path()).st_size;
         long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
@@ -178,11 +178,11 @@ public final class LocalFileTest extends FileBaseTest {
             OutputProvider provider) throws Exception {
 
         File file = dir1().resolve("file").createFile();
-        file.writeString(UTF_8, initial);
+        file.append(initial, UTF_8);
         try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
         }
-        assertEquals(result, file.toString(UTF_8));
+        assertEquals(result, file.readAll(UTF_8));
     }
 
     private interface OutputProvider {
@@ -206,7 +206,7 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_input() throws Exception {
         File file = dir1().resolve("a").createFile();
         String expected = "hello\nworld\n";
-        file.writeString(UTF_8, expected);
+        file.append(expected, UTF_8);
         try (InputStream in = file.input()) {
 
             String actual = new String(toByteArray(in), UTF_8);
@@ -265,8 +265,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_readString() throws Exception {
         File file = dir1().resolve("file").createFile();
         String expected = "a\nb\tc";
-        file.writeString(UTF_8, expected);
-        assertEquals(expected, file.toString(UTF_8));
+        file.append(expected, UTF_8);
+        assertEquals(expected, file.readAll(UTF_8));
     }
 
     public void test_createFile() throws Exception {
@@ -357,11 +357,11 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_moveTo_fileToNonExistingFile() throws Exception {
         File src = dir1().resolve("src");
         File dst = dir1().resolve("dst");
-        src.writeString(UTF_8, "src");
+        src.append("src", UTF_8);
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", dst.toString(UTF_8));
+        assertEquals("src", dst.readAll(UTF_8));
     }
 
     public void test_moveTo_directoryToNonExistingDirectory() throws Exception {

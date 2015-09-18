@@ -266,21 +266,11 @@ public interface File extends Parcelable {
      */
     void removePermissions(Set<Permission> permissions) throws IOException;
 
-    /**
-     * Reads the underlying file content as string.
-     */
-    String toString(Charset charset) throws IOException;
+    String readAll(Charset charset) throws IOException;
 
-    /**
-     * Appends the underlying file content as string into the given appendable,
-     * returns the appendable.
-     */
-    <T extends Appendable> T toString(Charset charset, T appendable) throws IOException;
+    <T extends Appendable> T writeTo(T sink, Charset charset) throws IOException;
 
-    /**
-     * Overrides the content of this file with the given content.
-     */
-    void writeString(Charset charset, CharSequence content) throws IOException;
+    void append(CharSequence content, Charset charset) throws IOException;
 
     /**
      * Detects the content type of this file based on its properties

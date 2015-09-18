@@ -19,7 +19,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
 
     public void test_detects_unreadable_file_as_octet_stream() throws Exception {
         File file = dir1().resolve("a.txt").createFile();
-        file.writeString(UTF_8, "hello world");
+        file.append("hello world", UTF_8);
         file.setPermissions(Collections.<Permission>emptySet());
         try {
             detector().detect(file);

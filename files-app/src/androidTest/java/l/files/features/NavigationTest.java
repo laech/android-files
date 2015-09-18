@@ -139,7 +139,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void test_shows_time_and_size_for_file() throws Exception {
         File file = dir().resolve("file").createFile();
-        file.writeString(UTF_8, file.path());
+        file.append(file.path(), UTF_8);
 
         Context c = getActivity();
         String date = getTimeFormat(c).format(new Date());

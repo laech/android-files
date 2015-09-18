@@ -41,7 +41,7 @@ public final class MoveTest extends PasteTest {
         move.execute();
 
         assertFalse(srcFile.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.toString(UTF_8));
+        assertEquals("Test", dstFile.readAll(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
@@ -58,7 +58,7 @@ public final class MoveTest extends PasteTest {
         move.execute();
 
         assertFalse(srcDir.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.toString(UTF_8));
+        assertEquals("Test", dstFile.readAll(UTF_8));
         assertEquals(move.getMovedItemCount(), 1);
     }
 

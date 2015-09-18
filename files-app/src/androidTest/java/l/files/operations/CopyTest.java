@@ -105,8 +105,8 @@ public final class CopyTest extends PasteTest {
         }
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", srcFile.toString(UTF_8));
-        assertEquals("Testing", dstFile.toString(UTF_8));
+        assertEquals("Testing", srcFile.readAll(UTF_8));
+        assertEquals("Testing", dstFile.readAll(UTF_8));
     }
 
     public void test_copies_empty_directory() throws Exception {
@@ -133,8 +133,8 @@ public final class CopyTest extends PasteTest {
         }
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", srcFile.toString(UTF_8));
-        assertEquals("Testing", dstFile.toString(UTF_8));
+        assertEquals("Testing", srcFile.readAll(UTF_8));
+        assertEquals("Testing", dstFile.readAll(UTF_8));
     }
 
     private void copy(File src, File dstDir)

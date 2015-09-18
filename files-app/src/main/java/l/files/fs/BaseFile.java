@@ -76,25 +76,25 @@ public abstract class BaseFile implements File {
     }
 
     @Override
-    public String toString(Charset charset) throws IOException {
-        return toString(charset, new StringBuilder()).toString();
+    public String readAll(Charset charset) throws IOException {
+        return writeTo(new StringBuilder(), charset).toString();
     }
 
     @Override
-    public <T extends Appendable> T toString(Charset charset, T appendable) throws IOException {
+    public <T extends Appendable> T writeTo(T sink, Charset charset) throws IOException {
         try (Reader reader = reader(charset)) {
             for (CharBuffer buffer = CharBuffer.allocate(8192);
                  reader.read(buffer) > -1; ) {
                 buffer.flip();
-                appendable.append(buffer);
+                sink.append(buffer);
             }
         }
-        return appendable;
+        return sink;
     }
 
     @Override
-    public void writeString(Charset charset, CharSequence content) throws IOException {
-        try (Writer writer = writer(charset)) {
+    public void append(CharSequence content, Charset charset) throws IOException {
+        try (Writer writer = writer(charset, true)) {
             writer.write(content.toString());
         }
     }
