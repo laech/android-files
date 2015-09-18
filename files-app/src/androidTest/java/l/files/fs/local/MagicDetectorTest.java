@@ -8,7 +8,7 @@ import l.files.fs.Permission;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.common.testing.Tests.assertExists;
-import static l.files.fs.File.OCTET_STREAM;
+import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
 
@@ -42,6 +42,6 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
 
     public void test_detects_content_only_not_file_name() throws Exception {
         File file = dir1().resolve("a.txt").createFile();
-        assertEquals(OCTET_STREAM, detector().detect(file));
+        assertEquals(MEDIA_TYPE_OCTET_STREAM, detector().detect(file));
     }
 }

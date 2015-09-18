@@ -10,7 +10,7 @@ import java.text.Collator;
 import collation.NaturalKey;
 import l.files.fs.Stat;
 
-import static l.files.fs.File.OCTET_STREAM;
+import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 
 public abstract class FileListItem {
 
@@ -71,7 +71,7 @@ public abstract class FileListItem {
             try {
                 return file().detectBasicMediaType();
             } catch (IOException e) {
-                return OCTET_STREAM;
+                return MEDIA_TYPE_OCTET_STREAM;
             }
         }
 

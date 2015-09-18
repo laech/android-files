@@ -4,7 +4,7 @@ import android.webkit.MimeTypeMap;
 
 import l.files.fs.File;
 
-import static l.files.fs.File.OCTET_STREAM;
+import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 
 /**
  * Detects content type based on name and file type.
@@ -21,7 +21,7 @@ final class BasicDetector extends AbstractDetector {
         MimeTypeMap typeMap = MimeTypeMap.getSingleton();
         String ext = file.name().ext();
         String type = typeMap.getMimeTypeFromExtension(ext);
-        return type != null ? type : OCTET_STREAM;
+        return type != null ? type : MEDIA_TYPE_OCTET_STREAM;
     }
 
 }

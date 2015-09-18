@@ -20,8 +20,8 @@ import l.files.common.base.Consumer;
  */
 public interface File extends Parcelable {
 
-    String OCTET_STREAM = "application/octet-stream";
-    String ANY_TYPE = "*/*";
+    String MEDIA_TYPE_OCTET_STREAM = "application/octet-stream";
+    String MEDIA_TYPE_ANY = "*/*";
 
     URI uri();
 
@@ -275,13 +275,13 @@ public interface File extends Parcelable {
     /**
      * Detects the content type of this file based on its properties
      * without reading the content of this file.
-     * Returns {@link #OCTET_STREAM} if unknown.
+     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
     String detectBasicMediaType() throws IOException;
 
     /**
      * Reads the content of this file to determine its media type.
-     * Returns {@link #OCTET_STREAM} if unknown.
+     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
     String detectContentMediaType() throws IOException;
 

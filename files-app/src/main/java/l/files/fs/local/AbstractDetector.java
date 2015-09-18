@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import l.files.fs.File;
 
-import static l.files.fs.File.OCTET_STREAM;
+import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
 
 abstract class AbstractDetector {
@@ -30,7 +30,7 @@ abstract class AbstractDetector {
             if (stat.isDirectory()) return INODE_DIRECTORY;
             if (stat.isBlockDevice()) return INODE_BLOCKDEVICE;
             if (stat.isCharacterDevice()) return INODE_CHARDEVICE;
-            return OCTET_STREAM;
+            return MEDIA_TYPE_OCTET_STREAM;
         }
     }
 

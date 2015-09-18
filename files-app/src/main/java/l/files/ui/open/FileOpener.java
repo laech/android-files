@@ -17,7 +17,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.BuildConfig.DEBUG;
-import static l.files.fs.File.ANY_TYPE;
+import static l.files.fs.File.MEDIA_TYPE_ANY;
 import static l.files.ui.IOExceptions.message;
 
 public final class FileOpener implements Consumer<File> {
@@ -67,7 +67,7 @@ public final class FileOpener implements Consumer<File> {
 
             if (!showFile((String) result) &&
                     !showFile(generalize((String) result))) {
-                showFile(ANY_TYPE);
+                showFile(MEDIA_TYPE_ANY);
             }
         }
 
