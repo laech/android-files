@@ -47,8 +47,6 @@ public interface File extends Parcelable {
      */
     File parent();
 
-    boolean isRoot();
-
     /**
      * Gets the file hierarchy of this file.
      * <p/>

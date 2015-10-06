@@ -155,11 +155,6 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public boolean isRoot() {
-        return "/".equals(path());
-    }
-
-    @Override
     public Closeable observe(
             LinkOption option,
             Observer observer,

@@ -97,7 +97,7 @@ final class HierarchyAdapter extends BaseAdapter {
         iconView.setEnabled(enabled);
 
         TextView titleView = (TextView) view.findViewById(title);
-        titleView.setText(res.isRoot() ? res.path() : res.name());
+        titleView.setText(res.name().length() > 0 ? res.name() : res.path());
         titleView.setEnabled(enabled);
 
         return view;
