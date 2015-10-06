@@ -58,7 +58,6 @@ import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.formatDateRange;
 import static android.text.format.Formatter.formatShortFileSize;
 import static android.view.View.GONE;
-import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static java.lang.System.currentTimeMillis;
 import static java.text.DateFormat.MEDIUM;
@@ -221,6 +220,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             implements PreviewCallback {
 
         private final TextView icon;
+        private final View iconContainer;
         private final TextView title;
         private final TextView summary;
         private final TextView symlink;
@@ -241,6 +241,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             super(itemView, selection, actionModeProvider, actionModeCallback);
             this.paletteContainer = find(R.id.palette, this);
             this.icon = find(R.id.icon, this);
+            this.iconContainer = find(R.id.icon_container, this);
             this.title = find(R.id.title, this);
             this.summary = find(R.id.summary, this);
             this.symlink = find(R.id.symlink, this);
@@ -327,7 +328,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             Stat stat = file.stat();
             if (stat == null) {
                 summary.setText("");
-                summary.setVisibility(INVISIBLE);
+                summary.setVisibility(GONE);
             } else {
                 summary.setVisibility(VISIBLE);
                 summary.setEnabled(file.isReadable());
@@ -343,7 +344,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 } else if (isFile) {
                     summary.setText(size);
                 } else {
-                    summary.setVisibility(INVISIBLE);
+                    summary.setVisibility(GONE);
                 }
             }
         }
@@ -357,7 +358,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             Stat stat = file.stat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
                 preview.setImageDrawable(null);
-                previewContainer.setVisibility(GONE);
+                showPreviewContainer(false);
                 updatePaletteColor(TRANSPARENT);
                 return;
             }
@@ -372,7 +373,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             Bitmap bitmap = decorator.getBitmap(res, stat, constraint);
             if (bitmap != null) {
                 preview.setImageBitmap(bitmap);
-                previewContainer.setVisibility(VISIBLE);
+                showPreviewContainer(true);
                 return;
             }
 
@@ -380,13 +381,23 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             if (size != null) {
                 preview.setImageDrawable(
                         new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
-                previewContainer.setVisibility(VISIBLE);
+                showPreviewContainer(true);
             } else {
                 preview.setImageDrawable(null);
-                previewContainer.setVisibility(GONE);
+                showPreviewContainer(false);
             }
 
             task = decorator.set(res, stat, constraint, this);
+        }
+
+        private void showPreviewContainer(boolean show) {
+            if (show) {
+                previewContainer.setVisibility(VISIBLE);
+                iconContainer.setVisibility(GONE);
+            } else {
+                previewContainer.setVisibility(GONE);
+                iconContainer.setVisibility(VISIBLE);
+            }
         }
 
         private void updatePaletteColor(int color) {
@@ -446,8 +457,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         @Override
         public void onPreviewAvailable(File item, Bitmap bitmap) {
             if (Objects.equals(item, itemId())) {
+                showPreviewContainer(true);
                 preview.setImageBitmap(bitmap);
-                previewContainer.setVisibility(VISIBLE);
                 preview.setAlpha(0f);
                 preview.animate().alpha(1).setDuration(animateDuration);
             }
@@ -456,7 +467,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         @Override
         public void onPreviewFailed(File item) {
             if (Objects.equals(item, itemId())) {
-                previewContainer.setVisibility(GONE);
+                showPreviewContainer(false);
             }
         }
     }

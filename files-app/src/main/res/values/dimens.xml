@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="files_list_space">3dp</dimen>
+    <dimen name="files_list_space">5dp</dimen>
     <dimen name="files_item_space_horizontal">5dp</dimen>
     <dimen name="files_item_space_vertical">5dp</dimen>
     <dimen name="files_item_card_inner_space">1dp</dimen>

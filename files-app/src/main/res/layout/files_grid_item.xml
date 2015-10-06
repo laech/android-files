@@ -40,51 +40,57 @@
 
         </android.support.v7.widget.CardView>
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="12dp"
-            android:lineSpacingMultiplier="1.2"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp"/>
-
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/icon_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginStart="12dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/summary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textSize="12sp"/>
-
-            <TextView
-                android:id="@+id/symlink"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:text="@string/link_icon"
-                android:textAppearance="?android:attr/textAppearanceSmall"/>
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"/>
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"
+                android:textColor="?android:attr/textColorTertiary"
+                android:textSize="32sp"/>
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/symlink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/icon"
+                android:layout_marginEnd="6dp"
+                android:layout_toEndOf="@id/icon"
+                android:text="@string/link_icon"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:lineSpacingMultiplier="1.2"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="12sp"/>
+
     </LinearLayout>
 
     <View
