@@ -27,6 +27,7 @@ import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
+import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
@@ -475,13 +476,13 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public String detectBasicMediaType() throws IOException {
-        return BasicDetector.INSTANCE.detect(this);
+    public String detectBasicMediaType(l.files.fs.Stat stat) throws IOException {
+        return BasicDetector.INSTANCE.detect(this, stat);
     }
 
     @Override
-    public String detectContentMediaType() throws IOException {
-        return MagicDetector.INSTANCE.detect(this);
+    public String detectContentMediaType(Stat stat) throws IOException {
+        return MagicDetector.INSTANCE.detect(this, stat);
     }
 
     @Override

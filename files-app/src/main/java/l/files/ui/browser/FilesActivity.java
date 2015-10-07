@@ -5,6 +5,7 @@ import android.app.FragmentManager.OnBackStackChangedListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.KeyEvent;
@@ -28,7 +29,6 @@ import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.newtab.NewTabMenu;
-import l.files.ui.open.FileOpener;
 import l.files.ui.preview.Preview;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
@@ -128,7 +128,7 @@ public final class FilesActivity extends BaseActivity implements
         log.debug("onItemSelected");
         File item = (File) parent.getAdapter().getItem(position);
         if (!Objects.equals(item, fragment().directory())) {
-            open(item);
+            onOpen(item);
         } else {
             log.debug("Already show requested directory.");
         }
@@ -230,20 +230,22 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     public void onOpen(File file) {
+        onOpen(file, null);
+    }
+
+    @Override
+    public void onOpen(final File file, @Nullable final Stat stat) {
         log.debug("onOpen(%s)", file);
+
         ActionMode mode = currentActionMode();
         if (mode != null) {
             mode.finish();
         }
-        open(file);
-    }
 
-    private void open(final File file) {
-        log.debug("open(%s)", file);
         closeDrawerThenRun(new Runnable() {
             @Override
             public void run() {
-                show(file);
+                show(file, stat);
             }
         });
     }
@@ -257,8 +259,14 @@ public final class FilesActivity extends BaseActivity implements
         }
     }
 
-    private void show(final File file) {
+    private void show(final File file, @Nullable final Stat stat) {
+        if (stat != null) {
+            doShow(file, stat);
+            return;
+        }
+
         new AsyncTask<Void, Void, Object>() {
+
             @Override
             protected Object doInBackground(Void... params) {
                 try {
@@ -274,23 +282,24 @@ public final class FilesActivity extends BaseActivity implements
                 super.onPostExecute(result);
                 if (!isDestroyed() && !isFinishing()) {
                     if (result instanceof Stat) {
-                        show(file, (Stat) result);
+                        doShow(file, (Stat) result);
                     } else {
                         String msg = message((IOException) result);
                         makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
                     }
                 }
             }
+
         }.execute();
     }
 
-    private void show(File file, Stat stat) {
+    private void doShow(File file, Stat stat) {
         if (!isReadable(file)) { // TODO Check in background
             showPermissionDenied();
         } else if (stat.isDirectory()) {
             showDirectory(file);
         } else {
-            showFile(file);
+            showFile(file, stat);
         }
     }
 
@@ -321,8 +330,8 @@ public final class FilesActivity extends BaseActivity implements
                 .commit();
     }
 
-    private void showFile(File file) {
-        FileOpener.get(this).apply(file);
+    private void showFile(File file, Stat stat) {
+        new OpenFile(this, file, stat).execute();
     }
 
     public FilesFragment fragment() {

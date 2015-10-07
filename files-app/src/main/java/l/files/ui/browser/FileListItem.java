@@ -69,7 +69,7 @@ public abstract class FileListItem {
 
         public String basicMediaType() {
             try {
-                return file().detectBasicMediaType();
+                return file().detectBasicMediaType(stat());
             } catch (IOException e) {
                 return MEDIA_TYPE_OCTET_STREAM;
             }

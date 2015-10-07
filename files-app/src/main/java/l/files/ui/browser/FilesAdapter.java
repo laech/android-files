@@ -265,7 +265,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
         @Override
         protected void onClick(View v, FileListItem.File file) {
-            listener.onOpen(file.file());
+            listener.onOpen(file.file(), file.stat());
         }
 
         @Override

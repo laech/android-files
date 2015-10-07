@@ -275,12 +275,12 @@ public interface File extends Parcelable {
      * without reading the content of this file.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    String detectBasicMediaType() throws IOException;
+    String detectBasicMediaType(Stat stat) throws IOException;
 
     /**
      * Reads the content of this file to determine its media type.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    String detectContentMediaType() throws IOException;
+    String detectContentMediaType(Stat stat) throws IOException;
 
 }

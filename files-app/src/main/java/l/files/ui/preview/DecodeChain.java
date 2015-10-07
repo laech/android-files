@@ -192,12 +192,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-
-            log.debug("decode media start %s", file);
-            String media = file.detectContentMediaType();
-            log.debug("decode media end %s %s", media, file);
-            return media;
-
+            return file.detectContentMediaType(stat);
         } catch (Exception e) {
             log.error(e);
             return null;
