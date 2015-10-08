@@ -12,7 +12,7 @@ import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
 
-final class DecodeImage extends DecodeBitmap {
+final class DecodeImage extends DecodeThumbnail {
 
     DecodeImage(
             File res,
@@ -52,7 +52,9 @@ final class DecodeImage extends DecodeBitmap {
 
         try (InputStream in = file.input()) {
             Bitmap bitmap = decodeStream(in, null, options(size));
-            return bitmap != null ? new Result(bitmap, size) : null;
+            return bitmap != null
+                    ? new Result(new Thumbnail(bitmap, thumbnailType()), size)
+                    : null;
         }
     }
 

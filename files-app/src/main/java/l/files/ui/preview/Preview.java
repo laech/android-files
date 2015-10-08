@@ -31,7 +31,8 @@ public final class Preview {
     public static Preview get(Context context) {
         synchronized (Preview.class) {
             if (instance == null) {
-                instance = new Preview(context);
+                File cacheDir = LocalFile.create(context.getExternalCacheDir());
+                instance = new Preview(context, cacheDir);
                 instance.cleanupAsync();
             }
         }
@@ -49,9 +50,9 @@ public final class Preview {
     final File cacheDir;
     final Context context;
 
-    private Preview(Context context) {
-        this.context = context;
-        this.cacheDir = LocalFile.create(context.getExternalCacheDir());
+    Preview(Context context, File cacheDir) {
+        this.context = requireNonNull(context);
+        this.cacheDir = requireNonNull(cacheDir);
         this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
         this.sizeCache = new RectCache(cacheDir);
         this.paletteCache = new PaletteCache(cacheDir);
@@ -80,22 +81,22 @@ public final class Preview {
     }
 
     @Nullable
-    public Bitmap getBitmap(File res, Stat stat, Rect constraint) {
+    public Thumbnail getThumbnail(File res, Stat stat, Rect constraint) {
         return thumbnailMemCache.get(res, stat, constraint);
     }
 
-    void putBitmap(File res, Stat stat, Rect constraint, Bitmap bitmap) {
-        thumbnailMemCache.put(res, stat, constraint, bitmap);
+    void putThumbnail(File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+        thumbnailMemCache.put(res, stat, constraint, thumbnail);
     }
 
     @Nullable
-    Bitmap getBitmapFromDisk(File res, Stat stat, Rect constraint) throws IOException {
+    Thumbnail getThumbnailFromDisk(File res, Stat stat, Rect constraint) throws IOException {
         return thumbnailDiskCache.get(res, stat, constraint);
     }
 
-    void putBitmapToDiskAsync(
-            File res, Stat stat, Rect constraint, Bitmap bitmap) {
-        thumbnailDiskCache.putAsync(res, stat, constraint, bitmap);
+    void putThumbnailToDiskAsync(
+            File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+        thumbnailDiskCache.putAsync(res, stat, constraint, thumbnail);
     }
 
     @Nullable
@@ -158,7 +159,6 @@ public final class Preview {
     }
 
     Rect decodeSize(File file) {
-        log.debug("decode size start %s", file);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
@@ -169,8 +169,6 @@ public final class Preview {
             log.warn(e);
             return null;
         }
-
-        log.debug("decode size end %s", file);
 
         if (options.outWidth > 0 && options.outHeight > 0) {
             return Rect.of(options.outWidth, options.outHeight);

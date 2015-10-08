@@ -2,7 +2,6 @@ package l.files.ui.preview;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.LruCache;
 
 import l.files.common.graphics.Rect;
@@ -11,9 +10,9 @@ import l.files.fs.Stat;
 
 import static android.content.Context.ACTIVITY_SERVICE;
 
-final class ThumbnailMemCache extends MemCache<Bitmap> {
+final class ThumbnailMemCache extends MemCache<Thumbnail> {
 
-    private final LruCache<String, Snapshot<Bitmap>> delegate;
+    private final LruCache<String, Snapshot<Thumbnail>> delegate;
 
     ThumbnailMemCache(Context context, float appMemoryPercentageToUseForCache) {
         if (appMemoryPercentageToUseForCache <= 0 ||
@@ -25,10 +24,10 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
         int megabytes = manager.getMemoryClass();
         int bytes = megabytes * 1024 * 1024;
         int size = (int) (bytes * appMemoryPercentageToUseForCache);
-        delegate = new LruCache<String, Snapshot<Bitmap>>(size) {
+        delegate = new LruCache<String, Snapshot<Thumbnail>>(size) {
             @Override
-            protected int sizeOf(String key, Snapshot<Bitmap> value) {
-                return value.get().getByteCount();
+            protected int sizeOf(String key, Snapshot<Thumbnail> value) {
+                return value.get().bitmap.getByteCount();
             }
         };
     }
@@ -44,7 +43,7 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     }
 
     @Override
-    LruCache<String, Snapshot<Bitmap>> delegate() {
+    LruCache<String, Snapshot<Thumbnail>> delegate() {
         return delegate;
     }
 

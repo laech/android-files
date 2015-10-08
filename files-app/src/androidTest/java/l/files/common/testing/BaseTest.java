@@ -26,7 +26,7 @@ public abstract class BaseTest extends InstrumentationTestCase {
                 delete(child);
             }
         }
-        assertTrue(file.delete());
+        assertTrue(file.delete() || !file.exists());
     }
 
     protected Context getContext() {

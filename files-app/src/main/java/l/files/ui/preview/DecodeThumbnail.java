@@ -11,10 +11,11 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static l.files.ui.preview.Preview.decodePalette;
+import static l.files.ui.preview.Thumbnail.Type.PICTURE;
 
-abstract class DecodeBitmap extends Decode {
+abstract class DecodeThumbnail extends Decode {
 
-    DecodeBitmap(
+    DecodeThumbnail(
             File res,
             Stat stat,
             Rect constraint,
@@ -23,13 +24,19 @@ abstract class DecodeBitmap extends Decode {
         super(res, stat, constraint, callback, context);
     }
 
+    boolean shouldScale() {
+        return true;
+    }
+
+    Thumbnail.Type thumbnailType() {
+        return PICTURE;
+    }
+
     @Override
     protected Void doInBackground(Object... params) {
         if (isCancelled()) {
             return null;
         }
-
-        log.verbose("decode start");
 
         Result result;
         try {
@@ -41,7 +48,7 @@ abstract class DecodeBitmap extends Decode {
 
         if (isCancelled()) {
             if (result != null) {
-                result.maybeScaled.recycle();
+                result.thumbnail.bitmap.recycle();
             }
             return null;
         }
@@ -55,24 +62,29 @@ abstract class DecodeBitmap extends Decode {
             publishProgress(result.originalSize);
         }
 
-        Rect scaledSize = result.originalSize.scale(constraint);
-        Bitmap scaledBitmap = createScaledBitmap(
-                result.maybeScaled,
-                scaledSize.width(),
-                scaledSize.height(),
-                true);
+        final Bitmap scaledBitmap;
+        if (shouldScale()) {
 
-        publishProgress(scaledBitmap);
+            Rect scaledSize = result.originalSize.scale(constraint);
+            scaledBitmap = createScaledBitmap(
+                    result.thumbnail.bitmap,
+                    scaledSize.width(),
+                    scaledSize.height(),
+                    true);
+
+        } else {
+            scaledBitmap = result.thumbnail.bitmap;
+        }
+
+        publishProgress(new Thumbnail(scaledBitmap, thumbnailType()));
 
         if (context.getPalette(file, stat, constraint) == null) {
             publishProgress(decodePalette(scaledBitmap));
         }
 
-        if (result.maybeScaled != scaledBitmap) {
-            result.maybeScaled.recycle();
+        if (result.thumbnail.bitmap != scaledBitmap) {
+            result.thumbnail.bitmap.recycle();
         }
-
-        log.verbose("decode end");
 
         if (isCancelled()) {
             return null;
@@ -83,7 +95,8 @@ abstract class DecodeBitmap extends Decode {
                         result.originalSize.height() > scaledBitmap.getHeight();
 
         if (scaledDown) {
-            context.putBitmapToDiskAsync(file, stat, constraint, scaledBitmap);
+            Thumbnail cache = new Thumbnail(scaledBitmap, result.thumbnail.type);
+            context.putThumbnailToDiskAsync(file, stat, constraint, cache);
         }
 
         return null;
@@ -93,11 +106,11 @@ abstract class DecodeBitmap extends Decode {
     abstract Result decode() throws IOException;
 
     static final class Result {
-        final Bitmap maybeScaled;
+        final Thumbnail thumbnail;
         final Rect originalSize;
 
-        Result(Bitmap maybeScaled, Rect originalSize) {
-            this.maybeScaled = maybeScaled;
+        Result(Thumbnail thumbnail, Rect originalSize) {
+            this.thumbnail = thumbnail;
             this.originalSize = originalSize;
         }
     }

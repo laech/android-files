@@ -14,7 +14,7 @@ import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
-abstract class DecodeMedia extends DecodeBitmap {
+abstract class DecodeMedia extends DecodeThumbnail {
 
     // No need to set UncaughtExceptionHandler to terminate
     // on exception already set by Android
@@ -51,7 +51,7 @@ abstract class DecodeMedia extends DecodeBitmap {
             Bitmap bitmap = decode(retriever);
             if (bitmap != null) {
                 Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-                return new Result(bitmap, size);
+                return new Result(new Thumbnail(bitmap, thumbnailType()), size);
             }
 
         } finally {

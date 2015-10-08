@@ -29,7 +29,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
-final class ThumbnailDiskCache extends Cache<Bitmap> {
+final class ThumbnailDiskCache extends Cache<Thumbnail> {
 
     private static final Logger log = Logger.get(ThumbnailDiskCache.class);
 
@@ -45,6 +45,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
      * of the cache...
      */
     private static final int DUMMY_BYTE = 0;
+
+    private static final int VERSION = 1;
 
     final File cacheDir;
 
@@ -115,12 +117,22 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     @Override
-    Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
+    Thumbnail get(File file, Stat stat, Rect constraint) throws IOException {
 
         log.verbose("read bitmap %s", file);
         File cache = cacheFile(file, stat, constraint);
         try (InputStream in = new BufferedInputStream(cache.input())) {
             in.read(); // read DUMMY_BYTE
+
+            int version = in.read();
+            if (version != VERSION) {
+                return null;
+            }
+
+            Thumbnail.Type type = Thumbnail.Type.ofCode(in.read());
+            if (type == null) {
+                return null;
+            }
 
             Bitmap bitmap = decodeStream(in);
 
@@ -139,7 +151,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             } catch (IOException ignore) {
             }
 
-            return bitmap;
+            return new Thumbnail(bitmap, type);
 
         } catch (FileNotFoundException e) {
             return null;
@@ -147,38 +159,40 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     @Override
-    Snapshot<Bitmap> put(
+    Snapshot<Thumbnail> put(
             File file,
             Stat stat,
             Rect constraint,
-            Bitmap bitmap) throws IOException {
+            Thumbnail thumbnail) throws IOException {
 
         File cache = cacheFile(file, stat, constraint);
         cache.createFiles();
         try (OutputStream out = new BufferedOutputStream(cache.output())) {
             out.write(DUMMY_BYTE);
-            bitmap.compress(WEBP, 100, out);
+            out.write(VERSION);
+            out.write(thumbnail.type.code);
+            thumbnail.bitmap.compress(WEBP, 100, out);
             log.verbose("write %s", file);
         }
         return null;
     }
 
-    public void putAsync(File res, Stat stat, Rect constraint, Bitmap bitmap) {
-        executor.execute(new WriteBitmap(
-                res, stat, constraint, new WeakReference<>(bitmap)));
+    public void putAsync(File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+        executor.execute(new WriteThumbnail(
+                res, stat, constraint, new WeakReference<>(thumbnail)));
     }
 
-    private final class WriteBitmap implements Runnable {
+    private final class WriteThumbnail implements Runnable {
         private final File res;
         private final Stat stat;
         private final Rect constraint;
-        private final WeakReference<Bitmap> ref;
+        private final WeakReference<Thumbnail> ref;
 
-        private WriteBitmap(
+        private WriteThumbnail(
                 File res,
                 Stat stat,
                 Rect constraint,
-                WeakReference<Bitmap> ref) {
+                WeakReference<Thumbnail> ref) {
             this.res = requireNonNull(res);
             this.stat = requireNonNull(stat);
             this.constraint = requireNonNull(constraint);
@@ -187,10 +201,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         @Override
         public void run() {
-            Bitmap bitmap = ref.get();
-            if (bitmap != null) {
+            Thumbnail thumbnail = ref.get();
+            if (thumbnail != null) {
                 try {
-                    put(res, stat, constraint, bitmap);
+                    put(res, stat, constraint, thumbnail);
                 } catch (IOException e) {
                     log.error(e);
                 }

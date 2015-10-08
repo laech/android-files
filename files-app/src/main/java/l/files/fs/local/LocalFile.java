@@ -481,8 +481,8 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public String detectContentMediaType(Stat stat) throws IOException {
-        return MagicDetector.INSTANCE.detect(this, stat);
+    public String detectMediaType(Stat stat) throws IOException {
+        return MetaMagicDetector.INSTANCE.detect(this, stat);
     }
 
     @Override

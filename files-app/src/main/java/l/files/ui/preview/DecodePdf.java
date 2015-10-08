@@ -44,8 +44,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static l.files.R.string.authority_pdfpreview;
+import static l.files.ui.preview.Thumbnail.Type.PICTURE;
 
-final class DecodePdf extends DecodeBitmap {
+final class DecodePdf extends DecodeThumbnail {
 
   /*
    * Some notes:
@@ -98,8 +99,13 @@ final class DecodePdf extends DecodeBitmap {
 
     @Override
     Result decode() throws IOException {
-        return PdfPreviewProvider.query(
-                context.context, signal, file, constraint);
+        try {
+            return PdfPreviewProvider.query(
+                    context.context, signal, file, constraint);
+        } catch (Throwable e) {
+            log.error(e);
+            throw e;
+        }
     }
 
     public static final class PdfPreviewProvider extends ContentProvider {
@@ -117,7 +123,7 @@ final class DecodePdf extends DecodeBitmap {
         private static final ExecutorService decoder = newSingleThreadExecutor();
 
         @Nullable
-        public static DecodeBitmap.Result query(
+        public static Result query(
                 Context context,
                 CancellationSignal signal,
                 File res,
@@ -150,7 +156,9 @@ final class DecodePdf extends DecodeBitmap {
                 int originalHeight = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORIGINAL_HEIGHT));
                 byte[] bytes = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_BITMAP_BYTES));
                 Bitmap bitmap = bitmapFromBytes(bytes);
-                return new DecodeBitmap.Result(bitmap, Rect.of(originalWidth, originalHeight));
+                return new Result(
+                        new Thumbnail(bitmap, PICTURE),
+                        Rect.of(originalWidth, originalHeight));
 
             } catch (OperationCanceledException e) {
                 log.debug(e.getMessage());
@@ -215,7 +223,7 @@ final class DecodePdf extends DecodeBitmap {
 
                     cursor
                             .newRow()
-                            .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.maybeScaled))
+                            .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.thumbnail.bitmap))
                             .add(COLUMN_ORIGINAL_WIDTH, result.originalSize.width())
                             .add(COLUMN_ORIGINAL_HEIGHT, result.originalSize.height());
 
@@ -323,7 +331,7 @@ final class DecodePdf extends DecodeBitmap {
                             ARGB_8888);
                     bitmap.eraseColor(WHITE);
                     page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
-                    return new Result(bitmap, originalSize);
+                    return new Result(new Thumbnail(bitmap, PICTURE), originalSize);
                 }
             }
         }

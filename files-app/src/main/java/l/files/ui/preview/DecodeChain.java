@@ -1,6 +1,5 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.Executor;
@@ -10,6 +9,7 @@ import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static l.files.ui.preview.DecodeApk.isApk;
 import static l.files.ui.preview.DecodeAudio.isAudio;
 import static l.files.ui.preview.DecodeImage.isImage;
 import static l.files.ui.preview.DecodePdf.isPdf;
@@ -48,7 +48,7 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        Bitmap cached = context.getBitmap(res, stat, constraint);
+        Thumbnail cached = context.getThumbnail(res, stat, constraint);
         if (cached != null) {
             callback.onPreviewAvailable(res, cached);
             return null;
@@ -77,7 +77,7 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        if (checkBitmapMemCache()) {
+        if (checkThumbnailMemCache()) {
             return null;
         }
 
@@ -93,7 +93,7 @@ final class DecodeChain extends Decode {
             }
         }
 
-        if (checkBitmapDiskCache()) {
+        if (checkThumbnailDiskCache()) {
             return null;
         }
 
@@ -126,6 +126,10 @@ final class DecodeChain extends Decode {
             publishProgress(new DecodeVideo(
                     file, stat, constraint, callback, context));
 
+        } else if (isApk(media)) {
+            publishProgress(new DecodeApk(
+                    file, stat, constraint, callback, context));
+
         } else {
             publishProgress(NoPreview.INSTANCE);
         }
@@ -149,27 +153,27 @@ final class DecodeChain extends Decode {
         return false;
     }
 
-    private boolean checkBitmapMemCache() {
-        Bitmap bitmap = context.getBitmap(file, stat, constraint);
-        if (bitmap != null) {
-            publishProgress(bitmap);
+    private boolean checkThumbnailMemCache() {
+        Thumbnail thumbnail = context.getThumbnail(file, stat, constraint);
+        if (thumbnail != null) {
+            publishProgress(thumbnail);
             return true;
         }
         return false;
     }
 
-    private boolean checkBitmapDiskCache() {
-        Bitmap bitmap = null;
+    private boolean checkThumbnailDiskCache() {
+        Thumbnail thumbnail = null;
         try {
-            bitmap = context.getBitmapFromDisk(file, stat, constraint);
+            thumbnail = context.getThumbnailFromDisk(file, stat, constraint);
         } catch (Exception e) {
             log.error(e);
         }
 
-        if (bitmap != null) {
-            publishProgress(bitmap);
+        if (thumbnail != null) {
+            publishProgress(thumbnail);
             if (context.getPalette(file, stat, constraint) == null) {
-                publishProgress(decodePalette(bitmap));
+                publishProgress(decodePalette(thumbnail.bitmap));
             }
             return true;
         }
@@ -192,7 +196,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-            return file.detectContentMediaType(stat);
+            return file.detectMediaType(stat);
         } catch (Exception e) {
             log.error(e);
             return null;

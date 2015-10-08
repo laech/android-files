@@ -3,25 +3,26 @@ package l.files.fs.local;
 import org.apache.tika.io.TaggedIOException;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import l.files.fs.File;
 
 /**
- * Detects the media type of the underlying file by reading it's header.
+ * Detects the media type of the underlying file using
+ * its properties and its content.
  */
-final class MagicDetector extends AbstractDetector {
+final class MetaMagicDetector extends AbstractDetector {
 
-    static final MagicDetector INSTANCE = new MagicDetector();
+    static final MetaMagicDetector INSTANCE = new MetaMagicDetector();
 
-    private MagicDetector() {
+    private MetaMagicDetector() {
     }
 
     @Override
     String detectFile(File file, l.files.fs.Stat stat) throws IOException {
 
-        try (InputStream in = file.input()) {
-            return TikaHolder.tika.detect(in);
+        try {
+
+            return TikaHolder.tika.detect(file.uri().toURL());
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {

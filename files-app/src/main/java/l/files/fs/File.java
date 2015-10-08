@@ -278,9 +278,10 @@ public interface File extends Parcelable {
     String detectBasicMediaType(Stat stat) throws IOException;
 
     /**
-     * Reads the content of this file to determine its media type.
+     * Detects the content type of this file based on its properties
+     * and its content.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    String detectContentMediaType(Stat stat) throws IOException;
+    String detectMediaType(Stat stat) throws IOException;
 
 }

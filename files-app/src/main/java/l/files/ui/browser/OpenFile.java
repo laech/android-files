@@ -34,7 +34,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     @Override
     protected Object doInBackground(Void... params) {
         try {
-            return file.detectContentMediaType(stat);
+            return file.detectMediaType(stat);
         } catch (IOException e) {
             return e;
         }

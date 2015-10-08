@@ -1,0 +1,84 @@
+package l.files.ui.preview;
+
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+
+import java.io.IOException;
+
+import l.files.common.graphics.Rect;
+import l.files.fs.File;
+import l.files.fs.Stat;
+
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.createBitmap;
+import static l.files.ui.preview.Thumbnail.Type.ICON;
+
+final class DecodeApk extends DecodeThumbnail {
+
+    DecodeApk(
+            File file,
+            Stat stat,
+            Rect constraint,
+            PreviewCallback callback,
+            Preview context) {
+        super(file, stat, constraint, callback, context);
+    }
+
+    static boolean isApk(String mediaType) {
+        return mediaType.equals("application/vnd.android.package-archive");
+    }
+
+    @Override
+    boolean shouldScale() {
+        return false;
+    }
+
+    @Override
+    Thumbnail.Type thumbnailType() {
+        return ICON;
+    }
+
+    @Override
+    Result decode() throws IOException {
+        Drawable drawable = loadApkIcon();
+        Bitmap bitmap = toBitmap(drawable);
+        Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
+        return new Result(new Thumbnail(bitmap, thumbnailType()), size);
+    }
+
+    private Drawable loadApkIcon() {
+        PackageManager manager = context.context.getPackageManager();
+        PackageInfo info = manager.getPackageArchiveInfo(file.path(), 0);
+        ApplicationInfo app = info.applicationInfo;
+        app.sourceDir = app.publicSourceDir = file.path();
+        return app.loadIcon(manager);
+    }
+
+    @NonNull
+    private Bitmap toBitmap(Drawable drawable) {
+
+        Bitmap bitmap = createBitmap(
+                context.displayMetrics,
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(),
+                ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
+    @Override
+    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
+        return execute(THREAD_POOL_EXECUTOR);
+    }
+
+}

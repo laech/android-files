@@ -1,22 +1,22 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
-
 import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.graphics.Bitmap.createBitmap;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.preview.Thumbnail.Type.PICTURE;
 
 public final class ThumbnailMemCacheTest
-        extends MemCacheTest<Bitmap, ThumbnailMemCache> {
+        extends MemCacheTest<Thumbnail, ThumbnailMemCache> {
 
     public void test_constraint_is_used_as_part_of_key() throws Exception {
         File res = dir1();
         Stat stat = res.stat(NOFOLLOW);
         Rect constraint = newConstraint();
-        Bitmap value = newValue();
+        Thumbnail value = newValue();
         cache.put(res, stat, constraint, value);
         assertEquals(value, cache.get(res, stat, constraint));
         assertNull(cache.get(res, stat, newConstraint()));
@@ -29,7 +29,7 @@ public final class ThumbnailMemCacheTest
     }
 
     @Override
-    Bitmap newValue() {
-        return Bitmap.createBitmap(1, 1, ARGB_8888);
+    Thumbnail newValue() {
+        return new Thumbnail(createBitmap(1, 1, ARGB_8888), PICTURE);
     }
 }

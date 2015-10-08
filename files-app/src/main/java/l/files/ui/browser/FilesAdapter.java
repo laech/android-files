@@ -3,7 +3,6 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -39,6 +38,7 @@ import l.files.ui.mode.Selectable;
 import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
+import l.files.ui.preview.Thumbnail;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
@@ -78,6 +78,7 @@ import static l.files.common.view.Views.find;
 import static l.files.ui.Icons.defaultDirectoryIconStringId;
 import static l.files.ui.Icons.defaultFileIconStringId;
 import static l.files.ui.Icons.fileIconStringId;
+import static l.files.ui.preview.Thumbnail.Type.ICON;
 
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         implements Selectable {
@@ -226,6 +227,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         private final TextView symlink;
         private final ImageView preview;
         private final View previewContainer;
+        private final View previewContainerSpaceTop;
         private final View paletteContainer;
 
         private final int animateDuration;
@@ -247,6 +249,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             this.symlink = find(R.id.symlink, this);
             this.preview = find(R.id.preview, this);
             this.previewContainer = find(R.id.preview_container, this);
+            this.previewContainerSpaceTop = find(R.id.preview_container_space_top, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
             this.animateDuration = itemView.getResources().getInteger(config_shortAnimTime);
@@ -370,9 +373,9 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 updatePaletteColor(TRANSPARENT);
             }
 
-            Bitmap bitmap = decorator.getBitmap(res, stat, constraint);
-            if (bitmap != null) {
-                preview.setImageBitmap(bitmap);
+            Thumbnail thumbnail = decorator.getThumbnail(res, stat, constraint);
+            if (thumbnail != null) {
+                setPreviewImage(thumbnail);
                 showPreviewContainer(true);
                 return;
             }
@@ -428,7 +431,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         @Override
         public void onSizeAvailable(File item, Rect size) {
             if (Objects.equals(item, itemId())) {
-                previewContainer.setVisibility(VISIBLE);
+                showPreviewContainer(true);
                 preview.setImageDrawable(
                         new SizedColorDrawable(TRANSPARENT, size.scale(constraint)));
             }
@@ -455,13 +458,19 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewAvailable(File item, Bitmap bitmap) {
+        public void onPreviewAvailable(File item, Thumbnail thumbnail) {
             if (Objects.equals(item, itemId())) {
                 showPreviewContainer(true);
-                preview.setImageBitmap(bitmap);
+                setPreviewImage(thumbnail);
                 preview.setAlpha(0f);
                 preview.animate().alpha(1).setDuration(animateDuration);
             }
+        }
+
+        private void setPreviewImage(Thumbnail thumbnail) {
+            preview.setImageBitmap(thumbnail.bitmap);
+            previewContainerSpaceTop.setVisibility(
+                    thumbnail.type == ICON ? VISIBLE : GONE);
         }
 
         @Override

@@ -1,6 +1,5 @@
 .*
 *.iml
-*.apk
 bin
 build
 local.properties
