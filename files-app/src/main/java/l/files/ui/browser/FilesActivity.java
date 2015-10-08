@@ -260,7 +260,7 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     private void show(final File file, @Nullable final Stat stat) {
-        if (stat != null) {
+        if (stat != null && !stat.isSymbolicLink()) {
             doShow(file, stat);
             return;
         }
