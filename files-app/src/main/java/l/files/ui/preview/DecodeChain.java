@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.Executor;
@@ -48,7 +49,7 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        Thumbnail cached = context.getThumbnail(res, stat, constraint);
+        Bitmap cached = context.getThumbnail(res, stat, constraint);
         if (cached != null) {
             callback.onPreviewAvailable(res, cached);
             return null;
@@ -154,7 +155,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkThumbnailMemCache() {
-        Thumbnail thumbnail = context.getThumbnail(file, stat, constraint);
+        Bitmap thumbnail = context.getThumbnail(file, stat, constraint);
         if (thumbnail != null) {
             publishProgress(thumbnail);
             return true;
@@ -163,7 +164,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkThumbnailDiskCache() {
-        Thumbnail thumbnail = null;
+        Bitmap thumbnail = null;
         try {
             thumbnail = context.getThumbnailFromDisk(file, stat, constraint);
         } catch (Exception e) {
@@ -173,7 +174,7 @@ final class DecodeChain extends Decode {
         if (thumbnail != null) {
             publishProgress(thumbnail);
             if (context.getPalette(file, stat, constraint) == null) {
-                publishProgress(decodePalette(thumbnail.bitmap));
+                publishProgress(decodePalette(thumbnail));
             }
             return true;
         }

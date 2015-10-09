@@ -44,7 +44,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static l.files.R.string.authority_pdfpreview;
-import static l.files.ui.preview.Thumbnail.Type.PICTURE;
 
 final class DecodePdf extends DecodeThumbnail {
 
@@ -156,9 +155,7 @@ final class DecodePdf extends DecodeThumbnail {
                 int originalHeight = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORIGINAL_HEIGHT));
                 byte[] bytes = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_BITMAP_BYTES));
                 Bitmap bitmap = bitmapFromBytes(bytes);
-                return new Result(
-                        new Thumbnail(bitmap, PICTURE),
-                        Rect.of(originalWidth, originalHeight));
+                return new Result(bitmap, Rect.of(originalWidth, originalHeight));
 
             } catch (OperationCanceledException e) {
                 log.debug(e.getMessage());
@@ -223,7 +220,7 @@ final class DecodePdf extends DecodeThumbnail {
 
                     cursor
                             .newRow()
-                            .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.thumbnail.bitmap))
+                            .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.maybeScaled))
                             .add(COLUMN_ORIGINAL_WIDTH, result.originalSize.width())
                             .add(COLUMN_ORIGINAL_HEIGHT, result.originalSize.height());
 
@@ -331,7 +328,7 @@ final class DecodePdf extends DecodeThumbnail {
                             ARGB_8888);
                     bitmap.eraseColor(WHITE);
                     page.render(bitmap, null, null, RENDER_MODE_FOR_DISPLAY);
-                    return new Result(new Thumbnail(bitmap, PICTURE), originalSize);
+                    return new Result(bitmap, originalSize);
                 }
             }
         }

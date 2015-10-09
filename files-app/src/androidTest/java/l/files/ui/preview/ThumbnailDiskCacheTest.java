@@ -1,5 +1,7 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
+
 import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -13,13 +15,13 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class ThumbnailDiskCacheTest
-        extends CacheTest<Thumbnail, ThumbnailDiskCache> {
+        extends CacheTest<Bitmap, ThumbnailDiskCache> {
 
     public void test_cleans_old_cache_files_not_accessed_in_30_days() throws Exception {
         File res = dir1();
         Stat stat = res.stat(NOFOLLOW);
         Rect constraint = newConstraint();
-        Thumbnail value = newValue();
+        Bitmap value = newValue();
 
         File cacheFile = cache.cacheFile(res, stat, constraint);
         assertFalse(cacheFile.exists(NOFOLLOW));
@@ -46,7 +48,7 @@ public final class ThumbnailDiskCacheTest
         File res = dir1();
         Stat stat = res.stat(NOFOLLOW);
         Rect constraint = newConstraint();
-        Thumbnail value = newValue();
+        Bitmap value = newValue();
 
         cache.put(res, stat, constraint, value);
 
@@ -66,7 +68,7 @@ public final class ThumbnailDiskCacheTest
         File res = dir1();
         Stat stat = res.stat(NOFOLLOW);
         Rect constraint = newConstraint();
-        Thumbnail value = newValue();
+        Bitmap value = newValue();
         cache.put(res, stat, constraint, value);
         assertValueEquals(value, cache.get(res, stat, constraint));
         assertNull(cache.get(res, stat, newConstraint()));
@@ -74,15 +76,14 @@ public final class ThumbnailDiskCacheTest
     }
 
     @Override
-    void assertValueEquals(Thumbnail a, Thumbnail b) {
+    void assertValueEquals(Bitmap a, Bitmap b) {
         assertNotNull(a);
         assertNotNull(b);
-        assertEquals(a.type, b.type);
-        assertEquals(a.bitmap.getWidth(), b.bitmap.getWidth());
-        assertEquals(a.bitmap.getHeight(), b.bitmap.getHeight());
-        for (int i = 0; i < a.bitmap.getWidth(); i++) {
-            for (int j = 0; j < a.bitmap.getHeight(); j++) {
-                assertEquals(a.bitmap.getPixel(i, j), b.bitmap.getPixel(i, j));
+        assertEquals(a.getWidth(), b.getWidth());
+        assertEquals(a.getHeight(), b.getHeight());
+        for (int i = 0; i < a.getWidth(); i++) {
+            for (int j = 0; j < a.getHeight(); j++) {
+                assertEquals(a.getPixel(i, j), b.getPixel(i, j));
             }
         }
     }
@@ -93,12 +94,11 @@ public final class ThumbnailDiskCacheTest
     }
 
     @Override
-    Thumbnail newValue() {
-        return new Thumbnail(
-                createBitmap(
-                        random.nextInt(5) + 1,
-                        random.nextInt(10) + 1,
-                        ARGB_8888),
-                Thumbnail.Type.PICTURE);
+    Bitmap newValue() {
+        return createBitmap(
+                random.nextInt(5) + 1,
+                random.nextInt(10) + 1,
+                ARGB_8888);
     }
+
 }

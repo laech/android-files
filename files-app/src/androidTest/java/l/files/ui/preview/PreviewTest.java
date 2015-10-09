@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
 import org.apache.tika.io.IOUtils;
@@ -67,7 +68,7 @@ public final class PreviewTest extends FileBaseTest {
         int millis = 5000;
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), notNull(Rect.class));
         verify(callback, timeout(millis)).onPaletteAvailable(eq(file), notNull(Palette.class));
-        verify(callback, timeout(millis)).onPreviewAvailable(eq(file), notNull(Thumbnail.class));
+        verify(callback, timeout(millis)).onPreviewAvailable(eq(file), notNull(Bitmap.class));
         verify(callback, never()).onPreviewFailed(eq(file));
     }
 

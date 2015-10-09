@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
 import l.files.common.graphics.Rect;
@@ -11,7 +12,7 @@ public interface PreviewCallback {
 
     void onPaletteAvailable(File item, Palette palette);
 
-    void onPreviewAvailable(File item, Thumbnail thumbnail);
+    void onPreviewAvailable(File item, Bitmap thumbnail);
 
     void onPreviewFailed(File item);
 

@@ -81,21 +81,21 @@ public final class Preview {
     }
 
     @Nullable
-    public Thumbnail getThumbnail(File res, Stat stat, Rect constraint) {
+    public Bitmap getThumbnail(File res, Stat stat, Rect constraint) {
         return thumbnailMemCache.get(res, stat, constraint);
     }
 
-    void putThumbnail(File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+    void putThumbnail(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
         thumbnailMemCache.put(res, stat, constraint, thumbnail);
     }
 
     @Nullable
-    Thumbnail getThumbnailFromDisk(File res, Stat stat, Rect constraint) throws IOException {
+    Bitmap getThumbnailFromDisk(File res, Stat stat, Rect constraint) throws IOException {
         return thumbnailDiskCache.get(res, stat, constraint);
     }
 
     void putThumbnailToDiskAsync(
-            File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+            File res, Stat stat, Rect constraint, Bitmap thumbnail) {
         thumbnailDiskCache.putAsync(res, stat, constraint, thumbnail);
     }
 

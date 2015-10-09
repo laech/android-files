@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v7.graphics.Palette;
 
@@ -59,9 +60,9 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 callback.onPaletteAvailable(file, (Palette) value);
                 context.putPalette(file, stat, constraint, (Palette) value);
 
-            } else if (value instanceof Thumbnail) {
-                callback.onPreviewAvailable(file, (Thumbnail) value);
-                context.putThumbnail(file, stat, constraint, (Thumbnail) value);
+            } else if (value instanceof Bitmap) {
+                callback.onPreviewAvailable(file, (Bitmap) value);
+                context.putThumbnail(file, stat, constraint, (Bitmap) value);
                 context.putPreviewable(file, stat, constraint, true);
 
             } else if (value instanceof NoPreview) {

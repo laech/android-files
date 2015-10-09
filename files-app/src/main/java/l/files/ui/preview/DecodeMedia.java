@@ -51,7 +51,7 @@ abstract class DecodeMedia extends DecodeThumbnail {
             Bitmap bitmap = decode(retriever);
             if (bitmap != null) {
                 Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-                return new Result(new Thumbnail(bitmap, thumbnailType()), size);
+                return new Result(bitmap, size);
             }
 
         } finally {

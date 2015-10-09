@@ -17,7 +17,6 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
-import static l.files.ui.preview.Thumbnail.Type.ICON;
 
 final class DecodeApk extends DecodeThumbnail {
 
@@ -40,16 +39,11 @@ final class DecodeApk extends DecodeThumbnail {
     }
 
     @Override
-    Thumbnail.Type thumbnailType() {
-        return ICON;
-    }
-
-    @Override
     Result decode() throws IOException {
         Drawable drawable = loadApkIcon();
         Bitmap bitmap = toBitmap(drawable);
         Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
-        return new Result(new Thumbnail(bitmap, thumbnailType()), size);
+        return new Result(bitmap, size);
     }
 
     private Drawable loadApkIcon() {

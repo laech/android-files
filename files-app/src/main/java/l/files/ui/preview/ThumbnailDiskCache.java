@@ -29,7 +29,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
-final class ThumbnailDiskCache extends Cache<Thumbnail> {
+final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     private static final Logger log = Logger.get(ThumbnailDiskCache.class);
 
@@ -46,7 +46,7 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
      */
     private static final int DUMMY_BYTE = 0;
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     final File cacheDir;
 
@@ -117,7 +117,7 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
     }
 
     @Override
-    Thumbnail get(File file, Stat stat, Rect constraint) throws IOException {
+    Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
 
         log.verbose("read bitmap %s", file);
         File cache = cacheFile(file, stat, constraint);
@@ -129,13 +129,7 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
                 return null;
             }
 
-            Thumbnail.Type type = Thumbnail.Type.ofCode(in.read());
-            if (type == null) {
-                return null;
-            }
-
             Bitmap bitmap = decodeStream(in);
-
             if (bitmap == null) {
                 return null;
             }
@@ -151,7 +145,7 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
             } catch (IOException ignore) {
             }
 
-            return new Thumbnail(bitmap, type);
+            return bitmap;
 
         } catch (FileNotFoundException e) {
             return null;
@@ -159,25 +153,24 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
     }
 
     @Override
-    Snapshot<Thumbnail> put(
+    Snapshot<Bitmap> put(
             File file,
             Stat stat,
             Rect constraint,
-            Thumbnail thumbnail) throws IOException {
+            Bitmap thumbnail) throws IOException {
 
         File cache = cacheFile(file, stat, constraint);
         cache.createFiles();
         try (OutputStream out = new BufferedOutputStream(cache.output())) {
             out.write(DUMMY_BYTE);
             out.write(VERSION);
-            out.write(thumbnail.type.code);
-            thumbnail.bitmap.compress(WEBP, 100, out);
+            thumbnail.compress(WEBP, 100, out);
             log.verbose("write %s", file);
         }
         return null;
     }
 
-    public void putAsync(File res, Stat stat, Rect constraint, Thumbnail thumbnail) {
+    public void putAsync(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
         executor.execute(new WriteThumbnail(
                 res, stat, constraint, new WeakReference<>(thumbnail)));
     }
@@ -186,13 +179,13 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
         private final File res;
         private final Stat stat;
         private final Rect constraint;
-        private final WeakReference<Thumbnail> ref;
+        private final WeakReference<Bitmap> ref;
 
         private WriteThumbnail(
                 File res,
                 Stat stat,
                 Rect constraint,
-                WeakReference<Thumbnail> ref) {
+                WeakReference<Bitmap> ref) {
             this.res = requireNonNull(res);
             this.stat = requireNonNull(stat);
             this.constraint = requireNonNull(constraint);
@@ -201,7 +194,7 @@ final class ThumbnailDiskCache extends Cache<Thumbnail> {
 
         @Override
         public void run() {
-            Thumbnail thumbnail = ref.get();
+            Bitmap thumbnail = ref.get();
             if (thumbnail != null) {
                 try {
                     put(res, stat, constraint, thumbnail);
