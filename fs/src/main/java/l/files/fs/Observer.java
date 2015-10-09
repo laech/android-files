@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import android.support.annotation.Nullable;
-
 public interface Observer {
 
     /**
@@ -9,6 +7,6 @@ public interface Observer {
      *              null the event is for the child of the observed file with
      *              that this name
      */
-    void onEvent(Event event, @Nullable String child);
+    void onEvent(Event event, String child);
 
 }
