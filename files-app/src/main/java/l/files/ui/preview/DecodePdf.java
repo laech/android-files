@@ -46,6 +46,26 @@ import static l.files.R.string.authority_pdfpreview;
 
 final class DecodePdf extends DecodeThumbnail {
 
+    static final Previewer PREVIEWER = new Previewer() {
+
+        @Override
+        public boolean accept(String mediaType) {
+            return mediaType.equals("application/pdf");
+        }
+
+
+        @Override
+        public Decode create(
+                File res,
+                Stat stat,
+                Rect constraint,
+                PreviewCallback callback,
+                Preview context) {
+            return new DecodePdf(res, stat, constraint, callback, context);
+        }
+
+    };
+
   /*
    * Some notes:
    *
@@ -89,10 +109,6 @@ final class DecodePdf extends DecodeThumbnail {
     @Override
     DecodePdf executeOnPreferredExecutor() {
         return (DecodePdf) executeOnExecutor(requestPool);
-    }
-
-    static boolean isPdf(String media) {
-        return media.equals("application/pdf");
     }
 
     @Override

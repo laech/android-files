@@ -14,6 +14,25 @@ import static android.graphics.BitmapFactory.decodeStream;
 
 final class DecodeImage extends DecodeThumbnail {
 
+    static final Previewer PREVIEWER = new Previewer() {
+
+        @Override
+        public boolean accept(String mediaType) {
+            return mediaType.startsWith("image/");
+        }
+
+        @Override
+        public Decode create(
+                File res,
+                Stat stat,
+                Rect constraint,
+                PreviewCallback callback,
+                Preview context) {
+            return new DecodeImage(res, stat, constraint, callback, context);
+        }
+
+    };
+
     DecodeImage(
             File res,
             Stat stat,
@@ -21,10 +40,6 @@ final class DecodeImage extends DecodeThumbnail {
             PreviewCallback callback,
             Preview context) {
         super(res, stat, constraint, callback, context);
-    }
-
-    static boolean isImage(String media) {
-        return media.startsWith("image/");
     }
 
     @Override

@@ -20,6 +20,25 @@ import static android.graphics.Bitmap.createBitmap;
 
 final class DecodeApk extends DecodeThumbnail {
 
+    static final Previewer PREVIEWER = new Previewer() {
+
+        @Override
+        public boolean accept(String mediaType) {
+            return mediaType.equals("application/vnd.android.package-archive");
+        }
+
+        @Override
+        public Decode create(
+                File res,
+                Stat stat,
+                Rect constraint,
+                PreviewCallback callback,
+                Preview context) {
+            return new DecodeApk(res, stat, constraint, callback, context);
+        }
+
+    };
+
     DecodeApk(
             File file,
             Stat stat,
@@ -27,10 +46,6 @@ final class DecodeApk extends DecodeThumbnail {
             PreviewCallback callback,
             Preview context) {
         super(file, stat, constraint, callback, context);
-    }
-
-    static boolean isApk(String mediaType) {
-        return mediaType.equals("application/vnd.android.package-archive");
     }
 
     @Override

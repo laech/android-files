@@ -10,11 +10,6 @@ import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static l.files.ui.preview.DecodeApk.isApk;
-import static l.files.ui.preview.DecodeAudio.isAudio;
-import static l.files.ui.preview.DecodeImage.isImage;
-import static l.files.ui.preview.DecodePdf.isPdf;
-import static l.files.ui.preview.DecodeVideo.isVideo;
 import static l.files.ui.preview.Preview.decodePalette;
 
 final class DecodeChain extends Decode {
@@ -22,6 +17,14 @@ final class DecodeChain extends Decode {
     // No need to set UncaughtExceptionHandler to terminate
     // on exception already set by Android
     private static final Executor executor = newFixedThreadPool(5);
+
+    private static final Previewer[] PREVIEWERS = {
+            DecodeImage.PREVIEWER,
+            DecodePdf.PREVIEWER,
+            DecodeApk.PREVIEWER,
+            DecodeAudio.PREVIEWER,
+            DecodeVideo.PREVIEWER
+    };
 
     DecodeChain(
             File res,
@@ -111,29 +114,15 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        if (isImage(media)) {
-            publishProgress(new DecodeImage(
-                    file, stat, constraint, callback, context));
-
-        } else if (isPdf(media)) {
-            publishProgress(new DecodePdf(
-                    file, stat, constraint, callback, context));
-
-        } else if (isAudio(media)) {
-            publishProgress(new DecodeAudio(
-                    file, stat, constraint, callback, context));
-
-        } else if (isVideo(media)) {
-            publishProgress(new DecodeVideo(
-                    file, stat, constraint, callback, context));
-
-        } else if (isApk(media)) {
-            publishProgress(new DecodeApk(
-                    file, stat, constraint, callback, context));
-
-        } else {
-            publishProgress(NoPreview.INSTANCE);
+        for (Previewer previewer : PREVIEWERS) {
+            if (previewer.accept(media)) {
+                publishProgress(previewer.create(
+                        file, stat, constraint, callback, context));
+                return null;
+            }
         }
+
+        publishProgress(NoPreview.INSTANCE);
 
         return null;
     }

@@ -11,6 +11,25 @@ import static android.graphics.BitmapFactory.decodeByteArray;
 
 final class DecodeAudio extends DecodeMedia {
 
+    static final Previewer PREVIEWER = new Previewer() {
+
+        @Override
+        public boolean accept(String mediaType) {
+            return mediaType.startsWith("audio/");
+        }
+
+        @Override
+        public Decode create(
+                File res,
+                Stat stat,
+                Rect constraint,
+                PreviewCallback callback,
+                Preview context) {
+            return new DecodeAudio(res, stat, constraint, callback, context);
+        }
+
+    };
+
     DecodeAudio(
             File res,
             Stat stat,
@@ -18,10 +37,6 @@ final class DecodeAudio extends DecodeMedia {
             PreviewCallback callback,
             Preview context) {
         super(res, stat, constraint, callback, context);
-    }
-
-    static boolean isAudio(String media) {
-        return media.startsWith("audio/");
     }
 
     @Override

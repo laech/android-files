@@ -9,6 +9,25 @@ import l.files.fs.Stat;
 
 final class DecodeVideo extends DecodeMedia {
 
+    static final Previewer PREVIEWER = new Previewer() {
+
+        @Override
+        public boolean accept(String mediaType) {
+            return mediaType.startsWith("video/");
+        }
+
+        @Override
+        public Decode create(
+                File res,
+                Stat stat,
+                Rect constraint,
+                PreviewCallback callback,
+                Preview context) {
+            return new DecodeVideo(res, stat, constraint, callback, context);
+        }
+
+    };
+
     DecodeVideo(
             File res,
             Stat stat,
@@ -16,10 +35,6 @@ final class DecodeVideo extends DecodeMedia {
             PreviewCallback callback,
             Preview context) {
         super(res, stat, constraint, callback, context);
-    }
-
-    static boolean isVideo(String media) {
-        return media.startsWith("video/");
     }
 
     @Override
