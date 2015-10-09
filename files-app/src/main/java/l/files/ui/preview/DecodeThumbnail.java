@@ -27,6 +27,10 @@ abstract class DecodeThumbnail extends Decode {
         return true;
     }
 
+    boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
+        return true;
+    }
+
     @Override
     protected Void doInBackground(Object... params) {
         if (isCancelled()) {
@@ -85,11 +89,7 @@ abstract class DecodeThumbnail extends Decode {
             return null;
         }
 
-        boolean scaledDown =
-                result.originalSize.width() > scaledBitmap.getWidth() ||
-                        result.originalSize.height() > scaledBitmap.getHeight();
-
-        if (scaledDown) {
+        if (shouldCacheToDisk(result, scaledBitmap)) {
             context.putThumbnailToDiskAsync(file, stat, constraint, scaledBitmap);
         }
 

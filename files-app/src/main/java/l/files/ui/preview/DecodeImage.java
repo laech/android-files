@@ -33,6 +33,12 @@ final class DecodeImage extends DecodeThumbnail {
     }
 
     @Override
+    boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
+        return result.originalSize.width() > scaledBitmap.getWidth() ||
+                result.originalSize.height() > scaledBitmap.getHeight();
+    }
+
+    @Override
     Result decode() throws IOException {
         Rect size = context.getSize(file, stat, constraint);
         if (size == null) {
