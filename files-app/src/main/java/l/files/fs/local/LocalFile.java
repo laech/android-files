@@ -19,9 +19,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import l.files.common.base.Consumer;
 import l.files.fs.BaseFile;
 import l.files.fs.File;
+import l.files.fs.FileConsumer;
 import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -159,7 +159,7 @@ public abstract class LocalFile extends BaseFile {
     public Closeable observe(
             LinkOption option,
             Observer observer,
-            Consumer<File> childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException {
 
         return LocalObservable.observe(
                 this, option, observer, childrenConsumer);

@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import l.files.common.base.Consumer;
 import l.files.fs.Event;
 import l.files.fs.File;
+import l.files.fs.FileConsumer;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Stream;
@@ -178,7 +178,7 @@ final class LocalObservable extends Native
             LocalFile file,
             LinkOption option,
             Observer observer,
-            Consumer<File> childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException {
 
         requireNonNull(file, "root");
         requireNonNull(option, "option");
@@ -257,7 +257,7 @@ final class LocalObservable extends Native
             LocalFile file,
             LinkOption option,
             LocalObservable observable,
-            Consumer<File> childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException {
 
         try (Stream<Dirent> stream = Dirent.stream(file, option)) {
             for (Dirent child : stream) {
@@ -266,7 +266,7 @@ final class LocalObservable extends Native
                     return;
                 }
 
-                childrenConsumer.apply(file.resolve(child.name()));
+                childrenConsumer.accept(file.resolve(child.name()));
 
                 if (child.type() == DT_DIR) {
                     try {

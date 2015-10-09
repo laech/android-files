@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.common.base.Consumer;
 import l.files.fs.Event;
 import l.files.fs.File;
+import l.files.fs.FileConsumer;
 import l.files.fs.Observer;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
@@ -218,10 +218,10 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         children.add(child);
     }
 
-    private Consumer<File> collectInto(final List<File> children) {
-        return new Consumer<File>() {
+    private FileConsumer collectInto(final List<File> children) {
+        return new FileConsumer() {
             @Override
-            public void apply(File child) {
+            public void accept(File child) {
                 checkedAdd(children, child);
             }
         };

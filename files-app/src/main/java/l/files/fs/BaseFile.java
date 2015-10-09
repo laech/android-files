@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import l.files.common.base.Consumer;
-
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -40,9 +38,9 @@ public abstract class BaseFile implements File {
     @Override
     public Closeable observe(LinkOption option, Observer observer) throws IOException {
 
-        return observe(option, observer, new Consumer<File>() {
+        return observe(option, observer, new FileConsumer() {
             @Override
-            public void apply(File input) {
+            public void accept(File file) {
             }
         });
 

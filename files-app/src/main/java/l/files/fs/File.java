@@ -13,8 +13,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 
-import l.files.common.base.Consumer;
-
 /**
  * Represents a file system file, such as a file or directory.
  */
@@ -133,7 +131,7 @@ public interface File extends Parcelable {
     Closeable observe(
             LinkOption option,
             Observer observer,
-            Consumer<File> childrenConsumer) throws IOException;
+            FileConsumer childrenConsumer) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.
