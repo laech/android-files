@@ -1,7 +1,7 @@
 package l.files.operations;
 
 import l.files.fs.File;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.fs.LinkOption.NOFOLLOW;

@@ -9,7 +9,7 @@ import java.util.Locale;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;

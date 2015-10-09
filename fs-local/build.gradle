@@ -11,6 +11,10 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        ndk {
+            moduleName 'fslocal'
+            ldLibs 'log'
+        }
     }
 
     packagingOptions {
@@ -22,6 +26,9 @@ android {
 }
 
 dependencies {
+
+    compile project(':fs')
+    compile 'org.apache.tika:tika-core:1.9'
 
     apt 'com.google.auto.value:auto-value:1.1'
     provided 'com.google.auto.value:auto-value:1.1'

@@ -10,7 +10,7 @@ import java.io.OutputStream;
 
 import l.files.common.graphics.Rect;
 import l.files.fs.File;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.mockito.Matchers.eq;

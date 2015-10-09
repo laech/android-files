@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import android.support.annotation.Nullable;
-
 import com.google.auto.value.AutoValue;
 
 import java.io.Closeable;
@@ -526,7 +524,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         }
 
         @Override
-        public void onEvent(Event event, @Nullable String child) {
+        public void onEvent(Event event, String child) {
             File target = child == null
                     ? file
                     : file.resolve(child);

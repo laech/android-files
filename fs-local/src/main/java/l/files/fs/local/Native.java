@@ -7,7 +7,7 @@ class Native {
     }
 
     synchronized static void load() {
-        System.loadLibrary("files");
+        System.loadLibrary("fslocal");
     }
 
 }

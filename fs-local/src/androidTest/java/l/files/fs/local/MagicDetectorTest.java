@@ -7,7 +7,6 @@ import l.files.fs.File;
 import l.files.fs.Permission;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static l.files.common.testing.Tests.assertExists;
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
@@ -31,7 +30,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
 
     public void test_detects_special_file_as_octet_stream() throws Exception {
         java.io.File file = new java.io.File("/proc/1/maps");
-        assertExists(file);
+        assertTrue(file.exists());
         try {
             detector().detect(LocalFile.create(file));
             fail();

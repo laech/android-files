@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import java.util.HashSet;
 
 import l.files.fs.File;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;

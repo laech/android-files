@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.File;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 import l.files.operations.OperationService.TaskListener;
 
 import static java.lang.System.currentTimeMillis;

@@ -6,7 +6,7 @@ import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.fs.local.FileBaseTest;
+import l.files.common.testing.FileBaseTest;
 
 import static java.lang.System.currentTimeMillis;
 import static l.files.fs.LinkOption.NOFOLLOW;
