@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;

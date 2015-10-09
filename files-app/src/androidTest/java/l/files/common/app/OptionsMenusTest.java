@@ -1,6 +1,6 @@
 package l.files.common.app;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 
 import static org.mockito.Mockito.mock;
 

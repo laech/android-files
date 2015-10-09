@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.File;
-import l.files.common.testing.FileBaseTest;
+import l.files.testing.fs.FileBaseTest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

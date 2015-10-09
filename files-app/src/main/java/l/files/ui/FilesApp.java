@@ -6,7 +6,7 @@ import android.os.StrictMode.ThreadPolicy;
 import android.os.StrictMode.VmPolicy;
 
 import l.files.operations.ui.OperationsUi;
-import l.files.ui.preview.Preview;
+import l.files.preview.Preview;
 
 import static l.files.BuildConfig.DEBUG;
 

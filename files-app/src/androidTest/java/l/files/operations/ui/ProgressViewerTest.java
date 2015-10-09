@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 import l.files.R;
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;
 import l.files.operations.Failure;

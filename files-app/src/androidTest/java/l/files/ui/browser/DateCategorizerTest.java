@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import l.files.R;
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Instant;

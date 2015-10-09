@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 import l.files.fs.local.LocalFile;
 
 import static java.util.Arrays.asList;

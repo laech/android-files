@@ -8,7 +8,7 @@ import l.files.fs.Permission;
 import l.files.test.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.common.testing.Tests.timeout;
+import static l.files.testing.Tests.timeout;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class RenameTest extends BaseFilesActivityTest {

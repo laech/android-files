@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.File;
-import l.files.common.testing.FileBaseTest;
+import l.files.testing.fs.FileBaseTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;

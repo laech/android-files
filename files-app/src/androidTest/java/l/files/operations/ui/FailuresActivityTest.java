@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import l.files.R;
-import l.files.common.testing.BaseActivityTest;
+import l.files.testing.BaseActivityTest;
 import l.files.fs.local.LocalFile;
 
 import static java.util.Arrays.asList;

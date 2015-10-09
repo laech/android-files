@@ -5,7 +5,7 @@ import android.content.Intent;
 import java.io.IOException;
 
 import l.files.common.base.Provider;
-import l.files.common.testing.BaseActivityTest;
+import l.files.testing.BaseActivityTest;
 import l.files.features.objects.UiFileActivity;
 import l.files.fs.File;
 import l.files.fs.Permission;

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 import l.files.fs.File;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;

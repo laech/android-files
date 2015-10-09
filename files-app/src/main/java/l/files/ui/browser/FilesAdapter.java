@@ -30,8 +30,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import l.files.R;
-import l.files.common.graphics.Rect;
-import l.files.common.graphics.drawable.SizedColorDrawable;
 import l.files.common.view.ActionModeProvider;
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -39,9 +37,11 @@ import l.files.ui.Icons;
 import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.Header;
 import l.files.ui.mode.Selectable;
-import l.files.ui.preview.Decode;
-import l.files.ui.preview.Preview;
-import l.files.ui.preview.PreviewCallback;
+import l.files.preview.Decode;
+import l.files.preview.Preview;
+import l.files.preview.PreviewCallback;
+import l.files.preview.Rect;
+import l.files.preview.SizedColorDrawable;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 

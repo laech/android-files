@@ -50,15 +50,18 @@ dependencies {
     compile project(':fs')
     compile project(':fs-local')
     compile project(':collation')
+    compile project(':preview')
+
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.android.support:recyclerview-v7:23.0.1'
     compile 'com.android.support:cardview-v7:23.0.1'
-    compile 'com.android.support:palette-v7:23.0.1'
 
     apt 'com.google.auto.value:auto-value:1.1'
     provided 'com.google.auto.value:auto-value:1.1'
     provided 'javax.annotation:javax.annotation-api:1.2'
+
+    androidTestCompile project(':testing-fs')
 
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.google.dexmaker:dexmaker:1.2'

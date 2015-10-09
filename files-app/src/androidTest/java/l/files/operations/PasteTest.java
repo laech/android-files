@@ -7,7 +7,7 @@ import java.util.Set;
 
 import l.files.fs.File;
 import l.files.fs.Stream;
-import l.files.common.testing.FileBaseTest;
+import l.files.testing.fs.FileBaseTest;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;

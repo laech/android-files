@@ -46,11 +46,5 @@
             </intent-filter>
         </service>
 
-        <provider
-            android:name=".ui.preview.DecodePdf$PdfPreviewProvider"
-            android:authorities="@string/authority_pdfpreview"
-            android:exported="false"
-            android:process=":pdfpreview"/>
-
     </application>
 </manifest>

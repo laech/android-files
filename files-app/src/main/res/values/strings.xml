@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="authority_pdfpreview">l.files.preview.pdf</string>
-
     <string name="app_name">Files (beta)</string>
     <string name="empty">Empty</string>
     <string name="not_a_directory">Not a directory</string>

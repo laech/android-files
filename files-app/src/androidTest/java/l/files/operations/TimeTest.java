@@ -1,6 +1,6 @@
 package l.files.operations;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

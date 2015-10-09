@@ -2,7 +2,7 @@ package l.files.common.widget;
 
 import android.view.View;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 
 import static android.support.v4.widget.DrawerLayout.DrawerListener;
 import static org.mockito.Mockito.mock;

@@ -3,7 +3,7 @@ package l.files.common.app;
 import android.os.Looper;
 import android.view.Menu;
 
-import l.files.common.testing.BaseTest;
+import l.files.testing.BaseTest;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
