@@ -17,7 +17,6 @@ import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
-import l.files.logging.Logger;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
@@ -30,8 +29,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
-
-    private static final Logger log = Logger.get(ThumbnailDiskCache.class);
 
     // No need to set UncaughtExceptionHandler to terminate
     // on exception already set by Android
@@ -61,7 +58,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 try {
                     cleanup();
                 } catch (IOException e) {
-                    log.error(e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -69,11 +66,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     void cleanup() throws IOException {
         if (!cacheDir.exists(FOLLOW)) {
-            log.verbose("cache dir does not exists, nothing to cleanup");
             return;
         }
-
-        log.verbose("cleanup");
 
         cacheDir.traverse(NOFOLLOW, new Visitor.Base() {
 
@@ -87,7 +81,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
                     try {
                         file.delete();
-                        log.debug("Deleted empty cache directory %s", file);
                     } catch (DirectoryNotEmpty ignore) {
                     }
 
@@ -96,7 +89,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                     long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
                     if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
                         file.delete();
-                        log.debug("Deleted old cache file %s", file);
                     }
 
                 }
@@ -119,7 +111,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     @Override
     Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
 
-        log.verbose("read bitmap %s", file);
         File cache = cacheFile(file, stat, constraint);
         try (InputStream in = new BufferedInputStream(cache.input())) {
             in.read(); // read DUMMY_BYTE
@@ -165,7 +156,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             out.write(DUMMY_BYTE);
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);
-            log.verbose("write %s", file);
         }
         return null;
     }
@@ -199,7 +189,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 try {
                     put(res, stat, constraint, thumbnail);
                 } catch (IOException e) {
-                    log.error(e);
+                    e.printStackTrace();
                 }
             }
         }

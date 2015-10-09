@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.auto.value.AutoValue;
 
@@ -30,7 +31,6 @@ import l.files.fs.File;
 import l.files.fs.Observer;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
-import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.System.nanoTime;
@@ -43,7 +43,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
-    private static final Logger log = Logger.get(FilesLoader.class);
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<String, FileListItem.File> data;
@@ -161,11 +160,9 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     protected void onStartLoading() {
         super.onStartLoading();
         if (data.isEmpty()) {
-            log.debug("forceLoad");
             forceLoad();
         } else {
             forceReload = true;
-            log.debug("forceReload");
         }
     }
 
@@ -191,7 +188,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 children = visit();
             }
         } catch (IOException e) {
-            log.debug(e);
+            e.printStackTrace();
             return Result.of(e);
         }
 
@@ -200,22 +197,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private List<File> observe() throws IOException {
-        log.verbose("observe start");
         List<File> children = new ArrayList<>();
         observable = root.observe(FOLLOW, listener, collectInto(children));
-        log.verbose("observe end");
         return children;
     }
 
     private List<File> visit() throws IOException {
-        log.verbose("visit start");
         List<File> children = new ArrayList<>();
         try (Stream<File> stream = root.list(FOLLOW)) {
             for (File child : stream) {
                 checkedAdd(children, child);
             }
         }
-        log.verbose("visit end");
         return children;
     }
 
@@ -235,12 +228,10 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private void update(List<File> children) {
-        log.verbose("update start");
         for (File child : children) {
             checkCancel();
             update(child);
         }
-        log.verbose("update end");
     }
 
     private void checkCancel() {
@@ -250,7 +241,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private Result buildResult() {
-        log.verbose("buildResult start");
         List<FileListItem.File> files = new ArrayList<>(data.size());
         if (showHidden) {
             files.addAll(data.values());
@@ -263,7 +253,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
         Resources res = getContext().getResources();
         List<FileListItem> result = sort.sort(files, res);
-        log.verbose("buildResult end");
         return Result.of(result);
     }
 
@@ -285,7 +274,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             try {
                 closeable.close();
             } catch (IOException e) {
-                log.warn(e);
+                e.printStackTrace();
             }
         }
 
@@ -305,7 +294,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
         if (closeable != null) {
-            log.error("Has not been unregistered");
+            Log.e(getClass().getSimpleName(), "Has not been unregistered");
             executor.shutdownNow();
             closeable.close();
         }
@@ -341,7 +330,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             try {
                 return file.stat(FOLLOW);
             } catch (IOException e) {
-                log.debug(e);
+                e.printStackTrace();
             }
         }
         return stat;

@@ -21,14 +21,11 @@ import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.util.Objects.requireNonNull;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
-
-    final Logger log = Logger.get(getClass());
 
     private final Executor loader = SERIAL_EXECUTOR;
     private final AtomicBoolean loaded = new AtomicBoolean(false);
@@ -110,8 +107,6 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                              new BufferedInputStream(
                                      file.input()))) {
 
-            log.verbose("read cache start");
-            int count = 0;
             while (true) {
                 try {
 
@@ -122,17 +117,14 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                     V value = read(in);
                     cache.put(key, Snapshot.of(value, time));
 
-                    count++;
-
                 } catch (EOFException e) {
                     break;
                 }
             }
-            log.verbose("read cache end %s entries", count);
 
         } catch (FileNotFoundException ignore) {
         } catch (IOException e) {
-            log.error(e);
+            e.printStackTrace();
         }
     }
 
@@ -161,7 +153,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         try {
             file.createFiles();
         } catch (IOException e) {
-            log.error(e);
+            e.printStackTrace();
             return;
         }
 
@@ -170,7 +162,6 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                              new BufferedOutputStream(
                                      file.output()))) {
 
-            log.verbose("write cache start");
             Map<String, Snapshot<V>> snapshot = cache.snapshot();
             for (Map.Entry<String, Snapshot<V>> entry : snapshot.entrySet()) {
                 out.writeUTF(entry.getKey());
@@ -178,10 +169,9 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 out.writeInt(entry.getValue().time().nanos());
                 write(out, entry.getValue().get());
             }
-            log.verbose("write cache end %s entries", snapshot.size());
 
         } catch (IOException e) {
-            log.error(e);
+            e.printStackTrace();
         }
     }
 

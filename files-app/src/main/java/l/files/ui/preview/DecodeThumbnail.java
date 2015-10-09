@@ -37,7 +37,7 @@ abstract class DecodeThumbnail extends Decode {
         try {
             result = decode();
         } catch (Exception e) {
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
 

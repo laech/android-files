@@ -14,15 +14,12 @@ import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalFile;
-import l.files.logging.Logger;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
 
 public final class Preview {
-
-    private static final Logger log = Logger.get(Preview.class);
 
     static final int PALETTE_MAX_COLOR_COUNT = 24;
 
@@ -166,7 +163,7 @@ public final class Preview {
             decodeStream(in, null, options);
 
         } catch (Exception e) {
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
 

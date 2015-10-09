@@ -13,7 +13,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.fs.File;
 import l.files.fs.local.LocalFile;
-import l.files.logging.Logger;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -39,8 +38,6 @@ public final class BookmarkManagerImpl implements BookmarkManager {
             return instance;
         }
     }
-
-    private static final Logger logger = Logger.get(BookmarkManagerImpl.class);
 
     private static final String PREF_KEY = "bookmarks";
 
@@ -84,7 +81,7 @@ public final class BookmarkManagerImpl implements BookmarkManager {
                     // Remove bookmarks that no longer exist
                 }
             } catch (URISyntaxException | IllegalArgumentException e) {
-                logger.warn(e, "Ignoring bookmark string  \"%s\"", uriString);
+                e.printStackTrace();
             }
         }
         return paths;

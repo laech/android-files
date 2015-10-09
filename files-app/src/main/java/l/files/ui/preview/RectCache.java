@@ -25,7 +25,7 @@ final class RectCache extends PersistenceCache<Rect> {
         try {
             return Rect.of(width, height);
         } catch (IllegalArgumentException e) {
-            log.warn(e);
+            e.printStackTrace();
             return null;
         }
     }

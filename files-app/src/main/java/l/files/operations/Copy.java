@@ -10,13 +10,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Copy extends Paste {
 
-    private static final Logger logger = Logger.get(Copy.class);
     private static final int BUFFER_SIZE = 1024 * 8;
 
     private final AtomicLong copiedByteCount = new AtomicLong();
@@ -122,7 +120,7 @@ final class Copy extends Paste {
             try {
                 dst.delete();
             } catch (IOException ex) {
-                logger.warn(ex, "Failed to delete path on exception %s", dst);
+                ex.printStackTrace();
             }
 
             if (!(e instanceof ClosedByInterruptException)) {
@@ -135,13 +133,13 @@ final class Copy extends Paste {
         try {
             dst.setLastModifiedTime(NOFOLLOW, src.lastModifiedTime());
         } catch (IOException e) {
-            logger.debug(e, "Failed to set modification time on %s", dst);
+            e.printStackTrace();
         }
 
         try {
             dst.setLastAccessedTime(NOFOLLOW, src.lastAccessedTime());
         } catch (IOException e) {
-            logger.debug(e, "Failed to set access time on %s", dst);
+            e.printStackTrace();
         }
     }
 

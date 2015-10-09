@@ -168,7 +168,7 @@ final class DecodeChain extends Decode {
         try {
             thumbnail = context.getThumbnailFromDisk(file, stat, constraint);
         } catch (Exception e) {
-            log.error(e);
+            e.printStackTrace();
         }
 
         if (thumbnail != null) {
@@ -199,7 +199,7 @@ final class DecodeChain extends Decode {
         try {
             return file.detectMediaType(stat);
         } catch (Exception e) {
-            log.error(e);
+            e.printStackTrace();
             return null;
         }
     }

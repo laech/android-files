@@ -10,13 +10,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
-    final Logger log = Logger.get(getClass());
     final File file;
     final Stat stat;
     final Rect constraint;

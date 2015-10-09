@@ -2,6 +2,7 @@ package l.files.fs.local;
 
 import android.os.Handler;
 import android.system.ErrnoException;
+import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,7 +17,6 @@ import l.files.fs.File;
 import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Stream;
-import l.files.logging.Logger;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.currentThread;
@@ -91,8 +91,6 @@ final class LocalObservable extends Native
      * interfere with anything, but it does mean that more inotify instances
      * will be required and they are of a limited resource.
      */
-
-    private static final Logger log = Logger.get(LocalObservable.class);
 
     private static final Handler handler = new Handler(getMainLooper());
 
@@ -215,7 +213,7 @@ final class LocalObservable extends Native
         try {
             observeChildren(fd, file, option, observable, childrenConsumer);
         } catch (IOException e) {
-            log.warn(e);
+            e.printStackTrace();
         }
 
         return observable;
@@ -278,7 +276,7 @@ final class LocalObservable extends Native
                         observable.childDirectories.put(wd, child.name());
 
                     } catch (ErrnoException e) {
-                        log.debug(e, "Failed to add watch. %s", child.name());
+                        e.printStackTrace();
                     }
                 }
 
@@ -425,7 +423,7 @@ final class LocalObservable extends Native
             int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
             childDirectories.put(wd, name);
         } catch (ErrnoException e) {
-            log.debug(e, "Failed to add watch %s", name);
+            e.printStackTrace();
         }
     }
 
@@ -491,10 +489,6 @@ final class LocalObservable extends Native
     }
 
     private void log(int wd, int event, String child) {
-        if (!log.isVerboseEnabled()) {
-            return;
-        }
-
         File file;
         if (wd == rootWd) {
             file = root;
@@ -502,7 +496,7 @@ final class LocalObservable extends Native
             file = root.resolve(childDirectories.get(wd));
         }
 
-        log.verbose("fd=" + fd +
+        Log.v(getClass().getSimpleName(), "fd=" + fd +
                 ", wd=" + wd +
                 ", event=" + eventName(event) +
                 ", parent=" + file +

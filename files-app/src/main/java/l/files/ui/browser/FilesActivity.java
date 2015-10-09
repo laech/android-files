@@ -24,7 +24,6 @@ import l.files.common.app.BaseActivity;
 import l.files.common.app.OptionsMenus;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
@@ -49,8 +48,6 @@ public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
         OnItemSelectedListener,
         OnOpenFileListener {
-
-    private static final Logger log = Logger.get(FilesActivity.class);
 
     public static final String EXTRA_DIRECTORY = "directory";
 
@@ -125,12 +122,9 @@ public final class FilesActivity extends BaseActivity implements
     @Override
     public void onItemSelected(
             AdapterView<?> parent, View view, int position, long id) {
-        log.debug("onItemSelected");
         File item = (File) parent.getAdapter().getItem(position);
         if (!Objects.equals(item, fragment().directory())) {
             onOpen(item);
-        } else {
-            log.debug("Already show requested directory.");
         }
     }
 
@@ -195,7 +189,6 @@ public final class FilesActivity extends BaseActivity implements
     @Override
     public void onActionModeFinished(ActionMode mode) {
         super.onActionModeFinished(mode);
-        log.debug("onActionModeFinished");
         drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
     }
 
@@ -208,12 +201,6 @@ public final class FilesActivity extends BaseActivity implements
         } else {
             drawer.setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
         }
-    }
-
-    @Override
-    public ActionMode startActionMode(ActionMode.Callback callback) {
-        log.debug("startActionMode");
-        return super.startActionMode(callback);
     }
 
     private boolean isSidebarOpen() {
@@ -235,13 +222,10 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     public void onOpen(final File file, @Nullable final Stat stat) {
-        log.debug("onOpen(%s)", file);
-
         ActionMode mode = currentActionMode();
         if (mode != null) {
             mode.finish();
         }
-
         closeDrawerThenRun(new Runnable() {
             @Override
             public void run() {
@@ -272,7 +256,7 @@ public final class FilesActivity extends BaseActivity implements
                 try {
                     return file.stat(FOLLOW);
                 } catch (IOException e) {
-                    log.debug(e, "%s", file);
+                    e.printStackTrace();
                     return e;
                 }
             }

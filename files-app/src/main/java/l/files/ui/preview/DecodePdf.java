@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 import l.files.common.graphics.Rect;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.logging.Logger;
 
 import static android.content.ContentResolver.SCHEME_CONTENT;
 import static android.graphics.Bitmap.CompressFormat.JPEG;
@@ -102,14 +101,12 @@ final class DecodePdf extends DecodeThumbnail {
             return PdfPreviewProvider.query(
                     context.context, signal, file, constraint);
         } catch (Throwable e) {
-            log.error(e);
+            e.printStackTrace();
             throw e;
         }
     }
 
     public static final class PdfPreviewProvider extends ContentProvider {
-
-        private static final Logger log = Logger.get(PdfPreviewProvider.class);
 
         private static final String PARAM_FILE = "file";
         private static final String PARAM_MAX_WIDTH = "maxWidth";
@@ -158,7 +155,6 @@ final class DecodePdf extends DecodeThumbnail {
                 return new Result(bitmap, Rect.of(originalWidth, originalHeight));
 
             } catch (OperationCanceledException e) {
-                log.debug(e.getMessage());
                 return null;
             }
         }
@@ -182,12 +178,8 @@ final class DecodePdf extends DecodeThumbnail {
                 String sortOrder,
                 CancellationSignal signal) {
 
-            if (signal == null) {
-                log.verbose(
-                        "CancellationSignal is null, is request being restarted after crash? %s",
-                        uri);
-
-            } else if (signal.isCanceled()) {
+            // CancellationSignal is null after crash
+            if (signal != null && signal.isCanceled()) {
                 return null;
             }
 
@@ -227,8 +219,11 @@ final class DecodePdf extends DecodeThumbnail {
                     return cursor;
                 }
 
-            } catch (InterruptedException | ExecutionException e) {
-                log.debug(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
 
             return null;
