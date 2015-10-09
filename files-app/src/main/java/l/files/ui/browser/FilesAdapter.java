@@ -63,8 +63,6 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.lang.System.currentTimeMillis;
-import static java.text.DateFormat.MEDIUM;
-import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
@@ -167,7 +165,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
         final Context context;
 
-        final DateFormat futureFormat;
         final DateFormat dateFormat;
         final DateFormat timeFormat;
 
@@ -187,7 +184,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
         DateFormatter(Context context) {
             this.context = requireNonNull(context, "context");
-            this.futureFormat = getDateTimeInstance(MEDIUM, MEDIUM);
             this.dateFormat = getDateFormat(context);
             this.timeFormat = getTimeFormat(context);
         }
@@ -202,10 +198,6 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
             thatTime.setTimeInMillis(millis);
             currentTime.setTimeInMillis(currentTimeMillis());
-
-            if (currentTime.before(thatTime)) {
-                return futureFormat.format(tempDate, tempBuffer, tempField).toString();
-            }
 
             if (currentTime.get(YEAR) == thatTime.get(YEAR)) {
                 if (currentTime.get(DAY_OF_YEAR) == thatTime.get(DAY_OF_YEAR)) {
