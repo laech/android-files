@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import l.files.R;
-
 public final class FailuresFragment extends ListFragment {
 
     private Adapter adapter;

@@ -1,7 +1,5 @@
 package l.files.operations.ui;
 
-import android.support.annotation.Nullable;
-
 import static android.text.format.DateUtils.formatElapsedTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -18,9 +16,8 @@ final class Formats {
      * @param now       current time in milliseconds
      * @param total     the total number of work
      * @param processed the number of work done
-     * @return the formatted string, or absent if unable to determine
+     * @return the formatted string, or null if unable to determine
      */
-    @Nullable
     public static String formatTimeRemaining(
             long startTime, long now, long total, long processed) {
 

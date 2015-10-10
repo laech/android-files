@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files.operations.ui;
 
 import android.system.ErrnoException;
 

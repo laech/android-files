@@ -17,7 +17,7 @@ import l.files.ui.FileCreationFragment;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.IOExceptions.message;
+import static l.files.operations.ui.IOExceptions.message;
 
 public final class RenameFragment extends FileCreationFragment {
 

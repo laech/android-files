@@ -10,9 +10,8 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.ArrayList;
 
-import l.files.R;
-import l.files.testing.BaseActivityTest;
 import l.files.fs.local.LocalFile;
+import l.files.testing.BaseActivityTest;
 
 import static java.util.Arrays.asList;
 import static l.files.operations.ui.FailuresActivity.EXTRA_FAILURES;

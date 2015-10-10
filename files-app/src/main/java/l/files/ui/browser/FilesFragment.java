@@ -51,7 +51,7 @@ import static android.view.View.VISIBLE;
 import static l.files.R.integer.files_grid_columns;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.common.view.Views.find;
-import static l.files.ui.IOExceptions.message;
+import static l.files.operations.ui.IOExceptions.message;
 import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;

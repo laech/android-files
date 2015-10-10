@@ -2,14 +2,13 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.R;
 import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
-import static l.files.common.content.res.Styles.getResourceId;
+import static l.files.operations.ui.Styles.getResourceId;
 
-public final class CopyViewer extends ProgressViewer {
+final class CopyViewer extends ProgressViewer {
 
     public CopyViewer(final Context context, final Clock clock) {
         super(context, clock);

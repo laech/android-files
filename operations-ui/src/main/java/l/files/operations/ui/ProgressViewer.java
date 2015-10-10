@@ -2,7 +2,6 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.R;
 import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;

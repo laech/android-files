@@ -2,12 +2,11 @@ package l.files.operations.ui;
 
 import android.content.Context;
 
-import l.files.R;
 import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
-public final class DeleteViewer extends ProgressViewer {
+final class DeleteViewer extends ProgressViewer {
 
     public DeleteViewer(final Context context, final Clock clock) {
         super(context, clock);

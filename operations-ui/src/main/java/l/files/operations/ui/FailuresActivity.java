@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import l.files.R;
-
-public class FailuresActivity extends Activity {
+public final class FailuresActivity extends Activity {
 
     static final String EXTRA_FAILURES = "failures";
     static final String EXTRA_TITLE = "title";

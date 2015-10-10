@@ -1,1 +1,1 @@
-include ':files-app', ':collation', ':collation-benchmark', ':fs', ':fs-local', ':preview', ':testing', ':testing-fs', ':operations'
+include ':files-app', ':collation', ':collation-benchmark', ':fs', ':fs-local', ':preview', ':testing', ':testing-fs', ':operations', ':operations-ui'

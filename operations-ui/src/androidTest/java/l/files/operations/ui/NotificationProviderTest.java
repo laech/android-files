@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.testing.BaseTest;
 import l.files.fs.File;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;
@@ -21,6 +20,7 @@ import l.files.operations.TaskId;
 import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
+import l.files.testing.BaseTest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

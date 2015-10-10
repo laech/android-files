@@ -6,8 +6,6 @@ import android.content.res.Resources;
 import java.io.File;
 import java.io.IOException;
 
-import l.files.R;
-import l.files.testing.BaseTest;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
@@ -16,6 +14,7 @@ import l.files.operations.Target;
 import l.files.operations.TaskId;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
+import l.files.testing.BaseTest;
 
 import static android.text.format.Formatter.formatFileSize;
 import static java.util.Arrays.asList;

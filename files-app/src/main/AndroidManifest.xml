@@ -28,9 +28,5 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".operations.ui.FailuresActivity"
-            android:exported="false"/>
-
     </application>
 </manifest>

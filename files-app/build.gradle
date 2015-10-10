@@ -52,6 +52,7 @@ dependencies {
     compile project(':collation')
     compile project(':preview')
     compile project(':operations')
+    compile project(':operations-ui')
 
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'

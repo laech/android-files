@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'provided-base'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+    }
+
+}
+
+dependencies {
+
+    compile project(':operations')
+
+    apt 'com.google.auto.value:auto-value:1.1'
+    provided 'com.google.auto.value:auto-value:1.1'
+    provided 'javax.annotation:javax.annotation-api:1.2'
+
+    androidTestCompile project(':testing')
+
+    androidTestCompile 'org.mockito:mockito-core:1.10.19'
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+
+}

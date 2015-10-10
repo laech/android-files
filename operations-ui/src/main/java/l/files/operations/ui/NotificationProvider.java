@@ -32,7 +32,7 @@ import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
 import static l.files.operations.ui.FailuresActivity.getTitle;
-import static l.files.ui.IOExceptions.message;
+import static l.files.operations.ui.IOExceptions.message;
 
 final class NotificationProvider implements TaskListener {
 
