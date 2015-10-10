@@ -28,7 +28,7 @@ public final class Preview {
         synchronized (Preview.class) {
             if (instance == null) {
                 File cacheDir = LocalFile.create(context.getExternalCacheDir());
-                instance = new Preview(context, cacheDir);
+                instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }
         }
