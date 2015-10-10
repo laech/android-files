@@ -4,7 +4,6 @@ import com.google.auto.value.AutoValue;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +17,6 @@ import l.files.fs.LinkOption;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -30,12 +28,12 @@ import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.LocalFile_observe_Test.Recorder.observe;
+import static l.files.fs.local.LocalFileObserveTest.Recorder.observe;
 
 /**
  * @see File#observe(LinkOption, Observer)
  */
-public final class LocalFile_observe_Test extends FileBaseTest {
+public final class LocalFileObserveTest extends FileBaseTest {
 
     public void testObserveOnLinkNoFollow() throws Exception {
         File dir = dir1().resolve("dir").createDir();
@@ -566,7 +564,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         abstract File resource();
 
         static WatchEvent create(Event kind, File file) {
-            return new AutoValue_LocalFile_observe_Test_WatchEvent(
+            return new AutoValue_LocalFileObserveTest_WatchEvent(
                     kind, file
             );
         }

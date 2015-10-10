@@ -20,13 +20,13 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.SKIP;
 import static l.files.fs.Visitor.Result.TERMINATE;
-import static l.files.fs.local.LocalFile_traverse_Test.TraversalOrder.POST;
-import static l.files.fs.local.LocalFile_traverse_Test.TraversalOrder.PRE;
+import static l.files.fs.local.LocalFileTraverseTest.TraversalOrder.POST;
+import static l.files.fs.local.LocalFileTraverseTest.TraversalOrder.PRE;
 
 /**
  * @see LocalFile#list(LinkOption)
  */
-public final class LocalFile_traverse_Test extends FileBaseTest {
+public final class LocalFileTraverseTest extends FileBaseTest {
 
     public void test_traverse_noFollowLink() throws Exception {
         File dir = dir1().resolve("dir").createDir();
@@ -309,7 +309,7 @@ public final class LocalFile_traverse_Test extends FileBaseTest {
         abstract File resource();
 
         static TraversalEvent of(TraversalOrder order, File file) {
-            return new AutoValue_LocalFile_traverse_Test_TraversalEvent(order, file);
+            return new AutoValue_LocalFileTraverseTest_TraversalEvent(order, file);
         }
     }
 

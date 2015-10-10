@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents a file system file, such as a file or directory.
@@ -131,6 +132,13 @@ public interface File extends Parcelable {
             LinkOption option,
             Observer observer,
             FileConsumer childrenConsumer) throws IOException;
+
+    Closeable observe(
+            LinkOption option,
+            BatchObserver batchObserver,
+            FileConsumer childrenConsumer,
+            long batchInterval,
+            TimeUnit batchInternalUnit) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.

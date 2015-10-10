@@ -221,7 +221,7 @@ final class LocalObservable extends Native
 
     private static int inotifyInit(LocalFile file) throws IOException {
         try {
-            return Inotify.init1(IN_NONBLOCK);
+            return Inotify.init1(0);
         } catch (ErrnoException e) {
             throw toIOException(e, file.path());
         }
@@ -330,17 +330,6 @@ final class LocalObservable extends Native
     }
 
     private native void observe(int fd);
-
-    // Also called from native code
-    @SuppressWarnings("UnusedDeclaration")
-    private void sleep() {
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            currentThread().interrupt();
-            // Interrupt from close()
-        }
-    }
 
     // Also called from native code
     @SuppressWarnings("UnusedDeclaration")

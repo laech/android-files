@@ -27,7 +27,6 @@
 
 -keepclassmembers class l.files.fs.local.LocalResourceObservable {
   *** isClosed();
-  *** sleep();
   *** onEvent(...);
 }
 

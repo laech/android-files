@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
@@ -49,6 +50,19 @@ public abstract class BaseFile implements File {
             public void accept(File file) {
             }
         });
+
+    }
+
+    @Override
+    public Closeable observe(
+            LinkOption option,
+            BatchObserver batchObserver,
+            FileConsumer childrenConsumer,
+            long batchInterval,
+            TimeUnit batchInternalUnit) throws IOException {
+
+        return new BatchObserverNotifier(batchObserver)
+                .start(this, option, childrenConsumer, batchInterval, batchInternalUnit);
 
     }
 

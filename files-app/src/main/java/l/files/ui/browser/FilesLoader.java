@@ -16,28 +16,24 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.Event;
+import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
-import l.files.fs.Observer;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
-import static java.lang.System.nanoTime;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -51,73 +47,47 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private volatile FileSort sort;
     private volatile boolean showHidden;
-    private volatile boolean forceReload;
 
     private volatile boolean observing;
     private volatile Closeable observable;
 
-    private final ScheduledExecutorService executor;
+    private final ExecutorService executor;
 
-    private final Set<String> childrenPendingUpdates;
-
-    private final Runnable childrenPendingUpdatesRun = new Runnable() {
-        long lastUpdateNanoTime = nanoTime();
+    private final BatchObserver listener = new BatchObserver() {
 
         @Override
-        public void run() {
-      /*
-       * Don't update if last update was less than a second ago,
-       * this avoid updating too frequently due to resources in the
-       * current directory being changed frequently by other processes,
-       * but since user triggered operation are usually seconds apart,
-       * those actions will still be updated instantly.
-       */
-            long now = nanoTime();
-            if (!forceReload && now - lastUpdateNanoTime < SECONDS.toNanos(1)) {
-                return;
-            }
-
-            String[] children;
-            synchronized (FilesLoader.this) {
-                if (!forceReload && childrenPendingUpdates.isEmpty()) {
-                    return;
-                }
-                children = new String[childrenPendingUpdates.size()];
-                childrenPendingUpdates.toArray(children);
-                childrenPendingUpdates.clear();
-            }
-
-            lastUpdateNanoTime = now;
-
-            boolean changed = false;
-            for (String child : children) {
-                changed |= update(child);
-            }
-
-            if (changed || forceReload) {
-                final Result result = buildResult();
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        deliverResult(result);
-                    }
-                });
-            }
-
-            forceReload = false;
-        }
-    };
-
-    private final Observer listener = new Observer() {
-        @Override
-        public void onEvent(Event event, String child) {
-            if (child != null) {
-                synchronized (FilesLoader.this) {
-                    childrenPendingUpdates.add(child);
-                }
+        public void onBatchEvent(boolean selfChanged, final Set<String> children) {
+            if (!children.isEmpty()) {
+                updateAll(children, false);
             }
         }
+
     };
+
+    private void updateAll(
+            final Set<String> changedChildren,
+            final boolean forceReload) {
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean changed = false;
+                for (String child : changedChildren) {
+                    changed |= update(child);
+                }
+
+                if (changed || forceReload) {
+                    final Result result = buildResult();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            deliverResult(result);
+                        }
+                    });
+                }
+            }
+        });
+    }
 
     private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
 
@@ -134,8 +104,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.collator = requireNonNull(collator, "collator");
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
-        this.childrenPendingUpdates = new HashSet<>();
-        this.executor = newSingleThreadScheduledExecutor();
+        this.executor = newSingleThreadExecutor();
     }
 
     public int approximateChildTotal() {
@@ -148,12 +117,12 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     public void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
-        this.forceReload = true;
+        updateAll(Collections.<String>emptySet(), true);
     }
 
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
-        this.forceReload = true;
+        updateAll(Collections.<String>emptySet(), true);
     }
 
     @Override
@@ -162,7 +131,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         if (data.isEmpty()) {
             forceLoad();
         } else {
-            forceReload = true;
+            updateAll(Collections.<String>emptySet(), true);
         }
     }
 
@@ -182,8 +151,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         try {
             if (observe) {
                 children = observe();
-                executor.scheduleWithFixedDelay(
-                        childrenPendingUpdatesRun, 80, 80, MILLISECONDS);
             } else {
                 children = visit();
             }
@@ -198,7 +165,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<File> observe() throws IOException {
         List<File> children = new ArrayList<>();
-        observable = root.observe(FOLLOW, listener, collectInto(children));
+        observable = root.observe(FOLLOW, listener, collectInto(children), 80, MILLISECONDS);
         return children;
     }
 
