@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 
-import l.files.R;
 import l.files.fs.File;
 import l.files.operations.Task.Callback;
 
@@ -141,7 +140,7 @@ public final class OperationService extends Service {
         // it less likely to be destroy, the notification will be replaced with ones
         // from operations-ui
         startForeground(startId, new Notification.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_storage_white_24dp)
                 .build());
 
         Task task = newTask(data, startId, handler, new Callback() {

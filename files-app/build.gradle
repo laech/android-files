@@ -51,6 +51,7 @@ dependencies {
     compile project(':fs-local')
     compile project(':collation')
     compile project(':preview')
+    compile project(':operations')
 
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'

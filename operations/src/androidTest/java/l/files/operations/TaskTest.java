@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.testing.BaseTest;
 import l.files.fs.local.LocalFile;
 import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;
 import l.files.operations.TaskState.Pending;
 import l.files.operations.TaskState.Success;
+import l.files.testing.BaseTest;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.Looper.getMainLooper;

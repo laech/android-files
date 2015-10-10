@@ -32,19 +32,5 @@
             android:name=".operations.ui.FailuresActivity"
             android:exported="false"/>
 
-        <service
-            android:name=".operations.OperationService"
-            android:exported="false">
-            <intent-filter>
-                <!--
-                  When error occurs, the app crashes, but notification will still be
-                  there, this allows the service to be started again when user attempts
-                  to cancel the notification and have it removed.
-                 -->
-                <action android:name="l.files.operations.CANCEL"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </service>
-
     </application>
 </manifest>
