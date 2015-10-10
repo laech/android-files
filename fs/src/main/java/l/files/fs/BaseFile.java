@@ -1,24 +1,30 @@
 package l.files.fs;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.FOLLOW;
 
 public abstract class BaseFile implements File {
+
+    private static final int BUFFER_SIZE = 8192;
 
     @Override
     public String toString() {
@@ -52,23 +58,64 @@ public abstract class BaseFile implements File {
     }
 
     @Override
-    public Reader reader(Charset charset) throws IOException {
-        return new InputStreamReader(input(), charset);
+    public OutputStream newOutputStream() throws IOException {
+        return newOutputStream(false);
     }
 
     @Override
-    public OutputStream output() throws IOException {
-        return output(false);
+    public InputStream newBufferedInputStream() throws IOException {
+        return new BufferedInputStream(newInputStream());
     }
 
     @Override
-    public Writer writer(Charset charset) throws IOException {
-        return new OutputStreamWriter(output(), charset);
+    public DataInputStream newBufferedDataInputStream() throws IOException {
+        return new DataInputStream(newBufferedInputStream());
     }
 
     @Override
-    public Writer writer(Charset charset, boolean append) throws IOException {
-        return new OutputStreamWriter(output(append), charset);
+    public OutputStream newBufferedOutputStream() throws IOException {
+        return new BufferedOutputStream(newOutputStream());
+    }
+
+    @Override
+    public DataOutputStream newBufferedDataOutputStream() throws IOException {
+        return new DataOutputStream(newBufferedOutputStream());
+    }
+
+    @Override
+    public String readAllUtf8() throws IOException {
+        StringBuilder builder = new StringBuilder();
+        try (Reader reader = new InputStreamReader(newInputStream(), UTF_8)) {
+            char[] buffer = new char[BUFFER_SIZE];
+            for (int i; (i = reader.read(buffer)) != -1; ) {
+                builder.append(buffer, 0, i);
+            }
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public void writeAllUtf8(CharSequence content) throws IOException {
+        try (Writer writer = new OutputStreamWriter(newOutputStream())) {
+            writer.write(content.toString());
+        }
+    }
+
+    @Override
+    public void appendUtf8(CharSequence content) throws IOException {
+        try (Writer writer = new OutputStreamWriter(newOutputStream(true), UTF_8)) {
+            writer.write(content.toString());
+        }
+    }
+
+    @Override
+    public void copyFrom(InputStream in) throws IOException {
+        try (OutputStream out = newOutputStream()) {
+            byte[] buffer = new byte[BUFFER_SIZE];
+            for (int i; (i = in.read(buffer)) != -1; ) {
+                out.write(buffer, 0, i);
+            }
+        }
     }
 
     @Override
@@ -77,30 +124,6 @@ public abstract class BaseFile implements File {
         Set<Permission> perms = new HashSet<>(existing);
         perms.removeAll(permissions);
         setPermissions(perms);
-    }
-
-    @Override
-    public String readAll(Charset charset) throws IOException {
-        return writeTo(new StringBuilder(), charset).toString();
-    }
-
-    @Override
-    public <T extends Appendable> T writeTo(T sink, Charset charset) throws IOException {
-        try (Reader reader = reader(charset)) {
-            for (CharBuffer buffer = CharBuffer.allocate(8192);
-                 reader.read(buffer) > -1; ) {
-                buffer.flip();
-                sink.append(buffer);
-            }
-        }
-        return sink;
-    }
-
-    @Override
-    public void append(CharSequence content, Charset charset) throws IOException {
-        try (Writer writer = writer(charset, true)) {
-            writer.write(content.toString());
-        }
     }
 
 }

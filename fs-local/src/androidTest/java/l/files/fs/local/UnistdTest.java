@@ -1,23 +1,23 @@
 package l.files.fs.local;
 
-import android.system.OsConstants;
-
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 
+import static android.system.OsConstants.EBADF;
+
 public final class UnistdTest extends FileBaseTest {
 
     public void testClose() throws Exception {
-        try (OutputStream out = dir1().resolve("a").createFile().output()) {
+        try (OutputStream out = dir1().resolve("a").createFile().newOutputStream()) {
             out.write(1); // Check write okay
             Unistd.close(getFd(out));
             try {
                 out.write(1); // Error closed
             } catch (IOException e) {
-                assertEquals(OsConstants.EBADF, ((android.system.ErrnoException) e.getCause()).errno);
+                assertEquals(EBADF, ((android.system.ErrnoException) e.getCause()).errno);
             }
         }
     }

@@ -3,13 +3,12 @@ package l.files.fs;
 import android.os.Parcelable;
 
 import java.io.Closeable;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 
@@ -158,17 +157,27 @@ public interface File extends Parcelable {
 
     Stream<File> list(LinkOption option) throws IOException;
 
-    InputStream input() throws IOException;
+    InputStream newInputStream() throws IOException;
 
-    OutputStream output() throws IOException;
+    InputStream newBufferedInputStream() throws IOException;
 
-    OutputStream output(boolean append) throws IOException;
+    DataInputStream newBufferedDataInputStream() throws IOException;
 
-    Reader reader(Charset charset) throws IOException;
+    OutputStream newOutputStream() throws IOException;
 
-    Writer writer(Charset charset) throws IOException;
+    OutputStream newOutputStream(boolean append) throws IOException;
 
-    Writer writer(Charset charset, boolean append) throws IOException;
+    OutputStream newBufferedOutputStream() throws IOException;
+
+    DataOutputStream newBufferedDataOutputStream() throws IOException;
+
+    String readAllUtf8() throws IOException;
+
+    void writeAllUtf8(CharSequence content) throws IOException;
+
+    void appendUtf8(CharSequence content) throws IOException;
+
+    void copyFrom(InputStream in) throws IOException;
 
     /**
      * Creates this file as a directory. Will fail if the directory already
@@ -261,12 +270,6 @@ public interface File extends Parcelable {
      * the permission of the link itself cannot be changed.
      */
     void removePermissions(Set<Permission> permissions) throws IOException;
-
-    String readAll(Charset charset) throws IOException;
-
-    <T extends Appendable> T writeTo(T sink, Charset charset) throws IOException;
-
-    void append(CharSequence content, Charset charset) throws IOException;
 
     /**
      * Detects the content type of this file based on its properties

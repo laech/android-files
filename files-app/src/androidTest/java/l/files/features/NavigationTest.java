@@ -3,7 +3,6 @@ package l.files.features;
 import android.content.Context;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -27,7 +26,6 @@ import static android.text.format.DateUtils.formatDateTime;
 import static android.text.format.Formatter.formatShortFileSize;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.text.DateFormat.MEDIUM;
 import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -139,7 +137,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void test_shows_time_and_size_for_file() throws Exception {
         File file = dir().resolve("file").createFile();
-        file.append(file.path(), UTF_8);
+        file.appendUtf8(file.path());
 
         Context c = getActivity();
         String date = getTimeFormat(c).format(new Date());
@@ -353,9 +351,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         if (stat.isDirectory()) {
             file.resolve(String.valueOf(nanoTime())).createDir();
         } else {
-            try (Writer writer = file.writer(UTF_8, true)) {
-                writer.write("test");
-            }
+            file.appendUtf8("test");
         }
         Instant lastModifiedAfter = file.stat(NOFOLLOW).lastModifiedTime();
         assertNotEqual(lastModifiedBefore, lastModifiedAfter);

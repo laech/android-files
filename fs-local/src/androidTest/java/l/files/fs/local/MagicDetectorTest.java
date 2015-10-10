@@ -6,7 +6,6 @@ import java.util.Collections;
 import l.files.fs.File;
 import l.files.fs.Permission;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 
 public final class MagicDetectorTest extends AbstractDetectorTest {
@@ -18,7 +17,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
 
     public void test_detects_unreadable_file_as_octet_stream() throws Exception {
         File file = dir1().resolve("a.txt").createFile();
-        file.append("hello world", UTF_8);
+        file.appendUtf8("hello world");
         file.setPermissions(Collections.<Permission>emptySet());
         try {
             detector().detect(file);

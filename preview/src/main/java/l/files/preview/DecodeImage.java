@@ -70,7 +70,7 @@ final class DecodeImage extends DecodeThumbnail {
             return null;
         }
 
-        try (InputStream in = file.input()) {
+        try (InputStream in = file.newBufferedInputStream()) {
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
         }

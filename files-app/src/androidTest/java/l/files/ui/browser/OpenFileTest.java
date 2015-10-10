@@ -21,9 +21,8 @@ public final class OpenFileTest extends FileBaseTest {
         String testFile = "open_file_test.apk";
         File file = dir1().resolve(testFile);
 
-        try (InputStream in = getTestContext().getAssets().open(testFile);
-             OutputStream out = file.output()) {
-            IOUtils.copy(in, out);
+        try (InputStream in = getTestContext().getAssets().open(testFile)) {
+            file.copyFrom(in);
         }
 
         final CountDownLatch latch = new CountDownLatch(1);

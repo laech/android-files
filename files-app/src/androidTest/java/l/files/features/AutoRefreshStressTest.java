@@ -92,9 +92,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
 
     private void updateFileContent(String name) throws IOException {
         File file = dir().resolve(name).createFiles();
-        try (Writer writer = file.writer(UTF_8)) {
-            writer.write(String.valueOf(new Random().nextLong()));
-        }
+        file.writeAllUtf8(String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {

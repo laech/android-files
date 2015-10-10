@@ -105,8 +105,8 @@ final class Copy extends Paste {
     private void copyFile(File src, Stat stat, File dst) throws IOException {
         if (isInterrupted()) return;
 
-        try (InputStream source = src.input();
-             OutputStream sink = dst.output()) {
+        try (InputStream source = src.newInputStream();
+             OutputStream sink = dst.newOutputStream()) {
             byte[] buf = new byte[BUFFER_SIZE];
             int n;
             while ((n = source.read(buf)) > 0) {

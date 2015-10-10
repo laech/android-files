@@ -3,7 +3,6 @@ package l.files.fs.local;
 import android.system.Os;
 import android.system.StructStat;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -87,7 +86,7 @@ public final class LocalFileTest extends FileBaseTest {
 
     public void test_stat_size() throws Exception {
         File file = dir1().resolve("file").createFile();
-        file.append("hello world", UTF_8);
+        file.appendUtf8("hello world");
         long expected = Os.stat(file.path()).st_size;
         long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
@@ -148,7 +147,7 @@ public final class LocalFileTest extends FileBaseTest {
         test_output("a", "b", "b", new OutputProvider() {
             @Override
             public OutputStream open(File file) throws IOException {
-                return file.output();
+                return file.newOutputStream();
             }
         });
     }
@@ -157,7 +156,7 @@ public final class LocalFileTest extends FileBaseTest {
         test_output("a", "b", "b", new OutputProvider() {
             @Override
             public OutputStream open(File file) throws IOException {
-                return file.output(false);
+                return file.newOutputStream(false);
             }
         });
     }
@@ -166,7 +165,7 @@ public final class LocalFileTest extends FileBaseTest {
         test_output("a", "b", "ab", new OutputProvider() {
             @Override
             public OutputStream open(File file) throws IOException {
-                return file.output(true);
+                return file.newOutputStream(true);
             }
         });
     }
@@ -178,11 +177,11 @@ public final class LocalFileTest extends FileBaseTest {
             OutputProvider provider) throws Exception {
 
         File file = dir1().resolve("file").createFile();
-        file.append(initial, UTF_8);
+        file.appendUtf8(initial);
         try (OutputStream out = provider.open(file)) {
             out.write(write.getBytes(UTF_8));
         }
-        assertEquals(result, file.readAll(UTF_8));
+        assertEquals(result, file.readAllUtf8());
     }
 
     private interface OutputProvider {
@@ -195,7 +194,7 @@ public final class LocalFileTest extends FileBaseTest {
         File actual = dir1().resolve("actual");
 
         assertTrue(new java.io.File(expected.uri()).createNewFile());
-        actual.output(false).close();
+        actual.newOutputStream(false).close();
 
         assertEquals(
                 Os.stat(expected.path()).st_mode,
@@ -206,33 +205,19 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_input() throws Exception {
         File file = dir1().resolve("a").createFile();
         String expected = "hello\nworld\n";
-        file.append(expected, UTF_8);
-        try (InputStream in = file.input()) {
-
-            String actual = new String(toByteArray(in), UTF_8);
-            assertEquals(expected, actual);
-        }
-    }
-
-    private byte[] toByteArray(InputStream in) throws IOException {
-        byte[] buffer = new byte[4192];
-        int count;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        while ((count = in.read(buffer)) != -1) {
-            out.write(buffer, 0, count);
-        }
-        return out.toByteArray();
+        file.appendUtf8(expected);
+        assertEquals(expected, file.readAllUtf8());
     }
 
     public void test_input_linkFollowSuccess() throws Exception {
         File target = dir1().resolve("target").createFile();
         File link = dir1().resolve("link").createLink(target);
-        link.input().close();
+        link.newInputStream().close();
     }
 
     public void test_input_cannotUseAfterClose() throws Exception {
         File file = dir1().resolve("a").createFile();
-        try (InputStream in = file.input()) {
+        try (InputStream in = file.newInputStream()) {
             FileDescriptor fd = ((FileInputStream) in).getFD();
 
             in.read();
@@ -265,8 +250,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_readString() throws Exception {
         File file = dir1().resolve("file").createFile();
         String expected = "a\nb\tc";
-        file.append(expected, UTF_8);
-        assertEquals(expected, file.readAll(UTF_8));
+        file.appendUtf8(expected);
+        assertEquals(expected, file.readAllUtf8());
     }
 
     public void test_createFile() throws Exception {
@@ -357,11 +342,11 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_moveTo_fileToNonExistingFile() throws Exception {
         File src = dir1().resolve("src");
         File dst = dir1().resolve("dst");
-        src.append("src", UTF_8);
+        src.appendUtf8("src");
         src.moveTo(dst);
         assertFalse(src.exists(NOFOLLOW));
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals("src", dst.readAll(UTF_8));
+        assertEquals("src", dst.readAllUtf8());
     }
 
     public void test_moveTo_directoryToNonExistingDirectory() throws Exception {

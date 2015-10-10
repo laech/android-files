@@ -158,7 +158,8 @@ public final class Preview {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
-        try (InputStream in = file.input()) {
+        try (InputStream in = file.newBufferedInputStream()) {
+
             decodeStream(in, null, options);
 
         } catch (Exception e) {

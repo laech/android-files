@@ -3,10 +3,7 @@ package l.files.preview;
 import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
-import org.apache.tika.io.IOUtils;
-
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import l.files.fs.File;
 import l.files.testing.fs.FileBaseTest;
@@ -56,9 +53,8 @@ public final class PreviewTest extends FileBaseTest {
     private void testPreviewSuccess(String testFile) throws Throwable {
         final File file = dir1().resolve(testFile);
 
-        try (InputStream in = getTestContext().getAssets().open(testFile);
-             OutputStream out = file.output()) {
-            IOUtils.copy(in, out);
+        try (InputStream in = getTestContext().getAssets().open(testFile)) {
+            file.copyFrom(in);
         }
 
         PreviewCallback callback = mock(PreviewCallback.class);

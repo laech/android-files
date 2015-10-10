@@ -1,11 +1,8 @@
 package l.files.fs.local;
 
 import java.io.IOException;
-import java.io.Writer;
 
 import l.files.fs.File;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class AbstractDetectorTest extends FileBaseTest {
 
@@ -32,9 +29,7 @@ public abstract class AbstractDetectorTest extends FileBaseTest {
 
     private File createTextFile(String name) throws IOException {
         File file = dir1().resolve(name).createFile();
-        try (Writer writer = file.writer(UTF_8)) {
-            writer.write("hello world");
-        }
+        file.writeAllUtf8("hello world");
         return file;
     }
 

@@ -101,10 +101,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         File file = cacheFile();
-        try (DataInputStream in =
-                     new DataInputStream(
-                             new BufferedInputStream(
-                                     file.input()))) {
+        try (DataInputStream in = file.newBufferedDataInputStream()) {
 
             while (true) {
                 try {
@@ -156,10 +153,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             return;
         }
 
-        try (DataOutputStream out =
-                     new DataOutputStream(
-                             new BufferedOutputStream(
-                                     file.output()))) {
+        try (DataOutputStream out = file.newBufferedDataOutputStream()) {
 
             Map<String, Snapshot<V>> snapshot = cache.snapshot();
             for (Map.Entry<String, Snapshot<V>> entry : snapshot.entrySet()) {

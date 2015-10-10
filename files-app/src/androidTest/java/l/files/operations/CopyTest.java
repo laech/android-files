@@ -1,14 +1,12 @@
 package l.files.operations;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 
 import l.files.fs.File;
 import l.files.fs.Instant;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -100,13 +98,11 @@ public final class CopyTest extends PasteTest {
         File dstDir = dir1().resolve("dst").createDir();
         File srcFile = srcDir.resolve("test.txt");
         File dstFile = dstDir.resolve("a/test.txt");
-        try (Writer out = srcFile.writer(UTF_8)) {
-            out.write("Testing");
-        }
+        srcFile.writeAllUtf8("Testing");
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", srcFile.readAll(UTF_8));
-        assertEquals("Testing", dstFile.readAll(UTF_8));
+        assertEquals("Testing", srcFile.readAllUtf8());
+        assertEquals("Testing", dstFile.readAllUtf8());
     }
 
     public void test_copies_empty_directory() throws Exception {
@@ -128,13 +124,11 @@ public final class CopyTest extends PasteTest {
         File srcFile = dir1().resolve("test.txt").createFile();
         File dstDir = dir1().resolve("dst").createDir();
         File dstFile = dstDir.resolve("test.txt");
-        try (Writer writer = srcFile.writer(UTF_8)) {
-            writer.write("Testing");
-        }
+        srcFile.writeAllUtf8("Testing");
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", srcFile.readAll(UTF_8));
-        assertEquals("Testing", dstFile.readAll(UTF_8));
+        assertEquals("Testing", srcFile.readAllUtf8());
+        assertEquals("Testing", dstFile.readAllUtf8());
     }
 
     private void copy(File src, File dstDir)

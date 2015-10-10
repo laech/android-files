@@ -20,7 +20,7 @@ final class MagicDetector extends AbstractDetector {
     @Override
     String detectFile(File file, l.files.fs.Stat stat) throws IOException {
 
-        try (InputStream in = file.input()) {
+        try (InputStream in = file.newInputStream()) {
             return TikaHolder.tika.detect(in);
 
         } catch (TaggedIOException e) {

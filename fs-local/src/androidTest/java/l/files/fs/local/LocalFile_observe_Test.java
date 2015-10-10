@@ -461,9 +461,7 @@ public final class LocalFile_observe_Test extends FileBaseTest {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                try (OutputStream out = file.output(true)) {
-                    out.write(content.toString().getBytes(UTF_8));
-                }
+                file.writeAllUtf8(content);
                 return null;
             }
         };

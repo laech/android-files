@@ -2,8 +2,6 @@ package l.files.preview;
 
 import android.graphics.Bitmap;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,7 +109,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
 
         File cache = cacheFile(file, stat, constraint);
-        try (InputStream in = new BufferedInputStream(cache.input())) {
+        try (InputStream in = cache.newBufferedInputStream()) {
             in.read(); // read DUMMY_BYTE
 
             int version = in.read();
@@ -151,7 +149,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         File cache = cacheFile(file, stat, constraint);
         cache.createFiles();
-        try (OutputStream out = new BufferedOutputStream(cache.output())) {
+        try (OutputStream out = cache.newBufferedOutputStream()) {
             out.write(DUMMY_BYTE);
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);

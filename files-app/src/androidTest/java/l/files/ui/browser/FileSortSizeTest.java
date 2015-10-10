@@ -5,7 +5,6 @@ import java.util.Locale;
 
 import l.files.fs.File;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static l.files.ui.browser.FileSort.SIZE;
 
 public final class FileSortSizeTest extends FileSortTest {
@@ -44,7 +43,7 @@ public final class FileSortSizeTest extends FileSortTest {
             final String name,
             final String content) throws IOException {
         final File file = dir1().resolve(name).createFile();
-        file.append(content, UTF_8);
+        file.appendUtf8(content);
         return file;
     }
 }
