@@ -2,5 +2,6 @@
 <resources>
 
     <string name="app_name">Files (debug)</string>
+    <string name="authority_pdfpreview">l.files.debug.preview.pdf</string>
 
 </resources>
