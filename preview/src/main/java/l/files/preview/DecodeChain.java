@@ -22,7 +22,8 @@ final class DecodeChain extends Decode {
             DecodePdf.PREVIEWER,
             DecodeApk.PREVIEWER,
             DecodeAudio.PREVIEWER,
-            DecodeVideo.PREVIEWER
+            DecodeVideo.PREVIEWER,
+            DecodeText.PREVIEWER
     };
 
     DecodeChain(

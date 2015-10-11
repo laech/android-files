@@ -23,6 +23,7 @@ import l.files.fs.Stream;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.Thread.sleep;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -534,8 +535,23 @@ public final class LocalFileTest extends FileBaseTest {
         assertTrue(link.stat(NOFOLLOW).permissions().contains(perm));
     }
 
-    private interface Code {
-        void run() throws Exception;
+    public void test_readDetectingCharset_utf8() throws Exception {
+        File file = dir1().resolve("a").createFile();
+        file.writeAllUtf8("你好");
+        assertEquals("", file.readDetectingCharset(0));
+        assertEquals("你", file.readDetectingCharset(1));
+        assertEquals("你好", file.readDetectingCharset(2));
+        assertEquals("你好", file.readDetectingCharset(3));
+    }
+
+    public void test_readDetectingCharset_iso88591() throws Exception {
+        File file = dir1().resolve("a").createFile();
+        file.writeAll("hello world", ISO_8859_1);
+        assertEquals("", file.readDetectingCharset(0));
+        assertEquals("h", file.readDetectingCharset(1));
+        assertEquals("he", file.readDetectingCharset(2));
+        assertEquals("hel", file.readDetectingCharset(3));
+        assertEquals("hello world", file.readDetectingCharset(100));
     }
 
 }

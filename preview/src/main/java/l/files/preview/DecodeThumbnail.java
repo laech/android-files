@@ -9,6 +9,7 @@ import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
+import static java.util.Objects.requireNonNull;
 import static l.files.preview.Preview.decodePalette;
 
 abstract class DecodeThumbnail extends Decode {
@@ -103,8 +104,8 @@ abstract class DecodeThumbnail extends Decode {
         final Rect originalSize;
 
         Result(Bitmap maybeScaled, Rect originalSize) {
-            this.maybeScaled = maybeScaled;
-            this.originalSize = originalSize;
+            this.maybeScaled = requireNonNull(maybeScaled);
+            this.originalSize = requireNonNull(originalSize);
         }
     }
 

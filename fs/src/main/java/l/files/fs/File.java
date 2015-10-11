@@ -8,7 +8,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -181,7 +184,17 @@ public interface File extends Parcelable {
 
     String readAllUtf8() throws IOException;
 
+    Reader newReader(Charset charset) throws IOException;
+
+    Writer newWriter(Charset charset) throws IOException;
+
+    Writer newWriter(Charset charset, boolean append) throws IOException;
+
+    String readDetectingCharset(int limit) throws IOException;
+
     void writeAllUtf8(CharSequence content) throws IOException;
+
+    void writeAll(CharSequence content, Charset charset) throws IOException;
 
     void appendUtf8(CharSequence content) throws IOException;
 

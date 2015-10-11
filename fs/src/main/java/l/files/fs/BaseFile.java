@@ -1,5 +1,7 @@
 package l.files.fs;
 
+import com.ibm.icu.text.CharsetDetector;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
@@ -12,6 +14,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -97,9 +100,43 @@ public abstract class BaseFile implements File {
     }
 
     @Override
+    public Reader newReader(Charset charset) throws IOException {
+        return new InputStreamReader(newInputStream(), charset);
+    }
+
+    @Override
+    public Writer newWriter(Charset charset) throws IOException {
+        return new OutputStreamWriter(newOutputStream(), charset);
+    }
+
+    @Override
+    public Writer newWriter(Charset charset, boolean append) throws IOException {
+        return new OutputStreamWriter(newOutputStream(append), charset);
+    }
+
+    @Override
+    public String readDetectingCharset(int limit) throws IOException {
+        CharsetDetector detector = new CharsetDetector();
+        try (InputStream in = newBufferedInputStream();
+             Reader reader = detector.getReader(in, null)) {
+            if (reader != null) {
+                char[] buffer = new char[limit];
+                int count = reader.read(buffer);
+                if (count > -1) {
+                    return String.valueOf(buffer, 0, count);
+                }
+            }
+        }
+        throw new UnknownCharsetException();
+    }
+
+    private static class UnknownCharsetException extends IOException {
+    }
+
+    @Override
     public String readAllUtf8() throws IOException {
         StringBuilder builder = new StringBuilder();
-        try (Reader reader = new InputStreamReader(newInputStream(), UTF_8)) {
+        try (Reader reader = newReader(UTF_8)) {
             char[] buffer = new char[BUFFER_SIZE];
             for (int i; (i = reader.read(buffer)) != -1; ) {
                 builder.append(buffer, 0, i);
@@ -110,14 +147,19 @@ public abstract class BaseFile implements File {
 
     @Override
     public void writeAllUtf8(CharSequence content) throws IOException {
-        try (Writer writer = new OutputStreamWriter(newOutputStream())) {
+        writeAll(content, UTF_8);
+    }
+
+    @Override
+    public void writeAll(CharSequence content, Charset charset) throws IOException {
+        try (Writer writer = newWriter(charset)) {
             writer.write(content.toString());
         }
     }
 
     @Override
     public void appendUtf8(CharSequence content) throws IOException {
-        try (Writer writer = new OutputStreamWriter(newOutputStream(true), UTF_8)) {
+        try (Writer writer = newWriter(UTF_8, true)) {
             writer.write(content.toString());
         }
     }

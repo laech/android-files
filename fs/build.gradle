@@ -23,6 +23,8 @@ android {
 
 dependencies {
 
+    compile 'com.ibm.icu:icu4j:56.1'
+
     apt 'com.google.auto.value:auto-value:1.1'
     provided 'com.google.auto.value:auto-value:1.1'
     provided 'javax.annotation:javax.annotation-api:1.2'
