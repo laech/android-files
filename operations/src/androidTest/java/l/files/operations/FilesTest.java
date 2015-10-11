@@ -1,8 +1,11 @@
-package l.files.fs.local;
+package l.files.operations;
+
+import java.io.IOException;
 
 import l.files.fs.File;
+import l.files.testing.fs.FileBaseTest;
 
-import static l.files.fs.local.Files.getNonExistentDestinationFile;
+import static l.files.operations.Files.getNonExistentDestinationFile;
 
 public final class FilesTest extends FileBaseTest {
 
@@ -29,11 +32,9 @@ public final class FilesTest extends FileBaseTest {
         testExistent(dir1().resolve(".b").createFile(), ".b 2");
     }
 
-    private void testExistent(File file, String expectedName) {
-        java.io.File expected = new java.io.File(dir1().resolve(expectedName).path());
-        java.io.File actual = getNonExistentDestinationFile(
-                new java.io.File(file.path()),
-                new java.io.File(dir1().path()));
+    private void testExistent(File file, String expectedName) throws IOException {
+        File expected = dir1().resolve(expectedName);
+        File actual = getNonExistentDestinationFile(file, dir1());
         assertEquals(expected, actual);
     }
 

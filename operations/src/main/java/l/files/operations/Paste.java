@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.Collection;
 
 import l.files.fs.File;
-import l.files.fs.local.Files;
-import l.files.fs.local.LocalFile;
 
 import static java.util.Objects.requireNonNull;
+import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
@@ -22,19 +21,16 @@ abstract class Paste extends AbstractOperation {
     void process(File file) throws InterruptedException {
         checkInterrupt();
 
-        java.io.File destinationFile = new java.io.File(destination.uri());
-        java.io.File fromFile = new java.io.File(file.uri());
         if (destination.equals(file) || destination.pathStartsWith(file)) {
-            // TODO prevent this from UI
             throw new CannotPasteIntoSelfException(
                     "Cannot paste directory " + file +
                             " into its own sub directory " + destination
             );
         }
 
-        java.io.File to = Files.getNonExistentDestinationFile(fromFile, destinationFile);
         try {
-            paste(file, LocalFile.create(to));
+            File to = getNonExistentDestinationFile(file, destination);
+            paste(file, to);
         } catch (IOException e) {
             record(file, e);
         }
