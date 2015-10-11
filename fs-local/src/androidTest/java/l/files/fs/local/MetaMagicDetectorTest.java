@@ -1,10 +1,6 @@
 package l.files.fs.local;
 
-import java.io.IOException;
-import java.util.Collections;
-
 import l.files.fs.File;
-import l.files.fs.Permission;
 
 public final class MetaMagicDetectorTest extends AbstractDetectorTest {
 
@@ -13,27 +9,15 @@ public final class MetaMagicDetectorTest extends AbstractDetectorTest {
         return MetaMagicDetector.INSTANCE;
     }
 
-    public void test_detects_unreadable_file_as_octet_stream() throws Exception {
+    public void test_can_detect_by_name() throws Exception {
         File file = dir1().resolve("a.txt").createFile();
-        file.appendUtf8("hello world");
-        file.setPermissions(Collections.<Permission>emptySet());
-        try {
-            detector().detect(file);
-            fail();
-        } catch (IOException e) {
-            // Pass
-        }
+        assertEquals("text/plain", detector().detect(file));
     }
 
-    public void test_detects_special_file_as_octet_stream() throws Exception {
-        java.io.File file = new java.io.File("/proc/1/maps");
-        assertTrue(file.exists());
-        try {
-            detector().detect(LocalFile.create(file));
-            fail();
-        } catch (IOException e) {
-            // Pass
-        }
+    public void test_can_detect_by_content() throws Exception {
+        File file = dir1().resolve("a.png").createFile();
+        file.writeAllUtf8("hello");
+        assertEquals("text/plain", detector().detect(file));
     }
 
 }

@@ -186,7 +186,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-            return file.detectMediaType(stat);
+            return file.detectContentMediaType(stat);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
