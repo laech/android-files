@@ -33,7 +33,7 @@ import l.files.fs.Stream;
 import static android.os.Looper.getMainLooper;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -165,7 +165,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<File> observe() throws IOException {
         List<File> children = new ArrayList<>();
-        observable = root.observe(FOLLOW, listener, collectInto(children), 80, MILLISECONDS);
+        observable = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
         return children;
     }
 
