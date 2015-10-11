@@ -5,7 +5,7 @@ import l.files.fs.Stat;
 
 interface Previewer {
 
-    boolean accept(String mediaType);
+    boolean accept(File file, String mediaType);
 
     Decode create(
             File res,

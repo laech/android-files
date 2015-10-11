@@ -146,7 +146,7 @@ public final class Preview {
     }
 
     @Nullable
-    public Decode set(
+    public Decode get(
             File res,
             Stat stat,
             Rect constraint,

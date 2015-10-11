@@ -22,8 +22,9 @@ final class DecodeApk extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(String mediaType) {
-            return mediaType.equals("application/vnd.android.package-archive");
+        public boolean accept(File file, String mediaType) {
+            return mediaType.equals("application/zip") &&
+                    file.name().ext().equalsIgnoreCase("apk");
         }
 
         @Override

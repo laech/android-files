@@ -48,7 +48,7 @@ final class DecodePdf extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(String mediaType) {
+        public boolean accept(File file, String mediaType) {
             return mediaType.equals("application/pdf");
         }
 

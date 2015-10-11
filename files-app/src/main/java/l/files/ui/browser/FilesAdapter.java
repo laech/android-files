@@ -386,7 +386,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 showPreviewContainer(false);
             }
 
-            task = decorator.set(res, stat, constraint, this);
+            task = decorator.get(res, stat, constraint, this);
         }
 
         private SizedColorDrawable newSizedColorDrawable(Rect size) {

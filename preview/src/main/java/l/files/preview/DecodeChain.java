@@ -27,12 +27,12 @@ final class DecodeChain extends Decode {
     };
 
     DecodeChain(
-            File res,
+            File file,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(file, stat, constraint, callback, context);
     }
 
     @Override
@@ -103,8 +103,7 @@ final class DecodeChain extends Decode {
         }
 
         for (Previewer previewer : PREVIEWERS) {
-            if (previewer.accept(media)) {
-                System.out.println("onPreview " + media);
+            if (previewer.accept(file, media)) {
                 publishProgress(previewer.create(
                         file, stat, constraint, callback, context));
                 return null;

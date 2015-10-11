@@ -3,11 +3,13 @@ package l.files.preview;
 import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.fs.File;
 import l.files.testing.fs.FileBaseTest;
 
+import static java.lang.System.nanoTime;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -27,38 +29,54 @@ public final class PreviewTest extends FileBaseTest {
     }
 
     public void testPreviewPdf() throws Throwable {
-        testPreviewSuccess("preview_test.pdf");
+        testPreviewSuccessForTestFile("preview_test.pdf");
     }
 
     public void testPreviewM4a() throws Throwable {
-        testPreviewSuccess("preview_test.m4a");
+        testPreviewSuccessForTestFile("preview_test.m4a");
     }
 
     public void testPreviewJpg() throws Throwable {
-        testPreviewSuccess("preview_test.jpg");
+        testPreviewSuccessForTestFile("preview_test.jpg");
     }
 
     public void testPreviewPng() throws Throwable {
-        testPreviewSuccess("preview_test.png");
+        testPreviewSuccessForTestFile("preview_test.png");
     }
 
     public void testPreviewMp4() throws Throwable {
-        testPreviewSuccess("preview_test.mp4");
+        testPreviewSuccessForTestFile("preview_test.mp4");
     }
 
     public void testPreviewApk() throws Throwable {
-        testPreviewSuccess("preview_test.apk");
+        testPreviewSuccessForTestFile("preview_test.apk");
     }
 
-    private void testPreviewSuccess(String testFile) throws Throwable {
-        final File file = dir1().resolve(testFile);
+    public void testPreviewPlainText() throws Throwable {
+        testPreviewSuccessForContent("hello world");
+    }
 
+    public void testPreviewXml() throws Throwable {
+        testPreviewSuccessForContent("<?xml version=\"1.0\"><hello>world</hello>");
+    }
+
+    private void testPreviewSuccessForTestFile(String testFile) throws Throwable {
+        File file = dir1().resolve(testFile);
         try (InputStream in = getTestContext().getAssets().open(testFile)) {
             file.copyFrom(in);
         }
+        testPreviewSuccess(file);
+    }
 
+    private void testPreviewSuccessForContent(String content) throws Throwable {
+        File file = dir1().resolve(String.valueOf(nanoTime()));
+        file.writeAllUtf8(content);
+        testPreviewSuccess(file);
+    }
+
+    private void testPreviewSuccess(File file) throws IOException {
         PreviewCallback callback = mock(PreviewCallback.class);
-        assertNotNull(preview.set(file, file.stat(NOFOLLOW), Rect.of(10, 10), callback));
+        assertNotNull(preview.get(file, file.stat(NOFOLLOW), Rect.of(10, 10), callback));
 
         int millis = 5000;
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), notNull(Rect.class));
