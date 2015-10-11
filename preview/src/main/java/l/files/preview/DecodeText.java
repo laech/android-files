@@ -12,8 +12,8 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
-import static android.graphics.Color.BLACK;
 import static android.graphics.Color.WHITE;
+import static android.graphics.Color.parseColor;
 import static android.graphics.Typeface.MONOSPACE;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
@@ -55,6 +55,7 @@ final class DecodeText extends DecodeThumbnail {
     };
 
     private static final int PREVIEW_LIMIT = 256;
+    private static final int TEXT_COLOR = parseColor("#424242");
 
     private final int padding;
     private final int size;
@@ -91,7 +92,7 @@ final class DecodeText extends DecodeThumbnail {
         view.setMaxLines(10);
         view.setLineSpacing(0, 1.1F);
         view.setBackgroundColor(WHITE);
-        view.setTextColor(BLACK);
+        view.setTextColor(TEXT_COLOR);
         view.setTypeface(MONOSPACE);
         view.setTextSize(COMPLEX_UNIT_SP, 11);
         view.setPadding(padding, padding, padding, padding);
