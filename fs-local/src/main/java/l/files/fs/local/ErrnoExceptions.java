@@ -32,6 +32,4 @@ public final class ErrnoExceptions {
         return new IOException(message, cause);
     }
 
-    public static native String strerror(int errno);
-
 }

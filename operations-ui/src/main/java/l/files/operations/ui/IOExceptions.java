@@ -4,7 +4,7 @@ import android.system.ErrnoException;
 
 import java.io.IOException;
 
-import static l.files.fs.local.ErrnoExceptions.strerror;
+import static android.system.Os.strerror;
 
 public final class IOExceptions {
 
