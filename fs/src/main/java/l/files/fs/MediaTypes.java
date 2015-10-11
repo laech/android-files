@@ -14,7 +14,7 @@ public class MediaTypes {
             if (mediaType.contains("json") ||
                     mediaType.contains("xml") ||
                     mediaType.contains("javascript") ||
-                    mediaType.contains("x-sh")) {
+                    mediaType.endsWith("/x-sh")) {
                 return "text/*";
             }
         }
