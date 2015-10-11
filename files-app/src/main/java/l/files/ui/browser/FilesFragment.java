@@ -25,7 +25,7 @@ import l.files.common.app.OptionsMenus;
 import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.ActionModes;
 import l.files.fs.File;
-import l.files.provider.bookmarks.BookmarkManagerImpl;
+import l.files.bookmarks.BookmarkManager;
 import l.files.ui.Preferences;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.BookmarkMenu;
@@ -160,7 +160,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
-                new BookmarkMenu(BookmarkManagerImpl.get(context), directory),
+                new BookmarkMenu(BookmarkManager.get(context), directory),
                 new NewDirMenu(context.getFragmentManager(), directory),
                 new PasteMenu(context, getClipboardManager(context), directory),
                 new SortMenu(context.getFragmentManager()),

@@ -11,10 +11,10 @@ import java.util.Locale;
 
 import l.files.fs.File;
 import l.files.fs.FileName;
-import l.files.provider.bookmarks.BookmarkManager;
+import l.files.bookmarks.BookmarkManager;
 
 import static java.util.Objects.requireNonNull;
-import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
+import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 
 final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 

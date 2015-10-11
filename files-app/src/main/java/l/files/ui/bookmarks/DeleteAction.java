@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import l.files.R;
 import l.files.common.widget.ActionModeItem;
 import l.files.fs.File;
-import l.files.provider.bookmarks.BookmarkManager;
+import l.files.bookmarks.BookmarkManager;
 import l.files.ui.selection.Selection;
 
 import static android.view.Menu.NONE;

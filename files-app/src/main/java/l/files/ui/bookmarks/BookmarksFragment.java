@@ -16,7 +16,7 @@ import l.files.R;
 import l.files.common.view.ActionModeProvider;
 import l.files.common.widget.ActionModes;
 import l.files.fs.File;
-import l.files.provider.bookmarks.BookmarkManagerImpl;
+import l.files.bookmarks.BookmarkManager;
 import l.files.ui.browser.OnOpenFileListener;
 import l.files.ui.mode.ClearSelectionOnDestroyActionMode;
 import l.files.ui.mode.CountSelectedItemsAction;
@@ -64,7 +64,7 @@ public final class BookmarksFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
-                new DeleteAction(BookmarkManagerImpl.get(getActivity()), selection())
+                new DeleteAction(BookmarkManager.get(getActivity()), selection())
         );
     }
 
@@ -77,7 +77,7 @@ public final class BookmarksFragment
     public Loader<List<File>> onCreateLoader(int id, Bundle bundle) {
         return new BookmarksLoader(
                 getActivity(),
-                BookmarkManagerImpl.get(getActivity()));
+                BookmarkManager.get(getActivity()));
     }
 
     @Override

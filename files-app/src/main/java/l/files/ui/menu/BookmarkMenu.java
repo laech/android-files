@@ -6,7 +6,7 @@ import android.view.MenuItem;
 import l.files.R;
 import l.files.common.app.OptionsMenuAction;
 import l.files.fs.File;
-import l.files.provider.bookmarks.BookmarkManager;
+import l.files.bookmarks.BookmarkManager;
 
 import static android.view.Menu.NONE;
 import static java.util.Objects.requireNonNull;

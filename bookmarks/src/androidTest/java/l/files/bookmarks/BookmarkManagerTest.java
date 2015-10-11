@@ -1,4 +1,4 @@
-package l.files.provider.bookmarks;
+package l.files.bookmarks;
 
 import android.content.SharedPreferences;
 
@@ -10,7 +10,7 @@ import l.files.testing.fs.FileBaseTest;
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static l.files.provider.bookmarks.BookmarkManager.BookmarkChangedListener;
+import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;

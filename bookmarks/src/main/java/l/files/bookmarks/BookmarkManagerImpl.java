@@ -1,4 +1,4 @@
-package l.files.provider.bookmarks;
+package l.files.bookmarks;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -20,24 +20,11 @@ import static android.os.Environment.DIRECTORY_MOVIES;
 import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
-import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class BookmarkManagerImpl implements BookmarkManager {
-
-    private static BookmarkManagerImpl instance;
-
-    public static BookmarkManagerImpl get(final Context context) {
-        synchronized (BookmarkManagerImpl.class) {
-            if (instance == null) {
-                final SharedPreferences pref = getDefaultSharedPreferences(context);
-                instance = new BookmarkManagerImpl(pref);
-            }
-            return instance;
-        }
-    }
+final class BookmarkManagerImpl extends BookmarkManager {
 
     private static final String PREF_KEY = "bookmarks";
 
