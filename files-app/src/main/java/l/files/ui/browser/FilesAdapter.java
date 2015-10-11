@@ -347,6 +347,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
 
         private void setPreview(FileListItem.File file) {
+            previewContainerSpaceTop.setVisibility(GONE);
+
             if (task != null) {
                 task.cancelAll();
             }
