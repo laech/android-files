@@ -158,7 +158,7 @@ final class NotificationProvider implements TaskListener {
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .addAction(
-                        android.R.drawable.ic_menu_close_clear_cancel,
+                        R.drawable.ic_undo_white_24dp,
                         context.getString(android.R.string.cancel),
                         newCancelPendingIntent(context, state.getTask().getId()));
     }
