@@ -2,6 +2,7 @@ package l.files.operations;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.Collection;
@@ -102,28 +103,39 @@ final class Copy extends Paste {
         copiedItemCount.incrementAndGet();
     }
 
-    private void copyFile(File src, Stat stat, File dst) throws IOException {
-        if (isInterrupted()) return;
+   private void copyFile(File src, Stat stat, File dst) throws IOException {
+        if (isInterrupted()) {
+            return;
+        }
 
         try (InputStream source = src.newInputStream();
              OutputStream sink = dst.newOutputStream()) {
+
             byte[] buf = new byte[BUFFER_SIZE];
             int n;
             while ((n = source.read(buf)) > 0) {
+
+                if (isInterrupted()) {
+                    throw new InterruptedIOException();
+                }
+
                 sink.write(buf, 0, n);
                 copiedByteCount.addAndGet(n);
             }
             copiedItemCount.incrementAndGet();
 
             setTimes(stat, dst);
+
         } catch (IOException e) {
+
             try {
                 dst.delete();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
 
-            if (!(e instanceof ClosedByInterruptException)) {
+            if (!(e instanceof ClosedByInterruptException) &&
+                    !(e instanceof InterruptedIOException)) {
                 throw e;
             }
         }
