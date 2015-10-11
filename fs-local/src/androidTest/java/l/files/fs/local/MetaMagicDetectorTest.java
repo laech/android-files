@@ -6,13 +6,11 @@ import java.util.Collections;
 import l.files.fs.File;
 import l.files.fs.Permission;
 
-import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
-
-public final class MagicDetectorTest extends AbstractDetectorTest {
+public final class MetaMagicDetectorTest extends AbstractDetectorTest {
 
     @Override
     AbstractDetector detector() {
-        return MagicDetector.INSTANCE;
+        return MetaMagicDetector.INSTANCE;
     }
 
     public void test_detects_unreadable_file_as_octet_stream() throws Exception {
@@ -38,8 +36,4 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
         }
     }
 
-    public void test_detects_content_only_not_file_name() throws Exception {
-        File file = dir1().resolve("a.txt").createFile();
-        assertEquals(MEDIA_TYPE_OCTET_STREAM, detector().detect(file));
-    }
 }
