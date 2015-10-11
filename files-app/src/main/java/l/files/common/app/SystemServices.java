@@ -11,10 +11,6 @@ public final class SystemServices {
     private SystemServices() {
     }
 
-    public static NotificationManager getNotificationManager(Context context) {
-        return (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-    }
-
     public static ClipboardManager getClipboardManager(Context context) {
         return (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
     }

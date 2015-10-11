@@ -11,14 +11,9 @@ import l.files.common.view.ActionModeProvider;
 public class BaseActivity extends Activity implements ActionModeProvider {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
-    private Menu menu;
 
     private ActionMode currentActionMode;
     private ActionMode.Callback currentActionModeCallback;
-
-    public Menu getMenu() {
-        return menu;
-    }
 
     public final void setOptionsMenu(OptionsMenu menu) {
         optionsMenu = OptionsMenus.nullToEmpty(menu);
@@ -28,21 +23,18 @@ public class BaseActivity extends Activity implements ActionModeProvider {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         this.optionsMenu.onCreateOptionsMenu(menu);
-        this.menu = menu;
         return true;
     }
 
     @Override
     public void onOptionsMenuClosed(Menu menu) {
         super.onOptionsMenuClosed(menu);
-        this.menu = null;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         this.optionsMenu.onPrepareOptionsMenu(menu);
-        this.menu = menu;
         return true;
     }
 

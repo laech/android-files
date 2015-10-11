@@ -1,14 +1,11 @@
 package l.files.testing;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.base.Executable;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 
 public final class Tests {
     private Tests() {
@@ -39,11 +36,4 @@ public final class Tests {
         }
     }
 
-    public static void assertExists(final File file) {
-        assertTrue(file + " to exist", file.exists());
-    }
-
-    public static void assertNotExists(final File file) {
-        assertFalse(file + " to not exist", file.exists());
-    }
 }

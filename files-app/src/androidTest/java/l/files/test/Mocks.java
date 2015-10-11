@@ -17,10 +17,6 @@ import static org.mockito.Mockito.mock;
 
 public final class Mocks {
 
-    public static MenuItem mockMenuItem() {
-        return mockMenuItem(0);
-    }
-
     public static MenuItem mockMenuItem(int id) {
         MenuItem item = mock(MenuItem.class);
         given(item.getItemId()).willReturn(id);
