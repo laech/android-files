@@ -32,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@null"
-                    android:dropDownVerticalOffset="8dp"
+                    android:dropDownVerticalOffset="4dp"
                     android:popupBackground="@drawable/title_popup_background"/>
 
             </Toolbar>
