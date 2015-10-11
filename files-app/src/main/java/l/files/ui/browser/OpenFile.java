@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import java.io.IOException;
 
 import l.files.fs.File;
+import l.files.fs.MediaTypes;
 import l.files.fs.Stat;
 
 import static android.content.Intent.ACTION_VIEW;
@@ -48,7 +49,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
         }
 
         if (!showFile((String) result) &&
-                !showFile(generalize((String) result))) {
+                !showFile(MediaTypes.generalize((String) result))) {
             showFile(MEDIA_TYPE_ANY);
         }
     }
@@ -70,22 +71,6 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
         } catch (ActivityNotFoundException e) {
             return false;
         }
-    }
-
-    private String generalize(String media) {
-        if (media.startsWith("text/")) return "text/*";
-        if (media.startsWith("image/")) return "image/*";
-        if (media.startsWith("audio/")) return "audio/*";
-        if (media.startsWith("video/")) return "video/*";
-        if (media.startsWith("application/")) {
-            if (media.contains("json") ||
-                    media.contains("xml") ||
-                    media.contains("javascript") ||
-                    media.contains("x-sh")) {
-                return "text/*";
-            }
-        }
-        return media;
     }
 
     private void debug(String media) {

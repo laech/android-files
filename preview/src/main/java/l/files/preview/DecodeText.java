@@ -8,6 +8,7 @@ import android.widget.TextView;
 import java.io.IOException;
 
 import l.files.fs.File;
+import l.files.fs.MediaTypes;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -28,18 +29,7 @@ final class DecodeText extends DecodeThumbnail {
 
         @Override
         public boolean accept(String mediaType) {
-            if (mediaType.startsWith("text/")) {
-                return true;
-            }
-            if (mediaType.startsWith("application/")) {
-                if (mediaType.contains("json") ||
-                        mediaType.contains("xml") ||
-                        mediaType.contains("javascript") ||
-                        mediaType.contains("x-sh")) {
-                    return true;
-                }
-            }
-            return false;
+            return MediaTypes.generalize(mediaType).startsWith("text/");
         }
 
         @Override
