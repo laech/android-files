@@ -1,4 +1,4 @@
-package collation;
+package l.files.collation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,9 +9,9 @@ import java.text.Collator;
 import java.util.Collection;
 import java.util.Locale;
 
-import static collation.NaturalKeyTest.Ord.EQUAL;
-import static collation.NaturalKeyTest.Ord.GREATER_THAN;
-import static collation.NaturalKeyTest.Ord.LESS_THAN;
+import static l.files.collation.NaturalKeyTest.Ord.EQUAL;
+import static l.files.collation.NaturalKeyTest.Ord.GREATER_THAN;
+import static l.files.collation.NaturalKeyTest.Ord.LESS_THAN;
 import static java.util.Arrays.asList;
 import static java.util.Locale.CHINESE;
 import static java.util.Locale.ENGLISH;

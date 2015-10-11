@@ -7,7 +7,7 @@ import com.google.auto.value.AutoValue;
 import java.io.IOException;
 import java.text.Collator;
 
-import collation.NaturalKey;
+import l.files.collation.NaturalKey;
 import l.files.fs.Stat;
 
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;

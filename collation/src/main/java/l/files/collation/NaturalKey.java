@@ -1,4 +1,4 @@
-package collation;
+package l.files.collation;
 
 import java.text.CollationKey;
 import java.text.Collator;

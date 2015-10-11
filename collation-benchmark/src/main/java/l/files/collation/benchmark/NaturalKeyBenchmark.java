@@ -1,4 +1,4 @@
-package collation.benchmark;
+package l.files.collation.benchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import collation.NaturalKey;
+import l.files.collation.NaturalKey;
 
 public class NaturalKeyBenchmark {
 
