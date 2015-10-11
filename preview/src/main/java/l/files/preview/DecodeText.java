@@ -28,8 +28,18 @@ final class DecodeText extends DecodeThumbnail {
 
         @Override
         public boolean accept(String mediaType) {
-            // TODO generalize
-            return mediaType.startsWith("text/");
+            if (mediaType.startsWith("text/")) {
+                return true;
+            }
+            if (mediaType.startsWith("application/")) {
+                if (mediaType.contains("json") ||
+                        mediaType.contains("xml") ||
+                        mediaType.contains("javascript") ||
+                        mediaType.contains("x-sh")) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
