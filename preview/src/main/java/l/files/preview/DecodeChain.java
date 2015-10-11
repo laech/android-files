@@ -85,18 +85,6 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        Rect size = context.getSize(file, stat, constraint);
-        if (size == null) {
-      /*
-       * Currently decoding the size is much quicker
-       * than decoding anything else.
-       */
-            size = context.decodeSize(file);
-            if (size != null) {
-                publishProgress(size);
-            }
-        }
-
         if (checkThumbnailDiskCache()) {
             return null;
         }
@@ -116,6 +104,7 @@ final class DecodeChain extends Decode {
 
         for (Previewer previewer : PREVIEWERS) {
             if (previewer.accept(media)) {
+                System.out.println("onPreview " + media);
                 publishProgress(previewer.create(
                         file, stat, constraint, callback, context));
                 return null;

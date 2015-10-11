@@ -33,15 +33,15 @@ import l.files.R;
 import l.files.common.view.ActionModeProvider;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.ui.Icons;
-import l.files.ui.StableAdapter;
-import l.files.ui.browser.FileListItem.Header;
-import l.files.ui.mode.Selectable;
 import l.files.preview.Decode;
 import l.files.preview.Preview;
 import l.files.preview.PreviewCallback;
 import l.files.preview.Rect;
 import l.files.preview.SizedColorDrawable;
+import l.files.ui.Icons;
+import l.files.ui.StableAdapter;
+import l.files.ui.browser.FileListItem.Header;
+import l.files.ui.mode.Selectable;
 import l.files.ui.selection.Selection;
 import l.files.ui.selection.SelectionModeViewHolder;
 
@@ -354,7 +354,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             }
 
             File res = file.file();
-            Stat stat = file.stat();
+            Stat stat = file.targetStat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
                 preview.setImageDrawable(null);
                 showPreviewContainer(false);
