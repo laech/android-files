@@ -23,13 +23,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@color/color_primary"
+                android:contentInsetEnd="72dp"
+                android:contentInsetStart="72dp"
                 android:popupTheme="@style/ToolbarPopup"
                 android:theme="@style/Toolbar"
                 app:layout_scrollFlags="scroll|enterAlways">
 
                 <Spinner
                     android:id="@+id/title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:dropDownVerticalOffset="4dp"
