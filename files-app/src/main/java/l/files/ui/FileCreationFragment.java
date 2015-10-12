@@ -11,8 +11,11 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
 
@@ -23,6 +26,7 @@ import l.files.fs.File;
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
+import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
 import static java.lang.System.identityHashCode;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -55,6 +59,7 @@ public abstract class FileCreationFragment extends DialogFragment
             editText = (EditText) getDialog().findViewById(android.R.id.text1);
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
+            editText.setOnEditorActionListener(new OkActionListener());
         }
 
         if (getFilename().isEmpty()) {
@@ -194,4 +199,23 @@ public abstract class FileCreationFragment extends DialogFragment
         public void afterTextChanged(Editable s) {
         }
     }
+
+    private class OkActionListener implements OnEditorActionListener {
+
+        @Override
+        public boolean onEditorAction(
+                TextView v, int actionId, KeyEvent event) {
+
+            if (actionId == IME_ACTION_DONE) {
+                AlertDialog dialog = getDialog();
+                onClick(dialog, BUTTON_POSITIVE);
+                dialog.dismiss();
+                return true;
+            }
+            
+            return false;
+        }
+
+    }
+
 }

@@ -9,6 +9,9 @@ import l.files.fs.Permission;
 import l.files.test.BaseFilesActivityTest;
 
 public final class NewDirTest extends BaseFilesActivityTest {
+
+    // TODO test click ok from keyboard
+
     public void test_shows_error_message_when_failed_to_create()
             throws Exception {
         dir().removePermissions(Permission.write());
