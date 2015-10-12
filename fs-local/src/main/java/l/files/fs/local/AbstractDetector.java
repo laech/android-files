@@ -3,6 +3,7 @@ package l.files.fs.local;
 import java.io.IOException;
 
 import l.files.fs.File;
+import l.files.fs.Stat;
 
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -20,20 +21,17 @@ abstract class AbstractDetector {
         return detect(file, file.stat(FOLLOW));
     }
 
-    String detect(File file, l.files.fs.Stat stat) throws IOException {
-        if (stat.isSymbolicLink()) {
-            return detect(file);
-        } else {
-            if (stat.isRegularFile()) return detectFile(file, stat);
-            if (stat.isFifo()) return INODE_FIFO;
-            if (stat.isSocket()) return INODE_SOCKET;
-            if (stat.isDirectory()) return INODE_DIRECTORY;
-            if (stat.isBlockDevice()) return INODE_BLOCKDEVICE;
-            if (stat.isCharacterDevice()) return INODE_CHARDEVICE;
-            return MEDIA_TYPE_OCTET_STREAM;
-        }
+    String detect(File file, Stat stat) throws IOException {
+        if (stat.isSymbolicLink()) return detect(file.readLink());
+        if (stat.isRegularFile()) return detectFile(file, stat);
+        if (stat.isFifo()) return INODE_FIFO;
+        if (stat.isSocket()) return INODE_SOCKET;
+        if (stat.isDirectory()) return INODE_DIRECTORY;
+        if (stat.isBlockDevice()) return INODE_BLOCKDEVICE;
+        if (stat.isCharacterDevice()) return INODE_CHARDEVICE;
+        return MEDIA_TYPE_OCTET_STREAM;
     }
 
-    abstract String detectFile(File file, l.files.fs.Stat stat) throws IOException;
+    abstract String detectFile(File file, Stat stat) throws IOException;
 
 }

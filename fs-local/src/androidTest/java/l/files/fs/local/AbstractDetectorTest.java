@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import l.files.fs.File;
 
+import static l.files.fs.LinkOption.NOFOLLOW;
+
 public abstract class AbstractDetectorTest extends FileBaseTest {
 
     /**
@@ -44,6 +46,17 @@ public abstract class AbstractDetectorTest extends FileBaseTest {
         File link1 = dir1().resolve("b").createLink(dir);
         File link2 = dir1().resolve("c").createLink(link1);
         assertEquals("inode/directory", detector().detect(link2));
+    }
+
+    public void test_detects_broken_links_no_stack_overflow() throws Exception {
+        File file = dir1().root().resolve("/proc/self/fdinfo/0");
+        assertTrue(file.stat(NOFOLLOW).isSymbolicLink());
+        try {
+            detector().detect(file);
+        } catch (IOException ignored) {
+        }
+        // Pass without StackOverflowError
+        // Had a bug before where this would crash the stack
     }
 
 }
