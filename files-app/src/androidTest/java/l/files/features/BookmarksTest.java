@@ -1,7 +1,7 @@
 package l.files.features;
 
 import l.files.fs.File;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 public final class BookmarksTest extends BaseFilesActivityTest {
 

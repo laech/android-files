@@ -13,7 +13,7 @@ import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.TextUtils.isEmpty;

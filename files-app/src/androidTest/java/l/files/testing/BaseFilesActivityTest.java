@@ -1,4 +1,4 @@
-package l.files.test;
+package l.files.testing;
 
 import android.content.Intent;
 

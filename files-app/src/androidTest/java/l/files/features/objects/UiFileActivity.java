@@ -51,7 +51,7 @@ import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
 import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.test.Mocks.mockMenuItem;
+import static l.files.testing.Mocks.mockMenuItem;
 
 public final class UiFileActivity {
 

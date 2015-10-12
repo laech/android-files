@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import l.files.fs.File;
 import l.files.fs.Instant;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;

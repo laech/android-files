@@ -1,7 +1,6 @@
 package l.files.features;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Random;
 
 import l.files.fs.File;
@@ -9,11 +8,10 @@ import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Stream;
 import l.files.fs.local.LocalFile;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.System.currentTimeMillis;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 

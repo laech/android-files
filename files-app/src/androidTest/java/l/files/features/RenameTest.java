@@ -5,7 +5,7 @@ import l.files.common.base.Executable;
 import l.files.features.objects.UiRename;
 import l.files.fs.File;
 import l.files.fs.Permission;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.testing.Tests.timeout;

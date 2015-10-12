@@ -6,7 +6,7 @@ import l.files.R;
 import l.files.common.base.Consumer;
 import l.files.features.objects.UiNewDir;
 import l.files.fs.Permission;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 public final class NewDirTest extends BaseFilesActivityTest {
 

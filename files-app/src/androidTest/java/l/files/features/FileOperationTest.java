@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import l.files.fs.File;
-import l.files.test.BaseFilesActivityTest;
+import l.files.testing.BaseFilesActivityTest;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
