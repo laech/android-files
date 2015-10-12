@@ -34,6 +34,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+    // TODO can show /etc/proc/self/fdinfo without crashing with StackOverflowError
+
     public void test_can_start_action_mode_after_rotation() throws Exception {
         for (int i = 0; i < 10; i++) {
             dir().resolve(String.valueOf(i)).createFile();
