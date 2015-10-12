@@ -23,6 +23,11 @@ public abstract class AbstractDetectorTest extends FileBaseTest {
         assertEquals("text/plain", detector().detect(file));
     }
 
+    public void test_detects_file_type_uppercase_extension() throws Exception {
+        File file = createTextFile("a.TXT");
+        assertEquals("text/plain", detector().detect(file));
+    }
+
     public void test_detects_linked_file_type() throws Exception {
         File file = createTextFile("a.mp3");
         File link = dir1().resolve("b.txt").createLink(file);
