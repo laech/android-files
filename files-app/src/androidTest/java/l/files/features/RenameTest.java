@@ -13,6 +13,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class RenameTest extends BaseFilesActivityTest {
 
+    // TODO test can rename from file.ext to file.EXT
+
     public void test_shows_error_when_failed_to_rename() throws Exception {
         final File file = dir().resolve("a").createFile();
         dir().removePermissions(Permission.write());
