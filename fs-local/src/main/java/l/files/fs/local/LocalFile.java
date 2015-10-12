@@ -147,6 +147,11 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
+    public File root() {
+        return create(new java.io.File("/"));
+    }
+
+    @Override
     public LocalFile parent() {
         java.io.File parent = file().getParentFile();
         if (parent == null) {

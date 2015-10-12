@@ -43,6 +43,8 @@ public interface File extends Parcelable {
      */
     FileName name();
 
+    File root();
+
     /**
      * Gets the parent file, or null.
      */

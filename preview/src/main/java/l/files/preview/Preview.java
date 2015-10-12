@@ -123,8 +123,7 @@ public final class Preview {
     }
 
     public boolean isPreviewable(File res, Stat stat, Rect constraint) {
-        return stat.size() > 0
-                && stat.isRegularFile()
+        return stat.isRegularFile()
                 && isReadable(res)
                 && !TRUE.equals(noPreviewCache.get(res, stat, constraint));
     }

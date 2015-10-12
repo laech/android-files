@@ -116,9 +116,8 @@ public abstract class BaseFile implements File {
 
     @Override
     public String readDetectingCharset(int limit) throws IOException {
-        CharsetDetector detector = new CharsetDetector();
         try (InputStream in = newBufferedInputStream();
-             Reader reader = detector.getReader(in, null)) {
+             Reader reader = new CharsetDetector().getReader(in, null)) {
             if (reader != null) {
                 char[] buffer = new char[limit];
                 int count = reader.read(buffer);

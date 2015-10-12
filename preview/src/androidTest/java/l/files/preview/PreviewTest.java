@@ -68,6 +68,10 @@ public final class PreviewTest extends FileBaseTest {
         testPreviewSuccess(file);
     }
 
+    public void testPreviewProcCpuinfo() throws Exception {
+        testPreviewSuccess(dir1().root().resolve("/proc/cpuinfo"));
+    }
+
     private void testPreviewSuccessForContent(String content) throws Throwable {
         File file = dir1().resolve(String.valueOf(nanoTime()));
         file.writeAllUtf8(content);
