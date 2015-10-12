@@ -111,6 +111,8 @@ final class Copy extends Paste {
         try (InputStream source = src.newInputStream();
              OutputStream sink = dst.newOutputStream()) {
 
+            // TODO perform sync to disk
+
             byte[] buf = new byte[BUFFER_SIZE];
             int n;
             while ((n = source.read(buf)) > 0) {
