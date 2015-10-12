@@ -13,6 +13,7 @@ public final class FilesTest extends FileBaseTest {
         testExistent(dir1().resolve("a").createFile(), "a 2");
         testExistent(dir1().resolve("b.txt").createFile(), "b 2.txt");
         testExistent(dir1().resolve("c 2.mp4").createFile(), "c 3.mp4");
+        testExistent(dir1().resolve("c2.mp4").createFile(), "c3.mp4");
         testExistent(dir1().resolve("d 2").createFile(), "d 3");
         testExistent(dir1().resolve("dir/x").createFiles(), "x");
     }
@@ -20,10 +21,12 @@ public final class FilesTest extends FileBaseTest {
     public void testGetNonExistentDestinationFile_directory() throws Exception {
         testExistent(dir1().resolve("a").createDir(), "a 2");
         testExistent(dir1().resolve("b.txt").createDir(), "b.txt 2");
-        testExistent(dir1().resolve("c 2.mp4").createDir(), "c 2.mp4 2");
-        testExistent(dir1().resolve("a2").createDir(), "a2 2");
+        testExistent(dir1().resolve("c 2.png").createDir(), "c 2.png 2");
+        testExistent(dir1().resolve("a2").createDir(), "a3");
         testExistent(dir1().resolve("a 3").createDir(), "a 4");
+        testExistent(dir1().resolve("a3").createDir(), "a4");
         testExistent(dir1().resolve("d 2").createDir(), "d 3");
+        testExistent(dir1().resolve("d2").createDir(), "d3");
         testExistent(dir1().resolve("dir/x").createDirs(), "x");
     }
 

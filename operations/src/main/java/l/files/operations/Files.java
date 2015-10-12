@@ -14,7 +14,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 final class Files {
 
     private static final Pattern NAME_WITH_NUMBER_SUFFIX =
-            Pattern.compile("(.*?\\s+)(\\d+)");
+            Pattern.compile("(.*?\\s*)(\\d+)");
 
     private Files() {
     }
