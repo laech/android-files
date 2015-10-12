@@ -13,6 +13,7 @@ import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
+import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
@@ -96,13 +97,17 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         });
     }
 
-    File cacheFile(File file, Stat stat, Rect constraint) {
+    private File cacheDir(File file, Rect constraint) {
         return cacheDir.resolve(file.scheme()
                 + "/" + file.path()
-                + "_" + stat.lastModifiedTime().seconds()
-                + "_" + stat.lastModifiedTime().nanos()
                 + "_" + constraint.width()
                 + "_" + constraint.height());
+    }
+
+    File cacheFile(File file, Stat stat, Rect constraint) {
+        return cacheDir(file, constraint).resolve(
+                stat.lastModifiedTime().seconds() + "_" +
+                        stat.lastModifiedTime().nanos());
     }
 
     @Override
@@ -147,6 +152,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             Rect constraint,
             Bitmap thumbnail) throws IOException {
 
+        purgeOldCacheFiles(file, constraint);
         File cache = cacheFile(file, stat, constraint);
         cache.createFiles();
         try (OutputStream out = cache.newBufferedOutputStream()) {
@@ -155,6 +161,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             thumbnail.compress(WEBP, 100, out);
         }
         return null;
+    }
+
+    private void purgeOldCacheFiles(File file, Rect constraint) throws IOException {
+        try (Stream<File> oldFiles = cacheDir(file, constraint).list(FOLLOW)) {
+            for (File oldFile : oldFiles) {
+                try {
+                    oldFile.delete();
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
+                }
+            }
+        } catch (FileNotFoundException ignored) {
+        }
     }
 
     public void putAsync(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
