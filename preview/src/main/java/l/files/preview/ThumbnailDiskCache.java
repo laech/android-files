@@ -19,6 +19,7 @@ import l.files.fs.Visitor;
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.System.nanoTime;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -28,20 +29,9 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
 
-    // No need to set UncaughtExceptionHandler to terminate
-    // on exception already set by Android
     private static final Executor executor = newFixedThreadPool(2);
 
-    /**
-     * Place a dummy byte at the beginning of the cache files,
-     * make them unrecognizable as image files, as to make them
-     * not previewable, so won't get into the situation of previewing
-     * the cache, save the thumbnail of the cache, preview the cache
-     * of the cache...
-     */
-    private static final int DUMMY_BYTE = 0;
-
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     final File cacheDir;
 
@@ -115,7 +105,6 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         File cache = cacheFile(file, stat, constraint);
         try (InputStream in = cache.newBufferedInputStream()) {
-            in.read(); // read DUMMY_BYTE
 
             int version = in.read();
             if (version != VERSION) {
@@ -153,13 +142,27 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             Bitmap thumbnail) throws IOException {
 
         purgeOldCacheFiles(file, constraint);
+
         File cache = cacheFile(file, stat, constraint);
-        cache.createFiles();
-        try (OutputStream out = cache.newBufferedOutputStream()) {
-            out.write(DUMMY_BYTE);
+        File parent = cache.parent();
+        parent.createDirs();
+
+        File tmp = parent.resolve(cache.name() + "-" + nanoTime());
+        try (OutputStream out = tmp.newBufferedOutputStream()) {
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);
+
+        } catch (Exception e) {
+            try {
+                tmp.delete();
+            } catch (Exception sup) {
+                e.addSuppressed(sup);
+            }
+            throw e;
         }
+
+        tmp.moveTo(cache);
+
         return null;
     }
 

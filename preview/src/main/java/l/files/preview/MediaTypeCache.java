@@ -9,7 +9,7 @@ import l.files.fs.File;
 final class MediaTypeCache extends PersistenceCache<String> {
 
     MediaTypeCache(File cacheDir) {
-        super(cacheDir);
+        super(cacheDir, 1);
     }
 
     @Override

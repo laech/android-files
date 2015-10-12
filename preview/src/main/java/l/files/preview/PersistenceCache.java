@@ -3,8 +3,6 @@ package l.files.preview;
 import android.os.AsyncTask;
 import android.util.LruCache;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -22,6 +20,7 @@ import l.files.fs.Instant;
 import l.files.fs.Stat;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
+import static java.lang.System.nanoTime;
 import static java.util.Objects.requireNonNull;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
@@ -49,9 +48,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             };
 
     private final File cacheDir;
+    private final int version;
 
-    PersistenceCache(File cacheDir) {
+    PersistenceCache(File cacheDir, int version) {
         this.cacheDir = requireNonNull(cacheDir);
+        this.version = version;
     }
 
     @Override
@@ -89,19 +90,28 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         new AsyncTask<Object, Object, Object>() {
             @Override
             protected Object doInBackground(Object... params) {
-                readIfNeeded();
+                try {
+                    readIfNeeded();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
         }.executeOnExecutor(loader);
     }
 
-    final void readIfNeeded() {
+    final void readIfNeeded() throws IOException {
         if (!loaded.compareAndSet(false, true)) {
             return;
         }
 
         File file = cacheFile();
         try (DataInputStream in = file.newBufferedDataInputStream()) {
+
+            int version = in.readInt();
+            if (version != this.version) {
+                return;
+            }
 
             while (true) {
                 try {
@@ -119,8 +129,6 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             }
 
         } catch (FileNotFoundException ignore) {
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -134,26 +142,28 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         new AsyncTask<Object, Object, Object>() {
             @Override
             protected Object doInBackground(Object... params) {
-                writeIfNeeded();
+                try {
+                    writeIfNeeded();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 return null;
             }
         }.executeOnExecutor(loader);
     }
 
-    final void writeIfNeeded() {
+    final void writeIfNeeded() throws IOException {
         if (!dirty.compareAndSet(true, false)) {
             return;
         }
 
         File file = cacheFile();
-        try {
-            file.createFiles();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        File parent = file.parent();
+        parent.createDirs();
 
-        try (DataOutputStream out = file.newBufferedDataOutputStream()) {
+        File tmp = parent.resolve(file.name() + "-" + nanoTime());
+        try (DataOutputStream out = tmp.newBufferedDataOutputStream()) {
+            out.writeInt(version);
 
             Map<String, Snapshot<V>> snapshot = cache.snapshot();
             for (Map.Entry<String, Snapshot<V>> entry : snapshot.entrySet()) {
@@ -163,9 +173,16 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 write(out, entry.getValue().get());
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            try {
+                tmp.delete();
+            } catch (IOException sup) {
+                e.addSuppressed(sup);
+            }
+            throw e;
         }
+
+        tmp.moveTo(file);
     }
 
     abstract void write(DataOutput out, V value) throws IOException;

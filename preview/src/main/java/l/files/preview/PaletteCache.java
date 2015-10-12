@@ -18,7 +18,7 @@ import static l.files.preview.Preview.PALETTE_MAX_COLOR_COUNT;
 final class PaletteCache extends PersistenceCache<Palette> {
 
     PaletteCache(File cacheDir) {
-        super(cacheDir);
+        super(cacheDir, 1);
     }
 
     @Override
