@@ -1,0 +1,26 @@
+<manifest package="l.files.ui"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <application>
+
+        <!--
+            Set soft input mode to avoid an issue with CoordinatorLayout.
+            When new folder menu is clicked, keyboard is shown, cancel, space
+            previously occupied by keyboard is now blank instead of showing
+            the list items.
+        -->
+        <activity
+            android:name=".browser.FilesActivity"
+            android:theme="@style/Theme.NoActionBar"
+            android:windowSoftInputMode="adjustNothing">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

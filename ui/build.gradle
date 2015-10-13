@@ -24,6 +24,17 @@ android {
 dependencies {
 
     compile project(':fs')
+    compile project(':fs-local')
+    compile project(':collation')
+    compile project(':preview')
+    compile project(':operations')
+    compile project(':operations-ui')
+    compile project(':bookmarks')
+
+    compile 'com.android.support:design:22.2.1'
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.1'
+    compile 'com.android.support:cardview-v7:22.2.1'
 
     apt 'com.google.auto.value:auto-value:1.1'
     provided 'com.google.auto.value:auto-value:1.1'
