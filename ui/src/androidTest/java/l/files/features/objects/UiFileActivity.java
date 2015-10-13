@@ -50,6 +50,7 @@ import static l.files.common.view.Views.find;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
 import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.testing.Mocks.mockMenuItem;
 
@@ -537,7 +538,7 @@ public final class UiFileActivity {
     }
 
     private List<Pair<File, Stat>> childrenStatsSortedByPath(File dir) {
-        try (Stream<File> stream = dir.list(NOFOLLOW)) {
+        try (Stream<File> stream = dir.list(FOLLOW)) {
             List<File> children = sortResourcesByPath(stream);
             return stat(children);
         } catch (IOException e) {

@@ -1,6 +1,8 @@
 package l.files.features;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import l.files.fs.File;
@@ -12,31 +14,58 @@ import l.files.testing.BaseFilesActivityTest;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class AutoRefreshStressTest extends BaseFilesActivityTest {
 
-    public void _ignored_test_large_directory() throws Exception {
-        final File dir = LocalFile.create(
-                new java.io.File(getExternalStorageDirectory(), "test-large-dir"))
-                .createDirs();
+    public void test_can_detect_files_added_and_removed_while_loading_() throws Exception {
 
-        int count = childCount(dir);
-        while (count < 10000) {
-            dir.resolve(String.valueOf(Math.random())).createFiles();
-            count++;
+        int childrenCount = 5000;
+        File dir = linkToExternalDir("files-test-add-remove-while-loading");
+        List<File> children = createRandomChildren(dir, childrenCount);
+
+        screen().click(dir);
+
+        for (int i = 0; i < 40; i++) {
+            while (children.size() > childrenCount) {
+                children.remove(children.size() - 1).delete();
+            }
+            randomFile(dir).createDir();
+            randomFile(dir).createFile();
+            sleep(100);
         }
+
+        screen().assertListViewContainsChildrenOf(dir);
     }
 
-    private int childCount(final File dir) throws IOException {
-        try (Stream<File> stream = dir.list(NOFOLLOW)) {
-            int count = 0;
-            for (File ignored : stream) {
-                count++;
-            }
-            return count;
+    private File linkToExternalDir(String name) throws IOException {
+        return dir().resolve(name).createLink(
+                externalStorageDir()
+                        .resolve(name)
+                        .createDirs()
+        );
+    }
+
+    private List<File> createRandomChildren(File dir, int count) throws IOException {
+        List<File> children = dir.list(FOLLOW).to(new ArrayList<File>());
+        while (children.size() < count) {
+            File file = randomFile(dir);
+            children.add(children.size() % 2 == 0
+                    ? file.createFile()
+                    : file.createDir());
         }
+        return children;
+    }
+
+    private File randomFile(File dir) {
+        return dir.resolve(String.valueOf(Math.random()));
+    }
+
+    private File externalStorageDir() {
+        return LocalFile.create(getExternalStorageDirectory());
     }
 
     public void test_shows_correct_information_on_large_change_events() throws Exception {
