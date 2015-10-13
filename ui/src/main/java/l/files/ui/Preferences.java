@@ -26,7 +26,7 @@ public final class Preferences {
     }
 
     public static FileSort getSort(Context context) {
-        String value = get(context).getString(PREF_SORT, FileSort.NAME.name());
+        String value = get(context).getString(PREF_SORT, FileSort.MODIFIED.name());
         try {
             return FileSort.valueOf(value);
         } catch (IllegalArgumentException e) {

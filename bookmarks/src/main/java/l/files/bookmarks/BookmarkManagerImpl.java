@@ -1,6 +1,6 @@
 package l.files.bookmarks;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 
 import java.io.IOException;
@@ -30,6 +30,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
 
     private static final Set<String> DEFAULTS = buildDefaults();
 
+    @SuppressLint("SdCardPath")
     private static Set<String> buildDefaults() {
         Set<String> defaults = new HashSet<>();
         defaults.add(getExternalStorageDirectory().toURI().toString());
@@ -38,6 +39,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         defaults.add(uri(DIRECTORY_MOVIES));
         defaults.add(uri(DIRECTORY_PICTURES));
         defaults.add(uri(DIRECTORY_DOWNLOADS));
+        defaults.add(new java.io.File("/sdcard2").toURI().toString());
         return unmodifiableSet(defaults);
     }
 
