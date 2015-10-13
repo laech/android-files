@@ -21,6 +21,36 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class AutoRefreshStressTest extends BaseFilesActivityTest {
 
+    public void test_can_show_updated_details_of_lots_of_child_dirs() throws Exception {
+        int childrenCount = 10_000;
+        File dir = linkToExternalDir("files-test-lots-of-child-dirs");
+        List<File> childDirs = createRandomDirs(dir, childrenCount);
+
+        screen().clickInto(dir).assertShowingLatestChildrenDetailsOf(dir);
+
+        for (File child : childDirs) {
+            Instant time = Instant.ofMillis(currentTimeMillis() - 1000);
+            child.setLastModifiedTime(NOFOLLOW, time);
+        }
+
+        screen().assertShowingLatestChildrenDetailsOf(dir);
+    }
+
+    private List<File> createRandomDirs(File dir, int count) throws IOException {
+        List<File> dirs = new ArrayList<>();
+        try (Stream<File> children = dir.list(FOLLOW)) {
+            for (File child : children) {
+                if (child.stat(NOFOLLOW).isDirectory()) {
+                    dirs.add(child);
+                }
+            }
+        }
+        while (dirs.size() < count) {
+            dirs.add(randomFile(dir).createDir());
+        }
+        return dirs;
+    }
+
     public void test_can_detect_files_added_and_removed_while_loading_() throws Exception {
 
         int childrenCount = 5000;
@@ -38,7 +68,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
             sleep(100);
         }
 
-        screen().assertListViewContainsChildrenOf(dir);
+        screen().assertShowingLatestChildrenDetailsOf(dir);
     }
 
     private File linkToExternalDir(String name) throws IOException {
@@ -70,7 +100,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
 
     public void test_shows_correct_information_on_large_change_events() throws Exception {
         dir().resolve("a").createFile();
-        screen().assertListViewContainsChildrenOf(dir());
+        screen().assertShowingLatestChildrenDetailsOf(dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(10);
         while (currentTimeMillis() < end) {
@@ -82,7 +112,7 @@ public final class AutoRefreshStressTest extends BaseFilesActivityTest {
             updateAttributes();
         }
 
-        screen().assertListViewContainsChildrenOf(dir());
+        screen().assertShowingLatestChildrenDetailsOf(dir());
     }
 
     private void updateAttributes() throws IOException {

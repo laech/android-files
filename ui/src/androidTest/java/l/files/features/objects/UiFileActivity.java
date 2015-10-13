@@ -524,8 +524,9 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertListViewContainsChildrenOf(
-            final File dir) throws IOException {
+    public UiFileActivity assertShowingLatestChildrenDetailsOf(final File dir)
+            throws IOException {
+
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -555,7 +556,7 @@ public final class UiFileActivity {
         return result;
     }
 
-    private List<File> sortResourcesByPath(Stream<File> iterable) {
+    private List<File> sortResourcesByPath(Stream<File> iterable) throws IOException {
         List<File> files = iterable.to(new ArrayList<File>());
         Collections.sort(files, new Comparator<File>() {
             @Override

@@ -54,8 +54,15 @@ abstract class Dirent extends Native {
 
         return new Stream<Dirent>() {
 
+            boolean closed;
+
             @Override
             public void close() throws IOException {
+                if (closed) {
+                    return;
+                }
+                closed = true;
+
                 try {
                     closedir(dir);
                 } catch (ErrnoException e) {

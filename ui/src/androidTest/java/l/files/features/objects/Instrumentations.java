@@ -24,7 +24,7 @@ import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -82,7 +82,7 @@ public final class Instrumentations {
     public static <T> T awaitOnMainThread(
             Instrumentation in,
             Callable<T> callable) {
-        return await(new InstrumentCallable<>(in, callable), 30, SECONDS);
+        return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
     }
 
     public static void awaitOnMainThread(
