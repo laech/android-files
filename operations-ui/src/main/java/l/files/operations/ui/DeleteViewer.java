@@ -29,7 +29,7 @@ final class DeleteViewer extends ProgressViewer {
 
     @Override
     public int getSmallIcon(final Context context) {
-        return android.R.drawable.ic_menu_delete;
+        return R.drawable.ic_delete_white_24dp;
     }
 
     @Override
