@@ -42,7 +42,7 @@ abstract class FileSortTest extends FileBaseTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileListItem.File.create(file, stat, stat, collator));
+            expected.add(FileListItem.File.create(file, stat, null, null, collator));
         }
         return expected;
     }

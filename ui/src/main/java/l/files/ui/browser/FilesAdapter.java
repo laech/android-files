@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import l.files.ui.R;
 import l.files.common.view.ActionModeProvider;
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -39,6 +38,7 @@ import l.files.preview.PreviewCallback;
 import l.files.preview.Rect;
 import l.files.preview.SizedColorDrawable;
 import l.files.ui.Icons;
+import l.files.ui.R;
 import l.files.ui.StableAdapter;
 import l.files.ui.browser.FileListItem.Header;
 import l.files.ui.mode.Selectable;
@@ -68,17 +68,17 @@ import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.common.content.res.Styles.getColorStateList;
+import static l.files.common.view.Views.find;
+import static l.files.ui.Icons.defaultDirectoryIconStringId;
+import static l.files.ui.Icons.defaultFileIconStringId;
+import static l.files.ui.Icons.fileIconStringId;
 import static l.files.ui.R.dimen.files_item_card_inner_space;
 import static l.files.ui.R.dimen.files_item_space_horizontal;
 import static l.files.ui.R.dimen.files_list_space;
 import static l.files.ui.R.integer.files_grid_columns;
 import static l.files.ui.R.layout.files_grid_header;
 import static l.files.ui.R.layout.files_grid_item;
-import static l.files.common.content.res.Styles.getColorStateList;
-import static l.files.common.view.Views.find;
-import static l.files.ui.Icons.defaultDirectoryIconStringId;
-import static l.files.ui.Icons.defaultFileIconStringId;
-import static l.files.ui.Icons.fileIconStringId;
 
 final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         implements Selectable {
@@ -218,7 +218,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         private final View iconContainer;
         private final TextView title;
         private final TextView summary;
-        private final TextView symlink;
+        private final TextView linkIcon;
+        private final TextView linkPath;
         private final ImageView preview;
         private final CardView previewContainer;
         private final View previewContainerSpaceTop;
@@ -240,7 +241,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             this.iconContainer = find(R.id.icon_container, this);
             this.title = find(R.id.title, this);
             this.summary = find(R.id.summary, this);
-            this.symlink = find(R.id.symlink, this);
+            this.linkIcon = find(R.id.link_icon, this);
+            this.linkPath = find(R.id.link_path, this);
             this.preview = find(R.id.preview, this);
             this.previewContainer = find(R.id.preview_container, this);
             this.previewContainerSpaceTop = find(R.id.preview_container_space_top, this);
@@ -270,7 +272,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             super.bind(file);
             setTitle(file);
             setIcon(file);
-            setSymlink(file);
+            setLink(file);
             setSummary(file);
             setPreview(file);
         }
@@ -418,22 +420,35 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
                 title.setTextColor(primaryText);
                 icon.setTextColor(tertiaryText);
                 summary.setTextColor(tertiaryText);
-                symlink.setTextColor(tertiaryText);
+                linkIcon.setTextColor(tertiaryText);
+                linkPath.setTextColor(tertiaryText);
             } else {
                 title.setTextColor(primaryTextInverse);
                 icon.setTextColor(tertiaryTextInverse);
                 summary.setTextColor(tertiaryTextInverse);
-                symlink.setTextColor(tertiaryTextInverse);
+                linkIcon.setTextColor(tertiaryTextInverse);
+                linkPath.setTextColor(tertiaryTextInverse);
             }
         }
 
-        private void setSymlink(FileListItem.File file) {
+        private void setLink(FileListItem.File file) {
             Stat stat = file.stat();
-            if (stat == null || !stat.isSymbolicLink()) {
-                symlink.setVisibility(GONE);
+            if (stat != null && stat.isSymbolicLink()) {
+                linkIcon.setEnabled(file.isReadable());
+                linkIcon.setVisibility(VISIBLE);
+
+                File target = file.target();
+                if (target != null) {
+                    linkPath.setText(resources().getString(R.string.link_x, target.path()));
+                    linkPath.setVisibility(VISIBLE);
+                    linkPath.setEnabled(file.isReadable());
+                } else {
+                    linkPath.setVisibility(GONE);
+                }
+
             } else {
-                symlink.setEnabled(file.isReadable());
-                symlink.setVisibility(VISIBLE);
+                linkIcon.setVisibility(GONE);
+                linkPath.setVisibility(GONE);
             }
         }
 

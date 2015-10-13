@@ -252,7 +252,7 @@ public final class DateCategorizerTest extends BaseTest {
         final File res = mock(File.class);
         given(res.name()).willReturn(FileName.of(String.valueOf(time)));
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileListItem.File.create(res, stat, stat, collator);
+        return FileListItem.File.create(res, stat, null, null, collator);
     }
 
     private void assertCategory(final String expected, final FileListItem.File... stats) {

@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 
 import l.files.common.base.Consumer;
 import l.files.common.base.Provider;
+import l.files.common.view.Views;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
@@ -457,18 +458,43 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity assertSymbolicLinkIconDisplayed(
-            File file,
-            final boolean displayed) {
+    public UiFileActivity assertLinkIconDisplayed(
+            File file, final boolean displayed) {
+
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
             public void apply(View input) {
-                View view = input.findViewById(R.id.symlink);
+                View view = input.findViewById(R.id.link_icon);
                 if (displayed) {
                     assertEquals(VISIBLE, view.getVisibility());
                 } else {
                     assertEquals(GONE, view.getVisibility());
                 }
+            }
+        });
+        return this;
+    }
+
+    public UiFileActivity assertLinkPathDisplayed(
+            File link, final File target) {
+
+        findItemOnMainThread(link, new Consumer<View>() {
+            @Override
+            public void apply(View input) {
+
+                TextView view = Views.find(R.id.link_path, input);
+                if (target != null) {
+
+                    String actual = view.getText().toString();
+                    assertTrue(
+                            actual + " to contain " + target.path(),
+                            actual.contains(target.path()));
+                    assertEquals(VISIBLE, view.getVisibility());
+
+                } else {
+                    assertEquals(GONE, view.getVisibility());
+                }
+
             }
         });
         return this;

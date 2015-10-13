@@ -64,7 +64,7 @@
                 android:textSize="32sp"/>
 
             <TextView
-                android:id="@+id/symlink"
+                android:id="@+id/link_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/icon"
@@ -79,7 +79,7 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="2dp"
             android:layout_marginEnd="12dp"
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
@@ -87,6 +87,17 @@
             android:lineSpacingMultiplier="1.2"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/link_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/summary"

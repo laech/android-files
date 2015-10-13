@@ -300,27 +300,40 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private boolean update(File file) {
         try {
+
             Stat stat = file.stat(NOFOLLOW);
             Stat targetStat = readTargetStatus(file, stat);
-            FileListItem.File newStat = FileListItem.File.create(file, stat, targetStat, collator);
+            File target = readTarget(file, stat);
+            FileListItem.File newStat = FileListItem.File.create(file, stat, target, targetStat, collator);
             FileListItem.File oldStat = data.put(file.name().toString(), newStat);
             return !Objects.equals(newStat, oldStat);
+
         } catch (FileNotFoundException e) {
             return data.remove(file.name().toString()) != null;
+
         } catch (IOException e) {
             data.put(
                     file.name().toString(),
-                    FileListItem.File.create(file, null, null, collator));
+                    FileListItem.File.create(file, null, null, null, collator));
             return true;
         }
+    }
+
+    private File readTarget(File file, Stat stat) {
+        if (stat.isSymbolicLink()) {
+            try {
+                return file.readLink();
+            } catch (IOException ignored) {
+            }
+        }
+        return null;
     }
 
     private Stat readTargetStatus(File file, Stat stat) {
         if (stat.isSymbolicLink()) {
             try {
                 return file.stat(FOLLOW);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignored) {
             }
         }
         return stat;

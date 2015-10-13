@@ -189,8 +189,16 @@ public final class NavigationTest extends BaseFilesActivityTest {
         File link = dir().resolve("link").createLink(dir);
 
         screen()
-                .assertSymbolicLinkIconDisplayed(dir, false)
-                .assertSymbolicLinkIconDisplayed(link, true);
+                .assertLinkIconDisplayed(dir, false)
+                .assertLinkIconDisplayed(link, true);
+    }
+
+    public void test_link_path_displayed() throws Exception {
+        File dir = dir().resolve("dir").createDir();
+        File link = dir().resolve("link").createLink(dir);
+        screen()
+                .assertLinkPathDisplayed(dir, null)
+                .assertLinkPathDisplayed(link, dir);
     }
 
     public void test_can_navigate_into_linked_directory() throws Exception {

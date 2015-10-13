@@ -46,6 +46,7 @@ public abstract class FileListItem {
         }
     }
 
+    // TODO rename
     @AutoValue
     public static abstract class File extends FileListItem implements Comparable<File> {
 
@@ -81,6 +82,9 @@ public abstract class FileListItem {
         public abstract Stat stat(); // TODO
 
         @Nullable
+        public abstract l.files.fs.File target();
+
+        @Nullable
         abstract Stat _targetStat();
 
         abstract NaturalKey collationKey();
@@ -88,11 +92,12 @@ public abstract class FileListItem {
         public static File create(
                 l.files.fs.File file,
                 @Nullable Stat stat,
+                @Nullable l.files.fs.File target,
                 @Nullable Stat targetStat,
                 Collator collator) {
             String name = file.name().toString();
             NaturalKey key = NaturalKey.create(collator, name);
-            return new AutoValue_FileListItem_File(file, stat, targetStat, key);
+            return new AutoValue_FileListItem_File(file, stat, target, targetStat, key);
         }
 
         @Override
