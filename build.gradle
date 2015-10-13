@@ -9,6 +9,13 @@ buildscript {
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.2'
     }
+
+    ext.minSdkVersion = 21
+    ext.targetSdkVersion = 23
+    ext.compileSdkVersion = 23
+    ext.buildToolsVersion = "23.0.1"
+    ext.supportLibVersion = "23.0.1"
+
 }
 
 allprojects {

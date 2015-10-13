@@ -2,19 +2,15 @@ apply plugin: 'com.android.application'
 
 android {
 
-    compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
 
     defaultConfig {
         applicationId 'l.files'
-        minSdkVersion 21
-        targetSdkVersion 23
-        versionCode 7
-        versionName '2.0 beta'
-    }
-
-    lintOptions {
-        abortOnError false
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode 8
+        versionName '3.0 beta'
     }
 
     buildTypes {
