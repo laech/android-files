@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import l.files.common.base.Consumer;
+import l.files.common.base.Provider;
 import l.files.ui.StableAdapter;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -81,7 +82,7 @@ public final class Instrumentations {
     public static <T> T awaitOnMainThread(
             Instrumentation in,
             Callable<T> callable) {
-        return await(in, new InstrumentCallable<>(in, callable), 30, SECONDS);
+        return await(new InstrumentCallable<>(in, callable), 30, SECONDS);
     }
 
     public static void awaitOnMainThread(
@@ -96,7 +97,6 @@ public final class Instrumentations {
     }
 
     public static <T> T await(
-            Instrumentation in,
             Callable<T> callable,
             long time,
             TimeUnit unit) {
@@ -110,22 +110,16 @@ public final class Instrumentations {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } catch (AssertionError e) {
-                if (error == null) {
-                    error = e;
-                } else {
-                    error.addSuppressed(e);
-                }
+                error = e;
             }
             sleep(500);
         }
 
         if (error == null) {
-            error = new AssertionError("Timed out.");
+            throw new AssertionError("Timed out.");
         }
 
-//    takeScreenshotAndThrow(in, error);
-//    return null;
-        throw error;
+        throw new AssertionError(error.getMessage(), error);
     }
 
     private static void takeScreenshotAndThrow(
@@ -152,24 +146,28 @@ public final class Instrumentations {
     }
 
     public static void scrollToTop(
-            Instrumentation in, final RecyclerView recycler) {
+            final Instrumentation in,
+            final Provider<RecyclerView> recycler) {
+
         awaitOnMainThread(in, new Runnable() {
             @Override
             public void run() {
-                @SuppressWarnings("unchecked")
-                StableAdapter<Object, ViewHolder> adapter =
-                        (StableAdapter<Object, ViewHolder>) recycler.getAdapter();
-
-                if (adapter.getItemCount() > 0) {
-                    recycler.scrollToPosition(0);
+                if (getStableAdapter(recycler).getItemCount() > 0) {
+                    recycler.get().scrollToPosition(0);
                 }
             }
         });
     }
 
+    @SuppressWarnings("unchecked")
+    private static StableAdapter<Object, ViewHolder> getStableAdapter(
+            Provider<RecyclerView> recycler) {
+        return (StableAdapter<Object, ViewHolder>) recycler.get().getAdapter();
+    }
+
     public static void clickItemOnMainThread(
             Instrumentation in,
-            RecyclerView recycler,
+            Provider<RecyclerView> recycler,
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
@@ -181,7 +179,7 @@ public final class Instrumentations {
 
     public static void longClickItemOnMainThread(
             Instrumentation in,
-            RecyclerView recycler,
+            Provider<RecyclerView> recycler,
             Object itemId) {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
@@ -193,7 +191,7 @@ public final class Instrumentations {
 
     public static void findItemOnMainThread(
             final Instrumentation in,
-            final RecyclerView recycler,
+            final Provider<RecyclerView> recycler,
             final Object itemId,
             final Consumer<View> consumer) {
         scrollToTop(in, recycler);
@@ -206,18 +204,18 @@ public final class Instrumentations {
     }
 
     private static void find(
-            RecyclerView recycler,
+            Provider<RecyclerView> recycler,
             Object itemId,
             Consumer<View> consumer) {
-        @SuppressWarnings("unchecked")
-        StableAdapter<Object, ViewHolder> adapter =
-                (StableAdapter<Object, ViewHolder>) recycler.getAdapter();
+
+        RecyclerView view = recycler.get();
+        StableAdapter<Object, ViewHolder> adapter = getStableAdapter(recycler);
 
         for (int i = 0; i < adapter.getItemCount(); i++) {
-            recycler.scrollBy(0, 5);
-            for (int j = 0; j < recycler.getChildCount(); j++) {
-                View child = recycler.getChildAt(j);
-                ViewHolder holder = recycler.getChildViewHolder(child);
+            view.scrollBy(0, 5);
+            for (int j = 0; j < view.getChildCount(); j++) {
+                View child = view.getChildAt(j);
+                ViewHolder holder = view.getChildViewHolder(child);
                 int position = holder.getAdapterPosition();
                 if (position == NO_POSITION) {
                     fail();
@@ -232,6 +230,7 @@ public final class Instrumentations {
             }
         }
 
-        fail("Item not found: " + itemId);
+        fail("Item not found: " + itemId + " in " + adapter + adapter.items());
     }
+
 }

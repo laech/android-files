@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
-import l.files.ui.R;
 import l.files.common.base.Consumer;
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -14,6 +13,7 @@ import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.testing.BaseFilesActivityTest;
+import l.files.ui.R;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.TextUtils.isEmpty;
@@ -26,15 +26,21 @@ import static android.text.format.DateUtils.formatDateTime;
 import static android.text.format.Formatter.formatShortFileSize;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
-import static java.text.DateFormat.MEDIUM;
-import static java.text.DateFormat.getDateTimeInstance;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
-    // TODO can show /etc/proc/self/fdinfo without crashing with StackOverflowError
+    public void test_can_navigate_into_etc_proc_self_fdinfo_without_crashing()
+            throws Exception {
+
+        File root = dir().root();
+        screen().selectFromNavigationMode(root);
+        screen().clickInto(root.resolve("/proc"));
+        screen().clickInto(root.resolve("/proc/self"));
+        screen().clickInto(root.resolve("/proc/self/fdinfo"));
+    }
 
     public void test_can_start_action_mode_after_rotation() throws Exception {
         for (int i = 0; i < 10; i++) {
@@ -115,24 +121,6 @@ public final class NavigationTest extends BaseFilesActivityTest {
             @Override
             public void apply(CharSequence actual) {
                 assertEquals(expected, actual);
-            }
-        });
-    }
-
-    public void test_shows_full_time_for_future_file() throws Exception {
-        File file = dir().resolve("file").createFile();
-        long future = currentTimeMillis() + 100000;
-        file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(future));
-
-        final String date = getDateTimeInstance(MEDIUM, MEDIUM)
-                .format(new Date(future));
-
-        screen().assertSummaryView(file, new Consumer<CharSequence>() {
-            @Override
-            public void apply(CharSequence actual) {
-                assertTrue(
-                        String.format("\"%s\".startsWith(\"%s\")", actual, date),
-                        actual.toString().startsWith(date));
             }
         });
     }

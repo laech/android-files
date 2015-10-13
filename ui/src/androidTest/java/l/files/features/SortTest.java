@@ -12,6 +12,7 @@ import static l.files.ui.browser.FileSort.NAME;
 import static l.files.ui.browser.FileSort.SIZE;
 
 public final class SortTest extends BaseFilesActivityTest {
+
     public void test_updates_list_on_sort_option_change_on_back() throws Exception {
         File a = dir().resolve("a").createDir();
         File aa = createFile("aa", "aa", Instant.of(1, 1), a);
@@ -23,7 +24,7 @@ public final class SortTest extends BaseFilesActivityTest {
                 .clickInto(a)
                 .sort().by(NAME).assertItemsDisplayed(aa, ab)
                 .sort().by(MODIFIED).assertItemsDisplayed(ab, aa)
-                .pressBack().assertItemsDisplayed(a, b, c);
+                .pressBack().assertItemsDisplayed(a, c, b);
     }
 
     public void test_updates_list_on_sort_option_change() throws Exception {

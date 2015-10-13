@@ -20,13 +20,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import l.files.ui.R;
 import l.files.common.base.Consumer;
 import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.ui.FileLabels;
+import l.files.ui.R;
 import l.files.ui.browser.FileListItem;
 import l.files.ui.browser.FilesActivity;
 import l.files.ui.browser.FilesFragment;
@@ -347,13 +347,20 @@ public final class UiFileActivity {
                 instrument, recycler(), file, consumer);
     }
 
-    private RecyclerView recycler() {
-        return awaitOnMainThread(instrument, new Callable<RecyclerView>() {
+    private Provider<RecyclerView> recycler() {
+        return new Provider<RecyclerView>() {
             @Override
-            public RecyclerView call() throws Exception {
-                return fragment().recycler;
+            public RecyclerView get() {
+
+                return awaitOnMainThread(instrument, new Callable<RecyclerView>() {
+                    @Override
+                    public RecyclerView call() throws Exception {
+                        return fragment().recycler;
+                    }
+                });
+
             }
-        });
+        };
     }
 
     private MenuItem renameMenu() {

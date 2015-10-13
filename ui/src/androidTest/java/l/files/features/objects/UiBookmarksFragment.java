@@ -1,13 +1,15 @@
 package l.files.features.objects;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.ui.R;
 import l.files.common.base.Consumer;
+import l.files.common.base.Provider;
 import l.files.fs.File;
+import l.files.ui.R;
 import l.files.ui.bookmarks.BookmarksFragment;
 import l.files.ui.browser.FilesActivity;
 
@@ -36,7 +38,7 @@ public final class UiBookmarksFragment {
     }
 
     public UiBookmarksFragment longClick(File bookmark) {
-        longClickItemOnMainThread(context.instrumentation(), fragment().recycler, bookmark);
+        longClickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
 
@@ -48,7 +50,7 @@ public final class UiBookmarksFragment {
     }
 
     public UiBookmarksFragment click(File bookmark) {
-        clickItemOnMainThread(context.instrumentation(), fragment().recycler, bookmark);
+        clickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
 
@@ -120,13 +122,25 @@ public final class UiBookmarksFragment {
     public UiBookmarksFragment assertChecked(
             File bookmark, final boolean checked) {
         findItemOnMainThread(
-                context.instrumentation(), fragment().recycler, bookmark, new Consumer<View>() {
+                context.instrumentation(),
+                recycler(),
+                bookmark,
+                new Consumer<View>() {
                     @Override
                     public void apply(View view) {
                         assertEquals(checked, view.isActivated());
                     }
                 });
         return this;
+    }
+
+    private Provider<RecyclerView> recycler() {
+        return new Provider<RecyclerView>() {
+            @Override
+            public RecyclerView get() {
+                return fragment().recycler;
+            }
+        };
     }
 
     public UiBookmarksFragment assertDrawerIsOpened(boolean opened) {
