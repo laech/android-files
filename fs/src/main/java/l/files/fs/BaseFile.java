@@ -46,7 +46,8 @@ public abstract class BaseFile implements File {
     }
 
     @Override
-    public Closeable observe(LinkOption option, Observer observer) throws IOException {
+    public Closeable observe(LinkOption option, Observer observer)
+            throws IOException, InterruptedException {
 
         return observe(option, observer, new FileConsumer() {
             @Override
@@ -62,7 +63,7 @@ public abstract class BaseFile implements File {
             BatchObserver batchObserver,
             FileConsumer childrenConsumer,
             long batchInterval,
-            TimeUnit batchInternalUnit) throws IOException {
+            TimeUnit batchInternalUnit) throws IOException, InterruptedException {
 
         return new BatchObserverNotifier(batchObserver)
                 .start(this, option, childrenConsumer, batchInterval, batchInternalUnit);

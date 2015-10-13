@@ -31,6 +31,7 @@ import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
+import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -50,6 +51,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private volatile boolean observing;
     private volatile Closeable observable;
+    private volatile Thread loadInBackgroundThread;
 
     private final ExecutorService executor;
 
@@ -136,7 +138,22 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     @Override
+    public void cancelLoadInBackground() {
+        super.cancelLoadInBackground();
+        Thread thread = loadInBackgroundThread;
+        if (thread != null) {
+            thread.interrupt();
+        }
+    }
+
+    @Override
     public Result loadInBackground() {
+        loadInBackgroundThread = currentThread();
+
+        if (isLoadInBackgroundCanceled()) {
+            return null;
+        }
+
         data.clear();
 
         boolean observe = false;
@@ -157,13 +174,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         } catch (IOException e) {
             e.printStackTrace();
             return Result.of(e);
+
+        } catch (InterruptedException e) {
+            currentThread().interrupt();
+            cancelLoad();
+            throw new OperationCanceledException();
         }
 
         update(children);
         return buildResult();
     }
 
-    private List<File> observe() throws IOException {
+    private List<File> observe() throws IOException, InterruptedException {
         List<File> children = new ArrayList<>();
         observable = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
         return children;
@@ -226,6 +248,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     @Override
     protected void onReset() {
         super.onReset();
+        cancelLoad();
 
         Closeable closeable = null;
         synchronized (this) {

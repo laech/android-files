@@ -116,6 +116,8 @@ public interface File extends Parcelable {
      */
     boolean isExecutable() throws IOException;
 
+    // TODO notify failed to observe
+
     /**
      * Observes on this file for change events.
      * <p/>
@@ -131,19 +133,20 @@ public interface File extends Parcelable {
      * @param option if option is {@link LinkOption#NOFOLLOW} and this file is a
      *               link, observe on the link instead of the link target
      */
-    Closeable observe(LinkOption option, Observer observer) throws IOException;
+    Closeable observe(LinkOption option, Observer observer)
+            throws IOException, InterruptedException;
 
     Closeable observe(
             LinkOption option,
             Observer observer,
-            FileConsumer childrenConsumer) throws IOException;
+            FileConsumer childrenConsumer) throws IOException, InterruptedException;
 
     Closeable observe(
             LinkOption option,
             BatchObserver batchObserver,
             FileConsumer childrenConsumer,
             long batchInterval,
-            TimeUnit batchInternalUnit) throws IOException;
+            TimeUnit batchInternalUnit) throws IOException, InterruptedException;
 
     /**
      * Performs a depth first traverse of this tree.
@@ -168,7 +171,7 @@ public interface File extends Parcelable {
      */
     void traverse(LinkOption option, Visitor visitor) throws IOException;
 
-    Stream<File> list(LinkOption option) throws IOException;
+    Stream<File> list(LinkOption option) throws IOException; // Add filter
 
     InputStream newInputStream() throws IOException;
 

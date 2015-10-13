@@ -13,6 +13,7 @@ import l.files.fs.local.LocalFile;
 import l.files.testing.BaseFilesActivityTest;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static java.lang.Integer.parseInt;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -20,6 +21,26 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class AutoRefreshStressTest extends BaseFilesActivityTest {
+
+    public void test_pressing_back_releases_resources() throws Exception {
+
+        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_watches");
+        int maxUserWatches = parseInt(limitFile.readAllUtf8().trim());
+
+        File dir = linkToExternalDir("files-test-pressing-back-releases-resources");
+        List<File> childDirs = createRandomDirs(dir, 5_000);
+
+        for (int i = 0; i * childDirs.size() < maxUserWatches * 10; i++) {
+            screen().clickInto(dir);
+            sleep(100);
+            screen().pressBack();
+        }
+        screen().clickInto(dir)
+                .assertShowingLatestChildrenDetailsOf(dir)
+                .pressBack()
+                .clickInto(dir)
+                .assertShowingLatestChildrenDetailsOf(dir);
+    }
 
     public void test_can_show_updated_details_of_lots_of_child_dirs() throws Exception {
         int childrenCount = 10_000;

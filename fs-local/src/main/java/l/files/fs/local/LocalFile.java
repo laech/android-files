@@ -120,6 +120,15 @@ public abstract class LocalFile extends BaseFile {
 
     abstract java.io.File file();
 
+    public static LocalFile of(String path) {
+        return of(new java.io.File(path));
+    }
+
+    public static LocalFile of(java.io.File file) {
+        return new AutoValue_LocalFile(file);
+    }
+
+    @Deprecated
     public static LocalFile create(java.io.File file) {
         return new AutoValue_LocalFile(file);
     }
@@ -176,7 +185,7 @@ public abstract class LocalFile extends BaseFile {
     public Closeable observe(
             LinkOption option,
             Observer observer,
-            FileConsumer childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
         return LocalObservable.observe(
                 this, option, observer, childrenConsumer);

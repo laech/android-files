@@ -6,6 +6,8 @@ import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +44,6 @@ import static l.files.fs.local.Inotify.IN_MODIFY;
 import static l.files.fs.local.Inotify.IN_MOVED_FROM;
 import static l.files.fs.local.Inotify.IN_MOVED_TO;
 import static l.files.fs.local.Inotify.IN_MOVE_SELF;
-import static l.files.fs.local.Inotify.IN_NONBLOCK;
 import static l.files.fs.local.Inotify.IN_ONLYDIR;
 import static l.files.fs.local.Inotify.IN_OPEN;
 import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
@@ -178,7 +179,7 @@ final class LocalObservable extends Native
             LocalFile file,
             LinkOption option,
             Observer observer,
-            FileConsumer childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
         requireNonNull(file, "root");
         requireNonNull(option, "option");
@@ -192,28 +193,39 @@ final class LocalObservable extends Native
         LocalObservable observable =
                 new LocalObservable(fd, wd, file, observer);
 
-    /* Using a new thread seems to be much quicker than using a thread pool
-     * executor, didn't investigate why, just a reminder here to check the
-     * performance if this is to be changed to a pool.
-     */
+        /* Using a new thread seems to be much quicker than using a thread pool
+         * executor, didn't investigate why, just a reminder here to check the
+         * performance if this is to be changed to a pool.
+         */
         Thread thread = new Thread(observable);
         thread.setName(observable.toString());
-
-    /*
-     * Start the thread then observe on the children directories, this
-     * allows them to happen at the same time, just need to make sure the
-     * latest one wins.
-     */
-        thread.start();
-
-        if (!directory) {
-            return observable;
-        }
-
         try {
+
+            /*
+             * Start the thread then observe on the children directories, this
+             * allows them to happen at the same time, just need to make sure the
+             * latest one wins.
+             */
+            thread.start();
+
+            if (!directory) {
+                return observable;
+            }
+
             observeChildren(fd, file, option, observable, childrenConsumer);
+
         } catch (IOException e) {
+            thread.interrupt();
             e.printStackTrace();
+
+        } catch (Throwable e) {
+            thread.interrupt();
+            try {
+                observable.close();
+            } catch (Exception sup) {
+                e.addSuppressed(sup);
+            }
+            throw e;
         }
 
         return observable;
@@ -231,9 +243,11 @@ final class LocalObservable extends Native
             int fd, LocalFile file, LinkOption opt) throws IOException {
 
         try {
+
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
             String path = file.file().getPath();
             return addWatch(fd, path, mask);
+
         } catch (ErrnoException e) {
             try {
                 Unistd.close(fd);
@@ -257,16 +271,20 @@ final class LocalObservable extends Native
             LocalFile file,
             LinkOption option,
             LocalObservable observable,
-            FileConsumer childrenConsumer) throws IOException {
+            FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
         try (Stream<Dirent> stream = Dirent.stream(file, option)) {
             for (Dirent child : stream) {
 
+                childrenConsumer.accept(file.resolve(child.name()));
+
+                if (currentThread().isInterrupted()) {
+                    throw new InterruptedException();
+                }
+
                 if (observable.isClosed()) {
                     return;
                 }
-
-                childrenConsumer.accept(file.resolve(child.name()));
 
                 if (child.type() == DT_DIR) {
                     try {
@@ -276,7 +294,7 @@ final class LocalObservable extends Native
                         observable.childDirectories.put(wd, child.name());
 
                     } catch (ErrnoException e) {
-                        e.printStackTrace();
+                        e.printStackTrace(); // TODO notify
                     }
                 }
 
@@ -307,15 +325,40 @@ final class LocalObservable extends Native
             t.interrupt();
         }
 
+        List<ErrnoException> suppressed = new ArrayList<>(0);
+        for (Integer wd : childDirectories.keySet()) {
+            try {
+                Inotify.removeWatch(fd, wd);
+            } catch (ErrnoException e) {
+                suppressed.add(e);
+            }
+        }
+
         try {
+
             Unistd.close(fd);
+
         } catch (ErrnoException e) {
+            for (ErrnoException sup : suppressed) {
+                e.addSuppressed(sup);
+            }
             throw toIOException(e, root.path());
+        }
+
+        if (!suppressed.isEmpty()) {
+            IOException e = new IOException();
+            for (ErrnoException sup : suppressed) {
+                e.addSuppressed(sup);
+            }
+            throw e;
         }
     }
 
     @Override
     public void run() {
+        if (currentThread().isInterrupted() || closed.get()) {
+            return;
+        }
         try {
             thread.set(currentThread());
             observe(fd);

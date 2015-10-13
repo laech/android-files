@@ -33,7 +33,7 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
             LinkOption option,
             FileConsumer childrenConsumer,
             long batchInterval,
-            TimeUnit batchInternalUnit) throws IOException {
+            TimeUnit batchInternalUnit) throws IOException, InterruptedException {
 
         if (observation != null || checker != null) {
             throw new IllegalStateException();
@@ -49,7 +49,8 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
 
             try {
                 close();
-            } catch (Exception ignored) {
+            } catch (Exception sup) {
+                e.addSuppressed(sup);
             }
             throw e;
 
