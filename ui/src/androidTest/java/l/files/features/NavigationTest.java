@@ -32,6 +32,26 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
+    public void test_can_preview() throws Exception {
+        File empty = dir().resolve("empty").createFile();
+        File file = dir().resolve("file");
+        file.writeAllUtf8("hello");
+        screen()
+                .assertThumbnailShown(file, true)
+                .assertThumbnailShown(empty, false);
+    }
+
+    public void test_can_preview_link() throws Exception {
+        File empty = dir().resolve("empty").createFile();
+        File file = dir().resolve("file");
+        File link = dir().resolve("link").createLink(file);
+        file.writeAllUtf8("hello");
+        screen()
+                .assertThumbnailShown(file, true)
+                .assertThumbnailShown(link, true)
+                .assertThumbnailShown(empty, false);
+    }
+
     public void test_can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 

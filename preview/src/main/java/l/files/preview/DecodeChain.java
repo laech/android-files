@@ -73,7 +73,7 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        if (checkNotPreviewable()) {
+        if (!checkPreviewable()) {
             return null;
         }
 
@@ -123,11 +123,11 @@ final class DecodeChain extends Decode {
         return false;
     }
 
-    private boolean checkNotPreviewable() {
-        if (!context.isPreviewable(file, stat, constraint)) {
-            publishProgress(NoPreview.INSTANCE);
+    private boolean checkPreviewable() {
+        if (context.isPreviewable(file, stat, constraint)) {
             return true;
         }
+        publishProgress(NoPreview.INSTANCE);
         return false;
     }
 

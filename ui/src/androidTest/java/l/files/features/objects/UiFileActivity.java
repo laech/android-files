@@ -11,6 +11,7 @@ import android.util.Pair;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -456,6 +457,26 @@ public final class UiFileActivity {
                 assertEquals(checked, item.isChecked());
             }
         });
+    }
+
+    public UiFileActivity assertThumbnailShown(
+            File file, final boolean shown) {
+
+        findItemOnMainThread(file, new Consumer<View>() {
+            @Override
+            public void apply(View input) {
+                ImageView view = Views.find(R.id.preview, input);
+                View container = Views.find(R.id.preview_container, input);
+                if (shown) {
+                    assertEquals(VISIBLE, container.getVisibility());
+                    assertNotNull(view.getDrawable());
+                } else {
+                    assertEquals(GONE, container.getVisibility());
+                    assertNull(view.getDrawable());
+                }
+            }
+        });
+        return this;
     }
 
     public UiFileActivity assertLinkIconDisplayed(
