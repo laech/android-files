@@ -36,9 +36,9 @@ public final class FileIcons {
     private static Typeface font;
 
     private static final Map<File, Integer> iconByDirectoryUri =
-            buildIconByDIrectoryUri();
+            buildIconByDirectoryUri();
 
-    private static Map<File, Integer> buildIconByDIrectoryUri() {
+    private static Map<File, Integer> buildIconByDirectoryUri() {
         Map<File, Integer> icons = new HashMap<>();
         icons.put(DIR_ROOT, ic_dir_device);
         icons.put(DIR_HOME, ic_dir_home);
