@@ -5,10 +5,10 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.R;
-import l.files.ui.base.view.ActionModeItem;
 import l.files.fs.File;
+import l.files.ui.R;
 import l.files.ui.base.selection.Selection;
+import l.files.ui.base.view.ActionModeItem;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
@@ -20,9 +20,7 @@ public final class RenameAction extends ActionModeItem
     private final Selection<File> selection;
     private final FragmentManager manager;
 
-    public RenameAction(
-            final FragmentManager manager,
-            final Selection<File> selection) {
+    public RenameAction(Selection<File> selection, FragmentManager manager) {
         super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "selection");

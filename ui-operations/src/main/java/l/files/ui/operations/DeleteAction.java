@@ -24,7 +24,7 @@ public final class DeleteAction extends ActionModeItem {
     private final Context context;
     private final Selection<File> selection;
 
-    public DeleteAction(final Context context, final Selection<File> selection) {
+    public DeleteAction(Selection<File> selection, Context context) {
         super(R.id.delete);
         this.context = requireNonNull(context);
         this.selection = requireNonNull(selection);

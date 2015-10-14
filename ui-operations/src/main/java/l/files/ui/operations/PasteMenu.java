@@ -17,6 +17,7 @@ import l.files.operations.OperationService;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
+import static android.content.Context.CLIPBOARD_SERVICE;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
@@ -35,13 +36,10 @@ public final class PasteMenu extends OptionsMenuAction
 
     private Menu menu;
 
-    public PasteMenu(
-            Activity context,
-            ClipboardManager manager,
-            File destination) {
+    public PasteMenu(Activity context, File destination) {
         super(android.R.id.paste);
         this.context = requireNonNull(context, "context");
-        this.manager = requireNonNull(manager, "manager");
+        this.manager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
         this.destination = requireNonNull(destination, "destination");
     }
 

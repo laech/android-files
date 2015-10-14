@@ -1,7 +1,6 @@
 package l.files.ui.browser;
 
 import android.app.Activity;
-import android.content.ClipboardManager;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -48,7 +47,6 @@ import static android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
@@ -162,7 +160,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
         setOptionsMenu(OptionsMenus.compose(
                 new BookmarkMenu(context, directory),
                 new NewDirMenu(context.getFragmentManager(), directory),
-                new PasteMenu(context, getClipboardManager(context), directory),
+                new PasteMenu(context, directory),
                 new SortMenu(context.getFragmentManager()),
                 new ShowHiddenFilesMenu(context)
         ));
@@ -176,15 +174,14 @@ public final class FilesFragment extends SelectionModeFragment<File>
     @Override
     protected ActionMode.Callback actionModeCallback() {
         Activity context = getActivity();
-        ClipboardManager clipboard = getClipboardManager(context);
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new SelectAllAction(this),
-                new CutAction(clipboard, selection()),
-                new CopyAction(clipboard, selection()),
-                new DeleteAction(context, selection()),
-                new RenameAction(context.getFragmentManager(), selection())
+                new CutAction(selection(), context),
+                new CopyAction(selection(), context),
+                new DeleteAction(selection(), context),
+                new RenameAction(selection(), context.getFragmentManager())
         );
     }
 
