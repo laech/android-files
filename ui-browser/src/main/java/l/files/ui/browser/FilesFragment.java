@@ -29,7 +29,7 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
-import l.files.ui.bookmarks.BookmarkMenu;
+import l.files.ui.bookmarks.actions.Bookmark;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.ShowHiddenFilesMenu;
 import l.files.ui.menu.SortMenu;
@@ -158,7 +158,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
-                new BookmarkMenu(context, directory),
+                new Bookmark(directory, context),
                 new NewDirMenu(context.getFragmentManager(), directory),
                 new Paste(context, directory),
                 new SortMenu(context.getFragmentManager()),

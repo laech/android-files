@@ -63,7 +63,7 @@ public final class BookmarksFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
-                new RemoveBookmarkAction(BookmarkManager.get(getActivity()), selection())
+                new RemoveBookmark(selection(), BookmarkManager.get(getActivity()))
         );
     }
 

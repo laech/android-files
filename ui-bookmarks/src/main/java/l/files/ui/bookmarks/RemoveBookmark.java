@@ -12,15 +12,15 @@ import l.files.ui.base.view.ActionModeItem;
 import static android.view.Menu.NONE;
 import static java.util.Objects.requireNonNull;
 
-final class RemoveBookmarkAction extends ActionModeItem {
+final class RemoveBookmark extends ActionModeItem {
 
     private final BookmarkManager bookmarks;
     private final Selection<File> selections;
 
-    RemoveBookmarkAction(BookmarkManager bookmarks, Selection<File> selections) {
+    RemoveBookmark(Selection<File> selection, BookmarkManager bookmarks) {
         super(R.id.delete_selected_bookmarks);
+        this.selections = requireNonNull(selection, "selection");
         this.bookmarks = requireNonNull(bookmarks, "bookmarks");
-        this.selections = requireNonNull(selections, "selections");
     }
 
     @Override
