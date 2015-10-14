@@ -1,4 +1,4 @@
-package l.files.ui.mode;
+package l.files.ui.operations;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -10,11 +10,10 @@ import android.view.MenuItem;
 
 import java.util.Collection;
 
-import l.files.ui.R;
-import l.files.ui.base.view.ActionModeItem;
 import l.files.fs.File;
 import l.files.operations.OperationService;
 import l.files.ui.base.selection.Selection;
+import l.files.ui.base.view.ActionModeItem;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;

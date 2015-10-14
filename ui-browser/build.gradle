@@ -27,7 +27,7 @@ dependencies {
     compile project(':fs-local')
     compile project(':collation')
     compile project(':ui-preview')
-    compile project(':operations')
+    compile project(':ui-operations')
     compile project(':ui-bookmarks')
 
     compile "com.android.support:design:$supportLibVersion"

@@ -1,4 +1,4 @@
-package l.files.ui.menu;
+package l.files.ui.operations;
 
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
@@ -12,20 +12,19 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.ui.base.app.OptionsMenuAction;
 import l.files.fs.File;
 import l.files.operations.OperationService;
-import l.files.ui.Clipboards;
+import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.Clipboards.clear;
-import static l.files.ui.Clipboards.getFiles;
-import static l.files.ui.Clipboards.isCopy;
-import static l.files.ui.Clipboards.isCut;
+import static l.files.ui.operations.Clipboards.clear;
+import static l.files.ui.operations.Clipboards.getFiles;
+import static l.files.ui.operations.Clipboards.isCopy;
+import static l.files.ui.operations.Clipboards.isCut;
 
 public final class PasteMenu extends OptionsMenuAction
         implements LoaderCallbacks<PasteMenu.FileExistence> {

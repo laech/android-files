@@ -20,42 +20,42 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.ui.R;
-import l.files.ui.base.fs.OnOpenFileListener;
-import l.files.ui.base.app.OptionsMenus;
-import l.files.ui.base.view.ActionModeProvider;
-import l.files.ui.base.view.ActionModes;
 import l.files.fs.File;
 import l.files.ui.Preferences;
-import l.files.ui.browser.FilesLoader.Result;
+import l.files.ui.R;
+import l.files.ui.base.app.OptionsMenus;
+import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.selection.SelectionModeFragment;
+import l.files.ui.base.view.ActionModeProvider;
+import l.files.ui.base.view.ActionModes;
+import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
+import l.files.ui.base.view.CountSelectedItemsAction;
 import l.files.ui.bookmarks.BookmarkMenu;
-import l.files.ui.menu.PasteMenu;
+import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.menu.ShowHiddenFilesMenu;
 import l.files.ui.menu.SortMenu;
-import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
-import l.files.ui.mode.CopyAction;
-import l.files.ui.base.view.CountSelectedItemsAction;
-import l.files.ui.mode.CutAction;
-import l.files.ui.mode.DeleteAction;
 import l.files.ui.mode.SelectAllAction;
 import l.files.ui.mode.Selectable;
 import l.files.ui.newdir.NewDirMenu;
+import l.files.ui.operations.CopyAction;
+import l.files.ui.operations.CutAction;
+import l.files.ui.operations.DeleteAction;
+import l.files.ui.operations.PasteMenu;
 import l.files.ui.rename.RenameAction;
-import l.files.ui.base.selection.SelectionModeFragment;
 
 import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static l.files.ui.R.integer.files_grid_columns;
 import static l.files.common.app.SystemServices.getClipboardManager;
-import static l.files.ui.base.view.Views.find;
-import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
+import static l.files.ui.R.integer.files_grid_columns;
+import static l.files.ui.base.fs.IOExceptions.message;
+import static l.files.ui.base.view.Views.find;
 
 public final class FilesFragment extends SelectionModeFragment<File>
         implements
