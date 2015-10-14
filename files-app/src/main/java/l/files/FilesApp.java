@@ -1,4 +1,4 @@
-package l.files.ui;
+package l.files;
 
 import android.app.Application;
 import android.os.StrictMode;
@@ -8,7 +8,7 @@ import android.os.StrictMode.VmPolicy;
 import l.files.operations.ui.OperationsUi;
 import l.files.preview.Preview;
 
-import static l.files.ui.BuildConfig.DEBUG;
+import static l.files.BuildConfig.DEBUG;
 
 public final class FilesApp extends Application {
 
