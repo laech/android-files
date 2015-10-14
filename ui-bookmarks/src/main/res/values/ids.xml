@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <item type="id" name="bookmark"/>
   <item type="id" name="delete_selected_bookmarks"/>
 
 </resources>

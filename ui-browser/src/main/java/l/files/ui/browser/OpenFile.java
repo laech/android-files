@@ -18,7 +18,7 @@ import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
 import static l.files.ui.BuildConfig.DEBUG;
 import static l.files.fs.File.MEDIA_TYPE_ANY;
-import static l.files.operations.ui.IOExceptions.message;
+import static l.files.ui.base.fs.IOExceptions.message;
 
 final class OpenFile extends AsyncTask<Void, Void, Object> {
 

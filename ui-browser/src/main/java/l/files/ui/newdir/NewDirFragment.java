@@ -13,7 +13,7 @@ import l.files.ui.FileCreationFragment;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.operations.ui.IOExceptions.message;
+import static l.files.ui.base.fs.IOExceptions.message;
 
 public final class NewDirFragment extends FileCreationFragment {
 

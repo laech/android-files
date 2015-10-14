@@ -42,7 +42,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.ui.base.view.Views.find;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.operations.ui.IOExceptions.message;
+import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 public final class FilesActivity extends BaseActivity implements

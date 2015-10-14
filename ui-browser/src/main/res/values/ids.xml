@@ -4,7 +4,6 @@
   <item type="id" name="content"/>
   <item type="id" name="delete"/>
   <item type="id" name="new_dir"/>
-  <item type="id" name="bookmark"/>
   <item type="id" name="sort_by"/>
   <item type="id" name="show_hidden_files"/>
   <item type="id" name="show_path_bar"/>

@@ -26,10 +26,9 @@ import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
 import l.files.fs.File;
-import l.files.bookmarks.BookmarkManager;
 import l.files.ui.Preferences;
 import l.files.ui.browser.FilesLoader.Result;
-import l.files.ui.menu.BookmarkMenu;
+import l.files.ui.bookmarks.BookmarkMenu;
 import l.files.ui.menu.PasteMenu;
 import l.files.ui.menu.ShowHiddenFilesMenu;
 import l.files.ui.menu.SortMenu;
@@ -52,7 +51,7 @@ import static android.view.View.VISIBLE;
 import static l.files.ui.R.integer.files_grid_columns;
 import static l.files.common.app.SystemServices.getClipboardManager;
 import static l.files.ui.base.view.Views.find;
-import static l.files.operations.ui.IOExceptions.message;
+import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
@@ -161,7 +160,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
-                new BookmarkMenu(BookmarkManager.get(context), directory),
+                new BookmarkMenu(context, directory),
                 new NewDirMenu(context.getFragmentManager(), directory),
                 new PasteMenu(context, getClipboardManager(context), directory),
                 new SortMenu(context.getFragmentManager()),
