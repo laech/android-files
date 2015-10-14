@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="home">Home</string>
+
+    <!--
+        See https://github.com/google/material-design-icons/tree/master/iconfont
+        See https://www.google.com/design/icons/index.html
+    -->
+    <string name="ic_dir">&#xE2C7;</string>
+    <string name="ic_dir_device">&#xE324;</string>
+    <string name="ic_dir_home">&#xE88A;</string>
+    <string name="ic_dir_download">&#xE2C0;</string>
+    <string name="ic_dir_video">&#xE04A;</string>
+    <string name="ic_dir_music">&#xE030;</string>
+    <string name="ic_dir_image">&#xE3B6;</string>
+
+    <string name="ic_file">&#xE24D;</string>
+    <string name="ic_file_archive">&#xE89B;</string>
+    <string name="ic_file_music">&#xE050;</string>
+    <string name="ic_file_image">&#xE251;</string>
+    <string name="ic_file_pdf">&#xE415;</string>
+    <string name="ic_file_text">&#xE873;</string>
+    <string name="ic_file_video">&#xE04B;</string>
+
+</resources>

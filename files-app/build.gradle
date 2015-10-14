@@ -41,6 +41,6 @@ android {
 
 dependencies {
 
-    compile project(':ui')
+    compile project(':ui-browser')
 
 }
