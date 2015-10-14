@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +33,14 @@ public final class BookmarksFragment
     private BookmarksAdapter adapter;
 
     public List<File> bookmarks() {
-        return adapter.items();
+        List<Object> items = adapter.items();
+        List<File> bookmarks = new ArrayList<>(items.size());
+        for (Object item : items) {
+            if (item instanceof File) {
+                bookmarks.add((File) item);
+            }
+        }
+        return bookmarks;
     }
 
     @Override
@@ -80,9 +88,11 @@ public final class BookmarksFragment
     }
 
     @Override
-    public void onLoadFinished(
-            Loader<List<File>> loader, List<File> bookmarks) {
-        adapter.setItems(bookmarks);
+    public void onLoadFinished(Loader<List<File>> loader, List<File> bookmarks) {
+        List<Object> items = new ArrayList<>(bookmarks.size() + 1);
+        items.add(getString(R.string.bookmarks));
+        items.addAll(bookmarks);
+        adapter.setItems(items);
     }
 
     @Override

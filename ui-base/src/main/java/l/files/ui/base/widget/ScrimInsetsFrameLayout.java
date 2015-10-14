@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package l.files.ui.browser;
+package l.files.ui.base.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
