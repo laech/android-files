@@ -1,4 +1,4 @@
-package l.files.ui.operations;
+package l.files.ui.operations.actions;
 
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,20 +9,21 @@ import android.view.MenuItem;
 import l.files.fs.File;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
+import l.files.ui.operations.R;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 import static java.util.Objects.requireNonNull;
 
-public final class CopyAction extends ActionModeItem {
+public final class Copy extends ActionModeItem {
 
     private final ClipboardManager manager;
     private final Selection<File> selection;
 
-    public CopyAction(Selection<File> selection, Context context) {
+    public Copy(Selection<File> selection, Context context) {
         this(selection, (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE));
     }
 
-    CopyAction(Selection<File> selection, ClipboardManager manager) {
+    Copy(Selection<File> selection, ClipboardManager manager) {
         super(android.R.id.copy);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "selection");

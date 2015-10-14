@@ -1,4 +1,4 @@
-package l.files.ui.operations;
+package l.files.ui.operations.actions;
 
 import android.app.Activity;
 import android.content.AsyncTaskLoader;
@@ -22,13 +22,13 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.operations.Clipboards.clear;
-import static l.files.ui.operations.Clipboards.getFiles;
-import static l.files.ui.operations.Clipboards.isCopy;
-import static l.files.ui.operations.Clipboards.isCut;
+import static l.files.ui.operations.actions.Clipboards.clear;
+import static l.files.ui.operations.actions.Clipboards.getFiles;
+import static l.files.ui.operations.actions.Clipboards.isCopy;
+import static l.files.ui.operations.actions.Clipboards.isCut;
 
-public final class PasteMenu extends OptionsMenuAction
-        implements LoaderCallbacks<PasteMenu.FileExistence> {
+public final class Paste extends OptionsMenuAction
+        implements LoaderCallbacks<Paste.FileExistence> {
 
     private final File destination;
     private final ClipboardManager manager;
@@ -36,7 +36,7 @@ public final class PasteMenu extends OptionsMenuAction
 
     private Menu menu;
 
-    public PasteMenu(Activity context, File destination) {
+    public Paste(Activity context, File destination) {
         super(android.R.id.paste);
         this.context = requireNonNull(context, "context");
         this.manager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);

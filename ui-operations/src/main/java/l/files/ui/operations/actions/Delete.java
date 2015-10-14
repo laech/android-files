@@ -1,4 +1,4 @@
-package l.files.ui.operations;
+package l.files.ui.operations.actions;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,17 +14,18 @@ import l.files.fs.File;
 import l.files.operations.OperationService;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
+import l.files.ui.operations.R;
 
 import static android.content.DialogInterface.OnClickListener;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 
-public final class DeleteAction extends ActionModeItem {
+public final class Delete extends ActionModeItem {
     private final Context context;
     private final Selection<File> selection;
 
-    public DeleteAction(Selection<File> selection, Context context) {
+    public Delete(Selection<File> selection, Context context) {
         super(R.id.delete);
         this.context = requireNonNull(context);
         this.selection = requireNonNull(selection);

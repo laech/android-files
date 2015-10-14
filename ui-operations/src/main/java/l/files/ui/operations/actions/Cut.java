@@ -1,4 +1,4 @@
-package l.files.ui.operations;
+package l.files.ui.operations.actions;
 
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,20 +9,21 @@ import android.view.MenuItem;
 import l.files.fs.File;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
+import l.files.ui.operations.R;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 import static java.util.Objects.requireNonNull;
 
-public final class CutAction extends ActionModeItem {
+public final class Cut extends ActionModeItem {
 
     private final ClipboardManager manager;
     private final Selection<File> selection;
 
-    public CutAction(Selection<File> selection, Context context) {
+    public Cut(Selection<File> selection, Context context) {
         this(selection, (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE));
     }
 
-    CutAction(Selection<File> selection, ClipboardManager manager) {
+    Cut(Selection<File> selection, ClipboardManager manager) {
         super(android.R.id.cut);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "provider");

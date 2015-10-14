@@ -1,4 +1,4 @@
-package l.files.ui.operations;
+package l.files.ui.operations.actions;
 
 import android.content.ClipboardManager;
 import android.content.Intent;

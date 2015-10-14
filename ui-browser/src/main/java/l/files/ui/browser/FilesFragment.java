@@ -36,10 +36,10 @@ import l.files.ui.menu.SortMenu;
 import l.files.ui.mode.SelectAllAction;
 import l.files.ui.mode.Selectable;
 import l.files.ui.newdir.NewDirMenu;
-import l.files.ui.operations.CopyAction;
-import l.files.ui.operations.CutAction;
-import l.files.ui.operations.DeleteAction;
-import l.files.ui.operations.PasteMenu;
+import l.files.ui.operations.actions.Copy;
+import l.files.ui.operations.actions.Cut;
+import l.files.ui.operations.actions.Delete;
+import l.files.ui.operations.actions.Paste;
 import l.files.ui.rename.RenameAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -160,7 +160,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
         setOptionsMenu(OptionsMenus.compose(
                 new BookmarkMenu(context, directory),
                 new NewDirMenu(context.getFragmentManager(), directory),
-                new PasteMenu(context, directory),
+                new Paste(context, directory),
                 new SortMenu(context.getFragmentManager()),
                 new ShowHiddenFilesMenu(context)
         ));
@@ -178,9 +178,9 @@ public final class FilesFragment extends SelectionModeFragment<File>
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new SelectAllAction(this),
-                new CutAction(selection(), context),
-                new CopyAction(selection(), context),
-                new DeleteAction(selection(), context),
+                new Cut(selection(), context),
+                new Copy(selection(), context),
+                new Delete(selection(), context),
                 new RenameAction(selection(), context.getFragmentManager())
         );
     }
