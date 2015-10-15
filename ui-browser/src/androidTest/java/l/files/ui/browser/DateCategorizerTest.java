@@ -3,7 +3,8 @@ package l.files.ui.browser;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
-import java.text.Collator;
+import com.ibm.icu.text.Collator;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -1,11 +1,12 @@
 package l.files.collation;
 
+import com.ibm.icu.text.Collator;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.text.Collator;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -68,7 +69,7 @@ public final class NaturalKeyTest {
     private final NaturalKey b;
 
     public NaturalKeyTest(Ord ord, Locale locale, String a, String b) {
-        Collator collator = Collator.getInstance(requireNonNull(locale));
+        Collator collator = NaturalKey.collator(locale);
         this.ord = requireNonNull(ord);
         this.a = NaturalKey.create(collator, a);
         this.b = NaturalKey.create(collator, b);

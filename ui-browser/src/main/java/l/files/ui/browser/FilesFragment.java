@@ -18,13 +18,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.text.Collator;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import l.files.collation.NaturalKey;
 import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.ui.Preferences;
@@ -254,7 +254,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 context,
                 directory,
                 getSort(context),
-                Collator.getInstance(Locale.getDefault()),
+                NaturalKey.collator(Locale.getDefault()),
                 getShowHiddenFiles(context),
                 autoRefreshEnabled);
     }

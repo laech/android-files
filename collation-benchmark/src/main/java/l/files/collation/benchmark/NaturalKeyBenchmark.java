@@ -7,11 +7,10 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.text.CollationKey;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import l.files.collation.NaturalKey;
 
@@ -20,47 +19,49 @@ public class NaturalKeyBenchmark {
     @State(Scope.Benchmark)
     public static class BenchmarkState {
 
-        final Collator collator;
-        final List<CollationKey> collationKeys;
+        final com.ibm.icu.text.Collator icuCollator;
+        final java.text.Collator jdkCollator;
+        final List<java.text.CollationKey> jdkCollationKeys;
         final List<NaturalKey> naturalKeys;
         final List<String> strings;
 
         public BenchmarkState() {
-            collator = Collator.getInstance();
+            icuCollator = NaturalKey.collator(Locale.getDefault());
+            jdkCollator = java.text.Collator.getInstance();
             final int n = 10000;
             strings = new ArrayList<>(n);
-            collationKeys = new ArrayList<>(n);
+            jdkCollationKeys = new ArrayList<>(n);
             naturalKeys = new ArrayList<>(n);
             for (int i = 0; i < n; i++) {
                 final String string = i + ". " + i;
                 strings.add(string);
-                collationKeys.add(collator.getCollationKey(string));
-                naturalKeys.add(NaturalKey.create(collator, string));
+                jdkCollationKeys.add(jdkCollator.getCollationKey(string));
+                naturalKeys.add(NaturalKey.create(icuCollator, string));
             }
         }
     }
 
     @Benchmark
-    public void naturalKey(BenchmarkState state) {
+    public void sortByNaturalKey(BenchmarkState state) {
         Collections.sort(state.naturalKeys);
     }
 
     @Benchmark
-    public void collationKey(BenchmarkState state) {
-        Collections.sort(state.collationKeys);
+    public void sortByJdkCollationKey(BenchmarkState state) {
+        Collections.sort(state.jdkCollationKeys);
     }
 
     @Benchmark
     public void makeNaturalKeys(BenchmarkState state) {
         for (String string : state.strings) {
-            NaturalKey.create(state.collator, string);
+            NaturalKey.create(state.icuCollator, string);
         }
     }
 
     @Benchmark
-    public void makeCollationKeys(BenchmarkState state) {
+    public void makeJdkCollationKeys(BenchmarkState state) {
         for (String string : state.strings) {
-            state.collator.getCollationKey(string);
+            state.jdkCollator.getCollationKey(string);
         }
     }
 

@@ -1,7 +1,8 @@
 package l.files.ui.browser;
 
+import com.ibm.icu.text.Collator;
+
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

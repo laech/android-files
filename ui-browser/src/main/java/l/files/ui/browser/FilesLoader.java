@@ -8,11 +8,11 @@ import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.ibm.icu.text.Collator;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

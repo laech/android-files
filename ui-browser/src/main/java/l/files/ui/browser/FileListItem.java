@@ -3,10 +3,9 @@ package l.files.ui.browser;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.ibm.icu.text.Collator;
 
 import java.io.IOException;
-import java.text.Collator;
-
 import l.files.collation.NaturalKey;
 import l.files.fs.Stat;
 
