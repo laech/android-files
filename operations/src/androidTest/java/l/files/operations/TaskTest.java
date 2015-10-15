@@ -2,7 +2,6 @@ package l.files.operations;
 
 import android.os.Handler;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.MOVE;
+import static org.mockito.Mockito.mock;
 
 public final class TaskTest extends BaseTest {
 
@@ -57,7 +57,7 @@ public final class TaskTest extends BaseTest {
             @Override
             public void execute(Task task) throws FileException {
                 throw new FileException(singletonList(Failure.create(
-                        LocalFile.create(new File("a")), new IOException("Test")
+                        LocalFile.of("a"), new IOException("Test")
                 )));
             }
         }));
@@ -99,7 +99,7 @@ public final class TaskTest extends BaseTest {
     }
 
     Task create(int id, Clock clock, Handler handler, Callback callback) {
-        return new Task(TaskId.create(id, MOVE), Target.NONE, clock, callback, handler) {
+        return new Task(TaskId.create(id, MOVE), mock(Target.class), clock, callback, handler) {
             @Override
             protected void doTask() {
             }
@@ -113,7 +113,7 @@ public final class TaskTest extends BaseTest {
 
     private static abstract class TestTask extends Task {
         TestTask(Handler handler, Callback callback) {
-            super(TaskId.create(0, COPY), Target.NONE, Clock.system(), callback, handler);
+            super(TaskId.create(0, COPY), mock(Target.class), Clock.system(), callback, handler);
         }
 
         @Override

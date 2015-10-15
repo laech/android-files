@@ -12,11 +12,15 @@ import java.util.concurrent.CountDownLatch;
 
 import l.files.fs.Event;
 import l.files.fs.File;
+import l.files.fs.FileConsumer;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
+import l.files.fs.Stream;
 
+import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
@@ -30,16 +34,111 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.LocalFileObserveTest.Recorder.observe;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @see File#observe(LinkOption, Observer)
  */
 public final class LocalFileObserveTest extends FileBaseTest {
 
+    public void test_notifies_observer_on_max_user_instances_reached() throws Exception {
+        int maxUserInstances = maxUserInstances();
+        List<Observation> observations = new ArrayList<>(maxUserInstances);
+        try {
+
+            for (int i = 1; i < maxUserInstances + 10; i++) {
+                File child = dir1().resolve(String.valueOf(i)).createFile();
+                Observation observation = child.observe(NOFOLLOW, mock(Observer.class));
+                observations.add(observation);
+                if (i <= maxUserInstances) {
+                    assertFalse("Failed at " + i, observation.isClosed());
+                } else {
+                    assertTrue("Failed at " + i, observation.isClosed());
+                }
+            }
+
+        } finally {
+            for (Observation observation : observations) {
+                try {
+                    observation.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    public void test_notifies_observer_on_max_user_watches_reached_on_observe()
+            throws Exception {
+
+        File dir = linkToExternalDir("files-test-max-user-watches-exceeded");
+        int expectedCount = maxUserWatches() + 10;
+        createRandomDirs(dir, expectedCount);
+
+        FileConsumer consumer = mock(FileConsumer.class);
+        Observer observer = mock(Observer.class);
+
+        try (Observation observation = dir.observe(FOLLOW, observer, consumer)) {
+            assertTrue(observation.isClosed());
+            verify(consumer, times(expectedCount)).accept(notNull(File.class));
+        }
+    }
+
+    public void test_notifies_observer_on_max_user_watches_reached_during_observe()
+            throws Exception {
+
+        File dir = linkToExternalDir("files-test-max-user-watches-exceeded");
+        int expectedCount = maxUserWatches() - 10;
+        createRandomDirs(dir, expectedCount);
+
+        FileConsumer consumer = mock(FileConsumer.class);
+        Observer observer = mock(Observer.class);
+
+        try (Observation observation = dir.observe(FOLLOW, observer, consumer)) {
+            assertFalse(observation.isClosed());
+            for (int i = 0; i < 20; i++) {
+                dir.resolve(String.valueOf(Math.random())).createDir();
+            }
+            verify(observer, timeout(1000)).onCancel();
+            verify(consumer, times(expectedCount)).accept(notNull(File.class));
+        }
+    }
+
+    private void createRandomDirs(File dir, int expectedCount) throws IOException {
+        int actualCount = 0;
+        try (Stream<File> children = dir.listDirs(FOLLOW)) {
+            for (File child : children) {
+                actualCount++;
+                if (actualCount > expectedCount) {
+                    child.deleteRecursive();
+                    actualCount--;
+                }
+            }
+        }
+        while (actualCount < expectedCount) {
+            dir.resolve(String.valueOf(Math.random())).createDir();
+            actualCount++;
+        }
+    }
+
+
+    private File linkToExternalDir(String name) throws IOException {
+        return dir1().resolve(name).createLink(
+                externalStorageDir()
+                        .resolve(name)
+                        .createDirs()
+        );
+    }
+
+    private File externalStorageDir() {
+        return LocalFile.of(getExternalStorageDirectory());
+    }
+
     public void test_releases_all_watches_on_close() throws Exception {
-        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_watches");
-        int maxUserWatches = parseInt(limitFile.readAllUtf8().trim());
+        int maxUserWatches = maxUserWatches();
         int count = maxUserWatches / 5;
         for (int i = 0; i < count; i++) {
             dir1().resolve(String.valueOf(i)).createDir();
@@ -50,12 +149,21 @@ public final class LocalFileObserveTest extends FileBaseTest {
     }
 
     public void test_releases_fd_on_close() throws Exception {
-        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_instances");
-        int maxUserInstances = parseInt(limitFile.readAllUtf8().trim());
+        int maxUserInstances = maxUserInstances();
         int count = (int) (maxUserInstances * 1.5);
         for (int i = 0; i < count; i++) {
             dir1().observe(FOLLOW, mock(Observer.class)).close();
         }
+    }
+
+    private int maxUserInstances() throws IOException {
+        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_instances");
+        return parseInt(limitFile.readAllUtf8().trim());
+    }
+
+    private int maxUserWatches() throws IOException {
+        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_watches");
+        return parseInt(limitFile.readAllUtf8().trim());
     }
 
     public void test_observe_on_link_no_follow() throws Exception {
@@ -550,6 +658,11 @@ public final class LocalFileObserveTest extends FileBaseTest {
             if (expected.equals(actual)) {
                 success.countDown();
             }
+        }
+
+        @Override
+        public void onCancel() {
+            // fail(); TODO handle observing on dir add/remove no permission etc
         }
 
         void await(

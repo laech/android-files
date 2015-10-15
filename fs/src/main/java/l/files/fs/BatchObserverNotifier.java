@@ -1,6 +1,5 @@
 package l.files.fs;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
-final class BatchObserverNotifier implements Observer, Closeable, Runnable {
+final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     private static final ScheduledExecutorService service
             = newSingleThreadScheduledExecutor();
@@ -20,7 +19,7 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
     private final Set<String> childrenChanged;
     private final BatchObserver batchObserver;
 
-    private Closeable observation;
+    private Observation observation;
     private ScheduledFuture<?> checker;
 
     BatchObserverNotifier(BatchObserver batchObserver) {
@@ -28,22 +27,24 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
         this.childrenChanged = new HashSet<>();
     }
 
-    Closeable start(
+    Observation start(
             File file,
             LinkOption option,
             FileConsumer childrenConsumer,
             long batchInterval,
             TimeUnit batchInternalUnit) throws IOException, InterruptedException {
 
-        if (observation != null || checker != null) {
+        if (observation != null) {
             throw new IllegalStateException();
         }
 
         try {
 
             observation = file.observe(option, this, childrenConsumer);
-            checker = service.scheduleWithFixedDelay(
-                    this, batchInterval, batchInterval, batchInternalUnit);
+            if (!observation.isClosed()) {
+                checker = service.scheduleWithFixedDelay(
+                        this, batchInterval, batchInterval, batchInternalUnit);
+            }
 
         } catch (Throwable e) {
 
@@ -70,6 +71,14 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
             }
 
         }
+    }
+
+    @Override
+    public void onCancel() {
+        if (checker != null) {
+            checker.cancel(true);
+        }
+        batchObserver.onCancel();
     }
 
     @Override
@@ -104,9 +113,12 @@ final class BatchObserverNotifier implements Observer, Closeable, Runnable {
         if (checker != null) {
             checker.cancel(true);
         }
-        if (observation != null) {
-            observation.close();
-        }
+        observation.close();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return observation.isClosed();
     }
 
 }

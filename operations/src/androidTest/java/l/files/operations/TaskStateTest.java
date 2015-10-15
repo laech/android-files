@@ -1,13 +1,13 @@
 package l.files.operations;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import l.files.fs.local.LocalFile;
 import l.files.testing.BaseTest;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
 
 public final class TaskStateTest extends BaseTest {
@@ -22,7 +22,7 @@ public final class TaskStateTest extends BaseTest {
         super.setUp();
         this.time = Time.create(10, 11);
         this.task = TaskId.create(1, COPY);
-        this.target = Target.create("src", "dst");
+        this.target = Target.from(singleton(LocalFile.of("src")), LocalFile.of("dst"));
         this.pending = TaskState.pending(task, target, time);
     }
 
@@ -77,8 +77,8 @@ public final class TaskStateTest extends BaseTest {
 
     public void testRunningToFailed() throws Exception {
         Time failureTime = Time.create(20, 2);
-        List<Failure> failures = asList(Failure.create(
-                LocalFile.create(new File("1")), new IOException("ok")
+        List<Failure> failures = singletonList(Failure.create(
+                LocalFile.of("1"), new IOException("ok")
         ));
         TaskState.Failed state = pending.running(time).failed(failureTime, failures);
         assertEquals(task, state.getTask());

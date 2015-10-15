@@ -9,14 +9,17 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
-import l.files.ui.R;
 import l.files.common.app.BaseActivity;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.ui.FileCreationFragment;
+import l.files.ui.R;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.base.fs.FileIntents.broadcastFilesChanged;
 import static l.files.ui.base.fs.IOExceptions.message;
 
 public final class RenameFragment extends FileCreationFragment {
@@ -119,8 +122,8 @@ public final class RenameFragment extends FileCreationFragment {
 
     private void rename() {
         File dst = parent().resolve(getFilename());
-        rename = new Rename()
-                .executeOnExecutor(THREAD_POOL_EXECUTOR, file(), dst);
+        rename = new Rename(file(), dst)
+                .executeOnExecutor(THREAD_POOL_EXECUTOR);
 
         ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
         if (mode != null) {
@@ -130,10 +133,16 @@ public final class RenameFragment extends FileCreationFragment {
 
     private class Rename extends AsyncTask<File, Void, IOException> {
 
+        private final File src;
+        private final File dst;
+
+        private Rename(File src, File dst) {
+            this.src = requireNonNull(src);
+            this.dst = requireNonNull(dst);
+        }
+
         @Override
         protected IOException doInBackground(File... params) {
-            File src = params[0];
-            File dst = params[1];
             try {
                 src.moveTo(dst);
                 return null;
@@ -143,11 +152,24 @@ public final class RenameFragment extends FileCreationFragment {
         }
 
         @Override
+        protected void onCancelled(IOException e) {
+            if (e == null) {
+                broadcastChange();
+            }
+        }
+
+        @Override
         protected void onPostExecute(IOException e) {
             super.onPostExecute(e);
             if (e != null) {
                 toaster.apply(message(e));
+            } else {
+                broadcastChange();
             }
+        }
+
+        private void broadcastChange() {
+            broadcastFilesChanged(asList(src, dst), getActivity());
         }
     }
 

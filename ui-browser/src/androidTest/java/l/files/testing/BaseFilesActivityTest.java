@@ -30,7 +30,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        dir = LocalFile.create(createTempDir());
+        dir = LocalFile.of(createTempDir());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -52,9 +52,11 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+        screen = null;
         if (dir.exists(NOFOLLOW)) {
             dir.traverse(NOFOLLOW, delete());
         }
+        dir = null;
     }
 
     private Visitor delete() {

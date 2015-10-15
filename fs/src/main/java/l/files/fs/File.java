@@ -2,7 +2,6 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
-import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -116,8 +115,6 @@ public interface File extends Parcelable {
      */
     boolean isExecutable() throws IOException;
 
-    // TODO notify failed to observe
-
     /**
      * Observes on this file for change events.
      * <p/>
@@ -129,19 +126,21 @@ public interface File extends Parcelable {
      * Note that by the time a listener is notified, the target file may
      * have already be changed again, therefore a robust application should have
      * an alternative way of handling instead of reply on this fully.
+     * <p/>
+     * The returned observation is closed if failed to observe.
      *
      * @param option if option is {@link LinkOption#NOFOLLOW} and this file is a
      *               link, observe on the link instead of the link target
      */
-    Closeable observe(LinkOption option, Observer observer)
+    Observation observe(LinkOption option, Observer observer)
             throws IOException, InterruptedException;
 
-    Closeable observe(
+    Observation observe(
             LinkOption option,
             Observer observer,
             FileConsumer childrenConsumer) throws IOException, InterruptedException;
 
-    Closeable observe(
+    Observation observe(
             LinkOption option,
             BatchObserver batchObserver,
             FileConsumer childrenConsumer,
@@ -171,7 +170,15 @@ public interface File extends Parcelable {
      */
     void traverse(LinkOption option, Visitor visitor) throws IOException;
 
-    Stream<File> list(LinkOption option) throws IOException; // Add filter
+    /**
+     * List children of this directory.
+     */
+    Stream<File> list(LinkOption option) throws IOException;
+
+    /**
+     * Like {@link #list(LinkOption)} but only return directories.
+     */
+    Stream<File> listDirs(LinkOption option) throws IOException;
 
     InputStream newInputStream() throws IOException;
 
@@ -269,6 +276,8 @@ public interface File extends Parcelable {
      * Deletes this file. Fails if this is a non-empty directory.
      */
     void delete() throws IOException;
+
+    void deleteRecursive() throws IOException;
 
     /**
      * Updates the access time for this file.

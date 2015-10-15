@@ -13,12 +13,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import l.files.common.base.Consumer;
@@ -48,6 +49,8 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static l.files.features.objects.Instrumentations.await;
 import static l.files.features.objects.Instrumentations.awaitOnMainThread;
 import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
 import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
@@ -86,6 +89,11 @@ public final class UiFileActivity {
         return instrument;
     }
 
+    public UiFileActivity refresh() {
+        selectMenuAction(R.id.refresh);
+        return this;
+    }
+
     public UiFileActivity bookmark() {
         assertBookmarkMenuChecked(false);
         selectMenuAction(R.id.bookmark);
@@ -108,8 +116,19 @@ public final class UiFileActivity {
         return new UiRename(this);
     }
 
+    public UiDelete delete() {
+        selectActionModeAction(R.id.delete);
+        return new UiDelete(this);
+    }
+
     public UiFileActivity copy() {
         selectActionModeAction(android.R.id.copy);
+        waitForActionModeToFinish();
+        return this;
+    }
+
+    public UiFileActivity cut() {
+        selectActionModeAction(android.R.id.cut);
         waitForActionModeToFinish();
         return this;
     }
@@ -232,27 +251,18 @@ public final class UiFileActivity {
     }
 
     private UiFileActivity findOptionMenuItem(
-            final int id,
-            final Consumer<MenuItem> consumer) {
+            final int id, final Consumer<MenuItem> consumer) {
+
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                activity().toolbar().hideOverflowMenu();
-                activity().toolbar().showOverflowMenu();
-            }
-        });
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                MenuItem item = activity().toolbar().getMenu().findItem(id);
+                Toolbar toolbar = activity().toolbar();
+                toolbar.hideOverflowMenu();
+                toolbar.showOverflowMenu();
+                MenuItem item = toolbar.getMenu().findItem(id);
                 assertNotNull(item);
                 consumer.apply(item);
-            }
-        });
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                activity().toolbar().hideOverflowMenu();
+                toolbar.hideOverflowMenu();
             }
         });
         return this;
@@ -386,6 +396,7 @@ public final class UiFileActivity {
             @Override
             public void run() {
                 ActionMode mode = activity().currentActionMode();
+                assertNotNull(mode);
                 MenuItem item = mode.getMenu().findItem(id);
                 assertTrue(activity()
                         .currentActionModeCallback()
@@ -455,6 +466,15 @@ public final class UiFileActivity {
             @Override
             public void apply(MenuItem item) {
                 assertEquals(checked, item.isChecked());
+            }
+        });
+    }
+
+    public UiFileActivity assertRefreshMenuVisible(final boolean visible) {
+        return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
+            @Override
+            public void apply(MenuItem input) {
+                assertEquals(visible, input.isVisible());
             }
         });
     }
@@ -571,73 +591,57 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertShowingLatestChildrenDetailsOf(final File dir)
+    public UiFileActivity assertListMatchesFileSystem(final File dir)
             throws IOException {
 
-        awaitOnMainThread(instrument, new Runnable() {
+        await(new Callable<Void>() {
             @Override
-            public void run() {
-                assertEquals(
-                        childrenStatsSortedByPath(dir),
-                        listViewStatsSortedByPath());
+            public Void call() throws Exception {
+
+                Pair<File, Stat> fileNotInView = null;
+                Pair<File, Stat> fileNotInFs = null;
+
+                Set<Pair<File, Stat>> filesInView = filesInView();
+                try (Stream<File> stream = dir.list(FOLLOW)) {
+                    for (File child : stream) {
+                        Pair<File, Stat> item = Pair.create(child, child.stat(NOFOLLOW));
+                        if (!filesInView.remove(item)) {
+                            fileNotInView = item;
+                        }
+                    }
+                }
+
+                if (!filesInView.isEmpty()) {
+                    fileNotInFs = filesInView.iterator().next();
+                }
+
+                if (fileNotInView != null || fileNotInFs != null) {
+                    fail("Details do not match."
+                                    + "\nin view: " + toString(fileNotInFs)
+                                    + "\nin fs:   " + toString(fileNotInView)
+                    );
+                }
+
+                return null;
+
             }
+
+            private String toString(Pair<File, ?> pair) {
+                return pair == null ? null : (pair.first.name()) + "=" + pair.second;
+            }
+
         });
+
         return this;
     }
 
-    private List<Pair<File, Stat>> childrenStatsSortedByPath(File dir) {
-        try (Stream<File> stream = dir.list(FOLLOW)) {
-            List<File> children = sortResourcesByPath(stream);
-            return stat(children);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<Pair<File, Stat>> stat(
-            List<File> files) throws IOException {
-        List<Pair<File, Stat>> result = new ArrayList<>();
-        for (File file : files) {
-            result.add(Pair.create(file, file.stat(NOFOLLOW)));
-        }
-        return result;
-    }
-
-    private List<File> sortResourcesByPath(Stream<File> iterable) throws IOException {
-        List<File> files = iterable.to(new ArrayList<File>());
-        Collections.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File a, File b) {
-                return a.path().compareTo(b.path());
-            }
-        });
-        return files;
-    }
-
-    private List<Pair<File, Stat>> listViewStatsSortedByPath() {
-        List<FileListItem.File> items = sortFilesByPath(fileItems());
-        return stats(items);
-    }
-
-    private List<Pair<File, Stat>> stats(List<FileListItem.File> items) {
-        List<Pair<File, Stat>> result = new ArrayList<>();
+    private Set<Pair<File, Stat>> filesInView() {
+        List<FileListItem.File> items = fileItems();
+        Set<Pair<File, Stat>> result = new HashSet<>(items.size() * 2);
         for (FileListItem.File item : items) {
             result.add(Pair.create(item.file(), item.stat()));
         }
         return result;
-    }
-
-    private List<FileListItem.File> sortFilesByPath(
-            List<FileListItem.File> items) {
-        Collections.sort(items, new Comparator<FileListItem.File>() {
-            @Override
-            public int compare(
-                    FileListItem.File a,
-                    FileListItem.File b) {
-                return a.file().path().compareTo(b.file().path());
-            }
-        });
-        return items;
     }
 
     private List<FileListItem.File> fileItems() {

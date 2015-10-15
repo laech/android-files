@@ -103,16 +103,16 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     public void test_getHierarchy_single() throws Exception {
-        File a = LocalFile.create(new java.io.File("/"));
+        File a = LocalFile.of("/");
         assertEquals(singletonList(a), a.hierarchy());
     }
 
     public void test_getHierarchy_multi() throws Exception {
-        File a = LocalFile.create(new java.io.File("/a/b"));
+        File a = LocalFile.of("/a/b");
         List<File> expected = Arrays.<File>asList(
-                LocalFile.create(new java.io.File("/")),
-                LocalFile.create(new java.io.File("/a")),
-                LocalFile.create(new java.io.File("/a/b"))
+                LocalFile.of("/"),
+                LocalFile.of("/a"),
+                LocalFile.of("/a/b")
         );
         assertEquals(expected, a.hierarchy());
     }
@@ -140,6 +140,30 @@ public final class LocalFileTest extends FileBaseTest {
         File b = dir1().resolve("b").createDir();
         List<?> expected = asList(a, b);
         try (Stream<File> actual = dir1().list(NOFOLLOW)) {
+            assertEquals(expected, actual.to(new ArrayList<>()));
+        }
+    }
+
+    public void test_listDir_linkFollowSuccess() throws Exception {
+        File dir = dir1().resolve("dir").createDir();
+        File a = dir.resolve("a").createFile();
+        File b = dir.resolve("b").createDir();
+        dir.resolve("c").createLink(a);
+
+        File link = dir1().resolve("link").createLink(dir);
+        List<File> expected = singletonList(link.resolve("b"));
+
+        try (Stream<File> actual = link.listDirs(FOLLOW)) {
+            assertEquals(expected, actual.to(new ArrayList<>()));
+        }
+    }
+
+    public void test_listDir() throws Exception {
+        dir1().resolve("a").createFile();
+        dir1().resolve("b").createDir();
+        dir1().resolve("c").createFile();
+        List<?> expected = singletonList(dir1().resolve("b"));
+        try (Stream<File> actual = dir1().listDirs(NOFOLLOW)) {
             assertEquals(expected, actual.to(new ArrayList<>()));
         }
     }
@@ -221,9 +245,11 @@ public final class LocalFileTest extends FileBaseTest {
         try (InputStream in = file.newInputStream()) {
             FileDescriptor fd = ((FileInputStream) in).getFD();
 
+            //noinspection ResultOfMethodCallIgnored
             in.read();
             in.close();
             try {
+                //noinspection ResultOfMethodCallIgnored
                 new FileInputStream(fd).read();
                 fail();
             } catch (IOException e) {
@@ -382,6 +408,44 @@ public final class LocalFileTest extends FileBaseTest {
         assertTrue(directory.exists(NOFOLLOW));
         directory.delete();
         assertFalse(directory.exists(NOFOLLOW));
+    }
+
+    public void test_deleteRecursive_symbolicLink() throws Exception {
+        File dir = dir1().resolve("dir").createDir();
+        File a = dir.resolve("a").createFile();
+        File link = dir1().resolve("link").createLink(dir);
+        assertTrue(link.exists(NOFOLLOW));
+        link.deleteRecursive();
+        assertFalse(link.exists(NOFOLLOW));
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(a.exists(NOFOLLOW));
+    }
+
+    public void test_deleteRecursive_file() throws Exception {
+        File file = dir1().resolve("file").createFile();
+        assertTrue(file.exists(NOFOLLOW));
+        file.deleteRecursive();
+        assertFalse(file.exists(NOFOLLOW));
+    }
+
+    public void test_deleteRecursive_emptyDirectory() throws Exception {
+        File dir = dir1().resolve("dir").createDir();
+        assertTrue(dir.exists(NOFOLLOW));
+        dir.delete();
+        assertFalse(dir.exists(NOFOLLOW));
+    }
+
+    public void test_deleteRecursive_nonEmptyDirectory() throws Exception {
+        File dir = dir1().resolve("dir").createDir();
+        File sub = dir.resolve("sub").createDir();
+        File a = dir.resolve("a").createFile();
+        File b = sub.resolve("b").createFile();
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(sub.exists(NOFOLLOW));
+        assertTrue(a.exists(NOFOLLOW));
+        assertTrue(b.exists(NOFOLLOW));
+        dir.deleteRecursive();
+        assertFalse(dir.exists(NOFOLLOW));
     }
 
     public void test_setModificationTime() throws Exception {

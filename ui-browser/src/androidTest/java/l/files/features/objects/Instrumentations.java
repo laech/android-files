@@ -31,14 +31,14 @@ import static junit.framework.Assert.fail;
 public final class Instrumentations {
 
     private static final class InstrumentCallable<T> implements Callable<T> {
-        private final Instrumentation mInstrumentation;
-        private final Callable<T> mDelegate;
+
+        private final Instrumentation instrumentation;
+        private final Callable<T> delegate;
 
         private InstrumentCallable(
-                Instrumentation instrumentation,
-                Callable<T> delegate) {
-            this.mInstrumentation = instrumentation;
-            this.mDelegate = delegate;
+                Instrumentation instrumentation, Callable<T> delegate) {
+            this.instrumentation = instrumentation;
+            this.delegate = delegate;
         }
 
         @Override
@@ -50,17 +50,17 @@ public final class Instrumentations {
                 @Override
                 public void run() {
                     try {
-                        result[0] = mDelegate.call();
+                        result[0] = delegate.call();
                     } catch (Exception | AssertionError e) {
                         error[0] = e;
                     }
                 }
             };
 
-            if (getMainLooper() == myLooper()) {
-                code.run();
+            if (instrumentation != null && getMainLooper() != myLooper()) {
+                instrumentation.runOnMainSync(code);
             } else {
-                mInstrumentation.runOnMainSync(code);
+                code.run();
             }
 
             if (error[0] instanceof Error) {
@@ -79,9 +79,12 @@ public final class Instrumentations {
         }
     }
 
+    public static <T> T await(Callable<T> callable) {
+        return await(new InstrumentCallable<>(null, callable), 1, MINUTES);
+    }
+
     public static <T> T awaitOnMainThread(
-            Instrumentation in,
-            Callable<T> callable) {
+            Instrumentation in, Callable<T> callable) {
         return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
     }
 
@@ -230,7 +233,7 @@ public final class Instrumentations {
             }
         }
 
-        fail("Item not found: " + itemId + " in " + adapter + adapter.items());
+        fail("Item not found: " + itemId);
     }
 
 }

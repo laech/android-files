@@ -4,7 +4,6 @@ import com.ibm.icu.text.CharsetDetector;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -25,6 +24,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 public abstract class BaseFile implements File {
 
@@ -46,7 +46,7 @@ public abstract class BaseFile implements File {
     }
 
     @Override
-    public Closeable observe(LinkOption option, Observer observer)
+    public Observation observe(LinkOption option, Observer observer)
             throws IOException, InterruptedException {
 
         return observe(option, observer, new FileConsumer() {
@@ -58,7 +58,7 @@ public abstract class BaseFile implements File {
     }
 
     @Override
-    public Closeable observe(
+    public Observation observe(
             LinkOption option,
             BatchObserver batchObserver,
             FileConsumer childrenConsumer,
@@ -73,6 +73,17 @@ public abstract class BaseFile implements File {
     @Override
     public File resolve(FileName other) {
         return resolve(other.toString());
+    }
+
+    @Override
+    public void deleteRecursive() throws IOException {
+        traverse(NOFOLLOW, new Visitor.Base() {
+            @Override
+            public Result onPostVisit(File file) throws IOException {
+                file.delete();
+                return super.onPostVisit(file);
+            }
+        });
     }
 
     @Override

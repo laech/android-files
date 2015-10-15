@@ -9,4 +9,11 @@ public interface Observer {
      */
     void onEvent(Event event, String child);
 
+    /**
+     * Called when internal system limit has been reached and we can no longer
+     * observe on anymore files/directories. Existing watches for this observer
+     * registration will be cancelled.
+     */
+    void onCancel();
+
 }

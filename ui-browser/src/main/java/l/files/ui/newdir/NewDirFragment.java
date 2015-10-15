@@ -7,12 +7,15 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
-import l.files.ui.R;
 import l.files.fs.File;
 import l.files.ui.FileCreationFragment;
+import l.files.ui.R;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
+import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.base.fs.FileIntents.broadcastFilesChanged;
 import static l.files.ui.base.fs.IOExceptions.message;
 
 public final class NewDirFragment extends FileCreationFragment {
@@ -103,18 +106,31 @@ public final class NewDirFragment extends FileCreationFragment {
     }
 
     private void createDir(File dir) {
-        creation = new CreateDir().executeOnExecutor(THREAD_POOL_EXECUTOR, dir);
+        creation = new CreateDir(dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
     private class CreateDir extends AsyncTask<File, Void, IOException> {
 
+        private final File dir;
+
+        private CreateDir(File dir) {
+            this.dir = requireNonNull(dir);
+        }
+
         @Override
         protected IOException doInBackground(File... params) {
             try {
-                params[0].createDir();
+                dir.createDir();
                 return null;
             } catch (IOException e) {
                 return e;
+            }
+        }
+
+        @Override
+        protected void onCancelled(IOException e) {
+            if (e == null) {
+                broadcastChange();
             }
         }
 
@@ -123,7 +139,13 @@ public final class NewDirFragment extends FileCreationFragment {
             super.onPostExecute(e);
             if (e != null) {
                 toaster.apply(message(e));
+            } else {
+                broadcastChange();
             }
+        }
+
+        private void broadcastChange() {
+            broadcastFilesChanged(singleton(dir), getActivity());
         }
     }
 

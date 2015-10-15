@@ -5,7 +5,6 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.os.StrictMode.VmPolicy;
 
-import l.files.ui.operations.OperationsUi;
 import l.files.ui.preview.Preview;
 
 import static l.files.BuildConfig.DEBUG;
@@ -15,8 +14,6 @@ public final class FilesApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        new OperationsUi().init(this);
 
         if (DEBUG) {
             StrictMode.setThreadPolicy(

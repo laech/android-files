@@ -18,6 +18,7 @@ import l.files.testing.BaseTest;
 
 import static android.text.format.Formatter.formatFileSize;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.ui.operations.Formats.formatTimeRemaining;
 import static org.mockito.BDDMockito.given;
@@ -69,7 +70,7 @@ public abstract class ProgressViewerTest extends BaseTest {
         viewer = create(getContext(), clock);
         pending = TaskState.pending(
                 TaskId.create(1, COPY),
-                Target.create("src", "dst"),
+                Target.from(singleton(LocalFile.of("src")), LocalFile.of("dst")),
                 Time.create(1, 1)
         );
         running = pending.running(
@@ -86,8 +87,8 @@ public abstract class ProgressViewerTest extends BaseTest {
 
     public void testGetContentTitle_Failed() throws Exception {
         TaskState.Failed state = running.failed(Time.create(2, 2), asList(
-                Failure.create(LocalFile.create(new File("a")), new IOException("1")),
-                Failure.create(LocalFile.create(new File("b")), new IOException("2"))
+                Failure.create(LocalFile.of(new File("a")), new IOException("1")),
+                Failure.create(LocalFile.of(new File("b")), new IOException("2"))
         ));
         String expected = res.getQuantityString(getTitleFailed(), 2);
         String actual = viewer.getContentTitle(state);
@@ -101,7 +102,7 @@ public abstract class ProgressViewerTest extends BaseTest {
                 state.getBytes()
         );
         String expected = res.getQuantityString(
-                getTitlePreparing(), 100, 100, state.getTarget().destination());
+                getTitlePreparing(), 100, 100, state.getTarget().dstDir());
         String actual = viewer.getContentTitle(state);
         assertEquals(expected, actual);
     }
@@ -115,7 +116,7 @@ public abstract class ProgressViewerTest extends BaseTest {
 
         String actual = viewer.getContentTitle(state);
         String expected = res.getQuantityString(
-                getTitleRunning(), 100, 100, state.getTarget().destination());
+                getTitleRunning(), 100, 100, state.getTarget().dstDir());
         assertEquals(expected, actual);
     }
 

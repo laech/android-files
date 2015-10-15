@@ -47,7 +47,7 @@ final class NotificationProvider implements TaskListener {
 
     public NotificationProvider(
             Context context, Clock clock, NotificationManager manager) {
-        this.context = requireNonNull(context, "context");
+        this.context = context.getApplicationContext();
         this.manager = requireNonNull(manager, "manager");
         this.viewers = buildViewers(context, clock);
     }

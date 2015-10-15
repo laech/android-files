@@ -38,7 +38,7 @@ abstract class ProgressViewer implements TaskStateViewer {
         int template = getWork(state).getProcessed() > 0
                 ? getTitleRunning() : getTitlePreparing();
         return context.getResources().getQuantityString(template, total, total,
-                state.getTarget().destination());
+                state.getTarget().dstDir());
     }
 
     @Override

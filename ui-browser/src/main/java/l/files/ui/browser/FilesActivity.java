@@ -29,6 +29,7 @@ import l.files.ui.menu.AboutMenu;
 import l.files.ui.menu.ActionBarDrawerToggleAction;
 import l.files.ui.menu.GoBackOnHomePressedAction;
 import l.files.ui.newtab.NewTabMenu;
+import l.files.ui.operations.OperationsUi;
 import l.files.ui.preview.Preview;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
@@ -76,6 +77,7 @@ public final class FilesActivity extends BaseActivity implements
         super.onCreate(state);
         setContentView(R.layout.files_activity);
         Preview.get(this).readCacheAsyncIfNeeded();
+        OperationsUi.init(this);
 
         toolbar = find(R.id.toolbar, this);
         hierarchy = new HierarchyAdapter();

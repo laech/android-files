@@ -2,8 +2,11 @@ package l.files.operations;
 
 import junit.framework.TestCase;
 
-import java.io.File;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
+import l.files.fs.File;
 import l.files.fs.local.LocalFile;
 
 import static java.util.Arrays.asList;
@@ -11,30 +14,19 @@ import static java.util.Arrays.asList;
 public final class TargetTest extends TestCase {
 
     public void testCreate() throws Exception {
-        final Target target = Target.create("src", "dst");
-        assertEquals("src", target.source().toString());
-        assertEquals("dst", target.destination().toString());
+        Set<File> srcFiles = Collections.<File>singleton(LocalFile.of("src"));
+        File dstDir = LocalFile.of("dst");
+        Target target = Target.from(srcFiles, dstDir);
+        assertEquals(srcFiles, new HashSet<>(target.srcFiles()));
+        assertEquals(dstDir, target.dstDir());
     }
 
     public void testFromSource() throws Exception {
-        final Target target = Target.from(asList(
-                LocalFile.create(new File("/0/a/b")),
-                LocalFile.create(new File("/0/a/c"))
+        Target target = Target.from(asList(
+                LocalFile.of("/0/a/b"),
+                LocalFile.of("/0/a/c")
         ));
-        assertEquals("a", target.source().toString());
-        assertEquals("a", target.destination().toString());
-    }
-
-    public void testFromSourceAndDestination() throws Exception {
-        final Target target = Target.from(
-                asList(
-                        LocalFile.create(new File("/0/a/b")),
-                        LocalFile.create(new File("/0/a/c"))
-                ),
-                LocalFile.create(new File("/a/b/c/d"))
-        );
-        assertEquals("a", target.source().toString());
-        assertEquals("d", target.destination().toString());
+        assertEquals(LocalFile.of("/0/a"), target.dstDir());
     }
 
 }

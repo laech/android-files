@@ -43,7 +43,10 @@ abstract class Dirent extends Native {
         return new AutoValue_Dirent(inode, type, name);
     }
 
-    static Stream<Dirent> stream(LocalFile res, LinkOption option) throws IOException {
+    static Stream<Dirent> stream(
+            final LocalFile res,
+            final LinkOption option,
+            final boolean dirOnly) throws IOException {
 
         final long dir;
         try {
@@ -72,13 +75,16 @@ abstract class Dirent extends Native {
 
             @Override
             public Iterator<Dirent> iterator() {
-                return Dirent.iterator(dir);
+                return Dirent.iterator(dir, dirOnly);
             }
 
         };
     }
 
-    private static Iterator<Dirent> iterator(final long dir) {
+    private static Iterator<Dirent> iterator(
+            final long dir,
+            final boolean dirOnly) {
+
         return new Iterator<Dirent>() {
 
             Dirent next;
@@ -94,12 +100,29 @@ abstract class Dirent extends Native {
             private void readNext() {
                 do {
                     try {
+
                         next = readdir(dir);
+
+                        if (next == null) {
+                            continue;
+                        }
+                        if (dirOnly && next.type() != DT_DIR) {
+                            continue;
+                        }
+                        if (".".equals(next.name())) {
+                            continue;
+                        }
+                        if ("..".equals(next.name())) {
+                            continue;
+                        }
+
+                        break;
+
                     } catch (ErrnoException e) {
                         this.<RuntimeException>rethrow(toIOException(e));
                     }
                 }
-                while (next != null && (".".equals(next.name()) || "..".equals(next.name())));
+                while (next != null);
             }
 
             @SuppressWarnings("unchecked")

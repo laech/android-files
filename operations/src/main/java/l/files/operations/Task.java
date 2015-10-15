@@ -16,9 +16,10 @@ abstract class Task extends AsyncTask<Void, TaskState, Void> {
     private final Runnable update = new Runnable() {
         @Override
         public void run() {
-            if (!state.isFinished()) {
-                state = running((Running) state);
-                callback.onUpdate(state);
+            TaskState s = Task.this.state;
+            if (!s.isFinished()) {
+                s = running((Running) s);
+                callback.onUpdate(s);
                 handler.postDelayed(this, PROGRESS_UPDATE_DELAY_MILLIS);
             }
         }

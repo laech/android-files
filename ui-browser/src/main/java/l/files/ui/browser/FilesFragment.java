@@ -1,6 +1,10 @@
 package l.files.ui.browser;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,9 +20,12 @@ import android.widget.TextView;
 
 import java.text.Collator;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
+import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.ui.Preferences;
 import l.files.ui.R;
@@ -51,12 +58,13 @@ import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
-import static l.files.ui.R.integer.files_grid_columns;
+import static l.files.ui.base.fs.FileIntents.getChangedFiles;
+import static l.files.ui.base.fs.FileIntents.registerFilesChangedReceiver;
+import static l.files.ui.base.fs.FileIntents.unregisterFilesChangedReceiver;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 
-public final class FilesFragment extends SelectionModeFragment<File>
-        implements
+public final class FilesFragment extends SelectionModeFragment<File> implements
         LoaderCallbacks<Result>,
         OnSharedPreferenceChangeListener,
         Selectable {
@@ -74,6 +82,8 @@ public final class FilesFragment extends SelectionModeFragment<File>
         return browser;
     }
 
+    private boolean autoRefreshEnabled = true;
+
     private File directory;
     private ProgressBar progress;
     private FilesAdapter adapter;
@@ -82,9 +92,11 @@ public final class FilesFragment extends SelectionModeFragment<File>
     public RecyclerView recycler;
 
     private final Handler handler = new Handler();
+
     private final Runnable checkProgress = new Runnable() {
         @Override
         public void run() {
+
             Activity activity = getActivity();
             if (activity == null
                     || activity.isFinishing()
@@ -103,6 +115,29 @@ public final class FilesFragment extends SelectionModeFragment<File>
                 progress.setVisibility(VISIBLE);
             }
             handler.postDelayed(this, 10);
+
+        }
+    };
+
+    private final BroadcastReceiver manualRefresh = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (autoRefreshEnabled) {
+                return;
+            }
+
+            List<File> changedFiles = getChangedFiles(intent);
+            Set<String> myFiles = new HashSet<>(changedFiles.size() * 2);
+            for (File file : changedFiles) {
+                if (directory().equals(file.parent())) {
+                    myFiles.add(file.name().toString());
+                }
+            }
+
+            FilesLoader loader = filesLoader();
+            if (loader != null && !myFiles.isEmpty()) {
+                loader.updateAll(myFiles, false);
+            }
         }
     };
 
@@ -134,7 +169,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
                 actionModeCallback(),
                 (OnOpenFileListener) getActivity());
 
-        int columns = getResources().getInteger(files_grid_columns);
+        int columns = getResources().getInteger(R.integer.files_grid_columns);
         recycler = find(android.R.id.list, this);
         recycler.setAdapter(adapter);
         recycler.setHasFixedSize(true);
@@ -147,23 +182,44 @@ public final class FilesFragment extends SelectionModeFragment<File>
         handler.postDelayed(checkProgress, 500);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
+        registerFilesChangedReceiver(manualRefresh, getActivity());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Preferences.unregister(getActivity(), this);
+        unregisterFilesChangedReceiver(manualRefresh, getActivity());
     }
 
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
+                new Refresh(autoRefreshEnabled(), refresh()),
                 new Bookmark(directory, context),
                 new NewDirMenu(context.getFragmentManager(), directory),
                 new Paste(context, directory),
                 new SortMenu(context.getFragmentManager()),
                 new ShowHiddenFilesMenu(context)
         ));
+    }
+
+    private Runnable refresh() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                getLoaderManager().restartLoader(0, null, FilesFragment.this);
+            }
+        };
+    }
+
+    private Provider<Boolean> autoRefreshEnabled() {
+        return new Provider<Boolean>() {
+            @Override
+            public Boolean get() {
+                return !autoRefreshEnabled;
+            }
+        };
     }
 
     @Override
@@ -174,14 +230,15 @@ public final class FilesFragment extends SelectionModeFragment<File>
     @Override
     protected ActionMode.Callback actionModeCallback() {
         Activity context = getActivity();
+        FragmentManager manager = context.getFragmentManager();
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new SelectAllAction(this),
                 new Cut(selection(), context),
                 new Copy(selection(), context),
-                new Delete(selection(), context),
-                new RenameAction(selection(), context.getFragmentManager())
+                new Delete(selection(), manager),
+                new RenameAction(selection(), manager)
         );
     }
 
@@ -193,10 +250,13 @@ public final class FilesFragment extends SelectionModeFragment<File>
     @Override
     public Loader<Result> onCreateLoader(int id, Bundle bundle) {
         Activity context = getActivity();
-        FileSort sort = getSort(context);
-        Collator collator = Collator.getInstance(Locale.getDefault());
-        boolean showHidden = Preferences.getShowHiddenFiles(context);
-        return new FilesLoader(context, directory, sort, collator, showHidden);
+        return new FilesLoader(
+                context,
+                directory,
+                getSort(context),
+                Collator.getInstance(Locale.getDefault()),
+                getShowHiddenFiles(context),
+                autoRefreshEnabled);
     }
 
     @Override
@@ -208,6 +268,7 @@ public final class FilesFragment extends SelectionModeFragment<File>
             if (data.exception() != null) {
                 empty.setText(message(data.exception()));
             } else {
+                autoRefreshEnabled = data.autoRefreshEnabled();
                 empty.setText(R.string.empty);
             }
 

@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.google.auto.value.AutoValue;
 
@@ -27,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
+import l.files.fs.Observation;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 
@@ -50,7 +50,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean showHidden;
 
     private volatile boolean observing;
-    private volatile Closeable observable;
+    private volatile boolean autoRefreshEnabled;
+    private volatile Observation observation;
     private volatile Thread loadInBackgroundThread;
 
     private final ExecutorService executor;
@@ -64,9 +65,15 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
 
+        @Override
+        public void onCancel() {
+            autoRefreshEnabled = false;
+            updateAll(Collections.<String>emptySet(), true);
+        }
+
     };
 
-    private void updateAll(
+    void updateAll(
             final Set<String> changedChildren,
             final boolean forceReload) {
 
@@ -98,13 +105,15 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             File root,
             FileSort sort,
             Collator collator,
-            boolean showHidden) {
+            boolean showHidden,
+            boolean attemptAutoRefreshEnabled) {
         super(context);
 
         this.root = requireNonNull(root, "root");
         this.sort = requireNonNull(sort, "sort");
         this.collator = requireNonNull(collator, "collator");
         this.showHidden = showHidden;
+        this.autoRefreshEnabled = attemptAutoRefreshEnabled;
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
     }
@@ -166,7 +175,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         List<File> children;
         try {
-            if (observe) {
+            if (observe && autoRefreshEnabled) {
                 children = observe();
             } else {
                 children = visit();
@@ -187,7 +196,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<File> observe() throws IOException, InterruptedException {
         List<File> children = new ArrayList<>();
-        observable = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
+        observation = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
+        autoRefreshEnabled = !observation.isClosed();
         return children;
     }
 
@@ -242,7 +252,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
         Resources res = getContext().getResources();
         List<FileListItem> result = sort.sort(files, res);
-        return Result.of(result);
+        return Result.of(result, autoRefreshEnabled);
     }
 
     @Override
@@ -253,8 +263,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         Closeable closeable = null;
         synchronized (this) {
             if (observing) {
-                closeable = observable;
-                observable = null;
+                closeable = observation;
+                observation = null;
                 observing = false;
             }
         }
@@ -278,13 +288,12 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         Closeable closeable = null;
         synchronized (this) {
             if (observing) {
-                closeable = observable;
-                observable = null;
+                closeable = observation;
+                observation = null;
                 observing = false;
             }
         }
         if (closeable != null) {
-            Log.e(getClass().getSimpleName(), "Has not been unregistered");
             executor.shutdownNow();
             closeable.close();
         }
@@ -346,16 +355,21 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         abstract List<FileListItem> items();
 
+        abstract boolean autoRefreshEnabled();
+
         @Nullable
         abstract IOException exception();
 
         private static Result of(IOException exception) {
             return new AutoValue_FilesLoader_Result(
-                    Collections.<FileListItem>emptyList(), exception);
+                    Collections.<FileListItem>emptyList(), false, exception);
         }
 
-        private static Result of(List<FileListItem> result) {
-            return new AutoValue_FilesLoader_Result(result, null);
+        private static Result of(
+                List<FileListItem> result, boolean autoRefreshEnabled) {
+
+            return new AutoValue_FilesLoader_Result(
+                    result, autoRefreshEnabled, null);
         }
     }
 

@@ -6,4 +6,6 @@ public interface BatchObserver {
 
     void onBatchEvent(boolean selfChanged, Set<String> children);
 
+    void onCancel();
+
 }

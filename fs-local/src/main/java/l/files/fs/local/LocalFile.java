@@ -7,7 +7,6 @@ import android.system.Os;
 
 import com.google.auto.value.AutoValue;
 
-import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +25,7 @@ import l.files.fs.FileConsumer;
 import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
@@ -169,7 +169,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public File root() {
-        return create(new java.io.File("/"));
+        return of(new java.io.File("/"));
     }
 
     @Override
@@ -182,7 +182,7 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public Closeable observe(
+    public Observation observe(
             LinkOption option,
             Observer observer,
             FileConsumer childrenConsumer) throws IOException, InterruptedException {
@@ -206,7 +206,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile resolve(String other) {
-        return create(new java.io.File(file(), other));
+        return of(new java.io.File(file(), other));
     }
 
     @Override
@@ -273,10 +273,21 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public Stream<File> list(final LinkOption option) throws IOException {
-        return new Stream<File>() {
+    public Stream<File> list(LinkOption option) throws IOException {
+        return list(option, false);
+    }
 
-            final Stream<Dirent> stream = Dirent.stream(LocalFile.this, option);
+    @Override
+    public Stream<File> listDirs(LinkOption option) throws IOException {
+        return list(option, true);
+    }
+
+    private Stream<File> list(
+            final LinkOption option,
+            final boolean dirOnly) throws IOException {
+
+        final Stream<Dirent> stream = Dirent.stream(LocalFile.this, option, dirOnly);
+        return new Stream<File>() {
 
             @Override
             public void close() throws IOException {
@@ -285,9 +296,8 @@ public abstract class LocalFile extends BaseFile {
 
             @Override
             public Iterator<File> iterator() {
+                final Iterator<Dirent> iterator = stream.iterator();
                 return new Iterator<File>() {
-
-                    final Iterator<Dirent> iterator = stream.iterator();
 
                     @Override
                     public boolean hasNext() {
@@ -420,7 +430,7 @@ public abstract class LocalFile extends BaseFile {
     public LocalFile readLink() throws IOException {
         try {
             String link = Os.readlink(path());
-            return create(new java.io.File(link));
+            return of(link);
         } catch (ErrnoException e) {
             throw toIOException(e, path());
         }
@@ -530,7 +540,7 @@ public abstract class LocalFile extends BaseFile {
 
         @Override
         public LocalFile createFromParcel(Parcel source) {
-            return create(new java.io.File(source.readString()));
+            return of(source.readString());
         }
 
         @Override

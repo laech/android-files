@@ -87,6 +87,7 @@ public abstract class FileListItem {
         @Nullable
         abstract Stat _targetStat();
 
+        // TODO compute this lazyly
         abstract NaturalKey collationKey();
 
         public static File create(

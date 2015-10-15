@@ -2,9 +2,7 @@ package l.files.fs.local;
 
 import android.os.Handler;
 import android.system.ErrnoException;
-import android.util.Log;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +15,13 @@ import l.files.fs.Event;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
 import l.files.fs.LinkOption;
+import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
+import static android.system.OsConstants.EINVAL;
+import static android.system.OsConstants.ENOSPC;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
@@ -51,7 +52,7 @@ import static l.files.fs.local.Inotify.IN_UNMOUNT;
 import static l.files.fs.local.Inotify.addWatch;
 
 final class LocalObservable extends Native
-        implements Runnable, Closeable {
+        implements Runnable, Observation {
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -137,12 +138,12 @@ final class LocalObservable extends Native
     /**
      * The watch descriptor of {@link #root}.
      */
-    private final int rootWd;
+    private final int wd;
 
     /**
      * The root file being watched.
      */
-    private final LocalFile root;
+    private final File root;
 
     /**
      * If {@link #root} is a directory, its immediate child directories will
@@ -164,10 +165,9 @@ final class LocalObservable extends Native
 
     private final AtomicBoolean closed;
 
-    LocalObservable(
-            int fd, int rootWd, LocalFile root, Observer observer) {
+    LocalObservable(int fd, int wd, LocalFile root, Observer observer) {
         this.fd = fd;
-        this.rootWd = rootWd;
+        this.wd = wd;
         this.root = requireNonNull(root, "root");
         this.observer = requireNonNull(observer, "observer");
         this.childDirectories = new ConcurrentHashMap<>();
@@ -175,7 +175,7 @@ final class LocalObservable extends Native
         this.closed = new AtomicBoolean(false);
     }
 
-    public static Closeable observe(
+    public static Observation observe(
             LocalFile file,
             LinkOption option,
             Observer observer,
@@ -186,12 +186,20 @@ final class LocalObservable extends Native
         requireNonNull(observer, "observer");
 
         boolean directory = file.stat(option).isDirectory();
+        boolean observeSuccess = true;
 
-        int fd = inotifyInit(file);
-        int wd = inotifyAddWatchWillCloseOnError(fd, file, option);
+        int fd;
+        int wd;
+        try {
+            fd = Inotify.init();
+            wd = inotifyAddWatchWillCloseOnError(fd, file, option);
+        } catch (ErrnoException e) {
+            fd = -1;
+            wd = -1;
+            observeSuccess = false;
+        }
 
-        LocalObservable observable =
-                new LocalObservable(fd, wd, file, observer);
+        LocalObservable observable = new LocalObservable(fd, wd, file, observer);
 
         /* Using a new thread seems to be much quicker than using a thread pool
          * executor, didn't investigate why, just a reminder here to check the
@@ -206,17 +214,15 @@ final class LocalObservable extends Native
              * allows them to happen at the same time, just need to make sure the
              * latest one wins.
              */
-            thread.start();
-
-            if (!directory) {
-                return observable;
+            if (observeSuccess) {
+                thread.start();
             }
 
-            observeChildren(fd, file, option, observable, childrenConsumer);
-
-        } catch (IOException e) {
-            thread.interrupt();
-            e.printStackTrace();
+            if (directory
+                    && observeSuccess
+                    && !observeChildren(fd, file, option, observable, childrenConsumer)) {
+                observeSuccess = false;
+            }
 
         } catch (Throwable e) {
             thread.interrupt();
@@ -228,33 +234,21 @@ final class LocalObservable extends Native
             throw e;
         }
 
+        if (!observeSuccess) {
+            thread.interrupt();
+            observable.close();
+        }
+
         return observable;
     }
 
-    private static int inotifyInit(LocalFile file) throws IOException {
-        try {
-            return Inotify.init1(0);
-        } catch (ErrnoException e) {
-            throw toIOException(e, file.path());
-        }
-    }
-
-    private static int inotifyAddWatchWillCloseOnError(
-            int fd, LocalFile file, LinkOption opt) throws IOException {
+    private static int inotifyAddWatchWillCloseOnError(int fd, File file, LinkOption opt)
+            throws ErrnoException {
 
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            String path = file.file().getPath();
-            return addWatch(fd, path, mask);
-
-        } catch (ErrnoException e) {
-            try {
-                Unistd.close(fd);
-            } catch (ErrnoException ee) {
-                e.addSuppressed(ee);
-            }
-            throw toIOException(e, file.path());
+            return addWatch(fd, file.path(), mask);
 
         } catch (Throwable e) {
             try {
@@ -266,27 +260,25 @@ final class LocalObservable extends Native
         }
     }
 
-    private static void observeChildren(
+    private static boolean observeChildren(
             int fd,
             LocalFile file,
             LinkOption option,
             LocalObservable observable,
             FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
-        try (Stream<Dirent> stream = Dirent.stream(file, option)) {
+        boolean observe = fd != -1;
+        try (Stream<Dirent> stream = Dirent.stream(file, option, false)) {
             for (Dirent child : stream) {
 
-                childrenConsumer.accept(file.resolve(child.name()));
+                File childFile = file.resolve(child.name());
+                childrenConsumer.accept(childFile);
 
                 if (currentThread().isInterrupted()) {
                     throw new InterruptedException();
                 }
 
-                if (observable.isClosed()) {
-                    return;
-                }
-
-                if (child.type() == DT_DIR) {
+                if (observe && child.type() == DT_DIR) {
                     try {
 
                         String path = file.path() + "/" + child.name();
@@ -294,23 +286,27 @@ final class LocalObservable extends Native
                         observable.childDirectories.put(wd, child.name());
 
                     } catch (ErrnoException e) {
-                        e.printStackTrace(); // TODO notify
+                        // TODO handle other types
+                        if (e.errno == ENOSPC) {
+                            observe = false;
+                        }
                     }
                 }
 
             }
         }
 
+        return observe;
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{fd=" + fd + ",wd=" + rootWd + ",root=" + root + "}";
+                + "{fd=" + fd + ",wd=" + wd + ",root=" + root + "}";
     }
 
-    // Also called from native code
-    private boolean isClosed() {
+    @Override
+    public boolean isClosed() {
         return closed.get();
     }
 
@@ -325,12 +321,28 @@ final class LocalObservable extends Native
             t.interrupt();
         }
 
+        if (fd == -1) {
+            return;
+        }
+
         List<ErrnoException> suppressed = new ArrayList<>(0);
         for (Integer wd : childDirectories.keySet()) {
             try {
                 Inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
-                suppressed.add(e);
+                if (e.errno != EINVAL) {
+                    suppressed.add(e);
+                }
+            }
+        }
+
+        if (wd != -1) {
+            try {
+                Inotify.removeWatch(fd, wd);
+            } catch (ErrnoException e) {
+                if (e.errno != EINVAL) {
+                    suppressed.add(e);
+                }
             }
         }
 
@@ -404,11 +416,11 @@ final class LocalObservable extends Native
             return;
         }
 
-        if (wd == rootWd) {
+        if (wd == this.wd) {
 
             if (isChildCreated(event, child)) {
                 if (isDirectory(event)) {
-                    addWatchForDirectory(child);
+                    addWatchForNewDirectory(child);
                 }
                 observer(CREATE, child);
 
@@ -449,13 +461,20 @@ final class LocalObservable extends Native
         observer.onEvent(kind, name);
     }
 
-    private void addWatchForDirectory(String name) {
+    private void addWatchForNewDirectory(String name) {
         try {
             String path = root.path() + "/" + name;
             int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
             childDirectories.put(wd, name);
         } catch (ErrnoException e) {
-            e.printStackTrace();
+//            TODO handle other types
+            if (e.errno == ENOSPC) {
+                try {
+                    close();
+                } catch (IOException ignored) {
+                }
+                observer.onCancel();
+            }
         }
     }
 
@@ -520,19 +539,19 @@ final class LocalObservable extends Native
         return "UNKNOWN";
     }
 
-    private void log(int wd, int event, String child) {
-        File file;
-        if (wd == rootWd) {
-            file = root;
-        } else {
-            file = root.resolve(childDirectories.get(wd));
-        }
-
-        Log.v(getClass().getSimpleName(), "fd=" + fd +
-                ", wd=" + wd +
-                ", event=" + eventName(event) +
-                ", parent=" + file +
-                ", child=" + child);
-    }
+//    private void log(int wd, int event, String child) {
+//        File file;
+//        if (wd == this.wd) {
+//            file = root;
+//        } else {
+//            file = root.resolve(childDirectories.get(wd));
+//        }
+//
+//        Log.v(getClass().getSimpleName(), "fd=" + fd +
+//                ", wd=" + wd +
+//                ", event=" + eventName(event) +
+//                ", parent=" + file +
+//                ", child=" + child);
+//    }
 
 }
