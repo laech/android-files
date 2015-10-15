@@ -61,7 +61,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<File> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                File file = LocalFile.create(new java.io.File(new URI(uriString)));
+                File file = LocalFile.of(new java.io.File(new URI(uriString)));
                 try {
                     if (file.exists(NOFOLLOW)) {
                         paths.add(file);

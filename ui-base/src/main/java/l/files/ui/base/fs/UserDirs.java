@@ -12,8 +12,8 @@ public final class UserDirs {
     private UserDirs() {
     }
 
-    public static final File DIR_ROOT = LocalFile.create(new java.io.File("/"));
-    public static final File DIR_HOME = LocalFile.create(getExternalStorageDirectory());
+    public static final File DIR_ROOT = LocalFile.of("/");
+    public static final File DIR_HOME = LocalFile.of(getExternalStorageDirectory());
     public static final File DIR_DCIM = dir(Environment.DIRECTORY_DCIM);
     public static final File DIR_DOWNLOADS = dir(Environment.DIRECTORY_DOWNLOADS);
     public static final File DIR_MOVIES = dir(Environment.DIRECTORY_MOVIES);
@@ -21,7 +21,7 @@ public final class UserDirs {
     public static final File DIR_PICTURES = dir(Environment.DIRECTORY_PICTURES);
 
     private static File dir(final String type) {
-        return LocalFile.create(getExternalStoragePublicDirectory(type));
+        return LocalFile.of(getExternalStoragePublicDirectory(type));
     }
 
 }

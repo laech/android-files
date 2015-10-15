@@ -19,14 +19,14 @@ public abstract class FileBaseTest extends TestCase {
 
     protected final File dir1() {
         if (dir1 == null) {
-            dir1 = LocalFile.create(createTempDir());
+            dir1 = LocalFile.of(createTempDir());
         }
         return dir1;
     }
 
     protected final File dir2() {
         if (dir2 == null) {
-            dir2 = LocalFile.create(createTempDir());
+            dir2 = LocalFile.of(createTempDir());
         }
         return dir2;
     }
