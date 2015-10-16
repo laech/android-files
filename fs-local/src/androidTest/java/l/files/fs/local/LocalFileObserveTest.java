@@ -315,6 +315,16 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
+    public void test_rename_dir() throws Exception {
+        File src = dir1().resolve("a").createDir();
+        File dst = dir1().resolve("b");
+        try (Recorder observer = observe(dir1())) {
+            observer.awaitModifyByCreateFile(src, "1");
+            observer.awaitMove(src, dst);
+            observer.awaitModifyByCreateFile(dst, "2");
+        }
+    }
+
     public void test_move_dir_in_then_add_file_into_it() throws Exception {
         File dst = dir1().resolve("a");
         File src = dir2().resolve("a").createDir();
@@ -926,7 +936,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
                 boolean rootIsDstParent = root.equals(dst.parent());
 
                 if (rootIsSrcParent && rootIsDstParent) {
-                    fail("Not implemented"); // TODO
+                    awaitMoveWithinSameDir(tracker, src, dst);
 
                 } else if (rootIsSrcParent) {
                     awaitMoveFrom(tracker, src, dst);
@@ -941,6 +951,23 @@ public final class LocalFileObserveTest extends FileBaseTest {
                     fail();
                 }
             }
+        }
+
+        private void awaitMoveWithinSameDir(Tracker tracker, File src, File dst) throws Exception {
+            boolean isDir = src.stat(NOFOLLOW).isDirectory();
+            await(
+                    asList(
+                            event(DELETE, src),
+                            event(CREATE, dst)
+                    ),
+                    newMove(src, dst)
+            );
+            InOrder order = inOrder(tracker);
+            if (isDir) {
+                order.verify(tracker).onWatchRemoved(fd, allChildWds.get(src));
+                order.verify(tracker).onWatchAdded(eq(fd), eq(dst.path()), anyInt(), anyInt());
+            }
+            order.verifyNoMoreInteractions();
         }
 
         private void awaitMoveFrom(Tracker tracker, File src, File dst) throws Exception {
