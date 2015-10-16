@@ -235,7 +235,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_create_file_in_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().createFile("c")
         );
     }
@@ -243,7 +243,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_create_link_in_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().createLink("c", dir1())
         );
     }
@@ -251,7 +251,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_create_dir_in_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().createDir("c")
         );
     }
@@ -259,7 +259,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_delete_file_from_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PreMoves().createFile("b"),
                 new PostMoves().delete("b")
         );
@@ -268,7 +268,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_delete_link_from_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PreMoves().createLink("b", dir1()),
                 new PostMoves().delete("b")
         );
@@ -277,7 +277,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_delete_dir_from_it()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PreMoves().createDir("b"),
                 new PostMoves().delete("b")
         );
@@ -286,7 +286,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_change_its_atime()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().setLastAccessedTime(EPOCH)
         );
     }
@@ -294,7 +294,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_change_its_mtime()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().setLastModifiedTime(EPOCH)
         );
     }
@@ -302,7 +302,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_unreadable_dir_in_then_change_its_permission()
             throws Exception {
 
-        testMoveUnreadableDir(
+        testMoveUnreadableDirIn(
                 new PostMoves().removeAllPermissions()
         );
     }
@@ -310,7 +310,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
     public void test_move_dir_in_then_change_its_permission()
             throws Exception {
 
-        testMoveDir(
+        testMoveDirIn(
                 new PostMoves().removeAllPermissions()
         );
     }
@@ -1205,19 +1205,19 @@ public final class LocalFileObserveTest extends FileBaseTest {
         }
     }
 
-    private void testMoveUnreadableDir(PostMove post) throws Exception {
-        testMoveUnreadableDir(new PreMoves(), post);
+    private void testMoveUnreadableDirIn(PostMove post) throws Exception {
+        testMoveUnreadableDirIn(new PreMoves(), post);
     }
 
-    private void testMoveUnreadableDir(PreMove pre, PostMove post) throws Exception {
-        testMoveDir(new PreMoves().add(pre).setNoRead(), post);
+    private void testMoveUnreadableDirIn(PreMove pre, PostMove post) throws Exception {
+        testMoveDirIn(new PreMoves().add(pre).setNoRead(), post);
     }
 
-    private void testMoveDir(PostMove post) throws Exception {
-        testMoveDir(new PreMoves(), post);
+    private void testMoveDirIn(PostMove post) throws Exception {
+        testMoveDirIn(new PreMoves(), post);
     }
 
-    private void testMoveDir(PreMove pre, PostMove post) throws Exception {
+    private void testMoveDirIn(PreMove pre, PostMove post) throws Exception {
         File dst = dir1().resolve("a");
         File src = dir2().resolve("a").createDir();
         pre.onPreMove(src);
