@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -446,6 +447,36 @@ public final class LocalFileTest extends FileBaseTest {
         assertTrue(b.exists(NOFOLLOW));
         dir.deleteRecursive();
         assertFalse(dir.exists(NOFOLLOW));
+    }
+
+    public void test_deleteIfExists_nonExist_willIgnore() throws Exception {
+        dir1().resolve("a").deleteIfExists();
+    }
+
+    public void test_deleteIfExists_fileExist_willDelete() throws Exception {
+        File file = dir1().resolve("a").createFile();
+        assertTrue(file.exists(NOFOLLOW));
+        file.deleteIfExists();
+        assertFalse(file.exists(NOFOLLOW));
+    }
+
+    public void test_deleteIfExists_emptyDirExist_willDelete() throws Exception {
+        File dir = dir1().resolve("a").createDir();
+        assertTrue(dir.exists(NOFOLLOW));
+        dir.deleteIfExists();
+        assertFalse(dir.exists(NOFOLLOW));
+    }
+
+    public void test_deleteIfExists_nonEmptyDirExist_willError() throws Exception {
+        File dir = dir1().resolve("a").createDir();
+        File file = dir.resolve("1").createFile();
+        assertTrue(dir.exists(NOFOLLOW));
+        try {
+            dir.deleteIfExists();
+        } catch (DirectoryNotEmpty ignore) {
+        }
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(file.exists(NOFOLLOW));
     }
 
     public void test_setModificationTime() throws Exception {

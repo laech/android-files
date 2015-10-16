@@ -6,8 +6,9 @@ import android.system.ErrnoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,6 +24,7 @@ import static android.os.Looper.getMainLooper;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENOSPC;
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
@@ -49,7 +51,6 @@ import static l.files.fs.local.Inotify.IN_ONLYDIR;
 import static l.files.fs.local.Inotify.IN_OPEN;
 import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
-import static l.files.fs.local.Inotify.addWatch;
 
 final class LocalObservable extends Native
         implements Runnable, Observation {
@@ -153,7 +154,41 @@ final class LocalObservable extends Native
      * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final Map<Integer, String> childDirectories;
+    private final BiMap<Integer, String> children = new BiMap<>();
+
+    private static final class BiMap<A, B> {
+        private final ConcurrentMap<A, B> ab = new ConcurrentHashMap<>();
+        private final ConcurrentMap<B, A> ba = new ConcurrentHashMap<>();
+
+        B get(A a) {
+            return ab.get(a);
+        }
+
+        void put(A a, B b) {
+            ab.put(a, b);
+            ba.put(b, a);
+        }
+
+        B remove(A a) {
+            B b = ab.remove(a);
+            if (b != null) {
+                ba.remove(b);
+            }
+            return b;
+        }
+
+        A remove2(B b) {
+            A a = ba.remove(b);
+            if (a != null) {
+                ab.remove(a);
+            }
+            return a;
+        }
+
+        Set<A> keySet() {
+            return unmodifiableSet(ab.keySet());
+        }
+    }
 
     // TODO use weak reference
     private final Observer observer;
@@ -170,7 +205,6 @@ final class LocalObservable extends Native
         this.wd = wd;
         this.root = requireNonNull(root, "root");
         this.observer = requireNonNull(observer, "observer");
-        this.childDirectories = new ConcurrentHashMap<>();
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
     }
@@ -248,11 +282,11 @@ final class LocalObservable extends Native
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            return addWatch(fd, file.path(), mask);
+            return Inotify.addWatch(fd, file.path(), mask);
 
         } catch (Throwable e) {
             try {
-                Unistd.close(fd);
+                Inotify.close(fd);
             } catch (ErrnoException ee) {
                 e.addSuppressed(ee);
             }
@@ -282,8 +316,8 @@ final class LocalObservable extends Native
                     try {
 
                         String path = file.path() + "/" + child.name();
-                        int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
-                        observable.childDirectories.put(wd, child.name());
+                        int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
+                        observable.children.put(wd, child.name());
 
                     } catch (ErrnoException e) {
                         // TODO handle other types
@@ -326,7 +360,7 @@ final class LocalObservable extends Native
         }
 
         List<ErrnoException> suppressed = new ArrayList<>(0);
-        for (Integer wd : childDirectories.keySet()) {
+        for (Integer wd : children.keySet()) {
             try {
                 Inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
@@ -348,7 +382,7 @@ final class LocalObservable extends Native
 
         try {
 
-            Unistd.close(fd);
+            Inotify.close(fd);
 
         } catch (ErrnoException e) {
             for (ErrnoException sup : suppressed) {
@@ -400,13 +434,17 @@ final class LocalObservable extends Native
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    throw e;
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    } else {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
         }
     }
 
-    private void handleEvent(int wd, int event, String child) {
+    private void handleEvent(int wd, int event, String child) throws IOException {
         // Disable to avoid getting called on large number of events,
         // even just calling isVerboseEnabled has some overhead,
         // enable when needed for debugging
@@ -425,11 +463,13 @@ final class LocalObservable extends Native
                 observer(CREATE, child);
 
             } else if (isChildDeleted(event, child)) {
-                removeWatch(wd);
+                if (isDirectory(event)) {
+                    removeChildWatch(child);
+                }
                 observer(DELETE, child);
 
             } else if (isSelfDeleted(event, child)) {
-                removeWatch(wd);
+                close();
                 observer(DELETE, null);
 
             } else if (isChildModified(event, child)) {
@@ -449,7 +489,7 @@ final class LocalObservable extends Native
             if (isObserverStopped(event)) {
                 onObserverStopped(wd);
             } else {
-                String childDirectory = childDirectories.get(wd);
+                String childDirectory = children.get(wd);
                 if (childDirectory != null) {
                     observer(MODIFY, childDirectory);
                 }
@@ -464,8 +504,8 @@ final class LocalObservable extends Native
     private void addWatchForNewDirectory(String name) {
         try {
             String path = root.path() + "/" + name;
-            int wd = addWatch(fd, path, CHILD_DIRECTORY_MASK);
-            childDirectories.put(wd, name);
+            int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
+            children.put(wd, name);
         } catch (ErrnoException e) {
 //            TODO handle other types
             if (e.errno == ENOSPC) {
@@ -478,8 +518,14 @@ final class LocalObservable extends Native
         }
     }
 
-    private void removeWatch(int wd) {
-        childDirectories.remove(wd);
+    private void removeChildWatch(String child) {
+        Integer wd = children.remove2(child);
+        if (wd != null) {
+            try {
+                Inotify.removeWatch(fd, wd);
+            } catch (ErrnoException ignored) {
+            }
+        }
     }
 
     private boolean isDirectory(int event) {
@@ -487,7 +533,7 @@ final class LocalObservable extends Native
     }
 
     private void onObserverStopped(int wd) {
-        childDirectories.remove(wd);
+        children.remove(wd);
     }
 
     private boolean isObserverStopped(int event) {
@@ -544,7 +590,7 @@ final class LocalObservable extends Native
 //        if (wd == this.wd) {
 //            file = root;
 //        } else {
-//            file = root.resolve(childDirectories.get(wd));
+//            file = root.resolve(children.get(wd));
 //        }
 //
 //        Log.v(getClass().getSimpleName(), "fd=" + fd +

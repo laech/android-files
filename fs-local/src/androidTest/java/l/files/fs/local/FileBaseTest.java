@@ -1,18 +1,17 @@
 package l.files.fs.local;
 
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.util.EnumSet;
 
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.fs.Visitor;
+import l.files.testing.BaseTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
-public abstract class FileBaseTest extends TestCase {
+public abstract class FileBaseTest extends BaseTest {
 
     private File dir1;
     private File dir2;

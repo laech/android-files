@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -73,6 +74,15 @@ public abstract class BaseFile implements File {
     @Override
     public File resolve(FileName other) {
         return resolve(other.toString());
+    }
+
+
+    @Override
+    public void deleteIfExists() throws IOException {
+        try {
+            delete();
+        } catch (FileNotFoundException ignored) {
+        }
     }
 
     @Override
