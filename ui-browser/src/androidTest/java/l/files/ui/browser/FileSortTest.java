@@ -8,7 +8,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import l.files.collation.NaturalKey;
 import l.files.fs.File;
+import l.files.fs.FileName;
 import l.files.fs.Stat;
 import l.files.testing.fs.FileBaseTest;
 
@@ -27,14 +29,23 @@ abstract class FileSortTest extends FileBaseTest {
         List<FileListItem.File> actual = new ArrayList<>(expected);
         shuffle(actual);
         sort(actual, comparator);
+        assertEquals(names(expected), names(actual));
         assertEquals(expected, actual);
+    }
+
+    private List<FileName> names(List<FileListItem.File> items) {
+        List<FileName> names = new ArrayList<>(items.size());
+        for (FileListItem.File item : items) {
+            names.add(item.file().name());
+        }
+        return names;
     }
 
     private List<FileListItem.File> mapData(
             Locale locale,
             File... files) throws IOException {
 
-        Collator collator = Collator.getInstance(locale);
+        Collator collator = NaturalKey.collator(locale);
         List<FileListItem.File> expected = new ArrayList<>(files.length);
         for (File file : files) {
             Stat stat;
