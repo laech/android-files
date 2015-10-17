@@ -168,6 +168,9 @@ public final class FilesActivity extends BaseActivity implements
 
     private void updateToolBar() {
         FilesFragment fragment = fragment();
+        if (fragment == null) {
+            return;
+        }
         int backStacks = getFragmentManager().getBackStackEntryCount();
         if (backStacks == 0) {
             toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
