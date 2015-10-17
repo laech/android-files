@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.app.Instrumentation;
 import android.graphics.Bitmap;

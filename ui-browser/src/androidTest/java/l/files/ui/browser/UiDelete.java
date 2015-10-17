@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.app.AlertDialog;
 
@@ -8,7 +8,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 public final class UiDelete {
 

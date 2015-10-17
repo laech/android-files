@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -11,15 +11,14 @@ import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.ui.R;
 import l.files.ui.bookmarks.BookmarksFragment;
-import l.files.ui.browser.FilesActivity;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
-import static l.files.features.objects.Instrumentations.awaitOnMainThread;
-import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
-import static l.files.features.objects.Instrumentations.findItemOnMainThread;
-import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
+import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
+import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
+import static l.files.ui.browser.Instrumentations.findItemOnMainThread;
+import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 
 public final class UiBookmarksFragment {
 

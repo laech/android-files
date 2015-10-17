@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.ui.browser.FileListItem.File;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 /**
  * Provides category information for items in cursors.
@@ -16,29 +16,29 @@ interface Categorizer {
      */
     Categorizer NULL = new Categorizer() {
         @Override
-        public Object id(final File file) {
+        public Object id(final FileItem item) {
             return null;
         }
 
         @Override
         public String label(
-                final File file,
+                final FileItem item,
                 final Resources res,
                 final Object id) {
             return null;
         }
 
         @Override
-        public List<FileListItem> categorize(
+        public List<BrowserItem> categorize(
                 final Resources res,
-                final List<File> items) {
-            return Collections.<FileListItem>unmodifiableList(items);
+                final List<FileItem> items) {
+            return Collections.<BrowserItem>unmodifiableList(items);
         }
     };
 
-    Object id(File file);
+    Object id(FileItem item);
 
-    String label(File file, Resources res, Object id);
+    String label(FileItem item, Resources res, Object id);
 
-    List<FileListItem> categorize(Resources res, List<File> items);
+    List<BrowserItem> categorize(Resources res, List<FileItem> items);
 }

@@ -2,7 +2,7 @@ package l.files.features;
 
 import l.files.ui.R;
 import l.files.common.base.Executable;
-import l.files.features.objects.UiRename;
+import l.files.ui.browser.UiRename;
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.testing.BaseFilesActivityTest;

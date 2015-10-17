@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import l.files.ui.newdir.NewDirFragment;
 

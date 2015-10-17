@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.app.AlertDialog;
 import android.widget.EditText;
@@ -15,7 +15,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;

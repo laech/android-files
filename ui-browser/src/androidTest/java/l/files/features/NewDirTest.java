@@ -4,7 +4,7 @@ import android.widget.EditText;
 
 import l.files.ui.R;
 import l.files.common.base.Consumer;
-import l.files.features.objects.UiNewDir;
+import l.files.ui.browser.UiNewDir;
 import l.files.fs.Permission;
 import l.files.testing.BaseFilesActivityTest;
 

@@ -29,22 +29,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import l.files.ui.base.fs.FileIcons;
-import l.files.ui.base.fs.OnOpenFileListener;
-import l.files.ui.base.view.ActionModeProvider;
 import l.files.fs.File;
 import l.files.fs.Stat;
+import l.files.ui.R;
+import l.files.ui.base.fs.FileIcons;
+import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.base.selection.Selection;
+import l.files.ui.base.selection.SelectionModeViewHolder;
+import l.files.ui.base.view.ActionModeProvider;
+import l.files.ui.base.widget.StableAdapter;
+import l.files.ui.browser.BrowserItem.FileItem;
+import l.files.ui.browser.BrowserItem.HeaderItem;
+import l.files.ui.mode.Selectable;
 import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
 import l.files.ui.preview.Rect;
 import l.files.ui.preview.SizedColorDrawable;
-import l.files.ui.R;
-import l.files.ui.base.widget.StableAdapter;
-import l.files.ui.browser.FileListItem.Header;
-import l.files.ui.mode.Selectable;
-import l.files.ui.base.selection.Selection;
-import l.files.ui.base.selection.SelectionModeViewHolder;
 
 import static android.R.attr.textColorPrimary;
 import static android.R.attr.textColorPrimaryInverse;
@@ -70,18 +71,18 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.common.content.res.Styles.getColorStateList;
-import static l.files.ui.base.view.Views.find;
-import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
-import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
-import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.R.dimen.files_item_card_inner_space;
 import static l.files.ui.R.dimen.files_item_space_horizontal;
 import static l.files.ui.R.dimen.files_list_space;
 import static l.files.ui.R.integer.files_grid_columns;
 import static l.files.ui.R.layout.files_grid_header;
 import static l.files.ui.R.layout.files_grid_item;
+import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
+import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
+import static l.files.ui.base.fs.FileIcons.fileIconStringId;
+import static l.files.ui.base.view.Views.find;
 
-final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
+final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
 
     private final Preview decorator;
@@ -119,7 +120,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position).isFile() ? 0 : 1;
+        return getItem(position).isFileItem() ? 0 : 1;
     }
 
     @Override
@@ -133,30 +134,30 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FileListItem item = getItem(position);
-        if (item.isHeader()) {
-            ((HeaderHolder) holder).bind((Header) item);
+        BrowserItem item = getItem(position);
+        if (item.isHeaderItem()) {
+            ((HeaderHolder) holder).bind((HeaderItem) item);
         } else {
-            ((FileHolder) holder).bind((FileListItem.File) item);
+            ((FileHolder) holder).bind((FileItem) item);
         }
     }
 
     @Override
     public Object getItemIdObject(int position) {
-        FileListItem item = getItem(position);
-        if (item instanceof FileListItem.File) {
-            return ((FileListItem.File) item).file();
+        BrowserItem item = getItem(position);
+        if (item instanceof FileItem) {
+            return ((FileItem) item).selfFile();
         }
         return item;
     }
 
     @Override
     public void selectAll() {
-        List<FileListItem> items = items();
+        List<BrowserItem> items = items();
         List<File> files = new ArrayList<>(items.size());
-        for (FileListItem item : items) {
-            if (item.isFile()) {
-                files.add(((FileListItem.File) item).file());
+        for (BrowserItem item : items) {
+            if (item.isFileItem()) {
+                files.add(((FileItem) item).selfFile());
             }
         }
         selection.addAll(files);
@@ -212,7 +213,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
     }
 
-    final class FileHolder extends SelectionModeViewHolder<File, FileListItem.File>
+    final class FileHolder extends SelectionModeViewHolder<File, FileItem>
             implements PreviewCallback {
 
         private final TextView icon;
@@ -259,17 +260,17 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
         }
 
         @Override
-        protected File itemId(FileListItem.File file) {
-            return file.file();
+        protected File itemId(FileItem file) {
+            return file.selfFile();
         }
 
         @Override
-        protected void onClick(View v, FileListItem.File file) {
-            listener.onOpen(file.file(), file.targetStat());
+        protected void onClick(View v, FileItem file) {
+            listener.onOpen(file.selfFile(), file.linkTargetOrSelfStat());
         }
 
         @Override
-        public void bind(FileListItem.File file) {
+        public void bind(FileItem file) {
             super.bind(file);
             setTitle(file);
             setIcon(file);
@@ -278,16 +279,16 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             setPreview(file);
         }
 
-        private void setTitle(FileListItem.File file) {
-            title.setText(file.file().name());
+        private void setTitle(FileItem file) {
+            title.setText(file.selfFile().name());
             title.setEnabled(file.isReadable());
         }
 
-        private void setIcon(FileListItem.File file) {
-            icon.setEnabled(file.targetStat() != null && file.isReadable());
+        private void setIcon(FileItem file) {
+            icon.setEnabled(file.linkTargetOrSelfStat() != null && file.isReadable());
 
-            if (file.targetStat() != null
-                    && setLocalIcon(icon, file.targetStat())) {
+            if (file.linkTargetOrSelfStat() != null
+                    && setLocalIcon(icon, file.linkTargetOrSelfStat())) {
                 icon.setTypeface(SANS_SERIF, BOLD);
             } else {
                 icon.setText(iconTextId(file));
@@ -311,8 +312,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             return true;
         }
 
-        private int iconTextId(FileListItem.File file) {
-            Stat stat = file.targetStat();
+        private int iconTextId(FileItem file) {
+            Stat stat = file.linkTargetOrSelfStat();
             if (stat == null) {
                 return defaultFileIconStringId();
             }
@@ -324,8 +325,8 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             }
         }
 
-        private void setSummary(FileListItem.File file) {
-            Stat stat = file.stat();
+        private void setSummary(FileItem file) {
+            Stat stat = file.selfStat();
             if (stat == null) {
                 summary.setText("");
                 summary.setVisibility(GONE);
@@ -349,15 +350,15 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             }
         }
 
-        private void setPreview(FileListItem.File file) {
+        private void setPreview(FileItem file) {
             previewContainerSpaceTop.setVisibility(GONE);
 
             if (task != null) {
                 task.cancelAll();
             }
 
-            File res = file.file();
-            Stat stat = file.targetStat();
+            File res = file.selfFile();
+            Stat stat = file.linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
                 preview.setImageDrawable(null);
                 showPreviewContainer(false);
@@ -382,7 +383,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             Rect size = decorator.getSize(res, stat, constraint);
             if (size != null) {
                 setPreviewImage(newSizedColorDrawable(size));
-                onSizeAvailable(file.file(), size);
+                onSizeAvailable(file.selfFile(), size);
                 showPreviewContainer(true);
             } else {
                 setPreviewImage((Drawable) null);
@@ -432,13 +433,13 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             }
         }
 
-        private void setLink(FileListItem.File file) {
-            Stat stat = file.stat();
+        private void setLink(FileItem file) {
+            Stat stat = file.selfStat();
             if (stat != null && stat.isSymbolicLink()) {
                 linkIcon.setEnabled(file.isReadable());
                 linkIcon.setVisibility(VISIBLE);
 
-                File target = file.target();
+                File target = file.linkTargetFile();
                 if (target != null) {
                     linkPath.setText(resources().getString(R.string.link_x, target.path()));
                     linkPath.setVisibility(VISIBLE);
@@ -527,7 +528,7 @@ final class FilesAdapter extends StableAdapter<FileListItem, ViewHolder>
             title = find(android.R.id.title, this);
         }
 
-        void bind(Header header) {
+        void bind(HeaderItem header) {
             title.setText(header.toString());
             LayoutParams params = itemView.getLayoutParams();
             if (params instanceof StaggeredGridLayoutManager.LayoutParams) {

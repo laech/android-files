@@ -12,9 +12,9 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import l.files.ui.R;
 import l.files.fs.Stat;
-import l.files.ui.browser.FileListItem.File;
+import l.files.ui.R;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
@@ -54,8 +54,8 @@ final class DateCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public Object id(File file) {
-        Stat stat = file.stat();
+    public Object id(FileItem file) {
+        Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
         }
@@ -81,15 +81,15 @@ final class DateCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public String label(File file, Resources res, Object id) {
+    public String label(FileItem file, Resources res, Object id) {
         if (id instanceof Year) {
-            Stat stat = requireNonNull(file.stat());
+            Stat stat = requireNonNull(file.selfStat());
             timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
             return String.valueOf(timestamp.get(YEAR));
         }
 
         if (id instanceof Month) {
-            Stat stat = requireNonNull(file.stat());
+            Stat stat = requireNonNull(file.selfStat());
             timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
             int month = timestamp.get(MONTH);
             String format = monthCache.get(month);

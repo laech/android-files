@@ -1,4 +1,4 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.app.Fragment;
 import android.app.Instrumentation;
@@ -30,9 +30,7 @@ import l.files.fs.Stream;
 import l.files.ui.R;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
-import l.files.ui.browser.FileListItem;
-import l.files.ui.browser.FilesActivity;
-import l.files.ui.browser.FilesFragment;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -50,14 +48,14 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
-import static l.files.features.objects.Instrumentations.await;
-import static l.files.features.objects.Instrumentations.awaitOnMainThread;
-import static l.files.features.objects.Instrumentations.clickItemOnMainThread;
-import static l.files.features.objects.Instrumentations.longClickItemOnMainThread;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.testing.Mocks.mockMenuItem;
 import static l.files.ui.base.view.Views.find;
+import static l.files.ui.browser.Instrumentations.await;
+import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
+import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
+import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 
 public final class UiFileActivity {
 
@@ -636,30 +634,30 @@ public final class UiFileActivity {
     }
 
     private Set<Pair<File, Stat>> filesInView() {
-        List<FileListItem.File> items = fileItems();
+        List<FileItem> items = fileItems();
         Set<Pair<File, Stat>> result = new HashSet<>(items.size() * 2);
-        for (FileListItem.File item : items) {
-            result.add(Pair.create(item.file(), item.stat()));
+        for (FileItem item : items) {
+            result.add(Pair.create(item.selfFile(), item.selfStat()));
         }
         return result;
     }
 
-    private List<FileListItem.File> fileItems() {
-        List<FileListItem> items = fragment().items();
-        List<FileListItem.File> files = new ArrayList<>(items.size());
-        for (FileListItem item : items) {
-            if (item.isFile()) {
-                files.add(((FileListItem.File) item));
+    private List<FileItem> fileItems() {
+        List<BrowserItem> items = fragment().items();
+        List<FileItem> files = new ArrayList<>(items.size());
+        for (BrowserItem item : items) {
+            if (item.isFileItem()) {
+                files.add(((FileItem) item));
             }
         }
         return files;
     }
 
     private List<File> resources() {
-        List<FileListItem.File> items = fileItems();
+        List<FileItem> items = fileItems();
         List<File> files = new ArrayList<>(items.size());
-        for (FileListItem.File item : items) {
-            files.add(item.file());
+        for (FileItem item : items) {
+            files.add(item.selfFile());
         }
         return files;
     }
@@ -669,8 +667,8 @@ public final class UiFileActivity {
             @Override
             public void run() {
                 List<File> actual = new ArrayList<>();
-                for (FileListItem.File item : fileItems()) {
-                    actual.add(item.file());
+                for (FileItem item : fileItems()) {
+                    actual.add(item.selfFile());
                 }
                 assertEquals(asList(expected), actual);
             }

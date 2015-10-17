@@ -2,9 +2,9 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 
-import l.files.ui.R;
 import l.files.fs.Stat;
-import l.files.ui.browser.FileListItem.File;
+import l.files.ui.R;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 /**
  * Categorizes by file size (descending order).
@@ -28,8 +28,8 @@ final class SizeCategorizer extends BaseCategorizer {
             };
 
     @Override
-    public Object id(final File file) {
-        final Stat stat = file.stat();
+    public Object id(final FileItem file) {
+        final Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
         }
@@ -49,7 +49,7 @@ final class SizeCategorizer extends BaseCategorizer {
 
     @Override
     public String label(
-            final File file,
+            final FileItem file,
             final Resources res,
             final Object id) {
         final int value = (int) id;

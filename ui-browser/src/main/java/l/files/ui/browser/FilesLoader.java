@@ -29,6 +29,7 @@ import l.files.fs.FileConsumer;
 import l.files.fs.Observation;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.currentThread;
@@ -42,7 +43,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final ConcurrentMap<String, FileListItem.File> data;
+    private final ConcurrentMap<String, FileItem> data;
     private final File root;
     private final Collator collator;
 
@@ -240,18 +241,18 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private Result buildResult() {
-        List<FileListItem.File> files = new ArrayList<>(data.size());
+        List<FileItem> files = new ArrayList<>(data.size());
         if (showHidden) {
             files.addAll(data.values());
         } else {
-            for (FileListItem.File item : data.values()) {
-                if (!item.file().isHidden()) {
+            for (FileItem item : data.values()) {
+                if (!item.selfFile().isHidden()) {
                     files.add(item);
                 }
             }
         }
         Resources res = getContext().getResources();
-        List<FileListItem> result = sort.sort(files, res);
+        List<BrowserItem> result = sort.sort(files, res);
         return Result.of(result);
     }
 
@@ -313,8 +314,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat stat = file.stat(NOFOLLOW);
             Stat targetStat = readTargetStatus(file, stat);
             File target = readTarget(file, stat);
-            FileListItem.File newStat = FileListItem.File.create(file, stat, target, targetStat, collator);
-            FileListItem.File oldStat = data.put(file.name().toString(), newStat);
+            FileItem newStat = FileItem.create(file, stat, target, targetStat, collator);
+            FileItem oldStat = data.put(file.name().toString(), newStat);
             return !Objects.equals(newStat, oldStat);
 
         } catch (FileNotFoundException e) {
@@ -323,7 +324,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         } catch (IOException e) {
             data.put(
                     file.name().toString(),
-                    FileListItem.File.create(file, null, null, null, collator));
+                    FileItem.create(file, null, null, null, collator));
             return true;
         }
     }
@@ -353,17 +354,17 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         Result() {
         }
 
-        abstract List<FileListItem> items();
+        abstract List<BrowserItem> items();
 
         @Nullable
         abstract IOException exception();
 
         private static Result of(IOException exception) {
             return new AutoValue_FilesLoader_Result(
-                    Collections.<FileListItem>emptyList(), exception);
+                    Collections.<BrowserItem>emptyList(), exception);
         }
 
-        private static Result of(List<FileListItem> result) {
+        private static Result of(List<BrowserItem> result) {
             return new AutoValue_FilesLoader_Result(result, null);
         }
     }

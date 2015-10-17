@@ -113,7 +113,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         return directory;
     }
 
-    public List<FileListItem> items() {
+    public List<BrowserItem> items() {
         return adapter.items();
     }
 
@@ -251,7 +251,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
     @Override
     public void onLoaderReset(Loader<Result> loader) {
-        adapter.setItems(Collections.<FileListItem>emptyList());
+        adapter.setItems(Collections.<BrowserItem>emptyList());
     }
 
     @Override

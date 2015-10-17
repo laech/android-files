@@ -18,7 +18,8 @@ import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.ui.browser.FileListItem.Header;
+import l.files.ui.browser.BrowserItem.FileItem;
+import l.files.ui.browser.BrowserItem.HeaderItem;
 
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
@@ -50,23 +51,23 @@ public final class DateCategorizerTest extends BaseTest {
     }
 
     public void test_categorize_with_header() throws Exception {
-        final FileListItem.File future1 = file(addDaysToMidnight(2));
-        final FileListItem.File future2 = file(addDaysToMidnight(1));
-        final FileListItem.File today1 = file(addDaysToMidnight(0) + 1);
-        final FileListItem.File today2 = file(addDaysToMidnight(0));
-        final FileListItem.File yesterday1 = file(addDaysToMidnight(-1) + 10);
-        final FileListItem.File yesterday2 = file(addDaysToMidnight(-1));
-        final FileListItem.File prev7Days1 = file(addDaysToMidnight(-2));
-        final FileListItem.File prev7Days2 = file(addDaysToMidnight(-3));
-        final FileListItem.File prev30Days1 = file(addDaysToMidnight(-10));
-        final FileListItem.File prev30Days2 = file(addDaysToMidnight(-12));
-        final FileListItem.File prevMonth1 = file(addDaysToMidnight(-31));
-        final FileListItem.File prevMonth2 = file(addDaysToMidnight(-31 * 2));
-        final FileListItem.File prevMonth3 = file(addDaysToMidnight(-31 * 3));
-        final FileListItem.File prevYear1 = file(addDaysToMidnight(-365));
-        final FileListItem.File prevYear2 = file(addDaysToMidnight(-365 * 2));
+        final FileItem future1 = file(addDaysToMidnight(2));
+        final FileItem future2 = file(addDaysToMidnight(1));
+        final FileItem today1 = file(addDaysToMidnight(0) + 1);
+        final FileItem today2 = file(addDaysToMidnight(0));
+        final FileItem yesterday1 = file(addDaysToMidnight(-1) + 10);
+        final FileItem yesterday2 = file(addDaysToMidnight(-1));
+        final FileItem prev7Days1 = file(addDaysToMidnight(-2));
+        final FileItem prev7Days2 = file(addDaysToMidnight(-3));
+        final FileItem prev30Days1 = file(addDaysToMidnight(-10));
+        final FileItem prev30Days2 = file(addDaysToMidnight(-12));
+        final FileItem prevMonth1 = file(addDaysToMidnight(-31));
+        final FileItem prevMonth2 = file(addDaysToMidnight(-31 * 2));
+        final FileItem prevMonth3 = file(addDaysToMidnight(-31 * 3));
+        final FileItem prevYear1 = file(addDaysToMidnight(-365));
+        final FileItem prevYear2 = file(addDaysToMidnight(-365 * 2));
 
-        final List<FileListItem> expected = asList(
+        final List<BrowserItem> expected = asList(
                 header(R.string.future),
                 future1,
                 future2,
@@ -94,7 +95,7 @@ public final class DateCategorizerTest extends BaseTest {
                 prevYear2
         );
 
-        final List<FileListItem> actual = categorizer.categorize(res, asList(
+        final List<BrowserItem> actual = categorizer.categorize(res, asList(
                 future1,
                 future2,
                 today1,
@@ -114,12 +115,12 @@ public final class DateCategorizerTest extends BaseTest {
         assertEquals(names(expected), names(actual));
     }
 
-    private static List<String> names(Collection<FileListItem> items) {
+    private static List<String> names(Collection<BrowserItem> items) {
         List<String> names = new ArrayList<>(items.size());
-        for (FileListItem item : items) {
-            names.add(item.isHeader()
-                    ? ((Header) item).header()
-                    : ((FileListItem.File) item).file().name().toString());
+        for (BrowserItem item : items) {
+            names.add(item.isHeaderItem()
+                    ? ((HeaderItem) item).header()
+                    : ((FileItem) item).selfFile().name().toString());
         }
         return unmodifiableList(names);
     }
@@ -131,12 +132,12 @@ public final class DateCategorizerTest extends BaseTest {
         return calendar.getTimeInMillis();
     }
 
-    private Header header(final int stringId) {
+    private HeaderItem header(final int stringId) {
         return header(res.getString(stringId));
     }
 
-    private Header header(final String string) {
-        return Header.of(string);
+    private HeaderItem header(final String string) {
+        return HeaderItem.of(string);
     }
 
     private long millis(final Calendar calendar) {
@@ -207,7 +208,7 @@ public final class DateCategorizerTest extends BaseTest {
         assertEquals(expected, actual);
     }
 
-    private String label(final FileListItem.File file) {
+    private String label(final FileItem file) {
         final Object id = categorizer.id(file);
         return categorizer.label(file, res, id);
     }
@@ -244,20 +245,20 @@ public final class DateCategorizerTest extends BaseTest {
         assertCategory(res.getString(R.string.__), file(-1L), file(0L));
     }
 
-    private FileListItem.File file(final Calendar time) {
+    private FileItem file(final Calendar time) {
         return file(time.getTimeInMillis());
     }
 
-    private FileListItem.File file(final long time) {
+    private FileItem file(final long time) {
         final Stat stat = mock(Stat.class);
         final File res = mock(File.class);
         given(res.name()).willReturn(FileName.of(String.valueOf(time)));
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileListItem.File.create(res, stat, null, null, collator);
+        return FileItem.create(res, stat, null, null, collator);
     }
 
-    private void assertCategory(final String expected, final FileListItem.File... stats) {
-        for (final FileListItem.File file : stats) {
+    private void assertCategory(final String expected, final FileItem... stats) {
+        for (final FileItem file : stats) {
             assertEquals(file.toString(), expected, label(file));
         }
     }

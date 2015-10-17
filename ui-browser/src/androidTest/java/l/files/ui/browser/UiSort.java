@@ -1,15 +1,14 @@
-package l.files.features.objects;
+package l.files.ui.browser;
 
 import android.app.Dialog;
 import android.widget.ListView;
 
-import l.files.ui.browser.FileSort;
 import l.files.ui.menu.SortDialog;
 
 import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
-import static l.files.features.objects.Instrumentations.awaitOnMainThread;
+import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 public final class UiSort {
 

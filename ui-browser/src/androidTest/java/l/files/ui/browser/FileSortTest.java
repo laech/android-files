@@ -13,6 +13,7 @@ import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Stat;
 import l.files.testing.fs.FileBaseTest;
+import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
@@ -22,31 +23,31 @@ abstract class FileSortTest extends FileBaseTest {
 
     protected final void testSortMatches(
             Locale locale,
-            Comparator<FileListItem.File> comparator,
+            Comparator<FileItem> comparator,
             File... expectedOrder) throws IOException {
 
-        List<FileListItem.File> expected = mapData(locale, expectedOrder);
-        List<FileListItem.File> actual = new ArrayList<>(expected);
+        List<FileItem> expected = mapData(locale, expectedOrder);
+        List<FileItem> actual = new ArrayList<>(expected);
         shuffle(actual);
         sort(actual, comparator);
         assertEquals(names(expected), names(actual));
         assertEquals(expected, actual);
     }
 
-    private List<FileName> names(List<FileListItem.File> items) {
+    private List<FileName> names(List<FileItem> items) {
         List<FileName> names = new ArrayList<>(items.size());
-        for (FileListItem.File item : items) {
-            names.add(item.file().name());
+        for (FileItem item : items) {
+            names.add(item.selfFile().name());
         }
         return names;
     }
 
-    private List<FileListItem.File> mapData(
+    private List<FileItem> mapData(
             Locale locale,
             File... files) throws IOException {
 
         Collator collator = NaturalKey.collator(locale);
-        List<FileListItem.File> expected = new ArrayList<>(files.length);
+        List<FileItem> expected = new ArrayList<>(files.length);
         for (File file : files) {
             Stat stat;
             try {
@@ -54,7 +55,7 @@ abstract class FileSortTest extends FileBaseTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileListItem.File.create(file, stat, null, null, collator));
+            expected.add(FileItem.create(file, stat, null, null, collator));
         }
         return expected;
     }
