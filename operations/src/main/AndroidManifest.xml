@@ -6,7 +6,8 @@
 
         <service
             android:name=".OperationService"
-            android:exported="false">
+            android:exported="false"
+            android:process=":operationservice">
             <intent-filter>
                 <!--
                   When error occurs, the app crashes, but notification will still be
