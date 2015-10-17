@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import l.files.ui.R;
-import l.files.ui.base.fs.OnOpenFileListener;
-import l.files.ui.base.app.OptionsMenus;
 import l.files.fs.File;
 import l.files.fs.Stat;
+import l.files.ui.R;
+import l.files.ui.base.app.OptionsMenus;
+import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.operations.OperationsUi;
 import l.files.ui.preview.Preview;
 
@@ -36,10 +36,10 @@ import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
-import static l.files.ui.base.view.Views.find;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
+import static l.files.ui.base.view.Views.find;
 
 public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
@@ -94,8 +94,8 @@ public final class FilesActivity extends BaseActivity implements
         setOptionsMenu(OptionsMenus.compose(
                 new ActionBarDrawerToggleAction(drawer, getFragmentManager()),
                 new GoBackOnHomePressedAction(this),
-                new NewTabMenu(this),
-                new AboutMenu(this)));
+                new NewTabMenu(this)
+        ));
 
         getFragmentManager().addOnBackStackChangedListener(this);
 
