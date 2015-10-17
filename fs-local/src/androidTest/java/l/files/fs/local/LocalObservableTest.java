@@ -44,7 +44,7 @@ import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.Inotify.registerTracker;
-import static l.files.fs.local.LocalFileObserveTest.Recorder.observe;
+import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 /**
  * @see File#observe(LinkOption, Observer)
  */
-public final class LocalFileObserveTest extends FileBaseTest {
+public final class LocalObservableTest extends FileBaseTest {
 
     public void test_release_watch_when_dir_moves_out() throws Exception {
 
