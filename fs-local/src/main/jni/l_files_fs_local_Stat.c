@@ -17,10 +17,10 @@ jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
   if (NULL == path) {
     return NULL;
   }
-  struct stat sb;
+  struct stat64 sb;
   int rc = (JNI_TRUE == is_lstat)
-      ? TEMP_FAILURE_RETRY(lstat(path, &sb))
-      : TEMP_FAILURE_RETRY(stat(path, &sb));
+      ? TEMP_FAILURE_RETRY(lstat64(path, &sb))
+      : TEMP_FAILURE_RETRY(stat64(path, &sb));
   if (-1 == rc) {
     (*env)->ReleaseStringUTFChars(env, jpath, path);
     throw_errno_exception(env);
@@ -48,10 +48,10 @@ jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
       (jlong) sb.st_blocks);
 }
 
-jobject Java_l_files_fs_local_Stat_stat(JNIEnv* env, jclass clazz, jstring jpath) {
+jobject Java_l_files_fs_local_Stat_stat64(JNIEnv* env, jclass clazz, jstring jpath) {
   return do_stat(env, clazz, jpath, JNI_FALSE);
 }
 
-jobject Java_l_files_fs_local_Stat_lstat(JNIEnv* env, jclass clazz, jstring jpath) {
+jobject Java_l_files_fs_local_Stat_lstat64(JNIEnv* env, jclass clazz, jstring jpath) {
   return do_stat(env, clazz, jpath, JNI_TRUE);
 }

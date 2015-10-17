@@ -10,7 +10,7 @@ public final class StatTest extends FileBaseTest {
 
     public void testException() {
         try {
-            Stat.stat("/not/exist");
+            Stat.stat64("/not/exist");
             fail();
         } catch (final ErrnoException e) {
             assertEquals(ENOENT, e.errno);
@@ -19,8 +19,8 @@ public final class StatTest extends FileBaseTest {
 
     public void testStat() throws Exception {
         final String path = dir1().resolve("link").createLink(dir2()).path();
-        checkEquals(Os.stat(path), Stat.stat(path));
-        checkEquals(Os.lstat(path), Stat.lstat(path));
+        checkEquals(Os.stat(path), Stat.stat64(path));
+        checkEquals(Os.lstat(path), Stat.lstat64(path));
     }
 
     private static void checkEquals(final StructStat expected, final Stat actual) {

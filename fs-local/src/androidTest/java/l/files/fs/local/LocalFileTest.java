@@ -33,7 +33,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.local.LocalFile.permissionsFromMode;
-import static l.files.fs.local.Stat.lstat;
+import static l.files.fs.local.Stat.lstat64;
 
 public final class LocalFileTest extends FileBaseTest {
 
@@ -299,7 +299,7 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals(expected.canWrite(), actual.isWritable());
         assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath()).mode()),
+                permissionsFromMode(lstat64(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
@@ -321,7 +321,7 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals(expected.canWrite(), actual.isWritable());
         assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath()).mode()),
+                permissionsFromMode(lstat64(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }

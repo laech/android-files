@@ -4,9 +4,6 @@ import android.system.ErrnoException;
 
 import com.google.auto.value.AutoValue;
 
-/**
- * @see <a href="http://www.opengroup.org/onlinepubs/000095399/basedefs/sys/stat.h.html">stat.h</a>
- */
 @AutoValue
 @SuppressWarnings("OctalInteger")
 abstract class Stat extends Native {
@@ -88,14 +85,8 @@ abstract class Stat extends Native {
 
     private static native void init();
 
-    /**
-     * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/stat.html">stat()</a>
-     */
-    public static native Stat stat(String path) throws ErrnoException;
+    static native Stat stat64(String path) throws ErrnoException;
 
-    /**
-     * @see <a href="http://pubs.opengroup.org/onlinepubs/000095399/functions/lstat.html">lstat()</a>
-     */
-    public static native Stat lstat(String path) throws ErrnoException;
+    static native Stat lstat64(String path) throws ErrnoException;
 
 }
