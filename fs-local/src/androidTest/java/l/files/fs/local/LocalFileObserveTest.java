@@ -30,7 +30,6 @@ import l.files.fs.local.Inotify.Tracker;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
-import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -240,7 +239,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         }
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_create_file_in_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_file_in_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -248,7 +247,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_create_link_in_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_link_in_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -256,7 +255,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_create_dir_in_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_dir_in_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -264,28 +263,28 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_delete_file_from_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_file_from_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PreActions().createFile("b"),
                 new PostActions().recoverFromObserveFailed().awaitDelete("b")
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_delete_link_from_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_link_from_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PreActions().createLink("b", dir1()),
                 new PostActions().recoverFromObserveFailed().awaitDelete("b")
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_delete_dir_from_it() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_dir_from_it() throws Exception {
         testMoveUnreadableDirIn(
                 new PreActions().createDir("b"),
                 new PostActions().recoverFromObserveFailed().awaitDelete("b")
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_change_its_atime() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_change_its_atime() throws Exception {
         testMoveUnreadableDirIn(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -293,7 +292,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_move_unreadable_dir_in_then_recover_and_change_its_mtime() throws Exception {
+    public void test_move_unreadable_dir_in_then_make_it_readable_and_change_its_mtime() throws Exception {
         testMoveUnreadableDirIn(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -531,7 +530,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         }
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_change_its_mtime() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_mtime() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -539,7 +538,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_change_its_atime() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_atime() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -547,7 +546,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_change_its_permissions() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_permissions() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -555,7 +554,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_create_file_in_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_file_in_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -563,7 +562,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_create_dir_in_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_dir_in_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -571,7 +570,7 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_create_link_in_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_link_in_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PostActions()
                         .recoverFromObserveFailed()
@@ -579,21 +578,21 @@ public final class LocalFileObserveTest extends FileBaseTest {
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_delete_file_from_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_file_from_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PreActions().createFile("a"),
                 new PostActions().recoverFromObserveFailed().awaitDelete("a")
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_delete_dir_from_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_dir_from_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PreActions().createDir("a"),
                 new PostActions().recoverFromObserveFailed().awaitDelete("a")
         );
     }
 
-    public void test_observe_unreadable_child_dir_then_recover_and_delete_link_from_it() throws Exception {
+    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_link_from_it() throws Exception {
         testObserveUnreadableChildDir(
                 new PreActions().createLink("a", dir2()),
                 new PostActions().recoverFromObserveFailed().awaitDelete("a")
