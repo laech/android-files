@@ -20,15 +20,10 @@ import java.util.List;
 import java.util.Objects;
 
 import l.files.ui.R;
-import l.files.common.app.BaseActivity;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.ui.menu.AboutMenu;
-import l.files.ui.menu.ActionBarDrawerToggleAction;
-import l.files.ui.menu.GoBackOnHomePressedAction;
-import l.files.ui.newtab.NewTabMenu;
 import l.files.ui.operations.OperationsUi;
 import l.files.ui.preview.Preview;
 

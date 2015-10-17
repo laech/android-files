@@ -6,9 +6,6 @@ import android.widget.EditText;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import l.files.common.base.Consumer;
-import l.files.ui.FileCreationFragment;
-
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static java.util.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
@@ -21,12 +18,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public abstract class UiFileCreation<T extends UiFileCreation> {
+abstract class UiFileCreation<T extends UiFileCreation> {
 
     private final UiFileActivity context;
     private final String tag;
 
-    public UiFileCreation(UiFileActivity context, String tag) {
+    UiFileCreation(UiFileActivity context, String tag) {
         requireNonNull(context);
         requireNonNull(tag);
         this.context = context;
@@ -38,7 +35,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return (T) this;
     }
 
-    public T setFilename(final CharSequence name) {
+    T setFilename(final CharSequence name) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -48,7 +45,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    public UiFileActivity ok() {
+    UiFileActivity ok() {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -58,7 +55,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return context;
     }
 
-    public UiFileActivity okExpectingFailure(final String message) {
+    UiFileActivity okExpectingFailure(final String message) {
         @SuppressWarnings("unchecked")
         final Consumer<String>[] original = new Consumer[1];
 
@@ -92,7 +89,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return context;
     }
 
-    public T assertOkButtonEnabled(final boolean enabled) {
+    T assertOkButtonEnabled(final boolean enabled) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -106,7 +103,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    public T assertHasError(final int resId, final Object... args) {
+    T assertHasError(final int resId, final Object... args) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -118,7 +115,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    public T assertHasNoError() {
+    T assertHasNoError() {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -128,7 +125,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    public T assertError(final CharSequence error) {
+    T assertError(final CharSequence error) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -138,7 +135,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return self();
     }
 
-    public EditText editText() {
+    EditText editText() {
         return (EditText) dialog().findViewById(android.R.id.text1);
     }
 
@@ -151,7 +148,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
                 .findFragmentByTag(tag);
     }
 
-    public T assertFilename(final CharSequence name) {
+    T assertFilename(final CharSequence name) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
@@ -166,7 +163,7 @@ public abstract class UiFileCreation<T extends UiFileCreation> {
         return editText().getText().toString();
     }
 
-    public T assertSelection(final String selection) {
+    T assertSelection(final String selection) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {

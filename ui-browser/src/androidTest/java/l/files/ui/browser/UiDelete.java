@@ -10,16 +10,16 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
-public final class UiDelete {
+final class UiDelete {
 
     private final UiFileActivity context;
 
-    public UiDelete(UiFileActivity context) {
+    UiDelete(UiFileActivity context) {
         requireNonNull(context);
         this.context = context;
     }
 
-    public UiFileActivity ok() {
+    UiFileActivity ok() {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {

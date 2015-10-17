@@ -6,8 +6,6 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.common.base.Consumer;
-import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.ui.R;
 import l.files.ui.bookmarks.BookmarksFragment;
@@ -20,11 +18,11 @@ import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.findItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 
-public final class UiBookmarksFragment {
+final class UiBookmarksFragment {
 
     private final UiFileActivity context;
 
-    public UiBookmarksFragment(UiFileActivity context) {
+    UiBookmarksFragment(UiFileActivity context) {
         this.context = requireNonNull(context);
     }
 
@@ -32,11 +30,11 @@ public final class UiBookmarksFragment {
         return context.activity();
     }
 
-    public UiFileActivity activityObject() {
+    UiFileActivity activityObject() {
         return context;
     }
 
-    public UiBookmarksFragment longClick(File bookmark) {
+    UiBookmarksFragment longClick(File bookmark) {
         longClickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
@@ -48,19 +46,19 @@ public final class UiBookmarksFragment {
                 .findFragmentById(R.id.bookmarks_fragment);
     }
 
-    public UiBookmarksFragment click(File bookmark) {
+    UiBookmarksFragment click(File bookmark) {
         clickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
 
-    public UiBookmarksFragment delete() {
+    UiBookmarksFragment delete() {
         UiFileActivity activity = activityObject();
         activity.selectActionModeAction(R.id.delete_selected_bookmarks);
         activity.waitForActionModeToFinish();
         return this;
     }
 
-    public UiBookmarksFragment assertCurrentDirectoryBookmarked(
+    UiBookmarksFragment assertCurrentDirectoryBookmarked(
             final boolean bookmarked) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
@@ -73,7 +71,7 @@ public final class UiBookmarksFragment {
         return this;
     }
 
-    public UiBookmarksFragment assertBookmarked(
+    UiBookmarksFragment assertBookmarked(
             final File bookmark,
             final boolean bookmarked) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
@@ -85,7 +83,7 @@ public final class UiBookmarksFragment {
         return this;
     }
 
-    public UiBookmarksFragment assertContainsBookmarksInOrder(
+    UiBookmarksFragment assertContainsBookmarksInOrder(
             final File... bookmarks) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
@@ -103,22 +101,22 @@ public final class UiBookmarksFragment {
         return this;
     }
 
-    public UiBookmarksFragment assertActionModePresent(boolean present) {
+    UiBookmarksFragment assertActionModePresent(boolean present) {
         activityObject().assertActionModePresent(present);
         return this;
     }
 
-    public UiBookmarksFragment assertActionModeTitle(Object title) {
+    UiBookmarksFragment assertActionModeTitle(Object title) {
         activityObject().assertActionModeTitle(title);
         return this;
     }
 
-    public UiBookmarksFragment rotate() {
+    UiBookmarksFragment rotate() {
         activityObject().rotate();
         return this;
     }
 
-    public UiBookmarksFragment assertChecked(
+    UiBookmarksFragment assertChecked(
             File bookmark, final boolean checked) {
         findItemOnMainThread(
                 context.instrumentation(),
@@ -142,12 +140,12 @@ public final class UiBookmarksFragment {
         };
     }
 
-    public UiBookmarksFragment assertDrawerIsOpened(boolean opened) {
+    UiBookmarksFragment assertDrawerIsOpened(boolean opened) {
         activityObject().assertDrawerIsOpened(opened);
         return this;
     }
 
-    public UiBookmarksFragment pressBack() {
+    UiBookmarksFragment pressBack() {
         activityObject().pressBack();
         return this;
     }

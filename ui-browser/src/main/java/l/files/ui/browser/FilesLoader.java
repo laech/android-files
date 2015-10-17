@@ -39,7 +39,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
+final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
@@ -100,7 +100,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
 
-    public FilesLoader(
+    FilesLoader(
             Context context,
             File root,
             FileSort sort,
@@ -116,24 +116,24 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.executor = newSingleThreadExecutor();
     }
 
-    public boolean autoRefreshDisabled() {
+    boolean autoRefreshDisabled() {
         return autoRefreshDisabled;
     }
 
-    public int approximateChildTotal() {
+    int approximateChildTotal() {
         return approximateChildTotal.get();
     }
 
-    public int approximateChildLoaded() {
+    int approximateChildLoaded() {
         return data.size();
     }
 
-    public void setSort(FileSort sort) {
+    void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
         updateAll(Collections.<String>emptySet(), true);
     }
 
-    public void setShowHidden(boolean showHidden) {
+    void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
         updateAll(Collections.<String>emptySet(), true);
     }

@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import l.files.common.base.Consumer;
-import l.files.common.base.Provider;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
@@ -50,19 +48,19 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.testing.Mocks.mockMenuItem;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
+import static l.files.ui.browser.Mocks.mockMenuItem;
 
-public final class UiFileActivity {
+final class UiFileActivity {
 
     private final Instrumentation instrument;
     private FilesActivity activity;
 
-    public UiFileActivity(
+    UiFileActivity(
             final Instrumentation instrumentation,
             final Provider<FilesActivity> provider) {
 
@@ -87,61 +85,61 @@ public final class UiFileActivity {
         return instrument;
     }
 
-    public UiFileActivity refresh() {
+    UiFileActivity refresh() {
         selectMenuAction(R.id.refresh);
         return this;
     }
 
-    public UiFileActivity bookmark() {
+    UiFileActivity bookmark() {
         assertBookmarkMenuChecked(false);
         selectMenuAction(R.id.bookmark);
         return this;
     }
 
-    public UiFileActivity unbookmark() {
+    UiFileActivity unbookmark() {
         assertBookmarkMenuChecked(true);
         selectMenuAction(R.id.bookmark);
         return this;
     }
 
-    public UiNewDir newFolder() {
+    UiNewDir newFolder() {
         selectMenuAction(R.id.new_dir);
         return new UiNewDir(this);
     }
 
-    public UiRename rename() {
+    UiRename rename() {
         selectActionModeAction(R.id.rename);
         return new UiRename(this);
     }
 
-    public UiDelete delete() {
+    UiDelete delete() {
         selectActionModeAction(R.id.delete);
         return new UiDelete(this);
     }
 
-    public UiFileActivity copy() {
+    UiFileActivity copy() {
         selectActionModeAction(android.R.id.copy);
         waitForActionModeToFinish();
         return this;
     }
 
-    public UiFileActivity cut() {
+    UiFileActivity cut() {
         selectActionModeAction(android.R.id.cut);
         waitForActionModeToFinish();
         return this;
     }
 
-    public UiFileActivity paste() {
+    UiFileActivity paste() {
         selectMenuAction(android.R.id.paste);
         return this;
     }
 
-    public UiSort sort() {
+    UiSort sort() {
         selectMenuAction(R.id.sort_by);
         return new UiSort(this);
     }
 
-    public UiFileActivity selectFromNavigationMode(final File dir) {
+    UiFileActivity selectFromNavigationMode(final File dir) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -152,23 +150,23 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity clickInto(File file) {
+    UiFileActivity clickInto(File file) {
         click(file);
         assertCurrentDirectory(file);
         return this;
     }
 
-    public UiFileActivity click(File file) {
+    UiFileActivity click(File file) {
         clickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
 
-    public UiFileActivity longClick(File file) {
+    UiFileActivity longClick(File file) {
         longClickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
 
-    public UiBookmarksFragment openBookmarksDrawer() {
+    UiBookmarksFragment openBookmarksDrawer() {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -179,7 +177,7 @@ public final class UiFileActivity {
         return new UiBookmarksFragment(this);
     }
 
-    public UiFileActivity assertDrawerIsOpened(final boolean opened) {
+    UiFileActivity assertDrawerIsOpened(final boolean opened) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -189,7 +187,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity pressBack() {
+    UiFileActivity pressBack() {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -201,7 +199,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity longPressBack() {
+    UiFileActivity longPressBack() {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -211,7 +209,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity pressActionBarUpIndicator() {
+    UiFileActivity pressActionBarUpIndicator() {
         waitForUpIndicatorToAppear();
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -234,12 +232,12 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity assertCanRename(boolean can) {
+    UiFileActivity assertCanRename(boolean can) {
         assertEquals(can, renameMenu().isEnabled());
         return this;
     }
 
-    public UiFileActivity assertCanPaste(final boolean can) {
+    UiFileActivity assertCanPaste(final boolean can) {
         return findOptionMenuItem(android.R.id.paste, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem input) {
@@ -266,7 +264,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertCurrentDirectory(final File expected) {
+    UiFileActivity assertCurrentDirectory(final File expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -279,7 +277,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertListViewContains(
+    UiFileActivity assertListViewContains(
             final File item,
             final boolean contains) {
         awaitOnMainThread(instrument, new Runnable() {
@@ -291,7 +289,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertSummaryView(
+    UiFileActivity assertSummaryView(
             final File file,
             final Consumer<CharSequence> assertion) {
         findItemOnMainThread(file, new Consumer<View>() {
@@ -304,7 +302,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertActionBarTitle(final String title) {
+    UiFileActivity assertActionBarTitle(final String title) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -318,7 +316,7 @@ public final class UiFileActivity {
         return FileLabels.get(activity().getResources(), file);
     }
 
-    public UiFileActivity assertActionBarUpIndicatorIsVisible(
+    UiFileActivity assertActionBarUpIndicatorIsVisible(
             final boolean visible) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -375,6 +373,7 @@ public final class UiFileActivity {
     }
 
     private MenuItem renameMenu() {
+        //noinspection ConstantConditions
         return activity().currentActionMode().getMenu().findItem(R.id.rename);
     }
 
@@ -396,6 +395,7 @@ public final class UiFileActivity {
                 ActionMode mode = activity().currentActionMode();
                 assertNotNull(mode);
                 MenuItem item = mode.getMenu().findItem(id);
+                //noinspection ConstantConditions
                 assertTrue(activity()
                         .currentActionModeCallback()
                         .onActionItemClicked(mode, item));
@@ -415,7 +415,7 @@ public final class UiFileActivity {
     /**
      * Clicks the "Select All" action item.
      */
-    public UiFileActivity selectAll() {
+    UiFileActivity selectAll() {
         selectActionModeAction(android.R.id.selectAll);
         return this;
     }
@@ -423,7 +423,7 @@ public final class UiFileActivity {
     /**
      * Asserts whether the given item is currently checked.
      */
-    public UiFileActivity assertChecked(
+    UiFileActivity assertChecked(
             File file, final boolean checked) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
@@ -437,7 +437,7 @@ public final class UiFileActivity {
     /**
      * Asserts whether the activity.get() currently in an action mode.
      */
-    public UiFileActivity assertActionModePresent(final boolean present) {
+    UiFileActivity assertActionModePresent(final boolean present) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -447,7 +447,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertActionModeTitle(final Object title) {
+    UiFileActivity assertActionModeTitle(final Object title) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -459,7 +459,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
+    UiFileActivity assertBookmarkMenuChecked(final boolean checked) {
         return findOptionMenuItem(R.id.bookmark, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem item) {
@@ -468,7 +468,7 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity assertRefreshMenuVisible(final boolean visible) {
+    UiFileActivity assertRefreshMenuVisible(final boolean visible) {
         return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem input) {
@@ -477,7 +477,7 @@ public final class UiFileActivity {
         });
     }
 
-    public UiFileActivity assertThumbnailShown(
+    UiFileActivity assertThumbnailShown(
             File file, final boolean shown) {
 
         findItemOnMainThread(file, new Consumer<View>() {
@@ -497,7 +497,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertLinkIconDisplayed(
+    UiFileActivity assertLinkIconDisplayed(
             File file, final boolean displayed) {
 
         findItemOnMainThread(file, new Consumer<View>() {
@@ -514,7 +514,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertLinkPathDisplayed(
+    UiFileActivity assertLinkPathDisplayed(
             File link, final File target) {
 
         findItemOnMainThread(link, new Consumer<View>() {
@@ -539,7 +539,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertBookmarksSidebarIsOpenLocked(
+    UiFileActivity assertBookmarksSidebarIsOpenLocked(
             final boolean openLocked) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -553,7 +553,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertBookmarksSidebarIsClosed() {
+    UiFileActivity assertBookmarksSidebarIsClosed() {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -563,7 +563,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertDisabled(File file) {
+    UiFileActivity assertDisabled(File file) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
             public void apply(View input) {
@@ -575,7 +575,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertNavigationModeHierarchy(final File dir) {
+    UiFileActivity assertNavigationModeHierarchy(final File dir) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -589,7 +589,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity assertListMatchesFileSystem(final File dir)
+    UiFileActivity assertListMatchesFileSystem(final File dir)
             throws IOException {
 
         await(new Callable<Void>() {
@@ -662,7 +662,7 @@ public final class UiFileActivity {
         return files;
     }
 
-    public UiFileActivity assertItemsDisplayed(final File... expected) {
+    UiFileActivity assertItemsDisplayed(final File... expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -676,7 +676,7 @@ public final class UiFileActivity {
         return this;
     }
 
-    public UiFileActivity rotate() {
+    UiFileActivity rotate() {
         ActivityMonitor monitor = new ActivityMonitor(
                 FilesActivity.class.getName(), null, false);
 

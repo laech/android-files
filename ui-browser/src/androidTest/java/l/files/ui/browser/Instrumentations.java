@@ -14,8 +14,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import l.files.common.base.Consumer;
-import l.files.common.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -28,7 +26,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public final class Instrumentations {
+final class Instrumentations {
 
     private static final class InstrumentCallable<T> implements Callable<T> {
 
@@ -79,17 +77,16 @@ public final class Instrumentations {
         }
     }
 
-    public static <T> T await(Callable<T> callable) {
+    static <T> T await(Callable<T> callable) {
         return await(new InstrumentCallable<>(null, callable), 1, MINUTES);
     }
 
-    public static <T> T awaitOnMainThread(
+    static <T> T awaitOnMainThread(
             Instrumentation in, Callable<T> callable) {
         return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
     }
 
-    public static void awaitOnMainThread(
-            Instrumentation in, final Runnable runnable) {
+    static void awaitOnMainThread(Instrumentation in, final Runnable runnable) {
         awaitOnMainThread(in, new Callable<Boolean>() {
             @Override
             public Boolean call() {
@@ -99,10 +96,7 @@ public final class Instrumentations {
         });
     }
 
-    public static <T> T await(
-            Callable<T> callable,
-            long time,
-            TimeUnit unit) {
+    static <T> T await(Callable<T> callable, long time, TimeUnit unit) {
         AssertionError error = null;
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {
@@ -126,8 +120,8 @@ public final class Instrumentations {
     }
 
     private static void takeScreenshotAndThrow(
-            Instrumentation in,
-            AssertionError e) {
+            Instrumentation in, AssertionError e) {
+
         File file = new File(getExternalStorageDirectory(),
                 "test/failed-" + currentTimeMillis() + ".jpg");
         File parent = file.getParentFile();
@@ -148,7 +142,7 @@ public final class Instrumentations {
                 "\nAssertion failed, screenshot saved " + file, e);
     }
 
-    public static void scrollToTop(
+    static void scrollToTop(
             final Instrumentation in,
             final Provider<RecyclerView> recycler) {
 
@@ -168,7 +162,7 @@ public final class Instrumentations {
         return (StableAdapter<Object, ViewHolder>) recycler.get().getAdapter();
     }
 
-    public static void clickItemOnMainThread(
+    static void clickItemOnMainThread(
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId) {
@@ -180,7 +174,7 @@ public final class Instrumentations {
         });
     }
 
-    public static void longClickItemOnMainThread(
+    static void longClickItemOnMainThread(
             Instrumentation in,
             Provider<RecyclerView> recycler,
             Object itemId) {
@@ -192,7 +186,7 @@ public final class Instrumentations {
         });
     }
 
-    public static void findItemOnMainThread(
+    static void findItemOnMainThread(
             final Instrumentation in,
             final Provider<RecyclerView> recycler,
             final Object itemId,

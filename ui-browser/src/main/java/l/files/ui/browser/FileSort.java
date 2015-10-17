@@ -14,11 +14,11 @@ import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.lang.System.currentTimeMillis;
 
-public enum FileSort {
+enum FileSort {
 
     NAME(R.string.name) {
         @Override
-        public Comparator<FileItem> comparator() {
+        Comparator<FileItem> comparator() {
             return new Comparator<FileItem>() {
                 @Override
                 public int compare(FileItem a, FileItem b) {
@@ -28,12 +28,12 @@ public enum FileSort {
         }
 
         @Override
-        public Categorizer categorizer() {
+        Categorizer categorizer() {
             return Categorizer.NULL;
         }
 
         @Override
-        public List<BrowserItem> sort(List<FileItem> items, Resources res) {
+        List<BrowserItem> sort(List<FileItem> items, Resources res) {
             List<FileItem> result = new ArrayList<>(items);
             Collections.sort(result);
             return Collections.<BrowserItem>unmodifiableList(result);
@@ -42,7 +42,7 @@ public enum FileSort {
 
     MODIFIED(R.string.date_modified) {
         @Override
-        public Comparator<FileItem> comparator() {
+        Comparator<FileItem> comparator() {
             return new StatComparator() {
                 @Override
                 protected int compareNotNull(
@@ -60,14 +60,14 @@ public enum FileSort {
         }
 
         @Override
-        public Categorizer categorizer() {
+        Categorizer categorizer() {
             return new DateCategorizer(currentTimeMillis());
         }
     },
 
     SIZE(R.string.size) {
         @Override
-        public Comparator<FileItem> comparator() {
+        Comparator<FileItem> comparator() {
             return new StatComparator() {
                 @Override
                 protected int compareNotNull(
@@ -90,7 +90,7 @@ public enum FileSort {
         }
 
         @Override
-        public Categorizer categorizer() {
+        Categorizer categorizer() {
             return new SizeCategorizer();
         }
     };
@@ -101,22 +101,22 @@ public enum FileSort {
         this.labelId = labelId;
     }
 
-    public String getLabel(Resources res) {
+    String getLabel(Resources res) {
         return res.getString(labelId);
     }
 
-    public abstract Comparator<FileItem> comparator();
+    abstract Comparator<FileItem> comparator();
 
-    public abstract Categorizer categorizer();
+    abstract Categorizer categorizer();
 
-    public List<BrowserItem> sort(
-            List<FileItem> items, Resources res) {
+    List<BrowserItem> sort(List<FileItem> items, Resources res) {
         List<FileItem> sorted = new ArrayList<>(items);
         Collections.sort(sorted, comparator());
         return categorizer().categorize(res, sorted);
     }
 
     private static abstract class StatComparator implements Comparator<FileItem> {
+
         @Override
         public int compare(FileItem a, FileItem b) {
             if (a.selfStat() == null && b.selfStat() == null) return a.compareTo(b);
@@ -130,6 +130,9 @@ public enum FileSort {
 
         protected abstract int compareNotNull(
                 FileItem a, Stat aStat,
-                FileItem b, Stat bStat);
+                FileItem b, Stat bStat
+        );
+
     }
+
 }

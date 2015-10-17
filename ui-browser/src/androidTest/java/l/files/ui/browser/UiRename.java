@@ -1,10 +1,8 @@
 package l.files.ui.browser;
 
-import l.files.ui.rename.RenameFragment;
+final class UiRename extends UiFileCreation<UiRename> {
 
-public final class UiRename extends UiFileCreation<UiRename> {
-
-    public UiRename(UiFileActivity context) {
+    UiRename(UiFileActivity context) {
         super(context, RenameFragment.TAG);
     }
 
