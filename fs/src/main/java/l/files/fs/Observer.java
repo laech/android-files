@@ -10,22 +10,11 @@ public interface Observer {
     void onEvent(Event event, String child);
 
     /**
-     * Notifies the given child is not observable.
-     * e.g. no read permission.
+     * Called when we can no longer fully observe on all files.
+     * For example, internal system limit has been reached,
+     * or some files are inaccessible.
+     * This maybe called multiple times.
      */
-    void onObserveFailed(String child);
-
-    /**
-     * Notifies the given child is observable,
-     * after a previous call to {@link #onObserveFailed(String)}.
-     */
-    void onObserveRecovered(String child);
-
-    /**
-     * Called when internal system limit has been reached and we can no longer
-     * observe on anymore files/directories. Existing watches for this observer
-     * registration will be cancelled.
-     */
-    void onCancel();
+    void onIncompleteObservation();
 
 }

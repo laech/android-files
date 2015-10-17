@@ -3,10 +3,16 @@ package l.files.fs.local;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static android.system.OsConstants.ENOMEM;
+import static android.system.OsConstants.ENOSPC;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @see <a href="http://man7.org/linux/man-pages/man7/inotify.7.html">inotify</a>
@@ -57,18 +63,27 @@ final class Inotify extends Native {
             | IN_DELETE_SELF
             | IN_MOVE_SELF;
 
-    private static final CopyOnWriteArrayList<WeakReference<Tracker>> trackers
+    private static final Inotify instance = new Inotify();
+
+    static Inotify get() {
+        return instance;
+    }
+
+    private final CopyOnWriteArrayList<WeakReference<Tracker>> trackers
             = new CopyOnWriteArrayList<>();
+
+    private final ConcurrentMap<Integer, Entry> entries
+            = new ConcurrentHashMap<>();
 
     private Inotify() {
     }
 
-    static Tracker registerTracker(Tracker tracker) {
+    Tracker registerTracker(Tracker tracker) {
         trackers.add(new WeakReference<>(tracker));
         return tracker;
     }
 
-    static void unregisterTracker(Tracker tracker) {
+    void unregisterTracker(Tracker tracker) {
         for (WeakReference<Tracker> ref : trackers) {
             Tracker current = ref.get();
             if (current == null || tracker == current) {
@@ -77,27 +92,47 @@ final class Inotify extends Native {
         }
     }
 
+    private boolean makeRoomFor(int fd) {
+        Entry largest = null;
+        for (Entry entry : entries.values()) {
+            if (largest == null || largest.size() < entry.size()) {
+                largest = entry;
+            }
+        }
+        if (largest != null) {
+            largest.release();
+            return largest.fd() != fd;
+        }
+        return false;
+    }
+
     /**
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_init.2.html">inotify_init()</a>
      */
-    static int init() throws ErrnoException {
+    int init(Callback obj) throws ErrnoException {
+
         int fd = internalInit();
-        notifyInit(fd);
+        entries.put(fd, new Entry(fd, obj));
+
+        try {
+
+            notifyInit(fd);
+
+        } catch (Throwable e) {
+            try {
+                close(fd);
+            } catch (Throwable sup) {
+                e.addSuppressed(sup);
+            }
+            throw e;
+        }
+
         return fd;
     }
 
     private static native int internalInit() throws ErrnoException;
 
-    /**
-     * @see <a href="http://man7.org/linux/man-pages/man2/inotify_init.2.html">inotify_init1()</a>
-     */
-    static int init1(int flags) throws ErrnoException {
-        int fd = internalInit1(flags);
-        notifyInit(fd);
-        return fd;
-    }
-
-    private static void notifyInit(int fd) {
+    private void notifyInit(int fd) {
         if (trackers.isEmpty()) {
             return;
         }
@@ -113,18 +148,52 @@ final class Inotify extends Native {
         }
     }
 
-    private static native int internalInit1(int flags) throws ErrnoException;
-
     /**
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_add_watch.2.html">inotify_add_watch()</a>
      */
-    static int addWatch(int fd, String path, int mask) throws ErrnoException {
-        int wd = internalAddWatch(fd, path, mask);
-        notifyAddWatch(fd, path, mask, wd);
+    int addWatch(int fd, String path, int mask) throws ErrnoException {
+
+        int wd;
+        try {
+
+            wd = internalAddWatch(fd, path, mask);
+
+        } catch (ErrnoException e) {
+
+            if (e.errno == ENOSPC || e.errno == ENOMEM) {
+
+                if (!makeRoomFor(fd)) {
+                    throw e;
+                }
+                wd = internalAddWatch(fd, path, mask);
+
+            } else {
+                throw e;
+            }
+        }
+
+        Entry entry = entries.get(fd);
+        if (entry != null) {
+            entry.add(wd);
+        }
+
+        try {
+
+            notifyAddWatch(fd, path, mask, wd);
+
+        } catch (Throwable e) {
+            try {
+                removeWatch(fd, wd);
+            } catch (Throwable sup) {
+                e.addSuppressed(sup);
+            }
+            throw e;
+        }
+
         return wd;
     }
 
-    private static void notifyAddWatch(int fd, String path, int mask, int wd) {
+    private void notifyAddWatch(int fd, String path, int mask, int wd) {
         if (trackers.isEmpty()) {
             return;
         }
@@ -144,14 +213,20 @@ final class Inotify extends Native {
     /**
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_rm_watch.2.html">inotify_rm_watch()</a>
      */
-    static void removeWatch(int fd, int wd) throws ErrnoException {
+    void removeWatch(int fd, int wd) throws ErrnoException {
         internalRemoveWatch(fd, wd);
+
+        Entry entry = entries.get(fd);
+        if (entry != null) {
+            entry.remove(wd);
+        }
+
         notifyRemoveWatch(fd, wd);
     }
 
     private static native void internalRemoveWatch(int fd, int wd) throws ErrnoException;
 
-    private static void notifyRemoveWatch(int fd, int wd) {
+    private void notifyRemoveWatch(int fd, int wd) {
         if (trackers.isEmpty()) {
             return;
         }
@@ -166,12 +241,13 @@ final class Inotify extends Native {
         }
     }
 
-    static void close(int fd) throws ErrnoException {
+    void close(int fd) throws ErrnoException {
         Unistd.close(fd);
+        entries.remove(fd);
         notifyClose(fd);
     }
 
-    private static void notifyClose(int fd) {
+    private void notifyClose(int fd) {
         if (trackers.isEmpty()) {
             return;
         }
@@ -186,24 +262,83 @@ final class Inotify extends Native {
         }
     }
 
-    public static class Tracker implements Closeable {
+    private final class Entry {
 
-        public void onInit(int fd) {
+        private final int fd;
+        private final Set<Integer> wds = new HashSet<>();
+        private final Callback callback;
+
+        private Entry(int fd, Callback callback) {
+            this.fd = fd;
+            this.callback = requireNonNull(callback);
         }
 
-        public void onWatchAdded(int fd, String path, int mask, int wd) {
+        int fd() {
+            return fd;
         }
 
-        public void onWatchRemoved(int fd, int wd) {
+        void add(int wd) {
+            synchronized (this) {
+                wds.add(wd);
+            }
         }
 
-        public void onClose(int fd) {
+        void remove(int wd) {
+            synchronized (this) {
+                wds.remove(wd);
+            }
         }
 
-        @Override
-        public void close() throws IOException {
-            unregisterTracker(this);
+        int size() {
+            synchronized (this) {
+                return wds.size();
+            }
         }
+
+        void release() {
+
+            Set<Integer> copy;
+            synchronized (this) {
+                copy = new HashSet<>(wds);
+                wds.clear();
+            }
+
+            if (copy.isEmpty()) {
+                return;
+            }
+
+            for (int wd : copy) {
+                try {
+                    removeWatch(fd, wd);
+                } catch (ErrnoException ignored) {
+                }
+            }
+
+            callback.onWatchesReleased(copy);
+        }
+
+    }
+
+    interface Callback {
+
+        /**
+         * Called when this instance's watches have been removed
+         * forcibly due to system limits.
+         */
+        void onWatchesReleased(Set<Integer> wds);
+
+    }
+
+    interface Tracker {
+
+        void onInit(int fd);
+
+        void onWatchAdded(int fd, String path, int mask, int wd);
+
+        void onWatchRemoved(int fd, int wd);
+
+        void onClose(int fd);
+
     }
 
 }

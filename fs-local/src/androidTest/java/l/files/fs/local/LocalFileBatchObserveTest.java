@@ -29,7 +29,7 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         consumer = mock(FileConsumer.class);
     }
 
-    public void testNotifiesSelfChange() throws Exception {
+    public void test_notifies_self_change() throws Exception {
         try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             verify(observer, timeout(20)).onBatchEvent(true, names());
@@ -38,7 +38,7 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         }
     }
 
-    public void testNotifiesChildrenChange() throws Exception {
+    public void test_notifies_children_change() throws Exception {
         File a = dir1().resolve("a").createFile();
         File b = dir1().resolve("b").createDir();
         dir1().resolve("c").createFile();
@@ -53,7 +53,7 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         }
     }
 
-    public void testNotifiesSelfAndChildrenChange() throws Exception {
+    public void test_notifies_self_and_children_change() throws Exception {
         File child = dir1().resolve("a").createFile();
 
         try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {

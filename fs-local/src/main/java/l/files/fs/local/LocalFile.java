@@ -187,8 +187,9 @@ public abstract class LocalFile extends BaseFile {
             Observer observer,
             FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
-        return LocalObservable.observe(
-                this, option, observer, childrenConsumer);
+        LocalObservable observable = new LocalObservable(this, observer);
+        observable.start(option, childrenConsumer);
+        return observable;
     }
 
     @Override

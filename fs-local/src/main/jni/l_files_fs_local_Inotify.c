@@ -4,7 +4,7 @@
 #include "util.h"
 
 jint Java_l_files_fs_local_Inotify_internalInit(
-        JNIEnv *env, jclass clazz) {
+        JNIEnv *env, jobject obj) {
 
     int fd = inotify_init();
     if (-1 == fd) {
@@ -13,18 +13,8 @@ jint Java_l_files_fs_local_Inotify_internalInit(
     return fd;
 }
 
-jint Java_l_files_fs_local_Inotify_internalInit1(
-        JNIEnv *env, jclass clazz, jint flags) {
-
-    int fd = inotify_init1(flags);
-    if (-1 == fd) {
-        throw_errno_exception(env);
-    }
-    return fd;
-}
-
 jint Java_l_files_fs_local_Inotify_internalAddWatch(
-        JNIEnv *env, jclass clazz, jint fd, jstring jpath, jint mask) {
+        JNIEnv *env, jobject obj, jint fd, jstring jpath, jint mask) {
 
     const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
     if (NULL == path) {
@@ -41,7 +31,7 @@ jint Java_l_files_fs_local_Inotify_internalAddWatch(
 }
 
 void Java_l_files_fs_local_Inotify_internalRemoveWatch(
-        JNIEnv *env, jclass clazz, jint fd, jint wd) {
+        JNIEnv *env, jobject obj, jint fd, jint wd) {
 
     int result = inotify_rm_watch(fd, (uint32_t) wd);
     if (-1 == result) {

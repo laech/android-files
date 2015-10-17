@@ -6,8 +6,7 @@ import android.system.ErrnoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -54,7 +53,7 @@ import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
 
 final class LocalObservable extends Native
-        implements Runnable, Observation {
+        implements Runnable, Observation, Inotify.Callback {
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -133,19 +132,11 @@ final class LocalObservable extends Native
 
     private static native void init();
 
-    /**
-     * The file descriptor of the inotify instance.
-     */
-    private final int fd;
+    private final Inotify inotify = Inotify.get();
 
-    /**
-     * The watch descriptor of {@link #root}.
-     */
-    private final int wd;
+    private volatile int fd;
+    private volatile int wd;
 
-    /**
-     * The root file being watched.
-     */
     private final File root;
 
     /**
@@ -158,8 +149,6 @@ final class LocalObservable extends Native
      */
     private final ConcurrentBiMap<Integer, String> childDirs = new ConcurrentBiMap<>();
 
-    private final ConcurrentMap<String, String> childDirsNoAccess = new ConcurrentHashMap<>();
-
     // TODO use weak reference
     private final Observer observer;
 
@@ -169,48 +158,41 @@ final class LocalObservable extends Native
     private final AtomicReference<Thread> thread;
 
     private final AtomicBoolean closed;
+    private final AtomicBoolean released;
 
-    LocalObservable(int fd, int wd, LocalFile root, Observer observer) {
-        this.fd = fd;
-        this.wd = wd;
+    LocalObservable(LocalFile root, Observer observer) {
         this.root = requireNonNull(root, "root");
         this.observer = requireNonNull(observer, "observer");
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
+        this.released = new AtomicBoolean(false);
     }
 
-    public static Observation observe(
-            LocalFile file,
-            LinkOption option,
-            Observer observer,
-            FileConsumer childrenConsumer) throws IOException, InterruptedException {
+    void start(LinkOption option, FileConsumer childrenConsumer)
+            throws IOException, InterruptedException {
 
-        requireNonNull(file, "root");
         requireNonNull(option, "option");
-        requireNonNull(observer, "observer");
+        requireNonNull(childrenConsumer, "childrenConsumer");
 
-        boolean directory = file.stat(option).isDirectory();
-        boolean observeSuccess = true;
+        boolean directory = root.stat(option).isDirectory();
 
-        int fd;
-        int wd;
         try {
-            fd = Inotify.init();
-            wd = inotifyAddWatchWillCloseOnError(fd, file, option);
+            fd = inotify.init(this);
+            wd = inotifyAddWatchWillCloseOnError(option);
         } catch (ErrnoException e) {
             fd = -1;
             wd = -1;
-            observeSuccess = false;
+            close();
+            observer.onIncompleteObservation();
+            return;
         }
-
-        LocalObservable observable = new LocalObservable(fd, wd, file, observer);
 
         /* Using a new thread seems to be much quicker than using a thread pool
          * executor, didn't investigate why, just a reminder here to check the
          * performance if this is to be changed to a pool.
          */
-        Thread thread = new Thread(observable);
-        thread.setName(observable.toString());
+        Thread thread = new Thread(this);
+        thread.setName(toString());
         try {
 
             /*
@@ -218,87 +200,72 @@ final class LocalObservable extends Native
              * allows them to happen at the same time, just need to make sure the
              * latest one wins.
              */
-            if (observeSuccess) {
-                thread.start();
-            }
+            thread.start();
 
-            if (directory
-                    && observeSuccess
-                    && !observeChildren(fd, file, option, observable, childrenConsumer)) {
-                observeSuccess = false;
+            if (directory && !observeChildren(option, childrenConsumer)) {
+                observer.onIncompleteObservation();
             }
 
         } catch (Throwable e) {
             thread.interrupt();
             try {
-                observable.close();
+                close();
             } catch (Exception sup) {
                 e.addSuppressed(sup);
             }
             throw e;
         }
 
-        if (!observeSuccess) {
-            thread.interrupt();
-            observable.close();
-        }
-
-        return observable;
     }
 
-    private static int inotifyAddWatchWillCloseOnError(int fd, File file, LinkOption opt)
-            throws ErrnoException {
+    private int inotifyAddWatchWillCloseOnError(LinkOption opt) throws ErrnoException {
 
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            return Inotify.addWatch(fd, file.path(), mask);
+            return inotify.addWatch(fd, root.path(), mask);
 
         } catch (Throwable e) {
             try {
-                Inotify.close(fd);
-            } catch (ErrnoException ee) {
-                e.addSuppressed(ee);
+                inotify.close(fd);
+            } catch (ErrnoException sup) {
+                e.addSuppressed(sup);
             }
             throw e;
         }
     }
 
-    private static boolean observeChildren(
-            int fd,
-            LocalFile file,
-            LinkOption option,
-            LocalObservable observable,
-            FileConsumer childrenConsumer) throws IOException, InterruptedException {
+    private boolean observeChildren(LinkOption option, FileConsumer childrenConsumer)
+            throws IOException, InterruptedException {
 
-        boolean observe = fd != -1;
-        try (Stream<Dirent> stream = Dirent.stream(file, option, false)) {
+        boolean limitReached = fd == -1;
+        boolean someFailed = false;
+        try (Stream<Dirent> stream = Dirent.stream(root, option, false)) {
             for (Dirent child : stream) {
 
-                File childFile = file.resolve(child.name());
+                File childFile = root.resolve(child.name());
                 childrenConsumer.accept(childFile);
 
                 if (currentThread().isInterrupted()) {
                     throw new InterruptedException();
                 }
 
-                if (observe && child.type() == DT_DIR) {
+                if (!limitReached && child.type() == DT_DIR && !released.get()) {
                     try {
 
-                        String path = file.path() + "/" + child.name();
-                        int wd = Inotify.addWatch(fd, path, CHILD_DIR_MASK);
-                        observable.childDirs.put(wd, child.name());
+                        String path = root.path() + "/" + child.name();
+                        int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
+                        childDirs.put(wd, child.name());
 
                     } catch (ErrnoException e) {
                         //noinspection StatementWithEmptyBody
                         if (e.errno == ENOENT) {
                             // Ignore
                         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
-                            observe = false;
+                            limitReached = true;
 
                         } else if (e.errno == EACCES) {
-                            observable.childDirsNoAccess.put(child.name(), child.name());
-                            observable.observer.onObserveFailed(child.name());
+                            someFailed = true;
 
                         } else {
                             throw toIOException(e);
@@ -309,7 +276,7 @@ final class LocalObservable extends Native
             }
         }
 
-        return observe;
+        return !limitReached && !someFailed;
     }
 
     @Override
@@ -341,7 +308,7 @@ final class LocalObservable extends Native
         List<ErrnoException> suppressed = new ArrayList<>(0);
         for (Integer wd : childDirs.keySet()) {
             try {
-                Inotify.removeWatch(fd, wd);
+                inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
                 if (e.errno != EINVAL) {
                     suppressed.add(e);
@@ -351,7 +318,7 @@ final class LocalObservable extends Native
 
         if (wd != -1) {
             try {
-                Inotify.removeWatch(fd, wd);
+                inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
                 if (e.errno != EINVAL) {
                     suppressed.add(e);
@@ -361,7 +328,7 @@ final class LocalObservable extends Native
 
         try {
 
-            Inotify.close(fd);
+            inotify.close(fd);
 
         } catch (ErrnoException e) {
             for (ErrnoException sup : suppressed) {
@@ -377,6 +344,19 @@ final class LocalObservable extends Native
             }
             throw e;
         }
+    }
+
+    @Override
+    public void onWatchesReleased(Set<Integer> wds) {
+        released.set(true);
+        childDirs.removeAll(wds);
+        if (wds.contains(wd)) {
+            try {
+                wd = inotify.addWatch(fd, root.path(), ROOT_MASK);
+            } catch (ErrnoException ignored) {
+            }
+        }
+        observer.onIncompleteObservation();
     }
 
     @Override
@@ -444,7 +424,7 @@ final class LocalObservable extends Native
 
             } else if (isChildCreated(event, child)) {
                 if (isDirectory(event)) {
-                    addWatchForNewDirectory(child, false);
+                    addWatchForNewDirectory(child);
                 }
                 observer(CREATE, child);
 
@@ -459,10 +439,6 @@ final class LocalObservable extends Native
                 observer(DELETE, null);
 
             } else if (isChildModified(event, child)) {
-                if (isDirectory(event) &&
-                        childDirsNoAccess.remove(child) != null) {
-                    addWatchForNewDirectory(child, true);
-                }
                 observer(MODIFY, child);
 
             } else if (isSelfAccessed(event, child)) {
@@ -495,15 +471,16 @@ final class LocalObservable extends Native
         observer.onEvent(kind, name);
     }
 
-    private void addWatchForNewDirectory(String name, boolean failedPreviously) throws IOException {
+    private void addWatchForNewDirectory(String name) throws IOException {
+        if (released.get()) {
+            return;
+        }
+
         try {
 
             String path = root.path() + "/" + name;
-            int wd = Inotify.addWatch(fd, path, CHILD_DIR_MASK);
+            int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, name);
-            if (failedPreviously) {
-                observer.onObserveRecovered(name);
-            }
 
         } catch (ErrnoException e) {
 
@@ -511,18 +488,10 @@ final class LocalObservable extends Native
             if (e.errno == ENOENT) {
                 // Ignore
 
-            } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
-                try {
-                    close();
-                } catch (IOException ignored) {
-                }
-                observer.onCancel();
-
-            } else if (e.errno == EACCES) {
-                childDirsNoAccess.put(name, name);
-                if (!failedPreviously) {
-                    observer.onObserveFailed(name);
-                }
+            } else if (e.errno == ENOSPC
+                    || e.errno == ENOMEM
+                    || e.errno == EACCES) {
+                observer.onIncompleteObservation();
 
             } else {
                 throw toIOException(e);
@@ -534,7 +503,7 @@ final class LocalObservable extends Native
         Integer wd = childDirs.remove2(child);
         if (wd != null) {
             try {
-                Inotify.removeWatch(fd, wd);
+                inotify.removeWatch(fd, wd);
             } catch (ErrnoException ignored) {
             }
         }

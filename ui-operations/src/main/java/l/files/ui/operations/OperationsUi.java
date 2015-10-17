@@ -15,7 +15,6 @@ public final class OperationsUi {
     public static void init(Context context) {
         if (init.compareAndSet(false, true)) {
             addListener(new NotificationProvider(context, Clock.system()));
-            addListener(new FilesChangedBroadcaster(context));
         }
     }
 

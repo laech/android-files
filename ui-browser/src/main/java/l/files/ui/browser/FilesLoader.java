@@ -50,7 +50,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean showHidden;
 
     private volatile boolean observing;
-    private volatile boolean autoRefreshEnabled;
+    private volatile boolean autoRefreshDisabled;
     private volatile Observation observation;
     private volatile Thread loadInBackgroundThread;
 
@@ -66,9 +66,8 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
 
         @Override
-        public void onCancel() {
-            autoRefreshEnabled = false;
-            updateAll(Collections.<String>emptySet(), true);
+        public void onIncompleteObservation() {
+            autoRefreshDisabled = true;
         }
 
     };
@@ -105,17 +104,19 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             File root,
             FileSort sort,
             Collator collator,
-            boolean showHidden,
-            boolean attemptAutoRefreshEnabled) {
+            boolean showHidden) {
         super(context);
 
         this.root = requireNonNull(root, "root");
         this.sort = requireNonNull(sort, "sort");
         this.collator = requireNonNull(collator, "collator");
         this.showHidden = showHidden;
-        this.autoRefreshEnabled = attemptAutoRefreshEnabled;
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
+    }
+
+    public boolean autoRefreshDisabled() {
+        return autoRefreshDisabled;
     }
 
     public int approximateChildTotal() {
@@ -175,7 +176,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         List<File> children;
         try {
-            if (observe && autoRefreshEnabled) {
+            if (observe) {
                 children = observe();
             } else {
                 children = visit();
@@ -197,7 +198,6 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private List<File> observe() throws IOException, InterruptedException {
         List<File> children = new ArrayList<>();
         observation = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
-        autoRefreshEnabled = !observation.isClosed();
         return children;
     }
 
@@ -252,7 +252,7 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
         Resources res = getContext().getResources();
         List<FileListItem> result = sort.sort(files, res);
-        return Result.of(result, autoRefreshEnabled);
+        return Result.of(result);
     }
 
     @Override
@@ -355,21 +355,16 @@ public final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         abstract List<FileListItem> items();
 
-        abstract boolean autoRefreshEnabled();
-
         @Nullable
         abstract IOException exception();
 
         private static Result of(IOException exception) {
             return new AutoValue_FilesLoader_Result(
-                    Collections.<FileListItem>emptyList(), false, exception);
+                    Collections.<FileListItem>emptyList(), exception);
         }
 
-        private static Result of(
-                List<FileListItem> result, boolean autoRefreshEnabled) {
-
-            return new AutoValue_FilesLoader_Result(
-                    result, autoRefreshEnabled, null);
+        private static Result of(List<FileListItem> result) {
+            return new AutoValue_FilesLoader_Result(result, null);
         }
     }
 

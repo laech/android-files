@@ -12,10 +12,8 @@ import l.files.ui.FileCreationFragment;
 import l.files.ui.R;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
-import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.base.fs.FileIntents.broadcastFilesChanged;
 import static l.files.ui.base.fs.IOExceptions.message;
 
 public final class NewDirFragment extends FileCreationFragment {
@@ -128,25 +126,13 @@ public final class NewDirFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onCancelled(IOException e) {
-            if (e == null) {
-                broadcastChange();
-            }
-        }
-
-        @Override
         protected void onPostExecute(IOException e) {
             super.onPostExecute(e);
             if (e != null) {
                 toaster.apply(message(e));
-            } else {
-                broadcastChange();
             }
         }
 
-        private void broadcastChange() {
-            broadcastFilesChanged(singleton(dir), getActivity());
-        }
     }
 
     @Override

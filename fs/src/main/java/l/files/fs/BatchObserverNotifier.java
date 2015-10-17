@@ -78,21 +78,8 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onObserveFailed(String child) {
-        batchObserver.onObserveFailed(child);
-    }
-
-    @Override
-    public void onObserveRecovered(String child) {
-        batchObserver.onObserveRecovered(child);
-    }
-
-    @Override
-    public void onCancel() {
-        if (checker != null) {
-            checker.cancel(true);
-        }
-        batchObserver.onCancel();
+    public void onIncompleteObservation() {
+        batchObserver.onIncompleteObservation();
     }
 
     @Override

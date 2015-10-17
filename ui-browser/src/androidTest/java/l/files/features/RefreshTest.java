@@ -36,7 +36,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 .assertListMatchesFileSystem(linkedDir)
                 .assertRefreshMenuVisible(true);
 
-        randomFile(linkedDir).createDir();
+        try (Stream<File> children = linkedDir.listDirs(FOLLOW)) {
+            File dir = children.iterator().next();
+            dir.resolve(String.valueOf(nanoTime())).createFile();
+        }
         screen().refresh().assertListMatchesFileSystem(linkedDir);
     }
 

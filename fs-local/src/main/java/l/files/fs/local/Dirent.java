@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import l.files.fs.File;
 import l.files.fs.LinkOption;
 import l.files.fs.Stream;
 
@@ -44,13 +45,13 @@ abstract class Dirent extends Native {
     }
 
     static Stream<Dirent> stream(
-            final LocalFile res,
+            final File file,
             final LinkOption option,
             final boolean dirOnly) throws IOException {
 
         final long dir;
         try {
-            dir = opendir(res.path(), option == FOLLOW);
+            dir = opendir(file.path(), option == FOLLOW);
         } catch (ErrnoException e) {
             throw toIOException(e);
         }

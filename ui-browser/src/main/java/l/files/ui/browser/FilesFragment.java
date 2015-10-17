@@ -2,9 +2,6 @@ package l.files.ui.browser;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,10 +16,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import l.files.collation.NaturalKey;
 import l.files.common.base.Provider;
@@ -58,9 +53,6 @@ import static l.files.ui.Preferences.getShowHiddenFiles;
 import static l.files.ui.Preferences.getSort;
 import static l.files.ui.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.Preferences.isSortKey;
-import static l.files.ui.base.fs.FileIntents.getChangedFiles;
-import static l.files.ui.base.fs.FileIntents.registerFilesChangedReceiver;
-import static l.files.ui.base.fs.FileIntents.unregisterFilesChangedReceiver;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 
@@ -81,8 +73,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         browser.setArguments(bundle);
         return browser;
     }
-
-    private boolean autoRefreshEnabled = true;
 
     private File directory;
     private ProgressBar progress;
@@ -116,28 +106,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             }
             handler.postDelayed(this, 10);
 
-        }
-    };
-
-    private final BroadcastReceiver manualRefresh = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (autoRefreshEnabled) {
-                return;
-            }
-
-            List<File> changedFiles = getChangedFiles(intent);
-            Set<String> myFiles = new HashSet<>(changedFiles.size() * 2);
-            for (File file : changedFiles) {
-                if (directory().equals(file.parent())) {
-                    myFiles.add(file.name().toString());
-                }
-            }
-
-            FilesLoader loader = filesLoader();
-            if (loader != null && !myFiles.isEmpty()) {
-                loader.updateAll(myFiles, false);
-            }
         }
     };
 
@@ -182,20 +150,18 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         handler.postDelayed(checkProgress, 500);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
-        registerFilesChangedReceiver(manualRefresh, getActivity());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Preferences.unregister(getActivity(), this);
-        unregisterFilesChangedReceiver(manualRefresh, getActivity());
     }
 
     private void setupOptionsMenu() {
         Activity context = getActivity();
         setOptionsMenu(OptionsMenus.compose(
-                new Refresh(autoRefreshEnabled(), refresh()),
+                new Refresh(autoRefreshDisable(), refresh()),
                 new Bookmark(directory, context),
                 new NewDirMenu(context.getFragmentManager(), directory),
                 new Paste(context, directory),
@@ -213,11 +179,12 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         };
     }
 
-    private Provider<Boolean> autoRefreshEnabled() {
+    private Provider<Boolean> autoRefreshDisable() {
         return new Provider<Boolean>() {
             @Override
             public Boolean get() {
-                return !autoRefreshEnabled;
+                FilesLoader loader = filesLoader();
+                return loader != null && loader.autoRefreshDisabled();
             }
         };
     }
@@ -255,8 +222,8 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 directory,
                 getSort(context),
                 NaturalKey.collator(Locale.getDefault()),
-                getShowHiddenFiles(context),
-                autoRefreshEnabled);
+                getShowHiddenFiles(context)
+        );
     }
 
     @Override
@@ -268,7 +235,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             if (data.exception() != null) {
                 empty.setText(message(data.exception()));
             } else {
-                autoRefreshEnabled = data.autoRefreshEnabled();
                 empty.setText(R.string.empty);
             }
 

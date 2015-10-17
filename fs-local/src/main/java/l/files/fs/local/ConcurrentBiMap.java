@@ -1,5 +1,6 @@
 package l.files.fs.local;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,8 +37,12 @@ final class ConcurrentBiMap<A, B> {
         return a;
     }
 
+    void removeAll(Collection<A> items) {
+        ab.keySet().removeAll(items);
+        ba.values().removeAll(items);
+    }
+
     Set<A> keySet() {
         return unmodifiableSet(ab.keySet());
     }
-
 }

@@ -4,6 +4,8 @@ import com.google.auto.value.AutoValue;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Stream;
-import l.files.fs.local.Inotify.Tracker;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
@@ -37,17 +38,14 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
-import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Permission.OWNER_EXECUTE;
-import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.Inotify.registerTracker;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -88,12 +86,15 @@ public final class LocalObservableTest extends FileBaseTest {
 
             for (int i = 1; i < maxUserInstances + 10; i++) {
                 File child = dir1().resolve(String.valueOf(i)).createFile();
-                Observation observation = child.observe(NOFOLLOW, mock(Observer.class));
+                Observer observer = mock(Observer.class);
+                Observation observation = child.observe(NOFOLLOW, observer);
                 observations.add(observation);
                 if (i <= maxUserInstances) {
                     assertFalse("Failed at " + i, observation.isClosed());
+                    verify(observer, never()).onIncompleteObservation();
                 } else {
                     assertTrue("Failed at " + i, observation.isClosed());
+                    verify(observer).onIncompleteObservation();
                 }
             }
 
@@ -116,8 +117,8 @@ public final class LocalObservableTest extends FileBaseTest {
         FileConsumer consumer = mock(FileConsumer.class);
         Observer observer = mock(Observer.class);
 
-        try (Observation observation = dir.observe(FOLLOW, observer, consumer)) {
-            assertTrue(observation.isClosed());
+        try (Observation ignored = dir.observe(FOLLOW, observer, consumer)) {
+            verify(observer, atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
         }
     }
@@ -136,7 +137,7 @@ public final class LocalObservableTest extends FileBaseTest {
             for (int i = 0; i < 20; i++) {
                 dir.resolve(String.valueOf(Math.random())).createDir();
             }
-            verify(observer, timeout(1000)).onCancel();
+            verify(observer, timeout(1000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
         }
     }
@@ -239,72 +240,12 @@ public final class LocalObservableTest extends FileBaseTest {
         }
     }
 
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_file_in_it() throws Exception {
-        testMoveUnreadableDirIn(
+    public void test_move_unreadable_dir_in_will_notify_incomplete_observation() throws Exception {
+        testMoveDirIn(
+                new PreActions().removeReadPermissions(),
                 new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateFile("c")
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_link_in_it() throws Exception {
-        testMoveUnreadableDirIn(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateLink("c", dir1())
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_create_dir_in_it() throws Exception {
-        testMoveUnreadableDirIn(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateDir("c")
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_file_from_it() throws Exception {
-        testMoveUnreadableDirIn(
-                new PreActions().createFile("b"),
-                new PostActions().recoverFromObserveFailed().awaitDelete("b")
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_link_from_it() throws Exception {
-        testMoveUnreadableDirIn(
-                new PreActions().createLink("b", dir1()),
-                new PostActions().recoverFromObserveFailed().awaitDelete("b")
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_delete_dir_from_it() throws Exception {
-        testMoveUnreadableDirIn(
-                new PreActions().createDir("b"),
-                new PostActions().recoverFromObserveFailed().awaitDelete("b")
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_change_its_atime() throws Exception {
-        testMoveUnreadableDirIn(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitSetLastAccessedTime(EPOCH)
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_and_change_its_mtime() throws Exception {
-        testMoveUnreadableDirIn(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitSetLastModifiedTime(EPOCH)
-        );
-    }
-
-    public void test_move_unreadable_dir_in_then_make_it_readable_will_recover() throws Exception {
-        testMoveUnreadableDirIn(
-                new PostActions()
-                        .setPermissions(EnumSet.of(OWNER_READ))
-                        .awaitOnObserveRecovered()
+                        .awaitOnIncompleteObservation()
+                        .awaitCreateFileInParent("parent watch still works")
         );
     }
 
@@ -530,91 +471,12 @@ public final class LocalObservableTest extends FileBaseTest {
         }
     }
 
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_mtime() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitSetLastModifiedTime(EPOCH)
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_atime() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitSetLastAccessedTime(EPOCH)
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_change_its_permissions() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitRemoveAllPermissions()
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_file_in_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateFile("a")
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_dir_in_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateDir("a")
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_create_link_in_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PostActions()
-                        .recoverFromObserveFailed()
-                        .awaitCreateLink("a", dir2())
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_file_from_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PreActions().createFile("a"),
-                new PostActions().recoverFromObserveFailed().awaitDelete("a")
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_dir_from_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PreActions().createDir("a"),
-                new PostActions().recoverFromObserveFailed().awaitDelete("a")
-        );
-    }
-
-    public void test_observe_unreadable_child_dir_then_make_it_readable_and_delete_link_from_it() throws Exception {
-        testObserveUnreadableChildDir(
-                new PreActions().createLink("a", dir2()),
-                new PostActions().recoverFromObserveFailed().awaitDelete("a")
-        );
-    }
-
-    private void testObserveUnreadableChildDir(PostAction post) throws Exception {
-        testObserveUnreadableChildDir(new PreActions(), post);
-    }
-
-    private void testObserveUnreadableChildDir(PreAction pre, PostAction post) throws Exception {
-        testObserveChildDir(
-                new PreActions().add(pre).removeReadPermissions(),
-                new PostActions().awaitOnObserveFailed().add(post)
-        );
-    }
-
-    private void testObserveChildDir(PreAction pre, PostAction post) throws Exception {
+    public void test_observe_unreadable_child_dir_will_notify_incomplete_observation() throws Exception {
         File dir = dir1().resolve("dir").createDir();
-        pre.action(dir);
+        dir.removePermissions(Permission.read());
         try (Recorder observer = observe(dir1())) {
-            post.action(dir, observer);
+            observer.awaitOnIncompleteObservation();
+            observer.awaitCreateFile(dir1().resolve("parent watch still works"));
         }
     }
 
@@ -866,7 +728,7 @@ public final class LocalObservableTest extends FileBaseTest {
                 observer.observation = file.observe(option, observer);
                 assertFalse(observer.observation.isClosed());
                 verifyTracker(observer, tracker, file, option);
-                registerTracker(observer);
+                Inotify.get().registerTracker(observer);
                 return observer;
             }
         }
@@ -937,26 +799,12 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         @Override
-        public void onObserveFailed(String child) {
-            observer.onObserveFailed(child);
+        public void onIncompleteObservation() {
+            observer.onIncompleteObservation();
         }
 
-        @Override
-        public void onObserveRecovered(String child) {
-            observer.onObserveRecovered(child);
-        }
-
-        @Override
-        public void onCancel() {
-            observer.onCancel();
-        }
-
-        void awaitOnObserveFailed(String child) {
-            verify(observer, timeout(1000)).onObserveFailed(child);
-        }
-
-        void awaitOnObserveRecovered(String child) {
-            verify(observer, timeout(1000)).onObserveRecovered(child);
+        void awaitOnIncompleteObservation() {
+            verify(observer).onIncompleteObservation();
         }
 
         void await(Event kind, File file, Callable<?> action) throws Exception {
@@ -1082,14 +930,14 @@ public final class LocalObservableTest extends FileBaseTest {
             if (srcIsDir) {
                 if (readable) {
                     verify(tracker).onWatchAdded(eq(fd), eq(dst.path()), anyInt(), anyInt());
-                    verify(observer, never()).onObserveFailed(dst.name().toString());
+                    verify(observer, never()).onIncompleteObservation();
                 } else {
                     verify(tracker, never()).onWatchAdded(eq(fd), eq(dst.path()), anyInt(), anyInt());
-                    verify(observer).onObserveFailed(dst.name().toString());
+                    verify(observer).onIncompleteObservation();
                 }
             } else {
                 verify(tracker, never()).onWatchAdded(eq(fd), eq(dst.path()), anyInt(), anyInt());
-                verify(observer, never()).onObserveFailed(dst.name().toString());
+                verify(observer, never()).onIncompleteObservation();
             }
             verifyNoMoreInteractions(tracker);
         }
@@ -1113,15 +961,6 @@ public final class LocalObservableTest extends FileBaseTest {
 
         void awaitModifyByCreateFile(File target, String child) throws Exception {
             awaitModify(target, newCreateFile(target.resolve(child)));
-        }
-
-        void awaitModifyByCreateLink(
-                File linkParentDir,
-                String linkName,
-                File linkTarget) throws Exception {
-
-            File link = linkParentDir.resolve(linkName);
-            awaitModify(linkParentDir, newCreateLink(link, linkTarget));
         }
 
         void awaitModifyByCreateDir(File target, String child) throws Exception {
@@ -1150,7 +989,44 @@ public final class LocalObservableTest extends FileBaseTest {
     }
 
     private static Tracker registerMockTracker() {
-        return registerTracker(mock(Tracker.class));
+        final Tracker tracker = mock(Tracker.class);
+        try {
+            doAnswer(new Answer<Void>() {
+                @Override
+                public Void answer(InvocationOnMock invocation) throws Throwable {
+                    Inotify.get().unregisterTracker(tracker);
+                    return null;
+                }
+            }).when(tracker).close();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        Inotify.get().registerTracker(tracker);
+        return tracker;
+    }
+
+    public static abstract class Tracker implements Inotify.Tracker, AutoCloseable {
+
+        @Override
+        public void close() throws IOException {
+        }
+
+        @Override
+        public void onClose(int fd) {
+        }
+
+        @Override
+        public void onWatchRemoved(int fd, int wd) {
+        }
+
+        @Override
+        public void onWatchAdded(int fd, String path, int mask, int wd) {
+        }
+
+        @Override
+        public void onInit(int fd) {
+        }
+
     }
 
     @AutoValue
@@ -1160,7 +1036,7 @@ public final class LocalObservableTest extends FileBaseTest {
         abstract File resource();
 
         static WatchEvent create(Event kind, File file) {
-            return new AutoValue_LocalFileObserveTest_WatchEvent(
+            return new AutoValue_LocalObservableTest_WatchEvent(
                     kind, file
             );
         }
@@ -1208,23 +1084,6 @@ public final class LocalObservableTest extends FileBaseTest {
             });
         }
 
-        PreActions createDir(final String name) {
-            return add(new PreAction() {
-                @Override
-                public void action(File src) throws Exception {
-                    src.resolve(name).createDir();
-                }
-            });
-        }
-
-        PreActions createLink(final String name, final File target) {
-            return add(new PreAction() {
-                @Override
-                public void action(File src) throws Exception {
-                    src.resolve(name).createLink(target);
-                }
-            });
-        }
     }
 
     private static final class PostActions implements PostAction {
@@ -1252,11 +1111,11 @@ public final class LocalObservableTest extends FileBaseTest {
             });
         }
 
-        PostActions awaitSetLastModifiedTime(final Instant instant) {
+        PostActions awaitCreateFileInParent(final String name) {
             return add(new PostAction() {
                 @Override
                 public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitModifyBySetLastModifiedTime(dst, instant);
+                    observer.awaitCreateFile(dst.parent().resolve(name));
                 }
             });
         }
@@ -1279,38 +1138,11 @@ public final class LocalObservableTest extends FileBaseTest {
             });
         }
 
-        PostActions setPermissions(final Set<Permission> permissions) {
-            return add(new PostAction() {
-                @Override
-                public void action(File dst, Recorder observer) throws Exception {
-                    dst.setPermissions(permissions);
-                }
-            });
-        }
-
-        PostActions awaitSetLastAccessedTime(final Instant instant) {
-            return add(new PostAction() {
-                @Override
-                public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitModifyBySetLastAccessedTime(dst, instant);
-                }
-            });
-        }
-
         PostActions awaitCreateDir(final String name) {
             return add(new PostAction() {
                 @Override
                 public void action(File dst, Recorder observer) throws Exception {
                     observer.awaitModifyByCreateDir(dst, name);
-                }
-            });
-        }
-
-        PostActions awaitCreateLink(final String name, final File target) {
-            return add(new PostAction() {
-                @Override
-                public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitModifyByCreateLink(dst, name, target);
                 }
             });
         }
@@ -1324,39 +1156,15 @@ public final class LocalObservableTest extends FileBaseTest {
             });
         }
 
-        PostActions awaitOnObserveFailed() {
+        PostActions awaitOnIncompleteObservation() {
             return add(new PostAction() {
                 @Override
                 public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitOnObserveFailed(dst.name().toString());
+                    observer.awaitOnIncompleteObservation();
                 }
             });
         }
 
-        PostActions awaitOnObserveRecovered() {
-            return add(new PostAction() {
-                @Override
-                public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitOnObserveRecovered(dst.name().toString());
-                }
-            });
-        }
-
-        PostActions recoverFromObserveFailed() {
-            return setPermissions(EnumSet.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE))
-                    .awaitOnObserveRecovered();
-        }
-    }
-
-    private void testMoveUnreadableDirIn(PostAction post) throws Exception {
-        testMoveUnreadableDirIn(new PreActions(), post);
-    }
-
-    private void testMoveUnreadableDirIn(PreAction pre, PostAction post) throws Exception {
-        testMoveDirIn(
-                new PreActions().add(pre).removeReadPermissions(),
-                new PostActions().awaitOnObserveFailed().add(post)
-        );
     }
 
     private void testMoveDirIn(PostAction post) throws Exception {
