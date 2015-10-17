@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme" parent="android:Theme.Material.Light.DarkActionBar">
+    <style name="Theme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:colorPrimaryDark">@color/color_primary_dark</item>
         <item name="android:colorPrimary">@color/color_primary</item>
         <item name="android:windowBackground">@drawable/window_background</item>
+        <item name="android:actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
-    <style name="Toolbar" parent="android:Theme.Material">
+    <style name="Toolbar" parent="Theme.AppCompat">
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
-    <style name="ToolbarPopup" parent="android:Theme.Material">
+    <style name="ToolbarPopup" parent="Theme.AppCompat">
         <item name="android:colorBackground">@color/color_primary</item>
     </style>
 
