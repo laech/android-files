@@ -40,6 +40,8 @@ import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Permission.OWNER_EXECUTE;
+import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -477,6 +479,15 @@ public final class LocalObservableTest extends FileBaseTest {
         try (Recorder observer = observe(dir1())) {
             observer.awaitOnIncompleteObservation();
             observer.awaitCreateFile(dir1().resolve("parent watch still works"));
+        }
+    }
+
+    public void test_create_dir_then_make_it_unreadable() throws Exception {
+        File dir = dir1().resolve("dir");
+        try (Recorder observer = observe(dir1())) {
+            observer.awaitCreateDir(dir);
+            observer.awaitModifyBySetPermissions(dir, EnumSet.of(OWNER_WRITE, OWNER_EXECUTE));
+            observer.awaitModifyByCreateFile(dir, "a");
         }
     }
 
