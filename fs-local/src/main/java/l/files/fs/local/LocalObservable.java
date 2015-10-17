@@ -6,7 +6,6 @@ import android.system.ErrnoException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,10 +20,12 @@ import l.files.fs.Observer;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
+import static android.system.OsConstants.EACCES;
 import static android.system.OsConstants.EINVAL;
+import static android.system.OsConstants.ENOENT;
+import static android.system.OsConstants.ENOMEM;
 import static android.system.OsConstants.ENOSPC;
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
@@ -102,6 +103,7 @@ final class LocalObservable extends Native
      */
     private static final int ROOT_MASK
             = IN_EXCL_UNLINK
+            | IN_ACCESS
             | IN_ATTRIB
             | IN_CREATE
             | IN_DELETE
@@ -116,7 +118,7 @@ final class LocalObservable extends Native
      * about events that will change the attributes of the sub directory but not
      * reported through {@link #ROOT_MASK}.
      */
-    private static final int CHILD_DIRECTORY_MASK
+    private static final int CHILD_DIR_MASK
             = IN_DONT_FOLLOW
             | IN_EXCL_UNLINK
             | IN_ONLYDIR
@@ -154,41 +156,9 @@ final class LocalObservable extends Native
      * directories name being watched, and it will be updated as directories are
      * being created/deleted.
      */
-    private final BiMap<Integer, String> children = new BiMap<>();
+    private final ConcurrentBiMap<Integer, String> childDirs = new ConcurrentBiMap<>();
 
-    private static final class BiMap<A, B> {
-        private final ConcurrentMap<A, B> ab = new ConcurrentHashMap<>();
-        private final ConcurrentMap<B, A> ba = new ConcurrentHashMap<>();
-
-        B get(A a) {
-            return ab.get(a);
-        }
-
-        void put(A a, B b) {
-            ab.put(a, b);
-            ba.put(b, a);
-        }
-
-        B remove(A a) {
-            B b = ab.remove(a);
-            if (b != null) {
-                ba.remove(b);
-            }
-            return b;
-        }
-
-        A remove2(B b) {
-            A a = ba.remove(b);
-            if (a != null) {
-                ab.remove(a);
-            }
-            return a;
-        }
-
-        Set<A> keySet() {
-            return unmodifiableSet(ab.keySet());
-        }
-    }
+    private final ConcurrentMap<String, String> childDirsNoAccess = new ConcurrentHashMap<>();
 
     // TODO use weak reference
     private final Observer observer;
@@ -316,13 +286,22 @@ final class LocalObservable extends Native
                     try {
 
                         String path = file.path() + "/" + child.name();
-                        int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
-                        observable.children.put(wd, child.name());
+                        int wd = Inotify.addWatch(fd, path, CHILD_DIR_MASK);
+                        observable.childDirs.put(wd, child.name());
 
                     } catch (ErrnoException e) {
-                        // TODO handle other types
-                        if (e.errno == ENOSPC) {
+                        //noinspection StatementWithEmptyBody
+                        if (e.errno == ENOENT) {
+                            // Ignore
+                        } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
                             observe = false;
+
+                        } else if (e.errno == EACCES) {
+                            observable.childDirsNoAccess.put(child.name(), child.name());
+                            observable.observer.onObserveFailed(child.name());
+
+                        } else {
+                            throw toIOException(e);
                         }
                     }
                 }
@@ -360,7 +339,7 @@ final class LocalObservable extends Native
         }
 
         List<ErrnoException> suppressed = new ArrayList<>(0);
-        for (Integer wd : children.keySet()) {
+        for (Integer wd : childDirs.keySet()) {
             try {
                 Inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
@@ -431,17 +410,21 @@ final class LocalObservable extends Native
             } catch (Throwable ee) {
                 e.addSuppressed(ee);
             }
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    } else {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            throwOnMainThread(e);
         }
+    }
+
+    private static void throwOnMainThread(final Exception e) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                } else {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
     }
 
     private void handleEvent(int wd, int event, String child) throws IOException {
@@ -456,9 +439,12 @@ final class LocalObservable extends Native
 
         if (wd == this.wd) {
 
-            if (isChildCreated(event, child)) {
+            if (isChildAccessed(event, child)) {
+                observer(MODIFY, child);
+
+            } else if (isChildCreated(event, child)) {
                 if (isDirectory(event)) {
-                    addWatchForNewDirectory(child);
+                    addWatchForNewDirectory(child, false);
                 }
                 observer(CREATE, child);
 
@@ -473,7 +459,14 @@ final class LocalObservable extends Native
                 observer(DELETE, null);
 
             } else if (isChildModified(event, child)) {
+                if (isDirectory(event) &&
+                        childDirsNoAccess.remove(child) != null) {
+                    addWatchForNewDirectory(child, true);
+                }
                 observer(MODIFY, child);
+
+            } else if (isSelfAccessed(event, child)) {
+                observer(MODIFY, null);
 
             } else if (isSelfModified(event, child)) {
                 observer(MODIFY, null);
@@ -482,14 +475,15 @@ final class LocalObservable extends Native
                 onObserverStopped(wd);
 
             } else {
-                throw new RuntimeException(eventName(event) + ": " + child);
+                throw new RuntimeException(eventNames(event) + ": " + child);
             }
 
         } else {
             if (isObserverStopped(event)) {
                 onObserverStopped(wd);
+
             } else {
-                String childDirectory = children.get(wd);
+                String childDirectory = childDirs.get(wd);
                 if (childDirectory != null) {
                     observer(MODIFY, childDirectory);
                 }
@@ -501,25 +495,43 @@ final class LocalObservable extends Native
         observer.onEvent(kind, name);
     }
 
-    private void addWatchForNewDirectory(String name) {
+    private void addWatchForNewDirectory(String name, boolean failedPreviously) throws IOException {
         try {
+
             String path = root.path() + "/" + name;
-            int wd = Inotify.addWatch(fd, path, CHILD_DIRECTORY_MASK);
-            children.put(wd, name);
+            int wd = Inotify.addWatch(fd, path, CHILD_DIR_MASK);
+            childDirs.put(wd, name);
+            if (failedPreviously) {
+                observer.onObserveRecovered(name);
+            }
+
         } catch (ErrnoException e) {
-//            TODO handle other types
-            if (e.errno == ENOSPC) {
+
+            //noinspection StatementWithEmptyBody
+            if (e.errno == ENOENT) {
+                // Ignore
+
+            } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
                 try {
                     close();
                 } catch (IOException ignored) {
                 }
                 observer.onCancel();
+
+            } else if (e.errno == EACCES) {
+                childDirsNoAccess.put(name, name);
+                if (!failedPreviously) {
+                    observer.onObserveFailed(name);
+                }
+
+            } else {
+                throw toIOException(e);
             }
         }
     }
 
     private void removeChildWatch(String child) {
-        Integer wd = children.remove2(child);
+        Integer wd = childDirs.remove2(child);
         if (wd != null) {
             try {
                 Inotify.removeWatch(fd, wd);
@@ -533,11 +545,15 @@ final class LocalObservable extends Native
     }
 
     private void onObserverStopped(int wd) {
-        children.remove(wd);
+        childDirs.remove(wd);
     }
 
     private boolean isObserverStopped(int event) {
         return 0 != (event & IN_IGNORED);
+    }
+
+    private boolean isChildAccessed(int mask, String child) {
+        return child != null && 0 != (mask & IN_ACCESS);
     }
 
     private boolean isChildCreated(int mask, String child) {
@@ -556,6 +572,10 @@ final class LocalObservable extends Native
                 (child != null && 0 != (event & IN_DELETE));
     }
 
+    private boolean isSelfAccessed(int mask, String child) {
+        return child == null && 0 != (mask & IN_ACCESS);
+    }
+
     private boolean isSelfModified(int mask, String child) {
         return (child == null && 0 != (mask & IN_ATTRIB)) ||
                 (child == null && 0 != (mask & IN_MODIFY));
@@ -566,23 +586,25 @@ final class LocalObservable extends Native
                 (child == null && 0 != (mask & IN_MOVE_SELF));
     }
 
-    private String eventName(int event) {
-        if (0 != (event & IN_OPEN)) return "IN_OPEN";
-        if (0 != (event & IN_ACCESS)) return "IN_ACCESS";
-        if (0 != (event & IN_ATTRIB)) return "IN_ATTRIB";
-        if (0 != (event & IN_CREATE)) return "IN_CREATE";
-        if (0 != (event & IN_DELETE)) return "IN_DELETE";
-        if (0 != (event & IN_MODIFY)) return "IN_MODIFY";
-        if (0 != (event & IN_MOVED_TO)) return "IN_MOVED_TO";
-        if (0 != (event & IN_MOVE_SELF)) return "IN_MOVE_SELF";
-        if (0 != (event & IN_MOVED_FROM)) return "IN_MOVED_FROM";
-        if (0 != (event & IN_CLOSE_WRITE)) return "IN_CLOSE_WRITE";
-        if (0 != (event & IN_DELETE_SELF)) return "IN_DELETE_SELF";
-        if (0 != (event & IN_CLOSE_NOWRITE)) return "IN_CLOSE_NOWRITE";
-        if (0 != (event & IN_IGNORED)) return "IN_IGNORED";
-        if (0 != (event & IN_Q_OVERFLOW)) return "IN_Q_OVERFLOW";
-        if (0 != (event & IN_UNMOUNT)) return "IN_UNMOUNT";
-        return "UNKNOWN";
+    private List<String> eventNames(int event) {
+        List<String> events = new ArrayList<>(1);
+        if (0 != (event & IN_OPEN)) events.add("IN_OPEN");
+        if (0 != (event & IN_ACCESS)) events.add("IN_ACCESS");
+        if (0 != (event & IN_ATTRIB)) events.add("IN_ATTRIB");
+        if (0 != (event & IN_CREATE)) events.add("IN_CREATE");
+        if (0 != (event & IN_DELETE)) events.add("IN_DELETE");
+        if (0 != (event & IN_MODIFY)) events.add("IN_MODIFY");
+        if (0 != (event & IN_MOVED_TO)) events.add("IN_MOVED_TO");
+        if (0 != (event & IN_MOVE_SELF)) events.add("IN_MOVE_SELF");
+        if (0 != (event & IN_MOVED_FROM)) events.add("IN_MOVED_FROM");
+        if (0 != (event & IN_CLOSE_WRITE)) events.add("IN_CLOSE_WRITE");
+        if (0 != (event & IN_DELETE_SELF)) events.add("IN_DELETE_SELF");
+        if (0 != (event & IN_CLOSE_NOWRITE)) events.add("IN_CLOSE_NOWRITE");
+        if (0 != (event & IN_IGNORED)) events.add("IN_IGNORED");
+        if (0 != (event & IN_Q_OVERFLOW)) events.add("IN_Q_OVERFLOW");
+        if (0 != (event & IN_UNMOUNT)) events.add("IN_UNMOUNT");
+        if (0 != (event & IN_ISDIR)) events.add("IN_ISDIR");
+        return events;
     }
 
 //    private void log(int wd, int event, String child) {
@@ -590,12 +612,16 @@ final class LocalObservable extends Native
 //        if (wd == this.wd) {
 //            file = root;
 //        } else {
-//            file = root.resolve(children.get(wd));
+//            String name = childDirs.get(wd);
+//            if (name == null) {
+//                name = "?";
+//            }
+//            file = root.resolve(name);
 //        }
 //
 //        Log.v(getClass().getSimpleName(), "fd=" + fd +
 //                ", wd=" + wd +
-//                ", event=" + eventName(event) +
+//                ", event=" + eventNames(event) +
 //                ", parent=" + file +
 //                ", child=" + child);
 //    }
