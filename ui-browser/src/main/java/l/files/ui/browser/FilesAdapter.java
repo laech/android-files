@@ -69,7 +69,6 @@ import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static l.files.ui.browser.Styles.getColorStateList;
 import static l.files.ui.R.dimen.files_item_card_inner_space;
 import static l.files.ui.R.dimen.files_item_space_horizontal;
 import static l.files.ui.R.dimen.files_list_space;
@@ -80,6 +79,7 @@ import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.base.view.Views.find;
+import static l.files.ui.browser.Styles.getColorStateList;
 
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
@@ -271,6 +271,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void bind(FileItem file) {
             super.bind(file);
+            setEnabled(file);
             setTitle(file);
             setIcon(file);
             setLink(file);
@@ -278,13 +279,15 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             setPreview(file);
         }
 
+        private void setEnabled(FileItem file) {
+            itemView.setEnabled(file.isReadable());
+        }
+
         private void setTitle(FileItem file) {
             title.setText(file.selfFile().name());
-            title.setEnabled(file.isReadable());
         }
 
         private void setIcon(FileItem file) {
-            icon.setEnabled(file.linkTargetOrSelfStat() != null && file.isReadable());
 
             if (file.linkTargetOrSelfStat() != null
                     && setLocalIcon(icon, file.linkTargetOrSelfStat())) {
@@ -331,7 +334,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 summary.setVisibility(GONE);
             } else {
                 summary.setVisibility(VISIBLE);
-                summary.setEnabled(file.isReadable());
                 CharSequence date = formatter.apply(stat);
                 CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
                 boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
@@ -435,14 +437,12 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private void setLink(FileItem file) {
             Stat stat = file.selfStat();
             if (stat != null && stat.isSymbolicLink()) {
-                linkIcon.setEnabled(file.isReadable());
                 linkIcon.setVisibility(VISIBLE);
 
                 File target = file.linkTargetFile();
                 if (target != null) {
                     linkPath.setText(resources().getString(R.string.link_x, target.path()));
                     linkPath.setVisibility(VISIBLE);
-                    linkPath.setEnabled(file.isReadable());
                 } else {
                     linkPath.setVisibility(GONE);
                 }
