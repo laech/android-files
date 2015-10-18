@@ -6,6 +6,7 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.ActionMode;
@@ -41,12 +42,12 @@ import static android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static l.files.ui.base.fs.IOExceptions.message;
+import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Preferences.getShowHiddenFiles;
 import static l.files.ui.browser.Preferences.getSort;
 import static l.files.ui.browser.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.browser.Preferences.isSortKey;
-import static l.files.ui.base.fs.IOExceptions.message;
-import static l.files.ui.base.view.Views.find;
 
 public final class FilesFragment extends SelectionModeFragment<File> implements
         LoaderCallbacks<Result>,
@@ -134,6 +135,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         recycler.setAdapter(adapter);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(columns * 3);
+        recycler.setItemAnimator(null);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(columns, VERTICAL));
 
         setupOptionsMenu();
@@ -222,6 +224,12 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     public void onLoadFinished(Loader<Result> loader, Result data) {
         Activity activity = getActivity();
         if (activity != null && !activity.isFinishing()) {
+
+            // First load no animation to speed up
+            if (recycler.getItemAnimator() == null && adapter.getItemCount() != 0) {
+                recycler.setItemAnimator(new DefaultItemAnimator());
+            }
+
             adapter.setItems(data.items());
             //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null) {
