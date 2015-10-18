@@ -1,5 +1,4 @@
 #include <jni.h>
-#include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include "util.h"
@@ -43,16 +42,19 @@ void Java_l_files_fs_local_Dirent_closedir(JNIEnv *env, jclass clazz, jlong jdir
 
 jobject Java_l_files_fs_local_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jdir) {
     DIR *dir = (DIR *) (intptr_t) jdir;
-    errno = 0;
-    struct dirent *entry = readdir(dir);
-    if (NULL == entry) {
-        if (0 != errno) {
-            throw_errno_exception(env);
-        }
+    struct dirent entry;
+    struct dirent *result;
+
+    if (0 != readdir_r(dir, &entry, &result)) {
+        throw_errno_exception(env);
         return NULL;
     }
 
-    jstring jname = (*env)->NewStringUTF(env, entry->d_name);
+    if (NULL == result) {
+        return NULL;
+    }
+
+    jstring jname = (*env)->NewStringUTF(env, entry.d_name);
     return (*env)->CallStaticObjectMethod(
-            env, clazz, dirent_create, entry->d_ino, entry->d_type, jname);
+            env, clazz, dirent_create, entry.d_ino, entry.d_type, jname);
 }
