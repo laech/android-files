@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/activated_item_background"
-    android:minHeight="48dp">
+    android:layout_height="?android:attr/listPreferredItemHeightSmall"
+    android:background="?android:attr/activatedBackgroundIndicator"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart">
 
     <TextView
         android:id="@android:id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
+        android:layout_gravity="center_vertical|start"
+        android:duplicateParentState="true"
         android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="24sp"/>
+        android:textSize="24sp" />
 
     <TextView
         android:id="@android:id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="72dp"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="56dp"
+        android:duplicateParentState="true"
         android:ellipsize="end"
         android:singleLine="true"
         android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
-</RelativeLayout>
+</FrameLayout>
