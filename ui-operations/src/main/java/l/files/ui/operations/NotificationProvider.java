@@ -41,8 +41,9 @@ final class NotificationProvider implements TaskListener {
     private final Map<TaskKind, ProgressViewer> viewers;
 
     public NotificationProvider(Context context, Clock clock) {
-        this(context, clock, (NotificationManager)
-                context.getSystemService(NOTIFICATION_SERVICE));
+        this(context, clock, (NotificationManager) context
+                .getApplicationContext()
+                .getSystemService(NOTIFICATION_SERVICE));
     }
 
     public NotificationProvider(

@@ -71,8 +71,8 @@ public final class FilesActivity extends BaseActivity implements
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.files_activity);
-        Preview.get(this).readCacheAsyncIfNeeded();
-        OperationsUi.init(this);
+        Preview.get(getApplicationContext()).readCacheAsyncIfNeeded();
+        OperationsUi.init(getApplicationContext());
 
         toolbar = find(R.id.toolbar, this);
         hierarchy = new HierarchyAdapter();
