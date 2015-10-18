@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.collation.NaturalKey;
 import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Stat;
@@ -46,7 +45,7 @@ abstract class FileSortTest extends FileBaseTest {
             Locale locale,
             File... files) throws IOException {
 
-        Collator collator = NaturalKey.collator(locale);
+        Collator collator = Collators.of(locale);
         List<FileItem> expected = new ArrayList<>(files.length);
         for (File file : files) {
             Stat stat;

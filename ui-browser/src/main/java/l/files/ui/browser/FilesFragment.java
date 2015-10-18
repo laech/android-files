@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.collation.NaturalKey;
 import l.files.fs.File;
 import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenus;
@@ -215,7 +214,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 context,
                 directory,
                 getSort(context),
-                NaturalKey.collator(Locale.getDefault()),
+                Collators.of(Locale.getDefault()),
                 getShowHiddenFiles(context)
         );
     }

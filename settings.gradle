@@ -1,1 +1,1 @@
-include ':app', ':collation', ':collation-benchmark', ':fs', ':fs-local', ':ui-preview', ':testing', ':testing-fs', ':operations', ':ui-operations', ':bookmarks', ':ui-browser', ':ui-base', ':ui-bookmarks'
+include ':app', ':fs', ':fs-local', ':ui-preview', ':testing', ':testing-fs', ':operations', ':ui-operations', ':bookmarks', ':ui-browser', ':ui-base', ':ui-bookmarks'
