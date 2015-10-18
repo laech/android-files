@@ -38,6 +38,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
+import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_EXECUTE;
@@ -61,6 +62,20 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @see File#observe(LinkOption, Observer)
  */
 public final class LocalObservableTest extends FileBaseTest {
+
+    public void test_observe_on_regular_file() throws Exception {
+        File file = dir1().resolve("file").createFile();
+        try (Recorder observer = observe(file, NOFOLLOW)) {
+            observer.awaitModifyByAppend(file, "hello");
+        }
+    }
+
+    public void test_observe_on_link() throws Exception {
+        File file = dir1().resolve("link").createLink(dir2());
+        try (Recorder observer = observe(file, NOFOLLOW)) {
+            observer.awaitModifyBySetLastModifiedTime(file, EPOCH);
+        }
+    }
 
     public void test_release_watch_when_dir_moves_out() throws Exception {
 
