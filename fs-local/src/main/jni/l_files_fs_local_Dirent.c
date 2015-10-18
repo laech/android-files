@@ -7,52 +7,52 @@
 static jmethodID dirent_create;
 
 void Java_l_files_fs_local_Dirent_init(JNIEnv *env, jclass clazz) {
-  dirent_create = (*env)->GetStaticMethodID(
-          env, clazz, "create", "(JILjava/lang/String;)Ll/files/fs/local/Dirent;");
+    dirent_create = (*env)->GetStaticMethodID(
+            env, clazz, "create", "(JILjava/lang/String;)Ll/files/fs/local/Dirent;");
 }
 
 jlong Java_l_files_fs_local_Dirent_opendir(
-        JNIEnv* env, jclass clazz, jstring jpath, jboolean followLink) {
+        JNIEnv *env, jclass clazz, jstring jpath, jboolean followLink) {
 
-  const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-  if (NULL == path) {
-    return -1;
-  }
+    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    if (NULL == path) {
+        return -1;
+    }
 
-  int flags = O_DIRECTORY;
-  if (JNI_FALSE == followLink) {
-    flags |= O_NOFOLLOW;
-  }
-  int fd = open(path, flags);
-  (*env)->ReleaseStringUTFChars(env, jpath, path);
+    int flags = O_DIRECTORY;
+    if (JNI_FALSE == followLink) {
+        flags |= O_NOFOLLOW;
+    }
+    int fd = open(path, flags);
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
 
-  if (-1 == fd) {
-    throw_errno_exception(env);
-    return -1;
-  }
+    if (-1 == fd) {
+        throw_errno_exception(env);
+        return -1;
+    }
 
-  return (jlong)(intptr_t)fdopendir(fd);
+    return (jlong) (intptr_t) fdopendir(fd);
 }
 
 void Java_l_files_fs_local_Dirent_closedir(JNIEnv *env, jclass clazz, jlong jdir) {
-  DIR *dir = (DIR*)(intptr_t)jdir;
-  if (0 != closedir(dir)) {
-    throw_errno_exception(env);
-  }
+    DIR *dir = (DIR *) (intptr_t) jdir;
+    if (0 != closedir(dir)) {
+        throw_errno_exception(env);
+    }
 }
 
 jobject Java_l_files_fs_local_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jdir) {
-  DIR *dir = (DIR*)(intptr_t)jdir;
-  errno = 0;
-  struct dirent *entry = readdir(dir);
-  if (NULL == entry) {
-    if (0 != errno) {
-      throw_errno_exception(env);
+    DIR *dir = (DIR *) (intptr_t) jdir;
+    errno = 0;
+    struct dirent *entry = readdir(dir);
+    if (NULL == entry) {
+        if (0 != errno) {
+            throw_errno_exception(env);
+        }
+        return NULL;
     }
-    return NULL;
-  }
 
-  jstring jname = (*env)->NewStringUTF(env, entry->d_name);
-  return (*env)->CallStaticObjectMethod(
-          env, clazz, dirent_create, entry->d_ino, entry->d_type, jname);
+    jstring jname = (*env)->NewStringUTF(env, entry->d_name);
+    return (*env)->CallStaticObjectMethod(
+            env, clazz, dirent_create, entry->d_ino, entry->d_type, jname);
 }
