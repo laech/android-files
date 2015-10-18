@@ -3,11 +3,11 @@ package l.files.ui.browser;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
+import com.ibm.icu.text.CollationKey;
 import com.ibm.icu.text.Collator;
 
 import java.io.IOException;
 
-import l.files.collation.NaturalKey;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -50,6 +50,8 @@ abstract class BrowserItem {
     @AutoValue
     static abstract class FileItem extends BrowserItem implements Comparable<FileItem> {
 
+        private Collator collator;
+        private CollationKey collationKey;
         private Boolean readable;
 
         FileItem() {
@@ -92,8 +94,12 @@ abstract class BrowserItem {
             return linkTargetStat() != null ? linkTargetStat() : selfStat();
         }
 
-        // TODO compute this lazyly
-        abstract NaturalKey collationKey();
+        private CollationKey collationKey() {
+            if (collationKey == null) {
+                collationKey = collator.getCollationKey(selfFile().name().toString());
+            }
+            return collationKey;
+        }
 
         @Override
         boolean isFileItem() {
@@ -111,9 +117,9 @@ abstract class BrowserItem {
                 @Nullable File target,
                 @Nullable Stat targetStat,
                 Collator collator) {
-            String name = file.name().toString();
-            NaturalKey key = NaturalKey.create(collator, name);
-            return new AutoValue_BrowserItem_FileItem(file, stat, target, targetStat, key);
+            FileItem item = new AutoValue_BrowserItem_FileItem(file, stat, target, targetStat);
+            item.collator = collator;
+            return item;
         }
     }
 
