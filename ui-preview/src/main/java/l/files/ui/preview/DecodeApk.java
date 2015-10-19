@@ -56,6 +56,9 @@ final class DecodeApk extends DecodeThumbnail {
     @Override
     Result decode() throws IOException {
         Drawable drawable = loadApkIcon();
+        if (drawable == null) {
+            return null;
+        }
         Bitmap bitmap = toBitmap(drawable);
         Rect size = Rect.of(bitmap.getWidth(), bitmap.getHeight());
         return new Result(bitmap, size);
@@ -64,6 +67,9 @@ final class DecodeApk extends DecodeThumbnail {
     private Drawable loadApkIcon() {
         PackageManager manager = context.context.getPackageManager();
         PackageInfo info = manager.getPackageArchiveInfo(file.path(), 0);
+        if (info == null) {
+            return null;
+        }
         ApplicationInfo app = info.applicationInfo;
         app.sourceDir = app.publicSourceDir = file.path();
         return app.loadIcon(manager);
