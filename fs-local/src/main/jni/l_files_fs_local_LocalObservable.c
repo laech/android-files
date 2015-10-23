@@ -3,7 +3,6 @@
 #include <sys/inotify.h>
 #include "util.h"
 #include <unistd.h>
-//#include <android/log.h>
 
 static jmethodID method_onEvent;
 static jmethodID method_isClosed;
@@ -23,14 +22,22 @@ void Java_l_files_fs_local_LocalObservable_observe(
     char *p;
     struct inotify_event *event;
 
-    while (!(*env)->CallBooleanMethod(env, object, method_isClosed)) {
+    for (; ;) {
+
         num_bytes = read(fd, buf, BUF_SIZE);
         if (num_bytes == -1) {
+
+            if ((*env)->CallBooleanMethod(env, object, method_isClosed)) {
+                break;
+            }
+
             if (EINTR == errno) {
                 continue;
             }
+
             throw_errno_exception(env);
             return;
+
         }
 
         for (p = buf; p < buf + num_bytes;) {
