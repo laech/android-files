@@ -10,12 +10,12 @@ import static l.files.ui.operations.Styles.getResourceId;
 
 final class CopyViewer extends ProgressViewer {
 
-    public CopyViewer(final Context context, final Clock clock) {
-        super(context, clock);
+    CopyViewer(Clock clock) {
+        super(clock);
     }
 
     @Override
-    protected Progress getWork(final TaskState.Running state) {
+    protected Progress getWork(TaskState.Running state) {
         return state.getBytes();
     }
 
@@ -35,7 +35,7 @@ final class CopyViewer extends ProgressViewer {
     }
 
     @Override
-    public int getSmallIcon(final Context context) {
+    public int getSmallIcon(Context context) {
         return getResourceId(android.R.attr.actionModeCopyDrawable, context);
     }
 }

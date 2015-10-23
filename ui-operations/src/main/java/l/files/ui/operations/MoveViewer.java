@@ -10,8 +10,8 @@ import static l.files.ui.operations.Styles.getResourceId;
 
 final class MoveViewer extends ProgressViewer {
 
-    MoveViewer(Context context, Clock system) {
-        super(context, system);
+    MoveViewer(Clock system) {
+        super(system);
     }
 
     @Override

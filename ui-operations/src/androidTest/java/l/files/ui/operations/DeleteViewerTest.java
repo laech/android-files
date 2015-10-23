@@ -10,7 +10,7 @@ public final class DeleteViewerTest extends ProgressViewerTest {
 
     @Override
     protected DeleteViewer create(Context context, Clock clock) {
-        return new DeleteViewer(context, clock);
+        return new DeleteViewer(clock);
     }
 
     @Override

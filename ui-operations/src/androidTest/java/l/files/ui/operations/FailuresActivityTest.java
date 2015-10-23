@@ -26,7 +26,7 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
     public void testSetsTitleFromIntent() {
         String title = "hello";
         setActivityIntent(newIntent().putExtra(EXTRA_TITLE, title));
-        assertEquals(title, getActivity().getTitle());
+        assertEquals(title, getActivity().getActionBar().getTitle());
     }
 
     public void testSetsFailuresFromIntent() {

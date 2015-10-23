@@ -10,7 +10,7 @@ public final class CopyViewerTest extends ProgressViewerTest {
 
     @Override
     protected CopyViewer create(Context context, Clock clock) {
-        return new CopyViewer(context, clock);
+        return new CopyViewer(clock);
     }
 
     @Override

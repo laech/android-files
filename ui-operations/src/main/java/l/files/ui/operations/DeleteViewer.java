@@ -8,12 +8,12 @@ import l.files.operations.TaskState;
 
 final class DeleteViewer extends ProgressViewer {
 
-    public DeleteViewer(final Context context, final Clock clock) {
-        super(context, clock);
+    DeleteViewer(Clock clock) {
+        super(clock);
     }
 
     @Override
-    protected Progress getWork(final TaskState.Running state) {
+    protected Progress getWork(TaskState.Running state) {
         return state.getItems();
     }
 
@@ -28,7 +28,7 @@ final class DeleteViewer extends ProgressViewer {
     }
 
     @Override
-    public int getSmallIcon(final Context context) {
+    public int getSmallIcon(Context context) {
         return R.drawable.ic_delete_white_24dp;
     }
 

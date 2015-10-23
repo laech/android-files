@@ -13,19 +13,19 @@ interface TaskStateViewer {
     int getSmallIcon(Context context);
 
     // android.app.Notification.Builder#setContentTitle(CharSequence)
-    String getContentTitle(TaskState.Pending state);
+    String getContentTitle(Context context, TaskState.Pending state);
 
-    String getContentTitle(TaskState.Running state);
+    String getContentTitle(Context context, TaskState.Running state);
 
-    String getContentTitle(TaskState.Failed state);
+    String getContentTitle(Context context, TaskState.Failed state);
 
     // android.app.Notification.Builder#setContentText(CharSequence)
-    String getContentText(TaskState.Running state);
+    String getContentText(Context context, TaskState.Running state);
 
     // android.app.Notification.Builder#setContentInfo(CharSequence)
-    String getContentInfo(TaskState.Running state);
+    String getContentInfo(Context context, TaskState.Running state);
 
     // android.app.Notification.Builder#setProgress(int, int, boolean)
-    float getProgress(TaskState.Running state);
+    float getProgress(Context context, TaskState.Running state);
 
 }

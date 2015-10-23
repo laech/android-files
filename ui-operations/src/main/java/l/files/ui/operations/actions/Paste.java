@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.File;
-import l.files.operations.OperationService;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.app.LoaderManager.LoaderCallbacks;
@@ -22,6 +21,8 @@ import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.operations.OperationService.newCopyIntent;
+import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.ui.operations.actions.Clipboards.clear;
 import static l.files.ui.operations.actions.Clipboards.getFiles;
 import static l.files.ui.operations.actions.Clipboards.isCopy;
@@ -76,9 +77,9 @@ public final class Paste extends OptionsMenuAction
     @Override
     protected void onItemSelected(MenuItem item) {
         if (isCopy(manager)) {
-            OperationService.copy(context, getFiles(manager), destination);
+            context.startService(newCopyIntent(context, getFiles(manager), destination));
         } else if (isCut(manager)) {
-            OperationService.move(context, getFiles(manager), destination);
+            context.startService(newMoveIntent(context, getFiles(manager), destination));
             clear(manager);
         }
     }

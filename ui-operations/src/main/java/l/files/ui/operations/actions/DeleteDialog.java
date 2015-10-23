@@ -1,6 +1,7 @@
 package l.files.ui.operations.actions;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
@@ -11,8 +12,9 @@ import android.view.ActionMode;
 import java.util.Collection;
 
 import l.files.fs.File;
-import l.files.operations.OperationService;
 import l.files.ui.operations.R;
+
+import static l.files.operations.OperationService.newDeleteIntent;
 
 public final class DeleteDialog extends DialogFragment {
 
@@ -62,7 +64,8 @@ public final class DeleteDialog extends DialogFragment {
     }
 
     private void requestDelete(Collection<? extends File> files) {
-        OperationService.delete(getActivity(), files);
+        Activity context = getActivity();
+        context.startService(newDeleteIntent(context, files));
     }
 
     private String getConfirmMessage(int size) {

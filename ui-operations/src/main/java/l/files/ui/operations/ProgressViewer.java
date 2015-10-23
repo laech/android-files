@@ -16,21 +16,19 @@ import static l.files.ui.operations.Formats.formatTimeRemaining;
  */
 abstract class ProgressViewer implements TaskStateViewer {
 
-    private final Context context;
     private final Clock clock;
 
-    ProgressViewer(Context context, Clock clock) {
-        this.context = requireNonNull(context, "context");
+    ProgressViewer(Clock clock) {
         this.clock = requireNonNull(clock, "clock");
     }
 
     @Override
-    public final String getContentTitle(TaskState.Pending state) {
+    public final String getContentTitle(Context context, TaskState.Pending state) {
         return context.getString(R.string.pending);
     }
 
     @Override
-    public final String getContentTitle(TaskState.Running state) {
+    public final String getContentTitle(Context context, TaskState.Running state) {
         if (state.getItems().isDone() || state.getBytes().isDone()) {
             return context.getString(R.string.cleaning_up);
         }
@@ -42,17 +40,17 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public String getContentTitle(TaskState.Failed state) {
+    public String getContentTitle(Context context, TaskState.Failed state) {
         return context.getResources()
                 .getQuantityString(getTitleFailed(), state.getFailures().size());
     }
 
     @Override
-    public final String getContentText(TaskState.Running state) {
-        return getItemsRemaining(state);
+    public final String getContentText(Context context, TaskState.Running state) {
+        return getItemsRemaining(context, state);
     }
 
-    private String getItemsRemaining(TaskState.Running state) {
+    private String getItemsRemaining(Context context, TaskState.Running state) {
         long count = state.getItems().getLeft();
         long size = state.getBytes().getLeft();
         if (count == 0 || size == 0) {
@@ -63,11 +61,11 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public final String getContentInfo(TaskState.Running state) {
-        return getTimeRemaining(state);
+    public final String getContentInfo(Context context, TaskState.Running state) {
+        return getTimeRemaining(context, state);
     }
 
-    private String getTimeRemaining(TaskState.Running state) {
+    private String getTimeRemaining(Context context, TaskState.Running state) {
         String formatted = formatTimeRemaining(
                 state.getTime().getTick(),
                 clock.tick(),
@@ -80,7 +78,7 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     @Override
-    public final float getProgress(TaskState.Running value) {
+    public final float getProgress(Context context, TaskState.Running value) {
         return getWork(value).getProcessedPercentage();
     }
 

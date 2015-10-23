@@ -1,6 +1,7 @@
 package l.files.operations;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 
 import java.util.ArrayList;
@@ -20,10 +21,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.operations.OperationService.ACTION_CANCEL;
 import static l.files.operations.OperationService.EXTRA_TASK_ID;
-import static l.files.operations.OperationService.copy;
-import static l.files.operations.OperationService.delete;
-import static l.files.operations.OperationService.move;
 import static l.files.operations.OperationService.newCancelIntent;
+import static l.files.operations.OperationService.newCopyIntent;
+import static l.files.operations.OperationService.newDeleteIntent;
+import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
@@ -32,7 +33,17 @@ import static org.mockito.Mockito.verify;
 
 public final class OperationServiceTest extends FileBaseTest {
 
-    public void testCancelIntent() throws Exception {
+    private OperationService service;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        service = new OperationService();
+        service.foreground = false;
+    }
+
+    public void test_cancel_intent() throws Exception {
+
         Intent intent = newCancelIntent(getContext(), 101);
         assertEquals(ACTION_CANCEL, intent.getAction());
         assertEquals(101, intent.getIntExtra(EXTRA_TASK_ID, -1));
@@ -40,111 +51,78 @@ public final class OperationServiceTest extends FileBaseTest {
                 intent.getComponent());
     }
 
-    public void testCancelTaskNotFound() throws Exception {
-        OperationService service = new OperationService();
+    public void test_cancel_task_not_found() throws Exception {
+
+        TaskListener listener = mock(TaskListener.class);
+        service.listener = listener;
         service.onCreate();
-        TaskListener listener = register(mock(TaskListener.class));
-        try {
 
-            service.onStartCommand(newCancelIntent(getContext(), 1011), 0, 0);
-            verify(listener).onNotFound(TaskNotFound.create(1011));
+        service.onStartCommand(newCancelIntent(getContext(), 1011), 0, 0);
 
-        } finally {
-            unregister(listener);
-        }
+        verify(listener).onNotFound(service, TaskNotFound.create(1011));
     }
 
-    public void testMovesFile() throws Exception {
+    public void test_moves_file() throws Exception {
+
         File src = dir1().resolve("a").createFile();
         File dst = dir1().resolve("dst").createDir();
-        CountDownListener listener = register(new CountDownListener(MOVE));
-        try {
+        CountDownListener listener = new CountDownListener(MOVE);
+        service.listener = listener;
+        service.onCreate();
 
-            move(getContext(), singleton(src), dst);
-            listener.await();
-            assertFalse(src.exists(NOFOLLOW));
-            assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
+        service.onStartCommand(newMoveIntent(getContext(), singleton(src), dst), 0, 0);
 
-        } finally {
-            unregister(listener);
-        }
+        listener.await();
+        assertFalse(src.exists(NOFOLLOW));
+        assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
     }
 
-    public void testCopiesFile() throws Exception {
+    public void test_copies_file() throws Exception {
+
         File src = dir1().resolve("a").createFile();
         File dst = dir1().resolve("dst").createDir();
-        CountDownListener listener = register(new CountDownListener(COPY));
-        try {
+        CountDownListener listener = new CountDownListener(COPY);
+        service.listener = listener;
+        service.onCreate();
 
-            copy(getContext(), singleton(src), dst);
-            listener.await();
-            assertTrue(src.exists(NOFOLLOW));
-            assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
+        service.onStartCommand(newCopyIntent(getContext(), singleton(src), dst), 0, 0);
 
-        } finally {
-            unregister(listener);
-        }
+        listener.await();
+        assertTrue(src.exists(NOFOLLOW));
+        assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
     }
 
-    public void testDeletesFiles() throws Exception {
+    public void test_deletes_files() throws Exception {
+
         File a = dir1().resolve("a").createFiles();
         File b = dir1().resolve("b/c").createFiles();
-        CountDownListener listener = register(new CountDownListener(DELETE));
-        try {
+        CountDownListener listener = new CountDownListener(DELETE);
+        service.listener = listener;
+        service.onCreate();
 
-            delete(getContext(), new HashSet<>(asList(a, b)));
-            listener.await();
-            assertFalse(a.exists(NOFOLLOW));
-            assertFalse(b.exists(NOFOLLOW));
+        service.onStartCommand(newDeleteIntent(getContext(), asList(a, b)), 0, 0);
 
-        } finally {
-            unregister(listener);
-        }
+        listener.await();
+        assertFalse(a.exists(NOFOLLOW));
+        assertFalse(b.exists(NOFOLLOW));
     }
 
-    public void testTaskIdIsUnique() throws Exception {
-        CountDownListener listener = register(new CountDownListener(DELETE, 2));
-        try {
+    public void test_task_start_time_is_correct() throws Exception {
 
-            delete(getContext(), singleton(dir1().resolve("a").createFile()));
-            delete(getContext(), singleton(dir1().resolve("2").createFile()));
-            listener.await();
-            assertTrue(listener.getValues().size() > 1);
-            assertEquals(2, getTaskIds(listener.getValues()).size());
-
-        } finally {
-            unregister(listener);
-        }
-    }
-
-    private Set<Integer> getTaskIds(List<? extends TaskState> values) {
-        Set<Integer> result = new HashSet<>();
-        for (TaskState value : values) {
-            result.add(value.getTask().getId());
-        }
-        return result;
-    }
-
-    public void testTaskStartTimeIsCorrect() throws Exception {
         File file1 = dir1().resolve("a").createFile();
         File file2 = dir1().resolve("b").createFile();
-        CountDownListener listener = register(new CountDownListener(DELETE));
-        try {
+        CountDownListener listener = new CountDownListener(DELETE);
+        service.listener = listener;
+        service.onCreate();
 
-            long start = currentTimeMillis();
-            {
-                delete(getContext(), new HashSet<>(asList(file1, file2)));
-                listener.await();
-            }
-            long end = currentTimeMillis();
+        long start = currentTimeMillis();
+        service.onStartCommand(newDeleteIntent(getContext(), asList(file1, file2)), 0, 0);
+        listener.await();
+        long end = currentTimeMillis();
 
-            Set<Long> times = getTaskStartTimes(listener.getValues());
-            assertTrue(times.iterator().next() >= start);
-            assertTrue(times.iterator().next() <= end);
-
-        } finally {
-            unregister(listener);
-        }
+        Set<Long> times = getTaskStartTimes(listener.getValues());
+        assertTrue(times.iterator().next() >= start);
+        assertTrue(times.iterator().next() <= end);
     }
 
     private Set<Long> getTaskStartTimes(List<? extends TaskState> values) {
@@ -153,15 +131,6 @@ public final class OperationServiceTest extends FileBaseTest {
             result.add(value.getTime().getTime());
         }
         return result;
-    }
-
-    private <T extends TaskListener> T register(T listener) {
-        OperationService.addListener(listener);
-        return listener;
-    }
-
-    private void unregister(TaskListener listener) {
-        OperationService.removeListener(listener);
     }
 
     private static class CountDownListener implements TaskListener {
@@ -180,7 +149,7 @@ public final class OperationServiceTest extends FileBaseTest {
         }
 
         @Override
-        public void onUpdate(TaskState state) {
+        public void onUpdate(Context context, TaskState state) {
             values.add(state);
             assertEquals(kind, state.getTask().getKind());
             if (state.isFinished()) {
@@ -197,8 +166,9 @@ public final class OperationServiceTest extends FileBaseTest {
         }
 
         @Override
-        public void onNotFound(TaskNotFound notFound) {
-
+        public void onNotFound(Context context, TaskNotFound notFound) {
         }
+
     }
+
 }

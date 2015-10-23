@@ -24,7 +24,6 @@ import l.files.fs.Stat;
 import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
-import l.files.ui.operations.OperationsUi;
 import l.files.ui.preview.Preview;
 
 import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
@@ -72,7 +71,6 @@ public final class FilesActivity extends BaseActivity implements
         super.onCreate(state);
         setContentView(R.layout.files_activity);
         Preview.get(getApplicationContext()).readCacheAsyncIfNeeded();
-        OperationsUi.init(getApplicationContext());
 
         toolbar = find(R.id.toolbar, this);
         hierarchy = new HierarchyAdapter();

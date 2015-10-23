@@ -37,8 +37,8 @@ public final class FailuresActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.failures_activity);
         setActionBar(Views.<Toolbar>find(R.id.toolbar, this));
-        getActionBar().setTitle(getIntent().getStringExtra(EXTRA_TITLE));
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setTitle(getIntent().getStringExtra(EXTRA_TITLE));
     }
 
     @Override

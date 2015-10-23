@@ -15,8 +15,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 
 import l.files.fs.File;
@@ -28,6 +26,7 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.operations.OperationService.FileAction.COPY;
 import static l.files.operations.OperationService.FileAction.DELETE;
 import static l.files.operations.OperationService.FileAction.MOVE;
+import static l.files.operations.R.string.l_files_operations_listeners;
 
 /**
  * Base class for services that perform operations on files.
@@ -43,49 +42,39 @@ public final class OperationService extends Service {
     static final String EXTRA_DESTINATION = "destination";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
-    private static final Set<TaskListener> listeners = new CopyOnWriteArraySet<>();
 
-    public static void addListener(TaskListener listener) {
-        listeners.add(listener);
+    public static Intent newDeleteIntent(Context context, Collection<? extends File> files) {
+        return new Intent(context, OperationService.class)
+                .setAction(DELETE.action())
+                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files));
     }
 
-    public static void removeListener(TaskListener listener) {
-        listeners.remove(listener);
-    }
-
-    public static void delete(Context context, Collection<? extends File> files) {
-        context.startService(
-                new Intent(context, OperationService.class)
-                        .setAction(DELETE.action())
-                        .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files))
-        );
-    }
-
-    public static void copy(
+    public static Intent newCopyIntent(
             Context context,
             Collection<? extends File> sources,
             File destination) {
-        paste(COPY.action(), context, sources, destination);
+
+        return newPasteIntent(COPY.action(), context, sources, destination);
     }
 
-    public static void move(
+    public static Intent newMoveIntent(
             Context context,
             Collection<? extends File> sources,
             File destination) {
-        paste(MOVE.action(), context, sources, destination);
+
+        return newPasteIntent(MOVE.action(), context, sources, destination);
     }
 
-    private static void paste(
+    private static Intent newPasteIntent(
             String action,
             Context context,
             Collection<? extends File> sources,
             File destination) {
-        context.startService(
-                new Intent(context, OperationService.class)
-                        .setAction(action)
-                        .putExtra(EXTRA_DESTINATION, destination)
-                        .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(sources))
-        );
+
+        return new Intent(context, OperationService.class)
+                .setAction(action)
+                .putExtra(EXTRA_DESTINATION, destination)
+                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(sources));
     }
 
     public static PendingIntent newCancelPendingIntent(Context context, int id) {
@@ -101,6 +90,9 @@ public final class OperationService extends Service {
     private Handler handler;
     private Map<Integer, AsyncTask<?, ?, ?>> tasks;
 
+    TaskListener listener;
+    boolean foreground = true;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -111,6 +103,18 @@ public final class OperationService extends Service {
         super.onCreate();
         tasks = new HashMap<>();
         handler = new Handler(Looper.getMainLooper());
+        if (listener == null) {
+            listener = findListener();
+        }
+    }
+
+    private TaskListener findListener() {
+        try {
+            String className = getString(l_files_operations_listeners);
+            return (TaskListener) Class.forName(className).newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -139,9 +143,11 @@ public final class OperationService extends Service {
         // A dummy notification so that the service can use startForeground, making
         // it less likely to be destroy, the notification will be replaced with ones
         // from operations-ui
-        startForeground(startId, new Notification.Builder(this)
-                .setSmallIcon(R.drawable.ic_storage_white_24dp)
-                .build());
+        if (foreground) {
+            startForeground(startId, new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.ic_storage_white_24dp)
+                    .build());
+        }
 
         Task task = newTask(data, startId, handler, new Callback() {
             @Override
@@ -152,16 +158,13 @@ public final class OperationService extends Service {
                         stopSelf();
                     }
                 }
-                for (TaskListener listener : listeners) {
-                    listener.onUpdate(state);
-                }
+                listener.onUpdate(OperationService.this, state);
             }
         });
         tasks.put(startId, task.executeOnExecutor(executor));
     }
 
     private Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-        intent.setExtrasClassLoader(getClassLoader());
         return FileAction
                 .fromIntent(intent.getAction())
                 .newTask(intent, id, handler, callback);
@@ -173,10 +176,7 @@ public final class OperationService extends Service {
         if (task != null) {
             task.cancel(true);
         } else {
-            TaskNotFound notFound = TaskNotFound.create(startId);
-            for (TaskListener listener : listeners) {
-                listener.onNotFound(notFound);
-            }
+            listener.onNotFound(this, TaskNotFound.create(startId));
         }
         if (tasks.isEmpty()) {
             stopSelf();
@@ -235,9 +235,9 @@ public final class OperationService extends Service {
 
     public interface TaskListener {
 
-        void onUpdate(TaskState state);
+        void onUpdate(Context context, TaskState state);
 
-        void onNotFound(TaskNotFound notFound);
+        void onNotFound(Context context, TaskNotFound notFound);
 
     }
 
