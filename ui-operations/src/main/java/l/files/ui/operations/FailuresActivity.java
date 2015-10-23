@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import l.files.ui.base.view.Views;
 
 public final class FailuresActivity extends Activity {
 
@@ -33,7 +36,8 @@ public final class FailuresActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.failures_activity);
-        setTitle(getIntent().getStringExtra(EXTRA_TITLE));
+        setActionBar(Views.<Toolbar>find(R.id.toolbar, this));
+        getActionBar().setTitle(getIntent().getStringExtra(EXTRA_TITLE));
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 

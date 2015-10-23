@@ -1,6 +1,7 @@
 package l.files.ui.operations;
 
 import android.app.ListFragment;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+
+import static android.graphics.Color.TRANSPARENT;
 
 public final class FailuresFragment extends ListFragment {
 
@@ -20,6 +23,7 @@ public final class FailuresFragment extends ListFragment {
 
         adapter = new Adapter();
         setListAdapter(adapter);
+        getListView().setSelector(new ColorDrawable(TRANSPARENT));
     }
 
     public void setFailures(List<FailureMessage> failures) {

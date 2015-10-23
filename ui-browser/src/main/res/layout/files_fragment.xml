@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/file_list_fragment"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -15,7 +14,7 @@
         android:paddingStart="@dimen/files_list_space"
         android:paddingTop="8dp"
         android:scrollbarStyle="outsideOverlay"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical" />
 
     <TextView
         android:id="@android:id/empty"
@@ -23,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:paddingBottom="?android:actionBarSize"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <ProgressBar
         android:id="@android:id/progress"
@@ -32,11 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:paddingBottom="?android:actionBarSize"
-        android:visibility="gone"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@drawable/toolbar_shadow"/>
+        android:visibility="gone" />
 
 </RelativeLayout>

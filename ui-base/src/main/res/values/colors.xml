@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="activated_highlight">#aa009688</color>
+    <color name="color_primary_dark">#0d2b48</color>
+    <color name="color_primary">#1d3b58</color>
 </resources>
