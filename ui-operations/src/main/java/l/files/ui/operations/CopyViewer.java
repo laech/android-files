@@ -16,7 +16,7 @@ final class CopyViewer extends ProgressViewer {
 
     @Override
     protected Progress getWork(TaskState.Running state) {
-        return state.getBytes();
+        return state.bytes();
     }
 
     @Override

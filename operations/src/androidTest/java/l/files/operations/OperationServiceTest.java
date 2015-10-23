@@ -128,7 +128,7 @@ public final class OperationServiceTest extends FileBaseTest {
     private Set<Long> getTaskStartTimes(List<? extends TaskState> values) {
         Set<Long> result = new HashSet<>();
         for (TaskState value : values) {
-            result.add(value.getTime().getTime());
+            result.add(value.time().time());
         }
         return result;
     }
@@ -151,7 +151,7 @@ public final class OperationServiceTest extends FileBaseTest {
         @Override
         public void onUpdate(Context context, TaskState state) {
             values.add(state);
-            assertEquals(kind, state.getTask().getKind());
+            assertEquals(kind, state.task().kind());
             if (state.isFinished()) {
                 latch.countDown();
             }

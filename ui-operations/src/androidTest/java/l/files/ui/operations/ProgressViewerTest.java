@@ -99,10 +99,10 @@ public abstract class ProgressViewerTest extends BaseTest {
         TaskState.Running state = setProgress(running, Progress.create(1, 0));
         state = state.running(
                 Progress.create(100, 0),
-                state.getBytes()
+                state.bytes()
         );
         String expected = res.getQuantityString(
-                getTitlePreparing(), 100, 100, state.getTarget().dstDir());
+                getTitlePreparing(), 100, 100, state.target().dstDir());
         String actual = viewer.getContentTitle(getContext(), state);
         assertEquals(expected, actual);
     }
@@ -111,12 +111,12 @@ public abstract class ProgressViewerTest extends BaseTest {
         TaskState.Running state = setProgress(running, Progress.create(2, 1));
         state = state.running(
                 Progress.create(100, 1),
-                state.getBytes()
+                state.bytes()
         );
 
         String actual = viewer.getContentTitle(getContext(), state);
         String expected = res.getQuantityString(
-                getTitleRunning(), 100, 100, state.getTarget().dstDir());
+                getTitleRunning(), 100, 100, state.target().dstDir());
         assertEquals(expected, actual);
     }
 

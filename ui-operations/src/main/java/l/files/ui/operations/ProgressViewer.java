@@ -29,20 +29,24 @@ abstract class ProgressViewer implements TaskStateViewer {
 
     @Override
     public final String getContentTitle(Context context, TaskState.Running state) {
-        if (state.getItems().isDone() || state.getBytes().isDone()) {
+        if (state.items().isDone() || state.bytes().isDone()) {
             return context.getString(R.string.cleaning_up);
         }
-        int total = (int) state.getItems().getTotal();
-        int template = getWork(state).getProcessed() > 0
+        int total = (int) state.items().total();
+        int template = getWork(state).processed() > 0
                 ? getTitleRunning() : getTitlePreparing();
-        return context.getResources().getQuantityString(template, total, total,
-                state.getTarget().dstDir());
+        return context.getResources().getQuantityString(
+                template,
+                total,
+                total,
+                state.target().dstDir().name()
+        );
     }
 
     @Override
     public String getContentTitle(Context context, TaskState.Failed state) {
         return context.getResources()
-                .getQuantityString(getTitleFailed(), state.getFailures().size());
+                .getQuantityString(getTitleFailed(), state.failures().size());
     }
 
     @Override
@@ -51,8 +55,8 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     private String getItemsRemaining(Context context, TaskState.Running state) {
-        long count = state.getItems().getLeft();
-        long size = state.getBytes().getLeft();
+        long count = state.items().getLeft();
+        long size = state.bytes().getLeft();
         if (count == 0 || size == 0) {
             return "";
         }
@@ -67,10 +71,10 @@ abstract class ProgressViewer implements TaskStateViewer {
 
     private String getTimeRemaining(Context context, TaskState.Running state) {
         String formatted = formatTimeRemaining(
-                state.getTime().getTick(),
+                state.time().tick(),
                 clock.tick(),
-                getWork(state).getTotal(),
-                getWork(state).getProcessed());
+                getWork(state).total(),
+                getWork(state).processed());
         if (formatted != null) {
             return context.getString(R.string.x_countdown, formatted);
         }
@@ -94,7 +98,7 @@ abstract class ProgressViewer implements TaskStateViewer {
      * Gets the title template to display when the task is in the running state.
      * The returned template must be a {@link R.plurals} template and have two
      * place holders, the first one is for the number of items being processed,
-     * the other one is for {@link TaskState#getTarget()}'s destination.
+     * the other one is for {@link TaskState#target()}'s destination.
      */
     protected abstract int getTitleRunning();
 

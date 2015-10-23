@@ -16,7 +16,7 @@ public final class CopyViewerTest extends ProgressViewerTest {
     @Override
     protected TaskState.Running setProgress(
             TaskState.Running state, Progress progress) {
-        return state.running(state.getItems(), progress);
+        return state.running(state.items(), progress);
     }
 
     @Override

@@ -26,14 +26,6 @@ public abstract class Target {
      */
     public abstract File dstDir();
 
-    public List<File> dstFiles() {
-        List<File> dstFiles = new ArrayList<>(srcFiles().size());
-        for (File src : srcFiles()) {
-            dstFiles.add(dstDir().resolve(src.name()));
-        }
-        return dstFiles;
-    }
-
     public static Target from(Collection<? extends File> srcFiles, File dstDir) {
         return new AutoValue_Target(
                 unmodifiableList(new ArrayList<>(srcFiles)), dstDir);

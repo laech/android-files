@@ -153,7 +153,7 @@ public final class OperationService extends Service {
             @Override
             public void onUpdate(TaskState state) {
                 if (state.isFinished()) {
-                    tasks.remove(state.getTask().getId());
+                    tasks.remove(state.task().id());
                     if (tasks.isEmpty()) {
                         stopSelf();
                     }

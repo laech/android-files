@@ -9,8 +9,8 @@ public final class TimeTest extends BaseTest {
 
     public void testCreate() throws Exception {
         Time time = Time.create(1, 2);
-        assertEquals(1, time.getTime());
-        assertEquals(2, time.getTick());
+        assertEquals(1, time.time());
+        assertEquals(2, time.tick());
     }
 
     public void testCreateFromClock() throws Exception {
@@ -18,8 +18,8 @@ public final class TimeTest extends BaseTest {
         given(clock.time()).willReturn(1L);
         given(clock.tick()).willReturn(2L);
         Time time = Time.from(clock);
-        assertEquals(1, time.getTime());
-        assertEquals(2, time.getTick());
+        assertEquals(1, time.time());
+        assertEquals(2, time.tick());
     }
 
 }

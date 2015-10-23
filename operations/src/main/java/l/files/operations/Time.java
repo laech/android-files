@@ -12,13 +12,13 @@ public abstract class Time {
      * The clock time in millis, the clock changes with the user setting the
      * system clock.
      */
-    public abstract long getTime();
+    public abstract long time();
 
     /**
      * Some arbitrary millis since system boot, won't be affected by user
      * changing the system time.
      */
-    public abstract long getTick();
+    public abstract long tick();
 
     public static Time create(long time, long tick) {
         return new AutoValue_Time(time, tick);

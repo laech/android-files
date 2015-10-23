@@ -27,9 +27,9 @@ public final class TaskStateTest extends BaseTest {
     }
 
     public void testCreatePending() throws Exception {
-        assertEquals(task, pending.getTask());
-        assertEquals(time, pending.getTime());
-        assertEquals(target, pending.getTarget());
+        assertEquals(task, pending.task());
+        assertEquals(time, pending.time());
+        assertEquals(target, pending.target());
     }
 
     public void testPendingToRunning() throws Exception {
@@ -37,21 +37,21 @@ public final class TaskStateTest extends BaseTest {
         Progress bytes = Progress.create(10100, 0);
         Time time = Time.create(1010, 11);
         TaskState.Running state = pending.running(time, items, bytes);
-        assertEquals(task, state.getTask());
-        assertEquals(time, state.getTime());
-        assertEquals(items, state.getItems());
-        assertEquals(bytes, state.getBytes());
-        assertEquals(target, state.getTarget());
+        assertEquals(task, state.task());
+        assertEquals(time, state.time());
+        assertEquals(items, state.items());
+        assertEquals(bytes, state.bytes());
+        assertEquals(target, state.target());
     }
 
     public void testPendingToRunningWithoutProgress() throws Exception {
         Time time = Time.create(10101, 100);
         TaskState.Running state = pending.running(time);
-        assertEquals(task, state.getTask());
-        assertEquals(time, state.getTime());
-        assertEquals(target, state.getTarget());
-        assertEquals(Progress.NONE, state.getItems());
-        assertEquals(Progress.NONE, state.getBytes());
+        assertEquals(task, state.task());
+        assertEquals(time, state.time());
+        assertEquals(target, state.target());
+        assertEquals(Progress.NONE, state.items());
+        assertEquals(Progress.NONE, state.bytes());
 
     }
 
@@ -60,19 +60,19 @@ public final class TaskStateTest extends BaseTest {
         Progress items = Progress.create(4, 2);
         Progress bytes = Progress.create(9, 2);
         TaskState.Running state = pending.running(time).running(items, bytes);
-        assertEquals(task, state.getTask());
-        assertEquals(time, state.getTime());
-        assertEquals(items, state.getItems());
-        assertEquals(bytes, state.getBytes());
-        assertEquals(target, state.getTarget());
+        assertEquals(task, state.task());
+        assertEquals(time, state.time());
+        assertEquals(items, state.items());
+        assertEquals(bytes, state.bytes());
+        assertEquals(target, state.target());
     }
 
     public void testRunningToSuccess() throws Exception {
         Time successTime = Time.create(2, 2);
         TaskState state = pending.running(time).success(successTime);
-        assertEquals(task, state.getTask());
-        assertEquals(successTime, state.getTime());
-        assertEquals(target, state.getTarget());
+        assertEquals(task, state.task());
+        assertEquals(successTime, state.time());
+        assertEquals(target, state.target());
     }
 
     public void testRunningToFailed() throws Exception {
@@ -81,10 +81,10 @@ public final class TaskStateTest extends BaseTest {
                 LocalFile.of("1"), new IOException("ok")
         ));
         TaskState.Failed state = pending.running(time).failed(failureTime, failures);
-        assertEquals(task, state.getTask());
-        assertEquals(failureTime, state.getTime());
-        assertEquals(target, state.getTarget());
-        assertEquals(failures, state.getFailures());
+        assertEquals(task, state.task());
+        assertEquals(failureTime, state.time());
+        assertEquals(target, state.target());
+        assertEquals(failures, state.failures());
     }
 
 }

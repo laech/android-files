@@ -77,7 +77,7 @@ public final class NotificationProviderTest extends BaseTest {
     public void test_cancel_notification_on_success() {
 
         provider.onUpdate(context, base.running(Time.create(1, 1)).success(Time.create(2, 2)));
-        verify(manager, timeout(1000)).cancel(base.getTask().getId());
+        verify(manager, timeout(1000)).cancel(base.task().id());
         verifyNoMoreInteractions(manager);
     }
 
@@ -85,7 +85,7 @@ public final class NotificationProviderTest extends BaseTest {
 
         provider.onUpdate(context, base.running(Time.create(1, 1)));
         verify(manager, timeout(1000))
-                .notify(eq(base.getTask().getId()), notNull(Notification.class));
+                .notify(eq(base.task().id()), notNull(Notification.class));
         verifyNoMoreInteractions(manager);
     }
 
@@ -98,7 +98,7 @@ public final class NotificationProviderTest extends BaseTest {
                 .running(Time.create(1, 1))
                 .failed(Time.create(2, 2), failures));
         // See comment in class under test for this ID
-        int id = Integer.MAX_VALUE - base.getTask().getId();
+        int id = Integer.MAX_VALUE - base.task().id();
         verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
     }
 
@@ -107,7 +107,7 @@ public final class NotificationProviderTest extends BaseTest {
         provider.onUpdate(context, base
                 .running(Time.create(1, 1))
                 .failed(Time.create(2, 2), Collections.<Failure>emptyList()));
-        verify(manager, timeout(1000)).cancel(base.getTask().getId());
+        verify(manager, timeout(1000)).cancel(base.task().id());
     }
 
     public void test_create_failure_intent_with_correct_failure_data() throws Exception {

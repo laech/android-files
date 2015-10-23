@@ -10,9 +10,9 @@ public abstract class Progress {
     Progress() {
     }
 
-    public abstract long getTotal();
+    public abstract long total();
 
-    public abstract long getProcessed();
+    public abstract long processed();
 
     /**
      * Throws IllegalArgumentException if total < processed or negative
@@ -47,16 +47,16 @@ public abstract class Progress {
         if (NONE == this) {
             return 1F;
         } else {
-            return getProcessed() / (float) getTotal();
+            return processed() / (float) total();
         }
     }
 
     public long getLeft() {
-        return getTotal() - getProcessed();
+        return total() - processed();
     }
 
     public boolean isDone() {
-        return getTotal() == getProcessed();
+        return total() == processed();
     }
 
 }

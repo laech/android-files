@@ -19,19 +19,19 @@ public abstract class TaskState {
     /**
      * The source task this state is for.
      */
-    public abstract TaskId getTask();
+    public abstract TaskId task();
 
     /**
      * Gets the source/destination of the source task.
      */
-    public abstract Target getTarget();
+    public abstract Target target();
 
     /**
      * Gets the time when the state transitioned to this one. This time will
      * stay the same for subsequent state updates of the same kind. i.e. this
      * value will only change if the next state is of a different kind.
      */
-    public abstract Time getTime();
+    public abstract Time time();
 
     /**
      * Returns true if the task is finished (success or failure).
@@ -52,7 +52,7 @@ public abstract class TaskState {
 
         public Running running(Time time, Progress items, Progress bytes) {
             return new AutoValue_TaskState_Running(
-                    getTask(), getTarget(), time, items, bytes);
+                    task(), target(), time, items, bytes);
         }
 
     }
@@ -66,26 +66,26 @@ public abstract class TaskState {
         /**
          * Number of items to process.
          */
-        public abstract Progress getItems();
+        public abstract Progress items();
 
         /**
          * Number of bytes to process.
          */
-        public abstract Progress getBytes();
+        public abstract Progress bytes();
 
         public Running running(Progress items, Progress bytes) {
             // Do not update the time as specified by the contract on time()
             return new AutoValue_TaskState_Running(
-                    getTask(), getTarget(), getTime(), items, bytes);
+                    task(), target(), time(), items, bytes);
         }
 
         public Success success(Time time) {
             return new AutoValue_TaskState_Success(
-                    getTask(), getTarget(), time);
+                    task(), target(), time);
         }
 
         public Failed failed(Time time, List<Failure> failures) {
-            return new AutoValue_TaskState_Failed(getTask(), getTarget(), time,
+            return new AutoValue_TaskState_Failed(task(), target(), time,
                     unmodifiableList(new ArrayList<>(failures)));
         }
     }
@@ -106,7 +106,7 @@ public abstract class TaskState {
          * The file failures of the task, may be empty if the task if caused by
          * other errors.
          */
-        public abstract List<Failure> getFailures();
+        public abstract List<Failure> failures();
 
     }
 

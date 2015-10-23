@@ -80,26 +80,26 @@ public final class NotificationProvider implements TaskListener {
 
     private void onEvent(Context context, Pending state) {
         manager(context).notify(
-                state.getTask().getId(),
+                state.task().id(),
                 newIndeterminateNotification(context, state)
         );
     }
 
     private void onEvent(Context context, Running state) {
         manager(context).notify(
-                state.getTask().getId(),
+                state.task().id(),
                 newProgressNotification(context, state)
         );
     }
 
     private void onEvent(Context context, Failed state) {
-        manager(context).cancel(state.getTask().getId());
-        if (!state.getFailures().isEmpty()) {
+        manager(context).cancel(state.task().id());
+        if (!state.failures().isEmpty()) {
             // This is the last notification we will display for this task, and it
             // needs to stay until the user dismissed it, can't use the task ID as
             // the notification as when the service finishes, it will bring down the
             // startForeground notification with it.
-            int id = Integer.MAX_VALUE - state.getTask().getId();
+            int id = Integer.MAX_VALUE - state.task().id();
             manager(context).notify(id, newFailureNotification(context, state));
         }
         // If no file failures in collection, then failure is caused by some other
@@ -107,16 +107,16 @@ public final class NotificationProvider implements TaskListener {
     }
 
     private void onEvent(Context context, Success state) {
-        manager(context).cancel(state.getTask().getId());
+        manager(context).cancel(state.task().id());
     }
 
     @Override
     public void onNotFound(Context context, TaskNotFound notFound) {
-        manager(context).cancel(notFound.getTaskId());
+        manager(context).cancel(notFound.id());
     }
 
     private TaskStateViewer getViewer(TaskState state) {
-        TaskStateViewer viewer = viewers.get(state.getTask().getKind());
+        TaskStateViewer viewer = viewers.get(state.task().kind());
         if (viewer == null) {
             throw new AssertionError(state);
         }
@@ -140,7 +140,7 @@ public final class NotificationProvider implements TaskListener {
     private Notification newProgressNotification(Context context, Running state) {
         TaskStateViewer viewer = getViewer(state);
         String title = viewer.getContentTitle(context, state);
-        if (state.getItems().isDone() || state.getBytes().isDone()) {
+        if (state.items().isDone() || state.bytes().isDone()) {
             return newIndeterminateNotification(context, state, title);
         }
         int progressMax = 10000;
@@ -165,19 +165,19 @@ public final class NotificationProvider implements TaskListener {
                  * Set when to a fixed value to prevent flickering on update when there
                  * are multiple notifications being displayed/updated.
                  */
-                .setWhen(state.getTime().getTime())
+                .setWhen(state.time().time())
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .addAction(
                         R.drawable.ic_cancel_black_24dp,
                         context.getString(android.R.string.cancel),
-                        newCancelPendingIntent(context, state.getTask().getId()));
+                        newCancelPendingIntent(context, state.task().id()));
     }
 
     private Notification newFailureNotification(Context context, Failed state) {
         Intent intent = getFailureIntent(context, state);
         PendingIntent pending = getActivity(
-                context, state.getTask().getId(), intent, FLAG_UPDATE_CURRENT);
+                context, state.task().id(), intent, FLAG_UPDATE_CURRENT);
         return new Notification.Builder(context)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentTitle(getTitle(intent))
@@ -188,7 +188,7 @@ public final class NotificationProvider implements TaskListener {
 
     Intent getFailureIntent(Context context, Failed state) {
         TaskStateViewer viewer = getViewer(state);
-        Collection<l.files.operations.Failure> failures = state.getFailures();
+        Collection<l.files.operations.Failure> failures = state.failures();
         ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
         for (l.files.operations.Failure failure : failures) {
             messages.add(FailureMessage.create(

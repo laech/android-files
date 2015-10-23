@@ -13,7 +13,7 @@ public abstract class TaskNotFound {
     TaskNotFound() {
     }
 
-    public abstract int getTaskId();
+    public abstract int id();
 
     public static TaskNotFound create(int id) {
         return new AutoValue_TaskNotFound(id);

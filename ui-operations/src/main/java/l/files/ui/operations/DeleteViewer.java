@@ -14,7 +14,7 @@ final class DeleteViewer extends ProgressViewer {
 
     @Override
     protected Progress getWork(TaskState.Running state) {
-        return state.getItems();
+        return state.items();
     }
 
     @Override

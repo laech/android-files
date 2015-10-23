@@ -8,8 +8,8 @@ public final class TaskIdTest extends TestCase {
 
     public void testCreate() throws Exception {
         TaskId task = TaskId.create(101, COPY);
-        assertEquals(101, task.getId());
-        assertEquals(COPY, task.getKind());
+        assertEquals(101, task.id());
+        assertEquals(COPY, task.kind());
     }
 
 }
