@@ -13,7 +13,7 @@
         -->
         <activity
             android:name=".browser.FilesActivity"
-            android:theme="@style/Theme.NoActionBar"
+            android:theme="@style/Theme.NoActionBar.Overlay"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
