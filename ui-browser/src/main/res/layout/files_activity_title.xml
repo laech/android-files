@@ -13,6 +13,7 @@
         android:layout_gravity="center"
         android:ellipsize="end"
         android:fontFamily="sans-serif-thin"
+        android:gravity="center"
         android:maxLines="1"
         android:textStyle="bold" />
 
@@ -22,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:textSize="24sp" />
 
 </FrameLayout>
