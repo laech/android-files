@@ -50,14 +50,26 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
     }
 
     private void createFutureFiles(File dir) throws IOException {
-        dir.resolve("future").setLastModifiedTime(
-                FOLLOW, Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
+        dir.resolve("future")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365))
+                );
 
-        dir.resolve("future3").setLastModifiedTime(
-                FOLLOW, Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
+        dir.resolve("future3")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2))
+                );
 
-        dir.resolve("future5").setLastModifiedTime(
-                FOLLOW, Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));
+        dir.resolve("future5")
+                .createFiles()
+                .setLastModifiedTime(
+                        FOLLOW,
+                        Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5))
+                );
     }
 
 }

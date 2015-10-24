@@ -281,7 +281,12 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         private void setEnabled(FileItem file) {
-            itemView.setEnabled(file.isReadable());
+            boolean enable = file.isReadable();
+            icon.setEnabled(enable);
+            title.setEnabled(enable);
+            summary.setEnabled(enable);
+            linkIcon.setEnabled(enable);
+            linkPath.setEnabled(enable);
         }
 
         private void setTitle(FileItem file) {

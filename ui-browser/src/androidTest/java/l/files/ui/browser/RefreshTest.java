@@ -20,6 +20,7 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.Tests.timeout;
 
 public final class RefreshTest extends BaseFilesActivityTest {
@@ -135,6 +136,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         assertFalse(dst.exists(NOFOLLOW));
 
         screen()
+                .sort()
+                .by(MODIFIED)
                 .clickInto(linkedDir)
                 .assertListMatchesFileSystem(linkedDir)
                 .assertListViewContains(src, true)
