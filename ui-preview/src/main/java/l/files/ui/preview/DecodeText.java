@@ -84,7 +84,7 @@ final class DecodeText extends DecodeThumbnail {
         view.setBackgroundColor(WHITE);
         view.setTextColor(TEXT_COLOR);
         view.setTypeface(MONOSPACE);
-        view.setTextSize(COMPLEX_UNIT_SP, 11);
+        view.setTextSize(COMPLEX_UNIT_SP, 10);
         view.setPadding(padding, padding, padding, padding);
         view.setText(text.length() == PREVIEW_LIMIT ? text + "..." : text);
         view.measure(
