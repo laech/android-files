@@ -14,6 +14,7 @@
     <string name="ic_dir_video">&#xE04A;</string>
     <string name="ic_dir_music">&#xE030;</string>
     <string name="ic_dir_image">&#xE3B6;</string>
+    <string name="ic_dir_sdcard2">&#xE1C2;</string>
 
     <string name="ic_file">&#xE24D;</string>
     <string name="ic_file_archive">&#xE89B;</string>

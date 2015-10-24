@@ -16,6 +16,7 @@ import static l.files.ui.base.R.string.ic_dir_download;
 import static l.files.ui.base.R.string.ic_dir_home;
 import static l.files.ui.base.R.string.ic_dir_image;
 import static l.files.ui.base.R.string.ic_dir_music;
+import static l.files.ui.base.R.string.ic_dir_sdcard2;
 import static l.files.ui.base.R.string.ic_dir_video;
 import static l.files.ui.base.R.string.ic_file;
 import static l.files.ui.base.R.string.ic_file_archive;
@@ -31,6 +32,7 @@ import static l.files.ui.base.fs.UserDirs.DIR_MOVIES;
 import static l.files.ui.base.fs.UserDirs.DIR_MUSIC;
 import static l.files.ui.base.fs.UserDirs.DIR_PICTURES;
 import static l.files.ui.base.fs.UserDirs.DIR_ROOT;
+import static l.files.ui.base.fs.UserDirs.DIR_SDCARD2;
 
 public final class FileIcons {
     private static Typeface font;
@@ -47,6 +49,7 @@ public final class FileIcons {
         icons.put(DIR_MOVIES, ic_dir_video);
         icons.put(DIR_PICTURES, ic_dir_image);
         icons.put(DIR_DOWNLOADS, ic_dir_download);
+        icons.put(DIR_SDCARD2, ic_dir_sdcard2);
         return unmodifiableMap(icons);
     }
 
