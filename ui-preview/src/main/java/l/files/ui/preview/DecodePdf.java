@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -41,7 +42,6 @@ import static java.lang.Integer.parseInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static l.files.ui.preview.R.string.authority_pdfpreview;
 
 final class DecodePdf extends DecodeThumbnail {
 
@@ -83,7 +83,8 @@ final class DecodePdf extends DecodeThumbnail {
    * Need to use white background for decoded bitmap to avoid transparency
    * behind the PDF text, since the resulting bitmap is not transparent, use
    * JPEG compression to send the data back, using original bitmap pixel would
-   * be too big. Compressing to JPEG is also much faster than WEBP (~10x).
+   * be too big. Compressing to JPEG is also much faster than WEBP at time of
+   * writing.
    */
 
     private static final Executor requestPool = newFixedThreadPool(3);
@@ -121,7 +122,13 @@ final class DecodePdf extends DecodeThumbnail {
         }
     }
 
-    public static final class PdfPreviewProvider extends ContentProvider {
+    public static final class PdfPreviewProvider1 extends PdfPreviewProvider {
+    }
+
+    public static final class PdfPreviewProvider2 extends PdfPreviewProvider {
+    }
+
+    private static abstract class PdfPreviewProvider extends ContentProvider {
 
         private static final String PARAM_FILE = "file";
         private static final String PARAM_MAX_WIDTH = "maxWidth";
@@ -149,9 +156,13 @@ final class DecodePdf extends DecodeThumbnail {
                 return null;
             }
 
+            String authority = ThreadLocalRandom.current().nextInt() % 2 == 0
+                    ? context.getString(R.string.authority_pdfpreview1)
+                    : context.getString(R.string.authority_pdfpreview2);
+
             Uri uri = new Uri.Builder()
                     .scheme(SCHEME_CONTENT)
-                    .authority(context.getString(authority_pdfpreview))
+                    .authority(authority)
                     .appendQueryParameter(PARAM_FILE, res.path())
                     .appendQueryParameter(PARAM_MAX_WIDTH, String.valueOf(constraint.width()))
                     .appendQueryParameter(PARAM_MAX_HEIGHT, String.valueOf(constraint.height()))
