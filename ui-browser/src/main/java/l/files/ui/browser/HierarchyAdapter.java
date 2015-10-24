@@ -18,10 +18,13 @@ import l.files.ui.base.fs.FileLabels;
 
 import static android.R.id.icon;
 import static android.R.id.title;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static l.files.ui.R.layout.files_activity_title;
 import static l.files.ui.R.layout.files_activity_title_item;
+import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 final class HierarchyAdapter extends BaseAdapter {
     private List<File> hierarchy = emptyList();
@@ -74,8 +77,22 @@ final class HierarchyAdapter extends BaseAdapter {
                 ? convertView
                 : inflate(files_activity_title, parent);
 
-        ((TextView) view.findViewById(title)).setText(
-                FileLabels.get(parent.getResources(), getItem(position)));
+        File file = getItem(position);
+
+        TextView title = (TextView) view.findViewById(android.R.id.title);
+        title.setText(FileLabels.get(parent.getResources(), file));
+
+        TextView icon = (TextView) view.findViewById(android.R.id.icon);
+        icon.setTypeface(FileIcons.font(view.getContext().getAssets()));
+        icon.setText(FileIcons.directoryIconStringId(file));
+
+        if (file.equals(DIR_HOME)) {
+            title.setVisibility(GONE);
+            icon.setVisibility(VISIBLE);
+        } else {
+            title.setVisibility(VISIBLE);
+            icon.setVisibility(GONE);
+        }
 
         return view;
     }
