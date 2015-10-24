@@ -45,7 +45,7 @@ final class DecodeText extends DecodeThumbnail {
     };
 
     private static final int PREVIEW_LIMIT = 256;
-    private static final int TEXT_COLOR = parseColor("#424242");
+    private static final int TEXT_COLOR = parseColor("#616161");
 
     private final int padding;
     private final int size;
@@ -84,7 +84,7 @@ final class DecodeText extends DecodeThumbnail {
         view.setBackgroundColor(WHITE);
         view.setTextColor(TEXT_COLOR);
         view.setTypeface(MONOSPACE);
-        view.setTextSize(COMPLEX_UNIT_SP, 10);
+        view.setTextSize(COMPLEX_UNIT_SP, 11);
         view.setPadding(padding, padding, padding, padding);
         view.setText(text.length() == PREVIEW_LIMIT ? text + "..." : text);
         view.measure(
