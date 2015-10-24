@@ -1,12 +1,22 @@
 package l.files.ui.browser;
 
 import l.files.fs.File;
+import l.files.fs.Permission;
 import l.files.fs.Stream;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.NAME;
 
 public final class ActionModeTest extends BaseFilesActivityTest {
+
+    public void test_disabled_item_can_still_be_selected() throws Exception {
+        File a = dir().resolve("a").createFile();
+        a.removePermissions(Permission.read());
+        screen()
+                .longClick(a)
+                .assertActionModePresent(true)
+                .assertChecked(a, true);
+    }
 
     public void test_auto_finishes_action_mode_if_selected_item_deleted_from_file_system()
             throws Exception {

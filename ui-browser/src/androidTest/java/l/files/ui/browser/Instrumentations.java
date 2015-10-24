@@ -181,6 +181,7 @@ final class Instrumentations {
         findItemOnMainThread(in, recycler, itemId, new Consumer<View>() {
             @Override
             public void apply(View input) {
+                assertTrue(input.isEnabled());
                 input.performLongClick();
             }
         });
