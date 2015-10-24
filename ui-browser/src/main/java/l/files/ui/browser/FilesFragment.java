@@ -197,8 +197,8 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new SelectAllAction(this),
-                new Cut(selection(), context),
-                new Copy(selection(), context),
+                new Cut(selection()),
+                new Copy(selection()),
                 new Delete(selection(), manager),
                 new RenameAction(selection(), manager)
         );

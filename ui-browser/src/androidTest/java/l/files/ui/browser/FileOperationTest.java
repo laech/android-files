@@ -104,35 +104,4 @@ public final class FileOperationTest extends BaseFilesActivityTest {
                 .assertCanPaste(true);
     }
 
-    public void test_paste_menu_is_disabled_if_files_do_not_exist()
-            throws Exception {
-
-        File dir = dir().resolve("dir").createDir();
-
-        screen()
-                .longClick(dir)
-                .copy()
-                .assertCanPaste(true);
-
-        dir.delete();
-
-        screen().assertCanPaste(false);
-    }
-
-    public void test_paste_menu_is_enabled_if_some_files_do_not_exist_some_exist()
-            throws Exception {
-
-        File dir = dir().resolve("dir1").createDir();
-        dir().resolve("dir2").createDir();
-
-        screen()
-                .longClick(dir)
-                .copy()
-                .assertCanPaste(true);
-
-        dir.delete();
-
-        screen().assertCanPaste(true);
-    }
-
 }
