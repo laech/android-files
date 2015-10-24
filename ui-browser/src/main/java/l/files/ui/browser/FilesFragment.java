@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +31,7 @@ import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 import l.files.ui.bookmarks.actions.Bookmark;
+import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.operations.actions.Copy;
 import l.files.ui.operations.actions.Cut;
@@ -229,6 +231,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 recycler.setItemAnimator(new DefaultItemAnimator());
             }
 
+            updateSelection(data);
             adapter.setItems(data.items());
             //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null) {
@@ -246,6 +249,16 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 empty.setVisibility(GONE);
             }
         }
+    }
+
+    private void updateSelection(Result data) {
+        List<File> files = new ArrayList<>(data.items().size());
+        for (BrowserItem item : data.items()) {
+            if (item.isFileItem()) {
+                files.add(((FileItem) item).selfFile());
+            }
+        }
+        selection().retainAll(files);
     }
 
     @Override

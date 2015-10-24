@@ -3,25 +3,27 @@ package l.files.ui.base.selection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import static java.util.Collections.unmodifiableSet;
 
-public final class Selection<T> {
+public final class Selection<T> implements Iterable<T> {
+
     private final Set<T> selection = new HashSet<>();
     private final WeakHashMap<Callback, Void> callbacks = new WeakHashMap<>();
 
-    public void addWeaklyReferencedCallback(final Callback callback) {
+    public void addWeaklyReferencedCallback(Callback callback) {
         callbacks.put(callback, null);
     }
 
-    public void removeCallback(final Callback callback) {
+    public void removeCallback(Callback callback) {
         callbacks.remove(callback);
     }
 
     private void notifyCallbacks() {
-        for (final Callback callback : new ArrayList<>(callbacks.keySet())) {
+        for (Callback callback : new ArrayList<>(callbacks.keySet())) {
             callback.onSelectionChanged();
         }
     }
@@ -41,7 +43,7 @@ public final class Selection<T> {
         return selection.isEmpty();
     }
 
-    public boolean contains(final T item) {
+    public boolean contains(T item) {
         return selection.contains(item);
     }
 
@@ -49,25 +51,36 @@ public final class Selection<T> {
         return unmodifiableSet(new HashSet<>(selection));
     }
 
-    public void add(final T item) {
+    public void add(T item) {
         if (selection.add(item)) {
             notifyCallbacks();
         }
     }
 
-    public void addAll(final Collection<T> items) {
+    public void addAll(Collection<T> items) {
         if (selection.addAll(items)) {
             notifyCallbacks();
         }
     }
 
-    public void toggle(final T item) {
+    public void retainAll(Collection<T> items) {
+        if (selection.retainAll(items)) {
+            notifyCallbacks();
+        }
+    }
+
+    public void toggle(T item) {
         if (selection.contains(item)) {
             selection.remove(item);
         } else {
             selection.add(item);
         }
         notifyCallbacks();
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return unmodifiableSet(selection).iterator();
     }
 
     public interface Callback {
