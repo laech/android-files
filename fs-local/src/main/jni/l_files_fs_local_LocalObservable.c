@@ -3,6 +3,8 @@
 #include <sys/inotify.h>
 #include "util.h"
 #include <unistd.h>
+#include <sys/vfs.h>
+//#include <android/log.h>
 
 static jmethodID method_onEvent;
 static jmethodID method_isClosed;
@@ -13,6 +15,29 @@ void Java_l_files_fs_local_LocalObservable_init(JNIEnv *env, jclass clazz) {
     method_isClosed = (*env)->GetMethodID(env, clazz, "isClosed", "()Z");
 }
 
+jboolean Java_l_files_fs_local_LocalObservable_isProcfs(
+        JNIEnv *env, jclass clazz, jstring jpath) {
+
+    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    if (NULL == path) {
+        return NULL;
+    }
+
+    struct statfs buff;
+    if (-1 == TEMP_FAILURE_RETRY(statfs(path, &buff))) {
+
+        (*env)->ReleaseStringUTFChars(env, jpath, path);
+        throw_errno_exception(env);
+        return NULL;
+
+    } else {
+        (*env)->ReleaseStringUTFChars(env, jpath, path);
+        return (jboolean) (PROC_SUPER_MAGIC == buff.f_type);
+    }
+
+}
+
+
 void Java_l_files_fs_local_LocalObservable_observe(
         JNIEnv *env, jobject object, jint fd) {
 
@@ -22,13 +47,13 @@ void Java_l_files_fs_local_LocalObservable_observe(
     char *p;
     struct inotify_event *event;
 
-    for (; ;) {
+    while (!(*env)->CallBooleanMethod(env, object, method_isClosed)) {
 
         num_bytes = read(fd, buf, BUF_SIZE);
         if (num_bytes == -1) {
 
             if ((*env)->CallBooleanMethod(env, object, method_isClosed)) {
-                break;
+                return;
             }
 
             if (EINTR == errno) {

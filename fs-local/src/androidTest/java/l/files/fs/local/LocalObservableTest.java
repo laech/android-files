@@ -63,6 +63,16 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  */
 public final class LocalObservableTest extends FileBaseTest {
 
+    public void test_no_observe_on_procfs() throws Exception {
+
+        try (Tracker tracker = registerMockTracker();
+             Recorder observer = observe(LocalFile.of("/proc/self"), FOLLOW, false)) {
+
+            assertTrue(observer.isClosed());
+            verifyZeroInteractions(tracker);
+        }
+    }
+
     public void test_observe_on_regular_file() throws Exception {
         File file = dir1().resolve("file").createFile();
         try (Recorder observer = observe(file, NOFOLLOW)) {
@@ -749,11 +759,17 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         static Recorder observe(File file, LinkOption option) throws Exception {
+            return observe(file, option, true);
+        }
+
+        static Recorder observe(File file, LinkOption option, boolean verifyTracker) throws Exception {
             try (Tracker tracker = registerMockTracker()) {
                 Recorder observer = new Recorder(file);
                 observer.observation = file.observe(option, observer);
-                assertFalse(observer.observation.isClosed());
-                verifyTracker(observer, tracker, file, option);
+                if (verifyTracker) {
+                    assertFalse(observer.observation.isClosed());
+                    verifyTracker(observer, tracker, file, option);
+                }
                 Inotify.get().registerTracker(observer);
                 return observer;
             }
@@ -812,6 +828,10 @@ public final class LocalObservableTest extends FileBaseTest {
         public void close() throws IOException {
             super.close();
             observation.close();
+        }
+
+        boolean isClosed() {
+            return observation.isClosed();
         }
 
         @Override

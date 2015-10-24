@@ -132,10 +132,12 @@ final class LocalObservable extends Native
 
     private static native void init();
 
+    private static native boolean isProcfs(String path) throws ErrnoException;
+
     private final Inotify inotify = Inotify.get();
 
-    private volatile int fd;
-    private volatile int wd;
+    private volatile int fd = -1;
+    private volatile int wd = -1;
 
     private final File root;
 
@@ -174,11 +176,13 @@ final class LocalObservable extends Native
         requireNonNull(option, "option");
         requireNonNull(childrenConsumer, "childrenConsumer");
 
-        boolean directory = root.stat(option).isDirectory();
-
         try {
-            fd = inotify.init(this);
-            wd = inotifyAddWatchWillCloseOnError(option);
+            if (!isProcfs(root.path())) {
+                fd = inotify.init(this);
+                wd = inotifyAddWatchWillCloseOnError(option);
+            } else {
+                close();
+            }
         } catch (ErrnoException e) {
             fd = -1;
             wd = -1;
@@ -191,8 +195,7 @@ final class LocalObservable extends Native
          * executor, didn't investigate why, just a reminder here to check the
          * performance if this is to be changed to a pool.
          */
-        Thread thread = new Thread(this);
-        thread.setName(toString());
+        Thread thread = null;
         try {
 
             /*
@@ -200,14 +203,22 @@ final class LocalObservable extends Native
              * allows them to happen at the same time, just need to make sure the
              * latest one wins.
              */
-            thread.start();
+            if (fd != -1) {
+                thread = new Thread(this);
+                thread.setName(toString());
+                thread.start();
+            }
 
-            if (directory && !observeChildren(option, childrenConsumer)) {
+            if (root.stat(option).isDirectory() &&
+                    !traverseChildren(option, childrenConsumer)) {
                 observer.onIncompleteObservation();
             }
 
         } catch (Throwable e) {
-            thread.interrupt();
+
+            if (thread != null) {
+                thread.interrupt();
+            }
             try {
                 close();
             } catch (Exception sup) {
@@ -235,7 +246,7 @@ final class LocalObservable extends Native
         }
     }
 
-    private boolean observeChildren(LinkOption option, FileConsumer childrenConsumer)
+    private boolean traverseChildren(LinkOption option, FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
         boolean limitReached = fd == -1;
