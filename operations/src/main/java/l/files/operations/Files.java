@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
-import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -51,12 +51,30 @@ final class Files {
     private static String increment(String base) {
         Matcher matcher = NAME_WITH_NUMBER_SUFFIX.matcher(base);
         if (matcher.matches()) {
-            return matcher.group(1) + (parseInt(matcher.group(2)) + 1);
+
+            String end = null;
+            try {
+                long num = parseLong(matcher.group(2));
+                if (num < Long.MAX_VALUE) {
+                    end = String.valueOf(num + 1);
+                }
+            } catch (NumberFormatException ignored) {
+                // e.g. Number too big, handled below
+            }
+
+            if (end == null) {
+                end = matcher.group(2) + " 2";
+            }
+
+            return matcher.group(1) + end;
+
         } else if (base.equals("")) {
             return "2";
+
         } else {
             return base + " 2";
         }
+
     }
 
 }

@@ -9,6 +9,16 @@ import static l.files.operations.Files.getNonExistentDestinationFile;
 
 public final class FilesTest extends FileBaseTest {
 
+    public void testGetNonExistentDestinationFile_largeNumberSuffix() throws Exception {
+        String tooBig = Long.MAX_VALUE + "" + Long.MAX_VALUE;
+        testExistent(dir1().resolve("a " + tooBig).createFile(), "a " + tooBig + " 2");
+    }
+
+    public void testGetNonExistentDestinationFile_numberOverflow() throws Exception {
+        String tooBig = String.valueOf(Long.MAX_VALUE);
+        testExistent(dir1().resolve("a " + tooBig).createFile(), "a " + tooBig + " 2");
+    }
+
     public void testGetNonExistentDestinationFile_file() throws Exception {
         testExistent(dir1().resolve("a").createFile(), "a 2");
         testExistent(dir1().resolve("b.txt").createFile(), "b 2.txt");
