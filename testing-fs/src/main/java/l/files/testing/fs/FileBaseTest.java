@@ -52,15 +52,7 @@ public abstract class FileBaseTest extends BaseTest {
         if (file == null) {
             return;
         }
-        file.traverse(NOFOLLOW, new Visitor.Base() {
-
-            @Override
-            public Result onPostVisit(File file) throws IOException {
-                file.delete();
-                return CONTINUE;
-            }
-
-        });
+        file.deleteRecursive();
     }
 
 }

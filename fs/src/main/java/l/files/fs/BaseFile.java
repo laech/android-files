@@ -90,7 +90,7 @@ public abstract class BaseFile implements File {
         traverse(NOFOLLOW, new Visitor.Base() {
             @Override
             public Result onPostVisit(File file) throws IOException {
-                file.delete();
+                file.deleteIfExists();
                 return super.onPostVisit(file);
             }
         });

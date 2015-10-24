@@ -43,7 +43,7 @@ public final class ThumbnailDiskCacheTest
         assertFalse(cacheFile.parent().exists(NOFOLLOW));
     }
 
-    public void test_updates_access_time_on_read() throws Exception {
+    public void test_updates_modified_time_on_read() throws Exception {
         File res = dir1();
         Stat stat = res.stat(NOFOLLOW);
         Rect constraint = newConstraint();
@@ -54,11 +54,11 @@ public final class ThumbnailDiskCacheTest
         File cacheFile = cache.cacheFile(res, stat, constraint);
         Instant oldTime = Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(99));
-        cacheFile.setLastAccessedTime(NOFOLLOW, oldTime);
-        assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastAccessedTime());
+        cacheFile.setLastModifiedTime(NOFOLLOW, oldTime);
+        assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime());
 
         cache.get(res, stat, constraint);
-        Instant newTime = cacheFile.stat(NOFOLLOW).lastAccessedTime();
+        Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
         assertNotEqual(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }

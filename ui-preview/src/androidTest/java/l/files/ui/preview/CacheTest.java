@@ -43,6 +43,17 @@ public abstract class CacheTest<V, C extends Cache<V>>
         assertNull(cache.get(res, res.stat(NOFOLLOW), constraint));
     }
 
+    public void test_gets_old_value_if_stat_not_provided() throws Exception {
+
+        File res = dir1().resolve("a").createFile();
+        Stat stat = res.stat(NOFOLLOW);
+        Rect constraint = newConstraint();
+        V value = newValue();
+        cache.put(res, stat, constraint, value);
+
+        assertValueEquals(value, cache.get(res, null, constraint));
+    }
+
     abstract C newCache();
 
     abstract V newValue();

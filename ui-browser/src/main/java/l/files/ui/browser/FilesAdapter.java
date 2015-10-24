@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
@@ -367,24 +368,23 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 return;
             }
 
-            Palette palette = decorator.getPalette(res, stat, constraint);
+            Palette palette = decorator.getPalette(res, null, constraint);
             if (palette != null) {
                 updatePaletteColor(backgroundColor(palette));
             } else {
                 updatePaletteColor(TRANSPARENT);
             }
 
-            Bitmap thumbnail = decorator.getThumbnail(res, stat, constraint);
+            Bitmap thumbnail = getCachedThumbnail(res, stat);
             if (thumbnail != null) {
                 setPreviewImage(thumbnail);
                 showPreviewContainer(true);
                 return;
             }
 
-            Rect size = decorator.getSize(res, stat, constraint);
+            Rect size = decorator.getSize(res, null, constraint);
             if (size != null) {
                 setPreviewImage(newSizedColorDrawable(size));
-                onSizeAvailable(file.selfFile(), size);
                 showPreviewContainer(true);
             } else {
                 setPreviewImage((Drawable) null);
@@ -392,6 +392,17 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             }
 
             task = decorator.get(res, stat, constraint, this);
+        }
+
+        private Bitmap getCachedThumbnail(File res, Stat stat) {
+            long now = currentTimeMillis();
+            long then = stat.lastModifiedTime().to(MILLISECONDS);
+            boolean changedMoreThan5SecondsAgo = now - then > 5000;
+            if (changedMoreThan5SecondsAgo) {
+                return decorator.getThumbnail(res, stat, constraint);
+            } else {
+                return decorator.getThumbnail(res, null, constraint);
+            }
         }
 
         private SizedColorDrawable newSizedColorDrawable(Rect size) {
@@ -415,6 +426,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 previewContainer.setVisibility(GONE);
                 iconContainer.setVisibility(VISIBLE);
             }
+        }
+
+        private int getPaletteColor() {
+            return ((ColorDrawable) paletteContainer.getBackground()).getColor();
         }
 
         private void updatePaletteColor(int color) {
@@ -465,10 +480,12 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         public void onPaletteAvailable(File item, Palette palette) {
             if (Objects.equals(item, itemId())) {
                 int color = backgroundColor(palette);
-                updatePaletteColor(color);
-                if (color != TRANSPARENT) {
-                    paletteContainer.setAlpha(0);
-                    paletteContainer.animate().alpha(1).setDuration(animateDuration);
+                if (color != getPaletteColor()) {
+                    updatePaletteColor(color);
+                    if (color != TRANSPARENT) {
+                        paletteContainer.setAlpha(0);
+                        paletteContainer.animate().alpha(1).setDuration(animateDuration);
+                    }
                 }
             }
         }

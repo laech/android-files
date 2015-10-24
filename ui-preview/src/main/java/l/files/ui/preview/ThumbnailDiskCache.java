@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -94,15 +95,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 + "_" + constraint.height());
     }
 
-    File cacheFile(File file, Stat stat, Rect constraint) {
+    File cacheFile(File file, @Nullable Stat stat, Rect constraint) throws IOException {
+        if (stat == null) {
+            try (Stream<File> children = cacheDir(file, constraint).list(NOFOLLOW)) {
+                return children.iterator().next();
+            }
+        }
+        Instant time = stat.lastModifiedTime();
         return cacheDir(file, constraint).resolve(
-                stat.lastModifiedTime().seconds() + "_" +
-                        stat.lastModifiedTime().nanos());
+                time.seconds() + "_" + time.nanos());
     }
 
     @Override
-    Bitmap get(File file, Stat stat, Rect constraint) throws IOException {
-
+    Bitmap get(File file, @Nullable Stat stat, Rect constraint) throws IOException {
         File cache = cacheFile(file, stat, constraint);
         try (InputStream in = cache.newBufferedInputStream()) {
 
@@ -123,7 +128,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             }
 
             try {
-                cache.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+                cache.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
             } catch (IOException ignore) {
             }
 

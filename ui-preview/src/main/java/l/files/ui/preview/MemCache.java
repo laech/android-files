@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.support.annotation.Nullable;
 import android.util.LruCache;
 
 import l.files.fs.File;
@@ -8,12 +9,12 @@ import l.files.fs.Stat;
 abstract class MemCache<V> extends Cache<V> {
 
     @Override
-    V get(File res, Stat stat, Rect constraint) {
+    V get(File res, @Nullable Stat stat, Rect constraint) {
         Snapshot<V> value = delegate().get(key(res, stat, constraint));
         if (value == null) {
             return null;
         }
-        if (!value.time().equals(stat.lastModifiedTime())) {
+        if (stat != null && !stat.lastModifiedTime().equals(value.time())) {
             return null;
         }
         return value.get();
