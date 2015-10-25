@@ -7,15 +7,13 @@
 
     <TextView
         android:id="@android:id/title"
-        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        style="@style/ToolbarTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:ellipsize="end"
-        android:fontFamily="sans-serif-thin"
         android:gravity="center"
-        android:maxLines="1"
-        android:textStyle="bold" />
+        android:maxLines="1" />
 
     <TextView
         android:id="@android:id/icon"
