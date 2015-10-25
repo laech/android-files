@@ -31,7 +31,7 @@ public final class MagicDetectorTest extends AbstractDetectorTest {
         java.io.File file = new java.io.File("/proc/1/maps");
         assertTrue(file.exists());
         try {
-            detector().detect(LocalFile.create(file));
+            detector().detect(LocalFile.of(file));
             fail();
         } catch (IOException e) {
             // Pass

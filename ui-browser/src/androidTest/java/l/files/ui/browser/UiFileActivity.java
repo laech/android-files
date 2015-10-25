@@ -1,11 +1,11 @@
 package l.files.ui.browser;
 
-import android.app.Fragment;
 import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Pair;
@@ -486,12 +486,11 @@ final class UiFileActivity {
             @Override
             public void apply(View input) {
                 ImageView view = Views.find(R.id.preview, input);
-                View container = Views.find(R.id.preview_container, input);
                 if (shown) {
-                    assertEquals(VISIBLE, container.getVisibility());
+                    assertEquals(VISIBLE, view.getVisibility());
                     assertNotNull(view.getDrawable());
                 } else {
-                    assertEquals(GONE, container.getVisibility());
+                    assertEquals(GONE, view.getVisibility());
                     assertNull(view.getDrawable());
                 }
             }

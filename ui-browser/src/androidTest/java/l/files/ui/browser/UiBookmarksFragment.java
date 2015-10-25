@@ -42,7 +42,7 @@ final class UiBookmarksFragment {
     private BookmarksFragment fragment() {
         return (BookmarksFragment) context
                 .activity()
-                .getFragmentManager()
+                .getSupportFragmentManager()
                 .findFragmentById(R.id.bookmarks_fragment);
     }
 

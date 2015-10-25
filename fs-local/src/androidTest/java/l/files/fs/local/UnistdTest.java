@@ -9,12 +9,20 @@ import java.lang.reflect.Field;
 public final class UnistdTest extends FileBaseTest {
 
     public void testClose() throws Exception {
-        try (OutputStream out = dir1().resolve("a").createFile().newOutputStream()) {
+        OutputStream out = dir1().resolve("a").createFile().newOutputStream();
+        try {
+
             out.write(1); // Check write okay
             Unistd.close(getFd(out));
             try {
                 out.write(1); // Error closed
                 fail();
+            } catch (IOException ignored) {
+            }
+
+        } finally {
+            try {
+                out.close();
             } catch (IOException ignored) {
             }
         }

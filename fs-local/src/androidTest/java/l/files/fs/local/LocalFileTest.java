@@ -563,9 +563,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_setAccessTime_linkFollow() throws Exception {
         File link = dir1().resolve("link").createLink(dir1());
 
-        Instant linkTime = getAccessTime(dir1(), NOFOLLOW);
+        Instant linkTime = getAccessTime(link, NOFOLLOW);
         Instant fileTime = Instant.of(123, 456);
-
         link.setLastAccessedTime(FOLLOW, fileTime);
 
         assertEquals(linkTime, getAccessTime(link, NOFOLLOW));

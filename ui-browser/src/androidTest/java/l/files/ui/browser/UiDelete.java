@@ -32,7 +32,7 @@ final class UiDelete {
     private AlertDialog dialog() {
         DeleteDialog fragment = (DeleteDialog) context
                 .activity()
-                .getFragmentManager()
+                .getSupportFragmentManager()
                 .findFragmentByTag(DeleteDialog.FRAGMENT_TAG);
         assertNotNull(fragment);
         AlertDialog dialog = fragment.getDialog();

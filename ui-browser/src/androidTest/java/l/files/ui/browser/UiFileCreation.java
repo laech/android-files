@@ -144,7 +144,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     private FileCreationFragment fragment() {
-        return (FileCreationFragment) context.activity().getFragmentManager()
+        return (FileCreationFragment) context.activity().getSupportFragmentManager()
                 .findFragmentByTag(tag);
     }
 

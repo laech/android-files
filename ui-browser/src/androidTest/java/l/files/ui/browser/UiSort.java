@@ -42,7 +42,7 @@ final class UiSort {
     private Dialog dialog() {
         SortDialog fragment = (SortDialog) context
                 .activity()
-                .getFragmentManager()
+                .getSupportFragmentManager()
                 .findFragmentByTag(SortDialog.FRAGMENT_TAG);
         assertNotNull(fragment);
         Dialog dialog = fragment.getDialog();
