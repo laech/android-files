@@ -30,8 +30,8 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.local.LocalFile.permissionsFromMode;
-import static l.files.fs.local.Stat.lstat64;
-import static l.files.fs.local.Stat.stat64;
+import static l.files.fs.local.Stat.lstat;
+import static l.files.fs.local.Stat.stat;
 
 public final class LocalFileTest extends FileBaseTest {
 
@@ -74,19 +74,19 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_stat_modificationTime() throws Exception {
         Stat stat = dir1().stat(NOFOLLOW);
         long actual = stat.lastModifiedTime().seconds();
-        long expected = stat64(dir1().path()).atime();
+        long expected = stat(dir1().path()).atime();
         assertEquals(expected, actual);
     }
 
     public void test_stat_accessTime() throws Exception {
         Stat actual = dir1().stat(NOFOLLOW);
-        assertEquals(stat64(dir1().path()).atime(), actual.lastAccessedTime().seconds());
+        assertEquals(stat(dir1().path()).atime(), actual.lastAccessedTime().seconds());
     }
 
     public void test_stat_size() throws Exception {
         File file = dir1().resolve("file").createFile();
         file.appendUtf8("hello world");
-        long expected = stat64(file.path()).size();
+        long expected = stat(file.path()).size();
         long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
     }
@@ -220,8 +220,8 @@ public final class LocalFileTest extends FileBaseTest {
         actual.newOutputStream(false).close();
 
         assertEquals(
-                stat64(expected.path()).mode(),
-                stat64(actual.path()).mode()
+                stat(expected.path()).mode(),
+                stat(actual.path()).mode()
         );
     }
 
@@ -296,7 +296,7 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals(expected.canWrite(), actual.isWritable());
         assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
-                permissionsFromMode(lstat64(expected.getPath()).mode()),
+                permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
@@ -318,7 +318,7 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals(expected.canWrite(), actual.isWritable());
         assertEquals(expected.canExecute(), actual.isExecutable());
         assertEquals(
-                permissionsFromMode(lstat64(expected.getPath()).mode()),
+                permissionsFromMode(lstat(expected.getPath()).mode()),
                 actual.stat(NOFOLLOW).permissions()
         );
     }
@@ -591,9 +591,9 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     public void test_setPermissions_rawBits() throws Exception {
-        int expected = stat64(dir1().path()).mode();
+        int expected = stat(dir1().path()).mode();
         dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
-        int actual = stat64(dir1().path()).mode();
+        int actual = stat(dir1().path()).mode();
         assertEquals(expected, actual);
     }
 

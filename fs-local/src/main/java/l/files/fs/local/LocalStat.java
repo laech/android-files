@@ -21,8 +21,6 @@ import static l.files.fs.local.Stat.S_ISFIFO;
 import static l.files.fs.local.Stat.S_ISLNK;
 import static l.files.fs.local.Stat.S_ISREG;
 import static l.files.fs.local.Stat.S_ISSOCK;
-import static l.files.fs.local.Stat.lstat64;
-import static l.files.fs.local.Stat.stat64;
 
 @AutoValue
 abstract class LocalStat implements Stat {
@@ -108,9 +106,9 @@ abstract class LocalStat implements Stat {
         while (stat == null) {
             try {
                 if (option == FOLLOW) {
-                    stat = stat64(file.path());
+                    stat = l.files.fs.local.Stat.stat(file.path());
                 } else {
-                    stat = lstat64(file.path());
+                    stat = l.files.fs.local.Stat.lstat(file.path());
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {

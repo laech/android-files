@@ -138,9 +138,9 @@ abstract class Stat extends Native {
 
     private static native void init();
 
-    static native Stat stat64(String path) throws ErrnoException;
+    static native Stat stat(String path) throws ErrnoException;
 
-    static native Stat lstat64(String path) throws ErrnoException;
+    static native Stat lstat(String path) throws ErrnoException;
 
     static native void chmod(String path, int mode) throws ErrnoException;
 
