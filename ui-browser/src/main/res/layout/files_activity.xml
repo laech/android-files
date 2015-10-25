@@ -33,8 +33,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
-                    android:dropDownVerticalOffset="4dp"
-                    android:popupBackground="@drawable/title_popup_background" />
+                    android:dropDownVerticalOffset="@dimen/title_drop_down_vertical_offset"
+                    app:popupTheme="@style/ToolbarPopup" />
 
             </android.support.v7.widget.Toolbar>
 
