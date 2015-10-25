@@ -46,7 +46,7 @@ jstring Java_l_files_fs_local_Unistd_readlink(
     const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
     char buf[PATH_MAX];
 
-    int count = TEMP_FAILURE_RETRY(readlink(path, buf, PATH_MAX - 1));
+    ssize_t count = TEMP_FAILURE_RETRY(readlink(path, buf, PATH_MAX - 1));
 
     (*env)->ReleaseStringUTFChars(env, jpath, path);
 
