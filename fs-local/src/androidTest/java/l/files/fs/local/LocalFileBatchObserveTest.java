@@ -32,7 +32,7 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
     public void test_notifies_self_change() throws Exception {
         try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
-            verify(observer, timeout(20)).onBatchEvent(true, names());
+            verify(observer, timeout(100)).onBatchEvent(true, names());
             verifyNoMoreInteractions(observer);
             verifyZeroInteractions(consumer);
         }
