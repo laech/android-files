@@ -20,7 +20,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
-import static l.files.ui.browser.Tests.timeout;
 
 public final class RefreshTest extends BaseFilesActivityTest {
 
@@ -30,155 +29,39 @@ public final class RefreshTest extends BaseFilesActivityTest {
         File linkedDir = linkToDirWithMaxWatchReached();
 
         screen()
+                .sort()
+                .by(MODIFIED)
                 .clickInto(linkedDir)
                 .assertListMatchesFileSystem(linkedDir)
                 .assertRefreshMenuVisible(true);
 
         try (Stream<File> children = linkedDir.listDirs(FOLLOW)) {
             File dir = children.iterator().next();
-            dir.resolve(String.valueOf(nanoTime())).createFile();
+            setRandomLastModified(dir);
         }
         screen().refresh().assertListMatchesFileSystem(linkedDir);
     }
 
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_in_app_cut()
+    public void test_manual_refresh_enabled_but_still_auto_refreshes_file_creation_deletion()
             throws Exception {
 
-        final File linkedDir = linkToDirWithMaxWatchReached();
-        final File src = dir().resolve("cut-" + nanoTime()).createFile();
-        final File dst = linkedDir.resolve(src.name());
-
-        assertFalse(dst.exists(NOFOLLOW));
-
-        screen()
-                .longClick(src)
-                .cut()
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
-                .assertRefreshMenuVisible(true)
-                .paste();
-
-
-        timeout(10, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertTrue(dst.exists(NOFOLLOW));
-            }
-        });
-
-        screen().assertListMatchesFileSystem(linkedDir);
-    }
-
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_in_app_copy()
-            throws Exception {
-
-        final File linkedDir = linkToDirWithMaxWatchReached();
-        final File src = dir().resolve("copy-" + nanoTime()).createFile();
-        final File dst = linkedDir.resolve(src.name());
-
-        assertFalse(dst.exists(NOFOLLOW));
-
-        screen()
-                .longClick(src)
-                .copy()
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
-                .assertRefreshMenuVisible(true)
-                .paste();
-
-        timeout(10, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertTrue(dst.exists(NOFOLLOW));
-            }
-        });
-
-        screen().assertListMatchesFileSystem(linkedDir);
-
-    }
-
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_in_app_delete()
-            throws Exception {
-
-        final File linkedDir = linkToDirWithMaxWatchReached();
-        final File src = linkedDir.resolve("delete-" + nanoTime()).createFile();
-
-        assertTrue(src.exists(NOFOLLOW));
-
-        screen()
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
-                .assertListViewContains(src, true)
-                .assertRefreshMenuVisible(true)
-                .longClick(src)
-                .delete()
-                .ok();
-
-        timeout(10, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertFalse(src.exists(NOFOLLOW));
-            }
-        });
-
-        screen().assertListMatchesFileSystem(linkedDir);
-
-    }
-
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_in_app_rename()
-            throws Exception {
-
-        final File linkedDir = linkToDirWithMaxWatchReached();
-        final File src = linkedDir.resolve("before-rename-" + nanoTime()).createFile();
-        final File dst = linkedDir.resolve("after--rename-" + nanoTime());
-
-        assertFalse(dst.exists(NOFOLLOW));
+        File linkedDir = linkToDirWithMaxWatchReached();
 
         screen()
                 .sort()
                 .by(MODIFIED)
                 .clickInto(linkedDir)
                 .assertListMatchesFileSystem(linkedDir)
-                .assertListViewContains(src, true)
-                .assertRefreshMenuVisible(true)
-                .longClick(src)
-                .rename()
-                .setFilename(dst.name())
-                .ok();
+                .assertRefreshMenuVisible(true);
 
-        timeout(10, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertTrue(dst.exists(NOFOLLOW));
-            }
-        });
+        linkedDir.resolve("file-" + nanoTime()).createFile();
+        linkedDir.resolve("dir-" + nanoTime()).createDir();
+        linkedDir.resolve("before-move-" + nanoTime()).createFile()
+                .moveTo(linkedDir.resolve("after-move-" + nanoTime()));
 
-        screen().assertListMatchesFileSystem(linkedDir);
-
-    }
-
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_in_app_new_dir()
-            throws Exception {
-
-        final File linkedDir = linkToDirWithMaxWatchReached();
-        final File dst = linkedDir.resolve("new-dir-" + nanoTime());
-
-        assertFalse(dst.exists(NOFOLLOW));
-
-        screen()
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
-                .assertRefreshMenuVisible(true)
-                .newFolder()
-                .setFilename(dst.name())
-                .ok();
-
-        timeout(10, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertTrue(dst.exists(NOFOLLOW));
-            }
-        });
+        try (Stream<File> children = linkedDir.list(FOLLOW)) {
+            children.iterator().next().deleteRecursive();
+        }
 
         screen().assertListMatchesFileSystem(linkedDir);
     }
@@ -193,24 +76,6 @@ public final class RefreshTest extends BaseFilesActivityTest {
             throws Exception {
 
         screen().assertRefreshMenuVisible(false);
-    }
-
-    public void test_pressing_back_releases_resources() throws Exception {
-
-        int maxUserWatches = maxUserWatches();
-        File dir = linkToExternalDir("files-test-pressing-back-releases-resources");
-        createRandomDirs(dir, (int) (maxUserWatches * 0.75F));
-
-        for (int i = 0; i < 10; i++) {
-            screen().clickInto(dir);
-            sleep(100);
-            screen().pressBack();
-        }
-        screen().clickInto(dir)
-                .assertListMatchesFileSystem(dir)
-                .pressBack()
-                .clickInto(dir)
-                .assertListMatchesFileSystem(dir);
     }
 
     private int maxUserWatches() throws IOException {

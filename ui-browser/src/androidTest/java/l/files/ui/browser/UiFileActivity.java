@@ -266,6 +266,16 @@ final class UiFileActivity {
         return this;
     }
 
+    private UiFileActivity clickOptionMenuItem(final int id) {
+        awaitOnMainThread(instrument, new Runnable() {
+            @Override
+            public void run() {
+                activity().toolbar().getMenu().performIdentifierAction(id, 0);
+            }
+        });
+        return this;
+    }
+
     UiFileActivity assertCurrentDirectory(final File expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -386,8 +396,7 @@ final class UiFileActivity {
                 assertTrue(item.isEnabled());
             }
         });
-        instrument.invokeMenuActionSync(activity(), id, 0);
-        return this;
+        return clickOptionMenuItem(id);
     }
 
     void selectActionModeAction(final int id) {

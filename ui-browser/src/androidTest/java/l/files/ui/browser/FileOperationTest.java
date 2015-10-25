@@ -9,23 +9,67 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.browser.Tests.timeout;
 
 public final class FileOperationTest extends BaseFilesActivityTest {
 
-    // TODO cut/delete tests
+    public void test_delete_file() throws Exception {
 
-    public void test_copies_files() throws Exception {
-
-        File a = dir().resolve("a").createFile();
-        File d = dir().resolve("d").createDir();
+        final File a = dir().resolve("a").createFile();
 
         screen()
                 .longClick(a)
-                .copy()
-                .click(d)
+                .delete()
+                .ok();
+
+        timeout(5, SECONDS, new Executable() {
+            @Override
+            public void execute() throws Exception {
+                assertFalse(a.exists(NOFOLLOW));
+            }
+        });
+
+    }
+
+    public void test_cut_files() throws Exception {
+
+        final File file = dir().resolve("a").createFile();
+        final File dir = dir().resolve("dir").createDir();
+
+        screen()
+                .longClick(file)
+                .cut()
+                .click(dir)
                 .paste();
 
-        assertTrue(waitFor(dir().resolve("d/a"), 5, SECONDS));
+        timeout(5, SECONDS, new Executable() {
+            @Override
+            public void execute() throws Exception {
+                assertFalse(file.exists(NOFOLLOW));
+                assertTrue(dir.resolve(file.name()).exists(NOFOLLOW));
+            }
+        });
+
+    }
+
+    public void test_copy_files() throws Exception {
+
+        final File file = dir().resolve("a").createFile();
+        final File dir = dir().resolve("dir").createDir();
+
+        screen()
+                .longClick(file)
+                .copy()
+                .click(dir)
+                .paste();
+
+        timeout(5, SECONDS, new Executable() {
+            @Override
+            public void execute() throws Exception {
+                assertTrue(dir.resolve(file.name()).exists(NOFOLLOW));
+                assertTrue(file.exists(NOFOLLOW));
+            }
+        });
     }
 
     public void test_copies_empty_directory() throws Exception {
