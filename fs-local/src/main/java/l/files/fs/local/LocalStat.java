@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import android.system.ErrnoException;
-
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
@@ -12,18 +10,19 @@ import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
-import static android.system.OsConstants.EAGAIN;
-import static android.system.OsConstants.S_ISBLK;
-import static android.system.OsConstants.S_ISCHR;
-import static android.system.OsConstants.S_ISDIR;
-import static android.system.OsConstants.S_ISFIFO;
-import static android.system.OsConstants.S_ISLNK;
-import static android.system.OsConstants.S_ISREG;
-import static android.system.OsConstants.S_ISSOCK;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.local.ErrnoExceptions.toIOException;
+import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.LocalFile.permissionsFromMode;
+import static l.files.fs.local.Stat.S_ISBLK;
+import static l.files.fs.local.Stat.S_ISCHR;
+import static l.files.fs.local.Stat.S_ISDIR;
+import static l.files.fs.local.Stat.S_ISFIFO;
+import static l.files.fs.local.Stat.S_ISLNK;
+import static l.files.fs.local.Stat.S_ISREG;
+import static l.files.fs.local.Stat.S_ISSOCK;
+import static l.files.fs.local.Stat.lstat64;
+import static l.files.fs.local.Stat.stat64;
 
 @AutoValue
 abstract class LocalStat implements Stat {
@@ -109,13 +108,13 @@ abstract class LocalStat implements Stat {
         while (stat == null) {
             try {
                 if (option == FOLLOW) {
-                    stat = l.files.fs.local.Stat.stat64(file.path());
+                    stat = stat64(file.path());
                 } else {
-                    stat = l.files.fs.local.Stat.lstat64(file.path());
+                    stat = lstat64(file.path());
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw toIOException(e, file.path());
+                    throw e.toIOException(file.path());
                 }
             }
         }

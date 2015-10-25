@@ -7,13 +7,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Pair;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +48,8 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.R.drawable.ic_arrow_back_white_24dp;
+import static l.files.ui.R.drawable.ic_menu_white_24dp;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
@@ -226,7 +228,7 @@ final class UiFileActivity {
             @Override
             public void run() {
                 assertBitmapEquals(
-                        activity().getDrawable(R.drawable.ic_arrow_back_white_24dp),
+                        activity().getResources().getDrawable(ic_arrow_back_white_24dp),
                         activity().toolbar().getNavigationIcon());
             }
         });
@@ -323,11 +325,11 @@ final class UiFileActivity {
             public void run() {
                 if (visible) {
                     assertBitmapEquals(
-                            activity().getDrawable(R.drawable.ic_arrow_back_white_24dp),
+                            activity().getResources().getDrawable(ic_arrow_back_white_24dp),
                             activity().toolbar().getNavigationIcon());
                 } else {
                     assertBitmapEquals(
-                            activity().getDrawable(R.drawable.ic_menu_white_24dp),
+                            activity().getResources().getDrawable(ic_menu_white_24dp),
                             activity().toolbar().getNavigationIcon());
                 }
             }

@@ -1,8 +1,5 @@
 package l.files.fs.local;
 
-import android.system.Os;
-import android.system.StructStat;
-
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,6 +31,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.local.LocalFile.permissionsFromMode;
 import static l.files.fs.local.Stat.lstat64;
+import static l.files.fs.local.Stat.stat64;
 
 public final class LocalFileTest extends FileBaseTest {
 
@@ -76,20 +74,19 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_stat_modificationTime() throws Exception {
         Stat stat = dir1().stat(NOFOLLOW);
         long actual = stat.lastModifiedTime().seconds();
-        long expected = Os.stat(dir1().path()).st_atime;
+        long expected = stat64(dir1().path()).atime();
         assertEquals(expected, actual);
     }
 
     public void test_stat_accessTime() throws Exception {
         Stat actual = dir1().stat(NOFOLLOW);
-        StructStat expected = Os.stat(dir1().path());
-        assertEquals(expected.st_atime, actual.lastAccessedTime().seconds());
+        assertEquals(stat64(dir1().path()).atime(), actual.lastAccessedTime().seconds());
     }
 
     public void test_stat_size() throws Exception {
         File file = dir1().resolve("file").createFile();
         file.appendUtf8("hello world");
-        long expected = Os.stat(file.path()).st_size;
+        long expected = stat64(file.path()).size();
         long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
     }
@@ -148,7 +145,7 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_listDir_linkFollowSuccess() throws Exception {
         File dir = dir1().resolve("dir").createDir();
         File a = dir.resolve("a").createFile();
-        File b = dir.resolve("b").createDir();
+        dir.resolve("b").createDir();
         dir.resolve("c").createLink(a);
 
         File link = dir1().resolve("link").createLink(dir);
@@ -223,8 +220,8 @@ public final class LocalFileTest extends FileBaseTest {
         actual.newOutputStream(false).close();
 
         assertEquals(
-                Os.stat(expected.path()).st_mode,
-                Os.stat(actual.path()).st_mode
+                stat64(expected.path()).mode(),
+                stat64(actual.path()).mode()
         );
     }
 
@@ -595,9 +592,9 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     public void test_setPermissions_rawBits() throws Exception {
-        int expected = Os.stat(dir1().path()).st_mode;
+        int expected = stat64(dir1().path()).mode();
         dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
-        int actual = Os.stat(dir1().path()).st_mode;
+        int actual = stat64(dir1().path()).mode();
         assertEquals(expected, actual);
     }
 

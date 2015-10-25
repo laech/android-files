@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@android:id/selectAll"
         android:icon="?android:attr/actionModeSelectAllDrawable"
-        android:showAsAction="ifRoom"
-        android:title="@android:string/selectAll"/>
+        android:title="@android:string/selectAll"
+        app:showAsAction="ifRoom" />
 
 </menu>

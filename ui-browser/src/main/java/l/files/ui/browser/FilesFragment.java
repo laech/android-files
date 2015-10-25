@@ -1,11 +1,13 @@
 package l.files.ui.browser;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -38,7 +40,6 @@ import l.files.ui.operations.actions.Cut;
 import l.files.ui.operations.actions.Delete;
 import l.files.ui.operations.actions.Paste;
 
-import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
@@ -154,13 +155,14 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     }
 
     private void setupOptionsMenu() {
-        Activity context = getActivity();
+        FragmentActivity context = getActivity();
+        FragmentManager manager = context.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new Refresh(autoRefreshDisable(), refresh()),
                 new Bookmark(directory, context),
-                new NewDirMenu(context.getFragmentManager(), directory),
+                new NewDirMenu(manager, directory),
                 new Paste(context, directory),
-                new SortMenu(context.getFragmentManager()),
+                new SortMenu(manager),
                 new ShowHiddenFilesMenu(context)
         ));
     }
@@ -191,8 +193,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
     @Override
     protected ActionMode.Callback actionModeCallback() {
-        Activity context = getActivity();
-        FragmentManager manager = context.getFragmentManager();
+        FragmentManager manager = getActivity().getSupportFragmentManager();
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
@@ -281,7 +282,11 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     }
 
     private FilesLoader filesLoader() {
-        Loader<?> _loader = getLoaderManager().getLoader(0);
-        return (FilesLoader) _loader;
+        try {
+            Loader<?> _loader = getLoaderManager().getLoader(0);
+            return (FilesLoader) _loader;
+        } catch (IllegalStateException e) {
+            return null;
+        }
     }
 }

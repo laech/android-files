@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -17,21 +17,21 @@ final class NewDirMenu extends OptionsMenuAction {
     private final File directory;
     private final FragmentManager manager;
 
-    NewDirMenu(final FragmentManager manager, final File directory) {
+    NewDirMenu(FragmentManager manager, File directory) {
         super(R.id.new_dir);
         this.manager = requireNonNull(manager, "manager");
         this.directory = requireNonNull(directory, "directory");
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu) {
+    public void onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(NONE, id(), NONE, R.string.new_dir)
                 .setShowAsAction(SHOW_AS_ACTION_NEVER);
     }
 
     @Override
-    protected void onItemSelected(final MenuItem item) {
+    protected void onItemSelected(MenuItem item) {
         NewDirFragment.create(directory).show(manager, NewDirFragment.TAG);
     }
 }

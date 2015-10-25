@@ -1,10 +1,8 @@
 package l.files.ui.base.fs;
 
-import android.system.ErrnoException;
-
 import java.io.IOException;
 
-import static android.system.Os.strerror;
+import l.files.fs.local.ErrnoException;
 
 public final class IOExceptions {
 
@@ -14,7 +12,7 @@ public final class IOExceptions {
     public static String message(final IOException exception) {
         final Throwable cause = exception.getCause();
         if (cause instanceof ErrnoException) {
-            return strerror(((ErrnoException) cause).errno);
+            return ((ErrnoException) cause).strerror();
         }
         return exception.getMessage();
     }

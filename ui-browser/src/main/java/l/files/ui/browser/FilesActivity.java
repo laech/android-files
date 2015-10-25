@@ -1,19 +1,19 @@
 package l.files.ui.browser;
 
-import android.app.ActionBar;
-import android.app.FragmentManager.OnBackStackChangedListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
-import android.widget.Toolbar;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +26,7 @@ import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
 
-import static android.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
+import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
@@ -83,22 +83,22 @@ public final class FilesActivity extends BaseActivity implements
 
         drawer.setDrawerListener(drawerListener);
 
-        setActionBar(toolbar);
-        ActionBar actionBar = getActionBar();
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
 
         setOptionsMenu(OptionsMenus.compose(
-                new ActionBarDrawerToggleAction(drawer, getFragmentManager()),
+                new ActionBarDrawerToggleAction(drawer, getSupportFragmentManager()),
                 new GoBackOnHomePressedAction(this),
                 new NewTabMenu(this)
         ));
 
-        getFragmentManager().addOnBackStackChangedListener(this);
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
 
         if (state == null) {
-            getFragmentManager()
+            getSupportFragmentManager()
                     .beginTransaction()
                     .replace(
                             R.id.content,
@@ -130,7 +130,7 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     protected void onDestroy() {
-        getFragmentManager().removeOnBackStackChangedListener(this);
+        getSupportFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
     }
 
@@ -164,7 +164,7 @@ public final class FilesActivity extends BaseActivity implements
         if (fragment == null) {
             return;
         }
-        int backStacks = getFragmentManager().getBackStackEntryCount();
+        int backStacks = getSupportFragmentManager().getBackStackEntryCount();
         if (backStacks == 0) {
             toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
         } else {
@@ -177,8 +177,8 @@ public final class FilesActivity extends BaseActivity implements
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         if (keyCode == KEYCODE_BACK) {
-            while (getFragmentManager().getBackStackEntryCount() > 0) {
-                getFragmentManager().popBackStackImmediate();
+            while (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStackImmediate();
             }
             return true;
         }
@@ -304,12 +304,12 @@ public final class FilesActivity extends BaseActivity implements
             return;
         }
         FilesFragment f = FilesFragment.create(file);
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.content, f, FilesFragment.TAG)
-                .addToBackStack(null)
                 .setBreadCrumbTitle(file.name())
                 .setTransition(TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.content, f, FilesFragment.TAG)
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -318,7 +318,7 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     public FilesFragment fragment() {
-        return (FilesFragment) getFragmentManager()
+        return (FilesFragment) getSupportFragmentManager()
                 .findFragmentByTag(FilesFragment.TAG);
     }
 

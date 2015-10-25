@@ -1,17 +1,20 @@
 package l.files.ui.browser;
 
 import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.content.AsyncTaskLoader;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Loader;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputFilter.LengthFilter;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,10 +22,9 @@ import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
 
-import l.files.ui.R;
 import l.files.fs.File;
+import l.files.ui.R;
 
-import static android.app.LoaderManager.LoaderCallbacks;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
 import static android.view.inputmethod.EditorInfo.IME_ACTION_DONE;
@@ -73,9 +75,12 @@ public abstract class FileCreationFragment extends DialogFragment
 
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
+        View view = LayoutInflater.from(getActivity())
+                .inflate(R.layout.file_name, null, false);
+
         return new AlertDialog.Builder(getActivity())
                 .setTitle(getTitleResourceId())
-                .setView(R.layout.file_name)
+                .setView(view)
                 .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
@@ -211,7 +216,7 @@ public abstract class FileCreationFragment extends DialogFragment
                 dialog.dismiss();
                 return true;
             }
-            
+
             return false;
         }
 

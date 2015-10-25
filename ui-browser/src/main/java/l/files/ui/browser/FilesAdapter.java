@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
@@ -53,8 +51,11 @@ import static android.R.attr.textColorTertiary;
 import static android.R.attr.textColorTertiaryInverse;
 import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Color.TRANSPARENT;
+import static android.graphics.Color.WHITE;
 import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -70,6 +71,7 @@ import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.ui.R.dimen.files_item_card_inner_radius;
 import static l.files.ui.R.dimen.files_item_card_inner_space;
 import static l.files.ui.R.dimen.files_item_space_horizontal;
 import static l.files.ui.R.dimen.files_list_space;
@@ -91,7 +93,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     private final ActionMode.Callback actionModeCallback;
     private final Selection<File> selection;
     private final OnOpenFileListener listener;
-    private final Rect constraint;
+    private Rect constraint;
 
     FilesAdapter(
             Context context,
@@ -105,17 +107,24 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
         this.formatter = new DateFormatter(context);
+        this.decorator = Preview.get(context);
+    }
 
+    private Rect calculateThumbnailConstraint(Context context, CardView card) {
         Resources res = context.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
         int columns = res.getInteger(files_grid_columns);
-        int maxThumbnailWidth = (int) (((float) metrics.widthPixels)
-                - res.getDimension(files_item_space_horizontal) * columns * 2
-                - res.getDimension(files_item_card_inner_space) * columns * 2
-                - res.getDimension(files_list_space) * 2) / columns;
+        float cardSpace = SDK_INT >= LOLLIPOP
+                ? 0
+                : card.getPaddingLeft() + card.getPaddingRight();
+        int maxThumbnailWidth = (int) (
+                (metrics.widthPixels - res.getDimension(files_list_space) * 2) / columns
+                        - res.getDimension(files_item_space_horizontal) * 2
+                        - res.getDimension(files_item_card_inner_space) * 2
+                        - cardSpace
+        );
         int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
-        this.constraint = Rect.of(maxThumbnailWidth, maxThumbnailHeight);
-        this.decorator = Preview.get(context);
+        return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
     }
 
     @Override
@@ -223,11 +232,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private final TextView linkIcon;
         private final TextView linkPath;
         private final ImageView preview;
-        private final CardView previewContainer;
         private final View previewContainerSpaceTop;
-        private final View paletteContainer;
 
         private final int animateDuration;
+        private final float previewRadius;
 
         private final ColorStateList primaryText;
         private final ColorStateList primaryTextInverse;
@@ -238,7 +246,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         FileHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
-            this.paletteContainer = find(R.id.palette, this);
             this.icon = find(R.id.icon, this);
             this.iconContainer = find(R.id.icon_container, this);
             this.title = find(R.id.title, this);
@@ -246,11 +253,11 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             this.linkIcon = find(R.id.link_icon, this);
             this.linkPath = find(R.id.link_path, this);
             this.preview = find(R.id.preview, this);
-            this.previewContainer = find(R.id.preview_container, this);
             this.previewContainerSpaceTop = find(R.id.preview_container_space_top, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
             this.animateDuration = itemView.getResources().getInteger(config_shortAnimTime);
+            this.previewRadius = itemView.getResources().getDimension(files_item_card_inner_radius);
 
             Context context = itemView.getContext();
             this.primaryText = getColorStateList(textColorPrimary, context);
@@ -272,6 +279,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void bind(FileItem file) {
             super.bind(file);
+            if (constraint == null) {
+                constraint = calculateThumbnailConstraint(itemView.getContext(), (CardView) itemView);
+            }
+
             setEnabled(file);
             setTitle(file);
             setIcon(file);
@@ -367,33 +378,29 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             File res = file.selfFile();
             Stat stat = file.linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
-                preview.setImageDrawable(null);
-                showPreviewContainer(false);
-                updatePaletteColor(TRANSPARENT);
+                setPreviewImage((Drawable) null);
+                setPaletteColor(TRANSPARENT);
                 return;
             }
 
             Palette palette = decorator.getPalette(res, null, constraint);
             if (palette != null) {
-                updatePaletteColor(backgroundColor(palette));
+                setPaletteColor(backgroundColor(palette));
             } else {
-                updatePaletteColor(TRANSPARENT);
+                setPaletteColor(TRANSPARENT);
             }
 
             Bitmap thumbnail = getCachedThumbnail(res, stat);
             if (thumbnail != null) {
                 setPreviewImage(thumbnail);
-                showPreviewContainer(true);
                 return;
             }
 
             Rect size = decorator.getSize(res, null, constraint);
             if (size != null) {
                 setPreviewImage(newSizedColorDrawable(size));
-                showPreviewContainer(true);
             } else {
                 setPreviewImage((Drawable) null);
-                showPreviewContainer(false);
             }
 
             task = decorator.get(res, stat, constraint, this);
@@ -423,29 +430,16 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         }
 
-        private void showPreviewContainer(boolean show) {
-            if (show) {
-                previewContainer.setVisibility(VISIBLE);
-                iconContainer.setVisibility(GONE);
-            } else {
-                previewContainer.setVisibility(GONE);
-                iconContainer.setVisibility(VISIBLE);
-            }
-        }
-
-        private int getPaletteColor() {
-            return ((ColorDrawable) paletteContainer.getBackground()).getColor();
-        }
-
-        private void updatePaletteColor(int color) {
-            paletteContainer.setBackgroundColor(color);
+        private void setPaletteColor(int color) {
             if (color == TRANSPARENT) {
+                ((CardView) itemView).setCardBackgroundColor(WHITE);
                 title.setTextColor(primaryText);
                 icon.setTextColor(tertiaryText);
                 summary.setTextColor(tertiaryText);
                 linkIcon.setTextColor(tertiaryText);
                 linkPath.setTextColor(tertiaryText);
             } else {
+                ((CardView) itemView).setCardBackgroundColor(color);
                 title.setTextColor(primaryTextInverse);
                 icon.setTextColor(tertiaryTextInverse);
                 summary.setTextColor(tertiaryTextInverse);
@@ -477,21 +471,13 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         public void onSizeAvailable(File item, Rect size) {
             if (Objects.equals(item, itemId())) {
                 setPreviewImage(newSizedColorDrawable(size));
-                showPreviewContainer(true);
             }
         }
 
         @Override
         public void onPaletteAvailable(File item, Palette palette) {
             if (Objects.equals(item, itemId())) {
-                int color = backgroundColor(palette);
-                if (color != getPaletteColor()) {
-                    updatePaletteColor(color);
-                    if (color != TRANSPARENT) {
-                        paletteContainer.setAlpha(0);
-                        paletteContainer.animate().alpha(1).setDuration(animateDuration);
-                    }
-                }
+                setPaletteColor(backgroundColor(palette));
             }
         }
 
@@ -506,7 +492,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void onPreviewAvailable(File item, Bitmap thumbnail) {
             if (Objects.equals(item, itemId())) {
-                showPreviewContainer(true);
                 setPreviewImage(thumbnail);
                 preview.setAlpha(0f);
                 preview.animate().alpha(1).setDuration(animateDuration);
@@ -518,6 +503,11 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             if (drawable != null) {
                 boolean small = drawable.getIntrinsicWidth() < constraint.width();
                 previewContainerSpaceTop.setVisibility(small ? VISIBLE : GONE);
+                preview.setVisibility(VISIBLE);
+                iconContainer.setVisibility(GONE);
+            } else {
+                preview.setVisibility(GONE);
+                iconContainer.setVisibility(VISIBLE);
             }
         }
 
@@ -527,7 +517,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private void setPreviewImage(Bitmap bitmap) {
             if (bitmap != null) {
-                setPreviewImage(new BitmapDrawable(resources(), bitmap));
+                setPreviewImage(new RoundedBitmapDrawable(previewRadius, bitmap));
             } else {
                 setPreviewImage((Drawable) null);
             }
@@ -536,7 +526,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void onPreviewFailed(File item) {
             if (Objects.equals(item, itemId())) {
-                showPreviewContainer(false);
+                setPreviewImage((Drawable) null);
             }
         }
     }

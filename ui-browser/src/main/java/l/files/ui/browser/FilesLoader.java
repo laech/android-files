@@ -1,11 +1,11 @@
 package l.files.ui.browser;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
+import android.support.v4.content.AsyncTaskLoader;
 
 import com.google.auto.value.AutoValue;
 import com.ibm.icu.text.Collator;

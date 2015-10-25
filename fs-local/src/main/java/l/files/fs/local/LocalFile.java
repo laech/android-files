@@ -2,12 +2,9 @@ package l.files.fs.local;
 
 import android.os.AsyncTask;
 import android.os.Parcel;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import com.google.auto.value.AutoValue;
 
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -32,24 +29,6 @@ import l.files.fs.Stat;
 import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
-import static android.system.OsConstants.EACCES;
-import static android.system.OsConstants.EEXIST;
-import static android.system.OsConstants.O_CREAT;
-import static android.system.OsConstants.O_EXCL;
-import static android.system.OsConstants.O_RDWR;
-import static android.system.OsConstants.R_OK;
-import static android.system.OsConstants.S_IRGRP;
-import static android.system.OsConstants.S_IROTH;
-import static android.system.OsConstants.S_IRUSR;
-import static android.system.OsConstants.S_IRWXU;
-import static android.system.OsConstants.S_IWGRP;
-import static android.system.OsConstants.S_IWOTH;
-import static android.system.OsConstants.S_IWUSR;
-import static android.system.OsConstants.S_IXGRP;
-import static android.system.OsConstants.S_IXOTH;
-import static android.system.OsConstants.S_IXUSR;
-import static android.system.OsConstants.W_OK;
-import static android.system.OsConstants.X_OK;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -63,7 +42,28 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.ErrnoExceptions.toIOException;
+import static l.files.fs.local.ErrnoException.EACCES;
+import static l.files.fs.local.ErrnoException.EEXIST;
+import static l.files.fs.local.Fcntl.O_CREAT;
+import static l.files.fs.local.Fcntl.O_EXCL;
+import static l.files.fs.local.Fcntl.O_RDWR;
+import static l.files.fs.local.Fcntl.open;
+import static l.files.fs.local.Stat.S_IRGRP;
+import static l.files.fs.local.Stat.S_IROTH;
+import static l.files.fs.local.Stat.S_IRUSR;
+import static l.files.fs.local.Stat.S_IRWXU;
+import static l.files.fs.local.Stat.S_IWGRP;
+import static l.files.fs.local.Stat.S_IWOTH;
+import static l.files.fs.local.Stat.S_IWUSR;
+import static l.files.fs.local.Stat.S_IXGRP;
+import static l.files.fs.local.Stat.S_IXOTH;
+import static l.files.fs.local.Stat.S_IXUSR;
+import static l.files.fs.local.Stat.chmod;
+import static l.files.fs.local.Unistd.R_OK;
+import static l.files.fs.local.Unistd.W_OK;
+import static l.files.fs.local.Unistd.X_OK;
+import static l.files.fs.local.Unistd.readlink;
+import static l.files.fs.local.Unistd.symlink;
 
 @AutoValue
 public abstract class LocalFile extends BaseFile {
@@ -258,13 +258,13 @@ public abstract class LocalFile extends BaseFile {
 
     private boolean accessible(int mode) throws IOException {
         try {
-            Os.access(path(), mode);
+            Unistd.access(path(), mode);
             return true;
         } catch (ErrnoException e) {
             if (e.errno == EACCES) {
                 return false;
             }
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 
@@ -335,14 +335,14 @@ public abstract class LocalFile extends BaseFile {
         try {
             mkdir();
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
         return this;
     }
 
     private void mkdir() throws ErrnoException {
         // Same permission bits as java.io.File.mkdir() on Android
-        Os.mkdir(path(), S_IRWXU);
+        l.files.fs.local.Stat.mkdir(path(), S_IRWXU);
     }
 
     @Override
@@ -364,7 +364,7 @@ public abstract class LocalFile extends BaseFile {
             mkdir();
         } catch (ErrnoException e) {
             if (e.errno != EEXIST) {
-                throw toIOException(e, path());
+                throw e.toIOException(path());
             }
         }
 
@@ -376,7 +376,7 @@ public abstract class LocalFile extends BaseFile {
         try {
             createFileNative();
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
         return this;
     }
@@ -385,8 +385,8 @@ public abstract class LocalFile extends BaseFile {
         // Same flags and mode as java.io.File.createNewFile() on Android
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
-        FileDescriptor fd = Os.open(path(), flags, mode);
-        Os.close(fd);
+        int fd = open(path(), flags, mode);
+        Unistd.close(fd);
     }
 
     @Override
@@ -408,7 +408,7 @@ public abstract class LocalFile extends BaseFile {
             createFileNative();
         } catch (ErrnoException e) {
             if (e.errno != EEXIST) {
-                throw toIOException(e, path());
+                throw e.toIOException(path());
             }
         }
 
@@ -420,9 +420,9 @@ public abstract class LocalFile extends BaseFile {
         ensureIsLocal(target);
         String targetPath = target.path();
         try {
-            Os.symlink(targetPath, path());
+            symlink(targetPath, path());
         } catch (ErrnoException e) {
-            throw toIOException(e, path(), targetPath);
+            throw e.toIOException(path(), targetPath);
         }
         return this;
     }
@@ -430,10 +430,10 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public LocalFile readLink() throws IOException {
         try {
-            String link = Os.readlink(path());
+            String link = readlink(path());
             return of(link);
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 
@@ -443,18 +443,18 @@ public abstract class LocalFile extends BaseFile {
         String dstPath = dst.path();
         String srcPath = path();
         try {
-            Os.rename(srcPath, dstPath);
+            Stdio.rename(srcPath, dstPath);
         } catch (ErrnoException e) {
-            throw toIOException(e, srcPath, dstPath);
+            throw e.toIOException(srcPath, dstPath);
         }
     }
 
     @Override
     public void delete() throws IOException {
         try {
-            Os.remove(path());
+            Stdio.remove(path());
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 
@@ -468,7 +468,7 @@ public abstract class LocalFile extends BaseFile {
             boolean followLink = option == FOLLOW;
             setAccessTime(path(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 
@@ -489,7 +489,7 @@ public abstract class LocalFile extends BaseFile {
             boolean followLink = option == FOLLOW;
             setModificationTime(path(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 
@@ -506,9 +506,9 @@ public abstract class LocalFile extends BaseFile {
             mode |= PERMISSION_BITS[permission.ordinal()];
         }
         try {
-            Os.chmod(path(), mode);
+            chmod(path(), mode);
         } catch (ErrnoException e) {
-            throw toIOException(e, path());
+            throw e.toIOException(path());
         }
     }
 

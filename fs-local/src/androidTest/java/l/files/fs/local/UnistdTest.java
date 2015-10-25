@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 
-import static android.system.OsConstants.EBADF;
-
 public final class UnistdTest extends FileBaseTest {
 
     public void testClose() throws Exception {
@@ -16,8 +14,8 @@ public final class UnistdTest extends FileBaseTest {
             Unistd.close(getFd(out));
             try {
                 out.write(1); // Error closed
-            } catch (IOException e) {
-                assertEquals(EBADF, ((android.system.ErrnoException) e.getCause()).errno);
+                fail();
+            } catch (IOException ignored) {
             }
         }
     }

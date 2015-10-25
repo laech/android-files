@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -247,8 +246,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
         }
     }
 
+    private static final Random random = new Random();
+
     private void setRandomLastModified(File file) throws IOException {
-        long time = ThreadLocalRandom.current().nextLong();
+        long time = random.nextLong();
         file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(time));
     }
 

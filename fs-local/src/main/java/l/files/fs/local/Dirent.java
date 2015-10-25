@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import android.system.ErrnoException;
-
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
@@ -13,7 +11,6 @@ import l.files.fs.LinkOption;
 import l.files.fs.Stream;
 
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.local.ErrnoExceptions.toIOException;
 
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html">dirent.h</a>
@@ -53,7 +50,7 @@ abstract class Dirent extends Native {
         try {
             dir = opendir(file.path(), option == FOLLOW);
         } catch (ErrnoException e) {
-            throw toIOException(e);
+            throw e.toIOException();
         }
 
         return new Stream<Dirent>() {
@@ -70,7 +67,7 @@ abstract class Dirent extends Native {
                 try {
                     closedir(dir);
                 } catch (ErrnoException e) {
-                    throw toIOException(e);
+                    throw e.toIOException();
                 }
             }
 
@@ -120,7 +117,7 @@ abstract class Dirent extends Native {
                         break;
 
                     } catch (ErrnoException e) {
-                        this.<RuntimeException>rethrow(toIOException(e));
+                        this.<RuntimeException>rethrow(e.toIOException());
                     }
                 }
                 while (next != null);

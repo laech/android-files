@@ -1,7 +1,6 @@
 package l.files.fs.local;
 
 import android.os.Handler;
-import android.system.ErrnoException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,11 +18,6 @@ import l.files.fs.Observer;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
-import static android.system.OsConstants.EACCES;
-import static android.system.OsConstants.EINVAL;
-import static android.system.OsConstants.ENOENT;
-import static android.system.OsConstants.ENOMEM;
-import static android.system.OsConstants.ENOSPC;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
@@ -31,7 +25,11 @@ import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.Dirent.DT_DIR;
-import static l.files.fs.local.ErrnoExceptions.toIOException;
+import static l.files.fs.local.ErrnoException.EACCES;
+import static l.files.fs.local.ErrnoException.EINVAL;
+import static l.files.fs.local.ErrnoException.ENOENT;
+import static l.files.fs.local.ErrnoException.ENOMEM;
+import static l.files.fs.local.ErrnoException.ENOSPC;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
 import static l.files.fs.local.Inotify.IN_CLOSE_NOWRITE;
@@ -279,7 +277,7 @@ final class LocalObservable extends Native
                             someFailed = true;
 
                         } else {
-                            throw toIOException(e);
+                            throw e.toIOException();
                         }
                     }
                 }
@@ -345,7 +343,7 @@ final class LocalObservable extends Native
             for (ErrnoException sup : suppressed) {
                 e.addSuppressed(sup);
             }
-            throw toIOException(e, root.path());
+            throw e.toIOException(root.path());
         }
 
         if (!suppressed.isEmpty()) {
@@ -505,7 +503,7 @@ final class LocalObservable extends Native
                 observer.onIncompleteObservation();
 
             } else {
-                throw toIOException(e);
+                throw e.toIOException();
             }
         }
     }

@@ -1,8 +1,6 @@
 package l.files.fs.local;
 
-import android.system.ErrnoException;
-
-import static android.system.OsConstants.EBADF;
+import static l.files.fs.local.ErrnoException.EBADF;
 import static l.files.fs.local.Inotify.IN_ALL_EVENTS;
 import static l.files.fs.local.Unistd.close;
 import static org.mockito.Mockito.mock;

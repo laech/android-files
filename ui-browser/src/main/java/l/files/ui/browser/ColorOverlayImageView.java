@@ -28,11 +28,6 @@ public final class ColorOverlayImageView extends ImageView {
         super(context, attrs, defStyleAttr);
     }
 
-    public ColorOverlayImageView(
-            Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

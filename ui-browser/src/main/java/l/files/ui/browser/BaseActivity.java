@@ -1,7 +1,7 @@
 package l.files.ui.browser;
 
-import android.app.Activity;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,7 +10,7 @@ import l.files.ui.base.app.OptionsMenu;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.view.ActionModeProvider;
 
-class BaseActivity extends Activity implements ActionModeProvider {
+class BaseActivity extends AppCompatActivity implements ActionModeProvider {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 

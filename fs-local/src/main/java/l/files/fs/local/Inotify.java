@@ -1,8 +1,5 @@
 package l.files.fs.local;
 
-import android.system.ErrnoException;
-import android.system.OsConstants;
-
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static android.system.OsConstants.ENOMEM;
-import static android.system.OsConstants.ENOSPC;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.local.ErrnoException.ENOMEM;
+import static l.files.fs.local.ErrnoException.ENOSPC;
 
 /**
  * @see <a href="http://man7.org/linux/man-pages/man7/inotify.7.html">inotify</a>
@@ -46,8 +43,8 @@ final class Inotify extends Native {
     static final int IN_ISDIR = 0x40000000;
     static final int IN_ONESHOT = 0x80000000;
 
-    static final int IN_NONBLOCK = OsConstants.O_NONBLOCK;
-    static final int IN_CLOEXEC = OsConstants.FD_CLOEXEC;
+    // static final int IN_NONBLOCK = OsConstants.O_NONBLOCK;
+    // static final int IN_CLOEXEC = OsConstants.FD_CLOEXEC;
 
     static final int IN_ALL_EVENTS
             = IN_ACCESS

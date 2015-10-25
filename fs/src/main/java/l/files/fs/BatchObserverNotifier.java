@@ -6,18 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 
 final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
-    private static final ScheduledExecutorService service = newScheduler();
-
-    private static ScheduledExecutorService newScheduler() {
-        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        executor.setRemoveOnCancelPolicy(true);
-        return executor;
-    }
+    private static final ScheduledExecutorService service = newSingleThreadScheduledExecutor();
 
     private boolean selfChanged;
     private final Set<String> childrenChanged;

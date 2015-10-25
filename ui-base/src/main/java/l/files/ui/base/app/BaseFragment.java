@@ -1,6 +1,6 @@
 package l.files.ui.base.app;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;

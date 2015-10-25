@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.annotation.TargetApi;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -34,6 +35,8 @@ import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.BitmapFactory.decodeByteArray;
 import static android.graphics.Color.WHITE;
 import static android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.open;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
@@ -151,6 +154,11 @@ final class DecodePdf extends DecodeThumbnail {
             requireNonNull(signal);
             requireNonNull(res);
             requireNonNull(constraint);
+
+            // TODO
+            if (SDK_INT < LOLLIPOP) {
+                return null;
+            }
 
             if (!"file".equals(res.scheme())) {
                 return null;
@@ -295,6 +303,7 @@ final class DecodePdf extends DecodeThumbnail {
         }
     }
 
+    @TargetApi(LOLLIPOP)
     private static final class ReadPreview implements Callable<Result> {
 
         private final Context context;

@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import android.system.ErrnoException;
-
 import com.google.auto.value.AutoValue;
 
 /**

@@ -1,11 +1,11 @@
 package l.files.ui.operations;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.Toolbar;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +13,7 @@ import java.util.List;
 
 import l.files.ui.base.view.Views;
 
-public final class FailuresActivity extends Activity {
+public final class FailuresActivity extends AppCompatActivity {
 
     static final String EXTRA_FAILURES = "failures";
     static final String EXTRA_TITLE = "title";
@@ -36,9 +36,10 @@ public final class FailuresActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.failures_activity);
-        setActionBar(Views.<Toolbar>find(R.id.toolbar, this));
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setTitle(getIntent().getStringExtra(EXTRA_TITLE));
+        setSupportActionBar(Views.<Toolbar>find(R.id.toolbar, this));
+        //noinspection ConstantConditions
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getIntent().getStringExtra(EXTRA_TITLE));
     }
 
     @Override
