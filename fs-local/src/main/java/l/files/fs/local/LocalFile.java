@@ -1,6 +1,5 @@
 package l.files.fs.local;
 
-import android.os.AsyncTask;
 import android.os.Parcel;
 
 import com.google.auto.value.AutoValue;
@@ -105,17 +104,6 @@ public abstract class LocalFile extends BaseFile {
 
     static {
         Native.load();
-        initTika();
-    }
-
-    private static void initTika() {
-        // TODO do this cleaner
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                TikaHolder.tika.detect("");
-            }
-        });
     }
 
     abstract java.io.File file();
