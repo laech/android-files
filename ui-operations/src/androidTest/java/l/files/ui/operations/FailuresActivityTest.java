@@ -1,8 +1,8 @@
 package l.files.ui.operations;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Parcelable;
+import android.support.v7.app.ActionBar;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,12 +26,14 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
     public void testSetsTitleFromIntent() {
         String title = "hello";
         setActivityIntent(newIntent().putExtra(EXTRA_TITLE, title));
-        assertEquals(title, getActivity().getActionBar().getTitle());
+        ActionBar actionBar = getActivity().getSupportActionBar();
+        assertNotNull(actionBar);
+        assertEquals(title, actionBar.getTitle());
     }
 
     public void testSetsFailuresFromIntent() {
-        FailureMessage f1 = FailureMessage.create(LocalFile.create(new File("1")), "test1");
-        FailureMessage f2 = FailureMessage.create(LocalFile.create(new File("2")), "test2");
+        FailureMessage f1 = FailureMessage.create(LocalFile.of(new File("1")), "test1");
+        FailureMessage f2 = FailureMessage.create(LocalFile.of(new File("2")), "test2");
         setActivityIntent(newIntent().putParcelableArrayListExtra(EXTRA_FAILURES, new ArrayList<>(asList(f1, f2))));
 
         ListView list = (ListView) getActivity().findViewById(android.R.id.list);
@@ -48,7 +50,7 @@ public final class FailuresActivityTest extends BaseActivityTest<FailuresActivit
 
     public void testHomeAsUpIsDisplayed() {
         setActivityIntent(newIntent());
-        ActionBar actionBar = getActivity().getActionBar();
+        ActionBar actionBar = getActivity().getSupportActionBar();
         assertNotNull(actionBar);
         assertTrue((actionBar.getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0);
     }
