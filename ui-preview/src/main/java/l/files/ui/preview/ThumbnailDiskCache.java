@@ -65,21 +65,25 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             @Override
             public Result onPostVisit(File file) throws IOException {
 
-                Stat stat = file.stat(NOFOLLOW);
-                if (stat.isDirectory()) {
+                try {
+                    Stat stat = file.stat(NOFOLLOW);
+                    if (stat.isDirectory()) {
 
-                    try {
-                        file.delete();
-                    } catch (DirectoryNotEmpty ignore) {
+                        try {
+                            file.delete();
+                        } catch (DirectoryNotEmpty ignore) {
+                        }
+
+                    } else {
+
+                        long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
+                        if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
+                            file.delete();
+                        }
+
                     }
-
-                } else {
-
-                    long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
-                    if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
-                        file.delete();
-                    }
-
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
                 return CONTINUE;
