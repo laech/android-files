@@ -1,5 +1,6 @@
 package l.files.ui.browser;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
@@ -10,6 +11,8 @@ import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static java.util.Objects.requireNonNull;
@@ -29,11 +32,14 @@ final class NewTabMenu extends OptionsMenuAction {
     @Override
     public void onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(NONE, id(), NONE, R.string.new_tab)
-                .setShowAsAction(SHOW_AS_ACTION_NEVER);
+        if (SDK_INT >= LOLLIPOP) {
+            menu.add(NONE, id(), NONE, R.string.new_tab)
+                    .setShowAsAction(SHOW_AS_ACTION_NEVER);
+        }
     }
 
     @Override
+    @TargetApi(LOLLIPOP)
     protected void onItemSelected(final MenuItem item) {
         final int flags
                 = FLAG_ACTIVITY_NEW_DOCUMENT
