@@ -164,7 +164,7 @@ public final class LocalObservableTest extends FileBaseTest {
             for (int i = 0; i < 20; i++) {
                 dir.resolve(String.valueOf(Math.random())).createDir();
             }
-            verify(observer, timeout(1000).atLeastOnce()).onIncompleteObservation();
+            verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
         }
     }
