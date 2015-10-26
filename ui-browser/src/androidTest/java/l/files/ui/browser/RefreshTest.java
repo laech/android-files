@@ -117,6 +117,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
             child.delete();
         } catch (FileNotFoundException e) {
             child.createFile();
+        } catch (IOException e) {
+            child.delete();
         }
     }
 

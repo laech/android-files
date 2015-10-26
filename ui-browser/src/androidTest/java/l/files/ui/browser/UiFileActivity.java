@@ -175,6 +175,7 @@ final class UiFileActivity {
                 activity().drawerLayout().openDrawer(START);
             }
         });
+        assertDrawerIsOpened(true);
         return new UiBookmarksFragment(this);
     }
 
@@ -182,7 +183,7 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(opened, activity().drawerLayout().isDrawerVisible(START));
+                assertEquals(opened, activity().drawerLayout().isDrawerOpen(START));
             }
         });
         return this;
