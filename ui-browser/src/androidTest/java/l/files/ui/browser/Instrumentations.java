@@ -112,7 +112,7 @@ final class Instrumentations {
             } catch (AssertionError e) {
                 error = e;
             }
-            sleep(500);
+            sleep(10);
         }
 
         if (error == null) {
