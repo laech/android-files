@@ -142,6 +142,8 @@ abstract class Stat extends Native {
 
     static native Stat lstat(String path) throws ErrnoException;
 
+    static native Stat fstat(int fd) throws ErrnoException;
+
     static native void chmod(String path, int mode) throws ErrnoException;
 
     static native void mkdir(String path, int mode) throws ErrnoException;

@@ -11,7 +11,6 @@ import l.files.fs.Permission;
 import l.files.fs.Stream;
 import l.files.fs.local.LocalFile;
 
-import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
@@ -72,7 +71,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private File linkToDirWithMaxWatchReached() throws IOException {
-        File dir = linkToExternalDir("files-test-max-watches-reached");
+        File dir = linkToCacheDir("files-test-max-watches-reached");
         createRandomDirs(dir, maxUserWatches() + 1);
         return dir;
     }
@@ -89,7 +88,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     public void test_auto_show_updated_details_of_lots_of_child_dirs() throws Exception {
-        File dir = linkToExternalDir("files-test-lots-of-child-dirs");
+        File dir = linkToCacheDir("files-test-lots-of-child-dirs");
         createRandomDirs(dir, maxUserWatches() - 2);
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
@@ -152,7 +151,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void test_auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         int childrenCount = (int) (maxUserWatches() * 0.75F);
-        File dir = linkToExternalDir("files-test-add-remove-while-loading");
+        File dir = linkToCacheDir("files-test-add-remove-while-loading");
         createRandomChildren(dir, childrenCount);
 
         screen().click(dir);
@@ -171,9 +170,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir);
     }
 
-    private File linkToExternalDir(String name) throws IOException {
+    private File linkToCacheDir(String name) throws IOException {
         return dir().resolve(name).createLink(
-                externalStorageDir()
+                cacheDir()
                         .resolve(name)
                         .createDirs()
         );
@@ -201,8 +200,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         return dir.resolve(String.valueOf(Math.random()));
     }
 
-    private File externalStorageDir() {
-        return LocalFile.of(getExternalStorageDirectory());
+    private File cacheDir() {
+        return LocalFile.of(getInstrumentation().getContext().getExternalCacheDir());
     }
 
     public void test_auto_show_correct_information_on_large_change_events() throws Exception {

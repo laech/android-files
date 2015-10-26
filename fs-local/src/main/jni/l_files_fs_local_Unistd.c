@@ -5,6 +5,10 @@
 #include <linux/limits.h>
 
 void Java_l_files_fs_local_Unistd_close(JNIEnv *env, jclass clazz, jint fd) {
+    // See https://android.googlesource.com/platform/libcore/+/master/luni/src/main/native/libcore_io_Posix.cpp
+    // Even if close(2) fails with EINTR, the fd will have been closed.
+    // Using TEMP_FAILURE_RETRY will either lead to EBADF or closing someone else's fd.
+    // http://lkml.indiana.edu/hypermail/linux/kernel/0509.1/0877.html
     if (-1 == close((int) fd)) {
         throw_errno_exception(env);
     }

@@ -4,9 +4,7 @@ import android.os.Parcel;
 
 import com.google.auto.value.AutoValue;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -310,12 +308,12 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public InputStream newInputStream() throws IOException {
-        return new FileInputStream(file());
+        return LocalStreams.newInputStream(this);
     }
 
     @Override
     public OutputStream newOutputStream(boolean append) throws IOException {
-        return new FileOutputStream(file(), append);
+        return LocalStreams.newOutputStream(this, append);
     }
 
     @Override

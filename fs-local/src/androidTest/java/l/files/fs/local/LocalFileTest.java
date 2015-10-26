@@ -2,6 +2,7 @@ package l.files.fs.local;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -164,6 +165,19 @@ public final class LocalFileTest extends FileBaseTest {
         try (Stream<File> actual = dir1().listDirs(NOFOLLOW)) {
             assertEquals(expected, actual.to(new ArrayList<>()));
         }
+    }
+
+    public void test_output_created_file_has_correct_permissions() throws Exception {
+        File a = dir1().resolve("a");
+        File b = dir1().resolve("b");
+
+        new FileOutputStream(a.path()).close();
+        b.newOutputStream().close();
+
+        assertEquals(
+                a.stat(NOFOLLOW).permissions(),
+                b.stat(NOFOLLOW).permissions()
+        );
     }
 
     public void test_output_append_defaultFalse() throws Exception {
