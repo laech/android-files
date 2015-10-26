@@ -1,38 +1,43 @@
 package l.files.operations;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.List;
 
-import l.files.fs.local.LocalFile;
-import l.files.testing.BaseTest;
+import l.files.fs.File;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
-public final class TaskStateTest extends BaseTest {
+public final class TaskStateTest {
 
     private Time time;
     private TaskId task;
     private Target target;
     private TaskState.Pending pending;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         this.time = Time.create(10, 11);
         this.task = TaskId.create(1, COPY);
-        this.target = Target.from(singleton(LocalFile.of("src")), LocalFile.of("dst"));
+        this.target = Target.from(singleton(mock(File.class)), mock(File.class));
         this.pending = TaskState.pending(task, target, time);
     }
 
-    public void testCreatePending() throws Exception {
+    @Test
+    public void CreatePending() throws Exception {
         assertEquals(task, pending.task());
         assertEquals(time, pending.time());
         assertEquals(target, pending.target());
     }
 
-    public void testPendingToRunning() throws Exception {
+    @Test
+    public void PendingToRunning() throws Exception {
         Progress items = Progress.create(10101, 1);
         Progress bytes = Progress.create(10100, 0);
         Time time = Time.create(1010, 11);
@@ -44,7 +49,8 @@ public final class TaskStateTest extends BaseTest {
         assertEquals(target, state.target());
     }
 
-    public void testPendingToRunningWithoutProgress() throws Exception {
+    @Test
+    public void PendingToRunningWithoutProgress() throws Exception {
         Time time = Time.create(10101, 100);
         TaskState.Running state = pending.running(time);
         assertEquals(task, state.task());
@@ -55,7 +61,8 @@ public final class TaskStateTest extends BaseTest {
 
     }
 
-    public void testRunningToRunningDoesNotChangeTime() throws Exception {
+    @Test
+    public void RunningToRunningDoesNotChangeTime() throws Exception {
         Time time = Time.create(102, 2);
         Progress items = Progress.create(4, 2);
         Progress bytes = Progress.create(9, 2);
@@ -67,7 +74,8 @@ public final class TaskStateTest extends BaseTest {
         assertEquals(target, state.target());
     }
 
-    public void testRunningToSuccess() throws Exception {
+    @Test
+    public void RunningToSuccess() throws Exception {
         Time successTime = Time.create(2, 2);
         TaskState state = pending.running(time).success(successTime);
         assertEquals(task, state.task());
@@ -75,10 +83,11 @@ public final class TaskStateTest extends BaseTest {
         assertEquals(target, state.target());
     }
 
-    public void testRunningToFailed() throws Exception {
+    @Test
+    public void RunningToFailed() throws Exception {
         Time failureTime = Time.create(20, 2);
         List<Failure> failures = singletonList(Failure.create(
-                LocalFile.of("1"), new IOException("ok")
+                mock(File.class), new IOException("ok")
         ));
         TaskState.Failed state = pending.running(time).failed(failureTime, failures);
         assertEquals(task, state.task());
