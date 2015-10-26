@@ -225,9 +225,6 @@ public final class RefreshTest extends BaseFilesActivityTest {
         try (Stream<File> stream = dir().list(NOFOLLOW)) {
             Random r = new Random();
             for (File child : stream) {
-                child.setLastAccessedTime(NOFOLLOW, Instant.of(
-                        r.nextInt((int) (currentTimeMillis() / 1000)),
-                        r.nextInt(999999)));
                 child.setLastModifiedTime(NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));

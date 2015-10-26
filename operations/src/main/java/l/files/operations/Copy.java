@@ -103,7 +103,7 @@ final class Copy extends Paste {
         copiedItemCount.incrementAndGet();
     }
 
-   private void copyFile(File src, Stat stat, File dst) throws IOException {
+    private void copyFile(File src, Stat stat, File dst) throws IOException {
         if (isInterrupted()) {
             return;
         }
@@ -146,12 +146,6 @@ final class Copy extends Paste {
     private void setTimes(Stat src, File dst) {
         try {
             dst.setLastModifiedTime(NOFOLLOW, src.lastModifiedTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            dst.setLastAccessedTime(NOFOLLOW, src.lastAccessedTime());
         } catch (IOException e) {
             e.printStackTrace();
         }

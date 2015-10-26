@@ -93,6 +93,10 @@ final class LocalObservable extends Native
      * will be required and they are of a limited resource.
      */
 
+    /*
+     * No last access time watch because it is unreliable and it's not needed
+     */
+
     private static final Handler handler = new Handler(getMainLooper());
 
     /**
@@ -100,7 +104,6 @@ final class LocalObservable extends Native
      */
     private static final int ROOT_MASK
             = IN_EXCL_UNLINK
-            | IN_ACCESS
             | IN_ATTRIB
             | IN_CREATE
             | IN_DELETE
@@ -428,10 +431,7 @@ final class LocalObservable extends Native
 
         if (wd == this.wd) {
 
-            if (isChildAccessed(event, child)) {
-                observer(MODIFY, child);
-
-            } else if (isChildCreated(event, child)) {
+            if (isChildCreated(event, child)) {
                 if (isDirectory(event)) {
                     addWatchForNewDirectory(child);
                 }
@@ -449,9 +449,6 @@ final class LocalObservable extends Native
 
             } else if (isChildModified(event, child)) {
                 observer(MODIFY, child);
-
-            } else if (isSelfAccessed(event, child)) {
-                observer(MODIFY, null);
 
             } else if (isSelfModified(event, child)) {
                 observer(MODIFY, null);
@@ -530,10 +527,6 @@ final class LocalObservable extends Native
         return 0 != (event & IN_IGNORED);
     }
 
-    private boolean isChildAccessed(int mask, String child) {
-        return child != null && 0 != (mask & IN_ACCESS);
-    }
-
     private boolean isChildCreated(int mask, String child) {
         return (child != null && 0 != (mask & IN_CREATE)) ||
                 (child != null && 0 != (mask & IN_MOVED_TO));
@@ -548,10 +541,6 @@ final class LocalObservable extends Native
     private boolean isChildDeleted(int event, String child) {
         return (child != null && 0 != (event & IN_MOVED_FROM)) ||
                 (child != null && 0 != (event & IN_DELETE));
-    }
-
-    private boolean isSelfAccessed(int mask, String child) {
-        return child == null && 0 != (mask & IN_ACCESS);
     }
 
     private boolean isSelfModified(int mask, String child) {

@@ -80,10 +80,6 @@ abstract class Stat extends Native {
 
     abstract long size();
 
-    abstract long atime();
-
-    abstract int atime_nsec();
-
     abstract long mtime();
 
     abstract int mtime_nsec();
@@ -105,8 +101,6 @@ abstract class Stat extends Native {
             int gid,
             long rdev,
             long size,
-            long atime,
-            int atime_nsec,
             long mtime,
             int mtime_nsec,
             long ctime,
@@ -122,8 +116,6 @@ abstract class Stat extends Native {
                 gid,
                 rdev,
                 size,
-                atime,
-                atime_nsec,
                 mtime,
                 mtime_nsec,
                 ctime,

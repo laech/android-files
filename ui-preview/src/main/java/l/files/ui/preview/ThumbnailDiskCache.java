@@ -76,8 +76,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
                     } else {
 
-                        long lastAccessedMillis = stat.lastAccessedTime().to(MILLISECONDS);
-                        if (MILLISECONDS.toDays(now - lastAccessedMillis) > 30) {
+                        long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
+                        if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
                             file.delete();
                         }
 

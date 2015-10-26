@@ -405,23 +405,6 @@ public final class LocalObservableTest extends FileBaseTest {
         }
     }
 
-    public void test_modify_atime() throws Exception {
-        File file = dir1().resolve("file").createFile();
-        File dir = dir1().resolve("dir").createDir();
-        testModifyLastAccessedTime(file, file);
-        testModifyLastAccessedTime(file, dir1());
-        testModifyLastAccessedTime(dir, dir);
-        testModifyLastAccessedTime(dir, dir1());
-    }
-
-    private void testModifyLastAccessedTime(File target, File observable) throws Exception {
-        Instant old = target.stat(NOFOLLOW).lastModifiedTime();
-        Instant t = Instant.of(old.seconds() - 1, old.nanos());
-        try (Recorder observer = observe(observable)) {
-            observer.awaitModifyBySetLastAccessedTime(target, t);
-        }
-    }
-
     public void test_delete() throws Exception {
         File file = dir1().resolve("file");
         File dir = dir1().resolve("dir");
@@ -721,19 +704,6 @@ public final class LocalObservableTest extends FileBaseTest {
         };
     }
 
-    private static Callable<Void> newSetLastAccessedTime(
-            final File file,
-            final LinkOption option,
-            final Instant instant) {
-        return new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                file.setLastAccessedTime(option, instant);
-                return null;
-            }
-        };
-    }
-
     static class Recorder extends Tracker implements Observer {
 
         private final File root;
@@ -1013,10 +983,6 @@ public final class LocalObservableTest extends FileBaseTest {
             awaitModify(target, newCreateDir(target.resolve(child)));
         }
 
-        void awaitModifyBySetLastAccessedTime(File target, Instant time) throws Exception {
-            awaitModify(target, newSetLastAccessedTime(target, NOFOLLOW, time));
-        }
-
         void awaitModifyBySetPermissions(File target, Set<Permission> perms) throws Exception {
             awaitModify(target, newSetPermissions(target, perms));
         }
@@ -1146,15 +1112,6 @@ public final class LocalObservableTest extends FileBaseTest {
         PostActions add(PostAction move) {
             moves.add(move);
             return this;
-        }
-
-        PostActions awaitCreateFile(final String name) {
-            return add(new PostAction() {
-                @Override
-                public void action(File dst, Recorder observer) throws Exception {
-                    observer.awaitModifyByCreateFile(dst, name);
-                }
-            });
         }
 
         PostActions awaitCreateFileInParent(final String name) {

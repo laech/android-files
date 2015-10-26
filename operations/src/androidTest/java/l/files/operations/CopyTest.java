@@ -61,26 +61,18 @@ public final class CopyTest extends PasteTest {
         File dst = dir.resolve(src.name());
         assertFalse(dst.exists(NOFOLLOW));
 
-        Instant atime = Instant.of(123, 456);
         Instant mtime = Instant.of(100001, 101);
-        src.setLastAccessedTime(NOFOLLOW, atime);
         src.setLastModifiedTime(NOFOLLOW, mtime);
 
         copy(src, dir);
 
         assertTrue(dst.exists(NOFOLLOW));
-        assertEquals(atime, atime(src));
-        assertEquals(atime, atime(dst));
         assertEquals(mtime, mtime(src));
         assertEquals(mtime, mtime(dst));
     }
 
     private Instant mtime(File srcFile) throws IOException {
         return srcFile.stat(NOFOLLOW).lastModifiedTime();
-    }
-
-    private Instant atime(File file) throws IOException {
-        return file.stat(NOFOLLOW).lastAccessedTime();
     }
 
     public void test_copies_link() throws Exception {

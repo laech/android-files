@@ -445,26 +445,6 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public void setLastAccessedTime(LinkOption option, Instant instant) throws IOException {
-        requireNonNull(option, "option");
-        requireNonNull(instant, "instant");
-        try {
-            long seconds = instant.seconds();
-            int nanos = instant.nanos();
-            boolean followLink = option == FOLLOW;
-            setAccessTime(path(), seconds, nanos, followLink);
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
-    }
-
-    private static native void setAccessTime(
-            String path,
-            long seconds,
-            int nanos,
-            boolean followLink) throws ErrnoException;
-
-    @Override
     public void setLastModifiedTime(LinkOption option, Instant instant) throws IOException {
 
         requireNonNull(option, "option");

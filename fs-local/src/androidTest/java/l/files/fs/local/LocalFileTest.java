@@ -21,7 +21,6 @@ import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -75,13 +74,8 @@ public final class LocalFileTest extends FileBaseTest {
     public void test_stat_modificationTime() throws Exception {
         Stat stat = dir1().stat(NOFOLLOW);
         long actual = stat.lastModifiedTime().seconds();
-        long expected = stat(dir1().path()).atime();
+        long expected = stat(dir1().path()).mtime();
         assertEquals(expected, actual);
-    }
-
-    public void test_stat_accessTime() throws Exception {
-        Stat actual = dir1().stat(NOFOLLOW);
-        assertEquals(stat(dir1().path()).atime(), actual.lastAccessedTime().seconds());
     }
 
     public void test_stat_size() throws Exception {
@@ -498,17 +492,6 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals(expect, actual);
     }
 
-    public void test_setModificationTime_doesNotAffectAccessTime()
-            throws Exception {
-        Instant atime = getAccessTime(dir1(), NOFOLLOW);
-        Instant mtime = Instant.of(1, 2);
-        sleep(3);
-        dir1().setLastModifiedTime(NOFOLLOW, mtime);
-        assertNotEqual(atime, mtime);
-        assertEquals(mtime, getModificationTime(dir1(), NOFOLLOW));
-        assertEquals(atime, getAccessTime(dir1(), NOFOLLOW));
-    }
-
     public void test_setModificationTime_linkFollow() throws Exception {
         File file = dir1().resolve("file").createFile();
         File link = dir1().resolve("link").createLink(file);
@@ -540,56 +523,6 @@ public final class LocalFileTest extends FileBaseTest {
             File file,
             LinkOption option) throws IOException {
         return file.stat(option).lastModifiedTime();
-    }
-
-    public void test_setAccessTime() throws Exception {
-        Instant old = getAccessTime(dir1(), NOFOLLOW);
-        Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
-        dir1().setLastAccessedTime(NOFOLLOW, expect);
-        Instant actual = getAccessTime(dir1(), NOFOLLOW);
-        assertEquals(expect, actual);
-    }
-
-    public void test_setAccessTime_doesNotAffectModificationTime()
-            throws Exception {
-        Instant mtime = getModificationTime(dir1(), NOFOLLOW);
-        Instant atime = Instant.of(1, 2);
-        sleep(3);
-        dir1().setLastAccessedTime(NOFOLLOW, atime);
-        assertNotEqual(mtime, atime);
-        assertEquals(atime, getAccessTime(dir1(), NOFOLLOW));
-        assertEquals(mtime, getModificationTime(dir1(), NOFOLLOW));
-    }
-
-    public void test_setAccessTime_linkNoFollow() throws Exception {
-        File link = dir1().resolve("link").createLink(dir1());
-
-        Instant targetTime = getAccessTime(dir1(), NOFOLLOW);
-        Instant linkTime = Instant.of(123, 456);
-
-        link.setLastAccessedTime(NOFOLLOW, linkTime);
-
-        assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
-        assertEquals(targetTime, getAccessTime(dir1(), NOFOLLOW));
-        assertNotEqual(targetTime, linkTime);
-    }
-
-    public void test_setAccessTime_linkFollow() throws Exception {
-        File link = dir1().resolve("link").createLink(dir1());
-
-        Instant linkTime = getAccessTime(link, NOFOLLOW);
-        Instant fileTime = Instant.of(123, 456);
-        link.setLastAccessedTime(FOLLOW, fileTime);
-
-        assertEquals(linkTime, getAccessTime(link, NOFOLLOW));
-        assertEquals(fileTime, getAccessTime(dir1(), NOFOLLOW));
-        assertNotEqual(fileTime, linkTime);
-    }
-
-    private Instant getAccessTime(
-            File file,
-            LinkOption option) throws IOException {
-        return file.stat(option).lastAccessedTime();
     }
 
     public void test_setPermissions() throws Exception {

@@ -282,11 +282,6 @@ public interface File extends Parcelable {
     void deleteRecursive() throws IOException;
 
     /**
-     * Updates the access time for this file.
-     */
-    void setLastAccessedTime(LinkOption option, Instant instant) throws IOException;
-
-    /**
      * Updates the modification time for this file.
      */
     void setLastModifiedTime(LinkOption option, Instant instant) throws IOException;

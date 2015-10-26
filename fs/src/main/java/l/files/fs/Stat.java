@@ -20,8 +20,6 @@ public interface Stat {
 
     boolean isCharacterDevice();
 
-    Instant lastAccessedTime();
-
     Instant lastModifiedTime();
 
     Set<Permission> permissions();

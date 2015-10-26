@@ -31,12 +31,12 @@ public final class ThumbnailDiskCacheTest
         cache.cleanup();
         assertTrue(cacheFile.exists(NOFOLLOW));
 
-        cacheFile.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(
+        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(29)));
         cache.cleanup();
         assertTrue(cacheFile.exists(NOFOLLOW));
 
-        cacheFile.setLastAccessedTime(NOFOLLOW, Instant.ofMillis(
+        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(31)));
         cache.cleanup();
         assertFalse(cacheFile.exists(NOFOLLOW));

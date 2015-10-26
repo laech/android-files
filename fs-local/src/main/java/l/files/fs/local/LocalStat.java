@@ -25,7 +25,6 @@ import static l.files.fs.local.Stat.S_ISSOCK;
 @AutoValue
 abstract class LocalStat implements Stat {
 
-    private Instant lastAccessedTime;
     private Instant lastModifiedTime;
     private Set<Permission> permissions;
 
@@ -33,14 +32,6 @@ abstract class LocalStat implements Stat {
 
     static LocalStat create(final l.files.fs.local.Stat stat) {
         return new AutoValue_LocalStat(stat);
-    }
-
-    @Override
-    public Instant lastAccessedTime() {
-        if (lastAccessedTime == null) {
-            lastAccessedTime = Instant.of(stat().atime(), stat().atime_nsec());
-        }
-        return lastAccessedTime;
     }
 
     @Override
