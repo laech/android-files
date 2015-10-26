@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="files_item_card_inner_space">1dp</dimen>
     <dimen name="title_drop_down_vertical_offset">4dp</dimen>
 </resources>

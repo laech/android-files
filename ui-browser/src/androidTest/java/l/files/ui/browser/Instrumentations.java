@@ -77,10 +77,6 @@ final class Instrumentations {
         }
     }
 
-    static <T> T await(Callable<T> callable) {
-        return await(new InstrumentCallable<>(null, callable), 1, MINUTES);
-    }
-
     static <T> T awaitOnMainThread(
             Instrumentation in, Callable<T> callable) {
         return await(new InstrumentCallable<>(in, callable), 1, MINUTES);
@@ -97,6 +93,9 @@ final class Instrumentations {
     }
 
     static <T> T await(Callable<T> callable, long time, TimeUnit unit) {
+        if (!(callable instanceof InstrumentCallable<?>)) {
+            callable = new InstrumentCallable<>(null, callable);
+        }
         AssertionError error = null;
         long end = currentTimeMillis() + unit.toMillis(time);
         while (currentTimeMillis() < end) {

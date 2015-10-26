@@ -23,12 +23,20 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
     public void test() throws Exception {
         File dir = LocalFile.of(getExternalStorageDirectory()).resolve("test");
         dir.createDirs();
-        dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+        try {
+            dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+        } catch (IOException ignore) {
+            // Older versions does not support changing mtime
+        }
         dir.resolve(".nomedia").createFiles();
         dir.resolve("html.html").createFiles();
         dir.resolve("zip.zip").createFiles();
 
-        createFutureFiles(dir);
+        try {
+            createFutureFiles(dir);
+        } catch (IOException ignored) {
+            // Older versions does not support changing mtime
+        }
 
         List<String> resources = asList(
                 "will_scale_up.jpg",

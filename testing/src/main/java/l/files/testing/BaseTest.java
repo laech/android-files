@@ -16,7 +16,10 @@ public abstract class BaseTest extends InstrumentationTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        delete(getTestContext().getExternalCacheDir());
+        File dir = getTestContext().getExternalCacheDir();
+        if (dir != null) {
+            delete(dir);
+        }
         super.tearDown();
     }
 

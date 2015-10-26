@@ -16,7 +16,7 @@
 #   public *;
 #}
 
-#-dontobfuscate
+-dontobfuscate
 -dontshrink
 
 -dontwarn org.apache.tika.**
@@ -24,6 +24,7 @@
 -keeppackagenames org.apache.tika.mime
 
 -keep class android.support.design.widget.AppBarLayout$ScrollingViewBehavior
+-keep class l.files.ui.operations.NotificationProvider
 
 -keepclassmembers class l.files.fs.local.LocalResourceObservable {
   *** isClosed();

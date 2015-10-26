@@ -94,7 +94,12 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 if (nanoTime() % 2 == 0) {
                     deleteOrCreateChild(child);
                 } else {
-                    setRandomLastModified(child);
+                    try {
+                        setRandomLastModified(child);
+                    } catch (IOException e) {
+                        // Older versions does not support changing mtime
+                        deleteOrCreateChild(child);
+                    }
                 }
             }
         }
