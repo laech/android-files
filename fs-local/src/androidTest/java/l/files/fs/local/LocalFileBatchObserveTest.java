@@ -62,13 +62,13 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
 
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             child.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(2));
-            verify(observer, timeout(50)).onBatchEvent(true, names(child));
+            verify(observer, timeout(100)).onBatchEvent(true, names(child));
 
             child.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(3));
-            verify(observer, timeout(50)).onBatchEvent(false, names(child));
+            verify(observer, timeout(100)).onBatchEvent(false, names(child));
 
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(4));
-            verify(observer, timeout(50)).onBatchEvent(true, names());
+            verify(observer, timeout(100)).onBatchEvent(true, names());
 
             verifyNoMoreInteractions(observer);
 
