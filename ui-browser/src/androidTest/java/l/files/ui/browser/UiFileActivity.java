@@ -638,7 +638,7 @@ final class UiFileActivity {
                 return pair == null ? null : (pair.first.name()) + "=" + pair.second;
             }
 
-        }, 5, MINUTES);
+        });
 
         return this;
     }

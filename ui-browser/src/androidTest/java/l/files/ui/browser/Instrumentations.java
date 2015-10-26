@@ -77,6 +77,10 @@ final class Instrumentations {
         }
     }
 
+    static <T> T await(Callable<T> callable) {
+        return await(callable, 1, MINUTES);
+    }
+
     static <T> T awaitOnMainThread(
             Instrumentation in, Callable<T> callable) {
         return await(new InstrumentCallable<>(in, callable), 1, MINUTES);

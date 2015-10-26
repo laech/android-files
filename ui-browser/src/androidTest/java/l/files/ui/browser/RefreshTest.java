@@ -37,7 +37,12 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         try (Stream<File> children = linkedDir.listDirs(FOLLOW)) {
             File dir = children.iterator().next();
-            setRandomLastModified(dir);
+            try {
+                setRandomLastModified(dir);
+            } catch (IOException e) {
+                // Older versions does not support changing mtime
+                dir.deleteRecursive();
+            }
         }
         screen().refresh().assertListMatchesFileSystem(linkedDir);
     }

@@ -329,10 +329,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
     }
 
-    private File readTarget(File file, Stat stat) {
+    private File readTarget(File file, Stat stat) throws FileNotFoundException {
         if (stat.isSymbolicLink()) {
             try {
                 return file.readLink();
+            } catch (FileNotFoundException e) {
+                throw e;
             } catch (IOException ignored) {
             }
         }
