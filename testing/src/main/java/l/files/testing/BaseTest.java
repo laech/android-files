@@ -18,7 +18,9 @@ public abstract class BaseTest extends InstrumentationTestCase {
     protected void tearDown() throws Exception {
         File dir = getTestContext().getExternalCacheDir();
         if (dir != null) {
-            delete(dir);
+            for (File child : dir.listFiles()) {
+                delete(child);
+            }
         }
         super.tearDown();
     }
