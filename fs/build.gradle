@@ -34,4 +34,5 @@ dependencies {
     provided 'com.google.auto.value:auto-value:1.1'
     provided 'javax.annotation:javax.annotation-api:1.2'
 
+    testCompile 'junit:junit:4.12'
 }

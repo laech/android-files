@@ -1,19 +1,21 @@
 package l.files.fs;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
-import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Collections.reverse;
 import static java.util.Collections.sort;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Locale.ENGLISH;
 import static java.util.Locale.SIMPLIFIED_CHINESE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-public final class NameTest extends TestCase {
+public final class NameTest {
 
     private void testBaseDotExt(String value) {
         FileName name = FileName.of(value);
@@ -28,7 +30,8 @@ public final class NameTest extends TestCase {
         assertEquals(ext, FileName.of(name).ext());
     }
 
-    public void test_if_name_ends_with_a_dot_then_base_is_whole_name() {
+    @Test
+    public void if_name_ends_with_a_dot_then_base_is_whole_name() {
         testNameHasBase("pic.", "pic.");
         testNameHasBase("pic.png.", "pic.png.");
         testNameHasBase("pic.png..", "pic.png..");
@@ -36,7 +39,8 @@ public final class NameTest extends TestCase {
         testNameHasBase(" ...", " ...");
     }
 
-    public void test_if_name_ends_with_a_dot_then_ext_is_empty() {
+    @Test
+    public void if_name_ends_with_a_dot_then_ext_is_empty() {
         testNameHasExt("pic.", "");
         testNameHasExt("pic.png.", "");
         testNameHasExt("pic.png..", "");
@@ -44,33 +48,38 @@ public final class NameTest extends TestCase {
         testNameHasExt(" ...", "");
     }
 
-    public void test_if_name_contains_only_dots_then_base_is_whole_name() {
+    @Test
+    public void if_name_contains_only_dots_then_base_is_whole_name() {
         testNameHasBase(".", ".");
         testNameHasBase("..", "..");
         testNameHasBase("...", "...");
     }
 
-    public void test_if_name_contains_only_dots_then_ext_is_empty() {
+    @Test
+    public void if_name_contains_only_dots_then_ext_is_empty() {
         testNameHasExt(".", "");
         testNameHasExt("..", "");
         testNameHasExt("...", "");
     }
 
-    public void test_if_the_only_dot_is_at_start_then_base_is_whole_name() {
+    @Test
+    public void if_the_only_dot_is_at_start_then_base_is_whole_name() {
         testNameHasBase(".a", ".a");
         testNameHasBase(".abc", ".abc");
         testNameHasBase(". ", ". ");
         testNameHasBase(". hello world", ". hello world");
     }
 
-    public void test_if_the_only_dot_is_at_start_then_ext_is_empty() {
+    @Test
+    public void if_the_only_dot_is_at_start_then_ext_is_empty() {
         testNameHasExt(".a", "");
         testNameHasExt(".abc", "");
         testNameHasExt(". ", "");
         testNameHasExt(". hello world", "");
     }
 
-    public void test_if_last_dot_is_not_at_start_or_end_then_base_is_substring_before_it() {
+    @Test
+    public void if_last_dot_is_not_at_start_or_end_then_base_is_substring_before_it() {
         testNameHasBase("pic.png", "pic");
         testNameHasBase("pic.abc.png", "pic.abc");
         testNameHasBase("a.b.c.d.e.f", "a.b.c.d.e");
@@ -78,7 +87,8 @@ public final class NameTest extends TestCase {
         testNameHasBase("hello world.pdf", "hello world");
     }
 
-    public void test_if_last_dot_is_not_at_start_or_end_then_ext_is_substring_after_it() {
+    @Test
+    public void if_last_dot_is_not_at_start_or_end_then_ext_is_substring_after_it() {
         testNameHasExt("pic.png", "png");
         testNameHasExt("pic.abc.png", "png");
         testNameHasExt("a.b.c.d.e.f", "f");
@@ -86,15 +96,18 @@ public final class NameTest extends TestCase {
         testNameHasExt("hello world.pdf", "pdf");
     }
 
-    public void test_if_name_is_empty_then_base_is_empty() throws Exception {
+    @Test
+    public void if_name_is_empty_then_base_is_empty() throws Exception {
         testNameHasBase("", "");
     }
 
-    public void test_if_name_is_empty_ext_is_empty() throws Exception {
+    @Test
+    public void if_name_is_empty_ext_is_empty() throws Exception {
         testNameHasExt("", "");
     }
 
-    public void test_name_is_made_up_of_base_dot_ext() throws Exception {
+    @Test
+    public void name_is_made_up_of_base_dot_ext() throws Exception {
         testBaseDotExt("");
         testBaseDotExt(".");
         testBaseDotExt("..");
@@ -112,7 +125,8 @@ public final class NameTest extends TestCase {
         testBaseDotExt(".pic.abc.png");
     }
 
-    public void test_comparator_is_locale_sensitive() throws Exception {
+    @Test
+    public void comparator_is_locale_sensitive() throws Exception {
         testSort(ENGLISH, "a", "A", "b");
         testSort(SIMPLIFIED_CHINESE, "爱", "你好", "知道");
     }
@@ -122,7 +136,9 @@ public final class NameTest extends TestCase {
         List<FileName> actual = new ArrayList<>(expected);
 
         reverse(actual);
-        assertNotEqual(expected, actual);
+        if (Objects.equals(expected, actual)) {
+            fail();
+        }
 
         sort(actual, FileName.comparator(locale));
         assertEquals(expected, actual);
