@@ -9,6 +9,8 @@ import java.io.InputStream;
 import l.files.fs.File;
 import l.files.testing.fs.FileBaseTest;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.lang.System.nanoTime;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -30,7 +32,9 @@ public final class PreviewTest extends FileBaseTest {
     }
 
     public void test_preview_pdf() throws Throwable {
-        testPreviewSuccessForTestFile("preview_test.pdf");
+        if (SDK_INT >= LOLLIPOP) {
+            testPreviewSuccessForTestFile("preview_test.pdf");
+        }
     }
 
     public void test_preview_m4a() throws Throwable {

@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -8,6 +9,7 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
+import static android.graphics.Color.BLUE;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -94,10 +96,14 @@ public final class ThumbnailDiskCacheTest
 
     @Override
     Bitmap newValue() {
-        return createBitmap(
+        Bitmap bitmap = createBitmap(
                 random.nextInt(5) + 1,
                 random.nextInt(10) + 1,
-                ARGB_8888);
+                ARGB_8888
+        );
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(BLUE);
+        return bitmap;
     }
 
 }
