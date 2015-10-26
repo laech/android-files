@@ -31,6 +31,7 @@ import l.files.fs.Stream;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
+import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -162,7 +163,7 @@ public final class LocalObservableTest extends FileBaseTest {
         try (Observation observation = dir.observe(FOLLOW, observer, consumer)) {
             assertFalse(observation.isClosed());
             for (int i = 0; i < 20; i++) {
-                dir.resolve(String.valueOf(Math.random())).createDir();
+                dir.resolve(String.valueOf(nanoTime())).createDir();
             }
             verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
@@ -185,7 +186,7 @@ public final class LocalObservableTest extends FileBaseTest {
             }
         }
         while (actualCount < expectedCount) {
-            dir.resolve(String.valueOf(Math.random())).createDir();
+            dir.resolve(String.valueOf(nanoTime())).createDir();
             actualCount++;
         }
     }
