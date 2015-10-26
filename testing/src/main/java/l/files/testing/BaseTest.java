@@ -18,8 +18,11 @@ public abstract class BaseTest extends InstrumentationTestCase {
     protected void tearDown() throws Exception {
         File dir = getTestContext().getExternalCacheDir();
         if (dir != null) {
-            for (File child : dir.listFiles()) {
-                delete(child);
+            File[] children = dir.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    delete(child);
+                }
             }
         }
         super.tearDown();
@@ -27,8 +30,11 @@ public abstract class BaseTest extends InstrumentationTestCase {
 
     private void delete(File file) {
         if (file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                delete(child);
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    delete(child);
+                }
             }
         }
         assertTrue(file.delete() || !file.exists());
