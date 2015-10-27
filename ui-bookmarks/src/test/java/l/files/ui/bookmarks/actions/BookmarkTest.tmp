@@ -1,12 +1,19 @@
 package l.files.ui.bookmarks.actions;
 
 public final class BookmarkTest {
+
+    @Test
+    public void on_create_makes_checkable_bookmark_menu_item() {
+        action.onCreateOptionsMenu(menu);
+        verify(menu).add(anyInt(), eq(R.id.bookmark), anyInt(), eq(R.string.bookmark));
+        verify(item).setCheckable(true);
+    }
     
     @Test
     public void on_prepare_checks_menu_item_if_file_is_bookmarked() {
         testOnPrepareUpdatesMenuItemCheckState(true);
     }
-    
+
     @Test
     public void on_prepare_unchecks_menu_item_if_file_is_not_bookmarked() {
         testOnPrepareUpdatesMenuItemCheckState(false);
