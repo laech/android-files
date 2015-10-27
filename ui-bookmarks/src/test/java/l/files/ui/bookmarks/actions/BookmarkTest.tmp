@@ -1,0 +1,21 @@
+package l.files.ui.bookmarks.actions;
+
+public final class BookmarkTest {
+
+    @Test
+    public void on_click_adds_item_to_bookmarks_if_item_is_not_already_bookmarked() {
+        item.setChecked(false);
+        action.onItemSelected(item);
+        verify(bookmarks).addBookmark(dir);
+    }
+    
+    @Test
+    public void on_click_removes_item_from_bookmarks_if_item_is_not_already_bookmarked() {
+        item.setChecked(true);
+        action.onItemSelected(item);
+        verify(bookmarks).removeBookmark(dir);
+    }
+    
+    
+
+}
