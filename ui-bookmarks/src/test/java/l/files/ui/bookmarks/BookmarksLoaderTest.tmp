@@ -1,0 +1,13 @@
+package l.files.ui.bookmarks;
+
+public final class BookmarksLoaderTest {
+
+    @Test
+    public void sorts_bookmarks_by_name() throws Exception {
+        given(bookmarks.get()).willReturn(asSet(a, c, b, e, d));
+        List<File> expected = asList(a, b, c, d, e);
+        List<File> actual = loader.loadInBackground();
+        assertEquals(expected, actual);
+    }
+
+}
