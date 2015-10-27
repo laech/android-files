@@ -8,8 +8,8 @@
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
-    <style name="Theme.Sidebar">
-        <item name="android:windowBackground">@drawable/sidebar_background</item>
+    <style name="Sidebar">
+        <item name="android:background">@color/color_primary</item>
     </style>
 
     <style name="Toolbar" parent="Theme.AppCompat">
