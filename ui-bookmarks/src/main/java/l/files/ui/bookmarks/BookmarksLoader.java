@@ -22,7 +22,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
     private final BookmarkChangedListener listener;
     private List<File> bookmarks;
 
-    BookmarksLoader(final Context context, final BookmarkManager manager) {
+    BookmarksLoader(Context context, BookmarkManager manager) {
         super(context);
         this.manager = requireNonNull(manager);
         this.listener = new BookmarkListener();
@@ -34,7 +34,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
         final List<File> files = new ArrayList<>(manager.getBookmarks());
         Collections.sort(files, new Comparator<File>() {
             @Override
-            public int compare(final File a, final File b) {
+            public int compare(File a, File b) {
                 return comparator.compare(a.name(), b.name());
             }
         });
@@ -59,14 +59,14 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
     }
 
     @Override
-    public void deliverResult(final List<File> data) {
+    public void deliverResult(List<File> data) {
         super.deliverResult(data);
         this.bookmarks = data;
     }
 
     private final class BookmarkListener implements BookmarkChangedListener {
         @Override
-        public void onBookmarkChanged(final BookmarkManager manager) {
+        public void onBookmarkChanged(BookmarkManager manager) {
             forceLoad();
         }
     }
