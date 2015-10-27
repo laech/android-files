@@ -20,8 +20,6 @@ import l.files.ui.base.widget.StableAdapter;
 import static java.util.Objects.requireNonNull;
 import static l.files.ui.base.fs.FileIcons.directoryIconStringId;
 import static l.files.ui.base.view.Views.find;
-import static l.files.ui.bookmarks.R.layout.bookmark_header;
-import static l.files.ui.bookmarks.R.layout.bookmark_item;
 
 final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
@@ -51,8 +49,8 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         return viewType == 0
-                ? new BookmarkHolder(inflater.inflate(bookmark_item, parent, false))
-                : new HeaderHolder(inflater.inflate(bookmark_header, parent, false));
+                ? new BookmarkHolder(inflater.inflate(R.layout.bookmark_item, parent, false))
+                : new HeaderHolder(inflater.inflate(R.layout.bookmark_header, parent, false));
     }
 
     @Override
