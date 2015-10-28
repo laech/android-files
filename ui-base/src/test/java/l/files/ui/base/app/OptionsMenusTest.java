@@ -1,17 +1,21 @@
 package l.files.ui.base.app;
 
-import l.files.testing.BaseTest;
+import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
-public final class OptionsMenusTest extends BaseTest {
+public final class OptionsMenusTest {
 
-    public void testNullToEmpty_notNull() {
+    @Test
+    public void nullToEmpty_notNull() {
         OptionsMenu menu = mock(OptionsMenu.class);
         assertSame(menu, OptionsMenus.nullToEmpty(menu));
     }
 
-    public void testNullToEmpty_null() {
+    @Test
+    public void nullToEmpty_null() {
         assertNotNull(OptionsMenus.nullToEmpty(null));
     }
 }
