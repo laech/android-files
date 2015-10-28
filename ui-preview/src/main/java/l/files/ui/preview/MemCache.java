@@ -1,7 +1,7 @@
 package l.files.ui.preview;
 
 import android.support.annotation.Nullable;
-import android.util.LruCache;
+import android.support.v4.util.LruCache;
 
 import l.files.fs.File;
 import l.files.fs.Stat;

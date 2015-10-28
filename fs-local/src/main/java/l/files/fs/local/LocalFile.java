@@ -17,6 +17,7 @@ import l.files.fs.BaseFile;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
 import l.files.fs.FileName;
+import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observation;
@@ -256,7 +257,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void traverse(LinkOption option, Visitor visitor) throws IOException {
-        new LocalTraverser(this, option, visitor).traverse();
+        Files.traverse(this, option, visitor);
     }
 
     @Override

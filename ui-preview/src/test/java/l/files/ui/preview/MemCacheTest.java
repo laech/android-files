@@ -1,16 +1,15 @@
 package l.files.ui.preview;
 
-import l.files.fs.File;
-import l.files.fs.Stat;
+import org.junit.Test;
 
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public abstract class MemCacheTest<V, C extends MemCache<V>>
         extends CacheTest<V, C> {
 
-    public void test_removed_item_no_longer_available() throws Exception {
-        File res = dir1();
-        Stat stat = res.stat(NOFOLLOW);
+    @Test
+    public void removed_item_no_longer_available() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
         assertNull(cache.remove(res, stat, constraint));

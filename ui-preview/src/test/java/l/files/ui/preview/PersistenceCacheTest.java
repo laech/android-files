@@ -1,17 +1,16 @@
 package l.files.ui.preview;
 
-import l.files.fs.File;
-import l.files.fs.Stat;
+import org.junit.Test;
 
-import static android.test.MoreAsserts.assertNotEqual;
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         extends MemCacheTest<V, C> {
 
-    public void test_removed_item_will_not_be_persisted() throws Exception {
-        File res = dir1();
-        Stat stat = res.stat(NOFOLLOW);
+    @Test
+    public void removed_item_will_not_be_persisted() throws Exception {
+
         Rect constraint = newConstraint();
         V value = newValue();
 
@@ -30,9 +29,9 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         assertNull(c3.get(res, stat, constraint));
     }
 
-    public void test_reads_persisted_cache_from_put() throws Exception {
-        File res = dir1();
-        Stat stat = res.stat(NOFOLLOW);
+    @Test
+    public void reads_persisted_cache_from_put() throws Exception {
+
         Rect constraint = newConstraint();
         V value = newValue();
 
@@ -46,15 +45,15 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         assertValueEquals(value, c2.get(res, stat, constraint));
     }
 
-    public void test_constraint_is_not_used_as_part_of_key() throws Exception {
-        File res = dir1();
-        Stat stat = res.stat(NOFOLLOW);
+    @Test
+    public void constraint_is_not_used_as_part_of_key() throws Exception {
+
         V value = newValue();
         cache.put(res, stat, newConstraint(), value);
         assertValueEquals(value, cache.get(res, stat, newConstraint()));
         assertValueEquals(value, cache.get(res, stat, newConstraint()));
         assertValueEquals(value, cache.get(res, stat, newConstraint()));
-        assertNotEqual(newConstraint(), newConstraint());
+        assertNotEquals(newConstraint(), newConstraint());
     }
 
 }

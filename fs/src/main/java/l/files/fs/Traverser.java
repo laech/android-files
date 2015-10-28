@@ -1,4 +1,4 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -7,23 +7,19 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
-import l.files.fs.File;
-import l.files.fs.LinkOption;
-import l.files.fs.Stream;
-import l.files.fs.Visitor;
 import l.files.fs.Visitor.Result;
 
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-final class LocalTraverser {
+final class Traverser {
 
     private final File root;
     private final LinkOption rootOption;
     private final Visitor visitor;
     private final Deque<Node> stack;
 
-    LocalTraverser(File root, LinkOption option, Visitor visitor) {
+    Traverser(File root, LinkOption option, Visitor visitor) {
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
         this.visitor = requireNonNull(visitor);

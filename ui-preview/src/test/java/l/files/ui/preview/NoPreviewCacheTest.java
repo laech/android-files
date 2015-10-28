@@ -7,7 +7,7 @@ public final class NoPreviewCacheTest
 
     @Override
     NoPreviewCache newCache() {
-        return new NoPreviewCache(dir2());
+        return new NoPreviewCache(mockCacheDir());
     }
 
     @Override

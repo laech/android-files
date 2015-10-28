@@ -1,7 +1,7 @@
 package l.files.ui.preview;
 
 import android.os.AsyncTask;
-import android.util.LruCache;
+import android.support.v4.util.LruCache;
 
 import java.io.DataInput;
 import java.io.DataInputStream;

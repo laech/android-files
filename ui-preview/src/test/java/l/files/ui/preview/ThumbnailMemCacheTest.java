@@ -2,19 +2,24 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
-import l.files.fs.File;
-import l.files.fs.Stat;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static android.os.Build.VERSION_CODES.JELLY_BEAN;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = JELLY_BEAN)
 public final class ThumbnailMemCacheTest
         extends MemCacheTest<Bitmap, ThumbnailMemCache> {
 
-    public void test_constraint_is_used_as_part_of_key() throws Exception {
-        File res = dir1();
-        Stat stat = res.stat(NOFOLLOW);
+    @Test
+    public void constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
         Bitmap value = newValue();
         cache.put(res, stat, constraint, value);
@@ -25,7 +30,7 @@ public final class ThumbnailMemCacheTest
 
     @Override
     ThumbnailMemCache newCache() {
-        return new ThumbnailMemCache(getTestContext(), 0.05f);
+        return new ThumbnailMemCache(1024 * 1024);
     }
 
     @Override
