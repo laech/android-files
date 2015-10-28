@@ -15,6 +15,7 @@ import l.files.fs.Permission;
 import l.files.fs.Visitor;
 
 import static java.util.Arrays.asList;
+import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
@@ -35,7 +36,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         link.resolve("b").createFile();
 
         Recorder recorder = new Recorder();
-        link.traverse(NOFOLLOW, recorder);
+        traverse(link, NOFOLLOW, recorder);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, link),
                 TraversalEvent.of(POST, link)
@@ -52,7 +53,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         dir1().resolve("link").createLink(dir1().resolve("dir"));
 
         Recorder recorder = new Recorder();
-        dir1().resolve("link").traverse(FOLLOW, recorder);
+        traverse(dir1().resolve("link"), FOLLOW, recorder);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, dir1().resolve("link")),
                 TraversalEvent.of(PRE, dir1().resolve("link/a")),
@@ -75,7 +76,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         File a = link.resolve("a").createFile();
 
         Recorder recorder = new Recorder();
-        link.traverse(FOLLOW, recorder);
+        traverse(link, FOLLOW, recorder);
         List<TraversalEvent> expected = asList(
                 TraversalEvent.of(PRE, link),
                 TraversalEvent.of(PRE, a),
@@ -112,7 +113,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
             }
 
         };
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
 
         checkEquals(expected, recorder.events);
     }
@@ -152,7 +153,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
             }
 
         };
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
 
         checkEquals(expected, recorder.events);
     }
@@ -179,7 +180,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
                 // Ignore
             }
         };
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
 
         checkEquals(expected, recorder.events);
     }
@@ -206,7 +207,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         );
 
         Recorder recorder = new Recorder();
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
 
         checkEquals(expected, recorder.events);
     }
@@ -235,7 +236,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
                 return CONTINUE;
             }
         };
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
         checkEquals(expected, recorder.events);
     }
 
@@ -260,7 +261,7 @@ public final class LocalFileTraverseTest extends FileBaseTest {
                 return CONTINUE;
             }
         };
-        dir1().traverse(NOFOLLOW, recorder);
+        traverse(dir1(), NOFOLLOW, recorder);
         checkEquals(expected, recorder.events);
     }
 

@@ -8,6 +8,7 @@ import l.files.fs.Permission;
 import l.files.fs.Visitor;
 import l.files.testing.BaseTest;
 
+import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
@@ -52,7 +53,8 @@ public abstract class FileBaseTest extends BaseTest {
         if (file == null) {
             return;
         }
-        file.traverse(
+        traverse(
+                file,
                 NOFOLLOW,
                 new Visitor.Base() {
 

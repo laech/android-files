@@ -36,7 +36,7 @@ final class Copy extends Paste {
     @Override
     void paste(final File from, final File to) throws IOException {
 
-        from.traverse(NOFOLLOW, new OperationVisitor() {
+        l.files.fs.Files.traverse(from, NOFOLLOW, new OperationVisitor() {
 
             @Override
             public Result onPreVisit(File src) throws IOException {

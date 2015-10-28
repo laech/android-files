@@ -24,6 +24,7 @@ import static java.lang.System.nanoTime;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
@@ -58,7 +59,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             return;
         }
 
-        cacheDir.traverse(NOFOLLOW, new Visitor.Base() {
+        traverse(cacheDir, NOFOLLOW, new Visitor.Base() {
 
             final long now = currentTimeMillis();
 
