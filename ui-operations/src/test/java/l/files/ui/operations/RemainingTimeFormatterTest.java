@@ -11,11 +11,11 @@ import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.ui.operations.Formats.formatTimeRemaining;
+import static l.files.ui.operations.RemainingTimeFormatter.INSTANCE;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(ParameterizedRobolectricTestRunner.class)
-public final class FormatsTest {
+public final class RemainingTimeFormatterTest {
 
     @Parameters
     public static Collection<Object[]> data() {
@@ -45,7 +45,7 @@ public final class FormatsTest {
     private final long total;
     private final long processed;
 
-    public FormatsTest(String expected, long startTime, long now, long total, long processed) {
+    public RemainingTimeFormatterTest(String expected, long startTime, long now, long total, long processed) {
         this.expected = expected;
         this.startTime = startTime;
         this.now = now;
@@ -55,7 +55,7 @@ public final class FormatsTest {
 
     @Test
     public void format_time_remaining() {
-        assertEquals(expected, formatTimeRemaining(startTime, now, total, processed));
+        assertEquals(expected, INSTANCE.format(startTime, now, total, processed));
     }
 
 }

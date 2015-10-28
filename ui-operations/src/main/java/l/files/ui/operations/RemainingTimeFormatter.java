@@ -3,9 +3,16 @@ package l.files.ui.operations;
 import static android.text.format.DateUtils.formatElapsedTime;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-final class Formats {
-    private Formats() {
-    }
+abstract class RemainingTimeFormatter {
+
+    static final RemainingTimeFormatter INSTANCE = new RemainingTimeFormatter() {
+
+        @Override
+        String internalFormatTimeRemaining(long timeRemaining) {
+            return formatElapsedTime(MILLISECONDS.toSeconds(timeRemaining));
+        }
+
+    };
 
     /**
      * Formats the remaining time for a task.
@@ -18,19 +25,20 @@ final class Formats {
      * @param processed the number of work done
      * @return the formatted string, or null if unable to determine
      */
-    public static String formatTimeRemaining(
-            long startTime, long now, long total, long processed) {
-
+    final String format(long startTime, long now, long total, long processed) {
         if (processed <= 0) {
             return null;
         }
 
         float timeToProcessOne = (now - startTime) / (float) processed;
         float timeRemaining = (total - processed) * timeToProcessOne;
-        String formatted = formatElapsedTime(MILLISECONDS.toSeconds((long) timeRemaining));
+        String formatted = internalFormatTimeRemaining((long) timeRemaining);
         if (formatted.charAt(0) == '0' && formatted.charAt(1) != ':') {
             formatted = formatted.substring(1);
         }
         return formatted;
     }
+
+    abstract String internalFormatTimeRemaining(long timeRemaining);
+
 }

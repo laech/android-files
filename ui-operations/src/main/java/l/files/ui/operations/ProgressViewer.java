@@ -6,9 +6,7 @@ import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
-import static android.text.format.Formatter.formatFileSize;
 import static java.util.Objects.requireNonNull;
-import static l.files.ui.operations.Formats.formatTimeRemaining;
 
 /**
  * Base viewer for decorating subclasses of {@link TaskState} to ensure
@@ -17,6 +15,9 @@ import static l.files.ui.operations.Formats.formatTimeRemaining;
 abstract class ProgressViewer implements TaskStateViewer {
 
     private final Clock clock;
+
+    RemainingTimeFormatter remainingTimeFormatter = RemainingTimeFormatter.INSTANCE;
+    FileSizeFormatter fileSizeFormatter = FileSizeFormatter.INSTANCE;
 
     ProgressViewer(Clock clock) {
         this.clock = requireNonNull(clock, "clock");
@@ -60,8 +61,11 @@ abstract class ProgressViewer implements TaskStateViewer {
         if (count == 0 || size == 0) {
             return "";
         }
-        return context.getString(R.string.remain_count_x_size_x, count,
-                formatFileSize(context, size));
+        return context.getString(
+                R.string.remain_count_x_size_x,
+                count,
+                fileSizeFormatter.format(context, size)
+        );
     }
 
     @Override
@@ -70,7 +74,7 @@ abstract class ProgressViewer implements TaskStateViewer {
     }
 
     private String getTimeRemaining(Context context, TaskState.Running state) {
-        String formatted = formatTimeRemaining(
+        String formatted = remainingTimeFormatter.format(
                 state.time().tick(),
                 clock.tick(),
                 getWork(state).total(),

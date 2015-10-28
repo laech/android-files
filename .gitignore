@@ -4,3 +4,4 @@ bin
 build
 local.properties
 obj
+R.java
