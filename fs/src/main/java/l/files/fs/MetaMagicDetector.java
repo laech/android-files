@@ -1,10 +1,12 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import org.apache.tika.io.TaggedIOException;
+import org.apache.tika.metadata.Metadata;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import l.files.fs.File;
+import static org.apache.tika.metadata.TikaMetadataKeys.RESOURCE_NAME_KEY;
 
 /**
  * Detects the media type of the underlying file using
@@ -18,11 +20,14 @@ final class MetaMagicDetector extends AbstractDetector {
     }
 
     @Override
-    String detectFile(File file, l.files.fs.Stat stat) throws IOException {
+    String detectFile(File file, Stat stat) throws IOException {
 
-        try {
+        Metadata meta = new Metadata();
+        meta.add(RESOURCE_NAME_KEY, file.name().toString());
 
-            return TikaHolder.tika.detect(file.uri().toURL());
+        try (InputStream in = file.newInputStream()) {
+
+            return TikaHolder.tika.detect(in, meta);
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {

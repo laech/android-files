@@ -1,9 +1,4 @@
-package l.files.fs.local;
-
-import android.webkit.MimeTypeMap;
-
-import l.files.fs.File;
-import l.files.fs.Stat;
+package l.files.fs;
 
 import static java.util.Locale.ENGLISH;
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
@@ -20,9 +15,8 @@ final class BasicDetector extends AbstractDetector {
 
     @Override
     String detectFile(File file, Stat stat) {
-        MimeTypeMap typeMap = MimeTypeMap.getSingleton();
         String ext = file.name().ext().toLowerCase(ENGLISH);
-        String type = typeMap.getMimeTypeFromExtension(ext);
+        String type = MimeUtils.guessMimeTypeFromExtension(ext);
         return type != null ? type : MEDIA_TYPE_OCTET_STREAM;
     }
 

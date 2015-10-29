@@ -22,7 +22,6 @@ import l.files.fs.LinkOption;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
-import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static java.util.Collections.unmodifiableSet;
@@ -470,21 +469,6 @@ public abstract class LocalFile extends BaseFile {
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
-    }
-
-    @Override
-    public String detectBasicMediaType(l.files.fs.Stat stat) throws IOException {
-        return BasicDetector.INSTANCE.detect(this, stat);
-    }
-
-    @Override
-    public String detectContentMediaType(Stat stat) throws IOException {
-        return MagicDetector.INSTANCE.detect(this, stat);
-    }
-
-    @Override
-    public String detectMediaType(Stat stat) throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(this, stat);
     }
 
     @Override

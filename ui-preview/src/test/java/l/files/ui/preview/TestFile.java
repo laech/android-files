@@ -18,7 +18,6 @@ import java.util.Set;
 import l.files.fs.BaseFile;
 import l.files.fs.FileConsumer;
 import l.files.fs.FileName;
-import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Observation;
@@ -26,7 +25,6 @@ import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
-import l.files.fs.Visitor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -116,11 +114,6 @@ class TestFile extends BaseFile {
             Observer observer,
             FileConsumer childrenConsumer) throws IOException, InterruptedException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void traverse(LinkOption option, Visitor visitor) throws IOException {
-        Files.traverse(this, option, visitor);
     }
 
     @Override
@@ -235,21 +228,6 @@ class TestFile extends BaseFile {
 
     @Override
     public void setPermissions(Set<Permission> permissions) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String detectBasicMediaType(Stat stat) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String detectContentMediaType(Stat stat) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String detectMediaType(Stat stat) throws IOException {
         throw new UnsupportedOperationException();
     }
 

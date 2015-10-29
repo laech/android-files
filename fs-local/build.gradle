@@ -35,7 +35,6 @@ dependencies {
     compile project(':fs')
     compile project(':fs-local-stat')
     compile project(':fs-local-stat64')
-    compile 'org.apache.tika:tika-core:1.10'
 
     apt 'com.google.auto.value:auto-value:1.1'
     provided 'com.google.auto.value:auto-value:1.1'

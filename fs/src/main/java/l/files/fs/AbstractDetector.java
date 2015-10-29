@@ -1,9 +1,6 @@
-package l.files.fs.local;
+package l.files.fs;
 
 import java.io.IOException;
-
-import l.files.fs.File;
-import l.files.fs.Stat;
 
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -22,7 +19,14 @@ abstract class AbstractDetector {
     }
 
     String detect(File file, Stat stat) throws IOException {
-        if (stat.isSymbolicLink()) return detect(file.readLink());
+        return tryDetect(file, stat, 100);
+    }
+
+    String tryDetect(File file, Stat stat, int tries) throws IOException {
+        if (tries <= 0) {
+            return MEDIA_TYPE_OCTET_STREAM;
+        }
+        if (stat.isSymbolicLink()) return tryDetect(file.readLink(), file.stat(FOLLOW), tries - 1);
         if (stat.isRegularFile()) return detectFile(file, stat);
         if (stat.isFifo()) return INODE_FIFO;
         if (stat.isSocket()) return INODE_SOCKET;

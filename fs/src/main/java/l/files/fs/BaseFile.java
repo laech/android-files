@@ -208,4 +208,19 @@ public abstract class BaseFile implements File {
         setPermissions(perms);
     }
 
+    @Override
+    public String detectBasicMediaType(Stat stat) throws IOException {
+        return BasicDetector.INSTANCE.detect(this, stat);
+    }
+
+    @Override
+    public String detectContentMediaType(Stat stat) throws IOException {
+        return MagicDetector.INSTANCE.detect(this, stat);
+    }
+
+    @Override
+    public String detectMediaType(Stat stat) throws IOException {
+        return MetaMagicDetector.INSTANCE.detect(this, stat);
+    }
+
 }
