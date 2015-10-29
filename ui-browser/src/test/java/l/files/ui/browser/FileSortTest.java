@@ -11,14 +11,14 @@ import java.util.Locale;
 import l.files.fs.File;
 import l.files.fs.FileName;
 import l.files.fs.Stat;
-import l.files.testing.fs.FileBaseTest;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
 
-abstract class FileSortTest extends FileBaseTest {
+abstract class FileSortTest {
 
     protected final void testSortMatches(
             Locale locale,
