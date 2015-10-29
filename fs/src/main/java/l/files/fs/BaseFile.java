@@ -47,6 +47,50 @@ public abstract class BaseFile implements File {
     }
 
     @Override
+    public File createDirs() throws IOException {
+        try {
+            if (stat(NOFOLLOW).isDirectory()) {
+                return this;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        File parent = parent();
+        if (parent != null) {
+            parent.createDirs();
+        }
+
+        try {
+            createDir();
+        } catch (AlreadyExist ignore) {
+        }
+
+        return this;
+    }
+
+    @Override
+    public File createFiles() throws IOException {
+        try {
+            if (stat(NOFOLLOW).isRegularFile()) {
+                return this;
+            }
+        } catch (FileNotFoundException ignore) {
+        }
+
+        File parent = parent();
+        if (parent != null) {
+            parent.createDirs();
+        }
+
+        try {
+            createFile();
+        } catch (AlreadyExist ignore) {
+        }
+
+        return this;
+    }
+
+    @Override
     public void traverse(LinkOption option, Visitor visitor) throws IOException {
         new Traverser(this, option, visitor).traverse();
     }

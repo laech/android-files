@@ -167,24 +167,8 @@ class TestFile extends BaseFile {
     }
 
     @Override
-    public TestFile createDirs() throws IOException {
-        if (!file.isDirectory() && !file.mkdirs()) {
-            throw new IOException();
-        }
-        return this;
-    }
-
-    @Override
     public TestFile createFile() throws IOException {
         if (!file.createNewFile()) {
-            throw new IOException();
-        }
-        return this;
-    }
-
-    @Override
-    public TestFile createFiles() throws IOException {
-        if (!file.isFile() && !file.createNewFile()) {
             throw new IOException();
         }
         return this;

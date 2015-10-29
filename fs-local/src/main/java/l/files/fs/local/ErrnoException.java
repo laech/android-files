@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import l.files.fs.AlreadyExist;
 import l.files.fs.DirectoryNotEmpty;
 
 public final class ErrnoException extends Exception {
@@ -158,6 +159,9 @@ public final class ErrnoException extends Exception {
             FileNotFoundException e = new FileNotFoundException(message);
             e.initCause(this);
             return e;
+        }
+        if (errno == EEXIST) {
+            return new AlreadyExist(message, this);
         }
         if (errno == ENOTEMPTY) {
             return new DirectoryNotEmpty(message, this);

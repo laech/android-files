@@ -27,7 +27,6 @@ import l.files.fs.Stream;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -38,7 +37,6 @@ import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.ErrnoException.EACCES;
-import static l.files.fs.local.ErrnoException.EEXIST;
 import static l.files.fs.local.Fcntl.O_CREAT;
 import static l.files.fs.local.Fcntl.O_EXCL;
 import static l.files.fs.local.Fcntl.O_RDWR;
@@ -54,6 +52,7 @@ import static l.files.fs.local.Stat.S_IXGRP;
 import static l.files.fs.local.Stat.S_IXOTH;
 import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
+import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
 import static l.files.fs.local.Unistd.X_OK;
@@ -312,41 +311,11 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public LocalFile createDir() throws IOException {
         try {
-            mkdir();
+            // Same permission bits as java.io.File.mkdir() on Android
+            mkdir(path(), S_IRWXU);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
-        return this;
-    }
-
-    private void mkdir() throws ErrnoException {
-        // Same permission bits as java.io.File.mkdir() on Android
-        l.files.fs.local.Stat.mkdir(path(), S_IRWXU);
-    }
-
-    @Override
-    public LocalFile createDirs() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isDirectory()) {
-                return this;
-            }
-        } catch (FileNotFoundException ignore) {
-            // Ignore will create
-        }
-
-        File parent = parent();
-        if (parent != null) {
-            parent.createDirs();
-        }
-
-        try {
-            mkdir();
-        } catch (ErrnoException e) {
-            if (e.errno != EEXIST) {
-                throw e.toIOException(path());
-            }
-        }
-
         return this;
     }
 
@@ -366,32 +335,6 @@ public abstract class LocalFile extends BaseFile {
         int mode = S_IRUSR | S_IWUSR;
         int fd = open(path(), flags, mode);
         Unistd.close(fd);
-    }
-
-    @Override
-    public File createFiles() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isRegularFile()) {
-                return this;
-            }
-        } catch (FileNotFoundException ignore) {
-            // Ignore will create
-        }
-
-        File parent = parent();
-        if (parent != null) {
-            parent.createDirs();
-        }
-
-        try {
-            createFileNative();
-        } catch (ErrnoException e) {
-            if (e.errno != EEXIST) {
-                throw e.toIOException(path());
-            }
-        }
-
-        return this;
     }
 
     @Override
