@@ -1,6 +1,5 @@
 package l.files.ui.browser;
 
-import l.files.ui.R;
 import l.files.fs.File;
 import l.files.fs.Permission;
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;

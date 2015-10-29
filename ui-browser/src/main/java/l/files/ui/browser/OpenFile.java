@@ -16,7 +16,7 @@ import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static java.util.Objects.requireNonNull;
-import static l.files.ui.BuildConfig.DEBUG;
+import static l.files.ui.browser.BuildConfig.DEBUG;
 import static l.files.fs.File.MEDIA_TYPE_ANY;
 import static l.files.ui.base.fs.IOExceptions.message;
 

@@ -22,8 +22,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static l.files.ui.R.layout.files_activity_title;
-import static l.files.ui.R.layout.files_activity_title_item;
+import static l.files.ui.browser.R.layout.files_activity_title;
+import static l.files.ui.browser.R.layout.files_activity_title_item;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 final class HierarchyAdapter extends BaseAdapter {

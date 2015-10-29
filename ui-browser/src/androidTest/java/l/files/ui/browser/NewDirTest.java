@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.widget.EditText;
 
-import l.files.ui.R;
 import l.files.fs.Permission;
 
 public final class NewDirTest extends BaseFilesActivityTest {

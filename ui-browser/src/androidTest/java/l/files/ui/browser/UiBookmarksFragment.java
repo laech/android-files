@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import l.files.fs.File;
-import l.files.ui.R;
 import l.files.ui.bookmarks.BookmarksFragment;
 
 import static java.util.Arrays.asList;

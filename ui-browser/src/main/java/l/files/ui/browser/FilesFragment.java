@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Locale;
 
 import l.files.fs.File;
-import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;

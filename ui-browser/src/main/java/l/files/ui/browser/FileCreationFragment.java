@@ -23,7 +23,6 @@ import android.widget.TextView.OnEditorActionListener;
 import java.io.IOException;
 
 import l.files.fs.File;
-import l.files.ui.R;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;

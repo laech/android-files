@@ -11,8 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
 
-import l.files.ui.R;
-
 import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.ui.browser.Preferences.getSort;
 

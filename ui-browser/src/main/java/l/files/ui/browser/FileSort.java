@@ -9,7 +9,6 @@ import java.util.List;
 
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.ui.R;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.lang.System.currentTimeMillis;

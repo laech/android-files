@@ -1,46 +1,52 @@
 package l.files.ui.browser;
 
-import android.os.Looper;
 import android.view.Menu;
 
-import l.files.ui.base.app.OptionsMenu;
-import l.files.testing.BaseTest;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
+import l.files.ui.base.app.OptionsMenu;
+
+import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class BaseActivityTest extends BaseTest {
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = JELLY_BEAN)
+public final class BaseActivityTest {
 
     private Menu menu;
     private OptionsMenu optionsMenu;
     private BaseActivity activity;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
+    @Before
+    public void setUp() throws Exception {
         menu = mock(Menu.class);
         optionsMenu = mock(OptionsMenu.class);
         activity = new BaseActivity();
         activity.setOptionsMenu(optionsMenu);
     }
 
-    public void testOnCreateOptionsMenu_isDelegated() {
+    @Test
+    public void onCreateOptionsMenu_isDelegated() {
         activity.onCreateOptionsMenu(menu);
         verify(optionsMenu).onCreateOptionsMenu(menu);
     }
 
-    public void testOnPrepareOptionsMenu_isDelegated() {
+    @Test
+    public void onPrepareOptionsMenu_isDelegated() {
         activity.onPrepareOptionsMenu(menu);
         verify(optionsMenu).onPrepareOptionsMenu(menu);
     }
 
-    public void testCallingMenuCallbacksWithoutSettingMenuWonNotCrash() {
-        final BaseActivity activity = new BaseActivity();
+    @Test
+    public void callingMenuCallbacksWithoutSettingMenuWonNotCrash() {
         activity.onCreateOptionsMenu(null);
         activity.onPrepareOptionsMenu(null);
         activity.onOptionsMenuClosed(null);
     }
+
 }

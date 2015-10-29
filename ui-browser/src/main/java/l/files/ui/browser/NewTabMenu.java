@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;

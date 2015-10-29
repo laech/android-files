@@ -6,7 +6,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.fs.File;
-import l.files.ui.R;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 

@@ -5,7 +5,7 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import static l.files.ui.R.color.activated_highlight;
+import static l.files.ui.browser.R.color.activated_highlight;
 
 public final class ColorOverlayImageView extends ImageView {
 

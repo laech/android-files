@@ -4,7 +4,6 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.ui.R;
 import l.files.ui.base.view.ActionModeItem;
 
 import static java.util.Objects.requireNonNull;

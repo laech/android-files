@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import l.files.fs.Stat;
-import l.files.ui.R;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Calendar.MONTH;

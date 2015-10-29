@@ -10,7 +10,6 @@ import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.ui.R;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.TextUtils.isEmpty;

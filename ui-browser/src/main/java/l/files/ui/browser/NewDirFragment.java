@@ -8,7 +8,6 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.fs.File;
-import l.files.ui.R;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static java.util.Objects.requireNonNull;

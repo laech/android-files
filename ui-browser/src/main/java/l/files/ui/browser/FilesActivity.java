@@ -21,7 +21,6 @@ import java.util.Objects;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.ui.R;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
