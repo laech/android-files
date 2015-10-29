@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
-import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -45,6 +44,11 @@ public abstract class BaseFile implements File {
         }
         reverse(hierarchy);
         return unmodifiableList(hierarchy);
+    }
+
+    @Override
+    public void traverse(LinkOption option, Visitor visitor) throws IOException {
+        new Traverser(this, option, visitor).traverse();
     }
 
     @Override
@@ -88,7 +92,7 @@ public abstract class BaseFile implements File {
 
     @Override
     public void deleteRecursive() throws IOException {
-        traverse(this, NOFOLLOW, new Visitor.Base() {
+        traverse(NOFOLLOW, new Visitor.Base() {
             @Override
             public Result onPostVisit(File file) throws IOException {
                 file.deleteIfExists();

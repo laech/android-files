@@ -46,7 +46,7 @@ abstract class AbstractOperation implements FileOperation {
 
     final void traverse(File file, OperationVisitor visitor) {
         try {
-            l.files.fs.Files.traverse(file, NOFOLLOW, visitor);
+            file.traverse(NOFOLLOW, visitor);
         } catch (IOException e) {
             record(file, e);
         }

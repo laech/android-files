@@ -4,15 +4,14 @@ import android.content.Intent;
 
 import java.io.IOException;
 
+import l.files.testing.BaseActivityTest;
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.fs.Visitor;
 import l.files.fs.local.LocalFile;
-import l.files.testing.BaseActivityTest;
 
 import static java.io.File.createTempFile;
 import static java.lang.System.currentTimeMillis;
-import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
@@ -53,7 +52,7 @@ public class BaseFilesActivityTest extends BaseActivityTest<FilesActivity> {
         super.tearDown();
         screen = null;
         if (dir.exists(NOFOLLOW)) {
-            traverse(dir, NOFOLLOW, delete());
+            dir.traverse(NOFOLLOW, delete());
         }
         dir = null;
     }
