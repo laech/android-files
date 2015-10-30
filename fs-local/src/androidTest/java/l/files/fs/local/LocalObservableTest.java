@@ -9,6 +9,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,7 @@ import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.atLeastOnce;
@@ -139,35 +141,81 @@ public final class LocalObservableTest extends FileBaseTest {
     public void test_notifies_observer_on_max_user_watches_reached_on_observe() throws Exception {
 
         File dir = linkToMaxUserWatchesTestDir();
-        int expectedCount = maxUserWatches() + 10;
+        int maxUserWatches = maxUserWatches();
+        int expectedCount = maxUserWatches + 10;
         ensureExactNumberOfChildDirs(dir, expectedCount);
 
         FileConsumer consumer = mock(FileConsumer.class);
         Observer observer = mock(Observer.class);
 
-        try (Observation ignored = dir.observe(FOLLOW, observer, consumer)) {
+        try (Tracker tracker = registerMockTracker();
+             Observation ignored = dir.observe(FOLLOW, observer, consumer)) {
             verify(observer, atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
         }
     }
 
     public void test_notifies_observer_on_max_user_watches_reached_during_observe() throws Exception {
 
         File dir = linkToMaxUserWatchesTestDir();
-        int expectedCount = maxUserWatches() - 10;
+        int maxUserWatches = maxUserWatches();
+        int expectedCount = maxUserWatches - 10;
         ensureExactNumberOfChildDirs(dir, expectedCount);
 
         FileConsumer consumer = mock(FileConsumer.class);
         Observer observer = mock(Observer.class);
 
-        try (Observation observation = dir.observe(FOLLOW, observer, consumer)) {
+        try (Tracker tracker = registerMockTracker();
+             Observation observation = dir.observe(FOLLOW, observer, consumer)) {
+
             assertFalse(observation.isClosed());
             for (int i = 0; i < 20; i++) {
                 dir.resolve(String.valueOf(nanoTime())).createDir();
             }
-            verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
+
+            verify(observer, timeout(1000000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
         }
+    }
+
+    /**
+     * Verifies when max user watches is reached, all existing watches will be released
+     * but the root watch will be re added so that many of the modification to the root
+     * dir will still be notified.
+     */
+    private static void verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(
+            Tracker tracker, int maxUserWatches) {
+
+        ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> wdsAdded = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> wdsRemoved = ArgumentCaptor.forClass(Integer.class);
+
+        InOrder order = inOrder(tracker);
+        order.verify(tracker).onInit(fd.capture());
+        order.verify(tracker, times(maxUserWatches))
+                .onWatchAdded(eq(fd.getValue()), anyString(), anyInt(), wdsAdded.capture());
+
+        order.verify(tracker, times(maxUserWatches))
+                .onWatchRemoved(eq(fd.getValue()), wdsRemoved.capture());
+
+        assertValuesEqual(wdsAdded, wdsRemoved);
+
+        order.verify(tracker).onWatchAdded(eq(fd.getValue()), anyString(), anyInt(), anyInt());
+        order.verifyNoMoreInteractions();
+
+    }
+
+    private static <T extends Comparable<T>> void assertValuesEqual(
+            ArgumentCaptor<T> captor1,
+            ArgumentCaptor<T> captor2) {
+
+        List<T> xs = new ArrayList<>(captor1.getAllValues());
+        List<T> ys = new ArrayList<>(captor2.getAllValues());
+        Collections.sort(xs);
+        Collections.sort(ys);
+        assertEquals(xs, ys);
     }
 
     private File linkToMaxUserWatchesTestDir() throws IOException {
