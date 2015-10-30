@@ -137,11 +137,21 @@ public abstract class BaseFile implements File {
     @Override
     public void deleteRecursive() throws IOException {
         traverse(NOFOLLOW, new Visitor.Base() {
+
             @Override
             public Result onPostVisit(File file) throws IOException {
                 file.deleteIfExists();
                 return super.onPostVisit(file);
             }
+
+            @Override
+            public void onException(File file, IOException e) throws IOException {
+                if (e instanceof FileNotFoundException) {
+                    return;
+                }
+                super.onException(file, e);
+            }
+
         });
     }
 
