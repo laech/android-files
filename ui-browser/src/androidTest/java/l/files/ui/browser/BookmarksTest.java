@@ -72,18 +72,6 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_bookmarks_sidebar_locked_on_bookmarks_action_mode() throws Exception {
-        File a = dir().resolve("a").createDir();
-
-        screen()
-                .clickInto(a)
-                .bookmark()
-                .openBookmarksDrawer()
-                .longClick(a)
-                .activityObject()
-                .assertBookmarksSidebarIsOpenLocked(true);
-    }
-
     public void test_sidebar_displays_up_to_date_bookmarks() throws Exception {
         File a = dir().resolve("a").createDir();
         File b = dir().resolve("b").createDir();

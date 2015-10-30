@@ -213,6 +213,10 @@ public final class FilesActivity extends BaseActivity implements
         return drawer;
     }
 
+    void setDrawerLayout(DrawerLayout drawer) {
+        this.drawer = drawer;
+    }
+
     @Override
     public void onOpen(File file) {
         onOpen(file, null);

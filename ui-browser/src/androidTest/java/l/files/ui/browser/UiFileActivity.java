@@ -32,7 +32,6 @@ import l.files.ui.browser.BrowserItem.FileItem;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.support.v4.view.GravityCompat.START;
-import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -47,14 +46,14 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.browser.R.drawable.ic_arrow_back_white_24dp;
-import static l.files.ui.browser.R.drawable.ic_menu_white_24dp;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 import static l.files.ui.browser.Mocks.mockMenuItem;
+import static l.files.ui.browser.R.drawable.ic_arrow_back_white_24dp;
+import static l.files.ui.browser.R.drawable.ic_menu_white_24dp;
 
 final class UiFileActivity {
 
@@ -543,20 +542,6 @@ final class UiFileActivity {
                     assertEquals(GONE, view.getVisibility());
                 }
 
-            }
-        });
-        return this;
-    }
-
-    UiFileActivity assertBookmarksSidebarIsOpenLocked(
-            final boolean openLocked) {
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(
-                        openLocked,
-                        LOCK_MODE_LOCKED_OPEN == activity().drawerLayout()
-                                .getDrawerLockMode(START));
             }
         });
         return this;
