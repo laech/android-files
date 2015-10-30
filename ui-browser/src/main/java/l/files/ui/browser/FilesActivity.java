@@ -217,6 +217,10 @@ public final class FilesActivity extends BaseActivity implements
         this.drawer = drawer;
     }
 
+    void setDrawerListener(DrawerListener drawerListener) {
+        this.drawerListener = drawerListener;
+    }
+
     @Override
     public void onOpen(File file) {
         onOpen(file, null);
@@ -325,7 +329,7 @@ public final class FilesActivity extends BaseActivity implements
                 .findFragmentByTag(FilesFragment.TAG);
     }
 
-    private static class DrawerListener extends SimpleDrawerListener {
+    static class DrawerListener extends SimpleDrawerListener {
 
         Runnable mRunOnClosed;
 

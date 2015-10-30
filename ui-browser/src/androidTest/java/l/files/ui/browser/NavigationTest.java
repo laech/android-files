@@ -230,15 +230,6 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir());
     }
 
-    public void test_open_new_directory_will_close_opened_drawer() throws Exception {
-        File dir = dir().resolve("a").createDir();
-        screen()
-                .openBookmarksDrawer()
-                .activityObject()
-                .clickInto(dir)
-                .assertDrawerIsOpened(false);
-    }
-
     public void test_observes_on_current_directory_and_shows_newly_added_files() throws Exception {
         File dir = dir().resolve("a").createDir();
         screen().assertListViewContains(dir, true);
