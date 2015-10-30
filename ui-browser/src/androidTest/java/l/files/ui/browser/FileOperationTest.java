@@ -13,19 +13,29 @@ import static l.files.ui.browser.Tests.timeout;
 
 public final class FileOperationTest extends BaseFilesActivityTest {
 
-    public void test_delete_file() throws Exception {
+    public void test_delete() throws Exception {
 
-        final File a = dir().resolve("a").createFile();
+        final File file = dir().resolve("file").createFile();
+        final File link = dir().resolve("link").createLink(file);
+        final File dir1 = dir().resolve("dir1").createDir();
+        final File dir2 = dir().resolve("dir2").createDir();
+        dir2.resolve("a").createFile();
 
         screen()
-                .longClick(a)
+                .longClick(file)
+                .click(link)
+                .click(dir1)
+                .click(dir2)
                 .delete()
                 .ok();
 
         timeout(5, SECONDS, new Executable() {
             @Override
             public void execute() throws Exception {
-                assertFalse(a.exists(NOFOLLOW));
+                assertFalse(file.exists(NOFOLLOW));
+                assertFalse(link.exists(NOFOLLOW));
+                assertFalse(dir1.exists(NOFOLLOW));
+                assertFalse(dir2.exists(NOFOLLOW));
             }
         });
 
@@ -52,69 +62,33 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_copy_files() throws Exception {
+    public void test_copy() throws Exception {
 
-        final File file = dir().resolve("a").createFile();
-        final File dir = dir().resolve("dir").createDir();
-
-        screen()
-                .longClick(file)
-                .copy()
-                .click(dir)
-                .paste();
-
-        timeout(5, SECONDS, new Executable() {
-            @Override
-            public void execute() throws Exception {
-                assertTrue(dir.resolve(file.name()).exists(NOFOLLOW));
-                assertTrue(file.exists(NOFOLLOW));
-            }
-        });
-    }
-
-    public void test_copies_empty_directory() throws Exception {
-
-        File c = dir().resolve("c").createDir();
-        File d = dir().resolve("d").createDir();
+        File dstDir = dir().resolve("dstDir").createDir();
+        File srcFile = dir().resolve("srcFile").createFile();
+        File srcLink = dir().resolve("srcLink").createLink(srcFile);
+        File srcEmpty = dir().resolve("srcEmpty").createDir();
+        File srcFull = dir().resolve("srcFull").createDir();
+        srcFull.resolve("a").createFile();
+        srcFull.resolve("b").createDir();
+        srcFull.resolve("c").createLink(srcFull.resolve("a"));
 
         screen()
-                .longClick(c)
+                .longClick(srcEmpty)
+                .click(srcFull)
+                .click(srcFile)
+                .click(srcLink)
                 .copy()
-                .click(d)
+                .click(dstDir)
                 .paste();
 
-        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
-    }
-
-    public void test_copies_full_directory() throws Exception {
-
-        File d = dir().resolve("d").createDir();
-        File c = dir().resolve("c").createDir();
-        c.resolve("a").createFile();
-        c.resolve("b").createDir();
-        c.resolve("c").createLink(c.resolve("a"));
-
-        screen()
-                .longClick(c)
-                .copy()
-                .click(d)
-                .paste();
-
-        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
-    }
-
-    public void test_copies_link() throws Exception {
-
-        File d = dir().resolve("d").createDir();
-        File c = dir().resolve("c").createLink(dir());
-
-        screen()
-                .longClick(c)
-                .copy()
-                .click(d)
-                .paste();
-
-        assertTrue(waitFor(dir().resolve("d/c"), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFile.name()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcLink.name()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcEmpty.name()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFull.name()), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFull.name()).resolve("a"), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFull.name()).resolve("b"), 5, SECONDS));
+        assertTrue(waitFor(dstDir.resolve(srcFull.name()).resolve("c"), 5, SECONDS));
     }
 
     private boolean waitFor(

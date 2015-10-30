@@ -31,15 +31,6 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void test_can_preview() throws Exception {
         File empty = dir().resolve("empty").createFile();
         File file = dir().resolve("file");
-        file.writeAllUtf8("hello");
-        screen()
-                .assertThumbnailShown(file, true)
-                .assertThumbnailShown(empty, false);
-    }
-
-    public void test_can_preview_link() throws Exception {
-        File empty = dir().resolve("empty").createFile();
-        File file = dir().resolve("file");
         File link = dir().resolve("link").createLink(file);
         file.writeAllUtf8("hello");
         screen()
@@ -66,12 +57,9 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     public void test_updates_navigation_list_when_going_into_a_new_dir() throws Exception {
+        screen().assertNavigationModeHierarchy(dir());
         File dir = dir().resolve("dir").createDir();
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
-    }
-
-    public void test_shows_initial_navigation_list() throws Exception {
-        screen().assertNavigationModeHierarchy(dir());
     }
 
     public void test_shows_size_only_if_unable_to_determine_modified_date() throws Exception {
@@ -149,43 +137,27 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertDisabled(dir);
     }
 
-    public void test_link_icon_displayed() throws Exception {
+    public void test_link_displayed() throws Exception {
         File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
 
         screen()
                 .assertLinkIconDisplayed(dir, false)
-                .assertLinkIconDisplayed(link, true);
-    }
-
-    public void test_link_path_displayed() throws Exception {
-        File dir = dir().resolve("dir").createDir();
-        File link = dir().resolve("link").createLink(dir);
-        screen()
+                .assertLinkIconDisplayed(link, true)
                 .assertLinkPathDisplayed(dir, null)
                 .assertLinkPathDisplayed(link, dir);
-    }
-
-    public void test_can_navigate_into_linked_directory() throws Exception {
-        File dir = dir().resolve("dir").createDir();
-        dir.resolve("a").createDir();
-
-        File link = dir().resolve("link").createLink(dir);
-        File linkChild = link.resolve("a");
-        screen()
-                .clickInto(link)
-                .clickInto(linkChild)
-                .assertCurrentDirectory(linkChild);
     }
 
     public void test_can_see_changes_in_linked_directory() throws Exception {
         File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
-        screen().clickInto(link)
+        screen()
+                .clickInto(link)
                 .assertCurrentDirectory(link);
 
         File child = link.resolve("child").createDir();
-        screen().clickInto(child)
+        screen()
+                .clickInto(child)
                 .assertCurrentDirectory(child);
     }
 
@@ -230,16 +202,19 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir());
     }
 
-    public void test_observes_on_current_directory_and_shows_newly_added_files() throws Exception {
-        File dir = dir().resolve("a").createDir();
-        screen().assertListViewContains(dir, true);
-    }
+    public void test_observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
+        File a = dir().resolve("a").createDir();
+        screen().assertListViewContains(a, true);
 
-    public void test_observes_on_current_directory_and_hides_deleted_files() throws Exception {
-        File file = dir().resolve("a").createFile();
-        screen().assertListViewContains(file, true);
-        file.delete();
-        screen().assertListViewContains(file, false);
+        File b = dir().resolve("b").createFile();
+        screen()
+                .assertListViewContains(a, true)
+                .assertListViewContains(b, true);
+
+        b.delete();
+        screen()
+                .assertListViewContains(a, true)
+                .assertListViewContains(b, false);
     }
 
     public void test_updates_view_on_child_directory_modified() throws Exception {
