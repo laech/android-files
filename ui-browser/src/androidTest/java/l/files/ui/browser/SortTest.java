@@ -1,5 +1,7 @@
 package l.files.ui.browser;
 
+import org.junit.Test;
+
 import java.io.IOException;
 
 import l.files.fs.File;
@@ -12,7 +14,8 @@ import static l.files.ui.browser.FileSort.SIZE;
 
 public final class SortTest extends BaseFilesActivityTest {
 
-    public void test_updates_list_on_sort_option_change_on_back() throws Exception {
+    @Test
+    public void updates_list_on_sort_option_change_on_back() throws Exception {
         File a = dir().resolve("a").createDir();
         File aa = createFile("aa", "aa", Instant.of(1, 1), a);
         File ab = createFile("ab", "ab", Instant.of(2, 1), a);
@@ -26,7 +29,8 @@ public final class SortTest extends BaseFilesActivityTest {
                 .pressBack().assertItemsDisplayed(a, c, b);
     }
 
-    public void test_updates_list_on_sort_option_change() throws Exception {
+    @Test
+    public void updates_list_on_sort_option_change() throws Exception {
         File a = createFile("a", "a", Instant.of(1, 1));
         File b = createFile("b", "bbb", Instant.of(1, 2));
         File c = createFile("c", "cc", Instant.of(1, 3));

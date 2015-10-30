@@ -1,5 +1,7 @@
 package l.files.ui.browser;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -10,10 +12,13 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.Tests.timeout;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public final class FileOperationTest extends BaseFilesActivityTest {
 
-    public void test_delete() throws Exception {
+    @Test
+    public void delete() throws Exception {
 
         final File file = dir().resolve("file").createFile();
         final File link = dir().resolve("link").createLink(file);
@@ -41,7 +46,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_cut_files() throws Exception {
+    @Test
+    public void cut_files() throws Exception {
 
         final File file = dir().resolve("a").createFile();
         final File dir = dir().resolve("dir").createDir();
@@ -62,7 +68,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_copy() throws Exception {
+    @Test
+    public void copy() throws Exception {
 
         File dstDir = dir().resolve("dstDir").createDir();
         File srcFile = dir().resolve("srcFile").createFile();
@@ -106,7 +113,8 @@ public final class FileOperationTest extends BaseFilesActivityTest {
         return false;
     }
 
-    public void test_paste_menu_is_disabled_inside_folder_being_copied()
+    @Test
+    public void paste_menu_is_disabled_inside_folder_being_copied()
             throws Exception {
 
         File dir = dir().resolve("dir").createDir();

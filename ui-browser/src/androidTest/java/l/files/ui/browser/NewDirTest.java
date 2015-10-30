@@ -2,13 +2,18 @@ package l.files.ui.browser;
 
 import android.widget.EditText;
 
+import org.junit.Test;
+
 import l.files.fs.Permission;
+
+import static org.junit.Assert.assertEquals;
 
 public final class NewDirTest extends BaseFilesActivityTest {
 
     // TODO test click ok from keyboard
 
-    public void test_shows_error_message_when_failed_to_create()
+    @Test
+    public void shows_error_message_when_failed_to_create()
             throws Exception {
         dir().removePermissions(Permission.write());
         screen()
@@ -17,7 +22,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
                 .okExpectingFailure("Permission denied");
     }
 
-    public void test_creates_folder_with_name_specified() {
+    @Test
+    public void creates_folder_with_name_specified() {
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -25,13 +31,15 @@ public final class NewDirTest extends BaseFilesActivityTest {
                 .clickInto(dir().resolve("a"));
     }
 
-    public void test_name_field_has_initial_name_suggestion() {
+    @Test
+    public void name_field_has_initial_name_suggestion() {
         screen()
                 .newFolder()
                 .assertFilename(string(R.string.untitled_dir));
     }
 
-    public void test_name_field_has_new_name_suggestion_if_initial_names_are_taken()
+    @Test
+    public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception {
         dir().resolve(string(R.string.untitled_dir)).createFile();
         dir().resolve(string(R.string.untitled_dir) + " " + 2).createFile();
@@ -41,7 +49,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
                 .assertFilename(string(R.string.untitled_dir) + " " + 3);
     }
 
-    public void test_can_not_create_if_folder_with_specified_name_already_exists()
+    @Test
+    public void can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception {
         dir().resolve("a").createFile();
         screen()
@@ -54,7 +63,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
                 .assertOkButtonEnabled(true);
     }
 
-    public void test_name_field_is_limited_to_one_line() throws Throwable {
+    @Test
+    public void name_field_is_limited_to_one_line() throws Throwable {
         checkNameField(new Consumer<EditText>() {
             @Override
             public void apply(final EditText input) {
@@ -63,7 +73,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
         });
     }
 
-    public void test_name_field_has_all_text_selected() throws Throwable {
+    @Test
+    public void name_field_has_all_text_selected() throws Throwable {
         checkNameField(new Consumer<EditText>() {
             @Override
             public void apply(final EditText input) {

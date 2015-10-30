@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import android.test.InstrumentationTestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +11,7 @@ import l.files.fs.Instant;
 import l.files.fs.local.LocalFile;
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -18,8 +19,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
-public final class ManualInspectionTest extends InstrumentationTestCase {
+public final class ManualInspectionTest {
 
+    @Test
     public void test() throws Exception {
         File dir = LocalFile.of(getExternalStorageDirectory()).resolve("test");
         dir.createDirs();

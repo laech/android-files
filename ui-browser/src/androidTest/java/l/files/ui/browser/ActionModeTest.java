@@ -1,5 +1,7 @@
 package l.files.ui.browser;
 
+import org.junit.Test;
+
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.fs.Stream;
@@ -9,7 +11,8 @@ import static l.files.ui.browser.FileSort.NAME;
 
 public final class ActionModeTest extends BaseFilesActivityTest {
 
-    public void test_disabled_item_can_still_be_selected() throws Exception {
+    @Test
+    public void disabled_item_can_still_be_selected() throws Exception {
         File a = dir().resolve("a").createFile();
         a.removePermissions(Permission.read());
         screen()
@@ -18,7 +21,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .assertChecked(a, true);
     }
 
-    public void test_auto_finishes_action_mode_if_selected_item_deleted_from_file_system()
+    @Test
+    public void auto_finishes_action_mode_if_selected_item_deleted_from_file_system()
             throws Exception {
 
         File a = dir().resolve("a").createFile();
@@ -27,7 +31,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
         screen().assertActionModePresent(false);
     }
 
-    public void test_title_shows_correct_selected_item_count_after_selected_item_deletion()
+    @Test
+    public void title_shows_correct_selected_item_count_after_selected_item_deletion()
             throws Exception {
 
         File a = dir().resolve("a").createFile();
@@ -48,7 +53,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .assertActionModeTitle(2);
     }
 
-    public void test_old_checked_item_remains_checked_when_new_item_added()
+    @Test
+    public void old_checked_item_remains_checked_when_new_item_added()
             throws Exception {
 
         File a = dir().resolve("a").createFile();
@@ -66,7 +72,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .assertChecked(a, true);
     }
 
-    public void test_can_start_action_mode_after_rotation() throws Exception {
+    @Test
+    public void can_start_action_mode_after_rotation() throws Exception {
         for (int i = 0; i < 10; i++) {
             dir().resolve(String.valueOf(i)).createFile();
         }
@@ -81,7 +88,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
         }
     }
 
-    public void test_clears_selection_on_finish_of_action_mode() throws Exception {
+    @Test
+    public void clears_selection_on_finish_of_action_mode() throws Exception {
         File a = dir().resolve("a").createFile();
         screen()
                 .longClick(a)
@@ -98,7 +106,8 @@ public final class ActionModeTest extends BaseFilesActivityTest {
                 .assertChecked(a, false);
     }
 
-    public void test_maintains_action_mode_on_screen_rotation() throws Exception {
+    @Test
+    public void maintains_action_mode_on_screen_rotation() throws Exception {
         File a = dir().resolve("a").createFile();
         File b = dir().resolve("b").createFile();
         screen()

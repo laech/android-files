@@ -1,5 +1,7 @@
 package l.files.ui.browser;
 
+import org.junit.Test;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
@@ -23,7 +25,8 @@ import static l.files.ui.browser.FileSort.MODIFIED;
 
 public final class RefreshTest extends BaseFilesActivityTest {
 
-    public void test_manual_refresh_enabled_if_max_watches_reached()
+    @Test
+    public void manual_refresh_enabled_if_max_watches_reached()
             throws Exception {
 
         File dir = linkToCacheDir("files-test-max-watches-reached");
@@ -72,7 +75,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir);
     }
 
-    public void test_manual_refresh_disabled_if_max_watches_not_reached()
+    @Test
+    public void manual_refresh_disabled_if_max_watches_not_reached()
             throws Exception {
 
         screen().assertRefreshMenuVisible(false);
@@ -83,7 +87,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         return parseInt(limitFile.readAllUtf8().trim());
     }
 
-    public void test_auto_show_updated_details_of_lots_of_child_dirs() throws Exception {
+    @Test
+    public void auto_show_updated_details_of_lots_of_child_dirs() throws Exception {
         File dir = linkToCacheDir("files-test-lots-of-child-dirs");
         int count = max(maxUserWatches() / 2, 1000);
         createRandomDirs(dir, count);
@@ -145,7 +150,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_auto_detect_files_added_and_removed_while_loading() throws Exception {
+    @Test
+    public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         int childrenCount = (int) (maxUserWatches() * 0.75F);
         File dir = linkToCacheDir("files-test-add-remove-while-loading");
@@ -201,7 +207,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
         return LocalFile.of(getInstrumentation().getContext().getExternalCacheDir());
     }
 
-    public void test_auto_show_correct_information_on_large_change_events() throws Exception {
+    @Test
+    public void auto_show_correct_information_on_large_change_events() throws Exception {
         dir().resolve("a").createFile();
         screen().assertListMatchesFileSystem(dir());
 

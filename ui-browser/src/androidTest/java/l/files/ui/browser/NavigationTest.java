@@ -2,6 +2,8 @@ package l.files.ui.browser;
 
 import android.content.Context;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -25,10 +27,13 @@ import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
-    public void test_can_preview() throws Exception {
+    @Test
+    public void can_preview() throws Exception {
         File empty = dir().resolve("empty").createFile();
         File file = dir().resolve("file");
         File link = dir().resolve("link").createLink(file);
@@ -39,7 +44,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertThumbnailShown(empty, false);
     }
 
-    public void test_can_navigate_into_etc_proc_self_fdinfo_without_crashing()
+    @Test
+    public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
         File root = dir().root();
@@ -49,20 +55,23 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().clickInto(root.resolve("/proc/self/fdinfo"));
     }
 
-    public void test_can_navigate_through_title_list_drop_down() throws Exception {
+    @Test
+    public void can_navigate_through_title_list_drop_down() throws Exception {
         File parent = dir().parent();
         screen()
                 .selectFromNavigationMode(parent)
                 .assertNavigationModeHierarchy(parent);
     }
 
-    public void test_updates_navigation_list_when_going_into_a_new_dir() throws Exception {
+    @Test
+    public void updates_navigation_list_when_going_into_a_new_dir() throws Exception {
         screen().assertNavigationModeHierarchy(dir());
         File dir = dir().resolve("dir").createDir();
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
-    public void test_shows_size_only_if_unable_to_determine_modified_date() throws Exception {
+    @Test
+    public void shows_size_only_if_unable_to_determine_modified_date() throws Exception {
         File file = dir().resolve("file").createFile();
         file.setLastModifiedTime(NOFOLLOW, EPOCH);
 
@@ -78,7 +87,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    public void test_shows_time_and_size_for_file() throws Exception {
+    @Test
+    public void shows_time_and_size_for_file() throws Exception {
         File file = dir().resolve("file").createFile();
         file.appendUtf8(file.path());
 
@@ -95,14 +105,16 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    public void test_shows_time_only_for_today() throws Exception {
+    @Test
+    public void shows_time_only_for_today() throws Exception {
         long time = currentTimeMillis();
         DateFormat format = getTimeFormat(getActivity());
         String expected = format.format(new Date(time));
         testDirectorySummary(expected, time);
     }
 
-    public void test_shows_time_as_month_day_for_date_of_current_year() throws Exception {
+    @Test
+    public void shows_time_as_month_day_for_date_of_current_year() throws Exception {
         long time = currentTimeMillis() - DAYS.toMillis(2);
         int flags
                 = FORMAT_SHOW_DATE
@@ -112,7 +124,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
         testDirectorySummary(expected, time);
     }
 
-    public void test_shows_time_as_year_month_day_for_date_outside_of_current_year() throws Exception {
+    @Test
+    public void shows_time_as_year_month_day_for_date_outside_of_current_year() throws Exception {
         long time = currentTimeMillis() - DAYS.toMillis(400);
         DateFormat format = getDateFormat(getActivity());
         String expected = format.format(new Date(time));
@@ -131,13 +144,15 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    public void test_directory_view_is_disabled_if_no_read_permission() throws Exception {
+    @Test
+    public void directory_view_is_disabled_if_no_read_permission() throws Exception {
         File dir = dir().resolve("dir").createDir();
         dir.removePermissions(Permission.read());
         screen().assertDisabled(dir);
     }
 
-    public void test_link_displayed() throws Exception {
+    @Test
+    public void link_displayed() throws Exception {
         File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
 
@@ -148,7 +163,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertLinkPathDisplayed(link, dir);
     }
 
-    public void test_can_see_changes_in_linked_directory() throws Exception {
+    @Test
+    public void can_see_changes_in_linked_directory() throws Exception {
         File dir = dir().resolve("dir").createDir();
         File link = dir().resolve("link").createLink(dir);
         screen()
@@ -161,7 +177,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(child);
     }
 
-    public void test_press_action_bar_up_indicator_will_go_back() throws Exception {
+    @Test
+    public void press_action_bar_up_indicator_will_go_back() throws Exception {
         File dir = dir().resolve("dir").createDir();
         screen()
                 .clickInto(dir)
@@ -170,30 +187,35 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir.parent());
     }
 
-    public void test_action_bar_title_shows_name_of_directory() throws Exception {
+    @Test
+    public void action_bar_title_shows_name_of_directory() throws Exception {
         screen()
                 .clickInto(dir().resolve("a").createDir())
                 .assertActionBarTitle("a");
     }
 
-    public void test_action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
+    @Test
+    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
         screen().assertActionBarUpIndicatorIsVisible(false);
     }
 
-    public void test_action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
+    @Test
+    public void action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
         screen()
                 .clickInto(dir().resolve("dir").createDir())
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
-    public void test_action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
+    @Test
+    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
         screen()
                 .clickInto(dir().resolve("dir").createDir())
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
 
-    public void test_long_press_back_will_clear_back_stack() throws Exception {
+    @Test
+    public void long_press_back_will_clear_back_stack() throws Exception {
         screen()
                 .clickInto(dir().resolve("a").createDir())
                 .clickInto(dir().resolve("a/b").createDir())
@@ -202,7 +224,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir());
     }
 
-    public void test_observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
+    @Test
+    public void observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
         File a = dir().resolve("a").createDir();
         screen().assertListViewContains(a, true);
 
@@ -217,12 +240,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(b, false);
     }
 
-    public void test_updates_view_on_child_directory_modified() throws Exception {
+    @Test
+    public void updates_view_on_child_directory_modified() throws Exception {
         File dir = dir().resolve("a").createDir();
         testUpdatesDateViewOnChildModified(dir);
     }
 
-    public void test_updates_view_on_child_file_modified() throws Exception {
+    @Test
+    public void updates_view_on_child_file_modified() throws Exception {
         File file = dir().resolve("a").createFile();
         testUpdatesDateViewOnChildModified(file);
         testUpdatesSizeViewOnChildModified(file);

@@ -1,10 +1,14 @@
 package l.files.ui.browser;
 
+import org.junit.Test;
+
 import l.files.fs.File;
 
 public final class BookmarksTest extends BaseFilesActivityTest {
 
-    public void test_clears_selection_on_finish_of_action_mode() throws Exception {
+    @Test
+    public void clears_selection_on_finish_of_action_mode() throws Exception {
+
         File a = dir().resolve("a").createDir();
         screen()
                 .clickInto(a)
@@ -28,7 +32,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
                 .assertChecked(a, false);
     }
 
-    public void test_maintains_action_mode_on_screen_rotation() throws Exception {
+    @Test
+    public void maintains_action_mode_on_screen_rotation() throws Exception {
+
         File a = dir().resolve("a").createDir();
         File b = dir().resolve("b").createDir();
         screen()
@@ -51,7 +57,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
                 .assertActionModeTitle(2);
     }
 
-    public void test_click_on_bookmark_opens_directory() throws Exception {
+    @Test
+    public void click_on_bookmark_opens_directory() throws Exception {
+
         File a = dir().resolve("a").createDir();
         File b = dir().resolve("b").createDir();
         screen()
@@ -72,7 +80,9 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
     }
 
-    public void test_sidebar_displays_up_to_date_bookmarks() throws Exception {
+    @Test
+    public void sidebar_displays_up_to_date_bookmarks() throws Exception {
+
         File a = dir().resolve("a").createDir();
         File b = dir().resolve("b").createDir();
         File c = dir().resolve("c").createDir();
