@@ -12,6 +12,7 @@ import l.files.fs.Stream;
 import l.files.fs.local.LocalFile;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.Math.max;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
@@ -25,55 +26,50 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void test_manual_refresh_enabled_if_max_watches_reached()
             throws Exception {
 
-        File linkedDir = linkToDirWithMaxWatchReached();
+        File dir = linkToCacheDir("files-test-max-watches-reached");
+        createRandomDirs(dir, maxUserWatches() + 1);
 
         screen()
                 .sort()
                 .by(MODIFIED)
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
+                .clickInto(dir)
+                .assertListMatchesFileSystem(dir)
                 .assertRefreshMenuVisible(true);
 
-        try (Stream<File> children = linkedDir.listDirs(FOLLOW)) {
-            File dir = children.iterator().next();
-            try {
-                setRandomLastModified(dir);
-            } catch (IOException e) {
-                // Older versions does not support changing mtime
-                dir.deleteRecursive();
-            }
-        }
-        screen().refresh().assertListMatchesFileSystem(linkedDir);
+        testRefreshInManualMode(dir);
+        testFileCreationDeletionWillStillBeNotifiedInManualMode(dir);
     }
 
-    public void test_manual_refresh_enabled_but_still_auto_refreshes_file_creation_deletion()
-            throws Exception {
+    private void testRefreshInManualMode(File dir) throws IOException {
+        try (Stream<File> children = dir.listDirs(FOLLOW)) {
+            File childDir = children.iterator().next();
+            try {
+                // Inotify don't notify child directory last modified time,
+                // unless we explicitly monitor the child dir, but we aren't
+                // doing that because we ran out of watches, so this is a
+                // good operation for testing the manual refresh
+                setRandomLastModified(childDir);
+            } catch (IOException e) {
+                // Older versions does not support changing mtime
+                childDir.deleteRecursive();
+            }
+        }
+        screen().refresh().assertListMatchesFileSystem(dir);
+    }
 
-        File linkedDir = linkToDirWithMaxWatchReached();
+    private void testFileCreationDeletionWillStillBeNotifiedInManualMode(File dir)
+            throws IOException {
 
-        screen()
-                .sort()
-                .by(MODIFIED)
-                .clickInto(linkedDir)
-                .assertListMatchesFileSystem(linkedDir)
-                .assertRefreshMenuVisible(true);
+        dir.resolve("file-" + nanoTime()).createFile();
+        dir.resolve("dir-" + nanoTime()).createDir();
+        dir.resolve("before-move-" + nanoTime()).createFile()
+                .moveTo(dir.resolve("after-move-" + nanoTime()));
 
-        linkedDir.resolve("file-" + nanoTime()).createFile();
-        linkedDir.resolve("dir-" + nanoTime()).createDir();
-        linkedDir.resolve("before-move-" + nanoTime()).createFile()
-                .moveTo(linkedDir.resolve("after-move-" + nanoTime()));
-
-        try (Stream<File> children = linkedDir.list(FOLLOW)) {
+        try (Stream<File> children = dir.list(FOLLOW)) {
             children.iterator().next().deleteRecursive();
         }
 
-        screen().assertListMatchesFileSystem(linkedDir);
-    }
-
-    private File linkToDirWithMaxWatchReached() throws IOException {
-        File dir = linkToCacheDir("files-test-max-watches-reached");
-        createRandomDirs(dir, maxUserWatches() + 1);
-        return dir;
+        screen().assertListMatchesFileSystem(dir);
     }
 
     public void test_manual_refresh_disabled_if_max_watches_not_reached()
@@ -89,7 +85,8 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     public void test_auto_show_updated_details_of_lots_of_child_dirs() throws Exception {
         File dir = linkToCacheDir("files-test-lots-of-child-dirs");
-        createRandomDirs(dir, maxUserWatches() - 2);
+        int count = max(maxUserWatches() / 2, 1000);
+        createRandomDirs(dir, count);
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
@@ -116,9 +113,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         try {
             child.delete();
         } catch (FileNotFoundException e) {
-            child.createFile();
-        } catch (IOException e) {
-            child.delete();
+            child.createFiles();
         }
     }
 
@@ -158,7 +153,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen().click(dir);
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 200; i++) {
             try (Stream<File> children = dir.list(FOLLOW)) {
                 Iterator<File> it = children.iterator();
                 it.next().deleteRecursive();
@@ -166,7 +161,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
             }
             randomFile(dir).createDir();
             randomFile(dir).createFile();
-            sleep(100);
+            sleep(10);
         }
 
         screen().assertListMatchesFileSystem(dir);
@@ -210,7 +205,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir().resolve("a").createFile();
         screen().assertListMatchesFileSystem(dir());
 
-        long end = currentTimeMillis() + SECONDS.toMillis(10);
+        long end = currentTimeMillis() + SECONDS.toMillis(3);
         while (currentTimeMillis() < end) {
             updatePermissions("a");
             updateFileContent("b");
