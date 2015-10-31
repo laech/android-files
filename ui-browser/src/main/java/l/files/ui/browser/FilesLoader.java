@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
@@ -32,9 +33,9 @@ import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.currentThread;
-import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -203,10 +204,18 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<File> visit() throws IOException {
         List<File> children = new ArrayList<>();
-        try (Stream<File> stream = root.list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+
+            Stream<File> stream = closer.register(root.list(FOLLOW));
             for (File child : stream) {
                 checkedAdd(children, child);
             }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         return children;
     }

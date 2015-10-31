@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stream;
 import l.files.testing.fs.FileBaseTest;
@@ -104,8 +105,17 @@ public abstract class PasteTest extends FileBaseTest {
         });
         thread.start();
         thread.join();
-        try (Stream<File> stream = dstDir.list(NOFOLLOW)) {
+
+        Closer closer = Closer.create();
+        try {
+
+            Stream<File> stream = closer.register(dstDir.list(NOFOLLOW));
             assertFalse(stream.iterator().hasNext());
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

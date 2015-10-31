@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import org.junit.Test;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.fs.Stream;
@@ -78,13 +79,21 @@ public final class ActionModeTest extends BaseFilesActivityTest {
             dir().resolve(String.valueOf(i)).createFile();
         }
 
-        try (Stream<File> stream = dir().list(NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+
+            Stream<File> stream = closer.register(dir().list(NOFOLLOW));
             File child = stream.iterator().next();
             screen()
                     .rotate()
                     .longClick(child)
                     .assertChecked(child, true)
                     .assertActionModePresent(true);
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

@@ -11,6 +11,8 @@ public final class Throwables {
     public static void addSuppressed(Throwable e, Throwable suppressed) {
         if (SDK_INT >= KITKAT) {
             e.addSuppressed(suppressed);
+        } else {
+            suppressed.printStackTrace();
         }
     }
 

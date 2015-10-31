@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -108,8 +109,11 @@ final class Copy extends Paste {
             return;
         }
 
-        try (InputStream source = src.newInputStream();
-             OutputStream sink = dst.newOutputStream()) {
+        Closer closer = Closer.create();
+        try {
+
+            InputStream source = closer.register(src.newInputStream());
+            OutputStream sink = closer.register(dst.newOutputStream());
 
             // TODO perform sync to disk
 
@@ -140,6 +144,11 @@ final class Copy extends Paste {
                     !(e instanceof InterruptedIOException)) {
                 throw e;
             }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

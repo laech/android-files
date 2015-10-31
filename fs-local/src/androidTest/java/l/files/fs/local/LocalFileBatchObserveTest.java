@@ -2,10 +2,10 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
-import java.io.Closeable;
 import java.util.HashSet;
 import java.util.Set;
 
+import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
@@ -33,11 +33,17 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
 
     @Test
     public void notifies_self_change() throws Exception {
-        try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
+        Closer closer = Closer.create();
+        try {
+            closer.register(dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS));
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             verify(observer, timeout(100)).onBatchEvent(true, names());
             verifyNoMoreInteractions(observer);
             verifyZeroInteractions(consumer);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -48,12 +54,18 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         dir1().resolve("c").createFile();
         dir1().resolve("d").createDir();
 
-        try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
+        Closer closer = Closer.create();
+        try {
+            closer.register(dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS));
             a.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             b.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(2));
             verify(observer, timeout(100)).onBatchEvent(false, names(a, b));
             verify(observer, timeout(100)).onBatchEvent(false, names(a, b));
             verifyNoMoreInteractions(observer);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -61,7 +73,9 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
     public void notifies_self_and_children_change() throws Exception {
         File child = dir1().resolve("a").createFile();
 
-        try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
+        Closer closer = Closer.create();
+        try {
+            closer.register(dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS));
 
             verify(consumer).accept(child);
 
@@ -77,6 +91,10 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
 
             verifyNoMoreInteractions(observer);
 
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

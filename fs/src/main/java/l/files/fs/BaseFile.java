@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import l.files.base.io.Closer;
+
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -206,8 +208,11 @@ public abstract class BaseFile implements File {
 
     @Override
     public String readDetectingCharset(int limit) throws IOException {
-        try (InputStream in = newBufferedInputStream();
-             Reader reader = new CharsetDetector().getReader(in, null)) {
+        Closer closer = Closer.create();
+        try {
+
+            InputStream in = closer.register(newBufferedInputStream());
+            Reader reader = closer.register(new CharsetDetector().getReader(in, null));
             if (reader != null) {
                 char[] buffer = new char[limit];
                 int count = reader.read(buffer);
@@ -215,6 +220,11 @@ public abstract class BaseFile implements File {
                     return String.valueOf(buffer, 0, count);
                 }
             }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         throw new UnknownCharsetException();
     }
@@ -225,11 +235,18 @@ public abstract class BaseFile implements File {
     @Override
     public String readAllUtf8() throws IOException {
         StringBuilder builder = new StringBuilder();
-        try (Reader reader = newReader(UTF_8)) {
+        Closer closer = Closer.create();
+        try {
+            Reader reader = closer.register(newReader(UTF_8));
             char[] buffer = new char[BUFFER_SIZE];
             for (int i; (i = reader.read(buffer)) != -1; ) {
                 builder.append(buffer, 0, i);
             }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         return builder.toString();
     }
@@ -241,25 +258,45 @@ public abstract class BaseFile implements File {
 
     @Override
     public void writeAll(CharSequence content, Charset charset) throws IOException {
-        try (Writer writer = newWriter(charset)) {
+        Closer closer = Closer.create();
+        try {
+            Writer writer = closer.register(newWriter(charset));
             writer.write(content.toString());
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Override
     public void appendUtf8(CharSequence content) throws IOException {
-        try (Writer writer = newWriter(UTF_8, true)) {
+        Closer closer = Closer.create();
+        try {
+            Writer writer = closer.register(newWriter(UTF_8, true));
             writer.write(content.toString());
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Override
     public void copyFrom(InputStream in) throws IOException {
-        try (OutputStream out = newOutputStream()) {
+        Closer closer = Closer.create();
+        try {
+            OutputStream out = closer.register(newOutputStream());
             byte[] buffer = new byte[BUFFER_SIZE];
             for (int i; (i = in.read(buffer)) != -1; ) {
                 out.write(buffer, 0, i);
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

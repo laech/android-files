@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory.Options;
 import java.io.IOException;
 import java.io.InputStream;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -70,9 +71,17 @@ final class DecodeImage extends DecodeThumbnail {
             return null;
         }
 
-        try (InputStream in = file.newBufferedInputStream()) {
+        Closer closer = Closer.create();
+        try {
+
+            InputStream in = closer.register(file.newBufferedInputStream());
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

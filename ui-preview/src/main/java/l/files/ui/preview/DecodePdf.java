@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -42,9 +43,9 @@ import static android.os.ParcelFileDescriptor.open;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
 import static java.lang.Integer.parseInt;
-import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static l.files.base.Objects.requireNonNull;
 
 final class DecodePdf extends DecodeThumbnail {
 
@@ -148,7 +149,7 @@ final class DecodePdf extends DecodeThumbnail {
                 Context context,
                 CancellationSignal signal,
                 File res,
-                Rect constraint) {
+                Rect constraint) throws IOException {
 
             requireNonNull(context);
             requireNonNull(signal);
@@ -177,7 +178,10 @@ final class DecodePdf extends DecodeThumbnail {
                     .build();
 
             ContentResolver resolver = context.getContentResolver();
-            try (Cursor cursor = resolver.query(uri, null, null, null, null, signal)) {
+            Closer closer = Closer.create();
+            try {
+
+                Cursor cursor = closer.register(resolver.query(uri, null, null, null, null, signal));
                 if (cursor == null || !cursor.moveToFirst()) {
                     return null;
                 }
@@ -190,6 +194,10 @@ final class DecodePdf extends DecodeThumbnail {
 
             } catch (OperationCanceledException e) {
                 return null;
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
@@ -205,6 +213,7 @@ final class DecodePdf extends DecodeThumbnail {
 
         @Override
         public Cursor query(
+                @SuppressWarnings("NullableProblems")
                 Uri uri,
                 String[] projection,
                 String selection,
@@ -270,6 +279,7 @@ final class DecodePdf extends DecodeThumbnail {
 
         @Override
         public Cursor query(
+                @SuppressWarnings("NullableProblems")
                 Uri uri,
                 String[] projection,
                 String selection,
@@ -279,22 +289,30 @@ final class DecodePdf extends DecodeThumbnail {
         }
 
         @Override
-        public String getType(Uri uri) {
+        public String getType(@SuppressWarnings("NullableProblems") Uri uri) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Uri insert(Uri uri, ContentValues values) {
+        public Uri insert(
+                @SuppressWarnings("NullableProblems")
+                Uri uri,
+                ContentValues values) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public int delete(Uri uri, String selection, String[] selectionArgs) {
+        public int delete(
+                @SuppressWarnings("NullableProblems")
+                Uri uri,
+                String selection,
+                String[] selectionArgs) {
             throw new UnsupportedOperationException();
         }
 
         @Override
         public int update(
+                @SuppressWarnings("NullableProblems")
                 Uri uri,
                 ContentValues values,
                 String selection,

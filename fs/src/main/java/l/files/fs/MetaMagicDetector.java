@@ -6,6 +6,8 @@ import org.apache.tika.metadata.Metadata;
 import java.io.IOException;
 import java.io.InputStream;
 
+import l.files.base.io.Closer;
+
 import static org.apache.tika.metadata.TikaMetadataKeys.RESOURCE_NAME_KEY;
 
 /**
@@ -25,8 +27,10 @@ final class MetaMagicDetector extends AbstractDetector {
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, file.name().toString());
 
-        try (InputStream in = file.newInputStream()) {
+        Closer closer = Closer.create();
+        try {
 
+            InputStream in = closer.register(file.newInputStream());
             return TikaHolder.tika.detect(in, meta);
 
         } catch (TaggedIOException e) {
@@ -35,6 +39,10 @@ final class MetaMagicDetector extends AbstractDetector {
             } else {
                 throw e;
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

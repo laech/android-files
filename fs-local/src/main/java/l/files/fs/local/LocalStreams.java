@@ -123,20 +123,25 @@ final class LocalStreams {
 
         FileDescriptor descriptor = new FileDescriptor();
 
+        //noinspection TryWithIdenticalCatches
         try {
             Method setter = FileDescriptor.class.getMethod("setInt$", int.class);
             setter.setAccessible(true);
             setter.invoke(descriptor, fd);
             return descriptor;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+        } catch (NoSuchMethodException ignored) {
+        } catch (IllegalAccessException ignored) {
+        } catch (InvocationTargetException ignored) {
         }
 
+        //noinspection TryWithIdenticalCatches
         try {
             Field field = FileDescriptor.class.getField("descriptor");
             field.setAccessible(true);
             field.set(descriptor, fd);
             return descriptor;
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        } catch (NoSuchFieldException ignored) {
+        } catch (IllegalAccessException ignored) {
         }
 
         return descriptor;

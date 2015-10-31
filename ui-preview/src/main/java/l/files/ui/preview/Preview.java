@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import java.io.IOException;
 import java.io.InputStream;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalFile;
@@ -153,17 +154,23 @@ public final class Preview {
         return DecodeChain.run(res, stat, constraint, callback, this);
     }
 
-    Rect decodeSize(File file) {
+    Rect decodeSize(File file) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
-        try (InputStream in = file.newBufferedInputStream()) {
+        Closer closer = Closer.create();
+        try {
 
+            InputStream in = closer.register(file.newBufferedInputStream());
             decodeStream(in, null, options);
 
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         if (options.outWidth > 0 && options.outHeight > 0) {

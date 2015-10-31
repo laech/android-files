@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import l.files.base.io.Closer;
 import l.files.fs.Event;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
@@ -20,11 +21,11 @@ import l.files.fs.Stream;
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.currentThread;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.local.Dirent.DT_DIR;
 import static l.files.fs.local.ErrnoException.EACCES;
 import static l.files.fs.local.ErrnoException.EINVAL;
@@ -253,7 +254,10 @@ final class LocalObservable extends Native
 
         boolean limitReached = fd == -1;
         boolean someFailed = false;
-        try (Stream<Dirent> stream = Dirent.stream(root, option, false)) {
+        Closer closer = Closer.create();
+        try {
+
+            Stream<Dirent> stream = closer.register(Dirent.stream(root, option, false));
             for (Dirent child : stream) {
 
                 File childFile = root.resolve(child.name());
@@ -287,6 +291,10 @@ final class LocalObservable extends Native
                 }
 
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         return !limitReached && !someFailed;

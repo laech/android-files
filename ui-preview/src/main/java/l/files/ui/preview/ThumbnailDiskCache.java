@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
+import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -21,12 +22,12 @@ import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
-import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.base.Objects.requireNonNull;
+import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
@@ -102,10 +103,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     File cacheFile(File file, @Nullable Stat stat, Rect constraint) throws IOException {
         if (stat == null) {
-            try (Stream<File> children = cacheDir(file, constraint).list(NOFOLLOW)) {
+            Closer closer = Closer.create();
+            try {
+
+                Stream<File> children = closer.register(cacheDir(file, constraint).list(NOFOLLOW));
                 return children.iterator().next();
+
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
+        assert stat != null;
         Instant time = stat.lastModifiedTime();
         return cacheDir(file, constraint).resolve(
                 time.seconds() + "_" + time.nanos());
@@ -114,8 +124,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     @Override
     Bitmap get(File file, @Nullable Stat stat, Rect constraint) throws IOException {
         File cache = cacheFile(file, stat, constraint);
-        try (InputStream in = cache.newBufferedInputStream()) {
+        Closer closer = Closer.create();
+        try {
 
+            InputStream in = closer.register(cache.newBufferedInputStream());
             int version = in.read();
             if (version != VERSION) {
                 return null;
@@ -141,6 +153,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         } catch (FileNotFoundException e) {
             return null;
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -158,7 +174,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         parent.createDirs();
 
         File tmp = parent.resolve(cache.name() + "-" + nanoTime());
-        try (OutputStream out = tmp.newBufferedOutputStream()) {
+        Closer closer = Closer.create();
+        try {
+
+            OutputStream out = closer.register(tmp.newBufferedOutputStream());
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);
 
@@ -169,6 +188,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 addSuppressed(e, sup);
             }
             throw e;
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         tmp.moveTo(cache);
@@ -177,7 +200,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     private void purgeOldCacheFiles(File file, Rect constraint) throws IOException {
-        try (Stream<File> oldFiles = cacheDir(file, constraint).list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+
+            Stream<File> oldFiles = closer.register(cacheDir(file, constraint).list(FOLLOW));
             for (File oldFile : oldFiles) {
                 try {
                     oldFile.delete();
@@ -185,7 +211,12 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                     ignored.printStackTrace();
                 }
             }
+
         } catch (FileNotFoundException ignored) {
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

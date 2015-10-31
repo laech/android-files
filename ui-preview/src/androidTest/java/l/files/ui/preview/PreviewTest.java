@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.testing.fs.FileBaseTest;
 
@@ -79,8 +80,14 @@ public final class PreviewTest extends FileBaseTest {
 
     private void testPreviewSuccessForTestFile(String testFile) throws Throwable {
         File file = dir1().resolve(testFile);
-        try (InputStream in = getTestContext().getAssets().open(testFile)) {
+        Closer closer = Closer.create();
+        try {
+            InputStream in = closer.register(getTestContext().getAssets().open(testFile));
             file.copyFrom(in);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         testPreviewSuccess(file);
     }

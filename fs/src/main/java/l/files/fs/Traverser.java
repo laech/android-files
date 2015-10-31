@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
+import l.files.base.io.Closer;
 import l.files.fs.Visitor.Result;
 
 import static l.files.base.Objects.requireNonNull;
@@ -90,7 +91,10 @@ final class Traverser {
             return;
         }
 
-        try (Stream<File> stream = parent.file.list(option)) {
+        Closer closer = Closer.create();
+        try {
+
+            Stream<File> stream = closer.register(parent.file.list(option));
             List<File> items = stream.to(new ArrayList<File>());
             if (childrenComparator != null) {
                 Collections.sort(items, childrenComparator);
@@ -99,6 +103,11 @@ final class Traverser {
             while (it.hasPrevious()) {
                 stack.push(new Node(it.previous()));
             }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

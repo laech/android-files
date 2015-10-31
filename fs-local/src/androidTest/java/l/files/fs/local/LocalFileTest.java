@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.File;
 import l.files.fs.Instant;
@@ -150,8 +151,14 @@ public final class LocalFileTest extends FileBaseTest {
                 c.resolveParent(dir, link)
         );
 
-        try (Stream<File> actual = link.list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> actual = closer.register(link.list(FOLLOW));
             assertEquals(expected, sortByName(actual));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -160,8 +167,14 @@ public final class LocalFileTest extends FileBaseTest {
         File a = dir1().resolve("a").createFile();
         File b = dir1().resolve("b").createDir();
         List<?> expected = asList(a, b);
-        try (Stream<File> actual = dir1().list(NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> actual = closer.register(dir1().list(NOFOLLOW));
             assertEquals(expected, sortByName(actual));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -175,8 +188,14 @@ public final class LocalFileTest extends FileBaseTest {
         File link = dir1().resolve("link").createLink(dir);
         List<File> expected = singletonList(link.resolve("b"));
 
-        try (Stream<File> actual = link.listDirs(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> actual = closer.register(link.listDirs(FOLLOW));
             assertEquals(expected, sortByName(actual));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -186,8 +205,14 @@ public final class LocalFileTest extends FileBaseTest {
         dir1().resolve("b").createDir();
         dir1().resolve("c").createFile();
         List<?> expected = singletonList(dir1().resolve("b"));
-        try (Stream<File> actual = dir1().listDirs(NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> actual = closer.register(dir1().listDirs(NOFOLLOW));
             assertEquals(expected, sortByName(actual));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -243,8 +268,14 @@ public final class LocalFileTest extends FileBaseTest {
 
         File file = dir1().resolve("file").createFile();
         file.appendUtf8(initial);
-        try (OutputStream out = provider.open(file)) {
+        Closer closer = Closer.create();
+        try {
+            OutputStream out = closer.register(provider.open(file));
             out.write(write.getBytes(UTF_8));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         assertEquals(result, file.readAllUtf8());
     }
@@ -286,7 +317,9 @@ public final class LocalFileTest extends FileBaseTest {
     @Test
     public void input_cannotUseAfterClose() throws Exception {
         File file = dir1().resolve("a").createFile();
-        try (InputStream in = file.newInputStream()) {
+        Closer closer = Closer.create();
+        try {
+            InputStream in = closer.register(file.newInputStream());
             FileDescriptor fd = ((FileInputStream) in).getFD();
 
             //noinspection ResultOfMethodCallIgnored
@@ -299,6 +332,10 @@ public final class LocalFileTest extends FileBaseTest {
             } catch (IOException e) {
                 // Pass
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

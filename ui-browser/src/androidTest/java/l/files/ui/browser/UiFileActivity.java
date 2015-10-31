@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
@@ -37,13 +38,13 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
-import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.base.view.Views.find;
@@ -225,6 +226,7 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
+                //noinspection deprecation
                 assertBitmapEquals(
                         activity().getResources().getDrawable(ic_arrow_back_white_24dp),
                         activity().toolbar().getNavigationIcon());
@@ -332,10 +334,12 @@ final class UiFileActivity {
             @Override
             public void run() {
                 if (visible) {
+                    //noinspection deprecation
                     assertBitmapEquals(
                             activity().getResources().getDrawable(ic_arrow_back_white_24dp),
                             activity().toolbar().getNavigationIcon());
                 } else {
+                    //noinspection deprecation
                     assertBitmapEquals(
                             activity().getResources().getDrawable(ic_menu_white_24dp),
                             activity().toolbar().getNavigationIcon());
@@ -594,13 +598,21 @@ final class UiFileActivity {
                 Pair<File, Stat> fileNotInFs = null;
 
                 Set<Pair<File, Stat>> filesInView = filesInView();
-                try (Stream<File> stream = dir.list(FOLLOW)) {
+                Closer closer = Closer.create();
+                try {
+
+                    Stream<File> stream = closer.register(dir.list(FOLLOW));
                     for (File child : stream) {
                         Pair<File, Stat> item = Pair.create(child, child.stat(NOFOLLOW));
                         if (!filesInView.remove(item)) {
                             fileNotInView = item;
                         }
                     }
+
+                } catch (Throwable e) {
+                    throw closer.rethrow(e);
+                } finally {
+                    closer.close();
                 }
 
                 if (!filesInView.isEmpty()) {

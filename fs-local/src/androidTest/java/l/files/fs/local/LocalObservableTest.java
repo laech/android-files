@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 
+import l.files.base.io.Closer;
 import l.files.fs.AlreadyExist;
 import l.files.fs.Event;
 import l.files.fs.File;
@@ -76,27 +77,46 @@ public final class LocalObservableTest extends FileBaseTest {
     @Test
     public void no_observe_on_procfs() throws Exception {
 
-        try (Tracker tracker = registerMockTracker();
-             Recorder observer = observe(LocalFile.of("/proc/self"), FOLLOW, false)) {
+        Closer closer = Closer.create();
+        try {
 
+            Tracker tracker = closer.register(registerMockTracker());
+            Recorder observer = closer.register(observe(LocalFile.of("/proc/self"), FOLLOW, false));
             assertTrue(observer.isClosed());
             verifyZeroInteractions(tracker);
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void observe_on_regular_file() throws Exception {
         File file = dir1().resolve("file").createFile();
-        try (Recorder observer = observe(file, NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(file, NOFOLLOW));
             observer.awaitModifyByAppend(file, "hello");
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void observe_on_link() throws Exception {
         File file = dir1().resolve("link").createLink(dir2());
-        try (Recorder observer = observe(file, NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(file, NOFOLLOW));
             observer.awaitModifyBySetLastModifiedTime(file, EPOCH);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -106,8 +126,11 @@ public final class LocalObservableTest extends FileBaseTest {
         File src = dir1().resolve("src").createDir();
         File dst = dir2().resolve("dst");
 
-        try (Tracker tracker = registerMockTracker();
-             Recorder observer = observe(dir1(), NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+
+            Tracker tracker = closer.register(registerMockTracker());
+            Recorder observer = closer.register(observe(dir1(), NOFOLLOW));
 
             observer.awaitModify(src, newCreateFile(src.resolve("b")));
             observer.awaitMove(src, dst);
@@ -117,6 +140,11 @@ public final class LocalObservableTest extends FileBaseTest {
             ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
             verify(tracker).onWatchAdded(fd.capture(), eq(src.path()), anyInt(), wd.capture());
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getValue());
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -161,11 +189,19 @@ public final class LocalObservableTest extends FileBaseTest {
         FileConsumer consumer = mock(FileConsumer.class);
         Observer observer = mock(Observer.class);
 
-        try (Tracker tracker = registerMockTracker();
-             Observation ignored = dir.observe(FOLLOW, observer, consumer)) {
+        Closer closer = Closer.create();
+        try {
+
+            Tracker tracker = closer.register(registerMockTracker());
+            closer.register(dir.observe(FOLLOW, observer, consumer));
             verify(observer, atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -180,9 +216,11 @@ public final class LocalObservableTest extends FileBaseTest {
         FileConsumer consumer = mock(FileConsumer.class);
         Observer observer = mock(Observer.class);
 
-        try (Tracker tracker = registerMockTracker();
-             Observation observation = dir.observe(FOLLOW, observer, consumer)) {
+        Closer closer = Closer.create();
+        try {
 
+            Tracker tracker = closer.register(registerMockTracker());
+            Observation observation = closer.register(dir.observe(FOLLOW, observer, consumer));
             assertFalse(observation.isClosed());
             for (int i = 0; i < 20; i++) {
                 createRandomChildDir(dir);
@@ -191,6 +229,11 @@ public final class LocalObservableTest extends FileBaseTest {
             verify(observer, timeout(1000000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -198,9 +241,9 @@ public final class LocalObservableTest extends FileBaseTest {
         while (true) {
             try {
                 dir.resolve(String.valueOf(random())).createDir();
+                break;
             } catch (AlreadyExist ignore) {
             }
-            break;
         }
     }
 
@@ -248,7 +291,9 @@ public final class LocalObservableTest extends FileBaseTest {
 
     private void ensureExactNumberOfChildDirs(File dir, int expectedCount) throws IOException {
         int actualCount = 0;
-        try (Stream<File> children = dir.listDirs(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
             for (File child : children) {
                 actualCount++;
                 if (actualCount > expectedCount) {
@@ -256,6 +301,10 @@ public final class LocalObservableTest extends FileBaseTest {
                     actualCount--;
                 }
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         while (actualCount < expectedCount) {
             createRandomChildDir(dir);
@@ -281,7 +330,9 @@ public final class LocalObservableTest extends FileBaseTest {
 
         File a = dir1().resolve("a").createDir();
         File b = dir1().resolve("b").createDir();
-        try (Tracker tracker = registerMockTracker()) {
+        Closer closer = Closer.create();
+        try {
+            Tracker tracker = closer.register(registerMockTracker());
             dir1().observe(NOFOLLOW, mock(Observer.class)).close();
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
@@ -292,16 +343,26 @@ public final class LocalObservableTest extends FileBaseTest {
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(0));
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getAllValues().get(1));
             verify(tracker).onClose(fd.getValue());
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void releases_fd_on_close() throws Exception {
         ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-        try (Tracker tracker = registerMockTracker()) {
+        Closer closer = Closer.create();
+        try {
+            Tracker tracker = closer.register(registerMockTracker());
             dir1().observe(NOFOLLOW, mock(Observer.class)).close();
             verify(tracker).onInit(fd.capture());
             verify(tracker).onClose(fd.getValue());
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -320,7 +381,10 @@ public final class LocalObservableTest extends FileBaseTest {
         File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         File file = link.resolve("file");
-        try (Recorder observer = observe(link, NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+
+            Recorder observer = closer.register(observe(link, NOFOLLOW));
             // No follow, can observe the link
             observer.awaitModifyBySetLastModifiedTime(link, Instant.of(1, 1));
             // But not the child content
@@ -331,6 +395,11 @@ public final class LocalObservableTest extends FileBaseTest {
                 return;
             }
             fail();
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -339,8 +408,14 @@ public final class LocalObservableTest extends FileBaseTest {
         File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         File child = link.resolve("dir").createDir();
-        try (Recorder observer = observe(link, FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(link, FOLLOW));
             observer.awaitModifyByCreateFile(child, "a");
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -363,10 +438,16 @@ public final class LocalObservableTest extends FileBaseTest {
     public void rename_dir() throws Exception {
         File src = dir1().resolve("a").createDir();
         File dst = dir1().resolve("b");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitModifyByCreateFile(src, "1");
             observer.awaitMove(src, dst);
             observer.awaitModifyByCreateFile(dst, "2");
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -394,7 +475,9 @@ public final class LocalObservableTest extends FileBaseTest {
         File src = dir2().resolve("a").createDir();
         File dir = dir1().resolve("a");
         File child = dir.resolve("b");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dir);
             observer.await(
                     asList(
@@ -406,6 +489,10 @@ public final class LocalObservableTest extends FileBaseTest {
                             newMove(child, dir2().resolve("b"))
                     )
             );
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -413,16 +500,28 @@ public final class LocalObservableTest extends FileBaseTest {
     public void move_file_in() throws Exception {
         File src = dir2().resolve("a").createFile();
         File dst = dir1().resolve("b");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dst);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void move_file_out() throws Exception {
         File file = dir1().resolve("a").createFile();
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(file, dir2().resolve("a"));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -435,8 +534,14 @@ public final class LocalObservableTest extends FileBaseTest {
     }
 
     private static void testMoveSelfOut(File src, File dst) throws Exception {
-        try (Recorder observer = observe(src)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(src));
             observer.awaitMove(src, dst);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -448,8 +553,14 @@ public final class LocalObservableTest extends FileBaseTest {
     }
 
     private static void testModifyFileContent(File file, File observable) throws Exception {
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitModifyByAppend(file, "abc");
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -472,8 +583,14 @@ public final class LocalObservableTest extends FileBaseTest {
         if (newPerms.equals(oldPerms)) {
             newPerms.removeAll(Permission.write());
         }
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitModify(target, newSetPermissions(target, newPerms));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -490,8 +607,14 @@ public final class LocalObservableTest extends FileBaseTest {
     private void testModifyLastModifiedTime(File target, File observable) throws Exception {
         Instant old = target.stat(NOFOLLOW).lastModifiedTime();
         Instant t = Instant.of(old.seconds() - 1, old.nanos());
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitModifyBySetLastModifiedTime(target, t);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -507,7 +630,9 @@ public final class LocalObservableTest extends FileBaseTest {
 
     private static void testDelete(File target, File observable) throws Exception {
         boolean file = target.stat(NOFOLLOW).isRegularFile();
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             List<WatchEvent> expected = new ArrayList<>();
             // If target is file and observing on the file itself, an IN_ATTRIB
             // event is first sent in addition to IN_DELETE when deleting
@@ -516,6 +641,10 @@ public final class LocalObservableTest extends FileBaseTest {
             }
             expected.add(event(DELETE, target));
             observer.await(expected, newDelete(target));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -523,7 +652,9 @@ public final class LocalObservableTest extends FileBaseTest {
     public void delete_recreate_dir_will_be_observed() throws Exception {
         File dir = dir1().resolve("dir");
         File file = dir.resolve("file");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             for (int i = 0; i < 10; i++) {
                 observer.awaitCreateDir(dir);
                 observer.await(
@@ -539,6 +670,10 @@ public final class LocalObservableTest extends FileBaseTest {
                         )
                 );
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -553,14 +688,26 @@ public final class LocalObservableTest extends FileBaseTest {
     }
 
     private static void testCreateFile(File target, File observable) throws Exception {
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateFile(target);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     private static void testCreateDir(File target, File observable) throws Exception {
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateDir(target);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -569,8 +716,14 @@ public final class LocalObservableTest extends FileBaseTest {
             File target,
             File observable) throws Exception {
 
-        try (Recorder observer = observe(observable)) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(observable));
             observer.awaitCreateLink(link, target);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -578,26 +731,40 @@ public final class LocalObservableTest extends FileBaseTest {
     public void observe_unreadable_child_dir_will_notify_incomplete_observation() throws Exception {
         File dir = dir1().resolve("dir").createDir();
         dir.removePermissions(Permission.read());
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitOnIncompleteObservation();
             observer.awaitCreateFile(dir1().resolve("parent watch still works"));
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void create_dir_then_make_it_unreadable() throws Exception {
         File dir = dir1().resolve("dir");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(dir);
             observer.awaitModifyBySetPermissions(dir, EnumSet.of(OWNER_WRITE, OWNER_EXECUTE));
             observer.awaitModifyByCreateFile(dir, "a");
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
     @Test
     public void create_dir_then_create_items_into_it() throws Exception {
         File dir = dir1().resolve("dir");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(dir);
             observer.await(
                     asList(
@@ -611,6 +778,10 @@ public final class LocalObservableTest extends FileBaseTest {
                             newCreateLink(dir.resolve("link"), dir1())
                     )
             );
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -619,7 +790,9 @@ public final class LocalObservableTest extends FileBaseTest {
         File parent = dir1().resolve("parent");
         File file = parent.resolve("file");
         File dir = parent.resolve("dir");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -635,6 +808,10 @@ public final class LocalObservableTest extends FileBaseTest {
                             newDelete(dir)
                     )
             );
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -643,7 +820,9 @@ public final class LocalObservableTest extends FileBaseTest {
         File parent = dir1().resolve("parent");
         File file = parent.resolve("file");
         File dir = parent.resolve("dir");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -659,6 +838,10 @@ public final class LocalObservableTest extends FileBaseTest {
                             newMove(dir, dir2().resolve("dir"))
                     )
             );
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -667,7 +850,9 @@ public final class LocalObservableTest extends FileBaseTest {
         File parent = dir1().resolve("parent");
         File file = dir2().resolve("file").createFile();
         File dir = dir2().resolve("dir").createDir();
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(parent);
             observer.await(
                     asList(
@@ -679,6 +864,10 @@ public final class LocalObservableTest extends FileBaseTest {
                             newMove(dir, parent.resolve("dir"))
                     )
             );
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -688,7 +877,9 @@ public final class LocalObservableTest extends FileBaseTest {
         File b = dir1().resolve("b");
         File c = dir1().resolve("c");
         File d = dir1().resolve("d");
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitCreateDir(a);
             observer.awaitCreateDir(b);
             observer.awaitModify(a, newCreateFile(a.resolve("1")));
@@ -696,6 +887,10 @@ public final class LocalObservableTest extends FileBaseTest {
             observer.awaitMove(c, dir2().resolve("2"));
             observer.awaitDelete(b);
             observer.awaitCreateFile(d);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -833,7 +1028,9 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         static Recorder observe(File file, LinkOption option, boolean verifyTracker) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
                 Recorder observer = new Recorder(file);
                 observer.observation = file.observe(option, observer);
                 if (verifyTracker) {
@@ -842,6 +1039,10 @@ public final class LocalObservableTest extends FileBaseTest {
                 }
                 Inotify.get().registerTracker(observer);
                 return observer;
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
@@ -861,7 +1062,9 @@ public final class LocalObservableTest extends FileBaseTest {
             observer.wd = wd.getValue();
 
             if (file.stat(option).isDirectory()) {
-                try (Stream<File> dirs = file.listDirs(option)) {
+                Closer closer = Closer.create();
+                try {
+                    Stream<File> dirs = closer.register(file.listDirs(option));
                     for (File dir : dirs) {
                         if (dir.isReadable()) {
                             order.verify(tracker).onWatchAdded(
@@ -870,6 +1073,10 @@ public final class LocalObservableTest extends FileBaseTest {
                         observer.allChildWds.put(dir, wd.getValue());
                         observer.validChildWds.add(wd.getValue());
                     }
+                } catch (Throwable e) {
+                    throw closer.rethrow(e);
+                } finally {
+                    closer.close();
                 }
             }
 
@@ -955,34 +1162,52 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         void awaitCreateFile(File target) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, target, newCreateFile(target));
                 verifyZeroInteractions(tracker);
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
         void awaitCreateDir(File target) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, target, newCreateDir(target));
                 verify(tracker).onWatchAdded(eq(fd), eq(target.path()), anyInt(), anyInt());
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
         void awaitCreateLink(File link, File target) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
                 await(CREATE, link, newCreateLink(link, target));
                 verifyZeroInteractions(tracker);
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
         void awaitDelete(File target) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
-                await(DELETE, target, newDelete(target));
-            }
+            await(DELETE, target, newDelete(target));
         }
 
         void awaitMove(File src, File dst) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
 
                 boolean rootIsSrcParent = root.equals(src.parent());
                 boolean rootIsDstParent = root.equals(dst.parent());
@@ -1008,6 +1233,10 @@ public final class LocalObservableTest extends FileBaseTest {
                 } else {
                     fail();
                 }
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
@@ -1068,9 +1297,15 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         void awaitModify(File target, Callable<Void> action) throws Exception {
-            try (Tracker tracker = registerMockTracker()) {
+            Closer closer = Closer.create();
+            try {
+                Tracker tracker = closer.register(registerMockTracker());
                 await(MODIFY, target, action);
                 verifyZeroInteractions(tracker);
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 
@@ -1277,9 +1512,15 @@ public final class LocalObservableTest extends FileBaseTest {
         File dst = dir1().resolve("a");
         File src = dir2().resolve("a").createDir();
         pre.action(src);
-        try (Recorder observer = observe(dir1())) {
+        Closer closer = Closer.create();
+        try {
+            Recorder observer = closer.register(observe(dir1()));
             observer.awaitMove(src, dst);
             post.action(dst, observer);
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 

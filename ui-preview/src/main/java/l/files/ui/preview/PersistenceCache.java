@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
@@ -106,8 +107,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         }
 
         File file = cacheFile();
-        try (DataInputStream in = file.newBufferedDataInputStream()) {
+        Closer closer = Closer.create();
+        try {
 
+            DataInputStream in = closer.register(file.newBufferedDataInputStream());
             int version = in.readInt();
             if (version != this.version) {
                 return;
@@ -129,6 +132,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             }
 
         } catch (FileNotFoundException ignore) {
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
@@ -162,7 +169,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         parent.createDirs();
 
         File tmp = parent.resolve(file.name() + "-" + nanoTime());
-        try (DataOutputStream out = tmp.newBufferedDataOutputStream()) {
+        Closer closer = Closer.create();
+        try {
+
+            DataOutputStream out = closer.register(tmp.newBufferedDataOutputStream());
             out.writeInt(version);
 
             Map<String, Snapshot<V>> snapshot = cache.snapshot();
@@ -180,6 +190,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 addSuppressed(e, sup);
             }
             throw e;
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         tmp.moveTo(file);

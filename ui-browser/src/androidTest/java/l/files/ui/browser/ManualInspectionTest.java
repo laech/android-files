@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.local.LocalFile;
@@ -52,8 +53,15 @@ public final class ManualInspectionTest {
             if (file.exists(NOFOLLOW)) {
                 continue;
             }
-            try (InputStream in = getInstrumentation().getContext().getAssets().open(res)) {
+
+            Closer closer = Closer.create();
+            try {
+                InputStream in = closer.register(getInstrumentation().getContext().getAssets().open(res));
                 file.copyFrom(in);
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
         }
 

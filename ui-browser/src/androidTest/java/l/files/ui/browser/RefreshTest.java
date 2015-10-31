@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 
+import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
@@ -44,7 +45,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void testRefreshInManualMode(File dir) throws IOException {
-        try (Stream<File> children = dir.listDirs(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
             File childDir = children.iterator().next();
             try {
                 // Inotify don't notify child directory last modified time,
@@ -56,6 +59,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 // Older versions does not support changing mtime
                 childDir.deleteRecursive();
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         screen().refresh().assertListMatchesFileSystem(dir);
     }
@@ -68,8 +75,14 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir.resolve("before-move-" + nanoTime()).createFile()
                 .moveTo(dir.resolve("after-move-" + nanoTime()));
 
-        try (Stream<File> children = dir.list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.list(FOLLOW));
             children.iterator().next().deleteRecursive();
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         screen().assertListMatchesFileSystem(dir);
@@ -95,7 +108,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
-        try (Stream<File> children = dir.list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.list(FOLLOW));
             for (File child : children) {
                 if (nanoTime() % 2 == 0) {
                     deleteOrCreateChild(child);
@@ -108,6 +123,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     }
                 }
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         screen().assertListMatchesFileSystem(dir);
@@ -133,7 +152,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         int actualCount = 0;
 
-        try (Stream<File> children = dir.listDirs(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
             for (File child : children) {
                 actualCount++;
                 if (actualCount > expectedCount) {
@@ -141,6 +162,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     actualCount--;
                 }
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
 
         while (actualCount < expectedCount) {
@@ -160,10 +185,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().click(dir);
 
         for (int i = 0; i < 200; i++) {
-            try (Stream<File> children = dir.list(FOLLOW)) {
+            Closer closer = Closer.create();
+            try {
+                Stream<File> children = closer.register(dir.list(FOLLOW));
                 Iterator<File> it = children.iterator();
                 it.next().deleteRecursive();
                 it.next().deleteRecursive();
+            } catch (Throwable e) {
+                throw closer.rethrow(e);
+            } finally {
+                closer.close();
             }
             randomFile(dir).createDir();
             randomFile(dir).createFile();
@@ -183,10 +214,16 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void createRandomChildren(File dir, int expectedCount) throws IOException {
         int actualCount = 0;
-        try (Stream<File> children = dir.list(FOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> children = closer.register(dir.list(FOLLOW));
             for (File ignored : children) {
                 actualCount++;
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
         while (actualCount < expectedCount) {
             File file = randomFile(dir);
@@ -226,13 +263,19 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateAttributes() throws IOException {
-        try (Stream<File> stream = dir().list(NOFOLLOW)) {
+        Closer closer = Closer.create();
+        try {
+            Stream<File> stream = closer.register(dir().list(NOFOLLOW));
             Random r = new Random();
             for (File child : stream) {
                 child.setLastModifiedTime(NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
             }
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
         }
     }
 
