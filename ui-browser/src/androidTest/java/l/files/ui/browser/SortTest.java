@@ -31,9 +31,9 @@ public final class SortTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_list_on_sort_option_change() throws Exception {
-        File a = createFile("a", "a", Instant.of(1, 1));
-        File b = createFile("b", "bbb", Instant.of(1, 2));
-        File c = createFile("c", "cc", Instant.of(1, 3));
+        File a = createFile("a", "a", Instant.of(11, 0));
+        File b = createFile("b", "bbb", Instant.of(12, 0));
+        File c = createFile("c", "cc", Instant.of(13, 0));
         screen()
                 .sort().by(NAME).assertItemsDisplayed(a, b, c)
                 .sort().by(MODIFIED).assertItemsDisplayed(c, b, a)
