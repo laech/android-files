@@ -1,11 +1,12 @@
 package l.files.ui.browser;
 
 import android.app.Dialog;
+import android.support.v7.app.AlertDialog;
 import android.widget.ListView;
 
-import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 
 final class UiSort {
@@ -36,10 +37,10 @@ final class UiSort {
     }
 
     private ListView listView() {
-        return (ListView) dialog().findViewById(android.R.id.list);
+        return dialog().getListView();
     }
 
-    private Dialog dialog() {
+    private AlertDialog dialog() {
         SortDialog fragment = (SortDialog) context
                 .activity()
                 .getSupportFragmentManager()
@@ -47,6 +48,6 @@ final class UiSort {
         assertNotNull(fragment);
         Dialog dialog = fragment.getDialog();
         assertNotNull(dialog);
-        return dialog;
+        return (AlertDialog) dialog;
     }
 }

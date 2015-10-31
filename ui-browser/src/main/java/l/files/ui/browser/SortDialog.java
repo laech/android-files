@@ -1,49 +1,39 @@
 package l.files.ui.browser;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.view.LayoutInflater;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ListView;
 
-import static android.widget.AdapterView.OnItemClickListener;
 import static l.files.ui.browser.Preferences.getSort;
 
 public final class SortDialog
-        extends DialogFragment implements OnItemClickListener {
+        extends DialogFragment implements DialogInterface.OnClickListener {
 
     public static final String FRAGMENT_TAG = "sort-dialog";
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getDialog().setTitle(R.string.sort_by);
-
-        ListView list = (ListView) getView().findViewById(android.R.id.list);
-        list.setAdapter(new SorterAdapter(getActivity()));
-        list.setOnItemClickListener(this);
+    @SuppressWarnings("NullableProblems")
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return new AlertDialog.Builder(getContext())
+                .setTitle(R.string.sort_by)
+                .setAdapter(new SorterAdapter(getContext()), this)
+                .create();
     }
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        ListView view = new ListView(inflater.getContext());
-        view.setId(android.R.id.list);
-        return view;
-    }
-
-    @Override
-    public void onItemClick(
-            AdapterView<?> parent, View view, int position, long id) {
-        FileSort sort = (FileSort) parent.getItemAtPosition(position);
+    public void onClick(DialogInterface dialog, int which) {
+        ListView listView = ((AlertDialog) dialog).getListView();
+        FileSort sort = (FileSort) listView.getItemAtPosition(which);
         Preferences.setSort(getActivity(), sort);
-        getDialog().dismiss();
+        dialog.dismiss();
     }
 
     class SorterAdapter extends ArrayAdapter<FileSort> {
@@ -62,4 +52,5 @@ public final class SortDialog
             return view;
         }
     }
+
 }
