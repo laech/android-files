@@ -64,7 +64,7 @@ public class BaseFilesActivityTest {
     }
 
     private java.io.File createTempDir(String name) throws IOException {
-        java.io.File file = createTempFile(name, "");
+        java.io.File file = createTempFile(name + "_", "");
         assertTrue(file.delete());
         assertTrue(file.mkdir());
         return file;
