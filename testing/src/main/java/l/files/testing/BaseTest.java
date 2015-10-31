@@ -20,18 +20,13 @@ public abstract class BaseTest {
 
     @After
     public void tearDown() throws Exception {
-        File dir = getTestContext().getExternalCacheDir();
-        if (dir != null) {
-            File[] children = dir.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    delete(child);
-                }
-            }
-        }
+        delete(getTestContext().getExternalCacheDir());
     }
 
     private void delete(File file) {
+        if (file == null) {
+            return;
+        }
         if (file.isDirectory()) {
             File[] children = file.listFiles();
             if (children != null) {
