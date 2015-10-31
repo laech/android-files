@@ -17,7 +17,6 @@ import android.widget.Spinner;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -118,7 +117,7 @@ public final class FilesActivity extends BaseActivity implements
     public void onItemSelected(
             AdapterView<?> parent, View view, int position, long id) {
         File item = (File) parent.getAdapter().getItem(position);
-        if (!Objects.equals(item, fragment().directory())) {
+        if (!item.equals(fragment().directory())) {
             onOpen(item);
         }
     }

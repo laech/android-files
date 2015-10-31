@@ -4,7 +4,6 @@ import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.browser.BrowserItem.HeaderItem;
@@ -27,7 +26,7 @@ abstract class BaseCategorizer implements Categorizer {
                     result.add(HeaderItem.of(label(stat, res, category)));
                 }
             } else {
-                if (!Objects.equals(preCategory, category)) {
+                if (category != null && !category.equals(preCategory)) {
                     result.add(HeaderItem.of(label(stat, res, category)));
                 }
             }

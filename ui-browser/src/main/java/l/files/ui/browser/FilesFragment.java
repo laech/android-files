@@ -273,10 +273,15 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             return;
         }
 
+        FilesLoader loader = filesLoader();
+        if (loader == null) {
+            return;
+        }
+
         if (isShowHiddenFilesKey(key)) {
-            filesLoader().setShowHidden(getShowHiddenFiles(activity));
+            loader.setShowHidden(getShowHiddenFiles(activity));
         } else if (isSortKey(key)) {
-            filesLoader().setSort(getSort(activity));
+            loader.setSort(getSort(activity));
         }
     }
 

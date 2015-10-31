@@ -79,12 +79,17 @@ enum FileSort {
                     if (aStat.isDirectory()) return 1;
                     if (bStat.isDirectory()) return -1;
 
-                    int result = Long.compare(bStat.size(), aStat.size());
+                    int result = compare(bStat.size(), aStat.size());
                     if (result == 0) {
                         return a.compareTo(b);
                     }
                     return result;
                 }
+
+                private int compare(long a, long b) {
+                    return a < b ? -1 : (a == b ? 0 : 1);
+                }
+
             };
         }
 

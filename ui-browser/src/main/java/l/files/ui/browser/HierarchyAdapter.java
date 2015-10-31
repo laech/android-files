@@ -10,7 +10,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import l.files.fs.File;
 import l.files.ui.base.fs.FileIcons;
@@ -22,9 +21,9 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.browser.R.layout.files_activity_title;
 import static l.files.ui.browser.R.layout.files_activity_title_item;
-import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 final class HierarchyAdapter extends BaseAdapter {
     private List<File> hierarchy = emptyList();
@@ -53,7 +52,7 @@ final class HierarchyAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return !Objects.equals(directory, getItem(position));
+        return !directory.equals(getItem(position));
     }
 
     @Override

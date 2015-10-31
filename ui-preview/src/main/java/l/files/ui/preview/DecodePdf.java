@@ -246,9 +246,9 @@ final class DecodePdf extends DecodeThumbnail {
 
                     cursor
                             .newRow()
-                            .add(COLUMN_BITMAP_BYTES, bitmapToBytes(result.maybeScaled))
-                            .add(COLUMN_ORIGINAL_WIDTH, result.originalSize.width())
-                            .add(COLUMN_ORIGINAL_HEIGHT, result.originalSize.height());
+                            .add(bitmapToBytes(result.maybeScaled))
+                            .add(result.originalSize.width())
+                            .add(result.originalSize.height());
 
                     return cursor;
                 }

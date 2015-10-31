@@ -21,11 +21,11 @@ import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static android.test.MoreAsserts.assertNotEqual;
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static l.files.fs.File.ISO_8859_1;
+import static l.files.fs.File.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;

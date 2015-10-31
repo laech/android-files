@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -316,7 +315,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             File target = readTarget(file, stat);
             FileItem newStat = FileItem.create(file, stat, target, targetStat, collator);
             FileItem oldStat = data.put(file.name().toString(), newStat);
-            return !Objects.equals(newStat, oldStat);
+            return !newStat.equals(oldStat);
 
         } catch (FileNotFoundException e) {
             return data.remove(file.name().toString()) != null;

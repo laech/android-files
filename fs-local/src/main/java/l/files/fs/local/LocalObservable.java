@@ -24,6 +24,7 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Throwables.addSuppressed;
 import static l.files.fs.local.Dirent.DT_DIR;
 import static l.files.fs.local.ErrnoException.EACCES;
 import static l.files.fs.local.ErrnoException.EINVAL;
@@ -223,7 +224,7 @@ final class LocalObservable extends Native
             try {
                 close();
             } catch (Exception sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }
@@ -241,7 +242,7 @@ final class LocalObservable extends Native
             try {
                 inotify.close(fd);
             } catch (ErrnoException sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }
@@ -344,7 +345,7 @@ final class LocalObservable extends Native
 
         } catch (ErrnoException e) {
             for (ErrnoException sup : suppressed) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e.toIOException(root.path());
         }
@@ -352,7 +353,7 @@ final class LocalObservable extends Native
         if (!suppressed.isEmpty()) {
             IOException e = new IOException();
             for (ErrnoException sup : suppressed) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }
@@ -399,8 +400,8 @@ final class LocalObservable extends Native
         } catch (final Exception e) {
             try {
                 close();
-            } catch (Throwable ee) {
-                e.addSuppressed(ee);
+            } catch (Throwable sup) {
+                addSuppressed(e, sup);
             }
             throwOnMainThread(e);
         }

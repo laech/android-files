@@ -72,11 +72,19 @@ public abstract class Instant implements Comparable<Instant> {
 
     @Override
     public int compareTo(Instant that) {
-        int initial = Long.compare(seconds(), that.seconds());
+        int initial = compare(seconds(), that.seconds());
         if (initial == 0) {
-            return Integer.compare(nanos(), that.nanos());
+            return compare(nanos(), that.nanos());
         }
         return initial;
+    }
+
+    private int compare(long a, long b) {
+        return a < b ? -1 : (a == b ? 0 : 1);
+    }
+
+    private int compare(int a, int b) {
+        return a < b ? -1 : (a == b ? 0 : 1);
     }
 
 }

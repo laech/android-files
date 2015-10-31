@@ -7,6 +7,7 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1071,7 +1072,7 @@ public final class LocalObservableTest extends FileBaseTest {
         return tracker;
     }
 
-    public static abstract class Tracker implements Inotify.Tracker, AutoCloseable {
+    public static abstract class Tracker implements Inotify.Tracker, Closeable {
 
         @Override
         public void close() throws IOException {

@@ -23,6 +23,9 @@ public interface File extends Parcelable {
     String MEDIA_TYPE_OCTET_STREAM = "application/octet-stream";
     String MEDIA_TYPE_ANY = "*/*";
 
+    Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    Charset UTF_8 = Charset.forName("UTF-8");
+
     URI uri();
 
     /**

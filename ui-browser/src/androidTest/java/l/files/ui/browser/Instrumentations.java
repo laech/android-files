@@ -1,22 +1,15 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
-import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import l.files.ui.base.widget.StableAdapter;
 
-import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.os.SystemClock.sleep;
@@ -119,30 +112,9 @@ final class Instrumentations {
             throw new AssertionError("Timed out.");
         }
 
-        throw new AssertionError(error.getMessage(), error);
-    }
-
-    private static void takeScreenshotAndThrow(
-            Instrumentation in, AssertionError e) {
-
-        File file = new File(getExternalStorageDirectory(),
-                "test/failed-" + currentTimeMillis() + ".jpg");
-        File parent = file.getParentFile();
-        assertTrue(parent.isDirectory() || parent.mkdir());
-        Bitmap screenshot = in.getUiAutomation().takeScreenshot();
-        try (OutputStream out = new FileOutputStream(file)) {
-            screenshot.compress(Bitmap.CompressFormat.JPEG, 90, out);
-        } catch (IOException io) {
-            AssertionError error = new AssertionError(
-                    "Failed to take screenshot on assertion failure. " +
-                            "Original assertion error is included below.", e);
-            error.addSuppressed(io);
-            throw error;
-        } finally {
-            screenshot.recycle();
-        }
-        throw new AssertionError(e.getMessage() +
-                "\nAssertion failed, screenshot saved " + file, e);
+        AssertionError e = new AssertionError(error.getMessage());
+        e.initCause(error);
+        throw e;
     }
 
     static void scrollToTop(
@@ -223,7 +195,7 @@ final class Instrumentations {
                 }
                 if (position == i) {
                     Object thatId = adapter.getItemIdObject(position);
-                    if (Objects.equals(itemId, thatId)) {
+                    if (itemId.equals(thatId)) {
                         consumer.apply(child);
                         return;
                     }

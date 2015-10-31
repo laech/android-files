@@ -26,6 +26,7 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Throwables.addSuppressed;
 import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
@@ -165,7 +166,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             try {
                 tmp.delete();
             } catch (Exception sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }

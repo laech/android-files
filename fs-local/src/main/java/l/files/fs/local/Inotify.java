@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.Throwables.addSuppressed;
 import static l.files.fs.local.ErrnoException.ENOMEM;
 import static l.files.fs.local.ErrnoException.ENOSPC;
 
@@ -119,7 +120,7 @@ final class Inotify extends Native {
             try {
                 close(fd);
             } catch (Throwable sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }
@@ -182,7 +183,7 @@ final class Inotify extends Native {
             try {
                 removeWatch(fd, wd);
             } catch (Throwable sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }

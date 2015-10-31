@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
 import static l.files.fs.LinkOption.FOLLOW;

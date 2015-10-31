@@ -11,7 +11,6 @@ import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,6 +21,7 @@ import l.files.fs.Stat;
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.lang.System.nanoTime;
 import static java.util.Objects.requireNonNull;
+import static l.files.fs.Throwables.addSuppressed;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 
@@ -40,7 +40,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                         Snapshot<V> newValue) {
 
                     super.entryRemoved(evicted, key, oldValue, newValue);
-                    if (!Objects.equals(oldValue, newValue)) {
+                    if (!oldValue.equals(newValue)) {
                         dirty.set(true);
                     }
                 }
@@ -177,7 +177,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             try {
                 tmp.delete();
             } catch (IOException sup) {
-                e.addSuppressed(sup);
+                addSuppressed(e, sup);
             }
             throw e;
         }

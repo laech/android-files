@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -70,6 +69,10 @@ import static java.util.Calendar.YEAR;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
+import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
+import static l.files.ui.base.fs.FileIcons.fileIconStringId;
+import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.R.dimen.files_item_card_inner_radius;
 import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
@@ -77,10 +80,6 @@ import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
 import static l.files.ui.browser.R.layout.files_grid_header;
 import static l.files.ui.browser.R.layout.files_grid_item;
-import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
-import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
-import static l.files.ui.base.fs.FileIcons.fileIconStringId;
-import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Styles.getColorStateList;
 
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
@@ -468,14 +467,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onSizeAvailable(File item, Rect size) {
-            if (Objects.equals(item, itemId())) {
+            if (item.equals(itemId())) {
                 setPreviewImage(newSizedColorDrawable(size));
             }
         }
 
         @Override
         public void onPaletteAvailable(File item, Palette palette) {
-            if (Objects.equals(item, itemId())) {
+            if (item.equals(itemId())) {
                 setPaletteColor(backgroundColor(palette));
             }
         }
@@ -490,7 +489,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onPreviewAvailable(File item, Bitmap thumbnail) {
-            if (Objects.equals(item, itemId())) {
+            if (item.equals(itemId())) {
                 setPreviewImage(thumbnail);
                 preview.setAlpha(0f);
                 preview.animate().alpha(1).setDuration(animateDuration);
@@ -524,7 +523,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onPreviewFailed(File item) {
-            if (Objects.equals(item, itemId())) {
+            if (item.equals(itemId())) {
                 setPreviewImage((Drawable) null);
             }
         }

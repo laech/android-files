@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import l.files.fs.Throwables;
+
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -20,7 +22,7 @@ final class FileException extends RuntimeException {
         }
 
         for (Failure failure : failures) {
-            addSuppressed(failure.cause());
+            Throwables.addSuppressed(this, failure.cause());
         }
     }
 
