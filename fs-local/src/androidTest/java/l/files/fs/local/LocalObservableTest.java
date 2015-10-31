@@ -978,8 +978,6 @@ public final class LocalObservableTest extends FileBaseTest {
         void awaitDelete(File target) throws Exception {
             try (Tracker tracker = registerMockTracker()) {
                 await(DELETE, target, newDelete(target));
-                verify(tracker, timeout(5000)).onWatchRemoved(anyInt(), anyInt());
-                verifyNoMoreInteractions(tracker);
             }
         }
 
