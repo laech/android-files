@@ -23,14 +23,17 @@ public final class BookmarksLoaderTest {
 
     private BookmarkManager bookmarks;
     private BookmarksLoader loader;
+    private File home;
 
     @Before
     public void setUp() throws Exception {
         Context context = mock(Context.class);
         given(context.getApplicationContext()).willReturn(context);
 
+        home = mock(File.class);
+        given(home.name()).willReturn(FileName.of("home"));
         bookmarks = mock(BookmarkManager.class);
-        loader = new BookmarksLoader(context, bookmarks);
+        loader = new BookmarksLoader(context, bookmarks, home);
     }
 
     @Test
@@ -43,6 +46,17 @@ public final class BookmarksLoaderTest {
 
         given(bookmarks.getBookmarks()).willReturn(asSet(a, c, b, e, d));
         List<File> expected = asList(a, b, c, d, e);
+        List<File> actual = loader.loadInBackground();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void sorts_home_at_top() throws Exception {
+        File a = mockFile("a");
+        File z = mockFile("z");
+
+        given(bookmarks.getBookmarks()).willReturn(asSet(a, z, home));
+        List<File> expected = asList(home, a, z);
         List<File> actual = loader.loadInBackground();
         assertEquals(expected, actual);
     }

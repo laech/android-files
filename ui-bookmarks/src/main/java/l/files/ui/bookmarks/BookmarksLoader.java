@@ -18,12 +18,14 @@ import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 
 final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 
+    private final File home;
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
     private List<File> bookmarks;
 
-    BookmarksLoader(Context context, BookmarkManager manager) {
+    BookmarksLoader(Context context, BookmarkManager manager, File home) {
         super(context);
+        this.home = requireNonNull(home);
         this.manager = requireNonNull(manager);
         this.listener = new BookmarkListener();
     }
@@ -35,6 +37,12 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
         Collections.sort(files, new Comparator<File>() {
             @Override
             public int compare(File a, File b) {
+                if (a.equals(home)) {
+                    return -1;
+                }
+                if (b.equals(home)) {
+                    return 1;
+                }
                 return comparator.compare(a.name(), b.name());
             }
         });

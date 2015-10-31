@@ -23,6 +23,7 @@ import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 
+import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.base.view.Views.find;
 
 public final class BookmarksFragment
@@ -84,7 +85,7 @@ public final class BookmarksFragment
     public Loader<List<File>> onCreateLoader(int id, Bundle bundle) {
         return new BookmarksLoader(
                 getActivity(),
-                BookmarkManager.get(getActivity()));
+                BookmarkManager.get(getActivity()), DIR_HOME);
     }
 
     @Override
