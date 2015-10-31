@@ -112,7 +112,10 @@ public final class OperationService extends Service {
         try {
             String className = getString(l_files_operations_listeners);
             return (TaskListener) Class.forName(className).newInstance();
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
             throw new RuntimeException(e);
         }
     }
