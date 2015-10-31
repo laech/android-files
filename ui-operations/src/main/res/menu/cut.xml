@@ -4,7 +4,7 @@
 
     <item
         android:id="@android:id/cut"
-        android:icon="?android:attr/actionModeCutDrawable"
+        android:icon="?attr/actionModeCutDrawable"
         android:title="@android:string/cut"
         app:showAsAction="ifRoom" />
 
