@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import org.junit.Test;
+
 import java.io.Closeable;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,13 +25,14 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
     private FileConsumer consumer;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         observer = mock(BatchObserver.class);
         consumer = mock(FileConsumer.class);
     }
 
-    public void test_notifies_self_change() throws Exception {
+    @Test
+    public void notifies_self_change() throws Exception {
         try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {
             dir1().setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             verify(observer, timeout(100)).onBatchEvent(true, names());
@@ -38,7 +41,8 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         }
     }
 
-    public void test_notifies_children_change() throws Exception {
+    @Test
+    public void notifies_children_change() throws Exception {
         File a = dir1().resolve("a").createFile();
         File b = dir1().resolve("b").createDir();
         dir1().resolve("c").createFile();
@@ -53,7 +57,8 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         }
     }
 
-    public void test_notifies_self_and_children_change() throws Exception {
+    @Test
+    public void notifies_self_and_children_change() throws Exception {
         File child = dir1().resolve("a").createFile();
 
         try (Closeable ignored = dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS)) {

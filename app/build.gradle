@@ -11,6 +11,7 @@ android {
         targetSdkVersion project.targetSdkVersion
         versionCode 8
         versionName '3.0'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {

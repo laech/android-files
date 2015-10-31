@@ -18,4 +18,6 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support.test:runner:0.4.1'
+    compile 'com.android.support.test:rules:0.4.1'
 }

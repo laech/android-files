@@ -13,6 +13,7 @@ android {
             moduleName 'fslocalstat64'
             ldLibs 'log'
         }
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }
 

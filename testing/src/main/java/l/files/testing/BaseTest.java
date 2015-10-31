@@ -1,21 +1,25 @@
 package l.files.testing;
 
 import android.content.Context;
-import android.test.InstrumentationTestCase;
+
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.File;
 
-public abstract class BaseTest extends InstrumentationTestCase {
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static org.junit.Assert.assertTrue;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        Dexmaker.setup(this);
+public abstract class BaseTest {
+
+    @Before
+    public void setUp() throws Exception {
+        Dexmaker.setup(getContext().getCacheDir());
         delete(getTestContext().getExternalCacheDir());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         File dir = getTestContext().getExternalCacheDir();
         if (dir != null) {
             File[] children = dir.listFiles();
@@ -25,7 +29,6 @@ public abstract class BaseTest extends InstrumentationTestCase {
                 }
             }
         }
-        super.tearDown();
     }
 
     private void delete(File file) {

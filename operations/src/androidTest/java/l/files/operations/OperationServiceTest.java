@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,9 @@ import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -36,13 +41,14 @@ public final class OperationServiceTest extends FileBaseTest {
     private OperationService service;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         service = new OperationService();
         service.foreground = false;
     }
 
-    public void test_cancel_intent() throws Exception {
+    @Test
+    public void cancel_intent() throws Exception {
 
         Intent intent = newCancelIntent(getContext(), 101);
         assertEquals(ACTION_CANCEL, intent.getAction());
@@ -51,7 +57,8 @@ public final class OperationServiceTest extends FileBaseTest {
                 intent.getComponent());
     }
 
-    public void test_cancel_task_not_found() throws Exception {
+    @Test
+    public void cancel_task_not_found() throws Exception {
 
         TaskListener listener = mock(TaskListener.class);
         service.listener = listener;
@@ -62,7 +69,8 @@ public final class OperationServiceTest extends FileBaseTest {
         verify(listener).onNotFound(service, TaskNotFound.create(1011));
     }
 
-    public void test_moves_file() throws Exception {
+    @Test
+    public void moves_file() throws Exception {
 
         File src = dir1().resolve("a").createFile();
         File dst = dir1().resolve("dst").createDir();
@@ -77,7 +85,8 @@ public final class OperationServiceTest extends FileBaseTest {
         assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
     }
 
-    public void test_copies_file() throws Exception {
+    @Test
+    public void copies_file() throws Exception {
 
         File src = dir1().resolve("a").createFile();
         File dst = dir1().resolve("dst").createDir();
@@ -92,7 +101,8 @@ public final class OperationServiceTest extends FileBaseTest {
         assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
     }
 
-    public void test_deletes_files() throws Exception {
+    @Test
+    public void deletes_files() throws Exception {
 
         File a = dir1().resolve("a").createFiles();
         File b = dir1().resolve("b/c").createFiles();
@@ -107,7 +117,8 @@ public final class OperationServiceTest extends FileBaseTest {
         assertFalse(b.exists(NOFOLLOW));
     }
 
-    public void test_task_start_time_is_correct() throws Exception {
+    @Test
+    public void task_start_time_is_correct() throws Exception {
 
         File file1 = dir1().resolve("a").createFile();
         File file2 = dir1().resolve("b").createFile();

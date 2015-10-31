@@ -2,6 +2,8 @@ package l.files.operations;
 
 import android.os.Handler;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import static android.os.Looper.getMainLooper;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.TaskKind.COPY;
-import static l.files.operations.TaskKind.MOVE;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public final class TaskTest extends BaseTest {
@@ -27,12 +29,13 @@ public final class TaskTest extends BaseTest {
     private Handler handler;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         handler = new Handler(getMainLooper());
     }
 
-    public void testNotifiesOnCancelFromInterrupt() throws Exception {
+    @Test
+    public void notifiesOnCancelFromInterrupt() throws Exception {
         TaskState state = last(capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws InterruptedException {
@@ -42,7 +45,8 @@ public final class TaskTest extends BaseTest {
         assertTrue(state.toString(), state instanceof Success);
     }
 
-    public void testNotifiesOnCancelFromCancellingTask() throws Exception {
+    @Test
+    public void notifiesOnCancelFromCancellingTask() throws Exception {
         List<TaskState> states = capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws InterruptedException {
@@ -52,7 +56,8 @@ public final class TaskTest extends BaseTest {
         assertTrue(states.toString(), last(states) instanceof Success);
     }
 
-    public void testNotifiesOnFailure() throws Throwable {
+    @Test
+    public void notifiesOnFailure() throws Throwable {
         TaskState state = last(capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws FileException {
@@ -64,12 +69,14 @@ public final class TaskTest extends BaseTest {
         assertTrue(state.toString(), state instanceof Failed);
     }
 
-    public void testNotifiesOnStart() throws Exception {
+    @Test
+    public void notifiesOnStart() throws Exception {
         TaskState state = capturedExecute().get(0);
         assertTrue(state.toString(), state instanceof Pending);
     }
 
-    public void testNotifiesOnSuccess() throws Exception {
+    @Test
+    public void notifiesOnSuccess() throws Exception {
         List<TaskState> states = capturedExecute();
         assertTrue(states.toString(), last(states) instanceof Success);
     }
@@ -96,19 +103,6 @@ public final class TaskTest extends BaseTest {
         }.executeOnExecutor(THREAD_POOL_EXECUTOR);
         assertTrue(listener.latch.await(1, SECONDS));
         return listener.states;
-    }
-
-    Task create(int id, Clock clock, Handler handler, Callback callback) {
-        return new Task(TaskId.create(id, MOVE), mock(Target.class), clock, callback, handler) {
-            @Override
-            protected void doTask() {
-            }
-
-            @Override
-            protected TaskState.Running running(TaskState.Running state) {
-                return state;
-            }
-        };
     }
 
     private static abstract class TestTask extends Task {

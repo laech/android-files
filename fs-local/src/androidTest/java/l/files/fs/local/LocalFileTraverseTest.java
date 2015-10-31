@@ -4,6 +4,8 @@ import android.text.TextUtils;
 
 import com.google.auto.value.AutoValue;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +30,8 @@ import static l.files.fs.local.LocalFileTraverseTest.TraversalOrder.PRE;
  */
 public final class LocalFileTraverseTest extends FileBaseTest {
 
-    public void test_traverse_noFollowLink() throws Exception {
+    @Test
+    public void traverse_noFollowLink() throws Exception {
         File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         link.resolve("a").createFile();
@@ -43,7 +46,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_followLink_rootOnly() throws Exception {
+    @Test
+    public void traverse_followLink_rootOnly() throws Exception {
         dir1().resolve("dir").createDir();
         dir1().resolve("dir/a").createFile();
         dir1().resolve("dir/b").createDir();
@@ -69,7 +73,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_followLink() throws Exception {
+    @Test
+    public void traverse_followLink() throws Exception {
         File dir = dir1().resolve("dir").createDir();
         File link = dir1().resolve("link").createLink(dir);
         File a = link.resolve("a").createFile();
@@ -85,7 +90,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
         dir1().resolve("a").createDir();
         dir1().resolve("b").createDir();
 
@@ -117,7 +123,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
         dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
         dir1().resolve("b").createDirs();
@@ -157,7 +164,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
+    @Test
+    public void traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
         dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
         dir1().resolve("a/2").createDirs();
@@ -184,7 +192,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_order() throws Exception {
+    @Test
+    public void traverse_order() throws Exception {
         dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
         dir1().resolve("a/2").createDirs();
@@ -211,7 +220,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traversal_skip() throws Exception {
+    @Test
+    public void traversal_skip() throws Exception {
         dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
         dir1().resolve("a/2").createDirs();
@@ -239,7 +249,8 @@ public final class LocalFileTraverseTest extends FileBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    public void test_traverse_termination() throws Exception {
+    @Test
+    public void traverse_termination() throws Exception {
         dir1().resolve("a/1").createDirs();
         dir1().resolve("a/1/i").createFile();
         dir1().resolve("a/2").createDirs();

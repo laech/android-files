@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -10,10 +12,14 @@ import l.files.fs.Instant;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public final class CopyTest extends PasteTest {
 
-    public void test_copy_reports_summary() throws Exception {
+    @Test
+    public void copy_reports_summary() throws Exception {
         File dstDir = dir1().resolve("dir").createDir();
         File srcDir = dir1().resolve("a").createDir();
         File srcFile = dir1().resolve("a/file").createFile();
@@ -34,19 +40,22 @@ public final class CopyTest extends PasteTest {
         return size;
     }
 
-    public void test_preserves_timestamps_for_file() throws Exception {
+    @Test
+    public void preserves_timestamps_for_file() throws Exception {
         File src = dir1().resolve("a").createFile();
         File dir = dir1().resolve("dir").createDir();
         testCopyPreservesTimestamp(src, dir);
     }
 
-    public void test_preserves_timestamps_for_empty_dir() throws Exception {
+    @Test
+    public void preserves_timestamps_for_empty_dir() throws Exception {
         File src = dir1().resolve("dir1").createDir();
         File dir = dir1().resolve("dir2").createDir();
         testCopyPreservesTimestamp(src, dir);
     }
 
-    public void test_preserves_timestamps_for_full_dir() throws Exception {
+    @Test
+    public void preserves_timestamps_for_full_dir() throws Exception {
         File dir = dir1().resolve("dir2").createDir();
         File src = dir1().resolve("dir1").createDir();
         src.resolve("a").createFile();
@@ -75,7 +84,8 @@ public final class CopyTest extends PasteTest {
         return srcFile.stat(NOFOLLOW).lastModifiedTime();
     }
 
-    public void test_copies_link() throws Exception {
+    @Test
+    public void copies_link() throws Exception {
         File target = dir1().resolve("target").createFile();
         File link = dir1().resolve("link").createLink(target);
 
@@ -85,7 +95,8 @@ public final class CopyTest extends PasteTest {
         assertEquals(target, copied.readLink());
     }
 
-    public void test_copies_directory() throws Exception {
+    @Test
+    public void copies_directory() throws Exception {
         File srcDir = dir1().resolve("a").createDir();
         File dstDir = dir1().resolve("dst").createDir();
         File srcFile = srcDir.resolve("test.txt");
@@ -97,14 +108,16 @@ public final class CopyTest extends PasteTest {
         assertEquals("Testing", dstFile.readAllUtf8());
     }
 
-    public void test_copies_empty_directory() throws Exception {
+    @Test
+    public void copies_empty_directory() throws Exception {
         File src = dir1().resolve("empty").createDir();
         File dir = dir1().resolve("dst").createDir();
         copy(src, dir);
         assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
     }
 
-    public void test_copies_empty_file() throws Exception {
+    @Test
+    public void copies_empty_file() throws Exception {
         File srcFile = dir1().resolve("empty").createFile();
         File dstDir = dir1().resolve("dst").createDir();
 
@@ -112,7 +125,8 @@ public final class CopyTest extends PasteTest {
         assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
     }
 
-    public void test_copies_file() throws Exception {
+    @Test
+    public void copies_file() throws Exception {
         File srcFile = dir1().resolve("test.txt").createFile();
         File dstDir = dir1().resolve("dst").createDir();
         File dstFile = dstDir.resolve("test.txt");

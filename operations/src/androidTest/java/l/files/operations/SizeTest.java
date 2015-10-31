@@ -1,14 +1,18 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import l.files.fs.File;
 import l.files.testing.fs.FileBaseTest;
 
 import static java.util.Arrays.asList;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
 
 public final class SizeTest extends FileBaseTest {
 
-    public void testSize() throws Exception {
+    @Test
+    public void size() throws Exception {
         File a = dir1().resolve("a").createDir();
         File b = dir1().resolve("a/b").createFile();
         File c = dir1().resolve("c").createFile();

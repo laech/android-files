@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import org.junit.Test;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +15,9 @@ import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public abstract class PasteTest extends FileBaseTest {
 
@@ -20,7 +25,8 @@ public abstract class PasteTest extends FileBaseTest {
      * When pasting emptying directories, they should be created on the
      * destination, even if they are empty.
      */
-    public void testPastesEmptyDirectories() throws Exception {
+    @Test
+    public void pastesEmptyDirectories() throws Exception {
         File src = dir1().resolve("empty").createDir();
         File dstDir = dir1().resolve("dst").createDir();
         create(singleton(src), dstDir).execute();
@@ -32,7 +38,8 @@ public abstract class PasteTest extends FileBaseTest {
      * names, the existing files should not be overridden, new files will be
      * pasted with new names.
      */
-    public void testDoesNotOverrideExistingFile() throws Exception {
+    @Test
+    public void doesNotOverrideExistingFile() throws Exception {
         List<File> sources = asList(
                 dir1().resolve("a.txt").createFile(),
                 dir1().resolve("b.mp4").createFile()
@@ -56,7 +63,8 @@ public abstract class PasteTest extends FileBaseTest {
      * with the same names, the existing directories should not be overridden,
      * new directories will be pasted with new names.
      */
-    public void testDoesNotOverrideExistingDirectory() throws Exception {
+    @Test
+    public void doesNotOverrideExistingDirectory() throws Exception {
         dir1().resolve("a/1.txt").createFiles();
         dir1().resolve("a/b/2.txt").createFiles();
         dir1().resolve("a/b/3.txt").createFiles();
@@ -72,7 +80,8 @@ public abstract class PasteTest extends FileBaseTest {
         assertTrue(dir1().resolve("b/a 2/b/3.txt").exists(NOFOLLOW));
     }
 
-    public void testDoesNothingIfAlreadyCancelledOnExecution() throws Exception {
+    @Test
+    public void doesNothingIfAlreadyCancelledOnExecution() throws Exception {
         final List<File> sources = asList(
                 dir1().resolve("a/1.txt").createFiles(),
                 dir1().resolve("a/2.txt").createFiles()
@@ -100,7 +109,8 @@ public abstract class PasteTest extends FileBaseTest {
         }
     }
 
-    public void testErrorOnPastingSelfIntoSubDirectory() throws Exception {
+    @Test
+    public void errorOnPastingSelfIntoSubDirectory() throws Exception {
         File parent = dir1().resolve("parent").createDir();
         File child = dir1().resolve("parent/child").createDir();
         try {
@@ -111,7 +121,8 @@ public abstract class PasteTest extends FileBaseTest {
         }
     }
 
-    public void testErrorOnPastingIntoSelf() throws Exception {
+    @Test
+    public void errorOnPastingIntoSelf() throws Exception {
         File dir = dir1().resolve("parent").createDir();
         try {
             create(singleton(dir), dir).execute();

@@ -1,14 +1,20 @@
 package l.files.fs.local;
 
+import org.junit.Test;
+
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public final class UnistdTest extends FileBaseTest {
 
-    public void testClose() throws Exception {
+    @Test
+    public void test_close() throws Exception {
         OutputStream out = dir1().resolve("a").createFile().newOutputStream();
         try {
 

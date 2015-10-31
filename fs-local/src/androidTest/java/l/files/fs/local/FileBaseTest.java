@@ -1,5 +1,8 @@
 package l.files.fs.local;
 
+import org.junit.Rule;
+import org.junit.rules.TestName;
+
 import java.io.IOException;
 import java.util.EnumSet;
 
@@ -10,8 +13,12 @@ import l.files.testing.BaseTest;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
+import static org.junit.Assert.assertTrue;
 
 public abstract class FileBaseTest extends BaseTest {
+
+    @Rule
+    public final TestName testName = new TestName();
 
     private File dir1;
     private File dir2;
@@ -32,7 +39,11 @@ public abstract class FileBaseTest extends BaseTest {
 
     private java.io.File createTempDir() {
         try {
-            java.io.File file = java.io.File.createTempFile("test", null);
+            String name = testName.getMethodName();
+            if (name.length() > 100) {
+                name = name.substring(0, 100);
+            }
+            java.io.File file = java.io.File.createTempFile(name + "_", null);
             assertTrue(file.delete());
             assertTrue(file.mkdirs());
             return file;
@@ -42,7 +53,7 @@ public abstract class FileBaseTest extends BaseTest {
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         delete(dir1);
         delete(dir2);
         super.tearDown();
