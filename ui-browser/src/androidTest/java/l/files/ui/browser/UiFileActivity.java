@@ -692,7 +692,7 @@ final class UiFileActivity {
             }
         });
 
-        activity = (FilesActivity) monitor.getLastActivity();
+        activity = (FilesActivity) monitor.waitForActivityWithTimeout(2000);
         assertNotNull(activity);
         instrument.removeMonitor(monitor);
         return this;

@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 
+import l.files.fs.AlreadyExist;
 import l.files.fs.Event;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
@@ -32,6 +33,7 @@ import l.files.fs.Stream;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
+import static java.lang.Math.random;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
@@ -234,8 +236,11 @@ public final class LocalObservableTest extends FileBaseTest {
             }
         }
         while (actualCount < expectedCount) {
-            dir.resolve(String.valueOf(nanoTime())).createDir();
-            actualCount++;
+            try {
+                dir.resolve(String.valueOf(random())).createDir();
+                actualCount++;
+            } catch (AlreadyExist ignore) {
+            }
         }
     }
 
