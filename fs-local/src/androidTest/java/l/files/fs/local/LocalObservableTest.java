@@ -36,7 +36,6 @@ import l.files.fs.Stream;
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
-import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -186,12 +185,22 @@ public final class LocalObservableTest extends FileBaseTest {
 
             assertFalse(observation.isClosed());
             for (int i = 0; i < 20; i++) {
-                dir.resolve(String.valueOf(nanoTime())).createDir();
+                createRandomChildDir(dir);
             }
 
             verify(observer, timeout(1000000).atLeastOnce()).onIncompleteObservation();
             verify(consumer, times(expectedCount)).accept(notNull(File.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
+        }
+    }
+
+    private void createRandomChildDir(File dir) throws IOException {
+        while (true) {
+            try {
+                dir.resolve(String.valueOf(random())).createDir();
+            } catch (AlreadyExist ignore) {
+            }
+            break;
         }
     }
 
@@ -249,11 +258,8 @@ public final class LocalObservableTest extends FileBaseTest {
             }
         }
         while (actualCount < expectedCount) {
-            try {
-                dir.resolve(String.valueOf(random())).createDir();
-                actualCount++;
-            } catch (AlreadyExist ignore) {
-            }
+            createRandomChildDir(dir);
+            actualCount++;
         }
     }
 
@@ -931,7 +937,7 @@ public final class LocalObservableTest extends FileBaseTest {
             this.expected.addAll(expected);
             this.success = new CountDownLatch(1);
             action.call();
-            if (!success.await(1, SECONDS)) {
+            if (!success.await(5, SECONDS)) {
                 fail("\nexpected: " + this.expected
                         + "\nactual:   " + this.actual);
             }
@@ -972,7 +978,8 @@ public final class LocalObservableTest extends FileBaseTest {
         void awaitDelete(File target) throws Exception {
             try (Tracker tracker = registerMockTracker()) {
                 await(DELETE, target, newDelete(target));
-                verifyZeroInteractions(tracker);
+                verify(tracker, timeout(5000)).onWatchRemoved(anyInt(), anyInt());
+                verifyNoMoreInteractions(tracker);
             }
         }
 

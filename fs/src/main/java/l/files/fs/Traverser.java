@@ -3,6 +3,8 @@ package l.files.fs;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
@@ -18,8 +20,15 @@ final class Traverser {
     private final LinkOption rootOption;
     private final Visitor visitor;
     private final Deque<Node> stack;
+    private final Comparator<File> childrenComparator;
 
-    Traverser(File root, LinkOption option, Visitor visitor) {
+    Traverser(
+            File root,
+            LinkOption option,
+            Visitor visitor,
+            Comparator<File> childrenComparator) {
+
+        this.childrenComparator = childrenComparator;
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
         this.visitor = requireNonNull(visitor);
@@ -83,6 +92,9 @@ final class Traverser {
 
         try (Stream<File> stream = parent.file.list(option)) {
             List<File> items = stream.to(new ArrayList<File>());
+            if (childrenComparator != null) {
+                Collections.sort(items, childrenComparator);
+            }
             ListIterator<File> it = items.listIterator(items.size());
             while (it.hasPrevious()) {
                 stack.push(new Node(it.previous()));

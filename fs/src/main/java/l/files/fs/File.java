@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -172,6 +173,11 @@ public interface File extends Parcelable {
      * @param option applies to root only, child links are never followed
      */
     void traverse(LinkOption option, Visitor visitor) throws IOException;
+
+    /**
+     * @param childrenComparator option comparator to sort children
+     */
+    void traverse(LinkOption option, Visitor visitor, Comparator<File> childrenComparator) throws IOException;
 
     /**
      * List children of this directory.

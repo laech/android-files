@@ -9,6 +9,8 @@ import java.util.List;
 import l.files.fs.File;
 import l.files.fs.Instant;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -70,7 +72,7 @@ public final class CopyTest extends PasteTest {
         File dst = dir.resolve(src.name());
         assertFalse(dst.exists(NOFOLLOW));
 
-        Instant mtime = Instant.of(100001, 101);
+        Instant mtime = newInstant();
         src.setLastModifiedTime(NOFOLLOW, mtime);
 
         copy(src, dir);
@@ -78,6 +80,10 @@ public final class CopyTest extends PasteTest {
         assertTrue(dst.exists(NOFOLLOW));
         assertEquals(mtime, mtime(src));
         assertEquals(mtime, mtime(dst));
+    }
+
+    private Instant newInstant() {
+        return Instant.of(100001, SDK_INT >= LOLLIPOP ? 101 : 0);
     }
 
     private Instant mtime(File srcFile) throws IOException {

@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,7 +92,16 @@ public abstract class BaseFile implements File {
 
     @Override
     public void traverse(LinkOption option, Visitor visitor) throws IOException {
-        new Traverser(this, option, visitor).traverse();
+        traverse(option, visitor, null);
+    }
+
+    @Override
+    public void traverse(
+            LinkOption option,
+            Visitor visitor,
+            Comparator<File> childrenComparator) throws IOException {
+
+        new Traverser(this, option, visitor, childrenComparator).traverse();
     }
 
     @Override

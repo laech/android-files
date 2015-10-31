@@ -34,7 +34,7 @@ public final class UnistdTest extends FileBaseTest {
         }
     }
 
-    private int getFd(OutputStream out) throws ReflectiveOperationException, IOException {
+    private int getFd(OutputStream out) throws Exception {
         assertTrue(out instanceof FileOutputStream);
         Field field = FileDescriptor.class.getDeclaredField("descriptor");
         field.setAccessible(true);

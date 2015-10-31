@@ -10,8 +10,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import l.files.fs.DirectoryNotEmpty;
@@ -22,6 +25,8 @@ import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -40,6 +45,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public final class LocalFileTest extends FileBaseTest {
+
+    private static final Random random = new Random();
 
     @Test
     public void isReadable_true() throws Exception {
@@ -144,7 +151,7 @@ public final class LocalFileTest extends FileBaseTest {
         );
 
         try (Stream<File> actual = link.list(FOLLOW)) {
-            assertEquals(expected, actual.to(new ArrayList<>()));
+            assertEquals(expected, sortByName(actual));
         }
     }
 
@@ -154,7 +161,7 @@ public final class LocalFileTest extends FileBaseTest {
         File b = dir1().resolve("b").createDir();
         List<?> expected = asList(a, b);
         try (Stream<File> actual = dir1().list(NOFOLLOW)) {
-            assertEquals(expected, actual.to(new ArrayList<>()));
+            assertEquals(expected, sortByName(actual));
         }
     }
 
@@ -169,7 +176,7 @@ public final class LocalFileTest extends FileBaseTest {
         List<File> expected = singletonList(link.resolve("b"));
 
         try (Stream<File> actual = link.listDirs(FOLLOW)) {
-            assertEquals(expected, actual.to(new ArrayList<>()));
+            assertEquals(expected, sortByName(actual));
         }
     }
 
@@ -180,7 +187,7 @@ public final class LocalFileTest extends FileBaseTest {
         dir1().resolve("c").createFile();
         List<?> expected = singletonList(dir1().resolve("b"));
         try (Stream<File> actual = dir1().listDirs(NOFOLLOW)) {
-            assertEquals(expected, actual.to(new ArrayList<>()));
+            assertEquals(expected, sortByName(actual));
         }
     }
 
@@ -543,8 +550,7 @@ public final class LocalFileTest extends FileBaseTest {
 
     @Test
     public void setModificationTime() throws Exception {
-        Instant old = getModificationTime(dir1(), NOFOLLOW);
-        Instant expect = Instant.of(old.seconds() + 101, old.nanos() - 1);
+        Instant expect = newInstant();
         dir1().setLastModifiedTime(NOFOLLOW, expect);
         Instant actual = getModificationTime(dir1(), NOFOLLOW);
         assertEquals(expect, actual);
@@ -555,7 +561,7 @@ public final class LocalFileTest extends FileBaseTest {
         File file = dir1().resolve("file").createFile();
         File link = dir1().resolve("link").createLink(file);
 
-        Instant fileTime = Instant.of(123, 456);
+        Instant fileTime = newInstant();
         Instant linkTime = getModificationTime(link, NOFOLLOW);
         link.setLastModifiedTime(FOLLOW, fileTime);
 
@@ -570,13 +576,21 @@ public final class LocalFileTest extends FileBaseTest {
         File link = dir1().resolve("link").createLink(file);
 
         Instant fileTime = getModificationTime(file, NOFOLLOW);
-        Instant linkTime = Instant.of(123, 456);
+        Instant linkTime = newInstant();
 
         link.setLastModifiedTime(NOFOLLOW, linkTime);
 
         assertEquals(linkTime, getModificationTime(link, NOFOLLOW));
         assertEquals(fileTime, getModificationTime(file, NOFOLLOW));
         assertNotEqual(fileTime, linkTime);
+    }
+
+    private Instant newInstant() {
+        if (SDK_INT >= LOLLIPOP) {
+            return Instant.of(random.nextInt(1_000_000), random.nextInt(999_999) + 1);
+        } else {
+            return Instant.of(random.nextInt(1_000_000), 0); // Nanos not supported
+        }
     }
 
     private Instant getModificationTime(
@@ -656,6 +670,18 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals("he", file.readDetectingCharset(2));
         assertEquals("hel", file.readDetectingCharset(3));
         assertEquals("hello world", file.readDetectingCharset(100));
+    }
+
+    private List<File> sortByName(Stream<File> actual) throws IOException {
+        List<File> files = new ArrayList<>();
+        actual.to(files);
+        Collections.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File a, File b) {
+                return a.name().toString().compareTo(b.name().toString());
+            }
+        });
+        return files;
     }
 
 }
