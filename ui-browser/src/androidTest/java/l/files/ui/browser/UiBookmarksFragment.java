@@ -3,15 +3,12 @@ package l.files.ui.browser;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import l.files.fs.File;
 import l.files.ui.bookmarks.BookmarksFragment;
 
-import static java.util.Arrays.asList;
-import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.findItemOnMainThread;
@@ -23,10 +20,6 @@ final class UiBookmarksFragment {
 
     UiBookmarksFragment(UiFileActivity context) {
         this.context = requireNonNull(context);
-    }
-
-    private FilesActivity activity() {
-        return context.activity();
     }
 
     UiFileActivity activityObject() {
@@ -57,19 +50,6 @@ final class UiBookmarksFragment {
         return this;
     }
 
-    UiBookmarksFragment assertCurrentDirectoryBookmarked(
-            final boolean bookmarked) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                File dir = activity().fragment().directory();
-                List<File> all = fragment().bookmarks();
-                assertEquals(all.toString(), bookmarked, all.contains(dir));
-            }
-        });
-        return this;
-    }
-
     UiBookmarksFragment assertBookmarked(
             final File bookmark,
             final boolean bookmarked) {
@@ -82,24 +62,6 @@ final class UiBookmarksFragment {
         return this;
     }
 
-    UiBookmarksFragment assertContainsBookmarksInOrder(
-            final File... bookmarks) {
-        awaitOnMainThread(context.instrumentation(), new Runnable() {
-            @Override
-            public void run() {
-                List<File> expected = asList(bookmarks);
-                List<File> actual = new ArrayList<>();
-                for (File bookmark : fragment().bookmarks()) {
-                    if (expected.contains(bookmark)) {
-                        actual.add(bookmark);
-                    }
-                }
-                assertEquals(expected, actual);
-            }
-        });
-        return this;
-    }
-
     UiBookmarksFragment assertActionModePresent(boolean present) {
         activityObject().assertActionModePresent(present);
         return this;
@@ -107,11 +69,6 @@ final class UiBookmarksFragment {
 
     UiBookmarksFragment assertActionModeTitle(Object title) {
         activityObject().assertActionModeTitle(title);
-        return this;
-    }
-
-    UiBookmarksFragment rotate() {
-        activityObject().rotate();
         return this;
     }
 
@@ -134,7 +91,9 @@ final class UiBookmarksFragment {
         return new Provider<RecyclerView>() {
             @Override
             public RecyclerView get() {
-                return fragment().recycler;
+                BookmarksFragment fragment = fragment();
+                assertNotNull(fragment);
+                return fragment.recycler;
             }
         };
     }

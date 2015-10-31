@@ -9,6 +9,7 @@ import android.support.test.rule.UiThreadTestRule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 
 import java.io.IOException;
@@ -19,11 +20,9 @@ import l.files.fs.Visitor;
 import l.files.fs.local.LocalFile;
 
 import static android.content.Intent.ACTION_MAIN;
-import static java.io.File.createTempFile;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
-import static org.junit.Assert.assertTrue;
 
 public class BaseFilesActivityTest {
 
@@ -37,6 +36,9 @@ public class BaseFilesActivityTest {
     @Rule
     public final TestName testName = new TestName();
 
+    @Rule
+    public final TemporaryFolder folder = new TemporaryFolder();
+
     private File dir;
     private Intent intent;
     private UiFileActivity screen;
@@ -44,10 +46,10 @@ public class BaseFilesActivityTest {
     @Before
     public void setUp() throws Exception {
         String name = testName.getMethodName();
-        if (name.length() > 100) {
-            name = name.substring(0, 100);
+        if (name.length() > 255) {
+            name = name.substring(0, 255);
         }
-        dir = LocalFile.of(createTempDir(name));
+        dir = LocalFile.of(folder.newFolder(name));
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -61,13 +63,6 @@ public class BaseFilesActivityTest {
 
     private void setActivityIntent(Intent intent) {
         this.intent = intent;
-    }
-
-    private java.io.File createTempDir(String name) throws IOException {
-        java.io.File file = createTempFile(name + "_", "");
-        assertTrue(file.delete());
-        assertTrue(file.mkdir());
-        return file;
     }
 
     @After

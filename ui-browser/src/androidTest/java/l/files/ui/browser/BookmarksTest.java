@@ -20,41 +20,12 @@ public final class BookmarksTest extends BaseFilesActivityTest {
                 .assertActionModePresent(true)
                 .assertDrawerIsOpened(true)
                 .assertChecked(a, true)
+                .assertActionModeTitle(1)
 
                 .pressBack()
                 .assertActionModePresent(false)
                 .assertDrawerIsOpened(true)
-                .assertChecked(a, false)
-
-                .rotate()
-                .assertActionModePresent(false)
-                .assertDrawerIsOpened(true)
                 .assertChecked(a, false);
-    }
-
-    @Test
-    public void maintains_action_mode_on_screen_rotation() throws Exception {
-
-        File a = dir().resolve("a").createDir();
-        File b = dir().resolve("b").createDir();
-        screen()
-                .clickInto(a).bookmark().pressBack()
-                .clickInto(b).bookmark().pressBack()
-                .openBookmarksDrawer()
-                .longClick(a)
-                .assertActionModePresent(true)
-                .assertActionModeTitle(1)
-
-                .rotate()
-                .assertDrawerIsOpened(true)
-                .assertActionModePresent(true)
-                .assertActionModeTitle(1)
-                .assertChecked(a, true)
-                .assertChecked(b, false)
-
-                .click(b)
-                .assertActionModePresent(true)
-                .assertActionModeTitle(2);
     }
 
     @Test

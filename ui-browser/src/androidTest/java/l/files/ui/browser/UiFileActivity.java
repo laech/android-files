@@ -1,7 +1,6 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
-import android.app.Instrumentation.ActivityMonitor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -30,8 +29,6 @@ import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
 import l.files.ui.browser.BrowserItem.FileItem;
 
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.View.GONE;
@@ -682,31 +679,4 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity rotate() {
-        ActivityMonitor monitor = new ActivityMonitor(
-                FilesActivity.class.getName(), null, false);
-
-        instrument.addMonitor(monitor);
-
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                activity().setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-                activity().setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
-                activity().setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-            }
-        });
-
-        awaitOnMainThread(instrument, new Runnable() {
-            @Override
-            public void run() {
-                // This is waiting for previous action to be cleared in the UI thread
-            }
-        });
-
-        activity = (FilesActivity) monitor.waitForActivityWithTimeout(2000);
-        assertNotNull(activity);
-        instrument.removeMonitor(monitor);
-        return this;
-    }
 }
