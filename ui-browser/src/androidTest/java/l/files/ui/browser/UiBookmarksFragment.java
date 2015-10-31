@@ -10,7 +10,7 @@ import l.files.fs.File;
 import l.files.ui.bookmarks.BookmarksFragment;
 
 import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;

@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.base;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;

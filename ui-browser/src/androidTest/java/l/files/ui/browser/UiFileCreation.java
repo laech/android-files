@@ -7,7 +7,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;

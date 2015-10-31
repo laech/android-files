@@ -5,7 +5,7 @@ import android.view.MenuItem;
 
 import l.files.ui.base.app.OptionsMenuAction;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class GoBackOnHomePressedAction extends OptionsMenuAction {
 

@@ -5,7 +5,7 @@ import android.app.AlertDialog;
 import l.files.ui.operations.actions.DeleteDialog;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;

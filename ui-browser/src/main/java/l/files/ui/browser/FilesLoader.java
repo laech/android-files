@@ -32,7 +32,7 @@ import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Thread.currentThread;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.FOLLOW;

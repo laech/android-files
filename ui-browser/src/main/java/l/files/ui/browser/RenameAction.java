@@ -11,7 +11,7 @@ import l.files.ui.base.view.ActionModeItem;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class RenameAction extends ActionModeItem
         implements Selection.Callback {

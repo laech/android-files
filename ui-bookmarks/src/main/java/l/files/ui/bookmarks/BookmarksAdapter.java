@@ -17,7 +17,7 @@ import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.fs.FileIcons.directoryIconStringId;
 import static l.files.ui.base.view.Views.find;
 

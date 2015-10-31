@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public abstract class StableAdapter<T, VH extends ViewHolder> extends Adapter<VH> {
     private final Map<Object, Long> ids = new HashMap<>();

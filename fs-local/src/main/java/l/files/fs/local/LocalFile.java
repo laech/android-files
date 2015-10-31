@@ -25,7 +25,7 @@ import l.files.fs.Permission;
 import l.files.fs.Stream;
 
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;

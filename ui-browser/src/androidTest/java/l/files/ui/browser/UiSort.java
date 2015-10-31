@@ -3,7 +3,7 @@ package l.files.ui.browser;
 import android.app.Dialog;
 import android.widget.ListView;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;

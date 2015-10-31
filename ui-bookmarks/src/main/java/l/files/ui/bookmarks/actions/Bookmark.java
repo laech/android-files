@@ -10,7 +10,7 @@ import l.files.ui.base.app.OptionsMenuAction;
 import l.files.ui.bookmarks.R;
 
 import static android.view.Menu.NONE;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public final class Bookmark extends OptionsMenuAction {
 

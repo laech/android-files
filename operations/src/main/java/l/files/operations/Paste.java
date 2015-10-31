@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import l.files.fs.File;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {

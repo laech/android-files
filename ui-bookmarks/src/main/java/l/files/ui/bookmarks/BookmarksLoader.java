@@ -13,7 +13,7 @@ import l.files.bookmarks.BookmarkManager;
 import l.files.fs.File;
 import l.files.fs.FileName;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 
 final class BookmarksLoader extends AsyncTaskLoader<List<File>> {

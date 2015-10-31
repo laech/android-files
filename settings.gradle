@@ -1,1 +1,1 @@
-include ':app', ':fs', ':fs-local', ':ui-preview', ':testing', ':testing-fs', ':operations', ':ui-operations', ':bookmarks', ':ui-browser', ':ui-base', ':ui-bookmarks', ':fs-local-stat64', ':fs-local-stat'
+include ':app', ':fs', ':fs-local', ':ui-preview', ':testing', ':testing-fs', ':operations', ':ui-operations', ':bookmarks', ':ui-browser', ':ui-base', ':ui-bookmarks', ':fs-local-stat64', ':fs-local-stat', ':base'

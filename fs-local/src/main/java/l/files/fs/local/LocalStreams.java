@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static l.files.fs.Throwables.addSuppressed;
+import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.local.ErrnoException.EISDIR;
 import static l.files.fs.local.ErrnoException.EPERM;
 import static l.files.fs.local.Fcntl.O_APPEND;

@@ -6,7 +6,7 @@ import android.view.MenuItem;
 
 import l.files.ui.base.view.ActionModeItem;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class SelectAllAction extends ActionModeItem {
     private final Selectable selectable;

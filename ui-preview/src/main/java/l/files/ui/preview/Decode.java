@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 

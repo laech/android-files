@@ -9,7 +9,7 @@ import android.view.View.OnLongClickListener;
 
 import l.files.ui.base.view.ActionModeProvider;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         implements OnClickListener, OnLongClickListener, Selection.Callback {

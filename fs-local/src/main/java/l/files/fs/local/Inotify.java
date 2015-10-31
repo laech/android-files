@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static java.util.Objects.requireNonNull;
-import static l.files.fs.Throwables.addSuppressed;
+import static l.files.base.Objects.requireNonNull;
+import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.local.ErrnoException.ENOMEM;
 import static l.files.fs.local.ErrnoException.ENOSPC;
 

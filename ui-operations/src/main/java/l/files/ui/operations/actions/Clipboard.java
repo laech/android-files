@@ -10,7 +10,7 @@ import l.files.fs.File;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 enum Clipboard {
 

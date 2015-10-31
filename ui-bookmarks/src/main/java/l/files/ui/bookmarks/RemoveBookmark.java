@@ -10,7 +10,7 @@ import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 
 import static android.view.Menu.NONE;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class RemoveBookmark extends ActionModeItem {
 

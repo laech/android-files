@@ -7,7 +7,7 @@ import java.util.Collections;
 
 import l.files.operations.TaskState.Running;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 abstract class Task extends AsyncTask<Void, TaskState, Void> {
 

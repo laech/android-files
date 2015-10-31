@@ -9,7 +9,7 @@ import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.operations.R;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.operations.actions.Clipboard.Action.COPY;
 
 public final class Copy extends ActionModeItem {

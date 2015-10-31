@@ -6,7 +6,7 @@ import l.files.operations.Clock;
 import l.files.operations.Progress;
 import l.files.operations.TaskState;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 /**
  * Base viewer for decorating subclasses of {@link TaskState} to ensure

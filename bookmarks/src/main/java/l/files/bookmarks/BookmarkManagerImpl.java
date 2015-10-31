@@ -21,7 +21,7 @@ import static android.os.Environment.DIRECTORY_MUSIC;
 import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class BookmarkManagerImpl extends BookmarkManager {

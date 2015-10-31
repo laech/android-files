@@ -10,7 +10,7 @@ import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.LocalFile.permissionsFromMode;

@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
-import static l.files.fs.Throwables.addSuppressed;
+import static l.files.base.Throwables.addSuppressed;
 
 final class BatchObserverNotifier implements Observer, Observation, Runnable {
 

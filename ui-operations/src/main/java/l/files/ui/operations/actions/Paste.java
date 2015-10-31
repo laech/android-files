@@ -9,7 +9,7 @@ import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.operations.OperationService.newCopyIntent;
 import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.ui.operations.actions.Clipboard.Action.COPY;

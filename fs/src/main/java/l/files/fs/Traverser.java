@@ -9,7 +9,7 @@ import java.util.ListIterator;
 
 import l.files.fs.Visitor.Result;
 
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Traverser {

@@ -16,7 +16,7 @@ import l.files.fs.local.LocalFile;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public final class Preview {
 

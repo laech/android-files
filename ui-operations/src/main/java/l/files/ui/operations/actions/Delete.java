@@ -12,7 +12,7 @@ import l.files.ui.operations.R;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 public final class Delete extends ActionModeItem {
 

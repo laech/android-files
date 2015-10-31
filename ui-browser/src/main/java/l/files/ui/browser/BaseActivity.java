@@ -10,7 +10,7 @@ import l.files.ui.base.app.OptionsMenu;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.view.ActionModeProvider;
 
-class BaseActivity extends AppCompatActivity implements ActionModeProvider {
+public class BaseActivity extends AppCompatActivity implements ActionModeProvider {
 
     private OptionsMenu optionsMenu = OptionsMenus.EMPTY;
 

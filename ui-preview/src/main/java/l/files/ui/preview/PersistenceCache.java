@@ -20,8 +20,8 @@ import l.files.fs.Stat;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.lang.System.nanoTime;
-import static java.util.Objects.requireNonNull;
-import static l.files.fs.Throwables.addSuppressed;
+import static l.files.base.Objects.requireNonNull;
+import static l.files.base.Throwables.addSuppressed;
 
 abstract class PersistenceCache<V> extends MemCache<V> {
 

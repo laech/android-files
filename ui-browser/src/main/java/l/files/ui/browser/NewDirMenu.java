@@ -9,7 +9,7 @@ import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
-import static java.util.Objects.requireNonNull;
+import static l.files.base.Objects.requireNonNull;
 
 final class NewDirMenu extends OptionsMenuAction {
 
