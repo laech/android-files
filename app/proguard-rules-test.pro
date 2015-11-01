@@ -1,3 +1,0 @@
--dontwarn **
-
--keep class **Test

@@ -14,21 +14,29 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+
+        release {
+            if (System.console() != null) {
+                storeFile System.console().readLine("\nKeystore location: ")
+                storePassword new String(System.console().readPassword("\nKeystore password: "))
+                keyAlias "files"
+                keyPassword new String(System.console().readPassword("\nKey password: "))
+            }
+        }
+
+    }
+
     buildTypes {
+
         debug {
             applicationIdSuffix ".debug"
-//            minifyEnabled true
-//            proguardFile getDefaultProguardFile('proguard-android.txt')
-//            proguardFile 'proguard-rules.pro'
-//            testProguardFile getDefaultProguardFile('proguard-android.txt')
-//            testProguardFile 'proguard-rules.pro'
-//            testProguardFile 'proguard-rules-test.pro'
         }
+
         release {
-            minifyEnabled true
-            proguardFile getDefaultProguardFile('proguard-android.txt')
-            proguardFile 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
+
     }
 
     packagingOptions {
@@ -43,5 +51,12 @@ dependencies {
 
     compile project(':ui-browser')
     compile project(':ui-operations')
+
+    androidTestCompile project(':testing-fs')
+
+    androidTestCompile 'org.mockito:mockito-core:1.10.19'
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
+    androidTestCompile "com.android.support:support-annotations:$supportLibVersion"
 
 }
