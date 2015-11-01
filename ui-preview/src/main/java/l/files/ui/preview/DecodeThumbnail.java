@@ -32,7 +32,7 @@ abstract class DecodeThumbnail extends Decode {
     }
 
     @Override
-    protected Void doInBackground(Object... params) {
+    Object onDoInBackground() {
         if (isCancelled()) {
             return null;
         }

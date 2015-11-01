@@ -68,7 +68,7 @@ final class DecodeChain extends Decode {
     }
 
     @Override
-    protected Object doInBackground(Object... params) {
+    Object onDoInBackground() {
         if (isCancelled()) {
             return null;
         }

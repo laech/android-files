@@ -10,6 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import l.files.fs.File;
 import l.files.fs.Stat;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.setThreadPriority;
 import static l.files.base.Objects.requireNonNull;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
@@ -42,6 +44,14 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
             sub.cancelAll();
         }
     }
+
+    @Override
+    protected final Object doInBackground(Object... params) {
+        setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+        return onDoInBackground();
+    }
+
+    abstract Object onDoInBackground();
 
     @SuppressWarnings("unchecked")
     @Override

@@ -8,6 +8,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.setThreadPriority;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
 
@@ -80,6 +82,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     @Override
     public void run() {
+        setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
         boolean snapshotSelfChanged;
         Set<String> snapshotChildrenChanged;

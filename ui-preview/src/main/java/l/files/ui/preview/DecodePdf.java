@@ -40,6 +40,8 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.open;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.setThreadPriority;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
 import static java.lang.Integer.parseInt;
@@ -221,6 +223,8 @@ final class DecodePdf extends DecodeThumbnail {
                 String sortOrder,
                 CancellationSignal signal) {
 
+            setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+
             // CancellationSignal is null after crash
             if (signal != null && signal.isCanceled()) {
                 return null;
@@ -343,6 +347,7 @@ final class DecodePdf extends DecodeThumbnail {
 
         @Override
         public Result call() throws Exception {
+            setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
             if (isCancelled(signal)) {
                 return null;

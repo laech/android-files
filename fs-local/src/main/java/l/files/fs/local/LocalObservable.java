@@ -19,6 +19,8 @@ import l.files.fs.Observer;
 import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
@@ -385,6 +387,9 @@ final class LocalObservable extends Native
         if (currentThread().isInterrupted() || closed.get()) {
             return;
         }
+
+        setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+
         try {
             thread.set(currentThread());
             observe(fd);

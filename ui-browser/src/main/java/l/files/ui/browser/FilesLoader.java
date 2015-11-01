@@ -32,6 +32,8 @@ import l.files.fs.Stream;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -80,6 +82,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+
                 boolean changed = false;
                 for (String child : changedChildren) {
                     changed |= update(child);
