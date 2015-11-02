@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
@@ -50,7 +51,6 @@ import static android.R.attr.textColorTertiaryInverse;
 import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
-import static android.graphics.Typeface.BOLD;
 import static android.graphics.Typeface.SANS_SERIF;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -66,9 +66,9 @@ import static android.view.View.VISIBLE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.YEAR;
-import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
@@ -304,12 +304,18 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private void setIcon(FileItem file) {
 
+            Typeface typeface;
+
             if (file.linkTargetOrSelfStat() != null
                     && setLocalIcon(icon, file.linkTargetOrSelfStat())) {
-                icon.setTypeface(SANS_SERIF, BOLD);
+                typeface = SANS_SERIF;
             } else {
                 icon.setText(iconTextId(file));
-                icon.setTypeface(FileIcons.font(icon.getResources().getAssets()));
+                typeface = FileIcons.font(icon.getResources().getAssets());
+            }
+
+            if (icon.getTypeface() != typeface) {
+                icon.setTypeface(typeface);
             }
         }
 
