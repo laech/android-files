@@ -15,6 +15,7 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -69,9 +70,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     }
 
     private File directory;
-    private ProgressBar progress;
     private FilesAdapter adapter;
-    private TextView empty;
 
     public RecyclerView recycler;
 
@@ -93,10 +92,10 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             FilesLoader loader = filesLoader();
             if (loader != null) {
                 int current = loader.approximateChildLoaded();
-                progress.setProgress(current);
-                progress.setIndeterminate(current == 0);
-                progress.setMax(loader.approximateChildTotal());
-                progress.setVisibility(VISIBLE);
+                progressBar().setProgress(current);
+                progressBar().setIndeterminate(current == 0);
+                progressBar().setMax(loader.approximateChildTotal());
+                progressBar().setVisibility(VISIBLE);
             }
             handler.postDelayed(this, 10);
 
@@ -122,8 +121,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
-        empty = find(android.R.id.empty, this);
-        progress = find(android.R.id.progress, this);
         adapter = new FilesAdapter(
                 getActivity(),
                 selection(),
@@ -151,6 +148,28 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     public void onDestroy() {
         super.onDestroy();
         Preferences.unregister(getActivity(), this);
+    }
+
+    private ProgressBar progressBar;
+
+    private ProgressBar progressBar() {
+        if (progressBar == null) {
+            //noinspection ConstantConditions
+            ViewStub stub = (ViewStub) getView().findViewById(R.id.progress_stub);
+            progressBar = (ProgressBar) stub.inflate().findViewById(android.R.id.progress);
+        }
+        return progressBar;
+    }
+
+    private TextView emptyView;
+
+    private TextView emptyView() {
+        if (emptyView == null) {
+            //noinspection ConstantConditions
+            ViewStub stub = (ViewStub) getView().findViewById(R.id.empty_stub);
+            emptyView = (TextView) stub.inflate().findViewById(android.R.id.empty);
+        }
+        return emptyView;
     }
 
     private void setupOptionsMenu() {
@@ -235,18 +254,18 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             adapter.setItems(data.items());
             //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null) {
-                empty.setText(message(data.exception()));
+                emptyView().setText(message(data.exception()));
             } else {
-                empty.setText(R.string.empty);
+                emptyView().setText(R.string.empty);
             }
 
             handler.removeCallbacks(checkProgress);
-            progress.setVisibility(GONE);
+            progressBar().setVisibility(GONE);
 
             if (adapter.isEmpty()) {
-                empty.setVisibility(VISIBLE);
+                emptyView().setVisibility(VISIBLE);
             } else {
-                empty.setVisibility(GONE);
+                emptyView().setVisibility(GONE);
             }
         }
     }
