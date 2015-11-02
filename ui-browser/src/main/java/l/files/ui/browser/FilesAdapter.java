@@ -85,6 +85,9 @@ import static l.files.ui.browser.Styles.getColorStateList;
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
 
+    static final int VIEW_TYPE_FILE = 0;
+    static final int VIEW_TYPE_HEADER = 1;
+
     private final Preview decorator;
     private final DateFormatter formatter;
     private final ActionModeProvider actionModeProvider;
@@ -127,14 +130,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position).isFileItem() ? 0 : 1;
+        return getItem(position).isFileItem() ? VIEW_TYPE_FILE : VIEW_TYPE_HEADER;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        return viewType == 0
+        return viewType == VIEW_TYPE_FILE
                 ? new FileHolder(inflater.inflate(files_grid_item, parent, false))
                 : new HeaderHolder(inflater.inflate(files_grid_header, parent, false));
     }

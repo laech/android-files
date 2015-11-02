@@ -46,6 +46,8 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
+import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
+import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
 import static l.files.ui.browser.Preferences.getShowHiddenFiles;
 import static l.files.ui.browser.Preferences.getSort;
 import static l.files.ui.browser.Preferences.isShowHiddenFilesKey;
@@ -135,6 +137,8 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         recycler.setItemViewCacheSize(columns * 3);
         recycler.setItemAnimator(null);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(columns, VERTICAL));
+        recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
+        recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
