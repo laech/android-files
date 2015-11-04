@@ -6,6 +6,5 @@
     <dimen name="files_item_card_inner_space">0dp</dimen>
     <dimen name="files_item_card_inner_radius">2dp</dimen>
     <dimen name="files_item_card_radius">3dp</dimen>
-    <dimen name="files_item_icon_space_top">16dp</dimen>
     <dimen name="title_drop_down_vertical_offset">0dp</dimen>
 </resources>

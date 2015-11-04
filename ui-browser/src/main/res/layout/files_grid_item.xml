@@ -11,88 +11,18 @@
     app:cardCornerRadius="@dimen/files_item_card_radius"
     app:cardElevation="1dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@android:id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="12dp">
-
-        <android.widget.Space
-            android:id="@+id/preview_container_space_top"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/files_item_icon_space_top"
-            android:visibility="gone" />
-
-        <l.files.ui.browser.ColorOverlayImageView
-            android:id="@+id/preview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="@dimen/files_item_card_inner_space"
-            android:visibility="gone" />
-
-        <RelativeLayout
-            android:id="@+id/icon_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/files_item_icon_space_top">
-
-            <TextView
-                android:id="@+id/icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center_horizontal"
-                android:textColor="?android:attr/textColorTertiary"
-                android:textSize="32sp" />
-
-            <TextView
-                android:id="@+id/link_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/icon"
-                android:layout_marginEnd="6dp"
-                android:layout_toEndOf="@id/icon"
-                android:text="@string/link_icon"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center_horizontal"
-            android:lineSpacingMultiplier="1.1"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/link_path"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="3dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginStart="12dp"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.1"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/summary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:layout_marginStart="12dp"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textSize="12sp" />
-
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/files_item_card_inner_space"
+        android:drawablePadding="8dp"
+        android:gravity="center_horizontal"
+        android:lineSpacingMultiplier="1.1"
+        android:paddingBottom="14dp"
+        android:paddingEnd="12dp"
+        android:paddingStart="12dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="14sp" />
 
 </l.files.ui.browser.ActivatedCardView>

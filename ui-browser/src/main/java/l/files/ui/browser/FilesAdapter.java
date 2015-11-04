@@ -4,19 +4,22 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v4.util.CircularArray;
+import android.support.v4.util.CircularIntArray;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.SpannableString;
+import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -46,14 +49,11 @@ import l.files.ui.preview.SizedColorDrawable;
 
 import static android.R.attr.textColorPrimary;
 import static android.R.attr.textColorPrimaryInverse;
-import static android.R.attr.textColorTertiary;
-import static android.R.attr.textColorTertiaryInverse;
-import static android.R.integer.config_shortAnimTime;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
-import static android.graphics.Typeface.SANS_SERIF;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static android.text.Spanned.SPAN_INCLUSIVE_EXCLUSIVE;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -61,8 +61,7 @@ import static android.text.format.DateUtils.FORMAT_NO_YEAR;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.formatDateRange;
 import static android.text.format.Formatter.formatShortFileSize;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
+import static android.widget.TextView.BufferType.SPANNABLE;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Calendar.DAY_OF_YEAR;
 import static java.util.Calendar.YEAR;
@@ -73,7 +72,6 @@ import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.base.view.Views.find;
-import static l.files.ui.browser.R.dimen.files_item_card_inner_radius;
 import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
 import static l.files.ui.browser.R.dimen.files_list_space;
@@ -226,45 +224,26 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     final class FileHolder extends SelectionModeViewHolder<File, FileItem>
             implements PreviewCallback {
 
-        private final TextView icon;
-        private final View iconContainer;
-        private final TextView title;
-        private final TextView summary;
-        private final TextView linkIcon;
-        private final TextView linkPath;
-        private final ImageView preview;
-        private final View previewContainerSpaceTop;
+        private final TextView content;
 
-        private final int animateDuration;
         private final float previewRadius;
+        private final int transitionDuration;
 
         private final ColorStateList primaryText;
         private final ColorStateList primaryTextInverse;
-        private final ColorStateList tertiaryText;
-        private final ColorStateList tertiaryTextInverse;
 
         private Decode task;
 
         FileHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
-            this.icon = find(R.id.icon, this);
-            this.iconContainer = find(R.id.icon_container, this);
-            this.title = find(R.id.title, this);
-            this.summary = find(R.id.summary, this);
-            this.linkIcon = find(R.id.link_icon, this);
-            this.linkPath = find(R.id.link_path, this);
-            this.preview = find(R.id.preview, this);
-            this.previewContainerSpaceTop = find(R.id.preview_container_space_top, this);
+            this.content = find(android.R.id.content, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
-            this.animateDuration = itemView.getResources().getInteger(config_shortAnimTime);
-            this.previewRadius = itemView.getResources().getDimension(files_item_card_inner_radius);
+            this.previewRadius = itemView.getResources().getDimension(R.dimen.files_item_card_inner_radius);
+            this.transitionDuration = resources().getInteger(android.R.integer.config_shortAnimTime);
 
-            Context context = itemView.getContext();
-            this.primaryText = getColorStateList(textColorPrimary, context);
-            this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context);
-            this.tertiaryText = getColorStateList(textColorTertiary, context);
-            this.tertiaryTextInverse = getColorStateList(textColorTertiaryInverse, context);
+            this.primaryText = getColorStateList(textColorPrimary, context());
+            this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context());
         }
 
         @Override
@@ -277,65 +256,99 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             listener.onOpen(file.selfFile(), file.linkTargetOrSelfStat());
         }
 
+        private final CircularIntArray spanStarts = new CircularIntArray(3);
+        private final CircularIntArray spanEnds = new CircularIntArray(3);
+        private final CircularArray<Object[]> spanObjects = new CircularArray<>(16);
+
+        private final StringBuilder spanBuilder = new StringBuilder();
+
+        private final Object[] spansForIcon = {
+                new MaxAlphaSpan(150),
+                new AbsoluteSizeSpan(32, true),
+                new TypefaceSpan(FileIcons.font(assets())),
+                new VerticalSpaceSpan(16, 6),
+        };
+
+        private final Object[] spansForLink = {
+                new MaxAlphaSpan(150),
+                new AbsoluteSizeSpan(12, true),
+                new VerticalSpaceSpan(3),
+        };
+
+        private final Object[] spansForSummary = {
+                new MaxAlphaSpan(150),
+                new AbsoluteSizeSpan(12, true),
+                new VerticalSpaceSpan(3),
+        };
+
         @Override
         public void bind(FileItem file) {
             super.bind(file);
             if (constraint == null) {
-                constraint = calculateThumbnailConstraint(itemView.getContext(), (CardView) itemView);
+                constraint = calculateThumbnailConstraint(context(), (CardView) itemView);
             }
 
-            setEnabled(file);
-            setTitle(file);
-            setIcon(file);
-            setLink(file);
-            setSummary(file);
-            setPreview(file);
+            updateContent(retrievePreview());
         }
 
-        private void setEnabled(FileItem file) {
-            boolean enable = file.isReadable();
-            icon.setEnabled(enable);
-            title.setEnabled(enable);
-            summary.setEnabled(enable);
-            linkIcon.setEnabled(enable);
-            linkPath.setEnabled(enable);
-        }
+        private void updateContent(Drawable preview) {
 
-        private void setTitle(FileItem file) {
-            title.setText(file.selfFile().name());
-        }
+            spanStarts.clear();
+            spanEnds.clear();
+            spanObjects.clear();
+            spanBuilder.setLength(0);
 
-        private void setIcon(FileItem file) {
-
-            Typeface typeface;
-
-            if (file.linkTargetOrSelfStat() != null
-                    && setLocalIcon(icon, file.linkTargetOrSelfStat())) {
-                typeface = SANS_SERIF;
-            } else {
-                icon.setText(iconTextId(file));
-                typeface = FileIcons.font(icon.getResources().getAssets());
+            Stat stat = item().selfStat();
+            CharSequence name = item().selfFile().name();
+            CharSequence summary = getSummary(item());
+            CharSequence link = null;
+            if (stat != null && stat.isSymbolicLink()) {
+                File target = item().linkTargetFile();
+                if (target != null) {
+                    link = target.path();
+                }
             }
 
-            if (icon.getTypeface() != typeface) {
-                icon.setTypeface(typeface);
+            if (preview == null) {
+                spanBuilder.append(context().getString(iconTextId(item()))).append('\n');
+                spanStarts.addLast(0);
+                spanEnds.addLast(spanBuilder.length());
+                spanObjects.addLast(spansForIcon);
             }
-        }
 
-        private boolean setLocalIcon(TextView icon, Stat stat) {
-            // TODO
-            if (stat.isBlockDevice()) {
-                icon.setText("B");
-            } else if (stat.isCharacterDevice()) {
-                icon.setText("C");
-            } else if (stat.isSocket()) {
-                icon.setText("S");
-            } else if (stat.isFifo()) {
-                icon.setText("P");
-            } else {
-                return false;
+            spanBuilder.append(name);
+
+            if (link != null && link.length() > 0) {
+                spanStarts.addLast(spanBuilder.length());
+                spanBuilder.append('\n').append(resources().getString(R.string.link_x, link));
+                spanEnds.addLast(spanBuilder.length());
+                spanObjects.addLast(spansForLink);
             }
-            return true;
+
+            if (summary != null && summary.length() > 0) {
+                spanStarts.addLast(spanBuilder.length());
+                spanBuilder.append('\n').append(summary);
+                spanEnds.addLast(spanBuilder.length());
+                spanObjects.addLast(spansForSummary);
+            }
+
+            SpannableString span = new SpannableString(spanBuilder.toString());
+            while (!spanStarts.isEmpty()) {
+                int start = spanStarts.popFirst();
+                int end = spanEnds.popFirst();
+                for (Object sp : spanObjects.popFirst()) {
+                    if (sp instanceof VerticalSpaceSpan) {
+                        span.setSpan(sp, start, start == 0 ? end : start + 1, SPAN_INCLUSIVE_EXCLUSIVE);
+                    } else {
+                        span.setSpan(sp, start, end, SPAN_INCLUSIVE_EXCLUSIVE);
+                    }
+                }
+            }
+
+            content.setText(span, SPANNABLE);
+            content.setEnabled(item().isReadable());
+            content.setCompoundDrawablesWithIntrinsicBounds(null, preview, null, null);
+
         }
 
         private int iconTextId(FileItem file) {
@@ -351,43 +364,36 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             }
         }
 
-        private void setSummary(FileItem file) {
+        private CharSequence getSummary(FileItem file) {
             Stat stat = file.selfStat();
-            if (stat == null) {
-                summary.setText("");
-                summary.setVisibility(GONE);
-            } else {
-                summary.setVisibility(VISIBLE);
+            if (stat != null) {
                 CharSequence date = formatter.apply(stat);
-                CharSequence size = formatShortFileSize(summary.getContext(), stat.size());
+                CharSequence size = formatShortFileSize(context(), stat.size());
                 boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
                 boolean isFile = stat.isRegularFile();
                 if (hasDate && isFile) {
-                    Context context = summary.getContext();
-                    summary.setText(context.getString(R.string.x_dot_y, date, size));
+                    Context context = context();
+                    return context.getString(R.string.x_dot_y, date, size);
                 } else if (hasDate) {
-                    summary.setText(date);
+                    return date;
                 } else if (isFile) {
-                    summary.setText(size);
-                } else {
-                    summary.setVisibility(GONE);
+                    return size;
                 }
             }
+            return null;
         }
 
-        private void setPreview(FileItem file) {
-            previewContainerSpaceTop.setVisibility(GONE);
+        private Drawable retrievePreview() {
 
             if (task != null) {
                 task.cancelAll();
             }
 
-            File res = file.selfFile();
-            Stat stat = file.linkTargetOrSelfStat();
+            File res = item().selfFile();
+            Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
-                setPreviewImage((Drawable) null);
-                setPaletteColor(TRANSPARENT);
-                return;
+                setPaletteColor(TRANSPARENT); // TODO
+                return null;
             }
 
             Palette palette = decorator.getPalette(res, null, constraint);
@@ -399,18 +405,18 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
             Bitmap thumbnail = getCachedThumbnail(res, stat);
             if (thumbnail != null) {
-                setPreviewImage(thumbnail);
-                return;
-            }
-
-            Rect size = decorator.getSize(res, null, constraint);
-            if (size != null) {
-                setPreviewImage(newSizedColorDrawable(size));
-            } else {
-                setPreviewImage((Drawable) null);
+                return newThumbnailDrawable(thumbnail);
             }
 
             task = decorator.get(res, stat, constraint, this);
+
+            Rect size = decorator.getSize(res, null, constraint);
+            if (size != null) {
+                return newSizedColorDrawable(size);
+            } else {
+                return null;
+            }
+
         }
 
         private Bitmap getCachedThumbnail(File res, Stat stat) {
@@ -440,44 +446,17 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private void setPaletteColor(int color) {
             if (color == TRANSPARENT) {
                 ((CardView) itemView).setCardBackgroundColor(WHITE);
-                title.setTextColor(primaryText);
-                icon.setTextColor(tertiaryText);
-                summary.setTextColor(tertiaryText);
-                linkIcon.setTextColor(tertiaryText);
-                linkPath.setTextColor(tertiaryText);
+                content.setTextColor(primaryText);
             } else {
                 ((CardView) itemView).setCardBackgroundColor(color);
-                title.setTextColor(primaryTextInverse);
-                icon.setTextColor(tertiaryTextInverse);
-                summary.setTextColor(tertiaryTextInverse);
-                linkIcon.setTextColor(tertiaryTextInverse);
-                linkPath.setTextColor(tertiaryTextInverse);
-            }
-        }
-
-        private void setLink(FileItem file) {
-            Stat stat = file.selfStat();
-            if (stat != null && stat.isSymbolicLink()) {
-                linkIcon.setVisibility(VISIBLE);
-
-                File target = file.linkTargetFile();
-                if (target != null) {
-                    linkPath.setText(resources().getString(R.string.link_x, target.path()));
-                    linkPath.setVisibility(VISIBLE);
-                } else {
-                    linkPath.setVisibility(GONE);
-                }
-
-            } else {
-                linkIcon.setVisibility(GONE);
-                linkPath.setVisibility(GONE);
+                content.setTextColor(primaryTextInverse);
             }
         }
 
         @Override
         public void onSizeAvailable(File item, Rect size) {
             if (item.equals(itemId())) {
-                setPreviewImage(newSizedColorDrawable(size));
+                updateContent(newSizedColorDrawable(size));
             }
         }
 
@@ -497,43 +476,25 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewAvailable(File item, Bitmap thumbnail) {
+        public void onPreviewAvailable(File item, Bitmap bm) {
             if (item.equals(itemId())) {
-                setPreviewImage(thumbnail);
-                preview.setAlpha(0f);
-                preview.animate().alpha(1).setDuration(animateDuration);
+                TransitionDrawable transition = new TransitionDrawable(new Drawable[]{
+                        new SizedColorDrawable(TRANSPARENT, bm.getWidth(), bm.getHeight()),
+                        newThumbnailDrawable(bm)
+                });
+                updateContent(transition);
+                transition.startTransition(transitionDuration);
             }
         }
 
-        private void setPreviewImage(Drawable drawable) {
-            preview.setImageDrawable(drawable);
-            if (drawable != null) {
-                boolean small = drawable.getIntrinsicWidth() < constraint.width();
-                previewContainerSpaceTop.setVisibility(small ? VISIBLE : GONE);
-                preview.setVisibility(VISIBLE);
-                iconContainer.setVisibility(GONE);
-            } else {
-                preview.setVisibility(GONE);
-                iconContainer.setVisibility(VISIBLE);
-            }
-        }
-
-        private Resources resources() {
-            return itemView.getResources();
-        }
-
-        private void setPreviewImage(Bitmap bitmap) {
-            if (bitmap != null) {
-                setPreviewImage(new RoundedBitmapDrawable(previewRadius, bitmap));
-            } else {
-                setPreviewImage((Drawable) null);
-            }
+        private Drawable newThumbnailDrawable(Bitmap thumbnail) {
+            return new ThumbnailDrawable(context(), previewRadius, thumbnail);
         }
 
         @Override
         public void onPreviewFailed(File item) {
             if (item.equals(itemId())) {
-                setPreviewImage((Drawable) null);
+                updateContent(null);
             }
         }
     }

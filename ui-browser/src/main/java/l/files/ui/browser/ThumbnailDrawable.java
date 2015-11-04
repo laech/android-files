@@ -1,17 +1,23 @@
 package l.files.ui.browser;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 
 import static android.graphics.PixelFormat.TRANSLUCENT;
+import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.graphics.Shader.TileMode.CLAMP;
 
-final class RoundedBitmapDrawable extends Drawable {
+final class ThumbnailDrawable extends Drawable {
+
+    private static ColorFilter activatedFilter;
 
     private final Paint paint;
     private final RectF rect;
@@ -19,7 +25,7 @@ final class RoundedBitmapDrawable extends Drawable {
     private final int height;
     private final float radius;
 
-    RoundedBitmapDrawable(float radius, Bitmap bitmap) {
+    ThumbnailDrawable(Context context, float radius, Bitmap bitmap) {
         this.paint = new Paint();
         this.paint.setAntiAlias(true);
         this.paint.setShader(new BitmapShader(bitmap, CLAMP, CLAMP));
@@ -27,11 +33,32 @@ final class RoundedBitmapDrawable extends Drawable {
         this.width = bitmap.getWidth();
         this.height = bitmap.getHeight();
         this.rect = new RectF(0, 0, width, height);
+        if (activatedFilter == null) {
+            activatedFilter = new PorterDuffColorFilter(
+                    ContextCompat.getColor(context, R.color.activated_highlight),
+                    SRC_ATOP
+            );
+        }
     }
 
     @Override
     public void draw(Canvas canvas) {
+        paint.setColorFilter(isActivated() ? activatedFilter : null);
         canvas.drawRoundRect(rect, radius, radius, paint);
+    }
+
+    @Override
+    public boolean isStateful() {
+        return true;
+    }
+
+    private boolean isActivated() {
+        for (int state : getState()) {
+            if (state == android.R.attr.state_activated) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package l.files.ui.base.selection;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.ActionMode;
@@ -41,9 +44,25 @@ public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         return item == null ? null : itemId(item);
     }
 
+    protected final ITEM item() {
+        return item;
+    }
+
     public void bind(ITEM item) {
         this.item = item;
         setActivated(item);
+    }
+
+    protected final Context context() {
+        return itemView.getContext();
+    }
+
+    protected final Resources resources() {
+        return itemView.getResources();
+    }
+
+    protected final AssetManager assets() {
+        return context().getAssets();
     }
 
     @Override
