@@ -6,14 +6,11 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.support.v4.util.CircularArray;
-import android.support.v4.util.CircularIntArray;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.SpannableString;
-import android.text.style.AbsoluteSizeSpan;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -22,18 +19,11 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Formatter;
 import java.util.List;
-import java.util.Locale;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
@@ -53,24 +43,10 @@ import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.text.Spanned.SPAN_INCLUSIVE_EXCLUSIVE;
-import static android.text.format.DateFormat.getDateFormat;
-import static android.text.format.DateFormat.getTimeFormat;
-import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
-import static android.text.format.DateUtils.FORMAT_NO_YEAR;
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.formatDateRange;
-import static android.text.format.Formatter.formatShortFileSize;
 import static android.widget.TextView.BufferType.SPANNABLE;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Calendar.DAY_OF_YEAR;
-import static java.util.Calendar.YEAR;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
-import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
-import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
@@ -87,7 +63,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     static final int VIEW_TYPE_HEADER = 1;
 
     private final Preview decorator;
-    private final DateFormatter formatter;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<File> selection;
@@ -105,7 +80,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
-        this.formatter = new DateFormatter(context);
         this.decorator = Preview.get(context);
     }
 
@@ -171,56 +145,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         selection.addAll(files);
     }
 
-    static class DateFormatter {
-
-        final Context context;
-
-        final DateFormat dateFormat;
-        final DateFormat timeFormat;
-
-        static final Date tempDate = new Date();
-        static final StringBuffer tempBuffer = new StringBuffer();
-        static final FieldPosition tempField = new FieldPosition(0);
-
-        final Formatter tempFormatter = new Formatter(tempBuffer, Locale.getDefault());
-
-        static final Calendar currentTime = Calendar.getInstance();
-        static final Calendar thatTime = Calendar.getInstance();
-
-        static final int flags
-                = FORMAT_SHOW_DATE
-                | FORMAT_ABBREV_MONTH
-                | FORMAT_NO_YEAR;
-
-        DateFormatter(Context context) {
-            this.context = requireNonNull(context, "context");
-            this.dateFormat = getDateFormat(context);
-            this.timeFormat = getTimeFormat(context);
-        }
-
-        String apply(Stat file) {
-            long millis = file.lastModifiedTime().to(MILLISECONDS);
-
-            tempDate.setTime(millis);
-            tempField.setBeginIndex(0);
-            tempField.setEndIndex(0);
-            tempBuffer.setLength(0);
-
-            thatTime.setTimeInMillis(millis);
-            currentTime.setTimeInMillis(currentTimeMillis());
-
-            if (currentTime.get(YEAR) == thatTime.get(YEAR)) {
-                if (currentTime.get(DAY_OF_YEAR) == thatTime.get(DAY_OF_YEAR)) {
-                    return timeFormat.format(tempDate, tempBuffer, tempField).toString();
-                } else {
-                    return formatDateRange(context, tempFormatter, millis, millis, flags).toString();
-                }
-            }
-
-            return dateFormat.format(tempDate, tempBuffer, tempField).toString();
-        }
-    }
-
     final class FileHolder extends SelectionModeViewHolder<File, FileItem>
             implements PreviewCallback {
 
@@ -256,31 +180,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             listener.onOpen(file.selfFile(), file.linkTargetOrSelfStat());
         }
 
-        private final CircularIntArray spanStarts = new CircularIntArray(3);
-        private final CircularIntArray spanEnds = new CircularIntArray(3);
-        private final CircularArray<Object[]> spanObjects = new CircularArray<>(16);
-
-        private final StringBuilder spanBuilder = new StringBuilder();
-
-        private final Object[] spansForIcon = {
-                new MaxAlphaSpan(150),
-                new AbsoluteSizeSpan(32, true),
-                new TypefaceSpan(FileIcons.font(assets())),
-                new VerticalSpaceSpan(16, 6),
-        };
-
-        private final Object[] spansForLink = {
-                new MaxAlphaSpan(150),
-                new AbsoluteSizeSpan(12, true),
-                new VerticalSpaceSpan(3),
-        };
-
-        private final Object[] spansForSummary = {
-                new MaxAlphaSpan(150),
-                new AbsoluteSizeSpan(12, true),
-                new VerticalSpaceSpan(3),
-        };
-
         @Override
         public void bind(FileItem file) {
             super.bind(file);
@@ -293,94 +192,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private void updateContent(Drawable preview) {
 
-            spanStarts.clear();
-            spanEnds.clear();
-            spanObjects.clear();
-            spanBuilder.setLength(0);
-
-            Stat stat = item().selfStat();
-            CharSequence name = item().selfFile().name();
-            CharSequence summary = getSummary(item());
-            CharSequence link = null;
-            if (stat != null && stat.isSymbolicLink()) {
-                File target = item().linkTargetFile();
-                if (target != null) {
-                    link = target.path();
-                }
-            }
-
-            if (preview == null) {
-                spanBuilder.append(context().getString(iconTextId(item()))).append('\n');
-                spanStarts.addLast(0);
-                spanEnds.addLast(spanBuilder.length());
-                spanObjects.addLast(spansForIcon);
-            }
-
-            spanBuilder.append(name);
-
-            if (link != null && link.length() > 0) {
-                spanStarts.addLast(spanBuilder.length());
-                spanBuilder.append('\n').append(resources().getString(R.string.link_x, link));
-                spanEnds.addLast(spanBuilder.length());
-                spanObjects.addLast(spansForLink);
-            }
-
-            if (summary != null && summary.length() > 0) {
-                spanStarts.addLast(spanBuilder.length());
-                spanBuilder.append('\n').append(summary);
-                spanEnds.addLast(spanBuilder.length());
-                spanObjects.addLast(spansForSummary);
-            }
-
-            SpannableString span = new SpannableString(spanBuilder.toString());
-            while (!spanStarts.isEmpty()) {
-                int start = spanStarts.popFirst();
-                int end = spanEnds.popFirst();
-                for (Object sp : spanObjects.popFirst()) {
-                    if (sp instanceof VerticalSpaceSpan) {
-                        span.setSpan(sp, start, start == 0 ? end : start + 1, SPAN_INCLUSIVE_EXCLUSIVE);
-                    } else {
-                        span.setSpan(sp, start, end, SPAN_INCLUSIVE_EXCLUSIVE);
-                    }
-                }
-            }
+            SpannableString span = preview == null
+                    ? item().layoutWithIcon()
+                    : item().layoutWithoutIcon();
 
             content.setText(span, SPANNABLE);
             content.setEnabled(item().isReadable());
             content.setCompoundDrawablesWithIntrinsicBounds(null, preview, null, null);
 
-        }
-
-        private int iconTextId(FileItem file) {
-            Stat stat = file.linkTargetOrSelfStat();
-            if (stat == null) {
-                return defaultFileIconStringId();
-            }
-
-            if (stat.isDirectory()) {
-                return defaultDirectoryIconStringId();
-            } else {
-                return fileIconStringId(file.basicMediaType());
-            }
-        }
-
-        private CharSequence getSummary(FileItem file) {
-            Stat stat = file.selfStat();
-            if (stat != null) {
-                CharSequence date = formatter.apply(stat);
-                CharSequence size = formatShortFileSize(context(), stat.size());
-                boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
-                boolean isFile = stat.isRegularFile();
-                if (hasDate && isFile) {
-                    Context context = context();
-                    return context.getString(R.string.x_dot_y, date, size);
-                } else if (hasDate) {
-                    return date;
-                } else if (isFile) {
-                    return size;
-                }
-            }
-            return null;
         }
 
         private Drawable retrievePreview() {

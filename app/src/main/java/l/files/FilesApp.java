@@ -1,15 +1,15 @@
 package l.files;
 
-import android.app.Application;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.os.StrictMode.VmPolicy;
 
+import l.files.ui.base.app.BaseApplication;
 import l.files.ui.preview.Preview;
 
 import static l.files.BuildConfig.DEBUG;
 
-public final class FilesApp extends Application {
+public final class FilesApp extends BaseApplication {
 
     @Override
     public void onCreate() {
