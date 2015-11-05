@@ -196,8 +196,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
             SpannableString text =
                     preview == null
-                            ? item().layoutWithIcon()
-                            : item().layoutWithoutIcon();
+                            ? item().layoutWithIcon(context())
+                            : item().layoutWithoutIcon(context());
 
             int paddingTop =
                     preview == null

@@ -16,7 +16,6 @@ import java.io.IOException;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.ui.base.app.BaseApplication;
 import l.files.ui.base.fs.FileIcons;
 
 import static android.text.Spanned.SPAN_INCLUSIVE_EXCLUSIVE;
@@ -64,11 +63,7 @@ abstract class BrowserItem {
     @AutoValue
     static abstract class FileItem extends BrowserItem implements Comparable<FileItem> {
 
-        private static final Object[] spansForIcon = {
-                new MaxAlphaSpan(150),
-                new AbsoluteSizeSpan(32, true),
-                new TypefaceSpan(FileIcons.font(BaseApplication.get().getAssets())),
-        };
+        private static Object[] spansForIcon;
 
         private static final Object[] spansForLinkIcon = {
                 new MaxAlphaSpan(150),
@@ -124,15 +119,35 @@ abstract class BrowserItem {
                     }
                 };
 
-        private static final ThreadLocal<DateFormatter> formatter =
-                new ThreadLocal<DateFormatter>() {
-                    @Override
-                    protected DateFormatter initialValue() {
-                        return new DateFormatter(BaseApplication.get());
-                    }
-                };
+        private static ThreadLocal<DateFormatter> formatter;
 
-        private static SpannableString layout(FileItem item, boolean showIcon) {
+        private static ThreadLocal<DateFormatter> createFormatter(final Context context) {
+            return new ThreadLocal<DateFormatter>() {
+                @Override
+                protected DateFormatter initialValue() {
+                    return new DateFormatter(context);
+                }
+            };
+        }
+
+        private static Object[] createSpansForIcon(Context context) {
+            return new Object[]{
+                    new MaxAlphaSpan(150),
+                    new AbsoluteSizeSpan(32, true),
+                    new TypefaceSpan(FileIcons.font(context.getAssets())),
+            };
+        }
+
+        private static SpannableString layout(
+                final Context context, FileItem item, boolean showIcon) {
+
+            if (spansForIcon == null) {
+                spansForIcon = createSpansForIcon(context.getApplicationContext());
+            }
+
+            if (formatter == null) {
+                formatter = createFormatter(context.getApplicationContext());
+            }
 
             CircularIntArray localSpanStarts = spanStarts.get();
             CircularIntArray localSpanEnds = spanEnds.get();
@@ -146,7 +161,7 @@ abstract class BrowserItem {
 
             Stat stat = item.selfStat();
             CharSequence name = item.selfFile().name();
-            CharSequence summary = getSummary(item);
+            CharSequence summary = getSummary(context, item);
             CharSequence link = null;
             boolean isLink = stat != null && stat.isSymbolicLink();
             if (isLink) {
@@ -156,7 +171,6 @@ abstract class BrowserItem {
                 }
             }
 
-            Context context = BaseApplication.get();
             if (showIcon) {
                 if (isLink) {
                     // Invisible link on left to make icon center
@@ -223,15 +237,15 @@ abstract class BrowserItem {
             }
         }
 
-        private static CharSequence getSummary(FileItem file) {
+        private static CharSequence getSummary(Context context, FileItem file) {
             Stat stat = file.selfStat();
             if (stat != null) {
                 CharSequence date = formatter.get().apply(stat);
-                CharSequence size = formatShortFileSize(BaseApplication.get(), stat.size());
+                CharSequence size = formatShortFileSize(context, stat.size());
                 boolean hasDate = stat.lastModifiedTime().to(MINUTES) > 0;
                 boolean isFile = stat.isRegularFile();
                 if (hasDate && isFile) {
-                    return BaseApplication.get().getString(R.string.x_dot_y, date, size);
+                    return context.getString(R.string.x_dot_y, date, size);
                 } else if (hasDate) {
                     return date;
                 } else if (isFile) {
@@ -270,16 +284,16 @@ abstract class BrowserItem {
             }
         }
 
-        SpannableString layoutWithIcon() {
+        SpannableString layoutWithIcon(Context context) {
             if (layoutWithIcon == null) {
-                layoutWithIcon = layout(this, true);
+                layoutWithIcon = layout(context, this, true);
             }
             return layoutWithIcon;
         }
 
-        SpannableString layoutWithoutIcon() {
+        SpannableString layoutWithoutIcon(Context context) {
             if (layoutWithoutIcon == null) {
-                layoutWithoutIcon = layout(this, false);
+                layoutWithoutIcon = layout(context, this, false);
             }
             return layoutWithoutIcon;
         }

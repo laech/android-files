@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">Files (debug)</string>
-    <string name="authority_pdfpreview1">l.files.debug.preview.pdf1</string>
-    <string name="authority_pdfpreview2">l.files.debug.preview.pdf2</string>
-
-</resources>

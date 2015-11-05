@@ -11,7 +11,6 @@ import android.util.Pair;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -31,8 +30,6 @@ import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
 import static junit.framework.Assert.assertEquals;
@@ -44,7 +41,6 @@ import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.Instrumentations.await;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
@@ -298,14 +294,13 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertSummaryView(
+    UiFileActivity assertItemContentView(
             final File file,
-            final Consumer<CharSequence> assertion) {
+            final Consumer<TextView> assertion) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
             public void apply(View input) {
-                TextView summary = find(R.id.summary, input);
-                assertion.apply(summary.getText());
+                assertion.apply(Views.<TextView>find(android.R.id.content, input));
             }
         });
         return this;
@@ -487,64 +482,58 @@ final class UiFileActivity {
         });
     }
 
-    UiFileActivity assertThumbnailShown(
-            File file, final boolean shown) {
+    UiFileActivity assertThumbnailShown(File file, final boolean shown) {
 
-        findItemOnMainThread(file, new Consumer<View>() {
+        assertItemContentView(file, new Consumer<TextView>() {
             @Override
-            public void apply(View input) {
-                ImageView view = Views.find(R.id.preview, input);
-                if (shown) {
-                    assertEquals(VISIBLE, view.getVisibility());
-                    assertNotNull(view.getDrawable());
-                } else {
-                    assertEquals(GONE, view.getVisibility());
-                    assertNull(view.getDrawable());
-                }
+            public void apply(TextView input) {
+                Drawable topDrawable = input.getCompoundDrawables()[1];
+                assertEquals(shown, topDrawable != null);
             }
         });
+
         return this;
     }
 
-    UiFileActivity assertLinkIconDisplayed(
-            File file, final boolean displayed) {
+    UiFileActivity assertLinkIconDisplayed(File file, final boolean displayed) {
 
-        findItemOnMainThread(file, new Consumer<View>() {
+        assertItemContentView(file, new Consumer<TextView>() {
             @Override
-            public void apply(View input) {
-                View view = input.findViewById(R.id.link_icon);
-                if (displayed) {
-                    assertEquals(VISIBLE, view.getVisibility());
-                } else {
-                    assertEquals(GONE, view.getVisibility());
-                }
+            public void apply(TextView input) {
+                String expected = input.getContext().getString(R.string.link_icon);
+                String actual = input.getText().toString();
+                assertEquals(displayed, actual.contains(expected));
             }
         });
+
         return this;
     }
 
-    UiFileActivity assertLinkPathDisplayed(
-            File link, final File target) {
+    UiFileActivity assertLinkPathDisplayed(File link, final File target) {
 
-        findItemOnMainThread(link, new Consumer<View>() {
+        assertItemContentView(link, new Consumer<TextView>() {
             @Override
-            public void apply(View input) {
-
-                TextView view = Views.find(R.id.link_path, input);
+            public void apply(TextView input) {
                 if (target != null) {
-
-                    String actual = view.getText().toString();
-                    assertTrue(
-                            actual + " to contain " + target.path(),
-                            actual.contains(target.path()));
-                    assertEquals(VISIBLE, view.getVisibility());
-
-                } else {
-                    assertEquals(GONE, view.getVisibility());
+                    String expected = target.path();
+                    String actual = input.getText().toString();
+                    assertTrue(actual, actual.contains(expected));
                 }
-
             }
         });
+
+        return this;
+    }
+
+    UiFileActivity assertSummary(File file, final CharSequence expected) {
+
+        assertItemContentView(file, new Consumer<TextView>() {
+            @Override
+            public void apply(TextView view) {
+                assertTrue(view.getText().toString().contains(expected));
+            }
+        });
+
         return this;
     }
 
@@ -559,12 +548,10 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertDisabled(File file) {
-        findItemOnMainThread(file, new Consumer<View>() {
+        assertItemContentView(file, new Consumer<TextView>() {
             @Override
-            public void apply(View input) {
-                assertFalse(input.findViewById(R.id.icon).isEnabled());
-                assertFalse(input.findViewById(R.id.title).isEnabled());
-                assertFalse(input.findViewById(R.id.summary).isEnabled());
+            public void apply(TextView input) {
+                assertFalse(input.isEnabled());
             }
         });
         return this;
