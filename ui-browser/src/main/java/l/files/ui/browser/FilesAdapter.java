@@ -150,6 +150,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private final TextView content;
 
+        private final int iconPaddingTop;
         private final float previewRadius;
         private final int transitionDuration;
 
@@ -165,6 +166,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             this.itemView.setOnLongClickListener(this);
             this.previewRadius = itemView.getResources().getDimension(R.dimen.files_item_card_inner_radius);
             this.transitionDuration = resources().getInteger(android.R.integer.config_shortAnimTime);
+            this.iconPaddingTop = resources().getDimensionPixelSize(R.dimen.files_item_icon_padding_top);
 
             this.primaryText = getColorStateList(textColorPrimary, context());
             this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context());
@@ -192,11 +194,24 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private void updateContent(Drawable preview) {
 
-            SpannableString span = preview == null
-                    ? item().layoutWithIcon()
-                    : item().layoutWithoutIcon();
+            SpannableString text =
+                    preview == null
+                            ? item().layoutWithIcon()
+                            : item().layoutWithoutIcon();
 
-            content.setText(span, SPANNABLE);
+            int paddingTop =
+                    preview == null
+                            ? iconPaddingTop
+                            : 0;
+
+            content.setPaddingRelative(
+                    content.getPaddingStart(),
+                    paddingTop,
+                    content.getPaddingEnd(),
+                    content.getPaddingBottom()
+            );
+
+            content.setText(text, SPANNABLE);
             content.setEnabled(item().isReadable());
             content.setCompoundDrawablesWithIntrinsicBounds(null, preview, null, null);
 

@@ -7,16 +7,10 @@ import android.text.style.LineHeightSpan;
 
 final class VerticalSpaceSpan implements LineHeightSpan.WithDensity {
 
-    private final int top;
-    private final int bottom;
+    private final int dp;
 
-    VerticalSpaceSpan(int space) {
-        this(space, space);
-    }
-
-    VerticalSpaceSpan(int top, int bottom) {
-        this.top = top;
-        this.bottom = bottom;
+    VerticalSpaceSpan(int dp) {
+        this.dp = dp;
     }
 
     @Override
@@ -40,9 +34,8 @@ final class VerticalSpaceSpan implements LineHeightSpan.WithDensity {
             TextPaint paint) {
 
         if (end == ((Spanned) text).getSpanEnd(this)) {
-            fm.top -= top * paint.density;
-            fm.descent += bottom * paint.density;
-            fm.bottom += bottom * paint.density;
+            fm.descent += dp * paint.density;
+            fm.bottom += dp * paint.density;
         }
     }
 

@@ -1,10 +1,12 @@
 package l.files.ui.browser;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.util.CircularArray;
 import android.support.v4.util.CircularIntArray;
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.SuperscriptSpan;
 
 import com.google.auto.value.AutoValue;
 import com.ibm.icu.text.CollationKey;
@@ -66,7 +68,16 @@ abstract class BrowserItem {
                 new MaxAlphaSpan(150),
                 new AbsoluteSizeSpan(32, true),
                 new TypefaceSpan(FileIcons.font(BaseApplication.get().getAssets())),
-                new VerticalSpaceSpan(16, 6),
+        };
+
+        private static final Object[] spansForLinkIcon = {
+                new MaxAlphaSpan(150),
+                new SuperscriptSpan(),
+        };
+
+        private static final Object[] spansForLinkIconInvisiable = {
+                new MaxAlphaSpan(0),
+                new SuperscriptSpan(),
         };
 
         private static final Object[] spansForLink = {
@@ -137,25 +148,41 @@ abstract class BrowserItem {
             CharSequence name = item.selfFile().name();
             CharSequence summary = getSummary(item);
             CharSequence link = null;
-            if (stat != null && stat.isSymbolicLink()) {
+            boolean isLink = stat != null && stat.isSymbolicLink();
+            if (isLink) {
                 File target = item.linkTargetFile();
                 if (target != null) {
                     link = target.path();
                 }
             }
 
+            Context context = BaseApplication.get();
             if (showIcon) {
-                localSpanBuilder.append(BaseApplication.get().getString(iconTextId(item))).append('\n');
-                localSpanStarts.addLast(0);
+                if (isLink) {
+                    // Invisible link on left to make icon center
+                    localSpanStarts.addLast(localSpanBuilder.length());
+                    localSpanBuilder.append(context.getString(R.string.link_icon));
+                    localSpanEnds.addLast(localSpanBuilder.length());
+                    localSpanObjects.addLast(spansForLinkIconInvisiable);
+                }
+                localSpanStarts.addLast(localSpanBuilder.length());
+                localSpanBuilder.append(context.getString(iconTextId(item)));
                 localSpanEnds.addLast(localSpanBuilder.length());
                 localSpanObjects.addLast(spansForIcon);
+                if (isLink) {
+                    localSpanStarts.addLast(localSpanBuilder.length());
+                    localSpanBuilder.append(context.getString(R.string.link_icon));
+                    localSpanEnds.addLast(localSpanBuilder.length());
+                    localSpanObjects.addLast(spansForLinkIcon);
+                }
+                localSpanBuilder.append('\n');
             }
 
             localSpanBuilder.append(name);
 
             if (link != null && link.length() > 0) {
                 localSpanStarts.addLast(localSpanBuilder.length());
-                localSpanBuilder.append('\n').append(BaseApplication.get().getString(R.string.link_x, link));
+                localSpanBuilder.append('\n').append(context.getString(R.string.link_x, link));
                 localSpanEnds.addLast(localSpanBuilder.length());
                 localSpanObjects.addLast(spansForLink);
             }
@@ -182,7 +209,6 @@ abstract class BrowserItem {
 
             return span;
         }
-
 
         private static int iconTextId(FileItem file) {
             Stat stat = file.linkTargetOrSelfStat();
