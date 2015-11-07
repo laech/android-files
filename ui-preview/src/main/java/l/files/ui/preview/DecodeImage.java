@@ -43,11 +43,6 @@ final class DecodeImage extends DecodeThumbnail {
     }
 
     @Override
-    DecodeImage executeOnPreferredExecutor() {
-        return (DecodeImage) executeOnExecutor(THREAD_POOL_EXECUTOR);
-    }
-
-    @Override
     boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
         return result.originalSize.width() > scaledBitmap.getWidth() ||
                 result.originalSize.height() > scaledBitmap.getHeight();

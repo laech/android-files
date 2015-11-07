@@ -6,15 +6,33 @@ import android.support.v7.graphics.Palette;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
+import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
+
+    private static final Executor executor = newFixedThreadPool(
+            getRuntime().availableProcessors() + 1,
+            new ThreadFactory() {
+
+                private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "preview-decode-task-" + threadNumber.getAndIncrement());
+                }
+
+            });
 
     final File file;
     final Stat stat;
@@ -90,6 +108,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         }
     }
 
-    abstract AsyncTask<Object, Object, Object> executeOnPreferredExecutor();
+    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
+        return executeOnExecutor(executor);
+    }
 
 }

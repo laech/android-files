@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -15,9 +17,20 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 
 abstract class DecodeMedia extends DecodeThumbnail {
 
-    // No need to set UncaughtExceptionHandler to terminate
-    // on exception already set by Android
-    private static final Executor executor = newFixedThreadPool(2);
+    /**
+     * Only 2 thread because there is no 'get scaled down image' from MediaMetadataRetriever,
+     * so to avoid loading images that are too big.
+     */
+    private static final Executor executor = newFixedThreadPool(2, new ThreadFactory() {
+
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "preview-decode-media-" + threadNumber.getAndIncrement());
+        }
+
+    });
 
     DecodeMedia(
             File res,

@@ -2,7 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.os.AsyncTask;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -61,12 +60,7 @@ final class DecodeText extends DecodeThumbnail {
         padding = (int) applyDimension(COMPLEX_UNIT_DIP, 8, context.displayMetrics);
         size = Math.min(constraint.width(), constraint.height());
     }
-
-    @Override
-    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
-        return execute(THREAD_POOL_EXECUTOR);
-    }
-
+    
     @Override
     Result decode() throws IOException {
         String text = file.readDetectingCharset(PREVIEW_LIMIT);

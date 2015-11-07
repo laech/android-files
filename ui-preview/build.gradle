@@ -31,6 +31,7 @@ android {
 dependencies {
 
     compile project(':fs-local')
+    compile project(':ui-preview-pdf')
     compile "com.android.support:palette-v7:$supportLibVersion"
 
     apt 'com.google.auto.value:auto-value:1.1'

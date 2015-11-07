@@ -6,8 +6,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
@@ -75,7 +73,6 @@ final class DecodeApk extends DecodeThumbnail {
         return app.loadIcon(manager);
     }
 
-    @NonNull
     private Bitmap toBitmap(Drawable drawable) {
 
         Bitmap bitmap = createBitmap(
@@ -89,11 +86,6 @@ final class DecodeApk extends DecodeThumbnail {
         drawable.draw(canvas);
 
         return bitmap;
-    }
-
-    @Override
-    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
-        return execute(THREAD_POOL_EXECUTOR);
     }
 
 }

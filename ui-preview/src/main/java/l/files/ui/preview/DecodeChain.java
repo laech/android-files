@@ -3,19 +3,12 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import java.util.concurrent.Executor;
-
 import l.files.fs.File;
 import l.files.fs.Stat;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.ui.preview.Preview.decodePalette;
 
 final class DecodeChain extends Decode {
-
-    // No need to set UncaughtExceptionHandler to terminate
-    // on exception already set by Android
-    private static final Executor executor = newFixedThreadPool(5);
 
     private static final Previewer[] PREVIEWERS = {
             DecodeImage.PREVIEWER,
@@ -33,11 +26,6 @@ final class DecodeChain extends Decode {
             PreviewCallback callback,
             Preview context) {
         super(file, stat, constraint, callback, context);
-    }
-
-    @Override
-    DecodeChain executeOnPreferredExecutor() {
-        return (DecodeChain) executeOnExecutor(executor);
     }
 
     @Nullable
@@ -63,7 +51,7 @@ final class DecodeChain extends Decode {
             callback.onSizeAvailable(res, size);
         }
 
-        return new DecodeChain(res, stat, constraint, callback, context)
+        return (Decode) new DecodeChain(res, stat, constraint, callback, context)
                 .executeOnPreferredExecutor();
     }
 

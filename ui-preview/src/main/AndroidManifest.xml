@@ -1,21 +1,5 @@
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="l.files.ui.preview">
+<manifest package="l.files.ui.preview">
 
-    <application>
-
-        <provider
-            android:name=".DecodePdf$PdfPreviewProvider1"
-            android:authorities="@string/authority_pdfpreview1"
-            android:exported="false"
-            android:process=":pdfpreview1" />
-
-        <provider
-            android:name=".DecodePdf$PdfPreviewProvider2"
-            android:authorities="@string/authority_pdfpreview2"
-            android:exported="false"
-            android:process=":pdfpreview2" />
-
-    </application>
+    <application />
 
 </manifest>

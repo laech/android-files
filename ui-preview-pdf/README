@@ -1,0 +1,19 @@
+
+Provides support for previewing PDF files using pdfium.
+
+To build pdfium, see https://bitbucket.org/lae/pdfium and the android branch.
+Then copy the resulting libpdfium.so files for different architectures to jni/lib,
+copy the /public header files to jni/include, to build this module, run ndk-build
+under the jni folder manually, because the Android Gradle plugin doesn't support
+linking with prebuilt libs. jniLibs is linked to the output libs folder.
+
+Not using PdfRenderer (also uses pdfium) on Android because:
+
+  * It is only available since API 21.
+
+  * Native crashes the process sometime after opening a bad or encrypted PDF.
+    https://code.google.com/p/android/issues/detail?id=91625
+
+  * After upgrading to Android M, some PDFs are not showing text anymore.
+
+So pdfium is bundled in the app, to avoid the above issues. Sadly it's not thread safe.
