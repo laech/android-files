@@ -11,7 +11,6 @@ import android.util.Pair;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -296,11 +295,11 @@ final class UiFileActivity {
 
     UiFileActivity assertItemContentView(
             final File file,
-            final Consumer<TextView> assertion) {
+            final Consumer<FileView> assertion) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
             public void apply(View input) {
-                assertion.apply(Views.<TextView>find(android.R.id.content, input));
+                assertion.apply(Views.<FileView>find(android.R.id.content, input));
             }
         });
         return this;
@@ -484,11 +483,10 @@ final class UiFileActivity {
 
     UiFileActivity assertThumbnailShown(File file, final boolean shown) {
 
-        assertItemContentView(file, new Consumer<TextView>() {
+        assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(TextView input) {
-                Drawable topDrawable = input.getCompoundDrawables()[1];
-                assertEquals(shown, topDrawable != null);
+            public void apply(FileView input) {
+                assertEquals(shown, input.getPreview() != null);
             }
         });
 
@@ -497,12 +495,10 @@ final class UiFileActivity {
 
     UiFileActivity assertLinkIconDisplayed(File file, final boolean displayed) {
 
-        assertItemContentView(file, new Consumer<TextView>() {
+        assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(TextView input) {
-                String expected = input.getContext().getString(R.string.link_icon);
-                String actual = input.getText().toString();
-                assertEquals(displayed, actual.contains(expected));
+            public void apply(FileView input) {
+                assertEquals(displayed, input.isLinkIconVisible());
             }
         });
 
@@ -511,9 +507,9 @@ final class UiFileActivity {
 
     UiFileActivity assertLinkPathDisplayed(File link, final File target) {
 
-        assertItemContentView(link, new Consumer<TextView>() {
+        assertItemContentView(link, new Consumer<FileView>() {
             @Override
-            public void apply(TextView input) {
+            public void apply(FileView input) {
                 if (target != null) {
                     String expected = target.path();
                     String actual = input.getText().toString();
@@ -527,9 +523,9 @@ final class UiFileActivity {
 
     UiFileActivity assertSummary(File file, final CharSequence expected) {
 
-        assertItemContentView(file, new Consumer<TextView>() {
+        assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(TextView view) {
+            public void apply(FileView view) {
                 assertTrue(view.getText().toString().contains(expected));
             }
         });
@@ -548,9 +544,9 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertDisabled(File file) {
-        assertItemContentView(file, new Consumer<TextView>() {
+        assertItemContentView(file, new Consumer<FileView>() {
             @Override
-            public void apply(TextView input) {
+            public void apply(FileView input) {
                 assertFalse(input.isEnabled());
             }
         });

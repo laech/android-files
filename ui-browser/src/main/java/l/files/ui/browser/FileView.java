@@ -291,8 +291,15 @@ public final class FileView extends View implements Drawable.Callback {
         invalidate();
     }
 
-    boolean linkIconVisible() {
+    boolean isLinkIconVisible() {
         return showLinkIcon;
     }
 
+    Drawable getPreview() {
+        return preview;
+    }
+
+    CharSequence getText() {
+        return description.getText();
+    }
 }
