@@ -18,4 +18,8 @@ public final class Objects {
         return o;
     }
 
+    public static boolean equal(Object a, Object b) {
+        return a == null ? b == null : a.equals(b);
+    }
+
 }

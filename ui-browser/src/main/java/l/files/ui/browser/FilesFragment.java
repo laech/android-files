@@ -130,15 +130,16 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 actionModeCallback(),
                 (OnOpenFileListener) getActivity());
 
-        int columns = getResources().getInteger(R.integer.files_grid_columns);
+        int spanCount = getResources().getInteger(R.integer.files_grid_columns);
         recycler = find(android.R.id.list, this);
         recycler.setAdapter(adapter);
         recycler.setHasFixedSize(true);
-        recycler.setItemViewCacheSize(columns * 3);
+        recycler.setItemViewCacheSize(spanCount * 3);
         recycler.setItemAnimator(null);
-        recycler.setLayoutManager(new StaggeredGridLayoutManager(columns, VERTICAL));
+        recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
+        recycler.addOnScrollListener(warmUpOnIdle());
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -146,6 +147,18 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         handler.postDelayed(checkProgress, 500);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
+    }
+
+    private RecyclerView.OnScrollListener warmUpOnIdle() {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    adapter.warmUpOnIdle(getLayoutManager());
+                }
+            }
+        };
     }
 
     @Override
@@ -268,10 +281,23 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
             if (adapter.isEmpty()) {
                 emptyView().setVisibility(VISIBLE);
+
             } else {
+
                 emptyView().setVisibility(GONE);
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.warmUpOnIdle(getLayoutManager());
+                    }
+                });
             }
         }
+    }
+
+    private StaggeredGridLayoutManager getLayoutManager() {
+        return (StaggeredGridLayoutManager) recycler.getLayoutManager();
     }
 
     private void updateSelection(Result data) {

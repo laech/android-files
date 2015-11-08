@@ -11,18 +11,14 @@
     app:cardCornerRadius="@dimen/files_item_card_radius"
     app:cardElevation="1dp">
 
-    <TextView
+    <l.files.ui.browser.FileView
         android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/files_item_card_inner_space"
-        android:drawablePadding="8dp"
-        android:gravity="center_horizontal"
-        android:lineSpacingMultiplier="1.1"
+        android:layout_margin="@dimen/files_item_card_inner_space"
         android:paddingBottom="14dp"
         android:paddingEnd="12dp"
         android:paddingStart="12dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="14sp" />
+        android:paddingTop="16dp" />
 
 </l.files.ui.browser.ActivatedCardView>

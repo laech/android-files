@@ -10,7 +10,6 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.text.SpannableString;
 import android.util.DisplayMetrics;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import l.files.fs.File;
@@ -43,7 +43,7 @@ import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.widget.TextView.BufferType.SPANNABLE;
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -62,12 +62,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
 
+    private final Context context;
     private final Preview decorator;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<File> selection;
     private final OnOpenFileListener listener;
     private Rect constraint;
+    private int textWidth;
 
     FilesAdapter(
             Context context,
@@ -76,6 +78,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
 
+        this.context = requireNonNull(context);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
@@ -98,6 +101,30 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         );
         int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
         return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
+    }
+
+    void warmUpOnIdle(StaggeredGridLayoutManager layout) {
+
+        System.gc();
+
+        int[] lastVisiblePositions = layout.findLastVisibleItemPositions(null);
+        Arrays.sort(lastVisiblePositions);
+        int pos = lastVisiblePositions[lastVisiblePositions.length - 1];
+        if (pos == NO_POSITION) {
+            return;
+        }
+
+        int warmUpToPosition = pos + 50;
+
+        while (pos <= warmUpToPosition && pos < getItemCount()) {
+            BrowserItem item = getItem(pos);
+            if (item instanceof FileItem) {
+                FileTextLayoutCache.get(context, (FileItem) item, textWidth);
+            }
+            pos++;
+        }
+
+        FileTextLayoutCache.printStat();
     }
 
     @Override
@@ -148,9 +175,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     final class FileHolder extends SelectionModeViewHolder<File, FileItem>
             implements PreviewCallback {
 
-        private final TextView content;
+        private final FileView content;
 
-        private final int iconPaddingTop;
         private final float previewRadius;
         private final int transitionDuration;
 
@@ -166,7 +192,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             this.itemView.setOnLongClickListener(this);
             this.previewRadius = itemView.getResources().getDimension(R.dimen.files_item_card_inner_radius);
             this.transitionDuration = resources().getInteger(android.R.integer.config_shortAnimTime);
-            this.iconPaddingTop = resources().getDimensionPixelSize(R.dimen.files_item_icon_padding_top);
 
             this.primaryText = getColorStateList(textColorPrimary, context());
             this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context());
@@ -187,34 +212,15 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             super.bind(file);
             if (constraint == null) {
                 constraint = calculateThumbnailConstraint(context(), (CardView) itemView);
+                textWidth = constraint.width() - content.getPaddingStart() - content.getPaddingEnd();
             }
 
             updateContent(retrievePreview());
         }
 
         private void updateContent(Drawable preview) {
-
-            SpannableString text =
-                    preview == null
-                            ? item().layoutWithIcon(context())
-                            : item().layoutWithoutIcon(context());
-
-            int paddingTop =
-                    preview == null
-                            ? iconPaddingTop
-                            : 0;
-
-            content.setPaddingRelative(
-                    content.getPaddingStart(),
-                    paddingTop,
-                    content.getPaddingEnd(),
-                    content.getPaddingBottom()
-            );
-
-            content.setText(text, SPANNABLE);
+            content.set(item(), textWidth, preview);
             content.setEnabled(item().isReadable());
-            content.setCompoundDrawablesWithIntrinsicBounds(null, preview, null, null);
-
         }
 
         private Drawable retrievePreview() {
