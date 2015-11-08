@@ -107,7 +107,19 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         System.gc();
 
-        int[] lastVisiblePositions = layout.findLastVisibleItemPositions(null);
+        int[] lastVisiblePositions;
+        try {
+            lastVisiblePositions = layout.findLastVisibleItemPositions(null);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            /*
+             * java.lang.NullPointerException: Attempt to invoke virtual method 'int android.support.v7.widget.OrientationHelper.getStartAfterPadding()' on a null object reference
+             *     at android.support.v7.widget.StaggeredGridLayoutManager$Span.findOneVisibleChild(StaggeredGridLayoutManager.java:2345)
+             *     at android.support.v7.widget.StaggeredGridLayoutManager$Span.findLastVisibleItemPosition(StaggeredGridLayoutManager.java:2333)
+             *     at android.support.v7.widget.StaggeredGridLayoutManager.findLastVisibleItemPositions(StaggeredGridLayoutManager.java:897)
+             */
+            return;
+        }
         Arrays.sort(lastVisiblePositions);
         int pos = lastVisiblePositions[lastVisiblePositions.length - 1];
         if (pos == NO_POSITION) {
