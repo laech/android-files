@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.1'
+        classpath 'com.android.tools.build:gradle:1.5.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.2'
     }
@@ -14,7 +14,7 @@ buildscript {
     // Cannot target API 23 until request permission at runtime is implemented
     ext.targetSdkVersion = 22
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = "23.0.1"
+    ext.buildToolsVersion = "23.0.2"
     ext.supportLibVersion = "23.1.0"
 
 }
