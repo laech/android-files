@@ -15,6 +15,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Spinner;
 
+import com.android.debug.hv.ViewServer;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -42,6 +44,8 @@ public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
         OnItemSelectedListener,
         OnOpenFileListener {
+
+    public static boolean DEBUG_UI = false;
 
     public static final String EXTRA_DIRECTORY = "directory";
 
@@ -111,6 +115,10 @@ public final class FilesActivity extends BaseActivity implements
                 updateToolBar();
             }
         });
+
+        if (DEBUG_UI) {
+            ViewServer.get(this).addWindow(this);
+        }
     }
 
     @Override
@@ -127,9 +135,22 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (DEBUG_UI) {
+            ViewServer.get(this).setFocusedWindow(this);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         getSupportFragmentManager().removeOnBackStackChangedListener(this);
         super.onDestroy();
+
+        if (DEBUG_UI) {
+            ViewServer.get(this).removeWindow(this);
+        }
     }
 
     private File initialDirectory() {
