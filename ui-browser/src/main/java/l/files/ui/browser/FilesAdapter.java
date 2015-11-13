@@ -191,6 +191,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private final FileView content;
 
         private final float previewRadius;
+        private final float itemViewElevationWithPreview;
+        private final float itemViewElevationWithoutPreview;
         private final int transitionDuration;
 
         private final ColorStateList primaryText;
@@ -203,11 +205,17 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             this.content = find(android.R.id.content, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
-            this.previewRadius = itemView.getResources().getDimension(R.dimen.files_item_card_inner_radius);
+            this.previewRadius = dimen(R.dimen.files_item_card_inner_radius);
+            this.itemViewElevationWithoutPreview = dimen(R.dimen.files_item_elevation_without_preview);
+            this.itemViewElevationWithPreview = dimen(R.dimen.files_item_elevation_with_preview);
             this.transitionDuration = resources().getInteger(android.R.integer.config_shortAnimTime);
 
             this.primaryText = getColorStateList(textColorPrimary, context());
             this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context());
+        }
+
+        private float dimen(int id) {
+            return resources().getDimension(id);
         }
 
         @Override
@@ -234,6 +242,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private void updateContent(Drawable preview) {
             content.set(item(), textWidth, preview);
             content.setEnabled(item().isReadable());
+            ((CardView) itemView).setCardElevation(
+                    preview != null
+                            ? itemViewElevationWithPreview
+                            : itemViewElevationWithoutPreview);
         }
 
         private Drawable retrievePreview() {

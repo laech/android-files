@@ -43,4 +43,11 @@ public final class ActivatedCardView extends CardView {
                 : cardBackgroundColorNotActivated);
     }
 
+    @Override
+    public void setCardElevation(float radius) {
+        if (getCardElevation() != radius) {
+            super.setCardElevation(radius);
+        }
+    }
+
 }

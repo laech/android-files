@@ -87,6 +87,11 @@ final class FileTextLayoutCache {
         }
     }
 
+    private static final Object[] spansForName = {
+            new MaxAlphaSpan(240),
+            new AbsoluteSizeSpan(13, true),
+    };
+
     private static final Object[] spansForLink = {
             new MaxAlphaSpan(150),
             new AbsoluteSizeSpan(12, true),
@@ -151,7 +156,10 @@ final class FileTextLayoutCache {
             }
         }
 
+        spanStarts.addLast(spanBuilder.length());
         spanBuilder.append(name);
+        spanEnds.addLast(spanBuilder.length());
+        spanObjects.addLast(spansForName);
 
         if (link != null && link.length() > 0) {
             spanStarts.addLast(spanBuilder.length());
