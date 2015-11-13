@@ -22,7 +22,7 @@ import static android.os.Environment.DIRECTORY_PICTURES;
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.util.Collections.unmodifiableSet;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.LinkOption.FOLLOW;
 
 final class BookmarkManagerImpl extends BookmarkManager {
 
@@ -65,7 +65,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
             try {
                 File file = LocalFile.of(new java.io.File(new URI(uriString)));
                 try {
-                    if (file.exists(NOFOLLOW)) {
+                    if (file.exists(FOLLOW)) {
                         paths.add(file);
                     }
                 } catch (IOException ignored) {

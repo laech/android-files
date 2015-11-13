@@ -81,14 +81,16 @@ public final class BookmarkManagerTest extends FileBaseTest {
 
     @Test
     public void removes_non_existing_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDir();
-        File b = dir1().resolve("b").createDir();
-        manager.addBookmark(a);
-        manager.addBookmark(b);
-        assertEquals(new HashSet<>(asList(a, b)), manager.loadBookmarks());
+        File file = dir1().resolve("file").createFile();
+        File dir = dir1().resolve("dir").createDir();
+        File link = dir1().resolve("link").createLink(file);
+        manager.addBookmark(file);
+        manager.addBookmark(dir);
+        manager.addBookmark(link);
+        assertEquals(new HashSet<>(asList(file, link, dir)), manager.loadBookmarks());
 
-        a.delete();
-        assertEquals(singleton(b), manager.loadBookmarks());
+        file.delete();
+        assertEquals(singleton(dir), manager.loadBookmarks());
     }
 
 }
