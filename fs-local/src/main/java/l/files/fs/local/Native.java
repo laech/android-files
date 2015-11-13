@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.lang.System.loadLibrary;
 
 class Native {
@@ -15,12 +13,6 @@ class Native {
     synchronized static void load() {
         if (!loaded) {
             loaded = true;
-
-            if (SDK_INT >= LOLLIPOP) {
-                loadLibrary("fslocalstat64");
-            } else {
-                loadLibrary("fslocalstat");
-            }
             loadLibrary("fslocal");
         }
     }
