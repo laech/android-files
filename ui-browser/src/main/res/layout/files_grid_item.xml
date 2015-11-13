@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/files_item_card_inner_space"
-        android:paddingBottom="14dp"
+        android:paddingBottom="12dp"
         android:paddingEnd="12dp"
         android:paddingStart="12dp"
         android:paddingTop="16dp" />
