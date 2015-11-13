@@ -21,7 +21,8 @@ abstract class Paste extends AbstractOperation {
     void process(File file) throws InterruptedException {
         checkInterrupt();
 
-        if (destination.equals(file) || destination.pathStartsWith(file)) {
+        if (destination.equals(file) ||
+                destination.path().startsWith(file.path())) {
             throw new CannotPasteIntoSelfException(
                     "Cannot paste directory " + file +
                             " into its own sub directory " + destination

@@ -153,7 +153,7 @@ public final class ErrnoException extends Exception {
         this.errno = errno;
     }
 
-    IOException toIOException(String... paths) {
+    IOException toIOException(Object... paths) {
         String message = TextUtils.join(", ", paths);
         if (errno == ENOENT) {
             FileNotFoundException e = new FileNotFoundException(message);

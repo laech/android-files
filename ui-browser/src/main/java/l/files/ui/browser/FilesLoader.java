@@ -26,6 +26,7 @@ import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
+import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
@@ -62,7 +63,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private final BatchObserver listener = new BatchObserver() {
 
         @Override
-        public void onBatchEvent(boolean selfChanged, final Set<String> children) {
+        public void onBatchEvent(boolean selfChanged, Set<Name> children) {
             if (!children.isEmpty()) {
                 updateAll(children, false);
             }
@@ -76,7 +77,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     void updateAll(
-            final Set<String> changedChildren,
+            final Set<Name> changedChildren,
             final boolean forceReload) {
 
         executor.execute(new Runnable() {
@@ -85,7 +86,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
                 boolean changed = false;
-                for (String child : changedChildren) {
+                for (Name child : changedChildren) {
                     changed |= update(child);
                 }
 
@@ -134,12 +135,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
-        updateAll(Collections.<String>emptySet(), true);
+        updateAll(Collections.<Name>emptySet(), true);
     }
 
     void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
-        updateAll(Collections.<String>emptySet(), true);
+        updateAll(Collections.<Name>emptySet(), true);
     }
 
     @Override
@@ -148,7 +149,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         if (data.isEmpty()) {
             forceLoad();
         } else {
-            updateAll(Collections.<String>emptySet(), true);
+            updateAll(Collections.<Name>emptySet(), true);
         }
     }
 
@@ -316,7 +317,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean update(String child) {
+    private boolean update(Name child) {
         return update(root.resolve(child));
     }
 

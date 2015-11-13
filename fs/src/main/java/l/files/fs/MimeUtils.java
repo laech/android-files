@@ -25,7 +25,7 @@ import java.util.Map;
  * Utilities for dealing with MIME types.
  * Used to implement java.net.URLConnection and android.webkit.MimeTypeMap.
  */
-public final class MimeUtils {
+final class MimeUtils {
     private static final Map<String, String> mimeTypeToExtensionMap = new HashMap<String, String>();
     private static final Map<String, String> extensionToMimeTypeMap = new HashMap<String, String>();
     static {

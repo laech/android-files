@@ -7,23 +7,23 @@ static jmethodID dirent_create;
 
 void Java_l_files_fs_local_Dirent_init(JNIEnv *env, jclass clazz) {
     dirent_create = (*env)->GetStaticMethodID(
-            env, clazz, "create", "(JILjava/lang/String;)Ll/files/fs/local/Dirent;");
+            env, clazz, "create", "(JI[B)Ll/files/fs/local/Dirent;");
 }
 
 jlong Java_l_files_fs_local_Dirent_opendir(
-        JNIEnv *env, jclass clazz, jstring jpath, jboolean followLink) {
+        JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean followLink) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return -1;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     int flags = O_DIRECTORY;
     if (JNI_FALSE == followLink) {
         flags |= O_NOFOLLOW;
     }
+
     int fd = open(path, flags);
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
 
     if (-1 == fd) {
         throw_errno_exception(env);
@@ -54,7 +54,10 @@ jobject Java_l_files_fs_local_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jd
         return NULL;
     }
 
-    jstring jname = (*env)->NewStringUTF(env, entry.d_name);
+    jsize len = (jsize) strlen(entry.d_name);
+    jbyteArray name = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, name, 0, len, entry.d_name);
+
     return (*env)->CallStaticObjectMethod(
-            env, clazz, dirent_create, entry.d_ino, entry.d_type, jname);
+            env, clazz, dirent_create, entry.d_ino, entry.d_type, name);
 }

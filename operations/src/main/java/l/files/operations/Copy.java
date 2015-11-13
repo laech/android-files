@@ -61,7 +61,7 @@ final class Copy extends Paste {
             File toParent) throws IOException {
 
         Stat stat = src.stat(NOFOLLOW);
-        File dst = src.resolveParent(fromParent, toParent);
+        File dst = src.rebase(fromParent, toParent);
 
         if (stat.isSymbolicLink()) {
             copyLink(src, stat, dst);
@@ -84,7 +84,7 @@ final class Copy extends Paste {
             File toParent) throws IOException {
 
         Stat stat = src.stat(NOFOLLOW);
-        File dst = src.resolveParent(fromParent, toParent);
+        File dst = src.rebase(fromParent, toParent);
         if (stat.isDirectory()) {
             setTimes(stat, dst);
         }

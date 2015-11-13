@@ -19,10 +19,10 @@ public abstract class FileBaseTest extends BaseTest {
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
 
-    private File dir1;
-    private File dir2;
+    private LocalFile dir1;
+    private LocalFile dir2;
 
-    protected final File dir1() {
+    protected final LocalFile dir1() {
         if (dir1 == null) {
             try {
                 dir1 = LocalFile.of(folder.newFolder());
@@ -33,7 +33,7 @@ public abstract class FileBaseTest extends BaseTest {
         return dir1;
     }
 
-    protected final File dir2() {
+    protected final LocalFile dir2() {
         if (dir2 == null) {
             try {
                 dir2 = LocalFile.of(folder.newFolder());
@@ -52,7 +52,7 @@ public abstract class FileBaseTest extends BaseTest {
     }
 
     private static void delete(File file) throws IOException {
-        if (file == null) {
+        if (file == null || !file.exists(NOFOLLOW)) {
             return;
         }
         file.traverse(

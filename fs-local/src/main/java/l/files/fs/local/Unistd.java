@@ -10,11 +10,11 @@ final class Unistd extends Native {
     private Unistd() {
     }
 
-    static native void access(String path, int mode) throws ErrnoException;
+    static native void access(byte[] path, int mode) throws ErrnoException;
 
-    static native void symlink(String target, String linkpath) throws ErrnoException;
+    static native void symlink(byte[] target, byte[] linkpath) throws ErrnoException;
 
-    static native String readlink(String path) throws ErrnoException;
+    static native byte[] readlink(byte[] path) throws ErrnoException;
 
     static native void close(int fd) throws ErrnoException;
 

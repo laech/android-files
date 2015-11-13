@@ -97,9 +97,9 @@ abstract class LocalStat implements Stat {
         while (stat == null) {
             try {
                 if (option == FOLLOW) {
-                    stat = l.files.fs.local.Stat.stat(file.path());
+                    stat = l.files.fs.local.Stat.stat(file.path().bytes());
                 } else {
-                    stat = l.files.fs.local.Stat.lstat(file.path());
+                    stat = l.files.fs.local.Stat.lstat(file.path().bytes());
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {

@@ -64,12 +64,13 @@ final class DecodeApk extends DecodeThumbnail {
 
     private Drawable loadApkIcon() {
         PackageManager manager = context.context.getPackageManager();
-        PackageInfo info = manager.getPackageArchiveInfo(file.path(), 0);
+        String path = file.path().toString();
+        PackageInfo info = manager.getPackageArchiveInfo(path, 0);
         if (info == null) {
             return null;
         }
         ApplicationInfo app = info.applicationInfo;
-        app.sourceDir = app.publicSourceDir = file.path();
+        app.sourceDir = app.publicSourceDir = path;
         return app.loadIcon(manager);
     }
 

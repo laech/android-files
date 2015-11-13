@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.Locale;
 
 import l.files.fs.File;
-import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 
 import static l.files.ui.browser.FileSort.MODIFIED;
@@ -46,14 +46,16 @@ public final class FileSortDateTest extends FileSortTest {
         return createModified(name, instant, true);
     }
 
-    private File createModified(String name, Instant instant, boolean dir) throws IOException {
+    private File createModified(String nameStr, Instant instant, boolean dir) throws IOException {
         Stat stat = mock(Stat.class);
         File file = mock(File.class);
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(nameStr);
         given(stat.lastModifiedTime()).willReturn(instant);
         given(stat.isDirectory()).willReturn(dir);
         given(stat.isRegularFile()).willReturn(!dir);
         given(file.stat(any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(FileName.of(name));
+        given(file.name()).willReturn(name);
         return file;
     }
 

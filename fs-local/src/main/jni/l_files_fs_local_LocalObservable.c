@@ -4,34 +4,31 @@
 #include "util.h"
 #include <unistd.h>
 #include <sys/vfs.h>
-//#include <android/log.h>
 
 static jmethodID method_onEvent;
 static jmethodID method_isClosed;
 
 void Java_l_files_fs_local_LocalObservable_init(JNIEnv *env, jclass clazz) {
     method_onEvent = (*env)->GetMethodID(
-            env, clazz, "onEvent", "(IILjava/lang/String;)V");
+            env, clazz, "onEvent", "(II[B)V");
     method_isClosed = (*env)->GetMethodID(env, clazz, "isClosed", "()Z");
 }
 
 jboolean Java_l_files_fs_local_LocalObservable_isProcfs(
-        JNIEnv *env, jclass clazz, jstring jpath) {
+        JNIEnv *env, jclass clazz, jbyteArray jpath) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return NULL;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     struct statfs buff;
-    if (-1 == TEMP_FAILURE_RETRY(statfs(path, &buff))) {
 
-        (*env)->ReleaseStringUTFChars(env, jpath, path);
+    if (-1 == TEMP_FAILURE_RETRY(statfs(path, &buff))) {
         throw_errno_exception(env);
         return NULL;
 
     } else {
-        (*env)->ReleaseStringUTFChars(env, jpath, path);
         return (jboolean) (PROC_SUPER_MAGIC == buff.f_type);
     }
 
@@ -68,9 +65,11 @@ void Java_l_files_fs_local_LocalObservable_observe(
         for (p = buf; p < buf + num_bytes;) {
             event = (struct inotify_event *) p;
 
-            jstring path = NULL;
+            jbyteArray path = NULL;
             if (event->len > 0) {
-                path = (*env)->NewStringUTF(env, event->name);
+                jsize len = (jsize) strlen(event->name);
+                path = (*env)->NewByteArray(env, len);
+                (*env)->SetByteArrayRegion(env, path, 0, len, event->name);
             }
 
             (*env)->CallVoidMethod(

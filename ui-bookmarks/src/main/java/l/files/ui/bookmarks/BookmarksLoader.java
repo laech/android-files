@@ -1,7 +1,11 @@
 package l.files.ui.bookmarks;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.content.AsyncTaskLoader;
+
+import com.ibm.icu.text.CollationKey;
+import com.ibm.icu.text.Collator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +15,7 @@ import java.util.Locale;
 
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.File;
-import l.files.fs.FileName;
+import l.files.ui.base.text.Collators;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
@@ -32,21 +36,35 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 
     @Override
     public List<File> loadInBackground() {
-        final Comparator<FileName> comparator = FileName.comparator(Locale.getDefault());
-        final List<File> files = new ArrayList<>(manager.getBookmarks());
-        Collections.sort(files, new Comparator<File>() {
+        Collator collator = Collators.of(Locale.getDefault());
+        List<Entry> collation = collateBookmarks(collator);
+        List<File> bookmarks = new ArrayList<>(collation.size());
+        for (Entry pair : collation) {
+            bookmarks.add(pair.bookmark);
+        }
+        return bookmarks;
+    }
+
+    @NonNull
+    private List<Entry> collateBookmarks(Collator collator) {
+        List<Entry> collation = new ArrayList<>();
+        for (File bookmark : manager.getBookmarks()) {
+            CollationKey key = collator.getCollationKey(bookmark.name().toString());
+            collation.add(new Entry(bookmark, key));
+        }
+        Collections.sort(collation, new Comparator<Entry>() {
             @Override
-            public int compare(File a, File b) {
-                if (a.equals(home)) {
+            public int compare(Entry a, Entry b) {
+                if (a.bookmark.equals(home)) {
                     return -1;
                 }
-                if (b.equals(home)) {
+                if (b.bookmark.equals(home)) {
                     return 1;
                 }
-                return comparator.compare(a.name(), b.name());
+                return a.collationKey.compareTo(b.collationKey);
             }
         });
-        return files;
+        return collation;
     }
 
     @Override
@@ -78,4 +96,17 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
             forceLoad();
         }
     }
+
+    private static final class Entry {
+
+        final File bookmark;
+        final CollationKey collationKey;
+
+        Entry(File bookmark, CollationKey collationKey) {
+            this.bookmark = bookmark;
+            this.collationKey = collationKey;
+        }
+
+    }
+
 }

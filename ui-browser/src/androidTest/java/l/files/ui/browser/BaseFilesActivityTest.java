@@ -39,7 +39,7 @@ public class BaseFilesActivityTest {
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
 
-    private File dir;
+    private LocalFile dir;
     private Intent intent;
     private UiFileActivity screen;
 
@@ -100,7 +100,7 @@ public class BaseFilesActivityTest {
         return screen;
     }
 
-    File dir() {
+    LocalFile dir() {
         return dir;
     }
 

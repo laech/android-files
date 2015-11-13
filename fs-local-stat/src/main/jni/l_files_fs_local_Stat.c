@@ -37,11 +37,11 @@ jobject to_java_stat(JNIEnv *env, jclass clazz, struct stat *sb) {
     );
 }
 
-jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return NULL;
-    }
+jobject do_stat(JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean is_lstat) {
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     struct stat sb;
     int rc = (JNI_TRUE == is_lstat)
@@ -59,11 +59,11 @@ jobject do_stat(JNIEnv *env, jclass clazz, jstring jpath, jboolean is_lstat) {
     return to_java_stat(env, clazz, &sb);
 }
 
-jobject Java_l_files_fs_local_Stat_stat(JNIEnv *env, jclass clazz, jstring jpath) {
+jobject Java_l_files_fs_local_Stat_stat(JNIEnv *env, jclass clazz, jbyteArray jpath) {
     return do_stat(env, clazz, jpath, JNI_FALSE);
 }
 
-jobject Java_l_files_fs_local_Stat_lstat(JNIEnv *env, jclass clazz, jstring jpath) {
+jobject Java_l_files_fs_local_Stat_lstat(JNIEnv *env, jclass clazz, jbyteArray jpath) {
     return do_stat(env, clazz, jpath, JNI_TRUE);
 }
 

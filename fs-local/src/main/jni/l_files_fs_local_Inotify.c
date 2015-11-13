@@ -14,19 +14,17 @@ jint Java_l_files_fs_local_Inotify_internalInit(
 }
 
 jint Java_l_files_fs_local_Inotify_internalAddWatch(
-        JNIEnv *env, jobject obj, jint fd, jstring jpath, jint mask) {
+        JNIEnv *env, jobject obj, jint fd, jbyteArray jpath, jint mask) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return -1;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     int wd = inotify_add_watch(fd, path, (uint32_t) mask);
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
     if (wd == -1) {
         throw_errno_exception(env);
     }
-
     return wd;
 }
 

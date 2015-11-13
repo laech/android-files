@@ -11,7 +11,7 @@ import java.util.Set;
 
 import l.files.bookmarks.BookmarkManager;
 import l.files.fs.File;
-import l.files.fs.FileName;
+import l.files.fs.Name;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -31,7 +31,7 @@ public final class BookmarksLoaderTest {
         given(context.getApplicationContext()).willReturn(context);
 
         home = mock(File.class);
-        given(home.name()).willReturn(FileName.of("home"));
+        given(home.name()).willReturn(mock(Name.class));
         bookmarks = mock(BookmarkManager.class);
         loader = new BookmarksLoader(context, bookmarks, home);
     }
@@ -65,9 +65,11 @@ public final class BookmarksLoaderTest {
         return unmodifiableSet(new HashSet<>(asList(files)));
     }
 
-    private File mockFile(String name) {
-        File file = mock(File.class, name);
-        given(file.name()).willReturn(FileName.of(name));
+    private File mockFile(String nameStr) {
+        File file = mock(File.class);
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(nameStr);
+        given(file.name()).willReturn(name);
         return file;
     }
 

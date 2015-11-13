@@ -32,6 +32,6 @@ final class Fcntl extends Native {
     private Fcntl() {
     }
 
-    static native int open(String path, int flags, int mode) throws ErrnoException;
+    static native int open(byte[] path, int flags, int mode) throws ErrnoException;
 
 }

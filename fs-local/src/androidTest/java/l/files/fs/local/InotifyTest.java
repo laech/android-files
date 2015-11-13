@@ -13,11 +13,11 @@ public final class InotifyTest extends FileBaseTest {
     @Test
     public void cannot_use_fd_after_close() throws Exception {
         int fd = Inotify.get().init(mock(Inotify.Callback.class));
-        Inotify.get().addWatch(fd, dir1().path(), IN_ALL_EVENTS);
+        Inotify.get().addWatch(fd, dir1().path().bytes(), IN_ALL_EVENTS);
         close(fd);
         try {
 
-            Inotify.get().addWatch(fd, dir2().path(), IN_ALL_EVENTS);
+            Inotify.get().addWatch(fd, dir2().path().bytes(), IN_ALL_EVENTS);
             fail();
 
         } catch (ErrnoException e) {

@@ -90,7 +90,7 @@ public final class PreviewTest extends FileBaseTest {
 
     @Test
     public void preview_proc_cpuinfo() throws Exception {
-        testPreviewSuccess(dir1().root().resolve("/proc/cpuinfo"));
+        testPreviewSuccess(dir1().resolve("/proc/cpuinfo"));
     }
 
     @Test

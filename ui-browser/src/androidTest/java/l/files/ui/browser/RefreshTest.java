@@ -250,7 +250,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir().resolve("a").createFile();
         screen().assertListMatchesFileSystem(dir());
 
-        long end = currentTimeMillis() + SECONDS.toMillis(3);
+        long end = currentTimeMillis() + SECONDS.toMillis(5);
         while (currentTimeMillis() < end) {
             updatePermissions("a");
             updateFileContent("b");

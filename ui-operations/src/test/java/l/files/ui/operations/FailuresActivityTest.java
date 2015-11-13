@@ -17,6 +17,7 @@ import org.robolectric.util.ActivityController;
 import java.util.ArrayList;
 
 import l.files.fs.File;
+import l.files.fs.Path;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static java.util.Arrays.asList;
@@ -63,16 +64,24 @@ public final class FailuresActivityTest {
         assertFailureView(f2, list.getChildAt(1));
     }
 
-    private File mockFile(String path) {
+    private File mockFile(String pathStr) {
         File file = mock(File.class);
+        Path path = mock(Path.class);
+        given(path.toString()).willReturn(pathStr);
         given(file.path()).willReturn(path);
         return file;
     }
 
 
     private void assertFailureView(FailureMessage msg, View view) {
-        assertEquals(msg.file().path(), ((TextView) view.findViewById(R.id.failure_path)).getText());
-        assertEquals(msg.message(), ((TextView) view.findViewById(R.id.failure_message)).getText());
+        assertEquals(
+                msg.file().path().toString(),
+                ((TextView) view.findViewById(R.id.failure_path)).getText()
+        );
+        assertEquals(
+                msg.message(),
+                ((TextView) view.findViewById(R.id.failure_message)).getText()
+        );
     }
 
     @Test

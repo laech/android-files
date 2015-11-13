@@ -10,6 +10,7 @@ import l.files.fs.BatchObserver;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
 import l.files.fs.Instant;
+import l.files.fs.Name;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -56,10 +57,9 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
 
         Closer closer = Closer.create();
         try {
-            closer.register(dir1().observe(NOFOLLOW, observer, consumer, 10, MILLISECONDS));
+            closer.register(dir1().observe(NOFOLLOW, observer, consumer, 30, MILLISECONDS));
             a.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(1));
             b.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(2));
-            verify(observer, timeout(100)).onBatchEvent(false, names(a, b));
             verify(observer, timeout(100)).onBatchEvent(false, names(a, b));
             verifyNoMoreInteractions(observer);
         } catch (Throwable e) {
@@ -98,10 +98,10 @@ public final class LocalFileBatchObserveTest extends FileBaseTest {
         }
     }
 
-    private static Set<String> names(File... files) {
-        Set<String> names = new HashSet<>();
+    private static Set<Name> names(File... files) {
+        Set<Name> names = new HashSet<>();
         for (File file : files) {
-            names.add(file.name().toString());
+            names.add(file.name());
         }
         return names;
     }

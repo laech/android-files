@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.Locale;
 
 import l.files.fs.File;
-import l.files.fs.FileName;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 
 import static l.files.ui.browser.FileSort.SIZE;
@@ -53,22 +53,26 @@ public final class FileSortSizeTest extends FileSortTest {
         testSortMatches(Locale.getDefault(), SIZE.comparator(), a, b);
     }
 
-    protected File createFile(String name, long size) throws IOException {
+    protected File createFile(String nameStr, long size) throws IOException {
         Stat stat = mock(Stat.class);
         File file = mock(File.class);
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(nameStr);
         given(stat.size()).willReturn(size);
         given(stat.isRegularFile()).willReturn(true);
         given(file.stat(any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(FileName.of(name));
+        given(file.name()).willReturn(name);
         return file;
     }
 
-    protected File createDir(String name) throws IOException {
+    protected File createDir(String nameStr) throws IOException {
         Stat stat = mock(Stat.class);
         File file = mock(File.class);
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(nameStr);
         given(stat.isDirectory()).willReturn(true);
         given(file.stat(any(LinkOption.class))).willReturn(stat);
-        given(file.name()).willReturn(FileName.of(name));
+        given(file.name()).willReturn(name);
         return file;
     }
 

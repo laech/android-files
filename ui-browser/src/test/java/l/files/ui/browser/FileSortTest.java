@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Locale;
 
 import l.files.fs.File;
-import l.files.fs.FileName;
+import l.files.fs.Name;
 import l.files.fs.Stat;
+import l.files.ui.base.text.Collators;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Collections.shuffle;
@@ -33,8 +34,8 @@ abstract class FileSortTest {
         assertEquals(expected, actual);
     }
 
-    private List<FileName> names(List<FileItem> items) {
-        List<FileName> names = new ArrayList<>(items.size());
+    private List<Name> names(List<FileItem> items) {
+        List<Name> names = new ArrayList<>(items.size());
         for (FileItem item : items) {
             names.add(item.selfFile().name());
         }

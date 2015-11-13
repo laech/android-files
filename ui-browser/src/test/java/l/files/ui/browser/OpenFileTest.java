@@ -19,8 +19,8 @@ import java.util.concurrent.CountDownLatch;
 import l.files.fs.BaseFile;
 import l.files.fs.BuildConfig;
 import l.files.fs.File;
-import l.files.fs.FileName;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
@@ -45,11 +45,13 @@ public final class OpenFileTest {
         final String testFile = "open_file_test.apk";
         final Stat stat = mock(Stat.class);
         final File file = mock(BaseFile.class);
+        final Name name = mock(Name.class);
 
+        given(name.toString()).willReturn(testFile);
         given(stat.isRegularFile()).willReturn(true);
         given(file.stat(any(LinkOption.class))).willReturn(stat);
         given(file.detectMediaType(stat)).willCallRealMethod();
-        given(file.name()).willReturn(FileName.of(testFile));
+        given(file.name()).willReturn(name);
         given(file.uri()).willReturn(URI.create("file:///tmp/" + testFile));
         given(file.newInputStream()).willAnswer(new Answer<InputStream>() {
             @Override

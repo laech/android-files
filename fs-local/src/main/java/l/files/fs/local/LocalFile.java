@@ -16,9 +16,9 @@ import java.util.Set;
 import l.files.fs.BaseFile;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
-import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
@@ -92,8 +92,6 @@ public abstract class LocalFile extends BaseFile {
         return unmodifiableSet(permissions);
     }
 
-    private FileName name;
-
     LocalFile() {
     }
 
@@ -101,25 +99,19 @@ public abstract class LocalFile extends BaseFile {
         Native.load();
     }
 
-    abstract java.io.File file();
-
-    public static LocalFile of(String path) {
-        return of(new java.io.File(path));
-    }
+    @Override
+    public abstract LocalPath path();
 
     public static LocalFile of(java.io.File file) {
-        return new AutoValue_LocalFile(file);
+        return of(file.getPath());
     }
 
-    @Deprecated
-    public static LocalFile create(java.io.File file) {
-        return new AutoValue_LocalFile(file);
+    public static LocalFile of(String path) {
+        return of(LocalPath.of(path.getBytes(UTF_8)));
     }
 
-    private static void ensureIsLocal(File file) {
-        if (!(file instanceof LocalFile)) {
-            throw new IllegalArgumentException(file.toString());
-        }
+    public static LocalFile of(LocalPath path) {
+        return new AutoValue_LocalFile(path);
     }
 
     @Override
@@ -128,40 +120,27 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public String path() {
-        return file().getPath();
-    }
-
-    @Override
     public URI uri() {
-        return file().toURI();
+        return new java.io.File(path().toString()).toURI();
     }
 
     @Override
-    public FileName name() {
-        if (name == null) {
-            name = FileName.of(file().getName());
-        }
-        return name;
+    public LocalName name() {
+        return path().name();
     }
 
     @Override
     public boolean isHidden() {
-        return name().length() > 0 && name().charAt(0) == '.';
-    }
-
-    @Override
-    public File root() {
-        return of(new java.io.File("/"));
+        return path().isHidden();
     }
 
     @Override
     public LocalFile parent() {
-        java.io.File parent = file().getParentFile();
+        LocalPath parent = path().parent();
         if (parent == null) {
             return null;
         }
-        return new AutoValue_LocalFile(parent);
+        return of(parent);
     }
 
     @Override
@@ -175,34 +154,25 @@ public abstract class LocalFile extends BaseFile {
         return observable;
     }
 
-    @Override
-    public boolean pathStartsWith(File that) {
-        ensureIsLocal(that);
-        if (that.parent() == null || that.equals(this)) {
-            return true;
-        }
+    public LocalFile resolve(byte[] other) {
+        return of(path().resolve(other));
+    }
 
-        String thisPath = path();
-        String thatPath = that.path();
-        return thisPath.startsWith(thatPath) &&
-                thisPath.charAt(thatPath.length()) == '/';
+    @Override
+    public LocalFile resolve(Name other) {
+        return resolve(((LocalName) other).bytes());
     }
 
     @Override
     public LocalFile resolve(String other) {
-        return of(new java.io.File(file(), other));
+        return resolve(other.getBytes(UTF_8));
     }
 
     @Override
-    public LocalFile resolveParent(File fromParent, File toParent) {
-        ensureIsLocal(fromParent);
-        ensureIsLocal(toParent);
-        if (!pathStartsWith(fromParent)) {
-            throw new IllegalArgumentException();
-        }
-        java.io.File parent = ((LocalFile) toParent).file();
-        String child = path().substring(fromParent.path().length());
-        return new AutoValue_LocalFile(new java.io.File(parent, child));
+    public LocalFile rebase(File fromParent, File toParent) {
+        LocalPath src = (LocalPath) fromParent.path();
+        LocalPath dst = (LocalPath) toParent.path();
+        return of(path().rebase(src, dst));
     }
 
     @Override
@@ -241,7 +211,7 @@ public abstract class LocalFile extends BaseFile {
 
     private boolean accessible(int mode) throws IOException {
         try {
-            Unistd.access(path(), mode);
+            Unistd.access(path().bytes(), mode);
             return true;
         } catch (ErrnoException e) {
             if (e.errno == EACCES) {
@@ -312,7 +282,7 @@ public abstract class LocalFile extends BaseFile {
     public LocalFile createDir() throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
-            mkdir(path(), S_IRWXU);
+            mkdir(path().bytes(), S_IRWXU);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
@@ -333,16 +303,16 @@ public abstract class LocalFile extends BaseFile {
         // Same flags and mode as java.io.File.createNewFile() on Android
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
-        int fd = open(path(), flags, mode);
+        int fd = open(path().bytes(), flags, mode);
         Unistd.close(fd);
     }
 
     @Override
     public LocalFile createLink(File target) throws IOException {
-        ensureIsLocal(target);
-        String targetPath = target.path();
+        LocalPath targetPath = (LocalPath) target.path();
+        LocalPath linkPath = path();
         try {
-            symlink(targetPath, path());
+            symlink(targetPath.bytes(), linkPath.bytes());
         } catch (ErrnoException e) {
             throw e.toIOException(path(), targetPath);
         }
@@ -352,8 +322,8 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public LocalFile readLink() throws IOException {
         try {
-            String link = readlink(path());
-            return of(link);
+            byte[] link = readlink(path().bytes());
+            return of(LocalPath.of(link));
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
@@ -361,11 +331,10 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void moveTo(File dst) throws IOException {
-        ensureIsLocal(dst);
-        String dstPath = dst.path();
-        String srcPath = path();
+        LocalPath dstPath = (LocalPath) dst.path();
+        LocalPath srcPath = path();
         try {
-            Stdio.rename(srcPath, dstPath);
+            Stdio.rename(srcPath.bytes(), dstPath.bytes());
         } catch (ErrnoException e) {
             throw e.toIOException(srcPath, dstPath);
         }
@@ -374,7 +343,7 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public void delete() throws IOException {
         try {
-            Stdio.remove(path());
+            Stdio.remove(path().bytes());
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
@@ -389,14 +358,14 @@ public abstract class LocalFile extends BaseFile {
             long seconds = instant.seconds();
             int nanos = instant.nanos();
             boolean followLink = option == FOLLOW;
-            setModificationTime(path(), seconds, nanos, followLink);
+            setModificationTime(path().bytes(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
     }
 
     private static native void setModificationTime(
-            String path,
+            byte[] path,
             long seconds,
             int nanos,
             boolean followLink) throws ErrnoException;
@@ -408,15 +377,20 @@ public abstract class LocalFile extends BaseFile {
             mode |= PERMISSION_BITS[permission.ordinal()];
         }
         try {
-            chmod(path(), mode);
+            chmod(path().bytes(), mode);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
     }
 
     @Override
+    public String toString() {
+        return path().toString();
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(path());
+        dest.writeParcelable(path(), 0);
     }
 
     @Override
@@ -428,7 +402,8 @@ public abstract class LocalFile extends BaseFile {
 
         @Override
         public LocalFile createFromParcel(Parcel source) {
-            return of(source.readString());
+            LocalPath path = source.readParcelable(LocalPath.class.getClassLoader());
+            return of(path);
         }
 
         @Override

@@ -140,14 +140,14 @@ final class FileTextLayoutCache {
         spanObjects.clear();
         spanBuilder.setLength(0);
 
-        CharSequence name = file.name();
+        CharSequence name = file.name().toString();
         CharSequence summary = getSummary(context, item);
         CharSequence link = null;
         boolean isLink = stat != null && stat.isSymbolicLink();
         if (isLink) {
             File target = item.linkTargetFile();
             if (target != null) {
-                link = target.path();
+                link = target.path().toString();
             }
         }
 

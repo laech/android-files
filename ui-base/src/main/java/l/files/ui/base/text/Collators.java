@@ -1,16 +1,16 @@
-package l.files.ui.browser;
+package l.files.ui.base.text;
 
 import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 
 import java.util.Locale;
 
-final class Collators {
+public final class Collators {
 
     private Collators() {
     }
 
-    static Collator of(Locale locale) {
+    public static Collator of(Locale locale) {
         RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(locale);
         collator.setNumericCollation(true);
         collator.freeze();

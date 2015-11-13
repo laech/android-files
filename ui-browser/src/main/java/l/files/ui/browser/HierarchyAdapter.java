@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.fs.File;
+import l.files.fs.Name;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
 
@@ -113,7 +114,8 @@ final class HierarchyAdapter extends BaseAdapter {
         iconView.setEnabled(enabled);
 
         TextView titleView = (TextView) view.findViewById(title);
-        titleView.setText(res.name().length() > 0 ? res.name() : res.path());
+        Name name = res.name();
+        titleView.setText(!name.isEmpty() ? name.toString() : res.path().toString());
         titleView.setEnabled(enabled);
 
         return view;

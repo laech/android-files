@@ -3,20 +3,23 @@ package l.files.fs.local;
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import l.files.fs.File;
 import l.files.fs.LinkOption;
 import l.files.fs.Stream;
 
+import static l.files.fs.File.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 
 /**
  * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/dirent.h.html">dirent.h</a>
  */
-@AutoValue
-abstract class Dirent extends Native {
+final class Dirent extends Native {
+
+    private static final byte[] NAME_SELF = ".".getBytes(UTF_8);
+    private static final byte[] NAME_PARENT = "..".getBytes(UTF_8);
 
     static final int DT_UNKNOWN = 0;
     static final int DT_FIFO = 1;
@@ -28,29 +31,42 @@ abstract class Dirent extends Native {
     static final int DT_SOCK = 12;
     static final int DT_WHT = 14;
 
-    Dirent() {
+    private final long inode;
+    private final int type;
+    private final byte[] name;
+
+    Dirent(long inode, int type, byte[] name) {
+        this.inode = inode;
+        this.type = type;
+        this.name = name;
     }
 
-    abstract long inode();
+    long inode() {
+        return inode;
+    }
 
-    abstract int type();
+    int type() {
+        return type;
+    }
 
-    abstract String name();
+    byte[] name() {
+        return name;
+    }
 
-    static Dirent create(long inode, int type, String name) {
-        return new AutoValue_Dirent(inode, type, name);
+    static Dirent create(long inode, int type, byte[] name) {
+        return new Dirent(inode, type, name);
     }
 
     static Stream<Dirent> stream(
-            final File file,
+            final LocalFile file,
             final LinkOption option,
             final boolean dirOnly) throws IOException {
 
         final long dir;
         try {
-            dir = opendir(file.path(), option == FOLLOW);
+            dir = opendir(file.path().bytes(), option == FOLLOW);
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw e.toIOException(file.path());
         }
 
         return new Stream<Dirent>() {
@@ -107,10 +123,10 @@ abstract class Dirent extends Native {
                         if (dirOnly && next.type() != DT_DIR) {
                             continue;
                         }
-                        if (".".equals(next.name())) {
+                        if (Arrays.equals(next.name(), NAME_SELF)) {
                             continue;
                         }
-                        if ("..".equals(next.name())) {
+                        if (Arrays.equals(next.name(), NAME_PARENT)) {
                             continue;
                         }
 
@@ -158,7 +174,7 @@ abstract class Dirent extends Native {
     /**
      * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/opendir.html">opendir()</a>
      */
-    static native long opendir(String dir, boolean followLink) throws ErrnoException;
+    static native long opendir(byte[] path, boolean followLink) throws ErrnoException;
 
     /**
      * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/closedir.html">closedir()</a>
@@ -167,7 +183,6 @@ abstract class Dirent extends Native {
 
     /**
      * Note: this will also return the "." and  ".." directories.
-     * <p/>
      *
      * @see <a href="http://pubs.opengroup.org/onlinepubs/7908799/xsh/readdir.html">readdir()</a>
      */

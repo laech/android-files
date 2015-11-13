@@ -5,20 +5,18 @@
 
 void setTimes(
         JNIEnv *env,
-        jstring jpath,
+        jbyteArray jpath,
         const struct timespec times[2],
         jboolean followLink
 ) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     int flags = JNI_FALSE == followLink ? AT_SYMLINK_NOFOLLOW : 0;
     int result = utimensat(AT_FDCWD, path, times, flags);
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
-
     if (0 != result) {
         throw_errno_exception(env);
     }
@@ -28,7 +26,7 @@ void setTimes(
 void Java_l_files_fs_local_LocalFile_setModificationTime(
         JNIEnv *env,
         jclass clazz,
-        jstring jpath,
+        jbyteArray jpath,
         jlong seconds,
         jint nanos,
         jboolean followLink

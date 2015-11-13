@@ -1,33 +1,23 @@
-package l.files.fs;
+package l.files.fs.local;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-
-import static java.util.Collections.reverse;
-import static java.util.Collections.sort;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Locale.ENGLISH;
-import static java.util.Locale.SIMPLIFIED_CHINESE;
+import static l.files.fs.File.UTF_8;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-public final class NameTest {
+public final class LocalNameTest {
 
     private void testBaseDotExt(String value) {
-        FileName name = FileName.of(value);
+        LocalName name = LocalName.of(value.getBytes(UTF_8));
         assertEquals(value, name.base() + name.dotExt());
     }
 
     private void testNameHasBase(String name, String base) {
-        assertEquals(base, FileName.of(name).base());
+        assertEquals(base, LocalName.of(name.getBytes(UTF_8)).base());
     }
 
     private void testNameHasExt(String name, String ext) {
-        assertEquals(ext, FileName.of(name).ext());
+        assertEquals(ext, LocalName.of(name.getBytes(UTF_8)).ext());
     }
 
     @Test
@@ -123,33 +113,6 @@ public final class NameTest {
         testBaseDotExt(". pic.png");
         testBaseDotExt("pic.abc.png");
         testBaseDotExt(".pic.abc.png");
-    }
-
-    @Test
-    public void comparator_is_locale_sensitive() throws Exception {
-        testSort(ENGLISH, "a", "A", "b");
-        testSort(SIMPLIFIED_CHINESE, "爱", "你好", "知道");
-    }
-
-    private void testSort(Locale locale, String... names) {
-        List<FileName> expected = names(names);
-        List<FileName> actual = new ArrayList<>(expected);
-
-        reverse(actual);
-        if (Objects.equals(expected, actual)) {
-            fail();
-        }
-
-        sort(actual, FileName.comparator(locale));
-        assertEquals(expected, actual);
-    }
-
-    private List<FileName> names(String... names) {
-        List<FileName> result = new ArrayList<>(names.length);
-        for (String name : names) {
-            result.add(FileName.of(name));
-        }
-        return unmodifiableList(result);
     }
 
 }

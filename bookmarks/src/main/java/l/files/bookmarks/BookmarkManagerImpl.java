@@ -26,6 +26,8 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class BookmarkManagerImpl extends BookmarkManager {
 
+    // TODO don't use URI string any, use bytes
+
     private static final String PREF_KEY = "bookmarks";
 
     private static final Set<String> DEFAULTS = buildDefaults();

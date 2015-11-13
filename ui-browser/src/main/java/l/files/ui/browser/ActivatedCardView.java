@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 
-import static l.files.ui.browser.R.color.activated_background;
+import static android.support.v4.content.ContextCompat.getColor;
 
 public final class ActivatedCardView extends CardView {
 
@@ -12,7 +12,7 @@ public final class ActivatedCardView extends CardView {
     private int cardBackgroundColorNotActivated;
 
     {
-        cardBackgroundColorActivated = getContext().getResources().getColor(activated_background);
+        cardBackgroundColorActivated = getColor(getContext(), R.color.activated_background);
     }
 
     public ActivatedCardView(Context context) {

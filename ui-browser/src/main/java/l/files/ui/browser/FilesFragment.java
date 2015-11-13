@@ -28,6 +28,7 @@ import l.files.fs.File;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
+import l.files.ui.base.text.Collators;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;

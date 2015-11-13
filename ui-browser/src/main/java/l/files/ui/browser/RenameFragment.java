@@ -87,7 +87,7 @@ public final class RenameFragment extends FileCreationFragment {
                 if (!getFilename().isEmpty()) {
                     return;
                 }
-                field.setText(file.name());
+                field.setText(file.name().toString());
                 if (stat.isDirectory()) {
                     field.selectAll();
                 } else {

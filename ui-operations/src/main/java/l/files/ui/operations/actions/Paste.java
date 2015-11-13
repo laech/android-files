@@ -45,7 +45,7 @@ public final class Paste extends OptionsMenuAction {
 
         item.setEnabled(clipboard.action() != null);
         for (File file : clipboard.files()) {
-            if (this.destination.pathStartsWith(file)) {
+            if (this.destination.path().startsWith(file.path())) {
                 // Can't paste into itself
                 item.setEnabled(false);
                 return;

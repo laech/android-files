@@ -30,7 +30,7 @@ public final class RenameTest extends BaseFilesActivityTest {
         final File from = dir().resolve("a").createFile();
         final File to = dir().resolve("abc");
 
-        rename(from).setFilename(to.name()).ok();
+        rename(from).setFilename(to.name().toString()).ok();
 
         timeout(1, SECONDS, new Executable() {
             @Override
@@ -50,7 +50,7 @@ public final class RenameTest extends BaseFilesActivityTest {
     @Test
     public void uses_filename_as_default_text() throws Exception {
         final File file = dir().resolve("a").createFile();
-        rename(file).assertFilename(file.name());
+        rename(file).assertFilename(file.name().toString());
     }
 
     @Test

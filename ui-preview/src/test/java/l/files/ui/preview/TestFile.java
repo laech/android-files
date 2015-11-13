@@ -17,16 +17,19 @@ import java.util.Set;
 
 import l.files.fs.BaseFile;
 import l.files.fs.FileConsumer;
-import l.files.fs.FileName;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
+import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 class TestFile extends BaseFile {
 
@@ -47,18 +50,17 @@ class TestFile extends BaseFile {
     }
 
     @Override
-    public String path() {
-        return file.getPath();
+    public Path path() {
+        Path path = mock(Path.class);
+        given(path.toString()).willReturn(file.getPath());
+        return path;
     }
 
     @Override
-    public FileName name() {
-        return FileName.of(file.getName());
-    }
-
-    @Override
-    public TestFile root() {
-        return new TestFile(new File("/"));
+    public Name name() {
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(file.getName());
+        return name;
     }
 
     @Override
@@ -72,14 +74,14 @@ class TestFile extends BaseFile {
     }
 
     @Override
-    public TestFile resolveParent(
-            l.files.fs.File fromParent,
-            l.files.fs.File toParent) {
-        throw new UnsupportedOperationException();
+    public l.files.fs.File resolve(Name other) {
+        return resolve(other.toString());
     }
 
     @Override
-    public boolean pathStartsWith(l.files.fs.File that) {
+    public TestFile rebase(
+            l.files.fs.File fromParent,
+            l.files.fs.File toParent) {
         throw new UnsupportedOperationException();
     }
 
@@ -191,7 +193,7 @@ class TestFile extends BaseFile {
 
     @Override
     public void moveTo(l.files.fs.File dst) throws IOException {
-        if (!file.renameTo(new File(dst.path()))) {
+        if (!file.renameTo(new File(dst.path().toString()))) {
             throw new IOException();
         }
     }

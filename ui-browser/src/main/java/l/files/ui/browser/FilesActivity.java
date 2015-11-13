@@ -312,7 +312,7 @@ public final class FilesActivity extends BaseActivity implements
         FilesFragment f = FilesFragment.create(file);
         getSupportFragmentManager()
                 .beginTransaction()
-                .setBreadCrumbTitle(file.name())
+                .setBreadCrumbTitle(file.name().toString())
                 .setTransition(TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.content, f, FilesFragment.TAG)
                 .addToBackStack(null)

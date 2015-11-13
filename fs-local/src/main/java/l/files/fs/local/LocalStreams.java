@@ -34,7 +34,7 @@ final class LocalStreams {
 
             FileDescriptor descriptor = toFileDescriptor(fd);
             if (descriptor == null) {
-                return new FileInputStream(file.file());
+                return new FileInputStream(file.path().toString());
             } else {
                 return new LocalInputStream(descriptor, fd);
             }
@@ -68,7 +68,7 @@ final class LocalStreams {
 
             FileDescriptor descriptor = toFileDescriptor(fd);
             if (descriptor == null) {
-                return new FileOutputStream(file.file());
+                return new FileOutputStream(file.path().toString());
             } else {
                 return new LocalOutputStream(descriptor, fd);
             }
@@ -90,7 +90,7 @@ final class LocalStreams {
 
         try {
 
-            return Fcntl.open(file.path(), flags | O_NOATIME, mode);
+            return Fcntl.open(file.path().bytes(), flags | O_NOATIME, mode);
 
         } catch (ErrnoException e) {
             // EPERM for No permission for O_NOATIME
@@ -100,7 +100,7 @@ final class LocalStreams {
         }
 
         try {
-            return Fcntl.open(file.path(), flags, mode);
+            return Fcntl.open(file.path().bytes(), flags, mode);
         } catch (ErrnoException e) {
             throw e.toIOException(file.path());
         }

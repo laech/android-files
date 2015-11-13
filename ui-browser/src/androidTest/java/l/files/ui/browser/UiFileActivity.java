@@ -511,7 +511,7 @@ final class UiFileActivity {
             @Override
             public void apply(FileView input) {
                 if (target != null) {
-                    String expected = target.path();
+                    String expected = target.path().toString();
                     String actual = input.getText().toString();
                     assertTrue(actual, actual.contains(expected));
                 }

@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import l.files.fs.File;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 
 import static java.lang.Long.parseLong;
@@ -31,13 +32,14 @@ final class Files {
         String base;
         String last;
 
+        Name name = source.name();
         Stat stat = source.stat(FOLLOW);
         if (stat.isDirectory()) {
-            base = source.name().toString();
+            base = name.toString();
             last = "";
         } else {
-            base = source.name().base();
-            last = source.name().dotExt();
+            base = name.base();
+            last = name.dotExt();
         }
 
         File dst;

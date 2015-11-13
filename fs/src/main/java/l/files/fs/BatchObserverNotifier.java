@@ -18,7 +18,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     private static final ScheduledExecutorService service = newSingleThreadScheduledExecutor();
 
     private boolean selfChanged;
-    private final Set<String> childrenChanged;
+    private final Set<Name> childrenChanged;
     private final BatchObserver batchObserver;
 
     private Observation observation;
@@ -63,7 +63,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     @Override
-    public void onEvent(Event event, String child) {
+    public void onEvent(Event event, Name child) {
         synchronized (this) {
 
             if (child == null) {
@@ -85,13 +85,13 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
         boolean snapshotSelfChanged;
-        Set<String> snapshotChildrenChanged;
+        Set<Name> snapshotChildrenChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<String>emptySet()
+                    ? Collections.<Name>emptySet()
                     : Collections.unmodifiableSet(new HashSet<>(childrenChanged));
 
             selfChanged = false;

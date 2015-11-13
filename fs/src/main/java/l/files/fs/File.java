@@ -39,14 +39,12 @@ public interface File extends Parcelable {
      * Gets the path of this file. The returned path is only valid within
      * the context of the underlying file system.
      */
-    String path();
+    Path path();
 
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
-    FileName name();
-
-    File root();
+    Name name();
 
     /**
      * Gets the parent file, or null.
@@ -61,14 +59,14 @@ public interface File extends Parcelable {
     List<File> hierarchy();
 
     /**
-     * Resolves the given name/path relative to this file.
+     * Resolves the given path relative to this file.
      */
     File resolve(String other);
 
     /**
      * Resolves a child with the given name.
      */
-    File resolve(FileName other);
+    File resolve(Name other);
 
     /**
      * Returns a file with the given parent replaced.
@@ -81,12 +79,7 @@ public interface File extends Parcelable {
      *
      * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
      */
-    File resolveParent(File fromParent, File toParent);
-
-    /**
-     * True if this file is equal to or a descendant of the given file.
-     */
-    boolean pathStartsWith(File that);
+    File rebase(File fromParent, File toParent);
 
     /**
      * True if this file is considered a hidden file.

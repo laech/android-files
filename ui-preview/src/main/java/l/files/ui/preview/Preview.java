@@ -28,7 +28,11 @@ public final class Preview {
     public static Preview get(Context context) {
         synchronized (Preview.class) {
             if (instance == null) {
-                File cacheDir = LocalFile.of(context.getExternalCacheDir());
+                java.io.File dir = context.getExternalCacheDir();
+                if (dir == null) {
+                    dir = context.getCacheDir();
+                }
+                File cacheDir = LocalFile.of(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }

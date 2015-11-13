@@ -17,7 +17,7 @@ final class Pdf {
 
     private static native void init();
 
-    static synchronized native long open(String path) throws IOException;
+    static synchronized native long open(byte[] path) throws IOException;
 
     static synchronized native long openPage(long doc, int i) throws IOException;
 

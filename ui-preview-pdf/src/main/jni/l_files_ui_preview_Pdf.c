@@ -56,13 +56,12 @@ void Java_l_files_ui_preview_Pdf_closePage(
 }
 
 jlong Java_l_files_ui_preview_Pdf_open(
-        JNIEnv *env, jclass clazz, jstring jpath) {
+        JNIEnv *env, jclass clazz, jbyteArray jpath) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        throw_io_exception(env, "GetStringUTFChars");
-        return -1;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
 
     FPDF_DOCUMENT document = FPDF_LoadDocument(path, NULL);
     if (NULL == document) {

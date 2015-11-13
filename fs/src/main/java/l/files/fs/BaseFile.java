@@ -34,11 +34,6 @@ public abstract class BaseFile implements File {
     private static final int BUFFER_SIZE = 8192;
 
     @Override
-    public String toString() {
-        return path();
-    }
-
-    @Override
     public List<File> hierarchy() {
         List<File> hierarchy = new ArrayList<>();
         for (File p = this; p != null; p = p.parent()) {
@@ -130,12 +125,6 @@ public abstract class BaseFile implements File {
                 .start(this, option, childrenConsumer, batchInterval, batchInternalUnit);
 
     }
-
-    @Override
-    public File resolve(FileName other) {
-        return resolve(other.toString());
-    }
-
 
     @Override
     public void deleteIfExists() throws IOException {

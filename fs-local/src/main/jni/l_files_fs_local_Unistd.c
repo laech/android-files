@@ -15,44 +15,48 @@ void Java_l_files_fs_local_Unistd_close(JNIEnv *env, jclass clazz, jint fd) {
 }
 
 void Java_l_files_fs_local_Unistd_symlink(
-        JNIEnv *env, jclass clazz, jstring jtarget, jstring jlinkpath) {
+        JNIEnv *env, jclass clazz, jbyteArray jtarget, jbyteArray jlinkpath) {
 
-    const char *target = (*env)->GetStringUTFChars(env, jtarget, NULL);
-    const char *linkpath = (*env)->GetStringUTFChars(env, jlinkpath, NULL);
+    jsize targetlen = (*env)->GetArrayLength(env, jtarget);
+    char targetpath[targetlen + 1];
+    (*env)->GetByteArrayRegion(env, jtarget, 0, targetlen, targetpath);
+    targetpath[targetlen] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(symlink(target, linkpath));
+    jsize linklen = (*env)->GetArrayLength(env, jlinkpath);
+    char linkpath[linklen + 1];
+    (*env)->GetByteArrayRegion(env, jlinkpath, 0, linklen, linkpath);
+    linkpath[linklen] = '\0';
 
-    (*env)->ReleaseStringUTFChars(env, jtarget, target);
-    (*env)->ReleaseStringUTFChars(env, jlinkpath, linkpath);
-
+    int result = TEMP_FAILURE_RETRY(symlink(targetpath, linkpath));
     if (-1 == result) {
         throw_errno_exception(env);
     }
 }
 
 void Java_l_files_fs_local_Unistd_access(
-        JNIEnv *env, jclass clazz, jstring jpath, jint mode) {
+        JNIEnv *env, jclass clazz, jbyteArray jpath, jint mode) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
-    if (NULL == path) {
-        return;
-    }
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
+
     int result = TEMP_FAILURE_RETRY(access(path, mode));
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
     if (-1 == result) {
         throw_errno_exception(env);
     }
 }
 
-jstring Java_l_files_fs_local_Unistd_readlink(
-        JNIEnv *env, jclass clazz, jstring jpath) {
+jbyteArray Java_l_files_fs_local_Unistd_readlink(
+        JNIEnv *env, jclass clazz, jbyteArray jpath) {
 
-    const char *path = (*env)->GetStringUTFChars(env, jpath, NULL);
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    path[len] = '\0';
+
     char buf[PATH_MAX];
-
     ssize_t count = TEMP_FAILURE_RETRY(readlink(path, buf, PATH_MAX - 1));
-
-    (*env)->ReleaseStringUTFChars(env, jpath, path);
 
     if (-1 == count) {
         throw_errno_exception(env);
@@ -60,5 +64,8 @@ jstring Java_l_files_fs_local_Unistd_readlink(
     }
 
     buf[count] = '\0';
-    return (*env)->NewStringUTF(env, buf);
+
+    jbyteArray link = (*env)->NewByteArray(env, (jsize) count);
+    (*env)->SetByteArrayRegion(env, link, 0, (jsize) count, buf);
+    return link;
 }

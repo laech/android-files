@@ -18,8 +18,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import l.files.fs.File;
-import l.files.fs.FileName;
 import l.files.fs.Instant;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.browser.BrowserItem.HeaderItem;
@@ -270,10 +270,12 @@ public final class DateCategorizerTest {
 
     private FileItem file(long time) {
         Stat stat = mock(Stat.class);
-        File res = mock(File.class);
-        given(res.name()).willReturn(FileName.of(String.valueOf(time)));
+        File file = mock(File.class);
+        Name name = mock(Name.class);
+        given(name.toString()).willReturn(String.valueOf(time));
+        given(file.name()).willReturn(name);
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileItem.create(res, stat, null, null, collator);
+        return FileItem.create(file, stat, null, null, collator);
     }
 
     private void assertCategory(String expected, FileItem... stats) {

@@ -24,8 +24,10 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static l.files.fs.File.UTF_8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
@@ -43,14 +45,30 @@ public final class NavigationTest extends BaseFilesActivityTest {
     }
 
     @Test
+    public void can_navigate_into_non_utf8_named_dir() throws Exception {
+
+        byte[] nonUtf8Name = {-19, -96, -67, -19, -80, -117};
+        assertNotEquals(
+                nonUtf8Name.clone(),
+                new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
+        );
+
+        File nonUtf8NamedDir = dir().resolve(nonUtf8Name).createDir();
+        File child = nonUtf8NamedDir.resolve("a").createFile();
+
+        screen()
+                .clickInto(nonUtf8NamedDir)
+                .assertListViewContains(child, true);
+    }
+
+    @Test
     public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
-        File root = dir().root();
-        screen().selectFromNavigationMode(root);
-        screen().clickInto(root.resolve("/proc"));
-        screen().clickInto(root.resolve("/proc/self"));
-        screen().clickInto(root.resolve("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(dir().resolve("/"));
+        screen().clickInto(dir().resolve("/proc"));
+        screen().clickInto(dir().resolve("/proc/self"));
+        screen().clickInto(dir().resolve("/proc/self/fdinfo"));
     }
 
     @Test
@@ -88,7 +106,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void shows_time_and_size_for_file() throws Exception {
         File file = dir().resolve("file").createFile();
-        file.appendUtf8(file.path());
+        file.appendUtf8(file.path().toString());
 
         Context c = getActivity();
         String date = getTimeFormat(c).format(new Date());

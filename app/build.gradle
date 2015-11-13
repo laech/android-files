@@ -39,6 +39,12 @@ android {
 
     }
 
+    splits {
+        abi {
+            enable true
+        }
+    }
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'

@@ -149,7 +149,7 @@ final class Inotify extends Native {
     /**
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_add_watch.2.html">inotify_add_watch()</a>
      */
-    int addWatch(int fd, String path, int mask) throws ErrnoException {
+    int addWatch(int fd, byte[] path, int mask) throws ErrnoException {
 
         int wd;
         try {
@@ -191,7 +191,7 @@ final class Inotify extends Native {
         return wd;
     }
 
-    private void notifyAddWatch(int fd, String path, int mask, int wd) {
+    private void notifyAddWatch(int fd, byte[] path, int mask, int wd) {
         if (trackers.isEmpty()) {
             return;
         }
@@ -206,7 +206,7 @@ final class Inotify extends Native {
         }
     }
 
-    private static native int internalAddWatch(int fd, String path, int mask) throws ErrnoException;
+    private static native int internalAddWatch(int fd, byte[] path, int mask) throws ErrnoException;
 
     /**
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_rm_watch.2.html">inotify_rm_watch()</a>
@@ -331,7 +331,7 @@ final class Inotify extends Native {
 
         void onInit(int fd);
 
-        void onWatchAdded(int fd, String path, int mask, int wd);
+        void onWatchAdded(int fd, byte[] path, int mask, int wd);
 
         void onWatchRemoved(int fd, int wd);
 
