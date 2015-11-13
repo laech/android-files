@@ -49,11 +49,8 @@ jobject do_stat(JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean is_lstat) 
              : TEMP_FAILURE_RETRY(stat(path, &sb));
 
     if (-1 == rc) {
-        (*env)->ReleaseStringUTFChars(env, jpath, path);
         throw_errno_exception(env);
         return NULL;
-    } else {
-        (*env)->ReleaseStringUTFChars(env, jpath, path);
     }
 
     return to_java_stat(env, clazz, &sb);
