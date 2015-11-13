@@ -11,6 +11,7 @@ import java.io.IOException;
 final class Pdf {
 
     static {
+        System.loadLibrary("pdfium");
         System.loadLibrary("previewpdf");
         init();
     }
