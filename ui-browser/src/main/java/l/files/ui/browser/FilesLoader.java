@@ -46,7 +46,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final ConcurrentMap<String, FileItem> data;
+    private final ConcurrentMap<Name, FileItem> data;
     private final File root;
     private final Collator collator;
 
@@ -328,15 +328,15 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat targetStat = readTargetStatus(file, stat);
             File target = readTarget(file, stat);
             FileItem newStat = FileItem.create(file, stat, target, targetStat, collator);
-            FileItem oldStat = data.put(file.name().toString(), newStat);
+            FileItem oldStat = data.put(file.name(), newStat);
             return !newStat.equals(oldStat);
 
         } catch (FileNotFoundException e) {
-            return data.remove(file.name().toString()) != null;
+            return data.remove(file.name()) != null;
 
         } catch (IOException e) {
             data.put(
-                    file.name().toString(),
+                    file.name(),
                     FileItem.create(file, null, null, null, collator));
             return true;
         }

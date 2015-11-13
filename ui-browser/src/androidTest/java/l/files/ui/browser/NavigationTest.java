@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import l.files.fs.File;
@@ -27,6 +28,8 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.File.UTF_8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -59,6 +62,34 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen()
                 .clickInto(nonUtf8NamedDir)
                 .assertListViewContains(child, true);
+    }
+
+    @Test
+    public void can_shows_dirs_with_same_name_but_different_name_bytes() throws Exception {
+
+        byte[] notUtf8 = {-19, -96, -67, -19, -80, -117};
+        byte[] utf8 = new String(notUtf8, UTF_8).getBytes(UTF_8);
+
+        assertFalse(Arrays.equals(notUtf8, utf8));
+        assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
+
+        File notUtf8Dir = dir().resolve(notUtf8).createDir();
+        File notUtf8Child = notUtf8Dir.resolve("notUtf8").createFile();
+
+        File utf8Dir = dir().resolve(utf8).createDir();
+        File utf8Child = utf8Dir.resolve("utf8").createFile();
+
+        screen()
+                .assertItemsDisplayed(notUtf8Dir, utf8Dir)
+
+                .clickInto(notUtf8Dir)
+                .assertListViewContains(notUtf8Child, true)
+                .assertListViewContains(utf8Child, false)
+
+                .pressBack()
+                .clickInto(utf8Dir)
+                .assertListViewContains(utf8Child, true)
+                .assertListViewContains(notUtf8Child, false);
     }
 
     @Test
