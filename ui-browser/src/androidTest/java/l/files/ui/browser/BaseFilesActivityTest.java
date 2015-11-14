@@ -39,6 +39,10 @@ public class BaseFilesActivityTest {
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
 
+    @Rule
+    public final TakeScreenShotOnFailure screenshot =
+            new TakeScreenShotOnFailure();
+
     private LocalFile dir;
     private Intent intent;
     private UiFileActivity screen;

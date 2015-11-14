@@ -5,18 +5,16 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Pair;
 import android.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import l.files.base.io.Closer;
@@ -31,6 +29,7 @@ import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static java.util.Arrays.asList;
 import static java.util.Collections.reverse;
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -574,18 +573,24 @@ final class UiFileActivity {
             @Override
             public Void call() throws Exception {
 
-                Pair<File, Stat> fileNotInView = null;
-                Pair<File, Stat> fileNotInFs = null;
 
-                Set<Pair<File, Stat>> filesInView = filesInView();
+                SimpleArrayMap<File, Stat> filesInView = filesInView();
                 Closer closer = Closer.create();
                 try {
 
                     Stream<File> stream = closer.register(dir.list(FOLLOW));
                     for (File child : stream) {
-                        Pair<File, Stat> item = Pair.create(child, child.stat(NOFOLLOW));
-                        if (!filesInView.remove(item)) {
-                            fileNotInView = item;
+
+                        Stat oldStat = filesInView.remove(child);
+                        if (oldStat == null) {
+                            fail("File in file system but not in view: " + child);
+                        }
+
+                        Stat newStat = child.stat(NOFOLLOW);
+                        if (!newStat.equals(oldStat)) {
+                            fail("File details differ for : " + child
+                                    + "\nnew: " + newStat
+                                    + "\nold: " + oldStat);
                         }
                     }
 
@@ -596,34 +601,25 @@ final class UiFileActivity {
                 }
 
                 if (!filesInView.isEmpty()) {
-                    fileNotInFs = filesInView.iterator().next();
-                }
-
-                if (fileNotInView != null || fileNotInFs != null) {
-                    fail("Details do not match."
-                                    + "\nin view: " + toString(fileNotInFs)
-                                    + "\nin fs:   " + toString(fileNotInView)
-                    );
+                    fail("File in view but not on file system: "
+                            + filesInView.keyAt(0) + "="
+                            + filesInView.valueAt(0));
                 }
 
                 return null;
 
             }
 
-            private String toString(Pair<File, ?> pair) {
-                return pair == null ? null : (pair.first.name()) + "=" + pair.second;
-            }
-
-        });
+        }, 1, MINUTES);
 
         return this;
     }
 
-    private Set<Pair<File, Stat>> filesInView() {
+    private SimpleArrayMap<File, Stat> filesInView() {
         List<FileItem> items = fileItems();
-        Set<Pair<File, Stat>> result = new HashSet<>(items.size() * 2);
+        SimpleArrayMap<File, Stat> result = new SimpleArrayMap<>(items.size());
         for (FileItem item : items) {
-            result.add(Pair.create(item.selfFile(), item.selfStat()));
+            result.put(item.selfFile(), item.selfStat());
         }
         return result;
     }
@@ -652,8 +648,9 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                List<File> actual = new ArrayList<>();
-                for (FileItem item : fileItems()) {
+                List<FileItem> items = fileItems();
+                List<File> actual = new ArrayList<>(items.size());
+                for (FileItem item : items) {
                     actual.add(item.selfFile());
                 }
                 assertEquals(asList(expected), actual);
