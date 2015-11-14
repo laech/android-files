@@ -80,7 +80,8 @@ public final class NavigationTest extends BaseFilesActivityTest {
         File utf8Child = utf8Dir.resolve("utf8").createFile();
 
         screen()
-                .assertItemsDisplayed(notUtf8Dir, utf8Dir)
+                .assertListViewContains(notUtf8Dir, true)
+                .assertListViewContains(utf8Dir, true)
 
                 .clickInto(notUtf8Dir)
                 .assertListViewContains(notUtf8Child, true)
