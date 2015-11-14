@@ -77,6 +77,37 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public final class LocalObservableTest extends FileBaseTest {
 
     @Test
+    public void able_to_observe_the_rest_of_the_files_when_some_are_not_observable()
+            throws Exception {
+
+        List<LocalFile> observables = new ArrayList<>();
+        observables.add(createRandomChildDir(dir1()));
+        observables.add(createRandomChildDir(dir1()));
+
+        LocalFile unobservable = dir1().resolve("unobservable").createDir();
+        unobservable.removePermissions(Permission.read());
+
+        observables.add(createRandomChildDir(dir1()));
+        observables.add(createRandomChildDir(dir1()));
+
+        Closer closer = Closer.create();
+        try {
+
+            Recorder recorder = closer.register(observe(dir1(), FOLLOW));
+            recorder.awaitCreateFile(dir1().resolve("1"));
+            for (LocalFile observable : observables) {
+                recorder.awaitModifyByCreateFile(observable, "1");
+            }
+            recorder.awaitNoEvent(newCreateFile(unobservable.resolve("1")));
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+    }
+
+    @Test
     public void no_observe_on_procfs() throws Exception {
 
         Closer closer = Closer.create();
@@ -243,11 +274,10 @@ public final class LocalObservableTest extends FileBaseTest {
         }
     }
 
-    private void createRandomChildDir(LocalFile dir) throws IOException {
+    private LocalFile createRandomChildDir(LocalFile dir) throws IOException {
         while (true) {
             try {
-                dir.resolve(String.valueOf(random())).createDir();
-                break;
+                return dir.resolve(String.valueOf(random())).createDir();
             } catch (AlreadyExist ignore) {
             }
         }
