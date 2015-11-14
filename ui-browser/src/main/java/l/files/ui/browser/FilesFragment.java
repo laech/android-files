@@ -95,10 +95,11 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             FilesLoader loader = filesLoader();
             if (loader != null) {
                 int current = loader.approximateChildLoaded();
-                progressBar().setProgress(current);
-                progressBar().setIndeterminate(current == 0);
-                progressBar().setMax(loader.approximateChildTotal());
-                progressBar().setVisibility(VISIBLE);
+                ProgressBar progressBar = inflateProgressBar();
+                progressBar.setProgress(current);
+                progressBar.setIndeterminate(current == 0);
+                progressBar.setMax(loader.approximateChildTotal());
+                progressBar.setVisibility(VISIBLE);
             }
             handler.postDelayed(this, 10);
 
@@ -145,7 +146,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         setupOptionsMenu();
         setHasOptionsMenu(true);
 
-        handler.postDelayed(checkProgress, 500);
+        handler.postDelayed(checkProgress, 1000);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
     }
@@ -170,7 +171,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
     private ProgressBar progressBar;
 
-    private ProgressBar progressBar() {
+    private ProgressBar inflateProgressBar() {
         if (progressBar == null) {
             //noinspection ConstantConditions
             ViewStub stub = (ViewStub) getView().findViewById(R.id.progress_stub);
@@ -181,7 +182,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
     private TextView emptyView;
 
-    private TextView emptyView() {
+    private TextView inflateEmptyView() {
         if (emptyView == null) {
             //noinspection ConstantConditions
             ViewStub stub = (ViewStub) getView().findViewById(R.id.empty_stub);
@@ -260,8 +261,14 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
 
     @Override
     public void onLoadFinished(Loader<Result> loader, Result data) {
+        handler.removeCallbacks(checkProgress);
+
         Activity activity = getActivity();
         if (activity != null && !activity.isFinishing()) {
+
+            if (progressBar != null) {
+                progressBar.setVisibility(GONE);
+            }
 
             // First load no animation to speed up
             if (recycler.getItemAnimator() == null && adapter.getItemCount() != 0) {
@@ -272,20 +279,17 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             adapter.setItems(data.items());
             //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null) {
-                emptyView().setText(message(data.exception()));
-            } else {
-                emptyView().setText(R.string.empty);
-            }
+                inflateEmptyView().setText(message(data.exception()));
+                inflateEmptyView().setVisibility(VISIBLE);
 
-            handler.removeCallbacks(checkProgress);
-            progressBar().setVisibility(GONE);
-
-            if (adapter.isEmpty()) {
-                emptyView().setVisibility(VISIBLE);
+            } else if (adapter.isEmpty()) {
+                inflateEmptyView().setText(R.string.empty);
+                inflateEmptyView().setVisibility(VISIBLE);
 
             } else {
-
-                emptyView().setVisibility(GONE);
+                if (emptyView != null) {
+                    emptyView.setVisibility(GONE);
+                }
 
                 handler.post(new Runnable() {
                     @Override
@@ -294,6 +298,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                     }
                 });
             }
+
         }
     }
 
