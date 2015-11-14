@@ -11,7 +11,7 @@ void Java_l_files_fs_local_Stat_init(JNIEnv *env, jclass clazz) {
             env,
             clazz,
             "create",
-            "(JJIJIIJJJIJIJJ)Ll/files/fs/local/Stat;"
+            "(IIIJJIJ)Ll/files/fs/local/Stat;"
     );
 }
 
@@ -20,19 +20,12 @@ jobject to_java_stat(JNIEnv *env, jclass clazz, struct stat *sb) {
             env,
             clazz,
             stat_create,
-            (jlong) (*sb).st_dev,
-            (jlong) (*sb).st_ino,
             (jint) (*sb).st_mode,
-            (jlong) (*sb).st_nlink,
             (jint) (*sb).st_uid,
             (jint) (*sb).st_gid,
-            (jlong) (*sb).st_rdev,
             (jlong) (*sb).st_size,
             (jlong) (*sb).st_mtime,
             (jint) (*sb).st_mtime_nsec,
-            (jlong) (*sb).st_ctime,
-            (jint) (*sb).st_ctime_nsec,
-            (jlong) (*sb).st_blksize,
             (jlong) (*sb).st_blocks
     );
 }

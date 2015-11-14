@@ -64,19 +64,11 @@ abstract class Stat extends Native {
     Stat() {
     }
 
-    abstract long dev();
-
-    abstract long ino();
-
     abstract int mode();
-
-    abstract long nlink();
 
     abstract int uid();
 
     abstract int gid();
-
-    abstract long rdev();
 
     abstract long size();
 
@@ -84,43 +76,24 @@ abstract class Stat extends Native {
 
     abstract int mtime_nsec();
 
-    abstract long ctime();
-
-    abstract int ctime_nsec();
-
-    abstract long blksize();
-
     abstract long blocks();
 
     static Stat create(
-            long dev,
-            long ino,
             int mode,
-            long nlink,
             int uid,
             int gid,
-            long rdev,
             long size,
             long mtime,
             int mtime_nsec,
-            long ctime,
-            int ctime_nsec,
-            long blksize,
             long blocks) {
+
         return new AutoValue_Stat(
-                dev,
-                ino,
                 mode,
-                nlink,
                 uid,
                 gid,
-                rdev,
                 size,
                 mtime,
                 mtime_nsec,
-                ctime,
-                ctime_nsec,
-                blksize,
                 blocks);
     }
 
