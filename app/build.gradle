@@ -19,9 +19,9 @@ android {
         release {
             if (System.console() != null) {
                 storeFile file(System.console().readLine("\nKeystore location: "))
-                storePassword new String(System.console().readPassword("\nKeystore password: "))
+                storePassword new String(System.console().readPassword("Keystore password: "))
                 keyAlias "files"
-                keyPassword new String(System.console().readPassword("\nKey password: "))
+                keyPassword new String(System.console().readPassword("Key password: "))
             }
         }
 
