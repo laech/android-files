@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import l.files.fs.File;
-import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -19,7 +18,6 @@ import l.files.ui.base.widget.StableAdapter;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.fs.FileIcons.directoryIconStringId;
-import static l.files.ui.base.view.Views.find;
 
 final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
@@ -70,28 +68,19 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
     private static class HeaderHolder extends RecyclerView.ViewHolder {
 
-        private final TextView title;
-
         HeaderHolder(View itemView) {
             super(itemView);
-            title = find(android.R.id.title, this);
         }
 
         void bind(String header) {
-            title.setText(header);
+            ((TextView) itemView).setText(header);
         }
     }
 
     class BookmarkHolder extends SelectionModeViewHolder<File, File> {
 
-        private final TextView title;
-        private final TextView icon;
-
         BookmarkHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
-            title = find(android.R.id.title, this);
-            icon = find(android.R.id.icon, this);
-            icon.setTypeface(FileIcons.font(itemView.getResources().getAssets()));
         }
 
         @Override
@@ -102,8 +91,9 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         @Override
         public void bind(File file) {
             super.bind(file);
-            title.setText(FileLabels.get(title.getResources(), file));
-            icon.setText(directoryIconStringId(file));
+            String icon = context().getString(directoryIconStringId(file));
+            String title = FileLabels.get(resources(), file);
+            ((BookmarkView) itemView).set(icon, title);
         }
 
         @Override

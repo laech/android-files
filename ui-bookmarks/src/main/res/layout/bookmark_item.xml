@@ -1,31 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<l.files.ui.bookmarks.BookmarkView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="?attr/listPreferredItemHeightSmall"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:foreground="?attr/selectableItemBackground"
     android:paddingEnd="16dp"
-    android:paddingStart="16dp">
-
-    <TextView
-        android:id="@android:id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|start"
-        android:duplicateParentState="true"
-        android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="24sp" />
-
-    <TextView
-        android:id="@android:id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|start"
-        android:layout_marginStart="56dp"
-        android:duplicateParentState="true"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:textColor="?android:attr/textColorPrimaryInverse"
-        android:textSize="16sp" />
-
-</FrameLayout>
+    android:paddingStart="16dp" />
