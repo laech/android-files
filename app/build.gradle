@@ -9,8 +9,8 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 8
-        versionName '3.0'
+        versionCode 9
+        versionName '3.1'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,10 +31,18 @@ android {
 
         debug {
             applicationIdSuffix ".debug"
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            testProguardFile getDefaultProguardFile('proguard-android.txt')
+//            testProguardFile 'proguard-rules.pro'
+//            testProguardFile 'proguard-rules-test.pro'
         }
 
         release {
             signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFile getDefaultProguardFile('proguard-android.txt')
+            proguardFile 'proguard-rules.pro'
         }
 
     }
@@ -56,7 +64,6 @@ android {
 dependencies {
 
     compile project(':ui-browser')
-    compile project(':ui-operations')
 
     androidTestCompile project(':testing-fs')
 
