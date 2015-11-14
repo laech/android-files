@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./gradlew assembleRelease --no-daemon
+./gradlew clean assembleRelease --no-daemon
