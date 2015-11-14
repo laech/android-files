@@ -16,6 +16,13 @@ android {
 
     signingConfigs {
 
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'mykey'
+            keyPassword 'android'
+        }
+
         release {
             if (System.console() != null) {
                 storeFile file(System.console().readLine("\nKeystore location: "))
@@ -31,6 +38,7 @@ android {
 
         debug {
             applicationIdSuffix ".debug"
+            signingConfig signingConfigs.debug
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 //            testProguardFile getDefaultProguardFile('proguard-android.txt')
