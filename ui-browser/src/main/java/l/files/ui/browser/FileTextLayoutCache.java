@@ -87,10 +87,7 @@ final class FileTextLayoutCache {
         }
     }
 
-    private static final Object[] spansForName = {
-            new MaxAlphaSpan(240),
-            new AbsoluteSizeSpan(13, true),
-    };
+    private static Object[] spansForName;
 
     private static final Object[] spansForLink = {
             new MaxAlphaSpan(150),
@@ -116,6 +113,17 @@ final class FileTextLayoutCache {
     }
 
     static Layout get(Context context, FileItem item, int width) {
+
+        if (spansForName == null) {
+            spansForName = new Object[]{
+                    new MaxAlphaSpan(240),
+                    new AbsoluteSizeSpan(
+                            context
+                                    .getResources()
+                                    .getDimensionPixelSize(R.dimen.files_item_text_size),
+                            false),
+            };
+        }
 
         if (getMainLooper() != myLooper()) {
             throw new IllegalStateException();
