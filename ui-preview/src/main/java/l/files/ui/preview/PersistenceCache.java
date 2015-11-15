@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.base.io.Closer;
 import l.files.fs.File;
-import l.files.fs.Instant;
 import l.files.fs.Stat;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
 import static java.lang.System.nanoTime;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
 
@@ -48,12 +48,14 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
             };
 
-    private final File cacheDir;
-    private final int version;
+    private static final byte SUPERCLASS_VERSION = 0;
 
-    PersistenceCache(File cacheDir, int version) {
+    private final File cacheDir;
+    private final byte subclassVersion;
+
+    PersistenceCache(File cacheDir, byte version) {
         this.cacheDir = requireNonNull(cacheDir);
-        this.version = version;
+        this.subclassVersion = version;
     }
 
     @Override
@@ -66,7 +68,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         Snapshot<V> old = super.put(res, stat, constraint, value);
         if (old == null
                 || !old.get().equals(value)
-                || !old.time().equals(stat.lastModifiedTime())) {
+                || old.time() != stat.lastModifiedTime().to(MILLISECONDS)) {
             dirty.set(true);
         }
         return old;
@@ -111,8 +113,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         try {
 
             DataInputStream in = closer.register(file.newBufferedDataInputStream());
-            int version = in.readInt();
-            if (version != this.version) {
+
+            if (in.readByte() != SUPERCLASS_VERSION) {
+                return;
+            }
+            if (in.readByte() != subclassVersion) {
                 return;
             }
 
@@ -120,9 +125,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 try {
 
                     String key = in.readUTF();
-                    long seconds = in.readLong();
-                    int nanos = in.readInt();
-                    Instant time = Instant.of(seconds, nanos);
+                    long time = in.readLong();
                     V value = read(in);
                     cache.put(key, Snapshot.of(value, time));
 
@@ -173,13 +176,13 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         try {
 
             DataOutputStream out = closer.register(tmp.newBufferedDataOutputStream());
-            out.writeInt(version);
+            out.writeByte(SUPERCLASS_VERSION);
+            out.writeByte(subclassVersion);
 
             Map<String, Snapshot<V>> snapshot = cache.snapshot();
             for (Map.Entry<String, Snapshot<V>> entry : snapshot.entrySet()) {
                 out.writeUTF(entry.getKey());
-                out.writeLong(entry.getValue().time().seconds());
-                out.writeInt(entry.getValue().time().nanos());
+                out.writeLong(entry.getValue().time());
                 write(out, entry.getValue().get());
             }
 

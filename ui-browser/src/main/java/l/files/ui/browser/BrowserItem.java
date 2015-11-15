@@ -50,7 +50,7 @@ abstract class BrowserItem {
     @AutoValue
     static abstract class FileItem extends BrowserItem implements Comparable<FileItem> {
 
-        private Collator collator;
+        private Provider<Collator> collator;
         private CollationKey collationKey;
         private Boolean readable;
 
@@ -94,7 +94,8 @@ abstract class BrowserItem {
 
         private CollationKey collationKey() {
             if (collationKey == null) {
-                collationKey = collator.getCollationKey(selfFile().name().toString());
+                collationKey = collator.get()
+                        .getCollationKey(selfFile().name().toString());
             }
             return collationKey;
         }
@@ -114,7 +115,7 @@ abstract class BrowserItem {
                 @Nullable Stat stat,
                 @Nullable File target,
                 @Nullable Stat targetStat,
-                Collator collator) {
+                Provider<Collator> collator) {
             FileItem item = new AutoValue_BrowserItem_FileItem(file, stat, target, targetStat);
             item.collator = collator;
             return item;

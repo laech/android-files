@@ -22,13 +22,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import l.files.fs.File;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
-import l.files.ui.base.text.Collators;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
@@ -254,7 +252,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 context,
                 directory,
                 getSort(context),
-                Collators.of(Locale.getDefault()),
                 getShowHiddenFiles(context)
         );
     }

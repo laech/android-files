@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
@@ -20,6 +22,9 @@ import l.files.fs.Visitor;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
+import static android.os.Process.THREAD_PRIORITY_LOWEST;
+import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+import static android.os.Process.setThreadPriority;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -32,7 +37,23 @@ import static l.files.fs.Visitor.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
 
-    private static final Executor executor = newFixedThreadPool(2);
+    private static final Executor executor =
+            newFixedThreadPool(2, new ThreadFactory() {
+
+                private final AtomicInteger count =
+                        new AtomicInteger(1);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    String prefix = "ThumbnailDiskCache #";
+                    int num = count.getAndIncrement();
+                    return new Thread(r, prefix + num);
+                }
+
+            });
+
+    private static final int BACKGROUND_THREAD_PRIORITY =
+            THREAD_PRIORITY_LOWEST + THREAD_PRIORITY_MORE_FAVORABLE;
 
     private static final int VERSION = 3;
 
@@ -46,6 +67,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                setThreadPriority(BACKGROUND_THREAD_PRIORITY);
                 try {
                     cleanup();
                 } catch (IOException e) {
@@ -244,6 +266,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         @Override
         public void run() {
+            setThreadPriority(BACKGROUND_THREAD_PRIORITY);
+
             Bitmap thumbnail = ref.get();
             if (thumbnail != null) {
                 try {

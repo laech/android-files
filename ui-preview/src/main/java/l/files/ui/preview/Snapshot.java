@@ -9,10 +9,10 @@ abstract class Snapshot<V> {
 
     abstract V get();
 
-    abstract Instant time();
+    abstract long time();
 
-    static <V> Snapshot<V> of(V value, Instant mtime) {
-        return new AutoValue_Snapshot<>(value, mtime);
+    static <V> Snapshot<V> of(V value, long time) {
+        return new AutoValue_Snapshot<>(value, time);
     }
 
 }

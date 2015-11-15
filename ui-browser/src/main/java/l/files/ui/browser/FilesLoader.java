@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
@@ -30,6 +30,7 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
+import l.files.ui.base.text.Collators;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
@@ -48,7 +49,25 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private final ConcurrentMap<Name, FileItem> data;
     private final File root;
-    private final Collator collator;
+
+    private final Provider<Collator> collator = new Provider<Collator>() {
+
+        // Delay initialization Collator classes until they are needed
+        // the static initialization of the collator classes for the first
+        // time is expensive, so do it in background thread
+        private Collator instance;
+
+        @Override
+        public Collator get() {
+            Collator collator = instance;
+            if (collator == null) {
+                collator = instance = Collators.of(Locale.getDefault());
+            }
+            return collator;
+        }
+
+    };
+
 
     private volatile FileSort sort;
     private volatile boolean showHidden;
@@ -103,19 +122,17 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         });
     }
 
-    private final AtomicInteger approximateChildTotal = new AtomicInteger(0);
+    private volatile int approximateChildTotal;
 
     FilesLoader(
             Context context,
             File root,
             FileSort sort,
-            Collator collator,
             boolean showHidden) {
         super(context);
 
         this.root = requireNonNull(root, "root");
         this.sort = requireNonNull(sort, "sort");
-        this.collator = requireNonNull(collator, "collator");
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
@@ -126,7 +143,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     int approximateChildTotal() {
-        return approximateChildTotal.get();
+        return approximateChildTotal;
     }
 
     int approximateChildLoaded() {
@@ -227,7 +244,14 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private void checkedAdd(List<File> children, File child) {
         checkCancel();
-        approximateChildTotal.incrementAndGet();
+
+        /*
+         * Okay to do this without synchronization since the writer thread
+         * changing this is always the same one, also because this is
+         * just an approximation.
+         */
+        approximateChildTotal++;
+
         children.add(child);
     }
 
