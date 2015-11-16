@@ -3,7 +3,6 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.Layout;
 import android.text.TextPaint;
@@ -25,8 +24,6 @@ import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 
 public final class FileView extends View implements Drawable.Callback {
 
-    private static final Rect previewPadding = new Rect();
-
     private static TextPaint fileTypeIconPaint;
     private static TextPaint linkIconPaint;
 
@@ -40,6 +37,7 @@ public final class FileView extends View implements Drawable.Callback {
     private CharSequence fileTypeIcon;
     private Layout description;
     private Drawable preview;
+    private boolean previewNeedsPaddingTop;
 
     private ColorStateList textColor;
 
@@ -47,23 +45,17 @@ public final class FileView extends View implements Drawable.Callback {
 
     {
         if (fileTypeIconPaint == null) {
+
             fileTypeIconSize = getResources().getDimension(R.dimen.files_item_icon_text_size);
             fileTypeIconPaint = new TextPaint(ANTI_ALIAS_FLAG);
             fileTypeIconPaint.setTypeface(FileIcons.font(getContext().getAssets()));
             fileTypeIconPaint.setTextSize(fileTypeIconSize);
-        }
 
-        if (linkIconPaint == null) {
             linkIconSize = getResources().getDimension(R.dimen.files_item_text_size);
             linkIconPaint = new TextPaint(ANTI_ALIAS_FLAG);
             linkIconPaint.setTextSize(linkIconSize);
-        }
-
-        if (linkIcon == null) {
             linkIcon = getContext().getText(R.string.link_icon);
-        }
 
-        if (descriptionPaddingTop == -1) {
             descriptionPaddingTop =
                     getResources().getDimension(R.dimen.files_item_drawable_padding);
         }
@@ -207,11 +199,13 @@ public final class FileView extends View implements Drawable.Callback {
 
         canvas.save();
 
-        int dxPreview = 0;
-        int dyPreview = 0;
+        float dxPreview = 0;
+        float dyPreview = 0;
         if (preview != null) {
-            dxPreview = (getMeasuredWidth() - preview.getIntrinsicWidth() - previewPadding.left) / 2;
-            dyPreview = previewPadding.top;
+            dxPreview = (getMeasuredWidth() - preview.getIntrinsicWidth()) / 2F;
+            if (previewNeedsPaddingTop) {
+                dyPreview = descriptionPaddingTop;
+            }
             canvas.translate(dxPreview, dyPreview);
             preview.draw(canvas);
 
@@ -224,7 +218,7 @@ public final class FileView extends View implements Drawable.Callback {
             canvas.translate(
                     getPaddingStart() - dxPreview,
                     preview != null
-                            ? preview.getIntrinsicHeight() - dyPreview + descriptionPaddingTop
+                            ? preview.getIntrinsicHeight() + descriptionPaddingTop
                             : getPaddingTop() + fileTypeIconSize + descriptionPaddingTop
             );
 
@@ -278,12 +272,15 @@ public final class FileView extends View implements Drawable.Callback {
 
         if (preview != null) {
             preview.setCallback(this);
-            preview.getPadding(previewPadding);
 
             height = (int) (preview.getIntrinsicHeight()
                     + descriptionPaddingTop
                     + description.getHeight()
                     + getPaddingBottom());
+
+            if ((previewNeedsPaddingTop = preview.getIntrinsicWidth() < textWidth)) {
+                height += descriptionPaddingTop;
+            }
 
         } else {
             height = (int) (getPaddingTop()

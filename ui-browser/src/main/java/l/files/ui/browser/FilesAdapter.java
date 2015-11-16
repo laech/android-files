@@ -353,12 +353,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         private Drawable newThumbnailDrawable(Bitmap thumbnail) {
-            Drawable drawable = new ThumbnailDrawable(context(), previewRadius, thumbnail);
-            if (thumbnail.getWidth() < constraint.width()) {
-                int insetTop = resources().getDimensionPixelSize(R.dimen.files_item_drawable_padding);
-                drawable = new InsetDrawable(drawable, 0, insetTop, 0, 0);
-            }
-            return drawable;
+            return new ThumbnailDrawable(context(), previewRadius, thumbnail);
         }
 
         @Override
