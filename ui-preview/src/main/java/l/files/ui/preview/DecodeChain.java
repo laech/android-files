@@ -137,10 +137,19 @@ final class DecodeChain extends Decode {
         }
 
         if (thumbnail != null) {
-            publishProgress(thumbnail);
+
+            if (context.getSize(file, stat, constraint) == null) {
+                context.putSize(file, stat, constraint, Rect.of(
+                        thumbnail.getWidth(),
+                        thumbnail.getHeight()));
+            }
+
             if (context.getPalette(file, stat, constraint) == null) {
                 publishProgress(decodePalette(thumbnail));
             }
+
+            publishProgress(thumbnail);
+
             return true;
         }
         return false;
