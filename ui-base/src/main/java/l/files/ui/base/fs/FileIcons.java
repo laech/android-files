@@ -25,6 +25,7 @@ import static l.files.ui.base.R.string.ic_file_music;
 import static l.files.ui.base.R.string.ic_file_pdf;
 import static l.files.ui.base.R.string.ic_file_text;
 import static l.files.ui.base.R.string.ic_file_video;
+import static l.files.ui.base.R.string.ic_unknown;
 import static l.files.ui.base.fs.UserDirs.DIR_DCIM;
 import static l.files.ui.base.fs.UserDirs.DIR_DOWNLOADS;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
@@ -92,6 +93,10 @@ public final class FileIcons {
 
     public static int defaultFileIconStringId() {
         return ic_file;
+    }
+
+    public static int unknownIconStringId() {
+        return ic_unknown;
     }
 
     private FileIcons() {

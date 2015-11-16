@@ -19,8 +19,8 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
 import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
-import static l.files.ui.base.fs.FileIcons.defaultFileIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
+import static l.files.ui.base.fs.FileIcons.unknownIconStringId;
 
 public final class FileView extends View implements Drawable.Callback {
 
@@ -88,7 +88,7 @@ public final class FileView extends View implements Drawable.Callback {
     private int getIconTextId(FileItem item) {
         Stat stat = item.linkTargetOrSelfStat();
         if (stat == null) {
-            return defaultFileIconStringId();
+            return unknownIconStringId();
         }
 
         if (stat.isDirectory()) {
