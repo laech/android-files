@@ -35,7 +35,7 @@ public final class FilesActivityTest {
     @Test
     public void lock_closed_sidebar_on_start_action_mode() throws Exception {
         FilesActivity activity = activityWithMockDrawer();
-        activity.onActionModeStarted(null);
+        activity.onSupportActionModeStarted(null);
         verify(activity.drawerLayout()).setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED);
     }
 
@@ -43,14 +43,14 @@ public final class FilesActivityTest {
     public void lock_opened_sidebar_on_start_action_mode() throws Exception {
         FilesActivity activity = activityWithMockDrawer();
         given(activity.drawerLayout().isDrawerOpen(START)).willReturn(true);
-        activity.onActionModeStarted(null);
+        activity.onSupportActionModeStarted(null);
         verify(activity.drawerLayout()).setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);
     }
 
     @Test
     public void unlock_sidebar_on_finish_action_mode() throws Exception {
         FilesActivity activity = activityWithMockDrawer();
-        activity.onActionModeFinished(null);
+        activity.onSupportActionModeFinished(null);
         verify(activity.drawerLayout()).setDrawerLockMode(LOCK_MODE_UNLOCKED);
     }
 

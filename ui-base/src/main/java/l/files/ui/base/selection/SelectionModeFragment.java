@@ -1,7 +1,7 @@
 package l.files.ui.base.selection;
 
 import android.os.Bundle;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,7 +71,7 @@ public abstract class SelectionModeFragment<T> extends BaseFragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (!selection.isEmpty()) {
-            actionModeProvider().startActionMode(actionModeCallback());
+            actionModeProvider().startSupportActionMode(actionModeCallback());
         }
     }
 

@@ -1,6 +1,6 @@
 package l.files.ui.base.view;
 
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.MenuItem;
 
 public abstract class ActionModeItem extends ActionModeAdapter {

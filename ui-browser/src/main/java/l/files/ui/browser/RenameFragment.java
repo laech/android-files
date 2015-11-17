@@ -4,7 +4,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.widget.EditText;
 
 import java.io.IOException;

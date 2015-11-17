@@ -1,11 +1,10 @@
 package l.files.ui.base.selection;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.support.annotation.Nullable;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.view.ActionMode;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -61,10 +60,6 @@ public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         return itemView.getResources();
     }
 
-    protected final AssetManager assets() {
-        return context().getAssets();
-    }
-
     @Override
     public void onSelectionChanged() {
         if (item == null) {
@@ -76,7 +71,7 @@ public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         if (mode != null && selection.isEmpty()) {
             mode.finish();
         } else if (mode == null && !selection.isEmpty()) {
-            actionModeProvider.startActionMode(actionModeCallback);
+            actionModeProvider.startSupportActionMode(actionModeCallback);
         }
     }
 

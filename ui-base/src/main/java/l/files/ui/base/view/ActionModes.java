@@ -1,12 +1,12 @@
 package l.files.ui.base.view;
 
-import android.view.ActionMode.Callback;
+import android.support.v7.view.ActionMode;
 
 public final class ActionModes {
     private ActionModes() {
     }
 
-    public static CompositeItem compose(final Callback... callbacks) {
+    public static CompositeItem compose(ActionMode.Callback... callbacks) {
         return new CompositeItem(callbacks);
     }
 }

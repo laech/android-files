@@ -275,7 +275,12 @@ public final class DateCategorizerTest {
         given(name.toString()).willReturn(String.valueOf(time));
         given(file.name()).willReturn(name);
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileItem.create(file, stat, null, null, collator);
+        return FileItem.create(file, stat, null, null, new Provider<Collator>() {
+            @Override
+            public Collator get() {
+                return collator;
+            }
+        });
     }
 
     private void assertCategory(String expected, FileItem... stats) {

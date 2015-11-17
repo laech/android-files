@@ -1,6 +1,6 @@
 package l.files.ui.base.view;
 
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.Menu;
 
 import l.files.ui.base.selection.Selection;
@@ -13,12 +13,12 @@ public final class CountSelectedItemsAction
 
     private final Selection<?> selection;
 
-    public CountSelectedItemsAction(final Selection<?> selection) {
+    public CountSelectedItemsAction(Selection<?> selection) {
         this.selection = requireNonNull(selection, "selector");
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         super.onCreateActionMode(mode, menu);
         updateSelectedItemCount();
         this.selection.addWeaklyReferencedCallback(this);
@@ -26,7 +26,7 @@ public final class CountSelectedItemsAction
     }
 
     @Override
-    public void onDestroyActionMode(final ActionMode mode) {
+    public void onDestroyActionMode(ActionMode mode) {
         super.onDestroyActionMode(mode);
         this.selection.removeCallback(this);
     }

@@ -1,13 +1,13 @@
 package l.files.ui.base.view;
 
 import android.support.annotation.Nullable;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 
 public interface ActionModeProvider {
 
     @Nullable
     ActionMode currentActionMode();
 
-    ActionMode startActionMode(ActionMode.Callback callback);
+    ActionMode startSupportActionMode(ActionMode.Callback callback);
 
 }

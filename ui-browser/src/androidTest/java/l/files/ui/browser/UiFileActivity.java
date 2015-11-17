@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
 

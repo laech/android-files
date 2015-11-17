@@ -2,7 +2,7 @@ package l.files.ui.bookmarks;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

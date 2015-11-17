@@ -2,7 +2,7 @@ package l.files.ui.base.selection;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +36,7 @@ public final class SelectionModeFragmentTest {
         f2.onCreate(state);
         f2.onViewStateRestored(state);
         assertEquals(singleton(1), f2.selection().copy());
-        verify(f2.actionModeProvider()).startActionMode(f2.actionModeCallback());
+        verify(f2.actionModeProvider()).startSupportActionMode(f2.actionModeCallback());
     }
 
     @SuppressLint("ValidFragment")

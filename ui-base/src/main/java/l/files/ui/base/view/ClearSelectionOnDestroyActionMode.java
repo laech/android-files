@@ -1,6 +1,6 @@
 package l.files.ui.base.view;
 
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 
 import l.files.ui.base.selection.Selection;
 
@@ -15,7 +15,7 @@ public final class ClearSelectionOnDestroyActionMode
     }
 
     @Override
-    public void onDestroyActionMode(final ActionMode mode) {
+    public void onDestroyActionMode(ActionMode mode) {
         super.onDestroyActionMode(mode);
         selection.clear();
     }

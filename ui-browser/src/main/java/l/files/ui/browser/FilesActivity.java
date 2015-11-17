@@ -2,14 +2,13 @@ package l.files.ui.browser;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
-import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -206,14 +205,14 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
-    public void onActionModeFinished(ActionMode mode) {
-        super.onActionModeFinished(mode);
+    public void onSupportActionModeFinished(ActionMode mode) {
+        super.onSupportActionModeFinished(mode);
         drawer.setDrawerLockMode(LOCK_MODE_UNLOCKED);
     }
 
     @Override
-    public void onActionModeStarted(ActionMode mode) {
-        super.onActionModeStarted(mode);
+    public void onSupportActionModeStarted(ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
 
         if (isSidebarOpen()) {
             drawer.setDrawerLockMode(LOCK_MODE_LOCKED_OPEN);

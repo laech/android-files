@@ -46,8 +46,8 @@ abstract class FileSortTest {
             Locale locale,
             File... files) throws IOException {
 
-        Collator collator = Collators.of(locale);
-        List<FileItem> expected = new ArrayList<>(files.length);
+        final Collator collator = Collators.of(locale);
+        final List<FileItem> expected = new ArrayList<>(files.length);
         for (File file : files) {
             Stat stat;
             try {
@@ -55,7 +55,12 @@ abstract class FileSortTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileItem.create(file, stat, null, null, collator));
+            expected.add(FileItem.create(file, stat, null, null, new Provider<Collator>() {
+                @Override
+                public Collator get() {
+                    return collator;
+                }
+            }));
         }
         return expected;
     }

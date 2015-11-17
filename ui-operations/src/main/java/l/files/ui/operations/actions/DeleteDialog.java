@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.view.ActionMode;
+import android.support.v7.view.ActionMode;
 
 import java.util.Collection;
 
