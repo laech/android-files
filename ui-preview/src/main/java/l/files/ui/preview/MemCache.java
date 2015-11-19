@@ -10,13 +10,24 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 abstract class MemCache<V> extends Cache<V> {
 
+    private static final ThreadLocal<CharBuffer> keys = new ThreadLocal<CharBuffer>() {
+
+        @Override
+        protected CharBuffer initialValue() {
+            return new CharBuffer();
+        }
+
+
+    };
+
     private long lastModifiedTime(Stat stat) {
         return stat.lastModifiedTime().to(MILLISECONDS);
     }
 
     @Override
-    V get(File res, @Nullable Stat stat, Rect constraint) {
-        Snapshot<V> value = delegate().get(key(res, stat, constraint));
+    V get(File file, @Nullable Stat stat, Rect constraint) {
+        CharBuffer key = key(file, stat, constraint);
+        Snapshot<V> value = delegate().get(key);
         if (value == null) {
             return null;
         }
@@ -26,19 +37,26 @@ abstract class MemCache<V> extends Cache<V> {
         return value.get();
     }
 
+    private CharBuffer key(File res, @Nullable Stat stat, Rect constraint) {
+        CharBuffer key = keys.get();
+        key.clear();
+        key(key, res, stat, constraint);
+        return key;
+    }
+
     @Override
-    Snapshot<V> put(File res, Stat stat, Rect constraint, V value) {
+    Snapshot<V> put(File file, Stat stat, Rect constraint, V value) {
         return delegate().put(
-                key(res, stat, constraint),
+                key(file, stat, constraint).copy(),
                 Snapshot.of(value, lastModifiedTime(stat)));
     }
 
-    Snapshot<V> remove(File res, Stat stat, Rect constraint) {
-        return delegate().remove(key(res, stat, constraint));
+    Snapshot<V> remove(File file, Stat stat, Rect constraint) {
+        return delegate().remove(key(file, stat, constraint));
     }
 
-    abstract String key(File res, Stat stat, Rect constraint);
+    abstract void key(CharBuffer buffer, File res, Stat stat, Rect constraint);
 
-    abstract LruCache<String, Snapshot<V>> delegate();
+    abstract LruCache<CharBuffer, Snapshot<V>> delegate();
 
 }

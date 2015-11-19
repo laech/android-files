@@ -52,11 +52,11 @@ final class PaletteCache extends PersistenceCache<Palette> {
     }
 
     @Override
-    Snapshot<Palette> put(File res, Stat stat, Rect constraint, Palette value) {
+    Snapshot<Palette> put(File file, Stat stat, Rect constraint, Palette value) {
         if (value.getSwatches().isEmpty()) {
             return null;
         }
-        return super.put(res, stat, constraint, value);
+        return super.put(file, stat, constraint, value);
     }
 
 }

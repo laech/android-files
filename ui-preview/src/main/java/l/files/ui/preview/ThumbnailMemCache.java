@@ -12,16 +12,16 @@ import static android.content.Context.ACTIVITY_SERVICE;
 
 final class ThumbnailMemCache extends MemCache<Bitmap> {
 
-    private final LruCache<String, Snapshot<Bitmap>> delegate;
+    private final LruCache<CharBuffer, Snapshot<Bitmap>> delegate;
 
     ThumbnailMemCache(Context context, float appMemoryPercentageToUseForCache) {
         this(calculateSize(context, appMemoryPercentageToUseForCache));
     }
 
     ThumbnailMemCache(int size) {
-        delegate = new LruCache<String, Snapshot<Bitmap>>(size) {
+        delegate = new LruCache<CharBuffer, Snapshot<Bitmap>>(size) {
             @Override
-            protected int sizeOf(String key, Snapshot<Bitmap> value) {
+            protected int sizeOf(CharBuffer key, Snapshot<Bitmap> value) {
                 return value.get().getByteCount();
             }
         };
@@ -40,19 +40,20 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     }
 
     @Override
-    String key(File res, Stat stat, Rect constraint) {
-        return res.scheme()
-                + "_" + res.path()
-                + "_" + constraint.width()
-                + "_" + constraint.height();
+    void key(CharBuffer key, File res, Stat stat, Rect constraint) {
+        key.append(res.scheme())
+                .append("_").append(res.path())
+                .append("_").append(constraint.width())
+                .append("_").append(constraint.height());
     }
 
     @Override
-    LruCache<String, Snapshot<Bitmap>> delegate() {
+    LruCache<CharBuffer, Snapshot<Bitmap>> delegate() {
         return delegate;
     }
 
     void clear() {
         delegate().evictAll();
     }
+
 }
