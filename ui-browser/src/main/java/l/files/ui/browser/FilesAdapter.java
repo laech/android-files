@@ -5,14 +5,13 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.DisplayMetrics;
-import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,10 +64,15 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     private final Context context;
     private final Preview decorator;
+
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
     private final Selection<File> selection;
+
     private final OnOpenFileListener listener;
+
+    private final FileTextLayoutCache layouts;
+
     private Rect constraint;
     private int textWidth;
 
@@ -85,6 +89,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
         this.decorator = Preview.get(context);
+        this.layouts = new FileTextLayoutCache();
     }
 
     private Rect calculateThumbnailConstraint(Context context, CardView card) {
@@ -132,12 +137,12 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         while (pos <= warmUpToPosition && pos < getItemCount()) {
             BrowserItem item = getItem(pos);
             if (item instanceof FileItem) {
-                FileTextLayoutCache.get(context, (FileItem) item, textWidth);
+                layouts.get(context, (FileItem) item, textWidth);
             }
             pos++;
         }
 
-        FileTextLayoutCache.printStat();
+        layouts.printStat();
     }
 
     @Override
@@ -240,7 +245,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         private void updateContent(Drawable preview) {
-            content.set(item(), textWidth, preview);
+            content.set(layouts, item(), textWidth, preview);
             content.setEnabled(item().isReadable());
             ((CardView) itemView).setCardElevation(
                     preview != null

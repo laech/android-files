@@ -254,7 +254,7 @@ public final class FileView extends View implements Drawable.Callback {
         }
     }
 
-    void set(FileItem item, int textWidth, Drawable preview) {
+    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Drawable preview) {
 
         this.showLinkIcon = shouldShowLinkIcon(item);
 
@@ -264,7 +264,7 @@ public final class FileView extends View implements Drawable.Callback {
         }
 
         int width = textWidth + getPaddingStart() + getPaddingEnd();
-        this.description = FileTextLayoutCache.get(getContext(), item, textWidth);
+        this.description = layouts.get(getContext(), item, textWidth);
         this.preview = preview;
         this.fileTypeIcon = getIconText(item);
 

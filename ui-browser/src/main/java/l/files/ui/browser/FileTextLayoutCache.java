@@ -28,10 +28,10 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 
 final class FileTextLayoutCache {
 
-    private FileTextLayoutCache() {
+    FileTextLayoutCache() {
     }
 
-    private static final SparseArray<Cache> caches = new SparseArray<>(2);
+    private final SparseArray<Cache> caches = new SparseArray<>(2);
 
     // Like LruCache but simpler and without the synchronization overhead
     private static final class Cache extends LinkedHashMap<File, CacheEntry> {
@@ -66,7 +66,7 @@ final class FileTextLayoutCache {
         }
     }
 
-    static void printStat() {
+    void printStat() {
         if (!BuildConfig.DEBUG) {
             return;
         }
@@ -112,7 +112,7 @@ final class FileTextLayoutCache {
         return new DateFormatter(context.getApplicationContext());
     }
 
-    static Layout get(Context context, FileItem item, int width) {
+    Layout get(Context context, FileItem item, int width) {
 
         if (spansForName == null) {
             spansForName = new Object[]{
