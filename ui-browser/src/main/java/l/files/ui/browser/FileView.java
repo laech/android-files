@@ -273,6 +273,10 @@ public final class FileView extends View implements Drawable.Callback {
         if (preview != null) {
             preview.setCallback(this);
 
+            if (preview.isStateful()) {
+                preview.setState(getDrawableState());
+            }
+
             height = (int) (preview.getIntrinsicHeight()
                     + descriptionPaddingTop
                     + description.getHeight()
