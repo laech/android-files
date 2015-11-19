@@ -11,6 +11,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.PixelFormat.TRANSLUCENT;
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 import static android.graphics.Shader.TileMode.CLAMP;
@@ -19,20 +20,26 @@ final class ThumbnailDrawable extends Drawable {
 
     private static ColorFilter activatedFilter;
 
-    private final Paint paint;
-    private final RectF rect;
+    private static final Paint paint;
+    private static final RectF rect;
+
+    static {
+        paint = new Paint(ANTI_ALIAS_FLAG);
+        rect = new RectF(0, 0, 0, 0);
+    }
+
+    private final BitmapShader shader;
     private final int width;
     private final int height;
     private final float radius;
 
+    private int alpha = 255;
+
     ThumbnailDrawable(Context context, float radius, Bitmap bitmap) {
-        this.paint = new Paint();
-        this.paint.setAntiAlias(true);
-        this.paint.setShader(new BitmapShader(bitmap, CLAMP, CLAMP));
+        this.shader = new BitmapShader(bitmap, CLAMP, CLAMP);
         this.radius = radius;
         this.width = bitmap.getWidth();
         this.height = bitmap.getHeight();
-        this.rect = new RectF(0, 0, width, height);
         if (activatedFilter == null) {
             activatedFilter = new PorterDuffColorFilter(
                     ContextCompat.getColor(context, R.color.activated_highlight),
@@ -43,7 +50,22 @@ final class ThumbnailDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
-        paint.setColorFilter(isActivated() ? activatedFilter : null);
+
+        if (paint.getShader() != shader) {
+            paint.setShader(shader);
+        }
+
+        if (paint.getAlpha() != alpha) {
+            paint.setAlpha(alpha);
+        }
+
+        ColorFilter filter = isActivated() ? activatedFilter : null;
+        if (paint.getColorFilter() != filter) {
+            paint.setColorFilter(filter);
+        }
+
+        rect.set(0, 0, width, height);
+
         canvas.drawRoundRect(rect, radius, radius, paint);
     }
 
@@ -63,12 +85,11 @@ final class ThumbnailDrawable extends Drawable {
 
     @Override
     public void setAlpha(int alpha) {
-        paint.setAlpha(alpha);
+        this.alpha = alpha;
     }
 
     @Override
     public void setColorFilter(ColorFilter filter) {
-        paint.setColorFilter(filter);
     }
 
     @Override
