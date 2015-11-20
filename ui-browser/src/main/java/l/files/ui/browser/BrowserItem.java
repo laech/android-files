@@ -53,6 +53,7 @@ abstract class BrowserItem {
         private Provider<Collator> collator;
         private CollationKey collationKey;
         private Boolean readable;
+        private String basicMediaType;
 
         FileItem() {
         }
@@ -69,11 +70,14 @@ abstract class BrowserItem {
         }
 
         String basicMediaType() {
-            try {
-                return selfFile().detectBasicMediaType(linkTargetOrSelfStat());
-            } catch (IOException e) {
-                return MEDIA_TYPE_OCTET_STREAM;
+            if (basicMediaType == null) {
+                try {
+                    basicMediaType = selfFile().detectBasicMediaType(linkTargetOrSelfStat());
+                } catch (IOException e) {
+                    basicMediaType = MEDIA_TYPE_OCTET_STREAM;
+                }
             }
+            return basicMediaType;
         }
 
         abstract File selfFile();

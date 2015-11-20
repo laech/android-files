@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
@@ -35,7 +33,6 @@ import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
 import l.files.ui.preview.Rect;
-import l.files.ui.preview.SizedColorDrawable;
 
 import static android.R.attr.textColorPrimary;
 import static android.R.attr.textColorPrimaryInverse;
@@ -73,6 +70,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     private final FileTextLayoutCache layouts;
 
+    private final ColorStateList primaryText;
+    private final ColorStateList primaryTextInverse;
+
     private Rect constraint;
     private int textWidth;
 
@@ -90,6 +90,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.selection = requireNonNull(selection);
         this.decorator = Preview.get(context);
         this.layouts = new FileTextLayoutCache();
+
+        this.primaryText = getColorStateList(textColorPrimary, context);
+        this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context);
     }
 
     private Rect calculateThumbnailConstraint(Context context, CardView card) {
@@ -195,13 +198,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private final FileView content;
 
-        private final float previewRadius;
         private final float itemViewElevationWithPreview;
         private final float itemViewElevationWithoutPreview;
-        private final int transitionDuration;
-
-        private final ColorStateList primaryText;
-        private final ColorStateList primaryTextInverse;
 
         private Decode task;
 
@@ -210,13 +208,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             this.content = find(android.R.id.content, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
-            this.previewRadius = dimen(R.dimen.files_item_card_inner_radius);
             this.itemViewElevationWithoutPreview = dimen(R.dimen.files_item_elevation_without_preview);
             this.itemViewElevationWithPreview = dimen(R.dimen.files_item_elevation_with_preview);
-            this.transitionDuration = resources().getInteger(android.R.integer.config_shortAnimTime);
-
-            this.primaryText = getColorStateList(textColorPrimary, context());
-            this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context());
         }
 
         private float dimen(int id) {
@@ -244,8 +237,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             updateContent(retrievePreview());
         }
 
-        private void updateContent(Drawable preview) {
-            content.set(layouts, item(), textWidth, preview);
+        private void updateContent(Object preview) {
+            if (preview instanceof Rect) {
+                content.set(layouts, item(), textWidth, (Rect) preview);
+            } else if (preview instanceof Bitmap) {
+                content.set(layouts, item(), textWidth, (Bitmap) preview);
+            } else {
+                content.set(layouts, item(), textWidth, (Bitmap) null);
+            }
             content.setEnabled(item().isReadable());
             ((CardView) itemView).setCardElevation(
                     preview != null
@@ -253,7 +252,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                             : itemViewElevationWithoutPreview);
         }
 
-        private Drawable retrievePreview() {
+        private Object retrievePreview() {
 
             if (task != null) {
                 task.cancelAll();
@@ -262,7 +261,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             File res = item().selfFile();
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
-                setPaletteColor(TRANSPARENT); // TODO
+                setPaletteColor(TRANSPARENT);
                 return null;
             }
 
@@ -275,18 +274,17 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
             Bitmap thumbnail = getCachedThumbnail(res, stat);
             if (thumbnail != null) {
-                return newThumbnailDrawable(thumbnail);
+                return thumbnail;
             }
 
             task = decorator.get(res, stat, constraint, this);
 
             Rect size = decorator.getSize(res, null, constraint);
             if (size != null) {
-                return newSizedColorDrawable(size);
-            } else {
-                return null;
+                return scaleSize(size);
             }
 
+            return null;
         }
 
         private Bitmap getCachedThumbnail(File res, Stat stat) {
@@ -300,16 +298,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             }
         }
 
-        private SizedColorDrawable newSizedColorDrawable(Rect size) {
+        private Rect scaleSize(Rect size) {
 
             boolean tooBig = size.width() > constraint.width()
                     || size.height() > constraint.height();
 
-            Rect scaledDown = tooBig
+            return tooBig
                     ? size.scale(constraint)
                     : size;
-
-            return new SizedColorDrawable(TRANSPARENT, scaledDown);
 
         }
 
@@ -326,7 +322,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void onSizeAvailable(File item, Rect size) {
             if (item.equals(itemId())) {
-                updateContent(newSizedColorDrawable(size));
+                updateContent(scaleSize(size));
             }
         }
 
@@ -348,17 +344,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         @Override
         public void onPreviewAvailable(File item, Bitmap bm) {
             if (item.equals(itemId())) {
-                TransitionDrawable transition = new TransitionDrawable(new Drawable[]{
-                        new SizedColorDrawable(TRANSPARENT, bm.getWidth(), bm.getHeight()),
-                        newThumbnailDrawable(bm)
-                });
-                updateContent(transition);
-                transition.startTransition(transitionDuration);
+                updateContent(bm);
+                content.startPreviewTransition();
             }
-        }
-
-        private Drawable newThumbnailDrawable(Bitmap thumbnail) {
-            return new ThumbnailDrawable(context(), previewRadius, thumbnail);
         }
 
         @Override

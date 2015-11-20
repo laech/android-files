@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.text.Layout;
@@ -13,6 +14,7 @@ import android.view.View;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.browser.BrowserItem.FileItem;
+import l.files.ui.preview.Rect;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Build.VERSION.SDK_INT;
@@ -32,11 +34,14 @@ public final class FileView extends View implements Drawable.Callback {
 
     private static CharSequence linkIcon;
 
-    private static float descriptionPaddingTop = -1;
+    private static float descriptionPaddingTop;
+
+    private static int transitionDuration;
+
+    private final ThumbnailTransitionDrawable preview;
 
     private CharSequence fileTypeIcon;
     private Layout description;
-    private Drawable preview;
     private boolean previewNeedsPaddingTop;
 
     private ColorStateList textColor;
@@ -58,7 +63,16 @@ public final class FileView extends View implements Drawable.Callback {
 
             descriptionPaddingTop =
                     getResources().getDimension(R.dimen.files_item_drawable_padding);
+
+            transitionDuration =
+                    getResources().getInteger(android.R.integer.config_shortAnimTime);
+
         }
+
+        preview = new ThumbnailTransitionDrawable(
+                getContext(),
+                getResources().getDimension(R.dimen.files_item_card_inner_radius));
+        preview.setCallback(this);
     }
 
     public FileView(Context context) {
@@ -102,7 +116,7 @@ public final class FileView extends View implements Drawable.Callback {
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
 
-        if (preview != null) {
+        if (preview.hasVisibleContent()) {
             preview.jumpToCurrentState();
         }
     }
@@ -112,7 +126,7 @@ public final class FileView extends View implements Drawable.Callback {
         super.onVisibilityChanged(changedView, visibility);
 
         boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
-        if (preview != null && visible != preview.isVisible()) {
+        if (preview.hasVisibleContent() && visible != preview.isVisible()) {
             preview.setVisible(visible, false);
         }
     }
@@ -121,7 +135,7 @@ public final class FileView extends View implements Drawable.Callback {
     public void drawableHotspotChanged(float x, float y) {
         super.drawableHotspotChanged(x, y);
 
-        if (preview != null && SDK_INT >= LOLLIPOP) {
+        if (preview.hasVisibleContent() && SDK_INT >= LOLLIPOP) {
             preview.setHotspot(x, y);
         }
     }
@@ -130,7 +144,7 @@ public final class FileView extends View implements Drawable.Callback {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        if (preview != null && preview.isStateful()) {
+        if (preview.hasVisibleContent() && preview.isStateful()) {
             preview.setState(getDrawableState());
         }
     }
@@ -144,7 +158,7 @@ public final class FileView extends View implements Drawable.Callback {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
 
-        if (preview != null) {
+        if (preview.hasVisibleContent()) {
             preview.setVisible(visibility == VISIBLE, false);
         }
     }
@@ -154,7 +168,7 @@ public final class FileView extends View implements Drawable.Callback {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        if (preview != null) {
+        if (preview.hasVisibleContent()) {
             preview.setVisible(getVisibility() == VISIBLE, false);
         }
     }
@@ -163,7 +177,7 @@ public final class FileView extends View implements Drawable.Callback {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (preview != null) {
+        if (preview.hasVisibleContent()) {
             preview.setVisible(false, false);
         }
     }
@@ -172,7 +186,7 @@ public final class FileView extends View implements Drawable.Callback {
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
 
-        if (preview != null && SDK_INT >= M) {
+        if (preview.hasVisibleContent() && SDK_INT >= M) {
             preview.setLayoutDirection(layoutDirection);
         }
     }
@@ -184,7 +198,7 @@ public final class FileView extends View implements Drawable.Callback {
 
     @Override
     public void invalidateDrawable(Drawable drawable) {
-        if (this.preview != null && this.preview == drawable) {
+        if (this.preview.hasVisibleContent() && this.preview == drawable) {
             invalidate();
         } else {
             super.invalidateDrawable(drawable);
@@ -201,7 +215,7 @@ public final class FileView extends View implements Drawable.Callback {
 
         float dxPreview = 0;
         float dyPreview = 0;
-        if (preview != null) {
+        if (preview.hasVisibleContent()) {
             dxPreview = (getMeasuredWidth() - preview.getIntrinsicWidth()) / 2F;
             if (previewNeedsPaddingTop) {
                 dyPreview = descriptionPaddingTop;
@@ -217,7 +231,7 @@ public final class FileView extends View implements Drawable.Callback {
 
             canvas.translate(
                     getPaddingStart() - dxPreview,
-                    preview != null
+                    preview.hasVisibleContent()
                             ? preview.getIntrinsicHeight() + descriptionPaddingTop
                             : getPaddingTop() + fileTypeIconSize + descriptionPaddingTop
             );
@@ -254,28 +268,29 @@ public final class FileView extends View implements Drawable.Callback {
         }
     }
 
-    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Drawable preview) {
+    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Rect size) {
+        preview.setSize(size.width(), size.height());
+        preview.resetTransition();
+        set(layouts, item, textWidth);
+    }
+
+    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Bitmap bitmap) {
+        preview.setBitmap(bitmap);
+        preview.startTransition(0);
+        set(layouts, item, textWidth);
+    }
+
+    void set(FileTextLayoutCache layouts, FileItem item, int textWidth) {
 
         this.showLinkIcon = shouldShowLinkIcon(item);
 
-        if (this.preview != null) {
-            this.preview.setCallback(null);
-            unscheduleDrawable(this.preview);
-        }
-
         int width = textWidth + getPaddingStart() + getPaddingEnd();
         this.description = layouts.get(getContext(), item, textWidth);
-        this.preview = preview;
         this.fileTypeIcon = getIconText(item);
 
         int height;
 
-        if (preview != null) {
-            preview.setCallback(this);
-
-            if (preview.isStateful()) {
-                preview.setState(getDrawableState());
-            }
+        if (preview.hasVisibleContent()) {
 
             height = (int) (preview.getIntrinsicHeight()
                     + descriptionPaddingTop
@@ -313,11 +328,12 @@ public final class FileView extends View implements Drawable.Callback {
         return showLinkIcon;
     }
 
-    Drawable getPreview() {
-        return preview;
-    }
-
     CharSequence getText() {
         return description.getText();
     }
+
+    void startPreviewTransition() {
+        preview.startTransition(transitionDuration);
+    }
+
 }

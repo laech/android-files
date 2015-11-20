@@ -7,17 +7,26 @@ import android.graphics.drawable.ColorDrawable;
  */
 public final class SizedColorDrawable extends ColorDrawable {
 
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
 
-    public SizedColorDrawable(int color, Rect size) {
-        this(color, size.width(), size.height());
+    public SizedColorDrawable(int color) {
+        this(color, 0, 0);
     }
 
     public SizedColorDrawable(int color, int width, int height) {
         super(color);
         this.width = width;
         this.height = height;
+    }
+
+    public void setSize(int width, int height) {
+        boolean changed = this.width != width || this.height != height;
+        if (changed) {
+            this.width = width;
+            this.height = height;
+            invalidateSelf();
+        }
     }
 
     @Override

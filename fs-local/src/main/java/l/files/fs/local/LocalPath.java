@@ -34,6 +34,8 @@ public final class LocalPath implements Path {
      */
     private final byte[] bytes;
 
+    private LocalName name;
+
     LocalPath(byte[] bytes) {
         this.bytes = requireNonNull(bytes);
     }
@@ -108,23 +110,26 @@ public final class LocalPath implements Path {
 
     @Override
     public LocalName name() {
-        byte[] path = bytes;
+        if (name == null) {
+            byte[] path = bytes;
 
-        int nameEnd = path.length;
-        while (nameEnd > 0 && path[nameEnd - 1] == SEPARATOR) {
-            nameEnd--;
+            int nameEnd = path.length;
+            while (nameEnd > 0 && path[nameEnd - 1] == SEPARATOR) {
+                nameEnd--;
+            }
+
+            int nameStart = nameEnd;
+            while (nameStart > 0 && path[nameStart - 1] != SEPARATOR) {
+                nameStart--;
+            }
+
+            if (nameStart < 0) {
+                return LocalName.of(bytes);
+            }
+
+            name = LocalName.of(Arrays.copyOfRange(path, nameStart, nameEnd));
         }
-
-        int nameStart = nameEnd;
-        while (nameStart > 0 && path[nameStart - 1] != SEPARATOR) {
-            nameStart--;
-        }
-
-        if (nameStart < 0) {
-            return LocalName.of(bytes);
-        }
-
-        return LocalName.of(Arrays.copyOfRange(path, nameStart, nameEnd));
+        return name;
     }
 
     boolean isHidden() {

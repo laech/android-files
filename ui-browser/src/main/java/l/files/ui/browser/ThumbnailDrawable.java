@@ -28,18 +28,15 @@ final class ThumbnailDrawable extends Drawable {
         rect = new RectF(0, 0, 0, 0);
     }
 
-    private final BitmapShader shader;
-    private final int width;
-    private final int height;
+    private BitmapShader shader;
+    private int width;
+    private int height;
     private final float radius;
 
     private int alpha = 255;
 
-    ThumbnailDrawable(Context context, float radius, Bitmap bitmap) {
-        this.shader = new BitmapShader(bitmap, CLAMP, CLAMP);
+    ThumbnailDrawable(Context context, float radius) {
         this.radius = radius;
-        this.width = bitmap.getWidth();
-        this.height = bitmap.getHeight();
         if (activatedFilter == null) {
             activatedFilter = new PorterDuffColorFilter(
                     ContextCompat.getColor(context, R.color.activated_highlight),
@@ -48,8 +45,27 @@ final class ThumbnailDrawable extends Drawable {
         }
     }
 
+    void setBitmap(Bitmap bitmap) {
+        if (bitmap == null) {
+            shader = null;
+        } else {
+            shader = new BitmapShader(bitmap, CLAMP, CLAMP);
+            width = bitmap.getWidth();
+            height = bitmap.getHeight();
+        }
+        invalidateSelf();
+    }
+
+    public BitmapShader getBitmapShader() {
+        return shader;
+    }
+
     @Override
     public void draw(Canvas canvas) {
+
+        if (shader == null) {
+            return;
+        }
 
         if (paint.getShader() != shader) {
             paint.setShader(shader);
