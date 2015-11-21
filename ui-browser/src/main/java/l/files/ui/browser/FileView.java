@@ -27,12 +27,12 @@ import static l.files.ui.base.fs.FileIcons.unknownIconStringId;
 public final class FileView extends View implements Drawable.Callback {
 
     private static TextPaint fileTypeIconPaint;
-    private static TextPaint linkIconPaint;
+    private static TextPaint linkArrowPaint;
 
     private static float fileTypeIconSize;
-    private static float linkIconSize;
+    private static float linkArrowSize;
 
-    private static CharSequence linkIcon;
+    private static CharSequence linkArrow;
 
     private static float descriptionPaddingTop;
 
@@ -56,10 +56,10 @@ public final class FileView extends View implements Drawable.Callback {
             fileTypeIconPaint.setTypeface(FileIcons.font(getContext().getAssets()));
             fileTypeIconPaint.setTextSize(fileTypeIconSize);
 
-            linkIconSize = getResources().getDimension(R.dimen.files_item_text_size);
-            linkIconPaint = new TextPaint(ANTI_ALIAS_FLAG);
-            linkIconPaint.setTextSize(linkIconSize);
-            linkIcon = getContext().getText(R.string.link_icon);
+            linkArrowSize = getResources().getDimension(R.dimen.files_item_text_size);
+            linkArrowPaint = new TextPaint(ANTI_ALIAS_FLAG);
+            linkArrowPaint.setTextSize(linkArrowSize);
+            linkArrow = getContext().getText(R.string.link_icon);
 
             descriptionPaddingTop =
                     getResources().getDimension(R.dimen.files_item_drawable_padding);
@@ -258,13 +258,13 @@ public final class FileView extends View implements Drawable.Callback {
         canvas.drawText(fileTypeIcon, 0, fileTypeIcon.length(), fileTypeIconX, fileTypeIconY, fileTypeIconPaint);
 
         if (showLinkIcon) {
-            linkIconPaint.setColor(color);
-            if (linkIconPaint.getAlpha() > 150) {
-                linkIconPaint.setAlpha(150);
+            linkArrowPaint.setColor(color);
+            if (linkArrowPaint.getAlpha() > 150) {
+                linkArrowPaint.setAlpha(150);
             }
-            float linkIconX = fileTypeIconX + fileTypeIconSize;
-            float linkIconY = fileTypeIconY - (linkIconSize / 2);
-            canvas.drawText(linkIcon, 0, linkIcon.length(), linkIconX, linkIconY, linkIconPaint);
+            float linkArrowX = fileTypeIconX + fileTypeIconSize;
+            float linkArrowY = fileTypeIconY - (linkArrowSize / 2);
+            canvas.drawText(linkArrow, 0, linkArrow.length(), linkArrowX, linkArrowY, linkArrowPaint);
         }
     }
 
