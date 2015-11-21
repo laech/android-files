@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -15,7 +16,13 @@ import static l.files.base.Throwables.addSuppressed;
 
 final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
-    private static final ScheduledExecutorService service = newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService service =
+            newSingleThreadScheduledExecutor(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread("BatchObserverNotifier");
+                }
+            });
 
     private boolean selfChanged;
     private final Set<Name> childrenChanged;
