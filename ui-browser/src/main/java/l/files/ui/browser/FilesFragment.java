@@ -8,8 +8,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
@@ -57,7 +55,6 @@ import static l.files.ui.browser.Preferences.isSortKey;
 public final class FilesFragment extends SelectionModeFragment<File> implements
         LoaderCallbacks<Result>,
         OnSharedPreferenceChangeListener,
-        OnRefreshListener,
         Selectable {
 
     public static final String TAG = FilesFragment.class.getSimpleName();
@@ -77,8 +74,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
     private FilesAdapter adapter;
 
     public RecyclerView recycler;
-
-    private SwipeRefreshLayout refresher;
 
     private final Handler handler = new Handler();
 
@@ -146,10 +141,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
         recycler.addOnScrollListener(onScrollListener());
 
-        refresher = find(R.id.refresher, this);
-        refresher.setOnRefreshListener(this);
-        refresher.setColorSchemeResources(R.color.color_primary);
-
         setupOptionsMenu();
         setHasOptionsMenu(true);
 
@@ -164,14 +155,8 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     adapter.warmUpOnIdle(getLayoutManager());
-                    refresher.setEnabled(true);
-                } else {
-                    if (!refresher.isRefreshing()) {
-                        refresher.setEnabled(false);
-                    }
                 }
             }
 
@@ -210,6 +195,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         FragmentActivity context = getActivity();
         FragmentManager manager = context.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
+                new Refresh(autoRefreshDisable(), refresh()),
                 new Bookmark(directory, context),
                 new NewDirMenu(manager, directory),
                 new Paste(context, directory),
@@ -218,10 +204,23 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         ));
     }
 
-    @Override
-    public void onRefresh() {
-        // TODO make this more efficient without throwing everything away
-        getLoaderManager().restartLoader(0, null, FilesFragment.this);
+    private Runnable refresh() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                getLoaderManager().restartLoader(0, null, FilesFragment.this);
+            }
+        };
+    }
+
+    private Provider<Boolean> autoRefreshDisable() {
+        return new Provider<Boolean>() {
+            @Override
+            public Boolean get() {
+                FilesLoader loader = filesLoader();
+                return loader != null && loader.autoRefreshDisabled();
+            }
+        };
     }
 
     @Override
@@ -298,9 +297,6 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                     }
                 });
             }
-
-            refresher.setEnabled(true);
-            refresher.setRefreshing(false);
 
         }
     }

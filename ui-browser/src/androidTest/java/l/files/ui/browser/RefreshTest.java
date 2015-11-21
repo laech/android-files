@@ -28,7 +28,7 @@ import static l.files.ui.browser.FileSort.MODIFIED;
 public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
-    public void manual_refresh_updates_outdated_files()
+    public void manual_refresh_enabled_if_max_watches_reached()
             throws Exception {
 
         File dir = linkToStorageDir("files-test-max-watches-reached");
@@ -38,10 +38,11 @@ public final class RefreshTest extends BaseFilesActivityTest {
                 .sort()
                 .by(MODIFIED)
                 .clickInto(dir)
-                .assertListMatchesFileSystem(dir);
+                .assertListMatchesFileSystem(dir)
+                .assertRefreshMenuVisible(true);
 
         testRefreshInManualMode(dir);
-        testFileCreationDeletionWillStillBeNotifiedAfterRanOutOfWatches(dir);
+        testFileCreationDeletionWillStillBeNotifiedInManualMode(dir);
     }
 
     private void testRefreshInManualMode(File dir) throws IOException {
@@ -67,7 +68,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().refresh().assertListMatchesFileSystem(dir);
     }
 
-    private void testFileCreationDeletionWillStillBeNotifiedAfterRanOutOfWatches(File dir)
+    private void testFileCreationDeletionWillStillBeNotifiedInManualMode(File dir)
             throws IOException {
 
         dir.resolve("file-" + nanoTime()).createFile();
@@ -86,6 +87,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
         }
 
         screen().assertListMatchesFileSystem(dir);
+    }
+
+    @Test
+    public void manual_refresh_disabled_if_max_watches_not_reached()
+            throws Exception {
+
+        screen().assertRefreshMenuVisible(false);
     }
 
     private int maxUserWatches() throws IOException {

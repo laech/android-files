@@ -73,6 +73,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean showHidden;
 
     private volatile boolean observing;
+    private volatile boolean autoRefreshDisabled;
     private volatile Observation observation;
     private volatile Thread loadInBackgroundThread;
 
@@ -89,6 +90,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
         @Override
         public void onIncompleteObservation() {
+            autoRefreshDisabled = true;
         }
 
     };
@@ -134,6 +136,10 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
+    }
+
+    boolean autoRefreshDisabled() {
+        return autoRefreshDisabled;
     }
 
     int approximateChildTotal() {
