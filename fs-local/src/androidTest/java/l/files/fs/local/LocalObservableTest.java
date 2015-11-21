@@ -1,5 +1,9 @@
 package l.files.fs.local;
 
+import android.app.DownloadManager;
+import android.app.DownloadManager.Request;
+import android.net.Uri;
+
 import com.google.auto.value.AutoValue;
 
 import org.junit.Test;
@@ -34,10 +38,16 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 import l.files.fs.Stream;
+import l.files.testing.Executable;
+import l.files.testing.Tests;
 
+import static android.content.Context.DOWNLOAD_SERVICE;
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
+import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -55,6 +65,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -75,6 +86,76 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  * @see File#observe(LinkOption, Observer)
  */
 public final class LocalObservableTest extends FileBaseTest {
+
+    /*
+     * New bug affecting Android M (API 23) inotify, meaning some events will
+     * not be delivered.
+     *
+     * Examples:
+     *
+     *  - File download via DownloadManager
+     *  - 'touch file' using adb shell
+     *
+     * Issues:
+     *
+     *  - https://code.google.com/p/android/issues/detail?id=189231
+     *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
+     */
+    @Test
+    public void notifies_files_downloaded_by_download_manager() throws Exception {
+
+        Closer closer = Closer.create();
+        try {
+
+            final LocalFile downloadDir = downloadsDir();
+            final LocalFile downloadFile = downloadDir.resolve(uniqueTestName());
+            final Recorder observer = closer.register(observe(downloadDir));
+            observer.await(CREATE, downloadFile, new Callable<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+
+                    assertFalse(downloadFile.exists(NOFOLLOW));
+
+                    downloadManager().enqueue(new Request(Uri.parse("https://www.google.com"))
+                            .setDestinationUri(Uri.parse(downloadFile.uri().toString())));
+
+                    Tests.timeout(5, SECONDS, new Executable() {
+                        @Override
+                        public void execute() throws Exception {
+                            /*
+                             * Use assume instead of assert since this will fail on API 23,
+                             * the goal of this is to create visibility of this issue but
+                             * not fail the build.
+                             */
+                            assumeTrue(downloadFile.toString(), downloadFile.exists(NOFOLLOW));
+                        }
+                    });
+
+                    return null;
+
+                }
+
+            });
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+    }
+
+    private DownloadManager downloadManager() {
+        return (DownloadManager) getContext().getSystemService(DOWNLOAD_SERVICE);
+    }
+
+    private LocalFile downloadsDir() {
+        return LocalFile.of(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+    }
+
+    private String uniqueTestName() {
+        return testName.getMethodName() + "-" + currentTimeMillis();
+    }
 
     @Test
     public void able_to_observe_the_rest_of_the_files_when_some_are_not_observable()

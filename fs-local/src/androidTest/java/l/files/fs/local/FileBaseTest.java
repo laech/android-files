@@ -2,6 +2,7 @@ package l.files.fs.local;
 
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestName;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -18,6 +19,9 @@ public abstract class FileBaseTest extends BaseTest {
 
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
+
+    @Rule
+    public final TestName testName = new TestName();
 
     private LocalFile dir1;
     private LocalFile dir2;

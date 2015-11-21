@@ -1,15 +1,11 @@
-package l.files.ui.browser;
+package l.files.testing;
 
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 
-/**
- * Use {@link l.files.testing.Tests}
- */
-@Deprecated
-final class Tests {
+public final class Tests {
 
     private Tests() {
     }
@@ -19,7 +15,7 @@ final class Tests {
      * the assertion does not succeed within the given timeout, the {@link
      * AssertionError} from the assertion will be thrown.
      */
-    static void timeout(
+   public static void timeout(
             final long time,
             final TimeUnit unit,
             final Executable assertion) throws Exception {

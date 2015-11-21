@@ -102,6 +102,21 @@ final class LocalObservable extends Native
      * No last access time watch because it is unreliable and it's not needed
      */
 
+    /*
+     * New bug affecting Android M (API 23) inotify, meaning some events will
+     * not be delivered.
+     *
+     * Examples:
+     *
+     *  - File download via DownloadManager
+     *  - 'touch file' using adb shell
+     *
+     * Issues:
+     *
+     *  - https://code.google.com/p/android/issues/detail?id=189231
+     *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
+     */
+
     private static final Handler handler = new Handler(getMainLooper());
 
     /**
