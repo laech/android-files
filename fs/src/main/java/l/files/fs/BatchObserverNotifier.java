@@ -20,7 +20,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             newSingleThreadScheduledExecutor(new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
-                    return new Thread("BatchObserverNotifier");
+                    return new Thread(r, "BatchObserverNotifier");
                 }
             });
 
