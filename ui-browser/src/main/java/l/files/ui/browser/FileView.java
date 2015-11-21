@@ -340,4 +340,7 @@ public final class FileView extends View implements Drawable.Callback {
         preview.startTransition(transitionDuration);
     }
 
+    public boolean hasPreviewContent() {
+        return preview.hasVisibleContent();
+    }
 }

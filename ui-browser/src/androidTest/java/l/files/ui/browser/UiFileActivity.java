@@ -6,9 +6,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -78,7 +78,7 @@ final class UiFileActivity {
     }
 
     UiFileActivity refresh() {
-        selectMenuAction(R.id.refresh);
+        fragment().onRefresh();
         return this;
     }
 
@@ -471,21 +471,12 @@ final class UiFileActivity {
         });
     }
 
-    UiFileActivity assertRefreshMenuVisible(final boolean visible) {
-        return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
-            @Override
-            public void apply(MenuItem input) {
-                assertEquals(visible, input.isVisible());
-            }
-        });
-    }
-
     UiFileActivity assertThumbnailShown(File file, final boolean shown) {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                assertEquals(shown, input.getPreview() != null);
+                assertEquals(shown, input.hasPreviewContent());
             }
         });
 
