@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -23,55 +24,81 @@ import static android.os.Build.VERSION_CODES.M;
 import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.base.fs.FileIcons.unknownIconStringId;
+import static l.files.ui.browser.Styles.getColorStateList;
 
 public final class FileView extends View implements Drawable.Callback {
 
     private static TextPaint fileTypeIconPaint;
-    private static TextPaint linkArrowPaint;
-
     private static float fileTypeIconSize;
-    private static float linkArrowSize;
 
     private static CharSequence linkArrow;
+    private static TextPaint linkArrowPaint;
+    private static float linkArrowSize;
 
-    private static float descriptionPaddingTop;
+    private static ColorStateList primaryColor;
+    private static ColorStateList primaryColorInverse;
+
+    private static ColorStateList secondaryColor;
+    private static ColorStateList secondaryColorInverse;
+
+    private static float namePaddingTop;
+    private static float textPaddingTop;
 
     private static int transitionDuration;
 
     private final ThumbnailTransitionDrawable preview;
 
     private CharSequence fileTypeIcon;
-    private Layout description;
+    private Layout name;
+    private Layout link;
+    private Layout summary;
     private boolean previewNeedsPaddingTop;
 
-    private ColorStateList textColor;
-
     private boolean showLinkIcon;
+    private boolean useInverseTextColor;
 
     {
+        Context context = getContext();
+        Resources res = getResources();
+
         if (fileTypeIconPaint == null) {
 
-            fileTypeIconSize = getResources().getDimension(R.dimen.files_item_icon_text_size);
+            fileTypeIconSize = res.getDimension(R.dimen.files_item_icon_text_size);
             fileTypeIconPaint = new TextPaint(ANTI_ALIAS_FLAG);
-            fileTypeIconPaint.setTypeface(FileIcons.font(getContext().getAssets()));
+            fileTypeIconPaint.setTypeface(FileIcons.font(context.getAssets()));
             fileTypeIconPaint.setTextSize(fileTypeIconSize);
 
-            linkArrowSize = getResources().getDimension(R.dimen.files_item_text_size);
+            linkArrowSize = res.getDimension(R.dimen.files_item_summary_size);
             linkArrowPaint = new TextPaint(ANTI_ALIAS_FLAG);
             linkArrowPaint.setTextSize(linkArrowSize);
-            linkArrow = getContext().getText(R.string.link_icon);
+            linkArrow = context.getText(R.string.link_icon);
 
-            descriptionPaddingTop =
-                    getResources().getDimension(R.dimen.files_item_drawable_padding);
+            primaryColor = getColorStateList(
+                    android.R.attr.textColorPrimary, context);
 
-            transitionDuration =
-                    getResources().getInteger(android.R.integer.config_shortAnimTime);
+            primaryColorInverse = getColorStateList(
+                    android.R.attr.textColorPrimaryInverse, context);
+
+            secondaryColor = getColorStateList(
+                    android.R.attr.textColorSecondary, context);
+
+            secondaryColorInverse = getColorStateList(
+                    android.R.attr.textColorSecondaryInverse, context);
+
+            textPaddingTop = res.getDimension(
+                    R.dimen.files_item_summary_padding_top);
+
+            namePaddingTop = res.getDimension(
+                    R.dimen.files_item_name_padding_top);
+
+            transitionDuration = res.getInteger(
+                    android.R.integer.config_shortAnimTime);
 
         }
 
-        preview = new ThumbnailTransitionDrawable(
-                getContext(),
-                getResources().getDimension(R.dimen.files_item_card_inner_radius));
+        preview = new ThumbnailTransitionDrawable(context, res.getDimension(
+                R.dimen.files_item_card_inner_radius));
+
         preview.setCallback(this);
     }
 
@@ -209,62 +236,101 @@ public final class FileView extends View implements Drawable.Callback {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int color = textColor.getColorForState(getDrawableState(), textColor.getDefaultColor());
-
         canvas.save();
+
+        int nameColor = getColor(primaryColor, primaryColorInverse);
+        int summaryColor = getColor(secondaryColor, secondaryColorInverse);
 
         float dxPreview = 0;
         float dyPreview = 0;
         if (preview.hasVisibleContent()) {
             dxPreview = (getMeasuredWidth() - preview.getIntrinsicWidth()) / 2F;
             if (previewNeedsPaddingTop) {
-                dyPreview = descriptionPaddingTop;
+                dyPreview = namePaddingTop;
             }
             canvas.translate(dxPreview, dyPreview);
             preview.draw(canvas);
 
         } else if (fileTypeIcon != null) {
-            drawFileTypeIcon(canvas, color);
+            drawFileTypeIcon(canvas, summaryColor);
         }
 
-        if (description != null) {
-
-            canvas.translate(
-                    getPaddingStart() - dxPreview,
-                    preview.hasVisibleContent()
-                            ? preview.getIntrinsicHeight() + descriptionPaddingTop
-                            : getPaddingTop() + fileTypeIconSize + descriptionPaddingTop
-            );
-
-            if (textColor != null) {
-                description.getPaint().setColor(color);
-            }
-
-            description.draw(canvas);
-        }
+        drawName(canvas, nameColor, dxPreview);
+        drawLink(canvas, summaryColor);
+        drawSummary(canvas, summaryColor);
 
         canvas.restore();
 
     }
 
+    private void drawName(Canvas canvas, int color, float dxPreview) {
+        canvas.translate(
+                getPaddingStart() - dxPreview,
+                preview.hasVisibleContent()
+                        ? preview.getIntrinsicHeight() + namePaddingTop
+                        : getPaddingTop() + fileTypeIconSize + namePaddingTop
+        );
+
+        if (name.getPaint().getColor() != color) {
+            name.getPaint().setColor(color);
+        }
+
+        name.draw(canvas);
+        canvas.translate(0, name.getHeight());
+    }
+
+    private void drawLink(Canvas canvas, int color) {
+        if (link == null) {
+            return;
+        }
+        canvas.translate(0, textPaddingTop);
+        if (link.getPaint().getColor() != color) {
+            link.getPaint().setColor(color);
+        }
+        link.draw(canvas);
+        canvas.translate(0, link.getHeight());
+    }
+
+    private void drawSummary(Canvas canvas, int color) {
+        if (summary == null) {
+            return;
+        }
+        canvas.translate(0, textPaddingTop);
+        if (summary.getPaint().getColor() != color) {
+            summary.getPaint().setColor(color);
+        }
+        summary.draw(canvas);
+    }
+
     private void drawFileTypeIcon(Canvas canvas, int color) {
 
-        fileTypeIconPaint.setColor(color);
-        if (fileTypeIconPaint.getAlpha() > 150) {
-            fileTypeIconPaint.setAlpha(150);
+        if (fileTypeIconPaint.getColor() != color) {
+            fileTypeIconPaint.setColor(color);
         }
+
         float fileTypeIconX = (getMeasuredWidth() - fileTypeIconSize) / 2;
         float fileTypeIconY = getPaddingTop() + fileTypeIconSize;
-        canvas.drawText(fileTypeIcon, 0, fileTypeIcon.length(), fileTypeIconX, fileTypeIconY, fileTypeIconPaint);
+        canvas.drawText(
+                fileTypeIcon,
+                0,
+                fileTypeIcon.length(),
+                fileTypeIconX,
+                fileTypeIconY,
+                fileTypeIconPaint);
 
         if (showLinkIcon) {
-            linkArrowPaint.setColor(color);
-            if (linkArrowPaint.getAlpha() > 150) {
-                linkArrowPaint.setAlpha(150);
+            if (linkArrowPaint.getColor() != color) {
+                linkArrowPaint.setColor(color);
             }
             float linkArrowX = fileTypeIconX + fileTypeIconSize;
             float linkArrowY = fileTypeIconY - (linkArrowSize / 2);
-            canvas.drawText(linkArrow, 0, linkArrow.length(), linkArrowX, linkArrowY, linkArrowPaint);
+            canvas.drawText(
+                    linkArrow,
+                    0,
+                    linkArrow.length(),
+                    linkArrowX,
+                    linkArrowY,
+                    linkArrowPaint);
         }
     }
 
@@ -289,7 +355,9 @@ public final class FileView extends View implements Drawable.Callback {
         this.showLinkIcon = shouldShowLinkIcon(item);
 
         int width = textWidth + getPaddingStart() + getPaddingEnd();
-        this.description = layouts.get(getContext(), item, textWidth);
+        this.name = layouts.getName(getContext(), item, textWidth);
+        this.link = layouts.getLink(getContext(), item, textWidth);
+        this.summary = layouts.getSummary(getContext(), item, textWidth);
         this.fileTypeIcon = getIconText(item);
 
         int height;
@@ -297,19 +365,23 @@ public final class FileView extends View implements Drawable.Callback {
         if (preview.hasVisibleContent()) {
 
             height = (int) (preview.getIntrinsicHeight()
-                    + descriptionPaddingTop
-                    + description.getHeight()
+                    + namePaddingTop
+                    + name.getHeight()
+                    + (link == null ? 0 : textPaddingTop + link.getHeight())
+                    + (summary == null ? 0 : textPaddingTop + summary.getHeight())
                     + getPaddingBottom());
 
             if ((previewNeedsPaddingTop = preview.getIntrinsicWidth() < textWidth)) {
-                height += descriptionPaddingTop;
+                height += namePaddingTop;
             }
 
         } else {
             height = (int) (getPaddingTop()
                     + fileTypeIconSize
-                    + descriptionPaddingTop
-                    + description.getHeight()
+                    + namePaddingTop
+                    + name.getHeight()
+                    + (link == null ? 0 : textPaddingTop + link.getHeight())
+                    + (summary == null ? 0 : textPaddingTop + summary.getHeight())
                     + getPaddingBottom());
         }
 
@@ -323,17 +395,8 @@ public final class FileView extends View implements Drawable.Callback {
         return stat != null && stat.isSymbolicLink();
     }
 
-    void setTextColor(ColorStateList textColor) {
-        this.textColor = textColor;
-        invalidate();
-    }
-
     boolean isLinkIconVisible() {
         return showLinkIcon;
-    }
-
-    CharSequence getText() {
-        return description.getText();
     }
 
     void startPreviewTransition() {
@@ -342,5 +405,22 @@ public final class FileView extends View implements Drawable.Callback {
 
     public boolean hasPreviewContent() {
         return preview.hasVisibleContent();
+    }
+
+    void setUseInverseTextColor(boolean useInverseTextColor) {
+        this.useInverseTextColor = useInverseTextColor;
+    }
+
+    private int getColor(ColorStateList normal, ColorStateList inverse) {
+        ColorStateList color = useInverseTextColor ? inverse : normal;
+        return color.getColorForState(getDrawableState(), color.getDefaultColor());
+    }
+
+    Layout getSummary() {
+        return summary;
+    }
+
+    Layout getLink() {
+        return link;
     }
 }

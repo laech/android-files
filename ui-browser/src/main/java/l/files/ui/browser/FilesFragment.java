@@ -144,7 +144,7 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
-        recycler.addOnScrollListener(warmUpOnIdle());
+        recycler.addOnScrollListener(onScrollListener());
 
         refresher = find(R.id.refresher, this);
         refresher.setOnRefreshListener(this);
@@ -158,15 +158,23 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
         Preferences.register(getActivity(), this);
     }
 
-    private RecyclerView.OnScrollListener warmUpOnIdle() {
+    private RecyclerView.OnScrollListener onScrollListener() {
         return new RecyclerView.OnScrollListener() {
+
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     adapter.warmUpOnIdle(getLayoutManager());
+                    refresher.setEnabled(true);
+                } else {
+                    if (!refresher.isRefreshing()) {
+                        refresher.setEnabled(false);
+                    }
                 }
             }
+
         };
     }
 

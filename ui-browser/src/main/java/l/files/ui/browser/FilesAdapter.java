@@ -1,7 +1,6 @@
 package l.files.ui.browser;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
@@ -34,8 +33,6 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
 import l.files.ui.preview.Rect;
 
-import static android.R.attr.textColorPrimary;
-import static android.R.attr.textColorPrimaryInverse;
 import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
@@ -51,7 +48,6 @@ import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
 import static l.files.ui.browser.R.layout.files_grid_header;
 import static l.files.ui.browser.R.layout.files_grid_item;
-import static l.files.ui.browser.Styles.getColorStateList;
 
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
@@ -69,9 +65,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     private final OnOpenFileListener listener;
 
     private final FileTextLayoutCache layouts;
-
-    private final ColorStateList primaryText;
-    private final ColorStateList primaryTextInverse;
 
     private Rect constraint;
     private int textWidth;
@@ -91,8 +84,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.decorator = Preview.get(context);
         this.layouts = new FileTextLayoutCache();
 
-        this.primaryText = getColorStateList(textColorPrimary, context);
-        this.primaryTextInverse = getColorStateList(textColorPrimaryInverse, context);
     }
 
     private Rect calculateThumbnailConstraint(Context context, CardView card) {
@@ -140,7 +131,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         while (pos <= warmUpToPosition && pos < getItemCount()) {
             BrowserItem item = getItem(pos);
             if (item instanceof FileItem) {
-                layouts.get(context, (FileItem) item, textWidth);
+                layouts.getName(context, (FileItem) item, textWidth);
+                layouts.getLink(context, (FileItem) item, textWidth);
+                layouts.getSummary(context, (FileItem) item, textWidth);
             }
             pos++;
         }
@@ -312,10 +305,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         private void setPaletteColor(int color) {
             if (color == TRANSPARENT) {
                 ((CardView) itemView).setCardBackgroundColor(WHITE);
-                content.setTextColor(primaryText);
+                content.setUseInverseTextColor(false);
             } else {
                 ((CardView) itemView).setCardBackgroundColor(color);
-                content.setTextColor(primaryTextInverse);
+                content.setUseInverseTextColor(true);
             }
         }
 

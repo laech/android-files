@@ -501,9 +501,10 @@ final class UiFileActivity {
             @Override
             public void apply(FileView input) {
                 if (target != null) {
-                    String expected = target.path().toString();
-                    String actual = input.getText().toString();
-                    assertTrue(actual, actual.contains(expected));
+                    String expected = input.getResources().getString(
+                            R.string.link_x, target);
+                    String actual = input.getLink().toString();
+                    assertEquals(expected, actual);
                 }
             }
         });
@@ -516,7 +517,7 @@ final class UiFileActivity {
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView view) {
-                assertTrue(view.getText().toString().contains(expected));
+                assertEquals(expected, view.getSummary().toString());
             }
         });
 
