@@ -14,6 +14,8 @@ final class ThumbnailTransitionDrawable extends TransitionDrawable {
     private final SizedColorDrawable sizedColorDrawable;
     private final ThumbnailDrawable thumbnailDrawable;
 
+    private boolean showingBitmap;
+
     ThumbnailTransitionDrawable(Context context, float cornerRadius) {
         super(new Drawable[]{
                 new SizedColorDrawable(TRANSPARENT),
@@ -40,6 +42,22 @@ final class ThumbnailTransitionDrawable extends TransitionDrawable {
         return sizedColorDrawable.getIntrinsicWidth() > 0 &&
                 sizedColorDrawable.getIntrinsicHeight() > 0 ||
                 thumbnailDrawable.getBitmapShader() != null;
+    }
+
+    @Override
+    public void startTransition(int durationMillis) {
+        super.startTransition(durationMillis);
+        showingBitmap = true;
+    }
+
+    @Override
+    public void resetTransition() {
+        super.resetTransition();
+        showingBitmap = false;
+    }
+
+    boolean isShowingBitmap() {
+        return showingBitmap;
     }
 
 }

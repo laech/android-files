@@ -270,13 +270,17 @@ public final class FileView extends View implements Drawable.Callback {
 
     void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Rect size) {
         preview.setSize(size.width(), size.height());
-        preview.resetTransition();
+        if (preview.isShowingBitmap()) {
+            preview.resetTransition();
+        }
         set(layouts, item, textWidth);
     }
 
     void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Bitmap bitmap) {
         preview.setBitmap(bitmap);
-        preview.startTransition(0);
+        if (!preview.isShowingBitmap()) {
+            preview.startTransition(0);
+        }
         set(layouts, item, textWidth);
     }
 
