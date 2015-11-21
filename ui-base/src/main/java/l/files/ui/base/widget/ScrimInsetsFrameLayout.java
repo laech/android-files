@@ -30,7 +30,7 @@ import android.widget.FrameLayout;
 
 public class ScrimInsetsFrameLayout extends FrameLayout {
 
-    private static final int COLOR = Color.parseColor("#44000000");
+    private static final int COLOR = Color.parseColor("#22000000");
 
     private Drawable mInsetForeground;
 
