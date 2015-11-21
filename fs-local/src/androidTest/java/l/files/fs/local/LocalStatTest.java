@@ -13,8 +13,8 @@ public final class LocalStatTest extends FileBaseTest {
     @Test
     public void local_stat() throws Exception {
         LocalFile link = dir1().resolve("link").createLink(dir2());
-        assertEquals(lstat(link.path().bytes()), link.stat(NOFOLLOW).stat());
-        assertEquals(stat(link.path().bytes()), link.stat(FOLLOW).stat());
+        assertEquals(lstat(link.path().bytes()), link.stat(NOFOLLOW));
+        assertEquals(stat(link.path().bytes()), link.stat(FOLLOW));
     }
 
 }

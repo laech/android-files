@@ -2,9 +2,20 @@ package l.files.fs.local;
 
 import com.google.auto.value.AutoValue;
 
+import java.io.IOException;
+import java.util.Set;
+
+import l.files.fs.Instant;
+import l.files.fs.LinkOption;
+import l.files.fs.Permission;
+
+import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.local.LocalFile.permissionsFromMode;
+
 @AutoValue
 @SuppressWarnings("OctalInteger")
-abstract class Stat extends Native {
+abstract class Stat extends Native implements l.files.fs.Stat {
 
     static final int S_IFMT = 00170000;
     static final int S_IFSOCK = 0140000;
@@ -70,7 +81,8 @@ abstract class Stat extends Native {
 
     abstract int gid();
 
-    abstract long size();
+    @Override
+    public abstract long size();
 
     abstract long mtime();
 
@@ -112,5 +124,74 @@ abstract class Stat extends Native {
     static native void chmod(byte[] path, int mode) throws ErrnoException;
 
     static native void mkdir(byte[] path, int mode) throws ErrnoException;
+
+    static Stat stat(LocalFile file, LinkOption option) throws IOException {
+        requireNonNull(option, "option");
+
+        try {
+            if (option == FOLLOW) {
+                return stat(file.path().bytes());
+            } else {
+                return lstat(file.path().bytes());
+            }
+        } catch (final ErrnoException e) {
+            throw e.toIOException(file.path());
+        }
+    }
+
+    private Instant lastModifiedTime;
+
+    @Override
+    public Instant lastModifiedTime() {
+        if (lastModifiedTime == null) {
+            lastModifiedTime = Instant.of(mtime(), mtime_nsec());
+        }
+        return lastModifiedTime;
+    }
+
+    @Override
+    public boolean isSymbolicLink() {
+        return S_ISLNK(mode());
+    }
+
+    @Override
+    public boolean isRegularFile() {
+        return S_ISREG(mode());
+    }
+
+    @Override
+    public boolean isDirectory() {
+        return S_ISDIR(mode());
+    }
+
+    @Override
+    public boolean isFifo() {
+        return S_ISFIFO(mode());
+    }
+
+    @Override
+    public boolean isSocket() {
+        return S_ISSOCK(mode());
+    }
+
+    @Override
+    public boolean isBlockDevice() {
+        return S_ISBLK(mode());
+    }
+
+    @Override
+    public boolean isCharacterDevice() {
+        return S_ISCHR(mode());
+    }
+
+    private Set<Permission> permissions;
+
+    @Override
+    public Set<Permission> permissions() {
+        if (permissions == null) {
+            permissions = permissionsFromMode(mode());
+        }
+        return permissions;
+    }
 
 }

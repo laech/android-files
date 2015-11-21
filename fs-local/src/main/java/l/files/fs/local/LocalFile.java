@@ -176,8 +176,8 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public LocalStat stat(LinkOption option) throws IOException {
-        return LocalStat.stat(this, option);
+    public Stat stat(LinkOption option) throws IOException {
+        return Stat.stat(this, option);
     }
 
     @Override
