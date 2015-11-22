@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -29,6 +30,7 @@ import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
 
 import static android.content.ContentResolver.SCHEME_FILE;
+import static android.graphics.Color.WHITE;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
@@ -58,6 +60,7 @@ public final class FilesActivity extends BaseActivity implements
     private HierarchyAdapter hierarchy;
     private Toolbar toolbar;
     private Spinner title;
+    private DrawerArrowDrawable navigationIcon;
 
     public List<File> hierarchy() {
         return hierarchy.get();
@@ -77,7 +80,11 @@ public final class FilesActivity extends BaseActivity implements
         setContentView(R.layout.files_activity);
         Preview.get(getApplicationContext()).readCacheAsyncIfNeeded();
 
+        navigationIcon = new DrawerArrowDrawable(this);
+        navigationIcon.setColor(WHITE);
+
         toolbar = find(R.id.toolbar, this);
+        toolbar.setNavigationIcon(navigationIcon);
         hierarchy = new HierarchyAdapter();
         title = find(R.id.title, this);
         title.setAdapter(hierarchy);
@@ -199,9 +206,9 @@ public final class FilesActivity extends BaseActivity implements
         }
         int backStacks = getSupportFragmentManager().getBackStackEntryCount();
         if (backStacks == 0) {
-            toolbar.setNavigationIcon(R.drawable.ic_menu_white_24dp);
+            navigationIcon.setProgress(0);
         } else {
-            toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white_24dp);
+            navigationIcon.setProgress(1);
         }
         hierarchy.set(fragment.directory());
         title.setSelection(hierarchy.indexOf(fragment().directory()));
