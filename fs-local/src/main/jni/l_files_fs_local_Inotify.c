@@ -21,7 +21,7 @@ jint Java_l_files_fs_local_Inotify_internalAddWatch(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int wd = inotify_add_watch(fd, path, (uint32_t) mask);
+    int wd = TEMP_RETRY(inotify_add_watch(fd, path, (uint32_t) mask));
     if (wd == -1) {
         throw_errno_exception(env);
     }
@@ -31,7 +31,7 @@ jint Java_l_files_fs_local_Inotify_internalAddWatch(
 void Java_l_files_fs_local_Inotify_internalRemoveWatch(
         JNIEnv *env, jobject obj, jint fd, jint wd) {
 
-    int result = inotify_rm_watch(fd, (uint32_t) wd);
+    int result = TEMP_RETRY(inotify_rm_watch(fd, (uint32_t) wd));
     if (-1 == result) {
         throw_errno_exception(env);
     }
