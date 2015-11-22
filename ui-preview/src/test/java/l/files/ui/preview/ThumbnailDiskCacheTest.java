@@ -10,6 +10,7 @@ import org.robolectric.annotation.Config;
 
 import l.files.fs.File;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
@@ -29,6 +30,15 @@ import static org.junit.Assert.assertTrue;
 @Config(constants = BuildConfig.class, sdk = JELLY_BEAN)
 public final class ThumbnailDiskCacheTest
         extends CacheTest<Bitmap, ThumbnailDiskCache> {
+
+    @Test
+    public void cache_file_stored_in_cache_dir() throws Exception {
+        Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true).path();
+        Path cacheDirPath = cache.cacheDir.path();
+        assertTrue(
+                "\ncacheFile: " + cacheFilePath + ",\ncacheDir:  " + cacheDirPath,
+                cacheFilePath.startsWith(cacheDirPath));
+    }
 
     @Test
     public void cleans_old_cache_files_not_accessed_in_30_days() throws Exception {

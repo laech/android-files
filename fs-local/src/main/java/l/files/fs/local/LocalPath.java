@@ -66,29 +66,41 @@ public final class LocalPath implements Path {
                 Arrays.equals(bytes, ((LocalPath) o).bytes);
     }
 
-    LocalPath resolve(byte[] path) {
+    LocalPath resolve(byte[] path, boolean relative) {
 
         if (path.length == 0) {
             return this;
         }
 
-        if (path[0] == SEPARATOR) {
+        boolean pathStartsWithSeparator = path[0] == SEPARATOR;
+        if (!relative && pathStartsWithSeparator) {
             return of(path);
+        }
+
+        int start = pathStartsWithSeparator ? 1 : 0;
+        return resolveRelative(path, start, path.length);
+    }
+
+    private LocalPath resolveRelative(byte[] path, int start, int end) {
+
+        int extraLength = end - start;
+        if (extraLength == 0) {
+            return this;
         }
 
         byte[] myPath = bytes;
         byte[] newPath;
-        boolean hasSeparator = myPath.length > 0 &&
+        boolean myPathHasEndSeparator = myPath.length > 0 &&
                 myPath[myPath.length - 1] == SEPARATOR;
 
-        if (hasSeparator) {
-            newPath = Arrays.copyOf(myPath, myPath.length + path.length);
-            System.arraycopy(path, 0, newPath, myPath.length, path.length);
+        if (myPathHasEndSeparator) {
+            newPath = Arrays.copyOf(myPath, myPath.length + extraLength);
+            System.arraycopy(path, start, newPath, myPath.length, extraLength);
 
         } else {
-            newPath = Arrays.copyOf(myPath, myPath.length + path.length + 1);
+            newPath = Arrays.copyOf(myPath, myPath.length + extraLength + 1);
             newPath[myPath.length] = SEPARATOR;
-            System.arraycopy(path, 0, newPath, myPath.length + 1, path.length);
+            System.arraycopy(path, start, newPath, myPath.length + 1, extraLength);
         }
 
         return of(newPath);
@@ -184,7 +196,7 @@ public final class LocalPath implements Path {
         }
 
         byte[] retained = Arrays.copyOfRange(bytes, start, bytes.length);
-        return dst.resolve(retained);
+        return dst.resolve(retained, true);
     }
 
     private int length() {

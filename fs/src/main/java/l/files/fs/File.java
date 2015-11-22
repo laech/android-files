@@ -55,12 +55,18 @@ public interface File extends Parcelable {
     /**
      * Resolves the given path relative to this file.
      */
+    @Deprecated
     File resolve(String other);
+
+    File resolve(String other, boolean relative);
 
     /**
      * Resolves a child with the given name.
      */
+    @Deprecated
     File resolve(Name other);
+
+    File resolve(Name other, boolean relative);
 
     /**
      * Returns a file with the given parent replaced.

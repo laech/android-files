@@ -78,23 +78,17 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         for (Object value : values) {
 
             if (value instanceof Rect) {
-                if (context.getSize(file, stat, constraint, true) == null) {
-                    context.putSize(file, stat, constraint, (Rect) value);
-                    callback.onSizeAvailable(file, stat, (Rect) value);
-                }
+                context.putSize(file, stat, constraint, (Rect) value);
+                callback.onSizeAvailable(file, stat, (Rect) value);
 
             } else if (value instanceof Palette) {
-                if (context.getPalette(file, stat, constraint, true) == null) {
-                    context.putPalette(file, stat, constraint, (Palette) value);
-                    callback.onPaletteAvailable(file, stat, (Palette) value);
-                }
+                context.putPalette(file, stat, constraint, (Palette) value);
+                callback.onPaletteAvailable(file, stat, (Palette) value);
 
             } else if (value instanceof Bitmap) {
-                if (context.getThumbnail(file, stat, constraint, true) == null) {
-                    context.putThumbnail(file, stat, constraint, (Bitmap) value);
-                    context.putPreviewable(file, stat, constraint, true);
-                    callback.onPreviewAvailable(file, stat, (Bitmap) value);
-                }
+                context.putThumbnail(file, stat, constraint, (Bitmap) value);
+                context.putPreviewable(file, stat, constraint, true);
+                callback.onPreviewAvailable(file, stat, (Bitmap) value);
 
             } else if (value instanceof NoPreview) {
                 callback.onPreviewFailed(file, stat);

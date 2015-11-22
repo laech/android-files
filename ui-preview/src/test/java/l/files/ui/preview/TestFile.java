@@ -1,5 +1,6 @@
 package l.files.ui.preview;
 
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 
 import java.io.File;
@@ -26,11 +27,11 @@ import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.Stream;
+import l.files.fs.local.LocalPath;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
+@SuppressLint("ParcelCreator")
 class TestFile extends BaseFile {
 
     private final File file;
@@ -46,16 +47,12 @@ class TestFile extends BaseFile {
 
     @Override
     public Path path() {
-        Path path = mock(Path.class);
-        given(path.toString()).willReturn(file.getPath());
-        return path;
+        return LocalPath.of(file.getPath().getBytes(UTF_8));
     }
 
     @Override
     public Name name() {
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(file.getName());
-        return name;
+        return path().name();
     }
 
     @Override
@@ -65,12 +62,25 @@ class TestFile extends BaseFile {
 
     @Override
     public TestFile resolve(String other) {
+        return resolve(other, false);
+    }
+
+    @Override
+    public TestFile resolve(String other, boolean relative) {
+        if (!relative && other.startsWith("/")) {
+            return new TestFile(new File(other));
+        }
         return new TestFile(new File(file, other));
     }
 
     @Override
-    public l.files.fs.File resolve(Name other) {
+    public TestFile resolve(Name other) {
         return resolve(other.toString());
+    }
+
+    @Override
+    public l.files.fs.File resolve(Name other, boolean relative) {
+        return resolve(other.toString(), relative);
     }
 
     @Override

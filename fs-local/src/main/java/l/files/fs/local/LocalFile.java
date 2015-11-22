@@ -148,18 +148,28 @@ public abstract class LocalFile extends BaseFile {
         return observable;
     }
 
-    public LocalFile resolve(byte[] other) {
-        return of(path().resolve(other));
+    @Override
+    public File resolve(String other, boolean relative) {
+        return of(path().resolve(other.getBytes(UTF_8), relative));
+    }
+
+    @Override
+    public File resolve(Name other, boolean relative) {
+        return of(path().resolve(((LocalName) other).bytes(), relative));
+    }
+
+    public LocalFile resolve(byte[] other, boolean relative) {
+        return of(path().resolve(other, relative));
     }
 
     @Override
     public LocalFile resolve(Name other) {
-        return resolve(((LocalName) other).bytes());
+        return resolve(((LocalName) other).bytes(), false);
     }
 
     @Override
     public LocalFile resolve(String other) {
-        return resolve(other.getBytes(UTF_8));
+        return resolve(other.getBytes(UTF_8), false);
     }
 
     @Override
@@ -249,7 +259,7 @@ public abstract class LocalFile extends BaseFile {
 
                     @Override
                     public File next() {
-                        return resolve(iterator.next().name());
+                        return resolve(iterator.next().name(), true);
                     }
 
                     @Override

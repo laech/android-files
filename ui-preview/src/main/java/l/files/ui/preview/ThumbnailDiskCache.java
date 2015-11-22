@@ -59,7 +59,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     final File cacheDir;
 
     ThumbnailDiskCache(File cacheDir) {
-        this.cacheDir = cacheDir.resolve("thumbnails");
+        this.cacheDir = cacheDir.resolve("thumbnails", true);
     }
 
     public void cleanupAsync() {
@@ -116,9 +116,11 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     private File cacheDir(File file, Rect constraint) {
-        return cacheDir.resolve(file.path()
-                + "_" + constraint.width()
-                + "_" + constraint.height());
+        return cacheDir.resolve(
+                file.path()
+                        + "_" + constraint.width()
+                        + "_" + constraint.height(),
+                true);
     }
 
     File cacheFile(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
@@ -137,7 +139,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         }
         Instant time = stat.lastModifiedTime();
         return cacheDir(file, constraint).resolve(
-                time.seconds() + "-" + time.nanos());
+                time.seconds() + "-" + time.nanos(),
+                true);
     }
 
 
@@ -193,7 +196,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         File parent = cache.parent();
         parent.createDirs();
 
-        File tmp = parent.resolve(cache.name() + "-" + nanoTime());
+        File tmp = parent.resolve(cache.name() + "-" + nanoTime(), true);
         Closer closer = Closer.create();
         try {
 

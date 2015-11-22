@@ -56,7 +56,7 @@ public final class LocalFileTest extends FileBaseTest {
         byte[] bytes = {-19, -96, -67, -19, -80, -117};
         assertFalse(Arrays.equals(bytes.clone(), new String(bytes, UTF_8).getBytes(UTF_8)));
 
-        LocalFile dir = dir1().resolve(bytes.clone());
+        LocalFile dir = dir1().resolve(bytes.clone(), true);
         LocalFile file = dir.resolve("a");
         dir.createDir();
         file.createFile();

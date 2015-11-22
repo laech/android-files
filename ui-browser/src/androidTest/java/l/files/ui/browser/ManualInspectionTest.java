@@ -76,7 +76,7 @@ public final class ManualInspectionTest {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEquals(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        LocalFile dir = LocalFile.of(getExternalStorageDirectory()).resolve(nonUtf8);
+        LocalFile dir = LocalFile.of(getExternalStorageDirectory()).resolve(nonUtf8, true);
         LocalFile child = dir.resolve("good we can see this dir");
 
         try {
