@@ -82,8 +82,8 @@ public final class Preview {
     }
 
     @Nullable
-    public Bitmap getThumbnail(File res, Stat stat, Rect constraint) {
-        return thumbnailMemCache.get(res, stat, constraint);
+    public Bitmap getThumbnail(File res, Stat stat, Rect constraint, boolean matchTime) {
+        return thumbnailMemCache.get(res, stat, constraint, matchTime);
     }
 
     void putThumbnail(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
@@ -91,8 +91,8 @@ public final class Preview {
     }
 
     @Nullable
-    Bitmap getThumbnailFromDisk(File res, Stat stat, Rect constraint) throws IOException {
-        return thumbnailDiskCache.get(res, stat, constraint);
+    Bitmap getThumbnailFromDisk(File res, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+        return thumbnailDiskCache.get(res, stat, constraint, matchTime);
     }
 
     void putThumbnailToDiskAsync(
@@ -101,8 +101,8 @@ public final class Preview {
     }
 
     @Nullable
-    public Rect getSize(File res, Stat stat, Rect constraint) {
-        return sizeCache.get(res, stat, constraint);
+    public Rect getSize(File res, Stat stat, Rect constraint, boolean matchTime) {
+        return sizeCache.get(res, stat, constraint, matchTime);
     }
 
     void putSize(File res, Stat stat, Rect constraint, Rect size) {
@@ -110,8 +110,8 @@ public final class Preview {
     }
 
     @Nullable
-    public Palette getPalette(File res, Stat stat, Rect constraint) {
-        return paletteCache.get(res, stat, constraint);
+    public Palette getPalette(File res, Stat stat, Rect constraint, boolean matchTime) {
+        return paletteCache.get(res, stat, constraint, matchTime);
     }
 
     void putPalette(File res, Stat stat, Rect constraint, Palette palette) {
@@ -119,8 +119,8 @@ public final class Preview {
     }
 
     @Nullable
-    String getMediaType(File res, Stat stat, Rect constraint) {
-        return mediaTypeCache.get(res, stat, constraint);
+    String getMediaType(File res, Stat stat, Rect constraint, boolean matchTime) {
+        return mediaTypeCache.get(res, stat, constraint, matchTime);
     }
 
     void putMediaType(File res, Stat stat, Rect constraint, String media) {
@@ -130,7 +130,7 @@ public final class Preview {
     public boolean isPreviewable(File res, Stat stat, Rect constraint) {
         return stat.isRegularFile()
                 && isReadable(res)
-                && !TRUE.equals(noPreviewCache.get(res, stat, constraint));
+                && !TRUE.equals(noPreviewCache.get(res, stat, constraint, true));
     }
 
     void putPreviewable(File res, Stat stat, Rect constraint, boolean previewable) {

@@ -45,11 +45,6 @@ class TestFile extends BaseFile {
     }
 
     @Override
-    public String scheme() {
-        return "file";
-    }
-
-    @Override
     public Path path() {
         Path path = mock(Path.class);
         given(path.toString()).willReturn(file.getPath());

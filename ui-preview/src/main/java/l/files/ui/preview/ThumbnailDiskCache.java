@@ -1,7 +1,6 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,7 +54,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     private static final int BACKGROUND_THREAD_PRIORITY =
             THREAD_PRIORITY_LOWEST + THREAD_PRIORITY_MORE_FAVORABLE;
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
 
     final File cacheDir;
 
@@ -117,14 +116,13 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     private File cacheDir(File file, Rect constraint) {
-        return cacheDir.resolve(file.scheme()
-                + "/" + file.path()
+        return cacheDir.resolve(file.path()
                 + "_" + constraint.width()
                 + "_" + constraint.height());
     }
 
-    File cacheFile(File file, @Nullable Stat stat, Rect constraint) throws IOException {
-        if (stat == null) {
+    File cacheFile(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+        if (!matchTime) {
             Closer closer = Closer.create();
             try {
 
@@ -137,15 +135,15 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 closer.close();
             }
         }
-        assert stat != null;
         Instant time = stat.lastModifiedTime();
         return cacheDir(file, constraint).resolve(
-                time.seconds() + "_" + time.nanos());
+                time.seconds() + "-" + time.nanos());
     }
 
+
     @Override
-    Bitmap get(File file, @Nullable Stat stat, Rect constraint) throws IOException {
-        File cache = cacheFile(file, stat, constraint);
+    public Bitmap get(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+        File cache = cacheFile(file, stat, constraint, matchTime);
         Closer closer = Closer.create();
         try {
 
@@ -191,7 +189,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
         purgeOldCacheFiles(file, constraint);
 
-        File cache = cacheFile(file, stat, constraint);
+        File cache = cacheFile(file, stat, constraint, true);
         File parent = cache.parent();
         parent.createDirs();
 

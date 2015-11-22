@@ -24,7 +24,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
     C cache;
     Random random;
 
-    File res;
+    File file;
     Stat stat;
 
     @Before
@@ -33,7 +33,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         random = new Random();
 
         java.io.File localFile = folder.newFile("0");
-        res = new TestFile(localFile);
+        file = new TestFile(localFile);
         stat = new TestStat(localFile);
     }
 
@@ -41,18 +41,18 @@ public abstract class CacheTest<V, C extends Cache<V>> {
     public void gets_what_has_put_in() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
-        cache.put(res, stat, constraint, value);
-        assertValueEquals(value, cache.get(res, stat, constraint));
+        cache.put(file, stat, constraint, value);
+        assertValueEquals(value, cache.get(file, stat, constraint, true));
     }
 
     @Test
     public void gets_null_when_time_changes() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
-        cache.put(res, stat, constraint, value);
+        cache.put(file, stat, constraint, value);
 
-        res.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis() + 9999));
-        assertNull(cache.get(res, stat, constraint));
+        file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis() + 9999));
+        assertNull(cache.get(file, stat, constraint, true));
     }
 
     @Test
@@ -60,9 +60,9 @@ public abstract class CacheTest<V, C extends Cache<V>> {
 
         Rect constraint = newConstraint();
         V value = newValue();
-        cache.put(res, stat, constraint, value);
+        cache.put(file, stat, constraint, value);
 
-        assertValueEquals(value, cache.get(res, null, constraint));
+        assertValueEquals(value, cache.get(file, stat, constraint, false));
     }
 
     abstract C newCache();

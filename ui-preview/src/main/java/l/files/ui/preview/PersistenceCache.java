@@ -30,13 +30,13 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     private final AtomicBoolean loaded = new AtomicBoolean(false);
     private final AtomicBoolean dirty = new AtomicBoolean(false);
 
-    private final LruCache<CharBuffer, Snapshot<V>> cache =
-            new LruCache<CharBuffer, Snapshot<V>>(5000) {
+    private final LruCache<ByteBuffer, Snapshot<V>> cache =
+            new LruCache<ByteBuffer, Snapshot<V>>(5000) {
 
                 @Override
                 protected void entryRemoved(
                         boolean evicted,
-                        CharBuffer key,
+                        ByteBuffer key,
                         Snapshot<V> oldValue,
                         Snapshot<V> newValue) {
 
@@ -48,7 +48,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
             };
 
-    private static final byte SUPERCLASS_VERSION = 0;
+    private static final byte SUPERCLASS_VERSION = 3;
 
     private final File cacheDir;
     private final byte subclassVersion;
@@ -59,8 +59,12 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     }
 
     @Override
-    void key(CharBuffer key, File res, Stat stat, Rect constraint) {
-        key.append(res.scheme()).append("_").append(res.path());
+    final void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
+        try {
+            file.path().writeTo(key.asOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -75,7 +79,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     }
 
     @Override
-    LruCache<CharBuffer, Snapshot<V>> delegate() {
+    LruCache<ByteBuffer, Snapshot<V>> delegate() {
         return cache;
     }
 
@@ -124,10 +128,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             while (true) {
                 try {
 
-                    String key = in.readUTF();
+                    ByteBuffer key = ByteBuffer.readFrom(in);
                     long time = in.readLong();
                     V value = read(in);
-                    cache.put(new CharBuffer(key), Snapshot.of(value, time));
+
+                    cache.put(key, Snapshot.of(value, time));
 
                 } catch (EOFException e) {
                     break;
@@ -179,9 +184,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             out.writeByte(SUPERCLASS_VERSION);
             out.writeByte(subclassVersion);
 
-            Map<CharBuffer, Snapshot<V>> snapshot = cache.snapshot();
-            for (Map.Entry<CharBuffer, Snapshot<V>> entry : snapshot.entrySet()) {
-                out.writeUTF(entry.getKey().toString());
+            Map<ByteBuffer, Snapshot<V>> snapshot = cache.snapshot();
+            for (Map.Entry<ByteBuffer, Snapshot<V>> entry : snapshot.entrySet()) {
+
+                entry.getKey().writeTo(out);
                 out.writeLong(entry.getValue().time());
                 write(out, entry.getValue().get());
             }

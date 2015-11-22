@@ -15,18 +15,18 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         V value = newValue();
 
         C c1 = newCache();
-        c1.put(res, stat, constraint, value);
+        c1.put(file, stat, constraint, value);
         c1.writeIfNeeded();
 
         C c2 = newCache();
         c2.readIfNeeded();
-        assertValueEquals(value, c2.get(res, stat, constraint));
-        c2.remove(res, stat, constraint);
+        assertValueEquals(value, c2.get(file, stat, constraint, true));
+        c2.remove(file, stat, constraint);
         c2.writeIfNeeded();
 
         C c3 = newCache();
         c3.readIfNeeded();
-        assertNull(c3.get(res, stat, constraint));
+        assertNull(c3.get(file, stat, constraint, true));
     }
 
     @Test
@@ -36,23 +36,23 @@ public abstract class PersistenceCacheTest<V, C extends PersistenceCache<V>>
         V value = newValue();
 
         C c1 = newCache();
-        c1.put(res, stat, constraint, value);
+        c1.put(file, stat, constraint, value);
         c1.writeIfNeeded();
 
         C c2 = newCache();
-        assertNull(c2.get(res, stat, constraint));
+        assertNull(c2.get(file, stat, constraint, true));
         c2.readIfNeeded();
-        assertValueEquals(value, c2.get(res, stat, constraint));
+        assertValueEquals(value, c2.get(file, stat, constraint, true));
     }
 
     @Test
     public void constraint_is_not_used_as_part_of_key() throws Exception {
 
         V value = newValue();
-        cache.put(res, stat, newConstraint(), value);
-        assertValueEquals(value, cache.get(res, stat, newConstraint()));
-        assertValueEquals(value, cache.get(res, stat, newConstraint()));
-        assertValueEquals(value, cache.get(res, stat, newConstraint()));
+        cache.put(file, stat, newConstraint(), value);
+        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
+        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
+        assertValueEquals(value, cache.get(file, stat, newConstraint(), true));
         assertNotEquals(newConstraint(), newConstraint());
     }
 

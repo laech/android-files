@@ -27,7 +27,7 @@ void Java_l_files_fs_local_Unistd_symlink(
     (*env)->GetByteArrayRegion(env, jlinkpath, 0, linklen, linkpath);
     linkpath[linklen] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(symlink(targetpath, linkpath));
+    int result = TEMP_RETRY(symlink(targetpath, linkpath));
     if (-1 == result) {
         throw_errno_exception(env);
     }
@@ -41,7 +41,7 @@ void Java_l_files_fs_local_Unistd_access(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(access(path, mode));
+    int result = TEMP_RETRY(access(path, mode));
     if (-1 == result) {
         throw_errno_exception(env);
     }
@@ -56,7 +56,7 @@ jbyteArray Java_l_files_fs_local_Unistd_readlink(
     path[len] = '\0';
 
     char buf[PATH_MAX];
-    ssize_t count = TEMP_FAILURE_RETRY(readlink(path, buf, PATH_MAX - 1));
+    ssize_t count = TEMP_RETRY(readlink(path, buf, PATH_MAX - 1));
 
     if (-1 == count) {
         throw_errno_exception(env);

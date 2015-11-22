@@ -26,7 +26,6 @@ import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.operations.OperationService.FileAction.COPY;
 import static l.files.operations.OperationService.FileAction.DELETE;
 import static l.files.operations.OperationService.FileAction.MOVE;
-import static l.files.operations.R.string.l_files_operations_listeners;
 
 /**
  * Base class for services that perform operations on files.
@@ -110,7 +109,7 @@ public final class OperationService extends Service {
 
     private TaskListener findListener() {
         try {
-            String className = getString(l_files_operations_listeners);
+            String className = getString(R.string.l_files_operations_listeners);
             return (TaskListener) Class.forName(className).newInstance();
         } catch (Exception e) {
             if (e instanceof RuntimeException) {

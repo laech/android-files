@@ -10,7 +10,7 @@ import l.files.fs.Stat;
 abstract class Cache<V> {
 
     @Nullable
-    abstract V get(File file, @Nullable Stat stat, Rect constraint)
+    abstract V get(File file, Stat stat, Rect constraint, boolean matchTime)
             throws IOException;
 
     @Nullable

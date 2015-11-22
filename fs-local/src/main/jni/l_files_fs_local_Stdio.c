@@ -11,7 +11,7 @@ void Java_l_files_fs_local_Stdio_remove(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(remove(path));
+    int result = TEMP_RETRY(remove(path));
     if (-1 == result) {
         throw_errno_exception(env);
     }
@@ -30,7 +30,7 @@ void Java_l_files_fs_local_Stdio_rename(
     (*env)->GetByteArrayRegion(env, jnewpath, 0, newlen, newpath);
     newpath[newlen] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(rename(oldpath, newpath));
+    int result = TEMP_RETRY(rename(oldpath, newpath));
     if (-1 == result) {
         throw_errno_exception(env);
     }

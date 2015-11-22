@@ -82,7 +82,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
         this.decorator = Preview.get(context);
-        this.layouts = new FileTextLayoutCache();
+        this.layouts = FileTextLayoutCache.get();
 
     }
 
@@ -138,7 +138,6 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             pos++;
         }
 
-        layouts.printStat();
     }
 
     @Override
@@ -251,28 +250,28 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 task.cancelAll();
             }
 
-            File res = item().selfFile();
+            File file = item().selfFile();
             Stat stat = item().linkTargetOrSelfStat();
-            if (stat == null || !decorator.isPreviewable(res, stat, constraint)) {
+            if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
                 setPaletteColor(TRANSPARENT);
                 return null;
             }
 
-            Palette palette = decorator.getPalette(res, null, constraint);
+            Palette palette = decorator.getPalette(file, stat, constraint, false);
             if (palette != null) {
                 setPaletteColor(backgroundColor(palette));
             } else {
                 setPaletteColor(TRANSPARENT);
             }
 
-            Bitmap thumbnail = getCachedThumbnail(res, stat);
+            Bitmap thumbnail = getCachedThumbnail(file, stat);
             if (thumbnail != null) {
                 return thumbnail;
             }
 
-            task = decorator.get(res, stat, constraint, this);
+            task = decorator.get(file, stat, constraint, this);
 
-            Rect size = decorator.getSize(res, null, constraint);
+            Rect size = decorator.getSize(file, stat, constraint, false);
             if (size != null) {
                 return scaleSize(size);
             }
@@ -285,9 +284,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             long then = stat.lastModifiedTime().to(MILLISECONDS);
             boolean changedMoreThan5SecondsAgo = now - then > 5000;
             if (changedMoreThan5SecondsAgo) {
-                return decorator.getThumbnail(res, stat, constraint);
+                return decorator.getThumbnail(res, stat, constraint, true);
             } else {
-                return decorator.getThumbnail(res, null, constraint);
+                return decorator.getThumbnail(res, stat, constraint, false);
             }
         }
 
@@ -313,14 +312,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onSizeAvailable(File item, Rect size) {
+        public void onSizeAvailable(File item, Stat stat, Rect size) {
             if (item.equals(itemId())) {
                 updateContent(scaleSize(size));
             }
         }
 
         @Override
-        public void onPaletteAvailable(File item, Palette palette) {
+        public void onPaletteAvailable(File item, Stat stat, Palette palette) {
             if (item.equals(itemId())) {
                 setPaletteColor(backgroundColor(palette));
             }
@@ -335,7 +334,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewAvailable(File item, Bitmap bm) {
+        public void onPreviewAvailable(File item, Stat stat, Bitmap bm) {
             if (item.equals(itemId())) {
                 updateContent(bm);
                 content.startPreviewTransition();
@@ -343,7 +342,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewFailed(File item) {
+        public void onPreviewFailed(File item, Stat stat) {
             if (item.equals(itemId())) {
                 updateContent(null);
             }

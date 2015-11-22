@@ -114,12 +114,6 @@ public abstract class LocalFile extends BaseFile {
         return new AutoValue_LocalFile(path);
     }
 
-    @Override
-    public String scheme() {
-        return "file";
-    }
-
-    @Override
     public URI uri() {
         return new java.io.File(path().toString()).toURI();
     }

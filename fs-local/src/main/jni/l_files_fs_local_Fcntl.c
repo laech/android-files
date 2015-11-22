@@ -11,7 +11,7 @@ jint Java_l_files_fs_local_Fcntl_open(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int fd = TEMP_FAILURE_RETRY(open(path, flags, mode));
+    int fd = TEMP_RETRY(open(path, flags, mode));
 
     if (-1 == fd) {
         throw_errno_exception(env);

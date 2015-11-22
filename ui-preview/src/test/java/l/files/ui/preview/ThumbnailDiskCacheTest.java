@@ -35,10 +35,10 @@ public final class ThumbnailDiskCacheTest
         Rect constraint = newConstraint();
         Bitmap value = newValue();
 
-        File cacheFile = cache.cacheFile(res, stat, constraint);
+        File cacheFile = cache.cacheFile(file, stat, constraint, true);
         assertFalse(cacheFile.exists(NOFOLLOW));
 
-        cache.put(res, stat, constraint, value);
+        cache.put(file, stat, constraint, value);
         assertTrue(cacheFile.exists(NOFOLLOW));
 
         cache.cleanup();
@@ -61,14 +61,14 @@ public final class ThumbnailDiskCacheTest
         Rect constraint = newConstraint();
         Bitmap value = newValue();
 
-        cache.put(res, stat, constraint, value);
+        cache.put(file, stat, constraint, value);
 
-        File cacheFile = cache.cacheFile(res, stat, constraint);
+        File cacheFile = cache.cacheFile(file, stat, constraint, true);
         Instant oldTime = Instant.ofMillis(1000);
         cacheFile.setLastModifiedTime(NOFOLLOW, oldTime);
         assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime());
 
-        cache.get(res, stat, constraint);
+        cache.get(file, stat, constraint, true);
         Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
         assertNotEquals(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
@@ -78,10 +78,10 @@ public final class ThumbnailDiskCacheTest
     public void constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
         Bitmap value = newValue();
-        cache.put(res, stat, constraint, value);
-        assertValueEquals(value, cache.get(res, stat, constraint));
-        assertNull(cache.get(res, stat, newConstraint()));
-        assertNull(cache.get(res, stat, newConstraint()));
+        cache.put(file, stat, constraint, value);
+        assertValueEquals(value, cache.get(file, stat, constraint, true));
+        assertNull(cache.get(file, stat, newConstraint(), true));
+        assertNull(cache.get(file, stat, newConstraint(), true));
     }
 
     @Override

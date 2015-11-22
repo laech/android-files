@@ -22,10 +22,10 @@ public final class ThumbnailMemCacheTest
     public void constraint_is_used_as_part_of_key() throws Exception {
         Rect constraint = newConstraint();
         Bitmap value = newValue();
-        cache.put(res, stat, constraint, value);
-        assertEquals(value, cache.get(res, stat, constraint));
-        assertNull(cache.get(res, stat, newConstraint()));
-        assertNull(cache.get(res, stat, newConstraint()));
+        cache.put(file, stat, constraint, value);
+        assertEquals(value, cache.get(file, stat, constraint, true));
+        assertNull(cache.get(file, stat, newConstraint(), true));
+        assertNull(cache.get(file, stat, newConstraint(), true));
     }
 
     @Override

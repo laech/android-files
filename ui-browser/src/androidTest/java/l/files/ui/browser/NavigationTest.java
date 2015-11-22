@@ -130,7 +130,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView view) {
-                assertTrue(view.getText().toString().contains(expected));
+                assertTrue(view.getSummary().getText().toString().contains(expected));
             }
         });
     }
@@ -294,11 +294,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
             throws IOException {
         file.setLastModifiedTime(NOFOLLOW, EPOCH);
 
-        final String[] chars = {null};
+        final CharSequence[] chars = {null};
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                chars[0] = input.getText().toString();
+                chars[0] = input.getSummary().getText();
             }
         });
 
@@ -307,7 +307,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                assertNotEqual(chars[0], input.getText().toString());
+                assertNotEqual(chars[0], input.getSummary().getText());
             }
         });
     }
@@ -316,11 +316,11 @@ public final class NavigationTest extends BaseFilesActivityTest {
             throws IOException {
         file.setLastModifiedTime(NOFOLLOW, Instant.of(100000, 1));
 
-        final String[] date = {null};
+        final CharSequence[] date = {null};
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                date[0] = input.getText().toString();
+                date[0] = input.getSummary().getText();
             }
         });
 
@@ -329,7 +329,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                assertNotEqual(date[0], input.getText().toString());
+                assertNotEqual(date[0], input.getSummary().getText());
             }
         });
     }

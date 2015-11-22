@@ -24,7 +24,7 @@ jboolean Java_l_files_fs_local_LocalObservable_isProcfs(
 
     struct statfs buff;
 
-    if (-1 == TEMP_FAILURE_RETRY(statfs(path, &buff))) {
+    if (-1 == TEMP_RETRY(statfs(path, &buff))) {
         throw_errno_exception(env);
         return NULL;
 

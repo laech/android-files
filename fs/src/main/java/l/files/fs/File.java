@@ -30,12 +30,6 @@ public interface File extends Parcelable {
     URI uri();
 
     /**
-     * The scheme of the file system.
-     * e.g. "file" for local file system.
-     */
-    String scheme();
-
-    /**
      * Gets the path of this file. The returned path is only valid within
      * the context of the underlying file system.
      */

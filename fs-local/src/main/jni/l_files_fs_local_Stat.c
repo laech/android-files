@@ -38,8 +38,8 @@ jobject do_stat(JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean is_lstat) 
 
     struct stat sb;
     int rc = (JNI_TRUE == is_lstat)
-             ? TEMP_FAILURE_RETRY(lstat(path, &sb))
-             : TEMP_FAILURE_RETRY(stat(path, &sb));
+             ? TEMP_RETRY(lstat(path, &sb))
+             : TEMP_RETRY(stat(path, &sb));
 
     if (-1 == rc) {
         throw_errno_exception(env);
@@ -59,7 +59,7 @@ jobject Java_l_files_fs_local_Stat_lstat(JNIEnv *env, jclass clazz, jbyteArray j
 
 jobject Java_l_files_fs_local_Stat_fstat(JNIEnv *env, jclass clazz, jint fd) {
     struct stat sb;
-    if (-1 == TEMP_FAILURE_RETRY(fstat(fd, &sb))) {
+    if (-1 == TEMP_RETRY(fstat(fd, &sb))) {
         throw_errno_exception(env);
         return NULL;
     }
@@ -74,7 +74,7 @@ void Java_l_files_fs_local_Stat_chmod(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(chmod(path, (mode_t) mode));
+    int result = TEMP_RETRY(chmod(path, (mode_t) mode));
     if (-1 == result) {
         throw_errno_exception(env);
     }
@@ -88,7 +88,7 @@ void Java_l_files_fs_local_Stat_mkdir(
     (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
     path[len] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(mkdir(path, (mode_t) mode));
+    int result = TEMP_RETRY(mkdir(path, (mode_t) mode));
     if (-1 == result) {
         throw_errno_exception(env);
     }

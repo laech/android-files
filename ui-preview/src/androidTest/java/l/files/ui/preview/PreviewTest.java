@@ -10,6 +10,7 @@ import java.io.InputStream;
 
 import l.files.base.io.Closer;
 import l.files.fs.File;
+import l.files.fs.Stat;
 import l.files.testing.fs.FileBaseTest;
 
 import static java.lang.System.nanoTime;
@@ -98,6 +99,7 @@ public final class PreviewTest extends FileBaseTest {
         File file = dir1().resolve("file").createFile();
         File link = dir1().resolve("link").createLink(file);
         file.writeAllUtf8("hi");
+        testPreviewSuccess(file);
         testPreviewSuccess(link);
     }
 
@@ -119,13 +121,14 @@ public final class PreviewTest extends FileBaseTest {
 
     private void testPreviewSuccess(File file) throws IOException {
         PreviewCallback callback = mock(PreviewCallback.class);
-        assertNotNull(preview.get(file, file.stat(FOLLOW), Rect.of(10, 10), callback));
+        Stat stat = file.stat(FOLLOW);
+        assertNotNull(preview.get(file, stat, Rect.of(10, 10), callback));
 
         int millis = 5000;
-        verify(callback, timeout(millis)).onSizeAvailable(eq(file), notNull(Rect.class));
-        verify(callback, timeout(millis)).onPaletteAvailable(eq(file), notNull(Palette.class));
-        verify(callback, timeout(millis)).onPreviewAvailable(eq(file), notNull(Bitmap.class));
-        verify(callback, never()).onPreviewFailed(eq(file));
+        verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
+        verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
+        verify(callback, timeout(millis)).onPaletteAvailable(eq(file), eq(stat), notNull(Palette.class));
+        verify(callback, never()).onPreviewFailed(eq(file), eq(stat));
     }
 
     private void testPreviewFailure(File file) throws IOException {

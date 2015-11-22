@@ -12,12 +12,12 @@ public abstract class MemCacheTest<V, C extends MemCache<V>>
     public void removed_item_no_longer_available() throws Exception {
         Rect constraint = newConstraint();
         V value = newValue();
-        assertNull(cache.remove(res, stat, constraint));
+        assertNull(cache.remove(file, stat, constraint));
 
-        cache.put(res, stat, constraint, value);
-        assertEquals(value, cache.remove(res, stat, constraint).get());
-        assertNull(cache.remove(res, stat, constraint));
-        assertNull(cache.get(res, stat, constraint));
+        cache.put(file, stat, constraint, value);
+        assertEquals(value, cache.remove(file, stat, constraint).get());
+        assertNull(cache.remove(file, stat, constraint));
+        assertNull(cache.get(file, stat, constraint, true));
     }
 
 }

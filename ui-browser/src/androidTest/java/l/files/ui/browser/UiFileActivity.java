@@ -6,9 +6,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.view.ActionMode;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -485,7 +485,7 @@ final class UiFileActivity {
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
-                assertEquals(shown, input.getPreview() != null);
+                assertEquals(shown, input.hasPreviewContent());
             }
         });
 
@@ -510,9 +510,9 @@ final class UiFileActivity {
             @Override
             public void apply(FileView input) {
                 if (target != null) {
-                    String expected = input.getResources().getString(
+                    CharSequence expected = input.getResources().getString(
                             R.string.link_x, target);
-                    String actual = input.getLink().toString();
+                    CharSequence actual = input.getLink().getText();
                     assertEquals(expected, actual);
                 }
             }
@@ -526,7 +526,7 @@ final class UiFileActivity {
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView view) {
-                assertEquals(expected, view.getSummary().toString());
+                assertEquals(expected, view.getSummary().getText());
             }
         });
 

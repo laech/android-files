@@ -40,15 +40,15 @@ final class DecodeChain extends Decode {
             return null;
         }
 
-        Bitmap cached = context.getThumbnail(res, stat, constraint);
+        Bitmap cached = context.getThumbnail(res, stat, constraint, true);
         if (cached != null) {
-            callback.onPreviewAvailable(res, cached);
+            callback.onPreviewAvailable(res, stat, cached);
             return null;
         }
 
-        Rect size = context.getSize(res, stat, constraint);
+        Rect size = context.getSize(res, stat, constraint, true);
         if (size != null) {
-            callback.onSizeAvailable(res, size);
+            callback.onSizeAvailable(res, stat, size);
         }
 
         return (Decode) new DecodeChain(res, stat, constraint, callback, context)
@@ -120,7 +120,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkThumbnailMemCache() {
-        Bitmap thumbnail = context.getThumbnail(file, stat, constraint);
+        Bitmap thumbnail = context.getThumbnail(file, stat, constraint, true);
         if (thumbnail != null) {
             publishProgress(thumbnail);
             return true;
@@ -131,20 +131,20 @@ final class DecodeChain extends Decode {
     private boolean checkThumbnailDiskCache() {
         Bitmap thumbnail = null;
         try {
-            thumbnail = context.getThumbnailFromDisk(file, stat, constraint);
+            thumbnail = context.getThumbnailFromDisk(file, stat, constraint, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         if (thumbnail != null) {
 
-            if (context.getSize(file, stat, constraint) == null) {
+            if (context.getSize(file, stat, constraint, true) == null) {
                 context.putSize(file, stat, constraint, Rect.of(
                         thumbnail.getWidth(),
                         thumbnail.getHeight()));
             }
 
-            if (context.getPalette(file, stat, constraint) == null) {
+            if (context.getPalette(file, stat, constraint, true) == null) {
                 publishProgress(decodePalette(thumbnail));
             }
 
@@ -156,7 +156,7 @@ final class DecodeChain extends Decode {
     }
 
     private String checkMediaType() {
-        String media = context.getMediaType(file, stat, constraint);
+        String media = context.getMediaType(file, stat, constraint, true);
         if (media == null) {
             media = decodeMedia();
             if (media != null) {

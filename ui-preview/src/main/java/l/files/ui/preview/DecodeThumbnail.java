@@ -57,7 +57,7 @@ abstract class DecodeThumbnail extends Decode {
             return null;
         }
 
-        if (context.getSize(file, stat, constraint) == null) {
+        if (context.getSize(file, stat, constraint, true) == null) {
             publishProgress(result.originalSize);
         }
 
@@ -77,7 +77,7 @@ abstract class DecodeThumbnail extends Decode {
 
         publishProgress(scaledBitmap);
 
-        if (context.getPalette(file, stat, constraint) == null) {
+        if (context.getPalette(file, stat, constraint, true) == null) {
             publishProgress(decodePalette(scaledBitmap));
         }
 

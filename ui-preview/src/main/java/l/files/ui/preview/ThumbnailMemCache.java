@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
+import java.io.IOException;
+
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -12,16 +14,16 @@ import static android.content.Context.ACTIVITY_SERVICE;
 
 final class ThumbnailMemCache extends MemCache<Bitmap> {
 
-    private final LruCache<CharBuffer, Snapshot<Bitmap>> delegate;
+    private final LruCache<ByteBuffer, Snapshot<Bitmap>> delegate;
 
     ThumbnailMemCache(Context context, float appMemoryPercentageToUseForCache) {
         this(calculateSize(context, appMemoryPercentageToUseForCache));
     }
 
     ThumbnailMemCache(int size) {
-        delegate = new LruCache<CharBuffer, Snapshot<Bitmap>>(size) {
+        delegate = new LruCache<ByteBuffer, Snapshot<Bitmap>>(size) {
             @Override
-            protected int sizeOf(CharBuffer key, Snapshot<Bitmap> value) {
+            protected int sizeOf(ByteBuffer key, Snapshot<Bitmap> value) {
                 return value.get().getByteCount();
             }
         };
@@ -40,15 +42,18 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     }
 
     @Override
-    void key(CharBuffer key, File res, Stat stat, Rect constraint) {
-        key.append(res.scheme())
-                .append("_").append(res.path())
-                .append("_").append(constraint.width())
-                .append("_").append(constraint.height());
+    void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
+        try {
+            file.path().writeTo(key.asOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        key.putInt(constraint.width())
+                .putInt(constraint.height());
     }
 
     @Override
-    LruCache<CharBuffer, Snapshot<Bitmap>> delegate() {
+    LruCache<ByteBuffer, Snapshot<Bitmap>> delegate() {
         return delegate;
     }
 

@@ -2,6 +2,8 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 public interface Path extends Parcelable {
@@ -29,5 +31,7 @@ public interface Path extends Parcelable {
     boolean startsWith(Path p);
 
     boolean isEmpty();
+
+    void writeTo(OutputStream out) throws IOException;
 
 }

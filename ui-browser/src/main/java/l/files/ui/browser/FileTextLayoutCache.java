@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.LinkedHashMap;
@@ -21,67 +20,42 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.text.Layout.Alignment.ALIGN_CENTER;
 import static android.text.format.Formatter.formatShortFileSize;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 final class FileTextLayoutCache {
 
-    FileTextLayoutCache() {
+    private static final FileTextLayoutCache instance = new FileTextLayoutCache();
+
+    static FileTextLayoutCache get() {
+        return instance;
     }
 
-    private static final SparseArray<Cache<Name, Layout>> names = new SparseArray<>();
-    private static final SparseArray<Cache<File, Layout>> links = new SparseArray<>();
+    private FileTextLayoutCache() {
+    }
 
-    // Can't cache this globally because time format is relative
-    private final SparseArray<Cache<File, Layout>> summaries = new SparseArray<>();
+    private final SparseArray<Cache<Name, Layout>> names = new SparseArray<>();
+    private final SparseArray<Cache<File, Layout>> links = new SparseArray<>();
+    private final SparseArray<Cache<File, Snapshot<Layout>>> summaries = new SparseArray<>();
 
     // Like LruCache but simpler and without the synchronization overhead
     private static final class Cache<K, V> extends LinkedHashMap<K, V> {
-
-        private int hits;
-        private int misses;
-
-        @Override
-        public V get(Object key) {
-            V entry = super.get(key);
-
-            if (entry == null) {
-                misses++;
-            } else {
-                hits++;
-            }
-
-            return entry;
-        }
 
         @Override
         protected boolean removeEldestEntry(Entry<K, V> eldest) {
             return size() > 5_000;
         }
 
-        String stats() {
-            int total = hits + misses;
-            int hitPercent = total != 0 ? (100 * hits / total) : 0;
-            return "hits=" + hits +
-                    ", misses=" + misses +
-                    ", hitRate=" + hitPercent + "%";
-        }
     }
 
-    void printStat() {
-        if (!BuildConfig.DEBUG) {
-            return;
-        }
-        for (int i = 0; i < names.size(); i++) {
-            Cache cache = names.get(names.keyAt(i));
-            Log.d("FileTextLayoutCache", "Cache (name) #" + i + ": " + cache.stats());
-        }
-        for (int i = 0; i < links.size(); i++) {
-            Cache cache = links.get(links.keyAt(i));
-            Log.d("FileTextLayoutCache", "Cache (link) #" + i + ": " + cache.stats());
-        }
-        for (int i = 0; i < summaries.size(); i++) {
-            Cache cache = summaries.get(summaries.keyAt(i));
-            Log.d("FileTextLayoutCache", "Cache (summary) #" + i + ": " + cache.stats());
+    private static final class Snapshot<V> {
+
+        final V value;
+        final long timestamp;
+
+        Snapshot(V value, long timestamp) {
+            this.value = value;
+            this.timestamp = timestamp;
         }
     }
 
@@ -174,7 +148,8 @@ final class FileTextLayoutCache {
     @Nullable
     Layout getSummary(Context context, FileItem item, int width) {
 
-        if (item.selfStat() == null) {
+        Stat stat = item.selfStat();
+        if (stat == null) {
             return null;
         }
 
@@ -182,26 +157,33 @@ final class FileTextLayoutCache {
             throw new IllegalStateException();
         }
 
-        Cache<File, Layout> cache = getCache(context, summaries);
+        Cache<File, Snapshot<Layout>> cache = getCache(context, summaries);
         File file = item.selfFile();
-        Layout layout = cache.get(file);
-        if (layout == null) {
+        Snapshot<Layout> cached = cache.get(file);
+        long timestamp = stat.lastModifiedTime().to(MILLISECONDS);
+
+        if (cached == null || cached.timestamp != timestamp) {
+
             String summary = getSummary(context, item);
             if (summary == null || summary.isEmpty()) {
                 return null;
             }
-            layout = new StaticLayout(
-                    summary,
-                    getSummaryPaint(context),
-                    width,
-                    ALIGN_CENTER,
-                    1.1F,
-                    0,
-                    false);
-            cache.put(file, layout);
+
+            cached = new Snapshot<Layout>(
+                    new StaticLayout(
+                            summary,
+                            getSummaryPaint(context),
+                            width,
+                            ALIGN_CENTER,
+                            1.1F,
+                            0,
+                            false),
+                    timestamp);
+
+            cache.put(file, cached);
         }
 
-        return layout;
+        return cached.value;
 
     }
 

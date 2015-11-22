@@ -50,7 +50,7 @@ final class DecodeImage extends DecodeThumbnail {
 
     @Override
     Result decode() throws IOException {
-        Rect size = context.getSize(file, stat, constraint);
+        Rect size = context.getSize(file, stat, constraint, true);
         if (size == null) {
             size = context.decodeSize(file);
             if (size != null) {

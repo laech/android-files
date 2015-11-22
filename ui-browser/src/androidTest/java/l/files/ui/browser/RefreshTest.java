@@ -28,7 +28,7 @@ import static l.files.ui.browser.FileSort.MODIFIED;
 public final class RefreshTest extends BaseFilesActivityTest {
 
     @Test
-    public void manual_refresh_enabled_if_max_watches_reached()
+    public void manual_refresh_updates_outdated_files()
             throws Exception {
 
         File dir = linkToStorageDir("files-test-max-watches-reached");

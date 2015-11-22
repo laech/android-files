@@ -2,6 +2,8 @@ package l.files.fs.local;
 
 import android.os.Parcel;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 
 import l.files.fs.Path;
@@ -192,6 +194,11 @@ public final class LocalPath implements Path {
     @Override
     public boolean isEmpty() {
         return length() == 0;
+    }
+
+    @Override
+    public void writeTo(OutputStream out) throws IOException {
+        out.write(bytes);
     }
 
     @Override
