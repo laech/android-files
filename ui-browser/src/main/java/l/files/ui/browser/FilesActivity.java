@@ -1,5 +1,6 @@
 package l.files.ui.browser;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,10 +23,12 @@ import java.util.List;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalFile;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
 
+import static android.content.ContentResolver.SCHEME_FILE;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
@@ -122,6 +125,11 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    @Override
     public void onItemSelected(
             AdapterView<?> parent, View view, int position, long id) {
         File item = (File) parent.getAdapter().getItem(position);
@@ -155,6 +163,12 @@ public final class FilesActivity extends BaseActivity implements
 
     private File initialDirectory() {
         File dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+        if (dir == null
+                && getIntent().getData() != null
+                && getIntent().getData().getScheme() != null
+                && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
+            dir = LocalFile.of(getIntent().getData().getPath());
+        }
         return dir == null ? DIR_HOME : dir;
     }
 

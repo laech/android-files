@@ -43,6 +43,16 @@ public final class LocalPath implements Path {
     }
 
     public static LocalPath of(byte[] path) {
+
+        int end = path.length - 1;
+        while (end > 0 && path[end] == SEPARATOR) {
+            end--;
+        }
+
+        if (end != path.length - 1) {
+            path = Arrays.copyOf(path, end + 1);
+        }
+
         return new LocalPath(path);
     }
 

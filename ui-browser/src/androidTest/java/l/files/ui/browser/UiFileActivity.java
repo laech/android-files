@@ -50,7 +50,7 @@ import static l.files.ui.browser.R.drawable.ic_menu_white_24dp;
 final class UiFileActivity {
 
     private final Instrumentation instrument;
-    private FilesActivity activity;
+    private Provider<FilesActivity> activity;
 
     UiFileActivity(
             final Instrumentation instrumentation,
@@ -60,7 +60,7 @@ final class UiFileActivity {
         requireNonNull(provider);
 
         this.instrument = instrumentation;
-        this.activity = provider.get();
+        this.activity = provider;
     }
 
     private FilesFragment fragment() {
@@ -70,7 +70,7 @@ final class UiFileActivity {
     }
 
     FilesActivity activity() {
-        return activity;
+        return activity.get();
     }
 
     Instrumentation instrumentation() {

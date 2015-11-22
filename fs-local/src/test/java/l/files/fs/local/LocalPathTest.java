@@ -5,13 +5,44 @@ import org.junit.Test;
 import static l.files.fs.File.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public final class LocalPathTest {
 
     @Test
+    public void hash_codes_are_the_same_if_bytes_are_the_same() throws Exception {
+        LocalPath p1 = path("aa");
+        LocalPath p2 = path("aa");
+        assertEquals(p1.hashCode(), p2.hashCode());
+    }
+
+    @Test
+    public void hash_codes_are_different_if_bytes_are_different() throws Exception {
+        LocalPath p1 = path("aa");
+        LocalPath p2 = path("ab");
+        assertNotEquals(p1.hashCode(), p2.hashCode());
+    }
+
+    @Test
+    public void equal_if_bytes_are_equal() throws Exception {
+        LocalPath p1 = path("aa");
+        LocalPath p2 = path("aa");
+        assertEquals(p1, p2);
+    }
+
+    @Test
+    public void not_equal_if_bytes_are_not_equal() throws Exception {
+        LocalPath p1 = path("aa");
+        LocalPath p2 = path("ab");
+        assertNotEquals(p1, p2);
+    }
+
+    @Test
     public void returns_string_representation() throws Exception {
+        assertEquals("c", path("c").toString());
+        assertEquals("/", path("/").toString());
         assertEquals("/a/b/c", path("/a/b/c").toString());
     }
 

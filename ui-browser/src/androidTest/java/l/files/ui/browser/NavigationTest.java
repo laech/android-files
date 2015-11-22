@@ -1,6 +1,8 @@
 package l.files.ui.browser;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 
 import org.junit.Test;
 
@@ -34,6 +36,16 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
+
+    @Test
+    public void can_start_from_data_uri() throws Exception {
+        File dir = dir().resolve("dir").createDirs();
+        File file = dir.resolve("file").createFile();
+        setActivityIntent(new Intent().setData(Uri.parse(dir.uri().toString())));
+        screen()
+                .assertCurrentDirectory(dir)
+                .assertListViewContains(file, true);
+    }
 
     @Test
     public void can_preview() throws Exception {

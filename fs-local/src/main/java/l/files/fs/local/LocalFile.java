@@ -163,11 +163,13 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
+    @Deprecated
     public LocalFile resolve(Name other) {
         return resolve(((LocalName) other).bytes(), false);
     }
 
     @Override
+    @Deprecated
     public LocalFile resolve(String other) {
         return resolve(other.getBytes(UTF_8), false);
     }

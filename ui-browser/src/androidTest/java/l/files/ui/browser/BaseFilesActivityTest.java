@@ -65,7 +65,7 @@ public class BaseFilesActivityTest {
                 });
     }
 
-    private void setActivityIntent(Intent intent) {
+    protected void setActivityIntent(Intent intent) {
         this.intent = intent;
     }
 
