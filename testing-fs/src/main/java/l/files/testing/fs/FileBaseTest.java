@@ -39,18 +39,4 @@ public abstract class FileBaseTest extends BaseTest {
         return dir2;
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        delete(dir1);
-        delete(dir2);
-        super.tearDown();
-    }
-
-    private static void delete(File file) throws IOException {
-        if (file == null) {
-            return;
-        }
-        file.deleteRecursive();
-    }
-
 }

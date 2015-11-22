@@ -16,17 +16,33 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void resolves_correct_child_path() throws Exception {
-        assertEquals("/a/b", path("/a").resolve(bytes("b")).toString());
-        assertEquals("/a/b", path("/a/b").resolve(bytes("")).toString());
-        assertEquals("/a/b", path("/a/").resolve(bytes("b")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("b")).toString());
+    public void resolves_path_as_child_if_path_does_not_start_with_path_separator()
+            throws Exception {
+
+        assertEquals("/a/b", path("/a").resolve(bytes("b"), true).toString());
+        assertEquals("/a/b", path("/a").resolve(bytes("b"), false).toString());
+        assertEquals("/a/b", path("/a/b").resolve(bytes(""), true).toString());
+        assertEquals("/a/b", path("/a/b").resolve(bytes(""), false).toString());
+        assertEquals("/a/b", path("/a/").resolve(bytes("b"), true).toString());
+        assertEquals("/a/b", path("/a/").resolve(bytes("b"), false).toString());
+        assertEquals("a/b", path("a").resolve(bytes("b"), true).toString());
+        assertEquals("a/b", path("a").resolve(bytes("b"), false).toString());
     }
 
     @Test
-    public void resolves_absolute_path() throws Exception {
-        assertEquals("/b", path("a").resolve(bytes("/b")).toString());
-        assertEquals("/b", path("/a").resolve(bytes("/b")).toString());
+    public void resolves_absolute_path_relatively()
+            throws Exception {
+
+        assertEquals("a/b", path("a").resolve(bytes("/b"), true).toString());
+        assertEquals("/a/b", path("/a").resolve(bytes("/b"), true).toString());
+    }
+
+    @Test
+    public void resolves_path_as_absolute_if_path_starts_with_path_separator()
+            throws Exception {
+
+        assertEquals("/b", path("a").resolve(bytes("/b"), false).toString());
+        assertEquals("/b", path("/a").resolve(bytes("/b"), false).toString());
     }
 
     @Test

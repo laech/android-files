@@ -56,7 +56,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
 
-        File nonUtf8NamedDir = dir().resolve(nonUtf8Name).createDir();
+        File nonUtf8NamedDir = dir().resolve(nonUtf8Name, true).createDir();
         File child = nonUtf8NamedDir.resolve("a").createFile();
 
         screen()
@@ -73,10 +73,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
         assertFalse(Arrays.equals(notUtf8, utf8));
         assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
 
-        File notUtf8Dir = dir().resolve(notUtf8).createDir();
+        File notUtf8Dir = dir().resolve(notUtf8, true).createDir();
         File notUtf8Child = notUtf8Dir.resolve("notUtf8").createFile();
 
-        File utf8Dir = dir().resolve(utf8).createDir();
+        File utf8Dir = dir().resolve(utf8, true).createDir();
         File utf8Child = utf8Dir.resolve("utf8").createFile();
 
         screen()
