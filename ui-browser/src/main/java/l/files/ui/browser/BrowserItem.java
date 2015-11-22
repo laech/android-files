@@ -96,6 +96,10 @@ abstract class BrowserItem {
             return linkTargetStat() != null ? linkTargetStat() : selfStat();
         }
 
+        File linkTargetOrSelfFile() {
+            return linkTargetFile() != null ? linkTargetFile() : selfFile();
+        }
+
         private CollationKey collationKey() {
             if (collationKey == null) {
                 collationKey = collator.get()

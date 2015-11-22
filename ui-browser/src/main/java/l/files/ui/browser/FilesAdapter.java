@@ -250,7 +250,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 task.cancelAll();
             }
 
-            File file = item().selfFile();
+            File file = previewFile();
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
                 setPaletteColor(TRANSPARENT);
@@ -277,6 +277,10 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             }
 
             return null;
+        }
+
+        private File previewFile() {
+            return item().linkTargetOrSelfFile();
         }
 
         private Bitmap getCachedThumbnail(File res, Stat stat) {
@@ -313,14 +317,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onSizeAvailable(File item, Stat stat, Rect size) {
-            if (item.equals(itemId())) {
+            if (item.equals(previewFile())) {
                 updateContent(scaleSize(size));
             }
         }
 
         @Override
         public void onPaletteAvailable(File item, Stat stat, Palette palette) {
-            if (item.equals(itemId())) {
+            if (item.equals(previewFile())) {
                 setPaletteColor(backgroundColor(palette));
             }
         }
@@ -335,7 +339,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onPreviewAvailable(File item, Stat stat, Bitmap bm) {
-            if (item.equals(itemId())) {
+            if (item.equals(previewFile())) {
                 updateContent(bm);
                 content.startPreviewTransition();
             }
@@ -343,7 +347,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         @Override
         public void onPreviewFailed(File item, Stat stat) {
-            if (item.equals(itemId())) {
+            if (item.equals(previewFile())) {
                 updateContent(null);
             }
         }
