@@ -11,6 +11,7 @@ import java.io.InputStream;
 import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalFile;
 import l.files.testing.fs.FileBaseTest;
 
 import static java.lang.System.nanoTime;
@@ -91,7 +92,7 @@ public final class PreviewTest extends FileBaseTest {
 
     @Test
     public void preview_proc_cpuinfo() throws Exception {
-        testPreviewSuccess(dir1().resolve("/proc/cpuinfo"));
+        testPreviewSuccess(LocalFile.of("/proc/cpuinfo"));
     }
 
     @Test

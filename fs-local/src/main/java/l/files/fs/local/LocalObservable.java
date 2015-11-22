@@ -278,7 +278,7 @@ final class LocalObservable extends Native
             Stream<Dirent> stream = closer.register(Dirent.stream(root, option, false));
             for (Dirent child : stream) {
 
-                File childFile = root.resolve(child.name(), true);
+                File childFile = root.resolve(child.name());
                 childrenConsumer.accept(childFile);
 
                 if (currentThread().isInterrupted()) {
@@ -289,7 +289,7 @@ final class LocalObservable extends Native
                     try {
 
                         byte[] name = child.name();
-                        byte[] path = root.resolve(name, true).path().bytes();
+                        byte[] path = root.resolve(name).path().bytes();
                         int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
                         childDirs.put(wd, LocalName.of(name));
 
@@ -519,7 +519,7 @@ final class LocalObservable extends Native
 
         try {
 
-            byte[] path = root.resolve(name, true).path().bytes();
+            byte[] path = root.resolve(name).path().bytes();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, LocalName.of(name));
 

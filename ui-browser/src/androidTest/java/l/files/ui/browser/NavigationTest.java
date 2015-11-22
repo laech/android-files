@@ -15,6 +15,7 @@ import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalFile;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
@@ -68,7 +69,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
 
-        File nonUtf8NamedDir = dir().resolve(nonUtf8Name, true).createDir();
+        File nonUtf8NamedDir = dir().resolve(nonUtf8Name).createDir();
         File child = nonUtf8NamedDir.resolve("a").createFile();
 
         screen()
@@ -85,10 +86,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
         assertFalse(Arrays.equals(notUtf8, utf8));
         assertEquals(new String(notUtf8, UTF_8), new String(utf8, UTF_8));
 
-        File notUtf8Dir = dir().resolve(notUtf8, true).createDir();
+        File notUtf8Dir = dir().resolve(notUtf8).createDir();
         File notUtf8Child = notUtf8Dir.resolve("notUtf8").createFile();
 
-        File utf8Dir = dir().resolve(utf8, true).createDir();
+        File utf8Dir = dir().resolve(utf8).createDir();
         File utf8Child = utf8Dir.resolve("utf8").createFile();
 
         screen()
@@ -109,10 +110,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
-        screen().selectFromNavigationMode(dir().resolve("/"));
-        screen().clickInto(dir().resolve("/proc"));
-        screen().clickInto(dir().resolve("/proc/self"));
-        screen().clickInto(dir().resolve("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(LocalFile.of("/"));
+        screen().clickInto(LocalFile.of("/proc"));
+        screen().clickInto(LocalFile.of("/proc/self"));
+        screen().clickInto(LocalFile.of("/proc/self/fdinfo"));
     }
 
     @Test

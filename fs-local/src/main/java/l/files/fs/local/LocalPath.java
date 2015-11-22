@@ -76,17 +76,13 @@ public final class LocalPath implements Path {
                 Arrays.equals(bytes, ((LocalPath) o).bytes);
     }
 
-    LocalPath resolve(byte[] path, boolean relative) {
+    LocalPath resolve(byte[] path) {
 
         if (path.length == 0) {
             return this;
         }
 
         boolean pathStartsWithSeparator = path[0] == SEPARATOR;
-        if (!relative && pathStartsWithSeparator) {
-            return of(path);
-        }
-
         int start = pathStartsWithSeparator ? 1 : 0;
         return resolveRelative(path, start, path.length);
     }
@@ -206,7 +202,7 @@ public final class LocalPath implements Path {
         }
 
         byte[] retained = Arrays.copyOfRange(bytes, start, bytes.length);
-        return dst.resolve(retained, true);
+        return dst.resolve(retained);
     }
 
     private int length() {

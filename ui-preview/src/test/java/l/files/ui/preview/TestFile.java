@@ -62,25 +62,12 @@ class TestFile extends BaseFile {
 
     @Override
     public TestFile resolve(String other) {
-        return resolve(other, false);
-    }
-
-    @Override
-    public TestFile resolve(String other, boolean relative) {
-        if (!relative && other.startsWith("/")) {
-            return new TestFile(new File(other));
-        }
         return new TestFile(new File(file, other));
     }
 
     @Override
     public TestFile resolve(Name other) {
         return resolve(other.toString());
-    }
-
-    @Override
-    public l.files.fs.File resolve(Name other, boolean relative) {
-        return resolve(other.toString(), relative);
     }
 
     @Override
