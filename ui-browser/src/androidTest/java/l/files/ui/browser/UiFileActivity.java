@@ -1,9 +1,6 @@
 package l.files.ui.browser;
 
 import android.app.Instrumentation;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.view.ActionMode;
@@ -44,8 +41,6 @@ import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static l.files.ui.browser.Instrumentations.clickItemOnMainThread;
 import static l.files.ui.browser.Instrumentations.longClickItemOnMainThread;
 import static l.files.ui.browser.Mocks.mockMenuItem;
-import static l.files.ui.browser.R.drawable.ic_arrow_back_white_24dp;
-import static l.files.ui.browser.R.drawable.ic_menu_white_24dp;
 
 final class UiFileActivity {
 
@@ -217,10 +212,7 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                //noinspection deprecation
-                assertBitmapEquals(
-                        activity().getResources().getDrawable(ic_arrow_back_white_24dp),
-                        activity().toolbar().getNavigationIcon());
+                assertEquals(1F, activity().navigationIcon().getProgress());
             }
         });
     }
@@ -318,39 +310,14 @@ final class UiFileActivity {
         return FileLabels.get(activity().getResources(), file);
     }
 
-    UiFileActivity assertActionBarUpIndicatorIsVisible(
-            final boolean visible) {
+    UiFileActivity assertActionBarUpIndicatorIsVisible(final boolean visible) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                if (visible) {
-                    //noinspection deprecation
-                    assertBitmapEquals(
-                            activity().getResources().getDrawable(ic_arrow_back_white_24dp),
-                            activity().toolbar().getNavigationIcon());
-                } else {
-                    //noinspection deprecation
-                    assertBitmapEquals(
-                            activity().getResources().getDrawable(ic_menu_white_24dp),
-                            activity().toolbar().getNavigationIcon());
-                }
+                assertEquals(visible ? 1F : 0F, activity().navigationIcon().getProgress());
             }
         });
         return this;
-    }
-
-    private static void assertBitmapEquals(Drawable expected, Drawable actual) {
-        Bitmap bitmapExpected = ((BitmapDrawable) expected).getBitmap();
-        Bitmap bitmapActual = ((BitmapDrawable) actual).getBitmap();
-        assertEquals(bitmapExpected.getWidth(), bitmapActual.getWidth());
-        assertEquals(bitmapExpected.getHeight(), bitmapActual.getHeight());
-        for (int x = 0; x < bitmapExpected.getWidth(); x++) {
-            for (int y = 0; y < bitmapExpected.getHeight(); y++) {
-                assertEquals(
-                        bitmapExpected.getPixel(x, y),
-                        bitmapActual.getPixel(x, y));
-            }
-        }
     }
 
     private void findItemOnMainThread(

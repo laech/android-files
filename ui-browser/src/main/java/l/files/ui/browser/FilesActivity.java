@@ -262,6 +262,10 @@ public final class FilesActivity extends BaseActivity implements
         this.drawerListener = drawerListener;
     }
 
+    public DrawerArrowDrawable navigationIcon() {
+        return navigationIcon;
+    }
+
     @Override
     public void onOpen(File file) {
         onOpen(file, null);
