@@ -7,25 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import l.files.fs.File;
+import l.files.ui.base.R;
 
 import static android.graphics.Typeface.createFromAsset;
 import static java.util.Collections.unmodifiableMap;
-import static l.files.ui.base.R.string.ic_dir;
-import static l.files.ui.base.R.string.ic_dir_device;
-import static l.files.ui.base.R.string.ic_dir_download;
-import static l.files.ui.base.R.string.ic_dir_home;
-import static l.files.ui.base.R.string.ic_dir_image;
-import static l.files.ui.base.R.string.ic_dir_music;
-import static l.files.ui.base.R.string.ic_dir_sdcard2;
-import static l.files.ui.base.R.string.ic_dir_video;
-import static l.files.ui.base.R.string.ic_file;
-import static l.files.ui.base.R.string.ic_file_archive;
-import static l.files.ui.base.R.string.ic_file_image;
-import static l.files.ui.base.R.string.ic_file_music;
-import static l.files.ui.base.R.string.ic_file_pdf;
-import static l.files.ui.base.R.string.ic_file_text;
-import static l.files.ui.base.R.string.ic_file_video;
-import static l.files.ui.base.R.string.ic_unknown;
 import static l.files.ui.base.fs.UserDirs.DIR_DCIM;
 import static l.files.ui.base.fs.UserDirs.DIR_DOWNLOADS;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
@@ -43,14 +28,14 @@ public final class FileIcons {
 
     private static Map<File, Integer> buildIconByDirectoryUri() {
         Map<File, Integer> icons = new HashMap<>();
-        icons.put(DIR_ROOT, ic_dir_device);
-        icons.put(DIR_HOME, ic_dir_home);
-        icons.put(DIR_DCIM, ic_dir_image);
-        icons.put(DIR_MUSIC, ic_dir_music);
-        icons.put(DIR_MOVIES, ic_dir_video);
-        icons.put(DIR_PICTURES, ic_dir_image);
-        icons.put(DIR_DOWNLOADS, ic_dir_download);
-        icons.put(DIR_SDCARD2, ic_dir_sdcard2);
+        icons.put(DIR_ROOT, R.string.ic_dir_device);
+        icons.put(DIR_HOME, R.string.ic_dir_home);
+        icons.put(DIR_DCIM, R.string.ic_dir_image);
+        icons.put(DIR_MUSIC, R.string.ic_dir_music);
+        icons.put(DIR_MOVIES, R.string.ic_dir_video);
+        icons.put(DIR_PICTURES, R.string.ic_dir_image);
+        icons.put(DIR_DOWNLOADS, R.string.ic_dir_download);
+        icons.put(DIR_SDCARD2, R.string.ic_dir_sdcard2);
         return unmodifiableMap(icons);
     }
 
@@ -78,25 +63,25 @@ public final class FileIcons {
     }
 
     public static int defaultDirectoryIconStringId() {
-        return ic_dir;
+        return R.string.ic_dir;
     }
 
     public static int fileIconStringId(String media) {
-        if (media.equals("application/pdf")) return ic_file_pdf;
-        if (media.startsWith("audio/")) return ic_file_music;
-        if (media.startsWith("video/")) return ic_file_video;
-        if (media.startsWith("image/")) return ic_file_image;
-        if (media.startsWith("text/")) return ic_file_text;
-        if (isArchive(media)) return ic_file_archive;
+        if (media.equals("application/pdf")) return R.string.ic_file_pdf;
+        if (media.startsWith("audio/")) return R.string.ic_file_music;
+        if (media.startsWith("video/")) return R.string.ic_file_video;
+        if (media.startsWith("image/")) return R.string.ic_file_image;
+        if (media.startsWith("text/")) return R.string.ic_file_text;
+        if (isArchive(media)) return R.string.ic_file_archive;
         return defaultFileIconStringId();
     }
 
     public static int defaultFileIconStringId() {
-        return ic_file;
+        return R.string.ic_file;
     }
 
     public static int unknownIconStringId() {
-        return ic_unknown;
+        return R.string.ic_unknown;
     }
 
     private FileIcons() {

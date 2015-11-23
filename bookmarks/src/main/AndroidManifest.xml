@@ -1,5 +1,6 @@
-<manifest package="l.files.bookmarks">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="l.files.bookmarks">
 
-    <application/>
+    <application tools:ignore="GoogleAppIndexingWarning" />
 
 </manifest>

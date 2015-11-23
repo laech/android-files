@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackgroundBorderless"
-    android:minHeight="?attr/actionBarSize">
+    android:minHeight="?attr/actionBarSize"
+    tools:ignore="Overdraw">
 
     <TextView
         android:id="@android:id/title"

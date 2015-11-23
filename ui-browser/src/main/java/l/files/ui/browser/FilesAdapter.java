@@ -46,8 +46,6 @@ import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
 import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
-import static l.files.ui.browser.R.layout.files_grid_header;
-import static l.files.ui.browser.R.layout.files_grid_item;
 
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
@@ -150,8 +148,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         return viewType == VIEW_TYPE_FILE
-                ? new FileHolder(inflater.inflate(files_grid_item, parent, false))
-                : new HeaderHolder(inflater.inflate(files_grid_header, parent, false));
+                ? new FileHolder(inflater.inflate(R.layout.files_grid_item, parent, false))
+                : new HeaderHolder(inflater.inflate(R.layout.files_grid_header, parent, false));
     }
 
     @Override

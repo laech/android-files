@@ -1,5 +1,6 @@
-<manifest package="l.files.testing">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="l.files.testing">
 
-    <application/>
+    <application tools:ignore="GoogleAppIndexingWarning" />
 
 </manifest>

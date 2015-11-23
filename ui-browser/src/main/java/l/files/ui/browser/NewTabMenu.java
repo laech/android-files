@@ -8,8 +8,6 @@ import android.view.MenuItem;
 
 import l.files.ui.base.app.OptionsMenuAction;
 
-import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.view.Menu.NONE;
@@ -41,8 +39,8 @@ final class NewTabMenu extends OptionsMenuAction {
     @TargetApi(LOLLIPOP)
     protected void onItemSelected(final MenuItem item) {
         final int flags
-                = FLAG_ACTIVITY_NEW_DOCUMENT
-                | FLAG_ACTIVITY_MULTIPLE_TASK;
+                = Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 
         context.startActivity(
                 new Intent(context, FilesActivity.class)

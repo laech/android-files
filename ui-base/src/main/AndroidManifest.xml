@@ -1,5 +1,6 @@
-<manifest package="l.files.ui.base">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="l.files.ui.base">
 
-    <application/>
+    <application tools:ignore="GoogleAppIndexingWarning" />
 
 </manifest>

@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="l.files.ui.operations">
 
-    <application>
+    <application tools:ignore="GoogleAppIndexingWarning">
 
         <activity
             android:name=".FailuresActivity"

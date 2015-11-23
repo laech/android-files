@@ -23,8 +23,6 @@ import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
-import static l.files.ui.browser.R.layout.files_activity_title;
-import static l.files.ui.browser.R.layout.files_activity_title_item;
 
 final class HierarchyAdapter extends BaseAdapter {
     private List<File> hierarchy = emptyList();
@@ -75,7 +73,7 @@ final class HierarchyAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView != null
                 ? convertView
-                : inflate(files_activity_title, parent);
+                : inflate(R.layout.files_activity_title, parent);
 
         File file = getItem(position);
 
@@ -101,7 +99,7 @@ final class HierarchyAdapter extends BaseAdapter {
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         View view = convertView != null
                 ? convertView
-                : inflate(files_activity_title_item, parent);
+                : inflate(R.layout.files_activity_title_item, parent);
 
         boolean enabled = isEnabled(position);
         File res = getItem(position);

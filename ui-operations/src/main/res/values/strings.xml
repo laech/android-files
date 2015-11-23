@@ -42,7 +42,6 @@
     </plurals>
 
     <string name="cleaning_up">Cleaning up</string>
-    <string name="x_of_x_size">%1$s of %2$s</string>
     <string name="x_countdown">-%s</string>
 
     <plurals name="fail_to_copy">

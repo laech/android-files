@@ -1,5 +1,6 @@
-<manifest package="l.files.fs.local">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="l.files.fs.local">
 
-    <application/>
+    <application tools:ignore="GoogleAppIndexingWarning" />
 
 </manifest>

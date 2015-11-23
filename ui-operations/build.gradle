@@ -25,6 +25,10 @@ android {
         exclude 'META-INF/NOTICE'
     }
 
+    lintOptions {
+        disable 'ParcelCreator'
+    }
+
 }
 
 dependencies {

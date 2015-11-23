@@ -3,44 +3,14 @@
 
     <string name="refresh">Refresh</string>
     <string name="empty">Empty</string>
-    <string name="not_a_directory">Not a directory</string>
-    <string name="directory_doesnt_exist">Directory doesn\'t exist</string>
     <string name="permission_denied">Permission denied</string>
-    <string name="settings">Settings</string>
-    <string name="view">View</string>
     <string name="show_hidden_files">Show hidden files</string>
-    <string name="about">About</string>
-    <string name="device">Device</string>
     <string name="new_dir">New folder</string>
     <string name="sort_by">Sort</string>
     <string name="untitled_dir">Untitled Folder</string>
-    <string name="mkdir_failed">Failed to create folder.</string>
     <string name="name_exists">This name is already taken.</string>
     <string name="rename">Rename</string>
-    <string name="failed_to_rename_file_x">Failed to rename file.\n%s</string>
     <string name="new_tab">New tab</string>
-    <string name="close_tab">Close tab</string>
-    <string name="conflicts_activity_label">Resolve conflicts</string>
-
-    <plurals name="replace_dest_files">
-        <item quantity="one">Replace destination item</item>
-        <item quantity="other">Replace destination items</item>
-    </plurals>
-
-    <plurals name="skip_files">
-        <item quantity="one">Skip this item</item>
-        <item quantity="other">Skip these items</item>
-    </plurals>
-
-    <string name="keep_all">Keep all, rename new items</string>
-    <string name="let_me_choose">Let me choose</string>
-
-    <plurals name="conflicts_summary_html">
-        <item quantity="one"><![CDATA[<b>%1$s</b> already has <b>%2$s</b>]]></item>
-        <item quantity="other"><![CDATA[<b>%1$s</b> already has %3$s items with the same names (such as <b>%2$s</b>)]]></item>
-    </plurals>
-
-    <string name="failed_to_get_file_info">Failed to get file information</string>
 
     <string name="name">Name</string>
     <string name="date_modified">Date modified</string>
