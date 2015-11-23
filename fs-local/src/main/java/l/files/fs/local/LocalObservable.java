@@ -3,6 +3,7 @@ package l.files.fs.local;
 import android.os.Handler;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -172,8 +173,7 @@ final class LocalObservable extends Native
      */
     private final ConcurrentBiMap<Integer, LocalName> childDirs = new ConcurrentBiMap<>();
 
-    // TODO use weak reference
-    private final Observer observer;
+    private final WeakReference<Observer> observerRef;
 
     /**
      * Background thread that polls for events.
@@ -184,8 +184,8 @@ final class LocalObservable extends Native
     private final AtomicBoolean released;
 
     LocalObservable(LocalFile root, Observer observer) {
-        this.root = requireNonNull(root, "root");
-        this.observer = requireNonNull(observer, "observer");
+        this.root = requireNonNull(root);
+        this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
         this.released = new AtomicBoolean(false);
@@ -194,8 +194,8 @@ final class LocalObservable extends Native
     void start(LinkOption option, FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
-        requireNonNull(option, "option");
-        requireNonNull(childrenConsumer, "childrenConsumer");
+        requireNonNull(option);
+        requireNonNull(childrenConsumer);
 
         try {
             if (!isProcfs(root.path().bytes())) {
@@ -208,7 +208,7 @@ final class LocalObservable extends Native
             fd = -1;
             wd = -1;
             close();
-            observer.onIncompleteObservation();
+            notifyIncompleteObservationOrClose();
             return;
         }
 
@@ -232,7 +232,8 @@ final class LocalObservable extends Native
 
             if (root.stat(option).isDirectory() &&
                     !traverseChildren(option, childrenConsumer)) {
-                observer.onIncompleteObservation();
+
+                notifyIncompleteObservationOrClose();
             }
 
         } catch (Throwable e) {
@@ -396,7 +397,7 @@ final class LocalObservable extends Native
             } catch (ErrnoException ignored) {
             }
         }
-        observer.onIncompleteObservation();
+        notifyIncompleteObservationOrClose();
     }
 
     @Override
@@ -505,11 +506,24 @@ final class LocalObservable extends Native
     }
 
     private void observer(Event kind, byte[] name) {
-        observer.onEvent(kind, name == null ? null : LocalName.of(name));
+        notifyEventOrClose(kind, name == null ? null : LocalName.of(name));
     }
 
     private void observer(Event kind, LocalName name) {
-        observer.onEvent(kind, name);
+        notifyEventOrClose(kind, name);
+    }
+
+    private void notifyEventOrClose(Event kind, LocalName name) {
+        Observer observer = observerRef.get();
+        if (observer != null) {
+            observer.onEvent(kind, name);
+        } else {
+            try {
+                close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void addWatchForNewDirectory(byte[] name) throws IOException {
@@ -532,10 +546,24 @@ final class LocalObservable extends Native
             } else if (e.errno == ENOSPC
                     || e.errno == ENOMEM
                     || e.errno == EACCES) {
-                observer.onIncompleteObservation();
+
+                notifyIncompleteObservationOrClose();
 
             } else {
                 throw e.toIOException();
+            }
+        }
+    }
+
+    private void notifyIncompleteObservationOrClose() {
+        Observer observer = observerRef.get();
+        if (observer != null) {
+            observer.onIncompleteObservation();
+        } else {
+            try {
+                close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
