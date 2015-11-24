@@ -19,14 +19,14 @@ jboolean Java_l_files_fs_local_LocalObservable_isProcfs(
 
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
     struct statfs buff;
 
     if (-1 == TEMP_RETRY(statfs(path, &buff))) {
         throw_errno_exception(env);
-        return NULL;
+        return JNI_FALSE;
 
     } else {
         return (jboolean) (PROC_SUPER_MAGIC == buff.f_type);
@@ -69,7 +69,7 @@ void Java_l_files_fs_local_LocalObservable_observe(
             if (event->len > 0) {
                 jsize len = (jsize) strlen(event->name);
                 path = (*env)->NewByteArray(env, len);
-                (*env)->SetByteArrayRegion(env, path, 0, len, event->name);
+                (*env)->SetByteArrayRegion(env, path, 0, len, (const jbyte *) event->name);
             }
 
             (*env)->CallVoidMethod(
