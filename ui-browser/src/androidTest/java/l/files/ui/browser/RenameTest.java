@@ -4,16 +4,13 @@ import org.junit.Test;
 
 import l.files.fs.File;
 import l.files.fs.Permission;
-import l.files.fs.local.LocalFile;
 
-import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.Tests.timeout;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public final class RenameTest extends BaseFilesActivityTest {
 
@@ -22,22 +19,11 @@ public final class RenameTest extends BaseFilesActivityTest {
     @Test
     public void can_rename_to_same_name_but_difference_casing() throws Exception {
 
-        File dir = LocalFile.of(getExternalStorageDirectory())
-                .resolve(testName.getMethodName());
-
-        setActivityIntent(newIntent(dir));
-
+        File dir = createCaseInsensitiveFileSystemDir();
         try {
-
-            dir.deleteRecursiveIfExists();
-            dir.createDirs();
 
             File src = dir.resolve("file.txt").createFile();
             File dst = dir.resolve("file.TXT");
-
-            assumeTrue(
-                    "Assuming the underlying file system is case insensitive",
-                    dst.exists(NOFOLLOW));
 
             UiRename ui = rename(src);
             ui.setFilename(dst.name().toString());

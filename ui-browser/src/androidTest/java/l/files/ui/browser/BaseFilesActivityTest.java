@@ -13,16 +13,27 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import l.files.base.Throwables;
 import l.files.fs.File;
 import l.files.fs.Permission;
 import l.files.fs.Visitor;
 import l.files.fs.local.LocalFile;
 
 import static android.content.Intent.ACTION_MAIN;
+import static android.os.Environment.getExternalStorageDirectory;
+import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
 
 public class BaseFilesActivityTest {
 
@@ -125,6 +136,68 @@ public class BaseFilesActivityTest {
 
     void runTestOnUiThread(Runnable runnable) throws Throwable {
         uiThread.runOnUiThread(runnable);
+    }
+
+    File createCaseInsensitiveFileSystemDir() throws IOException {
+
+        /*
+         * Use getExternalStorageDirectory() for this test, as this issue
+         * is only reproducible there (this test assumes this, making it
+         * less reliable).
+         *
+         * The bug: "a" gets renamed to "A", instead of displaying only
+         * "A", both "a" and "A" are displayed.
+         */
+        File dir = LocalFile.of(getExternalStorageDirectory())
+                .resolve(testName.getMethodName());
+
+        File src = dir.resolve("a");
+        File dst = dir.resolve("A");
+        try {
+
+            dir.deleteRecursiveIfExists();
+            src.createFiles();
+
+            assertTrue(src.exists(NOFOLLOW));
+            assumeTrue(
+                    "Assuming the underlying file system is case insensitive",
+                    dst.exists(NOFOLLOW));
+
+            List<File> actual = dir.list(NOFOLLOW).to(new ArrayList<File>());
+            assertEquals(1, actual.size());
+            assumeThat(
+                    "Assuming the file can be renamed to different casing",
+                    actual,
+                    equalTo(singletonList(dst)));
+
+            setActivityIntent(newIntent(dir));
+
+        } catch (Throwable e) {
+            try {
+                dir.deleteRecursiveIfExists();
+            } catch (Throwable sup) {
+                Throwables.addSuppressed(e, sup);
+            }
+            throw e;
+
+        } finally {
+
+            try {
+                src.deleteIfExists();
+            } catch (IOException ignore) {
+            }
+
+            try {
+                dst.deleteIfExists();
+            } catch (IOException ignore) {
+            }
+
+        }
+
+        assertFalse(src.exists(NOFOLLOW));
+        assertFalse(dst.exists(NOFOLLOW));
+
+        return dir;
     }
 
 }

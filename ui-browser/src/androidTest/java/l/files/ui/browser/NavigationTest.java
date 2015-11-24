@@ -17,7 +17,6 @@ import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalFile;
 
-import static android.os.Environment.getExternalStorageDirectory;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -37,36 +36,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
     @Test
     public void can_see_file_renamed_to_different_casing() throws Exception {
 
-        /*
-         * Use getExternalStorageDirectory() for this test, as this issue
-         * is only reproducible there (this test assumes this, making it
-         * less reliable).
-         *
-         * The bug: "a" gets renamed to "A", instead of displaying only
-         * "A", both "a" and "A" are displayed.
-         */
-        File dir = LocalFile.of(getExternalStorageDirectory())
-                .resolve(testName.getMethodName());
-
+        File dir = createCaseInsensitiveFileSystemDir();
         try {
-
-            dir.deleteRecursiveIfExists();
-            dir.createDir();
-            setActivityIntent(newIntent(dir));
 
             File src = dir.resolve("a").createDir();
             File dst = dir.resolve("A");
-
-            assumeTrue(
-                    "Assuming the underlying file system is case insensitive",
-                    dst.exists(NOFOLLOW));
 
             screen().assertAllItemsDisplayedInOrder(src);
 
