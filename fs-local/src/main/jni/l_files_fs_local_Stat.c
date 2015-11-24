@@ -1,7 +1,6 @@
 #include <jni.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include "util.h"
 
 static jmethodID stat_create;
@@ -33,7 +32,7 @@ jobject to_java_stat(JNIEnv *env, jclass clazz, struct stat *sb) {
 jobject do_stat(JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean is_lstat) {
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
     struct stat sb;
@@ -71,7 +70,7 @@ void Java_l_files_fs_local_Stat_chmod(
 
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
     int result = TEMP_RETRY(chmod(path, (mode_t) mode));
@@ -85,7 +84,7 @@ void Java_l_files_fs_local_Stat_mkdir(
 
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
     int result = TEMP_RETRY(mkdir(path, (mode_t) mode));
