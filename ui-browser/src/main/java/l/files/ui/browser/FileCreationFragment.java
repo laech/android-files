@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
@@ -42,6 +43,7 @@ public abstract class FileCreationFragment extends DialogFragment
     private final LoaderCallbacks<Existence> checkerCallback =
             new CheckerCallback();
 
+    private TextInputLayout layout;
     private EditText editText;
 
     public Consumer<String> toaster;
@@ -56,8 +58,13 @@ public abstract class FileCreationFragment extends DialogFragment
     public void onStart() {
         super.onStart();
 
+        if (layout == null) {
+            layout = (TextInputLayout) getDialog().findViewById(R.id.text_layout);
+            layout.setHint(getString(getTitleResourceId()));
+        }
+
         if (editText == null) {
-            editText = (EditText) getDialog().findViewById(android.R.id.text1);
+            editText = (EditText) getDialog().findViewById(R.id.file_name);
             editText.setFilters(new InputFilter[]{new LengthFilter(255)});
             editText.addTextChangedListener(new FileTextWatcher());
             editText.setOnEditorActionListener(new OkActionListener());
@@ -79,7 +86,6 @@ public abstract class FileCreationFragment extends DialogFragment
                 .inflate(R.layout.file_name, (ViewGroup) getView(), false);
 
         return new AlertDialog.Builder(getActivity())
-                .setTitle(getTitleResourceId())
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, this)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -165,10 +171,10 @@ public abstract class FileCreationFragment extends DialogFragment
             }
             Button ok = getOkButton();
             if (existence.exists) {
-                editText.setError(getError(existence.file));
+                layout.setError(getError(existence.file));
                 ok.setEnabled(false);
             } else {
-                editText.setError(null);
+                layout.setError(null);
                 ok.setEnabled(true);
             }
         }

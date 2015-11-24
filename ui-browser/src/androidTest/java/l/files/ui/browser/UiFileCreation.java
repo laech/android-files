@@ -1,17 +1,18 @@
 package l.files.ui.browser;
 
 import android.app.AlertDialog;
+import android.support.design.widget.TextInputLayout;
 import android.widget.EditText;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
-import static l.files.base.Objects.requireNonNull;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.Instrumentations.awaitOnMainThread;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -109,7 +110,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
             public void run() {
                 assertEquals(
                         context.activity().getString(resId, args),
-                        editText().getError());
+                        error());
             }
         });
         return self();
@@ -119,7 +120,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
-                assertNull(editText().getError());
+                assertNull(error());
             }
         });
         return self();
@@ -129,14 +130,18 @@ abstract class UiFileCreation<T extends UiFileCreation> {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
             public void run() {
-                assertEquals(error, editText().getError());
+                assertEquals(error, error());
             }
         });
         return self();
     }
 
+    private CharSequence error() {
+        return ((TextInputLayout)  dialog().findViewById(R.id.text_layout)).getError();
+    }
+
     EditText editText() {
-        return (EditText) dialog().findViewById(android.R.id.text1);
+        return (EditText) dialog().findViewById(R.id.file_name);
     }
 
     private AlertDialog dialog() {
