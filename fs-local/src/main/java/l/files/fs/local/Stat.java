@@ -11,6 +11,7 @@ import l.files.fs.Permission;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.LocalFile.permissionsFromMode;
 
 @AutoValue
@@ -128,14 +129,18 @@ abstract class Stat extends Native implements l.files.fs.Stat {
     static Stat stat(LocalFile file, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
-        try {
-            if (option == FOLLOW) {
-                return stat(file.path().bytes());
-            } else {
-                return lstat(file.path().bytes());
+        while (true) {
+            try {
+                if (option == FOLLOW) {
+                    return stat(file.path().bytes());
+                } else {
+                    return lstat(file.path().bytes());
+                }
+            } catch (final ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw e.toIOException(file.path());
+                }
             }
-        } catch (final ErrnoException e) {
-            throw e.toIOException(file.path());
         }
     }
 
