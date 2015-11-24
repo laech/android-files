@@ -3,8 +3,8 @@ package l.files.ui.browser;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Pair;
 import android.support.v7.view.ActionMode;
+import android.util.Pair;
 import android.widget.EditText;
 
 import java.io.IOException;
@@ -35,6 +35,13 @@ public final class RenameFragment extends FileCreationFragment {
 
     private AsyncTask<?, ?, ?> highlight;
     private AsyncTask<?, ?, ?> rename;
+    private File file;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        file = getArguments().getParcelable(ARG_FILE);
+    }
 
     @Override
     public void onDestroy() {
@@ -54,8 +61,22 @@ public final class RenameFragment extends FileCreationFragment {
         highlight();
     }
 
+    @Override
+    void restartChecker() {
+
+        String oldName = file.name().toString();
+        String newName = getFilename();
+        if (!oldName.equals(newName) &&
+                oldName.equalsIgnoreCase(newName)) {
+            getOkButton().setEnabled(true);
+            return;
+        }
+
+        super.restartChecker();
+    }
+
     private File file() {
-        return getArguments().getParcelable(ARG_FILE);
+        return file;
     }
 
     private void highlight() {

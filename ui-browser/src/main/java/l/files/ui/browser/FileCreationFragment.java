@@ -97,7 +97,7 @@ public abstract class FileCreationFragment extends DialogFragment
         return (AlertDialog) super.getDialog();
     }
 
-    private void restartChecker() {
+    void restartChecker() {
         getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
     }
 
@@ -113,7 +113,7 @@ public abstract class FileCreationFragment extends DialogFragment
         return editText;
     }
 
-    private Button getOkButton() {
+    Button getOkButton() {
         return getDialog().getButton(BUTTON_POSITIVE);
     }
 
