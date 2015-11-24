@@ -104,12 +104,12 @@ public final class LocalObservableTest extends FileBaseTest {
     @Test
     public void notifies_files_downloaded_by_download_manager() throws Exception {
 
-        Closer closer = Closer.create();
+        final LocalFile downloadDir = downloadsDir();
+        final LocalFile downloadFile = downloadDir.resolve(uniqueTestName());
+        final Closer closer = Closer.create();
         try {
 
-            final LocalFile downloadDir = downloadsDir();
-            final LocalFile downloadFile = downloadDir.resolve(uniqueTestName());
-            final Recorder observer = closer.register(observe(downloadDir));
+            Recorder observer = closer.register(observe(downloadDir));
             observer.await(CREATE, downloadFile, new Callable<Void>() {
 
                 @Override
@@ -123,12 +123,7 @@ public final class LocalObservableTest extends FileBaseTest {
                     Tests.timeout(5, SECONDS, new Executable() {
                         @Override
                         public void execute() throws Exception {
-                            /*
-                             * Use assume instead of assert since this will fail on API 23,
-                             * the goal of this is to create visibility of this issue but
-                             * not fail the build.
-                             */
-                            assumeTrue(downloadFile.toString(), downloadFile.exists(NOFOLLOW));
+                            assertTrue(downloadFile.exists(NOFOLLOW));
                         }
                     });
 
@@ -137,6 +132,16 @@ public final class LocalObservableTest extends FileBaseTest {
                 }
 
             });
+
+        } catch (AssertionError e) {
+            /*
+             * Check file is downloaded but failed to receive event.
+             * Use assume here because this will fail on API 23,
+             * the goal of this is to create visibility of this issue but
+             * not fail the build.
+             */
+            assertTrue(downloadFile.exists(NOFOLLOW));
+            assumeTrue(false);
 
         } catch (Throwable e) {
             throw closer.rethrow(e);
