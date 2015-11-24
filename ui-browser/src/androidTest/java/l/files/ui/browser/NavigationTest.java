@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
@@ -61,16 +62,20 @@ public final class NavigationTest extends BaseFilesActivityTest {
             setActivityIntent(newIntent(dir));
 
             File src = dir.resolve("a").createDir();
+            File dst = dir.resolve("A");
+
+            assumeTrue(
+                    "Assuming the underlying file system is case insensitive",
+                    dst.exists(NOFOLLOW));
+
             screen().assertAllItemsDisplayedInOrder(src);
 
-            File dst = dir.resolve("A");
             src.moveTo(dst);
 
-            File extra = dir.resolve("b").createDir();
             screen()
                     .sort()
                     .by(NAME)
-                    .assertAllItemsDisplayedInOrder(dst, extra);
+                    .assertAllItemsDisplayedInOrder(dst);
 
         } finally {
             dir.deleteRecursiveIfExists();
