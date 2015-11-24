@@ -109,6 +109,13 @@ public final class LocalObservableTest extends FileBaseTest {
         final Closer closer = Closer.create();
         try {
 
+            closer.register(new Closeable() {
+                @Override
+                public void close() throws IOException {
+                    downloadFile.deleteIfExists();
+                }
+            });
+
             Recorder observer = closer.register(observe(downloadDir));
             observer.await(CREATE, downloadFile, new Callable<Void>() {
 
