@@ -42,6 +42,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     private final List<Decode> subs;
 
+    private boolean publishedSize;
+
     Decode(
             File file,
             Stat stat,
@@ -78,8 +80,11 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         for (Object value : values) {
 
             if (value instanceof Rect) {
-                context.putSize(file, stat, constraint, (Rect) value);
-                callback.onSizeAvailable(file, stat, (Rect) value);
+                if (!publishedSize) {
+                    publishedSize = true;
+                    context.putSize(file, stat, constraint, (Rect) value);
+                    callback.onSizeAvailable(file, stat, (Rect) value);
+                }
 
             } else if (value instanceof Palette) {
                 context.putPalette(file, stat, constraint, (Palette) value);
