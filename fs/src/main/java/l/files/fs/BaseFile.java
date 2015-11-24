@@ -156,6 +156,14 @@ public abstract class BaseFile implements File {
     }
 
     @Override
+    public void deleteRecursiveIfExists() throws IOException {
+        try {
+            deleteRecursive();
+        } catch (FileNotFoundException ignore) {
+        }
+    }
+
+    @Override
     public OutputStream newOutputStream() throws IOException {
         return newOutputStream(false);
     }

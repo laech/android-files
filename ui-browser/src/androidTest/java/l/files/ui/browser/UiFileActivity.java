@@ -612,7 +612,15 @@ final class UiFileActivity {
         return files;
     }
 
-    UiFileActivity assertItemsDisplayed(final File... expected) {
+    /**
+     * @deprecated use {@link #assertAllItemsDisplayedInOrder(File...)}
+     */
+    @Deprecated
+    UiFileActivity assertItemsDisplayed(File... expected) {
+        return assertAllItemsDisplayedInOrder(expected);
+    }
+
+    UiFileActivity assertAllItemsDisplayedInOrder(final File... expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {

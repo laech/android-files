@@ -108,7 +108,7 @@ public class BaseFilesActivityTest {
         return dir;
     }
 
-    private Intent newIntent(File dir) {
+    Intent newIntent(File dir) {
         return new Intent(ACTION_MAIN).putExtra(EXTRA_DIRECTORY, dir);
     }
 

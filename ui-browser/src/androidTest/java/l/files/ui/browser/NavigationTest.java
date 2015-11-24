@@ -17,6 +17,7 @@ import l.files.fs.Permission;
 import l.files.fs.Stat;
 import l.files.fs.local.LocalFile;
 
+import static android.os.Environment.getExternalStorageDirectory;
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
@@ -31,12 +32,50 @@ import static java.util.concurrent.TimeUnit.DAYS;
 import static l.files.fs.File.UTF_8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.ui.browser.FileSort.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
+
+    @Test
+    public void can_see_file_renamed_to_different_casing() throws Exception {
+
+        /*
+         * Use getExternalStorageDirectory() for this test, as this issue
+         * is only reproducible there (this test assumes this, making it
+         * less reliable).
+         *
+         * The bug: "a" gets renamed to "A", instead of displaying only
+         * "A", both "a" and "A" are displayed.
+         */
+        File dir = LocalFile.of(getExternalStorageDirectory())
+                .resolve(testName.getMethodName());
+
+        try {
+
+            dir.deleteRecursiveIfExists();
+            dir.createDir();
+            setActivityIntent(newIntent(dir));
+
+            File src = dir.resolve("a").createDir();
+            screen().assertAllItemsDisplayedInOrder(src);
+
+            File dst = dir.resolve("A");
+            src.moveTo(dst);
+
+            File extra = dir.resolve("b").createDir();
+            screen()
+                    .sort()
+                    .by(NAME)
+                    .assertAllItemsDisplayedInOrder(dst, extra);
+
+        } finally {
+            dir.deleteRecursiveIfExists();
+        }
+    }
 
     @Test
     public void can_start_from_data_uri() throws Exception {

@@ -1,10 +1,10 @@
 package l.files.fs;
 
-import java.util.Set;
+import java.util.Map;
 
 public interface BatchObserver {
 
-    void onBatchEvent(boolean selfChanged, Set<Name> children);
+    void onLatestEvents(boolean selfChanged, Map<Name, Event> children);
 
     void onIncompleteObservation();
 

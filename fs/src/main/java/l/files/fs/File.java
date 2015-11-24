@@ -277,6 +277,8 @@ public interface File extends Parcelable {
 
     void deleteRecursive() throws IOException;
 
+    void deleteRecursiveIfExists() throws IOException;
+
     /**
      * Updates the modification time for this file.
      */

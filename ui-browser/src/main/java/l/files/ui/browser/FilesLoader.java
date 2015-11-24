@@ -17,13 +17,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
 import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
+import l.files.fs.Event;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
 import l.files.fs.Name;
@@ -40,6 +42,7 @@ import static java.lang.Thread.currentThread;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.Event.DELETE;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -82,7 +85,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private final BatchObserver listener = new BatchObserver() {
 
         @Override
-        public void onBatchEvent(boolean selfChanged, Set<Name> children) {
+        public void onLatestEvents(boolean selfChanged, Map<Name, Event> children) {
             if (!children.isEmpty()) {
                 updateAll(children, false);
             }
@@ -96,7 +99,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     };
 
     void updateAll(
-            final Set<Name> changedChildren,
+            final Map<Name, Event> changedChildren,
             final boolean forceReload) {
 
         executor.execute(new Runnable() {
@@ -105,8 +108,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
                 boolean changed = false;
-                for (Name child : changedChildren) {
-                    changed |= update(child);
+                for (Entry<Name, Event> entry : changedChildren.entrySet()) {
+                    changed |= update(entry.getKey(), entry.getValue());
                 }
 
                 if (changed || forceReload) {
@@ -152,12 +155,12 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     void setSort(FileSort sort) {
         this.sort = requireNonNull(sort, "sort");
-        updateAll(Collections.<Name>emptySet(), true);
+        updateAll(Collections.<Name, Event>emptyMap(), true);
     }
 
     void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
-        updateAll(Collections.<Name>emptySet(), true);
+        updateAll(Collections.<Name, Event>emptyMap(), true);
     }
 
     @Override
@@ -166,7 +169,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         if (data.isEmpty()) {
             forceLoad();
         } else {
-            updateAll(Collections.<Name>emptySet(), true);
+            updateAll(Collections.<Name, Event>emptyMap(), true);
         }
     }
 
@@ -267,7 +270,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private void update(List<File> children) {
         for (File child : children) {
             checkCancel();
-            update(child);
+            update(child, null);
         }
     }
 
@@ -341,11 +344,38 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
      * Adds the new status of the given path to the data map. Returns true if
      * the data map is changed.
      */
-    private boolean update(Name child) {
-        return update(root.resolve(child));
+    private boolean update(Name child, Event event) {
+        return update(root.resolve(child), event);
     }
 
-    private boolean update(File file) {
+    private boolean update(File file, Event event) {
+
+        /*
+         * This if statement may seem unnecessary given the try-catch below
+         * will remove the entry if FileNotFoundException occur anyway, but
+         * this if statement is important for some case-insensitive file
+         * systems.
+         *
+         * For example:
+         *
+         *  file "a" gets renamed to file "A"
+         *
+         * 2 events will be generated:
+         *
+         *   "a" -> DELETE
+         *   "A" -> CREATE
+         *
+         * if this check is skipped, then:
+         *
+         *   stat("a") -> will succeed as path is case-insensitive
+         *   stat("A") -> will succeed
+         *
+         * resulting both "a" and "A" be displayed.
+         */
+        if (DELETE.equals(event)) {
+            return data.remove(file.name()) != null;
+        }
+
         try {
 
             Stat stat = file.stat(NOFOLLOW);

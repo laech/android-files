@@ -2,8 +2,8 @@ package l.files.fs;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
@@ -25,7 +25,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             });
 
     private boolean selfChanged;
-    private final Set<Name> childrenChanged;
+    private final Map<Name, Event> childrenChanged;
     private final BatchObserver batchObserver;
 
     private Observation observation;
@@ -33,7 +33,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
     BatchObserverNotifier(BatchObserver batchObserver) {
         this.batchObserver = batchObserver;
-        this.childrenChanged = new HashSet<>();
+        this.childrenChanged = new HashMap<>();
     }
 
     Observation start(
@@ -76,7 +76,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             if (child == null) {
                 selfChanged = true;
             } else {
-                childrenChanged.add(child);
+                childrenChanged.put(child, event);
             }
 
         }
@@ -92,14 +92,14 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         setThreadPriority(THREAD_PRIORITY_BACKGROUND);
 
         boolean snapshotSelfChanged;
-        Set<Name> snapshotChildrenChanged;
+        Map<Name, Event> snapshotChildrenChanged;
 
         synchronized (this) {
 
             snapshotSelfChanged = selfChanged;
             snapshotChildrenChanged = childrenChanged.isEmpty()
-                    ? Collections.<Name>emptySet()
-                    : Collections.unmodifiableSet(new HashSet<>(childrenChanged));
+                    ? Collections.<Name, Event>emptyMap()
+                    : Collections.unmodifiableMap(new HashMap<>(childrenChanged));
 
             selfChanged = false;
             childrenChanged.clear();
@@ -107,7 +107,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         }
 
         if (snapshotSelfChanged || !snapshotChildrenChanged.isEmpty()) {
-            batchObserver.onBatchEvent(
+            batchObserver.onLatestEvents(
                     snapshotSelfChanged,
                     snapshotChildrenChanged
             );

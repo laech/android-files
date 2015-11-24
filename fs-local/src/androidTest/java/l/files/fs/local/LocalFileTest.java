@@ -607,6 +607,72 @@ public final class LocalFileTest extends FileBaseTest {
     }
 
     @Test
+    public void deleteRecursiveIfExists_nonExistWillIgnore() throws Exception {
+        dir1().resolve("nonExist").deleteRecursiveIfExists();
+    }
+
+    @Test
+    public void deleteRecursiveIfExists_emptyDirWillDelete() throws Exception {
+
+        File dir = dir1().resolve("dir").createDir();
+        assertTrue(dir.exists(NOFOLLOW));
+
+        dir.deleteRecursiveIfExists();
+        assertFalse(dir.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void deleteRecursiveIfExists_nonEmptyDirWillDelete() throws Exception {
+
+        File dir = dir1().resolve("dir").createDir();
+        File file = dir.resolve("child").createFile();
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(file.exists(NOFOLLOW));
+
+        dir.deleteRecursiveIfExists();
+        assertFalse(dir.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void deleteRecursiveIfExists_fileWillDelete() throws Exception {
+
+        File file = dir1().resolve("file").createFile();
+        assertTrue(file.exists(NOFOLLOW));
+
+        file.deleteRecursiveIfExists();
+        assertFalse(file.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void deleteRecursiveIfExists_linkToFileWillDeleteNoFollow() throws Exception {
+
+        File file = dir1().resolve("file").createFile();
+        File link = dir1().resolve("link").createLink(file);
+        assertTrue(file.exists(NOFOLLOW));
+        assertTrue(link.exists(NOFOLLOW));
+
+        link.deleteRecursiveIfExists();
+        assertTrue(file.exists(NOFOLLOW));
+        assertFalse(link.exists(NOFOLLOW));
+    }
+
+    @Test
+    public void deleteRecursiveIfExists_linkToDirWillDeleteNoFollow() throws Exception {
+
+        File dir = dir1().resolve("dir").createDir();
+        File file = dir.resolve("file").createFile();
+        File link = dir1().resolve("link").createLink(dir);
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(file.exists(NOFOLLOW));
+        assertTrue(link.exists(NOFOLLOW));
+
+        link.deleteRecursiveIfExists();
+        assertTrue(dir.exists(NOFOLLOW));
+        assertTrue(file.exists(NOFOLLOW));
+        assertFalse(link.exists(NOFOLLOW));
+    }
+
+    @Test
     public void setModificationTime() throws Exception {
         Instant expect = newInstant();
         dir1().setLastModifiedTime(NOFOLLOW, expect);
