@@ -151,8 +151,8 @@ public class BaseFilesActivityTest {
         File dir = LocalFile.of(getExternalStorageDirectory())
                 .resolve(testName.getMethodName());
 
-        File src = dir.resolve("a");
-        File dst = dir.resolve("A");
+        File src = dir.resolve("z");
+        File dst = dir.resolve("Z");
         try {
 
             dir.deleteRecursiveIfExists();
@@ -163,6 +163,7 @@ public class BaseFilesActivityTest {
                     "Assuming the underlying file system is case insensitive",
                     dst.exists(NOFOLLOW));
 
+            src.moveTo(dst);
             List<File> actual = dir.list(NOFOLLOW).to(new ArrayList<File>());
             assertEquals(1, actual.size());
             assumeThat(
