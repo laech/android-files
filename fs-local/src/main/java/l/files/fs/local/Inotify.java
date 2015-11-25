@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
+import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.ErrnoException.ENOMEM;
 import static l.files.fs.local.ErrnoException.ENOSPC;
 
@@ -154,7 +155,16 @@ final class Inotify extends Native {
         int wd;
         try {
 
-            wd = internalAddWatch(fd, path, mask);
+            while (true) {
+                try {
+                    wd = internalAddWatch(fd, path, mask);
+                    break;
+                } catch (ErrnoException e) {
+                    if (e.errno != EAGAIN) {
+                        throw e;
+                    }
+                }
+            }
 
         } catch (ErrnoException e) {
 
@@ -163,7 +173,7 @@ final class Inotify extends Native {
                 if (!makeRoomFor(fd)) {
                     throw e;
                 }
-                wd = internalAddWatch(fd, path, mask);
+                wd = internalAddWatchRetry(fd, path, mask);
 
             } else {
                 throw e;
@@ -191,6 +201,18 @@ final class Inotify extends Native {
         return wd;
     }
 
+    private int internalAddWatchRetry(int fd, byte[] path, int mask) throws ErrnoException {
+        while (true) {
+            try {
+                return internalAddWatch(fd, path, mask);
+            } catch (ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     private void notifyAddWatch(int fd, byte[] path, int mask, int wd) {
         if (trackers.isEmpty()) {
             return;
@@ -212,7 +234,7 @@ final class Inotify extends Native {
      * @see <a href="http://man7.org/linux/man-pages/man2/inotify_rm_watch.2.html">inotify_rm_watch()</a>
      */
     void removeWatch(int fd, int wd) throws ErrnoException {
-        internalRemoveWatch(fd, wd);
+        internalRemoveWatchRetry(fd, wd);
 
         Entry entry = entries.get(fd);
         if (entry != null) {
@@ -220,6 +242,19 @@ final class Inotify extends Native {
         }
 
         notifyRemoveWatch(fd, wd);
+    }
+
+    private void internalRemoveWatchRetry(int fd, int wd) throws ErrnoException {
+        while (true) {
+            try {
+                internalRemoveWatch(fd, wd);
+                break;
+            } catch (ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private static native void internalRemoveWatch(int fd, int wd) throws ErrnoException;
