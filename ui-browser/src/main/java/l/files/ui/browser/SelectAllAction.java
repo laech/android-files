@@ -9,22 +9,23 @@ import l.files.ui.base.view.ActionModeItem;
 import static l.files.base.Objects.requireNonNull;
 
 final class SelectAllAction extends ActionModeItem {
+
     private final Selectable selectable;
 
-    SelectAllAction(final Selectable selectable) {
+    SelectAllAction(Selectable selectable) {
         super(android.R.id.selectAll);
-        this.selectable = requireNonNull(selectable, "selectable");
+        this.selectable = requireNonNull(selectable);
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         super.onCreateActionMode(mode, menu);
         mode.getMenuInflater().inflate(R.menu.select_all, menu);
         return true;
     }
 
     @Override
-    protected void onItemSelected(final ActionMode mode, final MenuItem item) {
+    protected void onItemSelected(ActionMode mode, MenuItem item) {
         selectable.selectAll();
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="share">Share</string>
     <string name="refresh">Refresh</string>
     <string name="empty">Empty</string>
     <string name="permission_denied">Permission denied</string>

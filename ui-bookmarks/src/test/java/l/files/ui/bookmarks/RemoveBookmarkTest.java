@@ -11,7 +11,6 @@ import l.files.bookmarks.BookmarkManager;
 import l.files.fs.File;
 import l.files.ui.base.selection.Selection;
 
-import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -24,7 +23,7 @@ public final class RemoveBookmarkTest {
     private ActionMode mode;
     private RemoveBookmark action;
     private BookmarkManager bookmarks;
-    private Selection<File> selection;
+    private Selection<File, File> selection;
 
     @Before
     public void setUp() throws Exception {
@@ -52,11 +51,12 @@ public final class RemoveBookmarkTest {
         MenuItem item = mock(MenuItem.class);
         File a = mock(File.class);
         File b = mock(File.class);
-        selection.addAll(asList(a, b));
+        selection.add(a, a);
+        selection.add(b, b);
 
         action.onItemSelected(mode, item);
 
-        verify(bookmarks).removeBookmarks(selection.copy());
+        verify(bookmarks).removeBookmarks(selection.keys());
         verifyNoMoreInteractions(bookmarks);
     }
 

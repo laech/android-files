@@ -15,16 +15,17 @@ import static l.files.base.Objects.requireNonNull;
 final class RemoveBookmark extends ActionModeItem {
 
     private final BookmarkManager bookmarks;
-    private final Selection<File> selections;
+    private final Selection<File, ?> selections;
 
-    RemoveBookmark(Selection<File> selection, BookmarkManager bookmarks) {
+    RemoveBookmark(Selection<File, ?> selection, BookmarkManager bookmarks) {
         super(R.id.delete_selected_bookmarks);
-        this.selections = requireNonNull(selection, "selection");
-        this.bookmarks = requireNonNull(bookmarks, "bookmarks");
+        this.selections = requireNonNull(selection);
+        this.bookmarks = requireNonNull(bookmarks);
     }
 
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        super.onCreateActionMode(mode, menu);
         menu.add(NONE, id(), NONE, R.string.remove)
                 .setIcon(R.drawable.ic_remove_circle_outline_white_24dp);
         return true;
@@ -32,7 +33,7 @@ final class RemoveBookmark extends ActionModeItem {
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        bookmarks.removeBookmarks(selections.copy());
+        bookmarks.removeBookmarks(selections.keys());
         mode.finish();
     }
 

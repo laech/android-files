@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.AbstractMap.SimpleEntry;
+
 import l.files.ui.base.BuildConfig;
 import l.files.ui.base.view.ActionModeProvider;
 
@@ -28,19 +30,22 @@ public final class SelectionModeFragmentTest {
         Bundle state = new Bundle();
         SelectionModeFragmentTester f1 = new SelectionModeFragmentTester();
         f1.onCreate(null);
-        f1.selection().add(1);
+        f1.selection().add(1, "one");
         f1.onSaveInstanceState(state);
         verifyZeroInteractions(f1.actionModeProvider());
 
         SelectionModeFragmentTester f2 = new SelectionModeFragmentTester();
         f2.onCreate(state);
         f2.onViewStateRestored(state);
-        assertEquals(singleton(1), f2.selection().copy());
+        assertEquals(
+                singleton(new SimpleEntry<>(1, "one")),
+                f2.selection().copy().entrySet());
         verify(f2.actionModeProvider()).startSupportActionMode(f2.actionModeCallback());
     }
 
     @SuppressLint("ValidFragment")
-    private static final class SelectionModeFragmentTester extends SelectionModeFragment<Integer> {
+    private static final class SelectionModeFragmentTester
+            extends SelectionModeFragment<Integer, Object> {
 
         private final ActionModeProvider provider = mock(ActionModeProvider.class);
         private final ActionMode.Callback callback = mock(ActionMode.Callback.class);

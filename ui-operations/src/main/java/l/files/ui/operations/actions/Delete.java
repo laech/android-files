@@ -16,10 +16,10 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Delete extends ActionModeItem {
 
-    private final Selection<File> selection;
+    private final Selection<File,?> selection;
     private final FragmentManager manager;
 
-    public Delete(Selection<File> selection, FragmentManager manager) {
+    public Delete(Selection<File,?> selection, FragmentManager manager) {
         super(R.id.delete);
         this.manager = requireNonNull(manager);
         this.selection = requireNonNull(selection);
@@ -35,7 +35,7 @@ public final class Delete extends ActionModeItem {
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        new DeleteDialog(selection.copy(), mode)
+        new DeleteDialog(selection.keys(), mode)
                 .show(manager, DeleteDialog.FRAGMENT_TAG);
     }
 

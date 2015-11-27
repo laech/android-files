@@ -1,5 +1,6 @@
 package l.files.ui.base.view;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
@@ -11,6 +12,7 @@ public class ActionModeAdapter implements ActionMode.Callback {
     protected ActionMode mode;
 
     @Override
+    @CallSuper
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         this.mode = mode;
         return true;
@@ -27,6 +29,7 @@ public class ActionModeAdapter implements ActionMode.Callback {
     }
 
     @Override
+    @CallSuper
     public void onDestroyActionMode(ActionMode mode) {
         this.mode = null;
     }

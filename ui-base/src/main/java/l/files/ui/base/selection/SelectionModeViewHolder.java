@@ -2,7 +2,6 @@ package l.files.ui.base.selection;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.Nullable;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
@@ -13,41 +12,38 @@ import l.files.ui.base.view.ActionModeProvider;
 
 import static l.files.base.Objects.requireNonNull;
 
-public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
+public abstract class SelectionModeViewHolder<K, V> extends ViewHolder
         implements OnClickListener, OnLongClickListener, Selection.Callback {
 
-    private final Selection<ID> selection;
+    private final Selection<K, V> selection;
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
 
-    private ITEM item;
+    private V item;
 
     public SelectionModeViewHolder(
             View itemView,
-            Selection<ID> selection,
+            Selection<K, V> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback) {
+
         super(itemView);
-        this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
-        this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
-        this.selection = requireNonNull(selection, "selection");
+
+        this.actionModeProvider = requireNonNull(actionModeProvider);
+        this.actionModeCallback = requireNonNull(actionModeCallback);
+        this.selection = requireNonNull(selection);
         this.selection.addWeaklyReferencedCallback(this);
         this.itemView.setOnClickListener(this);
         this.itemView.setOnLongClickListener(this);
     }
 
-    protected abstract ID itemId(ITEM item);
+    protected abstract K itemId(V item);
 
-    @Nullable
-    protected ID itemId() {
-        return item == null ? null : itemId(item);
-    }
-
-    protected final ITEM item() {
+    protected final V item() {
         return item;
     }
 
-    public void bind(ITEM item) {
+    public void bind(V item) {
         this.item = item;
         setActivated(item);
     }
@@ -75,8 +71,8 @@ public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         }
     }
 
-    private void setActivated(ITEM item) {
-        ID itemId = itemId(item);
+    private void setActivated(V item) {
+        K itemId = itemId(item);
         boolean selected = selection.contains(itemId);
         if (itemView.isActivated() != selected && itemId != null) {
             itemView.setActivated(selected);
@@ -92,15 +88,15 @@ public abstract class SelectionModeViewHolder<ID, ITEM> extends ViewHolder
         if (actionModeProvider.currentActionMode() == null) {
             onClick(v, item);
         } else {
-            selection.toggle(itemId(item));
+            selection.toggle(itemId(item), item);
         }
     }
 
-    protected abstract void onClick(View v, ITEM item);
+    protected abstract void onClick(View v, V item);
 
     @Override
     public boolean onLongClick(View v) {
-        selection.toggle(itemId(item));
+        selection.toggle(itemId(item), item);
         return true;
     }
 }

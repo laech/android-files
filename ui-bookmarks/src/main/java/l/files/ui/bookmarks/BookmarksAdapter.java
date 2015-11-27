@@ -1,8 +1,8 @@
 package l.files.ui.bookmarks;
 
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,19 +23,19 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<File> selection;
+    private final Selection<File, File> selection;
     private final OnOpenFileListener listener;
 
     BookmarksAdapter(
-            Selection<File> selection,
+            Selection<File, File> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
 
-        this.listener = requireNonNull(listener, "listener");
-        this.selection = requireNonNull(selection, "selection");
-        this.actionModeProvider = requireNonNull(actionModeProvider, "actionModeProvider");
-        this.actionModeCallback = requireNonNull(actionModeCallback, "actionModeCallback");
+        this.listener = requireNonNull(listener);
+        this.selection = requireNonNull(selection);
+        this.actionModeProvider = requireNonNull(actionModeProvider);
+        this.actionModeCallback = requireNonNull(actionModeCallback);
     }
 
     @Override

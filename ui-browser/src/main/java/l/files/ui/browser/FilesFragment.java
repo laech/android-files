@@ -52,7 +52,12 @@ import static l.files.ui.browser.Preferences.getSort;
 import static l.files.ui.browser.Preferences.isShowHiddenFilesKey;
 import static l.files.ui.browser.Preferences.isSortKey;
 
-public final class FilesFragment extends SelectionModeFragment<File> implements
+public final class FilesFragment
+
+        extends
+        SelectionModeFragment<File, FileItem>
+
+        implements
         LoaderCallbacks<Result>,
         OnSharedPreferenceChangeListener,
         Selectable {
@@ -238,7 +243,8 @@ public final class FilesFragment extends SelectionModeFragment<File> implements
                 new Cut(selection()),
                 new Copy(selection()),
                 new Delete(selection(), manager),
-                new RenameAction(selection(), manager)
+                new RenameAction(selection(), manager),
+                new Share(selection(), getActivity())
         );
     }
 

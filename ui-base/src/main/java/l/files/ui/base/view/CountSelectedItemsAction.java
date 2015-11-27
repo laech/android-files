@@ -11,10 +11,10 @@ public final class CountSelectedItemsAction
         extends ActionModeAdapter
         implements Selection.Callback {
 
-    private final Selection<?> selection;
+    private final Selection<?, ?> selection;
 
-    public CountSelectedItemsAction(Selection<?> selection) {
-        this.selection = requireNonNull(selection, "selector");
+    public CountSelectedItemsAction(Selection<?, ?> selection) {
+        this.selection = requireNonNull(selection);
     }
 
     @Override

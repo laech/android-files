@@ -14,14 +14,14 @@ import l.files.ui.base.view.ActionModeProvider;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.identityHashCode;
 
-public abstract class SelectionModeFragment<T> extends BaseFragment {
+public abstract class SelectionModeFragment<K, V> extends BaseFragment {
 
     private static final String SELECTION_ID = "selectionId";
 
     private static final Map<Integer, State> selections = new HashMap<>();
 
     private Integer selectionId;
-    private Selection<T> selection;
+    private Selection<K, V> selection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public abstract class SelectionModeFragment<T> extends BaseFragment {
             selectionId = savedInstanceState.getInt(SELECTION_ID);
             State state = selections.get(selectionId);
             if (state != null) {
-                selection = (Selection<T>) state.selection;
+                selection = (Selection<K, V>) state.selection;
             }
         }
 
@@ -75,7 +75,7 @@ public abstract class SelectionModeFragment<T> extends BaseFragment {
         }
     }
 
-    protected Selection<T> selection() {
+    protected Selection<K, V> selection() {
         return selection;
     }
 
@@ -84,10 +84,10 @@ public abstract class SelectionModeFragment<T> extends BaseFragment {
     protected abstract ActionModeProvider actionModeProvider();
 
     private static final class State {
-        final Selection<?> selection;
+        final Selection<?, ?> selection;
         final long creationTime;
 
-        State(Selection<?> selection) {
+        State(Selection<?, ?> selection) {
             this.selection = selection;
             this.creationTime = currentTimeMillis();
         }

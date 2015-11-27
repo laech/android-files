@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.support.v4.util.ArrayMap;
 import android.support.v7.graphics.Palette;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
@@ -15,9 +16,9 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
@@ -58,7 +59,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<File> selection;
+    private final Selection<File, FileItem> selection;
 
     private final OnOpenFileListener listener;
 
@@ -69,7 +70,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     FilesAdapter(
             Context context,
-            Selection<File> selection,
+            Selection<File, FileItem> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
@@ -174,10 +175,11 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     @Override
     public void selectAll() {
         List<BrowserItem> items = items();
-        List<File> files = new ArrayList<>(items.size());
+        Map<File, FileItem> files = new ArrayMap<>(items.size());
         for (BrowserItem item : items) {
             if (item.isFileItem()) {
-                files.add(((FileItem) item).selfFile());
+                FileItem file = (FileItem) item;
+                files.put(file.selfFile(), file);
             }
         }
         selection.addAll(files);

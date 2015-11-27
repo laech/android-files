@@ -2,16 +2,17 @@ package l.files.ui.base.selection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 import java.util.WeakHashMap;
 
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
-public final class Selection<T> implements Iterable<T> {
+public final class Selection<K, V> implements Iterable<K> {
 
-    private final Set<T> selection = new HashSet<>();
+    private final Map<K, V> selection = new HashMap<>();
     private final WeakHashMap<Callback, Void> callbacks = new WeakHashMap<>();
 
     public void addWeaklyReferencedCallback(Callback callback) {
@@ -43,44 +44,63 @@ public final class Selection<T> implements Iterable<T> {
         return selection.isEmpty();
     }
 
-    public boolean contains(T item) {
-        return selection.contains(item);
+    public boolean contains(K item) {
+        return selection.containsKey(item);
     }
 
-    public Set<T> copy() {
-        return unmodifiableSet(new HashSet<>(selection));
+    public Map<K, V> copy() {
+        return unmodifiableMap(new HashMap<>(selection));
     }
 
-    public void add(T item) {
-        if (selection.add(item)) {
+    public Collection<K> keys() {
+        return selection.keySet();
+    }
+
+    public Collection<V> values() {
+        return selection.values();
+    }
+
+    public void add(K item, V data) {
+        if (!data.equals(selection.put(item, data))) {
             notifyCallbacks();
         }
     }
 
-    public void addAll(Collection<T> items) {
-        if (selection.addAll(items)) {
+    public void addAll(Map<K, V> items) {
+
+        boolean changed = false;
+
+        for (Map.Entry<K, V> entry : items.entrySet()) {
+            K item = entry.getKey();
+            V data = entry.getValue();
+            if (!data.equals(selection.put(item, data))) {
+                changed = true;
+            }
+        }
+
+        if (changed) {
             notifyCallbacks();
         }
     }
 
-    public void retainAll(Collection<T> items) {
-        if (selection.retainAll(items)) {
+    public void retainAll(Collection<K> items) {
+        if (selection.keySet().retainAll(items)) {
             notifyCallbacks();
         }
     }
 
-    public void toggle(T item) {
-        if (selection.contains(item)) {
+    public void toggle(K item, V data) {
+        if (selection.containsKey(item)) {
             selection.remove(item);
         } else {
-            selection.add(item);
+            selection.put(item, data);
         }
         notifyCallbacks();
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return unmodifiableSet(selection).iterator();
+    public Iterator<K> iterator() {
+        return unmodifiableSet(selection.keySet()).iterator();
     }
 
     public interface Callback {

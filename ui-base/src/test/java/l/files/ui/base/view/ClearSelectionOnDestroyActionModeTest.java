@@ -13,8 +13,8 @@ public final class ClearSelectionOnDestroyActionModeTest {
     @Test
     public void clears_selection_on_destroy_action_mode() throws Exception {
         Selection.Callback callback = mock(Selection.Callback.class);
-        Selection<Integer> selection = new Selection<>();
-        selection.add(100);
+        Selection<Integer, String> selection = new Selection<>();
+        selection.add(100, "100");
         selection.addWeaklyReferencedCallback(callback);
         assertEquals(1, selection.size());
 

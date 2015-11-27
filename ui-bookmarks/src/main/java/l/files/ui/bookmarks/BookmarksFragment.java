@@ -3,9 +3,9 @@ package l.files.ui.bookmarks;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +27,7 @@ import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.base.view.Views.find;
 
 public final class BookmarksFragment
-        extends SelectionModeFragment<File>
+        extends SelectionModeFragment<File, File>
         implements LoaderCallbacks<List<File>> {
 
     public RecyclerView recycler;

@@ -14,22 +14,23 @@ import static l.files.ui.operations.actions.Clipboard.Action.COPY;
 
 public final class Copy extends ActionModeItem {
 
-    private final Selection<File> selection;
+    private final Selection<File, ?> selection;
 
-    public Copy(Selection<File> selection) {
+    public Copy(Selection<File, ?> selection) {
         super(android.R.id.copy);
         this.selection = requireNonNull(selection);
     }
 
     @Override
-    public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        super.onCreateActionMode(mode, menu);
         mode.getMenuInflater().inflate(R.menu.copy, menu);
         return true;
     }
 
     @Override
-    protected void onItemSelected(final ActionMode mode, final MenuItem item) {
-        Clipboard.INSTANCE.set(COPY, selection.copy());
+    protected void onItemSelected(ActionMode mode, MenuItem item) {
+        Clipboard.INSTANCE.set(COPY, selection.keys());
         mode.finish();
     }
 

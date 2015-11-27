@@ -8,10 +8,11 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class ClearSelectionOnDestroyActionMode
         extends ActionModeAdapter {
-    private final Selection<?> selection;
 
-    public ClearSelectionOnDestroyActionMode(final Selection<?> selection) {
-        this.selection = requireNonNull(selection, "selector");
+    private final Selection<?, ?> selection;
+
+    public ClearSelectionOnDestroyActionMode(Selection<?, ?> selection) {
+        this.selection = requireNonNull(selection);
     }
 
     @Override
