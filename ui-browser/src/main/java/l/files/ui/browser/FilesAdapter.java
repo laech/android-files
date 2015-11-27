@@ -294,6 +294,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
         private Rect scaleSize(Rect size) {
 
+            // TODO scale up too for small pics to avoid jumping
+
             boolean tooBig = size.width() > constraint.width()
                     || size.height() > constraint.height();
 
