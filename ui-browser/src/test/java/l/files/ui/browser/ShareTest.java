@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -29,6 +30,7 @@ import static java.util.Arrays.asList;
 import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -69,14 +71,20 @@ public final class ShareTest {
         given(mode.getMenuInflater()).willReturn(inflater);
         given(mode.getMenu()).willReturn(menu);
 
-        selection.add(1, mockFileItem("file:/tmp/1", true));
+        InOrder order = inOrder(item);
+
         action.onCreateActionMode(mode, menu);
         action.onPrepareActionMode(mode, menu);
-        verify(item).setVisible(true);
-        verifyNoMoreInteractions(item);
+        order.verify(item).setVisible(false);
+        order.verifyNoMoreInteractions();
+
+        selection.add(1, mockFileItem("file:/tmp/1", true));
+        order.verify(item).setVisible(true);
+        order.verifyNoMoreInteractions();
 
         selection.add(2, mockFileItem("file:/tmp/2", false));
-        verify(item).setVisible(false);
+        order.verify(item).setVisible(false);
+        order.verifyNoMoreInteractions();
     }
 
     @Test

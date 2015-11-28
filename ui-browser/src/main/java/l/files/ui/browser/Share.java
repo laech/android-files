@@ -67,6 +67,11 @@ final class Share extends ActionModeItem implements Selection.Callback {
             return;
         }
 
+        if (selection.isEmpty()) {
+            item.setVisible(false);
+            return;
+        }
+
         for (FileItem file : selection.values()) {
             Stat stat = file.linkTargetOrSelfStat();
             if (stat == null || !stat.isRegularFile()) {
