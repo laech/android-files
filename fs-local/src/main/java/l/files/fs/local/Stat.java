@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import android.os.Parcel;
+
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
@@ -199,4 +201,39 @@ abstract class Stat extends Native implements l.files.fs.Stat {
         return permissions;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mode());
+        dest.writeInt(uid());
+        dest.writeInt(gid());
+        dest.writeLong(size());
+        dest.writeLong(mtime());
+        dest.writeInt(mtime_nsec());
+        dest.writeLong(blocks());
+    }
+
+    public static final Creator<Stat> CREATOR = new Creator<Stat>() {
+
+        @Override
+        public Stat createFromParcel(Parcel source) {
+            int mode = source.readInt();
+            int uid = source.readInt();
+            int gid = source.readInt();
+            long size = source.readLong();
+            long mtime = source.readLong();
+            int mtimeNs = source.readInt();
+            long blocks = source.readLong();
+            return create(mode, uid, gid, size, mtime, mtimeNs, blocks);
+        }
+
+        @Override
+        public Stat[] newArray(int size) {
+            return new Stat[size];
+        }
+    };
 }

@@ -13,6 +13,12 @@
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
+    <style name="Theme.Dialog" parent="Theme.AppCompat.Dialog" />
+
+    <style name="Theme.Dialog.NoTitle">
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="Sidebar">
         <item name="android:background">@color/color_primary</item>
     </style>

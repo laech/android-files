@@ -193,4 +193,11 @@ public final class Preview {
         thumbnailMemCache.clear();
     }
 
+    public static int darkColor(Palette palette, int defaultColor) {
+        int color = palette.getDarkVibrantColor(defaultColor);
+        if (color == defaultColor) {
+            color = palette.getDarkMutedColor(defaultColor);
+        }
+        return color;
+    }
 }

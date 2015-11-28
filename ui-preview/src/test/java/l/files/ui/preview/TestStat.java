@@ -1,5 +1,8 @@
 package l.files.ui.preview;
 
+import android.annotation.SuppressLint;
+import android.os.Parcel;
+
 import java.io.File;
 import java.util.Set;
 
@@ -7,6 +10,7 @@ import l.files.fs.Instant;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
+@SuppressLint("ParcelCreator")
 class TestStat implements Stat {
 
     private final File file;
@@ -65,4 +69,12 @@ class TestStat implements Stat {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+    }
 }

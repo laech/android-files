@@ -47,6 +47,7 @@ import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
 import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
+import static l.files.ui.preview.Preview.darkColor;
 
 final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         implements Selectable {
@@ -332,11 +333,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         private int backgroundColor(Palette palette) {
-            int color = palette.getDarkVibrantColor(TRANSPARENT);
-            if (color == TRANSPARENT) {
-                color = palette.getDarkMutedColor(TRANSPARENT);
-            }
-            return color;
+            return darkColor(palette, TRANSPARENT);
         }
 
         @Override

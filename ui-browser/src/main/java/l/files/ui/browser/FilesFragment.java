@@ -244,7 +244,8 @@ public final class FilesFragment
                 new Copy(selection()),
                 new Delete(selection(), manager),
                 new RenameAction(selection(), manager),
-                new Share(selection(), getActivity())
+                new Share(selection(), getActivity()),
+                new Info(selection(), manager)
         );
     }
 

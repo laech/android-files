@@ -1,8 +1,10 @@
 package l.files.fs;
 
+import android.os.Parcelable;
+
 import java.util.Set;
 
-public interface Stat {
+public interface Stat extends Parcelable {
 
     long size();
 

@@ -35,4 +35,8 @@
     <string name="link_icon">➥</string>
     <string name="link_x">➞ %1$s</string>
 
+    <string name="info">Info</string>
+    <string name="modified_colon">Modified:</string>
+    <string name="size_colon">Size:</string>
+
 </resources>
