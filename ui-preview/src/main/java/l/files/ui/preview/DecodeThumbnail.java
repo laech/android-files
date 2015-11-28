@@ -42,6 +42,7 @@ abstract class DecodeThumbnail extends Decode {
             result = decode();
         } catch (Exception e) {
             e.printStackTrace();
+            publishProgress(NoPreview.INSTANCE);
             return null;
         }
 
