@@ -20,6 +20,8 @@ public final class LocalPath implements Path {
     static final byte DOT = 46; // '.' in UTF-8
     static final byte SEP = 47; // '/' in UTF-8
 
+    static final byte[][] EMPTY_NAMES = new byte[0][];
+
     /*
      * Binary representation of this path, normally it's whatever
      * returned from the native calls, unless when it's created
@@ -137,7 +139,7 @@ public final class LocalPath implements Path {
     private static byte[][] toNames(byte[] path) {
 
         if (path.length == 0) {
-            return new byte[0][];
+            return EMPTY_NAMES;
         }
 
         int separatorCount = 0;
@@ -172,7 +174,9 @@ public final class LocalPath implements Path {
      * Returns the parent path, or null.
      */
     LocalPath parent() {
-        if (names.length < 2) {
+        if (absolute && names.length == 1) {
+            return new LocalPath(EMPTY_NAMES, true); // "/"
+        } else if (names.length < 2) {
             return null;
         }
         byte[][] newNames = Arrays.copyOf(names, names.length - 1);

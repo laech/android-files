@@ -119,6 +119,7 @@ public final class LocalPathTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void returns_parent_path() throws Exception {
+        assertEquals("/", path("/a").parent().toString());
         assertEquals("/a", path("/a/b").parent().toString());
         assertEquals("/a/b", path("/a/b/c").parent().toString());
         assertEquals("/a/b", path("/a/b/c//").parent().toString());
