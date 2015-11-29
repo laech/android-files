@@ -115,7 +115,7 @@ public final class InfoFragment extends DialogFragment implements
                     CalculateSizeLoader loader = sizeLoader();
                     if (loader != null && !loader.finished()) {
                         calculatingSize.setVisibility(VISIBLE);
-                        size.setText(formatSize(loader.currentSize()));
+                        size.setText(formatSizeCount(loader.currentSize(), loader.currentCount()));
                         sizeOnDisk.setText(formatSizeOnDisk(loader.currentSizeOnDisk()));
                         handler.postDelayed(this, 100);
                     }
@@ -148,8 +148,13 @@ public final class InfoFragment extends DialogFragment implements
         return formatFileSize(getActivity(), size);
     }
 
+    private String formatSizeCount(long size, int count) {
+        return getResources().getQuantityString(
+                R.plurals.x_size_y_items, count, formatSize(size), count);
+    }
+
     private String formatSizeOnDisk(long size) {
-        return getString(R.string.x_on_disk, formatSize(size));
+        return getString(R.string.x_size_on_disk, formatSize(size));
     }
 
     private String formatDate() {
@@ -227,7 +232,7 @@ public final class InfoFragment extends DialogFragment implements
     @Override
     public void onLoadFinished(Loader<Size> loader, Size data) {
         calculatingSize.setVisibility(GONE);
-        size.setText(formatSize(data.size()));
+        size.setText(formatSizeCount(data.size(), data.count()));
         sizeOnDisk.setText(formatSizeOnDisk(data.sizeOnDisk()));
     }
 

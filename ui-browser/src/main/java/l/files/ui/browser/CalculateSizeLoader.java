@@ -21,6 +21,7 @@ import static l.files.fs.Visitor.Result.TERMINATE;
 final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor {
 
     private boolean started;
+    private volatile int currentCount;
     private volatile long currentSize;
     private volatile long currentSizeOnDisk;
     private volatile Size result;
@@ -46,6 +47,7 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
     @Override
     public Size loadInBackground() {
 
+        currentCount = 0;
         currentSize = 0;
         currentSizeOnDisk = 0;
 
@@ -55,11 +57,12 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
         }
 
         if (isLoadInBackgroundCanceled()) {
+            currentCount = 0;
             currentSize = 0;
             currentSizeOnDisk = 0;
         }
 
-        result = Size.of(currentSize, currentSizeOnDisk);
+        result = Size.of(currentCount, currentSize, currentSizeOnDisk);
         return result;
     }
 
@@ -71,6 +74,7 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
         Stat stat = file.stat(NOFOLLOW);
         currentSize += stat.size();
         currentSizeOnDisk += stat.sizeOnDisk();
+        currentCount++;
         return CONTINUE;
     }
 
@@ -85,6 +89,10 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
     @Override
     public void onException(File file, IOException e) throws IOException {
         // Ignore, not count it
+    }
+
+    int currentCount() {
+        return currentCount;
     }
 
     long currentSize() {
@@ -104,12 +112,14 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
         Size() {
         }
 
+        abstract int count();
+
         abstract long size();
 
         abstract long sizeOnDisk();
 
-        static Size of(long size, long sizeOnDisk) {
-            return new AutoValue_CalculateSizeLoader_Size(size, sizeOnDisk);
+        static Size of(int count, long size, long sizeOnDisk) {
+            return new AutoValue_CalculateSizeLoader_Size(count, size, sizeOnDisk);
         }
     }
 }
