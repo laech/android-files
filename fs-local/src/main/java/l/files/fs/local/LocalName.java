@@ -8,10 +8,9 @@ import l.files.fs.Name;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.File.UTF_8;
+import static l.files.fs.local.LocalPath.DOT;
 
 public final class LocalName implements Name {
-
-    static final byte DOT = 46; // '.' in UTF-8
 
     private final byte[] bytes;
 

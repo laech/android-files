@@ -2,10 +2,13 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
+import l.files.fs.Path;
+
 import static l.files.fs.File.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,9 +16,31 @@ public final class LocalPathTest {
 
     @Test
     public void hash_codes_are_the_same_if_bytes_are_the_same() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("aa");
-        assertEquals(p1.hashCode(), p2.hashCode());
+        assertEquals(path("aa").hashCode(), path("aa").hashCode());
+        assertEquals(path("a/").hashCode(), path("a/").hashCode());
+        assertEquals(path("/a").hashCode(), path("/a").hashCode());
+        assertEquals(path("/a/b").hashCode(), path("/a/b").hashCode());
+        assertEquals(path("/a/b/").hashCode(), path("/a/b/").hashCode());
+        assertEquals(path("a/b/").hashCode(), path("a/b/").hashCode());
+        assertEquals(path("a/./").hashCode(), path("a/./").hashCode());
+        assertEquals(path("a/.").hashCode(), path("a/.").hashCode());
+        assertEquals(path("a/../").hashCode(), path("a/../").hashCode());
+        assertEquals(path("a/..").hashCode(), path("a/..").hashCode());
+        assertEquals(path("/").hashCode(), path("/").hashCode());
+        assertEquals(path("").hashCode(), path("").hashCode());
+    }
+
+    @Test
+    public void hash_codes_are_the_same_ignoring_ignorable_separators() throws Exception {
+        assertEquals(path("aa/").hashCode(), path("aa").hashCode());
+        assertEquals(path("a//").hashCode(), path("a/").hashCode());
+        assertEquals(path("//a").hashCode(), path("/a").hashCode());
+        assertEquals(path("///a//b").hashCode(), path("/a/b").hashCode());
+        assertEquals(path("///a///b////").hashCode(), path("/a/b/").hashCode());
+        assertEquals(path("a/b//").hashCode(), path("a/b/").hashCode());
+        assertEquals(path("/").hashCode(), path("/").hashCode());
+        assertEquals(path("////").hashCode(), path("/").hashCode());
+        assertEquals(path("").hashCode(), path("").hashCode());
     }
 
     @Test
@@ -27,9 +52,30 @@ public final class LocalPathTest {
 
     @Test
     public void equal_if_bytes_are_equal() throws Exception {
-        LocalPath p1 = path("aa");
-        LocalPath p2 = path("aa");
-        assertEquals(p1, p2);
+        assertEquals(path("aa"), path("aa"));
+        assertEquals(path("a/"), path("a/"));
+        assertEquals(path("/a"), path("/a"));
+        assertEquals(path("/a/b"), path("/a/b"));
+        assertEquals(path("/a/b/"), path("/a/b/"));
+        assertEquals(path("a/b/"), path("a/b/"));
+        assertEquals(path("a/./"), path("a/./"));
+        assertEquals(path("a/."), path("a/."));
+        assertEquals(path("a/../"), path("a/../"));
+        assertEquals(path("a/.."), path("a/.."));
+        assertEquals(path("/"), path("/"));
+        assertEquals(path(""), path(""));
+    }
+
+    @Test
+    public void equal_ignores_ignorable_separators() throws Exception {
+        assertEquals(path("aa/"), path("aa"));
+        assertEquals(path("a//"), path("a/"));
+        assertEquals(path("//a"), path("/a"));
+        assertEquals(path("/a//b"), path("/a/b"));
+        assertEquals(path("////a//b//"), path("/a/b/"));
+        assertEquals(path("/"), path("/"));
+        assertEquals(path("///"), path("/"));
+        assertEquals(path(""), path(""));
     }
 
     @Test
@@ -42,27 +88,46 @@ public final class LocalPathTest {
     @Test
     public void returns_string_representation() throws Exception {
         assertEquals("c", path("c").toString());
+        assertEquals("c", path("c/").toString());
+        assertEquals("c", path("c///").toString());
+        assertEquals("/c", path("/c").toString());
+        assertEquals("/c", path("/c/").toString());
+        assertEquals("/c", path("/c///").toString());
         assertEquals("/", path("/").toString());
+        assertEquals("", path("").toString());
         assertEquals("/a/b/c", path("/a/b/c").toString());
+        assertEquals("/a/b/c", path("///a///b///c").toString());
+        assertEquals("/a/./c", path("///a///.///c//").toString());
     }
 
     @Test
     public void resolves_child_paths() throws Exception {
         assertEquals("/a/b", path("/a").resolve(bytes("b")).toString());
+        assertEquals("/a/b", path("/a").resolve(bytes("b///")).toString());
+        assertEquals("/a/b", path("////a").resolve(bytes("b///")).toString());
         assertEquals("/a/b", path("/a/b").resolve(bytes("")).toString());
+        assertEquals("/a/b", path("/a///b/").resolve(bytes("")).toString());
         assertEquals("/a/b", path("/a/").resolve(bytes("b")).toString());
+        assertEquals("/a/b", path("///a//").resolve(bytes("b/")).toString());
         assertEquals("a/b", path("a").resolve(bytes("b")).toString());
         assertEquals("a/b", path("a").resolve(bytes("/b")).toString());
+        assertEquals("a/b", path("a").resolve(bytes("/b/")).toString());
+        assertEquals("a/b", path("a").resolve(bytes("///b///")).toString());
         assertEquals("/a/b", path("/a").resolve(bytes("/b")).toString());
     }
 
     @Test
+    @SuppressWarnings("ConstantConditions")
     public void returns_parent_path() throws Exception {
         assertEquals("/a", path("/a/b").parent().toString());
+        assertEquals("/a/b", path("/a/b/c").parent().toString());
+        assertEquals("/a/b", path("/a/b/c//").parent().toString());
     }
 
     @Test
     public void returns_no_parent_path_if_none() throws Exception {
+        assertNull(path("").parent());
+        assertNull(path("a").parent());
         assertNull(path("/").parent());
     }
 

@@ -30,8 +30,12 @@ public interface Path extends Parcelable {
      */
     boolean startsWith(Path p);
 
-    boolean isEmpty();
-
+    /**
+     * @deprecated use {@link #toByteArray(OutputStream)} instead
+     */
+    @Deprecated
     void writeTo(OutputStream out) throws IOException;
+
+    void toByteArray(OutputStream out) throws IOException;
 
 }

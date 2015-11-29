@@ -2,24 +2,35 @@ package l.files.fs.local;
 
 import android.os.Parcel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import l.files.fs.Path;
 
+import static java.lang.System.arraycopy;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.File.UTF_8;
-import static l.files.fs.local.LocalName.DOT;
 
 public final class LocalPath implements Path {
 
-    private static final byte SEPARATOR = 47; // '/' in UTF-8
+    static final byte DOT = 46; // '.' in UTF-8
+    static final byte SEP = 47; // '/' in UTF-8
 
     /*
      * Binary representation of this path, normally it's whatever
      * returned from the native calls, unless when it's created
      * from java.lang.String.
+     *
+     * Example:
+     *
+     *   /         -> []              absolute=true
+     *   ""        -> []              absolute=false
+     *   /dev/null -> [[dev],[null]]  absolute=true
+     *   abc/hello -> [[abc],[hello]] absolute=false
      *
      * Using the original bytes from the OS means the path is
      * independent of charset encodings, avoiding byte loss when
@@ -34,158 +45,170 @@ public final class LocalPath implements Path {
      *
      * This class is free of the above issue.
      */
-    private final byte[] bytes;
+    private final byte[][] names;
 
-    private LocalName name;
+    private final boolean absolute;
 
-    LocalPath(byte[] bytes) {
-        this.bytes = requireNonNull(bytes);
+    private LocalPath(byte[][] names, boolean absolute) {
+        this.names = requireNonNull(names);
+        this.absolute = absolute;
+    }
+
+    public static LocalPath of(String path) {
+        return of(path.getBytes(UTF_8));
     }
 
     public static LocalPath of(byte[] path) {
-
-        int end = path.length - 1;
-        while (end > 0 && path[end] == SEPARATOR) {
-            end--;
-        }
-
-        if (end != path.length - 1) {
-            path = Arrays.copyOf(path, end + 1);
-        }
-
-        return new LocalPath(path);
+        byte[][] names = toNames(path);
+        boolean absolute = path.length > 0 && path[0] == SEP;
+        return new LocalPath(names, absolute);
     }
 
+    /**
+     * @deprecated use {@link #toByteArray()} instead
+     */
+    @Deprecated
     public byte[] bytes() {
-        return bytes;
+        return toByteArray();
+    }
+
+    public byte[] toByteArray() {
+
+        int len = absolute ? 1 : 0;
+        for (int i = 0; i < names.length; i++) {
+            if (i > 0) {
+                len++;
+            }
+            len += names[i].length;
+        }
+
+        byte[] path = new byte[len];
+
+        int i = 0;
+        if (absolute) {
+            path[i++] = SEP;
+        }
+        for (byte[] name : names) {
+            arraycopy(name, 0, path, i, name.length);
+            i += name.length;
+            if (i < len) {
+                path[i++] = SEP;
+            }
+        }
+
+        return path;
     }
 
     @Override
     public String toString() {
-        return new String(bytes, UTF_8);
+        return new String(toByteArray(), UTF_8);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(bytes);
+        int result = Arrays.deepHashCode(names);
+        return 31 * result + (absolute ? 1 : 0);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof LocalPath &&
-                Arrays.equals(bytes, ((LocalPath) o).bytes);
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof LocalPath)) {
+            return false;
+        }
+        LocalPath that = (LocalPath) o;
+        return absolute == that.absolute &&
+                Arrays.deepEquals(names, that.names);
+
     }
 
     LocalPath resolve(byte[] path) {
-
-        if (path.length == 0) {
+        byte[][] children = toNames(path);
+        if (children.length == 0) {
             return this;
         }
-
-        boolean pathStartsWithSeparator = path[0] == SEPARATOR;
-        int start = pathStartsWithSeparator ? 1 : 0;
-        return resolveRelative(path, start, path.length);
+        byte[][] newNames = Arrays.copyOf(names, names.length + children.length);
+        arraycopy(children, 0, newNames, names.length, children.length);
+        return new LocalPath(newNames, absolute);
     }
 
-    private LocalPath resolveRelative(byte[] path, int start, int end) {
+    private static byte[][] toNames(byte[] path) {
 
-        int extraLength = end - start;
-        if (extraLength == 0) {
-            return this;
+        if (path.length == 0) {
+            return new byte[0][];
         }
 
-        byte[] myPath = bytes;
-        byte[] newPath;
-        boolean myPathHasEndSeparator = myPath.length > 0 &&
-                myPath[myPath.length - 1] == SEPARATOR;
-
-        if (myPathHasEndSeparator) {
-            newPath = Arrays.copyOf(myPath, myPath.length + extraLength);
-            System.arraycopy(path, start, newPath, myPath.length, extraLength);
-
-        } else {
-            newPath = Arrays.copyOf(myPath, myPath.length + extraLength + 1);
-            newPath[myPath.length] = SEPARATOR;
-            System.arraycopy(path, start, newPath, myPath.length + 1, extraLength);
+        int separatorCount = 0;
+        for (byte b : path) {
+            if (b == SEP) {
+                separatorCount++;
+            }
         }
 
-        return of(newPath);
+        if (separatorCount == 0) {
+            return new byte[][]{path};
+        }
+
+        List<byte[]> parts = new ArrayList<>(separatorCount + 1);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (byte b : path) {
+            if (b != SEP) {
+                out.write(b);
+            } else if (out.size() > 0) {
+                parts.add(out.toByteArray());
+                out.reset();
+            }
+        }
+        if (out.size() > 0) {
+            parts.add(out.toByteArray());
+        }
+
+        return parts.toArray(new byte[parts.size()][]);
     }
 
     /**
      * Returns the parent path, or null.
      */
     LocalPath parent() {
-        byte[] path = bytes;
-        int i = path.length - 1;
-        while (i >= 0 && path[i] == SEPARATOR) i--;
-        while (i >= 0 && path[i] != SEPARATOR) i--;
-        if (i == 0 && path[i] == SEPARATOR) {
-            return of(new byte[]{SEPARATOR});
+        if (names.length < 2) {
+            return null;
         }
-
-        while (i >= 0 && path[i] == SEPARATOR) i--;
-        return i < 0 ? null : of(Arrays.copyOfRange(path, 0, i + 1));
+        byte[][] newNames = Arrays.copyOf(names, names.length - 1);
+        return new LocalPath(newNames, absolute);
     }
 
     @Override
     public LocalName name() {
-        if (name == null) {
-            byte[] path = bytes;
-
-            int nameEnd = path.length;
-            while (nameEnd > 0 && path[nameEnd - 1] == SEPARATOR) {
-                nameEnd--;
-            }
-
-            int nameStart = nameEnd;
-            while (nameStart > 0 && path[nameStart - 1] != SEPARATOR) {
-                nameStart--;
-            }
-
-            if (nameStart < 0) {
-                return LocalName.of(bytes);
-            }
-
-            name = LocalName.of(Arrays.copyOfRange(path, nameStart, nameEnd));
+        if (names.length == 0) {
+            return LocalName.of(new byte[0]);
         }
-        return name;
+        return LocalName.of(names[names.length - 1]);
     }
 
     boolean isHidden() {
-        byte[] path = bytes;
-        int i = path.length - 1;
-        while (i >= 0 && path[i] == SEPARATOR) i--;
-        while (i >= 0 && path[i] != SEPARATOR) i--;
-        return i < 0
-                ? path.length > 0 && path[0] == DOT
-                : path.length - 1 > i && path[i + 1] == DOT;
+        return names.length > 0 &&
+                names[names.length - 1][0] == DOT;
     }
 
     @Override
     public boolean startsWith(Path p) {
 
-        byte[] thatPath = ((LocalPath) p).bytes;
-        byte[] thisPath = bytes;
+        byte[][] thatNames = ((LocalPath) p).names;
+        byte[][] thisNames = names;
 
-        if (thatPath.length > thisPath.length) {
+        if (thatNames.length > thisNames.length) {
             return false;
         }
 
-        if (thatPath.length == 1 &&
-                thatPath[0] == SEPARATOR &&
-                thisPath[0] == SEPARATOR) {
-            return true;
-        }
-
-        for (int i = 0; i < thatPath.length; i++) {
-            if (thisPath[i] != thatPath[i]) {
+        for (int i = 0; i < thatNames.length; i++) {
+            if (!Arrays.equals(thisNames[i], thatNames[i])) {
                 return false;
             }
         }
 
-        return thatPath.length == thisPath.length ||
-                thisPath[thatPath.length] == SEPARATOR;
+        return true;
     }
 
     LocalPath rebase(LocalPath src, LocalPath dst) {
@@ -193,30 +216,22 @@ public final class LocalPath implements Path {
             throw new IllegalArgumentException();
         }
 
-        int start = src.length();
-        while (start < bytes.length && bytes[start] == SEPARATOR) {
-            start++;
-        }
-        if (start >= bytes.length) {
-            return dst;
-        }
-
-        byte[] retained = Arrays.copyOfRange(bytes, start, bytes.length);
-        return dst.resolve(retained);
-    }
-
-    private int length() {
-        return bytes.length;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return length() == 0;
+        int retainLen = names.length - src.names.length;
+        byte[][] newNames = Arrays.copyOf(dst.names, dst.names.length + retainLen);
+        arraycopy(names, src.names.length, newNames, dst.names.length, retainLen);
+        return new LocalPath(newNames, dst.absolute);
     }
 
     @Override
     public void writeTo(OutputStream out) throws IOException {
-        out.write(bytes);
+        toByteArray(out);
+    }
+
+    @Override
+    public void toByteArray(OutputStream out) throws IOException {
+        for (byte[] name : names) {
+            out.write(name);
+        }
     }
 
     @Override
@@ -226,14 +241,24 @@ public final class LocalPath implements Path {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByteArray(bytes);
+        dest.writeByte((byte) (absolute ? 1 : 0));
+        dest.writeInt(names.length);
+        for (byte[] name : names) {
+            dest.writeByteArray(name);
+        }
     }
 
     public static final Creator<LocalPath> CREATOR = new Creator<LocalPath>() {
 
         @Override
         public LocalPath createFromParcel(Parcel source) {
-            return of(source.createByteArray());
+            boolean absolute = source.readByte() == 1;
+            int len = source.readInt();
+            byte[][] names = new byte[len][];
+            for (int i = 0; i < len; i++) {
+                names[i] = source.createByteArray();
+            }
+            return new LocalPath(names, absolute);
         }
 
         @Override
