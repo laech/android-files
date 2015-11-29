@@ -157,6 +157,11 @@ abstract class Stat extends Native implements l.files.fs.Stat {
     }
 
     @Override
+    public long sizeOnDisk() {
+        return blocks() * 512;
+    }
+
+    @Override
     public boolean isSymbolicLink() {
         return S_ISLNK(mode());
     }

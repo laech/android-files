@@ -3,10 +3,14 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.google.auto.value.AutoValue;
+
 import java.io.IOException;
 
 import l.files.fs.File;
+import l.files.fs.Stat;
 import l.files.fs.Visitor;
+import l.files.ui.browser.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -14,11 +18,12 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Visitor.Result.CONTINUE;
 import static l.files.fs.Visitor.Result.TERMINATE;
 
-final class CalculateSizeLoader extends AsyncTaskLoader<Long> implements Visitor {
+final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor {
 
     private boolean started;
     private volatile long currentSize;
-    private volatile boolean finished;
+    private volatile long currentSizeOnDisk;
+    private volatile Size result;
 
     private final File file;
 
@@ -30,8 +35,8 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Long> implements Visitor
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
-        if (finished) {
-            deliverResult(currentSize);
+        if (finished()) {
+            deliverResult(result);
         } else if (!started) {
             started = true;
             forceLoad();
@@ -39,23 +44,23 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Long> implements Visitor
     }
 
     @Override
-    public Long loadInBackground() {
+    public Size loadInBackground() {
 
-        finished = false;
         currentSize = 0;
+        currentSizeOnDisk = 0;
 
         try {
             file.traverse(FOLLOW, this);
         } catch (IOException ignore) {
-        } finally {
-            finished = true;
         }
 
         if (isLoadInBackgroundCanceled()) {
             currentSize = 0;
+            currentSizeOnDisk = 0;
         }
 
-        return currentSize;
+        result = Size.of(currentSize, currentSizeOnDisk);
+        return result;
     }
 
     @Override
@@ -63,7 +68,9 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Long> implements Visitor
         if (isLoadInBackgroundCanceled()) {
             return TERMINATE;
         }
-        currentSize += file.stat(NOFOLLOW).size();
+        Stat stat = file.stat(NOFOLLOW);
+        currentSize += stat.size();
+        currentSizeOnDisk += stat.sizeOnDisk();
         return CONTINUE;
     }
 
@@ -77,14 +84,32 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Long> implements Visitor
 
     @Override
     public void onException(File file, IOException e) throws IOException {
-        // Ignore
+        // Ignore, not count it
     }
 
     long currentSize() {
         return currentSize;
     }
 
+    long currentSizeOnDisk() {
+        return currentSizeOnDisk;
+    }
+
     boolean finished() {
-        return finished;
+        return result != null;
+    }
+
+    @AutoValue
+    static abstract class Size {
+        Size() {
+        }
+
+        abstract long size();
+
+        abstract long sizeOnDisk();
+
+        static Size of(long size, long sizeOnDisk) {
+            return new AutoValue_CalculateSizeLoader_Size(size, sizeOnDisk);
+        }
     }
 }

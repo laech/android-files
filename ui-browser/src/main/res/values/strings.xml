@@ -36,7 +36,8 @@
     <string name="link_x">➞ %1$s</string>
 
     <string name="info">Info</string>
-    <string name="modified_colon">Modified:</string>
-    <string name="size_colon">Size:</string>
+    <string name="info_modified_label">Modified:</string>
+    <string name="info_size_label">Size:</string>
+    <string name="x_on_disk">%s on disk</string>
 
 </resources>

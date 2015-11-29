@@ -8,6 +8,8 @@ public interface Stat extends Parcelable {
 
     long size();
 
+    long sizeOnDisk();
+
     boolean isRegularFile();
 
     boolean isDirectory();

@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="4dp"
-                android:text="@string/modified_colon"
+                android:text="@string/info_modified_label"
                 android:textColor="?android:attr/textColorSecondary" />
 
             <TextView
@@ -57,14 +57,31 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:textIsSelectable="true" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="4dp"
                 android:layout_marginTop="2dp"
-                android:text="@string/size_colon"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/info_size_label"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <ProgressBar
+                    android:id="@+id/calculate_size_progress_bar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:layout_marginEnd="2dp"
+                    android:indeterminateOnly="true"
+                    android:scaleY="3"
+                    android:visibility="gone" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -79,13 +96,12 @@
                     android:textColor="?android:attr/textColorPrimary"
                     android:textIsSelectable="true" />
 
-                <ProgressBar
-                    android:id="@+id/calculate_size_progress_bar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="4dp"
-                    android:indeterminateOnly="true"
-                    android:visibility="gone" />
+                <TextView
+                    android:id="@+id/size_on_disk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textIsSelectable="true" />
 
             </LinearLayout>
 

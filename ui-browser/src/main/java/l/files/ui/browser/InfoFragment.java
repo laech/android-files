@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import l.files.fs.File;
 import l.files.fs.Stat;
+import l.files.ui.browser.CalculateSizeLoader.Size;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
 import l.files.ui.preview.Rect;
@@ -33,7 +34,7 @@ import static l.files.ui.base.view.Views.find;
 import static l.files.ui.preview.Preview.darkColor;
 
 public final class InfoFragment extends DialogFragment implements
-        PreviewCallback, LoaderCallbacks<Long> {
+        PreviewCallback, LoaderCallbacks<Size> {
 
     // TODO observe?
 
@@ -60,9 +61,10 @@ public final class InfoFragment extends DialogFragment implements
 
     private Rect constraint;
     private View root;
-    private TextView sizeView;
-    private ImageView imageView;
-    private ProgressBar calculateSizeProgressBar;
+    private TextView size;
+    private TextView sizeOnDisk;
+    private ImageView image;
+    private ProgressBar calculatingSize;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,9 +85,10 @@ public final class InfoFragment extends DialogFragment implements
         super.onActivityCreated(savedInstanceState);
 
         root = find(R.id.root, this);
-        sizeView = find(R.id.size, this);
-        imageView = find(R.id.image, this);
-        calculateSizeProgressBar = find(R.id.calculate_size_progress_bar, this);
+        size = find(R.id.size, this);
+        image = find(R.id.image, this);
+        sizeOnDisk = find(R.id.size_on_disk, this);
+        calculatingSize = find(R.id.calculate_size_progress_bar, this);
 
         file = getArguments().getParcelable(ARG_FILE);
         stat = getArguments().getParcelable(ARG_STAT);
@@ -100,7 +103,8 @@ public final class InfoFragment extends DialogFragment implements
 
         TextView dateView = find(R.id.modified, this);
         dateView.setText(formatDate());
-        sizeView.setText(formatSize(stat.size()));
+        size.setText(formatSize(stat.size()));
+        sizeOnDisk.setText(formatSizeOnDisk(stat.sizeOnDisk()));
 
         if (stat.isDirectory() || stat.isSymbolicLink()) {
             getLoaderManager().initLoader(0, null, this);
@@ -110,8 +114,9 @@ public final class InfoFragment extends DialogFragment implements
                 public void run() {
                     CalculateSizeLoader loader = sizeLoader();
                     if (loader != null && !loader.finished()) {
-                        calculateSizeProgressBar.setVisibility(VISIBLE);
-                        sizeView.setText(formatSize(loader.currentSize()));
+                        calculatingSize.setVisibility(VISIBLE);
+                        size.setText(formatSize(loader.currentSize()));
+                        sizeOnDisk.setText(formatSizeOnDisk(loader.currentSizeOnDisk()));
                         handler.postDelayed(this, 100);
                     }
                 }
@@ -128,7 +133,7 @@ public final class InfoFragment extends DialogFragment implements
 
         Bitmap thumbnail = preview.getThumbnail(file, stat, constraint, true);
         if (thumbnail != null) {
-            imageView.setImageBitmap(thumbnail);
+            image.setImageBitmap(thumbnail);
 
         } else {
             Rect size = preview.getSize(file, stat, constraint, false);
@@ -141,6 +146,10 @@ public final class InfoFragment extends DialogFragment implements
 
     private String formatSize(long size) {
         return formatFileSize(getActivity(), size);
+    }
+
+    private String formatSizeOnDisk(long size) {
+        return getString(R.string.x_on_disk, formatSize(size));
     }
 
     private String formatDate() {
@@ -181,8 +190,8 @@ public final class InfoFragment extends DialogFragment implements
     }
 
     private void setImageViewMinSize(int width, int height) {
-        imageView.setMinimumWidth(width);
-        imageView.setMinimumHeight(height);
+        image.setMinimumWidth(width);
+        image.setMinimumHeight(height);
     }
 
     @Override
@@ -196,9 +205,9 @@ public final class InfoFragment extends DialogFragment implements
 
     @Override
     public void onPreviewAvailable(File file, Stat stat, Bitmap thumbnail) {
-        imageView.setImageBitmap(thumbnail);
-        imageView.setAlpha(0F);
-        imageView.animate().alpha(1).setDuration(animationDuration());
+        image.setImageBitmap(thumbnail);
+        image.setAlpha(0F);
+        image.animate().alpha(1).setDuration(animationDuration());
     }
 
     private int animationDuration() {
@@ -207,22 +216,23 @@ public final class InfoFragment extends DialogFragment implements
 
     @Override
     public void onPreviewFailed(File file, Stat stat) {
-        imageView.setVisibility(GONE);
+        image.setVisibility(GONE);
     }
 
     @Override
-    public Loader<Long> onCreateLoader(int id, Bundle args) {
+    public Loader<Size> onCreateLoader(int id, Bundle args) {
         return new CalculateSizeLoader(getActivity(), file);
     }
 
     @Override
-    public void onLoadFinished(Loader<Long> loader, Long data) {
-        calculateSizeProgressBar.setVisibility(GONE);
-        sizeView.setText(formatSize(data));
+    public void onLoadFinished(Loader<Size> loader, Size data) {
+        calculatingSize.setVisibility(GONE);
+        size.setText(formatSize(data.size()));
+        sizeOnDisk.setText(formatSizeOnDisk(data.sizeOnDisk()));
     }
 
     @Override
-    public void onLoaderReset(Loader<Long> loader) {
+    public void onLoaderReset(Loader<Size> loader) {
     }
 
 }
