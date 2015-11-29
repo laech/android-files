@@ -25,6 +25,11 @@ class TestStat implements Stat {
     }
 
     @Override
+    public long sizeOnDisk() {
+        return file.length();
+    }
+
+    @Override
     public boolean isRegularFile() {
         return file.isFile();
     }
