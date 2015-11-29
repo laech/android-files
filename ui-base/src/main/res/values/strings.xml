@@ -24,6 +24,7 @@
     <string name="ic_file_text">&#xE873;</string>
     <string name="ic_file_video">&#xE04B;</string>
 
+    <string name="ic_multi">&#xE02F;</string>
     <string name="ic_unknown">&#xE8FD;</string>
 
 </resources>
