@@ -1,6 +1,8 @@
 package l.files.fs;
 
-public interface Name {
+import android.os.Parcelable;
+
+public interface Name extends Parcelable {
 
     /**
      * The name part without extension.

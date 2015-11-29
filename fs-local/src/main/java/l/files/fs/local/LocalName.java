@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import android.os.Parcel;
+
 import java.util.Arrays;
 
 import l.files.fs.Name;
@@ -77,5 +79,29 @@ public final class LocalName implements Name {
         return o instanceof LocalName &&
                 Arrays.equals(bytes, ((LocalName) o).bytes);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(bytes);
+    }
+
+    public static final Creator<LocalName> CREATOR = new Creator<LocalName>() {
+
+        @Override
+        public LocalName createFromParcel(Parcel source) {
+            return LocalName.of(source.createByteArray());
+        }
+
+        @Override
+        public LocalName[] newArray(int size) {
+            return new LocalName[size];
+        }
+
+    };
 
 }

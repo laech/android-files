@@ -3,6 +3,7 @@
 
     <item
         android:id="@+id/info"
+        android:icon="@drawable/ic_info_outline_white_24dp"
         android:title="@string/info" />
 
 </menu>

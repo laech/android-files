@@ -6,8 +6,10 @@ import android.support.v4.content.AsyncTaskLoader;
 import com.google.auto.value.AutoValue;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import l.files.fs.File;
+import l.files.fs.Name;
 import l.files.fs.Stat;
 import l.files.fs.Visitor;
 import l.files.ui.browser.CalculateSizeLoader.Size;
@@ -26,11 +28,13 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
     private volatile long currentSizeOnDisk;
     private volatile Size result;
 
-    private final File file;
+    private final File dir;
+    private final Collection<Name> children;
 
-    CalculateSizeLoader(Context context, File file) {
+    CalculateSizeLoader(Context context, File dir, Collection<Name> children) {
         super(context);
-        this.file = requireNonNull(file);
+        this.dir = requireNonNull(dir);
+        this.children = requireNonNull(children);
     }
 
     @Override
@@ -51,9 +55,12 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
         currentSize = 0;
         currentSizeOnDisk = 0;
 
-        try {
-            file.traverse(FOLLOW, this);
-        } catch (IOException ignore) {
+        for (Name child : children) {
+            try {
+                dir.resolve(child).traverse(FOLLOW, this);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         if (isLoadInBackgroundCanceled()) {
@@ -88,7 +95,7 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
 
     @Override
     public void onException(File file, IOException e) throws IOException {
-        // Ignore, not count it
+        e.printStackTrace();
     }
 
     int currentCount() {

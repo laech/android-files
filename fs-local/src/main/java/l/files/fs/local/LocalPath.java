@@ -226,7 +226,6 @@ public final class LocalPath implements Path {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(length());
         dest.writeByteArray(bytes);
     }
 
@@ -234,9 +233,7 @@ public final class LocalPath implements Path {
 
         @Override
         public LocalPath createFromParcel(Parcel source) {
-            byte[] path = new byte[source.readInt()];
-            source.readByteArray(path);
-            return of(path);
+            return of(source.createByteArray());
         }
 
         @Override

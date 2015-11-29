@@ -239,13 +239,13 @@ public final class FilesFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
+                new Info(selection(), manager, directory()),
                 new SelectAllAction(this),
                 new Cut(selection()),
                 new Copy(selection()),
                 new Delete(selection(), manager),
                 new RenameAction(selection(), manager),
-                new Share(selection(), getActivity()),
-                new Info(selection(), manager)
+                new Share(selection(), getActivity())
         );
     }
 
