@@ -16,7 +16,6 @@ import l.files.fs.DirectoryNotEmpty;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.fs.Stream;
 import l.files.fs.Visitor;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
@@ -123,17 +122,15 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     File cacheFile(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
-            Closer closer = Closer.create();
-            try {
-
-                Stream<File> children = closer.register(cacheDir(file, constraint).list(NOFOLLOW));
-                return children.iterator().next();
-
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
-            } finally {
-                closer.close();
-            }
+            final File[] result = {null};
+            cacheDir(file, constraint).list(NOFOLLOW, new File.Consumer<RuntimeException>() {
+                @Override
+                public boolean accept(File file) {
+                    result[0] = file;
+                    return false;
+                }
+            });
+            return result[0];
         }
         Instant time = stat.lastModifiedTime();
         return cacheDir(file, constraint).resolve(
@@ -220,23 +217,21 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     private void purgeOldCacheFiles(File file, Rect constraint) throws IOException {
-        Closer closer = Closer.create();
         try {
 
-            Stream<File> oldFiles = closer.register(cacheDir(file, constraint).list(FOLLOW));
-            for (File oldFile : oldFiles) {
-                try {
-                    oldFile.delete();
-                } catch (IOException ignored) {
-                    ignored.printStackTrace();
+            cacheDir(file, constraint).list(FOLLOW, new File.Consumer<RuntimeException>() {
+                @Override
+                public boolean accept(File file) {
+                    try {
+                        file.delete();
+                    } catch (IOException ignored) {
+                        ignored.printStackTrace();
+                    }
+                    return true;
                 }
-            }
+            });
 
         } catch (FileNotFoundException ignored) {
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
         }
     }
 

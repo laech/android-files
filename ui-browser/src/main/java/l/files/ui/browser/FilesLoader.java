@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
-import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
 import l.files.fs.File;
@@ -31,7 +30,6 @@ import l.files.fs.FileConsumer;
 import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Stat;
-import l.files.fs.Stream;
 import l.files.ui.base.text.Collators;
 import l.files.ui.browser.BrowserItem.FileItem;
 
@@ -228,20 +226,14 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private List<File> visit() throws IOException {
-        List<File> children = new ArrayList<>();
-        Closer closer = Closer.create();
-        try {
-
-            Stream<File> stream = closer.register(root.list(FOLLOW));
-            for (File child : stream) {
+        final List<File> children = new ArrayList<>();
+        root.list(FOLLOW, new File.Consumer<RuntimeException>() {
+            @Override
+            public boolean accept(File child) {
                 checkedAdd(children, child);
+                return true;
             }
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        });
         return children;
     }
 

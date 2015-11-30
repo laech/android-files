@@ -2,21 +2,19 @@ package l.files.operations;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import l.files.base.io.Closer;
 import l.files.fs.File;
-import l.files.fs.Stream;
 import l.files.testing.fs.FileBaseTest;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -106,17 +104,8 @@ public abstract class PasteTest extends FileBaseTest {
         thread.start();
         thread.join();
 
-        Closer closer = Closer.create();
-        try {
-
-            Stream<File> stream = closer.register(dstDir.list(NOFOLLOW));
-            assertFalse(stream.iterator().hasNext());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        List<File> actual = dstDir.list(NOFOLLOW, new ArrayList<File>());
+        assertTrue(actual.isEmpty());
     }
 
     @Test

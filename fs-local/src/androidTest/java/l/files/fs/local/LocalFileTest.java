@@ -24,7 +24,6 @@ import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.fs.Stream;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -63,7 +62,7 @@ public final class LocalFileTest extends FileBaseTest {
 
         assertTrue(dir.exists(NOFOLLOW));
         assertTrue(file.exists(NOFOLLOW));
-        assertEquals(singleton(file), dir.list(FOLLOW).to(new HashSet<>()));
+        assertEquals(singleton(file), dir.list(FOLLOW, new HashSet<>()));
 
         assertArrayEquals(bytes.clone(), dir.path().name().bytes());
         assertEquals(new String(bytes.clone(), UTF_8), dir.path().name().toString());
@@ -172,31 +171,17 @@ public final class LocalFileTest extends FileBaseTest {
                 c.rebase(dir, link)
         );
 
-        Closer closer = Closer.create();
-        try {
-            Stream<File> actual = closer.register(link.list(FOLLOW));
-            assertEquals(expected, sortByName(actual));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        List<File> actual = sortByName(link.list(FOLLOW, new ArrayList<File>()));
+        assertEquals(expected, actual);
     }
 
     @Test
     public void list() throws Exception {
         File a = dir1().resolve("a").createFile();
         File b = dir1().resolve("b").createDir();
-        List<?> expected = asList(a, b);
-        Closer closer = Closer.create();
-        try {
-            Stream<File> actual = closer.register(dir1().list(NOFOLLOW));
-            assertEquals(expected, sortByName(actual));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        List<File> expected = asList(a, b);
+        List<File> actual = sortByName(dir1().list(NOFOLLOW, new ArrayList<File>()));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -208,16 +193,8 @@ public final class LocalFileTest extends FileBaseTest {
 
         File link = dir1().resolve("link").createLink(dir);
         List<File> expected = singletonList(link.resolve("b"));
-
-        Closer closer = Closer.create();
-        try {
-            Stream<File> actual = closer.register(link.listDirs(FOLLOW));
-            assertEquals(expected, sortByName(actual));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        List<File> actual = sortByName(link.listDirs(FOLLOW, new ArrayList<File>()));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -226,15 +203,8 @@ public final class LocalFileTest extends FileBaseTest {
         dir1().resolve("b").createDir();
         dir1().resolve("c").createFile();
         List<?> expected = singletonList(dir1().resolve("b"));
-        Closer closer = Closer.create();
-        try {
-            Stream<File> actual = closer.register(dir1().listDirs(NOFOLLOW));
-            assertEquals(expected, sortByName(actual));
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        List<?> actual = sortByName(dir1().listDirs(NOFOLLOW, new ArrayList<File>()));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -796,9 +766,7 @@ public final class LocalFileTest extends FileBaseTest {
         assertEquals("hello world", file.readDetectingCharset(100));
     }
 
-    private List<File> sortByName(Stream<File> actual) throws IOException {
-        List<File> files = new ArrayList<>();
-        actual.to(files);
+    private List<File> sortByName(List<File> files) throws IOException {
         Collections.sort(files, new Comparator<File>() {
             @Override
             public int compare(File a, File b) {

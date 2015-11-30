@@ -37,7 +37,6 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
-import l.files.fs.Stream;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
 
@@ -430,30 +429,26 @@ public final class LocalObservableTest extends FileBaseTest {
     }
 
     private void ensureExactNumberOfChildDirs(
-            LocalFile dir,
-            int expectedCount) throws IOException {
+            final LocalFile dir,
+            final int expectedCount) throws IOException {
 
-        int actualCount = 0;
-        Closer closer = Closer.create();
-        try {
+        final int[] actualCount = {0};
 
-            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
-            for (File child : children) {
-                actualCount++;
-                if (actualCount > expectedCount) {
+        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File child) throws IOException {
+                actualCount[0]++;
+                if (actualCount[0] > expectedCount) {
                     child.deleteRecursive();
-                    actualCount--;
+                    actualCount[0]--;
                 }
+                return true;
             }
+        });
 
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-        while (actualCount < expectedCount) {
+        while (actualCount[0] < expectedCount) {
             createRandomChildDir(dir);
-            actualCount++;
+            actualCount[0]++;
         }
     }
 
@@ -1264,14 +1259,14 @@ public final class LocalObservableTest extends FileBaseTest {
         }
 
         private static void verifyTracker(
-                Recorder observer,
-                Tracker tracker,
+                final Recorder observer,
+                final Tracker tracker,
                 LocalFile file,
                 LinkOption option) throws IOException {
 
-            ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
-            ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
-            InOrder order = inOrder(tracker);
+            final ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
+            final ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
+            final InOrder order = inOrder(tracker);
             order.verify(tracker).onInit(fd.capture());
             order.verify(tracker).onWatchAdded(
                     eq(fd.getValue()),
@@ -1284,10 +1279,10 @@ public final class LocalObservableTest extends FileBaseTest {
             observer.wd = wd.getValue();
 
             if (file.stat(option).isDirectory()) {
-                Closer closer = Closer.create();
-                try {
-                    Stream<File> dirs = closer.register(file.listDirs(option));
-                    for (File dir : dirs) {
+
+                file.listDirs(option, new File.Consumer<IOException>() {
+                    @Override
+                    public boolean accept(File dir) throws IOException {
                         if (dir.isReadable()) {
                             order.verify(tracker).onWatchAdded(
                                     eq(fd.getValue()),
@@ -1298,12 +1293,10 @@ public final class LocalObservableTest extends FileBaseTest {
                         }
                         observer.allChildWds.put(dir, wd.getValue());
                         observer.validChildWds.add(wd.getValue());
+                        return true;
                     }
-                } catch (Throwable e) {
-                    throw closer.rethrow(e);
-                } finally {
-                    closer.close();
-                }
+                });
+
             }
 
             order.verifyNoMoreInteractions();

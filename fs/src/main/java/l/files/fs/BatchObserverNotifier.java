@@ -120,7 +120,9 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         if (checker != null) {
             checker.cancel(true);
         }
-        observation.close();
+        if (observation != null) {
+            observation.close();
+        }
     }
 
     @Override

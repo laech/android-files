@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 import l.files.fs.BaseFile;
@@ -26,7 +24,6 @@ import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.fs.Stream;
 import l.files.fs.local.LocalPath;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -111,34 +108,42 @@ class TestFile extends BaseFile {
     }
 
     @Override
-    public Stream<l.files.fs.File> list(LinkOption option) throws IOException {
+    public <C extends Collection<? super l.files.fs.File>> C list(
+            LinkOption option, C collection) throws IOException {
 
         if (!file.exists()) {
             throw new FileNotFoundException();
         }
 
-        final File[] files = file.listFiles();
-        final List<l.files.fs.File> children = new ArrayList<>(files.length);
-        for (File file : files) {
-            children.add(new TestFile(file));
+        for (File child : file.listFiles()) {
+            collection.add(new TestFile(child));
         }
-
-        return new Stream<l.files.fs.File>() {
-
-            @Override
-            public void close() throws IOException {
-            }
-
-            @Override
-            public Iterator<l.files.fs.File> iterator() {
-                return children.iterator();
-            }
-
-        };
+        return collection;
     }
 
     @Override
-    public Stream<l.files.fs.File> listDirs(LinkOption option) throws IOException {
+    public <C extends Collection<? super l.files.fs.File>> C listDirs(
+            LinkOption option, C collection) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <E extends Throwable> void list(
+            LinkOption option, Consumer<E> consumer) throws IOException, E {
+
+        if (!file.exists()) {
+            throw new FileNotFoundException();
+        }
+
+        for (File child : file.listFiles()) {
+            consumer.accept(new TestFile(child));
+        }
+
+    }
+
+    @Override
+    public <E extends Throwable> void listDirs(
+            LinkOption option, Consumer<E> consumer) throws IOException, E {
         throw new UnsupportedOperationException();
     }
 

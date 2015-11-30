@@ -5,6 +5,7 @@ import android.os.Handler;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,12 +13,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import l.files.base.io.Closer;
 import l.files.fs.Event;
-import l.files.fs.File;
 import l.files.fs.FileConsumer;
 import l.files.fs.LinkOption;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
-import l.files.fs.Stream;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -29,8 +28,8 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.File.UTF_8;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.local.Dirent.DT_DIR;
 import static l.files.fs.local.ErrnoException.EACCES;
 import static l.files.fs.local.ErrnoException.EINVAL;
 import static l.files.fs.local.ErrnoException.ENOENT;
@@ -198,7 +197,7 @@ final class LocalObservable extends Native
         requireNonNull(childrenConsumer);
 
         try {
-            if (!isProcfs(root.path().bytes())) {
+            if (!isProcfs(root.path().toByteArray())) {
                 fd = inotify.init(this);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
@@ -256,7 +255,7 @@ final class LocalObservable extends Native
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            return inotify.addWatch(fd, root.path().bytes(), mask);
+            return inotify.addWatch(fd, root.path().toByteArray(), mask);
 
         } catch (Throwable e) {
             try {
@@ -268,30 +267,34 @@ final class LocalObservable extends Native
         }
     }
 
-    private boolean traverseChildren(LinkOption option, FileConsumer childrenConsumer)
+    private boolean traverseChildren(
+            final LinkOption option,
+            final FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
-        boolean limitReached = fd == -1;
-        boolean someFailed = false;
-        Closer closer = Closer.create();
+        final boolean[] limitReached = {fd == -1};
+        final boolean[] someFailed = {false};
+        final Closer closer = Closer.create();
         try {
 
-            Stream<Dirent> stream = closer.register(Dirent.stream(root, option, false));
-            for (Dirent child : stream) {
+            Dirent.list(root.path().toByteArray(), option == FOLLOW, new Dirent.Callback<IOException>() {
 
-                File childFile = root.resolve(child.name());
-                childrenConsumer.accept(childFile);
+                @Override
+                public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory)
+                        throws IOException {
 
-                if (currentThread().isInterrupted()) {
-                    throw new InterruptedException();
-                }
+                    byte[] name = Arrays.copyOf(nameBuffer, nameLength);
+                    LocalFile childFile = root.resolve(name);
+                    childrenConsumer.accept(childFile);
 
-                if (!limitReached && child.type() == DT_DIR && !released.get()) {
+                    if (limitReached[0] || !isDirectory || released.get()) {
+                        return !currentThread().isInterrupted();
+                    }
+
                     try {
 
-                        byte[] name = child.name();
-                        byte[] path = root.resolve(name).path().bytes();
-                        int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
+                        byte[] childPath = childFile.path().toByteArray();
+                        int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
                         childDirs.put(wd, LocalName.of(name));
 
                     } catch (ErrnoException e) {
@@ -299,25 +302,28 @@ final class LocalObservable extends Native
                         if (e.errno == ENOENT) {
                             // Ignore
                         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
-                            limitReached = true;
+                            limitReached[0] = true;
 
                         } else if (e.errno == EACCES) {
-                            someFailed = true;
+                            someFailed[0] = true;
 
                         } else {
                             throw e.toIOException();
                         }
                     }
+
+                    return !currentThread().isInterrupted();
                 }
 
-            }
+            });
+
         } catch (Throwable e) {
             throw closer.rethrow(e);
         } finally {
             closer.close();
         }
 
-        return !limitReached && !someFailed;
+        return !limitReached[0] && !someFailed[0];
     }
 
     @Override
@@ -393,7 +399,7 @@ final class LocalObservable extends Native
         childDirs.removeAll(wds);
         if (wds.contains(wd)) {
             try {
-                wd = inotify.addWatch(fd, root.path().bytes(), ROOT_MASK);
+                wd = inotify.addWatch(fd, root.path().toByteArray(), ROOT_MASK);
             } catch (ErrnoException ignored) {
             }
         }
@@ -533,7 +539,7 @@ final class LocalObservable extends Native
 
         try {
 
-            byte[] path = root.resolve(name).path().bytes();
+            byte[] path = root.resolve(name).path().toByteArray();
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, LocalName.of(name));
 

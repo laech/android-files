@@ -3,20 +3,24 @@
 #include <fcntl.h>
 #include "util.h"
 
-static jmethodID dirent_create;
+static jmethodID on_next;
 
 void Java_l_files_fs_local_Dirent_init(JNIEnv *env, jclass clazz) {
-    dirent_create = (*env)->GetStaticMethodID(
-            env, clazz, "create", "(JI[B)Ll/files/fs/local/Dirent;");
+    jclass callback_class = (*env)->FindClass(env, "l/files/fs/local/Dirent$Callback");
+    if (NULL != callback_class) {
+        on_next = (*env)->GetMethodID(env, callback_class, "onNext", "([BIZ)Z");
+    }
 }
 
-jlong Java_l_files_fs_local_Dirent_opendir(
-        JNIEnv *env, jclass clazz, jbyteArray jpath, jboolean followLink) {
+DIR *open_directory(
+        JNIEnv *env,
+        jbyteArray jpath,
+        jboolean followLink) {
 
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
-    path[len] = '\0';
+    jsize path_len = (*env)->GetArrayLength(env, jpath);
+    char path[path_len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, path_len, (jbyte *) path);
+    path[path_len] = '\0';
 
     int flags = O_DIRECTORY;
     if (JNI_FALSE == followLink) {
@@ -24,40 +28,70 @@ jlong Java_l_files_fs_local_Dirent_opendir(
     }
 
     int fd = open(path, flags);
-
     if (-1 == fd) {
-        throw_errno_exception(env);
-        return -1;
+        return NULL;
     }
 
-    return (jlong) (intptr_t) fdopendir(fd);
+    return fdopendir(fd);
 }
 
-void Java_l_files_fs_local_Dirent_closedir(JNIEnv *env, jclass clazz, jlong jdir) {
-    DIR *dir = (DIR *) (intptr_t) jdir;
-    if (0 != closedir(dir)) {
+void Java_l_files_fs_local_Dirent_list(
+        JNIEnv *env,
+        jclass clazz,
+        jbyteArray jpath,
+        jboolean followLink,
+        jobject callback) {
+
+    DIR *dir = open_directory(env, jpath, followLink);
+    if (NULL == dir) {
         throw_errno_exception(env);
+        return;
     }
-}
 
-jobject Java_l_files_fs_local_Dirent_readdir(JNIEnv *env, jclass clazz, jlong jdir) {
-    DIR *dir = (DIR *) (intptr_t) jdir;
+    jsize name_len;
+    jboolean isdir;
+    jbyteArray name_buf = (*env)->NewByteArray(env, 256);
     struct dirent entry;
     struct dirent *result;
 
-    if (0 != readdir_r(dir, &entry, &result)) {
+    for (; ;) {
+
+        if ((*env)->ExceptionCheck(env)) {
+            (*env)->ExceptionDescribe(env);
+            break;
+        }
+
+        if (0 != readdir_r(dir, &entry, &result)) {
+            throw_errno_exception(env);
+            break;
+        }
+
+        if (NULL == result) {
+            break;
+        }
+
+        if (strcmp(entry.d_name, ".") == 0 ||
+            strcmp(entry.d_name, "..") == 0) {
+            continue;
+        }
+
+        isdir = (jboolean) (DT_DIR == entry.d_type);
+        name_len = (jsize) strlen(entry.d_name);
+        (*env)->SetByteArrayRegion(
+                env,
+                name_buf,
+                0,
+                name_len,
+                (const jbyte *) entry.d_name);
+
+        if (!(*env)->CallBooleanMethod(env, callback, on_next, name_buf, name_len, isdir)) {
+            break;
+        }
+
+    }
+
+    if (0 != closedir(dir)) {
         throw_errno_exception(env);
-        return NULL;
     }
 
-    if (NULL == result) {
-        return NULL;
-    }
-
-    jsize len = (jsize) strlen(entry.d_name);
-    jbyteArray name = (*env)->NewByteArray(env, len);
-    (*env)->SetByteArrayRegion(env, name, 0, len, entry.d_name);
-
-    return (*env)->CallStaticObjectMethod(
-            env, clazz, dirent_create, entry.d_ino, entry.d_type, name);
 }

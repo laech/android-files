@@ -73,12 +73,12 @@ void Java_l_files_fs_local_LocalObservable_observe(
             }
 
             (*env)->CallVoidMethod(
-                    env, object, method_onEvent, event->wd, event->mask, path);
-
-            if ((*env)->ExceptionCheck(env)) {
-                (*env)->ExceptionDescribe(env);
-                (*env)->ExceptionClear(env);
-            }
+                    env,
+                    object,
+                    method_onEvent,
+                    event->wd,
+                    event->mask,
+                    path);
 
             if (path != NULL) {
                 (*env)->DeleteLocalRef(env, path);

@@ -14,10 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Stat;
-import l.files.fs.Stream;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
 import l.files.ui.browser.BrowserItem.FileItem;
@@ -542,13 +540,11 @@ final class UiFileActivity {
             public Void call() throws Exception {
 
 
-                SimpleArrayMap<File, Stat> filesInView = filesInView();
-                Closer closer = Closer.create();
-                try {
+                final SimpleArrayMap<File, Stat> filesInView = filesInView();
 
-                    Stream<File> stream = closer.register(dir.list(FOLLOW));
-                    for (File child : stream) {
-
+                dir.list(FOLLOW, new File.Consumer<IOException>() {
+                    @Override
+                    public boolean accept(File child) throws IOException {
                         Stat oldStat = filesInView.remove(child);
                         if (oldStat == null) {
                             fail("File in file system but not in view: " + child);
@@ -560,13 +556,9 @@ final class UiFileActivity {
                                     + "\nnew: " + newStat
                                     + "\nold: " + oldStat);
                         }
+                        return true;
                     }
-
-                } catch (Throwable e) {
-                    throw closer.rethrow(e);
-                } finally {
-                    closer.close();
-                }
+                });
 
                 if (!filesInView.isEmpty()) {
                     fail("File in view but not on file system: "

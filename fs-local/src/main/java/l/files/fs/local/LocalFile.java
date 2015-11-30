@@ -9,8 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import l.files.fs.BaseFile;
@@ -22,7 +23,6 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
-import l.files.fs.Stream;
 
 import static java.util.Collections.unmodifiableSet;
 import static l.files.base.Objects.requireNonNull;
@@ -206,7 +206,7 @@ public abstract class LocalFile extends BaseFile {
 
     private boolean accessible(int mode) throws IOException {
         try {
-            Unistd.access(path().bytes(), mode);
+            Unistd.access(path().toByteArray(), mode);
             return true;
         } catch (ErrnoException e) {
             if (e.errno == EACCES) {
@@ -217,50 +217,72 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public Stream<File> list(LinkOption option) throws IOException {
-        return list(option, false);
+    public <C extends Collection<? super File>> C list(
+            final LinkOption option,
+            final C collection) throws IOException {
+
+        list(option, false, new Consumer<RuntimeException>() {
+            @Override
+            public boolean accept(File file) {
+                collection.add(file);
+                return true;
+            }
+        });
+        return collection;
     }
 
     @Override
-    public Stream<File> listDirs(LinkOption option) throws IOException {
-        return list(option, true);
+    public <C extends Collection<? super File>> C listDirs(
+            final LinkOption option,
+            final C collection) throws IOException {
+
+        list(option, true, new Consumer<RuntimeException>() {
+            @Override
+            public boolean accept(File file) {
+                collection.add(file);
+                return true;
+            }
+        });
+        return collection;
     }
 
-    private Stream<File> list(
+    @Override
+    public <E extends Throwable> void list(
+            LinkOption option,
+            Consumer<E> consumer) throws IOException, E {
+
+        list(option, false, consumer);
+    }
+
+    @Override
+    public <E extends Throwable> void listDirs(
+            LinkOption option,
+            Consumer<E> consumer) throws IOException, E {
+
+        list(option, true, consumer);
+    }
+
+    private <E extends Throwable> void list(
             final LinkOption option,
-            final boolean dirOnly) throws IOException {
+            final boolean dirOnly,
+            final Consumer<E> consumer) throws IOException, E {
 
-        final Stream<Dirent> stream = Dirent.stream(LocalFile.this, option, dirOnly);
-        return new Stream<File>() {
+        try {
+            Dirent.list(path().toByteArray(), option == FOLLOW, new Dirent.Callback<E>() {
 
-            @Override
-            public void close() throws IOException {
-                stream.close();
-            }
-
-            @Override
-            public Iterator<File> iterator() {
-                final Iterator<Dirent> iterator = stream.iterator();
-                return new Iterator<File>() {
-
-                    @Override
-                    public boolean hasNext() {
-                        return iterator.hasNext();
+                @Override
+                public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory) throws E {
+                    if (dirOnly && !isDirectory) {
+                        return true;
                     }
+                    byte[] name = Arrays.copyOf(nameBuffer, nameLength);
+                    return consumer.accept(resolve(name));
+                }
 
-                    @Override
-                    public File next() {
-                        return resolve(iterator.next().name());
-                    }
-
-                    @Override
-                    public void remove() {
-                        iterator.remove();
-                    }
-
-                };
-            }
-        };
+            });
+        } catch (ErrnoException e) {
+            throw e.toIOException(path());
+        }
     }
 
     @Override
@@ -277,7 +299,7 @@ public abstract class LocalFile extends BaseFile {
     public LocalFile createDir() throws IOException {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
-            mkdir(path().bytes(), S_IRWXU);
+            mkdir(path().toByteArray(), S_IRWXU);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
@@ -298,7 +320,7 @@ public abstract class LocalFile extends BaseFile {
         // Same flags and mode as java.io.File.createNewFile() on Android
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
-        int fd = open(path().bytes(), flags, mode);
+        int fd = open(path().toByteArray(), flags, mode);
         Unistd.close(fd);
     }
 
@@ -307,7 +329,7 @@ public abstract class LocalFile extends BaseFile {
         LocalPath targetPath = (LocalPath) target.path();
         LocalPath linkPath = path();
         try {
-            symlink(targetPath.bytes(), linkPath.bytes());
+            symlink(targetPath.toByteArray(), linkPath.toByteArray());
         } catch (ErrnoException e) {
             throw e.toIOException(path(), targetPath);
         }
@@ -317,7 +339,7 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public LocalFile readLink() throws IOException {
         try {
-            byte[] link = readlink(path().bytes());
+            byte[] link = readlink(path().toByteArray());
             return of(LocalPath.of(link));
         } catch (ErrnoException e) {
             throw e.toIOException(path());
@@ -329,7 +351,7 @@ public abstract class LocalFile extends BaseFile {
         LocalPath dstPath = (LocalPath) dst.path();
         LocalPath srcPath = path();
         try {
-            Stdio.rename(srcPath.bytes(), dstPath.bytes());
+            Stdio.rename(srcPath.toByteArray(), dstPath.toByteArray());
         } catch (ErrnoException e) {
             throw e.toIOException(srcPath, dstPath);
         }
@@ -358,7 +380,7 @@ public abstract class LocalFile extends BaseFile {
             long seconds = instant.seconds();
             int nanos = instant.nanos();
             boolean followLink = option == FOLLOW;
-            setModificationTime(path().bytes(), seconds, nanos, followLink);
+            setModificationTime(path().toByteArray(), seconds, nanos, followLink);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }
@@ -377,7 +399,7 @@ public abstract class LocalFile extends BaseFile {
             mode |= PERMISSION_BITS[permission.ordinal()];
         }
         try {
-            chmod(path().bytes(), mode);
+            chmod(path().toByteArray(), mode);
         } catch (ErrnoException e) {
             throw e.toIOException(path());
         }

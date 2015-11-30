@@ -4,14 +4,11 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Random;
 
-import l.files.base.io.Closer;
 import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Permission;
-import l.files.fs.Stream;
 import l.files.fs.local.LocalFile;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -46,25 +43,23 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void testRefreshInManualMode(File dir) throws IOException {
-        Closer closer = Closer.create();
-        try {
-            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
-            File childDir = children.iterator().next();
-            try {
-                // Inotify don't notify child directory last modified time,
-                // unless we explicitly monitor the child dir, but we aren't
-                // doing that because we ran out of watches, so this is a
-                // good operation for testing the manual refresh
-                setRandomLastModified(childDir);
-            } catch (IOException e) {
-                // Older versions does not support changing mtime
-                childDir.deleteRecursive();
+
+        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File childDir) throws IOException {
+                try {
+                    // Inotify don't notify child directory last modified time,
+                    // unless we explicitly monitor the child dir, but we aren't
+                    // doing that because we ran out of watches, so this is a
+                    // good operation for testing the manual refresh
+                    setRandomLastModified(childDir);
+                } catch (IOException e) {
+                    // Older versions does not support changing mtime
+                    childDir.deleteRecursive();
+                }
+                return false;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        });
         screen().refresh().assertListMatchesFileSystem(dir);
     }
 
@@ -76,15 +71,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir.resolve("before-move-" + nanoTime()).createFile()
                 .moveTo(dir.resolve("after-move-" + nanoTime()));
 
-        Closer closer = Closer.create();
-        try {
-            Stream<File> children = closer.register(dir.list(FOLLOW));
-            children.iterator().next().deleteRecursive();
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        dir.list(FOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File file) throws IOException {
+                file.deleteRecursive();
+                return false;
+            }
+        });
 
         screen().assertListMatchesFileSystem(dir);
     }
@@ -109,10 +102,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
-        Closer closer = Closer.create();
-        try {
-            Stream<File> children = closer.register(dir.list(FOLLOW));
-            for (File child : children) {
+        dir.list(FOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File child) throws IOException {
                 if (nanoTime() % 2 == 0) {
                     deleteOrCreateChild(child);
                 } else {
@@ -123,12 +115,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
                         deleteOrCreateChild(child);
                     }
                 }
+                return true;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        });
 
         screen().assertListMatchesFileSystem(dir);
     }
@@ -149,29 +138,27 @@ public final class RefreshTest extends BaseFilesActivityTest {
         file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(time));
     }
 
-    private void createRandomDirs(File dir, int expectedCount) throws IOException {
+    private void createRandomDirs(
+            final File dir,
+            final int expectedCount) throws IOException {
 
-        int actualCount = 0;
+        final int[] actualCount = {0};
 
-        Closer closer = Closer.create();
-        try {
-            Stream<File> children = closer.register(dir.listDirs(FOLLOW));
-            for (File child : children) {
-                actualCount++;
-                if (actualCount > expectedCount) {
+        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File child) throws IOException {
+                actualCount[0]++;
+                if (actualCount[0] > expectedCount) {
                     child.deleteRecursive();
-                    actualCount--;
+                    actualCount[0]--;
                 }
+                return true;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        });
 
-        while (actualCount < expectedCount) {
+        while (actualCount[0] < expectedCount) {
             randomFile(dir).createDir();
-            actualCount++;
+            actualCount[0]++;
         }
 
     }
@@ -186,17 +173,20 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().click(dir);
 
         for (int i = 0; i < 200; i++) {
-            Closer closer = Closer.create();
-            try {
-                Stream<File> children = closer.register(dir.list(FOLLOW));
-                Iterator<File> it = children.iterator();
-                it.next().deleteRecursive();
-                it.next().deleteRecursive();
-            } catch (Throwable e) {
-                throw closer.rethrow(e);
-            } finally {
-                closer.close();
-            }
+
+            dir.list(FOLLOW, new File.Consumer<IOException>() {
+
+                int count = 0;
+
+                @Override
+                public boolean accept(File file) throws IOException {
+                    file.deleteRecursive();
+                    count++;
+                    return count < 2;
+                }
+
+            });
+
             randomFile(dir).createDir();
             randomFile(dir).createFile();
             sleep(10);
@@ -214,26 +204,24 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void createRandomChildren(File dir, int expectedCount) throws IOException {
-        int actualCount = 0;
-        Closer closer = Closer.create();
-        try {
-            Stream<File> children = closer.register(dir.list(FOLLOW));
-            for (File ignored : children) {
-                actualCount++;
+
+        final int[] actualCount = {0};
+        dir.list(FOLLOW, new File.Consumer<RuntimeException>() {
+            @Override
+            public boolean accept(File file) {
+                actualCount[0]++;
+                return true;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-        while (actualCount < expectedCount) {
+        });
+
+        while (actualCount[0] < expectedCount) {
             File file = randomFile(dir);
-            if (actualCount % 2 == 0) {
+            if (actualCount[0] % 2 == 0) {
                 file.createFile();
             } else {
                 file.createDir();
             }
-            actualCount++;
+            actualCount[0]++;
         }
     }
 
@@ -264,20 +252,17 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateAttributes() throws IOException {
-        Closer closer = Closer.create();
-        try {
-            Stream<File> stream = closer.register(dir().list(NOFOLLOW));
-            Random r = new Random();
-            for (File child : stream) {
+
+        final Random r = new Random();
+        dir().list(NOFOLLOW, new File.Consumer<IOException>() {
+            @Override
+            public boolean accept(File child) throws IOException {
                 child.setLastModifiedTime(NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
+                return true;
             }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        });
     }
 
     private void updateDirectory(String name) throws IOException {

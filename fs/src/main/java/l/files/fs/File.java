@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -166,15 +167,13 @@ public interface File extends Parcelable {
      */
     void traverse(LinkOption option, Visitor visitor, Comparator<File> childrenComparator) throws IOException;
 
-    /**
-     * List children of this directory.
-     */
-    Stream<File> list(LinkOption option) throws IOException;
+    <C extends Collection<? super File>> C list(LinkOption option, C collection) throws IOException;
 
-    /**
-     * Like {@link #list(LinkOption)} but only return directories.
-     */
-    Stream<File> listDirs(LinkOption option) throws IOException;
+    <C extends Collection<? super File>> C listDirs(LinkOption option, C collection) throws IOException;
+
+    <E extends Throwable> void list(LinkOption option, Consumer<E> consumer) throws IOException, E;
+
+    <E extends Throwable> void listDirs(LinkOption option, Consumer<E> consumer) throws IOException, E;
 
     InputStream newInputStream() throws IOException;
 
@@ -320,5 +319,11 @@ public interface File extends Parcelable {
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
     String detectMediaType(Stat stat) throws IOException;
+
+    interface Consumer<E extends Throwable> {
+
+        boolean accept(File file) throws E;
+
+    }
 
 }

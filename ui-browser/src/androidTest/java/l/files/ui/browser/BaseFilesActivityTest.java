@@ -164,7 +164,7 @@ public class BaseFilesActivityTest {
                     dst.exists(NOFOLLOW));
 
             src.moveTo(dst);
-            List<File> actual = dir.list(NOFOLLOW).to(new ArrayList<File>());
+            List<File> actual = dir.list(NOFOLLOW, new ArrayList<File>());
             assertEquals(1, actual.size());
             assumeThat(
                     "Assuming the file can be renamed to different casing",
