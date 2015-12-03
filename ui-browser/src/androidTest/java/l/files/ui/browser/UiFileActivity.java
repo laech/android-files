@@ -542,7 +542,7 @@ final class UiFileActivity {
 
                 final SimpleArrayMap<File, Stat> filesInView = filesInView();
 
-                dir.list(FOLLOW, new File.Consumer<IOException>() {
+                dir.list(FOLLOW, new File.Consumer() {
                     @Override
                     public boolean accept(File child) throws IOException {
                         Stat oldStat = filesInView.remove(child);

@@ -44,7 +44,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(File dir) throws IOException {
 
-        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+        dir.listDirs(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File childDir) throws IOException {
                 try {
@@ -71,7 +71,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         dir.resolve("before-move-" + nanoTime()).createFile()
                 .moveTo(dir.resolve("after-move-" + nanoTime()));
 
-        dir.list(FOLLOW, new File.Consumer<IOException>() {
+        dir.list(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File file) throws IOException {
                 file.deleteRecursive();
@@ -102,7 +102,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
-        dir.list(FOLLOW, new File.Consumer<IOException>() {
+        dir.list(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File child) throws IOException {
                 if (nanoTime() % 2 == 0) {
@@ -144,7 +144,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         final int[] actualCount = {0};
 
-        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+        dir.listDirs(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File child) throws IOException {
                 actualCount[0]++;
@@ -174,7 +174,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         for (int i = 0; i < 200; i++) {
 
-            dir.list(FOLLOW, new File.Consumer<IOException>() {
+            dir.list(FOLLOW, new File.Consumer() {
 
                 int count = 0;
 
@@ -206,7 +206,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void createRandomChildren(File dir, int expectedCount) throws IOException {
 
         final int[] actualCount = {0};
-        dir.list(FOLLOW, new File.Consumer<RuntimeException>() {
+        dir.list(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File file) {
                 actualCount[0]++;
@@ -254,7 +254,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        dir().list(NOFOLLOW, new File.Consumer<IOException>() {
+        dir().list(NOFOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File child) throws IOException {
                 child.setLastModifiedTime(NOFOLLOW, Instant.of(

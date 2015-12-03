@@ -434,7 +434,7 @@ public final class LocalObservableTest extends FileBaseTest {
 
         final int[] actualCount = {0};
 
-        dir.listDirs(FOLLOW, new File.Consumer<IOException>() {
+        dir.listDirs(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File child) throws IOException {
                 actualCount[0]++;
@@ -1280,7 +1280,7 @@ public final class LocalObservableTest extends FileBaseTest {
 
             if (file.stat(option).isDirectory()) {
 
-                file.listDirs(option, new File.Consumer<IOException>() {
+                file.listDirs(option, new File.Consumer() {
                     @Override
                     public boolean accept(File dir) throws IOException {
                         if (dir.isReadable()) {

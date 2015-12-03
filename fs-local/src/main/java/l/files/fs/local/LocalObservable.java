@@ -280,7 +280,7 @@ final class LocalObservable extends Native
         final Closer closer = Closer.create();
         try {
 
-            Dirent.list(rootPathBytes, option == FOLLOW, new Dirent.Callback<IOException>() {
+            Dirent.list(rootPathBytes, option == FOLLOW, new Dirent.Callback() {
 
                 @Override
                 public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory)

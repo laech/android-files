@@ -10,17 +10,14 @@ import java.util.Collection;
 
 import l.files.fs.File;
 import l.files.fs.Name;
-import l.files.fs.Stat;
-import l.files.fs.Visitor;
 import l.files.ui.browser.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
 
-final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor {
+final class CalculateSizeLoader
+        extends AsyncTaskLoader<Size>
+        implements File.SizeVisitor {
 
     private boolean started;
     private volatile int currentCount;
@@ -57,7 +54,7 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
 
         for (Name child : children) {
             try {
-                dir.resolve(child).traverse(FOLLOW, this);
+                dir.resolve(child).traverseSize(FOLLOW, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,28 +71,11 @@ final class CalculateSizeLoader extends AsyncTaskLoader<Size> implements Visitor
     }
 
     @Override
-    public Result onPreVisit(File file) throws IOException {
-        if (isLoadInBackgroundCanceled()) {
-            return TERMINATE;
-        }
-        Stat stat = file.stat(NOFOLLOW);
-        currentSize += stat.size();
-        currentSizeOnDisk += stat.sizeOnDisk();
+    public boolean onSize(long size, long sizeOnDisk) throws RuntimeException {
         currentCount++;
-        return CONTINUE;
-    }
-
-    @Override
-    public Result onPostVisit(File file) throws IOException {
-        if (isLoadInBackgroundCanceled()) {
-            return TERMINATE;
-        }
-        return CONTINUE;
-    }
-
-    @Override
-    public void onException(File file, IOException e) throws IOException {
-        e.printStackTrace();
+        currentSize += size;
+        currentSizeOnDisk += sizeOnDisk;
+        return !isLoadInBackgroundCanceled();
     }
 
     int currentCount() {

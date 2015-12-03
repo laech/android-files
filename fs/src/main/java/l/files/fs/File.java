@@ -162,6 +162,23 @@ public interface File extends Parcelable {
      */
     void traverse(LinkOption option, Visitor visitor) throws IOException;
 
+    void traverseSize(
+            LinkOption option,
+            SizeVisitor accumulator) throws IOException;
+
+    interface SizeVisitor {
+
+        /**
+         * Called per file/directory.
+         *
+         * @param size       the size of the file/directory in bytes
+         * @param sizeOnDisk the size of actual storage used in bytes
+         */
+        boolean onSize(long size, long sizeOnDisk)
+                throws IOException;
+
+    }
+
     /**
      * @param childrenComparator option comparator to sort children
      */
@@ -171,9 +188,9 @@ public interface File extends Parcelable {
 
     <C extends Collection<? super File>> C listDirs(LinkOption option, C collection) throws IOException;
 
-    <E extends Throwable> void list(LinkOption option, Consumer<E> consumer) throws IOException, E;
+    void list(LinkOption option, Consumer consumer) throws IOException;
 
-    <E extends Throwable> void listDirs(LinkOption option, Consumer<E> consumer) throws IOException, E;
+    void listDirs(LinkOption option, Consumer consumer) throws IOException;
 
     InputStream newInputStream() throws IOException;
 
@@ -320,7 +337,7 @@ public interface File extends Parcelable {
      */
     String detectMediaType(Stat stat) throws IOException;
 
-    interface Consumer<E extends Throwable> {
+    interface Consumer {
 
         boolean accept(File file) throws IOException;
 

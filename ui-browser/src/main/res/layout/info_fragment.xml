@@ -39,14 +39,15 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
+            android:alignmentMode="alignBounds"
             android:columnCount="2"
-            android:rowCount="2">
+            android:rowCount="2"
+            android:useDefaultMargins="true">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginEnd="4dp"
                 android:text="@string/info_modified_label"
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="13sp" />

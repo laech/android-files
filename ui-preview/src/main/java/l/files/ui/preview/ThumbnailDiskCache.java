@@ -123,7 +123,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     File cacheFile(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
             final File[] result = {null};
-            cacheDir(file, constraint).list(NOFOLLOW, new File.Consumer<RuntimeException>() {
+            cacheDir(file, constraint).list(NOFOLLOW, new File.Consumer() {
                 @Override
                 public boolean accept(File file) {
                     result[0] = file;
@@ -219,7 +219,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     private void purgeOldCacheFiles(File file, Rect constraint) throws IOException {
         try {
 
-            cacheDir(file, constraint).list(FOLLOW, new File.Consumer<RuntimeException>() {
+            cacheDir(file, constraint).list(FOLLOW, new File.Consumer() {
                 @Override
                 public boolean accept(File file) {
                     try {

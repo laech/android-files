@@ -23,6 +23,8 @@ import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 
+import static l.files.fs.LinkOption.FOLLOW;
+
 @AutoValue
 public abstract class LocalFile extends BaseFile {
 
@@ -138,11 +140,29 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
+    public void traverseSize(
+            LinkOption option,
+            SizeVisitor accumulator) throws IOException {
+
+        try {
+            traverseSize(path().toByteArray(), option == FOLLOW, accumulator);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path());
+        }
+
+    }
+
+    private static native void traverseSize(
+            byte[] path,
+            boolean followLink,
+            SizeVisitor accumulator) throws ErrnoException;
+
+    @Override
     public <C extends Collection<? super File>> C list(
             final LinkOption option,
             final C collection) throws IOException {
 
-        list(option, new Consumer<RuntimeException>() {
+        list(option, new Consumer() {
             @Override
             public boolean accept(File file) {
                 collection.add(file);
@@ -157,7 +177,7 @@ public abstract class LocalFile extends BaseFile {
             final LinkOption option,
             final C collection) throws IOException {
 
-        listDirs(option, new Consumer<RuntimeException>() {
+        listDirs(option, new Consumer() {
             @Override
             public boolean accept(File file) {
                 collection.add(file);
@@ -168,9 +188,9 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public <E extends Throwable> void list(
+    public void list(
             final LinkOption option,
-            final Consumer<E> consumer) throws IOException {
+            final Consumer consumer) throws IOException {
 
         LocalFileSystem.INSTANCE.list(
                 path(),
@@ -184,9 +204,9 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
-    public <E extends Throwable> void listDirs(
+    public void listDirs(
             final LinkOption option,
-            final Consumer<E> consumer) throws IOException {
+            final Consumer consumer) throws IOException {
 
         LocalFileSystem.INSTANCE.listDirs(
                 path(),

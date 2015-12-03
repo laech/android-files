@@ -227,7 +227,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<File> visit() throws IOException {
         final List<File> children = new ArrayList<>();
-        root.list(FOLLOW, new File.Consumer<RuntimeException>() {
+        root.list(FOLLOW, new File.Consumer() {
             @Override
             public boolean accept(File child) {
                 checkedAdd(children, child);

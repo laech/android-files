@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import java.io.IOException;
+
 final class Dirent extends Native {
 
     static {
@@ -8,14 +10,17 @@ final class Dirent extends Native {
 
     private static native void init();
 
-    static native <E extends Throwable> void list(
+    static native void list(
             byte[] path,
             boolean followLink,
-            Callback<E> callback) throws ErrnoException, E;
+            Callback callback) throws ErrnoException, IOException;
 
-    interface Callback<E extends Throwable> {
+    interface Callback {
 
-        boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory) throws E;
+        boolean onNext(
+                byte[] nameBuffer,
+                int nameLength,
+                boolean isDirectory) throws IOException;
 
     }
 
