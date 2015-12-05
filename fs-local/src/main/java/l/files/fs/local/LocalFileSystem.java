@@ -10,7 +10,13 @@ import l.files.fs.LinkOption;
 import l.files.fs.Path;
 
 import static l.files.fs.local.ErrnoException.EACCES;
+import static l.files.fs.local.Fcntl.O_CREAT;
+import static l.files.fs.local.Fcntl.O_EXCL;
+import static l.files.fs.local.Fcntl.O_RDWR;
+import static l.files.fs.local.Fcntl.open;
+import static l.files.fs.local.Stat.S_IRUSR;
 import static l.files.fs.local.Stat.S_IRWXU;
+import static l.files.fs.local.Stat.S_IWUSR;
 import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
@@ -33,6 +39,23 @@ enum LocalFileSystem implements FileSystem {
         } catch (ErrnoException e) {
             throw e.toIOException(path);
         }
+    }
+
+    @Override
+    public void createFile(Path path) throws IOException {
+        try {
+            createFileNative((LocalPath) path);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
+        }
+    }
+
+    private void createFileNative(LocalPath path) throws ErrnoException {
+        // Same flags and mode as java.io.File.createNewFile() on Android
+        int flags = O_RDWR | O_CREAT | O_EXCL;
+        int mode = S_IRUSR | S_IWUSR;
+        int fd = open(path.toByteArray(), flags, mode);
+        Unistd.close(fd);
     }
 
     @Override

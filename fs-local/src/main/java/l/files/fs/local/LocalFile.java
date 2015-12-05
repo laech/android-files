@@ -36,10 +36,6 @@ import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.ErrnoException.EAGAIN;
-import static l.files.fs.local.Fcntl.O_CREAT;
-import static l.files.fs.local.Fcntl.O_EXCL;
-import static l.files.fs.local.Fcntl.O_RDWR;
-import static l.files.fs.local.Fcntl.open;
 import static l.files.fs.local.Stat.S_IRGRP;
 import static l.files.fs.local.Stat.S_IROTH;
 import static l.files.fs.local.Stat.S_IRUSR;
@@ -275,20 +271,8 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile createFile() throws IOException {
-        try {
-            createFileNative();
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+        LocalFileSystem.INSTANCE.createFile(path());
         return this;
-    }
-
-    private void createFileNative() throws ErrnoException {
-        // Same flags and mode as java.io.File.createNewFile() on Android
-        int flags = O_RDWR | O_CREAT | O_EXCL;
-        int mode = S_IRUSR | S_IWUSR;
-        int fd = open(path().toByteArray(), flags, mode);
-        Unistd.close(fd);
     }
 
     @Override
