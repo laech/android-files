@@ -66,14 +66,12 @@ public final class LocalPath implements Path {
         return new LocalPath(names, absolute);
     }
 
-    /**
-     * @deprecated use {@link #toByteArray()} instead
-     */
     @Deprecated
     public byte[] bytes() {
         return toByteArray();
     }
 
+    @Deprecated
     public byte[] toByteArray() {
 
         int len = absolute ? 1 : 0;
@@ -99,6 +97,33 @@ public final class LocalPath implements Path {
         }
 
         return path;
+    }
+
+    @Override
+    public int toByteArray(OutputStream out) throws IOException {
+
+        int count = 0;
+        if (absolute) {
+            out.write(SEP);
+            count++;
+        }
+
+        for (int i = 0; i < names.length; i++) {
+            out.write(names[i]);
+            count += names[i].length;
+
+            if (i < names.length - 1) {
+                out.write(SEP);
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    @Override
+    public void writeTo(OutputStream out) throws IOException {
+        toByteArray(out);
     }
 
     @Override
@@ -224,18 +249,6 @@ public final class LocalPath implements Path {
         byte[][] newNames = Arrays.copyOf(dst.names, dst.names.length + retainLen);
         arraycopy(names, src.names.length, newNames, dst.names.length, retainLen);
         return new LocalPath(newNames, dst.absolute);
-    }
-
-    @Override
-    public void writeTo(OutputStream out) throws IOException {
-        toByteArray(out);
-    }
-
-    @Override
-    public void toByteArray(OutputStream out) throws IOException {
-        for (byte[] name : names) {
-            out.write(name);
-        }
     }
 
     @Override

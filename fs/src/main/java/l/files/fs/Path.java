@@ -10,7 +10,7 @@ public interface Path extends Parcelable {
 
     /**
      * Returns a string representation of this path.
-     * <p/>
+     * <p>
      * This method always replaces malformed-input and unmappable-character
      * sequences with some default replacement string.
      *
@@ -36,6 +36,9 @@ public interface Path extends Parcelable {
     @Deprecated
     void writeTo(OutputStream out) throws IOException;
 
-    void toByteArray(OutputStream out) throws IOException;
+    /**
+     * @return the number of bytes written
+     */
+    int toByteArray(OutputStream out) throws IOException;
 
 }

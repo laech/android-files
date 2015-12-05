@@ -2,17 +2,36 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
-import l.files.fs.Path;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import static l.files.fs.File.UTF_8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public final class LocalPathTest {
+
+    @Test
+    public void can_be_turned_into_byte_array() throws Exception {
+        testToByteArray("");
+        testToByteArray("/");
+        testToByteArray("/a");
+        testToByteArray("/a/b");
+        testToByteArray("a/b");
+        testToByteArray("/aa/bb");
+        testToByteArray("/aaa/bbb/cccccc");
+        testToByteArray("/你好吗/我很好/谢谢");
+    }
+
+    private void testToByteArray(String path) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] bytes = path.getBytes(UTF_8);
+        assertEquals(bytes.length, path(path).toByteArray(out));
+        assertEquals(new String(bytes), out.toString("UTF-8"));
+    }
 
     @Test
     public void hash_codes_are_the_same_if_bytes_are_the_same() throws Exception {
