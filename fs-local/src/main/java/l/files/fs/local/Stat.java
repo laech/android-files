@@ -128,19 +128,19 @@ abstract class Stat extends Native implements l.files.fs.Stat {
 
     static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
-    static Stat stat(LocalFile file, LinkOption option) throws IOException {
+    static Stat stat(LocalPath path, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
         while (true) {
             try {
                 if (option == FOLLOW) {
-                    return stat(file.path().bytes());
+                    return stat(path.toByteArray());
                 } else {
-                    return lstat(file.path().bytes());
+                    return lstat(path.toByteArray());
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw e.toIOException(file.path());
+                    throw e.toIOException(path);
                 }
             }
         }

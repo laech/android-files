@@ -172,7 +172,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public Stat stat(LinkOption option) throws IOException {
-        return Stat.stat(this, option);
+        return LocalFileSystem.INSTANCE.stat(path(), option);
     }
 
     @Override
