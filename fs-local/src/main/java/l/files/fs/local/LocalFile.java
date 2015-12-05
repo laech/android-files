@@ -47,7 +47,6 @@ import static l.files.fs.local.Stat.S_IXOTH;
 import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
 import static l.files.fs.local.Unistd.readlink;
-import static l.files.fs.local.Unistd.symlink;
 
 @AutoValue
 public abstract class LocalFile extends BaseFile {
@@ -277,13 +276,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile createLink(File target) throws IOException {
-        LocalPath targetPath = (LocalPath) target.path();
-        LocalPath linkPath = path();
-        try {
-            symlink(targetPath.toByteArray(), linkPath.toByteArray());
-        } catch (ErrnoException e) {
-            throw e.toIOException(path(), targetPath);
-        }
+        LocalFileSystem.INSTANCE.createLink(target.path(), path());
         return this;
     }
 

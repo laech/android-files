@@ -21,6 +21,7 @@ import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
 import static l.files.fs.local.Unistd.X_OK;
+import static l.files.fs.local.Unistd.symlink;
 
 enum LocalFileSystem implements FileSystem {
 
@@ -56,6 +57,18 @@ enum LocalFileSystem implements FileSystem {
         int mode = S_IRUSR | S_IWUSR;
         int fd = open(path.toByteArray(), flags, mode);
         Unistd.close(fd);
+    }
+
+    @Override
+    public void createLink(Path target, Path link) throws IOException {
+        try {
+
+            symlink(((LocalPath) target).toByteArray(),
+                    ((LocalPath) link).toByteArray());
+
+        } catch (ErrnoException e) {
+            throw e.toIOException(target, link);
+        }
     }
 
     @Override

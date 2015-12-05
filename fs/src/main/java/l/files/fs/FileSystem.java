@@ -12,6 +12,12 @@ public interface FileSystem {
 
     void createFile(Path path) throws IOException;
 
+    /**
+     * @param target the target the link will point to
+     * @param link   the link itself
+     */
+    void createLink(Path target, Path link) throws IOException;
+
     boolean exists(Path path, LinkOption option) throws IOException;
 
     boolean isReadable(Path path) throws IOException;
