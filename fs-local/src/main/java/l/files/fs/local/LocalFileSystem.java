@@ -48,9 +48,11 @@ import static l.files.fs.local.Unistd.X_OK;
 import static l.files.fs.local.Unistd.readlink;
 import static l.files.fs.local.Unistd.symlink;
 
-enum LocalFileSystem implements FileSystem {
+final class LocalFileSystem extends Native implements FileSystem {
+    private LocalFileSystem() {
+    }
 
-    INSTANCE;
+    static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
     private static final int[] PERMISSION_BITS = permissionsToBits();
 

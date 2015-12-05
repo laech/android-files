@@ -34,10 +34,6 @@ public abstract class LocalFile extends BaseFile {
     LocalFile() {
     }
 
-    static {
-        Native.load();
-    }
-
     @Override
     public abstract LocalPath path();
 
