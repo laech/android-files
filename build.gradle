@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
+        classpath 'com.android.tools.build:gradle:2.0.0-alpha2'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.7'
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.2'
     }
