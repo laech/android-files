@@ -5,7 +5,6 @@ import android.os.Parcel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,14 +16,6 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.File.UTF_8;
 
 public final class LocalPath implements Path {
-
-    private static final ThreadLocal<ByteArrayOutputStream> buffers =
-            new ThreadLocal<ByteArrayOutputStream>() {
-                @Override
-                protected ByteArrayOutputStream initialValue() {
-                    return new ByteArrayOutputStream();
-                }
-            };
 
     static final byte DOT = 46; // '.' in UTF-8
     static final byte SEP = 47; // '/' in UTF-8
@@ -80,17 +71,10 @@ public final class LocalPath implements Path {
         return toByteArray();
     }
 
-    @Deprecated
     public byte[] toByteArray() {
-        ByteArrayOutputStream buffer = resetBuffer();
-        toByteArray(buffer);
-        return buffer.toByteArray();
-    }
-
-    private ByteArrayOutputStream resetBuffer() {
-        ByteArrayOutputStream buffer = buffers.get();
-        buffer.reset();
-        return buffer;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        toByteArray(out);
+        return out.toByteArray();
     }
 
     @Override
@@ -131,13 +115,7 @@ public final class LocalPath implements Path {
 
     @Override
     public String toString() {
-        ByteArrayOutputStream buffer = resetBuffer();
-        toByteArray(buffer);
-        try {
-            return buffer.toString(UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return new String(toByteArray(), UTF_8);
     }
 
     @Override
