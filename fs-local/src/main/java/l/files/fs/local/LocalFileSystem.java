@@ -83,6 +83,19 @@ enum LocalFileSystem implements FileSystem {
     }
 
     @Override
+    public void move(Path src, Path dst) throws IOException {
+        try {
+
+            Stdio.rename(
+                    ((LocalPath) src).toByteArray(),
+                    ((LocalPath) dst).toByteArray());
+
+        } catch (ErrnoException e) {
+            throw e.toIOException(src, dst);
+        }
+    }
+
+    @Override
     public boolean exists(Path path, LinkOption option) throws IOException {
         try {
             // access() follows symbolic links

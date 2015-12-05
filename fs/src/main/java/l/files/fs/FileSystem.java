@@ -20,6 +20,8 @@ public interface FileSystem {
 
     Path readLink(Path path) throws IOException;
 
+    void move(Path src, Path dst) throws IOException;
+
     boolean exists(Path path, LinkOption option) throws IOException;
 
     boolean isReadable(Path path) throws IOException;

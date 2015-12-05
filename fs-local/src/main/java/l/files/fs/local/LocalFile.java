@@ -286,13 +286,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void moveTo(File dst) throws IOException {
-        LocalPath dstPath = (LocalPath) dst.path();
-        LocalPath srcPath = path();
-        try {
-            Stdio.rename(srcPath.toByteArray(), dstPath.toByteArray());
-        } catch (ErrnoException e) {
-            throw e.toIOException(srcPath, dstPath);
-        }
+        LocalFileSystem.INSTANCE.move(path(), dst.path());
     }
 
     @Override
