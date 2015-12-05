@@ -10,6 +10,8 @@ import l.files.fs.LinkOption;
 import l.files.fs.Path;
 
 import static l.files.fs.local.ErrnoException.EACCES;
+import static l.files.fs.local.Stat.S_IRWXU;
+import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
 import static l.files.fs.local.Unistd.X_OK;
@@ -21,6 +23,16 @@ enum LocalFileSystem implements FileSystem {
     @Override
     public Stat stat(Path path, LinkOption option) throws IOException {
         return Stat.stat(((LocalPath) path), option);
+    }
+
+    @Override
+    public void createDir(Path path) throws IOException {
+        try {
+            // Same permission bits as java.io.File.mkdir() on Android
+            mkdir(((LocalPath) path).toByteArray(), S_IRWXU);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
+        }
     }
 
     @Override

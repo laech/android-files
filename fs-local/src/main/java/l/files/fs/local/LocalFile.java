@@ -43,7 +43,6 @@ import static l.files.fs.local.Fcntl.open;
 import static l.files.fs.local.Stat.S_IRGRP;
 import static l.files.fs.local.Stat.S_IROTH;
 import static l.files.fs.local.Stat.S_IRUSR;
-import static l.files.fs.local.Stat.S_IRWXU;
 import static l.files.fs.local.Stat.S_IWGRP;
 import static l.files.fs.local.Stat.S_IWOTH;
 import static l.files.fs.local.Stat.S_IWUSR;
@@ -51,7 +50,6 @@ import static l.files.fs.local.Stat.S_IXGRP;
 import static l.files.fs.local.Stat.S_IXOTH;
 import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
-import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.readlink;
 import static l.files.fs.local.Unistd.symlink;
 
@@ -271,12 +269,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile createDir() throws IOException {
-        try {
-            // Same permission bits as java.io.File.mkdir() on Android
-            mkdir(path().toByteArray(), S_IRWXU);
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+        LocalFileSystem.INSTANCE.createDir(path());
         return this;
     }
 
