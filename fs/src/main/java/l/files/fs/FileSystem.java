@@ -6,4 +6,5 @@ public interface FileSystem {
 
     Stat stat(Path path, LinkOption option) throws IOException;
 
+    boolean exists(Path path, LinkOption option) throws IOException;
 }

@@ -4,7 +4,6 @@ import android.os.Parcel;
 
 import com.google.auto.value.AutoValue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -177,16 +176,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public boolean exists(LinkOption option) throws IOException {
-        requireNonNull(option, "option");
-        try {
-            // access() follows symbolic links
-            // faccessat(AT_SYMLINK_NOFOLLOW) doesn't work on android
-            // so use stat here
-            stat(option);
-            return true;
-        } catch (FileNotFoundException e) {
-            return false;
-        }
+        return LocalFileSystem.INSTANCE.exists(path(), option);
     }
 
     @Override
