@@ -8,11 +8,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.FileSystem;
+import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 
 import static java.util.Collections.unmodifiableSet;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -81,7 +83,9 @@ enum LocalFileSystem implements FileSystem {
     }
 
     @Override
-    public void setPermissions(Path path, Set<Permission> permissions) throws IOException {
+    public void setPermissions(Path path, Set<Permission> permissions)
+            throws IOException {
+
         int mode = 0;
         for (Permission permission : permissions) {
             mode |= PERMISSION_BITS[permission.ordinal()];
@@ -92,6 +96,27 @@ enum LocalFileSystem implements FileSystem {
             throw e.toIOException(path);
         }
     }
+
+    @Override
+    public void setLastModifiedTime(Path path, LinkOption option, Instant instant)
+            throws IOException {
+
+        try {
+            byte[] pathBytes = ((LocalPath) path).toByteArray();
+            long seconds = instant.seconds();
+            int nanos = instant.nanos();
+            boolean followLink = option == FOLLOW;
+            setModificationTime(pathBytes, seconds, nanos, followLink);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
+        }
+    }
+
+    private static native void setModificationTime(
+            byte[] path,
+            long seconds,
+            int nanos,
+            boolean followLink) throws ErrnoException;
 
     @Override
     public Stat stat(Path path, LinkOption option) throws IOException {

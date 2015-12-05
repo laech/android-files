@@ -12,7 +12,7 @@ void setTimes(
 
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, path);
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
     int flags = JNI_FALSE == followLink ? AT_SYMLINK_NOFOLLOW : 0;
@@ -23,7 +23,7 @@ void setTimes(
 
 }
 
-void Java_l_files_fs_local_LocalFile_setModificationTime(
+void Java_l_files_fs_local_LocalFileSystem_setModificationTime(
         JNIEnv *env,
         jclass clazz,
         jbyteArray jpath,

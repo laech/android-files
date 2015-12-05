@@ -7,7 +7,11 @@ import java.util.Set;
 
 public interface FileSystem {
 
-    void setPermissions(Path path, Set<Permission> permissions) throws IOException;
+    void setPermissions(Path path, Set<Permission> permissions)
+            throws IOException;
+
+    void setLastModifiedTime(Path path, LinkOption option, Instant instant)
+            throws IOException;
 
     Stat stat(Path path, LinkOption option) throws IOException;
 

@@ -22,7 +22,6 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 
-import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 
 @AutoValue
@@ -248,24 +247,8 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void setLastModifiedTime(LinkOption option, Instant instant) throws IOException {
-
-        requireNonNull(option, "option");
-        requireNonNull(instant, "instant");
-        try {
-            long seconds = instant.seconds();
-            int nanos = instant.nanos();
-            boolean followLink = option == FOLLOW;
-            setModificationTime(path().toByteArray(), seconds, nanos, followLink);
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+        LocalFileSystem.INSTANCE.setLastModifiedTime(path(), option, instant);
     }
-
-    private static native void setModificationTime(
-            byte[] path,
-            long seconds,
-            int nanos,
-            boolean followLink) throws ErrnoException;
 
     @Override
     public void setPermissions(Set<Permission> permissions) throws IOException {
