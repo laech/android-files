@@ -35,7 +35,6 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.Stat.S_IRGRP;
 import static l.files.fs.local.Stat.S_IROTH;
 import static l.files.fs.local.Stat.S_IRUSR;
@@ -291,16 +290,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void delete() throws IOException {
-        while (true) {
-            try {
-                Stdio.remove(path().toByteArray());
-                break;
-            } catch (ErrnoException e) {
-                if (e.errno != EAGAIN) {
-                    throw e.toIOException(path());
-                }
-            }
-        }
+        LocalFileSystem.INSTANCE.delete(path());
     }
 
     @Override

@@ -22,6 +22,8 @@ public interface FileSystem {
 
     void move(Path src, Path dst) throws IOException;
 
+    void delete(Path path) throws IOException;
+
     boolean exists(Path path, LinkOption option) throws IOException;
 
     boolean isReadable(Path path) throws IOException;

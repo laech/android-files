@@ -10,6 +10,7 @@ import l.files.fs.LinkOption;
 import l.files.fs.Path;
 
 import static l.files.fs.local.ErrnoException.EACCES;
+import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.Fcntl.O_CREAT;
 import static l.files.fs.local.Fcntl.O_EXCL;
 import static l.files.fs.local.Fcntl.O_RDWR;
@@ -92,6 +93,20 @@ enum LocalFileSystem implements FileSystem {
 
         } catch (ErrnoException e) {
             throw e.toIOException(src, dst);
+        }
+    }
+
+    @Override
+    public void delete(Path path) throws IOException {
+        while (true) {
+            try {
+                Stdio.remove(((LocalPath) path).toByteArray());
+                break;
+            } catch (ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw e.toIOException(path);
+                }
+            }
         }
     }
 
