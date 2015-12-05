@@ -288,7 +288,10 @@ final class LocalObservable extends Native
 
                     byte[] name = Arrays.copyOf(nameBuffer, nameLength);
                     LocalPath child = root.resolve(name);
-                    childrenConsumer.accept(child);
+                    if (!childrenConsumer.accept(child)) {
+                        currentThread().interrupt();
+                        return false;
+                    }
 
                     if (limitReached[0] || !isDirectory || released.get()) {
                         return !currentThread().isInterrupted();
@@ -319,6 +322,10 @@ final class LocalObservable extends Native
                 }
 
             });
+
+            if (currentThread().isInterrupted()) {
+                throw new InterruptedException();
+            }
 
         } catch (Throwable e) {
             throw closer.rethrow(e);

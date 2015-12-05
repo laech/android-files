@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -23,8 +22,6 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
-
-import static l.files.fs.LinkOption.FOLLOW;
 
 @AutoValue
 public abstract class LocalFile extends BaseFile {
@@ -87,8 +84,9 @@ public abstract class LocalFile extends BaseFile {
                 observer,
                 new FileSystem.Consumer<Path>() {
                     @Override
-                    public void accept(Path entry) throws IOException {
+                    public boolean accept(Path entry) throws IOException {
                         childrenConsumer.accept(of(((LocalPath) entry)));
+                        return true;
                     }
                 });
     }
@@ -144,7 +142,7 @@ public abstract class LocalFile extends BaseFile {
             final LinkOption option,
             final C collection) throws IOException {
 
-        list(option, false, new Consumer<RuntimeException>() {
+        list(option, new Consumer<RuntimeException>() {
             @Override
             public boolean accept(File file) {
                 collection.add(file);
@@ -159,7 +157,7 @@ public abstract class LocalFile extends BaseFile {
             final LinkOption option,
             final C collection) throws IOException {
 
-        list(option, true, new Consumer<RuntimeException>() {
+        listDirs(option, new Consumer<RuntimeException>() {
             @Override
             public boolean accept(File file) {
                 collection.add(file);
@@ -171,41 +169,34 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public <E extends Throwable> void list(
-            LinkOption option,
-            Consumer<E> consumer) throws IOException, E {
+            final LinkOption option,
+            final Consumer<E> consumer) throws IOException {
 
-        list(option, false, consumer);
+        LocalFileSystem.INSTANCE.list(
+                path(),
+                option,
+                new FileSystem.Consumer<Path>() {
+                    @Override
+                    public boolean accept(Path entry) throws IOException {
+                        return consumer.accept(of(((LocalPath) entry)));
+                    }
+                });
     }
 
     @Override
     public <E extends Throwable> void listDirs(
-            LinkOption option,
-            Consumer<E> consumer) throws IOException, E {
-
-        list(option, true, consumer);
-    }
-
-    private <E extends Throwable> void list(
             final LinkOption option,
-            final boolean dirOnly,
-            final Consumer<E> consumer) throws IOException, E {
+            final Consumer<E> consumer) throws IOException {
 
-        try {
-            Dirent.list(path().toByteArray(), option == FOLLOW, new Dirent.Callback<E>() {
-
-                @Override
-                public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory) throws E {
-                    if (dirOnly && !isDirectory) {
-                        return true;
+        LocalFileSystem.INSTANCE.listDirs(
+                path(),
+                option,
+                new FileSystem.Consumer<Path>() {
+                    @Override
+                    public boolean accept(Path entry) throws IOException {
+                        return consumer.accept(of(((LocalPath) entry)));
                     }
-                    byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                    return consumer.accept(resolve(name));
-                }
-
-            });
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+                });
     }
 
     @Override

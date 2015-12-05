@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -254,6 +255,56 @@ final class LocalFileSystem extends Native implements FileSystem {
         LocalObservable observable = new LocalObservable(((LocalPath) path), observer);
         observable.start(option, childrenConsumer);
         return observable;
+    }
+
+    @Override
+    public void list(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException {
+
+        list(path, option, false, consumer);
+    }
+
+    @Override
+    public void listDirs(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException {
+
+        list(path, option, true, consumer);
+    }
+
+    private void list(
+            final Path path,
+            final LinkOption option,
+            final boolean dirOnly,
+            final Consumer<? super Path> consumer) throws IOException {
+
+        final LocalPath localPath = (LocalPath) path;
+        try {
+            Dirent.list(
+                    localPath.toByteArray(),
+                    option == FOLLOW,
+                    new Dirent.Callback<IOException>() {
+
+                        @Override
+                        public boolean onNext(
+                                byte[] nameBuffer,
+                                int nameLength,
+                                boolean isDirectory) throws IOException {
+
+                            if (dirOnly && !isDirectory) {
+                                return true;
+                            }
+                            byte[] name = Arrays.copyOf(nameBuffer, nameLength);
+                            return consumer.accept(localPath.resolve(name));
+                        }
+
+                    });
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
+        }
     }
 
     @Override

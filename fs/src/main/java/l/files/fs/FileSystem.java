@@ -46,11 +46,24 @@ public interface FileSystem {
             Consumer<? super Path> childrenConsumer)
             throws IOException, InterruptedException;
 
+    void list(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException;
+
+    void listDirs(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException;
+
     InputStream newInputStream(Path path) throws IOException;
 
     OutputStream newOutputStream(Path path, boolean append) throws IOException;
 
     interface Consumer<E> {
-        void accept(E entry) throws IOException;
+        /**
+         * @return true to continue, false to stop for multi-item callbacks
+         */
+        boolean accept(E entry) throws IOException;
     }
 }

@@ -322,7 +322,7 @@ public interface File extends Parcelable {
 
     interface Consumer<E extends Throwable> {
 
-        boolean accept(File file) throws E;
+        boolean accept(File file) throws IOException;
 
     }
 
