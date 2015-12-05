@@ -36,6 +36,8 @@ public interface File extends Parcelable {
      */
     Path path();
 
+    String pathString();
+
     /**
      * Gets the name of this file, or empty if this is the root file.
      */
@@ -75,6 +77,8 @@ public interface File extends Parcelable {
      * @throws IllegalArgumentException if {@code !this.startsWith(fromParent)}
      */
     File rebase(File fromParent, File toParent);
+
+    boolean equalsOrIsDecedentOf(File that);
 
     /**
      * True if this file is considered a hidden file.

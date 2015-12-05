@@ -113,7 +113,7 @@ final class HierarchyAdapter extends BaseAdapter {
 
         TextView titleView = (TextView) view.findViewById(title);
         Name name = res.name();
-        titleView.setText(!name.isEmpty() ? name.toString() : res.path().toString());
+        titleView.setText(!name.isEmpty() ? name.toString() : res.pathString());
         titleView.setEnabled(enabled);
 
         return view;

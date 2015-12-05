@@ -55,6 +55,11 @@ public abstract class LocalFile extends BaseFile {
     }
 
     @Override
+    public String pathString() {
+        return path().toString();
+    }
+
+    @Override
     public LocalName name() {
         return path().name();
     }
@@ -112,6 +117,11 @@ public abstract class LocalFile extends BaseFile {
         LocalPath src = (LocalPath) fromParent.path();
         LocalPath dst = (LocalPath) toParent.path();
         return of(path().rebase(src, dst));
+    }
+
+    @Override
+    public boolean equalsOrIsDecedentOf(File that) {
+        return equals(that) || path().startsWith(that.path());
     }
 
     @Override
