@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 public interface Path extends Parcelable {
@@ -25,10 +26,14 @@ public interface Path extends Parcelable {
     @Override
     String toString();
 
+    URI toUri();
+
     /**
      * @return the number of bytes written
      */
     int toByteArray(OutputStream out) throws IOException;
+
+    byte[] toByteArray() throws IOException;
 
     /**
      * @return the number of bytes written
@@ -42,6 +47,12 @@ public interface Path extends Parcelable {
 
     @Nullable
     Path parent();
+
+    Path resolve(String name);
+
+    Path resolve(Name name);
+
+    Path rebase(Path src, Path dst);
 
     /**
      * Returns true if the given path is an ancestor of this path,

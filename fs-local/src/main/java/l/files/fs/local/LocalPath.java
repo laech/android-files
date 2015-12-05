@@ -3,13 +3,16 @@ package l.files.fs.local;
 import android.os.Parcel;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import l.files.fs.FileSystem;
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.lang.System.arraycopy;
@@ -57,6 +60,10 @@ public final class LocalPath implements Path {
         this.absolute = absolute;
     }
 
+    public static LocalPath of(File file) {
+        return of(file.getPath());
+    }
+
     public static LocalPath of(String path) {
         return of(path.getBytes(UTF_8));
     }
@@ -72,6 +79,7 @@ public final class LocalPath implements Path {
         return toByteArray();
     }
 
+    @Override
     public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         toByteArray(out);
@@ -125,6 +133,11 @@ public final class LocalPath implements Path {
     }
 
     @Override
+    public URI toUri() {
+        return new java.io.File(toString()).toURI();
+    }
+
+    @Override
     public int hashCode() {
         int result = Arrays.deepHashCode(names);
         return 31 * result + (absolute ? 1 : 0);
@@ -142,6 +155,16 @@ public final class LocalPath implements Path {
         return absolute == that.absolute &&
                 Arrays.deepEquals(names, that.names);
 
+    }
+
+    @Override
+    public LocalPath resolve(String name) {
+        return resolve(name.getBytes(UTF_8));
+    }
+
+    @Override
+    public LocalPath resolve(Name name) {
+        return resolve(((LocalName) name).bytes());
     }
 
     LocalPath resolve(byte[] path) {
@@ -229,6 +252,11 @@ public final class LocalPath implements Path {
         }
 
         return true;
+    }
+
+    @Override
+    public LocalPath rebase(Path src, Path dst) {
+        return rebase(((LocalPath) src), ((LocalPath) dst));
     }
 
     LocalPath rebase(LocalPath src, LocalPath dst) {

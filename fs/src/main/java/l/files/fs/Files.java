@@ -52,6 +52,23 @@ public final class Files {
         return path.fileSystem().stat(path, option);
     }
 
+    public static boolean exists(Path path, LinkOption option) throws IOException {
+        return path.fileSystem().exists(path, option);
+    }
+
+
+    public static boolean isReadable(Path path) throws IOException {
+        return path.fileSystem().isReadable(path);
+    }
+
+    public static boolean isWritable(Path path) throws IOException {
+        return path.fileSystem().isWritable(path);
+    }
+
+    public static boolean isExecutable(Path path) throws IOException {
+        return path.fileSystem().isExecutable(path);
+    }
+
     public static Path createDirs(Path path) throws IOException {
         try {
             if (stat(path, NOFOLLOW).isDirectory()) {
@@ -102,6 +119,15 @@ public final class Files {
     public static Path createFile(Path path) throws IOException {
         path.fileSystem().createFile(path);
         return path;
+    }
+
+    public static Path createLink(Path target, Path link) throws IOException {
+        target.fileSystem().createLink(target, link);
+        return link;
+    }
+
+    public static void move(Path src, Path dst) throws IOException {
+        src.fileSystem().move(src, dst);
     }
 
     public static void traverse(
@@ -169,6 +195,21 @@ public final class Files {
             final C collection) throws IOException {
 
         path.fileSystem().list(path, option, new Consumer<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                collection.add(entry);
+                return true;
+            }
+        });
+        return collection;
+    }
+
+    public static <C extends Collection<? super Path>> C listDirs(
+            final Path path,
+            final LinkOption option,
+            final C collection) throws IOException {
+
+        path.fileSystem().listDirs(path, option, new Consumer<Path>() {
             @Override
             public boolean accept(Path entry) throws IOException {
                 collection.add(entry);
@@ -291,6 +332,13 @@ public final class Files {
 
     private static class UnknownCharsetException extends IOException {
 
+    }
+
+    public static void setLastModifiedTime(
+            Path path,
+            LinkOption option,
+            Instant time) throws IOException {
+        path.fileSystem().setLastModifiedTime(path, option, time);
     }
 
     public static Path readLink(Path path) throws IOException {
