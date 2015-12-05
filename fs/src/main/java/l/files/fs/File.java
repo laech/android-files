@@ -2,6 +2,7 @@ package l.files.fs;
 
 import android.os.Parcelable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,6 +38,8 @@ public interface File extends Parcelable {
     Path path();
 
     String pathString();
+
+    void pathBytes(ByteArrayOutputStream out);
 
     /**
      * Gets the name of this file, or empty if this is the root file.

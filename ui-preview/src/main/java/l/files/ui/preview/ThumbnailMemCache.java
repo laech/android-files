@@ -5,8 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
-import java.io.IOException;
-
 import l.files.fs.File;
 import l.files.fs.Stat;
 
@@ -43,11 +41,7 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
 
     @Override
     void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
-        try {
-            file.path().writeTo(key.asOutputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        file.pathBytes(key.asOutputStream());
         key.putInt(constraint.width())
                 .putInt(constraint.height());
     }

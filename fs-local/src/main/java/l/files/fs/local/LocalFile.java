@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import com.google.auto.value.AutoValue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,6 +58,15 @@ public abstract class LocalFile extends BaseFile {
     @Override
     public String pathString() {
         return path().toString();
+    }
+
+    @Override
+    public void pathBytes(ByteArrayOutputStream out) {
+        try {
+            path().toByteArray(out);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
