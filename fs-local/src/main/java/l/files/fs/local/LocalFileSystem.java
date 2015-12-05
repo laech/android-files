@@ -10,6 +10,8 @@ import java.util.Set;
 import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Observation;
+import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 
@@ -239,6 +241,19 @@ final class LocalFileSystem extends Native implements FileSystem {
             }
             throw e.toIOException(path);
         }
+    }
+
+    @Override
+    public Observation observe(
+            Path path,
+            LinkOption option,
+            Observer observer,
+            Consumer<? super Path> childrenConsumer)
+            throws IOException, InterruptedException {
+
+        LocalObservable observable = new LocalObservable(((LocalPath) path), observer);
+        observable.start(option, childrenConsumer);
+        return observable;
     }
 
     @Override

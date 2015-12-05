@@ -39,7 +39,18 @@ public interface FileSystem {
 
     boolean isExecutable(Path path) throws IOException;
 
+    Observation observe(
+            Path path,
+            LinkOption option,
+            Observer observer,
+            Consumer<? super Path> childrenConsumer)
+            throws IOException, InterruptedException;
+
     InputStream newInputStream(Path path) throws IOException;
 
     OutputStream newOutputStream(Path path, boolean append) throws IOException;
+
+    interface Consumer<E> {
+        void accept(E entry) throws IOException;
+    }
 }

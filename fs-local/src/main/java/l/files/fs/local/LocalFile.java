@@ -15,11 +15,13 @@ import java.util.Set;
 import l.files.fs.BaseFile;
 import l.files.fs.File;
 import l.files.fs.FileConsumer;
+import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
+import l.files.fs.Path;
 import l.files.fs.Permission;
 
 import static l.files.fs.LinkOption.FOLLOW;
@@ -74,13 +76,21 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public Observation observe(
-            LinkOption option,
-            Observer observer,
-            FileConsumer childrenConsumer) throws IOException, InterruptedException {
+            final LinkOption option,
+            final Observer observer,
+            final FileConsumer childrenConsumer)
+            throws IOException, InterruptedException {
 
-        LocalObservable observable = new LocalObservable(this, observer);
-        observable.start(option, childrenConsumer);
-        return observable;
+        return LocalFileSystem.INSTANCE.observe(
+                path(),
+                option,
+                observer,
+                new FileSystem.Consumer<Path>() {
+                    @Override
+                    public void accept(Path entry) throws IOException {
+                        childrenConsumer.accept(of(((LocalPath) entry)));
+                    }
+                });
     }
 
     @Override
