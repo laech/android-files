@@ -38,7 +38,7 @@ public final class LocalName implements Name {
     public String base() {
         int i = indexOfExtSeparator();
         return i != -1
-                ? new String(Arrays.copyOfRange(bytes, 0, i), UTF_8)
+                ? new String(bytes, 0, i, UTF_8)
                 : toString();
     }
 
@@ -48,8 +48,9 @@ public final class LocalName implements Name {
         if (i == -1) {
             return "";
         }
-        byte[] ext = Arrays.copyOfRange(bytes, i + 1, bytes.length);
-        return new String(ext, UTF_8);
+        int start = i + 1;
+        int count = bytes.length - start;
+        return new String(bytes, start, count, UTF_8);
     }
 
     @Override
