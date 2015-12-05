@@ -25,16 +25,16 @@ final class LocalStreams {
     private LocalStreams() {
     }
 
-    static FileInputStream newInputStream(LocalFile file) throws IOException {
+    static FileInputStream newInputStream(LocalPath path) throws IOException {
 
-        int fd = newFd(file, O_RDONLY, 0);
+        int fd = newFd(path, O_RDONLY, 0);
         try {
 
             checkNotDirectory(fd);
 
             FileDescriptor descriptor = toFileDescriptor(fd);
             if (descriptor == null) {
-                return new FileInputStream(file.path().toString());
+                return new FileInputStream(path.toString());
             } else {
                 return new LocalInputStream(descriptor, fd);
             }
@@ -49,7 +49,7 @@ final class LocalStreams {
         }
     }
 
-    static FileOutputStream newOutputStream(LocalFile file, boolean append) throws IOException {
+    static FileOutputStream newOutputStream(LocalPath path, boolean append) throws IOException {
 
         // Same flags and mode as java.io.FileOutputStream on Android
 
@@ -61,14 +61,14 @@ final class LocalStreams {
         }
 
         // noinspection OctalInteger
-        int fd = newFd(file, flags, 0600);
+        int fd = newFd(path, flags, 0600);
         try {
 
             checkNotDirectory(fd);
 
             FileDescriptor descriptor = toFileDescriptor(fd);
             if (descriptor == null) {
-                return new FileOutputStream(file.path().toString());
+                return new FileOutputStream(path.toString());
             } else {
                 return new LocalOutputStream(descriptor, fd);
             }
@@ -84,25 +84,25 @@ final class LocalStreams {
     }
 
 
-    private static int newFd(LocalFile file, int flags, int mode) throws IOException {
+    private static int newFd(LocalPath path, int flags, int mode) throws IOException {
 
         // TODO make O_NOATIME an option?
 
         try {
 
-            return Fcntl.open(file.path().bytes(), flags | O_NOATIME, mode);
+            return Fcntl.open(path.toByteArray(), flags | O_NOATIME, mode);
 
         } catch (ErrnoException e) {
             // EPERM for No permission for O_NOATIME
             if (e.errno != EPERM) {
-                throw e.toIOException(file.path());
+                throw e.toIOException(path);
             }
         }
 
         try {
-            return Fcntl.open(file.path().bytes(), flags, mode);
+            return Fcntl.open(path.toByteArray(), flags, mode);
         } catch (ErrnoException e) {
-            throw e.toIOException(file.path());
+            throw e.toIOException(path);
         }
 
     }

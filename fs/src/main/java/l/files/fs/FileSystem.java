@@ -1,6 +1,8 @@
 package l.files.fs;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public interface FileSystem {
 
@@ -13,4 +15,8 @@ public interface FileSystem {
     boolean isWritable(Path path) throws IOException;
 
     boolean isExecutable(Path path) throws IOException;
+
+    InputStream newInputStream(Path path) throws IOException;
+
+    OutputStream newOutputStream(Path path, boolean append) throws IOException;
 }

@@ -2,6 +2,8 @@ package l.files.fs.local;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
@@ -59,6 +61,16 @@ enum LocalFileSystem implements FileSystem {
             }
             throw e.toIOException(path);
         }
+    }
+
+    @Override
+    public InputStream newInputStream(Path path) throws IOException {
+        return LocalStreams.newInputStream((LocalPath) path);
+    }
+
+    @Override
+    public OutputStream newOutputStream(Path path, boolean append) throws IOException {
+        return LocalStreams.newOutputStream((LocalPath) path, append);
     }
 
 }

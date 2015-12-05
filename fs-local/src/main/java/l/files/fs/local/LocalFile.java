@@ -261,12 +261,12 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public InputStream newInputStream() throws IOException {
-        return LocalStreams.newInputStream(this);
+        return LocalFileSystem.INSTANCE.newInputStream(path());
     }
 
     @Override
     public OutputStream newOutputStream(boolean append) throws IOException {
-        return LocalStreams.newOutputStream(this, append);
+        return LocalFileSystem.INSTANCE.newOutputStream(path(), append);
     }
 
     @Override
