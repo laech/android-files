@@ -14,8 +14,8 @@ final class BasicDetector extends AbstractDetector {
     }
 
     @Override
-    String detectFile(File file, Stat stat) {
-        String ext = file.name().ext().toLowerCase(ENGLISH);
+    String detectFile(Path path, Stat stat) {
+        String ext = path.name().ext().toLowerCase(ENGLISH);
         String type = MimeUtils.guessMimeTypeFromExtension(ext);
         return type != null ? type : MEDIA_TYPE_OCTET_STREAM;
     }

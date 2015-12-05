@@ -286,7 +286,7 @@ final class LocalFileSystem extends Native implements FileSystem {
             Dirent.list(
                     localPath.toByteArray(),
                     option == FOLLOW,
-                    new Dirent.Callback<IOException>() {
+                    new Dirent.Callback() {
 
                         @Override
                         public boolean onNext(

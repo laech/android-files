@@ -31,6 +31,7 @@ dependencies {
 
     compile project(':base')
 
+    compile "com.android.support:support-annotations:$supportLibVersion"
     compile 'com.ibm.icu:icu4j:56.1'
     compile 'org.apache.tika:tika-core:1.10'
 

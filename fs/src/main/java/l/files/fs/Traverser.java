@@ -9,29 +9,30 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ListIterator;
 
-import l.files.fs.Visitor.Result;
+import l.files.fs.TraversalCallback.Result;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Traverser {
 
-    private final File root;
+    private final Path root;
     private final LinkOption rootOption;
-    private final Visitor visitor;
+    private final TraversalCallback<Path> visitor;
     private final Deque<Node> stack;
-    private final Comparator<File> childrenComparator;
+    private final Comparator<Path> childrenComparator;
 
+    @SuppressWarnings("unchecked")
     Traverser(
-            File root,
+            Path root,
             LinkOption option,
-            Visitor visitor,
-            Comparator<File> childrenComparator) {
+            TraversalCallback<? super Path> visitor,
+            Comparator<Path> childrenComparator) {
 
         this.childrenComparator = childrenComparator;
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
-        this.visitor = requireNonNull(visitor);
+        this.visitor = (TraversalCallback<Path>) requireNonNull(visitor);
         this.stack = new ArrayDeque<>();
         this.stack.push(new Node(root));
     }
@@ -44,10 +45,10 @@ final class Traverser {
 
                 Result result;
                 try {
-                    result = visitor.onPreVisit(node.file);
+                    result = visitor.onPreVisit(node.path);
                 } catch (IOException e) {
                     stack.pop();
-                    visitor.onException(node.file, e);
+                    visitor.onException(node.path, e);
                     continue;
                 }
 
@@ -62,7 +63,7 @@ final class Traverser {
                 try {
                     pushChildren(stack, node);
                 } catch (IOException e) {
-                    visitor.onException(node.file, e);
+                    visitor.onException(node.path, e);
                 }
 
             } else {
@@ -70,9 +71,9 @@ final class Traverser {
                 stack.pop();
                 Result result;
                 try {
-                    result = visitor.onPostVisit(node.file);
+                    result = visitor.onPostVisit(node.path);
                 } catch (IOException e) {
-                    visitor.onException(node.file, e);
+                    visitor.onException(node.path, e);
                     continue;
                 }
                 switch (result) {
@@ -85,28 +86,28 @@ final class Traverser {
     }
 
     private void pushChildren(Deque<Node> stack, Node parent) throws IOException {
-        LinkOption option = parent.file.equals(root) ? rootOption : NOFOLLOW;
-        if (!parent.file.stat(option).isDirectory()) {
+        LinkOption option = parent.path.equals(root) ? rootOption : NOFOLLOW;
+        if (!Files.stat(parent.path, option).isDirectory()) {
             return;
         }
 
-        List<File> children = parent.file.list(option, new ArrayList<File>());
+        List<Path> children = Files.list(parent.path, option, new ArrayList<Path>());
         if (childrenComparator != null) {
             Collections.sort(children, childrenComparator);
         }
 
-        ListIterator<File> it = children.listIterator(children.size());
+        ListIterator<Path> it = children.listIterator(children.size());
         while (it.hasPrevious()) {
             stack.push(new Node(it.previous()));
         }
     }
 
     private static class Node {
-        final File file;
+        final Path path;
         boolean visited;
 
-        private Node(File file) {
-            this.file = requireNonNull(file, "file");
+        private Node(Path path) {
+            this.path = requireNonNull(path);
         }
     }
 }

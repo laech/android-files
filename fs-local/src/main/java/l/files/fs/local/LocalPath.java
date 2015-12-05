@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import l.files.fs.FileSystem;
 import l.files.fs.Path;
 
 import static java.lang.System.arraycopy;
@@ -114,6 +115,11 @@ public final class LocalPath implements Path {
     }
 
     @Override
+    public FileSystem fileSystem() {
+        return LocalFileSystem.INSTANCE;
+    }
+
+    @Override
     public String toString() {
         return new String(toByteArray(), UTF_8);
     }
@@ -182,10 +188,8 @@ public final class LocalPath implements Path {
         return parts.toArray(new byte[parts.size()][]);
     }
 
-    /**
-     * Returns the parent path, or null.
-     */
-    LocalPath parent() {
+    @Override
+    public LocalPath parent() {
         if (absolute && names.length == 1) {
             return new LocalPath(EMPTY_NAMES, true); // "/"
         } else if (names.length < 2) {

@@ -9,6 +9,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import l.files.fs.FileSystem.Consumer;
+
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
@@ -37,9 +39,9 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     }
 
     Observation start(
-            File file,
+            Path path,
             LinkOption option,
-            FileConsumer childrenConsumer,
+            Consumer<? super Path> childrenConsumer,
             long batchInterval,
             TimeUnit batchInternalUnit) throws IOException, InterruptedException {
 
@@ -49,7 +51,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
         try {
 
-            observation = file.observe(option, this, childrenConsumer);
+            observation = Files.observe(path, option, this, childrenConsumer);
             if (!observation.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
                         this, batchInterval, batchInterval, batchInternalUnit);

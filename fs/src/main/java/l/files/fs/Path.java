@@ -1,6 +1,7 @@
 package l.files.fs;
 
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,6 +9,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 public interface Path extends Parcelable {
+
+    FileSystem fileSystem();
 
     /**
      * Returns a string representation of this path.
@@ -36,6 +39,9 @@ public interface Path extends Parcelable {
      * Returns the file name of this path.
      */
     Name name();
+
+    @Nullable
+    Path parent();
 
     /**
      * Returns true if the given path is an ancestor of this path,

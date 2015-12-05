@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Represents a file system file, such as a file or directory.
  */
+@Deprecated
 public interface File extends Parcelable {
 
     String MEDIA_TYPE_OCTET_STREAM = "application/octet-stream";

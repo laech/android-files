@@ -13,13 +13,13 @@ public final class MetaMagicDetectorTest extends AbstractDetectorTest {
 
     @Test
     public void can_detect_by_name() throws Exception {
-        File file = createTextFile("a", "txt", "");
+        Path file = createTextFile("a", "txt", "");
         assertEquals("text/plain", detector().detect(file));
     }
 
     @Test
     public void can_detect_by_content() throws Exception {
-        File file = createTextFile("a", "png");
+        Path file = createTextFile("a", "png");
         assertEquals("text/plain", detector().detect(file));
     }
 

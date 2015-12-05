@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 import l.files.base.io.Closer;
 
+import static l.files.fs.Files.newInputStream;
+
 /**
  * Detects the media type of the underlying file by reading it's header.
  */
@@ -18,12 +20,12 @@ final class MagicDetector extends AbstractDetector {
     }
 
     @Override
-    String detectFile(File file, Stat stat) throws IOException {
+    String detectFile(Path path, Stat stat) throws IOException {
 
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(file.newInputStream());
+            InputStream in = closer.register(newInputStream(path));
             return TikaHolder.tika.detect(in);
 
         } catch (TaggedIOException e) {

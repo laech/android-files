@@ -26,6 +26,7 @@ import l.files.fs.Permission;
 
 import static l.files.fs.LinkOption.FOLLOW;
 
+@Deprecated
 @AutoValue
 public abstract class LocalFile extends BaseFile {
 
@@ -49,6 +50,11 @@ public abstract class LocalFile extends BaseFile {
 
     public static LocalFile of(LocalPath path) {
         return new AutoValue_LocalFile(path);
+    }
+
+    @Override
+    protected File newInstance(Path path) {
+        return of((LocalPath) path);
     }
 
     public URI uri() {

@@ -1,37 +1,24 @@
 package l.files.fs;
 
-import com.ibm.icu.text.CharsetDetector;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import l.files.base.io.Closer;
-
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
-import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.LinkOption.NOFOLLOW;
 
+@Deprecated
 public abstract class BaseFile implements File {
-
-    private static final int BUFFER_SIZE = 8192;
 
     @Override
     public List<File> hierarchy() {
@@ -45,45 +32,13 @@ public abstract class BaseFile implements File {
 
     @Override
     public File createDirs() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isDirectory()) {
-                return this;
-            }
-        } catch (FileNotFoundException ignore) {
-        }
-
-        File parent = parent();
-        if (parent != null) {
-            parent.createDirs();
-        }
-
-        try {
-            createDir();
-        } catch (AlreadyExist ignore) {
-        }
-
+        Files.createDirs(path());
         return this;
     }
 
     @Override
     public File createFiles() throws IOException {
-        try {
-            if (stat(NOFOLLOW).isRegularFile()) {
-                return this;
-            }
-        } catch (FileNotFoundException ignore) {
-        }
-
-        File parent = parent();
-        if (parent != null) {
-            parent.createDirs();
-        }
-
-        try {
-            createFile();
-        } catch (AlreadyExist ignore) {
-        }
-
+        Files.createFiles(path());
         return this;
     }
 
@@ -94,12 +49,43 @@ public abstract class BaseFile implements File {
 
     @Override
     public void traverse(
-            LinkOption option,
-            Visitor visitor,
-            Comparator<File> childrenComparator) throws IOException {
+            final LinkOption option,
+            final Visitor visitor,
+            final Comparator<File> childrenComparator) throws IOException {
 
-        new Traverser(this, option, visitor, childrenComparator).traverse();
+        Files.traverse(path(), option, new TraversalCallback<Path>() {
+
+            private Result convert(Visitor.Result result) {
+                switch (result) {
+                    case CONTINUE:
+                        return Result.CONTINUE;
+                    case SKIP:
+                        return Result.SKIP;
+                    case TERMINATE:
+                        return Result.TERMINATE;
+                    default:
+                        throw new IllegalStateException();
+                }
+            }
+
+            @Override
+            public Result onPreVisit(Path path) throws IOException {
+                return convert(visitor.onPreVisit(newInstance(path)));
+            }
+
+            @Override
+            public Result onPostVisit(Path path) throws IOException {
+                return convert(visitor.onPostVisit(newInstance(path)));
+            }
+
+            @Override
+            public void onException(Path path, IOException e) throws IOException {
+                visitor.onException(newInstance(path), e);
+            }
+        });
     }
+
+    protected abstract File newInstance(Path path);
 
     @Override
     public Observation observe(LinkOption option, Observer observer)
@@ -115,209 +101,131 @@ public abstract class BaseFile implements File {
 
     @Override
     public Observation observe(
-            LinkOption option,
-            BatchObserver batchObserver,
-            FileConsumer childrenConsumer,
-            long batchInterval,
-            TimeUnit batchInternalUnit) throws IOException, InterruptedException {
+            final LinkOption option,
+            final BatchObserver batchObserver,
+            final FileConsumer childrenConsumer,
+            final long batchInterval,
+            final TimeUnit batchInternalUnit) throws IOException, InterruptedException {
 
-        return new BatchObserverNotifier(batchObserver)
-                .start(this, option, childrenConsumer, batchInterval, batchInternalUnit);
+        return Files.observe(
+                path(),
+                option,
+                batchObserver,
+                new FileSystem.Consumer<Path>() {
+                    @Override
+                    public boolean accept(Path entry) throws IOException {
+                        childrenConsumer.accept(resolve(entry.name()));
+                        return true;
+                    }
+                },
+                batchInterval,
+                batchInternalUnit);
 
     }
 
     @Override
     public void deleteIfExists() throws IOException {
-        try {
-            delete();
-        } catch (FileNotFoundException ignored) {
-        }
+        Files.deleteIfExists(path());
     }
 
     @Override
     public void deleteRecursive() throws IOException {
-        traverse(NOFOLLOW, new Visitor.Base() {
-
-            @Override
-            public Result onPostVisit(File file) throws IOException {
-                file.deleteIfExists();
-                return super.onPostVisit(file);
-            }
-
-            @Override
-            public void onException(File file, IOException e) throws IOException {
-                if (e instanceof FileNotFoundException) {
-                    return;
-                }
-                super.onException(file, e);
-            }
-
-        });
+        Files.deleteRecursive(path());
     }
 
     @Override
     public void deleteRecursiveIfExists() throws IOException {
-        try {
-            deleteRecursive();
-        } catch (FileNotFoundException ignore) {
-        }
+        Files.deleteRecursiveIfExists(path());
     }
 
     @Override
     public OutputStream newOutputStream() throws IOException {
-        return newOutputStream(false);
+        return Files.newOutputStream(path());
     }
 
     @Override
     public InputStream newBufferedInputStream() throws IOException {
-        return new BufferedInputStream(newInputStream());
+        return Files.newBufferedInputStream(path());
     }
 
     @Override
     public DataInputStream newBufferedDataInputStream() throws IOException {
-        return new DataInputStream(newBufferedInputStream());
+        return Files.newBufferedDataInputStream(path());
     }
 
     @Override
     public OutputStream newBufferedOutputStream() throws IOException {
-        return new BufferedOutputStream(newOutputStream());
+        return Files.newBufferedOutputStream(path());
     }
 
     @Override
     public DataOutputStream newBufferedDataOutputStream() throws IOException {
-        return new DataOutputStream(newBufferedOutputStream());
+        return Files.newBufferedDataOutputStream(path());
     }
 
     @Override
     public Reader newReader(Charset charset) throws IOException {
-        return new InputStreamReader(newInputStream(), charset);
+        return Files.newReader(path(), charset);
     }
 
     @Override
     public Writer newWriter(Charset charset) throws IOException {
-        return new OutputStreamWriter(newOutputStream(), charset);
+        return Files.newWriter(path(), charset);
     }
 
     @Override
     public Writer newWriter(Charset charset, boolean append) throws IOException {
-        return new OutputStreamWriter(newOutputStream(append), charset);
+        return Files.newWriter(path(), charset, append);
     }
 
     @Override
     public String readDetectingCharset(int limit) throws IOException {
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(newBufferedInputStream());
-            Reader reader = closer.register(new CharsetDetector().getReader(in, null));
-            if (reader != null) {
-                char[] buffer = new char[limit];
-                int count = reader.read(buffer);
-                if (count > -1) {
-                    return String.valueOf(buffer, 0, count);
-                }
-            }
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-        throw new UnknownCharsetException();
-    }
-
-    private static class UnknownCharsetException extends IOException {
+        return Files.readDetectingCharset(path(), limit);
     }
 
     @Override
     public String readAllUtf8() throws IOException {
-        StringBuilder builder = new StringBuilder();
-        Closer closer = Closer.create();
-        try {
-            Reader reader = closer.register(newReader(UTF_8));
-            char[] buffer = new char[BUFFER_SIZE];
-            for (int i; (i = reader.read(buffer)) != -1; ) {
-                builder.append(buffer, 0, i);
-            }
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-        return builder.toString();
+        return Files.readAllUtf8(path());
     }
 
     @Override
     public void writeAllUtf8(CharSequence content) throws IOException {
-        writeAll(content, UTF_8);
+        Files.writeUtf8(path(), content);
     }
 
     @Override
     public void writeAll(CharSequence content, Charset charset) throws IOException {
-        Closer closer = Closer.create();
-        try {
-            Writer writer = closer.register(newWriter(charset));
-            writer.write(content.toString());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        Files.write(path(), content, charset);
     }
 
     @Override
     public void appendUtf8(CharSequence content) throws IOException {
-        Closer closer = Closer.create();
-        try {
-            Writer writer = closer.register(newWriter(UTF_8, true));
-            writer.write(content.toString());
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        Files.appendUtf8(path(), content);
     }
 
     @Override
     public void copyFrom(InputStream in) throws IOException {
-        Closer closer = Closer.create();
-        try {
-            OutputStream out = closer.register(newOutputStream());
-            byte[] buffer = new byte[BUFFER_SIZE];
-            for (int i; (i = in.read(buffer)) != -1; ) {
-                out.write(buffer, 0, i);
-            }
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
+        Files.copy(in, path());
     }
 
     @Override
     public void removePermissions(Set<Permission> permissions) throws IOException {
-        Set<Permission> existing = stat(FOLLOW).permissions();
-        Set<Permission> perms = new HashSet<>(existing);
-        perms.removeAll(permissions);
-        setPermissions(perms);
+        Files.removePermissions(path(), permissions);
     }
 
     @Override
     public String detectBasicMediaType(Stat stat) throws IOException {
-        return BasicDetector.INSTANCE.detect(this, stat);
+        return Files.detectBasicMediaType(path(), stat);
     }
 
     @Override
     public String detectContentMediaType(Stat stat) throws IOException {
-        return MagicDetector.INSTANCE.detect(this, stat);
+        return Files.detectContentMediaType(path(), stat);
     }
 
     @Override
     public String detectMediaType(Stat stat) throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(this, stat);
+        return Files.detectMediaType(path(), stat);
     }
 
 }
