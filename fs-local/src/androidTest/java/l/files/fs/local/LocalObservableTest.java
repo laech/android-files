@@ -267,7 +267,7 @@ public final class LocalObservableTest extends FileBaseTest {
 
             ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
             ArgumentCaptor<Integer> wd = ArgumentCaptor.forClass(Integer.class);
-            verify(tracker).onWatchAdded(fd.capture(), aryEq(src.path().bytes()), anyInt(), wd.capture());
+            verify(tracker).onWatchAdded(fd.capture(), aryEq(src.pathBytes()), anyInt(), wd.capture());
             verify(tracker).onWatchRemoved(fd.getValue(), wd.getValue());
 
         } catch (Throwable e) {
@@ -481,13 +481,13 @@ public final class LocalObservableTest extends FileBaseTest {
             verify(tracker).onInit(fd.capture());
             verify(tracker).onWatchAdded(
                     eq(fd.getValue()),
-                    aryEq(a.path().bytes()),
+                    aryEq(a.pathBytes()),
                     anyInt(),
                     wd.capture()
             );
             verify(tracker).onWatchAdded(
                     eq(fd.getValue()),
-                    aryEq(b.path().bytes()),
+                    aryEq(b.pathBytes()),
                     anyInt(),
                     wd.capture()
             );
@@ -1270,7 +1270,7 @@ public final class LocalObservableTest extends FileBaseTest {
             order.verify(tracker).onInit(fd.capture());
             order.verify(tracker).onWatchAdded(
                     eq(fd.getValue()),
-                    aryEq(file.path().bytes()),
+                    aryEq(file.pathBytes()),
                     anyInt(),
                     wd.capture()
             );
@@ -1286,7 +1286,7 @@ public final class LocalObservableTest extends FileBaseTest {
                         if (dir.isReadable()) {
                             order.verify(tracker).onWatchAdded(
                                     eq(fd.getValue()),
-                                    aryEq(((LocalFile) dir).path().bytes()),
+                                    aryEq(((LocalFile) dir).pathBytes()),
                                     anyInt(),
                                     wd.capture()
                             );
@@ -1400,7 +1400,7 @@ public final class LocalObservableTest extends FileBaseTest {
                 await(CREATE, target, newCreateDir(target));
                 verify(tracker).onWatchAdded(
                         eq(fd),
-                        aryEq(target.path().bytes()),
+                        aryEq(target.pathBytes()),
                         anyInt(),
                         anyInt()
                 );
@@ -1482,7 +1482,7 @@ public final class LocalObservableTest extends FileBaseTest {
                 order.verify(tracker).onWatchRemoved(fd, allChildWds.get(src));
                 order.verify(tracker).onWatchAdded(
                         eq(fd),
-                        aryEq(dst.path().bytes()),
+                        aryEq(dst.pathBytes()),
                         anyInt(),
                         anyInt()
                 );
@@ -1508,7 +1508,7 @@ public final class LocalObservableTest extends FileBaseTest {
                 if (readable) {
                     verify(tracker).onWatchAdded(
                             eq(fd),
-                            aryEq(dst.path().bytes()),
+                            aryEq(dst.pathBytes()),
                             anyInt(),
                             anyInt()
                     );
@@ -1516,7 +1516,7 @@ public final class LocalObservableTest extends FileBaseTest {
                 } else {
                     verify(tracker, never()).onWatchAdded(
                             eq(fd),
-                            aryEq(dst.path().bytes()),
+                            aryEq(dst.pathBytes()),
                             anyInt(),
                             anyInt()
                     );
@@ -1525,7 +1525,7 @@ public final class LocalObservableTest extends FileBaseTest {
             } else {
                 verify(tracker, never()).onWatchAdded(
                         eq(fd),
-                        aryEq(dst.path().bytes()),
+                        aryEq(dst.pathBytes()),
                         anyInt(),
                         anyInt()
                 );

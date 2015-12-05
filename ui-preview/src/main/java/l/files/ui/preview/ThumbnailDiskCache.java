@@ -115,7 +115,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     private File cacheDir(File file, Rect constraint) {
-        return cacheDir.resolve(file.path()
+        return cacheDir.resolve(file.pathString()
                 + "_" + constraint.width()
                 + "_" + constraint.height());
     }

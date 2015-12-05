@@ -64,7 +64,7 @@ final class DecodeApk extends DecodeThumbnail {
 
     private Drawable loadApkIcon() {
         PackageManager manager = context.context.getPackageManager();
-        String path = file.path().toString();
+        String path = file.pathString();
         PackageInfo info = manager.getPackageArchiveInfo(path, 0);
         if (info == null) {
             return null;

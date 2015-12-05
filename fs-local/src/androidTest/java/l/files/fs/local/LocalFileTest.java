@@ -64,9 +64,9 @@ public final class LocalFileTest extends FileBaseTest {
         assertTrue(file.exists(NOFOLLOW));
         assertEquals(singleton(file), dir.list(FOLLOW, new HashSet<>()));
 
-        assertArrayEquals(bytes.clone(), dir.path().name().bytes());
-        assertEquals(new String(bytes.clone(), UTF_8), dir.path().name().toString());
-        assertFalse(Arrays.equals(bytes.clone(), dir.path().name().toString().getBytes(UTF_8)));
+        assertArrayEquals(bytes.clone(), dir.name().bytes());
+        assertEquals(new String(bytes.clone(), UTF_8), dir.name().toString());
+        assertFalse(Arrays.equals(bytes.clone(), dir.name().toString().getBytes(UTF_8)));
     }
 
     @Test
@@ -116,7 +116,7 @@ public final class LocalFileTest extends FileBaseTest {
     public void stat_modificationTime() throws Exception {
         Stat stat = dir1().stat(NOFOLLOW);
         long actual = stat.lastModifiedTime().seconds();
-        long expected = stat(dir1().path().bytes()).mtime();
+        long expected = stat(dir1().pathBytes()).mtime();
         assertEquals(expected, actual);
     }
 
@@ -124,7 +124,7 @@ public final class LocalFileTest extends FileBaseTest {
     public void stat_size() throws Exception {
         LocalFile file = dir1().resolve("file").createFile();
         file.appendUtf8("hello world");
-        long expected = stat(file.path().bytes()).size();
+        long expected = stat(file.pathBytes()).size();
         long actual = file.stat(NOFOLLOW).size();
         assertEquals(expected, actual);
     }
@@ -212,7 +212,7 @@ public final class LocalFileTest extends FileBaseTest {
         File a = dir1().resolve("a");
         File b = dir1().resolve("b");
 
-        new FileOutputStream(a.path().toString()).close();
+        new FileOutputStream(a.pathString()).close();
         b.newOutputStream().close();
 
         assertEquals(
@@ -285,8 +285,8 @@ public final class LocalFileTest extends FileBaseTest {
         actual.newOutputStream(false).close();
 
         assertEquals(
-                stat(expected.path().bytes()).mode(),
-                stat(actual.path().bytes()).mode()
+                stat(expected.pathBytes()).mode(),
+                stat(actual.pathBytes()).mode()
         );
     }
 
@@ -369,7 +369,7 @@ public final class LocalFileTest extends FileBaseTest {
         File actual = dir1().resolve("a");
         actual.createFile();
 
-        java.io.File expected = new java.io.File(dir1().path().toString(), "b");
+        java.io.File expected = new java.io.File(dir1().pathString(), "b");
         assertTrue(expected.createNewFile());
 
         assertEquals(expected.canRead(), actual.isReadable());
@@ -393,7 +393,7 @@ public final class LocalFileTest extends FileBaseTest {
         File actual = dir1().resolve("a");
         actual.createDir();
 
-        java.io.File expected = new java.io.File(dir1().path().toString(), "b");
+        java.io.File expected = new java.io.File(dir1().pathString(), "b");
         assertTrue(expected.mkdir());
 
         assertEquals(expected.canRead(), actual.isReadable());
@@ -708,9 +708,9 @@ public final class LocalFileTest extends FileBaseTest {
 
     @Test
     public void setPermissions_rawBits() throws Exception {
-        int expected = stat(dir1().path().bytes()).mode();
+        int expected = stat(dir1().pathBytes()).mode();
         dir1().setPermissions(dir1().stat(NOFOLLOW).permissions());
-        int actual = stat(dir1().path().bytes()).mode();
+        int actual = stat(dir1().pathBytes()).mode();
         assertEquals(expected, actual);
     }
 

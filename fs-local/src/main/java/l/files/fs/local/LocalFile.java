@@ -60,13 +60,13 @@ public abstract class LocalFile extends BaseFile {
         return path().toString();
     }
 
+    public byte[] pathBytes() {
+        return path().toByteArray();
+    }
+
     @Override
     public void pathBytes(ByteArrayOutputStream out) {
-        try {
-            path().toByteArray(out);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        path().toByteArray(out);
     }
 
     @Override
@@ -165,9 +165,9 @@ public abstract class LocalFile extends BaseFile {
             SizeVisitor accumulator) throws IOException {
 
         try {
-            traverseSize(path().toByteArray(), option == FOLLOW, accumulator);
+            traverseSize(pathBytes(), option == FOLLOW, accumulator);
         } catch (ErrnoException e) {
-            throw e.toIOException(path());
+            throw e.toIOException(this);
         }
 
     }

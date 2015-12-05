@@ -78,7 +78,7 @@ final class DecodePdf extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            final long doc = Pdf.open(((LocalFile) file).path().bytes());
+            final long doc = Pdf.open(((LocalFile) file).pathBytes());
             closer.register(new Closeable() {
                 @Override
                 public void close() throws IOException {

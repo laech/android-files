@@ -60,11 +60,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
     @Override
     final void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
-        try {
-            file.path().writeTo(key.asOutputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        file.pathBytes(key.asOutputStream());
     }
 
     @Override
