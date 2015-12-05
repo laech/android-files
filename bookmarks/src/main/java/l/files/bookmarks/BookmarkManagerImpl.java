@@ -11,8 +11,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import l.files.fs.File;
-import l.files.fs.local.LocalFile;
+import l.files.fs.Files;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -49,7 +50,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         return new java.io.File(getExternalStorageDirectory(), name).toURI().toString();
     }
 
-    private final Set<File> bookmarks;
+    private final Set<Path> bookmarks;
     private final SharedPreferences pref;
     private final Set<BookmarkChangedListener> listeners;
 
@@ -59,14 +60,14 @@ final class BookmarkManagerImpl extends BookmarkManager {
         this.bookmarks = new CopyOnWriteArraySet<>();
     }
 
-    private Set<File> toPaths(Set<String> uriStrings) {
-        Set<File> paths = new HashSet<>();
+    private Set<Path> toPaths(Set<String> uriStrings) {
+        Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                File file = LocalFile.of(new java.io.File(new URI(uriString)));
+                Path path = LocalPath.of(new java.io.File(new URI(uriString)));
                 try {
-                    if (file.exists(FOLLOW)) {
-                        paths.add(file);
+                    if (Files.exists(path, FOLLOW)) {
+                        paths.add(path);
                     }
                 } catch (IOException ignored) {
                     // Remove bookmarks that no longer exist
@@ -79,23 +80,23 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     @Override
-    public void addBookmark(File file) {
-        requireNonNull(file, "file");
-        if (bookmarks.add(file)) {
+    public void addBookmark(Path path) {
+        requireNonNull(path, "path");
+        if (bookmarks.add(path)) {
             saveBookmarksAndNotify();
         }
     }
 
     @Override
-    public void removeBookmark(File file) {
-        requireNonNull(file, "file");
-        if (bookmarks.remove(file)) {
+    public void removeBookmark(Path path) {
+        requireNonNull(path, "path");
+        if (bookmarks.remove(path)) {
             saveBookmarksAndNotify();
         }
     }
 
     @Override
-    public void removeBookmarks(Collection<File> bookmarks) {
+    public void removeBookmarks(Collection<Path> bookmarks) {
         requireNonNull(bookmarks, "bookmarks");
         if (this.bookmarks.removeAll(bookmarks)) {
             saveBookmarksAndNotify();
@@ -107,10 +108,10 @@ final class BookmarkManagerImpl extends BookmarkManager {
         notifyListeners();
     }
 
-    private Set<String> toUriStrings(Set<? extends File> bookmarks) {
+    private Set<String> toUriStrings(Set<? extends Path> bookmarks) {
         Set<String> uris = new HashSet<>();
-        for (File bookmark : bookmarks) {
-            uris.add(bookmark.uri().toString());
+        for (Path bookmark : bookmarks) {
+            uris.add(bookmark.toUri().toString());
         }
         return uris;
     }
@@ -122,12 +123,12 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     @Override
-    public boolean hasBookmark(File file) {
-        return bookmarks.contains(file);
+    public boolean hasBookmark(Path path) {
+        return bookmarks.contains(path);
     }
 
     @Override
-    public Set<File> getBookmarks() {
+    public Set<Path> getBookmarks() {
         synchronized (this) {
             if (bookmarks.isEmpty()) {
                 bookmarks.addAll(loadBookmarks());
@@ -136,7 +137,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         return unmodifiableSet(new HashSet<>(bookmarks));
     }
 
-    public Set<File> loadBookmarks() {
+    public Set<Path> loadBookmarks() {
         return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
     }
 

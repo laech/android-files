@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.operations.Task.Callback;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -37,29 +37,29 @@ public final class OperationService extends Service {
 
     static final String ACTION_CANCEL = "l.files.operations.CANCEL";
     static final String EXTRA_TASK_ID = "task_id";
-    static final String EXTRA_FILES = "files";
+    static final String EXTRA_PATHS = "paths";
     static final String EXTRA_DESTINATION = "destination";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
 
-    public static Intent newDeleteIntent(Context context, Collection<? extends File> files) {
+    public static Intent newDeleteIntent(Context context, Collection<? extends Path> files) {
         return new Intent(context, OperationService.class)
                 .setAction(DELETE.action())
-                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files));
+                .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(files));
     }
 
     public static Intent newCopyIntent(
             Context context,
-            Collection<? extends File> sources,
-            File destination) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
         return newPasteIntent(COPY.action(), context, sources, destination);
     }
 
     public static Intent newMoveIntent(
             Context context,
-            Collection<? extends File> sources,
-            File destination) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
         return newPasteIntent(MOVE.action(), context, sources, destination);
     }
@@ -67,13 +67,13 @@ public final class OperationService extends Service {
     private static Intent newPasteIntent(
             String action,
             Context context,
-            Collection<? extends File> sources,
-            File destination) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
         return new Intent(context, OperationService.class)
                 .setAction(action)
                 .putExtra(EXTRA_DESTINATION, destination)
-                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(sources));
+                .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(sources));
     }
 
     public static PendingIntent newCancelPendingIntent(Context context, int id) {
@@ -190,7 +190,7 @@ public final class OperationService extends Service {
         DELETE("l.files.operations.DELETE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> files = intent.getParcelableArrayListExtra(EXTRA_FILES);
+                List<Path> files = intent.getParcelableArrayListExtra(EXTRA_PATHS);
                 return new DeleteTask(id, Clock.system(), callback, handler, files);
             }
         },
@@ -198,8 +198,8 @@ public final class OperationService extends Service {
         COPY("l.files.operations.COPY") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_FILES);
-                File destination = intent.getParcelableExtra(EXTRA_DESTINATION);
+                List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+                Path destination = intent.getParcelableExtra(EXTRA_DESTINATION);
                 return new CopyTask(id, Clock.system(), callback, handler, sources, destination);
             }
         },
@@ -207,8 +207,8 @@ public final class OperationService extends Service {
         MOVE("l.files.operations.MOVE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<File> sources = intent.getParcelableArrayListExtra(EXTRA_FILES);
-                File destination = intent.getParcelableExtra(EXTRA_DESTINATION);
+                List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+                Path destination = intent.getParcelableExtra(EXTRA_DESTINATION);
                 return new MoveTask(id, Clock.system(), callback, handler, sources, destination);
             }
         };

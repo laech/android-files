@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import java.util.Collection;
 import java.util.Set;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -24,15 +24,15 @@ public abstract class BookmarkManager {
         }
     }
 
-    public abstract void addBookmark(File file);
+    public abstract void addBookmark(Path path);
 
-    public abstract void removeBookmark(File file);
+    public abstract void removeBookmark(Path path);
 
-    public abstract void removeBookmarks(Collection<File> bookmarks);
+    public abstract void removeBookmarks(Collection<Path> bookmarks);
 
-    public abstract boolean hasBookmark(File file);
+    public abstract boolean hasBookmark(Path path);
 
-    public abstract Set<File> getBookmarks();
+    public abstract Set<Path> getBookmarks();
 
     /**
      * Adds a listener for listening bookmark changes. Does nothing if the

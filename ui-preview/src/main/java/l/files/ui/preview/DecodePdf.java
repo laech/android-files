@@ -10,9 +10,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
@@ -36,31 +36,31 @@ final class DecodePdf extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(File file, String mediaType) {
-            return file instanceof LocalFile &&
+        public boolean accept(Path path, String mediaType) {
+            return path instanceof LocalPath &&
                     mediaType.equals("application/pdf");
         }
 
 
         @Override
         public Decode create(
-                File res,
+                Path path,
                 Stat stat,
                 Rect constraint,
                 PreviewCallback callback,
                 Preview context) {
-            return new DecodePdf(res, stat, constraint, callback, context);
+            return new DecodePdf(path, stat, constraint, callback, context);
         }
 
     };
 
     DecodePdf(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
     }
 
     @Override
@@ -78,7 +78,7 @@ final class DecodePdf extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            final long doc = Pdf.open(((LocalFile) file).pathBytes());
+            final long doc = Pdf.open(((LocalPath) file).toByteArray());
             closer.register(new Closeable() {
                 @Override
                 public void close() throws IOException {

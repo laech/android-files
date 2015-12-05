@@ -6,8 +6,9 @@ import org.junit.Test;
 
 import java.util.HashSet;
 
-import l.files.fs.File;
-import l.files.testing.fs.FileBaseTest;
+import l.files.fs.Files;
+import l.files.fs.Path;
+import l.files.testing.fs.PathBaseTest;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Arrays.asList;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-public final class BookmarkManagerTest extends FileBaseTest {
+public final class BookmarkManagerTest extends PathBaseTest {
 
     private BookmarkManagerImpl manager;
     private SharedPreferences pref;
@@ -40,8 +41,8 @@ public final class BookmarkManagerTest extends FileBaseTest {
 
     @Test
     public void can_add_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDir();
-        File b = dir2().resolve("b").createDir();
+        Path a = Files.createDir(dir1().resolve("a"));
+        Path b = Files.createDir(dir2().resolve("b"));
         manager.addBookmark(a);
         manager.addBookmark(b);
         assertTrue(manager.getBookmarks().containsAll(asList(a, b)));
@@ -49,9 +50,9 @@ public final class BookmarkManagerTest extends FileBaseTest {
 
     @Test
     public void can_remove_bookmarks() throws Exception {
-        File a = dir1().resolve("a").createDir();
-        File b = dir1().resolve("b").createDir();
-        File c = dir1().resolve("c").createDir();
+        Path a = Files.createDir(dir1().resolve("a"));
+        Path b = Files.createDir(dir1().resolve("b"));
+        Path c = Files.createDir(dir1().resolve("c"));
         manager.addBookmark(a);
         manager.addBookmark(b);
         manager.addBookmark(c);
@@ -81,15 +82,15 @@ public final class BookmarkManagerTest extends FileBaseTest {
 
     @Test
     public void removes_non_existing_bookmarks() throws Exception {
-        File file = dir1().resolve("file").createFile();
-        File dir = dir1().resolve("dir").createDir();
-        File link = dir1().resolve("link").createLink(file);
+        Path file = Files.createFile(dir1().resolve("file"));
+        Path dir = Files.createDir(dir1().resolve("dir"));
+        Path link = Files.createLink(dir1().resolve("link"), file);
         manager.addBookmark(file);
         manager.addBookmark(dir);
         manager.addBookmark(link);
         assertEquals(new HashSet<>(asList(file, link, dir)), manager.loadBookmarks());
 
-        file.delete();
+        Files.delete(file);
         assertEquals(singleton(dir), manager.loadBookmarks());
     }
 

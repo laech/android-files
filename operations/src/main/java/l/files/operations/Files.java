@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import l.files.fs.File;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static java.lang.Long.parseLong;
+import static l.files.fs.Files.exists;
+import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -26,14 +28,14 @@ final class Files {
      * extension if it's a regular file until the returned file
      * represents a nonexistent file.
      */
-    public static File getNonExistentDestinationFile(File source, File dstDir)
+    public static Path getNonExistentDestinationFile(Path source, Path dstDir)
             throws IOException {
 
         String base;
         String last;
 
         Name name = source.name();
-        Stat stat = source.stat(FOLLOW);
+        Stat stat = stat(source, FOLLOW);
         if (stat.isDirectory()) {
             base = name.toString();
             last = "";
@@ -42,8 +44,8 @@ final class Files {
             last = name.dotExt();
         }
 
-        File dst;
-        while ((dst = dstDir.resolve(base + last)).exists(NOFOLLOW)) {
+        Path dst;
+        while (exists((dst = dstDir.resolve(base + last)), NOFOLLOW)) {
             base = increment(base);
         }
 

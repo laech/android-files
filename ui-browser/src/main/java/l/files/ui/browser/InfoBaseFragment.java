@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import l.files.fs.File;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.ui.browser.CalculateSizeLoader.Size;
 
 import static android.text.format.Formatter.formatFileSize;
@@ -30,7 +30,7 @@ abstract class InfoBaseFragment
     static final String ARG_DIR = "dir";
     static final String ARG_CHILDREN = "children";
 
-    File dir;
+    Path dir;
     List<Name> children;
 
     TextView size;

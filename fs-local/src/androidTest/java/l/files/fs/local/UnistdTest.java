@@ -8,14 +8,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 
+import l.files.fs.Files;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public final class UnistdTest extends FileBaseTest {
+public final class UnistdTest extends PathBaseTest {
 
     @Test
     public void test_close() throws Exception {
-        OutputStream out = dir1().resolve("a").createFile().newOutputStream();
+        OutputStream out = Files.newOutputStream(Files.createFile(dir1().resolve("a")));
         try {
 
             out.write(1); // Check write okay

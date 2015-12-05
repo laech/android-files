@@ -28,7 +28,7 @@ import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
-import static l.files.fs.File.UTF_8;
+import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.ErrnoException.EACCES;

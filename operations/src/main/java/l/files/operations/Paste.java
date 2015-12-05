@@ -3,36 +3,36 @@ package l.files.operations;
 import java.io.IOException;
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
-    private final File destination;
+    private final Path destination;
 
-    Paste(Collection<? extends File> files, File destination) {
+    Paste(Collection<? extends Path> files, Path destination) {
         super(files);
         this.destination = requireNonNull(destination, "destination");
     }
 
     @Override
-    void process(File file) throws InterruptedException {
+    void process(Path path) throws InterruptedException {
         checkInterrupt();
 
-        if (destination.equalsOrIsDecedentOf(file)) {
+        if (destination.startsWith(path)) {
             throw new CannotPasteIntoSelfException(
-                    "Cannot paste directory " + file +
+                    "Cannot paste directory " + path +
                             " into its own sub directory " + destination
             );
         }
 
         try {
-            File to = getNonExistentDestinationFile(file, destination);
-            paste(file, to);
+            Path to = getNonExistentDestinationFile(path, destination);
+            paste(path, to);
         } catch (IOException e) {
-            record(file, e);
+            record(path, e);
         }
     }
 
@@ -41,6 +41,6 @@ abstract class Paste extends AbstractOperation {
      * its content into {@code to}. If {@code from} is a directory, paste its
      * content into {@code to}.
      */
-    abstract void paste(File from, File to) throws IOException;
+    abstract void paste(Path from, Path to) throws IOException;
 
 }

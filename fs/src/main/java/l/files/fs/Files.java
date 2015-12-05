@@ -25,14 +25,20 @@ import java.util.concurrent.TimeUnit;
 
 import l.files.base.io.Closer;
 import l.files.fs.FileSystem.Consumer;
+import l.files.fs.FileSystem.SizeVisitor;
 
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
-import static l.files.fs.File.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class Files {
+
+    public static final String MEDIA_TYPE_OCTET_STREAM = "application/octet-stream";
+    public static final String MEDIA_TYPE_ANY = "*/*";
+
+    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private Files() {
     }
@@ -121,8 +127,8 @@ public final class Files {
         return path;
     }
 
-    public static Path createLink(Path target, Path link) throws IOException {
-        target.fileSystem().createLink(target, link);
+    public static Path createLink(Path link, Path target) throws IOException {
+        target.fileSystem().createLink(link, target);
         return link;
     }
 
@@ -189,6 +195,14 @@ public final class Files {
                 batchInternalUnit);
     }
 
+    public static void list(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException {
+
+        path.fileSystem().list(path, option, consumer);
+    }
+
     public static <C extends Collection<? super Path>> C list(
             final Path path,
             final LinkOption option,
@@ -217,6 +231,14 @@ public final class Files {
             }
         });
         return collection;
+    }
+
+    public static void listDirs(
+            Path path,
+            LinkOption option,
+            Consumer<? super Path> consumer) throws IOException {
+
+        path.fileSystem().listDirs(path, option, consumer);
     }
 
     public static void delete(Path path) throws IOException {
@@ -328,6 +350,11 @@ public final class Files {
             closer.close();
         }
         throw new UnknownCharsetException();
+    }
+
+    public static void traverseSize(Path path, LinkOption option, SizeVisitor visitor)
+            throws IOException {
+        path.fileSystem().traverseSize(path, option, visitor);
     }
 
     private static class UnknownCharsetException extends IOException {

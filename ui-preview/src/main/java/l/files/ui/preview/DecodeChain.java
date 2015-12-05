@@ -3,7 +3,8 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.ui.preview.Preview.decodePalette;
@@ -20,7 +21,7 @@ final class DecodeChain extends Decode {
     };
 
     DecodeChain(
-            File file,
+            Path file,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
@@ -30,28 +31,28 @@ final class DecodeChain extends Decode {
 
     @Nullable
     static Decode run(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
 
-        if (!context.isPreviewable(res, stat, constraint)) {
+        if (!context.isPreviewable(path, stat, constraint)) {
             return null;
         }
 
-        Bitmap cached = context.getThumbnail(res, stat, constraint, true);
+        Bitmap cached = context.getThumbnail(path, stat, constraint, true);
         if (cached != null) {
-            callback.onPreviewAvailable(res, stat, cached);
+            callback.onPreviewAvailable(path, stat, cached);
             return null;
         }
 
-        Rect size = context.getSize(res, stat, constraint, true);
+        Rect size = context.getSize(path, stat, constraint, true);
         if (size != null) {
-            callback.onSizeAvailable(res, stat, size);
+            callback.onSizeAvailable(path, stat, size);
         }
 
-        return (Decode) new DecodeChain(res, stat, constraint, callback, context)
+        return (Decode) new DecodeChain(path, stat, constraint, callback, context)
                 .executeOnPreferredExecutor();
     }
 
@@ -104,7 +105,7 @@ final class DecodeChain extends Decode {
     }
 
     private boolean checkIsCache() {
-        if (file.hierarchy().contains(context.cacheDir)) {
+        if (Files.hierarchy(file).contains(context.cacheDir)) {
             publishProgress(NoPreview.INSTANCE);
             return true;
         }
@@ -171,7 +172,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-            return file.detectContentMediaType(stat);
+            return Files.detectContentMediaType(file, stat);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

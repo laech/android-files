@@ -8,8 +8,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.Collators;
 import l.files.ui.browser.BrowserItem.FileItem;
@@ -24,7 +25,7 @@ abstract class FileSortTest {
     protected final void testSortMatches(
             Locale locale,
             Comparator<FileItem> comparator,
-            File... expectedOrder) throws IOException {
+            Path... expectedOrder) throws IOException {
 
         List<FileItem> expected = mapData(locale, expectedOrder);
         List<FileItem> actual = new ArrayList<>(expected);
@@ -37,21 +38,21 @@ abstract class FileSortTest {
     private List<Name> names(List<FileItem> items) {
         List<Name> names = new ArrayList<>(items.size());
         for (FileItem item : items) {
-            names.add(item.selfFile().name());
+            names.add(item.selfPath().name());
         }
         return names;
     }
 
     private List<FileItem> mapData(
             Locale locale,
-            File... files) throws IOException {
+            Path... files) throws IOException {
 
         final Collator collator = Collators.of(locale);
         final List<FileItem> expected = new ArrayList<>(files.length);
-        for (File file : files) {
+        for (Path file : files) {
             Stat stat;
             try {
-                stat = file.stat(NOFOLLOW);
+                stat = Files.stat(file, NOFOLLOW);
             } catch (IOException e) {
                 stat = null;
             }

@@ -5,22 +5,21 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 
-import l.files.fs.File;
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 import l.files.testing.BaseTest;
 
-public abstract class FileBaseTest extends BaseTest {
+public abstract class PathBaseTest extends BaseTest {
 
     @Rule
     public final TemporaryFolder folder = new TemporaryFolder();
 
-    private File dir1;
-    private File dir2;
+    LocalPath dir1;
+    LocalPath dir2;
 
-    protected final File dir1() {
+    protected LocalPath dir1() {
         if (dir1 == null) {
             try {
-                dir1 = LocalFile.of(folder.newFolder());
+                dir1 = LocalPath.of(folder.newFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -28,10 +27,10 @@ public abstract class FileBaseTest extends BaseTest {
         return dir1;
     }
 
-    protected final File dir2() {
+    protected LocalPath dir2() {
         if (dir2 == null) {
             try {
-                dir2 = LocalFile.of(folder.newFolder());
+                dir2 = LocalPath.of(folder.newFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

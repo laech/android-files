@@ -55,6 +55,12 @@ final class LocalFileSystem extends Native implements FileSystem {
     private LocalFileSystem() {
     }
 
+    static {
+        init();
+    }
+
+    private static native void init();
+
     static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
     private static final int[] PERMISSION_BITS = permissionsToBits();
@@ -156,7 +162,7 @@ final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public void createLink(Path target, Path link) throws IOException {
+    public void createLink(Path link, Path target) throws IOException {
         try {
 
             symlink(((LocalPath) target).toByteArray(),
@@ -306,6 +312,26 @@ final class LocalFileSystem extends Native implements FileSystem {
             throw e.toIOException(path);
         }
     }
+
+    @Override
+    public void traverseSize(
+            Path path,
+            LinkOption option,
+            SizeVisitor accumulator) throws IOException {
+
+        try {
+            traverseSize(path.toByteArray(), option == FOLLOW, accumulator);
+        } catch (ErrnoException e) {
+            throw e.toIOException(this);
+        }
+
+    }
+
+    private static native void traverseSize(
+            byte[] path,
+            boolean followLink,
+            SizeVisitor accumulator) throws ErrnoException;
+
 
     @Override
     public InputStream newInputStream(Path path) throws IOException {

@@ -7,7 +7,8 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static l.files.base.Objects.requireNonNull;
@@ -18,9 +19,9 @@ public final class NewDirFragment extends FileCreationFragment {
 
     public static final String TAG = NewDirFragment.class.getSimpleName();
 
-    static NewDirFragment create(File file) {
+    static NewDirFragment create(Path file) {
         Bundle bundle = new Bundle(1);
-        bundle.putParcelable(ARG_PARENT_FILE, file);
+        bundle.putParcelable(ARG_PARENT_PATH, file);
 
         NewDirFragment fragment = new NewDirFragment();
         fragment.setArguments(bundle);
@@ -50,21 +51,21 @@ public final class NewDirFragment extends FileCreationFragment {
 
     private void suggestName() {
         String name = getString(R.string.untitled_dir);
-        File base = parent().resolve(name);
+        Path base = parent().resolve(name);
         suggestion = new SuggestName().executeOnExecutor(THREAD_POOL_EXECUTOR, base);
     }
 
-    private class SuggestName extends AsyncTask<File, Void, File> {
+    private class SuggestName extends AsyncTask<Path, Void, Path> {
 
         @Override
-        protected File doInBackground(File... params) {
-            File base = params[0];
+        protected Path doInBackground(Path... params) {
+            Path base = params[0];
             String baseName = base.name().toString();
-            File parent = base.parent();
+            Path parent = base.parent();
             assert parent != null;
-            File file = base;
+            Path file = base;
             try {
-                for (int i = 2; file.exists(NOFOLLOW); i++) {
+                for (int i = 2; Files.exists(file, NOFOLLOW); i++) {
                     if (isCancelled()) {
                         return null;
                     }
@@ -77,7 +78,7 @@ public final class NewDirFragment extends FileCreationFragment {
         }
 
         @Override
-        protected void onPostExecute(File result) {
+        protected void onPostExecute(Path result) {
             super.onPostExecute(result);
             if (result == null) {
                 set("");
@@ -101,22 +102,22 @@ public final class NewDirFragment extends FileCreationFragment {
         createDir(parent().resolve(getFilename()));
     }
 
-    private void createDir(File dir) {
+    private void createDir(Path dir) {
         creation = new CreateDir(dir).executeOnExecutor(THREAD_POOL_EXECUTOR);
     }
 
-    private class CreateDir extends AsyncTask<File, Void, IOException> {
+    private class CreateDir extends AsyncTask<Path, Void, IOException> {
 
-        private final File dir;
+        private final Path dir;
 
-        private CreateDir(File dir) {
+        private CreateDir(Path dir) {
             this.dir = requireNonNull(dir);
         }
 
         @Override
-        protected IOException doInBackground(File... params) {
+        protected IOException doInBackground(Path... params) {
             try {
-                dir.createDir();
+                Files.createDir(dir);
                 return null;
             } catch (IOException e) {
                 return e;

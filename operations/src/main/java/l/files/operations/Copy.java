@@ -10,7 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -22,7 +23,7 @@ final class Copy extends Paste {
     private final AtomicLong copiedByteCount = new AtomicLong();
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-    Copy(Collection<? extends File> sources, File destination) {
+    Copy(Collection<? extends Path> sources, Path destination) {
         super(sources, destination);
     }
 
@@ -35,18 +36,18 @@ final class Copy extends Paste {
     }
 
     @Override
-    void paste(final File from, final File to) throws IOException {
+    void paste(final Path from, final Path to) throws IOException {
 
-        from.traverse(NOFOLLOW, new OperationVisitor() {
+        l.files.fs.Files.traverse(from, NOFOLLOW, new OperationVisitor() {
 
             @Override
-            public Result onPreVisit(File src) throws IOException {
+            public Result onPreVisit(Path src) throws IOException {
                 copyItems(src, from, to);
                 return super.onPreVisit(src);
             }
 
             @Override
-            public Result onPostVisit(File src) throws IOException {
+            public Result onPostVisit(Path src) throws IOException {
                 updateDirectoryTimestamps(src, from, to);
                 return super.onPostVisit(src);
             }
@@ -56,12 +57,12 @@ final class Copy extends Paste {
     }
 
     private void copyItems(
-            File src,
-            File fromParent,
-            File toParent) throws IOException {
+            Path src,
+            Path fromParent,
+            Path toParent) throws IOException {
 
-        Stat stat = src.stat(NOFOLLOW);
-        File dst = src.rebase(fromParent, toParent);
+        Stat stat = Files.stat(src, NOFOLLOW);
+        Path dst = src.rebase(fromParent, toParent);
 
         if (stat.isSymbolicLink()) {
             copyLink(src, stat, dst);
@@ -79,32 +80,32 @@ final class Copy extends Paste {
     }
 
     private void updateDirectoryTimestamps(
-            File src,
-            File fromParent,
-            File toParent) throws IOException {
+            Path src,
+            Path fromParent,
+            Path toParent) throws IOException {
 
-        Stat stat = src.stat(NOFOLLOW);
-        File dst = src.rebase(fromParent, toParent);
+        Stat stat = Files.stat(src, NOFOLLOW);
+        Path dst = src.rebase(fromParent, toParent);
         if (stat.isDirectory()) {
             setTimes(stat, dst);
         }
 
     }
 
-    private void copyLink(File src, Stat stat, File dst) throws IOException {
-        dst.createLink(src.readLink());
+    private void copyLink(Path src, Stat stat, Path dst) throws IOException {
+        Files.createLink(dst, Files.readLink(src));
         copiedByteCount.addAndGet(stat.size());
         copiedItemCount.incrementAndGet();
         setTimes(stat, dst);
     }
 
-    private void createDirectory(Stat stat, File dst) throws IOException {
-        dst.createDir();
+    private void createDirectory(Stat stat, Path dst) throws IOException {
+        Files.createDir(dst);
         copiedByteCount.addAndGet(stat.size());
         copiedItemCount.incrementAndGet();
     }
 
-    private void copyFile(File src, Stat stat, File dst) throws IOException {
+    private void copyFile(Path src, Stat stat, Path dst) throws IOException {
         if (isInterrupted()) {
             return;
         }
@@ -112,8 +113,8 @@ final class Copy extends Paste {
         Closer closer = Closer.create();
         try {
 
-            InputStream source = closer.register(src.newInputStream());
-            OutputStream sink = closer.register(dst.newOutputStream());
+            InputStream source = closer.register(Files.newInputStream(src));
+            OutputStream sink = closer.register(Files.newOutputStream(dst));
 
             // TODO perform sync to disk
 
@@ -135,7 +136,7 @@ final class Copy extends Paste {
         } catch (IOException e) {
 
             try {
-                dst.delete();
+                Files.delete(dst);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -152,9 +153,9 @@ final class Copy extends Paste {
         }
     }
 
-    private void setTimes(Stat src, File dst) {
+    private void setTimes(Stat src, Path dst) {
         try {
-            dst.setLastModifiedTime(NOFOLLOW, src.lastModifiedTime());
+            Files.setLastModifiedTime(dst, NOFOLLOW, src.lastModifiedTime());
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
@@ -34,11 +34,11 @@ public final class InfoFragment
 
     private static final String ARG_STAT = "stat";
 
-    public static InfoFragment create(File file, Stat stat) {
+    public static InfoFragment create(Path path, Stat stat) {
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_DIR, file.parent());
-        bundle.putParcelableArrayList(ARG_CHILDREN, new ArrayList<>(singleton(file.name())));
+        bundle.putParcelable(ARG_DIR, path.parent());
+        bundle.putParcelableArrayList(ARG_CHILDREN, new ArrayList<>(singleton(path.name())));
         bundle.putParcelable(ARG_STAT, stat);
 
         InfoFragment fragment = new InfoFragment();
@@ -65,7 +65,7 @@ public final class InfoFragment
         root = find(R.id.root, this);
         image = find(R.id.image, this);
 
-        File file = dir.resolve(children.get(0));
+        Path file = dir.resolve(children.get(0));
         Stat stat = getArguments().getParcelable(ARG_STAT);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         constraint = Rect.of((int) (metrics.widthPixels * 0.75), metrics.heightPixels);
@@ -93,7 +93,7 @@ public final class InfoFragment
         }
     }
 
-    private void initImage(File file, Stat stat) {
+    private void initImage(Path file, Stat stat) {
         Preview preview = Preview.get(getActivity());
         Palette palette = preview.getPalette(file, stat, constraint, false);
         if (palette != null) {
@@ -133,7 +133,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onSizeAvailable(File file, Stat stat, Rect size) {
+    public void onSizeAvailable(Path file, Stat stat, Rect size) {
         setImageViewMinSize(size);
     }
 
@@ -148,7 +148,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPaletteAvailable(File file, Stat stat, Palette palette) {
+    public void onPaletteAvailable(Path file, Stat stat, Palette palette) {
         setBackground(palette);
     }
 
@@ -157,7 +157,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPreviewAvailable(File file, Stat stat, Bitmap thumbnail) {
+    public void onPreviewAvailable(Path file, Stat stat, Bitmap thumbnail) {
         image.setImageBitmap(thumbnail);
         image.setAlpha(0F);
         image.animate().alpha(1).setDuration(animationDuration());
@@ -168,7 +168,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPreviewFailed(File file, Stat stat) {
+    public void onPreviewFailed(Path file, Stat stat) {
         image.setVisibility(GONE);
     }
 

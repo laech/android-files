@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;

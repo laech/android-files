@@ -4,9 +4,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 
+import static l.files.fs.Files.createDir;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static l.files.ui.browser.FileSort.NAME;
@@ -16,47 +18,47 @@ public final class SortTest extends BaseFilesActivityTest {
 
     @Test
     public void updates_list_on_sort_option_change_on_back() throws Exception {
-        File a = dir().resolve("a").createDir();
-        File aa = createFile("aa", "aa", Instant.of(1, 1), a);
-        File ab = createFile("ab", "ab", Instant.of(2, 1), a);
-        File b = createFile("b", "b", Instant.of(1, 1));
-        File c = createFile("c", "c", Instant.of(6, 1));
+        Path a = createDir(dir().resolve("a"));
+        Path aa = createFile("aa", "aa", Instant.of(1, 1), a);
+        Path ab = createFile("ab", "ab", Instant.of(2, 1), a);
+        Path b = createFile("b", "b", Instant.of(1, 1));
+        Path c = createFile("c", "c", Instant.of(6, 1));
         screen()
-                .sort().by(NAME).assertItemsDisplayed(a, b, c)
+                .sort().by(NAME).assertAllItemsDisplayedInOrder(a, b, c)
                 .clickInto(a)
-                .sort().by(NAME).assertItemsDisplayed(aa, ab)
-                .sort().by(MODIFIED).assertItemsDisplayed(ab, aa)
-                .pressBack().assertItemsDisplayed(a, c, b);
+                .sort().by(NAME).assertAllItemsDisplayedInOrder(aa, ab)
+                .sort().by(MODIFIED).assertAllItemsDisplayedInOrder(ab, aa)
+                .pressBack().assertAllItemsDisplayedInOrder(a, c, b);
     }
 
     @Test
     public void updates_list_on_sort_option_change() throws Exception {
-        File a = createFile("a", "a", Instant.of(11, 0));
-        File b = createFile("b", "bbb", Instant.of(12, 0));
-        File c = createFile("c", "cc", Instant.of(13, 0));
+        Path a = createFile("a", "a", Instant.of(11, 0));
+        Path b = createFile("b", "bbb", Instant.of(12, 0));
+        Path c = createFile("c", "cc", Instant.of(13, 0));
         screen()
-                .sort().by(NAME).assertItemsDisplayed(a, b, c)
-                .sort().by(MODIFIED).assertItemsDisplayed(c, b, a)
-                .sort().by(SIZE).assertItemsDisplayed(b, c, a)
-                .sort().by(NAME).assertItemsDisplayed(a, b, c);
+                .sort().by(NAME).assertAllItemsDisplayedInOrder(a, b, c)
+                .sort().by(MODIFIED).assertAllItemsDisplayedInOrder(c, b, a)
+                .sort().by(SIZE).assertAllItemsDisplayedInOrder(b, c, a)
+                .sort().by(NAME).assertAllItemsDisplayedInOrder(a, b, c);
     }
 
-    private File createFile(
+    private Path createFile(
             String name,
             String content,
             Instant modified) throws IOException {
         return createFile(name, content, modified, dir());
     }
 
-    private File createFile(
+    private Path createFile(
             String name,
             String content,
             Instant modified,
-            File dir) throws IOException {
+            Path dir) throws IOException {
 
-        File file = dir.resolve(name).createFile();
-        file.writeAllUtf8(content);
-        file.setLastModifiedTime(NOFOLLOW, modified);
+        Path file = Files.createFile(dir.resolve(name));
+        Files.writeUtf8(file, content);
+        Files.setLastModifiedTime(file, NOFOLLOW, modified);
         return file;
 
     }

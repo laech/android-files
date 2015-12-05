@@ -8,8 +8,10 @@ import com.google.auto.value.AutoValue;
 import java.io.IOException;
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.FileSystem.SizeVisitor;
+import l.files.fs.Files;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.ui.browser.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
@@ -17,7 +19,7 @@ import static l.files.fs.LinkOption.FOLLOW;
 
 final class CalculateSizeLoader
         extends AsyncTaskLoader<Size>
-        implements File.SizeVisitor {
+        implements SizeVisitor {
 
     private boolean started;
     private volatile int currentCount;
@@ -25,10 +27,10 @@ final class CalculateSizeLoader
     private volatile long currentSizeOnDisk;
     private volatile Size result;
 
-    private final File dir;
+    private final Path dir;
     private final Collection<Name> children;
 
-    CalculateSizeLoader(Context context, File dir, Collection<Name> children) {
+    CalculateSizeLoader(Context context, Path dir, Collection<Name> children) {
         super(context);
         this.dir = requireNonNull(dir);
         this.children = requireNonNull(children);
@@ -54,7 +56,7 @@ final class CalculateSizeLoader
 
         for (Name child : children) {
             try {
-                dir.resolve(child).traverseSize(FOLLOW, this);
+                Files.traverseSize(dir.resolve(child), FOLLOW, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }

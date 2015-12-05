@@ -8,9 +8,10 @@ import java.io.InputStream;
 import java.util.List;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Instant;
-import l.files.fs.local.LocalFile;
+import l.files.fs.Path;
+import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -18,7 +19,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static l.files.fs.File.UTF_8;
+import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertNotEquals;
@@ -27,16 +28,16 @@ public final class ManualInspectionTest {
 
     @Test
     public void test() throws Exception {
-        LocalFile dir = LocalFile.of(getExternalStorageDirectory()).resolve("test");
-        dir.createDirs();
+        Path dir = LocalPath.of(getExternalStorageDirectory()).resolve("test");
+        Files.createDirs(dir);
         try {
-            dir.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+            Files.setLastModifiedTime(dir, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
         } catch (IOException ignore) {
             // Older versions does not support changing mtime
         }
-        dir.resolve(".nomedia").createFiles();
-        dir.resolve("html.html").createFiles();
-        dir.resolve("zip.zip").createFiles();
+        Files.createFiles(dir.resolve(".nomedia"));
+        Files.createFiles(dir.resolve("html.html"));
+        Files.createFiles(dir.resolve("zip.zip"));
         createNonUtf8Dir();
 
         try {
@@ -53,15 +54,15 @@ public final class ManualInspectionTest {
                 "test.m4a");
 
         for (String res : resources) {
-            File file = dir.resolve(res);
-            if (file.exists(NOFOLLOW)) {
+            Path file = dir.resolve(res);
+            if (Files.exists(file, NOFOLLOW)) {
                 continue;
             }
 
             Closer closer = Closer.create();
             try {
                 InputStream in = closer.register(getInstrumentation().getContext().getAssets().open(res));
-                file.copyFrom(in);
+                Files.copy(in, file);
             } catch (Throwable e) {
                 throw closer.rethrow(e);
             } finally {
@@ -76,39 +77,33 @@ public final class ManualInspectionTest {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEquals(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        LocalFile dir = LocalFile.of(getExternalStorageDirectory()).resolve(nonUtf8);
-        LocalFile child = dir.resolve("good we can see this dir");
+        LocalPath dir = LocalPath.of(getExternalStorageDirectory()).resolve(nonUtf8);
+        LocalPath child = dir.resolve("good we can see this dir");
 
         try {
-            dir.deleteRecursive();
+            Files.deleteRecursive(dir);
         } catch (FileNotFoundException ignored) {
         }
 
-        dir.createDir();
-        child.createFile();
+        Files.createDir(dir);
+        Files.createFile(child);
     }
 
-    private void createFutureFiles(File dir) throws IOException {
-        dir.resolve("future")
-                .createFiles()
-                .setLastModifiedTime(
-                        FOLLOW,
-                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365))
-                );
+    private void createFutureFiles(Path dir) throws IOException {
+        Files.setLastModifiedTime(
+                Files.createFiles(dir.resolve("future")),
+                FOLLOW,
+                Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(365)));
 
-        dir.resolve("future3")
-                .createFiles()
-                .setLastModifiedTime(
-                        FOLLOW,
-                        Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2))
-                );
+        Files.setLastModifiedTime(
+                Files.createFiles(dir.resolve("future3")),
+                FOLLOW,
+                Instant.ofMillis(currentTimeMillis() + DAYS.toMillis(2)));
 
-        dir.resolve("future5")
-                .createFiles()
-                .setLastModifiedTime(
-                        FOLLOW,
-                        Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5))
-                );
+        Files.setLastModifiedTime(
+                Files.createFiles(dir.resolve("future5")),
+                FOLLOW,
+                Instant.ofMillis(currentTimeMillis() + SECONDS.toMillis(5)));
     }
 
 }

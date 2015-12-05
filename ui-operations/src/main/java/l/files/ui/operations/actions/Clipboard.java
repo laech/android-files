@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
@@ -21,7 +21,7 @@ enum Clipboard {
     }
 
     private Action action;
-    private Set<File> files;
+    private Set<Path> files;
 
     Clipboard() {
         clear();
@@ -37,11 +37,11 @@ enum Clipboard {
         return action;
     }
 
-    Set<File> files() {
+    Set<Path> paths() {
         return files;
     }
 
-    void set(Action action, Collection<? extends File> files) {
+    void set(Action action, Collection<? extends Path> files) {
         this.action = requireNonNull(action);
         this.files = unmodifiableSet(new HashSet<>(files));
     }

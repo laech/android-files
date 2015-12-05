@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.operations.Failure;
 import l.files.operations.Progress;
 import l.files.operations.Target;
@@ -104,7 +104,7 @@ public final class NotificationProviderTest {
     @Test
     public void notify_on_failure() throws Exception {
 
-        File file = mock(File.class, "p");
+        Path file = mock(Path.class, "p");
         IOException err = new IOException("test");
         List<Failure> failures = singletonList(Failure.create(file, err));
         provider.onUpdate(context, base
@@ -127,8 +127,8 @@ public final class NotificationProviderTest {
     @Test
     public void create_failure_intent_with_correct_failure_data() throws Exception {
 
-        File f1 = mock(File.class, "1");
-        File f2 = mock(File.class, "2");
+        Path f1 = mock(Path.class, "1");
+        Path f2 = mock(Path.class, "2");
 
         Intent intent = provider.getFailureIntent(context, base
                 .running(Time.create(1, 1))

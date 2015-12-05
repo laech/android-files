@@ -2,7 +2,7 @@ package l.files.fs.local;
 
 import org.junit.Test;
 
-import static l.files.fs.File.UTF_8;
+import static l.files.fs.Files.UTF_8;
 import static org.junit.Assert.assertEquals;
 
 public final class LocalNameTest {

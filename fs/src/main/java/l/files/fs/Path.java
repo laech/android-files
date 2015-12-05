@@ -66,4 +66,5 @@ public interface Path extends Parcelable {
     @Deprecated
     void writeTo(OutputStream out) throws IOException;
 
+    boolean isHidden();
 }

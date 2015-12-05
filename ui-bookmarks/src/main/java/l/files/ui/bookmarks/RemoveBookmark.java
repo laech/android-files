@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 
@@ -15,9 +15,9 @@ import static l.files.base.Objects.requireNonNull;
 final class RemoveBookmark extends ActionModeItem {
 
     private final BookmarkManager bookmarks;
-    private final Selection<File, ?> selections;
+    private final Selection<Path, ?> selections;
 
-    RemoveBookmark(Selection<File, ?> selection, BookmarkManager bookmarks) {
+    RemoveBookmark(Selection<Path, ?> selection, BookmarkManager bookmarks) {
         super(R.id.delete_selected_bookmarks);
         this.selections = requireNonNull(selection);
         this.bookmarks = requireNonNull(bookmarks);

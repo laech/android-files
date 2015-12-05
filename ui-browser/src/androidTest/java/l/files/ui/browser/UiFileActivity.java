@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import l.files.fs.File;
+import l.files.fs.FileSystem;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
@@ -32,6 +34,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.Instrumentations.await;
@@ -124,7 +127,7 @@ final class UiFileActivity {
         return new UiSort(this);
     }
 
-    UiFileActivity selectFromNavigationMode(final File dir) {
+    UiFileActivity selectFromNavigationMode(final Path dir) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
@@ -135,18 +138,18 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity clickInto(File file) {
+    UiFileActivity clickInto(Path file) {
         click(file);
         assertCurrentDirectory(file);
         return this;
     }
 
-    UiFileActivity click(File file) {
+    UiFileActivity click(Path file) {
         clickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
 
-    UiFileActivity longClick(File file) {
+    UiFileActivity longClick(Path file) {
         longClickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
@@ -257,13 +260,13 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertCurrentDirectory(final File expected) {
+    UiFileActivity assertCurrentDirectory(final Path expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
                 FilesFragment fragment = activity().fragment();
                 assertNotNull(fragment);
-                File actual = fragment.directory();
+                Path actual = fragment.directory();
                 assertEquals(expected, actual);
             }
         });
@@ -271,7 +274,7 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertListViewContains(
-            final File item,
+            final Path item,
             final boolean contains) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -283,7 +286,7 @@ final class UiFileActivity {
     }
 
     UiFileActivity assertItemContentView(
-            final File file,
+            final Path file,
             final Consumer<FileView> assertion) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
@@ -298,13 +301,13 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                assertEquals(title, label((File) activity().title().getSelectedItem()));
+                assertEquals(title, label((Path) activity().title().getSelectedItem()));
             }
         });
         return this;
     }
 
-    private String label(File file) {
+    private String label(Path file) {
         return FileLabels.get(activity().getResources(), file);
     }
 
@@ -319,7 +322,7 @@ final class UiFileActivity {
     }
 
     private void findItemOnMainThread(
-            File file,
+            Path file,
             Consumer<View> consumer) {
         Instrumentations.findItemOnMainThread(
                 instrument, recycler(), file, consumer);
@@ -392,7 +395,7 @@ final class UiFileActivity {
      * Asserts whether the given item is currently checked.
      */
     UiFileActivity assertChecked(
-            File file, final boolean checked) {
+            Path file, final boolean checked) {
         findItemOnMainThread(file, new Consumer<View>() {
             @Override
             public void apply(View view) {
@@ -445,7 +448,7 @@ final class UiFileActivity {
         });
     }
 
-    UiFileActivity assertThumbnailShown(File file, final boolean shown) {
+    UiFileActivity assertThumbnailShown(Path file, final boolean shown) {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
@@ -457,7 +460,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertLinkIconDisplayed(File file, final boolean displayed) {
+    UiFileActivity assertLinkIconDisplayed(Path file, final boolean displayed) {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
@@ -469,7 +472,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertLinkPathDisplayed(File link, final File target) {
+    UiFileActivity assertLinkPathDisplayed(Path link, final Path target) {
 
         assertItemContentView(link, new Consumer<FileView>() {
             @Override
@@ -486,7 +489,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertSummary(File file, final CharSequence expected) {
+    UiFileActivity assertSummary(Path file, final CharSequence expected) {
 
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
@@ -508,7 +511,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertDisabled(File file) {
+    UiFileActivity assertDisabled(Path file) {
         assertItemContentView(file, new Consumer<FileView>() {
             @Override
             public void apply(FileView input) {
@@ -518,12 +521,12 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertNavigationModeHierarchy(final File dir) {
+    UiFileActivity assertNavigationModeHierarchy(final Path dir) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                List<File> actual = activity().hierarchy();
-                List<File> expected = new ArrayList<>(dir.hierarchy());
+                List<Path> actual = activity().hierarchy();
+                List<Path> expected = new ArrayList<>(Files.hierarchy(dir));
                 reverse(expected);
                 assertEquals(expected, actual);
                 assertEquals(dir, activity().title().getSelectedItem());
@@ -532,7 +535,7 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertListMatchesFileSystem(final File dir)
+    UiFileActivity assertListMatchesFileSystem(final Path dir)
             throws IOException {
 
         await(new Callable<Void>() {
@@ -540,19 +543,19 @@ final class UiFileActivity {
             public Void call() throws Exception {
 
 
-                final SimpleArrayMap<File, Stat> filesInView = filesInView();
+                final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                dir.list(FOLLOW, new File.Consumer() {
+                Files.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
                     @Override
-                    public boolean accept(File child) throws IOException {
+                    public boolean accept(Path child) throws IOException {
                         Stat oldStat = filesInView.remove(child);
                         if (oldStat == null) {
-                            fail("File in file system but not in view: " + child);
+                            fail("Path in file system but not in view: " + child);
                         }
 
-                        Stat newStat = child.stat(NOFOLLOW);
+                        Stat newStat = stat(child, NOFOLLOW);
                         if (!newStat.equals(oldStat)) {
-                            fail("File details differ for : " + child
+                            fail("Path details differ for : " + child
                                     + "\nnew: " + newStat
                                     + "\nold: " + oldStat);
                         }
@@ -561,7 +564,7 @@ final class UiFileActivity {
                 });
 
                 if (!filesInView.isEmpty()) {
-                    fail("File in view but not on file system: "
+                    fail("Path in view but not on file system: "
                             + filesInView.keyAt(0) + "="
                             + filesInView.valueAt(0));
                 }
@@ -575,11 +578,11 @@ final class UiFileActivity {
         return this;
     }
 
-    private SimpleArrayMap<File, Stat> filesInView() {
+    private SimpleArrayMap<Path, Stat> filesInView() {
         List<FileItem> items = fileItems();
-        SimpleArrayMap<File, Stat> result = new SimpleArrayMap<>(items.size());
+        SimpleArrayMap<Path, Stat> result = new SimpleArrayMap<>(items.size());
         for (FileItem item : items) {
-            result.put(item.selfFile(), item.selfStat());
+            result.put(item.selfPath(), item.selfStat());
         }
         return result;
     }
@@ -595,31 +598,31 @@ final class UiFileActivity {
         return files;
     }
 
-    private List<File> resources() {
+    private List<Path> resources() {
         List<FileItem> items = fileItems();
-        List<File> files = new ArrayList<>(items.size());
+        List<Path> files = new ArrayList<>(items.size());
         for (FileItem item : items) {
-            files.add(item.selfFile());
+            files.add(item.selfPath());
         }
         return files;
     }
 
     /**
-     * @deprecated use {@link #assertAllItemsDisplayedInOrder(File...)}
+     * @deprecated use {@link #assertAllItemsDisplayedInOrder(Path...)}
      */
     @Deprecated
-    UiFileActivity assertItemsDisplayed(File... expected) {
+    UiFileActivity assertItemsDisplayed(Path... expected) {
         return assertAllItemsDisplayedInOrder(expected);
     }
 
-    UiFileActivity assertAllItemsDisplayedInOrder(final File... expected) {
+    UiFileActivity assertAllItemsDisplayedInOrder(final Path... expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
                 List<FileItem> items = fileItems();
-                List<File> actual = new ArrayList<>(items.size());
+                List<Path> actual = new ArrayList<>(items.size());
                 for (FileItem item : items) {
-                    actual.add(item.selfFile());
+                    actual.add(item.selfPath());
                 }
                 assertEquals(asList(expected), actual);
             }

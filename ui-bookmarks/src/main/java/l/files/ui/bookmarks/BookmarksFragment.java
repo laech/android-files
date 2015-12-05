@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
@@ -27,18 +27,18 @@ import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 import static l.files.ui.base.view.Views.find;
 
 public final class BookmarksFragment
-        extends SelectionModeFragment<File, File>
-        implements LoaderCallbacks<List<File>> {
+        extends SelectionModeFragment<Path, Path>
+        implements LoaderCallbacks<List<Path>> {
 
     public RecyclerView recycler;
     private BookmarksAdapter adapter;
 
-    public List<File> bookmarks() {
+    public List<Path> bookmarks() {
         List<Object> items = adapter.items();
-        List<File> bookmarks = new ArrayList<>(items.size());
+        List<Path> bookmarks = new ArrayList<>(items.size());
         for (Object item : items) {
-            if (item instanceof File) {
-                bookmarks.add((File) item);
+            if (item instanceof Path) {
+                bookmarks.add((Path) item);
             }
         }
         return bookmarks;
@@ -82,14 +82,14 @@ public final class BookmarksFragment
     }
 
     @Override
-    public Loader<List<File>> onCreateLoader(int id, Bundle bundle) {
+    public Loader<List<Path>> onCreateLoader(int id, Bundle bundle) {
         return new BookmarksLoader(
                 getActivity(),
                 BookmarkManager.get(getActivity()), DIR_HOME);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<File>> loader, List<File> bookmarks) {
+    public void onLoadFinished(Loader<List<Path>> loader, List<Path> bookmarks) {
         List<Object> items = new ArrayList<>(bookmarks.size() + 1);
         items.add(getString(R.string.bookmarks));
         items.addAll(bookmarks);
@@ -97,7 +97,7 @@ public final class BookmarksFragment
     }
 
     @Override
-    public void onLoaderReset(Loader<List<File>> loader) {
-        adapter.setItems(Collections.<File>emptyList());
+    public void onLoaderReset(Loader<List<Path>> loader) {
+        adapter.setItems(Collections.<Path>emptyList());
     }
 }

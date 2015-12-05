@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import l.files.fs.Permission;
 
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.removePermissions;
 import static org.junit.Assert.assertEquals;
 
 public final class NewDirTest extends BaseFilesActivityTest {
@@ -15,7 +17,7 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void shows_error_message_when_failed_to_create()
             throws Exception {
-        dir().removePermissions(Permission.write());
+        removePermissions(dir(), Permission.write());
         screen()
                 .newFolder()
                 .setFilename("a")
@@ -41,8 +43,9 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void name_field_has_new_name_suggestion_if_initial_names_are_taken()
             throws Exception {
-        dir().resolve(string(R.string.untitled_dir)).createFile();
-        dir().resolve(string(R.string.untitled_dir) + " " + 2).createFile();
+
+        createFile(dir().resolve(string(R.string.untitled_dir)));
+        createFile(dir().resolve(string(R.string.untitled_dir) + " " + 2));
 
         screen()
                 .newFolder()
@@ -52,7 +55,8 @@ public final class NewDirTest extends BaseFilesActivityTest {
     @Test
     public void can_not_create_if_folder_with_specified_name_already_exists()
             throws Exception {
-        dir().resolve("a").createFile();
+
+        createFile(dir().resolve("a"));
         screen()
                 .newFolder()
                 .setFilename("a")

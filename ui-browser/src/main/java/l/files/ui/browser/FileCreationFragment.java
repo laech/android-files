@@ -24,7 +24,8 @@ import android.widget.TextView.OnEditorActionListener;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
@@ -35,7 +36,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 public abstract class FileCreationFragment extends DialogFragment
         implements OnClickListener {
 
-    public static final String ARG_PARENT_FILE = "parent";
+    public static final String ARG_PARENT_PATH = "parent";
 
     private static final int LOADER_CHECKER =
             identityHashCode(FileCreationFragment.class);
@@ -92,7 +93,7 @@ public abstract class FileCreationFragment extends DialogFragment
                 .create();
     }
 
-    protected CharSequence getError(File target) {
+    protected CharSequence getError(Path target) {
         return getString(R.string.name_exists);
     }
 
@@ -107,8 +108,8 @@ public abstract class FileCreationFragment extends DialogFragment
         getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
     }
 
-    protected File parent() {
-        return getArguments().getParcelable(ARG_PARENT_FILE);
+    protected Path parent() {
+        return getArguments().getParcelable(ARG_PARENT_PATH);
     }
 
     protected String getFilename() {
@@ -134,12 +135,12 @@ public abstract class FileCreationFragment extends DialogFragment
         }
 
         private Loader<Existence> newChecker() {
-            final File file = parent().resolve(getFilename());
+            final Path file = parent().resolve(getFilename());
             return new AsyncTaskLoader<Existence>(getActivity()) {
                 @Override
                 public Existence loadInBackground() {
                     try {
-                        boolean exists = file.exists(NOFOLLOW);
+                        boolean exists = Files.exists(file, NOFOLLOW);
                         return new Existence(file, exists);
                     } catch (IOException e) {
                         return null;
@@ -181,10 +182,10 @@ public abstract class FileCreationFragment extends DialogFragment
     }
 
     private static class Existence {
-        File file;
-        boolean exists;
+        final Path file;
+        final boolean exists;
 
-        Existence(File file, boolean exists) {
+        Existence(Path file, boolean exists) {
             this.file = file;
             this.exists = exists;
         }

@@ -2,7 +2,8 @@ package l.files.ui.browser;
 
 import org.junit.Test;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 
 public final class BookmarkMenuTest extends BaseFilesActivityTest {
 
@@ -10,8 +11,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_menu_is_unchecked_for_non_bookmarked_directory()
             throws Exception {
 
-        File dir1 = dir().resolve("Not bookmarked 1").createDir();
-        File dir2 = dir().resolve("Not bookmarked 2").createDir();
+        Path dir1 = Files.createDir(dir().resolve("Not bookmarked 1"));
+        Path dir2 = Files.createDir(dir().resolve("Not bookmarked 2"));
         screen()
                 .clickInto(dir1)
                 .assertBookmarkMenuChecked(false)
@@ -24,7 +25,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_menu_is_checked_for_bookmarked_directory()
             throws Exception {
 
-        File dir = dir().resolve("Bookmarked").createDir();
+        Path dir = Files.createDir(dir().resolve("Bookmarked"));
         screen()
                 .clickInto(dir)
                 .bookmark()
@@ -35,7 +36,7 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void bookmark_unbookmark_directory_checks_bookmark_menu_correctly()
             throws Exception {
 
-        File dir = dir().resolve("Bookmarked then unbookmarked").createDir();
+        Path dir = Files.createDir(dir().resolve("Bookmarked then unbookmarked"));
         screen()
                 .clickInto(dir)
                 .bookmark()
@@ -48,8 +49,8 @@ public final class BookmarkMenuTest extends BaseFilesActivityTest {
     public void navigate_through_bookmarked_unbookmarked_directories_checks_bookmark_menu_correctly()
             throws Exception {
 
-        File bookmarked = dir().resolve("Bookmarked").createDir();
-        File unbookmarked = dir().resolve("Bookmarked/Unbookmarked").createDir();
+        Path bookmarked = Files.createDir(dir().resolve("Bookmarked"));
+        Path unbookmarked = Files.createDir(dir().resolve("Bookmarked/Unbookmarked"));
         screen()
                 .clickInto(bookmarked)
                 .bookmark()

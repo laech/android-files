@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -25,7 +25,7 @@ public final class TaskStateTest {
     public void setUp() throws Exception {
         this.time = Time.create(10, 11);
         this.task = TaskId.create(1, COPY);
-        this.target = Target.from(singleton(mock(File.class)), mock(File.class));
+        this.target = Target.from(singleton(mock(Path.class)), mock(Path.class));
         this.pending = TaskState.pending(task, target, time);
     }
 
@@ -87,7 +87,7 @@ public final class TaskStateTest {
     public void RunningToFailed() throws Exception {
         Time failureTime = Time.create(20, 2);
         List<Failure> failures = singletonList(Failure.create(
-                mock(File.class), new IOException("ok")
+                mock(Path.class), new IOException("ok")
         ));
         TaskState.Failed state = pending.running(time).failed(failureTime, failures);
         assertEquals(task, state.task());

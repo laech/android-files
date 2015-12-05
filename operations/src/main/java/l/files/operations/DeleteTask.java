@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.DELETE;
 
@@ -18,18 +18,18 @@ final class DeleteTask extends Task {
             Clock clock,
             Callback callback,
             Handler handler,
-            Collection<? extends File> files) {
+            Collection<? extends Path> paths) {
 
         super(
                 TaskId.create(id, DELETE),
-                Target.from(files),
+                Target.from(paths),
                 clock,
                 callback,
                 handler
         );
 
-        this.count = new Size(files);
-        this.delete = new Delete(files);
+        this.count = new Size(paths);
+        this.delete = new Delete(paths);
     }
 
     @Override

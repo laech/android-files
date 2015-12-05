@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
@@ -20,7 +20,7 @@ import static android.content.Intent.ACTION_SEND_MULTIPLE;
 import static android.content.Intent.EXTRA_STREAM;
 import static android.content.Intent.createChooser;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 
 final class Share extends ActionModeItem implements Selection.Callback {
 
@@ -101,8 +101,8 @@ final class Share extends ActionModeItem implements Selection.Callback {
         Collection<FileItem> files = selection.values();
         ArrayList<Uri> uris = new ArrayList<>(files.size());
         for (FileItem item : files) {
-            File file = item.linkTargetOrSelfFile();
-            uris.add(Uri.parse(file.uri().toString()));
+            Path file = item.linkTargetOrSelfPath();
+            uris.add(Uri.parse(file.toUri().toString()));
         }
         return uris;
     }

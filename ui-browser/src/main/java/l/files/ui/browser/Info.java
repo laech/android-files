@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
@@ -20,9 +20,9 @@ public final class Info extends ActionModeItem implements Selection.Callback {
 
     private final Selection<?, FileItem> selection;
     private final FragmentManager manager;
-    private final File dir;
+    private final Path dir;
 
-    public Info(Selection<?, FileItem> selection, FragmentManager manager, File dir) {
+    public Info(Selection<?, FileItem> selection, FragmentManager manager, Path dir) {
         super(R.id.info);
         this.selection = requireNonNull(selection);
         this.manager = requireNonNull(manager);
@@ -49,7 +49,7 @@ public final class Info extends ActionModeItem implements Selection.Callback {
         if (values.size() == 1) {
             FileItem file = values.iterator().next();
             Stat stat = file.linkTargetOrSelfStat();
-            InfoFragment.create(file.selfFile(), stat).show(manager, FRAGMENT_TAG);
+            InfoFragment.create(file.selfPath(), stat).show(manager, FRAGMENT_TAG);
         } else {
             InfoMultiFragment.create(dir, values).show(manager, FRAGMENT_TAG);
         }

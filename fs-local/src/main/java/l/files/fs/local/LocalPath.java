@@ -17,7 +17,7 @@ import l.files.fs.Path;
 
 import static java.lang.System.arraycopy;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.File.UTF_8;
+import static l.files.fs.Files.UTF_8;
 
 public final class LocalPath implements Path {
 
@@ -167,7 +167,7 @@ public final class LocalPath implements Path {
         return resolve(((LocalName) name).bytes());
     }
 
-    LocalPath resolve(byte[] path) {
+    public LocalPath resolve(byte[] path) {
         byte[][] children = toNames(path);
         if (children.length == 0) {
             return this;
@@ -230,7 +230,8 @@ public final class LocalPath implements Path {
         return LocalName.of(names[names.length - 1]);
     }
 
-    boolean isHidden() {
+    @Override
+    public boolean isHidden() {
         return names.length > 0 &&
                 names[names.length - 1][0] == DOT;
     }

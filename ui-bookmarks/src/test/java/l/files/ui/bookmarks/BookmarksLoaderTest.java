@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Set;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
 import l.files.fs.Name;
+import l.files.fs.Path;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -23,14 +23,14 @@ public final class BookmarksLoaderTest {
 
     private BookmarkManager bookmarks;
     private BookmarksLoader loader;
-    private File home;
+    private Path home;
 
     @Before
     public void setUp() throws Exception {
         Context context = mock(Context.class);
         given(context.getApplicationContext()).willReturn(context);
 
-        home = mock(File.class);
+        home = mock(Path.class);
         given(home.name()).willReturn(mock(Name.class));
         bookmarks = mock(BookmarkManager.class);
         loader = new BookmarksLoader(context, bookmarks, home);
@@ -38,35 +38,35 @@ public final class BookmarksLoaderTest {
 
     @Test
     public void sorts_bookmarks_by_name() throws Exception {
-        File a = mockFile("a");
-        File b = mockFile("b");
-        File c = mockFile("c");
-        File d = mockFile("d");
-        File e = mockFile("e");
+        Path a = mockFile("a");
+        Path b = mockFile("b");
+        Path c = mockFile("c");
+        Path d = mockFile("d");
+        Path e = mockFile("e");
 
         given(bookmarks.getBookmarks()).willReturn(asSet(a, c, b, e, d));
-        List<File> expected = asList(a, b, c, d, e);
-        List<File> actual = loader.loadInBackground();
+        List<Path> expected = asList(a, b, c, d, e);
+        List<Path> actual = loader.loadInBackground();
         assertEquals(expected, actual);
     }
 
     @Test
     public void sorts_home_at_top() throws Exception {
-        File a = mockFile("a");
-        File z = mockFile("z");
+        Path a = mockFile("a");
+        Path z = mockFile("z");
 
         given(bookmarks.getBookmarks()).willReturn(asSet(a, z, home));
-        List<File> expected = asList(home, a, z);
-        List<File> actual = loader.loadInBackground();
+        List<Path> expected = asList(home, a, z);
+        List<Path> actual = loader.loadInBackground();
         assertEquals(expected, actual);
     }
 
-    private Set<File> asSet(File... files) {
+    private Set<Path> asSet(Path... files) {
         return unmodifiableSet(new HashSet<>(asList(files)));
     }
 
-    private File mockFile(String nameStr) {
-        File file = mock(File.class);
+    private Path mockFile(String nameStr) {
+        Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
         given(file.name()).willReturn(name);

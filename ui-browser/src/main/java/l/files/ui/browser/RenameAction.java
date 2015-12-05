@@ -5,7 +5,7 @@ import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 
@@ -16,10 +16,10 @@ import static l.files.base.Objects.requireNonNull;
 final class RenameAction extends ActionModeItem
         implements Selection.Callback {
 
-    private final Selection<File, ?> selection;
+    private final Selection<Path, ?> selection;
     private final FragmentManager manager;
 
-    RenameAction(Selection<File, ?> selection, FragmentManager manager) {
+    RenameAction(Selection<Path, ?> selection, FragmentManager manager) {
         super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "selection");
@@ -54,7 +54,7 @@ final class RenameAction extends ActionModeItem
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        File file = selection.keys().iterator().next();
+        Path file = selection.keys().iterator().next();
         RenameFragment.create(file).show(manager, RenameFragment.TAG);
     }
 }

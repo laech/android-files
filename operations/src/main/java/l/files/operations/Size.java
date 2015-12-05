@@ -4,16 +4,17 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
+import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class Size extends Count {
 
     private final AtomicLong size = new AtomicLong();
 
-    Size(Collection<? extends File> files) {
-        super(files);
+    Size(Collection<? extends Path> paths) {
+        super(paths);
     }
 
     public long getSize() {
@@ -21,10 +22,10 @@ final class Size extends Count {
     }
 
     @Override
-    void onCount(File file) {
-        super.onCount(file);
+    void onCount(Path path) {
+        super.onCount(path);
         try {
-            size.addAndGet(file.stat(NOFOLLOW).size());
+            size.addAndGet(stat(path, NOFOLLOW).size());
         } catch (IOException e) {
             // Ignore count
         }

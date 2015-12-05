@@ -25,10 +25,11 @@ import java.util.concurrent.ExecutorService;
 
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
-import l.files.fs.File;
-import l.files.fs.FileConsumer;
+import l.files.fs.FileSystem;
+import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Observation;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.Collators;
 import l.files.ui.browser.BrowserItem.FileItem;
@@ -49,7 +50,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<Name, FileItem> data;
-    private final File root;
+    private final Path root;
 
     private final Provider<Collator> collator = new Provider<Collator>() {
 
@@ -127,7 +128,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     FilesLoader(
             Context context,
-            File root,
+            Path root,
             FileSort sort,
             boolean showHidden) {
         super(context);
@@ -198,7 +199,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
 
-        List<File> children;
+        List<Path> children;
         try {
             if (observe) {
                 children = observe();
@@ -219,17 +220,17 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return buildResult();
     }
 
-    private List<File> observe() throws IOException, InterruptedException {
-        List<File> children = new ArrayList<>();
-        observation = root.observe(FOLLOW, listener, collectInto(children), 1, SECONDS);
+    private List<Path> observe() throws IOException, InterruptedException {
+        List<Path> children = new ArrayList<>();
+        observation = Files.observe(root, FOLLOW, listener, collectInto(children), 1, SECONDS);
         return children;
     }
 
-    private List<File> visit() throws IOException {
-        final List<File> children = new ArrayList<>();
-        root.list(FOLLOW, new File.Consumer() {
+    private List<Path> visit() throws IOException {
+        final List<Path> children = new ArrayList<>();
+        Files.list(root, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File child) {
+            public boolean accept(Path child) {
                 checkedAdd(children, child);
                 return true;
             }
@@ -237,7 +238,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return children;
     }
 
-    private void checkedAdd(List<File> children, File child) {
+    private void checkedAdd(List<Path> children, Path child) {
         checkCancel();
 
         /*
@@ -250,17 +251,18 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         children.add(child);
     }
 
-    private FileConsumer collectInto(final List<File> children) {
-        return new FileConsumer() {
+    private FileSystem.Consumer<Path> collectInto(final List<Path> children) {
+        return new FileSystem.Consumer<Path>() {
             @Override
-            public void accept(File child) {
+            public boolean accept(Path child) {
                 checkedAdd(children, child);
+                return true;
             }
         };
     }
 
-    private void update(List<File> children) {
-        for (File child : children) {
+    private void update(List<Path> children) {
+        for (Path child : children) {
             checkCancel();
             update(child, null);
         }
@@ -278,7 +280,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             files.addAll(data.values());
         } else {
             for (FileItem item : data.values()) {
-                if (!item.selfFile().isHidden()) {
+                if (!item.selfPath().isHidden()) {
                     files.add(item);
                 }
             }
@@ -340,7 +342,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return update(root.resolve(child), event);
     }
 
-    private boolean update(File file, Event event) {
+    private boolean update(Path path, Event event) {
 
         /*
          * This if statement may seem unnecessary given the try-catch below
@@ -365,33 +367,33 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
          * resulting both "a" and "A" be displayed.
          */
         if (DELETE.equals(event)) {
-            return data.remove(file.name()) != null;
+            return data.remove(path.name()) != null;
         }
 
         try {
 
-            Stat stat = file.stat(NOFOLLOW);
-            Stat targetStat = readTargetStatus(file, stat);
-            File target = readTarget(file, stat);
-            FileItem newStat = FileItem.create(file, stat, target, targetStat, collator);
-            FileItem oldStat = data.put(file.name(), newStat);
+            Stat stat = Files.stat(path, NOFOLLOW);
+            Stat targetStat = readTargetStatus(path, stat);
+            Path target = readTarget(path, stat);
+            FileItem newStat = FileItem.create(path, stat, target, targetStat, collator);
+            FileItem oldStat = data.put(path.name(), newStat);
             return !newStat.equals(oldStat);
 
         } catch (FileNotFoundException e) {
-            return data.remove(file.name()) != null;
+            return data.remove(path.name()) != null;
 
         } catch (IOException e) {
             data.put(
-                    file.name(),
-                    FileItem.create(file, null, null, null, collator));
+                    path.name(),
+                    FileItem.create(path, null, null, null, collator));
             return true;
         }
     }
 
-    private File readTarget(File file, Stat stat) throws FileNotFoundException {
+    private Path readTarget(Path path, Stat stat) throws FileNotFoundException {
         if (stat.isSymbolicLink()) {
             try {
-                return file.readLink();
+                return Files.readLink(path);
             } catch (FileNotFoundException e) {
                 throw e;
             } catch (IOException ignored) {
@@ -400,10 +402,10 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return null;
     }
 
-    private Stat readTargetStatus(File file, Stat stat) {
+    private Stat readTargetStatus(Path file, Stat stat) {
         if (stat.isSymbolicLink()) {
             try {
-                return file.stat(FOLLOW);
+                return Files.stat(file, FOLLOW);
             } catch (IOException ignored) {
             }
         }

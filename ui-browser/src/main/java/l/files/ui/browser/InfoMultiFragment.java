@@ -9,19 +9,19 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import l.files.fs.File;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.view.Views;
 import l.files.ui.browser.BrowserItem.FileItem;
 
 public final class InfoMultiFragment extends InfoBaseFragment {
 
-    public static InfoMultiFragment create(File dir, Collection<FileItem> items) {
+    public static InfoMultiFragment create(Path dir, Collection<FileItem> items) {
 
         ArrayList<Name> names = new ArrayList<>(items.size());
         for (FileItem item : items) {
-            names.add(item.selfFile().name());
+            names.add(item.selfPath().name());
         }
 
         Bundle bundle = new Bundle();

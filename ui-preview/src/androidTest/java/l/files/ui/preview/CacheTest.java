@@ -7,11 +7,14 @@ import org.junit.rules.TemporaryFolder;
 
 import java.util.Random;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.local.LocalPath;
 
-import static java.lang.System.currentTimeMillis;
+import static l.files.fs.Files.setLastModifiedTime;
+import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -24,7 +27,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
     C cache;
     Random random;
 
-    File file;
+    Path file;
     Stat stat;
 
     @Before
@@ -33,8 +36,8 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         random = new Random();
 
         java.io.File localFile = folder.newFile("0");
-        file = new TestFile(localFile);
-        stat = new TestStat(localFile);
+        file = LocalPath.of(localFile);
+        stat = Files.stat(file, FOLLOW);
     }
 
     @Test
@@ -51,8 +54,8 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         V value = newValue();
         cache.put(file, stat, constraint, value);
 
-        file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis() + 9999));
-        assertNull(cache.get(file, stat, constraint, true));
+        setLastModifiedTime(file, NOFOLLOW, Instant.EPOCH);
+        assertNull(cache.get(file, Files.stat(file, NOFOLLOW), constraint, true));
     }
 
     @Test
@@ -80,7 +83,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         assertEquals(a, b);
     }
 
-    File mockCacheDir() {
-        return new TestFile(folder.getRoot());
+    Path mockCacheDir() {
+        return LocalPath.of(folder.getRoot());
     }
 }

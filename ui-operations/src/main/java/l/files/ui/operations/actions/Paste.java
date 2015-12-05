@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
@@ -17,11 +17,11 @@ import static l.files.ui.operations.actions.Clipboard.Action.CUT;
 
 public final class Paste extends OptionsMenuAction {
 
-    private final File destination;
+    private final Path destination;
     private final Activity context;
     private final Clipboard clipboard;
 
-    public Paste(Activity context, File destination) {
+    public Paste(Activity context, Path destination) {
         super(android.R.id.paste);
         this.context = requireNonNull(context, "context");
         this.destination = requireNonNull(destination, "destination");
@@ -44,8 +44,8 @@ public final class Paste extends OptionsMenuAction {
         }
 
         item.setEnabled(clipboard.action() != null);
-        for (File file : clipboard.files()) {
-            if (destination.equalsOrIsDecedentOf(file)) {
+        for (Path path : clipboard.paths()) {
+            if (destination.startsWith(path)) {
                 // Can't paste into itself
                 item.setEnabled(false);
                 return;
@@ -58,10 +58,10 @@ public final class Paste extends OptionsMenuAction {
     protected void onItemSelected(MenuItem item) {
 
         if (clipboard.action() == COPY) {
-            context.startService(newCopyIntent(context, clipboard.files(), destination));
+            context.startService(newCopyIntent(context, clipboard.paths(), destination));
 
         } else if (clipboard.action() == CUT) {
-            context.startService(newMoveIntent(context, clipboard.files(), destination));
+            context.startService(newMoveIntent(context, clipboard.paths(), destination));
             clipboard.clear();
         }
     }

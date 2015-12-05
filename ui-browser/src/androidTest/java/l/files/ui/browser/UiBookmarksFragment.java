@@ -3,7 +3,7 @@ package l.files.ui.browser;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
 
 import static junit.framework.Assert.assertEquals;
@@ -26,7 +26,7 @@ final class UiBookmarksFragment {
         return context;
     }
 
-    UiBookmarksFragment longClick(File bookmark) {
+    UiBookmarksFragment longClick(Path bookmark) {
         longClickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
@@ -38,7 +38,7 @@ final class UiBookmarksFragment {
                 .findFragmentById(R.id.bookmarks_fragment);
     }
 
-    UiBookmarksFragment click(File bookmark) {
+    UiBookmarksFragment click(Path bookmark) {
         clickItemOnMainThread(context.instrumentation(), recycler(), bookmark);
         return this;
     }
@@ -51,7 +51,7 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment assertBookmarked(
-            final File bookmark,
+            final Path bookmark,
             final boolean bookmarked) {
         awaitOnMainThread(context.instrumentation(), new Runnable() {
             @Override
@@ -73,7 +73,7 @@ final class UiBookmarksFragment {
     }
 
     UiBookmarksFragment assertChecked(
-            File bookmark, final boolean checked) {
+            Path bookmark, final boolean checked) {
         findItemOnMainThread(
                 context.instrumentation(),
                 recycler(),

@@ -14,7 +14,7 @@ import l.files.fs.Permission;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.ErrnoException.EAGAIN;
-import static l.files.fs.local.LocalFile.permissionsFromMode;
+import static l.files.fs.local.LocalFileSystem.permissionsFromMode;
 
 @AutoValue
 @SuppressWarnings("OctalInteger")

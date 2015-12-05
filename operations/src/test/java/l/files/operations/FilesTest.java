@@ -5,8 +5,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.FileSystem;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.fs.LinkOption.FOLLOW;
@@ -19,14 +20,17 @@ import static org.mockito.Mockito.mock;
 
 public final class FilesTest {
 
-    private File dir;
+    private Path dir;
 
     @Before
     public void setUp() throws Exception {
-        dir = mock(File.class);
+        dir = mock(Path.class);
 
-        File file = mock(File.class);
+        Path file = mock(Path.class);
+        FileSystem fs = mock(FileSystem.class);
         given(dir.resolve(anyString())).willReturn(file);
+        given(dir.fileSystem()).willReturn(fs);
+        given(file.fileSystem()).willReturn(fs);
     }
 
     private Name mockName(String base, String ext) {
@@ -39,25 +43,27 @@ public final class FilesTest {
     }
 
 
-    private File mockFile(String base, String ext, boolean isDir) throws IOException {
+    private Path mockFile(String base, String ext, boolean isDir) throws IOException {
         Name name = mockName(base, ext);
+        FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
-        File file = mock(File.class);
+        Path file = mock(Path.class);
+        given(file.fileSystem()).willReturn(fs);
         given(stat.isRegularFile()).willReturn(!isDir);
         given(stat.isDirectory()).willReturn(isDir);
-        given(file.stat(FOLLOW)).willReturn(stat);
         given(file.name()).willReturn(name);
-        given(file.exists(NOFOLLOW)).willReturn(true);
+        given(fs.stat(file, FOLLOW)).willReturn(stat);
+        given(fs.exists(file, NOFOLLOW)).willReturn(true);
         given(dir.resolve(name)).willReturn(file);
         given(dir.resolve(file.name())).willReturn(file);
         return file;
     }
 
-    private File mockFile(String base, String ext) throws IOException {
+    private Path mockFile(String base, String ext) throws IOException {
         return mockFile(base, ext, false);
     }
 
-    private File mockDir(String base, String ext) throws IOException {
+    private Path mockDir(String base, String ext) throws IOException {
         return mockFile(base, ext, true);
     }
 
@@ -102,9 +108,9 @@ public final class FilesTest {
         testExistent(mockFile("", "b"), ".b 2");
     }
 
-    private void testExistent(File file, String expectedName) throws IOException {
-        File expected = dir.resolve(expectedName);
-        File actual = getNonExistentDestinationFile(file, dir);
+    private void testExistent(Path file, String expectedName) throws IOException {
+        Path expected = dir.resolve(expectedName);
+        Path actual = getNonExistentDestinationFile(file, dir);
         assertEquals(expected, actual);
     }
 

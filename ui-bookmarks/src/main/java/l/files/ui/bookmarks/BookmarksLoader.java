@@ -14,20 +14,20 @@ import java.util.List;
 import java.util.Locale;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.text.Collators;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.bookmarks.BookmarkManager.BookmarkChangedListener;
 
-final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
+final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
 
-    private final File home;
+    private final Path home;
     private final BookmarkManager manager;
     private final BookmarkChangedListener listener;
-    private List<File> bookmarks;
+    private List<Path> bookmarks;
 
-    BookmarksLoader(Context context, BookmarkManager manager, File home) {
+    BookmarksLoader(Context context, BookmarkManager manager, Path home) {
         super(context);
         this.home = requireNonNull(home);
         this.manager = requireNonNull(manager);
@@ -35,10 +35,10 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
     }
 
     @Override
-    public List<File> loadInBackground() {
+    public List<Path> loadInBackground() {
         Collator collator = Collators.of(Locale.getDefault());
         List<Entry> collation = collateBookmarks(collator);
-        List<File> bookmarks = new ArrayList<>(collation.size());
+        List<Path> bookmarks = new ArrayList<>(collation.size());
         for (Entry pair : collation) {
             bookmarks.add(pair.bookmark);
         }
@@ -48,7 +48,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
     @NonNull
     private List<Entry> collateBookmarks(Collator collator) {
         List<Entry> collation = new ArrayList<>();
-        for (File bookmark : manager.getBookmarks()) {
+        for (Path bookmark : manager.getBookmarks()) {
             CollationKey key = collator.getCollationKey(bookmark.name().toString());
             collation.add(new Entry(bookmark, key));
         }
@@ -85,7 +85,7 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
     }
 
     @Override
-    public void deliverResult(List<File> data) {
+    public void deliverResult(List<Path> data) {
         super.deliverResult(data);
         this.bookmarks = data;
     }
@@ -99,10 +99,10 @@ final class BookmarksLoader extends AsyncTaskLoader<List<File>> {
 
     private static final class Entry {
 
-        final File bookmark;
+        final Path bookmark;
         final CollationKey collationKey;
 
-        Entry(File bookmark, CollationKey collationKey) {
+        Entry(Path bookmark, CollationKey collationKey) {
             this.bookmark = bookmark;
             this.collationKey = collationKey;
         }

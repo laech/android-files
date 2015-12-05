@@ -2,7 +2,7 @@ package l.files.ui.preview;
 
 import android.support.v4.util.LruCache;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -23,8 +23,8 @@ abstract class MemCache<V> extends Cache<V> {
     }
 
     @Override
-    V get(File file, Stat stat, Rect constraint, boolean matchTime) {
-        ByteBuffer key = key(file, stat, constraint);
+    V get(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        ByteBuffer key = key(path, stat, constraint);
         Snapshot<V> value = delegate().get(key);
         if (value == null) {
             return null;
@@ -35,25 +35,25 @@ abstract class MemCache<V> extends Cache<V> {
         return value.get();
     }
 
-    private ByteBuffer key(File res, Stat stat, Rect constraint) {
+    private ByteBuffer key(Path path, Stat stat, Rect constraint) {
         ByteBuffer key = keys.get();
         key.clear();
-        key(key, res, stat, constraint);
+        key(key, path, stat, constraint);
         return key;
     }
 
     @Override
-    Snapshot<V> put(File file, Stat stat, Rect constraint, V value) {
+    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
         return delegate().put(
-                key(file, stat, constraint).copy(),
+                key(path, stat, constraint).copy(),
                 Snapshot.of(value, lastModifiedTime(stat)));
     }
 
-    Snapshot<V> remove(File file, Stat stat, Rect constraint) {
-        return delegate().remove(key(file, stat, constraint));
+    Snapshot<V> remove(Path path, Stat stat, Rect constraint) {
+        return delegate().remove(key(path, stat, constraint));
     }
 
-    abstract void key(ByteBuffer buffer, File file, Stat stat, Rect constraint);
+    abstract void key(ByteBuffer buffer, Path path, Stat stat, Rect constraint);
 
     abstract LruCache<ByteBuffer, Snapshot<V>> delegate();
 

@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
@@ -17,29 +18,29 @@ final class DecodeImage extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(File file, String mediaType) {
+        public boolean accept(Path path, String mediaType) {
             return mediaType.startsWith("image/");
         }
 
         @Override
         public Decode create(
-                File res,
+                Path path,
                 Stat stat,
                 Rect constraint,
                 PreviewCallback callback,
                 Preview context) {
-            return new DecodeImage(res, stat, constraint, callback, context);
+            return new DecodeImage(path, stat, constraint, callback, context);
         }
 
     };
 
     DecodeImage(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
     }
 
     @Override
@@ -69,7 +70,7 @@ final class DecodeImage extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(file.newBufferedInputStream());
+            InputStream in = closer.register(Files.newBufferedInputStream(file));
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
 

@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileLabels;
 
@@ -25,22 +26,23 @@ import static java.util.Collections.unmodifiableList;
 import static l.files.ui.base.fs.UserDirs.DIR_HOME;
 
 final class HierarchyAdapter extends BaseAdapter {
-    private List<File> hierarchy = emptyList();
-    private File directory;
 
-    void set(File dir) {
+    private List<Path> hierarchy = emptyList();
+    private Path directory;
+
+    void set(Path dir) {
         directory = dir;
-        hierarchy = new ArrayList<>(dir.hierarchy());
+        hierarchy = new ArrayList<>(Files.hierarchy(dir));
         Collections.reverse(hierarchy);
         hierarchy = unmodifiableList(hierarchy);
         notifyDataSetChanged();
     }
 
-    List<File> get() {
+    List<Path> get() {
         return hierarchy;
     }
 
-    int indexOf(File dir) {
+    int indexOf(Path dir) {
         return hierarchy.indexOf(dir);
     }
 
@@ -60,7 +62,7 @@ final class HierarchyAdapter extends BaseAdapter {
     }
 
     @Override
-    public File getItem(int position) {
+    public Path getItem(int position) {
         return hierarchy.get(position);
     }
 
@@ -75,7 +77,7 @@ final class HierarchyAdapter extends BaseAdapter {
                 ? convertView
                 : inflate(R.layout.files_activity_title, parent);
 
-        File file = getItem(position);
+        Path file = getItem(position);
 
         TextView title = (TextView) view.findViewById(android.R.id.title);
         title.setText(FileLabels.get(parent.getResources(), file));
@@ -102,7 +104,7 @@ final class HierarchyAdapter extends BaseAdapter {
                 : inflate(R.layout.files_activity_title_item, parent);
 
         boolean enabled = isEnabled(position);
-        File res = getItem(position);
+        Path res = getItem(position);
         view.setEnabled(enabled);
 
         AssetManager assets = parent.getContext().getAssets();
@@ -113,7 +115,7 @@ final class HierarchyAdapter extends BaseAdapter {
 
         TextView titleView = (TextView) view.findViewById(title);
         Name name = res.name();
-        titleView.setText(!name.isEmpty() ? name.toString() : res.pathString());
+        titleView.setText(!name.isEmpty() ? name.toString() : res.toString());
         titleView.setEnabled(enabled);
 
         return view;

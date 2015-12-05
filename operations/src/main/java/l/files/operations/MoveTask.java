@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.MOVE;
 
@@ -21,8 +21,8 @@ final class MoveTask extends Task {
             Clock clock,
             Callback callback,
             Handler handler,
-            Collection<? extends File> sources,
-            File destination) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
         super(
                 TaskId.create(id, MOVE),
@@ -49,9 +49,9 @@ final class MoveTask extends Task {
     private void copyThenDelete(List<Failure> failures)
             throws FileException, InterruptedException {
 
-        List<File> files = new ArrayList<>();
+        List<Path> files = new ArrayList<>();
         for (Failure failure : failures) {
-            files.add(failure.file());
+            files.add(failure.path());
         }
         count.execute();
         copy.execute();

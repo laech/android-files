@@ -6,25 +6,29 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import l.files.fs.File;
-import l.files.testing.fs.FileBaseTest;
+import l.files.fs.Path;
+import l.files.testing.fs.PathBaseTest;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public final class DeleteTest extends FileBaseTest {
+public final class DeleteTest extends PathBaseTest {
 
     @Test
     public void notifiesListener() throws Exception {
-        File a = dir1().resolve("a").createDir();
-        File b = dir1().resolve("a/b").createFile();
+        Path a = createDir(dir1().resolve("a"));
+        Path b = createFile(dir1().resolve("a/b"));
 
-        Set<File> expected = new HashSet<>(asList(a, b));
+        Set<Path> expected = new HashSet<>(asList(a, b));
 
         Delete delete = create(singletonList(a));
         delete.execute();
@@ -34,43 +38,43 @@ public final class DeleteTest extends FileBaseTest {
 
     @Test
     public void deletesFile() throws Exception {
-        File file = dir1().resolve("a").createFile();
+        Path file = createFile(dir1().resolve("a"));
         delete(file);
-        assertFalse(file.exists(NOFOLLOW));
+        assertFalse(exists(file, NOFOLLOW));
     }
 
     @Test
     public void deletesNonEmptyDirectory() throws Exception {
-        File dir = dir1().resolve("a").createDir();
-        File file = dir1().resolve("a/child.txt").createFile();
+        Path dir = createDir(dir1().resolve("a"));
+        Path file = createFile(dir1().resolve("a/child.txt"));
         delete(dir);
-        assertFalse(file.exists(NOFOLLOW));
-        assertFalse(dir.exists(NOFOLLOW));
+        assertFalse(exists(file, NOFOLLOW));
+        assertFalse(exists(dir, NOFOLLOW));
     }
 
     @Test
     public void deletesEmptyDirectory() throws Exception {
-        File dir = dir1().resolve("a").createDir();
+        Path dir = createDir(dir1().resolve("a"));
         delete(dir);
-        assertFalse(dir.exists(NOFOLLOW));
+        assertFalse(exists(dir, NOFOLLOW));
     }
 
     @Test
     public void deletesSymbolicLinkButNotLinkedFile() throws Exception {
-        File a = dir1().resolve("a").createFile();
-        File b = dir1().resolve("b").createLink(a);
-        assertTrue(a.exists(NOFOLLOW));
-        assertTrue(b.exists(NOFOLLOW));
+        Path a = createFile(dir1().resolve("a"));
+        Path b = createLink(dir1().resolve("b"), a);
+        assertTrue(exists(a, NOFOLLOW));
+        assertTrue(exists(b, NOFOLLOW));
         delete(b);
-        assertFalse(b.exists(NOFOLLOW));
-        assertTrue(a.exists(NOFOLLOW));
+        assertFalse(exists(b, NOFOLLOW));
+        assertTrue(exists(a, NOFOLLOW));
     }
 
-    private void delete(File file) throws Exception {
+    private void delete(Path file) throws Exception {
         create(singleton(file)).execute();
     }
 
-    private Delete create(Collection<? extends File> resources) {
+    private Delete create(Collection<? extends Path> resources) {
         return new Delete(resources);
     }
 

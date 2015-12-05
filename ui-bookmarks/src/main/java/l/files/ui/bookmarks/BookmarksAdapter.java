@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -23,11 +23,11 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<File, File> selection;
+    private final Selection<Path, Path> selection;
     private final OnOpenFileListener listener;
 
     BookmarksAdapter(
-            Selection<File, File> selection,
+            Selection<Path, Path> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
@@ -40,7 +40,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position) instanceof File ? 0 : 1;
+        return getItem(position) instanceof Path ? 0 : 1;
     }
 
     @Override
@@ -55,7 +55,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         Object item = getItem(position);
         if (holder instanceof BookmarkHolder) {
-            ((BookmarkHolder) holder).bind((File) item);
+            ((BookmarkHolder) holder).bind((Path) item);
         } else {
             ((HeaderHolder) holder).bind((String) item);
         }
@@ -77,19 +77,19 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         }
     }
 
-    class BookmarkHolder extends SelectionModeViewHolder<File, File> {
+    class BookmarkHolder extends SelectionModeViewHolder<Path, Path> {
 
         BookmarkHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
         }
 
         @Override
-        protected File itemId(File file) {
+        protected Path itemId(Path file) {
             return file;
         }
 
         @Override
-        public void bind(File file) {
+        public void bind(Path file) {
             super.bind(file);
             String icon = context().getString(directoryIconStringId(file));
             String title = FileLabels.get(resources(), file);
@@ -97,7 +97,7 @@ final class BookmarksAdapter extends StableAdapter<Object, ViewHolder> {
         }
 
         @Override
-        protected void onClick(View v, File item) {
+        protected void onClick(View v, Path item) {
             listener.onOpen(item);
         }
     }

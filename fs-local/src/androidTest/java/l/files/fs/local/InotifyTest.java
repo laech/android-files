@@ -8,16 +8,16 @@ import static l.files.fs.local.Unistd.close;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-public final class InotifyTest extends FileBaseTest {
+public final class InotifyTest extends PathBaseTest {
 
     @Test
     public void cannot_use_fd_after_close() throws Exception {
         int fd = Inotify.get().init(mock(Inotify.Callback.class));
-        Inotify.get().addWatch(fd, dir1().pathBytes(), IN_ALL_EVENTS);
+        Inotify.get().addWatch(fd, dir1().toByteArray(), IN_ALL_EVENTS);
         close(fd);
         try {
 
-            Inotify.get().addWatch(fd, dir2().pathBytes(), IN_ALL_EVENTS);
+            Inotify.get().addWatch(fd, dir2().toByteArray(), IN_ALL_EVENTS);
             fail();
 
         } catch (ErrnoException e) {

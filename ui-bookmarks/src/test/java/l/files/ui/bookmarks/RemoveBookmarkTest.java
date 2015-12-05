@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.selection.Selection;
 
 import static org.mockito.BDDMockito.given;
@@ -23,7 +23,7 @@ public final class RemoveBookmarkTest {
     private ActionMode mode;
     private RemoveBookmark action;
     private BookmarkManager bookmarks;
-    private Selection<File, File> selection;
+    private Selection<Path, Path> selection;
 
     @Before
     public void setUp() throws Exception {
@@ -49,8 +49,8 @@ public final class RemoveBookmarkTest {
     public void on_click_removes_selected_bookmarks() throws Exception {
 
         MenuItem item = mock(MenuItem.class);
-        File a = mock(File.class);
-        File b = mock(File.class);
+        Path a = mock(Path.class);
+        Path b = mock(Path.class);
         selection.add(a, a);
         selection.add(b, b);
 

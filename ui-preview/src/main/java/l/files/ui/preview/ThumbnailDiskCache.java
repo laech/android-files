@@ -13,10 +13,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
-import l.files.fs.File;
+import l.files.fs.FileSystem.Consumer;
+import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.Visitor;
+import l.files.fs.TraversalCallback;
 
 import static android.graphics.Bitmap.CompressFormat.WEBP;
 import static android.graphics.BitmapFactory.decodeStream;
@@ -31,7 +33,7 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
+import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
 
@@ -55,9 +57,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     private static final int VERSION = 4;
 
-    final File cacheDir;
+    final Path cacheDir;
 
-    ThumbnailDiskCache(File cacheDir) {
+    ThumbnailDiskCache(Path cacheDir) {
         this.cacheDir = cacheDir.resolve("thumbnails");
     }
 
@@ -76,23 +78,23 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     }
 
     void cleanup() throws IOException {
-        if (!cacheDir.exists(FOLLOW)) {
+        if (!Files.exists(cacheDir, FOLLOW)) {
             return;
         }
 
-        cacheDir.traverse(NOFOLLOW, new Visitor.Base() {
+        Files.traverse(cacheDir, NOFOLLOW, new TraversalCallback.Base<Path>() {
 
             final long now = currentTimeMillis();
 
             @Override
-            public Result onPostVisit(File file) throws IOException {
+            public Result onPostVisit(Path path) throws IOException {
 
                 try {
-                    Stat stat = file.stat(NOFOLLOW);
+                    Stat stat = Files.stat(path, NOFOLLOW);
                     if (stat.isDirectory()) {
 
                         try {
-                            file.delete();
+                            Files.delete(path);
                         } catch (DirectoryNotEmpty ignore) {
                         }
 
@@ -100,7 +102,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
                         long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
                         if (MILLISECONDS.toDays(now - lastModifiedMillis) > 30) {
-                            file.delete();
+                            Files.delete(path);
                         }
 
                     }
@@ -114,37 +116,37 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         });
     }
 
-    private File cacheDir(File file, Rect constraint) {
-        return cacheDir.resolve(file.pathString()
+    private Path cacheDir(Path path, Rect constraint) {
+        return cacheDir.resolve(path
                 + "_" + constraint.width()
                 + "_" + constraint.height());
     }
 
-    File cacheFile(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+    Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
-            final File[] result = {null};
-            cacheDir(file, constraint).list(NOFOLLOW, new File.Consumer() {
+            final Path[] result = {null};
+            Files.list(cacheDir(path, constraint), NOFOLLOW, new Consumer<Path>() {
                 @Override
-                public boolean accept(File file) {
-                    result[0] = file;
+                public boolean accept(Path path) {
+                    result[0] = path;
                     return false;
                 }
             });
             return result[0];
         }
         Instant time = stat.lastModifiedTime();
-        return cacheDir(file, constraint).resolve(
+        return cacheDir(path, constraint).resolve(
                 time.seconds() + "-" + time.nanos());
     }
 
 
     @Override
-    public Bitmap get(File file, Stat stat, Rect constraint, boolean matchTime) throws IOException {
-        File cache = cacheFile(file, stat, constraint, matchTime);
+    public Bitmap get(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+        Path cache = cacheFile(path, stat, constraint, matchTime);
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(cache.newBufferedInputStream());
+            InputStream in = closer.register(Files.newBufferedInputStream(cache));
             int version = in.read();
             if (version != VERSION) {
                 return null;
@@ -162,7 +164,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             }
 
             try {
-                cache.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
+                Files.setLastModifiedTime(cache, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
             } catch (IOException ignore) {
             }
 
@@ -179,28 +181,28 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
     @Override
     Snapshot<Bitmap> put(
-            File file,
+            Path path,
             Stat stat,
             Rect constraint,
             Bitmap thumbnail) throws IOException {
 
-        purgeOldCacheFiles(file, constraint);
+        purgeOldCacheFiles(path, constraint);
 
-        File cache = cacheFile(file, stat, constraint, true);
-        File parent = cache.parent();
-        parent.createDirs();
+        Path cache = cacheFile(path, stat, constraint, true);
+        Path parent = cache.parent();
+        Files.createDirs(parent);
 
-        File tmp = parent.resolve(cache.name() + "-" + nanoTime());
+        Path tmp = parent.resolve(cache.name() + "-" + nanoTime());
         Closer closer = Closer.create();
         try {
 
-            OutputStream out = closer.register(tmp.newBufferedOutputStream());
+            OutputStream out = closer.register(Files.newBufferedOutputStream(tmp));
             out.write(VERSION);
             thumbnail.compress(WEBP, 100, out);
 
         } catch (Exception e) {
             try {
-                tmp.delete();
+                Files.delete(tmp);
             } catch (Exception sup) {
                 addSuppressed(e, sup);
             }
@@ -211,19 +213,19 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             closer.close();
         }
 
-        tmp.moveTo(cache);
+        Files.move(tmp, cache);
 
         return null;
     }
 
-    private void purgeOldCacheFiles(File file, Rect constraint) throws IOException {
+    private void purgeOldCacheFiles(Path path, Rect constraint) throws IOException {
         try {
 
-            cacheDir(file, constraint).list(FOLLOW, new File.Consumer() {
+            Files.list(cacheDir(path, constraint), FOLLOW, new Consumer<Path>() {
                 @Override
-                public boolean accept(File file) {
+                public boolean accept(Path path) {
                     try {
-                        file.delete();
+                        Files.delete(path);
                     } catch (IOException ignored) {
                         ignored.printStackTrace();
                     }
@@ -235,23 +237,23 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         }
     }
 
-    public void putAsync(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
+    public void putAsync(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
         executor.execute(new WriteThumbnail(
-                res, stat, constraint, new WeakReference<>(thumbnail)));
+                path, stat, constraint, new WeakReference<>(thumbnail)));
     }
 
     private final class WriteThumbnail implements Runnable {
-        private final File res;
+        private final Path path;
         private final Stat stat;
         private final Rect constraint;
         private final WeakReference<Bitmap> ref;
 
         private WriteThumbnail(
-                File res,
+                Path path,
                 Stat stat,
                 Rect constraint,
                 WeakReference<Bitmap> ref) {
-            this.res = requireNonNull(res);
+            this.path = requireNonNull(path);
             this.stat = requireNonNull(stat);
             this.constraint = requireNonNull(constraint);
             this.ref = requireNonNull(ref);
@@ -264,7 +266,7 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
             Bitmap thumbnail = ref.get();
             if (thumbnail != null) {
                 try {
-                    put(res, stat, constraint, thumbnail);
+                    put(path, stat, constraint, thumbnail);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

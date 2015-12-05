@@ -10,14 +10,14 @@ import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.ui.preview.Preview.PALETTE_MAX_COLOR_COUNT;
 
 final class PaletteCache extends PersistenceCache<Palette> {
 
-    PaletteCache(File cacheDir) {
+    PaletteCache(Path cacheDir) {
         super(cacheDir, (byte) 1);
     }
 
@@ -52,11 +52,11 @@ final class PaletteCache extends PersistenceCache<Palette> {
     }
 
     @Override
-    Snapshot<Palette> put(File file, Stat stat, Rect constraint, Palette value) {
+    Snapshot<Palette> put(Path path, Stat stat, Rect constraint, Palette value) {
         if (value.getSwatches().isEmpty()) {
             return null;
         }
-        return super.put(file, stat, constraint, value);
+        return super.put(path, stat, constraint, value);
     }
 
 }

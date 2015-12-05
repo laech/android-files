@@ -4,20 +4,18 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.BLUE;
-import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static l.files.fs.Files.exists;
+import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,15 +24,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = JELLY_BEAN)
 public final class ThumbnailDiskCacheTest
         extends CacheTest<Bitmap, ThumbnailDiskCache> {
 
     @Test
     public void cache_file_stored_in_cache_dir() throws Exception {
-        Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true).path();
-        Path cacheDirPath = cache.cacheDir.path();
+        Path cacheFilePath = cache.cacheFile(this.file, stat, newConstraint(), true);
+        Path cacheDirPath = cache.cacheDir;
         assertTrue(
                 "\ncacheFile: " + cacheFilePath + ",\ncacheDir:  " + cacheDirPath,
                 cacheFilePath.startsWith(cacheDirPath));
@@ -45,25 +41,25 @@ public final class ThumbnailDiskCacheTest
         Rect constraint = newConstraint();
         Bitmap value = newValue();
 
-        File cacheFile = cache.cacheFile(file, stat, constraint, true);
-        assertFalse(cacheFile.exists(NOFOLLOW));
+        Path cacheFile = cache.cacheFile(file, stat, constraint, true);
+        assertFalse(exists(cacheFile, NOFOLLOW));
 
         cache.put(file, stat, constraint, value);
-        assertTrue(cacheFile.exists(NOFOLLOW));
+        assertTrue(exists(cacheFile, NOFOLLOW));
 
         cache.cleanup();
-        assertTrue(cacheFile.exists(NOFOLLOW));
+        assertTrue(exists(cacheFile, NOFOLLOW));
 
-        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
+        setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(29)));
         cache.cleanup();
-        assertTrue(cacheFile.exists(NOFOLLOW));
+        assertTrue(exists(cacheFile, NOFOLLOW));
 
-        cacheFile.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(
+        setLastModifiedTime(cacheFile, NOFOLLOW, Instant.ofMillis(
                 currentTimeMillis() - DAYS.toMillis(31)));
         cache.cleanup();
-        assertFalse(cacheFile.exists(NOFOLLOW));
-        assertFalse(cacheFile.parent().exists(NOFOLLOW));
+        assertFalse(exists(cacheFile, NOFOLLOW));
+        assertFalse(exists(cacheFile.parent(), NOFOLLOW));
     }
 
     @Test
@@ -73,13 +69,13 @@ public final class ThumbnailDiskCacheTest
 
         cache.put(file, stat, constraint, value);
 
-        File cacheFile = cache.cacheFile(file, stat, constraint, true);
+        Path cacheFile = cache.cacheFile(file, stat, constraint, true);
         Instant oldTime = Instant.ofMillis(1000);
-        cacheFile.setLastModifiedTime(NOFOLLOW, oldTime);
-        assertEquals(oldTime, cacheFile.stat(NOFOLLOW).lastModifiedTime());
+        setLastModifiedTime(cacheFile, NOFOLLOW, oldTime);
+        assertEquals(oldTime, Files.stat(cacheFile, NOFOLLOW).lastModifiedTime());
 
         cache.get(file, stat, constraint, true);
-        Instant newTime = cacheFile.stat(NOFOLLOW).lastModifiedTime();
+        Instant newTime = Files.stat(cacheFile, NOFOLLOW).lastModifiedTime();
         assertNotEquals(oldTime, newTime);
         assertTrue(oldTime.to(DAYS) < newTime.to(DAYS));
     }

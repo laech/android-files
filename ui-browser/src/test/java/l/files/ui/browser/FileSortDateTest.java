@@ -5,15 +5,17 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Locale;
 
-import l.files.fs.File;
+import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static l.files.ui.browser.FileSort.MODIFIED;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 
 public final class FileSortDateTest extends FileSortTest {
@@ -38,24 +40,26 @@ public final class FileSortDateTest extends FileSortTest {
                 createFileModified("c", Instant.of(1, 1)));
     }
 
-    private File createFileModified(String name, Instant instant) throws IOException {
+    private Path createFileModified(String name, Instant instant) throws IOException {
         return createModified(name, instant, false);
     }
 
-    private File createDirModified(String name, Instant instant) throws IOException {
+    private Path createDirModified(String name, Instant instant) throws IOException {
         return createModified(name, instant, true);
     }
 
-    private File createModified(String nameStr, Instant instant, boolean dir) throws IOException {
+    private Path createModified(String nameStr, Instant instant, boolean dir) throws IOException {
+        FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
-        File file = mock(File.class);
+        Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
         given(stat.lastModifiedTime()).willReturn(instant);
         given(stat.isDirectory()).willReturn(dir);
         given(stat.isRegularFile()).willReturn(!dir);
-        given(file.stat(any(LinkOption.class))).willReturn(stat);
+        given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
         given(file.name()).willReturn(name);
+        given(file.fileSystem()).willReturn(fs);
         return file;
     }
 

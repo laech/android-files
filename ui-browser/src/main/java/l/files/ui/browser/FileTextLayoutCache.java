@@ -10,8 +10,8 @@ import android.util.SparseArray;
 
 import java.util.LinkedHashMap;
 
-import l.files.fs.File;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.browser.BrowserItem.FileItem;
 
@@ -35,8 +35,8 @@ final class FileTextLayoutCache {
     }
 
     private final SparseArray<Cache<Name, Layout>> names = new SparseArray<>();
-    private final SparseArray<Cache<File, Layout>> links = new SparseArray<>();
-    private final SparseArray<Cache<File, Snapshot<Layout>>> summaries = new SparseArray<>();
+    private final SparseArray<Cache<Path, Layout>> links = new SparseArray<>();
+    private final SparseArray<Cache<Path, Snapshot<Layout>>> summaries = new SparseArray<>();
 
     // Like LruCache but simpler and without the synchronization overhead
     private static final class Cache<K, V> extends LinkedHashMap<K, V> {
@@ -85,7 +85,7 @@ final class FileTextLayoutCache {
         }
 
         Cache<Name, Layout> cache = getCache(context, names);
-        Name name = item.selfFile().name();
+        Name name = item.selfPath().name();
         Layout layout = cache.get(name);
         if (layout == null) {
             layout = new StaticLayout(
@@ -118,7 +118,7 @@ final class FileTextLayoutCache {
     @Nullable
     Layout getLink(Context context, FileItem item, int width) {
 
-        File target = item.linkTargetFile();
+        Path target = item.linkTargetPath();
         if (target == null) {
             return null;
         }
@@ -127,7 +127,7 @@ final class FileTextLayoutCache {
             throw new IllegalStateException();
         }
 
-        Cache<File, Layout> cache = getCache(context, links);
+        Cache<Path, Layout> cache = getCache(context, links);
         Layout layout = cache.get(target);
         if (layout == null) {
             layout = new StaticLayout(
@@ -157,8 +157,8 @@ final class FileTextLayoutCache {
             throw new IllegalStateException();
         }
 
-        Cache<File, Snapshot<Layout>> cache = getCache(context, summaries);
-        File file = item.selfFile();
+        Cache<Path, Snapshot<Layout>> cache = getCache(context, summaries);
+        Path file = item.selfPath();
         Snapshot<Layout> cached = cache.get(file);
         long timestamp = stat.lastModifiedTime().to(MILLISECONDS);
 

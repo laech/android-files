@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
 
@@ -14,7 +14,7 @@ final class Delete extends AbstractOperation {
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
 
-    Delete(Collection<? extends File> files) {
+    Delete(Collection<? extends Path> files) {
         super(files);
     }
 
@@ -27,21 +27,21 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(File file) {
+    void process(Path file) {
         traverse(file, new OperationVisitor() {
 
             @Override
-            public Result onPostVisit(File file) throws IOException {
-                delete(file);
-                return super.onPostVisit(file);
+            public Result onPostVisit(Path path) throws IOException {
+                delete(path);
+                return super.onPostVisit(path);
             }
 
         });
     }
 
-    private void delete(File file) throws IOException {
-        long size = file.stat(NOFOLLOW).size();
-        file.delete();
+    private void delete(Path path) throws IOException {
+        long size = l.files.fs.Files.stat(path, NOFOLLOW).size();
+        l.files.fs.Files.delete(path);
         deletedByteCount.addAndGet(size);
         deletedItemCount.incrementAndGet();
     }

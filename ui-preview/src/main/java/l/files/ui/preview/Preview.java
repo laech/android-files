@@ -11,9 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
@@ -32,7 +33,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                File cacheDir = LocalFile.of(dir);
+                Path cacheDir = LocalPath.of(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }
@@ -48,10 +49,10 @@ public final class Preview {
     private final ThumbnailDiskCache thumbnailDiskCache;
 
     final DisplayMetrics displayMetrics;
-    final File cacheDir;
+    final Path cacheDir;
     final Context context;
 
-    Preview(Context context, File cacheDir) {
+    Preview(Context context, Path cacheDir) {
         this.context = requireNonNull(context);
         this.cacheDir = requireNonNull(cacheDir);
         this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
@@ -82,68 +83,68 @@ public final class Preview {
     }
 
     @Nullable
-    public Bitmap getThumbnail(File res, Stat stat, Rect constraint, boolean matchTime) {
-        return thumbnailMemCache.get(res, stat, constraint, matchTime);
+    public Bitmap getThumbnail(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        return thumbnailMemCache.get(path, stat, constraint, matchTime);
     }
 
-    void putThumbnail(File res, Stat stat, Rect constraint, Bitmap thumbnail) {
-        thumbnailMemCache.put(res, stat, constraint, thumbnail);
+    void putThumbnail(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
+        thumbnailMemCache.put(path, stat, constraint, thumbnail);
     }
 
     @Nullable
-    Bitmap getThumbnailFromDisk(File res, Stat stat, Rect constraint, boolean matchTime) throws IOException {
-        return thumbnailDiskCache.get(res, stat, constraint, matchTime);
+    Bitmap getThumbnailFromDisk(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+        return thumbnailDiskCache.get(path, stat, constraint, matchTime);
     }
 
     void putThumbnailToDiskAsync(
-            File res, Stat stat, Rect constraint, Bitmap thumbnail) {
-        thumbnailDiskCache.putAsync(res, stat, constraint, thumbnail);
+            Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
+        thumbnailDiskCache.putAsync(path, stat, constraint, thumbnail);
     }
 
     @Nullable
-    public Rect getSize(File res, Stat stat, Rect constraint, boolean matchTime) {
-        return sizeCache.get(res, stat, constraint, matchTime);
+    public Rect getSize(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        return sizeCache.get(path, stat, constraint, matchTime);
     }
 
-    void putSize(File res, Stat stat, Rect constraint, Rect size) {
-        sizeCache.put(res, stat, constraint, size);
-    }
-
-    @Nullable
-    public Palette getPalette(File res, Stat stat, Rect constraint, boolean matchTime) {
-        return paletteCache.get(res, stat, constraint, matchTime);
-    }
-
-    void putPalette(File res, Stat stat, Rect constraint, Palette palette) {
-        paletteCache.put(res, stat, constraint, palette);
+    void putSize(Path path, Stat stat, Rect constraint, Rect size) {
+        sizeCache.put(path, stat, constraint, size);
     }
 
     @Nullable
-    String getMediaType(File res, Stat stat, Rect constraint, boolean matchTime) {
-        return mediaTypeCache.get(res, stat, constraint, matchTime);
+    public Palette getPalette(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        return paletteCache.get(path, stat, constraint, matchTime);
     }
 
-    void putMediaType(File res, Stat stat, Rect constraint, String media) {
-        mediaTypeCache.put(res, stat, constraint, media);
+    void putPalette(Path path, Stat stat, Rect constraint, Palette palette) {
+        paletteCache.put(path, stat, constraint, palette);
     }
 
-    public boolean isPreviewable(File res, Stat stat, Rect constraint) {
+    @Nullable
+    String getMediaType(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        return mediaTypeCache.get(path, stat, constraint, matchTime);
+    }
+
+    void putMediaType(Path path, Stat stat, Rect constraint, String media) {
+        mediaTypeCache.put(path, stat, constraint, media);
+    }
+
+    public boolean isPreviewable(Path path, Stat stat, Rect constraint) {
         return stat.isRegularFile()
-                && isReadable(res)
-                && !TRUE.equals(noPreviewCache.get(res, stat, constraint, true));
+                && isReadable(path)
+                && !TRUE.equals(noPreviewCache.get(path, stat, constraint, true));
     }
 
-    void putPreviewable(File res, Stat stat, Rect constraint, boolean previewable) {
+    void putPreviewable(Path path, Stat stat, Rect constraint, boolean previewable) {
         if (previewable) {
-            noPreviewCache.remove(res, stat, constraint);
+            noPreviewCache.remove(path, stat, constraint);
         } else {
-            noPreviewCache.put(res, stat, constraint, true);
+            noPreviewCache.put(path, stat, constraint, true);
         }
     }
 
-    private static boolean isReadable(File file) {
+    private static boolean isReadable(Path path) {
         try {
-            return file.isReadable();
+            return Files.isReadable(path);
         } catch (IOException e) {
             return false;
         }
@@ -151,21 +152,21 @@ public final class Preview {
 
     @Nullable
     public Decode get(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback) {
-        return DecodeChain.run(res, stat, constraint, callback, this);
+        return DecodeChain.run(path, stat, constraint, callback, this);
     }
 
-    Rect decodeSize(File file) throws IOException {
+    Rect decodeSize(Path path) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
 
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(file.newBufferedInputStream());
+            InputStream in = closer.register(Files.newBufferedInputStream(path));
             decodeStream(in, null, options);
 
         } catch (Exception e) {

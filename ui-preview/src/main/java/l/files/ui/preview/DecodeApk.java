@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -20,30 +20,30 @@ final class DecodeApk extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(File file, String mediaType) {
+        public boolean accept(Path path, String mediaType) {
             return mediaType.equals("application/zip") &&
-                    file.name().ext().equalsIgnoreCase("apk");
+                    path.name().ext().equalsIgnoreCase("apk");
         }
 
         @Override
         public Decode create(
-                File res,
+                Path path,
                 Stat stat,
                 Rect constraint,
                 PreviewCallback callback,
                 Preview context) {
-            return new DecodeApk(res, stat, constraint, callback, context);
+            return new DecodeApk(path, stat, constraint, callback, context);
         }
 
     };
 
     DecodeApk(
-            File file,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(file, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
     }
 
     @Override
@@ -64,7 +64,7 @@ final class DecodeApk extends DecodeThumbnail {
 
     private Drawable loadApkIcon() {
         PackageManager manager = context.context.getPackageManager();
-        String path = file.pathString();
+        String path = file.toString();
         PackageInfo info = manager.getPackageArchiveInfo(path, 0);
         if (info == null) {
             return null;

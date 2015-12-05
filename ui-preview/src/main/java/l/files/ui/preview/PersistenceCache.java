@@ -15,7 +15,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.os.AsyncTask.SERIAL_EXECUTOR;
@@ -50,22 +51,22 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
     private static final byte SUPERCLASS_VERSION = 3;
 
-    private final File cacheDir;
+    private final Path cacheDir;
     private final byte subclassVersion;
 
-    PersistenceCache(File cacheDir, byte version) {
+    PersistenceCache(Path cacheDir, byte version) {
         this.cacheDir = requireNonNull(cacheDir);
         this.subclassVersion = version;
     }
 
     @Override
-    final void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
-        file.pathBytes(key.asOutputStream());
+    final void key(ByteBuffer key, Path path, Stat stat, Rect constraint) {
+        path.toByteArray(key.asOutputStream());
     }
 
     @Override
-    Snapshot<V> put(File file, Stat stat, Rect constraint, V value) {
-        Snapshot<V> old = super.put(file, stat, constraint, value);
+    Snapshot<V> put(Path path, Stat stat, Rect constraint, V value) {
+        Snapshot<V> old = super.put(path, stat, constraint, value);
         if (old == null
                 || !old.get().equals(value)
                 || old.time() != stat.lastModifiedTime().to(MILLISECONDS)) {
@@ -79,7 +80,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         return cache;
     }
 
-    private File cacheFile() {
+    private Path cacheFile() {
         return cacheDir.resolve(cacheFileName());
     }
 
@@ -108,11 +109,11 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             return;
         }
 
-        File file = cacheFile();
+        Path file = cacheFile();
         Closer closer = Closer.create();
         try {
 
-            DataInputStream in = closer.register(file.newBufferedDataInputStream());
+            DataInputStream in = closer.register(Files.newBufferedDataInputStream(file));
 
             if (in.readByte() != SUPERCLASS_VERSION) {
                 return;
@@ -168,15 +169,15 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             return;
         }
 
-        File file = cacheFile();
-        File parent = file.parent();
-        parent.createDirs();
+        Path file = cacheFile();
+        Path parent = file.parent();
+        Files.createDirs(parent);
 
-        File tmp = parent.resolve(file.name() + "-" + nanoTime());
+        Path tmp = parent.resolve(file.name() + "-" + nanoTime());
         Closer closer = Closer.create();
         try {
 
-            DataOutputStream out = closer.register(tmp.newBufferedDataOutputStream());
+            DataOutputStream out = closer.register(Files.newBufferedDataOutputStream(tmp));
             out.writeByte(SUPERCLASS_VERSION);
             out.writeByte(subclassVersion);
 
@@ -190,7 +191,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
         } catch (Exception e) {
             try {
-                tmp.delete();
+                Files.delete(tmp);
             } catch (IOException sup) {
                 addSuppressed(e, sup);
             }
@@ -201,7 +202,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
             closer.close();
         }
 
-        tmp.moveTo(file);
+        Files.move(tmp, file);
     }
 
     abstract void write(DataOutput out, V value) throws IOException;

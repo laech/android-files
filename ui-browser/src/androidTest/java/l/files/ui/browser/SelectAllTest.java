@@ -2,15 +2,18 @@ package l.files.ui.browser;
 
 import org.junit.Test;
 
-import l.files.fs.File;
+import l.files.fs.Path;
+
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createFile;
 
 public final class SelectAllTest extends BaseFilesActivityTest {
 
     @Test
     public void selects_all() throws Exception {
-        final File a = dir().resolve("a").createFile();
-        final File b = dir().resolve("b").createFile();
-        final File c = dir().resolve("c").createDir();
+        Path a = createFile(dir().resolve("a"));
+        Path b = createFile(dir().resolve("b"));
+        Path c = createDir(dir().resolve("c"));
 
         screen()
                 .longClick(a)
@@ -22,7 +25,7 @@ public final class SelectAllTest extends BaseFilesActivityTest {
 
     @Test
     public void finishes_action_mode_on_no_selection() throws Throwable {
-        final File a = dir().resolve("a").createFile();
+        Path a = createFile(dir().resolve("a"));
         screen()
                 .longClick(a)
                 .assertActionModePresent(true)

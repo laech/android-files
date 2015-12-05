@@ -5,7 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.content.Context.ACTIVITY_SERVICE;
@@ -40,8 +40,8 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     }
 
     @Override
-    void key(ByteBuffer key, File file, Stat stat, Rect constraint) {
-        file.pathBytes(key.asOutputStream());
+    void key(ByteBuffer key, Path path, Stat stat, Rect constraint) {
+        path.toByteArray(key.asOutputStream());
         key.putInt(constraint.width())
                 .putInt(constraint.height());
     }

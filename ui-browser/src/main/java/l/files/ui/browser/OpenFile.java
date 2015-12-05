@@ -8,25 +8,26 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.MediaTypes;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.browser.BuildConfig.DEBUG;
-import static l.files.fs.File.MEDIA_TYPE_ANY;
+import static l.files.fs.Files.MEDIA_TYPE_ANY;
 import static l.files.ui.base.fs.IOExceptions.message;
+import static l.files.ui.browser.BuildConfig.DEBUG;
 
 final class OpenFile extends AsyncTask<Void, Void, Object> {
 
     private final Context context;
-    private final File file;
+    private final Path file;
     private final Stat stat;
 
-    OpenFile(Context context, File file, Stat stat) {
+    OpenFile(Context context, Path file, Stat stat) {
         this.context = requireNonNull(context);
         this.file = requireNonNull(file);
         this.stat = requireNonNull(stat);
@@ -35,7 +36,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     @Override
     protected Object doInBackground(Void... params) {
         try {
-            return file.detectMediaType(stat);
+            return Files.detectMediaType(file, stat);
         } catch (IOException e) {
             return e;
         }
@@ -62,7 +63,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     private boolean showFile(String media) {
         debug(media);
 
-        Uri uri = Uri.parse(file.uri().toString());
+        Uri uri = Uri.parse(file.toUri().toString());
         try {
             Intent intent = new Intent(ACTION_VIEW);
             intent.setDataAndType(uri, media);

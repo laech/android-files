@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import l.files.bookmarks.BookmarkManager;
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.bookmarks.R;
 
 import static org.mockito.BDDMockito.given;
@@ -18,13 +18,13 @@ import static org.mockito.Mockito.verify;
 
 public final class BookmarkTest {
 
-    private File file;
+    private Path file;
     private Bookmark action;
     private BookmarkManager bookmarks;
 
     @Before
     public void setUp() throws Exception {
-        file = mock(File.class, "bookmark");
+        file = mock(Path.class, "bookmark");
         bookmarks = mock(BookmarkManager.class);
         action = new Bookmark(file, bookmarks);
     }

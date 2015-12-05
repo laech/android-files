@@ -4,17 +4,17 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 abstract class Cache<V> {
 
     @Nullable
-    abstract V get(File file, Stat stat, Rect constraint, boolean matchTime)
+    abstract V get(Path path, Stat stat, Rect constraint, boolean matchTime)
             throws IOException;
 
     @Nullable
-    abstract Snapshot<V> put(File file, Stat stat, Rect constraint, V value)
+    abstract Snapshot<V> put(Path path, Stat stat, Rect constraint, V value)
             throws IOException;
 
 }

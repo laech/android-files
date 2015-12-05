@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 class Count extends AbstractOperation {
 
     private final AtomicInteger count = new AtomicInteger();
 
-    Count(Collection<? extends File> files) {
-        super(files);
+    Count(Collection<? extends Path> paths) {
+        super(paths);
     }
 
     public int getCount() {
@@ -19,20 +19,20 @@ class Count extends AbstractOperation {
     }
 
     @Override
-    void process(File file) {
+    void process(Path file) {
         traverse(file, new OperationVisitor() {
 
             @Override
-            public Result onPreVisit(File file) throws IOException {
+            public Result onPreVisit(Path path) throws IOException {
                 count.incrementAndGet();
-                onCount(file);
-                return super.onPreVisit(file);
+                onCount(path);
+                return super.onPreVisit(path);
             }
 
         });
     }
 
-    void onCount(File file) {
+    void onCount(Path path) {
     }
 
 }

@@ -6,8 +6,9 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
 import l.files.fs.MediaTypes;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
@@ -27,18 +28,18 @@ final class DecodeText extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(File file, String mediaType) {
+        public boolean accept(Path path, String mediaType) {
             return MediaTypes.generalize(mediaType).startsWith("text/");
         }
 
         @Override
         public Decode create(
-                File res,
+                Path path,
                 Stat stat,
                 Rect constraint,
                 PreviewCallback callback,
                 Preview context) {
-            return new DecodeText(res, stat, constraint, callback, context);
+            return new DecodeText(path, stat, constraint, callback, context);
         }
 
     };
@@ -50,20 +51,20 @@ final class DecodeText extends DecodeThumbnail {
     private final int size;
 
     DecodeText(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
 
         padding = (int) applyDimension(COMPLEX_UNIT_DIP, 8, context.displayMetrics);
         size = Math.min(constraint.width(), constraint.height());
     }
-    
+
     @Override
     Result decode() throws IOException {
-        String text = file.readDetectingCharset(PREVIEW_LIMIT);
+        String text = Files.readDetectingCharset(file, PREVIEW_LIMIT);
         Bitmap bitmap = draw(text);
         return new Result(bitmap, Rect.of(
                 bitmap.getWidth(),

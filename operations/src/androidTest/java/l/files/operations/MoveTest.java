@@ -4,9 +4,16 @@ import org.junit.Test;
 
 import java.util.Collection;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 import static java.util.Collections.singleton;
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.exists;
+import static l.files.fs.Files.readAllUtf8;
+import static l.files.fs.Files.readLink;
+import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,62 +22,62 @@ public final class MoveTest extends PasteTest {
 
     @Test
     public void movedCountInitialZero() throws Exception {
-        File src = dir1().resolve("a").createFile();
-        File dstDir = dir1().resolve("b").createDir();
+        Path src = createFile(dir1().resolve("a"));
+        Path dstDir = createDir(dir1().resolve("b"));
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
     @Test
     public void movesSymlink() throws Exception {
-        File target = dir1().resolve("target").createFile();
-        File link = dir1().resolve("link").createLink(target);
+        Path target = createFile(dir1().resolve("target"));
+        Path link = createLink(dir1().resolve("link"), target);
 
-        Move move = create(link, dir1().resolve("moved").createDir());
+        Move move = create(link, createDir(dir1().resolve("moved")));
         move.execute();
 
-        File actual = dir1().resolve("moved/link").readLink();
+        Path actual = readLink(dir1().resolve("moved/link"));
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }
 
     @Test
     public void movesFile() throws Exception {
-        File srcFile = dir1().resolve("a.txt").createFile();
-        File dstDir = dir1().resolve("dst").createDir();
-        File dstFile = dstDir.resolve("a.txt");
-        srcFile.writeAllUtf8("Test");
+        Path srcFile = createFile(dir1().resolve("a.txt"));
+        Path dstDir = createDir(dir1().resolve("dst"));
+        Path dstFile = dstDir.resolve("a.txt");
+        writeUtf8(srcFile, "Test");
 
         Move move = create(srcFile, dstDir);
         move.execute();
 
-        assertFalse(srcFile.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readAllUtf8());
+        assertFalse(exists(srcFile, NOFOLLOW));
+        assertEquals("Test", readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     @Test
     public void movesDirectory() throws Exception {
-        File srcDir = dir1().resolve("a").createDir();
-        File dstDir = dir1().resolve("dst").createDir();
-        File srcFile = srcDir.resolve("test.txt");
-        File dstFile = dstDir.resolve("a/test.txt");
-        srcFile.writeAllUtf8("Test");
+        Path srcDir = createDir(dir1().resolve("a"));
+        Path dstDir = createDir(dir1().resolve("dst"));
+        Path srcFile = srcDir.resolve("test.txt");
+        Path dstFile = dstDir.resolve("a/test.txt");
+        writeUtf8(srcFile, "Test");
 
         Move move = create(srcDir, dstDir);
         move.execute();
 
-        assertFalse(srcDir.exists(NOFOLLOW));
-        assertEquals("Test", dstFile.readAllUtf8());
+        assertFalse(exists(srcDir, NOFOLLOW));
+        assertEquals("Test", readAllUtf8(dstFile));
         assertEquals(move.getMovedItemCount(), 1);
     }
 
     @Override
-    Move create(Collection<File> sources, File dstDir) {
+    Move create(Collection<Path> sources, Path dstDir) {
         return new Move(sources, dstDir);
     }
 
-    private Move create(File src, File dstDir) {
+    private Move create(Path src, Path dstDir) {
         return create(singleton(src), dstDir);
     }
 

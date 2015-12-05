@@ -16,7 +16,7 @@ import org.robolectric.annotation.Config;
 
 import java.net.URI;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.browser.BrowserItem.FileItem;
@@ -27,13 +27,12 @@ import static android.content.Intent.EXTRA_INTENT;
 import static android.content.Intent.EXTRA_STREAM;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static java.util.Arrays.asList;
-import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -110,10 +109,10 @@ public final class ShareTest {
     }
 
     private FileItem mockFileItem(String uri, boolean isRegularFile) {
-        File file = mock(File.class);
+        Path file = mock(Path.class);
         Stat stat = mock(Stat.class);
         given(stat.isRegularFile()).willReturn(isRegularFile);
-        given(file.uri()).willReturn(URI.create(uri));
+        given(file.toUri()).willReturn(URI.create(uri));
         return FileItem.create(file, stat, null, null, null);
     }
 }

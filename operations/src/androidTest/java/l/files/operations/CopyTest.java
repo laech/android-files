@@ -6,13 +6,22 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import l.files.fs.File;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.exists;
+import static l.files.fs.Files.readAllUtf8;
+import static l.files.fs.Files.readLink;
+import static l.files.fs.Files.setLastModifiedTime;
+import static l.files.fs.Files.stat;
+import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,62 +31,62 @@ public final class CopyTest extends PasteTest {
 
     @Test
     public void copy_reports_summary() throws Exception {
-        File dstDir = dir1().resolve("dir").createDir();
-        File srcDir = dir1().resolve("a").createDir();
-        File srcFile = dir1().resolve("a/file").createFile();
+        Path dstDir = createDir(dir1().resolve("dir"));
+        Path srcDir = createDir(dir1().resolve("a"));
+        Path srcFile = createFile(dir1().resolve("a/file"));
 
         Copy copy = create(singleton(srcDir), dstDir);
         copy.execute();
 
-        List<File> expected = asList(srcDir, srcFile);
+        List<Path> expected = asList(srcDir, srcFile);
         assertEquals(size(expected), copy.getCopiedByteCount());
         assertEquals(expected.size(), copy.getCopiedItemCount());
     }
 
-    private long size(Iterable<File> resources) throws IOException {
+    private long size(Iterable<Path> resources) throws IOException {
         long size = 0;
-        for (File file : resources) {
-            size += file.stat(NOFOLLOW).size();
+        for (Path file : resources) {
+            size += stat(file, NOFOLLOW).size();
         }
         return size;
     }
 
     @Test
     public void preserves_timestamps_for_file() throws Exception {
-        File src = dir1().resolve("a").createFile();
-        File dir = dir1().resolve("dir").createDir();
+        Path src = createFile(dir1().resolve("a"));
+        Path dir = createDir(dir1().resolve("dir"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_empty_dir() throws Exception {
-        File src = dir1().resolve("dir1").createDir();
-        File dir = dir1().resolve("dir2").createDir();
+        Path src = createDir(dir1().resolve("dir1"));
+        Path dir = createDir(dir1().resolve("dir2"));
         testCopyPreservesTimestamp(src, dir);
     }
 
     @Test
     public void preserves_timestamps_for_full_dir() throws Exception {
-        File dir = dir1().resolve("dir2").createDir();
-        File src = dir1().resolve("dir1").createDir();
-        src.resolve("a").createFile();
-        src.resolve("b").createDir();
-        src.resolve("c").createLink(src);
+        Path dir = createDir(dir1().resolve("dir2"));
+        Path src = createDir(dir1().resolve("dir1"));
+        createFile(src.resolve("a"));
+        createDir(src.resolve("b"));
+        createLink(src.resolve("c"), src);
         testCopyPreservesTimestamp(src, dir);
     }
 
     private void testCopyPreservesTimestamp(
-            File src,
-            File dir) throws IOException, InterruptedException {
-        File dst = dir.resolve(src.name());
-        assertFalse(dst.exists(NOFOLLOW));
+            Path src,
+            Path dir) throws IOException, InterruptedException {
+        Path dst = dir.resolve(src.name());
+        assertFalse(exists(dst, NOFOLLOW));
 
         Instant mtime = newInstant();
-        src.setLastModifiedTime(NOFOLLOW, mtime);
+        setLastModifiedTime(src, NOFOLLOW, mtime);
 
         copy(src, dir);
 
-        assertTrue(dst.exists(NOFOLLOW));
+        assertTrue(exists(dst, NOFOLLOW));
         assertEquals(mtime, mtime(src));
         assertEquals(mtime, mtime(dst));
     }
@@ -86,70 +95,70 @@ public final class CopyTest extends PasteTest {
         return Instant.of(100001, SDK_INT >= LOLLIPOP ? 101 : 0);
     }
 
-    private Instant mtime(File srcFile) throws IOException {
-        return srcFile.stat(NOFOLLOW).lastModifiedTime();
+    private Instant mtime(Path srcFile) throws IOException {
+        return stat(srcFile, NOFOLLOW).lastModifiedTime();
     }
 
     @Test
     public void copies_link() throws Exception {
-        File target = dir1().resolve("target").createFile();
-        File link = dir1().resolve("link").createLink(target);
+        Path target = createFile(dir1().resolve("target"));
+        Path link = createLink(dir1().resolve("link"), target);
 
-        copy(link, dir1().resolve("copied").createDir());
+        copy(link, createDir(dir1().resolve("copied")));
 
-        File copied = dir1().resolve("copied/link");
-        assertEquals(target, copied.readLink());
+        Path copied = dir1().resolve("copied/link");
+        assertEquals(target, readLink(copied));
     }
 
     @Test
     public void copies_directory() throws Exception {
-        File srcDir = dir1().resolve("a").createDir();
-        File dstDir = dir1().resolve("dst").createDir();
-        File srcFile = srcDir.resolve("test.txt");
-        File dstFile = dstDir.resolve("a/test.txt");
-        srcFile.writeAllUtf8("Testing");
+        Path srcDir = createDir(dir1().resolve("a"));
+        Path dstDir = createDir(dir1().resolve("dst"));
+        Path srcFile = srcDir.resolve("test.txt");
+        Path dstFile = dstDir.resolve("a/test.txt");
+        writeUtf8(srcFile, "Testing");
 
         copy(srcDir, dstDir);
-        assertEquals("Testing", srcFile.readAllUtf8());
-        assertEquals("Testing", dstFile.readAllUtf8());
+        assertEquals("Testing", readAllUtf8(srcFile));
+        assertEquals("Testing", readAllUtf8(dstFile));
     }
 
     @Test
     public void copies_empty_directory() throws Exception {
-        File src = dir1().resolve("empty").createDir();
-        File dir = dir1().resolve("dst").createDir();
+        Path src = createDir(dir1().resolve("empty"));
+        Path dir = createDir(dir1().resolve("dst"));
         copy(src, dir);
-        assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
+        assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW));
     }
 
     @Test
     public void copies_empty_file() throws Exception {
-        File srcFile = dir1().resolve("empty").createFile();
-        File dstDir = dir1().resolve("dst").createDir();
+        Path srcFile = createFile(dir1().resolve("empty"));
+        Path dstDir = createDir(dir1().resolve("dst"));
 
         copy(srcFile, dstDir);
-        assertTrue(dir1().resolve("dst/empty").exists(NOFOLLOW));
+        assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW));
     }
 
     @Test
     public void copies_file() throws Exception {
-        File srcFile = dir1().resolve("test.txt").createFile();
-        File dstDir = dir1().resolve("dst").createDir();
-        File dstFile = dstDir.resolve("test.txt");
-        srcFile.writeAllUtf8("Testing");
+        Path srcFile = createFile(dir1().resolve("test.txt"));
+        Path dstDir = createDir(dir1().resolve("dst"));
+        Path dstFile = dstDir.resolve("test.txt");
+        writeUtf8(srcFile, "Testing");
 
         copy(srcFile, dstDir);
-        assertEquals("Testing", srcFile.readAllUtf8());
-        assertEquals("Testing", dstFile.readAllUtf8());
+        assertEquals("Testing", readAllUtf8(srcFile));
+        assertEquals("Testing", readAllUtf8(dstFile));
     }
 
-    private void copy(File src, File dstDir)
+    private void copy(Path src, Path dstDir)
             throws IOException, InterruptedException {
         create(singleton(src), dstDir).execute();
     }
 
     @Override
-    Copy create(Collection<File> sources, File dstDir) {
+    Copy create(Collection<Path> sources, Path dstDir) {
         return new Copy(sources, dstDir);
     }
 

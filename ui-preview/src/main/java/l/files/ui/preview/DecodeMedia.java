@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -33,12 +33,12 @@ abstract class DecodeMedia extends DecodeThumbnail {
     });
 
     DecodeMedia(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
     }
 
     @Override
@@ -54,7 +54,7 @@ abstract class DecodeMedia extends DecodeThumbnail {
 
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
-            retriever.setDataSource(context.context, Uri.parse(file.uri().toString()));
+            retriever.setDataSource(context.context, Uri.parse(file.toUri().toString()));
 
             if (isCancelled()) {
                 return null;

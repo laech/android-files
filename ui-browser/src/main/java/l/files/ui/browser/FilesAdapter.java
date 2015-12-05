@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -60,7 +60,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<File, FileItem> selection;
+    private final Selection<Path, FileItem> selection;
 
     private final OnOpenFileListener listener;
 
@@ -71,7 +71,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     FilesAdapter(
             Context context,
-            Selection<File, FileItem> selection,
+            Selection<Path, FileItem> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
@@ -168,7 +168,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     public Object getItemIdObject(int position) {
         BrowserItem item = getItem(position);
         if (item instanceof FileItem) {
-            return ((FileItem) item).selfFile();
+            return ((FileItem) item).selfPath();
         }
         return item;
     }
@@ -176,17 +176,17 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     @Override
     public void selectAll() {
         List<BrowserItem> items = items();
-        Map<File, FileItem> files = new ArrayMap<>(items.size());
+        Map<Path, FileItem> files = new ArrayMap<>(items.size());
         for (BrowserItem item : items) {
             if (item.isFileItem()) {
                 FileItem file = (FileItem) item;
-                files.put(file.selfFile(), file);
+                files.put(file.selfPath(), file);
             }
         }
         selection.addAll(files);
     }
 
-    final class FileHolder extends SelectionModeViewHolder<File, FileItem>
+    final class FileHolder extends SelectionModeViewHolder<Path, FileItem>
             implements PreviewCallback {
 
         private final FileView content;
@@ -210,13 +210,13 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        protected File itemId(FileItem file) {
-            return file.selfFile();
+        protected Path itemId(FileItem file) {
+            return file.selfPath();
         }
 
         @Override
         protected void onClick(View v, FileItem file) {
-            listener.onOpen(file.selfFile(), file.linkTargetOrSelfStat());
+            listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
         }
 
         @Override
@@ -251,7 +251,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
                 task.cancelAll();
             }
 
-            File file = previewFile();
+            Path file = previewFile();
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
                 setPaletteColor(TRANSPARENT);
@@ -280,18 +280,18 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             return null;
         }
 
-        private File previewFile() {
-            return item().linkTargetOrSelfFile();
+        private Path previewFile() {
+            return item().linkTargetOrSelfPath();
         }
 
-        private Bitmap getCachedThumbnail(File res, Stat stat) {
+        private Bitmap getCachedThumbnail(Path path, Stat stat) {
             long now = currentTimeMillis();
             long then = stat.lastModifiedTime().to(MILLISECONDS);
             boolean changedMoreThan5SecondsAgo = now - then > 5000;
             if (changedMoreThan5SecondsAgo) {
-                return decorator.getThumbnail(res, stat, constraint, true);
+                return decorator.getThumbnail(path, stat, constraint, true);
             } else {
-                return decorator.getThumbnail(res, stat, constraint, false);
+                return decorator.getThumbnail(path, stat, constraint, false);
             }
         }
 
@@ -319,14 +319,14 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onSizeAvailable(File item, Stat stat, Rect size) {
+        public void onSizeAvailable(Path item, Stat stat, Rect size) {
             if (item.equals(previewFile())) {
                 updateContent(scaleSize(size));
             }
         }
 
         @Override
-        public void onPaletteAvailable(File item, Stat stat, Palette palette) {
+        public void onPaletteAvailable(Path item, Stat stat, Palette palette) {
             if (item.equals(previewFile())) {
                 setPaletteColor(backgroundColor(palette));
             }
@@ -337,7 +337,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewAvailable(File item, Stat stat, Bitmap bm) {
+        public void onPreviewAvailable(Path item, Stat stat, Bitmap bm) {
             if (item.equals(previewFile())) {
                 updateContent(bm);
                 content.startPreviewTransition();
@@ -345,7 +345,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         }
 
         @Override
-        public void onPreviewFailed(File item, Stat stat) {
+        public void onPreviewFailed(Path item, Stat stat) {
             if (item.equals(previewFile())) {
                 updateContent(null);
             }

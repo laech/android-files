@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.browser.FilesActivity.DrawerListener;
 
@@ -28,7 +28,7 @@ public final class FilesActivityTest {
     public void closes_sidebar_on_open_file() throws Exception {
         FilesActivity activity = activityWithMockDrawer();
         given(activity.drawerLayout().isDrawerOpen(START)).willReturn(true);
-        activity.onOpen(mock(File.class), mock(Stat.class));
+        activity.onOpen(mock(Path.class), mock(Stat.class));
         verify(activity.drawerLayout()).closeDrawers();
     }
 

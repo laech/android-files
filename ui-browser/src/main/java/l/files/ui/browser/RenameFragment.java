@@ -9,7 +9,8 @@ import android.widget.EditText;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
@@ -21,12 +22,12 @@ public final class RenameFragment extends FileCreationFragment {
 
     public static final String TAG = RenameFragment.class.getSimpleName();
 
-    private static final String ARG_FILE = "file";
+    private static final String ARG_PATH = "path";
 
-    static RenameFragment create(File file) {
+    static RenameFragment create(Path path) {
         Bundle args = new Bundle(2);
-        args.putParcelable(ARG_PARENT_FILE, file.parent());
-        args.putParcelable(ARG_FILE, file);
+        args.putParcelable(ARG_PARENT_PATH, path.parent());
+        args.putParcelable(ARG_PATH, path);
 
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
@@ -35,12 +36,12 @@ public final class RenameFragment extends FileCreationFragment {
 
     private AsyncTask<?, ?, ?> highlight;
     private AsyncTask<?, ?, ?> rename;
-    private File file;
+    private Path path;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        file = getArguments().getParcelable(ARG_FILE);
+        path = getArguments().getParcelable(ARG_PATH);
     }
 
     @Override
@@ -64,7 +65,7 @@ public final class RenameFragment extends FileCreationFragment {
     @Override
     void restartChecker() {
 
-        String oldName = file.name().toString();
+        String oldName = path.name().toString();
         String newName = getFilename();
         if (!oldName.equals(newName) &&
                 oldName.equalsIgnoreCase(newName)) {
@@ -75,52 +76,52 @@ public final class RenameFragment extends FileCreationFragment {
         super.restartChecker();
     }
 
-    private File file() {
-        return file;
+    private Path path() {
+        return path;
     }
 
     private void highlight() {
         if (getFilename().isEmpty()) {
             highlight = new Highlight()
-                    .executeOnExecutor(THREAD_POOL_EXECUTOR, file());
+                    .executeOnExecutor(THREAD_POOL_EXECUTOR, path());
         }
     }
 
-    private class Highlight extends AsyncTask<File, Void, Pair<File, Stat>> {
+    private class Highlight extends AsyncTask<Path, Void, Pair<Path, Stat>> {
 
         @Override
-        protected Pair<File, Stat> doInBackground(File... params) {
-            File file = params[0];
+        protected Pair<Path, Stat> doInBackground(Path... params) {
+            Path path = params[0];
             try {
-                return Pair.create(file, file.stat(NOFOLLOW));
+                return Pair.create(path, Files.stat(path, NOFOLLOW));
             } catch (IOException e) {
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(Pair<File, Stat> pair) {
+        protected void onPostExecute(Pair<Path, Stat> pair) {
             super.onPostExecute(pair);
             if (pair != null) {
-                File file = pair.first;
+                Path path = pair.first;
                 Stat stat = pair.second;
                 EditText field = getFilenameField();
                 if (!getFilename().isEmpty()) {
                     return;
                 }
-                field.setText(file.name().toString());
+                field.setText(path.name().toString());
                 if (stat.isDirectory()) {
                     field.selectAll();
                 } else {
-                    field.setSelection(0, file.name().base().length());
+                    field.setSelection(0, path.name().base().length());
                 }
             }
         }
     }
 
     @Override
-    protected CharSequence getError(File target) {
-        if (file().equals(target)) {
+    protected CharSequence getError(Path target) {
+        if (path().equals(target)) {
             return null;
         }
         return super.getError(target);
@@ -137,8 +138,8 @@ public final class RenameFragment extends FileCreationFragment {
     }
 
     private void rename() {
-        File dst = parent().resolve(getFilename());
-        rename = new Rename(file(), dst)
+        Path dst = parent().resolve(getFilename());
+        rename = new Rename(path(), dst)
                 .executeOnExecutor(THREAD_POOL_EXECUTOR);
 
         ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();
@@ -147,20 +148,20 @@ public final class RenameFragment extends FileCreationFragment {
         }
     }
 
-    private class Rename extends AsyncTask<File, Void, IOException> {
+    private class Rename extends AsyncTask<Path, Void, IOException> {
 
-        private final File src;
-        private final File dst;
+        private final Path src;
+        private final Path dst;
 
-        private Rename(File src, File dst) {
+        private Rename(Path src, Path dst) {
             this.src = requireNonNull(src);
             this.dst = requireNonNull(dst);
         }
 
         @Override
-        protected IOException doInBackground(File... params) {
+        protected IOException doInBackground(Path... params) {
             try {
-                src.moveTo(dst);
+                Files.move(src, dst);
                 return null;
             } catch (IOException e) {
                 return e;

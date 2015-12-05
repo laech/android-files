@@ -4,7 +4,7 @@ import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenuAction;
 
 import static android.view.Menu.NONE;
@@ -13,10 +13,10 @@ import static l.files.base.Objects.requireNonNull;
 
 final class NewDirMenu extends OptionsMenuAction {
 
-    private final File directory;
+    private final Path directory;
     private final FragmentManager manager;
 
-    NewDirMenu(FragmentManager manager, File directory) {
+    NewDirMenu(FragmentManager manager, Path directory) {
         super(R.id.new_dir);
         this.manager = requireNonNull(manager, "manager");
         this.directory = requireNonNull(directory, "directory");

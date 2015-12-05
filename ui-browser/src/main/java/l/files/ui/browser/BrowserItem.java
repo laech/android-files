@@ -8,10 +8,11 @@ import com.ibm.icu.text.Collator;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
-import static l.files.fs.File.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 
 abstract class BrowserItem {
 
@@ -61,7 +62,7 @@ abstract class BrowserItem {
         boolean isReadable() {
             if (readable == null) {
                 try {
-                    readable = selfFile().isReadable();
+                    readable = Files.isReadable(selfPath());
                 } catch (IOException e) {
                     readable = false;
                 }
@@ -72,7 +73,8 @@ abstract class BrowserItem {
         String basicMediaType() {
             if (basicMediaType == null) {
                 try {
-                    basicMediaType = selfFile().detectBasicMediaType(linkTargetOrSelfStat());
+                    basicMediaType = Files.detectBasicMediaType(
+                            selfPath(), linkTargetOrSelfStat());
                 } catch (IOException e) {
                     basicMediaType = MEDIA_TYPE_OCTET_STREAM;
                 }
@@ -80,13 +82,13 @@ abstract class BrowserItem {
             return basicMediaType;
         }
 
-        abstract File selfFile();
+        abstract Path selfPath();
 
         @Nullable
         abstract Stat selfStat();
 
         @Nullable
-        abstract File linkTargetFile();
+        abstract Path linkTargetPath();
 
         @Nullable
         abstract Stat linkTargetStat();
@@ -96,14 +98,14 @@ abstract class BrowserItem {
             return linkTargetStat() != null ? linkTargetStat() : selfStat();
         }
 
-        File linkTargetOrSelfFile() {
-            return linkTargetFile() != null ? linkTargetFile() : selfFile();
+        Path linkTargetOrSelfPath() {
+            return linkTargetPath() != null ? linkTargetPath() : selfPath();
         }
 
         private CollationKey collationKey() {
             if (collationKey == null) {
                 collationKey = collator.get()
-                        .getCollationKey(selfFile().name().toString());
+                        .getCollationKey(selfPath().name().toString());
             }
             return collationKey;
         }
@@ -119,12 +121,12 @@ abstract class BrowserItem {
         }
 
         static FileItem create(
-                File file,
+                Path path,
                 @Nullable Stat stat,
-                @Nullable File target,
+                @Nullable Path target,
                 @Nullable Stat targetStat,
                 Provider<Collator> collator) {
-            FileItem item = new AutoValue_BrowserItem_FileItem(file, stat, target, targetStat);
+            FileItem item = new AutoValue_BrowserItem_FileItem(path, stat, target, targetStat);
             item.collator = collator;
             return item;
         }

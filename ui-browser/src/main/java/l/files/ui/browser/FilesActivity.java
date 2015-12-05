@@ -22,9 +22,10 @@ import com.android.debug.hv.ViewServer;
 import java.io.IOException;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
@@ -62,7 +63,7 @@ public final class FilesActivity extends BaseActivity implements
     private Spinner title;
     private DrawerArrowDrawable navigationIcon;
 
-    public List<File> hierarchy() {
+    public List<Path> hierarchy() {
         return hierarchy.get();
     }
 
@@ -139,7 +140,7 @@ public final class FilesActivity extends BaseActivity implements
     @Override
     public void onItemSelected(
             AdapterView<?> parent, View view, int position, long id) {
-        File item = (File) parent.getAdapter().getItem(position);
+        Path item = (Path) parent.getAdapter().getItem(position);
         if (!item.equals(fragment().directory())) {
             onOpen(item);
         }
@@ -168,13 +169,13 @@ public final class FilesActivity extends BaseActivity implements
         }
     }
 
-    private File initialDirectory() {
-        File dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+    private Path initialDirectory() {
+        LocalPath dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
         if (dir == null
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = LocalFile.of(getIntent().getData().getPath());
+            dir = LocalPath.of(getIntent().getData().getPath());
         }
         return dir == null ? DIR_HOME : dir;
     }
@@ -267,12 +268,12 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     @Override
-    public void onOpen(File file) {
+    public void onOpen(Path file) {
         onOpen(file, null);
     }
 
     @Override
-    public void onOpen(final File file, @Nullable final Stat stat) {
+    public void onOpen(final Path file, @Nullable final Stat stat) {
         ActionMode mode = currentActionMode();
         if (mode != null) {
             mode.finish();
@@ -294,9 +295,9 @@ public final class FilesActivity extends BaseActivity implements
         }
     }
 
-    private void show(final File file, @Nullable final Stat stat) {
+    private void show(final Path path, @Nullable final Stat stat) {
         if (stat != null && !stat.isSymbolicLink()) {
-            doShow(file, stat);
+            doShow(path, stat);
             return;
         }
 
@@ -305,7 +306,7 @@ public final class FilesActivity extends BaseActivity implements
             @Override
             protected Object doInBackground(Void... params) {
                 try {
-                    return file.stat(FOLLOW);
+                    return Files.stat(path, FOLLOW);
                 } catch (IOException e) {
                     e.printStackTrace();
                     return e;
@@ -317,7 +318,7 @@ public final class FilesActivity extends BaseActivity implements
                 super.onPostExecute(result);
                 if (!isDestroyed() && !isFinishing()) {
                     if (result instanceof Stat) {
-                        doShow(file, (Stat) result);
+                        doShow(path, (Stat) result);
                     } else {
                         String msg = message((IOException) result);
                         makeText(FilesActivity.this, msg, LENGTH_SHORT).show();
@@ -328,19 +329,19 @@ public final class FilesActivity extends BaseActivity implements
         }.execute();
     }
 
-    private void doShow(File file, Stat stat) {
-        if (!isReadable(file)) { // TODO Check in background
+    private void doShow(Path path, Stat stat) {
+        if (!isReadable(path)) { // TODO Check in background
             showPermissionDenied();
         } else if (stat.isDirectory()) {
-            showDirectory(file);
+            showDirectory(path);
         } else {
-            showFile(file, stat);
+            showFile(path, stat);
         }
     }
 
-    private boolean isReadable(File file) {
+    private boolean isReadable(Path path) {
         try {
-            return file.isReadable();
+            return Files.isReadable(path);
         } catch (IOException e) {
             return false;
         }
@@ -350,22 +351,22 @@ public final class FilesActivity extends BaseActivity implements
         makeText(this, R.string.permission_denied, LENGTH_SHORT).show();
     }
 
-    private void showDirectory(File file) {
+    private void showDirectory(Path path) {
         FilesFragment fragment = fragment();
-        if (fragment.directory().equals(file)) {
+        if (fragment.directory().equals(path)) {
             return;
         }
-        FilesFragment f = FilesFragment.create(file);
+        FilesFragment f = FilesFragment.create(path);
         getSupportFragmentManager()
                 .beginTransaction()
-                .setBreadCrumbTitle(file.name().toString())
+                .setBreadCrumbTitle(path.name().toString())
                 .setTransition(TRANSIT_FRAGMENT_OPEN)
                 .replace(R.id.content, f, FilesFragment.TAG)
                 .addToBackStack(null)
                 .commit();
     }
 
-    private void showFile(File file, Stat stat) {
+    private void showFile(Path file, Stat stat) {
         new OpenFile(this, file, stat).execute();
     }
 

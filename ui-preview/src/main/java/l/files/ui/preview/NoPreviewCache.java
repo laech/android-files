@@ -4,11 +4,11 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 
 final class NoPreviewCache extends PersistenceCache<Boolean> {
 
-    NoPreviewCache(File cacheDir) {
+    NoPreviewCache(Path cacheDir) {
         super(cacheDir, (byte) 1);
     }
 

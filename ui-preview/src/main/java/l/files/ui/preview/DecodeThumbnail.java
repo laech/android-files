@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
@@ -15,12 +15,12 @@ import static l.files.ui.preview.Preview.decodePalette;
 abstract class DecodeThumbnail extends Decode {
 
     DecodeThumbnail(
-            File res,
+            Path path,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,
             Preview context) {
-        super(res, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, context);
     }
 
     boolean shouldScale() {

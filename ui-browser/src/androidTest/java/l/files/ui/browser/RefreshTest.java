@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
 
-import l.files.fs.File;
+import l.files.fs.FileSystem;
+import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Path;
 import l.files.fs.Permission;
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
@@ -18,6 +20,18 @@ import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createDirs;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createFiles;
+import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.deleteRecursive;
+import static l.files.fs.Files.list;
+import static l.files.fs.Files.listDirs;
+import static l.files.fs.Files.move;
+import static l.files.fs.Files.readAllUtf8;
+import static l.files.fs.Files.setLastModifiedTime;
+import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.MODIFIED;
@@ -28,7 +42,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void manual_refresh_updates_outdated_files()
             throws Exception {
 
-        File dir = linkToStorageDir("files-test-max-watches-reached");
+        Path dir = linkToStorageDir("files-test-max-watches-reached");
         createRandomDirs(dir, maxUserWatches() + 1);
 
         screen()
@@ -42,11 +56,11 @@ public final class RefreshTest extends BaseFilesActivityTest {
         testFileCreationDeletionWillStillBeNotifiedInManualMode(dir);
     }
 
-    private void testRefreshInManualMode(File dir) throws IOException {
+    private void testRefreshInManualMode(Path dir) throws IOException {
 
-        dir.listDirs(FOLLOW, new File.Consumer() {
+        listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File childDir) throws IOException {
+            public boolean accept(Path childDir) throws IOException {
                 try {
                     // Inotify don't notify child directory last modified time,
                     // unless we explicitly monitor the child dir, but we aren't
@@ -55,7 +69,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
                     setRandomLastModified(childDir);
                 } catch (IOException e) {
                     // Older versions does not support changing mtime
-                    childDir.deleteRecursive();
+                    deleteRecursive(childDir);
                 }
                 return false;
             }
@@ -63,18 +77,18 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().refresh().assertListMatchesFileSystem(dir);
     }
 
-    private void testFileCreationDeletionWillStillBeNotifiedInManualMode(File dir)
+    private void testFileCreationDeletionWillStillBeNotifiedInManualMode(Path dir)
             throws IOException {
 
-        dir.resolve("file-" + nanoTime()).createFile();
-        dir.resolve("dir-" + nanoTime()).createDir();
-        dir.resolve("before-move-" + nanoTime()).createFile()
-                .moveTo(dir.resolve("after-move-" + nanoTime()));
+        createFile(dir.resolve("file-" + nanoTime()));
+        createDir(dir.resolve("dir-" + nanoTime()));
+        move(createFile(dir.resolve("before-move-" + nanoTime())),
+                dir.resolve("after-move-" + nanoTime()));
 
-        dir.list(FOLLOW, new File.Consumer() {
+        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File file) throws IOException {
-                file.deleteRecursive();
+            public boolean accept(Path file) throws IOException {
+                deleteRecursive(file);
                 return false;
             }
         });
@@ -90,21 +104,21 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private int maxUserWatches() throws IOException {
-        File limitFile = LocalFile.of("/proc/sys/fs/inotify/max_user_watches");
-        return parseInt(limitFile.readAllUtf8().trim());
+        Path limitFile = LocalPath.of("/proc/sys/fs/inotify/max_user_watches");
+        return parseInt(readAllUtf8(limitFile).trim());
     }
 
     @Test
     public void auto_show_updated_details_of_lots_of_child_dirs() throws Exception {
-        File dir = linkToStorageDir("files-test-lots-of-child-dirs");
+        Path dir = linkToStorageDir("files-test-lots-of-child-dirs");
         int count = max(maxUserWatches() / 2, 1000);
         createRandomDirs(dir, count);
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
-        dir.list(FOLLOW, new File.Consumer() {
+        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File child) throws IOException {
+            public boolean accept(Path child) throws IOException {
                 if (nanoTime() % 2 == 0) {
                     deleteOrCreateChild(child);
                 } else {
@@ -122,34 +136,34 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir);
     }
 
-    private void deleteOrCreateChild(File dir) throws IOException {
-        File child = dir.resolve("a");
+    private void deleteOrCreateChild(Path dir) throws IOException {
+        Path child = dir.resolve("a");
         try {
-            child.delete();
+            Files.delete(child);
         } catch (FileNotFoundException e) {
-            child.createFiles();
+            createFiles(child);
         }
     }
 
     private static final Random random = new Random();
 
-    private void setRandomLastModified(File file) throws IOException {
+    private void setRandomLastModified(Path file) throws IOException {
         long time = random.nextLong();
-        file.setLastModifiedTime(NOFOLLOW, Instant.ofMillis(time));
+        setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(time));
     }
 
     private void createRandomDirs(
-            final File dir,
+            final Path dir,
             final int expectedCount) throws IOException {
 
         final int[] actualCount = {0};
 
-        dir.listDirs(FOLLOW, new File.Consumer() {
+        listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File child) throws IOException {
+            public boolean accept(Path child) throws IOException {
                 actualCount[0]++;
                 if (actualCount[0] > expectedCount) {
-                    child.deleteRecursive();
+                    deleteRecursive(child);
                     actualCount[0]--;
                 }
                 return true;
@@ -157,7 +171,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         });
 
         while (actualCount[0] < expectedCount) {
-            randomFile(dir).createDir();
+            createDir(randomFile(dir));
             actualCount[0]++;
         }
 
@@ -167,75 +181,73 @@ public final class RefreshTest extends BaseFilesActivityTest {
     public void auto_detect_files_added_and_removed_while_loading() throws Exception {
 
         int childrenCount = (int) (maxUserWatches() * 0.75F);
-        File dir = linkToStorageDir("files-test-add-remove-while-loading");
+        Path dir = linkToStorageDir("files-test-add-remove-while-loading");
         createRandomChildren(dir, childrenCount);
 
         screen().click(dir);
 
         for (int i = 0; i < 200; i++) {
 
-            dir.list(FOLLOW, new File.Consumer() {
+            list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
 
                 int count = 0;
 
                 @Override
-                public boolean accept(File file) throws IOException {
-                    file.deleteRecursive();
+                public boolean accept(Path file) throws IOException {
+                    deleteRecursive(file);
                     count++;
                     return count < 2;
                 }
 
             });
 
-            randomFile(dir).createDir();
-            randomFile(dir).createFile();
+            createDir(randomFile(dir));
+            createFile(randomFile(dir));
             sleep(10);
         }
 
         screen().assertListMatchesFileSystem(dir);
     }
 
-    private File linkToStorageDir(String name) throws IOException {
-        return dir().resolve(name).createLink(
-                storageDir()
-                        .resolve(name)
-                        .createDirs()
+    private Path linkToStorageDir(String name) throws IOException {
+        return createLink(
+                dir().resolve(name), createDirs(storageDir().resolve(name))
         );
     }
 
-    private void createRandomChildren(File dir, int expectedCount) throws IOException {
+    private void createRandomChildren(Path dir, int expectedCount) throws IOException {
 
         final int[] actualCount = {0};
-        dir.list(FOLLOW, new File.Consumer() {
+        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File file) {
+            public boolean accept(Path file) {
                 actualCount[0]++;
                 return true;
             }
         });
 
         while (actualCount[0] < expectedCount) {
-            File file = randomFile(dir);
+            Path file = randomFile(dir);
             if (actualCount[0] % 2 == 0) {
-                file.createFile();
+                createFile(file);
             } else {
-                file.createDir();
+                createDir(file);
             }
             actualCount[0]++;
         }
     }
 
-    private File randomFile(File dir) {
+    private Path randomFile(Path dir) {
         return dir.resolve(String.valueOf(Math.random()));
     }
 
-    private File storageDir() {
-        return LocalFile.of(getExternalStorageDirectory());
+    private Path storageDir() {
+        return LocalPath.of(getExternalStorageDirectory());
     }
 
     @Test
     public void auto_show_correct_information_on_large_change_events() throws Exception {
-        dir().resolve("a").createFile();
+        createFile(dir().resolve("a"));
         screen().assertListMatchesFileSystem(dir());
 
         long end = currentTimeMillis() + SECONDS.toMillis(5);
@@ -254,10 +266,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        dir().list(NOFOLLOW, new File.Consumer() {
+        list(dir(), NOFOLLOW, new FileSystem.Consumer<Path>() {
             @Override
-            public boolean accept(File child) throws IOException {
-                child.setLastModifiedTime(NOFOLLOW, Instant.of(
+            public boolean accept(Path child) throws IOException {
+                setLastModifiedTime(child, NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
                 return true;
@@ -266,45 +278,48 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private void updateDirectory(String name) throws IOException {
-        File dir = dir().resolve(name);
-        if (dir.exists(NOFOLLOW)) {
-            dir.delete();
+        Path dir = dir().resolve(name);
+        if (Files.exists(dir, NOFOLLOW)) {
+            Files.delete(dir);
         } else {
-            dir.createDir();
+            Files.createDir(dir);
         }
     }
 
     private void updatePermissions(String name) throws IOException {
-        File res = dir().resolve(name).createFiles();
-        if (res.isReadable()) {
-            res.setPermissions(Permission.read());
+        Path res = createFiles(dir().resolve(name));
+        if (Files.isReadable(res)) {
+            Files.setPermissions(res, Permission.read());
         } else {
-            res.setPermissions(Permission.none());
+            Files.setPermissions(res, Permission.none());
         }
     }
 
     private void updateFileContent(String name) throws IOException {
-        File file = dir().resolve(name).createFiles();
-        file.writeAllUtf8(String.valueOf(new Random().nextLong()));
+        Path file = createFiles(dir().resolve(name));
+        writeUtf8(file, String.valueOf(new Random().nextLong()));
     }
 
     private void updateDirectoryChild(String name) throws IOException {
-        File dir = dir().resolve(name).createDirs();
-        File child = dir.resolve("child");
-        if (child.exists(NOFOLLOW)) {
-            child.delete();
+        Path dir = createDirs(dir().resolve(name));
+        Path child = dir.resolve("child");
+        if (Files.exists(child, NOFOLLOW)) {
+            Files.delete(child);
         } else {
-            child.createFile();
+            Files.createFile(child);
         }
     }
 
     private void updateLink(String name) throws IOException {
-        File link = dir().resolve(name);
-        if (link.exists(NOFOLLOW)) {
-            link.delete();
+        Path link = dir().resolve(name);
+        if (Files.exists(link, NOFOLLOW)) {
+            Files.delete(link);
         }
-        link.createLink(new Random().nextInt() % 2 == 0
-                ? link
-                : link.parent());
+        Files.createLink(
+                link,
+                new Random().nextInt() % 2 == 0
+                        ? link
+                        : link.parent()
+        );
     }
 }

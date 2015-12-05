@@ -12,14 +12,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.operations.OperationService.TaskListener;
-import l.files.testing.fs.FileBaseTest;
+import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.fs.Files.createDir;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createFiles;
+import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.operations.OperationService.ACTION_CANCEL;
 import static l.files.operations.OperationService.EXTRA_TASK_ID;
@@ -36,7 +40,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public final class OperationServiceTest extends FileBaseTest {
+public final class OperationServiceTest extends PathBaseTest {
 
     private OperationService service;
 
@@ -72,8 +76,8 @@ public final class OperationServiceTest extends FileBaseTest {
     @Test
     public void moves_file() throws Exception {
 
-        File src = dir1().resolve("a").createFile();
-        File dst = dir1().resolve("dst").createDir();
+        Path src = createFile(dir1().resolve("a"));
+        Path dst = createDir(dir1().resolve("dst"));
         CountDownListener listener = new CountDownListener(MOVE);
         service.listener = listener;
         service.onCreate();
@@ -81,15 +85,15 @@ public final class OperationServiceTest extends FileBaseTest {
         service.onStartCommand(newMoveIntent(getContext(), singleton(src), dst), 0, 0);
 
         listener.await();
-        assertFalse(src.exists(NOFOLLOW));
-        assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
+        assertFalse(exists(src, NOFOLLOW));
+        assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
     }
 
     @Test
     public void copies_file() throws Exception {
 
-        File src = dir1().resolve("a").createFile();
-        File dst = dir1().resolve("dst").createDir();
+        Path src = createFile(dir1().resolve("a"));
+        Path dst = createDir(dir1().resolve("dst"));
         CountDownListener listener = new CountDownListener(COPY);
         service.listener = listener;
         service.onCreate();
@@ -97,15 +101,15 @@ public final class OperationServiceTest extends FileBaseTest {
         service.onStartCommand(newCopyIntent(getContext(), singleton(src), dst), 0, 0);
 
         listener.await();
-        assertTrue(src.exists(NOFOLLOW));
-        assertTrue(dst.resolve(src.name()).exists(NOFOLLOW));
+        assertTrue(exists(src, NOFOLLOW));
+        assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
     }
 
     @Test
     public void deletes_files() throws Exception {
 
-        File a = dir1().resolve("a").createFiles();
-        File b = dir1().resolve("b/c").createFiles();
+        Path a = createFiles(dir1().resolve("a"));
+        Path b = createFiles(dir1().resolve("b/c"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();
@@ -113,15 +117,15 @@ public final class OperationServiceTest extends FileBaseTest {
         service.onStartCommand(newDeleteIntent(getContext(), asList(a, b)), 0, 0);
 
         listener.await();
-        assertFalse(a.exists(NOFOLLOW));
-        assertFalse(b.exists(NOFOLLOW));
+        assertFalse(exists(a, NOFOLLOW));
+        assertFalse(exists(b, NOFOLLOW));
     }
 
     @Test
     public void task_start_time_is_correct() throws Exception {
 
-        File file1 = dir1().resolve("a").createFile();
-        File file2 = dir1().resolve("b").createFile();
+        Path file1 = createFile(dir1().resolve("a"));
+        Path file2 = createFile(dir1().resolve("b"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();

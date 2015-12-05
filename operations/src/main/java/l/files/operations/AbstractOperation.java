@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import l.files.fs.File;
-import l.files.fs.Visitor;
+import l.files.fs.Path;
+import l.files.fs.TraversalCallback;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.Visitor.Result.CONTINUE;
-import static l.files.fs.Visitor.Result.TERMINATE;
+import static l.files.fs.TraversalCallback.Result.CONTINUE;
+import static l.files.fs.TraversalCallback.Result.TERMINATE;
 
 abstract class AbstractOperation implements FileOperation {
 
@@ -22,10 +22,10 @@ abstract class AbstractOperation implements FileOperation {
      */
     private static final int ERROR_LIMIT = 20;
 
-    private final Iterable<File> files;
+    private final Iterable<Path> files;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Collection<? extends File> files) {
+    AbstractOperation(Collection<? extends Path> files) {
         this.files = unmodifiableSet(new HashSet<>(files));
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
@@ -40,46 +40,46 @@ abstract class AbstractOperation implements FileOperation {
         return currentThread().isInterrupted();
     }
 
-    final void record(File file, final IOException exception) {
-        recorder.onFailure(file, exception);
+    final void record(Path path, final IOException exception) {
+        recorder.onFailure(path, exception);
     }
 
-    final void traverse(File file, OperationVisitor visitor) {
+    final void traverse(Path path, OperationVisitor visitor) {
         try {
-            file.traverse(NOFOLLOW, visitor);
+            l.files.fs.Files.traverse(path, NOFOLLOW, visitor);
         } catch (IOException e) {
-            record(file, e);
+            record(path, e);
         }
     }
 
-    class OperationVisitor implements Visitor {
+    class OperationVisitor implements TraversalCallback<Path> {
 
         @Override
-        public Result onPreVisit(File file) throws IOException {
+        public Result onPreVisit(Path path) throws IOException {
             return isInterrupted() ? TERMINATE : CONTINUE;
         }
 
         @Override
-        public Result onPostVisit(File file) throws IOException {
+        public Result onPostVisit(Path path) throws IOException {
             return isInterrupted() ? TERMINATE : CONTINUE;
         }
 
         @Override
-        public void onException(File file, IOException e) throws IOException {
-            record(file, e);
+        public void onException(Path path, IOException e) throws IOException {
+            record(path, e);
         }
 
     }
 
     @Override
     public void execute() throws InterruptedException {
-        for (File file : files) {
+        for (Path path : files) {
             checkInterrupt();
-            process(file);
+            process(path);
         }
         recorder.throwIfNotEmpty();
     }
 
-    abstract void process(File file) throws InterruptedException;
+    abstract void process(Path path) throws InterruptedException;
 
 }

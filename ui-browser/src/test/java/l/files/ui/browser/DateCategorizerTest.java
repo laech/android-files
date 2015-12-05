@@ -17,9 +17,9 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import l.files.fs.File;
 import l.files.fs.Instant;
 import l.files.fs.Name;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.browser.BrowserItem.HeaderItem;
@@ -131,7 +131,7 @@ public final class DateCategorizerTest {
         for (BrowserItem item : items) {
             names.add(item.isHeaderItem()
                     ? ((HeaderItem) item).header()
-                    : ((FileItem) item).selfFile().name().toString());
+                    : ((FileItem) item).selfPath().name().toString());
         }
         return unmodifiableList(names);
     }
@@ -270,7 +270,7 @@ public final class DateCategorizerTest {
 
     private FileItem file(long time) {
         Stat stat = mock(Stat.class);
-        File file = mock(File.class);
+        Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(String.valueOf(time));
         given(file.name()).willReturn(name);

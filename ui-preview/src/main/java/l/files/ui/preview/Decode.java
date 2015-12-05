@@ -10,7 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -34,7 +34,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
             });
 
-    final File file;
+    final Path file;
     final Stat stat;
     final Rect constraint;
     final Preview context;
@@ -45,7 +45,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     private boolean publishedSize;
 
     Decode(
-            File file,
+            Path file,
             Stat stat,
             Rect constraint,
             PreviewCallback callback,

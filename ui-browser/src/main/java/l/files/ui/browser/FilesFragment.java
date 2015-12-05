@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
@@ -55,7 +55,7 @@ import static l.files.ui.browser.Preferences.isSortKey;
 public final class FilesFragment
 
         extends
-        SelectionModeFragment<File, FileItem>
+        SelectionModeFragment<Path, FileItem>
 
         implements
         LoaderCallbacks<Result>,
@@ -66,7 +66,7 @@ public final class FilesFragment
 
     private static final String ARG_DIRECTORY = "directory";
 
-    public static FilesFragment create(File directory) {
+    public static FilesFragment create(Path directory) {
         Bundle bundle = new Bundle(1);
         bundle.putParcelable(ARG_DIRECTORY, directory);
 
@@ -75,7 +75,7 @@ public final class FilesFragment
         return browser;
     }
 
-    private File directory;
+    private Path directory;
     private FilesAdapter adapter;
 
     public RecyclerView recycler;
@@ -109,7 +109,7 @@ public final class FilesFragment
         }
     };
 
-    public File directory() {
+    public Path directory() {
         return directory;
     }
 
@@ -313,10 +313,10 @@ public final class FilesFragment
     }
 
     private void updateSelection(Result data) {
-        List<File> files = new ArrayList<>(data.items().size());
+        List<Path> files = new ArrayList<>(data.items().size());
         for (BrowserItem item : data.items()) {
             if (item.isFileItem()) {
-                files.add(((FileItem) item).selfFile());
+                files.add(((FileItem) item).selfPath());
             }
         }
         selection().retainAll(files);

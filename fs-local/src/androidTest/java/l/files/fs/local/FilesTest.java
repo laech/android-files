@@ -32,8 +32,8 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static l.files.fs.File.ISO_8859_1;
-import static l.files.fs.File.UTF_8;
+import static l.files.fs.Files.ISO_8859_1;
+import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
@@ -106,7 +106,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void stat_symbolicLink() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
-        Path link = Files.createLink(file, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), file);
         assertFalse(Files.stat(file, NOFOLLOW).isSymbolicLink());
         assertFalse(Files.stat(link, FOLLOW).isSymbolicLink());
         assertTrue(Files.stat(link, NOFOLLOW).isSymbolicLink());
@@ -163,8 +163,8 @@ public final class FilesTest extends PathBaseTest {
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path a = Files.createFile(dir.resolve("a"));
         Path b = Files.createDir(dir.resolve("b"));
-        Path c = Files.createLink(a, dir.resolve("c"));
-        Path link = Files.createLink(dir, dir1().resolve("link"));
+        Path c = Files.createLink(dir.resolve("c"), a);
+        Path link = Files.createLink(dir1().resolve("link"), dir);
 
         List<Path> expected = asList(
                 a.rebase(dir, link),
@@ -190,9 +190,9 @@ public final class FilesTest extends PathBaseTest {
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path a = Files.createFile(dir.resolve("a"));
         Files.createDir(dir.resolve("b"));
-        Files.createLink(a, dir.resolve("c"));
+        Files.createLink(dir.resolve("c"), a);
 
-        Path link = Files.createLink(dir, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), dir);
         List<Path> expected = singletonList(link.resolve("b"));
         List<Path> actual = sortByName(Files.listDirs(link, FOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
@@ -302,7 +302,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void input_linkFollowSuccess() throws Exception {
         Path target = Files.createFile(dir1().resolve("target"));
-        Path link = Files.createLink(target, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), target);
         Files.newInputStream(link).close();
     }
 
@@ -344,7 +344,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void exists_checkLinkNotTarget() throws Exception {
         Path target = dir1().resolve("target");
-        Path link = Files.createLink(target, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), target);
         assertFalse(Files.exists(target, NOFOLLOW));
         assertFalse(Files.exists(link, FOLLOW));
         assertTrue(Files.exists(link, NOFOLLOW));
@@ -416,14 +416,14 @@ public final class FilesTest extends PathBaseTest {
 
     @Test
     public void createSymbolicLink() throws Exception {
-        Path link = Files.createLink(dir1(), dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), dir1());
         assertTrue(Files.stat(link, NOFOLLOW).isSymbolicLink());
         assertEquals(dir1(), Files.readLink(link));
     }
 
     @Test
     public void stat_followLink() throws Exception {
-        Path child = Files.createLink(dir1(), dir1().resolve("a"));
+        Path child = Files.createLink(dir1().resolve("a"), dir1());
         Stat expected = Files.stat(dir1(), NOFOLLOW);
         Stat actual = Files.stat(child, FOLLOW);
         assertTrue(actual.isDirectory());
@@ -433,7 +433,7 @@ public final class FilesTest extends PathBaseTest {
 
     @Test
     public void stat_noFollowLink() throws Exception {
-        Path child = Files.createLink(dir1(), dir1().resolve("a"));
+        Path child = Files.createLink(dir1().resolve("a"), dir1());
         Stat actual = Files.stat(child, NOFOLLOW);
         assertTrue(actual.isSymbolicLink());
         assertFalse(actual.isDirectory());
@@ -443,7 +443,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void moveTo_moveLinkNotTarget() throws Exception {
         Path target = Files.createFile(dir1().resolve("target"));
-        Path src = Files.createLink(target, dir1().resolve("src"));
+        Path src = Files.createLink(dir1().resolve("src"), target);
         Path dst = dir1().resolve("dst");
         Files.move(src, dst);
         assertFalse(Files.exists(src, NOFOLLOW));
@@ -477,7 +477,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void delete_symbolicLink() throws Exception {
         Path link = dir1().resolve("link");
-        Files.createLink(dir1(), link);
+        Files.createLink(link, dir1());
         assertTrue(Files.exists(link, NOFOLLOW));
         Files.delete(link);
         assertFalse(Files.exists(link, NOFOLLOW));
@@ -505,7 +505,7 @@ public final class FilesTest extends PathBaseTest {
     public void deleteRecursive_symbolicLink() throws Exception {
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path a = Files.createFile(dir.resolve("a"));
-        Path link = Files.createLink(dir, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), dir);
         assertTrue(Files.exists(link, NOFOLLOW));
         Files.deleteRecursive(link);
         assertFalse(Files.exists(link, NOFOLLOW));
@@ -618,7 +618,7 @@ public final class FilesTest extends PathBaseTest {
     public void deleteRecursiveIfExists_linkToFileWillDeleteNoFollow() throws Exception {
 
         Path file = Files.createFile(dir1().resolve("file"));
-        Path link = Files.createLink(file, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), file);
         assertTrue(Files.exists(file, NOFOLLOW));
         assertTrue(Files.exists(link, NOFOLLOW));
 
@@ -632,7 +632,7 @@ public final class FilesTest extends PathBaseTest {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path file = Files.createFile(dir.resolve("file"));
-        Path link = Files.createLink(dir, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), dir);
         assertTrue(Files.exists(dir, NOFOLLOW));
         assertTrue(Files.exists(file, NOFOLLOW));
         assertTrue(Files.exists(link, NOFOLLOW));
@@ -654,7 +654,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void setModificationTime_linkFollow() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
-        Path link = Files.createLink(file, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), file);
 
         Instant fileTime = newInstant();
         Instant linkTime = getModificationTime(link, NOFOLLOW);
@@ -668,7 +668,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void setModificationTime_linkNoFollow() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
-        Path link = Files.createLink(file, dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), file);
 
         Instant fileTime = getModificationTime(file, NOFOLLOW);
         Instant linkTime = newInstant();
@@ -736,7 +736,7 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void removePermissions_changeTargetNotLink() throws Exception {
         Permission perm = OWNER_READ;
-        Path link = Files.createLink(dir1(), dir1().resolve("link"));
+        Path link = Files.createLink(dir1().resolve("link"), dir1());
         assertTrue(Files.stat(link, FOLLOW).permissions().contains(perm));
         assertTrue(Files.stat(link, NOFOLLOW).permissions().contains(perm));
 

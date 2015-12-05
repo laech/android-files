@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.fs.local.LocalFile;
+import l.files.fs.local.LocalPath;
 import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;
 import l.files.operations.TaskState.Pending;
@@ -62,7 +62,7 @@ public final class TaskTest extends BaseTest {
             @Override
             public void execute(Task task) throws FileException {
                 throw new FileException(singletonList(Failure.create(
-                        LocalFile.of("a"), new IOException("Test")
+                        LocalPath.of("a"), new IOException("Test")
                 )));
             }
         }));

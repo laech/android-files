@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.File;
+import l.files.fs.Path;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
 import l.files.operations.Progress;
@@ -76,7 +76,7 @@ public abstract class ProgressViewerTest {
         viewer = create(context, clock);
         pending = TaskState.pending(
                 TaskId.create(1, COPY),
-                Target.from(singleton(mock(File.class, "src")), mock(File.class, "dst")),
+                Target.from(singleton(mock(Path.class, "src")), mock(Path.class, "dst")),
                 Time.create(1, 1)
         );
         running = pending.running(
@@ -107,8 +107,8 @@ public abstract class ProgressViewerTest {
     @Test
     public void getContentTitle_Failed() throws Exception {
         TaskState.Failed state = running.failed(Time.create(2, 2), asList(
-                Failure.create(mock(File.class, "a"), new IOException("1")),
-                Failure.create(mock(File.class, "b"), new IOException("2"))
+                Failure.create(mock(Path.class, "a"), new IOException("1")),
+                Failure.create(mock(Path.class, "b"), new IOException("2"))
         ));
         String expected = res.getQuantityString(getTitleFailed(), 2);
         String actual = viewer.getContentTitle(context, state);

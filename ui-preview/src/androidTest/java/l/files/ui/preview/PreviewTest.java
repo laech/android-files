@@ -9,12 +9,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Closer;
-import l.files.fs.File;
+import l.files.fs.Files;
+import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalFile;
-import l.files.testing.fs.FileBaseTest;
+import l.files.fs.local.LocalPath;
+import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.System.nanoTime;
+import static l.files.fs.Files.createFile;
+import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertNotNull;
@@ -26,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-public final class PreviewTest extends FileBaseTest {
+public final class PreviewTest extends PathBaseTest {
 
     private Preview preview;
 
@@ -77,11 +81,11 @@ public final class PreviewTest extends FileBaseTest {
     }
 
     private void testPreviewSuccessForTestFile(String testFile) throws Throwable {
-        File file = dir1().resolve(testFile);
+        Path file = dir1().resolve(testFile);
         Closer closer = Closer.create();
         try {
             InputStream in = closer.register(getTestContext().getAssets().open(testFile));
-            file.copyFrom(in);
+            Files.copy(in, file);
         } catch (Throwable e) {
             throw closer.rethrow(e);
         } finally {
@@ -92,37 +96,37 @@ public final class PreviewTest extends FileBaseTest {
 
     @Test
     public void preview_proc_cpuinfo() throws Exception {
-        testPreviewSuccess(LocalFile.of("/proc/cpuinfo"));
+        testPreviewSuccess(LocalPath.of("/proc/cpuinfo"));
     }
 
     @Test
     public void preview_link() throws Exception {
-        File file = dir1().resolve("file").createFile();
-        File link = dir1().resolve("link").createLink(file);
-        file.writeAllUtf8("hi");
+        Path file = createFile(dir1().resolve("file"));
+        Path link = createLink(dir1().resolve("link"), file);
+        writeUtf8(file, "hi");
         testPreviewSuccess(file);
         testPreviewSuccess(link);
     }
 
     @Test
     public void preview_link_modified_target() throws Exception {
-        File file = dir1().resolve("file").createFile();
-        File link = dir1().resolve("link").createLink(file);
+        Path file = createFile(dir1().resolve("file"));
+        Path link = createLink(dir1().resolve("link"), file);
         testPreviewFailure(link);
 
-        file.writeAllUtf8("hi");
+        writeUtf8(file, "hi");
         testPreviewSuccess(link);
     }
 
     private void testPreviewSuccessForContent(String content) throws Throwable {
-        File file = dir1().resolve(String.valueOf(nanoTime()));
-        file.writeAllUtf8(content);
+        Path file = dir1().resolve(String.valueOf(nanoTime()));
+        writeUtf8(file, content);
         testPreviewSuccess(file);
     }
 
-    private void testPreviewSuccess(File file) throws IOException {
+    private void testPreviewSuccess(Path file) throws IOException {
         PreviewCallback callback = mock(PreviewCallback.class);
-        Stat stat = file.stat(FOLLOW);
+        Stat stat = Files.stat(file, FOLLOW);
         assertNotNull(preview.get(file, stat, Rect.of(10, 10), callback));
 
         int millis = 5000;
@@ -132,9 +136,9 @@ public final class PreviewTest extends FileBaseTest {
         verify(callback, never()).onPreviewFailed(eq(file), eq(stat));
     }
 
-    private void testPreviewFailure(File file) throws IOException {
+    private void testPreviewFailure(Path file) throws IOException {
         PreviewCallback callback = mock(PreviewCallback.class);
-        assertNull(preview.get(file, file.stat(NOFOLLOW), Rect.of(10, 10), callback));
+        assertNull(preview.get(file, Files.stat(file, NOFOLLOW), Rect.of(10, 10), callback));
     }
 
 }

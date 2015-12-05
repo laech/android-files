@@ -20,10 +20,10 @@ public interface FileSystem {
     void createFile(Path path) throws IOException;
 
     /**
-     * @param target the target the link will point to
      * @param link   the link itself
+     * @param target the target the link will point to
      */
-    void createLink(Path target, Path link) throws IOException;
+    void createLink(Path link, Path target) throws IOException;
 
     Path readLink(Path path) throws IOException;
 
@@ -55,6 +55,24 @@ public interface FileSystem {
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
+
+    void traverseSize(
+            Path path,
+            LinkOption option,
+            SizeVisitor accumulator) throws IOException;
+
+    interface SizeVisitor {
+
+        /**
+         * Called per file/directory.
+         *
+         * @param size       the size of the file/directory in bytes
+         * @param sizeOnDisk the size of actual storage used in bytes
+         */
+        boolean onSize(long size, long sizeOnDisk)
+                throws IOException;
+
+    }
 
     InputStream newInputStream(Path path) throws IOException;
 
