@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import l.files.fs.BaseFile;
@@ -23,60 +22,14 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Permission;
 
-import static java.util.Collections.unmodifiableSet;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.Permission.GROUP_EXECUTE;
-import static l.files.fs.Permission.GROUP_READ;
-import static l.files.fs.Permission.GROUP_WRITE;
-import static l.files.fs.Permission.OTHERS_EXECUTE;
-import static l.files.fs.Permission.OTHERS_READ;
-import static l.files.fs.Permission.OTHERS_WRITE;
-import static l.files.fs.Permission.OWNER_EXECUTE;
-import static l.files.fs.Permission.OWNER_READ;
-import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.Stat.S_IRGRP;
-import static l.files.fs.local.Stat.S_IROTH;
-import static l.files.fs.local.Stat.S_IRUSR;
-import static l.files.fs.local.Stat.S_IWGRP;
-import static l.files.fs.local.Stat.S_IWOTH;
-import static l.files.fs.local.Stat.S_IWUSR;
-import static l.files.fs.local.Stat.S_IXGRP;
-import static l.files.fs.local.Stat.S_IXOTH;
-import static l.files.fs.local.Stat.S_IXUSR;
-import static l.files.fs.local.Stat.chmod;
 
 @AutoValue
 public abstract class LocalFile extends BaseFile {
 
-    private static final int[] PERMISSION_BITS = permissionsToBits();
-
-    private static int[] permissionsToBits() {
-        int[] bits = new int[9];
-        bits[OWNER_READ.ordinal()] = S_IRUSR;
-        bits[OWNER_WRITE.ordinal()] = S_IWUSR;
-        bits[OWNER_EXECUTE.ordinal()] = S_IXUSR;
-        bits[GROUP_READ.ordinal()] = S_IRGRP;
-        bits[GROUP_WRITE.ordinal()] = S_IWGRP;
-        bits[GROUP_EXECUTE.ordinal()] = S_IXGRP;
-        bits[OTHERS_READ.ordinal()] = S_IROTH;
-        bits[OTHERS_WRITE.ordinal()] = S_IWOTH;
-        bits[OTHERS_EXECUTE.ordinal()] = S_IXOTH;
-        return bits;
-    }
-
     public static Set<Permission> permissionsFromMode(int mode) {
-        Set<Permission> permissions = new HashSet<>(9);
-        if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
-        if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
-        if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
-        if ((mode & S_IRGRP) != 0) permissions.add(GROUP_READ);
-        if ((mode & S_IWGRP) != 0) permissions.add(GROUP_WRITE);
-        if ((mode & S_IXGRP) != 0) permissions.add(GROUP_EXECUTE);
-        if ((mode & S_IROTH) != 0) permissions.add(OTHERS_READ);
-        if ((mode & S_IWOTH) != 0) permissions.add(OTHERS_WRITE);
-        if ((mode & S_IXOTH) != 0) permissions.add(OTHERS_EXECUTE);
-        return unmodifiableSet(permissions);
+        return LocalFileSystem.permissionsFromMode(mode);
     }
 
     LocalFile() {
@@ -316,15 +269,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public void setPermissions(Set<Permission> permissions) throws IOException {
-        int mode = 0;
-        for (Permission permission : permissions) {
-            mode |= PERMISSION_BITS[permission.ordinal()];
-        }
-        try {
-            chmod(path().toByteArray(), mode);
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+        LocalFileSystem.INSTANCE.setPermissions(path(), permissions);
     }
 
     @Override

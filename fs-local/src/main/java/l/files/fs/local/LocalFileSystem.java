@@ -4,20 +4,41 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
+import l.files.fs.Permission;
 
+import static java.util.Collections.unmodifiableSet;
+import static l.files.fs.Permission.GROUP_EXECUTE;
+import static l.files.fs.Permission.GROUP_READ;
+import static l.files.fs.Permission.GROUP_WRITE;
+import static l.files.fs.Permission.OTHERS_EXECUTE;
+import static l.files.fs.Permission.OTHERS_READ;
+import static l.files.fs.Permission.OTHERS_WRITE;
+import static l.files.fs.Permission.OWNER_EXECUTE;
+import static l.files.fs.Permission.OWNER_READ;
+import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.ErrnoException.EACCES;
 import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.Fcntl.O_CREAT;
 import static l.files.fs.local.Fcntl.O_EXCL;
 import static l.files.fs.local.Fcntl.O_RDWR;
 import static l.files.fs.local.Fcntl.open;
+import static l.files.fs.local.Stat.S_IRGRP;
+import static l.files.fs.local.Stat.S_IROTH;
 import static l.files.fs.local.Stat.S_IRUSR;
 import static l.files.fs.local.Stat.S_IRWXU;
+import static l.files.fs.local.Stat.S_IWGRP;
+import static l.files.fs.local.Stat.S_IWOTH;
 import static l.files.fs.local.Stat.S_IWUSR;
+import static l.files.fs.local.Stat.S_IXGRP;
+import static l.files.fs.local.Stat.S_IXOTH;
+import static l.files.fs.local.Stat.S_IXUSR;
+import static l.files.fs.local.Stat.chmod;
 import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
@@ -28,6 +49,49 @@ import static l.files.fs.local.Unistd.symlink;
 enum LocalFileSystem implements FileSystem {
 
     INSTANCE;
+
+    private static final int[] PERMISSION_BITS = permissionsToBits();
+
+    private static int[] permissionsToBits() {
+        int[] bits = new int[9];
+        bits[OWNER_READ.ordinal()] = S_IRUSR;
+        bits[OWNER_WRITE.ordinal()] = S_IWUSR;
+        bits[OWNER_EXECUTE.ordinal()] = S_IXUSR;
+        bits[GROUP_READ.ordinal()] = S_IRGRP;
+        bits[GROUP_WRITE.ordinal()] = S_IWGRP;
+        bits[GROUP_EXECUTE.ordinal()] = S_IXGRP;
+        bits[OTHERS_READ.ordinal()] = S_IROTH;
+        bits[OTHERS_WRITE.ordinal()] = S_IWOTH;
+        bits[OTHERS_EXECUTE.ordinal()] = S_IXOTH;
+        return bits;
+    }
+
+    public static Set<Permission> permissionsFromMode(int mode) {
+        Set<Permission> permissions = new HashSet<>(9);
+        if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
+        if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
+        if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
+        if ((mode & S_IRGRP) != 0) permissions.add(GROUP_READ);
+        if ((mode & S_IWGRP) != 0) permissions.add(GROUP_WRITE);
+        if ((mode & S_IXGRP) != 0) permissions.add(GROUP_EXECUTE);
+        if ((mode & S_IROTH) != 0) permissions.add(OTHERS_READ);
+        if ((mode & S_IWOTH) != 0) permissions.add(OTHERS_WRITE);
+        if ((mode & S_IXOTH) != 0) permissions.add(OTHERS_EXECUTE);
+        return unmodifiableSet(permissions);
+    }
+
+    @Override
+    public void setPermissions(Path path, Set<Permission> permissions) throws IOException {
+        int mode = 0;
+        for (Permission permission : permissions) {
+            mode |= PERMISSION_BITS[permission.ordinal()];
+        }
+        try {
+            chmod(((LocalPath) path).toByteArray(), mode);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
+        }
+    }
 
     @Override
     public Stat stat(Path path, LinkOption option) throws IOException {
