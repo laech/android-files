@@ -5,6 +5,7 @@ import android.os.Parcel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,14 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.File.UTF_8;
 
 public final class LocalPath implements Path {
+
+    private static final ThreadLocal<ByteArrayOutputStream> buffers =
+            new ThreadLocal<ByteArrayOutputStream>() {
+                @Override
+                protected ByteArrayOutputStream initialValue() {
+                    return new ByteArrayOutputStream();
+                }
+            };
 
     static final byte DOT = 46; // '.' in UTF-8
     static final byte SEP = 47; // '/' in UTF-8
@@ -73,30 +82,15 @@ public final class LocalPath implements Path {
 
     @Deprecated
     public byte[] toByteArray() {
+        ByteArrayOutputStream buffer = resetBuffer();
+        toByteArray(buffer);
+        return buffer.toByteArray();
+    }
 
-        int len = absolute ? 1 : 0;
-        for (int i = 0; i < names.length; i++) {
-            if (i > 0) {
-                len++;
-            }
-            len += names[i].length;
-        }
-
-        byte[] path = new byte[len];
-
-        int i = 0;
-        if (absolute) {
-            path[i++] = SEP;
-        }
-        for (byte[] name : names) {
-            arraycopy(name, 0, path, i, name.length);
-            i += name.length;
-            if (i < len) {
-                path[i++] = SEP;
-            }
-        }
-
-        return path;
+    private ByteArrayOutputStream resetBuffer() {
+        ByteArrayOutputStream buffer = buffers.get();
+        buffer.reset();
+        return buffer;
     }
 
     @Override
@@ -122,13 +116,28 @@ public final class LocalPath implements Path {
     }
 
     @Override
+    public int toByteArray(ByteArrayOutputStream out) {
+        try {
+            return toByteArray((OutputStream) out);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void writeTo(OutputStream out) throws IOException {
         toByteArray(out);
     }
 
     @Override
     public String toString() {
-        return new String(toByteArray(), UTF_8);
+        ByteArrayOutputStream buffer = resetBuffer();
+        toByteArray(buffer);
+        try {
+            return buffer.toString(UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
