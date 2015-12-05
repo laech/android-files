@@ -18,6 +18,8 @@ public interface FileSystem {
      */
     void createLink(Path target, Path link) throws IOException;
 
+    Path readLink(Path path) throws IOException;
+
     boolean exists(Path path, LinkOption option) throws IOException;
 
     boolean isReadable(Path path) throws IOException;

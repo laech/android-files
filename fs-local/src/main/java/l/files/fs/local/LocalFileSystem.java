@@ -21,6 +21,7 @@ import static l.files.fs.local.Stat.mkdir;
 import static l.files.fs.local.Unistd.R_OK;
 import static l.files.fs.local.Unistd.W_OK;
 import static l.files.fs.local.Unistd.X_OK;
+import static l.files.fs.local.Unistd.readlink;
 import static l.files.fs.local.Unistd.symlink;
 
 enum LocalFileSystem implements FileSystem {
@@ -68,6 +69,16 @@ enum LocalFileSystem implements FileSystem {
 
         } catch (ErrnoException e) {
             throw e.toIOException(target, link);
+        }
+    }
+
+    @Override
+    public LocalPath readLink(Path path) throws IOException {
+        try {
+            byte[] link = readlink(((LocalPath) path).toByteArray());
+            return LocalPath.of(link);
+        } catch (ErrnoException e) {
+            throw e.toIOException(path);
         }
     }
 

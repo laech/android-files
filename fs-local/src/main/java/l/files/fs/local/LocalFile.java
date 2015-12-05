@@ -46,7 +46,6 @@ import static l.files.fs.local.Stat.S_IXGRP;
 import static l.files.fs.local.Stat.S_IXOTH;
 import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
-import static l.files.fs.local.Unistd.readlink;
 
 @AutoValue
 public abstract class LocalFile extends BaseFile {
@@ -282,12 +281,7 @@ public abstract class LocalFile extends BaseFile {
 
     @Override
     public LocalFile readLink() throws IOException {
-        try {
-            byte[] link = readlink(path().toByteArray());
-            return of(LocalPath.of(link));
-        } catch (ErrnoException e) {
-            throw e.toIOException(path());
-        }
+        return of(LocalFileSystem.INSTANCE.readLink(path()));
     }
 
     @Override
