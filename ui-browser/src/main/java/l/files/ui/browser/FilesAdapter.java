@@ -27,8 +27,6 @@ import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
-import l.files.ui.browser.BrowserItem.FileItem;
-import l.files.ui.browser.BrowserItem.HeaderItem;
 import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
 import l.files.ui.preview.PreviewCallback;
@@ -142,7 +140,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position).isFileItem() ? VIEW_TYPE_FILE : VIEW_TYPE_HEADER;
+        return getItem(position) instanceof FileItem
+                ? VIEW_TYPE_FILE
+                : VIEW_TYPE_HEADER;
     }
 
     @Override
@@ -157,8 +157,8 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         BrowserItem item = getItem(position);
-        if (item.isHeaderItem()) {
-            ((HeaderHolder) holder).bind((HeaderItem) item);
+        if (item instanceof Header) {
+            ((HeaderHolder) holder).bind((Header) item);
         } else {
             ((FileHolder) holder).bind((FileItem) item);
         }
@@ -178,7 +178,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         List<BrowserItem> items = items();
         Map<Path, FileItem> files = new ArrayMap<>(items.size());
         for (BrowserItem item : items) {
-            if (item.isFileItem()) {
+            if (item instanceof FileItem) {
                 FileItem file = (FileItem) item;
                 files.put(file.selfPath(), file);
             }
@@ -360,7 +360,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
             title = find(android.R.id.title, this);
         }
 
-        void bind(HeaderItem header) {
+        void bind(Header header) {
             title.setText(header.toString());
             LayoutParams params = itemView.getLayoutParams();
             if (params instanceof StaggeredGridLayoutManager.LayoutParams) {

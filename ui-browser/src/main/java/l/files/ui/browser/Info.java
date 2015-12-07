@@ -11,7 +11,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.browser.InfoBaseFragment.FRAGMENT_TAG;

@@ -32,7 +32,6 @@ import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 import l.files.ui.bookmarks.actions.Bookmark;
-import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.browser.FilesLoader.Result;
 import l.files.ui.operations.actions.Copy;
 import l.files.ui.operations.actions.Cut;
@@ -315,7 +314,7 @@ public final class FilesFragment
     private void updateSelection(Result data) {
         List<Path> files = new ArrayList<>(data.items().size());
         for (BrowserItem item : data.items()) {
-            if (item.isFileItem()) {
+            if (item instanceof FileItem) {
                 files.add(((FileItem) item).selfPath());
             }
         }

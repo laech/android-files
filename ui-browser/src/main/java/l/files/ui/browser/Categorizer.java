@@ -5,8 +5,6 @@ import android.content.res.Resources;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.ui.browser.BrowserItem.FileItem;
-
 /**
  * Provides category information for items in cursors.
  */

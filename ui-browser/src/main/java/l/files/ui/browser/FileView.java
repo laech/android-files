@@ -14,7 +14,6 @@ import android.view.View;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileIcons;
-import l.files.ui.browser.BrowserItem.FileItem;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;

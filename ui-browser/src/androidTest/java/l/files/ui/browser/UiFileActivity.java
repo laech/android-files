@@ -20,7 +20,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;
@@ -591,7 +590,7 @@ final class UiFileActivity {
         List<BrowserItem> items = fragment().items();
         List<FileItem> files = new ArrayList<>(items.size());
         for (BrowserItem item : items) {
-            if (item.isFileItem()) {
+            if (item instanceof FileItem) {
                 files.add(((FileItem) item));
             }
         }

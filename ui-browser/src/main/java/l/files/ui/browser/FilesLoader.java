@@ -32,7 +32,6 @@ import l.files.fs.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.Collators;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;

@@ -13,7 +13,6 @@ import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.view.Views;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 public final class InfoMultiFragment extends InfoBaseFragment {
 

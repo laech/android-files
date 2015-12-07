@@ -14,7 +14,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.content.Intent.ACTION_SEND_MULTIPLE;
 import static android.content.Intent.EXTRA_STREAM;

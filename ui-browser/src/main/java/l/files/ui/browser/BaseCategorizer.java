@@ -5,9 +5,6 @@ import android.content.res.Resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import l.files.ui.browser.BrowserItem.FileItem;
-import l.files.ui.browser.BrowserItem.HeaderItem;
-
 import static java.util.Collections.unmodifiableList;
 
 abstract class BaseCategorizer implements Categorizer {
@@ -23,11 +20,11 @@ abstract class BaseCategorizer implements Categorizer {
             final Object category = id(stat);
             if (i == 0) {
                 if (category != null) {
-                    result.add(HeaderItem.of(label(stat, res, category)));
+                    result.add(Header.of(label(stat, res, category)));
                 }
             } else {
                 if (category != null && !category.equals(preCategory)) {
-                    result.add(HeaderItem.of(label(stat, res, category)));
+                    result.add(Header.of(label(stat, res, category)));
                 }
             }
             result.add(stat);
