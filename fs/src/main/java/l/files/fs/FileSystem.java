@@ -27,18 +27,62 @@ public interface FileSystem {
 
     Path readLink(Path path) throws IOException;
 
+    /**
+     * Moves src file tree to dst, destination must not exist.
+     * <p/>
+     * If src is a link, the link itself is moved, link target file is
+     * unaffected.
+     */
     void move(Path src, Path dst) throws IOException;
 
     void delete(Path path) throws IOException;
 
     boolean exists(Path path, LinkOption option) throws IOException;
 
+    /**
+     * Returns true if this file is readable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
     boolean isReadable(Path path) throws IOException;
 
+    /**
+     * Returns true if this file is writable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
     boolean isWritable(Path path) throws IOException;
 
+    /**
+     * Returns true if this file is executable, return false if not.
+     * <p/>
+     * If this is a link, returns the result for the link target, not the link
+     * itself.
+     */
     boolean isExecutable(Path path) throws IOException;
 
+    /**
+     * Observes on this file for change events.
+     * <p/>
+     * If this file is a directory, adding/removing immediate children and
+     * any changes to the content/attributes of immediate children of this
+     * directory will be notified, this is true for existing children as well as
+     * newly added items after observation started.
+     * <p/>
+     * Note that by the time a listener is notified, the target file may
+     * have already be changed again, therefore a robust application should have
+     * an alternative way of handling instead of reply on this fully.
+     * <p/>
+     * The returned observation is closed if failed to observe.
+     *
+     * @param option           if option is {@link LinkOption#NOFOLLOW} and
+     *                         this file is a link, observe on the link instead
+     *                         of the link target
+     * @param childrenConsumer consumer will be called for all immediate
+     *                         children of {@code path}
+     */
     Observation observe(
             Path path,
             LinkOption option,
@@ -51,6 +95,27 @@ public interface FileSystem {
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
 
+    /**
+     * Performs a depth first traverse of this tree.
+     * <p/>
+     * e.g. traversing the follow tree:
+     * <pre>
+     *     a
+     *    / \
+     *   b   c
+     * </pre>
+     * will generate:
+     * <pre>
+     * visitor.onPreVisit(a)
+     * visitor.onPreVisit(b)
+     * visitor.onPost(b)
+     * visitor.onPreVisit(c)
+     * visitor.onPost(c)
+     * visitor.onPost(a)
+     * </pre>
+     *
+     * @param option applies to root only, child links are never followed
+     */
     void listDirs(
             Path path,
             LinkOption option,

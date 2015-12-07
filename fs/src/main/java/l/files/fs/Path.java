@@ -41,17 +41,31 @@ public interface Path extends Parcelable {
     int toByteArray(ByteArrayOutputStream out);
 
     /**
-     * Returns the file name of this path.
+     * Gets the name of this file, or empty if this is the root file.
      */
     Name name();
 
     @Nullable
     Path parent();
 
+    /**
+     * Resolves the given path relative to this file.
+     */
     Path resolve(String name);
 
     Path resolve(Name name);
 
+    /**
+     * Returns a file with the given parent replaced.
+     * <p/>
+     * e.g.
+     * <pre>
+     * File("/a/b").resolve(File("/a"), File("/c")) =
+     * File("/c/b")
+     * </pre>
+     *
+     * @throws IllegalArgumentException if {@code !this.startsWith(src)}
+     */
     Path rebase(Path src, Path dst);
 
     /**

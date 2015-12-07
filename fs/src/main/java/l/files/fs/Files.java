@@ -75,6 +75,11 @@ public final class Files {
         return path.fileSystem().isExecutable(path);
     }
 
+    /**
+     * Creates this file and any missing parents as directories. This will
+     * throw the same exceptions as {@link #createDir(Path)} except
+     * will not error if already exists as a directory.
+     */
     public static Path createDirs(Path path) throws IOException {
         try {
             if (stat(path, NOFOLLOW).isDirectory()) {
@@ -101,6 +106,11 @@ public final class Files {
         return path;
     }
 
+    /**
+     * Creates this file as a file and creates any missing parents. This
+     * will throw the same exceptions as {@link #createFile(Path)} except
+     * will not error if already exists.
+     */
     public static Path createFiles(Path path) throws IOException {
         try {
             if (stat(path, NOFOLLOW).isRegularFile()) {
@@ -450,19 +460,37 @@ public final class Files {
         setPermissions(path, perms);
     }
 
-    public static void setPermissions(Path path, Set<Permission> perms) throws IOException {
+    public static void setPermissions(Path path, Set<Permission> perms)
+            throws IOException {
         path.fileSystem().setPermissions(path, perms);
     }
 
-    public static String detectBasicMediaType(Path path, Stat stat) throws IOException {
+    /**
+     * Detects the content type of this file based on its properties
+     * without reading the content of this file.
+     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
+     */
+    public static String detectBasicMediaType(Path path, Stat stat)
+            throws IOException {
         return BasicDetector.INSTANCE.detect(path, stat);
     }
 
-    public static String detectContentMediaType(Path path, Stat stat) throws IOException {
+    /**
+     * Detects the content type of this file based on its content.
+     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
+     */
+    public static String detectContentMediaType(Path path, Stat stat)
+            throws IOException {
         return MagicDetector.INSTANCE.detect(path, stat);
     }
 
-    public static String detectMediaType(Path path, Stat stat) throws IOException {
+    /**
+     * Detects the content type of this file based on its properties
+     * and its content.
+     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
+     */
+    public static String detectMediaType(Path path, Stat stat)
+            throws IOException {
         return MetaMagicDetector.INSTANCE.detect(path, stat);
     }
 
