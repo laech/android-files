@@ -20,10 +20,10 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
+import static android.support.v4.content.ContextCompat.getColorStateList;
 import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
 import static l.files.ui.base.fs.FileIcons.unknownIconStringId;
-import static l.files.ui.browser.Styles.getColorStateList;
 
 public final class FileView extends View implements Drawable.Callback {
 
@@ -72,17 +72,10 @@ public final class FileView extends View implements Drawable.Callback {
             linkArrowPaint.setTextSize(linkArrowSize);
             linkArrow = context.getText(R.string.link_icon);
 
-            primaryColor = getColorStateList(
-                    android.R.attr.textColorPrimary, context);
-
-            primaryColorInverse = getColorStateList(
-                    android.R.attr.textColorPrimaryInverse, context);
-
-            secondaryColor = getColorStateList(
-                    android.R.attr.textColorSecondary, context);
-
-            secondaryColorInverse = getColorStateList(
-                    android.R.attr.textColorSecondaryInverse, context);
+            primaryColor = getColorStateList(context, R.color.item_text_primary);
+            secondaryColor = getColorStateList(context, R.color.item_text_secondary);
+            primaryColorInverse = getColorStateList(context, R.color.item_text_primary_inverse);
+            secondaryColorInverse = getColorStateList(context, R.color.item_text_secondary_inverse);
 
             textPaddingTop = res.getDimension(
                     R.dimen.files_item_summary_padding_top);
