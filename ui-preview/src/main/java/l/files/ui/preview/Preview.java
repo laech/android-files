@@ -22,7 +22,14 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Preview {
 
-    static final int PALETTE_MAX_COLOR_COUNT = 24;
+    /**
+     * Increasing this also increases the chance that the palette would
+     * contain a color. e.g. {@link Palette#getDarkVibrantColor(int)}
+     * would return a color.
+     *
+     * TODO make this part of the cache key
+     */
+    static final int PALETTE_MAX_COLOR_COUNT = 256;
 
     private static Preview instance;
 
