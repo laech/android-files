@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import static l.files.fs.local.ErrnoException.EAGAIN;
+
 @SuppressWarnings("OctalInteger")
 final class Fcntl extends Native {
 
@@ -32,6 +34,20 @@ final class Fcntl extends Native {
     private Fcntl() {
     }
 
-    static native int open(byte[] path, int flags, int mode) throws ErrnoException;
+    static int open(byte[] path, int flags, int mode)
+            throws ErrnoException {
+        while (true) {
+            try {
+                return nativeOpen(path, flags, mode);
+            } catch (ErrnoException e) {
+                if (e.errno != EAGAIN) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private static native int nativeOpen(byte[] path, int flags, int mode)
+            throws ErrnoException;
 
 }

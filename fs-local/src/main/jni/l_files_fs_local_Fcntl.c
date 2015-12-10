@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include "util.h"
 
-jint Java_l_files_fs_local_Fcntl_open(
+jint Java_l_files_fs_local_Fcntl_nativeOpen(
         JNIEnv *env, jclass clazz, jbyteArray jpath, jint flags, jint mode) {
 
     jsize len = (*env)->GetArrayLength(env, jpath);
