@@ -29,7 +29,7 @@ public final class Preview {
      *
      * TODO make this part of the cache key
      */
-    static final int PALETTE_MAX_COLOR_COUNT = 256;
+    static final int PALETTE_MAX_COLOR_COUNT = 1024;
 
     private static Preview instance;
 
