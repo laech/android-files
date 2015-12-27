@@ -19,7 +19,6 @@ import java.net.URI;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static android.content.Intent.ACTION_CHOOSER;
 import static android.content.Intent.ACTION_SEND_MULTIPLE;

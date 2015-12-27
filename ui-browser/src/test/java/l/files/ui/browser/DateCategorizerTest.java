@@ -21,8 +21,6 @@ import l.files.fs.Instant;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.browser.BrowserItem.FileItem;
-import l.files.ui.browser.BrowserItem.HeaderItem;
 
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
@@ -129,8 +127,8 @@ public final class DateCategorizerTest {
     private static List<String> names(Collection<BrowserItem> items) {
         List<String> names = new ArrayList<>(items.size());
         for (BrowserItem item : items) {
-            names.add(item.isHeaderItem()
-                    ? ((HeaderItem) item).header()
+            names.add(item instanceof Header
+                    ? ((Header) item).header()
                     : ((FileItem) item).selfPath().name().toString());
         }
         return unmodifiableList(names);
@@ -143,12 +141,12 @@ public final class DateCategorizerTest {
         return calendar.getTimeInMillis();
     }
 
-    private HeaderItem header(int stringId) {
+    private Header header(int stringId) {
         return header(res.getString(stringId));
     }
 
-    private HeaderItem header(String string) {
-        return HeaderItem.of(string);
+    private Header header(String string) {
+        return Header.of(string);
     }
 
     private long millis(Calendar calendar) {

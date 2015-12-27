@@ -13,7 +13,6 @@ import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.text.Collators;
-import l.files.ui.browser.BrowserItem.FileItem;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
