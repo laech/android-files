@@ -35,7 +35,7 @@ final class Share extends ActionModeItem implements Selection.Callback {
     @Override
     public void onSelectionChanged() {
         if (mode != null) {
-            updateVisibility(mode.getMenu());
+            updateMenuItem(mode.getMenu());
         }
     }
 
@@ -56,30 +56,30 @@ final class Share extends ActionModeItem implements Selection.Callback {
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         super.onPrepareActionMode(mode, menu);
-        updateVisibility(menu);
+        updateMenuItem(menu);
         return true;
     }
 
-    private void updateVisibility(Menu menu) {
+    private void updateMenuItem(Menu menu) {
         MenuItem item = menu.findItem(id());
         if (item == null) {
             return;
         }
 
         if (selection.isEmpty()) {
-            item.setVisible(false);
+            item.setEnabled(false);
             return;
         }
 
         for (FileItem file : selection.values()) {
             Stat stat = file.linkTargetOrSelfStat();
             if (stat == null || !stat.isRegularFile()) {
-                item.setVisible(false);
+                item.setEnabled(false);
                 return;
             }
         }
 
-        item.setVisible(true);
+        item.setEnabled(true);
     }
 
     @Override

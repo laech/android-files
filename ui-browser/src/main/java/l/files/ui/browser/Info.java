@@ -58,18 +58,18 @@ public final class Info extends ActionModeItem implements Selection.Callback {
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
         super.onPrepareActionMode(mode, menu);
-        updateVisibility(menu);
+        updateMenuItem(menu);
         return true;
     }
 
     @Override
     public void onSelectionChanged() {
         if (mode != null) {
-            updateVisibility(mode.getMenu());
+            updateMenuItem(mode.getMenu());
         }
     }
 
-    private void updateVisibility(Menu menu) {
+    private void updateMenuItem(Menu menu) {
         MenuItem item = menu.findItem(id());
         if (item == null) {
             return;
@@ -77,10 +77,10 @@ public final class Info extends ActionModeItem implements Selection.Callback {
 
         for (FileItem file : selection.values()) {
             if (file.linkTargetOrSelfStat() != null) {
-                item.setVisible(true);
+                item.setEnabled(true);
                 return;
             }
         }
-        item.setVisible(false);
+        item.setEnabled(false);
     }
 }
