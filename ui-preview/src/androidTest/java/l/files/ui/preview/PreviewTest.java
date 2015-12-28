@@ -17,7 +17,7 @@ import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.System.nanoTime;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -102,7 +102,7 @@ public final class PreviewTest extends PathBaseTest {
     @Test
     public void preview_link() throws Exception {
         Path file = createFile(dir1().resolve("file"));
-        Path link = createLink(dir1().resolve("link"), file);
+        Path link = createSymbolicLink(dir1().resolve("link"), file);
         writeUtf8(file, "hi");
         testPreviewSuccess(file);
         testPreviewSuccess(link);
@@ -111,7 +111,7 @@ public final class PreviewTest extends PathBaseTest {
     @Test
     public void preview_link_modified_target() throws Exception {
         Path file = createFile(dir1().resolve("file"));
-        Path link = createLink(dir1().resolve("link"), file);
+        Path link = createSymbolicLink(dir1().resolve("link"), file);
         testPreviewFailure(link);
 
         writeUtf8(file, "hi");

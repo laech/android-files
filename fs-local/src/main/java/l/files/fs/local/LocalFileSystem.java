@@ -195,7 +195,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public void createLink(Path link, Path target) throws IOException {
+    public void createSymbolicLink(Path link, Path target) throws IOException {
         checkLocalPath(link);
         checkLocalPath(target);
         try {
@@ -208,7 +208,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public Path readLink(Path path) throws IOException {
+    public Path readSymbolicLink(Path path) throws IOException {
         checkLocalPath(path);
         try {
             byte[] link = readlink(path.toByteArray());

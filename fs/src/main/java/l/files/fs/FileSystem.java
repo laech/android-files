@@ -30,9 +30,9 @@ public interface FileSystem {
      * @param link   the link itself
      * @param target the target the link will point to
      */
-    void createLink(Path link, Path target) throws IOException;
+    void createSymbolicLink(Path link, Path target) throws IOException;
 
-    Path readLink(Path path) throws IOException;
+    Path readSymbolicLink(Path path) throws IOException;
 
     /**
      * Moves src file tree to dst, destination must not exist.

@@ -24,7 +24,7 @@ import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createDirs;
 import static l.files.fs.Files.createFile;
 import static l.files.fs.Files.createFiles;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.deleteRecursive;
 import static l.files.fs.Files.list;
 import static l.files.fs.Files.listDirs;
@@ -210,7 +210,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private Path linkToStorageDir(String name) throws IOException {
-        return createLink(
+        return createSymbolicLink(
                 dir().resolve(name), createDirs(storageDir().resolve(name))
         );
     }
@@ -315,7 +315,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
         if (Files.exists(link, NOFOLLOW)) {
             Files.delete(link);
         }
-        Files.createLink(
+        Files.createSymbolicLink(
                 link,
                 new Random().nextInt() % 2 == 0
                         ? link

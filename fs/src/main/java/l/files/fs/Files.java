@@ -137,8 +137,9 @@ public final class Files {
         return path;
     }
 
-    public static Path createLink(Path link, Path target) throws IOException {
-        target.fileSystem().createLink(link, target);
+    public static Path createSymbolicLink(Path link, Path target)
+            throws IOException {
+        target.fileSystem().createSymbolicLink(link, target);
         return link;
     }
 
@@ -378,8 +379,8 @@ public final class Files {
         path.fileSystem().setLastModifiedTime(path, option, time);
     }
 
-    public static Path readLink(Path path) throws IOException {
-        return path.fileSystem().readLink(path);
+    public static Path readSymbolicLink(Path path) throws IOException {
+        return path.fileSystem().readSymbolicLink(path);
     }
 
     public static String readAllUtf8(Path path) throws IOException {

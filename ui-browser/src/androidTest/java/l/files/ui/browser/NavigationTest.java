@@ -33,7 +33,7 @@ import static l.files.fs.Files.appendUtf8;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createDirs;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.delete;
 import static l.files.fs.Files.deleteRecursiveIfExists;
 import static l.files.fs.Files.move;
@@ -88,7 +88,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_preview() throws Exception {
         Path empty = createFile(dir().resolve("empty"));
         Path file = dir().resolve("file");
-        Path link = createLink(dir().resolve("link"), file);
+        Path link = createSymbolicLink(dir().resolve("link"), file);
         writeUtf8(file, "hello");
         screen()
                 .assertThumbnailShown(file, true)
@@ -240,7 +240,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void link_displayed() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
-        Path link = createLink(dir().resolve("link"), dir);
+        Path link = createSymbolicLink(dir().resolve("link"), dir);
 
         screen()
                 .assertLinkIconDisplayed(dir, false)
@@ -252,7 +252,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
     @Test
     public void can_see_changes_in_linked_directory() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
-        Path link = createLink(dir().resolve("link"), dir);
+        Path link = createSymbolicLink(dir().resolve("link"), dir);
         screen()
                 .clickInto(link)
                 .assertCurrentDirectory(link);

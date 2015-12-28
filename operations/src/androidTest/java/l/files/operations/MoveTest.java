@@ -9,10 +9,10 @@ import l.files.fs.Path;
 import static java.util.Collections.singleton;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.exists;
 import static l.files.fs.Files.readAllUtf8;
-import static l.files.fs.Files.readLink;
+import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
@@ -31,12 +31,12 @@ public final class MoveTest extends PasteTest {
     @Test
     public void movesSymlink() throws Exception {
         Path target = createFile(dir1().resolve("target"));
-        Path link = createLink(dir1().resolve("link"), target);
+        Path link = createSymbolicLink(dir1().resolve("link"), target);
 
         Move move = create(link, createDir(dir1().resolve("moved")));
         move.execute();
 
-        Path actual = readLink(dir1().resolve("moved/link"));
+        Path actual = readSymbolicLink(dir1().resolve("moved/link"));
         assertEquals(target, actual);
         assertEquals(1, move.getMovedItemCount());
     }

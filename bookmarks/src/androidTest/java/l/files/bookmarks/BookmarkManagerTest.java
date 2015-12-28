@@ -84,7 +84,7 @@ public final class BookmarkManagerTest extends PathBaseTest {
     public void removes_non_existing_bookmarks() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createLink(dir1().resolve("link"), file);
+        Path link = Files.createSymbolicLink(dir1().resolve("link"), file);
         manager.addBookmark(file);
         manager.addBookmark(dir);
         manager.addBookmark(link);

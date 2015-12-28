@@ -22,7 +22,7 @@ public final class FileOperationTest extends BaseFilesActivityTest {
     public void delete() throws Exception {
 
         final Path file = Files.createFile(dir().resolve("file"));
-        final Path link = Files.createLink(dir().resolve("link"), file);
+        final Path link = Files.createSymbolicLink(dir().resolve("link"), file);
         final Path dir1 = Files.createDir(dir().resolve("dir1"));
         final Path dir2 = Files.createDir(dir().resolve("dir2"));
         Files.createFile(dir2.resolve("a"));
@@ -74,12 +74,12 @@ public final class FileOperationTest extends BaseFilesActivityTest {
 
         Path dstDir = Files.createDir(dir().resolve("dstDir"));
         Path srcFile = Files.createFile(dir().resolve("srcFile"));
-        Path srcLink = Files.createLink(dir().resolve("srcLink"), srcFile);
+        Path srcLink = Files.createSymbolicLink(dir().resolve("srcLink"), srcFile);
         Path srcEmpty = Files.createDir(dir().resolve("srcEmpty"));
         Path srcFull = Files.createDir(dir().resolve("srcFull"));
         Files.createFile(srcFull.resolve("a"));
         Files.createDir(srcFull.resolve("b"));
-        Files.createLink(srcFull.resolve("c"), srcFull.resolve("a"));
+        Files.createSymbolicLink(srcFull.resolve("c"), srcFull.resolve("a"));
 
         screen()
                 .longClick(srcEmpty)

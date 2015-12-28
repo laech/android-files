@@ -93,7 +93,7 @@ final class Copy extends Paste {
     }
 
     private void copyLink(Path src, Stat stat, Path dst) throws IOException {
-        Files.createLink(dst, Files.readLink(src));
+        Files.createSymbolicLink(dst, Files.readSymbolicLink(src));
         copiedByteCount.addAndGet(stat.size());
         copiedItemCount.incrementAndGet();
         setTimes(stat, dst);

@@ -14,7 +14,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static org.junit.Assert.assertEquals;
@@ -62,7 +62,7 @@ public final class DeleteTest extends PathBaseTest {
     @Test
     public void deletesSymbolicLinkButNotLinkedFile() throws Exception {
         Path a = createFile(dir1().resolve("a"));
-        Path b = createLink(dir1().resolve("b"), a);
+        Path b = createSymbolicLink(dir1().resolve("b"), a);
         assertTrue(exists(a, NOFOLLOW));
         assertTrue(exists(b, NOFOLLOW));
         delete(b);

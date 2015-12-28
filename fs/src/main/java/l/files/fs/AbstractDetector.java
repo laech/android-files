@@ -3,7 +3,7 @@ package l.files.fs;
 import java.io.IOException;
 
 import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
-import static l.files.fs.Files.readLink;
+import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 
@@ -30,7 +30,7 @@ abstract class AbstractDetector {
         }
         if (stat.isSymbolicLink()) {
             return tryDetect(
-                    readLink(path),
+                    readSymbolicLink(path),
                     stat(path, FOLLOW),
                     tries - 1);
         }

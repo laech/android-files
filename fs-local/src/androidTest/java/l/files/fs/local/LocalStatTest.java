@@ -17,7 +17,7 @@ public final class LocalStatTest extends PathBaseTest {
 
     @Test
     public void local_stat() throws Exception {
-        Path link = Files.createLink(dir1().resolve("link"), dir2());
+        Path link = Files.createSymbolicLink(dir1().resolve("link"), dir2());
         assertEquals(lstat(link.toByteArray()), Files.stat(link, NOFOLLOW));
         assertEquals(stat(link.toByteArray()), Files.stat(link, FOLLOW));
     }

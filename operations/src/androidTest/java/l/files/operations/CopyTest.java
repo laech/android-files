@@ -15,10 +15,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.exists;
 import static l.files.fs.Files.readAllUtf8;
-import static l.files.fs.Files.readLink;
+import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.Files.stat;
 import static l.files.fs.Files.writeUtf8;
@@ -71,7 +71,7 @@ public final class CopyTest extends PasteTest {
         Path src = createDir(dir1().resolve("dir1"));
         createFile(src.resolve("a"));
         createDir(src.resolve("b"));
-        createLink(src.resolve("c"), src);
+        createSymbolicLink(src.resolve("c"), src);
         testCopyPreservesTimestamp(src, dir);
     }
 
@@ -102,12 +102,12 @@ public final class CopyTest extends PasteTest {
     @Test
     public void copies_link() throws Exception {
         Path target = createFile(dir1().resolve("target"));
-        Path link = createLink(dir1().resolve("link"), target);
+        Path link = createSymbolicLink(dir1().resolve("link"), target);
 
         copy(link, createDir(dir1().resolve("copied")));
 
         Path copied = dir1().resolve("copied/link");
-        assertEquals(target, readLink(copied));
+        assertEquals(target, readSymbolicLink(copied));
     }
 
     @Test

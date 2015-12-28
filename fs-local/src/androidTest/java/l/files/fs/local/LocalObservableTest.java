@@ -237,7 +237,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
     @Test
     public void observe_on_link() throws Exception {
-        Path file = Files.createLink(dir1().resolve("link"), dir2());
+        Path file = Files.createSymbolicLink(dir1().resolve("link"), dir2());
         Closer closer = Closer.create();
         try {
             Recorder observer = closer.register(observe(file, NOFOLLOW));
@@ -458,7 +458,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
 
     private Path linkToExternalDir(String name) throws IOException {
-        return Files.createLink(
+        return Files.createSymbolicLink(
                 dir1().resolve(name),
                 Files.createDirs(externalStorageDir().resolve(name))
         );
@@ -535,7 +535,7 @@ public final class LocalObservableTest extends PathBaseTest {
     public void observe_on_link_no_follow() throws Exception {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createLink(dir1().resolve("link"), dir);
+        Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
         Path file = link.resolve("file");
         Closer closer = Closer.create();
         try {
@@ -563,7 +563,7 @@ public final class LocalObservableTest extends PathBaseTest {
     public void observe_on_link_follow() throws Exception {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
-        Path link = Files.createLink(dir1().resolve("link"), dir);
+        Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
         Path child = Files.createDir(link.resolve("dir"));
         Closer closer = Closer.create();
         try {
@@ -877,7 +877,7 @@ public final class LocalObservableTest extends PathBaseTest {
         Path link = dir1().resolve("link");
         testCreateFile(file, dir1());
         testCreateDir(dir, dir1());
-        testCreateLink(link, dir1(), dir1());
+        testCreateSymbolicLink(link, dir1(), dir1());
     }
 
     private static void testCreateFile(
@@ -910,7 +910,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    private static void testCreateLink(
+    private static void testCreateSymbolicLink(
             Path link,
             Path target,
             Path observable) throws Exception {
@@ -918,7 +918,7 @@ public final class LocalObservableTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
             Recorder observer = closer.register(observe(observable));
-            observer.awaitCreateLink(link, target);
+            observer.awaitCreateSymbolicLink(link, target);
         } catch (Throwable e) {
             throw closer.rethrow(e);
         } finally {
@@ -981,7 +981,7 @@ public final class LocalObservableTest extends PathBaseTest {
                     compose(
                             newCreateFile(dir.resolve("file")),
                             newCreateDir(dir.resolve("dir2()")),
-                            newCreateLink(dir.resolve("link"), dir1())
+                            newCreateSymbolicLink(dir.resolve("link"), dir1())
                     )
             );
         } catch (Throwable e) {
@@ -1158,13 +1158,13 @@ public final class LocalObservableTest extends PathBaseTest {
         };
     }
 
-    private static Callable<Void> newCreateLink(
+    private static Callable<Void> newCreateSymbolicLink(
             final Path link,
             final Path target) {
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                Files.createLink(link, target);
+                Files.createSymbolicLink(link, target);
                 return null;
             }
         };
@@ -1414,11 +1414,11 @@ public final class LocalObservableTest extends PathBaseTest {
             }
         }
 
-        void awaitCreateLink(Path link, Path target) throws Exception {
+        void awaitCreateSymbolicLink(Path link, Path target) throws Exception {
             Closer closer = Closer.create();
             try {
                 Tracker tracker = closer.register(registerMockTracker());
-                await(CREATE, link, newCreateLink(link, target));
+                await(CREATE, link, newCreateSymbolicLink(link, target));
                 verifyZeroInteractions(tracker);
             } catch (Throwable e) {
                 throw closer.rethrow(e);

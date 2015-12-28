@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createDirs;
 import static l.files.fs.Files.createFile;
-import static l.files.fs.Files.createLink;
+import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.setPermissions;
 import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -42,7 +42,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     @Test
     public void traverse_noFollowLink() throws Exception {
         Path dir = createDir(dir1().resolve("dir"));
-        Path link = createLink(dir1().resolve("link"), dir);
+        Path link = createSymbolicLink(dir1().resolve("link"), dir);
         createFile(link.resolve("a"));
         createFile(link.resolve("b"));
 
@@ -61,8 +61,8 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         createFile(dir1().resolve("dir/a"));
         createDir(dir1().resolve("dir/b"));
         createFile(dir1().resolve("dir/b/1"));
-        createLink(dir1().resolve("dir/c"), dir1().resolve("dir/b"));
-        createLink(dir1().resolve("link"), dir1().resolve("dir"));
+        createSymbolicLink(dir1().resolve("dir/c"), dir1().resolve("dir/b"));
+        createSymbolicLink(dir1().resolve("link"), dir1().resolve("dir"));
 
         Recorder recorder = new Recorder();
         traverse(dir1().resolve("link"), FOLLOW, recorder, SORT_BY_NAME);
@@ -85,7 +85,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
     @Test
     public void traverse_followLink() throws Exception {
         Path dir = createDir(dir1().resolve("dir"));
-        Path link = createLink(dir1().resolve("link"), dir);
+        Path link = createSymbolicLink(dir1().resolve("link"), dir);
         Path a = createFile(link.resolve("a"));
 
         Recorder recorder = new Recorder();

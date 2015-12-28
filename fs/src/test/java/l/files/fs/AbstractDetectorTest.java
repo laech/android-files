@@ -49,7 +49,7 @@ public abstract class AbstractDetectorTest {
     public void detects_linked_file_type() throws Exception {
 
         Path file = createTextFile("a", "mp3");
-        Path link = createLink("b", "txt", file);
+        Path link = createSymbolicLink("b", "txt", file);
         assertEquals("text/plain", detector().detect(link));
     }
 
@@ -57,7 +57,7 @@ public abstract class AbstractDetectorTest {
     public void detects_linked_directory_type() throws Exception {
 
         Path dir = createDir("a", "");
-        Path link = createLink("b", "", dir);
+        Path link = createSymbolicLink("b", "", dir);
         assertEquals("inode/directory", detector().detect(link));
     }
 
@@ -65,8 +65,8 @@ public abstract class AbstractDetectorTest {
     public void detects_multi_linked_directory_type() throws Exception {
 
         Path dir = createDir("a", "");
-        Path link1 = createLink("b", "", dir);
-        Path link2 = createLink("c", "", link1);
+        Path link1 = createSymbolicLink("b", "", dir);
+        Path link2 = createSymbolicLink("c", "", link1);
         assertEquals("inode/directory", detector().detect(link2));
     }
 
@@ -83,8 +83,8 @@ public abstract class AbstractDetectorTest {
         given(link2.fileSystem()).willReturn(fs);
         given(fs.stat(eq(link1), any(LinkOption.class))).willReturn(stat);
         given(fs.stat(eq(link2), any(LinkOption.class))).willReturn(stat);
-        given(fs.readLink(link1)).willReturn(link2);
-        given(fs.readLink(link2)).willReturn(link1);
+        given(fs.readSymbolicLink(link1)).willReturn(link2);
+        given(fs.readSymbolicLink(link2)).willReturn(link1);
 
         detector().detect(link1);
     }
@@ -101,7 +101,11 @@ public abstract class AbstractDetectorTest {
         return dir;
     }
 
-    protected Path createLink(String base, String ext, final Path target) throws IOException {
+    protected Path createSymbolicLink(
+            final String base,
+            final String ext,
+            final Path target) throws IOException {
+
         FileSystem fs = mock(FileSystem.class);
         Path link = mock(Path.class);
         Stat linkStat = mock(Stat.class);
@@ -112,7 +116,7 @@ public abstract class AbstractDetectorTest {
         given(fs.stat(link, NOFOLLOW)).willReturn(linkStat);
         given(fs.stat(link, FOLLOW)).willReturn(targetStat);
         given(link.name()).willReturn(name);
-        given(fs.readLink(link)).willReturn(target);
+        given(fs.readSymbolicLink(link)).willReturn(target);
         given(fs.newInputStream(link)).will(new Answer<InputStream>() {
             @Override
             public InputStream answer(InvocationOnMock invocation) throws Throwable {
