@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
@@ -53,7 +53,7 @@ final class DateCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public Object id(FileItem file) {
+    public Object id(FileInfo file) {
         Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
@@ -80,7 +80,7 @@ final class DateCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public String label(FileItem file, Resources res, Object id) {
+    public String label(FileInfo file, Resources res, Object id) {
         if (id instanceof Year) {
             Stat stat = requireNonNull(file.selfStat());
             timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));

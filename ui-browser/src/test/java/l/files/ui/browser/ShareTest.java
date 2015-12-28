@@ -18,7 +18,7 @@ import java.net.URI;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
 
 import static android.content.Intent.ACTION_CHOOSER;
@@ -40,7 +40,7 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(constants = BuildConfig.class, sdk = JELLY_BEAN)
 public final class ShareTest {
 
-    private Selection<Object, FileItem> selection;
+    private Selection<Object, FileInfo> selection;
     private Share action;
 
     @Before
@@ -103,15 +103,15 @@ public final class ShareTest {
                 shareIntent.getParcelableArrayListExtra(EXTRA_STREAM));
     }
 
-    private FileItem mockFileItem(String uri) {
+    private FileInfo mockFileItem(String uri) {
         return mockFileItem(uri, true);
     }
 
-    private FileItem mockFileItem(String uri, boolean isRegularFile) {
+    private FileInfo mockFileItem(String uri, boolean isRegularFile) {
         Path file = mock(Path.class);
         Stat stat = mock(Stat.class);
         given(stat.isRegularFile()).willReturn(isRegularFile);
         given(file.toUri()).willReturn(URI.create(uri));
-        return FileItem.create(file, stat, null, null, null);
+        return FileInfo.create(file, stat, null, null, null);
     }
 }

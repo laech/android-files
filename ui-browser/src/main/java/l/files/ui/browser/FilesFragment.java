@@ -26,7 +26,7 @@ import java.util.List;
 import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
@@ -57,7 +57,7 @@ import static l.files.ui.browser.Preferences.isSortKey;
 public final class FilesFragment
 
         extends
-        SelectionModeFragment<Path, FileItem>
+        SelectionModeFragment<Path, FileInfo>
 
         implements
         LoaderCallbacks<Result>,
@@ -317,8 +317,8 @@ public final class FilesFragment
     private void updateSelection(Result data) {
         List<Path> files = new ArrayList<>(data.items().size());
         for (Object item : data.items()) {
-            if (item instanceof FileItem) {
-                files.add(((FileItem) item).selfPath());
+            if (item instanceof FileInfo) {
+                files.add(((FileInfo) item).selfPath());
             }
         }
         selection().retainAll(files);

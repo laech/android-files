@@ -12,7 +12,7 @@ import java.util.Collection;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 
@@ -24,10 +24,10 @@ import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 
 final class Share extends ActionModeItem implements Selection.Callback {
 
-    private final Selection<?, FileItem> selection;
+    private final Selection<?, FileInfo> selection;
     private final Context context;
 
-    Share(Selection<?, FileItem> selection, Context context) {
+    Share(Selection<?, FileInfo> selection, Context context) {
         super(R.id.share);
         this.selection = requireNonNull(selection);
         this.context = requireNonNull(context);
@@ -72,7 +72,7 @@ final class Share extends ActionModeItem implements Selection.Callback {
             return;
         }
 
-        for (FileItem file : selection.values()) {
+        for (FileInfo file : selection.values()) {
             Stat stat = file.linkTargetOrSelfStat();
             if (stat == null || !stat.isRegularFile()) {
                 item.setEnabled(false);
@@ -98,9 +98,9 @@ final class Share extends ActionModeItem implements Selection.Callback {
     }
 
     private ArrayList<Uri> selectionUris() {
-        Collection<FileItem> files = selection.values();
+        Collection<FileInfo> files = selection.values();
         ArrayList<Uri> uris = new ArrayList<>(files.size());
-        for (FileItem item : files) {
+        for (FileInfo item : files) {
             Path file = item.linkTargetOrSelfPath();
             uris.add(Uri.parse(file.toUri().toString()));
         }

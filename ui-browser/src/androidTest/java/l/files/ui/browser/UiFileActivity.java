@@ -19,7 +19,7 @@ import l.files.fs.FileSystem;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
 
@@ -228,7 +228,8 @@ final class UiFileActivity {
         return findOptionMenuItem(android.R.id.paste, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem input) {
-                assertEquals(can, input.isEnabled());
+                String msg = "Paste menu enabled to be " + can;
+                assertEquals(msg, can, input.isEnabled());
             }
         });
     }
@@ -444,7 +445,8 @@ final class UiFileActivity {
         return findOptionMenuItem(R.id.refresh, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem input) {
-                assertEquals(visible, input.isVisible());
+                String msg = "Refresh menu visible to be " + visible;
+                assertEquals(msg, visible, input.isVisible());
             }
         });
     }
@@ -580,29 +582,29 @@ final class UiFileActivity {
     }
 
     private SimpleArrayMap<Path, Stat> filesInView() {
-        List<FileItem> items = fileItems();
+        List<FileInfo> items = fileItems();
         SimpleArrayMap<Path, Stat> result = new SimpleArrayMap<>(items.size());
-        for (FileItem item : items) {
+        for (FileInfo item : items) {
             result.put(item.selfPath(), item.selfStat());
         }
         return result;
     }
 
-    private List<FileItem> fileItems() {
+    private List<FileInfo> fileItems() {
         List<Object> items = fragment().items();
-        List<FileItem> files = new ArrayList<>(items.size());
+        List<FileInfo> files = new ArrayList<>(items.size());
         for (Object item : items) {
-            if (item instanceof FileItem) {
-                files.add(((FileItem) item));
+            if (item instanceof FileInfo) {
+                files.add(((FileInfo) item));
             }
         }
         return files;
     }
 
     private List<Path> resources() {
-        List<FileItem> items = fileItems();
+        List<FileInfo> items = fileItems();
         List<Path> files = new ArrayList<>(items.size());
-        for (FileItem item : items) {
+        for (FileInfo item : items) {
             files.add(item.selfPath());
         }
         return files;
@@ -620,9 +622,9 @@ final class UiFileActivity {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
             public void run() {
-                List<FileItem> items = fileItems();
+                List<FileInfo> items = fileItems();
                 List<Path> actual = new ArrayList<>(items.size());
-                for (FileItem item : items) {
+                for (FileInfo item : items) {
                     actual.add(item.selfPath());
                 }
                 assertEquals(asList(expected), actual);

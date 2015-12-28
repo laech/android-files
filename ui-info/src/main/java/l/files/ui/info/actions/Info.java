@@ -9,9 +9,9 @@ import java.util.Collection;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
-import l.files.ui.base.fs.FileItem;
 import l.files.ui.info.InfoFragment;
 import l.files.ui.info.InfoMultiFragment;
 import l.files.ui.info.R;
@@ -21,11 +21,11 @@ import static l.files.ui.info.InfoBaseFragment.FRAGMENT_TAG;
 
 public final class Info extends ActionModeItem implements Selection.Callback {
 
-    private final Selection<?, FileItem> selection;
+    private final Selection<?, FileInfo> selection;
     private final FragmentManager manager;
     private final Path dir;
 
-    public Info(Selection<?, FileItem> selection, FragmentManager manager, Path dir) {
+    public Info(Selection<?, FileInfo> selection, FragmentManager manager, Path dir) {
         super(R.id.info);
         this.selection = requireNonNull(selection);
         this.manager = requireNonNull(manager);
@@ -48,9 +48,9 @@ public final class Info extends ActionModeItem implements Selection.Callback {
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        Collection<FileItem> values = selection.values();
+        Collection<FileInfo> values = selection.values();
         if (values.size() == 1) {
-            FileItem file = values.iterator().next();
+            FileInfo file = values.iterator().next();
             Stat stat = file.linkTargetOrSelfStat();
             InfoFragment.create(file.selfPath(), stat).show(manager, FRAGMENT_TAG);
         } else {
@@ -79,7 +79,7 @@ public final class Info extends ActionModeItem implements Selection.Callback {
             return;
         }
 
-        for (FileItem file : selection.values()) {
+        for (FileInfo file : selection.values()) {
             if (file.linkTargetOrSelfStat() != null) {
                 item.setEnabled(true);
                 return;

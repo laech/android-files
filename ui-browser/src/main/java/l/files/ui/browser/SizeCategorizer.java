@@ -3,7 +3,7 @@ package l.files.ui.browser;
 import android.content.res.Resources;
 
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 /**
  * Categorizes by file size (descending order).
@@ -27,7 +27,7 @@ final class SizeCategorizer extends BaseCategorizer {
             };
 
     @Override
-    public Object id(final FileItem file) {
+    public Object id(final FileInfo file) {
         final Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
@@ -48,7 +48,7 @@ final class SizeCategorizer extends BaseCategorizer {
 
     @Override
     public String label(
-            final FileItem file,
+            final FileInfo file,
             final Resources res,
             final Object id) {
         final int value = (int) id;

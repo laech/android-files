@@ -13,7 +13,7 @@ import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.text.Collators;
 
 import static java.util.Collections.shuffle;
@@ -25,31 +25,31 @@ abstract class FileSortTest {
 
     protected final void testSortMatches(
             Locale locale,
-            Comparator<FileItem> comparator,
+            Comparator<FileInfo> comparator,
             Path... expectedOrder) throws IOException {
 
-        List<FileItem> expected = mapData(locale, expectedOrder);
-        List<FileItem> actual = new ArrayList<>(expected);
+        List<FileInfo> expected = mapData(locale, expectedOrder);
+        List<FileInfo> actual = new ArrayList<>(expected);
         shuffle(actual);
         sort(actual, comparator);
         assertEquals(names(expected), names(actual));
         assertEquals(expected, actual);
     }
 
-    private List<Name> names(List<FileItem> items) {
+    private List<Name> names(List<FileInfo> items) {
         List<Name> names = new ArrayList<>(items.size());
-        for (FileItem item : items) {
+        for (FileInfo item : items) {
             names.add(item.selfPath().name());
         }
         return names;
     }
 
-    private List<FileItem> mapData(
+    private List<FileInfo> mapData(
             Locale locale,
             Path... files) throws IOException {
 
         final Collator collator = Collators.of(locale);
-        final List<FileItem> expected = new ArrayList<>(files.length);
+        final List<FileInfo> expected = new ArrayList<>(files.length);
         for (Path file : files) {
             Stat stat;
             try {
@@ -57,7 +57,7 @@ abstract class FileSortTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileItem.create(file, stat, null, null, new Provider<Collator>() {
+            expected.add(FileInfo.create(file, stat, null, null, new Provider<Collator>() {
                 @Override
                 public Collator get() {
                     return collator;

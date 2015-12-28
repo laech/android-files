@@ -32,7 +32,7 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.text.Collators;
 
 import static android.os.Looper.getMainLooper;
@@ -50,7 +50,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private static final Handler handler = new Handler(getMainLooper());
 
-    private final ConcurrentMap<Name, FileItem> data;
+    private final ConcurrentMap<Name, FileInfo> data;
     private final Path root;
 
     private final Provider<Collator> collator = new Provider<Collator>() {
@@ -276,11 +276,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     }
 
     private Result buildResult() {
-        List<FileItem> files = new ArrayList<>(data.size());
+        List<FileInfo> files = new ArrayList<>(data.size());
         if (showHidden) {
             files.addAll(data.values());
         } else {
-            for (FileItem item : data.values()) {
+            for (FileInfo item : data.values()) {
                 if (!item.selfPath().isHidden()) {
                     files.add(item);
                 }
@@ -376,8 +376,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Stat stat = Files.stat(path, NOFOLLOW);
             Stat targetStat = readTargetStatus(path, stat);
             Path target = readTarget(path, stat);
-            FileItem newStat = FileItem.create(path, stat, target, targetStat, collator);
-            FileItem oldStat = data.put(path.name(), newStat);
+            FileInfo newStat = FileInfo.create(path, stat, target, targetStat, collator);
+            FileInfo oldStat = data.put(path.name(), newStat);
             return !newStat.equals(oldStat);
 
         } catch (FileNotFoundException e) {
@@ -386,7 +386,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         } catch (IOException e) {
             data.put(
                     path.name(),
-                    FileItem.create(path, null, null, null, collator));
+                    FileInfo.create(path, null, null, null, collator));
             return true;
         }
     }

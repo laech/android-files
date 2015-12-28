@@ -22,7 +22,7 @@ import l.files.fs.Instant;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
@@ -62,21 +62,21 @@ public final class DateCategorizerTest {
 
     @Test
     public void categorize_with_header() throws Exception {
-        FileItem future1 = file(addDaysToMidnight(2));
-        FileItem future2 = file(addDaysToMidnight(1));
-        FileItem today1 = file(addDaysToMidnight(0) + 1);
-        FileItem today2 = file(addDaysToMidnight(0));
-        FileItem yesterday1 = file(addDaysToMidnight(-1) + 10);
-        FileItem yesterday2 = file(addDaysToMidnight(-1));
-        FileItem prev7Days1 = file(addDaysToMidnight(-2));
-        FileItem prev7Days2 = file(addDaysToMidnight(-3));
-        FileItem prev30Days1 = file(addDaysToMidnight(-10));
-        FileItem prev30Days2 = file(addDaysToMidnight(-12));
-        FileItem prevMonth1 = file(addDaysToMidnight(-31));
-        FileItem prevMonth2 = file(addDaysToMidnight(-31 * 2));
-        FileItem prevMonth3 = file(addDaysToMidnight(-31 * 3));
-        FileItem prevYear1 = file(addDaysToMidnight(-365));
-        FileItem prevYear2 = file(addDaysToMidnight(-365 * 2));
+        FileInfo future1 = file(addDaysToMidnight(2));
+        FileInfo future2 = file(addDaysToMidnight(1));
+        FileInfo today1 = file(addDaysToMidnight(0) + 1);
+        FileInfo today2 = file(addDaysToMidnight(0));
+        FileInfo yesterday1 = file(addDaysToMidnight(-1) + 10);
+        FileInfo yesterday2 = file(addDaysToMidnight(-1));
+        FileInfo prev7Days1 = file(addDaysToMidnight(-2));
+        FileInfo prev7Days2 = file(addDaysToMidnight(-3));
+        FileInfo prev30Days1 = file(addDaysToMidnight(-10));
+        FileInfo prev30Days2 = file(addDaysToMidnight(-12));
+        FileInfo prevMonth1 = file(addDaysToMidnight(-31));
+        FileInfo prevMonth2 = file(addDaysToMidnight(-31 * 2));
+        FileInfo prevMonth3 = file(addDaysToMidnight(-31 * 3));
+        FileInfo prevYear1 = file(addDaysToMidnight(-365));
+        FileInfo prevYear2 = file(addDaysToMidnight(-365 * 2));
 
         List<Object> expected = asList(
                 header(R.string.future),
@@ -131,7 +131,7 @@ public final class DateCategorizerTest {
         for (Object item : items) {
             names.add(item instanceof Header
                     ? ((Header) item).header()
-                    : ((FileItem) item).selfPath().name().toString());
+                    : ((FileInfo) item).selfPath().name().toString());
         }
         return unmodifiableList(names);
     }
@@ -224,7 +224,7 @@ public final class DateCategorizerTest {
         assertEquals(expected, actual);
     }
 
-    private String label(FileItem file) {
+    private String label(FileInfo file) {
         Object id = categorizer.id(file);
         return categorizer.label(file, res, id);
     }
@@ -264,18 +264,18 @@ public final class DateCategorizerTest {
         assertCategory(res.getString(R.string.__), file(-1L), file(0L));
     }
 
-    private FileItem file(Calendar time) {
+    private FileInfo file(Calendar time) {
         return file(time.getTimeInMillis());
     }
 
-    private FileItem file(long time) {
+    private FileInfo file(long time) {
         Stat stat = mock(Stat.class);
         Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(String.valueOf(time));
         given(file.name()).willReturn(name);
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileItem.create(file, stat, null, null, new Provider<Collator>() {
+        return FileInfo.create(file, stat, null, null, new Provider<Collator>() {
             @Override
             public Collator get() {
                 return collator;
@@ -283,8 +283,8 @@ public final class DateCategorizerTest {
         });
     }
 
-    private void assertCategory(String expected, FileItem... stats) {
-        for (FileItem file : stats) {
+    private void assertCategory(String expected, FileInfo... stats) {
+        for (FileInfo file : stats) {
             assertEquals(file.toString(), expected, label(file));
         }
     }

@@ -14,7 +14,7 @@ import android.view.View;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileIcons;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
@@ -109,7 +109,7 @@ public final class FileView extends View implements Drawable.Callback {
 
     private static final SparseArray<CharSequence> icons = new SparseArray<>();
 
-    private CharSequence getIconText(FileItem item) {
+    private CharSequence getIconText(FileInfo item) {
         int id = getIconTextId(item);
         CharSequence text = icons.get(id);
         if (text == null) {
@@ -119,7 +119,7 @@ public final class FileView extends View implements Drawable.Callback {
         return text;
     }
 
-    private int getIconTextId(FileItem item) {
+    private int getIconTextId(FileInfo item) {
         Stat stat = item.linkTargetOrSelfStat();
         if (stat == null) {
             return unknownIconStringId();
@@ -327,7 +327,7 @@ public final class FileView extends View implements Drawable.Callback {
         }
     }
 
-    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Rect size) {
+    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Rect size) {
         preview.setSize(size.width(), size.height());
         if (preview.isShowingBitmap()) {
             preview.resetTransition();
@@ -335,7 +335,7 @@ public final class FileView extends View implements Drawable.Callback {
         set(layouts, item, textWidth);
     }
 
-    void set(FileTextLayoutCache layouts, FileItem item, int textWidth, Bitmap bitmap) {
+    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Bitmap bitmap) {
         preview.setBitmap(bitmap);
         if (!preview.isShowingBitmap()) {
             preview.startTransition(0);
@@ -343,7 +343,7 @@ public final class FileView extends View implements Drawable.Callback {
         set(layouts, item, textWidth);
     }
 
-    void set(FileTextLayoutCache layouts, FileItem item, int textWidth) {
+    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth) {
 
         this.showLinkIcon = shouldShowLinkIcon(item);
 
@@ -383,7 +383,7 @@ public final class FileView extends View implements Drawable.Callback {
         invalidate();
     }
 
-    private boolean shouldShowLinkIcon(FileItem item) {
+    private boolean shouldShowLinkIcon(FileInfo item) {
         Stat stat = item.selfStat();
         return stat != null && stat.isSymbolicLink();
     }

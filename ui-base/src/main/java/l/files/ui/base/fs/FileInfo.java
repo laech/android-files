@@ -16,14 +16,14 @@ import l.files.fs.Stat;
 import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 
 @AutoValue
-public abstract class FileItem implements Comparable<FileItem> {
+public abstract class FileInfo implements Comparable<FileInfo> {
 
     private Provider<Collator> collator;
     private CollationKey collationKey;
     private Boolean readable;
     private String basicMediaType;
 
-    FileItem() {
+    FileInfo() {
     }
 
     public boolean isReadable() {
@@ -78,17 +78,17 @@ public abstract class FileItem implements Comparable<FileItem> {
     }
 
     @Override
-    public int compareTo(FileItem another) {
+    public int compareTo(FileInfo another) {
         return collationKey().compareTo(another.collationKey());
     }
 
-    public static FileItem create(
+    public static FileInfo create(
             Path path,
             @Nullable Stat stat,
             @Nullable Path target,
             @Nullable Stat targetStat,
             Provider<Collator> collator) {
-        FileItem item = new AutoValue_FileItem(path, stat, target, targetStat);
+        FileInfo item = new AutoValue_FileInfo(path, stat, target, targetStat);
         item.collator = collator;
         return item;
     }

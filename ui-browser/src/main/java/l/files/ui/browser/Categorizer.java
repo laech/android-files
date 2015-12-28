@@ -5,7 +5,7 @@ import android.content.res.Resources;
 import java.util.Collections;
 import java.util.List;
 
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 /**
  * Provides category information for items in cursors.
@@ -16,13 +16,13 @@ interface Categorizer {
      */
     Categorizer NULL = new Categorizer() {
         @Override
-        public Object id(final FileItem item) {
+        public Object id(final FileInfo item) {
             return null;
         }
 
         @Override
         public String label(
-                final FileItem item,
+                final FileInfo item,
                 final Resources res,
                 final Object id) {
             return null;
@@ -31,14 +31,14 @@ interface Categorizer {
         @Override
         public List<Object> categorize(
                 final Resources res,
-                final List<FileItem> items) {
+                final List<FileInfo> items) {
             return Collections.<Object>unmodifiableList(items);
         }
     };
 
-    Object id(FileItem item);
+    Object id(FileInfo item);
 
-    String label(FileItem item, Resources res, Object id);
+    String label(FileInfo item, Resources res, Object id);
 
-    List<Object> categorize(Resources res, List<FileItem> items);
+    List<Object> categorize(Resources res, List<FileInfo> items);
 }

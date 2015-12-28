@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Looper.getMainLooper;
@@ -78,7 +78,7 @@ final class FileTextLayoutCache {
         return cache;
     }
 
-    Layout getName(Context context, FileItem item, int width) {
+    Layout getName(Context context, FileInfo item, int width) {
 
         if (getMainLooper() != myLooper()) {
             throw new IllegalStateException();
@@ -116,7 +116,7 @@ final class FileTextLayoutCache {
     }
 
     @Nullable
-    Layout getLink(Context context, FileItem item, int width) {
+    Layout getLink(Context context, FileInfo item, int width) {
 
         Path target = item.linkTargetPath();
         if (target == null) {
@@ -146,7 +146,7 @@ final class FileTextLayoutCache {
     }
 
     @Nullable
-    Layout getSummary(Context context, FileItem item, int width) {
+    Layout getSummary(Context context, FileInfo item, int width) {
 
         Stat stat = item.selfStat();
         if (stat == null) {
@@ -199,7 +199,7 @@ final class FileTextLayoutCache {
         return summaryPaint;
     }
 
-    private static String getSummary(Context context, FileItem file) {
+    private static String getSummary(Context context, FileInfo file) {
         Stat stat = file.selfStat();
         if (stat == null) {
             return null;

@@ -22,7 +22,7 @@ import java.util.Map;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
@@ -59,7 +59,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<Path, FileItem> selection;
+    private final Selection<Path, FileInfo> selection;
 
     private final OnOpenFileListener listener;
 
@@ -70,7 +70,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     FilesAdapter(
             Context context,
-            Selection<Path, FileItem> selection,
+            Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
@@ -129,10 +129,10 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
         while (pos <= warmUpToPosition && pos < getItemCount()) {
             Object item = getItem(pos);
-            if (item instanceof FileItem) {
-                layouts.getName(context, (FileItem) item, textWidth);
-                layouts.getLink(context, (FileItem) item, textWidth);
-                layouts.getSummary(context, (FileItem) item, textWidth);
+            if (item instanceof FileInfo) {
+                layouts.getName(context, (FileInfo) item, textWidth);
+                layouts.getLink(context, (FileInfo) item, textWidth);
+                layouts.getSummary(context, (FileInfo) item, textWidth);
             }
             pos++;
         }
@@ -141,7 +141,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position) instanceof FileItem
+        return getItem(position) instanceof FileInfo
                 ? VIEW_TYPE_FILE
                 : VIEW_TYPE_HEADER;
     }
@@ -161,15 +161,15 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         if (item instanceof Header) {
             ((HeaderHolder) holder).bind((Header) item);
         } else {
-            ((FileHolder) holder).bind((FileItem) item);
+            ((FileHolder) holder).bind((FileInfo) item);
         }
     }
 
     @Override
     public Object getItemIdObject(int position) {
         Object item = getItem(position);
-        if (item instanceof FileItem) {
-            return ((FileItem) item).selfPath();
+        if (item instanceof FileInfo) {
+            return ((FileInfo) item).selfPath();
         }
         return item;
     }
@@ -177,17 +177,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     @Override
     public void selectAll() {
         List<Object> items = items();
-        Map<Path, FileItem> files = new ArrayMap<>(items.size());
+        Map<Path, FileInfo> files = new ArrayMap<>(items.size());
         for (Object item : items) {
-            if (item instanceof FileItem) {
-                FileItem file = (FileItem) item;
+            if (item instanceof FileInfo) {
+                FileInfo file = (FileInfo) item;
                 files.put(file.selfPath(), file);
             }
         }
         selection.addAll(files);
     }
 
-    final class FileHolder extends SelectionModeViewHolder<Path, FileItem>
+    final class FileHolder extends SelectionModeViewHolder<Path, FileInfo>
             implements PreviewCallback {
 
         private final FileView content;
@@ -211,17 +211,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         }
 
         @Override
-        protected Path itemId(FileItem file) {
+        protected Path itemId(FileInfo file) {
             return file.selfPath();
         }
 
         @Override
-        protected void onClick(View v, FileItem file) {
+        protected void onClick(View v, FileInfo file) {
             listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
         }
 
         @Override
-        public void bind(FileItem file) {
+        public void bind(FileInfo file) {
             super.bind(file);
             if (constraint == null) {
                 constraint = calculateThumbnailConstraint(context(), (CardView) itemView);

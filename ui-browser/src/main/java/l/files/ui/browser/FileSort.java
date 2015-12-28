@@ -9,7 +9,7 @@ import java.util.List;
 
 import l.files.fs.Instant;
 import l.files.fs.Stat;
-import l.files.ui.base.fs.FileItem;
+import l.files.ui.base.fs.FileInfo;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -17,10 +17,10 @@ enum FileSort {
 
     NAME(R.string.name) {
         @Override
-        Comparator<FileItem> comparator() {
-            return new Comparator<FileItem>() {
+        Comparator<FileInfo> comparator() {
+            return new Comparator<FileInfo>() {
                 @Override
-                public int compare(FileItem a, FileItem b) {
+                public int compare(FileInfo a, FileInfo b) {
                     return a.compareTo(b);
                 }
             };
@@ -32,8 +32,8 @@ enum FileSort {
         }
 
         @Override
-        List<Object> sort(List<FileItem> items, Resources res) {
-            List<FileItem> result = new ArrayList<>(items);
+        List<Object> sort(List<FileInfo> items, Resources res) {
+            List<FileInfo> result = new ArrayList<>(items);
             Collections.sort(result);
             return Collections.<Object>unmodifiableList(result);
         }
@@ -41,12 +41,12 @@ enum FileSort {
 
     MODIFIED(R.string.date_modified) {
         @Override
-        Comparator<FileItem> comparator() {
+        Comparator<FileInfo> comparator() {
             return new StatComparator() {
                 @Override
                 protected int compareNotNull(
-                        FileItem a, Stat aStat,
-                        FileItem b, Stat bStat) {
+                        FileInfo a, Stat aStat,
+                        FileInfo b, Stat bStat) {
                     Instant aTime = aStat.lastModifiedTime();
                     Instant bTime = bStat.lastModifiedTime();
                     int result = bTime.compareTo(aTime);
@@ -66,12 +66,12 @@ enum FileSort {
 
     SIZE(R.string.size) {
         @Override
-        Comparator<FileItem> comparator() {
+        Comparator<FileInfo> comparator() {
             return new StatComparator() {
                 @Override
                 protected int compareNotNull(
-                        FileItem a, Stat aStat,
-                        FileItem b, Stat bStat) {
+                        FileInfo a, Stat aStat,
+                        FileInfo b, Stat bStat) {
                     if (aStat.isDirectory() && bStat.isDirectory()) {
                         return a.compareTo(b);
                     }
@@ -109,20 +109,20 @@ enum FileSort {
         return res.getString(labelId);
     }
 
-    abstract Comparator<FileItem> comparator();
+    abstract Comparator<FileInfo> comparator();
 
     abstract Categorizer categorizer();
 
-    List<Object> sort(List<FileItem> items, Resources res) {
-        List<FileItem> sorted = new ArrayList<>(items);
+    List<Object> sort(List<FileInfo> items, Resources res) {
+        List<FileInfo> sorted = new ArrayList<>(items);
         Collections.sort(sorted, comparator());
         return categorizer().categorize(res, sorted);
     }
 
-    private static abstract class StatComparator implements Comparator<FileItem> {
+    private static abstract class StatComparator implements Comparator<FileInfo> {
 
         @Override
-        public int compare(FileItem a, FileItem b) {
+        public int compare(FileInfo a, FileInfo b) {
             if (a.selfStat() == null && b.selfStat() == null) return a.compareTo(b);
             if (a.selfStat() == null) return 1;
             if (b.selfStat() == null) return -1;
@@ -133,8 +133,8 @@ enum FileSort {
         }
 
         protected abstract int compareNotNull(
-                FileItem a, Stat aStat,
-                FileItem b, Stat bStat
+                FileInfo a, Stat aStat,
+                FileInfo b, Stat bStat
         );
 
     }

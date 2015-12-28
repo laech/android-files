@@ -12,15 +12,15 @@ import java.util.Collection;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
+import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.view.Views;
-import l.files.ui.base.fs.FileItem;
 
 public final class InfoMultiFragment extends InfoBaseFragment {
 
-    public static InfoMultiFragment create(Path dir, Collection<FileItem> items) {
+    public static InfoMultiFragment create(Path dir, Collection<FileInfo> items) {
 
         ArrayList<Name> names = new ArrayList<>(items.size());
-        for (FileItem item : items) {
+        for (FileInfo item : items) {
             names.add(item.selfPath().name());
         }
 
