@@ -87,7 +87,6 @@ public final class FilesActivity extends BaseActivity implements
 
         toolbar = find(R.id.toolbar, this);
         toolbar.setNavigationIcon(navigationIcon);
-        toolbar.getOverflowIcon().setColorFilter(WHITE, MULTIPLY);
 
         hierarchy = new HierarchyAdapter();
         title = find(R.id.title, this);
