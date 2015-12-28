@@ -32,6 +32,7 @@ import l.files.ui.preview.Preview;
 
 import static android.content.ContentResolver.SCHEME_FILE;
 import static android.graphics.Color.WHITE;
+import static android.graphics.PorterDuff.Mode.MULTIPLY;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
@@ -86,6 +87,8 @@ public final class FilesActivity extends BaseActivity implements
 
         toolbar = find(R.id.toolbar, this);
         toolbar.setNavigationIcon(navigationIcon);
+        toolbar.getOverflowIcon().setColorFilter(WHITE, MULTIPLY);
+
         hierarchy = new HierarchyAdapter();
         title = find(R.id.title, this);
         title.setAdapter(hierarchy);
