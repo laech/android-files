@@ -12,7 +12,6 @@ import java.util.concurrent.ThreadFactory;
 import l.files.base.io.Closer;
 import l.files.fs.Path;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;
@@ -37,7 +36,7 @@ final class DecodePdf extends DecodeThumbnail {
 
         @Override
         public boolean accept(Path path, String mediaType) {
-            return path instanceof LocalPath &&
+            return path.fileSystem().scheme().equals("file") &&
                     mediaType.equals("application/pdf");
         }
 
@@ -78,7 +77,7 @@ final class DecodePdf extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            final long doc = Pdf.open(((LocalPath) file).toByteArray());
+            final long doc = Pdf.open(file.toByteArray());
             closer.register(new Closeable() {
                 @Override
                 public void close() throws IOException {

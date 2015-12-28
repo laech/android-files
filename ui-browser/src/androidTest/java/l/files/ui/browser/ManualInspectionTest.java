@@ -11,7 +11,7 @@ import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
+import l.files.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -28,7 +28,7 @@ public final class ManualInspectionTest {
 
     @Test
     public void test() throws Exception {
-        Path dir = LocalPath.of(getExternalStorageDirectory()).resolve("test");
+        Path dir = Paths.get(getExternalStorageDirectory()).resolve("test");
         Files.createDirs(dir);
         try {
             Files.setLastModifiedTime(dir, NOFOLLOW, Instant.ofMillis(currentTimeMillis()));
@@ -38,7 +38,11 @@ public final class ManualInspectionTest {
         Files.createFiles(dir.resolve(".nomedia"));
         Files.createFiles(dir.resolve("html.html"));
         Files.createFiles(dir.resolve("zip.zip"));
-        createNonUtf8Dir();
+        try {
+            createNonUtf8Dir();
+        } catch (IOException e) {
+            // Emulator not supported
+        }
 
         try {
             createFutureFiles(dir);
@@ -77,8 +81,8 @@ public final class ManualInspectionTest {
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
         assertNotEquals(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
-        LocalPath dir = LocalPath.of(getExternalStorageDirectory()).resolve(nonUtf8);
-        LocalPath child = dir.resolve("good we can see this dir");
+        Path dir = Paths.get(getExternalStorageDirectory()).resolve(nonUtf8);
+        Path child = dir.resolve("good we can see this dir");
 
         try {
             Files.deleteRecursive(dir);

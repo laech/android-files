@@ -24,8 +24,8 @@ import java.util.List;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
@@ -170,12 +170,12 @@ public final class FilesActivity extends BaseActivity implements
     }
 
     private Path initialDirectory() {
-        LocalPath dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
+        Path dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
         if (dir == null
                 && getIntent().getData() != null
                 && getIntent().getData().getScheme() != null
                 && getIntent().getData().getScheme().equals(SCHEME_FILE)) {
-            dir = LocalPath.of(getIntent().getData().getPath());
+            dir = Paths.get(getIntent().getData().getPath());
         }
         return dir == null ? DIR_HOME : dir;
     }

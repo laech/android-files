@@ -10,8 +10,8 @@ import java.util.Random;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 
 import static l.files.fs.Files.setLastModifiedTime;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -36,7 +36,7 @@ public abstract class CacheTest<V, C extends Cache<V>> {
         random = new Random();
 
         java.io.File localFile = folder.newFile("0");
-        file = LocalPath.of(localFile);
+        file = Paths.get(localFile);
         stat = Files.stat(file, FOLLOW);
     }
 
@@ -84,6 +84,6 @@ public abstract class CacheTest<V, C extends Cache<V>> {
     }
 
     Path mockCacheDir() {
-        return LocalPath.of(folder.getRoot());
+        return Paths.get(folder.getRoot());
     }
 }

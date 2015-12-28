@@ -23,7 +23,6 @@ android {
 }
 
 dependencies {
-    compile project(':fs')
     compile project(':fs-local')
     compile project(':testing')
 }

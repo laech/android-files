@@ -23,6 +23,7 @@ import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
 
@@ -56,8 +57,8 @@ public final class FilesTest extends PathBaseTest {
         byte[] bytes = {-19, -96, -67, -19, -80, -117};
         assertFalse(Arrays.equals(bytes.clone(), new String(bytes, UTF_8).getBytes(UTF_8)));
 
-        LocalPath dir = dir1().resolve(bytes.clone());
-        LocalPath file = dir.resolve("a");
+        Path dir = dir1().resolve(bytes.clone());
+        Path file = dir.resolve("a");
         Files.createDir(dir);
         Files.createFile(file);
 
@@ -65,7 +66,7 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(Files.exists(file, NOFOLLOW));
         assertEquals(singleton(file), Files.list(dir, FOLLOW, new HashSet<>()));
 
-        assertArrayEquals(bytes.clone(), dir.name().bytes());
+        assertArrayEquals(bytes.clone(), dir.name().toByteArray());
         assertEquals(new String(bytes.clone(), UTF_8), dir.name().toString());
         assertFalse(Arrays.equals(bytes.clone(), dir.name().toString().getBytes(UTF_8)));
     }
@@ -143,17 +144,17 @@ public final class FilesTest extends PathBaseTest {
 
     @Test
     public void getHierarchy_single() throws Exception {
-        Path a = LocalPath.of("/");
+        Path a = Paths.get("/");
         assertEquals(singletonList(a), Files.hierarchy(a));
     }
 
     @Test
     public void getHierarchy_multi() throws Exception {
-        Path a = LocalPath.of("/a/b");
-        List<Path> expected = Arrays.<Path>asList(
-                LocalPath.of("/"),
-                LocalPath.of("/a"),
-                LocalPath.of("/a/b")
+        Path a = Paths.get("/a/b");
+        List<Path> expected = asList(
+                Paths.get("/"),
+                Paths.get("/a"),
+                Paths.get("/a/b")
         );
         assertEquals(expected, Files.hierarchy(a));
     }
@@ -279,8 +280,8 @@ public final class FilesTest extends PathBaseTest {
     @Test
     public void output_createWithCorrectPermission()
             throws Exception {
-        LocalPath expected = dir1().resolve("expected");
-        LocalPath actual = dir1().resolve("actual");
+        Path expected = dir1().resolve("expected");
+        Path actual = dir1().resolve("actual");
 
         assertTrue(new java.io.File(expected.toUri()).createNewFile());
         Files.newOutputStream(actual, false).close();

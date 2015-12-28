@@ -10,8 +10,8 @@ import l.files.fs.FileSystem;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
-import l.files.fs.local.LocalPath;
 
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.lang.Integer.parseInt;
@@ -104,7 +104,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private int maxUserWatches() throws IOException {
-        Path limitFile = LocalPath.of("/proc/sys/fs/inotify/max_user_watches");
+        Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_watches");
         return parseInt(readAllUtf8(limitFile).trim());
     }
 
@@ -242,7 +242,7 @@ public final class RefreshTest extends BaseFilesActivityTest {
     }
 
     private Path storageDir() {
-        return LocalPath.of(getExternalStorageDirectory());
+        return Paths.get(getExternalStorageDirectory());
     }
 
     @Test

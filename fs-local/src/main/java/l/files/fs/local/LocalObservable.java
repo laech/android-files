@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import l.files.base.io.Closer;
 import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
+import l.files.fs.Files;
 import l.files.fs.LinkOption;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
@@ -161,7 +162,7 @@ final class LocalObservable extends Native
     private volatile int fd = -1;
     private volatile int wd = -1;
 
-    private final LocalPath root;
+    private final Path root;
     private final byte[] rootPathBytes;
 
     /**
@@ -184,7 +185,7 @@ final class LocalObservable extends Native
     private final AtomicBoolean closed;
     private final AtomicBoolean released;
 
-    LocalObservable(LocalPath root, Observer observer) {
+    LocalObservable(Path root, Observer observer) {
         this.root = requireNonNull(root);
         this.rootPathBytes = root.toByteArray();
         this.observerRef = new WeakReference<>(requireNonNull(observer));
@@ -232,7 +233,7 @@ final class LocalObservable extends Native
                 thread.start();
             }
 
-            if (LocalFileSystem.INSTANCE.stat(root, option).isDirectory() &&
+            if (Files.stat(root, option).isDirectory() &&
                     !traverseChildren(option, childrenConsumer)) {
 
                 notifyIncompleteObservationOrClose();
@@ -287,7 +288,7 @@ final class LocalObservable extends Native
                         throws IOException {
 
                     byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                    LocalPath child = root.resolve(name);
+                    Path child = root.resolve(name);
                     if (!childrenConsumer.accept(child)) {
                         currentThread().interrupt();
                         return false;

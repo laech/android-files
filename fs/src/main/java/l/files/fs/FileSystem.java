@@ -3,9 +3,16 @@ package l.files.fs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.Set;
 
 public interface FileSystem {
+
+    String scheme();
+
+    Path path(URI uri);
+
+    Path path(byte[] path);
 
     void setPermissions(Path path, Set<Permission> permissions)
             throws IOException;

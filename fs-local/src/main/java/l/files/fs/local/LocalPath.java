@@ -19,7 +19,7 @@ import static java.lang.System.arraycopy;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 
-public final class LocalPath implements Path {
+final class LocalPath implements Path {
 
     static final byte DOT = 46; // '.' in UTF-8
     static final byte SEP = 47; // '/' in UTF-8
@@ -158,8 +158,8 @@ public final class LocalPath implements Path {
     }
 
     @Override
-    public LocalPath resolve(String name) {
-        return resolve(name.getBytes(UTF_8));
+    public LocalPath resolve(String path) {
+        return resolve(path.getBytes(UTF_8));
     }
 
     @Override
@@ -167,6 +167,7 @@ public final class LocalPath implements Path {
         return resolve(((LocalName) name).bytes());
     }
 
+    @Override
     public LocalPath resolve(byte[] path) {
         byte[][] children = toNames(path);
         if (children.length == 0) {

@@ -13,9 +13,9 @@ import java.util.Date;
 
 import l.files.fs.Instant;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;
@@ -146,10 +146,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
     public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
-        screen().selectFromNavigationMode(LocalPath.of("/"));
-        screen().clickInto(LocalPath.of("/proc"));
-        screen().clickInto(LocalPath.of("/proc/self"));
-        screen().clickInto(LocalPath.of("/proc/self/fdinfo"));
+        screen().selectFromNavigationMode(Paths.get("/"));
+        screen().clickInto(Paths.get("/proc"));
+        screen().clickInto(Paths.get("/proc/self"));
+        screen().clickInto(Paths.get("/proc/self/fdinfo"));
     }
 
     @Test

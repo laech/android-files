@@ -1,9 +1,12 @@
 package l.files.fs.local;
 
+import com.google.auto.service.AutoService;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,9 +54,8 @@ import static l.files.fs.local.Unistd.X_OK;
 import static l.files.fs.local.Unistd.readlink;
 import static l.files.fs.local.Unistd.symlink;
 
-final class LocalFileSystem extends Native implements FileSystem {
-    private LocalFileSystem() {
-    }
+@AutoService(FileSystem.class)
+public final class LocalFileSystem extends Native implements FileSystem {
 
     static {
         init();
@@ -94,15 +96,41 @@ final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
+    public String scheme() {
+        return "file";
+    }
+
+    @Override
+    public Path path(URI uri) {
+        if (!scheme().equals(uri.getScheme())) {
+            throw new IllegalArgumentException(uri.toString());
+        }
+        return LocalPath.of(uri.getPath());
+    }
+
+    @Override
+    public Path path(byte[] path) {
+        return LocalPath.of(path);
+    }
+
+    private static void checkLocalPath(Path path) {
+        if (!(path instanceof LocalPath)) {
+            throw new IllegalArgumentException(path.toString());
+        }
+    }
+
+    @Override
     public void setPermissions(Path path, Set<Permission> permissions)
             throws IOException {
+
+        checkLocalPath(path);
 
         int mode = 0;
         for (Permission permission : permissions) {
             mode |= PERMISSION_BITS[permission.ordinal()];
         }
         try {
-            chmod(((LocalPath) path).toByteArray(), mode);
+            chmod(path.toByteArray(), mode);
         } catch (ErrnoException e) {
             throw e.toIOException(path);
         }
@@ -112,8 +140,10 @@ final class LocalFileSystem extends Native implements FileSystem {
     public void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException {
 
+        checkLocalPath(path);
+
         try {
-            byte[] pathBytes = ((LocalPath) path).toByteArray();
+            byte[] pathBytes = path.toByteArray();
             long seconds = instant.seconds();
             int nanos = instant.nanos();
             boolean followLink = option == FOLLOW;
@@ -131,14 +161,16 @@ final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public Stat stat(Path path, LinkOption option) throws IOException {
-        return Stat.stat(((LocalPath) path), option);
+        checkLocalPath(path);
+        return Stat.stat(path, option);
     }
 
     @Override
     public void createDir(Path path) throws IOException {
+        checkLocalPath(path);
         try {
             // Same permission bits as java.io.File.mkdir() on Android
-            mkdir(((LocalPath) path).toByteArray(), S_IRWXU);
+            mkdir(path.toByteArray(), S_IRWXU);
         } catch (ErrnoException e) {
             throw e.toIOException(path);
         }
@@ -147,13 +179,14 @@ final class LocalFileSystem extends Native implements FileSystem {
     @Override
     public void createFile(Path path) throws IOException {
         try {
-            createFileNative((LocalPath) path);
+            createFileNative(path);
         } catch (ErrnoException e) {
             throw e.toIOException(path);
         }
     }
 
-    private void createFileNative(LocalPath path) throws ErrnoException {
+    private void createFileNative(Path path) throws ErrnoException {
+        checkLocalPath(path);
         // Same flags and mode as java.io.File.createNewFile() on Android
         int flags = O_RDWR | O_CREAT | O_EXCL;
         int mode = S_IRUSR | S_IWUSR;
@@ -163,10 +196,11 @@ final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public void createLink(Path link, Path target) throws IOException {
+        checkLocalPath(link);
+        checkLocalPath(target);
         try {
 
-            symlink(((LocalPath) target).toByteArray(),
-                    ((LocalPath) link).toByteArray());
+            symlink(target.toByteArray(), link.toByteArray());
 
         } catch (ErrnoException e) {
             throw e.toIOException(target, link);
@@ -174,9 +208,10 @@ final class LocalFileSystem extends Native implements FileSystem {
     }
 
     @Override
-    public LocalPath readLink(Path path) throws IOException {
+    public Path readLink(Path path) throws IOException {
+        checkLocalPath(path);
         try {
-            byte[] link = readlink(((LocalPath) path).toByteArray());
+            byte[] link = readlink(path.toByteArray());
             return LocalPath.of(link);
         } catch (ErrnoException e) {
             throw e.toIOException(path);
@@ -185,11 +220,11 @@ final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public void move(Path src, Path dst) throws IOException {
+        checkLocalPath(src);
+        checkLocalPath(dst);
         try {
 
-            Stdio.rename(
-                    ((LocalPath) src).toByteArray(),
-                    ((LocalPath) dst).toByteArray());
+            Stdio.rename(src.toByteArray(), dst.toByteArray());
 
         } catch (ErrnoException e) {
             throw e.toIOException(src, dst);
@@ -198,9 +233,10 @@ final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public void delete(Path path) throws IOException {
+        checkLocalPath(path);
         while (true) {
             try {
-                Stdio.remove(((LocalPath) path).toByteArray());
+                Stdio.remove(path.toByteArray());
                 break;
             } catch (ErrnoException e) {
                 if (e.errno != EAGAIN) {
@@ -239,8 +275,9 @@ final class LocalFileSystem extends Native implements FileSystem {
     }
 
     private boolean accessible(Path path, int mode) throws IOException {
+        checkLocalPath(path);
         try {
-            Unistd.access(((LocalPath) path).toByteArray(), mode);
+            Unistd.access(path.toByteArray(), mode);
             return true;
         } catch (ErrnoException e) {
             if (e.errno == EACCES) {
@@ -258,7 +295,8 @@ final class LocalFileSystem extends Native implements FileSystem {
             Consumer<? super Path> childrenConsumer)
             throws IOException, InterruptedException {
 
-        LocalObservable observable = new LocalObservable(((LocalPath) path), observer);
+        checkLocalPath(path);
+        LocalObservable observable = new LocalObservable(path, observer);
         observable.start(option, childrenConsumer);
         return observable;
     }
@@ -287,10 +325,9 @@ final class LocalFileSystem extends Native implements FileSystem {
             final boolean dirOnly,
             final Consumer<? super Path> consumer) throws IOException {
 
-        final LocalPath localPath = (LocalPath) path;
         try {
             Dirent.list(
-                    localPath.toByteArray(),
+                    path.toByteArray(),
                     option == FOLLOW,
                     new Dirent.Callback() {
 
@@ -304,7 +341,7 @@ final class LocalFileSystem extends Native implements FileSystem {
                                 return true;
                             }
                             byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                            return consumer.accept(localPath.resolve(name));
+                            return consumer.accept(path.resolve(name));
                         }
 
                     });
@@ -335,12 +372,14 @@ final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public InputStream newInputStream(Path path) throws IOException {
-        return LocalStreams.newInputStream((LocalPath) path);
+        checkLocalPath(path);
+        return LocalStreams.newInputStream(path);
     }
 
     @Override
     public OutputStream newOutputStream(Path path, boolean append) throws IOException {
-        return LocalStreams.newOutputStream((LocalPath) path, append);
+        checkLocalPath(path);
+        return LocalStreams.newOutputStream(path, append);
     }
 
 }

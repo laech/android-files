@@ -30,7 +30,6 @@ android {
 dependencies {
 
     compile project(':fs')
-    compile project(':fs-local')
     compile project(':ui-preview')
     compile project(':ui-operations')
     compile project(':ui-bookmarks')

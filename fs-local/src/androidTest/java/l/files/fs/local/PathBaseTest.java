@@ -9,6 +9,7 @@ import java.util.EnumSet;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 import l.files.testing.BaseTest;
@@ -27,13 +28,13 @@ public abstract class PathBaseTest extends BaseTest {
     @Rule
     public final TestName testName = new TestName();
 
-    private LocalPath dir1;
-    private LocalPath dir2;
+    private Path dir1;
+    private Path dir2;
 
-    protected final LocalPath dir1() {
+    protected final Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = LocalPath.of(folder.newFolder());
+                dir1 = Paths.get(folder.newFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -41,10 +42,10 @@ public abstract class PathBaseTest extends BaseTest {
         return dir1;
     }
 
-    protected final LocalPath dir2() {
+    protected final Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = LocalPath.of(folder.newFolder());
+                dir2 = Paths.get(folder.newFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

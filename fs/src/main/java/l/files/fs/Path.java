@@ -33,7 +33,7 @@ public interface Path extends Parcelable {
      */
     int toByteArray(OutputStream out) throws IOException;
 
-    byte[] toByteArray() throws IOException;
+    byte[] toByteArray();
 
     /**
      * @return the number of bytes written
@@ -51,7 +51,9 @@ public interface Path extends Parcelable {
     /**
      * Resolves the given path relative to this file.
      */
-    Path resolve(String name);
+    Path resolve(String path);
+
+    Path resolve(byte[] path);
 
     Path resolve(Name name);
 

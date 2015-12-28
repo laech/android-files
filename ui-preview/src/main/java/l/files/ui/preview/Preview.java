@@ -13,8 +13,8 @@ import java.io.InputStream;
 import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 
 import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
@@ -26,7 +26,7 @@ public final class Preview {
      * Increasing this also increases the chance that the palette would
      * contain a color. e.g. {@link Palette#getDarkVibrantColor(int)}
      * would return a color.
-     *
+     * <p/>
      * TODO make this part of the cache key
      */
     static final int PALETTE_MAX_COLOR_COUNT = 1024;
@@ -40,7 +40,7 @@ public final class Preview {
                 if (dir == null) {
                     dir = context.getCacheDir();
                 }
-                Path cacheDir = LocalPath.of(dir);
+                Path cacheDir = Paths.get(dir);
                 instance = new Preview(context.getApplicationContext(), cacheDir);
                 instance.cleanupAsync();
             }

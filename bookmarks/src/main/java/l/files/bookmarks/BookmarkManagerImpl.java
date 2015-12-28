@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.local.LocalPath;
+import l.files.fs.Paths;
 
 import static android.os.Environment.DIRECTORY_DCIM;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
@@ -64,7 +64,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
-                Path path = LocalPath.of(new java.io.File(new URI(uriString)));
+                Path path = Paths.get(new URI(uriString));
                 try {
                     if (Files.exists(path, FOLLOW)) {
                         paths.add(path);

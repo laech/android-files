@@ -10,7 +10,7 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.local.LocalPath.DOT;
 
-public final class LocalName implements Name {
+final class LocalName implements Name {
 
     private final byte[] bytes;
 
@@ -32,6 +32,11 @@ public final class LocalName implements Name {
             i--;
         }
         return (i == -1 || i == 0 || i == bytes.length - 1) ? -1 : i;
+    }
+
+    @Override
+    public byte[] toByteArray() {
+        return bytes().clone();
     }
 
     @Override

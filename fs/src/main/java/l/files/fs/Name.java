@@ -4,6 +4,8 @@ import android.os.Parcelable;
 
 public interface Name extends Parcelable {
 
+    byte[] toByteArray();
+
     /**
      * The name part without extension.
      * <pre>
@@ -40,5 +42,4 @@ public interface Name extends Parcelable {
     String dotExt();
 
     boolean isEmpty();
-
 }

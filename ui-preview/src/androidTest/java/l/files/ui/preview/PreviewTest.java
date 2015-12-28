@@ -11,8 +11,8 @@ import java.io.InputStream;
 import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Stat;
-import l.files.fs.local.LocalPath;
 import l.files.testing.fs.PathBaseTest;
 
 import static java.lang.System.nanoTime;
@@ -96,7 +96,7 @@ public final class PreviewTest extends PathBaseTest {
 
     @Test
     public void preview_proc_cpuinfo() throws Exception {
-        testPreviewSuccess(LocalPath.of("/proc/cpuinfo"));
+        testPreviewSuccess(Paths.get("/proc/cpuinfo"));
     }
 
     @Test

@@ -27,7 +27,7 @@ android {
 
 dependencies {
 
-    compile project(':fs-local')
+    compile project(':fs')
 
     androidTestCompile project(':testing-fs')
 

@@ -19,9 +19,9 @@ import java.util.List;
 import l.files.base.Throwables;
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
-import l.files.fs.local.LocalPath;
 
 import static android.content.Intent.ACTION_MAIN;
 import static android.os.Environment.getExternalStorageDirectory;
@@ -55,7 +55,7 @@ public class BaseFilesActivityTest {
     public final TakeScreenShotOnFailure screenshot =
             new TakeScreenShotOnFailure();
 
-    private LocalPath dir;
+    private Path dir;
     private Intent intent;
     private UiFileActivity screen;
 
@@ -65,7 +65,7 @@ public class BaseFilesActivityTest {
         if (name.length() > 255) {
             name = name.substring(0, 255);
         }
-        dir = LocalPath.of(folder.newFolder(name));
+        dir = Paths.get(folder.newFolder(name));
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -116,7 +116,7 @@ public class BaseFilesActivityTest {
         return screen;
     }
 
-    LocalPath dir() {
+    Path dir() {
         return dir;
     }
 
@@ -149,7 +149,7 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = LocalPath.of(getExternalStorageDirectory())
+        Path dir = Paths.get(getExternalStorageDirectory())
                 .resolve(testName.getMethodName());
 
         Path src = dir.resolve("z");

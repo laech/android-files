@@ -7,8 +7,10 @@ import java.io.IOException;
 
 import l.files.fs.AlreadyExist;
 import l.files.fs.DirectoryNotEmpty;
+import l.files.fs.IOExceptionReason;
 
-public final class ErrnoException extends Exception {
+final class ErrnoException extends Exception
+        implements IOExceptionReason {
 
     public static final int EPERM = 1;
     public static final int ENOENT = 2;
@@ -251,7 +253,8 @@ public final class ErrnoException extends Exception {
         return null;
     }
 
-    public String strerror() {
+    @Override
+    public String reason() {
         return strerror(errno);
     }
 

@@ -37,6 +37,7 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
@@ -160,7 +161,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private Path downloadsDir() {
-        return LocalPath.of(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
+        return Paths.get(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
     private String uniqueTestName() {
@@ -206,7 +207,7 @@ public final class LocalObservableTest extends PathBaseTest {
 
             Tracker tracker = closer.register(registerMockTracker());
             Recorder observer = closer.register(observe(
-                    LocalPath.of("/proc/self"),
+                    Paths.get("/proc/self"),
                     FOLLOW,
                     false
             ));
@@ -464,7 +465,7 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private Path externalStorageDir() {
-        return LocalPath.of(getExternalStorageDirectory().getPath());
+        return Paths.get(getExternalStorageDirectory().getPath());
     }
 
     @Test
@@ -521,12 +522,12 @@ public final class LocalObservableTest extends PathBaseTest {
     }
 
     private int maxUserInstances() throws IOException {
-        Path limitFile = LocalPath.of("/proc/sys/fs/inotify/max_user_instances");
+        Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_instances");
         return parseInt(Files.readAllUtf8(limitFile).trim());
     }
 
     private int maxUserWatches() throws IOException {
-        Path limitFile = LocalPath.of("/proc/sys/fs/inotify/max_user_watches");
+        Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_watches");
         return parseInt(Files.readAllUtf8(limitFile).trim());
     }
 
@@ -1309,7 +1310,7 @@ public final class LocalObservableTest extends PathBaseTest {
         public void onWatchAdded(int fd, byte[] path, int mask, int wd) {
             super.onWatchAdded(fd, path, mask, wd);
             if (this.fd == fd) {
-                this.allChildWds.put(LocalPath.of(path), wd);
+                this.allChildWds.put(Paths.get(path), wd);
                 this.validChildWds.add(wd);
             }
         }

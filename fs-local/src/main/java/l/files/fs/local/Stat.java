@@ -9,6 +9,7 @@ import java.util.Set;
 
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
+import l.files.fs.Path;
 import l.files.fs.Permission;
 
 import static l.files.base.Objects.requireNonNull;
@@ -128,7 +129,7 @@ abstract class Stat extends Native implements l.files.fs.Stat {
 
     static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
-    static Stat stat(LocalPath path, LinkOption option) throws IOException {
+    static Stat stat(Path path, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
         while (true) {

@@ -65,6 +65,7 @@ android {
 
 dependencies {
 
+    compile project(':fs-local')
     compile project(':ui-browser')
 
     androidTestCompile project(':testing-fs')
