@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.info;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;

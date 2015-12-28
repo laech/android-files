@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <item type="id" name="info"/>
   <item type="id" name="share"/>
   <item type="id" name="refresh"/>
   <item type="id" name="content"/>

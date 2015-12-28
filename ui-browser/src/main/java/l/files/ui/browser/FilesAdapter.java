@@ -22,6 +22,7 @@ import java.util.Map;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.selection.SelectionModeViewHolder;
@@ -47,7 +48,7 @@ import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
 import static l.files.ui.preview.Preview.darkColor;
 
-final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
+final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         implements Selectable {
 
     static final int VIEW_TYPE_FILE = 0;
@@ -127,7 +128,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
         int warmUpToPosition = pos + 50;
 
         while (pos <= warmUpToPosition && pos < getItemCount()) {
-            BrowserItem item = getItem(pos);
+            Object item = getItem(pos);
             if (item instanceof FileItem) {
                 layouts.getName(context, (FileItem) item, textWidth);
                 layouts.getLink(context, (FileItem) item, textWidth);
@@ -156,7 +157,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        BrowserItem item = getItem(position);
+        Object item = getItem(position);
         if (item instanceof Header) {
             ((HeaderHolder) holder).bind((Header) item);
         } else {
@@ -166,7 +167,7 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     @Override
     public Object getItemIdObject(int position) {
-        BrowserItem item = getItem(position);
+        Object item = getItem(position);
         if (item instanceof FileItem) {
             return ((FileItem) item).selfPath();
         }
@@ -175,9 +176,9 @@ final class FilesAdapter extends StableAdapter<BrowserItem, ViewHolder>
 
     @Override
     public void selectAll() {
-        List<BrowserItem> items = items();
+        List<Object> items = items();
         Map<Path, FileItem> files = new ArrayMap<>(items.size());
-        for (BrowserItem item : items) {
+        for (Object item : items) {
             if (item instanceof FileItem) {
                 FileItem file = (FileItem) item;
                 files.put(file.selfPath(), file);

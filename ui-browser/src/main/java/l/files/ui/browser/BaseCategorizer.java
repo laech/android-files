@@ -5,14 +5,16 @@ import android.content.res.Resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import l.files.ui.base.fs.FileItem;
+
 import static java.util.Collections.unmodifiableList;
 
 abstract class BaseCategorizer implements Categorizer {
     @Override
-    public List<BrowserItem> categorize(
+    public List<Object> categorize(
             final Resources res,
             final List<FileItem> items) {
-        final List<BrowserItem> result = new ArrayList<>(items.size() + 10);
+        final List<Object> result = new ArrayList<>(items.size() + 10);
 
         Object preCategory = null;
         for (int i = 0; i < items.size(); i++) {

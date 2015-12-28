@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.info;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,6 +13,7 @@ import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.view.Views;
+import l.files.ui.base.fs.FileItem;
 
 public final class InfoMultiFragment extends InfoBaseFragment {
 

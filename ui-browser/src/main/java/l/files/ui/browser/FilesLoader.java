@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
+import l.files.base.Provider;
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
 import l.files.fs.FileSystem;
@@ -31,6 +32,7 @@ import l.files.fs.Name;
 import l.files.fs.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.text.Collators;
 
 import static android.os.Looper.getMainLooper;
@@ -285,7 +287,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
         Resources res = getContext().getResources();
-        List<BrowserItem> result = sort.sort(files, res);
+        List<Object> result = sort.sort(files, res);
         return Result.of(result);
     }
 
@@ -416,17 +418,17 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         Result() {
         }
 
-        abstract List<BrowserItem> items();
+        abstract List<Object> items();
 
         @Nullable
         abstract IOException exception();
 
         private static Result of(IOException exception) {
             return new AutoValue_FilesLoader_Result(
-                    Collections.<BrowserItem>emptyList(), exception);
+                    Collections.<Object>emptyList(), exception);
         }
 
-        private static Result of(List<BrowserItem> result) {
+        private static Result of(List<Object> result) {
             return new AutoValue_FilesLoader_Result(result, null);
         }
     }

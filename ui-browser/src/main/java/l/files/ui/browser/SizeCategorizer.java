@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.content.res.Resources;
 
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 
 /**
  * Categorizes by file size (descending order).

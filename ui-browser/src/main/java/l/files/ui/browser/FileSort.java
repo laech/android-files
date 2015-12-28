@@ -9,6 +9,7 @@ import java.util.List;
 
 import l.files.fs.Instant;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -31,10 +32,10 @@ enum FileSort {
         }
 
         @Override
-        List<BrowserItem> sort(List<FileItem> items, Resources res) {
+        List<Object> sort(List<FileItem> items, Resources res) {
             List<FileItem> result = new ArrayList<>(items);
             Collections.sort(result);
-            return Collections.<BrowserItem>unmodifiableList(result);
+            return Collections.<Object>unmodifiableList(result);
         }
     },
 
@@ -112,7 +113,7 @@ enum FileSort {
 
     abstract Categorizer categorizer();
 
-    List<BrowserItem> sort(List<FileItem> items, Resources res) {
+    List<Object> sort(List<FileItem> items, Resources res) {
         List<FileItem> sorted = new ArrayList<>(items);
         Collections.sort(sorted, comparator());
         return categorizer().categorize(res, sorted);

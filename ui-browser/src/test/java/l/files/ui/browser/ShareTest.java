@@ -18,6 +18,7 @@ import java.net.URI;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.selection.Selection;
 
 import static android.content.Intent.ACTION_CHOOSER;
@@ -57,8 +58,7 @@ public final class ShareTest {
     }
 
     @Test
-    public void hides_action_if_selection_contains_non_file() throws Exception {
-
+    public void disables_action_if_selection_contains_non_file() throws Exception {
 
         MenuItem item = mock(MenuItem.class);
         Menu menu = mock(Menu.class);
@@ -73,15 +73,15 @@ public final class ShareTest {
 
         action.onCreateActionMode(mode, menu);
         action.onPrepareActionMode(mode, menu);
-        order.verify(item).setVisible(false);
+        order.verify(item).setEnabled(false);
         order.verifyNoMoreInteractions();
 
         selection.add(1, mockFileItem("file:/tmp/1", true));
-        order.verify(item).setVisible(true);
+        order.verify(item).setEnabled(true);
         order.verifyNoMoreInteractions();
 
         selection.add(2, mockFileItem("file:/tmp/2", false));
-        order.verify(item).setVisible(false);
+        order.verify(item).setEnabled(false);
         order.verifyNoMoreInteractions();
     }
 

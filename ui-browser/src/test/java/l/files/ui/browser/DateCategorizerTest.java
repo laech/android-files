@@ -17,10 +17,12 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import l.files.base.Provider;
 import l.files.fs.Instant;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 
 import static java.util.Arrays.asList;
 import static java.util.Calendar.JUNE;
@@ -76,7 +78,7 @@ public final class DateCategorizerTest {
         FileItem prevYear1 = file(addDaysToMidnight(-365));
         FileItem prevYear2 = file(addDaysToMidnight(-365 * 2));
 
-        List<BrowserItem> expected = asList(
+        List<Object> expected = asList(
                 header(R.string.future),
                 future1,
                 future2,
@@ -104,7 +106,7 @@ public final class DateCategorizerTest {
                 prevYear2
         );
 
-        List<BrowserItem> actual = categorizer.categorize(res, asList(
+        List<Object> actual = categorizer.categorize(res, asList(
                 future1,
                 future2,
                 today1,
@@ -124,9 +126,9 @@ public final class DateCategorizerTest {
         assertEquals(names(expected), names(actual));
     }
 
-    private static List<String> names(Collection<BrowserItem> items) {
+    private static List<String> names(Collection<Object> items) {
         List<String> names = new ArrayList<>(items.size());
-        for (BrowserItem item : items) {
+        for (Object item : items) {
             names.add(item instanceof Header
                     ? ((Header) item).header()
                     : ((FileItem) item).selfPath().name().toString());

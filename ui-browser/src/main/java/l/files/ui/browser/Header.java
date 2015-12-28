@@ -3,7 +3,7 @@ package l.files.ui.browser;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-abstract class Header implements BrowserItem {
+abstract class Header {
 
     Header() {
     }

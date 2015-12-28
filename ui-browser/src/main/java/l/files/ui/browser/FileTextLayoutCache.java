@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Looper.getMainLooper;

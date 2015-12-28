@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'provided-base'
+
+android {
+
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+
+}
+
+dependencies {
+
+    compile project(':base')
+    compile project(':fs')
+    compile project(':ui-base')
+    compile project(':ui-preview')
+
+    apt 'com.google.auto.value:auto-value:1.1'
+    provided 'com.google.auto.value:auto-value:1.1'
+    provided 'javax.annotation:javax.annotation-api:1.2'
+
+}

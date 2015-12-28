@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.info;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,14 +12,14 @@ import java.util.List;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.browser.CalculateSizeLoader.Size;
+import l.files.ui.info.CalculateSizeLoader.Size;
 
 import static android.text.format.Formatter.formatFileSize;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static l.files.ui.base.view.Views.find;
 
-abstract class InfoBaseFragment
+public abstract class InfoBaseFragment
         extends DialogFragment
         implements LoaderCallbacks<Size> {
 

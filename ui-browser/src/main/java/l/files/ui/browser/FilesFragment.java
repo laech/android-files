@@ -23,8 +23,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenus;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
@@ -33,6 +35,7 @@ import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
 import l.files.ui.bookmarks.actions.Bookmark;
 import l.files.ui.browser.FilesLoader.Result;
+import l.files.ui.info.actions.Info;
 import l.files.ui.operations.actions.Copy;
 import l.files.ui.operations.actions.Cut;
 import l.files.ui.operations.actions.Delete;
@@ -112,7 +115,7 @@ public final class FilesFragment
         return directory;
     }
 
-    public List<BrowserItem> items() {
+    public List<Object> items() {
         return adapter.items();
     }
 
@@ -313,7 +316,7 @@ public final class FilesFragment
 
     private void updateSelection(Result data) {
         List<Path> files = new ArrayList<>(data.items().size());
-        for (BrowserItem item : data.items()) {
+        for (Object item : data.items()) {
             if (item instanceof FileItem) {
                 files.add(((FileItem) item).selfPath());
             }
@@ -323,7 +326,7 @@ public final class FilesFragment
 
     @Override
     public void onLoaderReset(Loader<Result> loader) {
-        adapter.setItems(Collections.<BrowserItem>emptyList());
+        adapter.setItems(Collections.<Object>emptyList());
     }
 
     @Override

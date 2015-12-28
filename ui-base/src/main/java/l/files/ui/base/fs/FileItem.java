@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.base.fs;
 
 import android.support.annotation.Nullable;
 
@@ -8,6 +8,7 @@ import com.ibm.icu.text.Collator;
 
 import java.io.IOException;
 
+import l.files.base.Provider;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -15,7 +16,7 @@ import l.files.fs.Stat;
 import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
 
 @AutoValue
-abstract class FileItem implements BrowserItem, Comparable<FileItem> {
+public abstract class FileItem implements Comparable<FileItem> {
 
     private Provider<Collator> collator;
     private CollationKey collationKey;
@@ -25,7 +26,7 @@ abstract class FileItem implements BrowserItem, Comparable<FileItem> {
     FileItem() {
     }
 
-    boolean isReadable() {
+    public boolean isReadable() {
         if (readable == null) {
             try {
                 readable = Files.isReadable(selfPath());
@@ -36,7 +37,7 @@ abstract class FileItem implements BrowserItem, Comparable<FileItem> {
         return readable;
     }
 
-    String basicMediaType() {
+    public String basicMediaType() {
         if (basicMediaType == null) {
             try {
                 basicMediaType = Files.detectBasicMediaType(
@@ -48,23 +49,23 @@ abstract class FileItem implements BrowserItem, Comparable<FileItem> {
         return basicMediaType;
     }
 
-    abstract Path selfPath();
+    public abstract Path selfPath();
 
     @Nullable
-    abstract Stat selfStat();
+    public abstract Stat selfStat();
 
     @Nullable
-    abstract Path linkTargetPath();
+    public abstract Path linkTargetPath();
 
     @Nullable
-    abstract Stat linkTargetStat();
+    public abstract Stat linkTargetStat();
 
     @Nullable
-    Stat linkTargetOrSelfStat() {
+    public Stat linkTargetOrSelfStat() {
         return linkTargetStat() != null ? linkTargetStat() : selfStat();
     }
 
-    Path linkTargetOrSelfPath() {
+    public Path linkTargetOrSelfPath() {
         return linkTargetPath() != null ? linkTargetPath() : selfPath();
     }
 
@@ -81,7 +82,7 @@ abstract class FileItem implements BrowserItem, Comparable<FileItem> {
         return collationKey().compareTo(another.collationKey());
     }
 
-    static FileItem create(
+    public static FileItem create(
             Path path,
             @Nullable Stat stat,
             @Nullable Path target,

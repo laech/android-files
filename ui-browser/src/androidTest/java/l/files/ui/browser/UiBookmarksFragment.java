@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import l.files.base.Provider;
 import l.files.fs.Path;
 import l.files.ui.bookmarks.BookmarksFragment;
 

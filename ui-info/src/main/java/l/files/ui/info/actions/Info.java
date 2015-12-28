@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.info.actions;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v7.view.ActionMode;
@@ -11,9 +11,13 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
+import l.files.ui.base.fs.FileItem;
+import l.files.ui.info.InfoFragment;
+import l.files.ui.info.InfoMultiFragment;
+import l.files.ui.info.R;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.browser.InfoBaseFragment.FRAGMENT_TAG;
+import static l.files.ui.info.InfoBaseFragment.FRAGMENT_TAG;
 
 public final class Info extends ActionModeItem implements Selection.Callback {
 

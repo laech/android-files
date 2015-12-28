@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import l.files.base.Provider;
 import l.files.fs.FileSystem;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
 
@@ -587,9 +589,9 @@ final class UiFileActivity {
     }
 
     private List<FileItem> fileItems() {
-        List<BrowserItem> items = fragment().items();
+        List<Object> items = fragment().items();
         List<FileItem> files = new ArrayList<>(items.size());
-        for (BrowserItem item : items) {
+        for (Object item : items) {
             if (item instanceof FileItem) {
                 files.add(((FileItem) item));
             }

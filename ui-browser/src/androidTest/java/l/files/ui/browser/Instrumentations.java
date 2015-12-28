@@ -8,6 +8,7 @@ import android.view.View;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import l.files.base.Provider;
 import l.files.ui.base.widget.StableAdapter;
 
 import static android.os.Looper.getMainLooper;

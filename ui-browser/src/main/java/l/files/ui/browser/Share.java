@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.ui.base.fs.FileItem;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
 

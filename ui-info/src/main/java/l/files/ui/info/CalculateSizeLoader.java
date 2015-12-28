@@ -1,4 +1,4 @@
-package l.files.ui.browser;
+package l.files.ui.info;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
@@ -12,7 +12,8 @@ import l.files.fs.FileSystem.SizeVisitor;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.browser.CalculateSizeLoader.Size;
+import l.files.ui.info.AutoValue_CalculateSizeLoader_Size;
+import l.files.ui.info.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;

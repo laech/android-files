@@ -35,13 +35,4 @@
     <string name="link_icon">➥</string>
     <string name="link_x">➞ %1$s</string>
 
-    <string name="info">Info</string>
-    <string name="info_modified_label">Modified:</string>
-    <string name="info_size_label">Size:</string>
-    <string name="x_size_on_disk">%s on disk</string>
-    <plurals name="x_size_y_items">
-        <item quantity="one">%1$s for %2$,d item</item>
-        <item quantity="other">%1$s for %2$,d items</item>
-    </plurals>
-
 </resources>
