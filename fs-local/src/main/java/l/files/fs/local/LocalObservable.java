@@ -328,6 +328,9 @@ final class LocalObservable extends Native
                 throw new InterruptedException();
             }
 
+        } catch (ErrnoException e) {
+            throw closer.rethrow(e.toIOException(root));
+
         } catch (Throwable e) {
             throw closer.rethrow(e);
         } finally {
