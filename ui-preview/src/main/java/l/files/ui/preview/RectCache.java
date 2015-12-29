@@ -9,7 +9,7 @@ import l.files.fs.Path;
 final class RectCache extends PersistenceCache<Rect> {
 
     RectCache(Path cacheDir) {
-        super(cacheDir, (byte) 1);
+        super(cacheDir, 1);
     }
 
     @Override

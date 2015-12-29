@@ -9,7 +9,7 @@ import l.files.fs.Path;
 final class NoPreviewCache extends PersistenceCache<Boolean> {
 
     NoPreviewCache(Path cacheDir) {
-        super(cacheDir, (byte) 1);
+        super(cacheDir, 1);
     }
 
     @Override

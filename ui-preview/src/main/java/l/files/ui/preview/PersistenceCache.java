@@ -49,12 +49,12 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
             };
 
-    private static final byte SUPERCLASS_VERSION = 3;
+    private static final int SUPERCLASS_VERSION = 3;
 
     private final Path cacheDir;
-    private final byte subclassVersion;
+    private final int subclassVersion;
 
-    PersistenceCache(Path cacheDir, byte version) {
+    PersistenceCache(Path cacheDir, int version) {
         this.cacheDir = requireNonNull(cacheDir);
         this.subclassVersion = version;
     }
@@ -115,10 +115,10 @@ abstract class PersistenceCache<V> extends MemCache<V> {
 
             DataInputStream in = closer.register(Files.newBufferedDataInputStream(file));
 
-            if (in.readByte() != SUPERCLASS_VERSION) {
+            if (in.readInt() != SUPERCLASS_VERSION) {
                 return;
             }
-            if (in.readByte() != subclassVersion) {
+            if (in.readInt() != subclassVersion) {
                 return;
             }
 
@@ -178,8 +178,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
         try {
 
             DataOutputStream out = closer.register(Files.newBufferedDataOutputStream(tmp));
-            out.writeByte(SUPERCLASS_VERSION);
-            out.writeByte(subclassVersion);
+            out.writeInt(SUPERCLASS_VERSION);
+            out.writeInt(subclassVersion);
 
             Map<ByteBuffer, Snapshot<V>> snapshot = cache.snapshot();
             for (Map.Entry<ByteBuffer, Snapshot<V>> entry : snapshot.entrySet()) {
