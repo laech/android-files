@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.media;
 
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -7,6 +7,13 @@ import org.mockito.stubbing.Answer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import l.files.fs.FileSystem;
+import l.files.fs.Files;
+import l.files.fs.LinkOption;
+import l.files.fs.Name;
+import l.files.fs.Path;
+import l.files.fs.Stat;
 
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;

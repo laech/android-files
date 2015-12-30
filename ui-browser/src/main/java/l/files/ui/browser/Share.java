@@ -20,7 +20,7 @@ import static android.content.Intent.ACTION_SEND_MULTIPLE;
 import static android.content.Intent.EXTRA_STREAM;
 import static android.content.Intent.createChooser;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
 final class Share extends ActionModeItem implements Selection.Callback {
 

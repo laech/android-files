@@ -1,8 +1,11 @@
-package l.files.fs;
+package l.files.fs.media;
 
 import java.io.IOException;
 
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import l.files.fs.Path;
+import l.files.fs.Stat;
+
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;

@@ -1,10 +1,12 @@
-package l.files.fs;
+package l.files.fs.media;
 
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import l.files.fs.*;
+
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;

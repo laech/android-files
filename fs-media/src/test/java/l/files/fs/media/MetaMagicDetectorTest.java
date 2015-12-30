@@ -1,6 +1,8 @@
-package l.files.fs;
+package l.files.fs.media;
 
 import org.junit.Test;
+
+import l.files.fs.*;
 
 import static org.junit.Assert.assertEquals;
 

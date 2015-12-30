@@ -30,6 +30,7 @@ android {
 dependencies {
 
     compile project(':fs')
+    compile project(':fs-media')
     compile project(':ui-info')
     compile project(':ui-preview')
     compile project(':ui-operations')

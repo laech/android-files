@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.media.MediaTypes;
 
 import static l.files.ui.preview.Preview.decodePalette;
 
@@ -172,7 +173,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-            return Files.detectContentMediaType(file, stat);
+            return MediaTypes.detectByContent(file, stat);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

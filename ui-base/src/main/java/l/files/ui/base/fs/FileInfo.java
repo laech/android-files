@@ -12,8 +12,9 @@ import l.files.base.Provider;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.media.MediaTypes;
 
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
 @AutoValue
 public abstract class FileInfo implements Comparable<FileInfo> {
@@ -40,7 +41,7 @@ public abstract class FileInfo implements Comparable<FileInfo> {
     public String basicMediaType() {
         if (basicMediaType == null) {
             try {
-                basicMediaType = Files.detectBasicMediaType(
+                basicMediaType = MediaTypes.detectByProperties(
                         selfPath(), linkTargetOrSelfStat());
             } catch (IOException e) {
                 basicMediaType = MEDIA_TYPE_OCTET_STREAM;

@@ -1,4 +1,4 @@
-package l.files.fs;
+package l.files.fs.media;
 
 import org.apache.tika.io.TaggedIOException;
 
@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Closer;
+import l.files.fs.Path;
+import l.files.fs.Stat;
 
 import static l.files.fs.Files.newInputStream;
 
@@ -30,9 +32,9 @@ final class MagicDetector extends AbstractDetector {
 
         } catch (TaggedIOException e) {
             if (e.getCause() != null) {
-                throw e.getCause();
+                throw closer.rethrow(e.getCause());
             } else {
-                throw e;
+                throw closer.rethrow(e);
             }
         } catch (Throwable e) {
             throw closer.rethrow(e);

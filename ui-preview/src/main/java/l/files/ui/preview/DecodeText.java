@@ -7,9 +7,9 @@ import android.widget.TextView;
 import java.io.IOException;
 
 import l.files.fs.Files;
-import l.files.fs.MediaTypes;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.media.MediaTypes;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import static android.graphics.Bitmap.createBitmap;

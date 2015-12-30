@@ -8,16 +8,15 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 
-import l.files.fs.Files;
-import l.files.fs.MediaTypes;
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.fs.media.MediaTypes;
 
 import static android.content.Intent.ACTION_VIEW;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.Files.MEDIA_TYPE_ANY;
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_ANY;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.browser.BuildConfig.DEBUG;
 
@@ -36,7 +35,7 @@ final class OpenFile extends AsyncTask<Void, Void, Object> {
     @Override
     protected Object doInBackground(Void... params) {
         try {
-            return Files.detectMediaType(file, stat);
+            return MediaTypes.detect(file, stat);
         } catch (IOException e) {
             return e;
         }

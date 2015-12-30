@@ -1,7 +1,10 @@
-package l.files.fs;
+package l.files.fs.media;
+
+import l.files.fs.Path;
+import l.files.fs.Stat;
 
 import static java.util.Locale.ENGLISH;
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
 /**
  * Detects content type based on name and file type.

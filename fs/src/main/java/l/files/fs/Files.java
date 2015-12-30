@@ -34,9 +34,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 public final class Files {
 
-    public static final String MEDIA_TYPE_OCTET_STREAM = "application/octet-stream";
-    public static final String MEDIA_TYPE_ANY = "*/*";
-
     public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -464,35 +461,6 @@ public final class Files {
     public static void setPermissions(Path path, Set<Permission> perms)
             throws IOException {
         path.fileSystem().setPermissions(path, perms);
-    }
-
-    /**
-     * Detects the content type of this file based on its properties
-     * without reading the content of this file.
-     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
-     */
-    public static String detectBasicMediaType(Path path, Stat stat)
-            throws IOException {
-        return BasicDetector.INSTANCE.detect(path, stat);
-    }
-
-    /**
-     * Detects the content type of this file based on its content.
-     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
-     */
-    public static String detectContentMediaType(Path path, Stat stat)
-            throws IOException {
-        return MagicDetector.INSTANCE.detect(path, stat);
-    }
-
-    /**
-     * Detects the content type of this file based on its properties
-     * and its content.
-     * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
-     */
-    public static String detectMediaType(Path path, Stat stat)
-            throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(path, stat);
     }
 
 }

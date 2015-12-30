@@ -27,7 +27,7 @@ import static android.content.Intent.EXTRA_INTENT;
 import static android.content.Intent.EXTRA_STREAM;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static java.util.Arrays.asList;
-import static l.files.fs.Files.MEDIA_TYPE_OCTET_STREAM;
+import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
