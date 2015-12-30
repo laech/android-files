@@ -118,11 +118,6 @@ final class LocalPath implements Path {
     }
 
     @Override
-    public void writeTo(OutputStream out) throws IOException {
-        toByteArray(out);
-    }
-
-    @Override
     public FileSystem fileSystem() {
         return LocalFileSystem.INSTANCE;
     }

@@ -76,11 +76,5 @@ public interface Path extends Parcelable {
      */
     boolean startsWith(Path p);
 
-    /**
-     * @deprecated use {@link #toByteArray(OutputStream)} instead
-     */
-    @Deprecated
-    void writeTo(OutputStream out) throws IOException;
-
     boolean isHidden();
 }
