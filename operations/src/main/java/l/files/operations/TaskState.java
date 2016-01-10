@@ -1,11 +1,10 @@
 package l.files.operations;
 
-import com.google.auto.value.AutoValue;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
+import static l.files.base.Objects.requireNonNull;
 
 /**
  * Represents the state of a task. Instances of this will be posted to the event
@@ -13,25 +12,38 @@ import static java.util.Collections.unmodifiableList;
  */
 public abstract class TaskState {
 
-    TaskState() {
+    private final TaskId task;
+    private final Target target;
+    private final Time time;
+
+    TaskState(TaskId task, Target target, Time time) {
+        this.task = requireNonNull(task);
+        this.target = requireNonNull(target);
+        this.time = requireNonNull(time);
     }
 
     /**
      * The source task this state is for.
      */
-    public abstract TaskId task();
+    public TaskId task() {
+        return task;
+    }
 
     /**
      * Gets the source/destination of the source task.
      */
-    public abstract Target target();
+    public Target target() {
+        return target;
+    }
 
     /**
      * Gets the time when the state transitioned to this one. This time will
      * stay the same for subsequent state updates of the same kind. i.e. this
      * value will only change if the next state is of a different kind.
      */
-    public abstract Time time();
+    public Time time() {
+        return time;
+    }
 
     /**
      * Returns true if the task is finished (success or failure).
@@ -40,10 +52,10 @@ public abstract class TaskState {
         return this instanceof Success || this instanceof Failed;
     }
 
-    @AutoValue
-    public static abstract class Pending extends TaskState {
+    public static final class Pending extends TaskState {
 
-        Pending() {
+        Pending(TaskId task, Target target, Time time) {
+            super(task, target, time);
         }
 
         public Running running(Time time) {
@@ -51,67 +63,78 @@ public abstract class TaskState {
         }
 
         public Running running(Time time, Progress items, Progress bytes) {
-            return new AutoValue_TaskState_Running(
-                    task(), target(), time, items, bytes);
+            return new Running(task(), target(), time, items, bytes);
         }
 
     }
 
-    @AutoValue
-    public static abstract class Running extends TaskState {
+    public static final class Running extends TaskState {
 
-        Running() {
+        private final Progress items;
+        private final Progress bytes;
+
+        Running(TaskId task, Target target, Time time, Progress items, Progress bytes) {
+            super(task, target, time);
+            this.items = requireNonNull(items);
+            this.bytes = requireNonNull(bytes);
         }
 
         /**
          * Number of items to process.
          */
-        public abstract Progress items();
+        public Progress items() {
+            return items;
+        }
 
         /**
          * Number of bytes to process.
          */
-        public abstract Progress bytes();
+        public Progress bytes() {
+            return bytes;
+        }
 
         public Running running(Progress items, Progress bytes) {
             // Do not update the time as specified by the contract on time()
-            return new AutoValue_TaskState_Running(
-                    task(), target(), time(), items, bytes);
+            return new Running(task(), target(), time(), items, bytes);
         }
 
         public Success success(Time time) {
-            return new AutoValue_TaskState_Success(
-                    task(), target(), time);
+            return new Success(task(), target(), time);
         }
 
         public Failed failed(Time time, List<Failure> failures) {
-            return new AutoValue_TaskState_Failed(task(), target(), time,
+            return new Failed(task(), target(), time,
                     unmodifiableList(new ArrayList<>(failures)));
         }
     }
 
-    @AutoValue
-    public static abstract class Success extends TaskState {
-        Success() {
+    public static final class Success extends TaskState {
+        Success(TaskId task, Target target, Time time) {
+            super(task, target, time);
         }
     }
 
-    @AutoValue
-    public static abstract class Failed extends TaskState {
+    public static final class Failed extends TaskState {
 
-        Failed() {
+        private final List<Failure> failures;
+
+        Failed(TaskId task, Target target, Time time, List<Failure> failures) {
+            super(task, target, time);
+            this.failures = requireNonNull(failures);
         }
 
         /**
          * The file failures of the task, may be empty if the task if caused by
          * other errors.
          */
-        public abstract List<Failure> failures();
+        public List<Failure> failures() {
+            return failures;
+        }
 
     }
 
     public static Pending pending(TaskId task, Target target, Time time) {
-        return new AutoValue_TaskState_Pending(task, target, time);
+        return new Pending(task, target, time);
     }
 
 }

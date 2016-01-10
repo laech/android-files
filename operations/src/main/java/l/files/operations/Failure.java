@@ -1,23 +1,31 @@
 package l.files.operations;
 
-import com.google.auto.value.AutoValue;
-
 import java.io.IOException;
 
 import l.files.fs.Path;
 
-@AutoValue
-public abstract class Failure {
+import static l.files.base.Objects.requireNonNull;
 
-    Failure() {
+public final class Failure {
+
+    private final Path path;
+    private final IOException cause;
+
+    private Failure(Path path, IOException cause) {
+        this.path = requireNonNull(path);
+        this.cause = requireNonNull(cause);
     }
 
-    public abstract Path path();
+    public Path path() {
+        return path;
+    }
 
-    public abstract IOException cause();
+    public IOException cause() {
+        return cause;
+    }
 
     public static Failure create(Path path, IOException cause) {
-        return new AutoValue_Failure(path, cause);
+        return new Failure(path, cause);
     }
 
 }

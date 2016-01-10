@@ -1,18 +1,24 @@
 package l.files.operations;
 
-import com.google.auto.value.AutoValue;
-
-@AutoValue
-public abstract class Progress {
+public final class Progress {
 
     public static final Progress NONE = normalize(0, 0);
 
-    Progress() {
+    private final long total;
+    private final long processed;
+
+    private Progress(long total, long processed) {
+        this.total = total;
+        this.processed = processed;
     }
 
-    public abstract long total();
+    public long total() {
+        return total;
+    }
 
-    public abstract long processed();
+    public long processed() {
+        return processed;
+    }
 
     /**
      * Throws IllegalArgumentException if total < processed or negative
@@ -28,7 +34,7 @@ public abstract class Progress {
             throw new IllegalArgumentException("total=" + total
                     + ", processed=" + processed);
         }
-        return new AutoValue_Progress(total, processed);
+        return new Progress(total, processed);
     }
 
     /**
@@ -59,4 +65,30 @@ public abstract class Progress {
         return total() == processed();
     }
 
+    @Override
+    public String toString() {
+        return "Progress{" +
+                "total=" + total +
+                ", processed=" + processed +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Progress progress = (Progress) o;
+
+        return total == progress.total &&
+                processed == progress.processed;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (total ^ (total >>> 32));
+        result = 31 * result + (int) (processed ^ (processed >>> 32));
+        return result;
+    }
 }

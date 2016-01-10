@@ -6,9 +6,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;
@@ -107,7 +109,13 @@ public final class TaskTest extends BaseTest {
 
     private static abstract class TestTask extends Task {
         TestTask(Handler handler, Callback callback) {
-            super(TaskId.create(0, COPY), mock(Target.class), Clock.system(), callback, handler);
+            super(
+                    TaskId.create(0, COPY),
+                    Target.from(Collections.<Path>emptyList(), mock(Path.class)),
+                    Clock.system(),
+                    callback,
+                    handler
+            );
         }
 
         @Override
