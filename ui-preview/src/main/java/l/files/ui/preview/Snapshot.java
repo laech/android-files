@@ -1,18 +1,27 @@
 package l.files.ui.preview;
 
-import com.google.auto.value.AutoValue;
+import static l.files.base.Objects.requireNonNull;
 
-import l.files.fs.Instant;
+final class Snapshot<V> {
 
-@AutoValue
-abstract class Snapshot<V> {
+    private final V value;
+    private final long time;
 
-    abstract V get();
+    Snapshot(V value, long time) {
+        this.value = requireNonNull(value);
+        this.time = time;
+    }
 
-    abstract long time();
+    V get() {
+        return value;
+    }
+
+    long time() {
+        return time;
+    }
 
     static <V> Snapshot<V> of(V value, long time) {
-        return new AutoValue_Snapshot<>(value, time);
+        return new Snapshot<>(value, time);
     }
 
 }

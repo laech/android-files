@@ -1,19 +1,26 @@
 package l.files.ui.preview;
 
-import com.google.auto.value.AutoValue;
-
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.round;
 
-@AutoValue
-public abstract class Rect {
-    Rect() {
+public final class Rect {
+
+    private final int width;
+    private final int height;
+
+    Rect(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    public abstract int width();
+    public int width() {
+        return width;
+    }
 
-    public abstract int height();
+    public int height() {
+        return height;
+    }
 
     public boolean contains(Rect that) {
         return width() >= that.width() && height() >= that.height();
@@ -23,7 +30,7 @@ public abstract class Rect {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException();
         }
-        return new AutoValue_Rect(width, height);
+        return new Rect(width, height);
     }
 
     public Rect scale(Rect constraint) {
