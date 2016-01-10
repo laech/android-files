@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
-import l.files.fs.BuildConfig;
 import l.files.fs.FileSystem;
 import l.files.fs.LinkOption;
 import l.files.fs.Name;

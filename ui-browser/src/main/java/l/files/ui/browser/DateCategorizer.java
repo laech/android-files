@@ -3,8 +3,6 @@ package l.files.ui.browser;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
-import com.google.auto.value.AutoValue;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,8 +15,8 @@ import l.files.ui.base.fs.FileInfo;
 
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
-import static l.files.base.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static l.files.base.Objects.requireNonNull;
 
 /**
  * Categories files by their last modified date.
@@ -74,9 +72,9 @@ final class DateCategorizer extends BaseCategorizer {
         int thatYear = timestamp.get(YEAR);
 
         if (currentYear != thatYear) {
-            return Year.of(thatYear);
+            return new Year(thatYear);
         }
-        return Month.of(timestamp.get(MONTH));
+        return new Month(timestamp.get(MONTH));
     }
 
     @Override
@@ -102,21 +100,21 @@ final class DateCategorizer extends BaseCategorizer {
         return res.getString((int) id);
     }
 
-    @AutoValue
-    static abstract class Year {
-        abstract int value();
+    static final class Year {
 
-        static Year of(int value) {
-            return new AutoValue_DateCategorizer_Year(value);
+        final int value;
+
+        Year(int value) {
+            this.value = value;
         }
     }
 
-    @AutoValue
-    static abstract class Month {
-        abstract int value();
+    static final class Month {
 
-        static Month of(int value) {
-            return new AutoValue_DateCategorizer_Month(value);
+        final int value;
+
+        Month(int value) {
+            this.value = value;
         }
     }
 }

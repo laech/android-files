@@ -7,7 +7,6 @@ import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.google.auto.value.AutoValue;
 import com.ibm.icu.text.Collator;
 
 import java.io.Closeable;
@@ -413,23 +412,32 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         return stat;
     }
 
-    @AutoValue
-    static abstract class Result {
-        Result() {
+    static final class Result {
+
+        private final List<Object> items;
+        private final IOException exception;
+
+        private Result(List<Object> items, IOException exception) {
+            this.items = items;
+            this.exception = exception;
         }
 
-        abstract List<Object> items();
+        List<Object> items() {
+            return items;
+        }
 
         @Nullable
-        abstract IOException exception();
+        IOException exception() {
+            return exception;
+        }
 
         private static Result of(IOException exception) {
-            return new AutoValue_FilesLoader_Result(
+            return new Result(
                     Collections.<Object>emptyList(), exception);
         }
 
         private static Result of(List<Object> result) {
-            return new AutoValue_FilesLoader_Result(result, null);
+            return new Result(result, null);
         }
     }
 

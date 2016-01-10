@@ -1,21 +1,36 @@
 package l.files.ui.browser;
 
-import com.google.auto.value.AutoValue;
+import static l.files.base.Objects.requireNonNull;
 
-@AutoValue
-abstract class Header {
+final class Header {
 
-    Header() {
+    private final String header;
+
+    private Header(String header) {
+        this.header = requireNonNull(header);
     }
 
-    abstract String header();
+    String header() {
+        return header;
+    }
 
     static Header of(String header) {
-        return new AutoValue_Header(header);
+        return new Header(header);
     }
 
     @Override
     public String toString() {
         return header();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Header &&
+                header.equals(((Header) o).header);
+    }
+
+    @Override
+    public int hashCode() {
+        return header.hashCode();
     }
 }
