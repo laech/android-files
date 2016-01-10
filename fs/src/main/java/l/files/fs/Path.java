@@ -1,7 +1,6 @@
 package l.files.fs;
 
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,7 +44,6 @@ public interface Path extends Parcelable {
      */
     Name name();
 
-    @Nullable
     Path parent();
 
     /**

@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import com.google.auto.value.AutoValue;
-
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -11,23 +9,31 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 /**
  * Represents a point in time with nanosecond precision.
  */
-@AutoValue
-public abstract class Instant implements Comparable<Instant> {
+public final class Instant implements Comparable<Instant> {
 
     public static final Instant EPOCH = of(0, 0);
 
-    Instant() {
+    private final long seconds;
+    private final int nanos;
+
+    private Instant(long seconds, int nanos) {
+        this.seconds = seconds;
+        this.nanos = nanos;
     }
 
     /**
      * The number of seconds since epoch.
      */
-    public abstract long seconds();
+    public long seconds() {
+        return seconds;
+    }
 
     /**
      * The number of nanoseconds since {@link #seconds()}.
      */
-    public abstract int nanos();
+    public int nanos() {
+        return nanos;
+    }
 
     public static Instant ofMillis(long time) {
         long seconds = MILLISECONDS.toSeconds(time);
@@ -58,7 +64,7 @@ public abstract class Instant implements Comparable<Instant> {
                             ", seconds=" + seconds +
                             ", nanos=" + nanos);
         }
-        return new AutoValue_Instant(seconds, nanos);
+        return new Instant(seconds, nanos);
     }
 
     /**
@@ -68,6 +74,31 @@ public abstract class Instant implements Comparable<Instant> {
         long seconds = unit.convert(seconds(), SECONDS);
         long nanos = unit.convert(nanos(), NANOSECONDS);
         return seconds + nanos;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Instant) {
+            Instant that = (Instant) o;
+            return seconds == that.seconds &&
+                    nanos == that.nanos;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (seconds ^ (seconds >>> 32));
+        result = 31 * result + nanos;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Instant{" +
+                "seconds=" + seconds +
+                ", nanos=" + nanos +
+                '}';
     }
 
     @Override
