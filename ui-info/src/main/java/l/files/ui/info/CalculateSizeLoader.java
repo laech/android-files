@@ -3,8 +3,6 @@ package l.files.ui.info;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.google.auto.value.AutoValue;
-
 import java.io.IOException;
 import java.util.Collection;
 
@@ -12,7 +10,6 @@ import l.files.fs.FileSystem.SizeVisitor;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.info.AutoValue_CalculateSizeLoader_Size;
 import l.files.ui.info.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
@@ -97,19 +94,32 @@ final class CalculateSizeLoader
         return result != null;
     }
 
-    @AutoValue
-    static abstract class Size {
-        Size() {
+    static final class Size {
+
+        private final int count;
+        private final long size;
+        private final long sizeOnDisk;
+
+        Size(int count, long size, long sizeOnDisk) {
+            this.count = count;
+            this.size = size;
+            this.sizeOnDisk = sizeOnDisk;
         }
 
-        abstract int count();
+        int count() {
+            return count;
+        }
 
-        abstract long size();
+        long size() {
+            return size;
+        }
 
-        abstract long sizeOnDisk();
+        long sizeOnDisk() {
+            return sizeOnDisk;
+        }
 
         static Size of(int count, long size, long sizeOnDisk) {
-            return new AutoValue_CalculateSizeLoader_Size(count, size, sizeOnDisk);
+            return new Size(count, size, sizeOnDisk);
         }
     }
 }
