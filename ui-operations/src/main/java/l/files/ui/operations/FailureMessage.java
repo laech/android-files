@@ -3,22 +3,58 @@ package l.files.ui.operations;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.auto.value.AutoValue;
-
+import l.files.base.Objects;
 import l.files.fs.Path;
 
-@AutoValue
-abstract class FailureMessage implements Parcelable {
+import static l.files.base.Objects.requireNonNull;
 
-    FailureMessage() {
+final class FailureMessage implements Parcelable {
+
+    private final Path path;
+    private final String message;
+
+    private FailureMessage(Path path, String message) {
+        this.path = requireNonNull(path);
+        this.message = requireNonNull(message);
     }
 
-    abstract Path path();
+    Path path() {
+        return path;
+    }
 
-    abstract String message();
+    String message() {
+        return message;
+    }
 
     static FailureMessage create(Path path, String message) {
-        return new AutoValue_FailureMessage(path, message);
+        return new FailureMessage(path, message);
+    }
+
+    @Override
+    public String toString() {
+        return "FailureMessage{" +
+                "path=" + path +
+                ", message='" + message + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        FailureMessage that = (FailureMessage) o;
+        return Objects.equal(path, that.path) &&
+                Objects.equal(message, that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, message);
     }
 
     @Override
