@@ -4,8 +4,6 @@ import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.net.Uri;
 
-import com.google.auto.value.AutoValue;
-
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -53,6 +51,7 @@ import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
@@ -1626,16 +1625,48 @@ public final class LocalObservableTest extends PathBaseTest {
 
     }
 
-    @AutoValue
-    static abstract class WatchEvent {
-        abstract Event kind();
+    static final class WatchEvent {
 
-        abstract Path resource();
+        final Event kind;
+        final Path path;
 
-        static WatchEvent create(Event kind, Path file) {
-            return new AutoValue_LocalObservableTest_WatchEvent(
-                    kind, file
-            );
+        private WatchEvent(Event kind, Path path) {
+            this.kind = requireNonNull(kind);
+            this.path = requireNonNull(path);
+        }
+
+        static WatchEvent create(Event kind, Path path) {
+            return new WatchEvent(kind, path);
+        }
+
+        @Override
+        public String toString() {
+            return "WatchEvent{" +
+                    "kind=" + kind +
+                    ", path=" + path +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            WatchEvent that = (WatchEvent) o;
+
+            return kind == that.kind &&
+                    path.equals(that.path);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = kind.hashCode();
+            result = 31 * result + path.hashCode();
+            return result;
         }
     }
 

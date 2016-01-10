@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import android.text.TextUtils;
 
-import com.google.auto.value.AutoValue;
-
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,6 +14,7 @@ import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 
 import static java.util.Arrays.asList;
+import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createDirs;
 import static l.files.fs.Files.createFile;
@@ -321,15 +320,49 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         PRE, POST
     }
 
-    @AutoValue
-    static abstract class TraversalEvent {
+    static final class TraversalEvent {
 
-        abstract TraversalOrder order();
+        final TraversalOrder order;
+        final Path path;
 
-        abstract Path resource();
+        private TraversalEvent(TraversalOrder order, Path path) {
+            this.order = requireNonNull(order);
+            this.path = requireNonNull(path);
+        }
 
         static TraversalEvent of(TraversalOrder order, Path file) {
-            return new AutoValue_LocalFileTraverseTest_TraversalEvent(order, file);
+            return new TraversalEvent(order, file);
+        }
+
+        @Override
+        public String toString() {
+            return "TraversalEvent{" +
+                    "order=" + order +
+                    ", path=" + path +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            TraversalEvent that = (TraversalEvent) o;
+
+            return order == that.order &&
+                    path.equals(that.path);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = order.hashCode();
+            result = 31 * result + path.hashCode();
+            return result;
         }
     }
 

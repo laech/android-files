@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import android.os.Parcel;
 
-import com.google.auto.value.AutoValue;
-
 import java.io.IOException;
 import java.util.Set;
 
@@ -17,9 +15,8 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.LocalFileSystem.permissionsFromMode;
 
-@AutoValue
 @SuppressWarnings("OctalInteger")
-abstract class Stat extends Native implements l.files.fs.Stat {
+final class Stat extends Native implements l.files.fs.Stat {
 
     static final int S_IFMT = 00170000;
     static final int S_IFSOCK = 0140000;
@@ -76,23 +73,61 @@ abstract class Stat extends Native implements l.files.fs.Stat {
     static final int S_IWOTH = 00002;
     static final int S_IXOTH = 00001;
 
-    Stat() {
+
+    private final int mode;
+    private final int uid;
+    private final int gid;
+    private final long size;
+    private final long mtime;
+    private final int mtime_nsec;
+    private final long blocks;
+
+    private Stat(
+            int mode,
+            int uid,
+            int gid,
+            long size,
+            long mtime,
+            int mtime_nsec,
+            long blocks) {
+
+        this.mode = mode;
+        this.uid = uid;
+        this.gid = gid;
+        this.size = size;
+        this.mtime = mtime;
+        this.mtime_nsec = mtime_nsec;
+        this.blocks = blocks;
     }
 
-    abstract int mode();
+    int mode() {
+        return this.mode;
+    }
 
-    abstract int uid();
+    int uid() {
+        return this.uid;
+    }
 
-    abstract int gid();
+    int gid() {
+        return this.gid;
+    }
 
     @Override
-    public abstract long size();
+    public long size() {
+        return this.size;
+    }
 
-    abstract long mtime();
+    long mtime() {
+        return this.mtime;
+    }
 
-    abstract int mtime_nsec();
+    int mtime_nsec() {
+        return this.mtime_nsec;
+    }
 
-    abstract long blocks();
+    long blocks() {
+        return this.blocks;
+    }
 
     static Stat create(
             int mode,
@@ -103,7 +138,7 @@ abstract class Stat extends Native implements l.files.fs.Stat {
             int mtime_nsec,
             long blocks) {
 
-        return new AutoValue_Stat(
+        return new Stat(
                 mode,
                 uid,
                 gid,
@@ -205,6 +240,51 @@ abstract class Stat extends Native implements l.files.fs.Stat {
             permissions = permissionsFromMode(mode());
         }
         return permissions;
+    }
+
+    @Override
+    public String toString() {
+        return "Stat{" +
+                "mode=" + mode +
+                ", uid=" + uid +
+                ", gid=" + gid +
+                ", size=" + size +
+                ", mtime=" + mtime +
+                ", mtime_nsec=" + mtime_nsec +
+                ", blocks=" + blocks +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Stat that = (Stat) o;
+
+        return mode == that.mode &&
+                uid == that.uid &&
+                gid == that.gid &&
+                size == that.size &&
+                mtime == that.mtime &&
+                mtime_nsec == that.mtime_nsec &&
+                blocks == that.blocks;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mode;
+        result = 31 * result + uid;
+        result = 31 * result + gid;
+        result = 31 * result + (int) (size ^ (size >>> 32));
+        result = 31 * result + (int) (mtime ^ (mtime >>> 32));
+        result = 31 * result + mtime_nsec;
+        result = 31 * result + (int) (blocks ^ (blocks >>> 32));
+        return result;
     }
 
     @Override

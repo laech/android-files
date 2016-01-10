@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import com.google.auto.service.AutoService;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +52,6 @@ import static l.files.fs.local.Unistd.X_OK;
 import static l.files.fs.local.Unistd.readlink;
 import static l.files.fs.local.Unistd.symlink;
 
-@AutoService(FileSystem.class)
 public final class LocalFileSystem extends Native implements FileSystem {
 
     static {
