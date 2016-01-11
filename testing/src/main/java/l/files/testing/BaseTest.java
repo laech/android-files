@@ -14,7 +14,6 @@ public abstract class BaseTest {
 
     @Before
     public void setUp() throws Exception {
-        Dexmaker.setup(getContext().getCacheDir());
         delete(getTestContext().getExternalCacheDir());
     }
 
