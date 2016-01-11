@@ -5,13 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
+import android.test.AndroidTestCase;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -27,14 +21,11 @@ import l.files.operations.TaskNotFound;
 import l.files.operations.TaskState;
 import l.files.operations.Time;
 
-import static android.os.Build.VERSION_CODES.KITKAT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.ui.operations.FailuresActivity.getFailures;
 import static l.files.ui.operations.FailuresActivity.getTitle;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -42,25 +33,25 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = KITKAT)
-public final class NotificationProviderTest {
+public final class NotificationProviderTest extends AndroidTestCase {
 
     private TaskState.Pending base;
     private Context context;
     private NotificationManager manager;
     private NotificationProvider provider;
 
-    @Before
-    public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().getAbsolutePath());
         provider = new NotificationProvider();
         base = TaskState.pending(
                 TaskId.create(1, COPY),
-                mock(Target.class),
+                Target.from(Collections.<Path>emptyList(), mock(Path.class)),
                 Time.create(0, 0)
         );
         manager = mock(NotificationManager.class);
-        context = new ContextWrapper(RuntimeEnvironment.application) {
+        context = new ContextWrapper(getContext()) {
 
             @Override
             public Object getSystemService(String name) {
@@ -78,31 +69,27 @@ public final class NotificationProviderTest {
         };
     }
 
-    @Test
-    public void cancel_on_task_not_found() throws Exception {
+    public void test_cancel_on_task_not_found() throws Exception {
 
         provider.onNotFound(context, TaskNotFound.create(1011));
         verify(manager).cancel(1011);
     }
 
-    @Test
-    public void cancel_notification_on_success() {
+    public void test_cancel_notification_on_success() {
 
         provider.onUpdate(context, base.running(Time.create(1, 1)).success(Time.create(2, 2)));
         verify(manager, timeout(1000)).cancel(base.task().id());
         verifyNoMoreInteractions(manager);
     }
 
-    @Test
-    public void notify_on_progress() {
+    public void test_notify_on_progress() {
 
         provider.onUpdate(context, base.running(Time.create(1, 1), Progress.NONE, Progress.NONE));
         verify(manager, timeout(1000)).notify(eq(base.task().id()), notNull(Notification.class));
         verifyNoMoreInteractions(manager);
     }
 
-    @Test
-    public void notify_on_failure() throws Exception {
+    public void test_notify_on_failure() throws Exception {
 
         Path file = mock(Path.class, "p");
         IOException err = new IOException("test");
@@ -115,8 +102,7 @@ public final class NotificationProviderTest {
         verify(manager, timeout(1000)).notify(eq(id), notNull(Notification.class));
     }
 
-    @Test
-    public void remove_notification_on_unknown_error() throws Exception {
+    public void test_remove_notification_on_unknown_error() throws Exception {
 
         provider.onUpdate(context, base
                 .running(Time.create(1, 1))
@@ -124,8 +110,7 @@ public final class NotificationProviderTest {
         verify(manager, timeout(1000)).cancel(base.task().id());
     }
 
-    @Test
-    public void create_failure_intent_with_correct_failure_data() throws Exception {
+    public void test_create_failure_intent_with_correct_failure_data() throws Exception {
 
         Path f1 = mock(Path.class, "1");
         Path f2 = mock(Path.class, "2");
