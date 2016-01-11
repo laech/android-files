@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import org.junit.Test;
-
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -34,15 +32,14 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
         observer = mock(BatchObserver.class);
         consumer = mock(Consumer.class);
         given(consumer.accept(any(Path.class))).willReturn(true);
     }
 
-    @Test
-    public void notifies_self_change() throws Exception {
+    public void test_notifies_self_change() throws Exception {
         Closer closer = Closer.create();
         try {
 
@@ -63,8 +60,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_children_change() throws Exception {
+    public void test_notifies_children_change() throws Exception {
 
         final Path b = Files.createDir(dir1().resolve("b"));
         final Path a = Files.createFile(dir1().resolve("a"));
@@ -102,8 +98,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_latest_event() throws Exception {
+    public void test_notifies_latest_event() throws Exception {
 
         final Path file = Files.createFile(dir1().resolve("file"));
 
@@ -131,8 +126,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_self_and_children_change() throws Exception {
+    public void test_notifies_self_and_children_change() throws Exception {
 
         final Path child = Files.createFile(dir1().resolve("a"));
 

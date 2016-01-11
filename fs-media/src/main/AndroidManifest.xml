@@ -1,5 +1,1 @@
-<manifest package="l.files.fs.media">
-
-    <application/>
-
-</manifest>
+<manifest package="l.files.fs.media" />

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Arrays;
@@ -44,17 +42,12 @@ import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.Instant.EPOCH;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.browser.FileSort.NAME;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 public final class NavigationTest extends BaseFilesActivityTest {
 
-    @Test
-    public void can_see_file_renamed_to_different_casing() throws Exception {
+    public void test_can_see_file_renamed_to_different_casing() throws Exception {
 
-        Path dir = createCaseInsensitiveFileSystemDir();
+        Path dir = createCaseInsensitiveFileSystemDir("can_see_file_renamed_to_different_casing");
         try {
 
             Path src = createDir(dir.resolve("a"));
@@ -74,8 +67,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         }
     }
 
-    @Test
-    public void can_start_from_data_uri() throws Exception {
+    public void test_can_start_from_data_uri() throws Exception {
         Path dir = createDirs(dir().resolve("dir"));
         Path file = createFile(dir.resolve("file"));
         setActivityIntent(new Intent().setData(Uri.parse(dir.toUri().toString())));
@@ -84,8 +76,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(file, true);
     }
 
-    @Test
-    public void can_preview() throws Exception {
+    public void test_can_preview() throws Exception {
         Path empty = createFile(dir().resolve("empty"));
         Path file = dir().resolve("file");
         Path link = createSymbolicLink(dir().resolve("link"), file);
@@ -96,11 +87,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertThumbnailShown(empty, false);
     }
 
-    @Test
-    public void can_navigate_into_non_utf8_named_dir() throws Exception {
+    public void test_can_navigate_into_non_utf8_named_dir() throws Exception {
 
         byte[] nonUtf8Name = {-19, -96, -67, -19, -80, -117};
-        assertNotEquals(
+        assertNotEqual(
                 nonUtf8Name.clone(),
                 new String(nonUtf8Name.clone(), UTF_8).getBytes(UTF_8)
         );
@@ -113,8 +103,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(child, true);
     }
 
-    @Test
-    public void can_shows_dirs_with_same_name_but_different_name_bytes() throws Exception {
+    public void test_can_shows_dirs_with_same_name_but_different_name_bytes() throws Exception {
 
         byte[] notUtf8 = {-19, -96, -67, -19, -80, -117};
         byte[] utf8 = new String(notUtf8, UTF_8).getBytes(UTF_8);
@@ -142,8 +131,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(notUtf8Child, false);
     }
 
-    @Test
-    public void can_navigate_into_etc_proc_self_fdinfo_without_crashing()
+    public void test_can_navigate_into_etc_proc_self_fdinfo_without_crashing()
             throws Exception {
 
         screen().selectFromNavigationMode(Paths.get("/"));
@@ -152,23 +140,20 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().clickInto(Paths.get("/proc/self/fdinfo"));
     }
 
-    @Test
-    public void can_navigate_through_title_list_drop_down() throws Exception {
+    public void test_can_navigate_through_title_list_drop_down() throws Exception {
         Path parent = dir().parent();
         screen()
                 .selectFromNavigationMode(parent)
                 .assertNavigationModeHierarchy(parent);
     }
 
-    @Test
-    public void updates_navigation_list_when_going_into_a_new_dir() throws Exception {
+    public void test_updates_navigation_list_when_going_into_a_new_dir() throws Exception {
         screen().assertNavigationModeHierarchy(dir());
         Path dir = createDir(dir().resolve("dir"));
         screen().clickInto(dir).assertNavigationModeHierarchy(dir);
     }
 
-    @Test
-    public void shows_size_only_if_unable_to_determine_modified_date() throws Exception {
+    public void test_shows_size_only_if_unable_to_determine_modified_date() throws Exception {
         Path file = createFile(dir().resolve("file"));
         setLastModifiedTime(file, NOFOLLOW, EPOCH);
 
@@ -184,8 +169,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         });
     }
 
-    @Test
-    public void shows_time_and_size_for_file() throws Exception {
+    public void test_shows_time_and_size_for_file() throws Exception {
         Path file = createFile(dir().resolve("file"));
         appendUtf8(file, file.toString());
 
@@ -196,16 +180,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertSummary(file, expected);
     }
 
-    @Test
-    public void shows_time_only_for_today() throws Exception {
+    public void test_shows_time_only_for_today() throws Exception {
         long time = currentTimeMillis();
         DateFormat format = getTimeFormat(getActivity());
         String expected = format.format(new Date(time));
         testDirectorySummary(expected, time);
     }
 
-    @Test
-    public void shows_time_as_month_day_for_date_of_current_year() throws Exception {
+    public void test_shows_time_as_month_day_for_date_of_current_year() throws Exception {
         long time = currentTimeMillis() - DAYS.toMillis(2);
         int flags
                 = FORMAT_SHOW_DATE
@@ -215,8 +197,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
         testDirectorySummary(expected, time);
     }
 
-    @Test
-    public void shows_time_as_year_month_day_for_date_outside_of_current_year() throws Exception {
+    public void test_shows_time_as_year_month_day_for_date_outside_of_current_year() throws Exception {
         long time = currentTimeMillis() - DAYS.toMillis(400);
         DateFormat format = getDateFormat(getActivity());
         String expected = format.format(new Date(time));
@@ -230,15 +211,13 @@ public final class NavigationTest extends BaseFilesActivityTest {
         screen().assertSummary(d, expected);
     }
 
-    @Test
-    public void directory_view_is_disabled_if_no_read_permission() throws Exception {
+    public void test_directory_view_is_disabled_if_no_read_permission() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
         removePermissions(dir, Permission.read());
         screen().assertDisabled(dir);
     }
 
-    @Test
-    public void link_displayed() throws Exception {
+    public void test_link_displayed() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
         Path link = createSymbolicLink(dir().resolve("link"), dir);
 
@@ -249,8 +228,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertLinkPathDisplayed(link, dir);
     }
 
-    @Test
-    public void can_see_changes_in_linked_directory() throws Exception {
+    public void test_can_see_changes_in_linked_directory() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
         Path link = createSymbolicLink(dir().resolve("link"), dir);
         screen()
@@ -263,8 +241,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(child);
     }
 
-    @Test
-    public void press_action_bar_up_indicator_will_go_back() throws Exception {
+    public void test_press_action_bar_up_indicator_will_go_back() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
         screen()
                 .clickInto(dir)
@@ -273,35 +250,30 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir.parent());
     }
 
-    @Test
-    public void action_bar_title_shows_name_of_directory() throws Exception {
+    public void test_action_bar_title_shows_name_of_directory() throws Exception {
         screen()
                 .clickInto(createDir(dir().resolve("a")))
                 .assertActionBarTitle("a");
     }
 
-    @Test
-    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
+    public void test_action_bar_hides_up_indicator_when_there_is_no_back_stack_initially() {
         screen().assertActionBarUpIndicatorIsVisible(false);
     }
 
-    @Test
-    public void action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
+    public void test_action_bar_shows_up_indicator_when_there_is_back_stack() throws Exception {
         screen()
                 .clickInto(createDir(dir().resolve("dir")))
                 .assertActionBarUpIndicatorIsVisible(true);
     }
 
-    @Test
-    public void action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
+    public void test_action_bar_hides_up_indicator_when_there_is_no_back_stack_to_go_back_to() throws Exception {
         screen()
                 .clickInto(createDir(dir().resolve("dir")))
                 .pressBack()
                 .assertActionBarUpIndicatorIsVisible(false);
     }
 
-    @Test
-    public void long_press_back_will_clear_back_stack() throws Exception {
+    public void test_long_press_back_will_clear_back_stack() throws Exception {
         screen()
                 .clickInto(createDir(dir().resolve("a")))
                 .clickInto(createDir(dir().resolve("a/b")))
@@ -310,8 +282,7 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertCurrentDirectory(dir());
     }
 
-    @Test
-    public void observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
+    public void test_observes_on_current_directory_and_shows_added_deleted_files() throws Exception {
         Path a = createDir(dir().resolve("a"));
         screen().assertListViewContains(a, true);
 
@@ -326,14 +297,12 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertListViewContains(b, false);
     }
 
-    @Test
-    public void updates_view_on_child_directory_modified() throws Exception {
+    public void test_updates_view_on_child_directory_modified() throws Exception {
         Path dir = createDir(dir().resolve("a"));
         testUpdatesDateViewOnChildModified(dir);
     }
 
-    @Test
-    public void updates_view_on_child_file_modified() throws Exception {
+    public void test_updates_view_on_child_file_modified() throws Exception {
         Path file = createFile(dir().resolve("a"));
         testUpdatesDateViewOnChildModified(file);
         testUpdatesSizeViewOnChildModified(file);

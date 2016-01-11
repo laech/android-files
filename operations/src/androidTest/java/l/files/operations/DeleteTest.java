@@ -1,7 +1,5 @@
 package l.files.operations;
 
-import org.junit.Test;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,14 +15,10 @@ import static l.files.fs.Files.createFile;
 import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.exists;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public final class DeleteTest extends PathBaseTest {
 
-    @Test
-    public void notifiesListener() throws Exception {
+    public void test_notifiesListener() throws Exception {
         Path a = createDir(dir1().resolve("a"));
         Path b = createFile(dir1().resolve("a/b"));
 
@@ -36,15 +30,13 @@ public final class DeleteTest extends PathBaseTest {
         assertEquals(delete.getDeletedItemCount(), expected.size());
     }
 
-    @Test
-    public void deletesFile() throws Exception {
+    public void test_deletesFile() throws Exception {
         Path file = createFile(dir1().resolve("a"));
         delete(file);
         assertFalse(exists(file, NOFOLLOW));
     }
 
-    @Test
-    public void deletesNonEmptyDirectory() throws Exception {
+    public void test_deletesNonEmptyDirectory() throws Exception {
         Path dir = createDir(dir1().resolve("a"));
         Path file = createFile(dir1().resolve("a/child.txt"));
         delete(dir);
@@ -52,15 +44,13 @@ public final class DeleteTest extends PathBaseTest {
         assertFalse(exists(dir, NOFOLLOW));
     }
 
-    @Test
-    public void deletesEmptyDirectory() throws Exception {
+    public void test_deletesEmptyDirectory() throws Exception {
         Path dir = createDir(dir1().resolve("a"));
         delete(dir);
         assertFalse(exists(dir, NOFOLLOW));
     }
 
-    @Test
-    public void deletesSymbolicLinkButNotLinkedFile() throws Exception {
+    public void test_deletesSymbolicLinkButNotLinkedFile() throws Exception {
         Path a = createFile(dir1().resolve("a"));
         Path b = createSymbolicLink(dir1().resolve("b"), a);
         assertTrue(exists(a, NOFOLLOW));

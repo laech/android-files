@@ -1,19 +1,13 @@
 package l.files.ui.preview;
 
-import org.junit.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 public final class RectCacheTest extends PersistenceCacheTest<Rect, RectCache> {
 
-    @Test
-    public void invalid_input_ignored() throws Exception {
+    public void test_invalid_input_ignored() throws Exception {
         assertNotNull(cache.read(byteInput(1, 1)));
         assertNull(cache.read(byteInput(0, 0)));
         assertNull(cache.read(byteInput(-1, -1)));

@@ -1,9 +1,10 @@
 package l.files.fs.local;
 
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestName;
+import android.test.AndroidTestCase;
 
+import junit.framework.TestCase;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
@@ -12,7 +13,6 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
-import l.files.testing.BaseTest;
 
 import static l.files.fs.Files.exists;
 import static l.files.fs.Files.setPermissions;
@@ -20,21 +20,22 @@ import static l.files.fs.Files.traverse;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
-public abstract class PathBaseTest extends BaseTest {
-
-    @Rule
-    public final TemporaryFolder folder = new TemporaryFolder();
-
-    @Rule
-    public final TestName testName = new TestName();
+public abstract class PathBaseTest extends AndroidTestCase {
 
     private Path dir1;
     private Path dir2;
 
+    private File createTempFolder() throws IOException {
+        File dir = File.createTempFile(getClass().getSimpleName(), null);
+        assertTrue(dir.delete());
+        assertTrue(dir.mkdir());
+        return dir;
+    }
+
     protected final Path dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Paths.get(folder.newFolder());
+                dir1 = Paths.get(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -45,7 +46,7 @@ public abstract class PathBaseTest extends BaseTest {
     protected final Path dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Paths.get(folder.newFolder());
+                dir2 = Paths.get(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -54,7 +55,7 @@ public abstract class PathBaseTest extends BaseTest {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         delete(dir1);
         delete(dir2);
         super.tearDown();

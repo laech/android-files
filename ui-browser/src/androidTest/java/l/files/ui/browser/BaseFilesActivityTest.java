@@ -1,17 +1,9 @@
 package l.files.ui.browser;
 
-import android.app.Instrumentation;
 import android.content.Intent;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.rule.UiThreadTestRule;
+import android.test.ActivityInstrumentationTestCase2;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestName;
-
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,43 +22,27 @@ import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
-import static org.junit.Assume.assumeTrue;
 
-public class BaseFilesActivityTest {
-
-    @Rule
-    public final ActivityTestRule<FilesActivity> activity =
-            new ActivityTestRule<>(FilesActivity.class, false, false);
-
-    @Rule
-    public final UiThreadTestRule uiThread = new UiThreadTestRule();
-
-    @Rule
-    public final TestName testName = new TestName();
-
-    @Rule
-    public final TemporaryFolder folder = new TemporaryFolder();
-
-    @Rule
-    public final TakeScreenShotOnFailure screenshot =
-            new TakeScreenShotOnFailure();
+public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<FilesActivity> {
 
     private Path dir;
-    private Intent intent;
     private UiFileActivity screen;
 
-    @Before
-    public void setUp() throws Exception {
-        String name = testName.getMethodName();
-        if (name.length() > 255) {
-            name = name.substring(0, 255);
-        }
-        dir = Paths.get(folder.newFolder(name));
+    public BaseFilesActivityTest() {
+        super(FilesActivity.class);
+    }
+
+    private File createTempFolder() throws IOException {
+        File dir = File.createTempFile(getClass().getSimpleName(), null);
+        assertTrue(dir.delete());
+        assertTrue(dir.mkdir());
+        return dir;
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        dir = Paths.get(createTempFolder());
         setActivityIntent(newIntent(dir));
         screen = new UiFileActivity(
                 getInstrumentation(),
@@ -78,17 +54,14 @@ public class BaseFilesActivityTest {
                 });
     }
 
-    protected void setActivityIntent(Intent intent) {
-        this.intent = intent;
-    }
-
-    @After
-    public void tearDown() throws Exception {
+    @Override
+    protected void tearDown() throws Exception {
         screen = null;
         if (Files.exists(dir, NOFOLLOW)) {
             Files.traverse(dir, NOFOLLOW, delete());
         }
         dir = null;
+        super.tearDown();
     }
 
     private TraversalCallback<Path> delete() {
@@ -125,22 +98,7 @@ public class BaseFilesActivityTest {
         return new Intent(ACTION_MAIN).putExtra(EXTRA_DIRECTORY, dir);
     }
 
-    Instrumentation getInstrumentation() {
-        return InstrumentationRegistry.getInstrumentation();
-    }
-
-    FilesActivity getActivity() {
-        if (activity.getActivity() == null) {
-            activity.launchActivity(intent);
-        }
-        return activity.getActivity();
-    }
-
-    void runTestOnUiThread(Runnable runnable) throws Throwable {
-        uiThread.runOnUiThread(runnable);
-    }
-
-    Path createCaseInsensitiveFileSystemDir() throws IOException {
+    Path createCaseInsensitiveFileSystemDir(String name) throws IOException {
 
         /*
          * Use getExternalStorageDirectory() for this test, as this issue
@@ -150,9 +108,7 @@ public class BaseFilesActivityTest {
          * The bug: "a" gets renamed to "A", instead of displaying only
          * "A", both "a" and "A" are displayed.
          */
-        Path dir = Paths.get(getExternalStorageDirectory())
-                .resolve(testName.getMethodName());
-
+        Path dir = Paths.get(getExternalStorageDirectory()).resolve(name);
         Path src = dir.resolve("z");
         Path dst = dir.resolve("Z");
         try {
@@ -161,17 +117,17 @@ public class BaseFilesActivityTest {
             Files.createFiles(src);
 
             assertTrue(Files.exists(src, NOFOLLOW));
-            assumeTrue(
+            assertTrue(
                     "Assuming the underlying file system is case insensitive",
                     Files.exists(dst, NOFOLLOW));
 
             Files.move(src, dst);
             List<Path> actual = Files.list(dir, NOFOLLOW, new ArrayList<Path>());
             assertEquals(1, actual.size());
-            assumeThat(
+            assertEquals(
                     "Assuming the file can be renamed to different casing",
-                    actual,
-                    equalTo(singletonList(dst)));
+                    singletonList(dst),
+                    actual);
 
             setActivityIntent(newIntent(dir));
 

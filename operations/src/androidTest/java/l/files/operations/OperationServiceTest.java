@@ -4,8 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,9 +32,6 @@ import static l.files.operations.OperationService.newMoveIntent;
 import static l.files.operations.TaskKind.COPY;
 import static l.files.operations.TaskKind.DELETE;
 import static l.files.operations.TaskKind.MOVE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -45,14 +40,13 @@ public final class OperationServiceTest extends PathBaseTest {
     private OperationService service;
 
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
         service = new OperationService();
         service.foreground = false;
     }
 
-    @Test
-    public void cancel_intent() throws Exception {
+    public void test_cancel_intent() throws Exception {
 
         Intent intent = newCancelIntent(getContext(), 101);
         assertEquals(ACTION_CANCEL, intent.getAction());
@@ -61,8 +55,7 @@ public final class OperationServiceTest extends PathBaseTest {
                 intent.getComponent());
     }
 
-    @Test
-    public void cancel_task_not_found() throws Exception {
+    public void test_cancel_task_not_found() throws Exception {
 
         TaskListener listener = mock(TaskListener.class);
         service.listener = listener;
@@ -73,8 +66,7 @@ public final class OperationServiceTest extends PathBaseTest {
         verify(listener).onNotFound(service, TaskNotFound.create(1011));
     }
 
-    @Test
-    public void moves_file() throws Exception {
+    public void test_moves_file() throws Exception {
 
         Path src = createFile(dir1().resolve("a"));
         Path dst = createDir(dir1().resolve("dst"));
@@ -89,8 +81,7 @@ public final class OperationServiceTest extends PathBaseTest {
         assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
     }
 
-    @Test
-    public void copies_file() throws Exception {
+    public void test_copies_file() throws Exception {
 
         Path src = createFile(dir1().resolve("a"));
         Path dst = createDir(dir1().resolve("dst"));
@@ -105,8 +96,7 @@ public final class OperationServiceTest extends PathBaseTest {
         assertTrue(exists(dst.resolve(src.name()), NOFOLLOW));
     }
 
-    @Test
-    public void deletes_files() throws Exception {
+    public void test_deletes_files() throws Exception {
 
         Path a = createFiles(dir1().resolve("a"));
         Path b = createFiles(dir1().resolve("b/c"));
@@ -121,8 +111,7 @@ public final class OperationServiceTest extends PathBaseTest {
         assertFalse(exists(b, NOFOLLOW));
     }
 
-    @Test
-    public void task_start_time_is_correct() throws Exception {
+    public void test_task_start_time_is_correct() throws Exception {
 
         Path file1 = createFile(dir1().resolve("a"));
         Path file2 = createFile(dir1().resolve("b"));

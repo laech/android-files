@@ -13,7 +13,6 @@ android {
             moduleName 'fslocal'
             ldLibs 'log'
         }
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
 }

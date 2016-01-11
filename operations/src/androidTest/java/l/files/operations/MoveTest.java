@@ -1,7 +1,5 @@
 package l.files.operations;
 
-import org.junit.Test;
-
 import java.util.Collection;
 
 import l.files.fs.Path;
@@ -15,21 +13,17 @@ import static l.files.fs.Files.readAllUtf8;
 import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public final class MoveTest extends PasteTest {
 
-    @Test
-    public void movedCountInitialZero() throws Exception {
+    public void test_movedCountInitialZero() throws Exception {
         Path src = createFile(dir1().resolve("a"));
         Path dstDir = createDir(dir1().resolve("b"));
         Move move = create(src, dstDir);
         assertEquals(move.getMovedItemCount(), 0);
     }
 
-    @Test
-    public void movesSymlink() throws Exception {
+    public void test_movesSymlink() throws Exception {
         Path target = createFile(dir1().resolve("target"));
         Path link = createSymbolicLink(dir1().resolve("link"), target);
 
@@ -41,8 +35,7 @@ public final class MoveTest extends PasteTest {
         assertEquals(1, move.getMovedItemCount());
     }
 
-    @Test
-    public void movesFile() throws Exception {
+    public void test_movesFile() throws Exception {
         Path srcFile = createFile(dir1().resolve("a.txt"));
         Path dstDir = createDir(dir1().resolve("dst"));
         Path dstFile = dstDir.resolve("a.txt");
@@ -56,8 +49,7 @@ public final class MoveTest extends PasteTest {
         assertEquals(move.getMovedItemCount(), 1);
     }
 
-    @Test
-    public void movesDirectory() throws Exception {
+    public void test_movesDirectory() throws Exception {
         Path srcDir = createDir(dir1().resolve("a"));
         Path dstDir = createDir(dir1().resolve("dst"));
         Path srcFile = srcDir.resolve("test.txt");

@@ -1,14 +1,11 @@
 package l.files.ui.browser;
 
-import org.junit.Test;
-
 import l.files.fs.Files;
 import l.files.fs.Path;
 
 public final class BookmarksTest extends BaseFilesActivityTest {
 
-    @Test
-    public void clears_selection_on_finish_of_action_mode() throws Exception {
+    public void test_clears_selection_on_finish_of_action_mode() throws Exception {
 
         Path a = Files.createDir(dir().resolve("a"));
         screen()
@@ -29,8 +26,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
                 .assertChecked(a, false);
     }
 
-    @Test
-    public void click_on_bookmark_opens_directory() throws Exception {
+    public void test_click_on_bookmark_opens_directory() throws Exception {
 
         Path a = Files.createDir(dir().resolve("a"));
         Path b = Files.createDir(dir().resolve("b"));
@@ -52,8 +48,7 @@ public final class BookmarksTest extends BaseFilesActivityTest {
 
     }
 
-    @Test
-    public void sidebar_displays_up_to_date_bookmarks() throws Exception {
+    public void test_sidebar_displays_up_to_date_bookmarks() throws Exception {
 
         Path a = Files.createDir(dir().resolve("a"));
         Path b = Files.createDir(dir().resolve("b"));

@@ -2,8 +2,6 @@ package l.files.fs.local;
 
 import android.text.TextUtils;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,8 +36,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         }
     };
 
-    @Test
-    public void traverse_noFollowLink() throws Exception {
+    public void test_traverse_noFollowLink() throws Exception {
         Path dir = createDir(dir1().resolve("dir"));
         Path link = createSymbolicLink(dir1().resolve("link"), dir);
         createFile(link.resolve("a"));
@@ -54,8 +51,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_followLink_rootOnly() throws Exception {
+    public void test_traverse_followLink_rootOnly() throws Exception {
         createDir(dir1().resolve("dir"));
         createFile(dir1().resolve("dir/a"));
         createDir(dir1().resolve("dir/b"));
@@ -81,8 +77,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_followLink() throws Exception {
+    public void test_traverse_followLink() throws Exception {
         Path dir = createDir(dir1().resolve("dir"));
         Path link = createSymbolicLink(dir1().resolve("link"), dir);
         Path a = createFile(link.resolve("a"));
@@ -98,8 +93,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
+    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_pre() throws Exception {
         createDir(dir1().resolve("a"));
         createDir(dir1().resolve("b"));
 
@@ -131,8 +125,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
+    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_post() throws Exception {
         createDirs(dir1().resolve("a/1"));
         createFile(dir1().resolve("a/1/i"));
         createDirs(dir1().resolve("b"));
@@ -172,8 +165,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
+    public void test_traverse_continuesIfExceptionHandlerDoesNotThrow_noPermission() throws Exception {
         createDirs(dir1().resolve("a/1"));
         createFile(dir1().resolve("a/1/i"));
         createDirs(dir1().resolve("a/2"));
@@ -200,8 +192,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_order() throws Exception {
+    public void test_traverse_order() throws Exception {
         createDirs(dir1().resolve("a/1"));
         createFile(dir1().resolve("a/1/i"));
         createDirs(dir1().resolve("a/2"));
@@ -228,8 +219,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traversal_skip() throws Exception {
+    public void test_traversal_skip() throws Exception {
         createDirs(dir1().resolve("a/1"));
         createFile(dir1().resolve("a/1/i"));
         createDirs(dir1().resolve("a/2"));
@@ -257,8 +247,7 @@ public final class LocalFileTraverseTest extends PathBaseTest {
         checkEquals(expected, recorder.events);
     }
 
-    @Test
-    public void traverse_termination() throws Exception {
+    public void test_traverse_termination() throws Exception {
         createDirs(dir1().resolve("a/1"));
         createFile(dir1().resolve("a/1/i"));
         createDirs(dir1().resolve("a/2"));

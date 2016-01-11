@@ -1,7 +1,5 @@
 package l.files.operations;
 
-import org.junit.Test;
-
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
@@ -10,12 +8,10 @@ import static l.files.fs.Files.createDir;
 import static l.files.fs.Files.createFile;
 import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertEquals;
 
 public final class SizeTest extends PathBaseTest {
 
-    @Test
-    public void size() throws Exception {
+    public void teset_size() throws Exception {
         Path a = createDir(dir1().resolve("a"));
         Path b = createFile(dir1().resolve("a/b"));
         Path c = createFile(dir1().resolve("c"));

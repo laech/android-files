@@ -1,8 +1,8 @@
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    package="l.files.operations"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="l.files.operations">
 
-    <application tools:ignore="GoogleAppIndexingWarning">
+    <application>
 
         <service
             android:name=".OperationService"
@@ -14,8 +14,8 @@
                   there, this allows the service to be started again when user attempts
                   to cancel the notification and have it removed.
                  -->
-                <action android:name="l.files.operations.CANCEL"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="l.files.operations.CANCEL" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
 

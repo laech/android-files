@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import org.junit.Test;
+import android.test.InstrumentationTestCase;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 
 import static android.os.Environment.getExternalStorageDirectory;
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static android.test.MoreAsserts.assertNotEqual;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -22,11 +22,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertNotEquals;
 
-public final class ManualInspectionTest {
+public final class ManualInspectionTest extends InstrumentationTestCase {
 
-    @Test
     public void test() throws Exception {
         Path dir = Paths.get(getExternalStorageDirectory()).resolve("test");
         Files.createDirs(dir);
@@ -79,7 +77,7 @@ public final class ManualInspectionTest {
     private void createNonUtf8Dir() throws IOException {
 
         byte[] nonUtf8 = {-19, -96, -67, -19, -80, -117};
-        assertNotEquals(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
+        assertNotEqual(nonUtf8.clone(), new String(nonUtf8.clone(), UTF_8).getBytes(UTF_8));
 
         Path dir = Paths.get(getExternalStorageDirectory()).resolve(nonUtf8);
         Path child = dir.resolve("good we can see this dir");

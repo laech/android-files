@@ -3,8 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,8 +19,6 @@ import static l.files.fs.Files.createSymbolicLink;
 import static l.files.fs.Files.writeUtf8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -40,43 +36,35 @@ public final class PreviewTest extends PathBaseTest {
         preview = new Preview(getContext(), dir2());
     }
 
-    @Test
-    public void preview_pdf() throws Throwable {
+    public void test_preview_pdf() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.pdf");
     }
 
-    @Test
-    public void preview_m4a() throws Throwable {
+    public void test_preview_m4a() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.m4a");
     }
 
-    @Test
-    public void preview_jpg() throws Throwable {
+    public void test_preview_jpg() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.jpg");
     }
 
-    @Test
-    public void preview_png() throws Throwable {
+    public void test_preview_png() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.png");
     }
 
-    @Test
-    public void preview_mp4() throws Throwable {
+    public void test_preview_mp4() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.mp4");
     }
 
-    @Test
-    public void preview_apk() throws Throwable {
+    public void test_preview_apk() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.apk");
     }
 
-    @Test
-    public void preview_plain_text() throws Throwable {
+    public void test_preview_plain_text() throws Throwable {
         testPreviewSuccessForContent("hello world");
     }
 
-    @Test
-    public void preview_xml() throws Throwable {
+    public void test_preview_xml() throws Throwable {
         testPreviewSuccessForContent("<?xml version=\"1.0\"><hello>world</hello>");
     }
 
@@ -84,7 +72,7 @@ public final class PreviewTest extends PathBaseTest {
         Path file = dir1().resolve(testFile);
         Closer closer = Closer.create();
         try {
-            InputStream in = closer.register(getTestContext().getAssets().open(testFile));
+            InputStream in = closer.register(getContext().getAssets().open(testFile));
             Files.copy(in, file);
         } catch (Throwable e) {
             throw closer.rethrow(e);
@@ -94,13 +82,11 @@ public final class PreviewTest extends PathBaseTest {
         testPreviewSuccess(file);
     }
 
-    @Test
-    public void preview_proc_cpuinfo() throws Exception {
+    public void test_preview_proc_cpuinfo() throws Exception {
         testPreviewSuccess(Paths.get("/proc/cpuinfo"));
     }
 
-    @Test
-    public void preview_link() throws Exception {
+    public void test_preview_link() throws Exception {
         Path file = createFile(dir1().resolve("file"));
         Path link = createSymbolicLink(dir1().resolve("link"), file);
         writeUtf8(file, "hi");
@@ -108,8 +94,7 @@ public final class PreviewTest extends PathBaseTest {
         testPreviewSuccess(link);
     }
 
-    @Test
-    public void preview_link_modified_target() throws Exception {
+    public void test_preview_link_modified_target() throws Exception {
         Path file = createFile(dir1().resolve("file"));
         Path link = createSymbolicLink(dir1().resolve("link"), file);
         testPreviewFailure(link);

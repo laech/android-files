@@ -1,7 +1,5 @@
 package l.files.fs.local;
 
-import org.junit.Test;
-
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,12 +8,8 @@ import java.lang.reflect.Field;
 
 import l.files.fs.Files;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 public final class UnistdTest extends PathBaseTest {
 
-    @Test
     public void test_close() throws Exception {
         OutputStream out = Files.newOutputStream(Files.createFile(dir1().resolve("a")));
         try {

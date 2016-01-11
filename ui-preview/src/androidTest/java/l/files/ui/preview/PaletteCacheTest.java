@@ -5,7 +5,6 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.Swatch;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
 
 public final class PaletteCacheTest
         extends PersistenceCacheTest<Palette, PaletteCache> {

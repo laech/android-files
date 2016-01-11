@@ -4,7 +4,6 @@ import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.net.Uri;
 
-import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
@@ -61,11 +60,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.LocalObservableTest.Recorder.observe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -99,11 +93,12 @@ public final class LocalObservableTest extends PathBaseTest {
      *  - https://code.google.com/p/android/issues/detail?id=189231
      *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
      */
-    @Test
-    public void notifies_files_downloaded_by_download_manager() throws Exception {
+    public void test_notifies_files_downloaded_by_download_manager() throws Exception {
 
         final Path downloadDir = downloadsDir();
-        final Path downloadFile = downloadDir.resolve(uniqueTestName());
+        final Path downloadFile = downloadDir.resolve(
+                "test_notifies_files_downloaded_by_download_manager-" +
+                        currentTimeMillis());
         final Closer closer = Closer.create();
         try {
 
@@ -141,12 +136,10 @@ public final class LocalObservableTest extends PathBaseTest {
         } catch (AssertionError e) {
             /*
              * Check file is downloaded but failed to receive event.
-             * Use assume here because this will fail on API 23,
-             * the goal of this is to create visibility of this issue but
-             * not fail the build.
+             * This will fail on API 23.
              */
             assertTrue(Files.exists(downloadFile, NOFOLLOW));
-            assumeTrue(false);
+            fail("Failed to receive file system event using download manager.");
 
         } catch (Throwable e) {
             throw closer.rethrow(e);
@@ -163,12 +156,7 @@ public final class LocalObservableTest extends PathBaseTest {
         return Paths.get(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
-    private String uniqueTestName() {
-        return testName.getMethodName() + "-" + currentTimeMillis();
-    }
-
-    @Test
-    public void able_to_observe_the_rest_of_the_files_when_some_are_not_observable()
+    public void test_able_to_observe_the_rest_of_the_files_when_some_are_not_observable()
             throws Exception {
 
         List<Path> observables = new ArrayList<>();
@@ -198,8 +186,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void no_observe_on_procfs() throws Exception {
+    public void test_no_observe_on_procfs() throws Exception {
 
         Closer closer = Closer.create();
         try {
@@ -220,8 +207,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void observe_on_regular_file() throws Exception {
+    public void test_observe_on_regular_file() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Closer closer = Closer.create();
         try {
@@ -234,8 +220,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void observe_on_link() throws Exception {
+    public void test_observe_on_link() throws Exception {
         Path file = Files.createSymbolicLink(dir1().resolve("link"), dir2());
         Closer closer = Closer.create();
         try {
@@ -248,8 +233,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void release_watch_when_dir_moves_out() throws Exception {
+    public void test_release_watch_when_dir_moves_out() throws Exception {
 
         Path src = Files.createDir(dir1().resolve("src"));
         Path dst = dir2().resolve("dst");
@@ -276,8 +260,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_observer_on_max_user_instances_reached() throws Exception {
+    public void test_notifies_observer_on_max_user_instances_reached() throws Exception {
         int maxUserInstances = maxUserInstances();
         List<Observation> observations = new ArrayList<>(maxUserInstances);
         try {
@@ -306,8 +289,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_observer_on_max_user_watches_reached_on_observe() throws Exception {
+    public void test_notifies_observer_on_max_user_watches_reached_on_observe() throws Exception {
 
         Path dir = linkToMaxUserWatchesTestDir();
         int maxUserWatches = maxUserWatches();
@@ -335,8 +317,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void notifies_observer_on_max_user_watches_reached_during_observe() throws Exception {
+    public void test_notifies_observer_on_max_user_watches_reached_during_observe() throws Exception {
 
         Path dir = linkToMaxUserWatchesTestDir();
         int maxUserWatches = maxUserWatches();
@@ -467,8 +448,7 @@ public final class LocalObservableTest extends PathBaseTest {
         return Paths.get(getExternalStorageDirectory().getPath());
     }
 
-    @Test
-    public void releases_all_watches_on_close() throws Exception {
+    public void test_releases_all_watches_on_close() throws Exception {
 
         Path a = Files.createDir(dir1().resolve("a"));
         Path b = Files.createDir(dir1().resolve("b"));
@@ -504,8 +484,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void releases_fd_on_close() throws Exception {
+    public void test_releases_fd_on_close() throws Exception {
         ArgumentCaptor<Integer> fd = ArgumentCaptor.forClass(Integer.class);
         Closer closer = Closer.create();
         try {
@@ -530,8 +509,7 @@ public final class LocalObservableTest extends PathBaseTest {
         return parseInt(Files.readAllUtf8(limitFile).trim());
     }
 
-    @Test
-    public void observe_on_link_no_follow() throws Exception {
+    public void test_observe_on_link_no_follow() throws Exception {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
@@ -558,8 +536,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void observe_on_link_follow() throws Exception {
+    public void test_observe_on_link_follow() throws Exception {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
         Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
@@ -577,8 +554,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void move_unreadable_dir_in_will_notify_incomplete_observation()
+    public void test_move_unreadable_dir_in_will_notify_incomplete_observation()
             throws Exception {
 
         testMoveDirIn(
@@ -589,13 +565,11 @@ public final class LocalObservableTest extends PathBaseTest {
         );
     }
 
-    @Test
-    public void move_dir_in_then_change_its_permission() throws Exception {
+    public void test_move_dir_in_then_change_its_permission() throws Exception {
         testMoveDirIn(new PostActions().awaitRemoveAllPermissions());
     }
 
-    @Test
-    public void rename_dir() throws Exception {
+    public void test_rename_dir() throws Exception {
         Path src = Files.createDir(dir1().resolve("a"));
         Path dst = dir1().resolve("b");
         Closer closer = Closer.create();
@@ -611,27 +585,23 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void move_dir_in_then_add_file_into_it() throws Exception {
+    public void test_move_dir_in_then_add_file_into_it() throws Exception {
         testMoveDirIn(new PostActions().awaitCreateDir("hello"));
     }
 
-    @Test
-    public void move_dir_in_then_delete_file_from_it() throws Exception {
+    public void test_move_dir_in_then_delete_file_from_it() throws Exception {
         testMoveDirIn(
                 new PreActions().createFile("hello"),
                 new PostActions().awaitDelete("hello")
         );
     }
 
-    @Test
-    public void move_dir_in_then_move_file_into_it() throws Exception {
+    public void test_move_dir_in_then_move_file_into_it() throws Exception {
         Path extra = Files.createFile(dir2().resolve("hello"));
         testMoveDirIn(new PostActions().awaitMoveIn(extra));
     }
 
-    @Test
-    public void move_dir_in_then_move_file_out_of_it() throws Exception {
+    public void test_move_dir_in_then_move_file_out_of_it() throws Exception {
 
         Path src = Files.createDir(dir2().resolve("a"));
         Path dir = dir1().resolve("a");
@@ -657,8 +627,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void move_file_in() throws Exception {
+    public void test_move_file_in() throws Exception {
 
         Path src = Files.createFile(dir2().resolve("a"));
         Path dst = dir1().resolve("b");
@@ -675,8 +644,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void move_file_out() throws Exception {
+    public void test_move_file_out() throws Exception {
 
         Path file = Files.createFile(dir1().resolve("a"));
         Closer closer = Closer.create();
@@ -692,8 +660,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void move_self_out() throws Exception {
+    public void test_move_self_out() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Path dir = Files.createDir(dir1().resolve("dir"));
         testMoveSelfOut(file, dir2().resolve("a"));
@@ -717,8 +684,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void modify_file_content() throws Exception {
+    public void test_modify_file_content() throws Exception {
         Path file = Files.createFile(dir1().resolve("a"));
         testModifyFileContent(file, file);
         testModifyFileContent(file, dir1());
@@ -741,8 +707,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void modify_permissions() throws Exception {
+    public void test_modify_permissions() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Path dir = Files.createDir(dir1().resolve("dir"));
         testModifyPermission(file, file);
@@ -779,8 +744,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void modify_mtime() throws Exception {
+    public void test_modify_mtime() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Path dir = Files.createDir(dir1().resolve("dir"));
         testModifyLastModifiedTime(file, file);
@@ -808,8 +772,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void delete() throws Exception {
+    public void test_delete() throws Exception {
         Path file = dir1().resolve("file");
         Path dir = dir1().resolve("dir");
         testDelete(Files.createFile(file), file);
@@ -840,8 +803,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void delete_recreate_dir_will_be_observed() throws Exception {
+    public void test_delete_recreate_dir_will_be_observed() throws Exception {
         Path dir = dir1().resolve("dir");
         Path file = dir.resolve("file");
         Closer closer = Closer.create();
@@ -869,8 +831,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create() throws Exception {
+    public void test_create() throws Exception {
         Path file = dir1().resolve("file");
         Path dir = dir1().resolve("dir");
         Path link = dir1().resolve("link");
@@ -925,8 +886,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void observe_unreadable_child_dir_will_notify_incomplete_observation()
+    public void test_observe_unreadable_child_dir_will_notify_incomplete_observation()
             throws Exception {
 
         Path dir = Files.createDir(dir1().resolve("dir"));
@@ -943,8 +903,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create_dir_then_make_it_unreadable() throws Exception {
+    public void test_create_dir_then_make_it_unreadable() throws Exception {
         Path dir = dir1().resolve("dir");
         Closer closer = Closer.create();
         try {
@@ -964,8 +923,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create_dir_then_create_items_into_it() throws Exception {
+    public void test_create_dir_then_create_items_into_it() throws Exception {
         Path dir = dir1().resolve("dir");
         Closer closer = Closer.create();
         try {
@@ -990,8 +948,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create_dir_then_delete_items_from_it() throws Exception {
+    public void test_create_dir_then_delete_items_from_it() throws Exception {
         Path parent = dir1().resolve("parent");
         Path file = parent.resolve("file");
         Path dir = parent.resolve("dir");
@@ -1020,8 +977,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create_dir_then_move_items_out_of_it() throws Exception {
+    public void test_create_dir_then_move_items_out_of_it() throws Exception {
         Path parent = dir1().resolve("parent");
         Path file = parent.resolve("file");
         Path dir = parent.resolve("dir");
@@ -1050,8 +1006,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void create_dir_then_move_file_into_it() throws Exception {
+    public void test_create_dir_then_move_file_into_it() throws Exception {
         Path parent = dir1().resolve("parent");
         Path file = Files.createFile(dir2().resolve("file"));
         Path dir = Files.createDir(dir2().resolve("dir"));
@@ -1076,8 +1031,7 @@ public final class LocalObservableTest extends PathBaseTest {
         }
     }
 
-    @Test
-    public void multiple_operations() throws Exception {
+    public void test_multiple_operations() throws Exception {
         Path a = dir1().resolve("a");
         Path b = dir1().resolve("b");
         Path c = dir1().resolve("c");

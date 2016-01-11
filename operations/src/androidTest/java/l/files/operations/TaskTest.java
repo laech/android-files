@@ -2,7 +2,7 @@ package l.files.operations;
 
 import android.os.Handler;
 
-import org.junit.Test;
+import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,28 +16,25 @@ import l.files.operations.Task.Callback;
 import l.files.operations.TaskState.Failed;
 import l.files.operations.TaskState.Pending;
 import l.files.operations.TaskState.Success;
-import l.files.testing.BaseTest;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.os.Looper.getMainLooper;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.operations.TaskKind.COPY;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-public final class TaskTest extends BaseTest {
+public final class TaskTest extends TestCase {
 
     private Handler handler;
 
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
         handler = new Handler(getMainLooper());
     }
 
-    @Test
-    public void notifiesOnCancelFromInterrupt() throws Exception {
+    public void test_notifiesOnCancelFromInterrupt() throws Exception {
         TaskState state = last(capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws InterruptedException {
@@ -47,8 +44,7 @@ public final class TaskTest extends BaseTest {
         assertTrue(state.toString(), state instanceof Success);
     }
 
-    @Test
-    public void notifiesOnCancelFromCancellingTask() throws Exception {
+    public void test_notifiesOnCancelFromCancellingTask() throws Exception {
         List<TaskState> states = capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws InterruptedException {
@@ -58,8 +54,7 @@ public final class TaskTest extends BaseTest {
         assertTrue(states.toString(), last(states) instanceof Success);
     }
 
-    @Test
-    public void notifiesOnFailure() throws Throwable {
+    public void test_notifiesOnFailure() throws Throwable {
         TaskState state = last(capturedExecute(new Command() {
             @Override
             public void execute(Task task) throws FileException {
@@ -71,14 +66,12 @@ public final class TaskTest extends BaseTest {
         assertTrue(state.toString(), state instanceof Failed);
     }
 
-    @Test
-    public void notifiesOnStart() throws Exception {
+    public void test_notifiesOnStart() throws Exception {
         TaskState state = capturedExecute().get(0);
         assertTrue(state.toString(), state instanceof Pending);
     }
 
-    @Test
-    public void notifiesOnSuccess() throws Exception {
+    public void test_notifiesOnSuccess() throws Exception {
         List<TaskState> states = capturedExecute();
         assertTrue(states.toString(), last(states) instanceof Success);
     }
