@@ -41,4 +41,30 @@ public final class Rect {
         int scaledHeight = max(round(height() * scale), 1);
         return of(scaledWith, scaledHeight);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Rect rect = (Rect) o;
+
+        return width == rect.width && height == rect.height;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = width;
+        result = 31 * result + height;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Rect{" +
+                "width=" + width +
+                ", height=" + height +
+                '}';
+    }
 }
