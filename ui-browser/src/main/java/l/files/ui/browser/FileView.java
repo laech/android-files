@@ -401,7 +401,10 @@ public final class FileView extends View implements Drawable.Callback {
     }
 
     void setUseInverseTextColor(boolean useInverseTextColor) {
-        this.useInverseTextColor = useInverseTextColor;
+        if (this.useInverseTextColor != useInverseTextColor) {
+            this.useInverseTextColor = useInverseTextColor;
+            invalidate();
+        }
     }
 
     private int getColor(ColorStateList normal, ColorStateList inverse) {
