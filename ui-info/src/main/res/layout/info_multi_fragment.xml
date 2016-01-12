@@ -3,20 +3,11 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
+    android:background="@color/color_primary"
     android:columnCount="2"
     android:padding="16dp"
-    android:rowCount="2">
-
-    <TextView
-        android:id="@android:id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_columnSpan="2"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
-        android:gravity="center"
-        android:text="@string/ic_multi"
-        android:textSize="28sp" />
+    android:rowCount="2"
+    android:useDefaultMargins="true">
 
     <include layout="@layout/info_size" />
 

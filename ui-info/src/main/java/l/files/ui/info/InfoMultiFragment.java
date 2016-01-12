@@ -4,16 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.ui.base.fs.FileIcons;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.view.Views;
 
 public final class InfoMultiFragment extends InfoBaseFragment {
 
@@ -44,10 +41,6 @@ public final class InfoMultiFragment extends InfoBaseFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        Views.<TextView>find(android.R.id.icon, this)
-                .setTypeface(FileIcons.font(getContext().getAssets()));
-
         initLoader();
     }
 

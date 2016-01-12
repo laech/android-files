@@ -12,6 +12,7 @@
             android:layout_height="wrap_content"
             android:text="@string/info_size_label"
             android:textColor="?android:attr/textColorSecondary"
+            android:textIsSelectable="true"
             android:textSize="13sp" />
 
         <ProgressBar
