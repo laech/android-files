@@ -30,13 +30,11 @@ import l.files.ui.preview.Preview;
 
 import static android.content.ContentResolver.SCHEME_FILE;
 import static android.graphics.Color.WHITE;
-import static android.graphics.PorterDuff.Mode.MULTIPLY;
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 import static android.support.v4.view.GravityCompat.START;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
-import static android.support.v4.widget.DrawerLayout.SimpleDrawerListener;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
@@ -55,7 +53,6 @@ public final class FilesActivity extends BaseActivity implements
     public static final String EXTRA_DIRECTORY = "directory";
 
     private DrawerLayout drawer;
-    private DrawerListener drawerListener;
 
     private HierarchyAdapter hierarchy;
     private Toolbar toolbar;
@@ -92,9 +89,6 @@ public final class FilesActivity extends BaseActivity implements
         title.setOnItemSelectedListener(this);
 
         drawer = find(R.id.drawer_layout, this);
-        drawerListener = new DrawerListener();
-
-        drawer.setDrawerListener(drawerListener);
 
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -238,14 +232,6 @@ public final class FilesActivity extends BaseActivity implements
         return drawer;
     }
 
-    void setDrawerLayout(DrawerLayout drawer) {
-        this.drawer = drawer;
-    }
-
-    void setDrawerListener(DrawerListener drawerListener) {
-        this.drawerListener = drawerListener;
-    }
-
     public DrawerArrowDrawable navigationIcon() {
         return navigationIcon;
     }
@@ -261,21 +247,12 @@ public final class FilesActivity extends BaseActivity implements
         if (mode != null) {
             mode.finish();
         }
-        closeDrawerThenRun(new Runnable() {
-            @Override
-            public void run() {
-                show(file, stat);
-            }
-        });
-    }
 
-    private void closeDrawerThenRun(Runnable runnable) {
         if (drawer.isDrawerOpen(START)) {
-            drawerListener.mRunOnClosed = runnable;
             drawer.closeDrawers();
-        } else {
-            runnable.run();
         }
+
+        show(file, stat);
     }
 
     private void show(final Path path, @Nullable final Stat stat) {
@@ -356,19 +333,5 @@ public final class FilesActivity extends BaseActivity implements
     public FilesFragment fragment() {
         return (FilesFragment) getSupportFragmentManager()
                 .findFragmentByTag(FilesFragment.TAG);
-    }
-
-    static class DrawerListener extends SimpleDrawerListener {
-
-        Runnable mRunOnClosed;
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            super.onDrawerClosed(drawerView);
-            if (mRunOnClosed != null) {
-                mRunOnClosed.run();
-                mRunOnClosed = null;
-            }
-        }
     }
 }
