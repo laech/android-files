@@ -107,6 +107,16 @@ final class DateCategorizer extends BaseCategorizer {
         Year(int value) {
             this.value = value;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Year && ((Year) o).value == value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value;
+        }
     }
 
     static final class Month {
@@ -115,6 +125,16 @@ final class DateCategorizer extends BaseCategorizer {
 
         Month(int value) {
             this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Month && ((Month) o).value == value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value;
         }
     }
 }

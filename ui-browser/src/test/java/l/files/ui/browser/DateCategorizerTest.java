@@ -72,11 +72,14 @@ public final class DateCategorizerTest {
         FileInfo prev7Days2 = file(addDaysToMidnight(-3));
         FileInfo prev30Days1 = file(addDaysToMidnight(-10));
         FileInfo prev30Days2 = file(addDaysToMidnight(-12));
-        FileInfo prevMonth1 = file(addDaysToMidnight(-31));
+        FileInfo prevMonth1_1 = file(addDaysToMidnight(-31));
+        FileInfo prevMonth1_2 = file(addDaysToMidnight(-31));
         FileInfo prevMonth2 = file(addDaysToMidnight(-31 * 2));
         FileInfo prevMonth3 = file(addDaysToMidnight(-31 * 3));
         FileInfo prevYear1 = file(addDaysToMidnight(-365));
-        FileInfo prevYear2 = file(addDaysToMidnight(-365 * 2));
+        FileInfo prevYear2_1 = file(addDaysToMidnight(-365 * 2));
+        FileInfo prevYear2_2 = file(addDaysToMidnight(-365 * 2));
+        FileInfo prevYear2_3 = file(addDaysToMidnight(-365 * 2 - 1));
 
         List<Object> expected = asList(
                 header(R.string.future),
@@ -95,7 +98,8 @@ public final class DateCategorizerTest {
                 prev30Days1,
                 prev30Days2,
                 header(formatMonth(addDaysToMidnight(-31))),
-                prevMonth1,
+                prevMonth1_1,
+                prevMonth1_2,
                 header(formatMonth(addDaysToMidnight(-31 * 2))),
                 prevMonth2,
                 header(formatMonth(addDaysToMidnight(-31 * 3))),
@@ -103,7 +107,9 @@ public final class DateCategorizerTest {
                 header("2013"),
                 prevYear1,
                 header("2012"),
-                prevYear2
+                prevYear2_1,
+                prevYear2_2,
+                prevYear2_3
         );
 
         List<Object> actual = categorizer.categorize(res, asList(
@@ -117,11 +123,14 @@ public final class DateCategorizerTest {
                 prev7Days2,
                 prev30Days1,
                 prev30Days2,
-                prevMonth1,
+                prevMonth1_1,
+                prevMonth1_2,
                 prevMonth2,
                 prevMonth3,
                 prevYear1,
-                prevYear2));
+                prevYear2_1,
+                prevYear2_2,
+                prevYear2_3));
 
         assertEquals(names(expected), names(actual));
     }
