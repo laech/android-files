@@ -43,7 +43,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS));
+            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS, false));
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
 
@@ -73,7 +73,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS));
+            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false));
 
             Files.setLastModifiedTime(a, NOFOLLOW, Instant.ofMillis(1));
             Files.setLastModifiedTime(b, NOFOLLOW, Instant.ofMillis(2));
@@ -105,7 +105,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS));
+            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false));
 
             Files.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
             Files.delete(file);
@@ -132,7 +132,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
         Closer closer = Closer.create();
         try {
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS));
+            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS, false));
 
             verify(consumer).accept(child);
 

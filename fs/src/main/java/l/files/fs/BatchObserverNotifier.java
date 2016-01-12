@@ -13,6 +13,7 @@ import l.files.fs.FileSystem.Consumer;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
+import static java.lang.System.nanoTime;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static l.files.base.Throwables.addSuppressed;
 
@@ -29,21 +30,38 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     private boolean selfChanged;
     private final Map<Name, Event> childrenChanged;
     private final BatchObserver batchObserver;
+    private final long batchInterval;
+    private final long batchIntervalNanos;
+    private final TimeUnit batchInternalUnit;
 
     private Observation observation;
     private ScheduledFuture<?> checker;
 
-    BatchObserverNotifier(BatchObserver batchObserver) {
+    /**
+     * If true, will deliver the new event immediate instead of waiting for next
+     * schedule check to run, if the previous event was a while ago or there was
+     * no previous event.
+     */
+    private final boolean quickNotifyFirstEvent;
+    private volatile long quickNotifyLastRunNanos;
+
+    BatchObserverNotifier(
+            BatchObserver batchObserver,
+            long batchInterval,
+            TimeUnit batchInternalUnit,
+            boolean quickNotifyFirstEvent) {
         this.batchObserver = batchObserver;
+        this.batchInterval = batchInterval;
+        this.batchInternalUnit = batchInternalUnit;
+        this.batchIntervalNanos = batchInternalUnit.toNanos(batchInterval);
+        this.quickNotifyFirstEvent = quickNotifyFirstEvent;
         this.childrenChanged = new HashMap<>();
     }
 
     Observation start(
             Path path,
             LinkOption option,
-            Consumer<? super Path> childrenConsumer,
-            long batchInterval,
-            TimeUnit batchInternalUnit) throws IOException, InterruptedException {
+            Consumer<? super Path> childrenConsumer) throws IOException, InterruptedException {
 
         if (observation != null) {
             throw new IllegalStateException();
@@ -82,6 +100,14 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
             }
 
         }
+
+        if (quickNotifyFirstEvent) {
+            long now = nanoTime();
+            if (now - quickNotifyLastRunNanos > batchIntervalNanos) {
+                quickNotifyLastRunNanos = now;
+                service.execute(this);
+            }
+        }
     }
 
     @Override
@@ -92,6 +118,10 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     @Override
     public void run() {
         setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+
+        if (quickNotifyFirstEvent) {
+            quickNotifyLastRunNanos = nanoTime();
+        }
 
         boolean snapshotSelfChanged;
         Map<Name, Event> snapshotChildrenChanged;

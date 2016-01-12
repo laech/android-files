@@ -195,12 +195,33 @@ public final class Files {
             TimeUnit batchInternalUnit)
             throws IOException, InterruptedException {
 
-        return new BatchObserverNotifier(batchObserver).start(
+        return observe(
                 path,
                 option,
+                batchObserver,
                 childrenConsumer,
                 batchInterval,
-                batchInternalUnit);
+                batchInternalUnit,
+                true
+        );
+    }
+
+    public static Observation observe(
+            Path path,
+            LinkOption option,
+            BatchObserver batchObserver,
+            Consumer<? super Path> childrenConsumer,
+            long batchInterval,
+            TimeUnit batchInternalUnit,
+            boolean quickNotifyFirstEvent)
+            throws IOException, InterruptedException {
+
+        return new BatchObserverNotifier(
+                batchObserver,
+                batchInterval,
+                batchInternalUnit,
+                quickNotifyFirstEvent
+        ).start(path, option, childrenConsumer);
     }
 
     public static void list(
