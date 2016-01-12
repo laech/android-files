@@ -22,14 +22,20 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
+import static l.files.fs.media.MediaTypes.detectByFileExtension;
 
 final class DecodeText extends DecodeThumbnail {
 
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(Path path, String mediaType) {
-            return MediaTypes.generalize(mediaType).startsWith("text/");
+        public boolean acceptsFileExtension(Path path, String extensionInLowercase) {
+            return acceptsMediaType(path, detectByFileExtension(extensionInLowercase));
+        }
+
+        @Override
+        public boolean acceptsMediaType(Path path, String mediaTypeInLowercase) {
+            return MediaTypes.generalize(mediaTypeInLowercase).startsWith("text/");
         }
 
         @Override
@@ -37,9 +43,10 @@ final class DecodeText extends DecodeThumbnail {
                 Path path,
                 Stat stat,
                 Rect constraint,
-                PreviewCallback callback,
+                Preview.Callback callback,
+                Preview.Using using,
                 Preview context) {
-            return new DecodeText(path, stat, constraint, callback, context);
+            return new DecodeText(path, stat, constraint, callback, using, context);
         }
 
     };
@@ -54,9 +61,10 @@ final class DecodeText extends DecodeThumbnail {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
-        super(path, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, using, context);
 
         padding = (int) applyDimension(COMPLEX_UNIT_DIP, 8, context.displayMetrics);
         size = Math.min(constraint.width(), constraint.height());
@@ -64,7 +72,7 @@ final class DecodeText extends DecodeThumbnail {
 
     @Override
     Result decode() throws IOException {
-        String text = Files.readDetectingCharset(file, PREVIEW_LIMIT);
+        String text = Files.readDetectingCharset(path, PREVIEW_LIMIT);
         Bitmap bitmap = draw(text);
         return new Result(bitmap, Rect.of(
                 bitmap.getWidth(),

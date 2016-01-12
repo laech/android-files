@@ -35,20 +35,28 @@ final class DecodePdf extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(Path path, String mediaType) {
-            return path.fileSystem().scheme().equals("file") &&
-                    mediaType.equals("application/pdf");
+        public boolean acceptsFileExtension(Path path, String extensionInLowercase) {
+            return isLocalFile(path) && extensionInLowercase.equals("pdf");
         }
 
+        @Override
+        public boolean acceptsMediaType(Path path, String mediaTypeInLowercase) {
+            return isLocalFile(path) && mediaTypeInLowercase.equals("application/pdf");
+        }
+
+        private boolean isLocalFile(Path path) {
+            return path.fileSystem().scheme().equals("file");
+        }
 
         @Override
         public Decode create(
                 Path path,
                 Stat stat,
                 Rect constraint,
-                PreviewCallback callback,
+                Preview.Callback callback,
+                Preview.Using using,
                 Preview context) {
-            return new DecodePdf(path, stat, constraint, callback, context);
+            return new DecodePdf(path, stat, constraint, callback, using, context);
         }
 
     };
@@ -57,14 +65,15 @@ final class DecodePdf extends DecodeThumbnail {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
-        super(path, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, using, context);
     }
 
     @Override
-    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
-        return executeOnExecutor(executor);
+    Decode executeOnPreferredExecutor() {
+        return (Decode) executeOnExecutor(executor);
     }
 
     @Override
@@ -77,7 +86,7 @@ final class DecodePdf extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            final long doc = Pdf.open(file.toByteArray());
+            final long doc = Pdf.open(path.toByteArray());
             closer.register(new Closeable() {
                 @Override
                 public void close() throws IOException {

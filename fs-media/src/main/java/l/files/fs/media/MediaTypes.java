@@ -37,7 +37,11 @@ public final class MediaTypes {
      */
     public static String detectByProperties(Path path, Stat stat)
             throws IOException {
-        return BasicDetector.INSTANCE.detect(path, stat);
+        return PropertyDetector.INSTANCE.detect(path, stat);
+    }
+
+    public static String detectByFileExtension(String ext) {
+        return ExtensionDetector.INSTANCE.detect(ext);
     }
 
     /**

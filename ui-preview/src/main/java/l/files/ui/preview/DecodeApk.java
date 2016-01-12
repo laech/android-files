@@ -20,8 +20,13 @@ final class DecodeApk extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(Path path, String mediaType) {
-            return mediaType.equals("application/zip") &&
+        public boolean acceptsFileExtension(Path path, String extensionInLowercase) {
+            return extensionInLowercase.equals("apk");
+        }
+
+        @Override
+        public boolean acceptsMediaType(Path path, String mediaTypeInLowercase) {
+            return mediaTypeInLowercase.equals("application/zip") &&
                     path.name().ext().equalsIgnoreCase("apk");
         }
 
@@ -30,9 +35,10 @@ final class DecodeApk extends DecodeThumbnail {
                 Path path,
                 Stat stat,
                 Rect constraint,
-                PreviewCallback callback,
+                Preview.Callback callback,
+                Preview.Using using,
                 Preview context) {
-            return new DecodeApk(path, stat, constraint, callback, context);
+            return new DecodeApk(path, stat, constraint, callback, using, context);
         }
 
     };
@@ -41,9 +47,10 @@ final class DecodeApk extends DecodeThumbnail {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
-        super(path, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, using, context);
     }
 
     @Override
@@ -64,7 +71,7 @@ final class DecodeApk extends DecodeThumbnail {
 
     private Drawable loadApkIcon() {
         PackageManager manager = context.context.getPackageManager();
-        String path = file.toString();
+        String path = this.path.toString();
         PackageInfo info = manager.getPackageArchiveInfo(path, 0);
         if (info == null) {
             return null;

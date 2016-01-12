@@ -24,12 +24,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 
-public abstract class AbstractDetectorTest {
+public abstract class BasePropertyDetectorTest {
 
     /**
      * The detector to be tested, using the given file system.
      */
-    abstract AbstractDetector detector();
+    abstract BasePropertyDetector detector();
 
     @Test
     public void detects_directory_type() throws Exception {

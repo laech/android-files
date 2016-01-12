@@ -12,7 +12,7 @@ import l.files.fs.Stat;
 /**
  * Detects the media type of the underlying file by reading it's header.
  */
-abstract class TikaDetector extends AbstractDetector {
+abstract class TikaDetector extends BasePropertyDetector {
 
     @Override
     String detectFile(Path path, Stat stat) throws IOException {

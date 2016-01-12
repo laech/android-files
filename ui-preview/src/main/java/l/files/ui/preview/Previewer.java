@@ -5,13 +5,16 @@ import l.files.fs.Stat;
 
 interface Previewer {
 
-    boolean accept(Path path, String mediaType);
+    boolean acceptsFileExtension(Path path, String extensionInLowercase);
+
+    boolean acceptsMediaType(Path path, String mediaTypeInLowercase);
 
     Decode create(
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context);
 
 }

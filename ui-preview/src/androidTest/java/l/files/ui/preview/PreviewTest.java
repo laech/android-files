@@ -110,7 +110,7 @@ public final class PreviewTest extends PathBaseTest {
     }
 
     private void testPreviewSuccess(Path file) throws IOException {
-        PreviewCallback callback = mock(PreviewCallback.class);
+        Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = Files.stat(file, FOLLOW);
         assertNotNull(preview.get(file, stat, Rect.of(10, 10), callback));
 
@@ -118,11 +118,11 @@ public final class PreviewTest extends PathBaseTest {
         verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
         verify(callback, timeout(millis)).onPaletteAvailable(eq(file), eq(stat), notNull(Palette.class));
-        verify(callback, never()).onPreviewFailed(eq(file), eq(stat));
+        verify(callback, never()).onPreviewFailed(eq(file), eq(stat), any(Preview.Using.class));
     }
 
     private void testPreviewFailure(Path file) throws IOException {
-        PreviewCallback callback = mock(PreviewCallback.class);
+        Preview.Callback callback = mock(Preview.Callback.class);
         assertNull(preview.get(file, Files.stat(file, NOFOLLOW), Rect.of(10, 10), callback));
     }
 

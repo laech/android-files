@@ -6,10 +6,10 @@ import l.files.fs.*;
 
 import static org.junit.Assert.assertEquals;
 
-public final class MetaMagicDetectorTest extends AbstractDetectorTest {
+public final class MetaMagicDetectorTest extends BasePropertyDetectorTest {
 
     @Override
-    AbstractDetector detector() {
+    BasePropertyDetector detector() {
         return MetaMagicDetector.INSTANCE;
     }
 

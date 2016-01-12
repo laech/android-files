@@ -18,6 +18,7 @@ import static android.os.Process.setThreadPriority;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.preview.Preview.decodePalette;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
@@ -34,27 +35,31 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
             });
 
-    final Path file;
+    final Path path;
     final Stat stat;
     final Rect constraint;
     final Preview context;
-    final PreviewCallback callback;
+    final Preview.Callback callback;
+    final Preview.Using using;
 
     private final List<Decode> subs;
 
     private boolean publishedSize;
 
     Decode(
-            Path file,
+            Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
-        this.file = requireNonNull(file);
+
+        this.path = requireNonNull(path);
         this.stat = requireNonNull(stat);
         this.constraint = requireNonNull(constraint);
-        this.context = requireNonNull(context);
         this.callback = requireNonNull(callback);
+        this.using = requireNonNull(using);
+        this.context = requireNonNull(context);
         this.subs = new CopyOnWriteArrayList<>();
     }
 
@@ -68,10 +73,83 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     @Override
     protected final Object doInBackground(Object... params) {
         setThreadPriority(THREAD_PRIORITY_BACKGROUND);
+
+        if (isCancelled()) {
+            return null;
+        }
+
+        if (!checkPreviewable()) {
+            return null;
+        }
+
+        if (checkIsCache()) {
+            return null;
+        }
+
+        if (checkThumbnailMemCache()) {
+            return null;
+        }
+
+        if (checkThumbnailDiskCache()) {
+            return null;
+        }
+
         return onDoInBackground();
     }
 
     abstract Object onDoInBackground();
+
+    private boolean checkIsCache() {
+        if (path.startsWith(context.cacheDir)) {
+            publishProgress(NoPreview.INSTANCE);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkPreviewable() {
+        if (context.isPreviewable(path, stat, constraint)) {
+            return true;
+        }
+        publishProgress(NoPreview.INSTANCE);
+        return false;
+    }
+
+    private boolean checkThumbnailMemCache() {
+        Bitmap thumbnail = context.getThumbnail(path, stat, constraint, true);
+        if (thumbnail != null) {
+            publishProgress(thumbnail);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkThumbnailDiskCache() {
+        Bitmap thumbnail = null;
+        try {
+            thumbnail = context.getThumbnailFromDisk(path, stat, constraint, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (thumbnail != null) {
+
+            if (context.getSize(path, stat, constraint, true) == null) {
+                context.putSize(path, stat, constraint, Rect.of(
+                        thumbnail.getWidth(),
+                        thumbnail.getHeight()));
+            }
+
+            if (context.getPalette(path, stat, constraint, true) == null) {
+                publishProgress(decodePalette(thumbnail));
+            }
+
+            publishProgress(thumbnail);
+
+            return true;
+        }
+        return false;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -82,22 +160,22 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
             if (value instanceof Rect) {
                 if (!publishedSize) {
                     publishedSize = true;
-                    context.putSize(file, stat, constraint, (Rect) value);
-                    callback.onSizeAvailable(file, stat, (Rect) value);
+                    context.putSize(path, stat, constraint, (Rect) value);
+                    callback.onSizeAvailable(path, stat, (Rect) value);
                 }
 
             } else if (value instanceof Palette) {
-                context.putPalette(file, stat, constraint, (Palette) value);
-                callback.onPaletteAvailable(file, stat, (Palette) value);
+                context.putPalette(path, stat, constraint, (Palette) value);
+                callback.onPaletteAvailable(path, stat, (Palette) value);
 
             } else if (value instanceof Bitmap) {
-                context.putThumbnail(file, stat, constraint, (Bitmap) value);
-                context.putPreviewable(file, stat, constraint, true);
-                callback.onPreviewAvailable(file, stat, (Bitmap) value);
+                context.putThumbnail(path, stat, constraint, (Bitmap) value);
+                context.putPreviewable(path, stat, constraint, true);
+                callback.onPreviewAvailable(path, stat, (Bitmap) value);
 
             } else if (value instanceof NoPreview) {
-                callback.onPreviewFailed(file, stat);
-                context.putPreviewable(file, stat, constraint, false);
+                callback.onPreviewFailed(path, stat, using);
+                context.putPreviewable(path, stat, constraint, false);
 
             } else if (value instanceof Decode) {
                 Decode sub = (Decode) value;
@@ -107,8 +185,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         }
     }
 
-    AsyncTask<Object, Object, Object> executeOnPreferredExecutor() {
-        return executeOnExecutor(executor);
+    Decode executeOnPreferredExecutor() {
+        return (Decode) executeOnExecutor(executor);
     }
 
 }

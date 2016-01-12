@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.preview.Preview;
-import l.files.ui.preview.PreviewCallback;
+import l.files.ui.preview.Preview.Using;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -30,7 +30,7 @@ import static l.files.ui.preview.Preview.darkColor;
 
 public final class InfoFragment
         extends InfoBaseFragment
-        implements PreviewCallback {
+        implements Preview.Callback {
 
     private static final String ARG_STAT = "stat";
 
@@ -109,7 +109,7 @@ public final class InfoFragment
             if (size != null) {
                 setImageViewMinSize(size);
             }
-            preview.get(file, stat, constraint, this);
+            preview.get(file, stat, constraint, this, Using.MEDIA_TYPE);
         }
     }
 
@@ -168,7 +168,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPreviewFailed(Path file, Stat stat) {
+    public void onPreviewFailed(Path file, Stat stat, Using used) {
         image.setVisibility(GONE);
     }
 

@@ -3,12 +3,12 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
+import l.files.ui.preview.Preview.Using;
 
-import static l.files.ui.preview.Preview.decodePalette;
+import static java.util.Locale.ENGLISH;
 
 final class DecodeChain extends Decode {
 
@@ -16,8 +16,7 @@ final class DecodeChain extends Decode {
             DecodeImage.PREVIEWER,
             DecodePdf.PREVIEWER,
             DecodeApk.PREVIEWER,
-            DecodeAudio.PREVIEWER,
-            DecodeVideo.PREVIEWER,
+            DecodeAudioVideo.PREVIEWER,
             DecodeText.PREVIEWER
     };
 
@@ -25,9 +24,10 @@ final class DecodeChain extends Decode {
             Path file,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Using using,
             Preview context) {
-        super(file, stat, constraint, callback, context);
+        super(file, stat, constraint, callback, using, context);
     }
 
     @Nullable
@@ -35,7 +35,8 @@ final class DecodeChain extends Decode {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
 
         if (!context.isPreviewable(path, stat, constraint)) {
@@ -53,50 +54,58 @@ final class DecodeChain extends Decode {
             callback.onSizeAvailable(path, stat, size);
         }
 
-        return (Decode) new DecodeChain(path, stat, constraint, callback, context)
-                .executeOnPreferredExecutor();
+        if (using == Using.FILE_EXTENSION) {
+            String extensionInLowercase = path.name().ext().toLowerCase(ENGLISH);
+            for (Previewer previewer : PREVIEWERS) {
+                if (previewer.acceptsFileExtension(path, extensionInLowercase)) {
+                    return previewer.create(
+                            path,
+                            stat,
+                            constraint,
+                            callback,
+                            using,
+                            context).executeOnPreferredExecutor();
+                }
+            }
+        }
+
+        String media = context.getMediaType(path, stat, constraint, true);
+        if (media != null) {
+            for (Previewer previewer : PREVIEWERS) {
+                if (previewer.acceptsMediaType(path, media)) {
+                    return previewer.create(
+                            path,
+                            stat,
+                            constraint,
+                            callback,
+                            Using.MEDIA_TYPE,
+                            context).executeOnPreferredExecutor();
+                }
+            }
+            return null;
+        }
+
+        return new DecodeChain(
+                path,
+                stat,
+                constraint,
+                callback,
+                Using.MEDIA_TYPE,
+                context
+        ).executeOnPreferredExecutor();
     }
 
     @Override
     Object onDoInBackground() {
-        if (isCancelled()) {
-            return null;
-        }
-
-        if (!checkPreviewable()) {
-            return null;
-        }
-
-        if (checkIsCache()) {
-            return null;
-        }
-
-        if (checkThumbnailMemCache()) {
-            return null;
-        }
-
-        if (checkThumbnailDiskCache()) {
-            return null;
-        }
-
-        if (isCancelled()) {
-            return null;
-        }
 
         String media = checkMediaType();
-        if (media == null) {
-            return null;
-        }
-
-        if (isCancelled()) {
-            return null;
-        }
-
-        for (Previewer previewer : PREVIEWERS) {
-            if (previewer.accept(file, media)) {
-                publishProgress(previewer.create(
-                        file, stat, constraint, callback, context));
-                return null;
+        if (media != null) {
+            for (Previewer previewer : PREVIEWERS) {
+                if (previewer.acceptsMediaType(path, media)) {
+                    publishProgress(previewer.create(
+                            path, stat, constraint, callback, Using.MEDIA_TYPE, context));
+                    return null;
+                }
             }
         }
 
@@ -105,64 +114,12 @@ final class DecodeChain extends Decode {
         return null;
     }
 
-    private boolean checkIsCache() {
-        if (Files.hierarchy(file).contains(context.cacheDir)) {
-            publishProgress(NoPreview.INSTANCE);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkPreviewable() {
-        if (context.isPreviewable(file, stat, constraint)) {
-            return true;
-        }
-        publishProgress(NoPreview.INSTANCE);
-        return false;
-    }
-
-    private boolean checkThumbnailMemCache() {
-        Bitmap thumbnail = context.getThumbnail(file, stat, constraint, true);
-        if (thumbnail != null) {
-            publishProgress(thumbnail);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkThumbnailDiskCache() {
-        Bitmap thumbnail = null;
-        try {
-            thumbnail = context.getThumbnailFromDisk(file, stat, constraint, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (thumbnail != null) {
-
-            if (context.getSize(file, stat, constraint, true) == null) {
-                context.putSize(file, stat, constraint, Rect.of(
-                        thumbnail.getWidth(),
-                        thumbnail.getHeight()));
-            }
-
-            if (context.getPalette(file, stat, constraint, true) == null) {
-                publishProgress(decodePalette(thumbnail));
-            }
-
-            publishProgress(thumbnail);
-
-            return true;
-        }
-        return false;
-    }
-
     private String checkMediaType() {
-        String media = context.getMediaType(file, stat, constraint, true);
+        String media = context.getMediaType(path, stat, constraint, true);
         if (media == null) {
             media = decodeMedia();
             if (media != null) {
-                context.putMediaType(file, stat, constraint, media);
+                context.putMediaType(path, stat, constraint, media);
             }
         }
         if (media == null) {
@@ -173,7 +130,7 @@ final class DecodeChain extends Decode {
 
     private String decodeMedia() {
         try {
-            return MediaTypes.detectByContent(file, stat);
+            return MediaTypes.detectByContent(path, stat);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

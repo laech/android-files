@@ -13,10 +13,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 
-public final class MagicDetectorTest extends AbstractDetectorTest {
+public final class MagicDetectorTest extends BasePropertyDetectorTest {
 
     @Override
-    AbstractDetector detector() {
+    BasePropertyDetector detector() {
         return MagicDetector.INSTANCE;
     }
 

@@ -10,7 +10,7 @@ import static l.files.fs.Files.readSymbolicLink;
 import static l.files.fs.Files.stat;
 import static l.files.fs.LinkOption.FOLLOW;
 
-abstract class AbstractDetector {
+abstract class BasePropertyDetector {
 
     // Media types for file types, kept consistent with the linux "file" command
     private static final String INODE_DIRECTORY = "inode/directory";

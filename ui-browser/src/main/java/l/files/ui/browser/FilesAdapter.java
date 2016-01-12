@@ -30,7 +30,7 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.preview.Decode;
 import l.files.ui.preview.Preview;
-import l.files.ui.preview.PreviewCallback;
+import l.files.ui.preview.Preview.Using;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Color.TRANSPARENT;
@@ -188,7 +188,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     }
 
     final class FileHolder extends SelectionModeViewHolder<Path, FileInfo>
-            implements PreviewCallback {
+            implements Preview.Callback {
 
         private final FileView content;
 
@@ -228,7 +228,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 textWidth = constraint.width() - content.getPaddingStart() - content.getPaddingEnd();
             }
 
-            updateContent(retrievePreview());
+            updateContent(retrievePreview(Using.FILE_EXTENSION));
         }
 
         private void updateContent(Object preview) {
@@ -246,7 +246,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                             : itemViewElevationWithoutPreview);
         }
 
-        private Object retrievePreview() {
+        private Object retrievePreview(Using using) {
 
             if (task != null) {
                 task.cancelAll();
@@ -271,7 +271,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return thumbnail;
             }
 
-            task = decorator.get(file, stat, constraint, this);
+            task = decorator.get(file, stat, constraint, this, using);
 
             Rect size = decorator.getSize(file, stat, constraint, false);
             if (size != null) {
@@ -346,9 +346,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         }
 
         @Override
-        public void onPreviewFailed(Path item, Stat stat) {
+        public void onPreviewFailed(Path item, Stat stat, Using used) {
             if (item.equals(previewFile())) {
-                updateContent(null);
+                updateContent(used == Using.FILE_EXTENSION
+                        ? retrievePreview(Using.MEDIA_TYPE)
+                        : null);
             }
         }
     }

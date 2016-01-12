@@ -18,8 +18,23 @@ final class DecodeImage extends DecodeThumbnail {
     static final Previewer PREVIEWER = new Previewer() {
 
         @Override
-        public boolean accept(Path path, String mediaType) {
-            return mediaType.startsWith("image/");
+        public boolean acceptsFileExtension(Path path, String extensionInLowercase) {
+            switch (extensionInLowercase) {
+                case "bmp":
+                case "gif":
+                case "jpg":
+                case "jpeg":
+                case "png":
+                case "webp":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public boolean acceptsMediaType(Path path, String mediaTypeInLowercase) {
+            return mediaTypeInLowercase.startsWith("image/");
         }
 
         @Override
@@ -27,9 +42,10 @@ final class DecodeImage extends DecodeThumbnail {
                 Path path,
                 Stat stat,
                 Rect constraint,
-                PreviewCallback callback,
+                Preview.Callback callback,
+                Preview.Using using,
                 Preview context) {
-            return new DecodeImage(path, stat, constraint, callback, context);
+            return new DecodeImage(path, stat, constraint, callback, using, context);
         }
 
     };
@@ -38,9 +54,10 @@ final class DecodeImage extends DecodeThumbnail {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback,
+            Preview.Callback callback,
+            Preview.Using using,
             Preview context) {
-        super(path, stat, constraint, callback, context);
+        super(path, stat, constraint, callback, using, context);
     }
 
     @Override
@@ -51,9 +68,9 @@ final class DecodeImage extends DecodeThumbnail {
 
     @Override
     Result decode() throws IOException {
-        Rect size = context.getSize(file, stat, constraint, true);
+        Rect size = context.getSize(path, stat, constraint, true);
         if (size == null) {
-            size = context.decodeSize(file);
+            size = context.decodeSize(path);
             if (size != null) {
                 publishProgress(size);
             }
@@ -70,7 +87,7 @@ final class DecodeImage extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(Files.newBufferedInputStream(file));
+            InputStream in = closer.register(Files.newBufferedInputStream(path));
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
 

@@ -26,7 +26,7 @@ public final class Preview {
      * Increasing this also increases the chance that the palette would
      * contain a color. e.g. {@link Palette#getDarkVibrantColor(int)}
      * would return a color.
-     * <p/>
+     * <p>
      * TODO make this part of the cache key
      */
     static final int PALETTE_MAX_COLOR_COUNT = 1024;
@@ -162,8 +162,16 @@ public final class Preview {
             Path path,
             Stat stat,
             Rect constraint,
-            PreviewCallback callback) {
-        return DecodeChain.run(path, stat, constraint, callback, this);
+            Callback callback,
+            Using using) {
+
+        return DecodeChain.run(
+                path,
+                stat,
+                constraint,
+                callback,
+                using,
+                this);
     }
 
     Rect decodeSize(Path path) throws IOException {
@@ -208,4 +216,22 @@ public final class Preview {
         }
         return color;
     }
+
+    public enum Using {
+        FILE_EXTENSION,
+        MEDIA_TYPE
+    }
+
+    public interface Callback {
+
+        void onSizeAvailable(Path path, Stat stat, Rect size);
+
+        void onPaletteAvailable(Path path, Stat stat, Palette palette);
+
+        void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
+
+        void onPreviewFailed(Path path, Stat stat, Using used);
+
+    }
+
 }
