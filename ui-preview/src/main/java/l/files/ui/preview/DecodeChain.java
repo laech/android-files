@@ -1,6 +1,5 @@
 package l.files.ui.preview;
 
-import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import l.files.fs.Path;
@@ -41,17 +40,6 @@ final class DecodeChain extends Decode {
 
         if (!context.isPreviewable(path, stat, constraint)) {
             return null;
-        }
-
-        Bitmap cached = context.getThumbnail(path, stat, constraint, true);
-        if (cached != null) {
-            callback.onPreviewAvailable(path, stat, cached);
-            return null;
-        }
-
-        Rect size = context.getSize(path, stat, constraint, true);
-        if (size != null) {
-            callback.onSizeAvailable(path, stat, size);
         }
 
         if (using == Using.FILE_EXTENSION) {
