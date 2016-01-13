@@ -4,6 +4,10 @@ import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -13,6 +17,8 @@ import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.preview.Preview.decodePalette;
 
 abstract class DecodeThumbnail extends Decode {
+
+    private volatile Future<?> saveThumbnailToDiskTask;
 
     DecodeThumbnail(
             Path path,
@@ -30,6 +36,16 @@ abstract class DecodeThumbnail extends Decode {
 
     boolean shouldCacheToDisk(Result result, Bitmap scaledBitmap) {
         return true;
+    }
+
+    @Override
+    public void awaitAll(long timeout, TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        super.awaitAll(timeout, unit);
+        Future<?> saveThumbnailToDiskTask = this.saveThumbnailToDiskTask;
+        if (saveThumbnailToDiskTask != null) {
+            saveThumbnailToDiskTask.get(timeout, unit);
+        }
     }
 
     @Override
@@ -92,7 +108,8 @@ abstract class DecodeThumbnail extends Decode {
         }
 
         if (shouldCacheToDisk(result, scaledBitmap)) {
-            context.putThumbnailToDiskAsync(path, stat, constraint, scaledBitmap);
+            saveThumbnailToDiskTask = context.putThumbnailToDiskAsync(
+                    path, stat, constraint, scaledBitmap);
         }
 
         return null;

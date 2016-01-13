@@ -8,10 +8,23 @@ import java.io.IOException;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 
+import static l.files.fs.Files.deleteRecursiveIfExists;
+
 public abstract class PathBaseTest extends AndroidTestCase {
 
     private Path dir1;
     private Path dir2;
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (dir1 != null) {
+            deleteRecursiveIfExists(dir1);
+        }
+        if (dir2 != null) {
+            deleteRecursiveIfExists(dir2);
+        }
+        super.tearDown();
+    }
 
     protected Path dir1() {
         if (dir1 == null) {
@@ -38,7 +51,7 @@ public abstract class PathBaseTest extends AndroidTestCase {
     private File createTempFolder() throws IOException {
         File dir = File.createTempFile(getClass().getSimpleName(), null);
         assertTrue(dir.delete());
-        assertTrue(dir.mkdir());
+        assertTrue(dir.mkdirs());
         return dir;
     }
 

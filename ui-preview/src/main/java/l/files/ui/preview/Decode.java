@@ -6,8 +6,11 @@ import android.support.v7.graphics.Palette;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Path;
@@ -18,6 +21,7 @@ import static android.os.Process.setThreadPriority;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
+import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 import static l.files.ui.preview.Preview.decodePalette;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
@@ -67,6 +71,15 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         cancel(true);
         for (Decode sub : subs) {
             sub.cancelAll();
+        }
+    }
+
+    public void awaitAll(long timeout, TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+
+        get(timeout, unit);
+        for (Decode sub : subs) {
+            sub.get(timeout, unit);
         }
     }
 
@@ -174,8 +187,17 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 callback.onPreviewAvailable(path, stat, (Bitmap) value);
 
             } else if (value instanceof NoPreview) {
-                callback.onPreviewFailed(path, stat, using);
-                context.putPreviewable(path, stat, constraint, false);
+                if (using == MEDIA_TYPE) {
+                    callback.onPreviewFailed(path, stat, using);
+                    context.putPreviewable(path, stat, constraint, false);
+
+                } else {
+                    Decode sub = DecodeChain.run(
+                            path, stat, constraint, callback, MEDIA_TYPE, context);
+                    if (sub != null) {
+                        subs.add(sub);
+                    }
+                }
 
             } else if (value instanceof Decode) {
                 Decode sub = (Decode) value;

@@ -9,6 +9,7 @@ import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Future;
 
 import l.files.base.io.Closer;
 import l.files.fs.Files;
@@ -99,13 +100,20 @@ public final class Preview {
     }
 
     @Nullable
-    Bitmap getThumbnailFromDisk(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
+    Bitmap getThumbnailFromDisk(
+            Path path,
+            Stat stat,
+            Rect constraint,
+            boolean matchTime) throws IOException {
         return thumbnailDiskCache.get(path, stat, constraint, matchTime);
     }
 
-    void putThumbnailToDiskAsync(
-            Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
-        thumbnailDiskCache.putAsync(path, stat, constraint, thumbnail);
+    Future<?> putThumbnailToDiskAsync(
+            Path path,
+            Stat stat,
+            Rect constraint,
+            Bitmap thumbnail) {
+        return thumbnailDiskCache.putAsync(path, stat, constraint, thumbnail);
     }
 
     @Nullable

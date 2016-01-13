@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +38,7 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
 final class ThumbnailDiskCache extends Cache<Bitmap> {
 
-    private static final Executor executor =
+    private static final ExecutorService executor =
             newFixedThreadPool(2, new ThreadFactory() {
 
                 private final AtomicInteger count =
@@ -237,8 +238,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
         }
     }
 
-    public void putAsync(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
-        executor.execute(new WriteThumbnail(
+    public Future<?> putAsync(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
+        return executor.submit(new WriteThumbnail(
                 path, stat, constraint, new WeakReference<>(thumbnail)));
     }
 

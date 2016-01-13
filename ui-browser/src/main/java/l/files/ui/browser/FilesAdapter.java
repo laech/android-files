@@ -348,9 +348,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         @Override
         public void onPreviewFailed(Path item, Stat stat, Using used) {
             if (item.equals(previewFile())) {
-                updateContent(used == Using.FILE_EXTENSION
-                        ? retrievePreview(Using.MEDIA_TYPE)
-                        : null);
+                updateContent(null);
             }
         }
     }
