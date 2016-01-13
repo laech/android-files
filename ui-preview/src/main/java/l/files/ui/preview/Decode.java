@@ -79,7 +79,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
         get(timeout, unit);
         for (Decode sub : subs) {
-            sub.get(timeout, unit);
+            sub.awaitAll(timeout, unit);
         }
     }
 
