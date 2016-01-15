@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
@@ -41,10 +42,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.view.Views.find;
-import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
-import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
-import static l.files.ui.browser.R.dimen.files_list_space;
-import static l.files.ui.browser.R.integer.files_grid_columns;
+import static l.files.ui.preview.Preview.darkColor;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         implements Selectable {
@@ -86,14 +84,14 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     private Rect calculateThumbnailConstraint(Context context, CardView card) {
         Resources res = context.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
-        int columns = res.getInteger(files_grid_columns);
+        int columns = res.getInteger(R.integer.files_grid_columns);
         float cardSpace = SDK_INT >= LOLLIPOP
                 ? 0
                 : card.getPaddingLeft() + card.getPaddingRight();
         int maxThumbnailWidth = (int) (
-                (metrics.widthPixels - res.getDimension(files_list_space) * 2) / columns
-                        - res.getDimension(files_item_space_horizontal) * 2
-                        - res.getDimension(files_item_card_inner_space) * 2
+                (metrics.widthPixels - res.getDimension(R.dimen.files_list_space) * 2) / columns
+                        - res.getDimension(R.dimen.files_item_space_horizontal) * 2
+                        - res.getDimension(R.dimen.files_item_card_inner_space) * 2
                         - cardSpace
         );
         int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
@@ -254,6 +252,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
                 setPaletteColor(TRANSPARENT);
+                setBlurredBackground(null);
                 return null;
             }
 
@@ -263,6 +262,9 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             } else {
                 setPaletteColor(TRANSPARENT);
             }
+
+            Bitmap blurred = decorator.getBlurredThumbnail(file, stat, constraint, false);
+            setBlurredBackground(blurred);
 
             Bitmap thumbnail = getCachedThumbnail(file, stat);
             if (thumbnail != null) {
@@ -308,6 +310,10 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             }
         }
 
+        private void setBlurredBackground(@Nullable Bitmap blurred) {
+            content.setBlurredBackground(blurred);
+        }
+
         @Override
         public void onSizeAvailable(Path item, Stat stat, Rect size) {
             if (item.equals(previewFile())) {
@@ -327,6 +333,13 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             if (item.equals(previewFile())) {
                 updateContent(bm);
                 content.startPreviewTransition();
+            }
+        }
+
+        @Override
+        public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
+            if (path.equals(previewFile())) {
+                setBlurredBackground(thumbnail);
             }
         }
 

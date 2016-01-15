@@ -134,6 +134,7 @@ public final class PreviewTest extends PathBaseTest {
 
         int millis = 5000;
         verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
+        verify(callback, timeout(millis)).onBlurredThumbnailAvailable(eq(file), eq(stat), notNull(Bitmap.class));
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
         verify(callback, timeout(millis)).onPaletteColorAvailable(eq(file), eq(stat), anyInt());
         verify(callback, never()).onPreviewFailed(eq(file), eq(stat), any(Using.class));

@@ -54,6 +54,7 @@ public final class Preview {
     private final PersistenceCache<Integer> paletteCache;
     private final PersistenceCache<String> mediaTypeCache;
     private final PersistenceCache<Boolean> noPreviewCache;
+    private final ThumbnailMemCache blurredThumbnailMemCache;
     private final ThumbnailMemCache thumbnailMemCache;
     private final ThumbnailDiskCache thumbnailDiskCache;
 
@@ -69,7 +70,9 @@ public final class Preview {
         this.paletteCache = new PaletteCache(cacheDir);
         this.mediaTypeCache = new MediaTypeCache(cacheDir);
         this.noPreviewCache = new NoPreviewCache(cacheDir);
-        this.thumbnailMemCache = new ThumbnailMemCache(context, 0.3f);
+        // TODO refactor so that size here and size in decoders are in same place
+        this.blurredThumbnailMemCache = new ThumbnailMemCache(context, 0.05f);
+        this.thumbnailMemCache = new ThumbnailMemCache(context, 0.20f);
         this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
     }
 
@@ -89,6 +92,15 @@ public final class Preview {
 
     private void cleanupAsync() {
         thumbnailDiskCache.cleanupAsync();
+    }
+
+    @Nullable
+    public Bitmap getBlurredThumbnail(Path path, Stat stat, Rect constraint, boolean matchTime) {
+        return blurredThumbnailMemCache.get(path, stat, constraint, matchTime);
+    }
+
+    void putBlurredThumbnail(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
+        blurredThumbnailMemCache.put(path, stat, constraint, thumbnail);
     }
 
     @Nullable
@@ -226,6 +238,7 @@ public final class Preview {
 
     public void clearBitmapMemCache() {
         thumbnailMemCache.clear();
+        blurredThumbnailMemCache.clear();
     }
 
     public enum Using {
@@ -240,6 +253,8 @@ public final class Preview {
         void onPaletteColorAvailable(Path path, Stat stat, int color);
 
         void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
+
+        void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail);
 
         void onPreviewFailed(Path path, Stat stat, Using used);
 

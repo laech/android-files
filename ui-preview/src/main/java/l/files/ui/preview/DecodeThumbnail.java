@@ -95,11 +95,14 @@ abstract class DecodeThumbnail extends Decode {
 
         publishProgress(scaledBitmap);
 
-        if (context.getPaletteColor(path, stat, constraint, true) == null) {
-            Integer color = decodePaletteColor(scaledBitmap);
-            if (color != null) {
-                publishProgress(new PaletteColor(color));
-            }
+        // TODO these ifs are also used else where, refactor this
+
+        if (context.getPalette(path, stat, constraint, true) == null) {
+            publishProgress(decodePalette(scaledBitmap));
+        }
+
+        if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
+            publishProgress(generateBlurredThumbnail(result.maybeScaled));
         }
 
         if (result.maybeScaled != scaledBitmap) {

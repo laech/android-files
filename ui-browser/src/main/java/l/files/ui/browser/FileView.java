@@ -6,6 +6,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -325,6 +328,14 @@ public final class FileView extends View implements Drawable.Callback {
                     linkArrowY,
                     linkArrowPaint);
         }
+    }
+
+    void setBlurredBackground(@Nullable Bitmap bitmap) {
+        RoundedBitmapDrawable drawable =
+                RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+        drawable.setAlpha((int) (0.3f * 255));
+        drawable.setCornerRadius(preview.getCornerRadius());
+        setBackground(drawable);
     }
 
     void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Rect size) {

@@ -151,6 +151,11 @@ public final class InfoFragment
         image.animate().alpha(1).setDuration(animationDuration());
     }
 
+    @Override
+    public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
+        // TODO
+    }
+
     private int animationDuration() {
         return getResources().getInteger(android.R.integer.config_mediumAnimTime);
     }
