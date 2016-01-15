@@ -3,12 +3,15 @@ package l.files.ui.preview;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.v4.util.LruCache;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.content.Context.ACTIVITY_SERVICE;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.KITKAT;
 
 final class ThumbnailMemCache extends MemCache<Bitmap> {
 
@@ -22,7 +25,11 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
         delegate = new LruCache<ByteBuffer, Snapshot<Bitmap>>(size) {
             @Override
             protected int sizeOf(ByteBuffer key, Snapshot<Bitmap> value) {
-                return value.get().getByteCount();
+                if (SDK_INT >= KITKAT) {
+                    return value.get().getAllocationByteCount();
+                } else {
+                    return value.get().getByteCount();
+                }
             }
         };
     }
