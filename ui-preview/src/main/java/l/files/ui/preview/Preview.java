@@ -18,6 +18,7 @@ import l.files.fs.Paths;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
+import static android.graphics.Color.TRANSPARENT;
 import static java.lang.Boolean.TRUE;
 import static l.files.base.Objects.requireNonNull;
 
@@ -27,7 +28,7 @@ public final class Preview {
      * Increasing this also increases the chance that the palette would
      * contain a color. e.g. {@link Palette#getDarkVibrantColor(int)}
      * would return a color.
-     * <p>
+     * <p/>
      * TODO make this part of the cache key
      */
     static final int PALETTE_MAX_COLOR_COUNT = 1024;
@@ -50,7 +51,7 @@ public final class Preview {
     }
 
     private final PersistenceCache<Rect> sizeCache;
-    private final PersistenceCache<Palette> paletteCache;
+    private final PersistenceCache<Integer> paletteCache;
     private final PersistenceCache<String> mediaTypeCache;
     private final PersistenceCache<Boolean> noPreviewCache;
     private final ThumbnailMemCache thumbnailMemCache;
@@ -126,12 +127,12 @@ public final class Preview {
     }
 
     @Nullable
-    public Palette getPalette(Path path, Stat stat, Rect constraint, boolean matchTime) {
+    public Integer getPaletteColor(Path path, Stat stat, Rect constraint, boolean matchTime) {
         return paletteCache.get(path, stat, constraint, matchTime);
     }
 
-    void putPalette(Path path, Stat stat, Rect constraint, Palette palette) {
-        paletteCache.put(path, stat, constraint, palette);
+    void putPaletteColor(Path path, Stat stat, Rect constraint, int color) {
+        paletteCache.put(path, stat, constraint, color);
     }
 
     @Nullable
@@ -207,22 +208,24 @@ public final class Preview {
         return null;
     }
 
-    static Palette decodePalette(Bitmap bitmap) {
-        return new Palette.Builder(bitmap)
+    @Nullable
+    static Integer decodePaletteColor(Bitmap bitmap) {
+        Palette palette = new Palette.Builder(bitmap)
                 .maximumColorCount(PALETTE_MAX_COLOR_COUNT)
                 .generate();
+
+        int color = palette.getDarkVibrantColor(TRANSPARENT);
+        if (color == TRANSPARENT) {
+            color = palette.getDarkMutedColor(TRANSPARENT);
+        }
+        if (color == TRANSPARENT) {
+            return null;
+        }
+        return color;
     }
 
     public void clearBitmapMemCache() {
         thumbnailMemCache.clear();
-    }
-
-    public static int darkColor(Palette palette, int defaultColor) {
-        int color = palette.getDarkVibrantColor(defaultColor);
-        if (color == defaultColor) {
-            color = palette.getDarkMutedColor(defaultColor);
-        }
-        return color;
     }
 
     public enum Using {
@@ -234,7 +237,7 @@ public final class Preview {
 
         void onSizeAvailable(Path path, Stat stat, Rect size);
 
-        void onPaletteAvailable(Path path, Stat stat, Palette palette);
+        void onPaletteColorAvailable(Path path, Stat stat, int color);
 
         void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
 

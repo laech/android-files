@@ -2,7 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v7.graphics.Palette;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,7 +21,7 @@ import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
-import static l.files.ui.preview.Preview.decodePalette;
+import static l.files.ui.preview.Preview.decodePaletteColor;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
@@ -153,8 +152,11 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                         thumbnail.getHeight()));
             }
 
-            if (context.getPalette(path, stat, constraint, true) == null) {
-                publishProgress(decodePalette(thumbnail));
+            if (context.getPaletteColor(path, stat, constraint, true) == null) {
+                Integer color = decodePaletteColor(thumbnail);
+                if (color != null) {
+                    publishProgress(new PaletteColor(color));
+                }
             }
 
             publishProgress(thumbnail);
@@ -177,9 +179,10 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                     callback.onSizeAvailable(path, stat, (Rect) value);
                 }
 
-            } else if (value instanceof Palette) {
-                context.putPalette(path, stat, constraint, (Palette) value);
-                callback.onPaletteAvailable(path, stat, (Palette) value);
+            } else if (value instanceof PaletteColor) {
+                int color = ((PaletteColor) value).color;
+                context.putPaletteColor(path, stat, constraint, color);
+                callback.onPaletteColorAvailable(path, stat, color);
 
             } else if (value instanceof Bitmap) {
                 context.putThumbnail(path, stat, constraint, (Bitmap) value);

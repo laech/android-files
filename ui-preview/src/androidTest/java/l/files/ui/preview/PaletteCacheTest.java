@@ -1,13 +1,11 @@
 package l.files.ui.preview;
 
-import android.graphics.Color;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.Palette.Swatch;
-
-import static java.util.Collections.singletonList;
+import java.util.Random;
 
 public final class PaletteCacheTest
-        extends PersistenceCacheTest<Palette, PaletteCache> {
+        extends PersistenceCacheTest<Integer, PaletteCache> {
+
+    static final Random random = new Random();
 
     @Override
     PaletteCache newCache() {
@@ -15,12 +13,8 @@ public final class PaletteCacheTest
     }
 
     @Override
-    Palette newValue() {
-        return Palette.from(singletonList(new Swatch(Color.BLUE, 1)));
+    Integer newValue() {
+        return random.nextInt();
     }
 
-    @Override
-    void assertValueEquals(Palette a, Palette b) {
-        assertEquals(a.getSwatches(), b.getSwatches());
-    }
 }

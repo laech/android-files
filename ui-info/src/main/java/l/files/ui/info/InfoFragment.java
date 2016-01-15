@@ -2,7 +2,6 @@ package l.files.ui.info;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,6 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.Preview.Using;
 import l.files.ui.preview.Rect;
 
-import static android.graphics.Color.TRANSPARENT;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
 import static android.text.format.DateUtils.formatDateTime;
@@ -26,7 +24,6 @@ import static android.view.View.GONE;
 import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.ui.base.view.Views.find;
-import static l.files.ui.preview.Preview.darkColor;
 
 public final class InfoFragment
         extends InfoBaseFragment
@@ -95,9 +92,9 @@ public final class InfoFragment
 
     private void initImage(Path file, Stat stat) {
         Preview preview = Preview.get(getActivity());
-        Palette palette = preview.getPalette(file, stat, constraint, false);
-        if (palette != null) {
-            setBackground(palette);
+        Integer color = preview.getPaletteColor(file, stat, constraint, false);
+        if (color != null) {
+            setBackground(color);
         }
 
         Bitmap thumbnail = preview.getThumbnail(file, stat, constraint, true);
@@ -139,12 +136,12 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPaletteAvailable(Path file, Stat stat, Palette palette) {
-        setBackground(palette);
+    public void onPaletteColorAvailable(Path file, Stat stat, int color) {
+        setBackground(color);
     }
 
-    private void setBackground(Palette palette) {
-        root.setBackgroundColor(darkColor(palette, TRANSPARENT));
+    private void setBackground(int color) {
+        root.setBackgroundColor(color);
     }
 
     @Override

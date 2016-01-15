@@ -14,7 +14,7 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.preview.Preview.decodePalette;
+import static l.files.ui.preview.Preview.decodePaletteColor;
 
 abstract class DecodeThumbnail extends Decode {
 
@@ -95,8 +95,11 @@ abstract class DecodeThumbnail extends Decode {
 
         publishProgress(scaledBitmap);
 
-        if (context.getPalette(path, stat, constraint, true) == null) {
-            publishProgress(decodePalette(scaledBitmap));
+        if (context.getPaletteColor(path, stat, constraint, true) == null) {
+            Integer color = decodePaletteColor(scaledBitmap);
+            if (color != null) {
+                publishProgress(new PaletteColor(color));
+            }
         }
 
         if (result.maybeScaled != scaledBitmap) {

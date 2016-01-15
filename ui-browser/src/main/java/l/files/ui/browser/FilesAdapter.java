@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.support.v4.util.ArrayMap;
-import android.support.v7.graphics.Palette;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -46,7 +45,6 @@ import static l.files.ui.browser.R.dimen.files_item_card_inner_space;
 import static l.files.ui.browser.R.dimen.files_item_space_horizontal;
 import static l.files.ui.browser.R.dimen.files_list_space;
 import static l.files.ui.browser.R.integer.files_grid_columns;
-import static l.files.ui.preview.Preview.darkColor;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         implements Selectable {
@@ -259,9 +257,9 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return null;
             }
 
-            Palette palette = decorator.getPalette(file, stat, constraint, false);
-            if (palette != null) {
-                setPaletteColor(backgroundColor(palette));
+            Integer color = decorator.getPaletteColor(file, stat, constraint, false);
+            if (color != null) {
+                setPaletteColor(color);
             } else {
                 setPaletteColor(TRANSPARENT);
             }
@@ -318,14 +316,10 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         }
 
         @Override
-        public void onPaletteAvailable(Path item, Stat stat, Palette palette) {
+        public void onPaletteColorAvailable(Path item, Stat stat, int color) {
             if (item.equals(previewFile())) {
-                setPaletteColor(backgroundColor(palette));
+                setPaletteColor(color);
             }
-        }
-
-        private int backgroundColor(Palette palette) {
-            return darkColor(palette, TRANSPARENT);
         }
 
         @Override

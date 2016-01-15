@@ -1,7 +1,6 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
-import android.support.v7.graphics.Palette;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +23,7 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -129,13 +129,13 @@ public final class PreviewTest extends PathBaseTest {
     private void testPreviewSuccess(Path file, Using using) throws Exception {
         Preview.Callback callback = mock(Preview.Callback.class);
         Stat stat = Files.stat(file, FOLLOW);
-        Decode task = newPreview().get(file, stat, Rect.of(10, 10), callback, using);
+        Decode task = newPreview().get(file, stat, Rect.of(100, 100), callback, using);
         assertNotNull(task);
 
         int millis = 5000;
         verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
-        verify(callback, timeout(millis)).onPaletteAvailable(eq(file), eq(stat), notNull(Palette.class));
+        verify(callback, timeout(millis)).onPaletteColorAvailable(eq(file), eq(stat), anyInt());
         verify(callback, never()).onPreviewFailed(eq(file), eq(stat), any(Using.class));
 
         task.awaitAll(1, MINUTES);
