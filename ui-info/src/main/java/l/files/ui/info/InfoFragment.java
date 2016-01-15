@@ -120,16 +120,7 @@ public final class InfoFragment
     }
 
     private Rect scaleSize(Rect size) {
-
-        // TODO scale up too for small pics to avoid jumping
-
-        boolean tooBig = size.width() > constraint.width()
-                || size.height() > constraint.height();
-
-        return tooBig
-                ? size.scale(constraint)
-                : size;
-
+        return size.scale(constraint);
     }
 
     @Override
