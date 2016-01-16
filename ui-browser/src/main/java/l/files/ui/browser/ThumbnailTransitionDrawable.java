@@ -13,7 +13,6 @@ final class ThumbnailTransitionDrawable extends TransitionDrawable {
 
     private final SizedColorDrawable sizedColorDrawable;
     private final ThumbnailDrawable thumbnailDrawable;
-    private final float cornerRadius;
 
     private boolean showingBitmap;
 
@@ -22,13 +21,8 @@ final class ThumbnailTransitionDrawable extends TransitionDrawable {
                 new SizedColorDrawable(TRANSPARENT),
                 new ThumbnailDrawable(context, cornerRadius)
         });
-        this.cornerRadius = cornerRadius;
         this.sizedColorDrawable = (SizedColorDrawable) getDrawable(0);
         this.thumbnailDrawable = (ThumbnailDrawable) getDrawable(1);
-    }
-
-    float getCornerRadius() {
-        return cornerRadius;
     }
 
     void setSize(int width, int height) {

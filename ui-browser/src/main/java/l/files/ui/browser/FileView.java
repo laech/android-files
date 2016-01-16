@@ -6,9 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -39,10 +36,7 @@ public final class FileView extends View implements Drawable.Callback {
     private static float linkArrowSize;
 
     private static ColorStateList primaryColor;
-    private static ColorStateList primaryColorInverse;
-
     private static ColorStateList secondaryColor;
-    private static ColorStateList secondaryColorInverse;
 
     private static float namePaddingTop;
     private static float textPaddingTop;
@@ -58,7 +52,6 @@ public final class FileView extends View implements Drawable.Callback {
     private boolean previewNeedsPaddingTop;
 
     private boolean showLinkIcon;
-    private boolean useInverseTextColor;
 
     {
         Context context = getContext();
@@ -78,8 +71,6 @@ public final class FileView extends View implements Drawable.Callback {
 
             primaryColor = getColorStateList(context, R.color.item_text_primary);
             secondaryColor = getColorStateList(context, R.color.item_text_secondary);
-            primaryColorInverse = getColorStateList(context, R.color.item_text_primary_inverse);
-            secondaryColorInverse = getColorStateList(context, R.color.item_text_secondary_inverse);
 
             textPaddingTop = res.getDimension(
                     R.dimen.files_item_summary_padding_top);
@@ -234,8 +225,8 @@ public final class FileView extends View implements Drawable.Callback {
 
         canvas.save();
 
-        int nameColor = getColor(primaryColor, primaryColorInverse);
-        int summaryColor = getColor(secondaryColor, secondaryColorInverse);
+        int nameColor = getColor(primaryColor);
+        int summaryColor = getColor(secondaryColor);
 
         float dxPreview = 0;
         float dyPreview = 0;
@@ -330,14 +321,6 @@ public final class FileView extends View implements Drawable.Callback {
         }
     }
 
-    void setBlurredBackground(@Nullable Bitmap bitmap) {
-        RoundedBitmapDrawable drawable =
-                RoundedBitmapDrawableFactory.create(getResources(), bitmap);
-        drawable.setAlpha((int) (0.3f * 255));
-        drawable.setCornerRadius(preview.getCornerRadius());
-        setBackground(drawable);
-    }
-
     void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Rect size) {
         preview.setSize(size.width(), size.height());
         if (preview.isShowingBitmap()) {
@@ -411,16 +394,8 @@ public final class FileView extends View implements Drawable.Callback {
         return preview.hasVisibleContent();
     }
 
-    void setUseInverseTextColor(boolean useInverseTextColor) {
-        if (this.useInverseTextColor != useInverseTextColor) {
-            this.useInverseTextColor = useInverseTextColor;
-            invalidate();
-        }
-    }
-
-    private int getColor(ColorStateList normal, ColorStateList inverse) {
-        ColorStateList color = useInverseTextColor ? inverse : normal;
-        return color.getColorForState(getDrawableState(), color.getDefaultColor());
+    private int getColor(ColorStateList list) {
+        return list.getColorForState(getDrawableState(), list.getDefaultColor());
     }
 
     Layout getSummary() {

@@ -23,7 +23,7 @@ dependencies {
     compile project(':fs')
     compile project(':fs-media')
     compile project(':ui-preview-pdf')
-    compile "com.android.support:palette-v7:$supportLibVersion"
+    compile "com.android.support:support-v4:$supportLibVersion"
 
     androidTestCompile project(':testing-fs')
 

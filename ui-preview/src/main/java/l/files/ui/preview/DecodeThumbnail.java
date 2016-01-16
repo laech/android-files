@@ -14,7 +14,6 @@ import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.createScaledBitmap;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.preview.Preview.decodePaletteColor;
 
 abstract class DecodeThumbnail extends Decode {
 
@@ -96,10 +95,6 @@ abstract class DecodeThumbnail extends Decode {
         publishProgress(scaledBitmap);
 
         // TODO these ifs are also used else where, refactor this
-
-        if (context.getPaletteColor(path, stat, constraint, true) == null) {
-            publishProgress(decodePaletteColor(scaledBitmap));
-        }
 
         if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
             publishProgress(generateBlurredThumbnail(result.maybeScaled));

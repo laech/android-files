@@ -23,7 +23,6 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -136,7 +135,6 @@ public final class PreviewTest extends PathBaseTest {
         verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
         verify(callback, timeout(millis)).onBlurredThumbnailAvailable(eq(file), eq(stat), notNull(Bitmap.class));
         verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
-        verify(callback, timeout(millis)).onPaletteColorAvailable(eq(file), eq(stat), anyInt());
         verify(callback, never()).onPreviewFailed(eq(file), eq(stat), any(Using.class));
 
         task.awaitAll(1, MINUTES);

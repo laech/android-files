@@ -8,7 +8,13 @@
     android:layout_marginStart="@dimen/files_item_space_horizontal"
     android:layout_marginTop="@dimen/files_item_space_vertical"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="@dimen/files_item_card_radius">
+    app:cardCornerRadius="@dimen/files_item_card_radius"
+    app:cardElevation="1dp">
+
+    <View
+        android:id="@+id/blur"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <l.files.ui.browser.FileView
         android:id="@android:id/content"

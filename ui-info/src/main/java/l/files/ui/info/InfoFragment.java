@@ -44,7 +44,6 @@ public final class InfoFragment
     }
 
     private Rect constraint;
-    private View root;
     private ImageView image;
 
     @Override
@@ -59,7 +58,6 @@ public final class InfoFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        root = find(R.id.root, this);
         image = find(R.id.image, this);
 
         Path file = dir.resolve(children.get(0));
@@ -92,11 +90,6 @@ public final class InfoFragment
 
     private void initImage(Path file, Stat stat) {
         Preview preview = Preview.get(getActivity());
-        Integer color = preview.getPaletteColor(file, stat, constraint, false);
-        if (color != null) {
-            setBackground(color);
-        }
-
         Bitmap thumbnail = preview.getThumbnail(file, stat, constraint, true);
         if (thumbnail != null) {
             image.setImageBitmap(thumbnail);
@@ -133,15 +126,6 @@ public final class InfoFragment
     private void setImageViewMinSize(int width, int height) {
         image.setMinimumWidth(width);
         image.setMinimumHeight(height);
-    }
-
-    @Override
-    public void onPaletteColorAvailable(Path file, Stat stat, int color) {
-        setBackground(color);
-    }
-
-    private void setBackground(int color) {
-        root.setBackgroundColor(color);
     }
 
     @Override

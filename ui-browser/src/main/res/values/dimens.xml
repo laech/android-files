@@ -11,7 +11,5 @@
     <dimen name="files_item_name_padding_top">10dp</dimen>
     <dimen name="files_item_summary_size">12sp</dimen>
     <dimen name="files_item_summary_padding_top">4dp</dimen>
-    <dimen name="files_item_elevation_without_preview">1dp</dimen>
-    <dimen name="files_item_elevation_with_preview">3dp</dimen>
     <dimen name="title_drop_down_vertical_offset">0dp</dimen>
 </resources>

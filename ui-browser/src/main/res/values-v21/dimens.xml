@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="files_item_card_inner_space">1px</dimen>
-    <dimen name="files_item_card_inner_radius">2.8dp</dimen>
+    <dimen name="files_item_card_inner_space">0px</dimen>
+    <dimen name="files_item_card_inner_radius">0dp</dimen>
     <dimen name="files_item_space_horizontal">6dp</dimen>
     <dimen name="files_item_space_vertical">10dp</dimen>
     <dimen name="title_drop_down_vertical_offset">4dp</dimen>

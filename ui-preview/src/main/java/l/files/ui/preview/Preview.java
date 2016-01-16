@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
-import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 
 import java.io.IOException;
@@ -18,20 +17,10 @@ import l.files.fs.Paths;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
-import static android.graphics.Color.TRANSPARENT;
 import static java.lang.Boolean.TRUE;
 import static l.files.base.Objects.requireNonNull;
 
 public final class Preview {
-
-    /**
-     * Increasing this also increases the chance that the palette would
-     * contain a color. e.g. {@link Palette#getDarkVibrantColor(int)}
-     * would return a color.
-     * <p/>
-     * TODO make this part of the cache key
-     */
-    static final int PALETTE_MAX_COLOR_COUNT = 1024;
 
     private static Preview instance;
 
@@ -51,7 +40,6 @@ public final class Preview {
     }
 
     private final PersistenceCache<Rect> sizeCache;
-    private final PersistenceCache<Integer> paletteCache;
     private final PersistenceCache<String> mediaTypeCache;
     private final PersistenceCache<Boolean> noPreviewCache;
     private final ThumbnailMemCache blurredThumbnailMemCache;
@@ -67,7 +55,6 @@ public final class Preview {
         this.cacheDir = requireNonNull(cacheDir);
         this.displayMetrics = requireNonNull(context).getResources().getDisplayMetrics();
         this.sizeCache = new RectCache(cacheDir);
-        this.paletteCache = new PaletteCache(cacheDir);
         this.mediaTypeCache = new MediaTypeCache(cacheDir);
         this.noPreviewCache = new NoPreviewCache(cacheDir);
         // TODO refactor so that size here and size in decoders are in same place
@@ -78,14 +65,12 @@ public final class Preview {
 
     public void writeCacheAsyncIfNeeded() {
         sizeCache.writeAsyncIfNeeded();
-        paletteCache.writeAsyncIfNeeded();
         mediaTypeCache.writeAsyncIfNeeded();
         noPreviewCache.writeAsyncIfNeeded();
     }
 
     public void readCacheAsyncIfNeeded() {
         sizeCache.readAsyncIfNeeded();
-        paletteCache.readAsyncIfNeeded();
         mediaTypeCache.readAsyncIfNeeded();
         noPreviewCache.readAsyncIfNeeded();
     }
@@ -136,15 +121,6 @@ public final class Preview {
 
     void putSize(Path path, Stat stat, Rect constraint, Rect size) {
         sizeCache.put(path, stat, constraint, size);
-    }
-
-    @Nullable
-    public Integer getPaletteColor(Path path, Stat stat, Rect constraint, boolean matchTime) {
-        return paletteCache.get(path, stat, constraint, matchTime);
-    }
-
-    void putPaletteColor(Path path, Stat stat, Rect constraint, int color) {
-        paletteCache.put(path, stat, constraint, color);
     }
 
     @Nullable
@@ -220,24 +196,11 @@ public final class Preview {
         return null;
     }
 
-    @Nullable
-    static Integer decodePaletteColor(Bitmap bitmap) {
-        Palette palette = new Palette.Builder(bitmap)
-                .maximumColorCount(PALETTE_MAX_COLOR_COUNT)
-                .generate();
-
-        int color = palette.getDarkVibrantColor(TRANSPARENT);
-        if (color == TRANSPARENT) {
-            color = palette.getDarkMutedColor(TRANSPARENT);
-        }
-        if (color == TRANSPARENT) {
-            return null;
-        }
-        return color;
+    public void clearThumbnailCache() {
+        thumbnailMemCache.clear();
     }
 
-    public void clearBitmapMemCache() {
-        thumbnailMemCache.clear();
+    public void clearBlurredThumbnailCache() {
         blurredThumbnailMemCache.clear();
     }
 
@@ -249,8 +212,6 @@ public final class Preview {
     public interface Callback {
 
         void onSizeAvailable(Path path, Stat stat, Rect size);
-
-        void onPaletteColorAvailable(Path path, Stat stat, int color);
 
         void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
 

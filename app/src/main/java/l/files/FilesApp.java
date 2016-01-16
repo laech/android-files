@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.os.StrictMode.VmPolicy;
+import android.util.Log;
 
 import java.util.Locale;
 
@@ -58,8 +59,19 @@ public final class FilesApp extends Application {
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
+
         if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
-            Preview.get(this).clearBitmapMemCache();
+            Preview.get(this).clearThumbnailCache();
+            System.gc();
+        }
+
+        if (level >= TRIM_MEMORY_MODERATE) {
+            Preview.get(this).clearBlurredThumbnailCache();
+            System.gc();
+        }
+
+        if (DEBUG) {
+            Log.d(getClass().getSimpleName(), "onTrimMemory(" + level + ")");
         }
     }
 

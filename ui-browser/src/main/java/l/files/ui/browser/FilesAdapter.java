@@ -3,7 +3,8 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
@@ -33,7 +34,6 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.Preview.Using;
 import l.files.ui.preview.Rect;
 
-import static android.graphics.Color.TRANSPARENT;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -185,24 +185,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     final class FileHolder extends SelectionModeViewHolder<Path, FileInfo>
             implements Preview.Callback {
 
+        private final View blur;
         private final FileView content;
-
-        private final float itemViewElevationWithPreview;
-        private final float itemViewElevationWithoutPreview;
 
         private Decode task;
 
         FileHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
             this.content = find(android.R.id.content, this);
+            this.blur = find(R.id.blur, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
-            this.itemViewElevationWithoutPreview = dimen(R.dimen.files_item_elevation_without_preview);
-            this.itemViewElevationWithPreview = dimen(R.dimen.files_item_elevation_with_preview);
-        }
-
-        private float dimen(int id) {
-            return resources().getDimension(id);
         }
 
         @Override
@@ -223,6 +216,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 textWidth = constraint.width() - content.getPaddingStart() - content.getPaddingEnd();
             }
 
+            ((CardView) itemView).setCardBackgroundColor(WHITE);
             updateContent(retrievePreview(Using.FILE_EXTENSION));
         }
 
@@ -235,10 +229,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 content.set(layouts, item(), textWidth, (Bitmap) null);
             }
             content.setEnabled(item().isReadable());
-            ((CardView) itemView).setCardElevation(
-                    preview != null
-                            ? itemViewElevationWithPreview
-                            : itemViewElevationWithoutPreview);
         }
 
         private Object retrievePreview(Using using) {
@@ -250,20 +240,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             Path file = previewFile();
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
-                setPaletteColor(TRANSPARENT);
-                setBlurredBackground(null);
+                backgroundBlurClear();
                 return null;
             }
 
-            Integer color = decorator.getPaletteColor(file, stat, constraint, false);
-            if (color != null) {
-                setPaletteColor(color);
-            } else {
-                setPaletteColor(TRANSPARENT);
-            }
-
-            Bitmap blurred = decorator.getBlurredThumbnail(file, stat, constraint, false);
-            setBlurredBackground(blurred);
+            backgroundBlurSet(decorator.getBlurredThumbnail(file, stat, constraint, false));
 
             Bitmap thumbnail = getCachedThumbnail(file, stat);
             if (thumbnail != null) {
@@ -299,31 +280,33 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             return size.scale(constraint);
         }
 
-        private void setPaletteColor(int color) {
-            if (color == TRANSPARENT) {
-                ((CardView) itemView).setCardBackgroundColor(WHITE);
-                content.setUseInverseTextColor(false);
-            } else {
-                ((CardView) itemView).setCardBackgroundColor(color);
-                content.setUseInverseTextColor(true);
-            }
+        private void backgroundBlurClear() {
+            blur.setBackground(null);
         }
 
-        private void setBlurredBackground(@Nullable Bitmap blurred) {
-            content.setBlurredBackground(blurred);
+        private void backgroundBlurSet(Bitmap bitmap) {
+            Resources res = itemView.getResources();
+            RoundedBitmapDrawable drawable =
+                    RoundedBitmapDrawableFactory.create(res, bitmap);
+            drawable.setAlpha((int) (0.3f * 255));
+            drawable.setCornerRadius(res.getDimension(
+                    R.dimen.files_item_card_inner_radius));
+            blur.setBackground(drawable);
+        }
+
+        private void backgroundBlurFadeIn(Bitmap thumbnail) {
+            backgroundBlurSet(thumbnail);
+            blur.setAlpha(0f);
+            blur.animate()
+                    .alpha(1)
+                    .setDuration(itemView.getResources().getInteger(
+                            android.R.integer.config_shortAnimTime));
         }
 
         @Override
         public void onSizeAvailable(Path item, Stat stat, Rect size) {
             if (item.equals(previewFile())) {
                 updateContent(scaleSize(size));
-            }
-        }
-
-        @Override
-        public void onPaletteColorAvailable(Path item, Stat stat, int color) {
-            if (item.equals(previewFile())) {
-                setPaletteColor(color);
             }
         }
 
@@ -338,7 +321,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         @Override
         public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
             if (path.equals(previewFile())) {
-                setBlurredBackground(thumbnail);
+                backgroundBlurFadeIn(thumbnail);
             }
         }
 

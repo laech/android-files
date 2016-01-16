@@ -2,7 +2,10 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.support.v7.graphics.Palette;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,14 +19,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
+import static android.graphics.Bitmap.createScaledBitmap;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
+import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.ui.preview.Blur.fastblur;
 import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
-import static l.files.ui.preview.Preview.decodePaletteColor;
 
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
@@ -39,6 +42,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 }
 
             });
+
+    private static RenderScript rs;
 
     final Path path;
     final Stat stat;
@@ -66,6 +71,10 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         this.using = requireNonNull(using);
         this.context = requireNonNull(context);
         this.subs = new CopyOnWriteArrayList<>();
+
+        if (rs == null) {
+            rs = RenderScript.create(context.context);
+        }
     }
 
     public void cancelAll() {
@@ -159,13 +168,6 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                         thumbnail.getHeight()));
             }
 
-            if (context.getPaletteColor(path, stat, constraint, true) == null) {
-                Integer color = decodePaletteColor(thumbnail);
-                if (color != null) {
-                    publishProgress(new PaletteColor(color));
-                }
-            }
-
             if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
                 publishProgress(generateBlurredThumbnail(thumbnail));
             }
@@ -178,7 +180,20 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     }
 
     static BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
-        return new BlurredThumbnail(fastblur(bitmap, 0.3f, 25));
+        int width = max(bitmap.getWidth() / 3, 1);
+        int height = max(bitmap.getHeight() / 3, 1);
+        Bitmap result = createScaledBitmap(bitmap, width, height, false);
+        Allocation input = Allocation.createFromBitmap(rs, result);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setRadius(25);
+        script.setInput(input);
+        script.forEach(output);
+        output.copyTo(result);
+        output.destroy();
+        input.destroy();
+        script.destroy();
+        return new BlurredThumbnail(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -193,11 +208,6 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                     context.putSize(path, stat, constraint, (Rect) value);
                     callback.onSizeAvailable(path, stat, (Rect) value);
                 }
-
-            } else if (value instanceof PaletteColor) {
-                int color = ((PaletteColor) value).color;
-                context.putPaletteColor(path, stat, constraint, color);
-                callback.onPaletteColorAvailable(path, stat, color);
 
             } else if (value instanceof Bitmap) {
                 context.putThumbnail(path, stat, constraint, (Bitmap) value);
