@@ -42,7 +42,6 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.view.Views.find;
-import static l.files.ui.preview.Preview.darkColor;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         implements Selectable {
