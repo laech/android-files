@@ -11,9 +11,6 @@ android {
         targetSdkVersion project.targetSdkVersion
         versionCode 11
         versionName '3.2'
-
-        renderscriptTargetApi project.renderscriptTargetApi
-        renderscriptSupportModeEnabled true
     }
 
     signingConfigs {
