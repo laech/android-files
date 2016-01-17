@@ -9,7 +9,7 @@
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
-    <style name="Theme.Dialog" parent="Theme.AppCompat.Dialog" />
+    <style name="Theme.Dialog" parent="Theme.AppCompat.Light.Dialog" />
 
     <style name="Theme.Dialog.NoTitle">
         <item name="windowNoTitle">true</item>

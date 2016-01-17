@@ -1,6 +1,8 @@
 package l.files.ui.info;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -44,6 +46,7 @@ public final class InfoFragment
     }
 
     private Rect constraint;
+    private View root;
     private ImageView image;
 
     @Override
@@ -58,6 +61,7 @@ public final class InfoFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        root = find(R.id.root, this);
         image = find(R.id.image, this);
 
         Path file = dir.resolve(children.get(0));
@@ -90,8 +94,16 @@ public final class InfoFragment
 
     private void initImage(Path file, Stat stat) {
         Preview preview = Preview.get(getActivity());
+        Bitmap blurred = preview.getBlurredThumbnail(file, stat, constraint, true);
+        if (blurred != null) {
+            setBlurBackground(blurred);
+        }
+
         Bitmap thumbnail = preview.getThumbnail(file, stat, constraint, true);
         if (thumbnail != null) {
+            if (blurred == null) {
+                // TODO
+            }
             image.setImageBitmap(thumbnail);
 
         } else {
@@ -101,6 +113,12 @@ public final class InfoFragment
             }
             preview.get(file, stat, constraint, this, Using.MEDIA_TYPE);
         }
+    }
+
+    private void setBlurBackground(Bitmap bitmap) {
+        Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+        drawable.setAlpha((int) (0.3f * 255));
+        root.setBackground(drawable);
     }
 
     private String formatDate(Stat stat) {

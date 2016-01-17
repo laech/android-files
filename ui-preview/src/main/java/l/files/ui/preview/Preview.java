@@ -58,8 +58,8 @@ public final class Preview {
         this.mediaTypeCache = new MediaTypeCache(cacheDir);
         this.noPreviewCache = new NoPreviewCache(cacheDir);
         // TODO refactor so that size here and size in decoders are in same place
-        this.blurredThumbnailMemCache = new ThumbnailMemCache(context, 0.05f);
-        this.thumbnailMemCache = new ThumbnailMemCache(context, 0.20f);
+        this.blurredThumbnailMemCache = new ThumbnailMemCache(context, false, 0.05f);
+        this.thumbnailMemCache = new ThumbnailMemCache(context, true, 0.20f);
         this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
     }
 

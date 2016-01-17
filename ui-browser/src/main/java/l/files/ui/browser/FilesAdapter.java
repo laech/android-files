@@ -244,10 +244,14 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return null;
             }
 
-            backgroundBlurSet(decorator.getBlurredThumbnail(file, stat, constraint, false));
+            Bitmap blurred = decorator.getBlurredThumbnail(file, stat, constraint, false);
+            backgroundBlurSet(blurred);
 
             Bitmap thumbnail = getCachedThumbnail(file, stat);
             if (thumbnail != null) {
+                if (blurred == null) {
+                    // TODO
+                }
                 return thumbnail;
             }
 

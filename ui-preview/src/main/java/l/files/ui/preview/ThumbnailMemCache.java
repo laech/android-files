@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.support.v4.util.LruCache;
 
 import l.files.fs.Path;
@@ -16,13 +15,22 @@ import static android.os.Build.VERSION_CODES.KITKAT;
 final class ThumbnailMemCache extends MemCache<Bitmap> {
 
     private final LruCache<ByteBuffer, Snapshot<Bitmap>> delegate;
+    private final boolean keyIncludeConstraint;
 
-    ThumbnailMemCache(Context context, float appMemoryPercentageToUseForCache) {
-        this(calculateSize(context, appMemoryPercentageToUseForCache));
+    ThumbnailMemCache(
+            Context context,
+            boolean keyIncludeConstraint,
+            float appMemoryPercentageToUseForCache) {
+
+        this(
+                calculateSize(context, appMemoryPercentageToUseForCache),
+                keyIncludeConstraint
+        );
     }
 
-    ThumbnailMemCache(int size) {
-        delegate = new LruCache<ByteBuffer, Snapshot<Bitmap>>(size) {
+    ThumbnailMemCache(int size, boolean keyIncludeConstraint) {
+        this.keyIncludeConstraint = keyIncludeConstraint;
+        this.delegate = new LruCache<ByteBuffer, Snapshot<Bitmap>>(size) {
             @Override
             protected int sizeOf(ByteBuffer key, Snapshot<Bitmap> value) {
                 if (SDK_INT >= KITKAT) {
@@ -49,8 +57,10 @@ final class ThumbnailMemCache extends MemCache<Bitmap> {
     @Override
     void key(ByteBuffer key, Path path, Stat stat, Rect constraint) {
         path.toByteArray(key.asOutputStream());
-        key.putInt(constraint.width())
-                .putInt(constraint.height());
+        if (keyIncludeConstraint) {
+            key.putInt(constraint.width())
+                    .putInt(constraint.height());
+        }
     }
 
     @Override
