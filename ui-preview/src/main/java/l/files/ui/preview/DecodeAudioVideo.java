@@ -6,32 +6,13 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeByteArray;
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 final class DecodeAudioVideo extends DecodeThumbnail {
-
-    /**
-     * Only 2 thread because there is no 'get scaled down image' from MediaMetadataRetriever,
-     * so to avoid loading images that are too big.
-     */
-    private static final Executor executor = newFixedThreadPool(2, new ThreadFactory() {
-
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, "preview-decode-media-" + threadNumber.getAndIncrement());
-        }
-
-    });
 
     static final Previewer PREVIEWER = new Previewer() {
 
@@ -80,11 +61,6 @@ final class DecodeAudioVideo extends DecodeThumbnail {
             Preview.Using using,
             Preview context) {
         super(path, stat, constraint, callback, using, context);
-    }
-
-    @Override
-    DecodeAudioVideo executeOnPreferredExecutor() {
-        return (DecodeAudioVideo) executeOnExecutor(executor);
     }
 
     @Override

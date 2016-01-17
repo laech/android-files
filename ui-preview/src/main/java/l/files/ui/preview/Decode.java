@@ -23,6 +23,7 @@ import static android.graphics.Bitmap.createScaledBitmap;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static l.files.base.Objects.requireNonNull;
@@ -31,7 +32,7 @@ import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     private static final Executor executor = newFixedThreadPool(
-            getRuntime().availableProcessors() + 1,
+            min(getRuntime().availableProcessors(), 2),
             new ThreadFactory() {
 
                 private final AtomicInteger threadNumber = new AtomicInteger(1);
