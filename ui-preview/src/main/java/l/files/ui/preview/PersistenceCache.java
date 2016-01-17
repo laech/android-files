@@ -32,7 +32,7 @@ abstract class PersistenceCache<V> extends MemCache<V> {
     private final AtomicBoolean dirty = new AtomicBoolean(false);
 
     private final LruCache<ByteBuffer, Snapshot<V>> cache =
-            new LruCache<ByteBuffer, Snapshot<V>>(5000) {
+            new LruCache<ByteBuffer, Snapshot<V>>(2000) {
 
                 @Override
                 protected void entryRemoved(
