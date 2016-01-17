@@ -19,7 +19,7 @@ final class MediaTypeCache extends PersistenceCache<String> {
 
     @Override
     String read(DataInput in) throws IOException {
-        return in.readUTF();
+        return in.readUTF().intern();
     }
 
     @Override

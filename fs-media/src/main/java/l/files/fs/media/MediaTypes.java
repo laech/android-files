@@ -37,11 +37,11 @@ public final class MediaTypes {
      */
     public static String detectByProperties(Path path, Stat stat)
             throws IOException {
-        return PropertyDetector.INSTANCE.detect(path, stat);
+        return PropertyDetector.INSTANCE.detect(path, stat).intern();
     }
 
     public static String detectByFileExtension(String ext) {
-        return ExtensionDetector.INSTANCE.detect(ext);
+        return ExtensionDetector.INSTANCE.detect(ext).intern();
     }
 
     /**
@@ -50,7 +50,7 @@ public final class MediaTypes {
      */
     public static String detectByContent(Path path, Stat stat)
             throws IOException {
-        return MagicDetector.INSTANCE.detect(path, stat);
+        return MagicDetector.INSTANCE.detect(path, stat).intern();
     }
 
     /**
@@ -60,7 +60,7 @@ public final class MediaTypes {
      */
     public static String detect(Path path, Stat stat)
             throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(path, stat);
+        return MetaMagicDetector.INSTANCE.detect(path, stat).intern();
     }
 
 }
