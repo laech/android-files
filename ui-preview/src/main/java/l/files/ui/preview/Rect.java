@@ -34,6 +34,9 @@ public final class Rect {
     }
 
     public Rect scale(Rect constraint) {
+        if (constraint.width() >= width() && constraint.height() >= height()) {
+            return this;
+        }
         float widthRatio = constraint.width() / (float) width();
         float heightRatio = constraint.height() / (float) height();
         float scale = min(widthRatio, heightRatio);
