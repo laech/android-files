@@ -2,21 +2,17 @@ package l.files.ui.preview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.Future;
 
-import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
 
-import static android.graphics.BitmapFactory.decodeStream;
 import static java.lang.Boolean.TRUE;
 import static l.files.base.Objects.requireNonNull;
 
@@ -169,31 +165,6 @@ public final class Preview {
                 callback,
                 using,
                 this);
-    }
-
-    Rect decodeSize(Path path) throws IOException {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(Files.newBufferedInputStream(path));
-            decodeStream(in, null, options);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-
-        if (options.outWidth > 0 && options.outHeight > 0) {
-            return Rect.of(options.outWidth, options.outHeight);
-        }
-        return null;
     }
 
     public void clearThumbnailCache() {

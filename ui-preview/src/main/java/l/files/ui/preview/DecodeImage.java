@@ -1,17 +1,18 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import l.files.base.io.Closer;
-import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.BitmapFactory.decodeStream;
+import static l.files.fs.Files.newBufferedInputStream;
 
 final class DecodeImage extends DecodeThumbnail {
 
@@ -70,7 +71,7 @@ final class DecodeImage extends DecodeThumbnail {
     Result decode() throws IOException {
         Rect size = context.getSize(path, stat, constraint, true);
         if (size == null) {
-            size = context.decodeSize(path);
+            size = decodeSize();
             if (size != null) {
                 publishProgress(size);
             }
@@ -87,7 +88,7 @@ final class DecodeImage extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
-            InputStream in = closer.register(Files.newBufferedInputStream(path));
+            InputStream in = closer.register(newBufferedInputStream(path));
             Bitmap bitmap = decodeStream(in, null, options(size));
             return bitmap != null ? new Result(bitmap, size) : null;
 
@@ -97,6 +98,32 @@ final class DecodeImage extends DecodeThumbnail {
             closer.close();
         }
     }
+
+    Rect decodeSize() throws IOException {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+
+        Closer closer = Closer.create();
+        try {
+
+            InputStream in = closer.register(newBufferedInputStream(path));
+            decodeStream(in, null, options);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+
+        if (options.outWidth > 0 && options.outHeight > 0) {
+            return Rect.of(options.outWidth, options.outHeight);
+        }
+        return null;
+    }
+
 
     private Options options(Rect original) {
         Rect scaled = original.scale(constraint);
