@@ -17,6 +17,37 @@ import static l.files.base.Objects.requireNonNull;
 
 abstract class DecodeThumbnail extends Decode {
 
+    /* TODO
+
+
+02-11 17:43:16.311 14022-14082/? E/AndroidRuntime: FATAL EXCEPTION: preview-decode-task-2
+Process: l.files.debug, PID: 14022
+java.lang.RuntimeException: An error occurred while executing doInBackground()
+   at android.os.AsyncTask$3.done(AsyncTask.java:309)
+   at java.util.concurrent.FutureTask.finishCompletion(FutureTask.java:354)
+   at java.util.concurrent.FutureTask.setException(FutureTask.java:223)
+   at java.util.concurrent.FutureTask.run(FutureTask.java:242)
+   at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1113)
+   at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:588)
+   at java.lang.Thread.run(Thread.java:818)
+Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocation with 457208 free bytes and 446KB until OOM
+   at dalvik.system.VMRuntime.newNonMovableArray(Native Method)
+   at android.graphics.Bitmap.nativeCreate(Native Method)
+   at android.graphics.Bitmap.createBitmap(Bitmap.java:831)
+   at android.graphics.Bitmap.createBitmap(Bitmap.java:808)
+   at android.graphics.Bitmap.createBitmap(Bitmap.java:739)
+   at android.graphics.Bitmap.createScaledBitmap(Bitmap.java:615)
+   at l.files.ui.preview.DecodeThumbnail.onDoInBackground(DecodeThumbnail.java:85)
+   at l.files.ui.preview.Decode.doInBackground(Decode.java:121)
+   at android.os.AsyncTask$2.call(AsyncTask.java:295)
+   at java.util.concurrent.FutureTask.run(FutureTask.java:237)
+   at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1113) 
+   at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:588) 
+   at java.lang.Thread.run(Thread.java:818) 
+
+
+     */
+
     private volatile Future<?> saveThumbnailToDiskTask;
 
     DecodeThumbnail(
