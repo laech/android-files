@@ -20,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import l.files.base.Provider;
@@ -45,6 +44,7 @@ import static android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static java.util.Collections.emptyList;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
@@ -146,7 +146,6 @@ public final class FilesFragment
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
-        recycler.addOnScrollListener(onScrollListener());
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -154,20 +153,6 @@ public final class FilesFragment
         handler.postDelayed(checkProgress, 1000);
         getLoaderManager().initLoader(0, null, this);
         Preferences.register(getActivity(), this);
-    }
-
-    private RecyclerView.OnScrollListener onScrollListener() {
-        return new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    adapter.warmUpOnIdle(getLayoutManager());
-                }
-            }
-
-        };
     }
 
     @Override
@@ -298,20 +283,9 @@ public final class FilesFragment
                 if (emptyView != null) {
                     emptyView.setVisibility(GONE);
                 }
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.warmUpOnIdle(getLayoutManager());
-                    }
-                });
             }
 
         }
-    }
-
-    private StaggeredGridLayoutManager getLayoutManager() {
-        return (StaggeredGridLayoutManager) recycler.getLayoutManager();
     }
 
     private void updateSelection(Result data) {
@@ -326,7 +300,7 @@ public final class FilesFragment
 
     @Override
     public void onLoaderReset(Loader<Result> loader) {
-        adapter.setItems(Collections.<Object>emptyList());
+        adapter.setItems(emptyList());
     }
 
     @Override

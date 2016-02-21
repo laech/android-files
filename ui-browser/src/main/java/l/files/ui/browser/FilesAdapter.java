@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +36,6 @@ import l.files.ui.preview.Rect;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -58,7 +56,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final OnOpenFileListener listener;
 
-    private final FileTextLayoutCache layouts;
+    private final FileTextLayouts layouts;
 
     private Rect constraint;
     private int textWidth;
@@ -76,7 +74,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
         this.decorator = Preview.get(context);
-        this.layouts = FileTextLayoutCache.get();
+        this.layouts = FileTextLayouts.get();
 
     }
 
@@ -95,43 +93,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         );
         int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
         return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
-    }
-
-    void warmUpOnIdle(StaggeredGridLayoutManager layout) {
-
-        System.gc();
-
-        int[] lastVisiblePositions;
-        try {
-            lastVisiblePositions = layout.findLastVisibleItemPositions(null);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            /*
-             * java.lang.NullPointerException: Attempt to invoke virtual method 'int android.support.v7.widget.OrientationHelper.getStartAfterPadding()' on a null object reference
-             *     at android.support.v7.widget.StaggeredGridLayoutManager$Span.findOneVisibleChild(StaggeredGridLayoutManager.java:2345)
-             *     at android.support.v7.widget.StaggeredGridLayoutManager$Span.findLastVisibleItemPosition(StaggeredGridLayoutManager.java:2333)
-             *     at android.support.v7.widget.StaggeredGridLayoutManager.findLastVisibleItemPositions(StaggeredGridLayoutManager.java:897)
-             */
-            return;
-        }
-        Arrays.sort(lastVisiblePositions);
-        int pos = lastVisiblePositions[lastVisiblePositions.length - 1];
-        if (pos == NO_POSITION) {
-            return;
-        }
-
-        int warmUpToPosition = pos + 50;
-
-        while (pos <= warmUpToPosition && pos < getItemCount()) {
-            Object item = getItem(pos);
-            if (item instanceof FileInfo) {
-                layouts.getName(context, (FileInfo) item, textWidth);
-                layouts.getLink(context, (FileInfo) item, textWidth);
-                layouts.getSummary(context, (FileInfo) item, textWidth);
-            }
-            pos++;
-        }
-
     }
 
     @Override

@@ -321,7 +321,7 @@ public final class FileView extends View implements Drawable.Callback {
         }
     }
 
-    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Rect size) {
+    void set(FileTextLayouts layouts, FileInfo item, int textWidth, Rect size) {
         preview.setSize(size.width(), size.height());
         if (preview.isShowingBitmap()) {
             preview.resetTransition();
@@ -329,7 +329,7 @@ public final class FileView extends View implements Drawable.Callback {
         set(layouts, item, textWidth);
     }
 
-    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth, Bitmap bitmap) {
+    void set(FileTextLayouts layouts, FileInfo item, int textWidth, Bitmap bitmap) {
         preview.setBitmap(bitmap);
         if (!preview.isShowingBitmap()) {
             preview.startTransition(0);
@@ -337,7 +337,7 @@ public final class FileView extends View implements Drawable.Callback {
         set(layouts, item, textWidth);
     }
 
-    void set(FileTextLayoutCache layouts, FileInfo item, int textWidth) {
+    void set(FileTextLayouts layouts, FileInfo item, int textWidth) {
 
         this.showLinkIcon = shouldShowLinkIcon(item);
 

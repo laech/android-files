@@ -6,9 +6,6 @@ import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.SparseArray;
-
-import java.util.LinkedHashMap;
 
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -20,43 +17,17 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 import static android.text.Layout.Alignment.ALIGN_CENTER;
 import static android.text.format.Formatter.formatShortFileSize;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
-final class FileTextLayoutCache {
+final class FileTextLayouts {
 
-    private static final FileTextLayoutCache instance = new FileTextLayoutCache();
+    private static final FileTextLayouts instance = new FileTextLayouts();
 
-    static FileTextLayoutCache get() {
+    static FileTextLayouts get() {
         return instance;
     }
 
-    private FileTextLayoutCache() {
-    }
-
-    private final SparseArray<Cache<Name, Layout>> names = new SparseArray<>();
-    private final SparseArray<Cache<Path, Layout>> links = new SparseArray<>();
-    private final SparseArray<Cache<Path, Snapshot<Layout>>> summaries = new SparseArray<>();
-
-    // Like LruCache but simpler and without the synchronization overhead
-    private static final class Cache<K, V> extends LinkedHashMap<K, V> {
-
-        @Override
-        protected boolean removeEldestEntry(Entry<K, V> eldest) {
-            return size() > 5_000;
-        }
-
-    }
-
-    private static final class Snapshot<V> {
-
-        final V value;
-        final long timestamp;
-
-        Snapshot(V value, long timestamp) {
-            this.value = value;
-            this.timestamp = timestamp;
-        }
+    private FileTextLayouts() {
     }
 
     private static DateFormatter formatter;
@@ -65,42 +36,21 @@ final class FileTextLayoutCache {
         return new DateFormatter(context.getApplicationContext());
     }
 
-    private <K, V> Cache<K, V> getCache(
-            Context context,
-            SparseArray<Cache<K, V>> caches) {
-
-        int orientation = context.getResources().getConfiguration().orientation;
-        Cache<K, V> cache = caches.get(orientation);
-        if (cache == null) {
-            cache = new Cache<>();
-            caches.put(orientation, cache);
-        }
-        return cache;
-    }
-
     Layout getName(Context context, FileInfo item, int width) {
 
         if (getMainLooper() != myLooper()) {
             throw new IllegalStateException();
         }
 
-        Cache<Name, Layout> cache = getCache(context, names);
         Name name = item.selfPath().name();
-        Layout layout = cache.get(name);
-        if (layout == null) {
-            layout = new StaticLayout(
-                    name.toString(),
-                    getNamePaint(context),
-                    width,
-                    ALIGN_CENTER,
-                    1.1F,
-                    0,
-                    false);
-            cache.put(name, layout);
-        }
-
-        return layout;
-
+        return new StaticLayout(
+                name.toString(),
+                getNamePaint(context),
+                width,
+                ALIGN_CENTER,
+                1.1F,
+                0,
+                false);
     }
 
     private static TextPaint namePaint;
@@ -127,22 +77,14 @@ final class FileTextLayoutCache {
             throw new IllegalStateException();
         }
 
-        Cache<Path, Layout> cache = getCache(context, links);
-        Layout layout = cache.get(target);
-        if (layout == null) {
-            layout = new StaticLayout(
-                    context.getString(R.string.link_x, target.toString()),
-                    getSummaryPaint(context),
-                    width,
-                    ALIGN_CENTER,
-                    1.1F,
-                    0,
-                    false);
-            cache.put(target, layout);
-        }
-
-        return layout;
-
+        return new StaticLayout(
+                context.getString(R.string.link_x, target.toString()),
+                getSummaryPaint(context),
+                width,
+                ALIGN_CENTER,
+                1.1F,
+                0,
+                false);
     }
 
     @Nullable
@@ -157,34 +99,19 @@ final class FileTextLayoutCache {
             throw new IllegalStateException();
         }
 
-        Cache<Path, Snapshot<Layout>> cache = getCache(context, summaries);
-        Path file = item.selfPath();
-        Snapshot<Layout> cached = cache.get(file);
-        long timestamp = stat.lastModifiedTime().to(MILLISECONDS);
-
-        if (cached == null || cached.timestamp != timestamp) {
-
-            String summary = getSummary(context, item);
-            if (summary == null || summary.isEmpty()) {
-                return null;
-            }
-
-            cached = new Snapshot<Layout>(
-                    new StaticLayout(
-                            summary,
-                            getSummaryPaint(context),
-                            width,
-                            ALIGN_CENTER,
-                            1.1F,
-                            0,
-                            false),
-                    timestamp);
-
-            cache.put(file, cached);
+        String summary = getSummary(context, item);
+        if (summary == null || summary.isEmpty()) {
+            return null;
         }
 
-        return cached.value;
-
+        return new StaticLayout(
+                summary,
+                getSummaryPaint(context),
+                width,
+                ALIGN_CENTER,
+                1.1F,
+                0,
+                false);
     }
 
     private static TextPaint summaryPaint;
