@@ -17,6 +17,23 @@ import static l.files.base.Objects.requireNonNull;
 
 abstract class DecodeThumbnail extends Decode {
 
+
+    /* TODO
+
+02-22 22:08:30.470 504-504/? A/DEBUG: Build fingerprint: 'htc/m8_google/htc_m8:6.0/MRA58K.H10/666671:user/release-keys'
+02-22 22:08:30.470 504-504/? A/DEBUG: Revision: '0'
+02-22 22:08:30.471 504-504/? A/DEBUG: ABI: 'arm'
+02-22 22:08:30.471 504-504/? A/DEBUG: pid: 20272, tid: 20289, name: ationTestRunner  >>> l.files.ui.preview.test <<<
+02-22 22:08:30.471 504-504/? A/DEBUG: signal 7 (SIGBUS), code 2 (BUS_ADRERR), fault addr 0x9e050000
+02-22 22:08:30.496 504-504/? A/DEBUG:     r0 9e0840b0  r1 9e04d124  r2 000001e0  r3 00000110
+02-22 22:08:30.497 504-504/? A/DEBUG:     r4 0000009c  r5 00000019  r6 00000019  r7 00000019
+02-22 22:08:30.497 504-504/? A/DEBUG:     r8 b36be4a0  r9 a92c94a0  sl 9e04a414  fp 9e04fff4
+02-22 22:08:30.497 504-504/? A/DEBUG:     ip a92c9430  sp a92c93f8  lr b36bddbc  pc b36be4a4  cpsr 200f0010
+02-22 22:08:30.500 504-504/? A/DEBUG:     #00 pc 0001b4a4  /system/lib/libRSCpuRef.so
+02-22 22:08:30.500 504-504/? A/DEBUG:     #01 pc 0001adb8  /system/lib/libRSCpuRef.so
+
+     */
+
     /* TODO
 
 
