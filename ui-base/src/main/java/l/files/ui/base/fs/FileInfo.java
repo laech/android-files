@@ -10,6 +10,7 @@ import java.io.IOException;
 import l.files.base.Objects;
 import l.files.base.Provider;
 import l.files.fs.Files;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
@@ -24,21 +25,28 @@ public final class FileInfo implements Comparable<FileInfo> {
     private Boolean readable;
     private String basicMediaType;
 
-    private final Path selfPath;
+    private final Path selfParent;
+    private final Name selfName;
     private final Stat selfStat;
     private final Path linkTargetPath;
     private final Stat linkTargetStat;
 
     private FileInfo(
-            Path selfPath,
+            Path selfParent,
+            Name selfName,
             @Nullable Stat selfStat,
             @Nullable Path linkTargetPath,
             @Nullable Stat linkTargetStat) {
 
-        this.selfPath = requireNonNull(selfPath);
+        this.selfParent = requireNonNull(selfParent);
+        this.selfName = requireNonNull(selfName);
         this.selfStat = selfStat;
         this.linkTargetPath = linkTargetPath;
         this.linkTargetStat = linkTargetStat;
+    }
+
+    public boolean isHidden() {
+        return selfName().isHidden();
     }
 
     public boolean isReadable() {
@@ -65,7 +73,15 @@ public final class FileInfo implements Comparable<FileInfo> {
     }
 
     public Path selfPath() {
-        return selfPath;
+        return selfParent().resolve(selfName());
+    }
+
+    public Path selfParent() {
+        return selfParent;
+    }
+
+    public Name selfName() {
+        return selfName;
     }
 
     @Nullable
@@ -95,7 +111,7 @@ public final class FileInfo implements Comparable<FileInfo> {
     private CollationKey collationKey() {
         if (collationKey == null) {
             collationKey = collator.get()
-                    .getCollationKey(selfPath().name().toString());
+                    .getCollationKey(selfName().toString());
         }
         return collationKey;
     }
@@ -108,7 +124,8 @@ public final class FileInfo implements Comparable<FileInfo> {
     @Override
     public String toString() {
         return "FileInfo{" +
-                "selfPath=" + selfPath +
+                "selfName=" + selfName +
+                ", selfParent=" + selfParent +
                 ", selfStat=" + selfStat +
                 ", linkTargetPath=" + linkTargetPath +
                 ", linkTargetStat=" + linkTargetStat +
@@ -126,7 +143,8 @@ public final class FileInfo implements Comparable<FileInfo> {
 
         FileInfo that = (FileInfo) o;
 
-        return Objects.equal(selfPath, that.selfPath) &&
+        return Objects.equal(selfParent, that.selfParent) &&
+                Objects.equal(selfName, that.selfName) &&
                 Objects.equal(selfStat, that.selfStat) &&
                 Objects.equal(linkTargetPath, that.linkTargetPath) &&
                 Objects.equal(linkTargetStat, that.linkTargetStat);
@@ -134,16 +152,17 @@ public final class FileInfo implements Comparable<FileInfo> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(selfPath, selfStat, linkTargetPath, linkTargetStat);
+        return Objects.hash(selfParent, selfName, selfStat, linkTargetPath, linkTargetStat);
     }
 
     public static FileInfo create(
-            Path path,
+            Path selfParent,
+            Name selfName,
             @Nullable Stat stat,
             @Nullable Path target,
             @Nullable Stat targetStat,
             Provider<Collator> collator) {
-        FileInfo item = new FileInfo(path, stat, target, targetStat);
+        FileInfo item = new FileInfo(selfParent, selfName, stat, target, targetStat);
         item.collator = collator;
         return item;
     }

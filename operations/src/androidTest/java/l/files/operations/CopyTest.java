@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import l.files.fs.Instant;
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -29,7 +30,7 @@ public final class CopyTest extends PasteTest {
         Path srcDir = createDir(dir1().resolve("a"));
         Path srcFile = createFile(dir1().resolve("a/file"));
 
-        Copy copy = create(singleton(srcDir), dstDir);
+        Copy copy = create(srcDir.parent(), singleton(srcDir.name()), dstDir);
         copy.execute();
 
         List<Path> expected = asList(srcDir, srcFile);
@@ -140,12 +141,11 @@ public final class CopyTest extends PasteTest {
 
     private void copy(Path src, Path dstDir)
             throws IOException, InterruptedException {
-        create(singleton(src), dstDir).execute();
+        create(src.parent(), singleton(src.name()), dstDir).execute();
     }
 
     @Override
-    Copy create(Collection<Path> sources, Path dstDir) {
-        return new Copy(sources, dstDir);
+    Copy create(Path sourceDirectory, Collection<Name> sourceFiles, Path destinationDirectory) {
+        return new Copy(sourceDirectory, sourceFiles, destinationDirectory);
     }
-
 }

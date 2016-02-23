@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.util.Collections.emptySet;
@@ -21,7 +22,8 @@ enum Clipboard {
     }
 
     private Action action;
-    private Set<Path> files;
+    private Path sourceDirectory;
+    private Set<Name> sourceFiles = emptySet();
 
     Clipboard() {
         clear();
@@ -29,7 +31,8 @@ enum Clipboard {
 
     void clear() {
         action = null;
-        files = emptySet();
+        sourceFiles = emptySet();
+        sourceDirectory = null;
     }
 
     @Nullable
@@ -37,13 +40,19 @@ enum Clipboard {
         return action;
     }
 
-    Set<Path> paths() {
-        return files;
+    @Nullable
+    Path sourceDirectory() {
+        return sourceDirectory;
     }
 
-    void set(Action action, Collection<? extends Path> files) {
+    Set<Name> sourceFiles() {
+        return sourceFiles;
+    }
+
+    void set(Action action, Path directory, Collection<? extends Name> sourceFiles) {
         this.action = requireNonNull(action);
-        this.files = unmodifiableSet(new HashSet<>(files));
+        this.sourceDirectory = requireNonNull(directory);
+        this.sourceFiles = unmodifiableSet(new HashSet<>(sourceFiles));
     }
 
 }

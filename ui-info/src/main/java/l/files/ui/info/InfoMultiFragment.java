@@ -18,11 +18,11 @@ public final class InfoMultiFragment extends InfoBaseFragment {
 
         ArrayList<Name> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
-            names.add(item.selfPath().name());
+            names.add(item.selfName());
         }
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_DIR, dir);
+        bundle.putParcelable(ARG_DIRECTORY, dir);
         bundle.putParcelableArrayList(ARG_CHILDREN, names);
 
         InfoMultiFragment fragment = new InfoMultiFragment();

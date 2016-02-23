@@ -2,6 +2,7 @@ package l.files.operations;
 
 import java.util.Collection;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static java.util.Collections.singleton;
@@ -65,12 +66,11 @@ public final class MoveTest extends PasteTest {
     }
 
     @Override
-    Move create(Collection<Path> sources, Path dstDir) {
-        return new Move(sources, dstDir);
+    Move create(Path sourceDirectory, Collection<Name> sourceFiles, Path destinationDirectory) {
+        return new Move(sourceDirectory, sourceFiles, destinationDirectory);
     }
 
-    private Move create(Path src, Path dstDir) {
-        return create(singleton(src), dstDir);
+    private Move create(Path sourceFile, Path destinationDirectory) {
+        return create(sourceFile.parent(), singleton(sourceFile.name()), destinationDirectory);
     }
-
 }

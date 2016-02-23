@@ -9,8 +9,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import l.files.fs.FileSystem.Consumer;
-
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.System.nanoTime;
@@ -61,7 +59,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     Observation start(
             Path path,
             LinkOption option,
-            Consumer<? super Path> childrenConsumer) throws IOException, InterruptedException {
+            FileConsumer childrenConsumer) throws IOException, InterruptedException {
 
         if (observation != null) {
             throw new IllegalStateException();

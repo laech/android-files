@@ -4,9 +4,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Random;
 
-import l.files.fs.FileSystem;
+import l.files.fs.FileConsumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
@@ -55,9 +56,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
     private void testRefreshInManualMode(Path dir) throws IOException {
 
-        listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        listDirs(dir, FOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path childDir) throws IOException {
+            public boolean accept(Path parent, Name child) throws IOException {
+                Path childDir = parent.resolve(child);
                 try {
                     // Inotify don't notify child directory last modified time,
                     // unless we explicitly monitor the child dir, but we aren't
@@ -82,10 +84,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
         move(createFile(dir.resolve("before-move-" + nanoTime())),
                 dir.resolve("after-move-" + nanoTime()));
 
-        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        list(dir, FOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path file) throws IOException {
-                deleteRecursive(file);
+            public boolean accept(Path parent, Name child) throws IOException {
+                deleteRecursive(parent.resolve(child));
                 return false;
             }
         });
@@ -111,17 +113,18 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         screen().clickInto(dir).assertListMatchesFileSystem(dir);
 
-        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        list(dir, FOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path child) throws IOException {
+            public boolean accept(Path parent, Name child) throws IOException {
+                Path path = parent.resolve(child);
                 if (nanoTime() % 2 == 0) {
-                    deleteOrCreateChild(child);
+                    deleteOrCreateChild(path);
                 } else {
                     try {
-                        setRandomLastModified(child);
+                        setRandomLastModified(path);
                     } catch (IOException e) {
                         // Older versions does not support changing mtime
-                        deleteOrCreateChild(child);
+                        deleteOrCreateChild(path);
                     }
                 }
                 return true;
@@ -153,12 +156,12 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         final int[] actualCount = {0};
 
-        listDirs(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        listDirs(dir, FOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path child) throws IOException {
+            public boolean accept(Path parent, Name child) throws IOException {
                 actualCount[0]++;
                 if (actualCount[0] > expectedCount) {
-                    deleteRecursive(child);
+                    deleteRecursive(parent.resolve(child));
                     actualCount[0]--;
                 }
                 return true;
@@ -182,13 +185,13 @@ public final class RefreshTest extends BaseFilesActivityTest {
 
         for (int i = 0; i < 200; i++) {
 
-            list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+            list(dir, FOLLOW, new FileConsumer() {
 
                 int count = 0;
 
                 @Override
-                public boolean accept(Path file) throws IOException {
-                    deleteRecursive(file);
+                public boolean accept(Path parent, Name child) throws IOException {
+                    deleteRecursive(parent.resolve(child));
                     count++;
                     return count < 2;
                 }
@@ -212,9 +215,9 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void createRandomChildren(Path dir, int expectedCount) throws IOException {
 
         final int[] actualCount = {0};
-        list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
+        list(dir, FOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path file) {
+            public boolean accept(Path parent, Name child) throws IOException {
                 actualCount[0]++;
                 return true;
             }
@@ -259,10 +262,10 @@ public final class RefreshTest extends BaseFilesActivityTest {
     private void updateAttributes() throws IOException {
 
         final Random r = new Random();
-        list(dir(), NOFOLLOW, new FileSystem.Consumer<Path>() {
+        list(dir(), NOFOLLOW, new FileConsumer() {
             @Override
-            public boolean accept(Path child) throws IOException {
-                setLastModifiedTime(child, NOFOLLOW, Instant.of(
+            public boolean accept(Path parent, Name child) throws IOException {
+                setLastModifiedTime(parent.resolve(child), NOFOLLOW, Instant.of(
                         r.nextInt((int) (currentTimeMillis() / 1000)),
                         r.nextInt(999999)));
                 return true;

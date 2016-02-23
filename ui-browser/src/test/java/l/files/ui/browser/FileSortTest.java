@@ -39,7 +39,7 @@ abstract class FileSortTest {
     private List<Name> names(List<FileInfo> items) {
         List<Name> names = new ArrayList<>(items.size());
         for (FileInfo item : items) {
-            names.add(item.selfPath().name());
+            names.add(item.selfName());
         }
         return names;
     }
@@ -57,12 +57,18 @@ abstract class FileSortTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileInfo.create(file, stat, null, null, new Provider<Collator>() {
-                @Override
-                public Collator get() {
-                    return collator;
-                }
-            }));
+            expected.add(FileInfo.create(
+                    file.parent(),
+                    file.name(),
+                    stat,
+                    null,
+                    null,
+                    new Provider<Collator>() {
+                        @Override
+                        public Collator get() {
+                            return collator;
+                        }
+                    }));
         }
         return expected;
     }

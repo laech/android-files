@@ -94,13 +94,13 @@ public interface FileSystem {
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> childrenConsumer)
+            FileConsumer childrenConsumer)
             throws IOException, InterruptedException;
 
     void list(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException;
+            FileConsumer consumer) throws IOException;
 
     /**
      * Performs a depth first traverse of this tree.
@@ -126,34 +126,15 @@ public interface FileSystem {
     void listDirs(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException;
+            FileConsumer consumer) throws IOException;
 
     void traverseSize(
             Path path,
             LinkOption option,
             SizeVisitor accumulator) throws IOException;
 
-    interface SizeVisitor {
-
-        /**
-         * Called per file/directory.
-         *
-         * @param size       the size of the file/directory in bytes
-         * @param sizeOnDisk the size of actual storage used in bytes
-         */
-        boolean onSize(long size, long sizeOnDisk)
-                throws IOException;
-
-    }
-
     InputStream newInputStream(Path path) throws IOException;
 
     OutputStream newOutputStream(Path path, boolean append) throws IOException;
 
-    interface Consumer<E> {
-        /**
-         * @return true to continue, false to stop for multi-item callbacks
-         */
-        boolean accept(E entry) throws IOException;
-    }
 }

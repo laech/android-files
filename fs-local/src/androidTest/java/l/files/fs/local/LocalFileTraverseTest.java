@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
@@ -29,10 +30,10 @@ import static l.files.fs.local.LocalFileTraverseTest.TraversalOrder.PRE;
 
 public final class LocalFileTraverseTest extends PathBaseTest {
 
-    private static final Comparator<Path> SORT_BY_NAME = new Comparator<Path>() {
+    private static final Comparator<Name> SORT_BY_NAME = new Comparator<Name>() {
         @Override
-        public int compare(Path a, Path b) {
-            return a.name().toString().compareTo(b.name().toString());
+        public int compare(Name a, Name b) {
+            return a.toString().compareTo(b.toString());
         }
     };
 

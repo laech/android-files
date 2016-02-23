@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import l.files.fs.FileConsumer;
 import l.files.fs.FileSystem;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -16,6 +17,7 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import l.files.fs.SizeVisitor;
 
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -289,7 +291,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> childrenConsumer)
+            FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
         checkLocalPath(path);
@@ -302,7 +304,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     public void list(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
+            FileConsumer consumer) throws IOException {
 
         list(path, option, false, consumer);
     }
@@ -311,7 +313,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     public void listDirs(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
+            FileConsumer consumer) throws IOException {
 
         list(path, option, true, consumer);
     }
@@ -320,7 +322,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             final Path path,
             final LinkOption option,
             final boolean dirOnly,
-            final Consumer<? super Path> consumer) throws IOException {
+            final FileConsumer consumer) throws IOException {
 
         try {
             Dirent.list(
@@ -338,7 +340,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
                                 return true;
                             }
                             byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                            return consumer.accept(path.resolve(name));
+                            return consumer.accept(path, LocalName.of(name));
                         }
 
                     });

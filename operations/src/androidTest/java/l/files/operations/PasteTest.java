@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
@@ -25,9 +26,9 @@ public abstract class PasteTest extends PathBaseTest {
      * destination, even if they are empty.
      */
     public void test_pastesEmptyDirectories() throws Exception {
-        Path src = createDir(dir1().resolve("empty"));
-        Path dstDir = createDir(dir1().resolve("dst"));
-        create(singleton(src), dstDir).execute();
+        Name sourceFile = createDir(dir1().resolve("empty")).name();
+        Path destinationDirectory = createDir(dir1().resolve("dst"));
+        create(dir1(), singleton(sourceFile), destinationDirectory).execute();
         assertTrue(exists(dir1().resolve("dst/empty"), NOFOLLOW));
     }
 
@@ -37,9 +38,9 @@ public abstract class PasteTest extends PathBaseTest {
      * pasted with new names.
      */
     public void test_doesNotOverrideExistingFile() throws Exception {
-        List<Path> sources = asList(
-                createFile(dir1().resolve("a.txt")),
-                createFile(dir1().resolve("b.mp4"))
+        List<Name> sourceFiles = asList(
+                createFile(dir1().resolve("a.txt")).name(),
+                createFile(dir1().resolve("b.mp4")).name()
         );
         createDir(dir1().resolve("1"));
         createFile(dir1().resolve("1/a.txt"));
@@ -47,7 +48,7 @@ public abstract class PasteTest extends PathBaseTest {
 
         Path dstDir = dir1().resolve("1");
 
-        create(sources, dstDir).execute();
+        create(dir1(), sourceFiles, dstDir).execute();
 
         assertTrue(exists(dir1().resolve("1/a.txt"), NOFOLLOW));
         assertTrue(exists(dir1().resolve("1/b.mp4"), NOFOLLOW));
@@ -65,10 +66,10 @@ public abstract class PasteTest extends PathBaseTest {
         createFiles(dir1().resolve("a/b/2.txt"));
         createFiles(dir1().resolve("a/b/3.txt"));
         createFiles(dir1().resolve("b/a/1.txt"));
-        Set<Path> sources = singleton(dir1().resolve("a"));
+        Set<Name> sourceFiles = singleton(dir1().resolve("a").name());
         Path dstDir = dir1().resolve("b");
 
-        create(sources, dstDir).execute();
+        create(dir1(), sourceFiles, dstDir).execute();
 
         assertTrue(exists(dir1().resolve("b/a/1.txt"), NOFOLLOW));
         assertTrue(exists(dir1().resolve("b/a 2/1.txt"), NOFOLLOW));
@@ -77,18 +78,19 @@ public abstract class PasteTest extends PathBaseTest {
     }
 
     public void test_doesNothingIfAlreadyCancelledOnExecution() throws Exception {
-        final List<Path> sources = asList(
-                createFiles(dir1().resolve("a/1.txt")),
-                createFiles(dir1().resolve("a/2.txt"))
+        final Path sourceDirectory = dir1().resolve("a");
+        final List<Name> sourceFiles = asList(
+                createFiles(sourceDirectory.resolve("1.txt")).name(),
+                createFiles(sourceDirectory.resolve("2.txt")).name()
         );
-        final Path dstDir = createDir(dir1().resolve("b"));
+        final Path destinationDirectory = createDir(dir1().resolve("b"));
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 currentThread().interrupt();
                 try {
-                    create(sources, dstDir).execute();
+                    create(dir1().resolve("a"), sourceFiles, destinationDirectory).execute();
                     fail();
                 } catch (InterruptedException e) {
                     // Pass
@@ -100,7 +102,7 @@ public abstract class PasteTest extends PathBaseTest {
         thread.start();
         thread.join();
 
-        List<Path> actual = list(dstDir, NOFOLLOW, new ArrayList<Path>());
+        List<Name> actual = list(destinationDirectory, NOFOLLOW, new ArrayList<Name>());
         assertTrue(actual.isEmpty());
     }
 
@@ -108,7 +110,7 @@ public abstract class PasteTest extends PathBaseTest {
         Path parent = createDir(dir1().resolve("parent"));
         Path child = createDir(dir1().resolve("parent/child"));
         try {
-            create(singleton(parent), child).execute();
+            create(parent.parent(), singleton(parent.name()), child).execute();
             fail();
         } catch (CannotPasteIntoSelfException pass) {
             // Pass
@@ -118,13 +120,16 @@ public abstract class PasteTest extends PathBaseTest {
     public void test_errorOnPastingIntoSelf() throws Exception {
         Path dir = createDir(dir1().resolve("parent"));
         try {
-            create(singleton(dir), dir).execute();
+            create(dir.parent(), singleton(dir.name()), dir).execute();
             fail();
         } catch (CannotPasteIntoSelfException pass) {
             // Pass
         }
     }
 
-    abstract Paste create(Collection<Path> sources, Path dstDir);
+    abstract Paste create(
+            Path sourceDirectory,
+            Collection<Name> sourceFiles,
+            Path destinationDirectory);
 
 }

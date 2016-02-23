@@ -51,6 +51,7 @@ public final class FileSortDateTest extends FileSortTest {
     private Path createModified(String nameStr, Instant instant, boolean dir) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
+        Path parent = mock(Path.class);
         Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
@@ -59,6 +60,7 @@ public final class FileSortDateTest extends FileSortTest {
         given(stat.isRegularFile()).willReturn(!dir);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
         given(file.name()).willReturn(name);
+        given(file.parent()).willReturn(parent);
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

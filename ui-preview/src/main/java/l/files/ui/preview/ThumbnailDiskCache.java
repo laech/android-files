@@ -14,9 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
-import l.files.fs.FileSystem.Consumer;
+import l.files.fs.FileConsumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.TraversalCallback;
@@ -126,10 +127,10 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     Path cacheFile(Path path, Stat stat, Rect constraint, boolean matchTime) throws IOException {
         if (!matchTime) {
             final Path[] result = {null};
-            Files.list(cacheDir(path, constraint), NOFOLLOW, new Consumer<Path>() {
+            Files.list(cacheDir(path, constraint), NOFOLLOW, new FileConsumer() {
                 @Override
-                public boolean accept(Path path) {
-                    result[0] = path;
+                public boolean accept(Path parent, Name child) {
+                    result[0] = parent.resolve(child);
                     return false;
                 }
             });
@@ -222,11 +223,11 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
     private void purgeOldCacheFiles(Path path, Rect constraint) throws IOException {
         try {
 
-            Files.list(cacheDir(path, constraint), FOLLOW, new Consumer<Path>() {
+            Files.list(cacheDir(path, constraint), FOLLOW, new FileConsumer() {
                 @Override
-                public boolean accept(Path path) {
+                public boolean accept(Path parent, Name child) {
                     try {
-                        Files.delete(path);
+                        Files.delete(parent.resolve(child));
                     } catch (IOException ignored) {
                         ignored.printStackTrace();
                     }

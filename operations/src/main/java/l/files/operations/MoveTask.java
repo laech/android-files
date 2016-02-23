@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.MOVE;
 
 final class MoveTask extends Task {
 
+    private final Path sourceDirectory;
     private final Move move;
     private final Size count;
     private final Copy copy;
@@ -21,20 +23,22 @@ final class MoveTask extends Task {
             Clock clock,
             Callback callback,
             Handler handler,
-            Collection<? extends Path> sources,
-            Path destination) {
+            Path sourceDirectory,
+            Collection<? extends Name> sourceFiles,
+            Path destinationDirectory) {
 
         super(
                 TaskId.create(id, MOVE),
-                Target.from(sources, destination),
+                Target.from(sourceDirectory, sourceFiles, destinationDirectory),
                 clock,
                 callback,
                 handler
         );
 
-        this.move = new Move(sources, destination);
-        this.count = new Size(sources);
-        this.copy = new Copy(sources, destination);
+        this.sourceDirectory = sourceDirectory;
+        this.move = new Move(sourceDirectory, sourceFiles, destinationDirectory);
+        this.count = new Size(sourceDirectory, sourceFiles);
+        this.copy = new Copy(sourceDirectory, sourceFiles, destinationDirectory);
     }
 
     @Override
@@ -42,6 +46,7 @@ final class MoveTask extends Task {
         try {
             move.execute();
         } catch (FileException e) {
+            // TODO failure is limited and not all source files are here
             copyThenDelete(e.failures());
         }
     }
@@ -49,13 +54,13 @@ final class MoveTask extends Task {
     private void copyThenDelete(List<Failure> failures)
             throws FileException, InterruptedException {
 
-        List<Path> files = new ArrayList<>();
+        List<Name> sourceFiles = new ArrayList<>();
         for (Failure failure : failures) {
-            files.add(failure.path());
+            sourceFiles.add(failure.file());
         }
         count.execute();
         copy.execute();
-        new Delete(files).execute();
+        new Delete(sourceDirectory, sourceFiles).execute();
     }
 
     @Override

@@ -140,7 +140,7 @@ public final class DateCategorizerTest {
         for (Object item : items) {
             names.add(item instanceof Header
                     ? ((Header) item).header()
-                    : ((FileInfo) item).selfPath().name().toString());
+                    : ((FileInfo) item).selfName().toString());
         }
         return unmodifiableList(names);
     }
@@ -279,12 +279,14 @@ public final class DateCategorizerTest {
 
     private FileInfo file(long time) {
         Stat stat = mock(Stat.class);
-        Path file = mock(Path.class);
-        Name name = mock(Name.class);
-        given(name.toString()).willReturn(String.valueOf(time));
-        given(file.name()).willReturn(name);
+        Path parent = mock(Path.class);
+        Name child = mock(Name.class);
+        Path path = mock(Path.class);
+        given(path.name()).willReturn(child);
+        given(child.toString()).willReturn(String.valueOf(time));
+        given(parent.resolve(child)).willReturn(path);
         given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
-        return FileInfo.create(file, stat, null, null, new Provider<Collator>() {
+        return FileInfo.create(parent, child, stat, null, null, new Provider<Collator>() {
             @Override
             public Collator get() {
                 return collator;

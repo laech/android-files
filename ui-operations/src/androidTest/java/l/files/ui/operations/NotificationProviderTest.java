@@ -12,7 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
+import l.files.fs.Paths;
 import l.files.operations.Failure;
 import l.files.operations.Progress;
 import l.files.operations.Target;
@@ -47,7 +49,7 @@ public final class NotificationProviderTest extends AndroidTestCase {
         provider = new NotificationProvider();
         base = TaskState.pending(
                 TaskId.create(1, COPY),
-                Target.from(Collections.<Path>emptyList(), mock(Path.class)),
+                Target.from(mock(Path.class), Collections.<Name>emptyList(), mock(Path.class)),
                 Time.create(0, 0)
         );
         manager = mock(NotificationManager.class);
@@ -91,9 +93,9 @@ public final class NotificationProviderTest extends AndroidTestCase {
 
     public void test_notify_on_failure() throws Exception {
 
-        Path file = mock(Path.class, "p");
         IOException err = new IOException("test");
-        List<Failure> failures = singletonList(Failure.create(file, err));
+        Path path = Paths.get("/tmp/a");
+        List<Failure> failures = singletonList(Failure.create(path.parent(), path.name(), err));
         provider.onUpdate(context, base
                 .running(Time.create(1, 1))
                 .failed(Time.create(2, 2), failures));
@@ -112,14 +114,14 @@ public final class NotificationProviderTest extends AndroidTestCase {
 
     public void test_create_failure_intent_with_correct_failure_data() throws Exception {
 
-        Path f1 = mock(Path.class, "1");
-        Path f2 = mock(Path.class, "2");
+        Path f1 = Paths.get("/tmp/1");
+        Path f2 = Paths.get("/tmp/2");
 
         Intent intent = provider.getFailureIntent(context, base
                 .running(Time.create(1, 1))
                 .failed(Time.create(2, 2), asList(
-                        Failure.create(f1, new IOException("test1")),
-                        Failure.create(f2, new IOException("test2")))));
+                        Failure.create(f1.parent(), f1.name(), new IOException("test1")),
+                        Failure.create(f2.parent(), f2.name(), new IOException("test2")))));
 
         Collection<FailureMessage> actual = getFailures(intent);
         Collection<FailureMessage> expected = asList(

@@ -42,4 +42,6 @@ public interface Name extends Parcelable {
     String dotExt();
 
     boolean isEmpty();
+
+    boolean isHidden();
 }

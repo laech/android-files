@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.operations.Task.Callback;
@@ -59,7 +60,7 @@ public final class TaskTest extends TestCase {
             @Override
             public void execute(Task task) throws FileException {
                 throw new FileException(singletonList(Failure.create(
-                        Paths.get("a"), new IOException("Test")
+                        Paths.get("a"), Paths.get("a").name(), new IOException("Test")
                 )));
             }
         }));
@@ -104,7 +105,7 @@ public final class TaskTest extends TestCase {
         TestTask(Handler handler, Callback callback) {
             super(
                     TaskId.create(0, COPY),
-                    Target.from(Collections.<Path>emptyList(), mock(Path.class)),
+                    Target.from(mock(Path.class), Collections.<Name>emptyList(), mock(Path.class)),
                     Clock.system(),
                     callback,
                     handler

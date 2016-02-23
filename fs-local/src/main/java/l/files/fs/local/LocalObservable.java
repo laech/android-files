@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import l.files.base.io.Closer;
 import l.files.fs.Event;
-import l.files.fs.FileSystem.Consumer;
+import l.files.fs.FileConsumer;
 import l.files.fs.Files;
 import l.files.fs.LinkOption;
 import l.files.fs.Observation;
@@ -194,7 +194,7 @@ final class LocalObservable extends Native
         this.released = new AtomicBoolean(false);
     }
 
-    void start(LinkOption option, Consumer<? super Path> childrenConsumer)
+    void start(LinkOption option, FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
         requireNonNull(option);
@@ -273,7 +273,7 @@ final class LocalObservable extends Native
 
     private boolean traverseChildren(
             final LinkOption option,
-            final Consumer<? super Path> childrenConsumer)
+            final FileConsumer childrenConsumer)
             throws IOException, InterruptedException {
 
         final boolean[] limitReached = {fd == -1};
@@ -287,9 +287,8 @@ final class LocalObservable extends Native
                 public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory)
                         throws IOException {
 
-                    byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                    Path child = root.resolve(name);
-                    if (!childrenConsumer.accept(child)) {
+                    LocalName child = LocalName.of(Arrays.copyOf(nameBuffer, nameLength));
+                    if (!childrenConsumer.accept(root, child)) {
                         currentThread().interrupt();
                         return false;
                     }
@@ -300,9 +299,9 @@ final class LocalObservable extends Native
 
                     try {
 
-                        byte[] childPath = child.toByteArray();
+                        byte[] childPath = root.resolve(child).toByteArray();
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
-                        childDirs.put(wd, LocalName.of(name));
+                        childDirs.put(wd, child);
 
                     } catch (ErrnoException e) {
                         //noinspection StatementWithEmptyBody

@@ -70,6 +70,11 @@ final class LocalName implements Name {
     }
 
     @Override
+    public boolean isHidden() {
+        return bytes.length > 0 && bytes[0] == DOT;
+    }
+
+    @Override
     public String toString() {
         return new String(bytes, UTF_8);
     }

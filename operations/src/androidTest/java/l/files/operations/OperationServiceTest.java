@@ -74,7 +74,7 @@ public final class OperationServiceTest extends PathBaseTest {
         service.listener = listener;
         service.onCreate();
 
-        service.onStartCommand(newMoveIntent(getContext(), singleton(src), dst), 0, 0);
+        service.onStartCommand(newMoveIntent(getContext(), dir1(), singleton(src.name()), dst), 0, 0);
 
         listener.await();
         assertFalse(exists(src, NOFOLLOW));
@@ -89,7 +89,7 @@ public final class OperationServiceTest extends PathBaseTest {
         service.listener = listener;
         service.onCreate();
 
-        service.onStartCommand(newCopyIntent(getContext(), singleton(src), dst), 0, 0);
+        service.onStartCommand(newCopyIntent(getContext(), dir1(), singleton(src.name()), dst), 0, 0);
 
         listener.await();
         assertTrue(exists(src, NOFOLLOW));
@@ -99,12 +99,13 @@ public final class OperationServiceTest extends PathBaseTest {
     public void test_deletes_files() throws Exception {
 
         Path a = createFiles(dir1().resolve("a"));
-        Path b = createFiles(dir1().resolve("b/c"));
+        Path b = createDir(dir1().resolve("b"));
+        createFiles(dir1().resolve("b/c"));
         CountDownListener listener = new CountDownListener(DELETE);
         service.listener = listener;
         service.onCreate();
 
-        service.onStartCommand(newDeleteIntent(getContext(), asList(a, b)), 0, 0);
+        service.onStartCommand(newDeleteIntent(getContext(), dir1(), asList(a.name(), b.name())), 0, 0);
 
         listener.await();
         assertFalse(exists(a, NOFOLLOW));
@@ -120,7 +121,7 @@ public final class OperationServiceTest extends PathBaseTest {
         service.onCreate();
 
         long start = currentTimeMillis();
-        service.onStartCommand(newDeleteIntent(getContext(), asList(file1, file2)), 0, 0);
+        service.onStartCommand(newDeleteIntent(getContext(), dir1(), asList(file1.name(), file2.name())), 0, 0);
         listener.await();
         long end = currentTimeMillis();
 

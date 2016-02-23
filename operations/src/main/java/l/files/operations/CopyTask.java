@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import java.util.Collection;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.operations.TaskKind.COPY;
@@ -18,18 +19,19 @@ final class CopyTask extends Task {
             Clock clock,
             Callback callback,
             Handler handler,
-            Collection<? extends Path> sources,
-            Path destination) {
+            Path sourceDirectory,
+            Collection<? extends Name> sourceFiles,
+            Path destinationDirectory) {
 
         super(
                 TaskId.create(id, COPY),
-                Target.from(sources, destination),
+                Target.from(sourceDirectory, sourceFiles, destinationDirectory),
                 clock,
                 callback,
                 handler);
 
-        this.size = new Size(sources);
-        this.copy = new Copy(sources, destination);
+        this.size = new Size(sourceDirectory, sourceFiles);
+        this.copy = new Copy(sourceDirectory, sourceFiles, destinationDirectory);
     }
 
     @Override

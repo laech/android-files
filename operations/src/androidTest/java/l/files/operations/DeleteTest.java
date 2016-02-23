@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.testing.fs.PathBaseTest;
 
@@ -24,7 +25,7 @@ public final class DeleteTest extends PathBaseTest {
 
         Set<Path> expected = new HashSet<>(asList(a, b));
 
-        Delete delete = create(singletonList(a));
+        Delete delete = create(a.parent(), singletonList(a.name()));
         delete.execute();
 
         assertEquals(delete.getDeletedItemCount(), expected.size());
@@ -61,11 +62,11 @@ public final class DeleteTest extends PathBaseTest {
     }
 
     private void delete(Path file) throws Exception {
-        create(singleton(file)).execute();
+        create(file.parent(), singleton(file.name())).execute();
     }
 
-    private Delete create(Collection<? extends Path> resources) {
-        return new Delete(resources);
+    private Delete create(Path sourceDirectory, Collection<? extends Name> sourceFiles) {
+        return new Delete(sourceDirectory, sourceFiles);
     }
 
 }

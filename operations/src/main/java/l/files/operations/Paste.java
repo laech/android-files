@@ -3,6 +3,7 @@ package l.files.operations;
 import java.io.IOException;
 import java.util.Collection;
 
+import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.base.Objects.requireNonNull;
@@ -10,29 +11,31 @@ import static l.files.operations.Files.getNonExistentDestinationFile;
 
 abstract class Paste extends AbstractOperation {
 
-    private final Path destination;
+    private final Path destinationDirectory;
 
-    Paste(Collection<? extends Path> files, Path destination) {
-        super(files);
-        this.destination = requireNonNull(destination, "destination");
+    Paste(Path sourceDirectory, Collection<? extends Name> sourceFiles, Path destinationDirectory) {
+        super(sourceDirectory, sourceFiles);
+        this.destinationDirectory = requireNonNull(destinationDirectory);
     }
 
     @Override
-    void process(Path path) throws InterruptedException {
+    void process(Path sourceDirectory, Name sourceFile) throws InterruptedException {
         checkInterrupt();
 
-        if (destination.startsWith(path)) {
+        Path path = sourceDirectory.resolve(sourceFile);
+
+        if (destinationDirectory.startsWith(path)) {
             throw new CannotPasteIntoSelfException(
                     "Cannot paste directory " + path +
-                            " into its own sub directory " + destination
+                            " into its own sub directory " + destinationDirectory
             );
         }
 
         try {
-            Path to = getNonExistentDestinationFile(path, destination);
+            Path to = getNonExistentDestinationFile(path, destinationDirectory);
             paste(path, to);
         } catch (IOException e) {
-            record(path, e);
+            record(sourceDirectory, sourceFile, e);
         }
     }
 

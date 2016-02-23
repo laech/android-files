@@ -24,8 +24,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import l.files.base.io.Closer;
-import l.files.fs.FileSystem.Consumer;
-import l.files.fs.FileSystem.SizeVisitor;
 
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
@@ -156,7 +154,7 @@ public final class Files {
             Path path,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            Comparator<Path> childrenComparator) throws IOException {
+            Comparator<? super Name> childrenComparator) throws IOException {
 
         new Traverser(path, option, visitor, childrenComparator).traverse();
     }
@@ -165,7 +163,7 @@ public final class Files {
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> consumer)
+            FileConsumer consumer)
             throws IOException, InterruptedException {
 
         return path.fileSystem().observe(path, option, observer, consumer);
@@ -177,9 +175,9 @@ public final class Files {
             Observer observer)
             throws IOException, InterruptedException {
 
-        return observe(path, option, observer, new Consumer<Path>() {
+        return observe(path, option, observer, new FileConsumer() {
             @Override
-            public boolean accept(Path entry) throws IOException {
+            public boolean accept(Path parent, Name child) throws IOException {
                 return true;
             }
         });
@@ -190,7 +188,7 @@ public final class Files {
             Path path,
             LinkOption option,
             BatchObserver batchObserver,
-            Consumer<? super Path> childrenConsumer,
+            FileConsumer childrenConsumer,
             long batchInterval,
             TimeUnit batchInternalUnit)
             throws IOException, InterruptedException {
@@ -210,7 +208,7 @@ public final class Files {
             Path path,
             LinkOption option,
             BatchObserver batchObserver,
-            Consumer<? super Path> childrenConsumer,
+            FileConsumer childrenConsumer,
             long batchInterval,
             TimeUnit batchInternalUnit,
             boolean quickNotifyFirstEvent)
@@ -227,35 +225,35 @@ public final class Files {
     public static void list(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
+            FileConsumer consumer) throws IOException {
 
         path.fileSystem().list(path, option, consumer);
     }
 
-    public static <C extends Collection<? super Path>> C list(
+    public static <C extends Collection<? super Name>> C list(
             final Path path,
             final LinkOption option,
             final C collection) throws IOException {
 
-        path.fileSystem().list(path, option, new Consumer<Path>() {
+        path.fileSystem().list(path, option, new FileConsumer() {
             @Override
-            public boolean accept(Path entry) throws IOException {
-                collection.add(entry);
+            public boolean accept(Path parent, Name child) throws IOException {
+                collection.add(child);
                 return true;
             }
         });
         return collection;
     }
 
-    public static <C extends Collection<? super Path>> C listDirs(
+    public static <C extends Collection<? super Name>> C listDirs(
             final Path path,
             final LinkOption option,
             final C collection) throws IOException {
 
-        path.fileSystem().listDirs(path, option, new Consumer<Path>() {
+        path.fileSystem().listDirs(path, option, new FileConsumer() {
             @Override
-            public boolean accept(Path entry) throws IOException {
-                collection.add(entry);
+            public boolean accept(Path parent, Name child) throws IOException {
+                collection.add(child);
                 return true;
             }
         });
@@ -265,7 +263,7 @@ public final class Files {
     public static void listDirs(
             Path path,
             LinkOption option,
-            Consumer<? super Path> consumer) throws IOException {
+            FileConsumer consumer) throws IOException {
 
         path.fileSystem().listDirs(path, option, consumer);
     }
