@@ -10,7 +10,6 @@ import android.widget.EditText;
 import java.io.IOException;
 
 import l.files.fs.Files;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -23,12 +22,12 @@ public final class RenameFragment extends FileCreationFragment {
 
     public static final String TAG = RenameFragment.class.getSimpleName();
 
-    private static final String ARG_FILE = "file";
+    private static final String ARG_PATH = "path";
 
-    static RenameFragment create(Path directory, Name file) {
-        Bundle args = new Bundle(3);
-        args.putParcelable(ARG_PARENT_PATH, directory);
-        args.putParcelable(ARG_FILE, file);
+    static RenameFragment create(Path path) {
+        Bundle args = new Bundle(2);
+        args.putParcelable(ARG_PARENT_PATH, path.parent());
+        args.putParcelable(ARG_PATH, path);
 
         RenameFragment fragment = new RenameFragment();
         fragment.setArguments(args);
@@ -42,15 +41,13 @@ public final class RenameFragment extends FileCreationFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Name file = getArguments().getParcelable(ARG_FILE);
-        path = parent().resolve(file);
+        path = getArguments().getParcelable(ARG_PATH);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        // TODO cancel on dialog cancel
         if (highlight != null) {
             highlight.cancel(true);
         }
@@ -79,10 +76,14 @@ public final class RenameFragment extends FileCreationFragment {
         super.restartChecker();
     }
 
+    private Path path() {
+        return path;
+    }
+
     private void highlight() {
         if (getFilename().isEmpty()) {
             highlight = new Highlight()
-                    .executeOnExecutor(THREAD_POOL_EXECUTOR, path);
+                    .executeOnExecutor(THREAD_POOL_EXECUTOR, path());
         }
     }
 
@@ -120,7 +121,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     @Override
     protected CharSequence getError(Path target) {
-        if (path.equals(target)) {
+        if (path().equals(target)) {
             return null;
         }
         return super.getError(target);
@@ -138,7 +139,7 @@ public final class RenameFragment extends FileCreationFragment {
 
     private void rename() {
         Path dst = parent().resolve(getFilename());
-        rename = new Rename(path, dst)
+        rename = new Rename(path(), dst)
                 .executeOnExecutor(THREAD_POOL_EXECUTOR);
 
         ActionMode mode = ((BaseActivity) getActivity()).currentActionMode();

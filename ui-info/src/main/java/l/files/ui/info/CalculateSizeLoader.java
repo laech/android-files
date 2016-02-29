@@ -6,7 +6,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import java.io.IOException;
 import java.util.Collection;
 
-import l.files.fs.SizeVisitor;
+import l.files.fs.FileSystem.SizeVisitor;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;

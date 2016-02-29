@@ -16,7 +16,7 @@ public final class CountTest extends PathBaseTest {
         createFiles(dir1().resolve("1/a.txt"));
         createFiles(dir1().resolve("3/4/c.txt"));
 
-        Set<Path> expected = new HashSet<>(asList(
+        Set<Path> expected = new HashSet<Path>(asList(
                 dir1(),
                 dir1().resolve("1"),
                 dir1().resolve("1/a.txt"),
@@ -25,7 +25,7 @@ public final class CountTest extends PathBaseTest {
                 dir1().resolve("3/4/c.txt")
         ));
 
-        Count counter = new Count(dir1().parent(), singletonList(dir1().name()));
+        Count counter = new Count(singletonList(dir1()));
         counter.execute();
 
         assertEquals(expected.size(), counter.getCount());

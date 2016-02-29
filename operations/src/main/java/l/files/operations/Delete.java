@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -15,8 +14,8 @@ final class Delete extends AbstractOperation {
     private final AtomicInteger deletedItemCount = new AtomicInteger();
     private final AtomicLong deletedByteCount = new AtomicLong();
 
-    Delete(Path sourceDirectory, Collection<? extends Name> sourceFiles) {
-        super(sourceDirectory, sourceFiles);
+    Delete(Collection<? extends Path> files) {
+        super(files);
     }
 
     public int getDeletedItemCount() {
@@ -28,8 +27,8 @@ final class Delete extends AbstractOperation {
     }
 
     @Override
-    void process(Path sourceDirectory, Name sourceFile) throws InterruptedException {
-        traverse(sourceDirectory, sourceFile, new OperationVisitor() {
+    void process(Path file) {
+        traverse(file, new OperationVisitor() {
 
             @Override
             public Result onPostVisit(Path path) throws IOException {

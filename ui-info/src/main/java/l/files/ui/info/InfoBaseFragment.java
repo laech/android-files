@@ -27,7 +27,7 @@ public abstract class InfoBaseFragment
 
     static final Handler handler = new Handler();
 
-    static final String ARG_DIRECTORY = "dir";
+    static final String ARG_DIR = "dir";
     static final String ARG_CHILDREN = "children";
 
     Path dir;
@@ -51,7 +51,7 @@ public abstract class InfoBaseFragment
         sizeOnDisk = find(R.id.size_on_disk, this);
         calculatingSize = find(R.id.calculate_size_progress_bar, this);
 
-        dir = getArguments().getParcelable(ARG_DIRECTORY);
+        dir = getArguments().getParcelable(ARG_DIR);
         children = getArguments().getParcelableArrayList(ARG_CHILDREN);
     }
 

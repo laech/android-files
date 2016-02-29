@@ -19,11 +19,9 @@ import java.util.Set;
 
 import l.files.base.io.Closer;
 import l.files.fs.DirectoryNotEmpty;
-import l.files.fs.FileConsumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
@@ -60,7 +58,7 @@ public final class FilesTest extends PathBaseTest {
 
         assertTrue(Files.exists(dir, NOFOLLOW));
         assertTrue(Files.exists(file, NOFOLLOW));
-        assertEquals(singleton(file.name()), Files.list(dir, FOLLOW, new HashSet<>()));
+        assertEquals(singleton(file), Files.list(dir, FOLLOW, new HashSet<>()));
 
         MoreAsserts.assertEquals(bytes.clone(), dir.name().toByteArray());
         assertEquals(new String(bytes.clone(), UTF_8), dir.name().toString());
@@ -155,7 +153,7 @@ public final class FilesTest extends PathBaseTest {
                 c.rebase(dir, link)
         );
 
-        List<Path> actual = listByName(link, FOLLOW);
+        List<Path> actual = sortByName(Files.list(link, FOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -163,7 +161,7 @@ public final class FilesTest extends PathBaseTest {
         Path a = Files.createFile(dir1().resolve("a"));
         Path b = Files.createDir(dir1().resolve("b"));
         List<Path> expected = asList(a, b);
-        List<Path> actual = listByName(dir1(), NOFOLLOW);
+        List<Path> actual = sortByName(Files.list(dir1(), NOFOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -175,7 +173,7 @@ public final class FilesTest extends PathBaseTest {
 
         Path link = Files.createSymbolicLink(dir1().resolve("link"), dir);
         List<Path> expected = singletonList(link.resolve("b"));
-        List<Path> actual = listDirsByName(link, FOLLOW);
+        List<Path> actual = sortByName(Files.listDirs(link, FOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -184,7 +182,7 @@ public final class FilesTest extends PathBaseTest {
         Files.createDir(dir1().resolve("b"));
         Files.createFile(dir1().resolve("c"));
         List<?> expected = singletonList(dir1().resolve("b"));
-        List<?> actual = listDirsByName(dir1(), NOFOLLOW);
+        List<?> actual = sortByName(Files.listDirs(dir1(), NOFOLLOW, new ArrayList<Path>()));
         assertEquals(expected, actual);
     }
 
@@ -698,35 +696,14 @@ public final class FilesTest extends PathBaseTest {
         assertEquals("hello world", Files.readDetectingCharset(file, 100));
     }
 
-    private List<Path> listByName(Path path, LinkOption option, boolean directoryOnly) throws IOException {
-        final List<Path> paths = new ArrayList<>();
-        final FileConsumer consumer = new FileConsumer() {
-            @Override
-            public boolean accept(Path parent, Name child) throws IOException {
-                paths.add(parent.resolve(child));
-                return true;
-            }
-        };
-        if (directoryOnly) {
-            Files.listDirs(path, option, consumer);
-        } else {
-            Files.list(path, option, consumer);
-        }
-        Collections.sort(paths, new Comparator<Path>() {
+    private List<Path> sortByName(List<Path> files) throws IOException {
+        Collections.sort(files, new Comparator<Path>() {
             @Override
             public int compare(Path a, Path b) {
                 return a.name().toString().compareTo(b.name().toString());
             }
         });
-        return paths;
-    }
-
-    private List<Path> listByName(Path path, LinkOption option) throws IOException {
-        return listByName(path, option, false);
-    }
-
-    private List<Path> listDirsByName(Path path, LinkOption option) throws IOException {
-        return listByName(path, option, true);
+        return files;
     }
 
 }

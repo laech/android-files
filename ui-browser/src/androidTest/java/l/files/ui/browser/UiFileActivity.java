@@ -15,9 +15,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import l.files.base.Provider;
-import l.files.fs.FileConsumer;
+import l.files.fs.FileSystem;
 import l.files.fs.Files;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -147,12 +146,12 @@ final class UiFileActivity {
     }
 
     UiFileActivity click(Path file) {
-        clickItemOnMainThread(instrument, recycler(), file.name());
+        clickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
 
     UiFileActivity longClick(Path file) {
-        longClickItemOnMainThread(instrument, recycler(), file.name());
+        longClickItemOnMainThread(instrument, recycler(), file);
         return this;
     }
 
@@ -328,7 +327,7 @@ final class UiFileActivity {
             Path file,
             Consumer<View> consumer) {
         Instrumentations.findItemOnMainThread(
-                instrument, recycler(), file.name(), consumer);
+                instrument, recycler(), file, consumer);
     }
 
     private Provider<RecyclerView> recycler() {
@@ -356,7 +355,7 @@ final class UiFileActivity {
         findOptionMenuItem(id, new Consumer<MenuItem>() {
             @Override
             public void apply(MenuItem item) {
-                assertTrue("Menu item to be enabled.", item.isEnabled());
+                assertTrue(item.isEnabled());
             }
         });
         return clickOptionMenuItem(id);
@@ -549,17 +548,17 @@ final class UiFileActivity {
 
                 final SimpleArrayMap<Path, Stat> filesInView = filesInView();
 
-                Files.list(dir, FOLLOW, new FileConsumer() {
+                Files.list(dir, FOLLOW, new FileSystem.Consumer<Path>() {
                     @Override
-                    public boolean accept(Path parent, Name child) throws IOException {
-                        Stat oldStat = filesInView.remove(parent.resolve(child));
+                    public boolean accept(Path child) throws IOException {
+                        Stat oldStat = filesInView.remove(child);
                         if (oldStat == null) {
-                            fail("Item in file system but not in view: " + child);
+                            fail("Path in file system but not in view: " + child);
                         }
 
-                        Stat newStat = stat(parent.resolve(child), NOFOLLOW);
+                        Stat newStat = stat(child, NOFOLLOW);
                         if (!newStat.equals(oldStat)) {
-                            fail("Item details differ for : " + child
+                            fail("Path details differ for : " + child
                                     + "\nnew: " + newStat
                                     + "\nold: " + oldStat);
                         }
@@ -609,6 +608,14 @@ final class UiFileActivity {
             files.add(item.selfPath());
         }
         return files;
+    }
+
+    /**
+     * @deprecated use {@link #assertAllItemsDisplayedInOrder(Path...)}
+     */
+    @Deprecated
+    UiFileActivity assertItemsDisplayed(Path... expected) {
+        return assertAllItemsDisplayedInOrder(expected);
     }
 
     UiFileActivity assertAllItemsDisplayedInOrder(final Path... expected) {

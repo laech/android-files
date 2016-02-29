@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.TraversalCallback;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.unmodifiableSet;
-import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.fs.TraversalCallback.Result.TERMINATE;
@@ -24,13 +22,11 @@ abstract class AbstractOperation implements FileOperation {
      */
     private static final int ERROR_LIMIT = 20;
 
-    private final Path sourceDirectory;
-    private final Iterable<Name> sourceFiles;
+    private final Iterable<Path> files;
     private final FailureRecorder recorder;
 
-    AbstractOperation(Path sourceDirectory, Collection<? extends Name> sourceFiles) {
-        this.sourceDirectory = requireNonNull(sourceDirectory);
-        this.sourceFiles = unmodifiableSet(new HashSet<>(sourceFiles));
+    AbstractOperation(Collection<? extends Path> files) {
+        this.files = unmodifiableSet(new HashSet<>(files));
         this.recorder = new FailureRecorder(ERROR_LIMIT);
     }
 
@@ -44,15 +40,15 @@ abstract class AbstractOperation implements FileOperation {
         return currentThread().isInterrupted();
     }
 
-    final void record(Path parentDirectory, Name file, final IOException exception) {
-        recorder.onFailure(parentDirectory, file, exception);
+    final void record(Path path, final IOException exception) {
+        recorder.onFailure(path, exception);
     }
 
-    final void traverse(Path parentDirectory, Name file, OperationVisitor visitor) {
+    final void traverse(Path path, OperationVisitor visitor) {
         try {
-            l.files.fs.Files.traverse(parentDirectory.resolve(file), NOFOLLOW, visitor);
+            l.files.fs.Files.traverse(path, NOFOLLOW, visitor);
         } catch (IOException e) {
-            record(parentDirectory, file, e);
+            record(path, e);
         }
     }
 
@@ -70,20 +66,20 @@ abstract class AbstractOperation implements FileOperation {
 
         @Override
         public void onException(Path path, IOException e) throws IOException {
-            record(path.parent(), path.name(), e);
+            record(path, e);
         }
 
     }
 
     @Override
     public void execute() throws InterruptedException {
-        for (Name file : sourceFiles) {
+        for (Path path : files) {
             checkInterrupt();
-            process(sourceDirectory, file);
+            process(path);
         }
         recorder.throwIfNotEmpty();
     }
 
-    abstract void process(Path sourceDirectory, Name sourceFile) throws InterruptedException;
+    abstract void process(Path path) throws InterruptedException;
 
 }

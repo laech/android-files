@@ -192,8 +192,7 @@ public final class NotificationProvider implements TaskListener {
         ArrayList<FailureMessage> messages = new ArrayList<>(failures.size());
         for (l.files.operations.Failure failure : failures) {
             messages.add(FailureMessage.create(
-                    failure.parentDirectory().resolve(failure.file()),
-                    message(failure.cause())));
+                    failure.path(), message(failure.cause())));
         }
         String title = viewer.getContentTitle(context, state);
         return FailuresActivity.newIntent(context, title, messages);

@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.preview.Preview;
@@ -34,11 +33,11 @@ public final class InfoFragment
 
     private static final String ARG_STAT = "stat";
 
-    public static InfoFragment create(Path directory, Name file, Stat stat) {
+    public static InfoFragment create(Path path, Stat stat) {
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_DIRECTORY, directory);
-        bundle.putParcelableArrayList(ARG_CHILDREN, new ArrayList<>(singleton(file)));
+        bundle.putParcelable(ARG_DIR, path.parent());
+        bundle.putParcelableArrayList(ARG_CHILDREN, new ArrayList<>(singleton(path.name())));
         bundle.putParcelable(ARG_STAT, stat);
 
         InfoFragment fragment = new InfoFragment();

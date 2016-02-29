@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.app.OptionsMenuAction;
 
@@ -18,14 +17,14 @@ import static l.files.ui.operations.actions.Clipboard.Action.CUT;
 
 public final class Paste extends OptionsMenuAction {
 
-    private final Path destinationDirectory;
+    private final Path destination;
     private final Activity context;
     private final Clipboard clipboard;
 
-    public Paste(Activity context, Path destinationDirectory) {
+    public Paste(Activity context, Path destination) {
         super(android.R.id.paste);
-        this.context = requireNonNull(context);
-        this.destinationDirectory = requireNonNull(destinationDirectory);
+        this.context = requireNonNull(context, "context");
+        this.destination = requireNonNull(destination, "destination");
         this.clipboard = Clipboard.INSTANCE;
     }
 
@@ -45,9 +44,8 @@ public final class Paste extends OptionsMenuAction {
         }
 
         item.setEnabled(clipboard.action() != null);
-        for (Name file : clipboard.sourceFiles()) {
-            Path path = clipboard.sourceDirectory().resolve(file);
-            if (destinationDirectory.startsWith(path)) {
+        for (Path path : clipboard.paths()) {
+            if (destination.startsWith(path)) {
                 // Can't paste into itself
                 item.setEnabled(false);
                 return;
@@ -60,18 +58,10 @@ public final class Paste extends OptionsMenuAction {
     protected void onItemSelected(MenuItem item) {
 
         if (clipboard.action() == COPY) {
-            context.startService(newCopyIntent(
-                    context,
-                    clipboard.sourceDirectory(),
-                    clipboard.sourceFiles(),
-                    destinationDirectory));
+            context.startService(newCopyIntent(context, clipboard.paths(), destination));
 
         } else if (clipboard.action() == CUT) {
-            context.startService(newMoveIntent(
-                    context,
-                    clipboard.sourceDirectory(),
-                    clipboard.sourceFiles(),
-                    destinationDirectory));
+            context.startService(newMoveIntent(context, clipboard.paths(), destination));
             clipboard.clear();
         }
     }

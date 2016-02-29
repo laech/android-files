@@ -20,7 +20,6 @@ import android.widget.TextView;
 import java.util.List;
 import java.util.Map;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
@@ -53,7 +52,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final ActionModeProvider actionModeProvider;
     private final ActionMode.Callback actionModeCallback;
-    private final Selection<Name, FileInfo> selection;
+    private final Selection<Path, FileInfo> selection;
 
     private final OnOpenFileListener listener;
 
@@ -64,7 +63,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     FilesAdapter(
             Context context,
-            Selection<Name, FileInfo> selection,
+            Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
@@ -126,7 +125,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     public Object getItemIdObject(int position) {
         Object item = getItem(position);
         if (item instanceof FileInfo) {
-            return ((FileInfo) item).selfName();
+            return ((FileInfo) item).selfPath();
         }
         return item;
     }
@@ -134,17 +133,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     @Override
     public void selectAll() {
         List<Object> items = items();
-        Map<Name, FileInfo> files = new ArrayMap<>(items.size());
+        Map<Path, FileInfo> files = new ArrayMap<>(items.size());
         for (Object item : items) {
             if (item instanceof FileInfo) {
                 FileInfo file = (FileInfo) item;
-                files.put(file.selfName(), file);
+                files.put(file.selfPath(), file);
             }
         }
         selection.addAll(files);
     }
 
-    final class FileHolder extends SelectionModeViewHolder<Name, FileInfo>
+    final class FileHolder extends SelectionModeViewHolder<Path, FileInfo>
             implements Preview.Callback {
 
         private final View blur;
@@ -161,8 +160,8 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         }
 
         @Override
-        protected Name itemId(FileInfo file) {
-            return file.selfName();
+        protected Path itemId(FileInfo file) {
+            return file.selfPath();
         }
 
         @Override

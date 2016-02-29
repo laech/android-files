@@ -58,7 +58,6 @@ public final class FileSortSizeTest extends FileSortTest {
     protected Path createFile(String nameStr, long size) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
-        Path parent = mock(Path.class);
         Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
@@ -66,7 +65,6 @@ public final class FileSortSizeTest extends FileSortTest {
         given(stat.isRegularFile()).willReturn(true);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
         given(file.name()).willReturn(name);
-        given(file.parent()).willReturn(parent);
         given(file.fileSystem()).willReturn(fs);
         return file;
     }
@@ -74,14 +72,12 @@ public final class FileSortSizeTest extends FileSortTest {
     protected Path createDir(String nameStr) throws IOException {
         FileSystem fs = mock(FileSystem.class);
         Stat stat = mock(Stat.class);
-        Path parent = mock(Path.class);
         Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
         given(stat.isDirectory()).willReturn(true);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);
         given(file.name()).willReturn(name);
-        given(file.parent()).willReturn(parent);
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

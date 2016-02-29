@@ -11,7 +11,6 @@ import android.support.v7.view.ActionMode;
 
 import java.util.Collection;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.operations.R;
 
@@ -22,25 +21,23 @@ public final class DeleteDialog extends DialogFragment {
     public static final String FRAGMENT_TAG = "delete-dialog";
 
     // Null after screen rotation, in that case dismiss dialog
-    private final Collection<Name> files;
+    private final Collection<Path> paths;
     private final ActionMode mode;
-    private final Path directory;
 
     public DeleteDialog() {
-        this(null, null, null);
+        this(null, null);
     }
 
     @SuppressLint("ValidFragment")
-    DeleteDialog(Path directory, Collection<Name> files, ActionMode mode) {
-        this.directory = directory;
-        this.files = files;
+    DeleteDialog(Collection<Path> paths, ActionMode mode) {
+        this.paths = paths;
         this.mode = mode;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (directory == null || files == null || mode == null) {
+        if (paths == null || mode == null) {
             setShowsDialog(false);
             dismissAllowingStateLoss();
         }
@@ -49,12 +46,12 @@ public final class DeleteDialog extends DialogFragment {
     @Override
     public AlertDialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-                .setMessage(getConfirmMessage(files.size()))
+                .setMessage(getConfirmMessage(paths.size()))
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.delete, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        requestDelete(files);
+                        requestDelete(paths);
                         mode.finish();
                     }
                 })
@@ -66,9 +63,9 @@ public final class DeleteDialog extends DialogFragment {
         return (AlertDialog) super.getDialog();
     }
 
-    private void requestDelete(Collection<? extends Name> files) {
+    private void requestDelete(Collection<? extends Path> files) {
         Activity context = getActivity();
-        context.startService(newDeleteIntent(context, directory, files));
+        context.startService(newDeleteIntent(context, files));
     }
 
     private String getConfirmMessage(int size) {

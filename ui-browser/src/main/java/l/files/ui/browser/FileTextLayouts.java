@@ -42,7 +42,7 @@ final class FileTextLayouts {
             throw new IllegalStateException();
         }
 
-        Name name = item.selfName();
+        Name name = item.selfPath().name();
         return new StaticLayout(
                 name.toString(),
                 getNamePaint(context),

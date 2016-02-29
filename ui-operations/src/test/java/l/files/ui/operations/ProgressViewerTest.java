@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.operations.Clock;
 import l.files.operations.Failure;
@@ -77,7 +76,7 @@ public abstract class ProgressViewerTest {
         viewer = create(context, clock);
         pending = TaskState.pending(
                 TaskId.create(1, COPY),
-                Target.from(mock(Path.class), singleton(mock(Name.class, "src")), mock(Path.class, "dst")),
+                Target.from(singleton(mock(Path.class, "src")), mock(Path.class, "dst")),
                 Time.create(1, 1)
         );
         running = pending.running(
@@ -108,8 +107,8 @@ public abstract class ProgressViewerTest {
     @Test
     public void getContentTitle_Failed() throws Exception {
         TaskState.Failed state = running.failed(Time.create(2, 2), asList(
-                Failure.create(mock(Path.class), mock(Name.class, "a"), new IOException("1")),
-                Failure.create(mock(Path.class), mock(Name.class, "b"), new IOException("2"))
+                Failure.create(mock(Path.class, "a"), new IOException("1")),
+                Failure.create(mock(Path.class, "b"), new IOException("2"))
         ));
         String expected = res.getQuantityString(getTitleFailed(), 2);
         String actual = viewer.getContentTitle(context, state);
@@ -124,7 +123,7 @@ public abstract class ProgressViewerTest {
                 state.bytes()
         );
         String expected = res.getQuantityString(
-                getTitlePreparing(), 100, 100, state.target().destinationDirectory());
+                getTitlePreparing(), 100, 100, state.target().dstDir());
         String actual = viewer.getContentTitle(context, state);
         assertEquals(expected, actual);
     }
@@ -139,7 +138,7 @@ public abstract class ProgressViewerTest {
 
         String actual = viewer.getContentTitle(context, state);
         String expected = res.getQuantityString(
-                getTitleRunning(), 100, 100, state.target().destinationDirectory());
+                getTitleRunning(), 100, 100, state.target().dstDir());
         assertEquals(expected, actual);
     }
 

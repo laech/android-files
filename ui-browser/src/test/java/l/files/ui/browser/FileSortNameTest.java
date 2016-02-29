@@ -7,7 +7,6 @@ import java.util.Locale;
 import l.files.fs.FileSystem;
 import l.files.fs.Name;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 
 import static java.util.Locale.SIMPLIFIED_CHINESE;
 import static l.files.ui.browser.FileSort.NAME;
@@ -71,12 +70,10 @@ public final class FileSortNameTest extends FileSortTest {
 
     private Path mockFile(String nameStr) {
         FileSystem fs = mock(FileSystem.class);
-        Path parent = mock(Path.class);
         Path file = mock(Path.class);
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
         given(file.name()).willReturn(name);
-        given(file.parent()).willReturn(parent);
         given(file.fileSystem()).willReturn(fs);
         return file;
     }

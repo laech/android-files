@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import l.files.base.io.Closer;
 import l.files.fs.Files;
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -24,12 +23,8 @@ final class Copy extends Paste {
     private final AtomicLong copiedByteCount = new AtomicLong();
     private final AtomicInteger copiedItemCount = new AtomicInteger();
 
-    Copy(
-            Path sourceDirectory,
-            Collection<? extends Name> sourceFiles,
-            Path destinationDirectory) {
-
-        super(sourceDirectory, sourceFiles, destinationDirectory);
+    Copy(Collection<? extends Path> sources, Path destination) {
+        super(sources, destination);
     }
 
     public int getCopiedItemCount() {

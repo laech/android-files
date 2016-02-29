@@ -20,37 +20,35 @@ final class Traverser {
     private final LinkOption rootOption;
     private final TraversalCallback<Path> visitor;
     private final Deque<Node> stack;
-    private final Comparator<Name> childrenComparator;
+    private final Comparator<Path> childrenComparator;
 
     @SuppressWarnings("unchecked")
     Traverser(
             Path root,
             LinkOption option,
             TraversalCallback<? super Path> visitor,
-            Comparator<? super Name> childrenComparator) {
+            Comparator<Path> childrenComparator) {
 
-        this.childrenComparator = (Comparator<Name>) childrenComparator;
+        this.childrenComparator = childrenComparator;
         this.rootOption = requireNonNull(option, "option");
         this.root = requireNonNull(root, "root");
         this.visitor = (TraversalCallback<Path>) requireNonNull(visitor);
         this.stack = new ArrayDeque<>();
-        this.stack.push(new RootNode(root));
+        this.stack.push(new Node(root));
     }
 
     void traverse() throws IOException {
         while (!stack.isEmpty()) {
             Node node = stack.peek();
-            Path path = node.path();
-
             if (!node.visited) {
                 node.visited = true;
 
                 Result result;
                 try {
-                    result = visitor.onPreVisit(path);
+                    result = visitor.onPreVisit(node.path);
                 } catch (IOException e) {
                     stack.pop();
-                    visitor.onException(path, e);
+                    visitor.onException(node.path, e);
                     continue;
                 }
 
@@ -63,9 +61,9 @@ final class Traverser {
                 }
 
                 try {
-                    pushChildren(stack, path);
+                    pushChildren(stack, node);
                 } catch (IOException e) {
-                    visitor.onException(path, e);
+                    visitor.onException(node.path, e);
                 }
 
             } else {
@@ -73,9 +71,9 @@ final class Traverser {
                 stack.pop();
                 Result result;
                 try {
-                    result = visitor.onPostVisit(path);
+                    result = visitor.onPostVisit(node.path);
                 } catch (IOException e) {
-                    visitor.onException(path, e);
+                    visitor.onException(node.path, e);
                     continue;
                 }
                 switch (result) {
@@ -87,54 +85,29 @@ final class Traverser {
         }
     }
 
-    private void pushChildren(Deque<Node> stack, Path parent) throws IOException {
-        LinkOption option = parent.equals(root) ? rootOption : NOFOLLOW;
-        if (!Files.stat(parent, option).isDirectory()) { // TODO catch NotDirectory
+    private void pushChildren(Deque<Node> stack, Node parent) throws IOException {
+        LinkOption option = parent.path.equals(root) ? rootOption : NOFOLLOW;
+        if (!Files.stat(parent.path, option).isDirectory()) {
             return;
         }
 
-        List<Name> children = Files.list(parent, option, new ArrayList<Name>());
+        List<Path> children = Files.list(parent.path, option, new ArrayList<Path>());
         if (childrenComparator != null) {
             Collections.sort(children, childrenComparator);
         }
 
-        ListIterator<Name> it = children.listIterator(children.size());
+        ListIterator<Path> it = children.listIterator(children.size());
         while (it.hasPrevious()) {
-            stack.push(new ChildNode(parent, it.previous()));
+            stack.push(new Node(it.previous()));
         }
     }
 
-    private static abstract class Node {
+    private static class Node {
+        final Path path;
         boolean visited;
 
-        abstract Path path();
-    }
-
-    private static final class RootNode extends Node {
-        final Path path;
-
-        RootNode(Path path) {
-            this.path = path;
-        }
-
-        @Override
-        Path path() {
-            return path;
-        }
-    }
-
-    private static class ChildNode extends Node {
-        final Path parent;
-        final Name name;
-
-        ChildNode(Path parent, Name name) {
-            this.parent = requireNonNull(parent);
-            this.name = requireNonNull(name);
-        }
-
-        @Override
-        Path path() {
-            return parent.resolve(name);
+        private Node(Path path) {
+            this.path = requireNonNull(path);
         }
     }
 }

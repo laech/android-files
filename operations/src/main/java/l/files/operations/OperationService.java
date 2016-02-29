@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.operations.Task.Callback;
 
@@ -30,7 +29,7 @@ import static l.files.operations.OperationService.FileAction.MOVE;
 
 /**
  * Base class for services that perform operations on files.
- * <p>
+ * <p/>
  * Progress will be posted to the event bus, and at a controlled rate to avoid
  * listeners from being flooded by messages.
  */
@@ -38,63 +37,43 @@ public final class OperationService extends Service {
 
     static final String ACTION_CANCEL = "l.files.operations.CANCEL";
     static final String EXTRA_TASK_ID = "task_id";
-    static final String EXTRA_SOURCE_DIRECTORY = "source_directory";
-    static final String EXTRA_FILES = "source_files";
-    static final String EXTRA_DESTINATION_DIRECTORY = "destination_directory";
+    static final String EXTRA_PATHS = "paths";
+    static final String EXTRA_DESTINATION = "destination";
 
     private static final ExecutorService executor = newFixedThreadPool(5);
 
-    public static Intent newDeleteIntent(
-            Context context,
-            Path directory,
-            Collection<? extends Name> files) {
-
+    public static Intent newDeleteIntent(Context context, Collection<? extends Path> files) {
         return new Intent(context, OperationService.class)
                 .setAction(DELETE.action())
-                .putExtra(EXTRA_SOURCE_DIRECTORY, directory)
-                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(files));
+                .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(files));
     }
 
     public static Intent newCopyIntent(
             Context context,
-            Path sourceDirectory,
-            Collection<? extends Name> sourceFiles,
-            Path destinationDirectory) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
-        return newPasteIntent(
-                COPY.action(),
-                context,
-                sourceDirectory,
-                sourceFiles,
-                destinationDirectory);
+        return newPasteIntent(COPY.action(), context, sources, destination);
     }
 
     public static Intent newMoveIntent(
             Context context,
-            Path sourceDirectory,
-            Collection<? extends Name> sourceFiles,
-            Path destinationDirectory) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
-        return newPasteIntent(
-                MOVE.action(),
-                context,
-                sourceDirectory,
-                sourceFiles,
-                destinationDirectory);
+        return newPasteIntent(MOVE.action(), context, sources, destination);
     }
 
     private static Intent newPasteIntent(
             String action,
             Context context,
-            Path sourceDirectory,
-            Collection<? extends Name> sourceFiles,
-            Path destinationDirectory) {
+            Collection<? extends Path> sources,
+            Path destination) {
 
         return new Intent(context, OperationService.class)
                 .setAction(action)
-                .putExtra(EXTRA_DESTINATION_DIRECTORY, destinationDirectory)
-                .putExtra(EXTRA_SOURCE_DIRECTORY, sourceDirectory)
-                .putParcelableArrayListExtra(EXTRA_FILES, new ArrayList<>(sourceFiles));
+                .putExtra(EXTRA_DESTINATION, destination)
+                .putParcelableArrayListExtra(EXTRA_PATHS, new ArrayList<>(sources));
     }
 
     public static PendingIntent newCancelPendingIntent(Context context, int id) {
@@ -211,49 +190,26 @@ public final class OperationService extends Service {
         DELETE("l.files.operations.DELETE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<Name> sourceFiles = intent.getParcelableArrayListExtra(EXTRA_FILES);
-                Path sourceDirectory = intent.getParcelableExtra(EXTRA_SOURCE_DIRECTORY);
-                return new DeleteTask(
-                        id,
-                        Clock.system(),
-                        callback,
-                        handler,
-                        sourceDirectory,
-                        sourceFiles);
+                List<Path> files = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+                return new DeleteTask(id, Clock.system(), callback, handler, files);
             }
         },
 
         COPY("l.files.operations.COPY") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<Name> sourceFiles = intent.getParcelableArrayListExtra(EXTRA_FILES);
-                Path sourceDirectory = intent.getParcelableExtra(EXTRA_SOURCE_DIRECTORY);
-                Path destinationDirectory = intent.getParcelableExtra(EXTRA_DESTINATION_DIRECTORY);
-                return new CopyTask(
-                        id,
-                        Clock.system(),
-                        callback,
-                        handler,
-                        sourceDirectory,
-                        sourceFiles,
-                        destinationDirectory);
+                List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+                Path destination = intent.getParcelableExtra(EXTRA_DESTINATION);
+                return new CopyTask(id, Clock.system(), callback, handler, sources, destination);
             }
         },
 
         MOVE("l.files.operations.MOVE") {
             @Override
             Task newTask(Intent intent, int id, Handler handler, Callback callback) {
-                List<Name> sourceFiles = intent.getParcelableArrayListExtra(EXTRA_FILES);
-                Path sourceDirectory = intent.getParcelableExtra(EXTRA_SOURCE_DIRECTORY);
-                Path destinationDirectory = intent.getParcelableExtra(EXTRA_DESTINATION_DIRECTORY);
-                return new MoveTask(
-                        id,
-                        Clock.system(),
-                        callback,
-                        handler,
-                        sourceDirectory,
-                        sourceFiles,
-                        destinationDirectory);
+                List<Path> sources = intent.getParcelableArrayListExtra(EXTRA_PATHS);
+                Path destination = intent.getParcelableExtra(EXTRA_DESTINATION);
+                return new MoveTask(id, Clock.system(), callback, handler, sources, destination);
             }
         };
 

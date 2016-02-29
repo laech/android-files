@@ -26,7 +26,7 @@ import java.util.concurrent.CountDownLatch;
 import l.files.base.io.Closer;
 import l.files.fs.AlreadyExist;
 import l.files.fs.Event;
-import l.files.fs.FileConsumer;
+import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
@@ -93,7 +93,7 @@ public final class LocalObservableTest extends PathBaseTest {
      *  - https://code.google.com/p/android/issues/detail?id=189231
      *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
      */
-    public void _test_notifies_files_downloaded_by_download_manager() throws Exception {
+    public void test_notifies_files_downloaded_by_download_manager() throws Exception {
 
         final Path downloadDir = downloadsDir();
         final Path downloadFile = downloadDir.resolve(
@@ -296,8 +296,9 @@ public final class LocalObservableTest extends PathBaseTest {
         int expectedCount = maxUserWatches + 10;
         ensureExactNumberOfChildDirs(dir, expectedCount);
 
-        FileConsumer consumer = mock(FileConsumer.class);
-        given(consumer.accept(any(Path.class), any(Name.class))).willReturn(true);
+        @SuppressWarnings("unchecked")
+        Consumer<Path> consumer = mock(Consumer.class);
+        given(consumer.accept(any(Path.class))).willReturn(true);
         Observer observer = mock(Observer.class);
 
         Closer closer = Closer.create();
@@ -306,7 +307,7 @@ public final class LocalObservableTest extends PathBaseTest {
             Tracker tracker = closer.register(registerMockTracker());
             closer.register(Files.observe(dir, FOLLOW, observer, consumer));
             verify(observer, atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(expectedCount)).accept(notNull(Path.class), notNull(Name.class));
+            verify(consumer, times(expectedCount)).accept(notNull(Path.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
 
         } catch (Throwable e) {
@@ -323,8 +324,9 @@ public final class LocalObservableTest extends PathBaseTest {
         int expectedCount = maxUserWatches - 10;
         ensureExactNumberOfChildDirs(dir, expectedCount);
 
-        FileConsumer consumer = mock(FileConsumer.class);
-        given(consumer.accept(any(Path.class), any(Name.class))).willReturn(true);
+        @SuppressWarnings("unchecked")
+        Consumer<Path> consumer = mock(Consumer.class);
+        given(consumer.accept(any(Path.class))).willReturn(true);
         Observer observer = mock(Observer.class);
 
         Closer closer = Closer.create();
@@ -338,7 +340,7 @@ public final class LocalObservableTest extends PathBaseTest {
             }
 
             verify(observer, timeout(1000000).atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(expectedCount)).accept(notNull(Path.class), notNull(Name.class));
+            verify(consumer, times(expectedCount)).accept(notNull(Path.class));
             verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
 
         } catch (Throwable e) {
@@ -416,12 +418,12 @@ public final class LocalObservableTest extends PathBaseTest {
 
         final int[] actualCount = {0};
 
-        Files.listDirs(dir, FOLLOW, new FileConsumer() {
+        Files.listDirs(dir, FOLLOW, new Consumer<Path>() {
             @Override
-            public boolean accept(Path parent, Name child) throws IOException {
+            public boolean accept(Path child) throws IOException {
                 actualCount[0]++;
                 if (actualCount[0] > expectedCount) {
-                    Files.deleteRecursive(parent.resolve(child));
+                    Files.deleteRecursive(child);
                     actualCount[0]--;
                 }
                 return true;
@@ -1234,10 +1236,9 @@ public final class LocalObservableTest extends PathBaseTest {
 
             if (Files.stat(file, option).isDirectory()) {
 
-                Files.listDirs(file, option, new FileConsumer() {
+                Files.listDirs(file, option, new Consumer<Path>() {
                     @Override
-                    public boolean accept(Path parent, Name child) throws IOException {
-                        Path dir = parent.resolve(child);
+                    public boolean accept(Path dir) throws IOException {
                         if (Files.isReadable(dir)) {
                             order.verify(tracker).onWatchAdded(
                                     eq(fd.getValue()),

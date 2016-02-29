@@ -5,7 +5,6 @@ import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.ui.base.selection.Selection;
 import l.files.ui.base.view.ActionModeItem;
@@ -17,13 +16,11 @@ import static l.files.base.Objects.requireNonNull;
 
 public final class Delete extends ActionModeItem {
 
-    private final Selection<Name, ?> selection;
+    private final Selection<Path, ?> selection;
     private final FragmentManager manager;
-    private final Path directory;
 
-    public Delete(Path directory, Selection<Name, ?> selection, FragmentManager manager) {
+    public Delete(Selection<Path, ?> selection, FragmentManager manager) {
         super(R.id.delete);
-        this.directory = requireNonNull(directory);
         this.manager = requireNonNull(manager);
         this.selection = requireNonNull(selection);
     }
@@ -38,7 +35,7 @@ public final class Delete extends ActionModeItem {
 
     @Override
     protected void onItemSelected(ActionMode mode, MenuItem item) {
-        new DeleteDialog(directory, selection.keys(), mode)
+        new DeleteDialog(selection.keys(), mode)
                 .show(manager, DeleteDialog.FRAGMENT_TAG);
     }
 

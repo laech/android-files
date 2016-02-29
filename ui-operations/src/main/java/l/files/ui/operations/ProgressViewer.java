@@ -40,7 +40,7 @@ abstract class ProgressViewer implements TaskStateViewer {
                 template,
                 total,
                 total,
-                state.target().destinationDirectory().name()
+                state.target().dstDir().name()
         );
     }
 

@@ -7,7 +7,7 @@
 static jmethodID accumulate;
 
 void Java_l_files_fs_local_LocalFileSystem_init(JNIEnv *env, jclass clazz) {
-    jclass size_visitor_class = (*env)->FindClass(env, "l/files/fs/SizeVisitor");
+    jclass size_visitor_class = (*env)->FindClass(env, "l/files/fs/FileSystem$SizeVisitor");
     if (NULL != size_visitor_class) {
         accumulate = (*env)->GetMethodID(env, size_visitor_class, "onSize", "(JJ)Z");
     }

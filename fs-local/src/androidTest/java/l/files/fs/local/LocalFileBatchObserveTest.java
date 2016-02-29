@@ -6,7 +6,7 @@ import java.util.HashMap;
 import l.files.base.io.Closer;
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
-import l.files.fs.FileConsumer;
+import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Name;
@@ -28,15 +28,15 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public final class LocalFileBatchObserveTest extends PathBaseTest {
 
     private BatchObserver observer;
-    private FileConsumer consumer;
+    private Consumer<Path> consumer;
 
     @Override
     @SuppressWarnings("unchecked")
     protected void setUp() throws Exception {
         super.setUp();
         observer = mock(BatchObserver.class);
-        consumer = mock(FileConsumer.class);
-        given(consumer.accept(any(Path.class), any(Name.class))).willReturn(true);
+        consumer = mock(Consumer.class);
+        given(consumer.accept(any(Path.class))).willReturn(true);
     }
 
     public void test_notifies_self_change() throws Exception {
@@ -134,7 +134,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         try {
             closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS, false));
 
-            verify(consumer).accept(child.parent(), child.name());
+            verify(consumer).accept(child);
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
             Files.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(2));
