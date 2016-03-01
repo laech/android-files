@@ -1411,7 +1411,9 @@ public final class LocalObservableTest extends PathBaseTest {
                     awaitModify(dst.parent(), newMove(src, dst));
 
                 } else {
-                    fail();
+                    fail("\nroot=" + root +
+                            "\nsrc=" + src +
+                            "\ndst=" + dst);
                 }
             } catch (Throwable e) {
                 throw closer.rethrow(e);
