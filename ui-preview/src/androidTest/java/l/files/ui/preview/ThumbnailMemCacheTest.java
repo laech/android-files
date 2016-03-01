@@ -19,7 +19,7 @@ public final class ThumbnailMemCacheTest
 
     @Override
     ThumbnailMemCache newCache() {
-        return new ThumbnailMemCache(1024 * 1024);
+        return new ThumbnailMemCache(1024 * 1024, true);
     }
 
     @Override
