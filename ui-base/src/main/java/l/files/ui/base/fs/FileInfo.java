@@ -2,8 +2,8 @@ package l.files.ui.base.fs;
 
 import android.support.annotation.Nullable;
 
-import com.ibm.icu.text.CollationKey;
 import com.ibm.icu.text.Collator;
+import com.ibm.icu.text.RawCollationKey;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 public final class FileInfo implements Comparable<FileInfo> {
 
     private Provider<Collator> collator;
-    private CollationKey collationKey;
+    private RawCollationKey collationKey;
     private Boolean readable;
     private String basicMediaType;
 
@@ -92,10 +92,10 @@ public final class FileInfo implements Comparable<FileInfo> {
         return linkTargetPath() != null ? linkTargetPath() : selfPath();
     }
 
-    private CollationKey collationKey() {
+    private RawCollationKey collationKey() {
         if (collationKey == null) {
             collationKey = collator.get()
-                    .getCollationKey(selfPath().name().toString());
+                    .getRawCollationKey(selfPath().name().toString(), null);
         }
         return collationKey;
     }
