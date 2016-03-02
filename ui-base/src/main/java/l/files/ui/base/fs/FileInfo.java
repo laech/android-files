@@ -3,7 +3,6 @@ package l.files.ui.base.fs;
 import android.support.annotation.Nullable;
 
 import com.ibm.icu.text.Collator;
-import com.ibm.icu.text.RawCollationKey;
 
 import java.io.IOException;
 
@@ -14,13 +13,14 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
 
+import static java.lang.Math.min;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
     private Provider<Collator> collator;
-    private RawCollationKey collationKey;
+    private byte[] collationKey;
     private Boolean readable;
     private String basicMediaType;
 
@@ -92,17 +92,26 @@ public final class FileInfo implements Comparable<FileInfo> {
         return linkTargetPath() != null ? linkTargetPath() : selfPath();
     }
 
-    private RawCollationKey collationKey() {
+    private byte[] collationKey() {
         if (collationKey == null) {
             collationKey = collator.get()
-                    .getRawCollationKey(selfPath().name().toString(), null);
+                    .getCollationKey(selfPath().name().toString())
+                    .toByteArray();
         }
         return collationKey;
     }
 
     @Override
-    public int compareTo(FileInfo another) {
-        return collationKey().compareTo(another.collationKey());
+    public int compareTo(FileInfo that) {
+        byte[] bytes = collationKey();
+        byte[] other = that.collationKey();
+        int minSize = min(bytes.length, other.length);
+        for (int i = 0; i < minSize; ++i) {
+            if (bytes[i] != other[i]) {
+                return (bytes[i] & 0xFF) - (other[i] & 0xFF);
+            }
+        }
+        return bytes.length - other.length;
     }
 
     @Override
