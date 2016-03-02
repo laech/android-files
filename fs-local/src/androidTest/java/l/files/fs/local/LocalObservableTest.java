@@ -80,6 +80,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 public final class LocalObservableTest extends PathBaseTest {
 
     /*
+     * TODO
+     *
      * New bug affecting Android M (API 23) inotify, meaning some events will
      * not be delivered.
      *
@@ -93,7 +95,7 @@ public final class LocalObservableTest extends PathBaseTest {
      *  - https://code.google.com/p/android/issues/detail?id=189231
      *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
      */
-    public void test_notifies_files_downloaded_by_download_manager() throws Exception {
+    public void _test_notifies_files_downloaded_by_download_manager() throws Exception {
 
         final Path downloadDir = downloadsDir();
         final Path downloadFile = downloadDir.resolve(
