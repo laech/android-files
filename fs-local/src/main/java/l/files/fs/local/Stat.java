@@ -75,8 +75,6 @@ final class Stat extends Native implements l.files.fs.Stat {
 
 
     private final int mode;
-    private final int uid;
-    private final int gid;
     private final long size;
     private final long mtime;
     private final int mtime_nsec;
@@ -84,16 +82,12 @@ final class Stat extends Native implements l.files.fs.Stat {
 
     private Stat(
             int mode,
-            int uid,
-            int gid,
             long size,
             long mtime,
             int mtime_nsec,
             long blocks) {
 
         this.mode = mode;
-        this.uid = uid;
-        this.gid = gid;
         this.size = size;
         this.mtime = mtime;
         this.mtime_nsec = mtime_nsec;
@@ -102,14 +96,6 @@ final class Stat extends Native implements l.files.fs.Stat {
 
     int mode() {
         return this.mode;
-    }
-
-    int uid() {
-        return this.uid;
-    }
-
-    int gid() {
-        return this.gid;
     }
 
     @Override
@@ -131,8 +117,6 @@ final class Stat extends Native implements l.files.fs.Stat {
 
     static Stat create(
             int mode,
-            int uid,
-            int gid,
             long size,
             long mtime,
             int mtime_nsec,
@@ -140,8 +124,6 @@ final class Stat extends Native implements l.files.fs.Stat {
 
         return new Stat(
                 mode,
-                uid,
-                gid,
                 size,
                 mtime,
                 mtime_nsec,
@@ -182,14 +164,9 @@ final class Stat extends Native implements l.files.fs.Stat {
         }
     }
 
-    private Instant lastModifiedTime;
-
     @Override
     public Instant lastModifiedTime() {
-        if (lastModifiedTime == null) {
-            lastModifiedTime = Instant.of(mtime(), mtime_nsec());
-        }
-        return lastModifiedTime;
+        return Instant.of(mtime(), mtime_nsec());
     }
 
     @Override
@@ -232,22 +209,15 @@ final class Stat extends Native implements l.files.fs.Stat {
         return S_ISCHR(mode());
     }
 
-    private Set<Permission> permissions;
-
     @Override
     public Set<Permission> permissions() {
-        if (permissions == null) {
-            permissions = permissionsFromMode(mode());
-        }
-        return permissions;
+        return permissionsFromMode(mode());
     }
 
     @Override
     public String toString() {
         return "Stat{" +
                 "mode=" + mode +
-                ", uid=" + uid +
-                ", gid=" + gid +
                 ", size=" + size +
                 ", mtime=" + mtime +
                 ", mtime_nsec=" + mtime_nsec +
@@ -267,8 +237,6 @@ final class Stat extends Native implements l.files.fs.Stat {
         Stat that = (Stat) o;
 
         return mode == that.mode &&
-                uid == that.uid &&
-                gid == that.gid &&
                 size == that.size &&
                 mtime == that.mtime &&
                 mtime_nsec == that.mtime_nsec &&
@@ -278,8 +246,6 @@ final class Stat extends Native implements l.files.fs.Stat {
     @Override
     public int hashCode() {
         int result = mode;
-        result = 31 * result + uid;
-        result = 31 * result + gid;
         result = 31 * result + (int) (size ^ (size >>> 32));
         result = 31 * result + (int) (mtime ^ (mtime >>> 32));
         result = 31 * result + mtime_nsec;
@@ -295,8 +261,6 @@ final class Stat extends Native implements l.files.fs.Stat {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mode());
-        dest.writeInt(uid());
-        dest.writeInt(gid());
         dest.writeLong(size());
         dest.writeLong(mtime());
         dest.writeInt(mtime_nsec());
@@ -308,13 +272,11 @@ final class Stat extends Native implements l.files.fs.Stat {
         @Override
         public Stat createFromParcel(Parcel source) {
             int mode = source.readInt();
-            int uid = source.readInt();
-            int gid = source.readInt();
             long size = source.readLong();
             long mtime = source.readLong();
             int mtimeNs = source.readInt();
             long blocks = source.readLong();
-            return create(mode, uid, gid, size, mtime, mtimeNs, blocks);
+            return create(mode, size, mtime, mtimeNs, blocks);
         }
 
         @Override
