@@ -37,9 +37,7 @@ final class CalculateSizeLoader
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
-        if (finished()) {
-            deliverResult(result);
-        } else if (!started) {
+        if (!started) {
             started = true;
             forceLoad();
         }

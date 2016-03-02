@@ -73,8 +73,6 @@ final class BookmarksLoader extends AsyncTaskLoader<List<Path>> {
         if (bookmarks == null) {
             manager.registerBookmarkChangedListener(listener);
             forceLoad();
-        } else {
-            deliverResult(bookmarks);
         }
     }
 

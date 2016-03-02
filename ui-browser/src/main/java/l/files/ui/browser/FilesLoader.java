@@ -38,6 +38,7 @@ import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
+import static java.util.Collections.emptyList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -167,8 +168,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         super.onStartLoading();
         if (data.isEmpty()) {
             forceLoad();
-        } else {
-            updateAll(Collections.<Name, Event>emptyMap(), true);
         }
     }
 
@@ -432,8 +431,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
 
         private static Result of(IOException exception) {
-            return new Result(
-                    Collections.<Object>emptyList(), exception);
+            return new Result(emptyList(), exception);
         }
 
         private static Result of(List<Object> result) {

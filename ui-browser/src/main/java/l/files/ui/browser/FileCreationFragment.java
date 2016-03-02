@@ -137,6 +137,9 @@ public abstract class FileCreationFragment extends DialogFragment
         private Loader<Existence> newChecker() {
             final Path file = parent().resolve(getFilename());
             return new AsyncTaskLoader<Existence>(getActivity()) {
+
+                boolean started;
+
                 @Override
                 public Existence loadInBackground() {
                     try {
@@ -150,7 +153,10 @@ public abstract class FileCreationFragment extends DialogFragment
                 @Override
                 protected void onStartLoading() {
                     super.onStartLoading();
-                    forceLoad();
+                    if (!started) {
+                        started = true;
+                        forceLoad();
+                    }
                 }
             };
         }
