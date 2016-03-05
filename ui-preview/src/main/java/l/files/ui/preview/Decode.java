@@ -157,12 +157,11 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                         thumbnail.getHeight()));
             }
 
+            publishProgress(thumbnail);
+
             if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
                 publishProgress(generateBlurredThumbnail(thumbnail));
             }
-
-            // TODO should publish this first so caller waits less
-            publishProgress(thumbnail);
 
             return true;
         }
