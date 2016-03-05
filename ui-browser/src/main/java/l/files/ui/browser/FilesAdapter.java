@@ -253,7 +253,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             Resources res = itemView.getResources();
             RoundedBitmapDrawable drawable =
                     RoundedBitmapDrawableFactory.create(res, bitmap);
-            drawable.setAlpha((int) (0.3f * 255));
+            drawable.setAlpha((int) (0.5f * 255));
             drawable.setCornerRadius(res.getDimension(
                     R.dimen.files_item_card_inner_radius));
             blur.setBackground(drawable);
@@ -265,7 +265,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             blur.animate()
                     .alpha(1)
                     .setDuration(itemView.getResources().getInteger(
-                            android.R.integer.config_shortAnimTime));
+                            android.R.integer.config_longAnimTime));
         }
 
         @Override

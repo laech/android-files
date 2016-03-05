@@ -161,6 +161,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 publishProgress(generateBlurredThumbnail(thumbnail));
             }
 
+            // TODO should publish this first so caller waits less
             publishProgress(thumbnail);
 
             return true;
@@ -168,8 +169,9 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         return false;
     }
 
+    // TODO save this to disk
     BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
-        return new BlurredThumbnail(StackBlur.blur(bitmap, 0.33f, 25));
+        return new BlurredThumbnail(StackBlur.blur(bitmap, 0.33f, 70));
     }
 
     @SuppressWarnings("unchecked")
