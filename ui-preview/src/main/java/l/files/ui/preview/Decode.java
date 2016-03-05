@@ -2,10 +2,6 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,10 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
-import static android.graphics.Bitmap.createScaledBitmap;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Runtime.getRuntime;
 import static java.util.concurrent.Executors.newFixedThreadPool;
@@ -43,8 +37,6 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 }
 
             });
-
-    private static RenderScript rs;
 
     final Path path;
     final Stat stat;
@@ -72,10 +64,6 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         this.using = requireNonNull(using);
         this.context = requireNonNull(context);
         this.subs = new CopyOnWriteArrayList<>();
-
-        if (rs == null) {
-            rs = RenderScript.create(context.context);
-        }
     }
 
     public void cancelAll() {
@@ -180,21 +168,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         return false;
     }
 
-    static BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
-        int width = max(bitmap.getWidth() / 3, 1);
-        int height = max(bitmap.getHeight() / 3, 1);
-        Bitmap result = createScaledBitmap(bitmap, width, height, false);
-        Allocation input = Allocation.createFromBitmap(rs, result);
-        Allocation output = Allocation.createTyped(rs, input.getType());
-        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-        script.setRadius(25);
-        script.setInput(input);
-        script.forEach(output);
-        output.copyTo(result);
-        output.destroy();
-        input.destroy();
-        script.destroy();
-        return new BlurredThumbnail(result);
+    BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
+        return new BlurredThumbnail(StackBlur.blur(bitmap, 0.33f, 25));
     }
 
     @SuppressWarnings("unchecked")
