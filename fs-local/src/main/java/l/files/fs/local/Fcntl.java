@@ -1,6 +1,6 @@
 package l.files.fs.local;
 
-import static l.files.fs.local.ErrnoException.EAGAIN;
+import static linux.Errno.EAGAIN;
 
 @SuppressWarnings("OctalInteger")
 final class Fcntl extends Native {

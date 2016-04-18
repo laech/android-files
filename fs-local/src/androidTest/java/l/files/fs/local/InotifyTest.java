@@ -1,8 +1,8 @@
 package l.files.fs.local;
 
-import static l.files.fs.local.ErrnoException.EBADF;
 import static l.files.fs.local.Inotify.IN_ALL_EVENTS;
 import static l.files.fs.local.Unistd.close;
+import static linux.Errno.EBADF;
 import static org.mockito.Mockito.mock;
 
 public final class InotifyTest extends PathBaseTest {

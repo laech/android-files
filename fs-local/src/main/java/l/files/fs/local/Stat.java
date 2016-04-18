@@ -12,8 +12,8 @@ import l.files.fs.Permission;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
-import static l.files.fs.local.ErrnoException.EAGAIN;
 import static l.files.fs.local.LocalFileSystem.permissionsFromMode;
+import static linux.Errno.EAGAIN;
 
 @SuppressWarnings("OctalInteger")
 final class Stat extends Native implements l.files.fs.Stat {

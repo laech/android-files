@@ -9,9 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.local.ErrnoException.EAGAIN;
-import static l.files.fs.local.ErrnoException.ENOMEM;
-import static l.files.fs.local.ErrnoException.ENOSPC;
+import static linux.Errno.EAGAIN;
+import static linux.Errno.ENOMEM;
+import static linux.Errno.ENOSPC;
 
 /**
  * @see <a href="http://man7.org/linux/man-pages/man7/inotify.7.html">inotify</a>

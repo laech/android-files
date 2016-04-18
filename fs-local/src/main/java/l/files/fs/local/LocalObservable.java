@@ -32,11 +32,6 @@ import static l.files.fs.Event.MODIFY;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.local.ErrnoException.EACCES;
-import static l.files.fs.local.ErrnoException.EINVAL;
-import static l.files.fs.local.ErrnoException.ENOENT;
-import static l.files.fs.local.ErrnoException.ENOMEM;
-import static l.files.fs.local.ErrnoException.ENOSPC;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
 import static l.files.fs.local.Inotify.IN_CLOSE_NOWRITE;
@@ -56,6 +51,11 @@ import static l.files.fs.local.Inotify.IN_ONLYDIR;
 import static l.files.fs.local.Inotify.IN_OPEN;
 import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
+import static linux.Errno.EACCES;
+import static linux.Errno.EINVAL;
+import static linux.Errno.ENOENT;
+import static linux.Errno.ENOMEM;
+import static linux.Errno.ENOSPC;
 
 final class LocalObservable extends Native
         implements Runnable, Observation, Inotify.Callback {
