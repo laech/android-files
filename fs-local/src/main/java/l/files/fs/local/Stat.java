@@ -9,6 +9,7 @@ import l.files.fs.Instant;
 import l.files.fs.LinkOption;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import linux.ErrnoException;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -158,7 +159,7 @@ final class Stat extends Native implements l.files.fs.Stat {
                 }
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw e.toIOException(path);
+                    throw ErrnoExceptions.toIOException(e, path);
                 }
             }
         }

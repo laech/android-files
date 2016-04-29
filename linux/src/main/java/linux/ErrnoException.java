@@ -6,7 +6,7 @@ public final class ErrnoException extends Exception {
 
     private String strerror;
 
-    ErrnoException(int errno) {
+    public ErrnoException(int errno) {
         super();
         this.errno = errno;
     }

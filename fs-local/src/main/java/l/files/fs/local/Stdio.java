@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import linux.ErrnoException;
+
 final class Stdio extends Native {
 
     private Stdio() {

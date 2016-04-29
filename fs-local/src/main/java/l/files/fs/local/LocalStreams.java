@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import l.files.fs.Path;
+import linux.ErrnoException;
 
 import static l.files.base.Throwables.addSuppressed;
 import static l.files.fs.local.Fcntl.O_APPEND;
@@ -97,14 +98,14 @@ final class LocalStreams {
         } catch (ErrnoException e) {
             // EPERM for No permission for O_NOATIME
             if (e.errno != EPERM) {
-                throw e.toIOException(path);
+                throw ErrnoExceptions.toIOException(e, path);
             }
         }
 
         try {
             return Fcntl.open(path.toByteArray(), flags, mode);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
 
     }
@@ -117,7 +118,7 @@ final class LocalStreams {
             }
 
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw ErrnoExceptions.toIOException(e);
         }
     }
 
@@ -162,7 +163,7 @@ final class LocalStreams {
         try {
             Unistd.close(closingFd);
         } catch (ErrnoException e) {
-            throw e.toIOException();
+            throw ErrnoExceptions.toIOException(e);
         }
     }
 

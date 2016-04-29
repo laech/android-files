@@ -16,6 +16,7 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import linux.ErrnoException;
 
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -129,7 +130,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
         try {
             chmod(path.toByteArray(), mode);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -146,7 +147,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             boolean followLink = option == FOLLOW;
             setModificationTime(pathBytes, seconds, nanos, followLink);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -169,7 +170,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(path.toByteArray(), S_IRWXU);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -178,7 +179,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
         try {
             createFileNative(path);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -200,7 +201,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             symlink(target.toByteArray(), link.toByteArray());
 
         } catch (ErrnoException e) {
-            throw e.toIOException(target, link);
+            throw ErrnoExceptions.toIOException(e, target, link);
         }
     }
 
@@ -211,7 +212,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             byte[] link = readlink(path.toByteArray());
             return LocalPath.of(link);
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -224,7 +225,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             Stdio.rename(src.toByteArray(), dst.toByteArray());
 
         } catch (ErrnoException e) {
-            throw e.toIOException(src, dst);
+            throw ErrnoExceptions.toIOException(e, src, dst);
         }
     }
 
@@ -237,7 +238,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
                 break;
             } catch (ErrnoException e) {
                 if (e.errno != EAGAIN) {
-                    throw e.toIOException(path);
+                    throw ErrnoExceptions.toIOException(e, path);
                 }
             }
         }
@@ -280,7 +281,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
             if (e.errno == EACCES) {
                 return false;
             }
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -343,7 +344,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
 
                     });
         } catch (ErrnoException e) {
-            throw e.toIOException(path);
+            throw ErrnoExceptions.toIOException(e, path);
         }
     }
 
@@ -356,7 +357,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
         try {
             traverseSize(path.toByteArray(), option == FOLLOW, accumulator);
         } catch (ErrnoException e) {
-            throw e.toIOException(this);
+            throw ErrnoExceptions.toIOException(e, this);
         }
 
     }

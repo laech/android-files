@@ -19,6 +19,7 @@ import l.files.fs.LinkOption;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
+import linux.ErrnoException;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -315,7 +316,7 @@ final class LocalObservable extends Native
                             someFailed[0] = true;
 
                         } else {
-                            throw e.toIOException();
+                            throw ErrnoExceptions.toIOException(e);
                         }
                     }
 
@@ -329,7 +330,7 @@ final class LocalObservable extends Native
             }
 
         } catch (ErrnoException e) {
-            throw closer.rethrow(e.toIOException(root));
+            throw closer.rethrow(ErrnoExceptions.toIOException(e, root));
 
         } catch (Throwable e) {
             throw closer.rethrow(e);
@@ -395,7 +396,7 @@ final class LocalObservable extends Native
             for (ErrnoException sup : suppressed) {
                 addSuppressed(e, sup);
             }
-            throw e.toIOException(root);
+            throw ErrnoExceptions.toIOException(e, root);
         }
 
         if (!suppressed.isEmpty()) {
@@ -570,7 +571,7 @@ final class LocalObservable extends Native
                 notifyIncompleteObservationOrClose();
 
             } else {
-                throw e.toIOException();
+                throw ErrnoExceptions.toIOException(e);
             }
         }
     }

@@ -3,7 +3,7 @@
 #include <errno.h>
 
 void throw_errno_exception(JNIEnv *env) {
-    jclass clazz = (*env)->FindClass(env, "l/files/fs/local/ErrnoException");
+    jclass clazz = (*env)->FindClass(env, "linux/ErrnoException");
     if (NULL == clazz) {
         return;
     }

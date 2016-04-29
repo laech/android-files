@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import linux.ErrnoException;
+
 import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
 import static linux.Errno.EAGAIN;

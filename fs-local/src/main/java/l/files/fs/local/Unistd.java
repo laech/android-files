@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import linux.ErrnoException;
+
 final class Unistd extends Native {
 
     public static final int R_OK = 4;  /* Read */

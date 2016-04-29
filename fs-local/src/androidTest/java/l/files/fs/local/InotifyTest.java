@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import linux.ErrnoException;
+
 import static l.files.fs.local.Inotify.IN_ALL_EVENTS;
 import static l.files.fs.local.Unistd.close;
 import static linux.Errno.EBADF;

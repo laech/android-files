@@ -2,6 +2,8 @@ package l.files.fs.local;
 
 import java.io.IOException;
 
+import linux.ErrnoException;
+
 final class Dirent extends Native {
 
     static {

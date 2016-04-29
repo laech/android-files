@@ -1,5 +1,7 @@
 package l.files.fs.local;
 
+import linux.ErrnoException;
+
 import static linux.Errno.EAGAIN;
 
 @SuppressWarnings("OctalInteger")
