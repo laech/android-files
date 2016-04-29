@@ -17,6 +17,7 @@ import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
 import linux.ErrnoException;
+import linux.Unistd;
 
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -45,11 +46,6 @@ import static l.files.fs.local.Stat.S_IXOTH;
 import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
 import static l.files.fs.local.Stat.mkdir;
-import static l.files.fs.local.Unistd.R_OK;
-import static l.files.fs.local.Unistd.W_OK;
-import static l.files.fs.local.Unistd.X_OK;
-import static l.files.fs.local.Unistd.readlink;
-import static l.files.fs.local.Unistd.symlink;
 import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
 
@@ -198,7 +194,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
         checkLocalPath(target);
         try {
 
-            symlink(target.toByteArray(), link.toByteArray());
+            Unistd.symlink(target.toByteArray(), link.toByteArray());
 
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, target, link);
@@ -209,7 +205,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     public Path readSymbolicLink(Path path) throws IOException {
         checkLocalPath(path);
         try {
-            byte[] link = readlink(path.toByteArray());
+            byte[] link = Unistd.readlink(path.toByteArray());
             return LocalPath.of(link);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
@@ -259,17 +255,17 @@ public final class LocalFileSystem extends Native implements FileSystem {
 
     @Override
     public boolean isReadable(Path path) throws IOException {
-        return accessible(path, R_OK);
+        return accessible(path, Unistd.R_OK);
     }
 
     @Override
     public boolean isWritable(Path path) throws IOException {
-        return accessible(path, W_OK);
+        return accessible(path, Unistd.W_OK);
     }
 
     @Override
     public boolean isExecutable(Path path) throws IOException {
-        return accessible(path, X_OK);
+        return accessible(path, Unistd.X_OK);
     }
 
     private boolean accessible(Path path, int mode) throws IOException {
