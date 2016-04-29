@@ -30,10 +30,6 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.Fcntl.O_CREAT;
-import static l.files.fs.local.Fcntl.O_EXCL;
-import static l.files.fs.local.Fcntl.O_RDWR;
-import static l.files.fs.local.Fcntl.open;
 import static l.files.fs.local.Stat.S_IRGRP;
 import static l.files.fs.local.Stat.S_IROTH;
 import static l.files.fs.local.Stat.S_IRUSR;
@@ -48,6 +44,10 @@ import static l.files.fs.local.Stat.chmod;
 import static l.files.fs.local.Stat.mkdir;
 import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
+import static linux.Fcntl.O_CREAT;
+import static linux.Fcntl.O_EXCL;
+import static linux.Fcntl.O_RDWR;
+import static linux.Fcntl.open;
 
 public final class LocalFileSystem extends Native implements FileSystem {
 
