@@ -25,6 +25,8 @@ public final class Dirent extends Native {
      */
     public int d_name_len;
 
+    public static native DIR fdopendir(int fd) throws ErrnoException;
+
     public static native DIR opendir(byte[] path) throws ErrnoException;
 
     public static native void closedir(DIR dir) throws ErrnoException;

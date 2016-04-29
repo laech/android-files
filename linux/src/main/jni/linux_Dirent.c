@@ -35,7 +35,19 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 }
 
-jobject Java_linux_Dirent_opendir(JNIEnv *env, jclass clazz, jbyteArray jpath) {
+jobject Java_linux_Dirent_fdopendir(JNIEnv *env, jclass class, jint fd) {
+
+    DIR *dir = fdopendir(fd);
+    if (NULL == dir) {
+        throw_errno_exception(env);
+        return NULL;
+    }
+
+    return dir;
+
+}
+
+jobject Java_linux_Dirent_opendir(JNIEnv *env, jclass class, jbyteArray jpath) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");
@@ -74,7 +86,7 @@ DIR *get_dir(JNIEnv *env, jobject dir) {
     return (DIR *) (intptr_t) (*env)->GetLongField(env, dir, dir_field_address);
 }
 
-void Java_linux_Dirent_closedir(JNIEnv *env, jclass clazz, jobject dir) {
+void Java_linux_Dirent_closedir(JNIEnv *env, jclass class, jobject dir) {
 
     if (NULL == dir) {
         throw_null_pointer_exception(env, "Dir is null");
@@ -90,7 +102,7 @@ void Java_linux_Dirent_closedir(JNIEnv *env, jclass clazz, jobject dir) {
 
 }
 
-jobject  Java_linux_Dirent_readdir(JNIEnv *env, jclass clazz, jobject jdir, jobject jentry) {
+jobject  Java_linux_Dirent_readdir(JNIEnv *env, jclass class, jobject jdir, jobject jentry) {
 
     if (NULL == jdir) {
         throw_null_pointer_exception(env, "Dir is null");

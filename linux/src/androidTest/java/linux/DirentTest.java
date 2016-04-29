@@ -44,6 +44,15 @@ public final class DirentTest extends TestCase {
         return dir;
     }
 
+    public void test_fdopendir_throws_ErrnoException_on_invalid_fd() throws Exception {
+        try {
+            Dirent.fdopendir(-1);
+            fail();
+        } catch (ErrnoException e) {
+            // Pass
+        }
+    }
+
     public void test_readdir_reads_entries_from_dir() throws Exception {
 
         File childFile = new File(tempDir, "child");
