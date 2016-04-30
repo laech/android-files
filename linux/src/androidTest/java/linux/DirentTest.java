@@ -53,6 +53,16 @@ public final class DirentTest extends TestCase {
         }
     }
 
+    public void test_fdopendir_returns_valid_dir() throws Exception {
+        int fd = Fcntl.open(new byte[]{'/'}, 0, 0);
+        DIR dir = Dirent.fdopendir(fd);
+        try {
+            assertNotNull(Dirent.readdir(dir, new Dirent()));
+        } finally {
+            Dirent.closedir(dir);
+        }
+    }
+
     public void test_readdir_reads_entries_from_dir() throws Exception {
 
         File childFile = new File(tempDir, "child");

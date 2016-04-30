@@ -43,7 +43,7 @@ jobject Java_linux_Dirent_fdopendir(JNIEnv *env, jclass class, jint fd) {
         return NULL;
     }
 
-    return dir;
+    return (*env)->NewObject(env, dir_class, dir_constructor, (jlong) (intptr_t) dir);
 
 }
 
