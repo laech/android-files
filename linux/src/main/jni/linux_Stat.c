@@ -82,3 +82,22 @@ void Java_linux_Stat_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject j
 void Java_linux_Stat_lstat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat) {
     do_stat(env, class, jpath, jstat, JNI_TRUE);
 }
+
+void Java_linux_Stat_chmod(JNIEnv *env, jclass clazz, jbyteArray jpath, jint mode) {
+
+    if (NULL == jpath) {
+        throw_null_pointer_exception(env, "Path is null");
+        return;
+    }
+
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
+    path[len] = '\0';
+
+    int result = chmod(path, (mode_t) mode);
+    if (-1 == result) {
+        throw_errno_exception(env);
+    }
+
+}

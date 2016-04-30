@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
+import static linux.Errno.ENOENT;
 import static linux.Stat.S_ISDIR;
 import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
@@ -174,4 +175,45 @@ public final class StatTest extends TestCase {
         }
     }
 
+    public void test_chmod_throws_NullPointerException_on_null_path_arg() throws Exception {
+        try {
+            Stat.chmod(null, 0);
+            fail();
+        } catch (NullPointerException e) {
+            // Pass
+        }
+    }
+
+    public void test_chmod_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+        try {
+            Stat.chmod("/abc".getBytes(), 0);
+            fail();
+        } catch (ErrnoException e) {
+            assertEquals(ENOENT, e.errno);
+        }
+    }
+
+    public void test_chmod_updates_permission() throws Exception {
+
+        File file = createTempFile(getClass().getSimpleName(), null);
+        try {
+
+            assertTrue(file.setReadable(true));
+            assertTrue(file.setWritable(true));
+            assertTrue(file.setExecutable(true));
+
+            assertTrue(file.canRead());
+            assertTrue(file.canWrite());
+            assertTrue(file.canExecute());
+
+            Stat.chmod(file.getPath().getBytes(), 0);
+
+            assertFalse(file.canRead());
+            assertFalse(file.canWrite());
+            assertFalse(file.canExecute());
+
+        } finally {
+            assertTrue(file.delete());
+        }
+    }
 }

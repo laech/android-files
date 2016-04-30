@@ -93,8 +93,6 @@ final class Stat extends Native implements l.files.fs.Stat {
 
     static native Stat fstat(int fd) throws ErrnoException;
 
-    static native void chmod(byte[] path, int mode) throws ErrnoException;
-
     static native void mkdir(byte[] path, int mode) throws ErrnoException;
 
     static Stat stat(Path path, LinkOption option) throws IOException {

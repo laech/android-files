@@ -63,20 +63,6 @@ jobject Java_l_files_fs_local_Stat_fstat(JNIEnv *env, jclass clazz, jint fd) {
     return to_java_stat(env, clazz, &sb);
 }
 
-void Java_l_files_fs_local_Stat_chmod(
-        JNIEnv *env, jclass clazz, jbyteArray jpath, jint mode) {
-
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
-
-    int result = TEMP_RETRY(chmod(path, (mode_t) mode));
-    if (-1 == result) {
-        throw_errno_exception(env);
-    }
-}
-
 void Java_l_files_fs_local_Stat_mkdir(
         JNIEnv *env, jclass clazz, jbyteArray jpath, jint mode) {
 

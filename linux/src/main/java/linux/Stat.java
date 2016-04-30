@@ -77,4 +77,6 @@ public final class Stat extends Native {
 
     public static native void lstat(byte[] path, Stat stat) throws ErrnoException;
 
+    public static native void chmod(byte[] path, int mode) throws ErrnoException;
+
 }
