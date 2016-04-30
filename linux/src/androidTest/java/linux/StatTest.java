@@ -7,6 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
@@ -16,6 +20,20 @@ import static linux.Stat.S_ISREG;
 import static linux.Unistd.symlink;
 
 public final class StatTest extends TestCase {
+
+    public void test_constants_are_initialized() throws Exception {
+        Field[] fields = Stat.class.getFields();
+        Set<Integer> values = new HashSet<>();
+        assertNotEqual(0, fields.length);
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                int value = field.getInt(null);
+                assertNotEqual(field.getName(), Stat.placeholder(), value);
+                assertTrue(values.add(value));
+            }
+        }
+        assertNotEqual(0, values.size());
+    }
 
     private static File createNonEmptyFile() throws IOException {
 
