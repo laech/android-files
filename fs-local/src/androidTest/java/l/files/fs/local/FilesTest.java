@@ -39,8 +39,6 @@ import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.local.LocalFileSystem.permissionsFromMode;
-import static l.files.fs.local.Stat.lstat;
-import static l.files.fs.local.Stat.stat;
 
 public final class FilesTest extends PathBaseTest {
 
@@ -102,16 +100,19 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_stat_modificationTime() throws Exception {
-        Stat stat = Files.stat(dir1(), NOFOLLOW);
-        long actual = stat.lastModifiedTime().seconds();
-        long expected = stat(dir1().toByteArray()).mtime();
+        linux.Stat stat = new linux.Stat();
+        linux.Stat.stat(dir1().toByteArray(), stat);
+        long expected = stat.st_mtime;
+        long actual = Files.stat(dir1(), NOFOLLOW).lastModifiedTime().seconds();
         assertEquals(expected, actual);
     }
 
     public void test_stat_size() throws Exception {
         Path file = Files.createFile(dir1().resolve("file"));
         Files.appendUtf8(file, "hello world");
-        long expected = stat(file.toByteArray()).size();
+        linux.Stat stat = new linux.Stat();
+        linux.Stat.stat(file.toByteArray(), stat);
+        long expected = stat.st_size;
         long actual = Files.stat(file, NOFOLLOW).size();
         assertEquals(expected, actual);
     }
@@ -250,18 +251,21 @@ public final class FilesTest extends PathBaseTest {
         OutputStream open(Path file) throws IOException;
     }
 
-    public void test_output_createWithCorrectPermission()
-            throws Exception {
+    public void test_output_createWithCorrectPermission() throws Exception {
+
         Path expected = dir1().resolve("expected");
         Path actual = dir1().resolve("actual");
 
         assertTrue(new java.io.File(expected.toUri()).createNewFile());
         Files.newOutputStream(actual, false).close();
 
-        assertEquals(
-                stat(expected.toByteArray()).mode(),
-                stat(actual.toByteArray()).mode()
-        );
+        linux.Stat expectedStat = new linux.Stat();
+        linux.Stat.stat(expected.toByteArray(), expectedStat);
+
+        linux.Stat actualStat = new linux.Stat();
+        linux.Stat.stat(actual.toByteArray(), actualStat);
+
+        assertEquals(expectedStat.st_mode, actualStat.st_mode);
     }
 
     public void test_input() throws Exception {
@@ -337,11 +341,14 @@ public final class FilesTest extends PathBaseTest {
         java.io.File expected = new java.io.File(dir1().toString(), "b");
         assertTrue(expected.createNewFile());
 
+        linux.Stat stat = new linux.Stat();
+        linux.Stat.lstat(expected.getPath().getBytes(), stat);
+
         assertEquals(expected.canRead(), Files.isReadable(actual));
         assertEquals(expected.canWrite(), Files.isWritable(actual));
         assertEquals(expected.canExecute(), Files.isExecutable(actual));
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath().getBytes(UTF_8)).mode()),
+                permissionsFromMode(stat.st_mode),
                 Files.stat(actual, NOFOLLOW).permissions()
         );
     }
@@ -359,11 +366,14 @@ public final class FilesTest extends PathBaseTest {
         java.io.File expected = new java.io.File(dir1().toString(), "b");
         assertTrue(expected.mkdir());
 
+        linux.Stat stat = new linux.Stat();
+        linux.Stat.lstat(expected.getPath().getBytes(), stat);
+
         assertEquals(expected.canRead(), Files.isReadable(actual));
         assertEquals(expected.canWrite(), Files.isWritable(actual));
         assertEquals(expected.canExecute(), Files.isExecutable(actual));
         assertEquals(
-                permissionsFromMode(lstat(expected.getPath().getBytes(UTF_8)).mode()),
+                permissionsFromMode(stat.st_mode),
                 Files.stat(actual, NOFOLLOW).permissions()
         );
     }
@@ -642,9 +652,15 @@ public final class FilesTest extends PathBaseTest {
     }
 
     public void test_setPermissions_rawBits() throws Exception {
-        int expected = stat(dir1().toByteArray()).mode();
+
+        linux.Stat stat = new linux.Stat();
+        linux.Stat.stat(dir1().toByteArray(), stat);
+        int expected = stat.st_mode;
+
         Files.setPermissions(dir1(), Files.stat(dir1(), NOFOLLOW).permissions());
-        int actual = stat(dir1().toByteArray()).mode();
+        linux.Stat.stat(dir1().toByteArray(), stat);
+        int actual = stat.st_mode;
+
         assertEquals(expected, actual);
     }
 

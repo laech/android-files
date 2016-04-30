@@ -3,10 +3,11 @@ package linux;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.Set;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static linux.Errno.ENOENT;
+import static linux.Fcntl.open;
 import static linux.Stat.S_IRGRP;
 import static linux.Stat.S_IROTH;
 import static linux.Stat.S_IRUSR;
@@ -27,6 +29,12 @@ import static linux.Stat.S_IWUSR;
 import static linux.Stat.S_IXGRP;
 import static linux.Stat.S_IXOTH;
 import static linux.Stat.S_IXUSR;
+import static linux.Stat.chmod;
+import static linux.Stat.fstat;
+import static linux.Stat.lstat;
+import static linux.Stat.mkdir;
+import static linux.Stat.stat;
+import static linux.Unistd.close;
 import static linux.Unistd.symlink;
 
 public final class StatTest extends TestCase {
@@ -60,9 +68,58 @@ public final class StatTest extends TestCase {
         return file;
     }
 
+    public void test_fstat_throws_NullPointerException_on_null_stat_arg() throws Exception {
+        try {
+            fstat(-1, null);
+            fail();
+        } catch (NullPointerException e) {
+            // Pass
+        }
+    }
+
+    public void test_fstat_returns_correct_information_for_file() throws Exception {
+
+        File file = createNonEmptyFile();
+        try {
+
+            FileInputStream in = new FileInputStream(file);
+            try {
+
+                Field field = FileDescriptor.class.getDeclaredField("descriptor");
+                field.setAccessible(true);
+                int fd = field.getInt(in.getFD());
+
+                Stat stat = new Stat();
+                fstat(fd, stat);
+                assertStat(file, stat);
+
+            } finally {
+                in.close();
+            }
+
+        } finally {
+            assertTrue(file.delete());
+        }
+    }
+
+    public void test_fstat_returns_correct_information_for_directory() throws Exception {
+
+        File dir = new File("/");
+        int fd = open(dir.getPath().getBytes(), 0, 0);
+        try {
+
+            Stat stat = new Stat();
+            fstat(fd, stat);
+            assertStat(dir, stat);
+
+        } finally {
+            close(fd);
+        }
+    }
+
     public void test_stat_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
-            Stat.stat(null, new Stat());
+            stat(null, new Stat());
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -71,7 +128,7 @@ public final class StatTest extends TestCase {
 
     public void test_stat_throws_NullPointerException_on_null_stat_arg() throws Exception {
         try {
-            Stat.stat(new byte[]{'/'}, null);
+            stat(new byte[]{'/'}, null);
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -109,19 +166,19 @@ public final class StatTest extends TestCase {
         }
     }
 
-    private void assertStat(File file) throws ErrnoException, UnsupportedEncodingException {
+    private static void assertStat(File file) throws ErrnoException {
         Stat stat = new Stat();
-        Stat.stat(file.getPath().getBytes(), stat);
+        stat(file.getPath().getBytes(), stat);
         assertStat(file, stat);
     }
 
-    private void assertLstat(File file) throws ErrnoException, UnsupportedEncodingException {
+    private static void assertLstat(File file) throws ErrnoException {
         Stat stat = new Stat();
-        Stat.lstat(file.getPath().getBytes(), stat);
+        lstat(file.getPath().getBytes(), stat);
         assertStat(file, stat);
     }
 
-    private void assertStat(File file, Stat stat) {
+    private static void assertStat(File file, Stat stat) {
         assertEquals(file.length(), stat.st_size);
         assertEquals(file.length() / 512, stat.st_blocks);
         assertEquals(file.lastModified() / 1000, stat.st_mtime);
@@ -132,7 +189,7 @@ public final class StatTest extends TestCase {
 
     public void test_lstat_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
-            Stat.lstat(null, new Stat());
+            lstat(null, new Stat());
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -141,7 +198,7 @@ public final class StatTest extends TestCase {
 
     public void test_lstat_throws_NullPointerException_on_null_stat_arg() throws Exception {
         try {
-            Stat.lstat(new byte[]{'/'}, null);
+            lstat(new byte[]{'/'}, null);
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -171,7 +228,7 @@ public final class StatTest extends TestCase {
             try {
 
                 Stat stat = new Stat();
-                Stat.lstat(link.getPath().getBytes(), stat);
+                lstat(link.getPath().getBytes(), stat);
                 assertEquals(true, S_ISLNK(stat.st_mode));
                 assertNotEqual(file.length(), stat.st_size);
 
@@ -186,7 +243,7 @@ public final class StatTest extends TestCase {
 
     public void test_chmod_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
-            Stat.chmod(null, 0);
+            chmod(null, 0);
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -195,7 +252,7 @@ public final class StatTest extends TestCase {
 
     public void test_chmod_throws_ErrnoException_if_path_does_not_exist() throws Exception {
         try {
-            Stat.chmod("/abc".getBytes(), 0);
+            chmod("/abc".getBytes(), 0);
             fail();
         } catch (ErrnoException e) {
             assertEquals(ENOENT, e.errno);
@@ -215,7 +272,7 @@ public final class StatTest extends TestCase {
             assertTrue(file.canWrite());
             assertTrue(file.canExecute());
 
-            Stat.chmod(file.getPath().getBytes(), 0);
+            chmod(file.getPath().getBytes(), 0);
 
             assertFalse(file.canRead());
             assertFalse(file.canWrite());
@@ -228,7 +285,7 @@ public final class StatTest extends TestCase {
 
     public void test_mkdir_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
-            Stat.mkdir(null, 0);
+            mkdir(null, 0);
             fail();
         } catch (NullPointerException e) {
             // Pass
@@ -238,7 +295,7 @@ public final class StatTest extends TestCase {
     public void test_mkdir_throws_ErrnoException_if_parent_does_not_exist() throws Exception {
         File dir = new File("/abc/def");
         try {
-            Stat.mkdir(dir.getPath().getBytes(), 0);
+            mkdir(dir.getPath().getBytes(), 0);
             fail();
         } catch (ErrnoException e) {
             assertEquals(ENOENT, e.errno);
@@ -252,12 +309,12 @@ public final class StatTest extends TestCase {
             assertTrue(dir.delete());
             assertFalse(dir.exists());
 
-            Stat.mkdir(dir.getPath().getBytes(), 0700);
+            mkdir(dir.getPath().getBytes(), 0700);
             assertTrue(dir.exists());
             assertTrue(dir.isDirectory());
 
             Stat stat = new Stat();
-            Stat.stat(dir.getPath().getBytes(), stat);
+            stat(dir.getPath().getBytes(), stat);
             assertTrue((S_IRUSR & stat.st_mode) != 0);
             assertTrue((S_IWUSR & stat.st_mode) != 0);
             assertTrue((S_IXUSR & stat.st_mode) != 0);

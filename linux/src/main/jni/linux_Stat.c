@@ -42,6 +42,14 @@ void Java_linux_Stat_init(JNIEnv *env, jclass class) {
 
 }
 
+void set_stat(JNIEnv *env, struct stat *stat, jobject jstat) {
+    (*env)->SetIntField(env, jstat, stat_mode, (*stat).st_mode);
+    (*env)->SetLongField(env, jstat, stat_size, (*stat).st_size);
+    (*env)->SetLongField(env, jstat, stat_mtime, (*stat).st_mtime);
+    (*env)->SetIntField(env, jstat, stat_mtime_nsec, (jint) (*stat).st_mtime_nsec);
+    (*env)->SetLongField(env, jstat, stat_blocks, (*stat).st_blocks);
+}
+
 void do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat, jboolean is_lstat) {
 
     if (NULL == jpath) {
@@ -67,11 +75,7 @@ void do_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat, jboolea
         return;
     }
 
-    (*env)->SetIntField(env, jstat, stat_mode, sb.st_mode);
-    (*env)->SetLongField(env, jstat, stat_size, sb.st_size);
-    (*env)->SetLongField(env, jstat, stat_mtime, sb.st_mtime);
-    (*env)->SetIntField(env, jstat, stat_mtime_nsec, (jint) sb.st_mtime_nsec);
-    (*env)->SetLongField(env, jstat, stat_blocks, sb.st_blocks);
+    set_stat(env, &sb, jstat);
 
 }
 
@@ -81,6 +85,23 @@ void Java_linux_Stat_stat(JNIEnv *env, jclass class, jbyteArray jpath, jobject j
 
 void Java_linux_Stat_lstat(JNIEnv *env, jclass class, jbyteArray jpath, jobject jstat) {
     do_stat(env, class, jpath, jstat, JNI_TRUE);
+}
+
+void Java_linux_Stat_fstat(JNIEnv *env, jclass class, jint fd, jobject jstat) {
+
+    if (NULL == jstat) {
+        throw_null_pointer_exception(env, "Stat is null");
+        return;
+    }
+
+    struct stat sb;
+    int rc = fstat(fd, &sb);
+    if (-1 == rc) {
+        throw_errno_exception(env);
+        return;
+    }
+
+    set_stat(env, &sb, jstat);
 }
 
 void Java_linux_Stat_chmod(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {

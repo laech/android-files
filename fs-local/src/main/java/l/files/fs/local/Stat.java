@@ -23,13 +23,21 @@ import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
 import static linux.Stat.S_ISSOCK;
 
-final class Stat extends Native implements l.files.fs.Stat {
+final class Stat implements l.files.fs.Stat {
 
     private final int mode;
     private final long size;
     private final long mtime;
     private final int mtime_nsec;
     private final long blocks;
+
+    Stat(linux.Stat stat) {
+        this.mode = stat.st_mode;
+        this.size = stat.st_size;
+        this.mtime = stat.st_mtime;
+        this.mtime_nsec = stat.st_mtime_nsec;
+        this.blocks = stat.st_blocks;
+    }
 
     private Stat(
             int mode,
@@ -66,43 +74,20 @@ final class Stat extends Native implements l.files.fs.Stat {
         return this.blocks;
     }
 
-    static Stat create(
-            int mode,
-            long size,
-            long mtime,
-            int mtime_nsec,
-            long blocks) {
-
-        return new Stat(
-                mode,
-                size,
-                mtime,
-                mtime_nsec,
-                blocks);
-    }
-
-    static {
-        init();
-    }
-
-    private static native void init();
-
-    static native Stat stat(byte[] path) throws ErrnoException;
-
-    static native Stat lstat(byte[] path) throws ErrnoException;
-
-    static native Stat fstat(int fd) throws ErrnoException;
-
     static Stat stat(Path path, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
+        linux.Stat stat = new linux.Stat();
         while (true) {
             try {
+
                 if (option == FOLLOW) {
-                    return stat(path.toByteArray());
+                    linux.Stat.stat(path.toByteArray(), stat);
                 } else {
-                    return lstat(path.toByteArray());
+                    linux.Stat.lstat(path.toByteArray(), stat);
                 }
+                return new Stat(stat);
+
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
                     throw ErrnoExceptions.toIOException(e, path);
@@ -223,7 +208,7 @@ final class Stat extends Native implements l.files.fs.Stat {
             long mtime = source.readLong();
             int mtimeNs = source.readInt();
             long blocks = source.readLong();
-            return create(mode, size, mtime, mtimeNs, blocks);
+            return new Stat(mode, size, mtime, mtimeNs, blocks);
         }
 
         @Override
