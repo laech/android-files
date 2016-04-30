@@ -1,6 +1,5 @@
 package linux;
 
-@SuppressWarnings("OctalInteger")
 public final class Fcntl extends Native {
 
     public static final int O_ACCMODE = placeholder();
