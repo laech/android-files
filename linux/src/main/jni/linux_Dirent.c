@@ -13,25 +13,27 @@ static jfieldID dirent_field_type;
 static jfieldID dirent_field_name;
 static jfieldID dirent_field_name_len;
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+void Java_linux_Dirent_init(JNIEnv *env, jclass class) {
 
-    JNIEnv *env;
-    if ((*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
-        return -1;
-    }
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_UNKNOWN", "B"), DT_UNKNOWN);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_FIFO", "B"), DT_FIFO);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_CHR", "B"), DT_CHR);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_DIR", "B"), DT_DIR);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_BLK", "B"), DT_BLK);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_REG", "B"), DT_REG);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_LNK", "B"), DT_LNK);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_SOCK", "B"), DT_SOCK);
+    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_WHT", "B"), DT_WHT);
 
-    jclass dirent_class = (*env)->FindClass(env, "linux/Dirent");
-    dirent_field_ino = (*env)->GetFieldID(env, dirent_class, "d_ino", "J");
-    dirent_field_type = (*env)->GetFieldID(env, dirent_class, "d_type", "B");
-    dirent_field_name = (*env)->GetFieldID(env, dirent_class, "d_name", "[B");
-    dirent_field_name_len = (*env)->GetFieldID(env, dirent_class, "d_name_len", "I");
+    dirent_field_ino = (*env)->GetFieldID(env, class, "d_ino", "J");
+    dirent_field_type = (*env)->GetFieldID(env, class, "d_type", "B");
+    dirent_field_name = (*env)->GetFieldID(env, class, "d_name", "[B");
+    dirent_field_name_len = (*env)->GetFieldID(env, class, "d_name_len", "I");
 
     dir_class = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "linux/Dirent$DIR"));
     dir_constructor = (*env)->GetMethodID(env, dir_class, "<init>", "(J)V");
     dir_field_address = (*env)->GetFieldID(env, dir_class, "address", "J");
     dir_field_closed = (*env)->GetFieldID(env, dir_class, "closed", "Z");
-
-    return JNI_VERSION_1_6;
 
 }
 

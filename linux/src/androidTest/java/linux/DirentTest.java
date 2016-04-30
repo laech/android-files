@@ -4,6 +4,10 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 import linux.Dirent.DIR;
 
@@ -13,6 +17,7 @@ import static linux.Dirent.DT_DIR;
 import static linux.Dirent.DT_REG;
 import static linux.Dirent.closedir;
 import static linux.Dirent.opendir;
+import static linux.Dirent.placeholder;
 import static linux.Dirent.readdir;
 
 public final class DirentTest extends TestCase {
@@ -36,6 +41,20 @@ public final class DirentTest extends TestCase {
             }
         }
     }
+
+    public void test_constants_are_initialized() throws Exception {
+        Field[] fields = Dirent.class.getFields();
+        Set<Byte> values = new HashSet<>();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                byte value = field.getByte(null);
+                assertNotEqual(placeholder(), value);
+                assertTrue(values.add(value));
+            }
+        }
+        assertNotEqual(0, values.size());
+    }
+
 
     private File createTempDir() throws IOException {
         File dir = createTempFile(getClass().getSimpleName(), null);

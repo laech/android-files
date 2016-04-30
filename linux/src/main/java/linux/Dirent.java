@@ -2,15 +2,19 @@ package linux;
 
 public final class Dirent extends Native {
 
-    public static final byte DT_UNKNOWN = 0;
-    public static final byte DT_FIFO = 1;
-    public static final byte DT_CHR = 2;
-    public static final byte DT_DIR = 4;
-    public static final byte DT_BLK = 6;
-    public static final byte DT_REG = 8;
-    public static final byte DT_LNK = 10;
-    public static final byte DT_SOCK = 12;
-    public static final byte DT_WHT = 14;
+    public static final byte DT_UNKNOWN = placeholder();
+    public static final byte DT_FIFO = placeholder();
+    public static final byte DT_CHR = placeholder();
+    public static final byte DT_DIR = placeholder();
+    public static final byte DT_BLK = placeholder();
+    public static final byte DT_REG = placeholder();
+    public static final byte DT_LNK = placeholder();
+    public static final byte DT_SOCK = placeholder();
+    public static final byte DT_WHT = placeholder();
+
+    static byte placeholder() {
+        return -1;
+    }
 
     public long d_ino;
     public byte d_type;
@@ -24,6 +28,12 @@ public final class Dirent extends Native {
      * The length of the name (not in dirent.h).
      */
     public int d_name_len;
+
+    static {
+        init();
+    }
+
+    private static native void init();
 
     public static native DIR fdopendir(int fd) throws ErrnoException;
 
