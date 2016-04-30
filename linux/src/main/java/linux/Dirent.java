@@ -1,5 +1,7 @@
 package linux;
 
+import static linux.Limits.NAME_MAX;
+
 public final class Dirent extends Native {
 
     public static final byte DT_UNKNOWN = placeholder();
@@ -22,7 +24,7 @@ public final class Dirent extends Native {
     /**
      * Only valid from 0 (inclusive) to {@link #d_name_len} (exclusive).
      */
-    public byte[] d_name = new byte[256]; // 256 = NAME_MAX, see dirent.h
+    public byte[] d_name = new byte[NAME_MAX];
 
     /**
      * The length of the name (not in dirent.h).
