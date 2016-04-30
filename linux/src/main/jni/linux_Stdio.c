@@ -1,24 +1,36 @@
 #include <jni.h>
 #include <stdio.h>
-#include <unistd.h>
 #include "util.h"
 
-void Java_l_files_fs_local_Stdio_remove(
-        JNIEnv *env, jclass clazz, jbyteArray jpath) {
+void Java_linux_Stdio_remove(JNIEnv *env, jclass clazz, jbyteArray jpath) {
+
+    if (NULL == jpath) {
+        throw_null_pointer_exception(env, "Path is null");
+        return;
+    }
 
     jsize len = (*env)->GetArrayLength(env, jpath);
     char path[len + 1];
     (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
     path[len] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(remove(path));
+    int result = remove(path);
     if (-1 == result) {
         throw_errno_exception(env);
     }
 }
 
-void Java_l_files_fs_local_Stdio_rename(
-        JNIEnv *env, jclass clazz, jbyteArray joldpath, jbyteArray jnewpath) {
+void Java_linux_Stdio_rename(JNIEnv *env, jclass clazz, jbyteArray joldpath, jbyteArray jnewpath) {
+
+    if (NULL == joldpath) {
+        throw_null_pointer_exception(env, "Old path is null");
+        return;
+    }
+
+    if (NULL == jnewpath) {
+        throw_null_pointer_exception(env, "New path is null");
+        return;
+    }
 
     jsize oldlen = (*env)->GetArrayLength(env, joldpath);
     char oldpath[oldlen + 1];
@@ -30,8 +42,9 @@ void Java_l_files_fs_local_Stdio_rename(
     (*env)->GetByteArrayRegion(env, jnewpath, 0, newlen, (jbyte *) newpath);
     newpath[newlen] = '\0';
 
-    int result = TEMP_FAILURE_RETRY(rename(oldpath, newpath));
+    int result = rename(oldpath, newpath);
     if (-1 == result) {
         throw_errno_exception(env);
     }
+
 }

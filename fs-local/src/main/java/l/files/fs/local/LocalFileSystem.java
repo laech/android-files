@@ -20,6 +20,7 @@ import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
 import linux.Fcntl;
+import linux.Stdio;
 import linux.Unistd;
 
 import static java.util.Collections.unmodifiableSet;
