@@ -15,59 +15,15 @@ import static l.files.base.Throwables.addSuppressed;
 import static linux.Errno.EAGAIN;
 import static linux.Errno.ENOMEM;
 import static linux.Errno.ENOSPC;
+import static linux.Inotify.inotify_add_watch;
+import static linux.Inotify.inotify_init;
+import static linux.Inotify.inotify_rm_watch;
 
-/**
- * @see <a href="http://man7.org/linux/man-pages/man7/inotify.7.html">inotify</a>
- */
-final class Inotify extends Native {
+final class InotifyTracker {
 
-    static final int IN_ACCESS = 0x00000001;
-    static final int IN_MODIFY = 0x00000002;
-    static final int IN_ATTRIB = 0x00000004;
-    static final int IN_CLOSE_WRITE = 0x00000008;
-    static final int IN_CLOSE_NOWRITE = 0x00000010;
-    static final int IN_OPEN = 0x00000020;
-    static final int IN_MOVED_FROM = 0x00000040;
-    static final int IN_MOVED_TO = 0x00000080;
-    static final int IN_CREATE = 0x00000100;
-    static final int IN_DELETE = 0x00000200;
-    static final int IN_DELETE_SELF = 0x00000400;
-    static final int IN_MOVE_SELF = 0x00000800;
+    private static final InotifyTracker instance = new InotifyTracker();
 
-    static final int IN_UNMOUNT = 0x00002000;
-    static final int IN_Q_OVERFLOW = 0x00004000;
-    static final int IN_IGNORED = 0x00008000;
-
-    static final int IN_CLOSE = IN_CLOSE_WRITE | IN_CLOSE_NOWRITE;
-    static final int IN_MOVE = IN_MOVED_FROM | IN_MOVED_TO;
-
-    static final int IN_ONLYDIR = 0x01000000;
-    static final int IN_DONT_FOLLOW = 0x02000000;
-    static final int IN_EXCL_UNLINK = 0x04000000;
-    static final int IN_MASK_ADD = 0x20000000;
-    static final int IN_ISDIR = 0x40000000;
-    static final int IN_ONESHOT = 0x80000000;
-
-    // static final int IN_NONBLOCK = OsConstants.O_NONBLOCK;
-    // static final int IN_CLOEXEC = OsConstants.FD_CLOEXEC;
-
-    static final int IN_ALL_EVENTS
-            = IN_ACCESS
-            | IN_MODIFY
-            | IN_ATTRIB
-            | IN_CLOSE_WRITE
-            | IN_CLOSE_NOWRITE
-            | IN_OPEN
-            | IN_MOVED_FROM
-            | IN_MOVED_TO
-            | IN_DELETE
-            | IN_CREATE
-            | IN_DELETE_SELF
-            | IN_MOVE_SELF;
-
-    private static final Inotify instance = new Inotify();
-
-    static Inotify get() {
+    static InotifyTracker get() {
         return instance;
     }
 
@@ -77,7 +33,7 @@ final class Inotify extends Native {
     private final ConcurrentMap<Integer, Entry> entries
             = new ConcurrentHashMap<>();
 
-    private Inotify() {
+    private InotifyTracker() {
     }
 
     Tracker registerTracker(Tracker tracker) {
@@ -108,12 +64,9 @@ final class Inotify extends Native {
         return false;
     }
 
-    /**
-     * @see <a href="http://man7.org/linux/man-pages/man2/inotify_init.2.html">inotify_init()</a>
-     */
     int init(Callback obj) throws ErrnoException {
 
-        int fd = internalInit();
+        int fd = inotify_init();
         entries.put(fd, new Entry(fd, obj));
 
         try {
@@ -132,8 +85,6 @@ final class Inotify extends Native {
         return fd;
     }
 
-    private static native int internalInit() throws ErrnoException;
-
     private void notifyInit(int fd) {
         if (trackers.isEmpty()) {
             return;
@@ -150,9 +101,6 @@ final class Inotify extends Native {
         }
     }
 
-    /**
-     * @see <a href="http://man7.org/linux/man-pages/man2/inotify_add_watch.2.html">inotify_add_watch()</a>
-     */
     int addWatch(int fd, byte[] path, int mask) throws ErrnoException {
 
         int wd;
@@ -160,7 +108,7 @@ final class Inotify extends Native {
 
             while (true) {
                 try {
-                    wd = internalAddWatch(fd, path, mask);
+                    wd = inotify_add_watch(fd, path, mask);
                     break;
                 } catch (ErrnoException e) {
                     if (e.errno != EAGAIN) {
@@ -207,7 +155,7 @@ final class Inotify extends Native {
     private int internalAddWatchRetry(int fd, byte[] path, int mask) throws ErrnoException {
         while (true) {
             try {
-                return internalAddWatch(fd, path, mask);
+                return inotify_add_watch(fd, path, mask);
             } catch (ErrnoException e) {
                 if (e.errno != EAGAIN) {
                     throw e;
@@ -231,11 +179,6 @@ final class Inotify extends Native {
         }
     }
 
-    private static native int internalAddWatch(int fd, byte[] path, int mask) throws ErrnoException;
-
-    /**
-     * @see <a href="http://man7.org/linux/man-pages/man2/inotify_rm_watch.2.html">inotify_rm_watch()</a>
-     */
     void removeWatch(int fd, int wd) throws ErrnoException {
         internalRemoveWatchRetry(fd, wd);
 
@@ -250,7 +193,7 @@ final class Inotify extends Native {
     private void internalRemoveWatchRetry(int fd, int wd) throws ErrnoException {
         while (true) {
             try {
-                internalRemoveWatch(fd, wd);
+                inotify_rm_watch(fd, wd);
                 break;
             } catch (ErrnoException e) {
                 if (e.errno != EAGAIN) {
@@ -259,8 +202,6 @@ final class Inotify extends Native {
             }
         }
     }
-
-    private static native void internalRemoveWatch(int fd, int wd) throws ErrnoException;
 
     private void notifyRemoveWatch(int fd, int wd) {
         if (trackers.isEmpty()) {

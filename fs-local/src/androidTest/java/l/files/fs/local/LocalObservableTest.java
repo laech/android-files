@@ -1206,7 +1206,7 @@ public final class LocalObservableTest extends PathBaseTest {
                     verifyTracker(observer, tracker, file, option);
                 }
 
-                Inotify.get().registerTracker(observer);
+                InotifyTracker.get().registerTracker(observer);
                 return observer;
 
             } catch (Throwable e) {
@@ -1548,18 +1548,18 @@ public final class LocalObservableTest extends PathBaseTest {
             doAnswer(new Answer<Void>() {
                 @Override
                 public Void answer(InvocationOnMock invocation) throws Throwable {
-                    Inotify.get().unregisterTracker(tracker);
+                    InotifyTracker.get().unregisterTracker(tracker);
                     return null;
                 }
             }).when(tracker).close();
         } catch (IOException e) {
             throw new AssertionError(e);
         }
-        Inotify.get().registerTracker(tracker);
+        InotifyTracker.get().registerTracker(tracker);
         return tracker;
     }
 
-    public static abstract class Tracker implements Inotify.Tracker, Closeable {
+    public static abstract class Tracker implements InotifyTracker.Tracker, Closeable {
 
         @Override
         public void close() throws IOException {

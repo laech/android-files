@@ -34,25 +34,6 @@ import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.NOFOLLOW;
-import static l.files.fs.local.Inotify.IN_ACCESS;
-import static l.files.fs.local.Inotify.IN_ATTRIB;
-import static l.files.fs.local.Inotify.IN_CLOSE_NOWRITE;
-import static l.files.fs.local.Inotify.IN_CLOSE_WRITE;
-import static l.files.fs.local.Inotify.IN_CREATE;
-import static l.files.fs.local.Inotify.IN_DELETE;
-import static l.files.fs.local.Inotify.IN_DELETE_SELF;
-import static l.files.fs.local.Inotify.IN_DONT_FOLLOW;
-import static l.files.fs.local.Inotify.IN_EXCL_UNLINK;
-import static l.files.fs.local.Inotify.IN_IGNORED;
-import static l.files.fs.local.Inotify.IN_ISDIR;
-import static l.files.fs.local.Inotify.IN_MODIFY;
-import static l.files.fs.local.Inotify.IN_MOVED_FROM;
-import static l.files.fs.local.Inotify.IN_MOVED_TO;
-import static l.files.fs.local.Inotify.IN_MOVE_SELF;
-import static l.files.fs.local.Inotify.IN_ONLYDIR;
-import static l.files.fs.local.Inotify.IN_OPEN;
-import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
-import static l.files.fs.local.Inotify.IN_UNMOUNT;
 import static l.files.fs.local.LocalFileSystem.isSelfOrParent;
 import static linux.Errno.EACCES;
 import static linux.Errno.EINVAL;
@@ -61,9 +42,27 @@ import static linux.Errno.ENOMEM;
 import static linux.Errno.ENOSPC;
 import static linux.Fcntl.O_DIRECTORY;
 import static linux.Fcntl.O_NOFOLLOW;
+import static linux.Inotify.IN_ACCESS;
+import static linux.Inotify.IN_ATTRIB;
+import static linux.Inotify.IN_CLOSE_NOWRITE;
+import static linux.Inotify.IN_CLOSE_WRITE;
+import static linux.Inotify.IN_CREATE;
+import static linux.Inotify.IN_DELETE;
+import static linux.Inotify.IN_DELETE_SELF;
+import static linux.Inotify.IN_DONT_FOLLOW;
+import static linux.Inotify.IN_IGNORED;
+import static linux.Inotify.IN_ISDIR;
+import static linux.Inotify.IN_MODIFY;
+import static linux.Inotify.IN_MOVED_FROM;
+import static linux.Inotify.IN_MOVED_TO;
+import static linux.Inotify.IN_MOVE_SELF;
+import static linux.Inotify.IN_ONLYDIR;
+import static linux.Inotify.IN_OPEN;
+import static linux.Inotify.IN_Q_OVERFLOW;
+import static linux.Inotify.IN_UNMOUNT;
 
 final class LocalObservable extends Native
-        implements Runnable, Observation, Inotify.Callback {
+        implements Runnable, Observation, InotifyTracker.Callback {
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -130,8 +129,7 @@ final class LocalObservable extends Native
      * Mask to use for root file.
      */
     private static final int ROOT_MASK
-            = IN_EXCL_UNLINK
-            | IN_ATTRIB
+            = IN_ATTRIB
             | IN_CREATE
             | IN_DELETE
             | IN_DELETE_SELF
@@ -147,7 +145,6 @@ final class LocalObservable extends Native
      */
     private static final int CHILD_DIR_MASK
             = IN_DONT_FOLLOW
-            | IN_EXCL_UNLINK
             | IN_ONLYDIR
             | IN_CREATE
             | IN_DELETE
@@ -162,7 +159,7 @@ final class LocalObservable extends Native
 
     private static native boolean isProcfs(byte[] path) throws ErrnoException;
 
-    private final Inotify inotify = Inotify.get();
+    private final InotifyTracker inotify = InotifyTracker.get();
 
     private volatile int fd = -1;
     private volatile int wd = -1;
