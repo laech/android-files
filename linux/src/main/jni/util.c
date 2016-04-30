@@ -37,6 +37,13 @@ void throw_null_pointer_exception(JNIEnv *env, const char *message) {
     (*env)->ThrowNew(env, clazz, message);
 }
 
+void init_long_field(JNIEnv *env, jclass class, const char *name, jlong value) {
+    jfieldID fieldId = (*env)->GetStaticFieldID(env, class, name, "J");
+    if (NULL != fieldId) {
+        (*env)->SetStaticLongField(env, class, fieldId, value);
+    }
+}
+
 void init_int_field(JNIEnv *env, jclass class, const char *name, jint value) {
     jfieldID fieldId = (*env)->GetStaticFieldID(env, class, name, "I");
     if (NULL != fieldId) {

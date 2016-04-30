@@ -3,7 +3,6 @@
 #include <sys/inotify.h>
 #include "util.h"
 #include <unistd.h>
-#include <sys/vfs.h>
 
 static jmethodID method_onEvent;
 static jmethodID method_isClosed;
@@ -13,27 +12,6 @@ void Java_l_files_fs_local_LocalObservable_init(JNIEnv *env, jclass clazz) {
             env, clazz, "onEvent", "(II[B)V");
     method_isClosed = (*env)->GetMethodID(env, clazz, "isClosed", "()Z");
 }
-
-jboolean Java_l_files_fs_local_LocalObservable_isProcfs(
-        JNIEnv *env, jclass clazz, jbyteArray jpath) {
-
-    jsize len = (*env)->GetArrayLength(env, jpath);
-    char path[len + 1];
-    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
-    path[len] = '\0';
-
-    struct statfs buff;
-
-    if (-1 == TEMP_RETRY(statfs(path, &buff))) {
-        throw_errno_exception(env);
-        return JNI_FALSE;
-
-    } else {
-        return (jboolean) (PROC_SUPER_MAGIC == buff.f_type);
-    }
-
-}
-
 
 void Java_l_files_fs_local_LocalObservable_observe(
         JNIEnv *env, jobject object, jint fd) {

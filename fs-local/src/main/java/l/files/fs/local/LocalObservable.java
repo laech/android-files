@@ -22,6 +22,7 @@ import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
 import linux.Fcntl;
+import linux.Vfs.Statfs;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -60,6 +61,8 @@ import static linux.Inotify.IN_ONLYDIR;
 import static linux.Inotify.IN_OPEN;
 import static linux.Inotify.IN_Q_OVERFLOW;
 import static linux.Inotify.IN_UNMOUNT;
+import static linux.Vfs.PROC_SUPER_MAGIC;
+import static linux.Vfs.statfs;
 
 final class LocalObservable extends Native
         implements Runnable, Observation, InotifyTracker.Callback {
@@ -157,7 +160,11 @@ final class LocalObservable extends Native
 
     private static native void init();
 
-    private static native boolean isProcfs(byte[] path) throws ErrnoException;
+    private static boolean isProcfs(byte[] path) throws ErrnoException {
+        Statfs statfs = new Statfs();
+        statfs(path, statfs);
+        return statfs.f_type == PROC_SUPER_MAGIC;
+    }
 
     private final InotifyTracker inotify = InotifyTracker.get();
 
