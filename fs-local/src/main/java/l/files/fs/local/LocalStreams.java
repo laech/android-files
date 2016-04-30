@@ -14,7 +14,6 @@ import linux.Fcntl;
 import linux.Unistd;
 
 import static l.files.base.Throwables.addSuppressed;
-import static l.files.fs.local.Stat.S_ISDIR;
 import static l.files.fs.local.Stat.fstat;
 import static linux.Errno.EISDIR;
 import static linux.Errno.EPERM;
@@ -24,6 +23,7 @@ import static linux.Fcntl.O_NOATIME;
 import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_TRUNC;
 import static linux.Fcntl.O_WRONLY;
+import static linux.Stat.S_ISDIR;
 
 final class LocalStreams {
 

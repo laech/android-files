@@ -35,16 +35,6 @@ import static l.files.fs.Permission.OTHERS_WRITE;
 import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
 import static l.files.fs.Permission.OWNER_WRITE;
-import static l.files.fs.local.Stat.S_IRGRP;
-import static l.files.fs.local.Stat.S_IROTH;
-import static l.files.fs.local.Stat.S_IRUSR;
-import static l.files.fs.local.Stat.S_IRWXU;
-import static l.files.fs.local.Stat.S_IWGRP;
-import static l.files.fs.local.Stat.S_IWOTH;
-import static l.files.fs.local.Stat.S_IWUSR;
-import static l.files.fs.local.Stat.S_IXGRP;
-import static l.files.fs.local.Stat.S_IXOTH;
-import static l.files.fs.local.Stat.S_IXUSR;
 import static l.files.fs.local.Stat.chmod;
 import static l.files.fs.local.Stat.mkdir;
 import static linux.Errno.EACCES;
@@ -55,6 +45,16 @@ import static linux.Fcntl.O_EXCL;
 import static linux.Fcntl.O_NOFOLLOW;
 import static linux.Fcntl.O_RDWR;
 import static linux.Fcntl.open;
+import static linux.Stat.S_IRGRP;
+import static linux.Stat.S_IROTH;
+import static linux.Stat.S_IRUSR;
+import static linux.Stat.S_IRWXU;
+import static linux.Stat.S_IWGRP;
+import static linux.Stat.S_IWOTH;
+import static linux.Stat.S_IWUSR;
+import static linux.Stat.S_IXGRP;
+import static linux.Stat.S_IXOTH;
+import static linux.Stat.S_IXUSR;
 
 public final class LocalFileSystem extends Native implements FileSystem {
 
