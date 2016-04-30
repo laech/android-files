@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static android.test.MoreAsserts.assertNotEqual;
+import static linux.Errno.ENOENT;
 import static linux.Fcntl.O_WRONLY;
 import static linux.Fcntl.placeholder;
 
@@ -24,6 +25,15 @@ public final class FcntlTest extends TestCase {
         assertNotEqual(0, fields.length);
         for (Field field : fields) {
             assertNotEqual(placeholder(), field.getInt(null));
+        }
+    }
+
+    public void test_open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+        try {
+            Fcntl.open("/abcdef".getBytes(), 0, 0);
+            fail();
+        } catch (ErrnoException e) {
+            assertEquals(ENOENT, e.errno);
         }
     }
 
