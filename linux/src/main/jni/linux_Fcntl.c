@@ -13,21 +13,16 @@ void Java_linux_Fcntl_init(JNIEnv *env, jclass class) {
     init_int_field(env, class, "O_TRUNC", O_TRUNC);
     init_int_field(env, class, "O_APPEND", O_APPEND);
     init_int_field(env, class, "O_NONBLOCK", O_NONBLOCK);
-    init_int_field(env, class, "O_DSYNC", O_DSYNC);
+    init_int_field(env, class, "O_SYNC", O_SYNC);
     init_int_field(env, class, "FASYNC", FASYNC);
     init_int_field(env, class, "O_DIRECT", O_DIRECT);
     init_int_field(env, class, "O_LARGEFILE", O_LARGEFILE);
     init_int_field(env, class, "O_DIRECTORY", O_DIRECTORY);
     init_int_field(env, class, "O_NOFOLLOW", O_NOFOLLOW);
     init_int_field(env, class, "O_NOATIME", O_NOATIME);
-    init_int_field(env, class, "O_CLOEXEC", O_CLOEXEC);
-    init_int_field(env, class, "__O_SYNC", __O_SYNC);
-    init_int_field(env, class, "O_SYNC", O_SYNC);
-    init_int_field(env, class, "O_PATH", O_PATH);
-    init_int_field(env, class, "__O_TMPFILE", __O_TMPFILE);
-    init_int_field(env, class, "O_TMPFILE", O_TMPFILE);
-    init_int_field(env, class, "O_TMPFILE_MASK", O_TMPFILE_MASK);
     init_int_field(env, class, "O_NDELAY", O_NDELAY);
+    init_int_field(env, class, "O_ASYNC", O_ASYNC);
+    init_int_field(env, class, "O_CLOEXEC", O_CLOEXEC);
 }
 
 jint Java_linux_Fcntl_open(JNIEnv *env, jclass class, jbyteArray jpath, jint flags, jint mode) {
