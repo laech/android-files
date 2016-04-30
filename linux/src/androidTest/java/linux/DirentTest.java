@@ -19,6 +19,7 @@ import static linux.Dirent.closedir;
 import static linux.Dirent.opendir;
 import static linux.Dirent.placeholder;
 import static linux.Dirent.readdir;
+import static linux.Errno.ENOENT;
 
 public final class DirentTest extends TestCase {
 
@@ -195,4 +196,12 @@ public final class DirentTest extends TestCase {
         }
     }
 
+    public void test_open_throws_ErrnoException_if_path_does_not_exist() throws Exception {
+        try {
+            opendir("/abcdef".getBytes());
+            fail();
+        } catch (ErrnoException e) {
+            assertEquals(ENOENT, e.errno);
+        }
+    }
 }
