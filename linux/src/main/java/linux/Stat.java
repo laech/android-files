@@ -79,4 +79,5 @@ public final class Stat extends Native {
 
     public static native void chmod(byte[] path, int mode) throws ErrnoException;
 
+    public static native void mkdir(byte[] path, int mode) throws ErrnoException;
 }

@@ -15,9 +15,18 @@ import java.util.Set;
 import static android.test.MoreAsserts.assertNotEqual;
 import static java.io.File.createTempFile;
 import static linux.Errno.ENOENT;
+import static linux.Stat.S_IRGRP;
+import static linux.Stat.S_IROTH;
+import static linux.Stat.S_IRUSR;
 import static linux.Stat.S_ISDIR;
 import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
+import static linux.Stat.S_IWGRP;
+import static linux.Stat.S_IWOTH;
+import static linux.Stat.S_IWUSR;
+import static linux.Stat.S_IXGRP;
+import static linux.Stat.S_IXOTH;
+import static linux.Stat.S_IXUSR;
 import static linux.Unistd.symlink;
 
 public final class StatTest extends TestCase {
@@ -214,6 +223,53 @@ public final class StatTest extends TestCase {
 
         } finally {
             assertTrue(file.delete());
+        }
+    }
+
+    public void test_mkdir_throws_NullPointerException_on_null_path_arg() throws Exception {
+        try {
+            Stat.mkdir(null, 0);
+            fail();
+        } catch (NullPointerException e) {
+            // Pass
+        }
+    }
+
+    public void test_mkdir_throws_ErrnoException_if_parent_does_not_exist() throws Exception {
+        File dir = new File("/abc/def");
+        try {
+            Stat.mkdir(dir.getPath().getBytes(), 0);
+            fail();
+        } catch (ErrnoException e) {
+            assertEquals(ENOENT, e.errno);
+        }
+    }
+
+    public void test_mkdir_creates_new_dir() throws Exception {
+        File dir = createTempFile(getClass().getSimpleName(), null);
+        try {
+
+            assertTrue(dir.delete());
+            assertFalse(dir.exists());
+
+            Stat.mkdir(dir.getPath().getBytes(), 0700);
+            assertTrue(dir.exists());
+            assertTrue(dir.isDirectory());
+
+            Stat stat = new Stat();
+            Stat.stat(dir.getPath().getBytes(), stat);
+            assertTrue((S_IRUSR & stat.st_mode) != 0);
+            assertTrue((S_IWUSR & stat.st_mode) != 0);
+            assertTrue((S_IXUSR & stat.st_mode) != 0);
+            assertTrue((S_IRGRP & stat.st_mode) == 0);
+            assertTrue((S_IWGRP & stat.st_mode) == 0);
+            assertTrue((S_IXGRP & stat.st_mode) == 0);
+            assertTrue((S_IROTH & stat.st_mode) == 0);
+            assertTrue((S_IWOTH & stat.st_mode) == 0);
+            assertTrue((S_IXOTH & stat.st_mode) == 0);
+
+        } finally {
+            assertTrue(!dir.exists() || dir.delete());
         }
     }
 }

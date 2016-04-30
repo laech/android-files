@@ -83,7 +83,7 @@ void Java_linux_Stat_lstat(JNIEnv *env, jclass class, jbyteArray jpath, jobject 
     do_stat(env, class, jpath, jstat, JNI_TRUE);
 }
 
-void Java_linux_Stat_chmod(JNIEnv *env, jclass clazz, jbyteArray jpath, jint mode) {
+void Java_linux_Stat_chmod(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
 
     if (NULL == jpath) {
         throw_null_pointer_exception(env, "Path is null");
@@ -100,4 +100,22 @@ void Java_linux_Stat_chmod(JNIEnv *env, jclass clazz, jbyteArray jpath, jint mod
         throw_errno_exception(env);
     }
 
+}
+
+void Java_linux_Stat_mkdir(JNIEnv *env, jclass class, jbyteArray jpath, jint mode) {
+
+    if (NULL == jpath) {
+        throw_null_pointer_exception(env, "Path is null");
+        return;
+    }
+
+    jsize len = (*env)->GetArrayLength(env, jpath);
+    char path[len + 1];
+    (*env)->GetByteArrayRegion(env, jpath, 0, len, (jbyte *) path);
+    path[len] = '\0';
+
+    int result = mkdir(path, (mode_t) mode);
+    if (-1 == result) {
+        throw_errno_exception(env);
+    }
 }
