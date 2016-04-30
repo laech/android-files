@@ -16,11 +16,15 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import linux.Dirent;
+import linux.Dirent.DIR;
 import linux.ErrnoException;
+import linux.Fcntl;
 import linux.Unistd;
 
 import static java.util.Collections.unmodifiableSet;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.Permission.GROUP_EXECUTE;
 import static l.files.fs.Permission.GROUP_READ;
 import static l.files.fs.Permission.GROUP_WRITE;
@@ -45,7 +49,9 @@ import static l.files.fs.local.Stat.mkdir;
 import static linux.Errno.EACCES;
 import static linux.Errno.EAGAIN;
 import static linux.Fcntl.O_CREAT;
+import static linux.Fcntl.O_DIRECTORY;
 import static linux.Fcntl.O_EXCL;
+import static linux.Fcntl.O_NOFOLLOW;
 import static linux.Fcntl.O_RDWR;
 import static linux.Fcntl.open;
 
@@ -314,34 +320,49 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     private void list(
-            final Path path,
-            final LinkOption option,
-            final boolean dirOnly,
-            final Consumer<? super Path> consumer) throws IOException {
+            Path path,
+            LinkOption option,
+            boolean dirOnly,
+            Consumer<? super Path> consumer) throws IOException {
+
+        int flags = O_DIRECTORY;
+        if (option == NOFOLLOW) {
+            flags |= O_NOFOLLOW;
+        }
 
         try {
-            Dirent.list(
-                    path.toByteArray(),
-                    option == FOLLOW,
-                    new Dirent.Callback() {
-
-                        @Override
-                        public boolean onNext(
-                                byte[] nameBuffer,
-                                int nameLength,
-                                boolean isDirectory) throws IOException {
-
-                            if (dirOnly && !isDirectory) {
-                                return true;
-                            }
-                            byte[] name = Arrays.copyOf(nameBuffer, nameLength);
-                            return consumer.accept(path.resolve(name));
-                        }
-
-                    });
+            int fd = Fcntl.open(path.toByteArray(), flags, 0);
+            DIR dir = Dirent.fdopendir(fd);
+            try {
+                Dirent entry = new Dirent();
+                while ((entry = Dirent.readdir(dir, entry)) != null) {
+                    if (isSelfOrParent(entry)) {
+                        continue;
+                    }
+                    if (dirOnly && (entry.d_type != Dirent.DT_DIR)) {
+                        continue;
+                    }
+                    byte[] name = Arrays.copyOfRange(entry.d_name, 0, entry.d_name_len);
+                    if (!consumer.accept(path.resolve(name))) {
+                        break;
+                    }
+                }
+            } finally {
+                Dirent.closedir(dir);
+            }
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
+    }
+
+    static boolean isSelfOrParent(Dirent entry) {
+        if (entry.d_name_len == 1 && entry.d_name[0] == '.') {
+            return true;
+        }
+        if (entry.d_name_len == 2 && entry.d_name[0] == '.' && entry.d_name[1] == '.') {
+            return true;
+        }
+        return false;
     }
 
     @Override

@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import l.files.base.io.Closer;
 import l.files.fs.Event;
 import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
@@ -19,7 +18,10 @@ import l.files.fs.LinkOption;
 import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
+import linux.Dirent;
+import linux.Dirent.DIR;
 import linux.ErrnoException;
+import linux.Fcntl;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -31,7 +33,6 @@ import static l.files.fs.Event.CREATE;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.Event.MODIFY;
 import static l.files.fs.Files.UTF_8;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.local.Inotify.IN_ACCESS;
 import static l.files.fs.local.Inotify.IN_ATTRIB;
@@ -52,11 +53,14 @@ import static l.files.fs.local.Inotify.IN_ONLYDIR;
 import static l.files.fs.local.Inotify.IN_OPEN;
 import static l.files.fs.local.Inotify.IN_Q_OVERFLOW;
 import static l.files.fs.local.Inotify.IN_UNMOUNT;
+import static l.files.fs.local.LocalFileSystem.isSelfOrParent;
 import static linux.Errno.EACCES;
 import static linux.Errno.EINVAL;
 import static linux.Errno.ENOENT;
 import static linux.Errno.ENOMEM;
 import static linux.Errno.ENOSPC;
+import static linux.Fcntl.O_DIRECTORY;
+import static linux.Fcntl.O_NOFOLLOW;
 
 final class LocalObservable extends Native
         implements Runnable, Observation, Inotify.Callback {
@@ -273,30 +277,37 @@ final class LocalObservable extends Native
     }
 
     private boolean traverseChildren(
-            final LinkOption option,
-            final Consumer<? super Path> childrenConsumer)
+            LinkOption option,
+            Consumer<? super Path> childrenConsumer)
             throws IOException, InterruptedException {
 
-        final boolean[] limitReached = {fd == -1};
-        final boolean[] someFailed = {false};
-        final Closer closer = Closer.create();
+        boolean limitReached = fd == -1;
+        boolean someFailed = false;
+
+        int flags = O_DIRECTORY;
+        if (option == NOFOLLOW) {
+            flags |= O_NOFOLLOW;
+        }
+
         try {
+            DIR dir = Dirent.fdopendir(Fcntl.open(rootPathBytes, flags, 0));
+            try {
+                Dirent entry = new Dirent();
+                while ((entry = Dirent.readdir(dir, entry)) != null) {
 
-            Dirent.list(rootPathBytes, option == FOLLOW, new Dirent.Callback() {
+                    if (isSelfOrParent(entry)) {
+                        continue;
+                    }
 
-                @Override
-                public boolean onNext(byte[] nameBuffer, int nameLength, boolean isDirectory)
-                        throws IOException {
-
-                    byte[] name = Arrays.copyOf(nameBuffer, nameLength);
+                    byte[] name = Arrays.copyOf(entry.d_name, entry.d_name_len);
                     Path child = root.resolve(name);
                     if (!childrenConsumer.accept(child)) {
                         currentThread().interrupt();
-                        return false;
+                        break;
                     }
 
-                    if (limitReached[0] || !isDirectory || released.get()) {
-                        return !currentThread().isInterrupted();
+                    if (limitReached || entry.d_type != Dirent.DT_DIR || released.get()) {
+                        continue;
                     }
 
                     try {
@@ -310,35 +321,32 @@ final class LocalObservable extends Native
                         if (e.errno == ENOENT) {
                             // Ignore
                         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
-                            limitReached[0] = true;
+                            limitReached = true;
 
                         } else if (e.errno == EACCES) {
-                            someFailed[0] = true;
+                            someFailed = true;
 
                         } else {
                             throw ErrnoExceptions.toIOException(e);
                         }
                     }
 
-                    return !currentThread().isInterrupted();
+                    if (currentThread().isInterrupted()) {
+                        break;
+                    }
                 }
-
-            });
-
-            if (currentThread().isInterrupted()) {
-                throw new InterruptedException();
+            } finally {
+                Dirent.closedir(dir);
             }
-
         } catch (ErrnoException e) {
-            throw closer.rethrow(ErrnoExceptions.toIOException(e, root));
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
+            throw ErrnoExceptions.toIOException(e, root);
         }
 
-        return !limitReached[0] && !someFailed[0];
+        if (currentThread().isInterrupted()) {
+            throw new InterruptedException();
+        }
+
+        return !limitReached && !someFailed;
     }
 
     @Override
