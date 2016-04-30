@@ -134,6 +134,4 @@ void Java_linux_Errno_init(JNIEnv *env, jclass class) {
     init_int_field(env, class, "EKEYREJECTED", EKEYREJECTED);
     init_int_field(env, class, "EOWNERDEAD", EOWNERDEAD);
     init_int_field(env, class, "ENOTRECOVERABLE", ENOTRECOVERABLE);
-    init_int_field(env, class, "ERFKILL", ERFKILL);
-    init_int_field(env, class, "EHWPOISON", EHWPOISON);
 }

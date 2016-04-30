@@ -140,8 +140,6 @@ public final class Errno extends Native {
     public static final int EKEYREJECTED = placeholder();
     public static final int EOWNERDEAD = placeholder();
     public static final int ENOTRECOVERABLE = placeholder();
-    public static final int ERFKILL = placeholder();
-    public static final int EHWPOISON = placeholder();
 
     static {
         init();

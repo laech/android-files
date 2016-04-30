@@ -142,8 +142,6 @@ public final class StrTest extends TestCase {
         assertEquals("EKEYREJECTED", "Key was rejected by service", strerror(EKEYREJECTED));
         assertEquals("EOWNERDEAD", "Owner died", strerror(EOWNERDEAD));
         assertEquals("ENOTRECOVERABLE", "State not recoverable", strerror(ENOTRECOVERABLE));
-        assertEquals("ERFKILL", "Unknown error 132", strerror(ERFKILL));
-        assertEquals("EHWPOISON", "Unknown error 133", strerror(EHWPOISON));
     }
 
     public void test_strerror_can_handle_all_errno() throws Exception {
