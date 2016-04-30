@@ -3,6 +3,13 @@
 #include "util.h"
 #include <linux/limits.h>
 
+void Java_linux_Unistd_init(JNIEnv *env, jclass class) {
+    init_byte_field(env, class, "R_OK", R_OK);
+    init_byte_field(env, class, "W_OK", W_OK);
+    init_byte_field(env, class, "X_OK", X_OK);
+    init_byte_field(env, class, "F_OK", F_OK);
+}
+
 void Java_linux_Unistd_close(JNIEnv *env, jclass class, jint fd) {
     // See https://android.googlesource.com/platform/libcore/+/master/luni/src/main/native/libcore_io_Posix.cpp
     // Even if close(2) fails with EINTR, the fd will have been closed.

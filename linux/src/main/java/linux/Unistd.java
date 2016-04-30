@@ -2,13 +2,23 @@ package linux;
 
 public final class Unistd extends Native {
 
-    public static final int R_OK = 4;  /* Read */
-    public static final int W_OK = 2;  /* Write */
-    public static final int X_OK = 1;  /* Execute */
-    public static final int F_OK = 0;  /* Existence */
+    public static final byte R_OK = placeholder();
+    public static final byte W_OK = placeholder();
+    public static final byte X_OK = placeholder();
+    public static final byte F_OK = placeholder();
+
+    static byte placeholder() {
+        return -1;
+    }
 
     private Unistd() {
     }
+
+    static {
+        init();
+    }
+
+    private static native void init();
 
     public static native void access(byte[] path, int mode) throws ErrnoException;
 
