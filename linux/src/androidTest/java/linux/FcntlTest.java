@@ -7,16 +7,25 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Fcntl.O_WRONLY;
+import static linux.Fcntl.placeholder;
 
 public final class FcntlTest extends TestCase {
+
+    public void test_constants_are_initialized() throws Exception {
+        Field[] fields = Fcntl.class.getFields();
+        assertNotEqual(0, fields.length);
+        for (Field field : fields) {
+            assertNotEqual(placeholder(), field.getInt(null));
+        }
+    }
 
     public void test_open_throws_NullPointerException_on_null_path_arg() throws Exception {
         try {
