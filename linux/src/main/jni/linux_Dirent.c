@@ -15,15 +15,15 @@ static jfieldID dirent_field_name_len;
 
 void Java_linux_Dirent_init(JNIEnv *env, jclass class) {
 
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_UNKNOWN", "B"), DT_UNKNOWN);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_FIFO", "B"), DT_FIFO);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_CHR", "B"), DT_CHR);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_DIR", "B"), DT_DIR);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_BLK", "B"), DT_BLK);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_REG", "B"), DT_REG);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_LNK", "B"), DT_LNK);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_SOCK", "B"), DT_SOCK);
-    (*env)->SetStaticByteField(env, class, (*env)->GetStaticFieldID(env, class, "DT_WHT", "B"), DT_WHT);
+    init_byte_field(env, class, "DT_UNKNOWN", DT_UNKNOWN);
+    init_byte_field(env, class, "DT_FIFO", DT_FIFO);
+    init_byte_field(env, class, "DT_CHR", DT_CHR);
+    init_byte_field(env, class, "DT_DIR", DT_DIR);
+    init_byte_field(env, class, "DT_BLK", DT_BLK);
+    init_byte_field(env, class, "DT_REG", DT_REG);
+    init_byte_field(env, class, "DT_LNK", DT_LNK);
+    init_byte_field(env, class, "DT_SOCK", DT_SOCK);
+    init_byte_field(env, class, "DT_WHT", DT_WHT);
 
     dirent_field_ino = (*env)->GetFieldID(env, class, "d_ino", "J");
     dirent_field_type = (*env)->GetFieldID(env, class, "d_type", "B");
@@ -31,10 +31,11 @@ void Java_linux_Dirent_init(JNIEnv *env, jclass class) {
     dirent_field_name_len = (*env)->GetFieldID(env, class, "d_name_len", "I");
 
     dir_class = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "linux/Dirent$DIR"));
-    dir_constructor = (*env)->GetMethodID(env, dir_class, "<init>", "(J)V");
-    dir_field_address = (*env)->GetFieldID(env, dir_class, "address", "J");
-    dir_field_closed = (*env)->GetFieldID(env, dir_class, "closed", "Z");
-
+    if (NULL != dir_class) {
+        dir_constructor = (*env)->GetMethodID(env, dir_class, "<init>", "(J)V");
+        dir_field_address = (*env)->GetFieldID(env, dir_class, "address", "J");
+        dir_field_closed = (*env)->GetFieldID(env, dir_class, "closed", "Z");
+    }
 }
 
 jobject Java_linux_Dirent_fdopendir(JNIEnv *env, jclass class, jint fd) {
@@ -104,7 +105,7 @@ void Java_linux_Dirent_closedir(JNIEnv *env, jclass class, jobject dir) {
 
 }
 
-jobject  Java_linux_Dirent_readdir(JNIEnv *env, jclass class, jobject jdir, jobject jentry) {
+jobject Java_linux_Dirent_readdir(JNIEnv *env, jclass class, jobject jdir, jobject jentry) {
 
     if (NULL == jdir) {
         throw_null_pointer_exception(env, "Dir is null");
