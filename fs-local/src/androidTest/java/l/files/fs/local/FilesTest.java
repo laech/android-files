@@ -46,7 +46,7 @@ public final class FilesTest extends PathBaseTest {
 
     private static final Random random = new Random();
 
-    public void test_can_handle_non_utf_8_path() throws Exception {
+    public void test_can_handle_invalid_utf_8_path() throws Exception {
 
         byte[] bytes = {-19, -96, -67, -19, -80, -117};
         assertFalse(Arrays.equals(bytes.clone(), new String(bytes, UTF_8).getBytes(UTF_8)));
