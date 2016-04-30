@@ -61,11 +61,11 @@ public final class Stat extends Native {
     public static final int S_IWOTH = placeholder();
     public static final int S_IXOTH = placeholder();
 
-    public int st_mode;
-    public long st_size;
-    public long st_mtime;
-    public int st_mtime_nsec;
-    public long st_blocks;
+    public int st_mode = placeholder();
+    public long st_size = placeholder();
+    public long st_mtime = placeholder();
+    public int st_mtime_nsec = placeholder();
+    public long st_blocks = placeholder();
 
     static {
         init();

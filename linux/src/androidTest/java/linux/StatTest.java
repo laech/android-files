@@ -53,6 +53,35 @@ public final class StatTest extends TestCase {
         assertNotEqual(0, values.size());
     }
 
+    public void test_stat_fields_are_initialized() throws Exception {
+
+        Stat stat = new Stat();
+        Field[] fields = Stat.class.getFields();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (field.getType() == int.class) {
+                assertEquals(Stat.placeholder(), field.getInt(stat));
+            } else {
+                assertEquals(Stat.placeholder(), field.getLong(stat));
+            }
+        }
+
+        stat("/".getBytes(), stat);
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (field.getType() == int.class) {
+                assertNotEqual(Stat.placeholder(), field.getInt(stat));
+            } else {
+                assertNotEqual(Stat.placeholder(), field.getLong(stat));
+            }
+        }
+    }
+
+
     private static File createNonEmptyFile() throws IOException {
 
         File file = createTempFile(StatTest.class.getSimpleName(), null);
