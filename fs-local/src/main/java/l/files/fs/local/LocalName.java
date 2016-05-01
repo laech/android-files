@@ -6,24 +6,29 @@ import java.util.Arrays;
 
 import l.files.fs.Name;
 
-import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.local.LocalPath.DOT;
+import static l.files.fs.local.LocalPath.SEP;
 
 final class LocalName implements Name {
 
-    private final byte[] bytes;
+    final byte[] bytes;
 
     LocalName(byte[] bytes) {
-        this.bytes = requireNonNull(bytes);
+        for (byte b : bytes) {
+            if (b == SEP) {
+                throw new IllegalArgumentException();
+            }
+        }
+        this.bytes = bytes;
     }
 
-    public static LocalName of(byte[] name) {
+    public static LocalName of(String name) {
+        return wrap(name.getBytes(UTF_8));
+    }
+
+    static LocalName wrap(byte[] name) {
         return new LocalName(name);
-    }
-
-    byte[] bytes() {
-        return bytes;
     }
 
     private int indexOfExtSeparator() {
@@ -36,7 +41,7 @@ final class LocalName implements Name {
 
     @Override
     public byte[] toByteArray() {
-        return bytes().clone();
+        return bytes.clone();
     }
 
     @Override
@@ -99,7 +104,7 @@ final class LocalName implements Name {
 
         @Override
         public LocalName createFromParcel(Parcel source) {
-            return LocalName.of(source.createByteArray());
+            return LocalName.wrap(source.createByteArray());
         }
 
         @Override

@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public final class LocalPathTest {
 
     @Test
-    public void can_be_turned_into_byte_array() throws Exception {
+    public void toByteArray_returns_correct_byte_representation_of_path() throws Exception {
         testToByteArray("");
         testToByteArray("/");
         testToByteArray("/a");
@@ -34,7 +34,7 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void hash_codes_are_the_same_if_bytes_are_the_same() throws Exception {
+    public void hashCode_are_the_same_if_bytes_are_the_same() throws Exception {
         assertEquals(path("aa").hashCode(), path("aa").hashCode());
         assertEquals(path("a/").hashCode(), path("a/").hashCode());
         assertEquals(path("/a").hashCode(), path("/a").hashCode());
@@ -50,7 +50,7 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void hash_codes_are_the_same_ignoring_ignorable_separators() throws Exception {
+    public void hashCode_are_the_same_ignoring_ignorable_separators() throws Exception {
         assertEquals(path("aa/").hashCode(), path("aa").hashCode());
         assertEquals(path("a//").hashCode(), path("a/").hashCode());
         assertEquals(path("//a").hashCode(), path("/a").hashCode());
@@ -63,14 +63,14 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void hash_codes_are_different_if_bytes_are_different() throws Exception {
+    public void hashCode_are_different_if_bytes_are_different() throws Exception {
         LocalPath p1 = path("aa");
         LocalPath p2 = path("ab");
         assertNotEquals(p1.hashCode(), p2.hashCode());
     }
 
     @Test
-    public void equal_if_bytes_are_equal() throws Exception {
+    public void equals_if_bytes_are_equal() throws Exception {
         assertEquals(path("aa"), path("aa"));
         assertEquals(path("a/"), path("a/"));
         assertEquals(path("/a"), path("/a"));
@@ -86,7 +86,7 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void equal_ignores_ignorable_separators() throws Exception {
+    public void equals_ignores_ignorable_separators() throws Exception {
         assertEquals(path("aa/"), path("aa"));
         assertEquals(path("a//"), path("a/"));
         assertEquals(path("//a"), path("/a"));
@@ -98,14 +98,14 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void not_equal_if_bytes_are_not_equal() throws Exception {
+    public void equals_return_false_if_bytes_are_not_equal() throws Exception {
         LocalPath p1 = path("aa");
         LocalPath p2 = path("ab");
         assertNotEquals(p1, p2);
     }
 
     @Test
-    public void returns_string_representation() throws Exception {
+    public void toString_returns_clean_path() throws Exception {
         assertEquals("c", path("c").toString());
         assertEquals("c", path("c/").toString());
         assertEquals("c", path("c///").toString());
@@ -120,7 +120,16 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void resolves_child_paths() throws Exception {
+    public void resolve_from_name() throws Exception {
+        assertEquals("/a/b", path("/a").resolve(LocalName.of("b")).toString());
+        assertEquals("/a/b", path("/a/b").resolve(LocalName.of("")).toString());
+        assertEquals("/a/b", path("/a///b/").resolve(LocalName.of("")).toString());
+        assertEquals("/a/b", path("/a/").resolve(LocalName.of("b")).toString());
+        assertEquals("a/b", path("a").resolve(LocalName.of("b")).toString());
+    }
+
+    @Test
+    public void resolve_from_byte_paths() throws Exception {
         assertEquals("/a/b", path("/a").resolve(bytes("b")).toString());
         assertEquals("/a/b", path("/a").resolve(bytes("b///")).toString());
         assertEquals("/a/b", path("////a").resolve(bytes("b///")).toString());
@@ -136,8 +145,7 @@ public final class LocalPathTest {
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
-    public void returns_parent_path() throws Exception {
+    public void parent_is_not_null_if_path_has_parent_component() throws Exception {
         assertEquals("/", path("/a").parent().toString());
         assertEquals("/a", path("/a/b").parent().toString());
         assertEquals("/a/b", path("/a/b/c").parent().toString());
@@ -145,14 +153,14 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void returns_no_parent_path_if_none() throws Exception {
+    public void parent_is_null_if_path_has_no_parent_component() throws Exception {
         assertNull(path("").parent());
         assertNull(path("a").parent());
         assertNull(path("/").parent());
     }
 
     @Test
-    public void returns_name_component() throws Exception {
+    public void name_returns_last_non_empty_path_component() throws Exception {
         assertEquals("b", path("/a/b").name().toString());
         assertEquals("b", path("/a/b/").name().toString());
         assertEquals("b", path("/a//b//").name().toString());
@@ -162,31 +170,31 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void is_hidden_if_name_starts_with_dot() throws Exception {
+    public void isHidden_is_true_if_name_starts_with_dot() throws Exception {
         assertTrue(path("/a/.b").isHidden());
         assertTrue(path(".b").isHidden());
     }
 
     @Test
-    public void is_not_hidden_if_name_does_not_start_with_dot() throws Exception {
+    public void isHidden_is_false_if_name_does_not_start_with_dot() throws Exception {
         assertFalse(path("/a/b").isHidden());
         assertFalse(path("/.a/b").isHidden());
         assertFalse(path("b").isHidden());
     }
 
     @Test
-    public void starts_with_returns_true_for_ancestors() throws Exception {
+    public void startsWith_returns_true_for_ancestors() throws Exception {
         assertTrue(path("/a/b").startsWith(path("/a")));
         assertTrue(path("/a/b").startsWith(path("/")));
     }
 
     @Test
-    public void starts_with_returns_true_for_self() throws Exception {
+    public void startsWith_returns_true_for_self() throws Exception {
         assertTrue(path("/a/b").startsWith(path("/a/b")));
     }
 
     @Test
-    public void starts_with_returns_false_for_non_ancestor_non_self_paths() throws Exception {
+    public void startsWith_returns_false_for_non_ancestor_non_self_paths() throws Exception {
         assertFalse(path("/a/b").startsWith(path("/b")));
     }
 

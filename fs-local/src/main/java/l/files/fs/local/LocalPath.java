@@ -159,7 +159,12 @@ final class LocalPath implements Path {
 
     @Override
     public LocalPath resolve(Name name) {
-        return resolve(((LocalName) name).bytes());
+        if (name.isEmpty()) {
+            return this;
+        }
+        byte[][] newNames = Arrays.copyOf(names, names.length + 1);
+        newNames[newNames.length - 1] = ((LocalName) name).bytes;
+        return new LocalPath(newNames, absolute);
     }
 
     @Override
@@ -221,9 +226,9 @@ final class LocalPath implements Path {
     @Override
     public LocalName name() {
         if (names.length == 0) {
-            return LocalName.of(new byte[0]);
+            return LocalName.wrap(new byte[0]);
         }
-        return LocalName.of(names[names.length - 1]);
+        return LocalName.wrap(names[names.length - 1]);
     }
 
     @Override
