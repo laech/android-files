@@ -74,11 +74,6 @@ final class LocalPath implements Path {
         return new LocalPath(names, absolute);
     }
 
-    @Deprecated
-    public byte[] bytes() {
-        return toByteArray();
-    }
-
     @Override
     public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

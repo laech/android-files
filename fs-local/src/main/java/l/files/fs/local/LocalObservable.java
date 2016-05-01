@@ -321,7 +321,7 @@ final class LocalObservable extends Native
                         childDirs.put(wd, LocalName.wrap(name));
 
                     } catch (ErrnoException e) {
-                        //noinspection StatementWithEmptyBody
+
                         if (e.errno == ENOENT) {
                             // Ignore
                         } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
@@ -457,7 +457,6 @@ final class LocalObservable extends Native
     private native void observe(int fd);
 
     // Also called from native code
-    @SuppressWarnings("UnusedDeclaration")
     private void onEvent(int wd, int event, byte[] child) {
         try {
             handleEvent(wd, event, child);
@@ -572,7 +571,6 @@ final class LocalObservable extends Native
 
         } catch (ErrnoException e) {
 
-            //noinspection StatementWithEmptyBody
             if (e.errno == ENOENT) {
                 // Ignore
 
