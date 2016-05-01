@@ -15,10 +15,8 @@ import linux.Unistd;
 
 import static l.files.base.Throwables.addSuppressed;
 import static linux.Errno.EISDIR;
-import static linux.Errno.EPERM;
 import static linux.Fcntl.O_APPEND;
 import static linux.Fcntl.O_CREAT;
-import static linux.Fcntl.O_NOATIME;
 import static linux.Fcntl.O_RDONLY;
 import static linux.Fcntl.O_TRUNC;
 import static linux.Fcntl.O_WRONLY;
@@ -88,28 +86,12 @@ final class LocalStreams {
         }
     }
 
-
     private static int newFd(Path path, int flags, int mode) throws IOException {
-
-        // TODO make O_NOATIME an option?
-
-        try {
-
-            return Fcntl.open(path.toByteArray(), flags | O_NOATIME, mode);
-
-        } catch (ErrnoException e) {
-            // EPERM for No permission for O_NOATIME
-            if (e.errno != EPERM) {
-                throw ErrnoExceptions.toIOException(e, path);
-            }
-        }
-
         try {
             return Fcntl.open(path.toByteArray(), flags, mode);
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
-
     }
 
     private static void checkNotDirectory(int fd) throws IOException {
@@ -130,7 +112,6 @@ final class LocalStreams {
 
         FileDescriptor descriptor = new FileDescriptor();
 
-        //noinspection TryWithIdenticalCatches
         try {
             Method setter = FileDescriptor.class.getMethod("setInt$", int.class);
             setter.setAccessible(true);
@@ -141,7 +122,6 @@ final class LocalStreams {
         } catch (InvocationTargetException ignored) {
         }
 
-        //noinspection TryWithIdenticalCatches
         try {
             Field field = FileDescriptor.class.getField("descriptor");
             field.setAccessible(true);
@@ -233,6 +213,5 @@ final class LocalStreams {
             this.fd = fd;
         }
     }
-
 
 }
