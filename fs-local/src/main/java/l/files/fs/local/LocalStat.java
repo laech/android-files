@@ -23,7 +23,7 @@ import static linux.Stat.S_ISLNK;
 import static linux.Stat.S_ISREG;
 import static linux.Stat.S_ISSOCK;
 
-final class Stat implements l.files.fs.Stat {
+final class LocalStat implements l.files.fs.Stat {
 
     private final int mode;
     private final long size;
@@ -31,7 +31,7 @@ final class Stat implements l.files.fs.Stat {
     private final int mtime_nsec;
     private final long blocks;
 
-    Stat(linux.Stat stat) {
+    LocalStat(linux.Stat stat) {
         this.mode = stat.st_mode;
         this.size = stat.st_size;
         this.mtime = stat.st_mtime;
@@ -39,7 +39,7 @@ final class Stat implements l.files.fs.Stat {
         this.blocks = stat.st_blocks;
     }
 
-    private Stat(
+    private LocalStat(
             int mode,
             long size,
             long mtime,
@@ -74,7 +74,7 @@ final class Stat implements l.files.fs.Stat {
         return this.blocks;
     }
 
-    static Stat stat(Path path, LinkOption option) throws IOException {
+    static LocalStat stat(Path path, LinkOption option) throws IOException {
         requireNonNull(option, "option");
 
         linux.Stat stat = new linux.Stat();
@@ -86,7 +86,7 @@ final class Stat implements l.files.fs.Stat {
                 } else {
                     linux.Stat.lstat(path.toByteArray(), stat);
                 }
-                return new Stat(stat);
+                return new LocalStat(stat);
 
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {
@@ -148,7 +148,7 @@ final class Stat implements l.files.fs.Stat {
 
     @Override
     public String toString() {
-        return "Stat{" +
+        return "LocalStat{" +
                 "mode=" + mode +
                 ", size=" + size +
                 ", mtime=" + mtime +
@@ -166,7 +166,7 @@ final class Stat implements l.files.fs.Stat {
             return false;
         }
 
-        Stat that = (Stat) o;
+        LocalStat that = (LocalStat) o;
 
         return mode == that.mode &&
                 size == that.size &&
@@ -199,21 +199,21 @@ final class Stat implements l.files.fs.Stat {
         dest.writeLong(blocks());
     }
 
-    public static final Creator<Stat> CREATOR = new Creator<Stat>() {
+    public static final Creator<LocalStat> CREATOR = new Creator<LocalStat>() {
 
         @Override
-        public Stat createFromParcel(Parcel source) {
+        public LocalStat createFromParcel(Parcel source) {
             int mode = source.readInt();
             long size = source.readLong();
             long mtime = source.readLong();
             int mtimeNs = source.readInt();
             long blocks = source.readLong();
-            return new Stat(mode, size, mtime, mtimeNs, blocks);
+            return new LocalStat(mode, size, mtime, mtimeNs, blocks);
         }
 
         @Override
-        public Stat[] newArray(int size) {
-            return new Stat[size];
+        public LocalStat[] newArray(int size) {
+            return new LocalStat[size];
         }
     };
 }

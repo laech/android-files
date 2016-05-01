@@ -161,9 +161,9 @@ public final class LocalFileSystem extends Native implements FileSystem {
             boolean followLink) throws ErrnoException;
 
     @Override
-    public Stat stat(Path path, LinkOption option) throws IOException {
+    public LocalStat stat(Path path, LinkOption option) throws IOException {
         checkLocalPath(path);
-        return Stat.stat(path, option);
+        return LocalStat.stat(path, option);
     }
 
     @Override

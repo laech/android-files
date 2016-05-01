@@ -14,7 +14,7 @@ public final class LocalStatTest extends PathBaseTest {
             l.files.fs.Stat expected = Files.stat(dir1(), NOFOLLOW);
             expected.writeToParcel(parcel, 0);
             parcel.setDataPosition(0);
-            Stat actual = Stat.CREATOR.createFromParcel(parcel);
+            LocalStat actual = LocalStat.CREATOR.createFromParcel(parcel);
             assertEquals(expected, actual);
         } finally {
             parcel.recycle();
