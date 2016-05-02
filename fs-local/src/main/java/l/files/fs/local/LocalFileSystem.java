@@ -83,7 +83,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
     }
 
     public static Set<Permission> permissionsFromMode(int mode) {
-        Set<Permission> permissions = new HashSet<>(9);
+        Set<Permission> permissions = new HashSet<>(9, 1);
         if ((mode & S_IRUSR) != 0) permissions.add(OWNER_READ);
         if ((mode & S_IWUSR) != 0) permissions.add(OWNER_WRITE);
         if ((mode & S_IXUSR) != 0) permissions.add(OWNER_EXECUTE);
