@@ -152,6 +152,27 @@ public final class Files {
         traverse(path, option, visitor, null);
     }
 
+    /**
+     * Performs a depth first traverse of this tree.
+     * <p/>
+     * e.g. traversing the follow tree:
+     * <pre>
+     *     a
+     *    / \
+     *   b   c
+     * </pre>
+     * will generate:
+     * <pre>
+     * visitor.onPreVisit(a)
+     * visitor.onPreVisit(b)
+     * visitor.onPostVisit(b)
+     * visitor.onPreVisit(c)
+     * visitor.onPostVisit(c)
+     * visitor.onPostVisit(a)
+     * </pre>
+     *
+     * @param option applies to root only, child links are never followed
+     */
     public static void traverse(
             Path path,
             LinkOption option,
