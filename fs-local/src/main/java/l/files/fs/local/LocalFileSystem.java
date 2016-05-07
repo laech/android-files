@@ -64,7 +64,7 @@ public final class LocalFileSystem extends Native implements FileSystem {
 
     private static native void init();
 
-    static final LocalFileSystem INSTANCE = new LocalFileSystem();
+    public static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
     private static final int[] PERMISSION_BITS = permissionsToBits();
 

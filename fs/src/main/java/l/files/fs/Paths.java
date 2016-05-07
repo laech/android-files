@@ -2,10 +2,7 @@ package l.files.fs;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.ServiceLoader;
 
 public final class Paths {
 
@@ -46,11 +43,16 @@ public final class Paths {
         static FileSystem[] FILE_SYSTEMS;
 
         static {
-            List<FileSystem> fileSystems = new ArrayList<>();
-            for (FileSystem fs : ServiceLoader.load(FileSystem.class)) {
-                fileSystems.add(fs);
+            try {
+                FILE_SYSTEMS = new FileSystem[]{
+                        (FileSystem) Class
+                                .forName("l.files.fs.local.LocalFileSystem")
+                                .getField("INSTANCE")
+                                .get(null)
+                };
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            FILE_SYSTEMS = fileSystems.toArray(new FileSystem[fileSystems.size()]);
         }
     }
 
