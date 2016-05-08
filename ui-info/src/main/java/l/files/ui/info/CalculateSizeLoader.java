@@ -6,18 +6,20 @@ import android.support.v4.content.AsyncTaskLoader;
 import java.io.IOException;
 import java.util.Collection;
 
-import l.files.fs.FileSystem.SizeVisitor;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
+import l.files.fs.Stat;
+import l.files.fs.TraversalCallback;
 import l.files.ui.info.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
+import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class CalculateSizeLoader
         extends AsyncTaskLoader<Size>
-        implements SizeVisitor {
+        implements TraversalCallback<Path> {
 
     private boolean started;
     private volatile int currentCount;
@@ -26,11 +28,13 @@ final class CalculateSizeLoader
     private volatile Size result;
 
     private final Path dir;
+    private final Stat statBuffer;
     private final Collection<Name> children;
 
     CalculateSizeLoader(Context context, Path dir, Collection<Name> children) {
         super(context);
         this.dir = requireNonNull(dir);
+        this.statBuffer = Files.newEmptyStat(dir);
         this.children = requireNonNull(children);
     }
 
@@ -52,7 +56,7 @@ final class CalculateSizeLoader
 
         for (Name child : children) {
             try {
-                Files.traverseSize(dir.resolve(child), FOLLOW, this);
+                Files.traverse(dir.resolve(child), FOLLOW, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -69,11 +73,28 @@ final class CalculateSizeLoader
     }
 
     @Override
-    public boolean onSize(long size, long sizeOnDisk) throws RuntimeException {
+    public Result onPreVisit(Path path) throws IOException {
+        if (isLoadInBackgroundCanceled()) {
+            return Result.TERMINATE;
+        }
+
+        Files.stat(path, NOFOLLOW, statBuffer);
+
         currentCount++;
-        currentSize += size;
-        currentSizeOnDisk += sizeOnDisk;
-        return !isLoadInBackgroundCanceled();
+        currentSize += statBuffer.size();
+        currentSizeOnDisk += statBuffer.sizeOnDisk();
+
+        return Result.CONTINUE;
+    }
+
+    @Override
+    public Result onPostVisit(Path path) throws IOException {
+        return Result.CONTINUE;
+    }
+
+    @Override
+    public void onException(Path path, IOException e) throws IOException {
+        e.printStackTrace();
     }
 
     int currentCount() {

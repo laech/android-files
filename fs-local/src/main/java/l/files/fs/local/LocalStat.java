@@ -7,9 +7,9 @@ import java.util.Set;
 
 import l.files.fs.Instant;
 import l.files.fs.LinkOption;
-import l.files.fs.Path;
 import l.files.fs.Permission;
 import linux.ErrnoException;
+import linux.Stat;
 
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -25,19 +25,18 @@ import static linux.Stat.S_ISSOCK;
 
 final class LocalStat implements l.files.fs.Stat {
 
-    private final int mode;
-    private final long size;
-    private final long mtime;
-    private final int mtime_nsec;
-    private final long blocks;
+    private static final ThreadLocal<Stat> buffers = new ThreadLocal<Stat>() {
+        @Override
+        protected Stat initialValue() {
+            return new Stat();
+        }
+    };
 
-    LocalStat(linux.Stat stat) {
-        this.mode = stat.st_mode;
-        this.size = stat.st_size;
-        this.mtime = stat.st_mtime;
-        this.mtime_nsec = stat.st_mtime_nsec;
-        this.blocks = stat.st_blocks;
-    }
+    private int mode;
+    private long size;
+    private long mtime;
+    private int mtime_nsec;
+    private long blocks;
 
     private LocalStat(
             int mode,
@@ -51,6 +50,17 @@ final class LocalStat implements l.files.fs.Stat {
         this.mtime = mtime;
         this.mtime_nsec = mtime_nsec;
         this.blocks = blocks;
+    }
+
+    LocalStat() {
+    }
+
+    void set(Stat stat) {
+        this.mode = stat.st_mode;
+        this.size = stat.st_size;
+        this.mtime = stat.st_mtime;
+        this.mtime_nsec = stat.st_mtime_nsec;
+        this.blocks = stat.st_blocks;
     }
 
     int mode() {
@@ -74,10 +84,17 @@ final class LocalStat implements l.files.fs.Stat {
         return this.blocks;
     }
 
-    static LocalStat stat(Path path, LinkOption option) throws IOException {
-        requireNonNull(option, "option");
+    static LocalStat stat(LocalPath path, LinkOption option) throws IOException {
+        LocalStat stat = new LocalStat();
+        stat(path, option, stat);
+        return stat;
+    }
 
-        linux.Stat stat = new linux.Stat();
+    static void stat(LocalPath path, LinkOption option, LocalStat buffer) throws IOException {
+        requireNonNull(option, "option");
+        requireNonNull(buffer, "buffer");
+
+        linux.Stat stat = buffers.get();
         while (true) {
             try {
 
@@ -86,7 +103,8 @@ final class LocalStat implements l.files.fs.Stat {
                 } else {
                     linux.Stat.lstat(path.toByteArray(), stat);
                 }
-                return new LocalStat(stat);
+                buffer.set(stat);
+                break;
 
             } catch (final ErrnoException e) {
                 if (e.errno != EAGAIN) {

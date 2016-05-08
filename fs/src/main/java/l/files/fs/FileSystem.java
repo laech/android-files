@@ -20,7 +20,11 @@ public interface FileSystem {
     void setLastModifiedTime(Path path, LinkOption option, Instant instant)
             throws IOException;
 
+    void stat(Path path, LinkOption option, Stat buffer) throws IOException;
+
     Stat stat(Path path, LinkOption option) throws IOException;
+
+    Stat newEmptyStat();
 
     void createDir(Path path) throws IOException;
 
@@ -106,24 +110,6 @@ public interface FileSystem {
             Path path,
             LinkOption option,
             Consumer<? super Path> consumer) throws IOException;
-
-    void traverseSize(
-            Path path,
-            LinkOption option,
-            SizeVisitor accumulator) throws IOException;
-
-    interface SizeVisitor {
-
-        /**
-         * Called per file/directory.
-         *
-         * @param size       the size of the file/directory in bytes
-         * @param sizeOnDisk the size of actual storage used in bytes
-         */
-        boolean onSize(long size, long sizeOnDisk)
-                throws IOException;
-
-    }
 
     InputStream newInputStream(Path path) throws IOException;
 

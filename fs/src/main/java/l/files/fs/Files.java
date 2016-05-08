@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import l.files.base.io.Closer;
 import l.files.fs.FileSystem.Consumer;
-import l.files.fs.FileSystem.SizeVisitor;
 
 import static java.util.Collections.reverse;
 import static java.util.Collections.unmodifiableList;
@@ -49,6 +48,14 @@ public final class Files {
         }
         reverse(hierarchy);
         return unmodifiableList(hierarchy);
+    }
+
+    public static Stat newEmptyStat(Path path) {
+        return path.fileSystem().newEmptyStat();
+    }
+
+    public static void stat(Path path, LinkOption option, Stat buffer) throws IOException {
+        path.fileSystem().stat(path, option, buffer);
     }
 
     public static Stat stat(Path path, LinkOption option) throws IOException {
@@ -400,11 +407,6 @@ public final class Files {
             closer.close();
         }
         throw new UnknownCharsetException();
-    }
-
-    public static void traverseSize(Path path, LinkOption option, SizeVisitor visitor)
-            throws IOException {
-        path.fileSystem().traverseSize(path, option, visitor);
     }
 
     private static class UnknownCharsetException extends IOException {

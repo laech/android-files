@@ -16,6 +16,7 @@ import l.files.fs.Observation;
 import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Permission;
+import l.files.fs.Stat;
 import linux.Dirent;
 import linux.Dirent.DIR;
 import linux.ErrnoException;
@@ -57,12 +58,6 @@ import static linux.Stat.chmod;
 import static linux.Stat.mkdir;
 
 public final class LocalFileSystem extends Native implements FileSystem {
-
-    static {
-        init();
-    }
-
-    private static native void init();
 
     public static final LocalFileSystem INSTANCE = new LocalFileSystem();
 
@@ -161,9 +156,20 @@ public final class LocalFileSystem extends Native implements FileSystem {
             boolean followLink) throws ErrnoException;
 
     @Override
+    public void stat(Path path, LinkOption option, Stat buffer) throws IOException {
+        checkLocalPath(path);
+        LocalStat.stat((LocalPath) path, option, (LocalStat) buffer);
+    }
+
+    @Override
     public LocalStat stat(Path path, LinkOption option) throws IOException {
         checkLocalPath(path);
-        return LocalStat.stat(path, option);
+        return LocalStat.stat((LocalPath) path, option);
+    }
+
+    @Override
+    public LocalStat newEmptyStat() {
+        return new LocalStat();
     }
 
     @Override
@@ -365,26 +371,6 @@ public final class LocalFileSystem extends Native implements FileSystem {
         }
         return false;
     }
-
-    @Override
-    public void traverseSize(
-            Path path,
-            LinkOption option,
-            SizeVisitor accumulator) throws IOException {
-
-        try {
-            traverseSize(path.toByteArray(), option == FOLLOW, accumulator);
-        } catch (ErrnoException e) {
-            throw ErrnoExceptions.toIOException(e, this);
-        }
-
-    }
-
-    private static native void traverseSize(
-            byte[] path,
-            boolean followLink,
-            SizeVisitor accumulator) throws ErrnoException;
-
 
     @Override
     public InputStream newInputStream(Path path) throws IOException {
