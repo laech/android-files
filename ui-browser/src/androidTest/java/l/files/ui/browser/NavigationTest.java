@@ -228,6 +228,27 @@ public final class NavigationTest extends BaseFilesActivityTest {
                 .assertLinkPathDisplayed(link, dir);
     }
 
+    public void test_can_see_changes_in_parent_directory() throws Exception {
+
+        Path level1Dir = dir();
+        Path level2Dir = createDir(level1Dir.resolve("level2Dir"));
+        Path level3Dir = createDir(level2Dir.resolve("level3Dir"));
+        screen()
+                .sort()
+                .by(NAME)
+                .clickInto(level2Dir)
+                .clickInto(level3Dir)
+                .assertCurrentDirectory(level3Dir);
+
+        Path level3File = createFile(level2Dir.resolve("level3File"));
+        Path level2File = createFile(level1Dir.resolve("level2File"));
+        screen()
+                .pressBack()
+                .assertAllItemsDisplayedInOrder(level3Dir, level3File)
+                .pressBack()
+                .assertAllItemsDisplayedInOrder(level2Dir, level2File);
+    }
+
     public void test_can_see_changes_in_linked_directory() throws Exception {
         Path dir = createDir(dir().resolve("dir"));
         Path link = createSymbolicLink(dir().resolve("link"), dir);

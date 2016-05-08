@@ -6,6 +6,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -610,14 +611,6 @@ final class UiFileActivity {
         return files;
     }
 
-    /**
-     * @deprecated use {@link #assertAllItemsDisplayedInOrder(Path...)}
-     */
-    @Deprecated
-    UiFileActivity assertItemsDisplayed(Path... expected) {
-        return assertAllItemsDisplayedInOrder(expected);
-    }
-
     UiFileActivity assertAllItemsDisplayedInOrder(final Path... expected) {
         awaitOnMainThread(instrument, new Runnable() {
             @Override
@@ -627,7 +620,12 @@ final class UiFileActivity {
                 for (FileInfo item : items) {
                     actual.add(item.selfPath());
                 }
-                assertEquals(asList(expected), actual);
+
+                if (!asList(expected).equals(actual)) {
+                    throw new AssertionError("" +
+                            "\nexpected in order:\n" + TextUtils.join("\n", expected) +
+                            "\nbus was:\n" + TextUtils.join("\n", actual));
+                }
             }
         });
         return this;

@@ -39,6 +39,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.setThreadPriority;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -79,6 +80,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private volatile boolean autoRefreshDisabled;
     private volatile Observation observation;
     private volatile Thread loadInBackgroundThread;
+    private volatile Result cachedResult;
 
     private final ExecutorService executor;
 
@@ -168,6 +170,11 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         super.onStartLoading();
         if (data.isEmpty()) {
             forceLoad();
+        } else {
+            Result result = this.cachedResult;
+            if (result != null) {
+                deliverResult(result);
+            }
         }
     }
 
@@ -285,8 +292,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             }
         }
         Resources res = getContext().getResources();
-        List<Object> result = sort.sort(files, res);
-        return Result.of(result);
+        List<Object> sorted = sort.sort(files, res);
+        return (cachedResult = Result.of(unmodifiableList(sorted)));
     }
 
     @Override
@@ -313,6 +320,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         }
 
         data.clear();
+        cachedResult = null;
     }
 
     @Override
