@@ -16,7 +16,7 @@ dependencies {
 
     compile project(':base')
 
-    compile 'com.ibm.icu:icu4j:56.1'
+    compile 'com.ibm.icu:icu4j:57.1'
 
     testCompile 'junit:junit:4.12'
 
