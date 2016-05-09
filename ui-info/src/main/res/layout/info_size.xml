@@ -19,10 +19,9 @@
             android:id="@+id/calculate_size_progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="4dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="2dp"
             android:indeterminateOnly="true"
-            android:scaleY="3"
             android:visibility="gone" />
 
     </LinearLayout>
