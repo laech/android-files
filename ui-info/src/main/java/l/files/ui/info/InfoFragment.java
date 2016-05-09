@@ -47,7 +47,17 @@ public final class InfoFragment
 
     private Rect constraint;
     private View root;
+    private TextView name;
+    private TextView date;
     private ImageView image;
+
+    public TextView getNameView() {
+        return name;
+    }
+
+    public TextView getDateView() {
+        return date;
+    }
 
     @Override
     public View onCreateView(
@@ -69,11 +79,11 @@ public final class InfoFragment
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         constraint = Rect.of((int) (metrics.widthPixels * 0.75), metrics.heightPixels);
 
-        TextView name = find(R.id.name, this);
+        name = find(R.id.name, this);
         name.setMaxWidth(constraint.width());
         name.setText(file.name().toString());
 
-        TextView date = find(R.id.modified, this);
+        date = find(R.id.modified, this);
         if (stat != null) {
 
             initImage(file, stat);
@@ -82,7 +92,7 @@ public final class InfoFragment
             size.setText(formatSize(stat.size()));
             sizeOnDisk.setText(formatSizeOnDisk(stat.sizeOnDisk()));
 
-            if (stat.isDirectory() || stat.isSymbolicLink()) {
+            if (stat.isDirectory()) {
                 initLoader();
             }
 

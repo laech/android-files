@@ -631,4 +631,8 @@ final class UiFileActivity {
         return this;
     }
 
+    public UiInfo getInfo() {
+        selectActionModeAction(R.id.info);
+        return new UiInfo(this);
+    }
 }

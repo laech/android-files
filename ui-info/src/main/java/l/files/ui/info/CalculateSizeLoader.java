@@ -14,7 +14,6 @@ import l.files.fs.TraversalCallback;
 import l.files.ui.info.CalculateSizeLoader.Size;
 
 import static l.files.base.Objects.requireNonNull;
-import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class CalculateSizeLoader
@@ -56,7 +55,7 @@ final class CalculateSizeLoader
 
         for (Name child : children) {
             try {
-                Files.traverse(dir.resolve(child), FOLLOW, this);
+                Files.traverse(dir.resolve(child), NOFOLLOW, this);
             } catch (IOException e) {
                 e.printStackTrace();
             }

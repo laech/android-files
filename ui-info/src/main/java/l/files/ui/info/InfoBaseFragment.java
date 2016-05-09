@@ -37,6 +37,14 @@ public abstract class InfoBaseFragment
     TextView sizeOnDisk;
     ProgressBar calculatingSize;
 
+    public TextView getSizeView() {
+        return size;
+    }
+
+    public TextView getSizeOnDiskView() {
+        return sizeOnDisk;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

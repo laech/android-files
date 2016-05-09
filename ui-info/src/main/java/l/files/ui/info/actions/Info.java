@@ -51,7 +51,7 @@ public final class Info extends ActionModeItem implements Selection.Callback {
         Collection<FileInfo> values = selection.values();
         if (values.size() == 1) {
             FileInfo file = values.iterator().next();
-            Stat stat = file.linkTargetOrSelfStat();
+            Stat stat = file.selfStat();
             InfoFragment.create(file.selfPath(), stat).show(manager, FRAGMENT_TAG);
         } else {
             InfoMultiFragment.create(dir, values).show(manager, FRAGMENT_TAG);
