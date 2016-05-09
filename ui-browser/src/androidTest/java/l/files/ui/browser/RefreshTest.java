@@ -93,12 +93,6 @@ public final class RefreshTest extends BaseFilesActivityTest {
         screen().assertListMatchesFileSystem(dir);
     }
 
-    public void test_manual_refresh_disabled_if_max_watches_not_reached()
-            throws Exception {
-
-        screen().assertRefreshMenuVisible(false);
-    }
-
     private int maxUserWatches() throws IOException {
         Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_watches");
         return parseInt(readAllUtf8(limitFile).trim());

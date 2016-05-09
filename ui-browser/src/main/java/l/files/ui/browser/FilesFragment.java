@@ -205,12 +205,13 @@ public final class FilesFragment
         };
     }
 
+    private boolean refreshEnabled;
+
     private Provider<Boolean> autoRefreshDisable() {
         return new Provider<Boolean>() {
             @Override
             public Boolean get() {
-                FilesLoader loader = filesLoader();
-                return loader != null && loader.autoRefreshDisabled();
+                return refreshEnabled;
             }
         };
     }
@@ -243,6 +244,7 @@ public final class FilesFragment
 
     @Override
     public Loader<Result> onCreateLoader(int id, Bundle bundle) {
+        refreshEnabled = false;
         Activity context = getActivity();
         return new FilesLoader(
                 context,
@@ -286,6 +288,8 @@ public final class FilesFragment
             }
 
         }
+
+        refreshEnabled = true;
     }
 
     private void updateSelection(Result data) {

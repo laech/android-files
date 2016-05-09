@@ -12,12 +12,12 @@ import static l.files.base.Objects.requireNonNull;
 
 final class Refresh extends OptionsMenuAction {
 
-    private final Provider<Boolean> show;
+    private final Provider<Boolean> enable;
     private final Runnable action;
 
-    Refresh(Provider<Boolean> show, Runnable action) {
+    Refresh(Provider<Boolean> enable, Runnable action) {
         super(R.id.refresh);
-        this.show = requireNonNull(show);
+        this.enable = requireNonNull(enable);
         this.action = requireNonNull(action);
     }
 
@@ -33,9 +33,7 @@ final class Refresh extends OptionsMenuAction {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(id());
         if (item != null) {
-            boolean enabled = show.get();
-            item.setEnabled(enabled);
-            item.setVisible(enabled);
+            item.setEnabled(enable.get());
         }
     }
 
