@@ -3,8 +3,6 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
@@ -47,7 +45,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
 
-    private final Context context;
     private final Preview decorator;
 
     private final ActionModeProvider actionModeProvider;
@@ -68,7 +65,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
 
-        this.context = requireNonNull(context);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
@@ -146,7 +142,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     final class FileHolder extends SelectionModeViewHolder<Path, FileInfo>
             implements Preview.Callback {
 
-        private final View blur;
         private final FileView content;
 
         private Decode task;
@@ -154,7 +149,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         FileHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
             this.content = find(android.R.id.content, this);
-            this.blur = find(R.id.blur, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
         }
@@ -201,18 +195,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             Path file = previewFile();
             Stat stat = item().linkTargetOrSelfStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
-                backgroundBlurClear();
                 return null;
             }
 
-            Bitmap blurred = decorator.getBlurredThumbnail(file, stat, constraint, false);
-            backgroundBlurSet(blurred);
-
             Bitmap thumbnail = getCachedThumbnail(file, stat);
             if (thumbnail != null) {
-                if (blurred == null) {
-                    // TODO
-                }
                 return thumbnail;
             }
 
@@ -245,29 +232,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             return size.scale(constraint);
         }
 
-        private void backgroundBlurClear() {
-            blur.setBackground(null);
-        }
-
-        private void backgroundBlurSet(Bitmap bitmap) {
-            Resources res = itemView.getResources();
-            RoundedBitmapDrawable drawable =
-                    RoundedBitmapDrawableFactory.create(res, bitmap);
-            drawable.setAlpha((int) (0.5f * 255));
-            drawable.setCornerRadius(res.getDimension(
-                    R.dimen.files_item_card_inner_radius));
-            blur.setBackground(drawable);
-        }
-
-        private void backgroundBlurFadeIn(Bitmap thumbnail) {
-            backgroundBlurSet(thumbnail);
-            blur.setAlpha(0f);
-            blur.animate()
-                    .alpha(1)
-                    .setDuration(itemView.getResources().getInteger(
-                            android.R.integer.config_longAnimTime));
-        }
-
         @Override
         public void onSizeAvailable(Path item, Stat stat, Rect size) {
             if (item.equals(previewFile())) {
@@ -280,13 +244,6 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             if (item.equals(previewFile())) {
                 updateContent(bm);
                 content.startPreviewTransition();
-            }
-        }
-
-        @Override
-        public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
-            if (path.equals(previewFile())) {
-                backgroundBlurFadeIn(thumbnail);
             }
         }
 

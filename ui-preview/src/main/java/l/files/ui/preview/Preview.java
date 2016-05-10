@@ -38,7 +38,6 @@ public final class Preview {
     private final PersistenceCache<Rect> sizeCache;
     private final PersistenceCache<String> mediaTypeCache;
     private final PersistenceCache<Boolean> noPreviewCache;
-    private final ThumbnailMemCache blurredThumbnailMemCache;
     private final ThumbnailMemCache thumbnailMemCache;
     private final ThumbnailDiskCache thumbnailDiskCache;
 
@@ -54,7 +53,6 @@ public final class Preview {
         this.mediaTypeCache = new MediaTypeCache(cacheDir);
         this.noPreviewCache = new NoPreviewCache(cacheDir);
         // TODO refactor so that size here and size in decoders are in same place
-        this.blurredThumbnailMemCache = new ThumbnailMemCache(context, false, 0.05f);
         this.thumbnailMemCache = new ThumbnailMemCache(context, true, 0.20f);
         this.thumbnailDiskCache = new ThumbnailDiskCache(cacheDir);
     }
@@ -73,15 +71,6 @@ public final class Preview {
 
     private void cleanupAsync() {
         thumbnailDiskCache.cleanupAsync();
-    }
-
-    @Nullable
-    public Bitmap getBlurredThumbnail(Path path, Stat stat, Rect constraint, boolean matchTime) {
-        return blurredThumbnailMemCache.get(path, stat, constraint, matchTime);
-    }
-
-    void putBlurredThumbnail(Path path, Stat stat, Rect constraint, Bitmap thumbnail) {
-        blurredThumbnailMemCache.put(path, stat, constraint, thumbnail);
     }
 
     @Nullable
@@ -171,10 +160,6 @@ public final class Preview {
         thumbnailMemCache.clear();
     }
 
-    public void clearBlurredThumbnailCache() {
-        blurredThumbnailMemCache.clear();
-    }
-
     public enum Using {
         FILE_EXTENSION,
         MEDIA_TYPE
@@ -185,8 +170,6 @@ public final class Preview {
         void onSizeAvailable(Path path, Stat stat, Rect size);
 
         void onPreviewAvailable(Path path, Stat stat, Bitmap thumbnail);
-
-        void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail);
 
         void onPreviewFailed(Path path, Stat stat, Using used);
 

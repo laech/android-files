@@ -127,10 +127,6 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
 
         // TODO these ifs are also used else where, refactor this
 
-        if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
-            publishProgress(generateBlurredThumbnail(result.maybeScaled));
-        }
-
         if (result.maybeScaled != scaledBitmap) {
             result.maybeScaled.recycle();
         }
