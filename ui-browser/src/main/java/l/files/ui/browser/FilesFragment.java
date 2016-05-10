@@ -101,9 +101,23 @@ public final class FilesFragment
             if (loader != null) {
                 int current = loader.approximateChildLoaded();
                 ProgressBar progressBar = inflateProgressBar();
-                progressBar.setProgress(current);
-                progressBar.setIndeterminate(current == 0);
-                progressBar.setMax(loader.approximateChildTotal());
+                /*
+                 * Note: do not collapse this if-else to:
+                 *
+                 * progressBar.setProgress(current);
+                 * progressBar.setIndeterminate(current == 0);
+                 * progressBar.setMax(loader.approximateChildTotal());
+                 *
+                 * because that will cause the indeterminate progress
+                 * bar to be blank on Android 4.3.
+                 */
+                if (current > 0) {
+                    progressBar.setProgress(current);
+                    progressBar.setMax(loader.approximateChildTotal());
+                    progressBar.setIndeterminate(false);
+                } else {
+                    progressBar.setIndeterminate(true);
+                }
                 progressBar.setVisibility(VISIBLE);
             }
             handler.postDelayed(this, 10);
