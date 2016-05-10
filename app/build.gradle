@@ -9,8 +9,8 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 14
-        versionName '4.0.2'
+        versionCode 15
+        versionName '4.0.3'
     }
 
     signingConfigs {
