@@ -1,7 +1,9 @@
 package l.files.fs.local;
 
 import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
+import android.database.Cursor;
 import android.net.Uri;
 
 import org.mockito.ArgumentCaptor;
@@ -39,6 +41,8 @@ import l.files.fs.Permission;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
 
+import static android.app.DownloadManager.COLUMN_STATUS;
+import static android.app.DownloadManager.STATUS_SUCCESSFUL;
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -96,11 +100,11 @@ public final class LocalObservableTest extends PathBaseTest {
      */
     public void test_notifies_files_downloaded_by_download_manager() throws Exception {
 
+        final Closer closer = Closer.create();
         final Path downloadDir = downloadsDir();
         final Path downloadFile = downloadDir.resolve(
                 "test_notifies_files_downloaded_by_download_manager-" +
                         currentTimeMillis());
-        final Closer closer = Closer.create();
         try {
 
             closer.register(new Closeable() {
@@ -118,12 +122,27 @@ public final class LocalObservableTest extends PathBaseTest {
 
                     assertFalse(Files.exists(downloadFile, NOFOLLOW));
 
-                    downloadManager().enqueue(new Request(Uri.parse("https://www.google.com"))
-                            .setDestinationUri(Uri.parse(downloadFile.toUri().toString())));
+                    final Uri src = Uri.parse("https://www.google.com");
+                    final Uri dst = Uri.parse(downloadFile.toUri().toString());
+                    final Request request = new Request(src).setDestinationUri(dst);
+                    final long id = downloadManager().enqueue(request);
 
-                    Tests.timeout(5, SECONDS, new Executable() {
+                    Tests.timeout(60, SECONDS, new Executable() {
                         @Override
                         public void execute() throws Exception {
+
+                            Query query = new Query().setFilterById(id);
+                            Cursor cursor = downloadManager().query(query);
+                            try {
+                                assertTrue(cursor.moveToFirst());
+                                // Need to wait until finish, this also ensures
+                                // downloadFile is cleanly deleted after test,
+                                // an observation was that it won't be delete otherwise
+                                int statusColumn = cursor.getColumnIndex(COLUMN_STATUS);
+                                assertEquals(STATUS_SUCCESSFUL, cursor.getInt(statusColumn));
+                            } finally {
+                                cursor.close();
+                            }
                             assertTrue(Files.exists(downloadFile, NOFOLLOW));
                         }
                     });
@@ -133,14 +152,6 @@ public final class LocalObservableTest extends PathBaseTest {
                 }
 
             });
-
-        } catch (AssertionError e) {
-            /*
-             * Check file is downloaded but failed to receive event.
-             * This will fail on API 23.
-             */
-            assertTrue(Files.exists(downloadFile, NOFOLLOW));
-            fail("Failed to receive file system event using download manager.");
 
         } catch (Throwable e) {
             throw closer.rethrow(e);

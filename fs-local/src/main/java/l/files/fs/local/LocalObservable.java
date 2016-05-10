@@ -674,21 +674,21 @@ final class LocalObservable extends Native
     }
 
 //    private void log(int wd, int event, byte[] child) {
-//        File file = null;
+//        Path path = null;
 //        if (wd == this.wd) {
-//            file = root;
+//            path = root;
 //        } else {
 //            LocalName name = childDirs.get(wd);
 //            if (name != null) {
-//                file = root.resolve(name);
+//                path = root.resolve(name);
 //            }
 //        }
 //
 //        android.util.Log.v(getClass().getSimpleName(), "fd=" + fd +
 //                ", wd=" + wd +
 //                ", event=" + eventNames(event) +
-//                ", parent=" + file +
-//                ", child=" + (child != null ? LocalName.of(child) : null));
+//                ", parent=" + path +
+//                ", child=" + (child != null ? new LocalName(child) : null));
 //    }
 
 }
