@@ -10,6 +10,7 @@ import l.files.fs.FileSystem.Consumer;
 import l.files.fs.Files;
 import l.files.fs.Instant;
 import l.files.fs.Name;
+import l.files.fs.Observation;
 import l.files.fs.Path;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -73,7 +74,9 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false));
+            Observation observation = Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false);
+            closer.register(observation);
+            assertFalse(observation.isClosed());
 
             Files.setLastModifiedTime(a, NOFOLLOW, Instant.ofMillis(1));
             Files.setLastModifiedTime(b, NOFOLLOW, Instant.ofMillis(2));

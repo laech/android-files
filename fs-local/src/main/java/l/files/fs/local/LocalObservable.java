@@ -205,13 +205,18 @@ final class LocalObservable extends Native
 
     void start(LinkOption option, Consumer<? super Path> childrenConsumer)
             throws IOException, InterruptedException {
+        start(option, childrenConsumer, -1);
+    }
+
+    void start(LinkOption option, Consumer<? super Path> childrenConsumer, int watchLimit)
+            throws IOException, InterruptedException {
 
         requireNonNull(option);
         requireNonNull(childrenConsumer);
 
         try {
             if (!isProcfs(rootPathBytes)) {
-                fd = inotify.init(this);
+                fd = inotify.init(this, watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
                 close();

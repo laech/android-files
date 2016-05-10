@@ -41,7 +41,6 @@ import l.files.testing.Tests;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.getExternalStorageDirectory;
 import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
@@ -95,7 +94,7 @@ public final class LocalObservableTest extends PathBaseTest {
      *  - https://code.google.com/p/android/issues/detail?id=189231
      *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
      */
-    public void _test_notifies_files_downloaded_by_download_manager() throws Exception {
+    public void test_notifies_files_downloaded_by_download_manager() throws Exception {
 
         final Path downloadDir = downloadsDir();
         final Path downloadFile = downloadDir.resolve(
@@ -293,10 +292,11 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_notifies_observer_on_max_user_watches_reached_on_observe() throws Exception {
 
-        Path dir = linkToMaxUserWatchesTestDir();
-        int maxUserWatches = maxUserWatches();
-        int expectedCount = maxUserWatches + 10;
-        ensureExactNumberOfChildDirs(dir, expectedCount);
+        int limit = 10;
+        int count = limit * 2;
+        for (int i = 0; i < count; i++) {
+            createRandomChildDir(dir1());
+        }
 
         @SuppressWarnings("unchecked")
         Consumer<Path> consumer = mock(Consumer.class);
@@ -307,10 +307,11 @@ public final class LocalObservableTest extends PathBaseTest {
         try {
 
             Tracker tracker = closer.register(registerMockTracker());
-            closer.register(Files.observe(dir, FOLLOW, observer, consumer));
+            LocalObservable observation = closer.register(new LocalObservable(dir1(), observer));
+            observation.start(FOLLOW, consumer, limit);
             verify(observer, atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(expectedCount)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
+            verify(consumer, times(count)).accept(notNull(Path.class));
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
 
         } catch (Throwable e) {
             throw closer.rethrow(e);
@@ -321,10 +322,11 @@ public final class LocalObservableTest extends PathBaseTest {
 
     public void test_notifies_observer_on_max_user_watches_reached_during_observe() throws Exception {
 
-        Path dir = linkToMaxUserWatchesTestDir();
-        int maxUserWatches = maxUserWatches();
-        int expectedCount = maxUserWatches - 10;
-        ensureExactNumberOfChildDirs(dir, expectedCount);
+        int limit = 10;
+        int count = limit / 2;
+        for (int i = 0; i < count; i++) {
+            createRandomChildDir(dir1());
+        }
 
         @SuppressWarnings("unchecked")
         Consumer<Path> consumer = mock(Consumer.class);
@@ -335,15 +337,16 @@ public final class LocalObservableTest extends PathBaseTest {
         try {
 
             Tracker tracker = closer.register(registerMockTracker());
-            Observation observation = closer.register(Files.observe(dir, FOLLOW, observer, consumer));
+            LocalObservable observation = closer.register(new LocalObservable(dir1(), observer));
+            observation.start(FOLLOW, consumer, limit);
             assertFalse(observation.isClosed());
-            for (int i = 0; i < 20; i++) {
-                createRandomChildDir(dir);
+            for (int i = 0; i < limit; i++) {
+                createRandomChildDir(dir1());
             }
 
-            verify(observer, timeout(1000000).atLeastOnce()).onIncompleteObservation();
-            verify(consumer, times(expectedCount)).accept(notNull(Path.class));
-            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, maxUserWatches);
+            verify(observer, timeout(10000).atLeastOnce()).onIncompleteObservation();
+            verify(consumer, times(count)).accept(notNull(Path.class));
+            verifyAllWatchesRemovedAndRootWatchAddedOnMaxUserWatchesReached(tracker, limit);
 
         } catch (Throwable e) {
             throw closer.rethrow(e);
@@ -410,46 +413,6 @@ public final class LocalObservableTest extends PathBaseTest {
         assertEquals(xs, ys);
     }
 
-    private Path linkToMaxUserWatchesTestDir() throws IOException {
-        return linkToExternalDir("files-test-max-user-watches-exceeded");
-    }
-
-    private void ensureExactNumberOfChildDirs(
-            final Path dir,
-            final int expectedCount) throws IOException {
-
-        final int[] actualCount = {0};
-
-        Files.listDirs(dir, FOLLOW, new Consumer<Path>() {
-            @Override
-            public boolean accept(Path child) throws IOException {
-                actualCount[0]++;
-                if (actualCount[0] > expectedCount) {
-                    Files.deleteRecursive(child);
-                    actualCount[0]--;
-                }
-                return true;
-            }
-        });
-
-        while (actualCount[0] < expectedCount) {
-            createRandomChildDir(dir);
-            actualCount[0]++;
-        }
-    }
-
-
-    private Path linkToExternalDir(String name) throws IOException {
-        return Files.createSymbolicLink(
-                dir1().resolve(name),
-                Files.createDirs(externalStorageDir().resolve(name))
-        );
-    }
-
-    private Path externalStorageDir() {
-        return Paths.get(getExternalStorageDirectory().getPath());
-    }
-
     public void test_releases_all_watches_on_close() throws Exception {
 
         Path a = Files.createDir(dir1().resolve("a"));
@@ -503,11 +466,6 @@ public final class LocalObservableTest extends PathBaseTest {
 
     private int maxUserInstances() throws IOException {
         Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_instances");
-        return parseInt(Files.readAllUtf8(limitFile).trim());
-    }
-
-    private int maxUserWatches() throws IOException {
-        Path limitFile = Paths.get("/proc/sys/fs/inotify/max_user_watches");
         return parseInt(Files.readAllUtf8(limitFile).trim());
     }
 

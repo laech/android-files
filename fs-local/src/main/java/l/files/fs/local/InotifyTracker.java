@@ -64,10 +64,10 @@ final class InotifyTracker {
         return false;
     }
 
-    int init(Callback obj) throws ErrnoException {
+    int init(Callback obj, int watchLimit) throws ErrnoException {
 
         int fd = inotify_init();
-        entries.put(fd, new Entry(fd, obj));
+        entries.put(fd, new Entry(fd, obj, watchLimit));
 
         try {
 
@@ -108,6 +108,13 @@ final class InotifyTracker {
 
             while (true) {
                 try {
+
+                    Entry entry = entries.get(fd);
+                    if (entry != null && entry.watchLimit > -1 && entry.watchLimit <= entry.size()) {
+                        // Throw the same error as native code to help testing.
+                        throw new ErrnoException(ENOSPC);
+                    }
+
                     wd = inotify_add_watch(fd, path, mask);
                     break;
                 } catch (ErrnoException e) {
@@ -244,17 +251,19 @@ final class InotifyTracker {
         private final int fd;
         private final Set<Integer> wds = new HashSet<>();
         private final Callback callback;
+        private final int watchLimit;
 
-        private Entry(int fd, Callback callback) {
+        private Entry(int fd, Callback callback, int watchLimit) {
             this.fd = fd;
             this.callback = requireNonNull(callback);
+            this.watchLimit = watchLimit;
         }
 
         int fd() {
             return fd;
         }
 
-        void add(int wd) {
+        void add(int wd) throws ErrnoException {
             synchronized (this) {
                 wds.add(wd);
             }
