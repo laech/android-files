@@ -1,7 +1,7 @@
 package l.files.ui.browser;
 
-import android.app.AlertDialog;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -137,7 +137,7 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     private CharSequence error() {
-        return ((TextInputLayout)  dialog().findViewById(R.id.text_layout)).getError();
+        return ((TextInputLayout) dialog().findViewById(R.id.text_layout)).getError();
     }
 
     EditText editText() {

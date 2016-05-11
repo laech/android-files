@@ -1,6 +1,6 @@
 package l.files.ui.browser;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 
 import l.files.ui.operations.actions.DeleteDialog;
 
