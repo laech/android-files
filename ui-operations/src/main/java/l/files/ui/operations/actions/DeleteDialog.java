@@ -5,8 +5,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.view.ActionMode;
 
 import java.util.Collection;
@@ -16,7 +16,7 @@ import l.files.ui.operations.R;
 
 import static l.files.operations.OperationService.newDeleteIntent;
 
-public final class DeleteDialog extends DialogFragment {
+public final class DeleteDialog extends AppCompatDialogFragment {
 
     public static final String FRAGMENT_TAG = "delete-dialog";
 

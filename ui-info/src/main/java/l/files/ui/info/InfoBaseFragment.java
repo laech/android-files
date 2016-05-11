@@ -2,9 +2,9 @@ package l.files.ui.info;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -20,7 +20,7 @@ import static android.view.View.VISIBLE;
 import static l.files.ui.base.view.Views.find;
 
 public abstract class InfoBaseFragment
-        extends DialogFragment
+        extends AppCompatDialogFragment
         implements LoaderCallbacks<Size> {
 
     public static final String FRAGMENT_TAG = "info-dialog";
