@@ -65,6 +65,11 @@ public final class FilesApp extends Application {
             System.gc();
         }
 
+        if (level >= TRIM_MEMORY_MODERATE) {
+            Preview.get(this).clearBlurredThumbnailCache();
+            System.gc();
+        }
+
         if (DEBUG) {
             Log.d(getClass().getSimpleName(), "onTrimMemory(" + level + ")");
         }

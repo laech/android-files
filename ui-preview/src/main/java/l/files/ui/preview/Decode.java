@@ -131,6 +131,11 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         Bitmap thumbnail = context.getThumbnail(path, stat, constraint, true);
         if (thumbnail != null) {
             publishProgress(thumbnail);
+
+            if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
+                publishProgress(generateBlurredThumbnail(thumbnail));
+            }
+
             return true;
         }
         return false;
@@ -154,9 +159,27 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
             publishProgress(thumbnail);
 
+            if (context.getBlurredThumbnail(path, stat, constraint, true) == null) {
+                publishProgress(generateBlurredThumbnail(thumbnail));
+            }
+
             return true;
         }
         return false;
+    }
+
+    // TODO save this to disk
+    BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
+//        long start = currentTimeMillis();
+//        try {
+            /*
+             * Before changing scale and radius, check performance before
+             * and after on slow devices as there could be big differences.
+             */
+        return new BlurredThumbnail(StackBlur.blur(bitmap, 0.05f, 5));
+//        } finally {
+//            Log.d("blurredThumbnail", (currentTimeMillis() - start) + "ms: " + path);
+//        }
     }
 
     @SuppressWarnings("unchecked")
@@ -176,6 +199,11 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                 context.putThumbnail(path, stat, constraint, (Bitmap) value);
                 context.putPreviewable(path, stat, constraint, true);
                 callback.onPreviewAvailable(path, stat, (Bitmap) value);
+
+            } else if (value instanceof BlurredThumbnail) {
+                Bitmap thumbnail = ((BlurredThumbnail) value).bitmap;
+                context.putBlurredThumbnail(path, stat, constraint, thumbnail);
+                callback.onBlurredThumbnailAvailable(path, stat, thumbnail);
 
             } else if (value instanceof NoPreview) {
                 if (using == MEDIA_TYPE) {
