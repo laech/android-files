@@ -2,6 +2,8 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 
+import static android.graphics.Bitmap.createScaledBitmap;
+
 /**
  * Stack Blur v1.0 from
  * http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
@@ -32,31 +34,53 @@ import android.graphics.Bitmap;
  */
 final class StackBlur {
 
+    /*
+     * Before changing scale and radius, check performance before
+     * and after on slow devices as there could be big differences.
+     */
+    private static final float scale = 0.05f;
+    private static final int radius = 5;
+    private static final int div = radius + radius + 1;
+    private static final int[] dv;
+
+    private static final ThreadLocal<int[][]> stacks = new ThreadLocal<int[][]>() {
+        @Override
+        protected int[][] initialValue() {
+            return new int[div][3];
+        }
+    };
+
+    static {
+        int divsum = (div + 1) >> 1;
+        divsum *= divsum;
+        dv = new int[256 * divsum];
+        for (int i = 0; i < 256 * divsum; i++) {
+            dv[i] = (i / divsum);
+        }
+    }
+
     private StackBlur() {
     }
 
-    static Bitmap blur(Bitmap sentBitmap, float scale, int radius) {
+    static Bitmap blur(Bitmap src) {
 
-        int width = Math.round(sentBitmap.getWidth() * scale);
-        int height = Math.round(sentBitmap.getHeight() * scale);
-        sentBitmap = Bitmap.createScaledBitmap(sentBitmap, width, height, false);
+        int width = Math.round(src.getWidth() * scale);
+        int height = Math.round(src.getHeight() * scale);
 
-        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-
-        if (radius < 1) {
-            return (null);
+        Bitmap dst = createScaledBitmap(src, width, height, false);
+        if (dst == src) {
+            dst = src.copy(src.getConfig(), true);
         }
 
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
+        int w = dst.getWidth();
+        int h = dst.getHeight();
 
         int[] pix = new int[w * h];
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+        dst.getPixels(pix, 0, w, 0, 0, w, h);
 
         int wm = w - 1;
         int hm = h - 1;
         int wh = w * h;
-        int div = radius + radius + 1;
 
         int r[] = new int[wh];
         int g[] = new int[wh];
@@ -64,16 +88,9 @@ final class StackBlur {
         int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
         int vmin[] = new int[Math.max(w, h)];
 
-        int divsum = (div + 1) >> 1;
-        divsum *= divsum;
-        int dv[] = new int[256 * divsum];
-        for (i = 0; i < 256 * divsum; i++) {
-            dv[i] = (i / divsum);
-        }
-
         yw = yi = 0;
 
-        int[][] stack = new int[div][3];
+        int[][] stack = stacks.get();
         int stackpointer;
         int stackstart;
         int[] sir;
@@ -238,9 +255,9 @@ final class StackBlur {
             }
         }
 
-        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
+        dst.setPixels(pix, 0, w, 0, 0, w, h);
 
-        return (bitmap);
+        return dst;
     }
 
 }

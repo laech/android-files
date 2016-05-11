@@ -170,16 +170,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     // TODO save this to disk
     BlurredThumbnail generateBlurredThumbnail(Bitmap bitmap) {
-//        long start = currentTimeMillis();
-//        try {
-            /*
-             * Before changing scale and radius, check performance before
-             * and after on slow devices as there could be big differences.
-             */
-        return new BlurredThumbnail(StackBlur.blur(bitmap, 0.05f, 5));
-//        } finally {
-//            Log.d("blurredThumbnail", (currentTimeMillis() - start) + "ms: " + path);
-//        }
+        return new BlurredThumbnail(StackBlur.blur(bitmap));
     }
 
     @SuppressWarnings("unchecked")
