@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<l.files.ui.base.widget.ScrimInsetsFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Sidebar"
     android:layout_width="match_parent"
@@ -16,4 +16,4 @@
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical" />
 
-</l.files.ui.base.widget.ScrimInsetsFrameLayout>
+</android.support.design.widget.NavigationView>
