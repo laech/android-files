@@ -4,8 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.widget.TextView;
 
-import java.io.IOException;
+import com.ibm.icu.text.CharsetDetector;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+
+import l.files.base.io.Closer;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -72,7 +77,7 @@ final class DecodeText extends DecodeThumbnail {
 
     @Override
     Result decode() throws IOException {
-        String text = Files.readDetectingCharset(path, PREVIEW_LIMIT);
+        String text = readDetectingCharset(path, PREVIEW_LIMIT);
         Bitmap bitmap = draw(text);
         return new Result(bitmap, Rect.of(
                 bitmap.getWidth(),
@@ -106,4 +111,29 @@ final class DecodeText extends DecodeThumbnail {
         return bitmap;
     }
 
+    static String readDetectingCharset(Path path, int limit) throws IOException {
+        Closer closer = Closer.create();
+        try {
+
+            InputStream in = closer.register(Files.newBufferedInputStream(path));
+            Reader reader = closer.register(new CharsetDetector().getReader(in, null));
+            if (reader != null) {
+                char[] buffer = new char[limit];
+                int count = reader.read(buffer);
+                if (count > -1) {
+                    return String.valueOf(buffer, 0, count);
+                }
+            }
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+        throw new UnknownCharsetException();
+    }
+
+    private static class UnknownCharsetException extends IOException {
+
+    }
 }

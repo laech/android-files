@@ -1,7 +1,5 @@
 package l.files.fs;
 
-import com.ibm.icu.text.CharsetDetector;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -161,7 +159,7 @@ public final class Files {
 
     /**
      * Performs a depth first traverse of this tree.
-     * <p/>
+     * <p>
      * e.g. traversing the follow tree:
      * <pre>
      *     a
@@ -385,32 +383,6 @@ public final class Files {
             Charset charset,
             boolean append) throws IOException {
         return new OutputStreamWriter(newOutputStream(path, append), charset);
-    }
-
-    public static String readDetectingCharset(Path path, int limit) throws IOException {
-        Closer closer = Closer.create();
-        try {
-
-            InputStream in = closer.register(newBufferedInputStream(path));
-            Reader reader = closer.register(new CharsetDetector().getReader(in, null));
-            if (reader != null) {
-                char[] buffer = new char[limit];
-                int count = reader.read(buffer);
-                if (count > -1) {
-                    return String.valueOf(buffer, 0, count);
-                }
-            }
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-        throw new UnknownCharsetException();
-    }
-
-    private static class UnknownCharsetException extends IOException {
-
     }
 
     public static void setLastModifiedTime(

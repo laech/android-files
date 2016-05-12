@@ -33,7 +33,6 @@ import static android.test.MoreAsserts.assertNotEqual;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
-import static l.files.fs.Files.ISO_8859_1;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -691,25 +690,6 @@ public final class FilesTest extends PathBaseTest {
 
         assertFalse(Files.stat(link, FOLLOW).permissions().contains(perm));
         assertTrue(Files.stat(link, NOFOLLOW).permissions().contains(perm));
-    }
-
-    public void test_readDetectingCharset_utf8() throws Exception {
-        Path file = Files.createFile(dir1().resolve("a"));
-        Files.writeUtf8(file, "你好");
-        assertEquals("", Files.readDetectingCharset(file, 0));
-        assertEquals("你", Files.readDetectingCharset(file, 1));
-        assertEquals("你好", Files.readDetectingCharset(file, 2));
-        assertEquals("你好", Files.readDetectingCharset(file, 3));
-    }
-
-    public void test_readDetectingCharset_iso88591() throws Exception {
-        Path file = Files.createFile(dir1().resolve("a"));
-        Files.write(file, "hello world", ISO_8859_1);
-        assertEquals("", Files.readDetectingCharset(file, 0));
-        assertEquals("h", Files.readDetectingCharset(file, 1));
-        assertEquals("he", Files.readDetectingCharset(file, 2));
-        assertEquals("hel", Files.readDetectingCharset(file, 3));
-        assertEquals("hello world", Files.readDetectingCharset(file, 100));
     }
 
     private List<Path> sortByName(List<Path> files) throws IOException {

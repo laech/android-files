@@ -17,6 +17,7 @@ buildscript {
     // i.e. scroll until toolbar is hidden, click into new directory,
     // scroll down, toolbar area is now blank
     ext.supportLibVersion = "23.2.1"
+    ext.icu4jVersion = "57.1"
 
 }
 
