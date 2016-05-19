@@ -13,10 +13,7 @@ buildscript {
     ext.targetSdkVersion = 22
     ext.compileSdkVersion = 23
     ext.buildToolsVersion = "23.0.3"
-    // Do not update to 23.3.0 due to bug in CoordinatorLayout
-    // i.e. scroll until toolbar is hidden, click into new directory,
-    // scroll down, toolbar area is now blank
-    ext.supportLibVersion = "23.2.1"
+    ext.supportLibVersion = "23.4.0"
     ext.icu4jVersion = "57.1"
 
 }
