@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import l.files.fs.Instant;
+import l.files.base.Integers;
+import l.files.base.Longs;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
@@ -47,12 +48,21 @@ enum FileSort {
                 protected int compareNotNull(
                         FileInfo a, Stat aStat,
                         FileInfo b, Stat bStat) {
-                    Instant aTime = aStat.lastModifiedTime();
-                    Instant bTime = bStat.lastModifiedTime();
-                    int result = bTime.compareTo(aTime);
+
+                    int result = Longs.compare(
+                            bStat.lastModifiedEpochSecond(),
+                            aStat.lastModifiedEpochSecond());
+
+                    if (result == 0) {
+                        result = Integers.compare(
+                                bStat.lastModifiedNanoOfSecond(),
+                                aStat.lastModifiedNanoOfSecond());
+                    }
+
                     if (result == 0) {
                         return a.compareTo(b);
                     }
+
                     return result;
                 }
             };

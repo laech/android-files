@@ -1,140 +1,94 @@
 package l.files.ui.browser;
 
-import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.JANUARY;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static l.files.base.Objects.requireNonNull;
 
 /**
  * Categories files by their last modified date.
  */
 final class DateCategorizer extends BaseCategorizer {
-    private static final long MILLIS_PER_MINUTE = 60 * 1000;
-    private static final long MILLIS_PER_DAY = 24 * 60 * MILLIS_PER_MINUTE;
 
-    @SuppressLint("SimpleDateFormat")
-    private final DateFormat monthFormat = new SimpleDateFormat("MMMM");
-    private final Map<Integer, String> monthCache = new HashMap<>();
+    private static final long SECONDS_PER_MINUTE = 60;
+    private static final long SECONDS_PER_DAY = 24 * 60 * SECONDS_PER_MINUTE;
 
+    private final String[] monthLabels = new DateFormatSymbols().getMonths();
     private final Calendar timestamp = new GregorianCalendar();
-    private final long startOfToday;
-    private final long startOfTomorrow;
-    private final long startOfYesterday;
-    private final long startOf7Days;
-    private final long startOf30Days;
+    private final long startSecondOfToday;
+    private final long startSecondOfTomorrow;
+    private final long startSecondOfYesterday;
+    private final long startSecondOf7Days;
+    private final long startSecondOf30Days;
+    private final long startSecondOfThisYear;
 
     public DateCategorizer(long now) {
         timestamp.setTimeInMillis(now);
-        timestamp.set(Calendar.HOUR_OF_DAY, 0);
-        timestamp.set(Calendar.MINUTE, 0);
-        timestamp.set(Calendar.SECOND, 0);
-        timestamp.set(Calendar.MILLISECOND, 0);
+        timestamp.set(HOUR_OF_DAY, 0);
+        timestamp.set(MINUTE, 0);
+        timestamp.set(SECOND, 0);
+        timestamp.set(MILLISECOND, 0);
 
-        startOfToday = timestamp.getTimeInMillis();
-        startOfTomorrow = startOfToday + MILLIS_PER_DAY;
-        startOfYesterday = startOfToday - MILLIS_PER_DAY;
-        startOf7Days = startOfToday - MILLIS_PER_DAY * 7L;
-        startOf30Days = startOfToday - MILLIS_PER_DAY * 30L;
+        startSecondOfToday = timestamp.getTimeInMillis() / 1000;
+        startSecondOfTomorrow = startSecondOfToday + SECONDS_PER_DAY;
+        startSecondOfYesterday = startSecondOfToday - SECONDS_PER_DAY;
+        startSecondOf7Days = startSecondOfToday - SECONDS_PER_DAY * 7L;
+        startSecondOf30Days = startSecondOfToday - SECONDS_PER_DAY * 30L;
+
+        timestamp.set(MONTH, JANUARY);
+        timestamp.set(DAY_OF_MONTH, 1);
+        startSecondOfThisYear = timestamp.getTimeInMillis() / 1000;
     }
 
     @Override
-    public Object id(FileInfo file) {
+    public int id(FileInfo file) {
         Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
         }
 
-        long t = stat.lastModifiedTime().to(MILLISECONDS);
-        if (t < MILLIS_PER_MINUTE) return R.string.__;
-        if (t >= startOfTomorrow) return R.string.future;
-        if (t >= startOfToday) return R.string.today;
-        if (t >= startOfYesterday) return R.string.yesterday;
-        if (t >= startOf7Days) return R.string.previous_7_days;
-        if (t >= startOf30Days) return R.string.previous_30_days;
+        long seconds = stat.lastModifiedEpochSecond();
+        if (seconds < SECONDS_PER_MINUTE) return R.string.__;
+        if (seconds >= startSecondOfTomorrow) return R.string.future;
+        if (seconds >= startSecondOfToday) return R.string.today;
+        if (seconds >= startSecondOfYesterday) return R.string.yesterday;
+        if (seconds >= startSecondOf7Days) return R.string.previous_7_days;
+        if (seconds >= startSecondOf30Days) return R.string.previous_30_days;
 
-        timestamp.setTimeInMillis(startOfToday);
-        int currentYear = timestamp.get(YEAR);
-
-        timestamp.setTimeInMillis(t);
-        int thatYear = timestamp.get(YEAR);
-
-        if (currentYear != thatYear) {
-            return new Year(thatYear);
+        timestamp.setTimeInMillis(seconds * 1000);
+        if (seconds >= startSecondOfThisYear) {
+            return -timestamp.get(MONTH);
+        } else {
+            return -timestamp.get(YEAR);
         }
-        return new Month(timestamp.get(MONTH));
     }
 
     @Override
-    public String label(FileInfo file, Resources res, Object id) {
-        if (id instanceof Year) {
-            Stat stat = requireNonNull(file.selfStat());
-            timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
-            return String.valueOf(timestamp.get(YEAR));
-        }
-
-        if (id instanceof Month) {
-            Stat stat = requireNonNull(file.selfStat());
-            timestamp.setTimeInMillis(stat.lastModifiedTime().to(MILLISECONDS));
-            int month = timestamp.get(MONTH);
-            String format = monthCache.get(month);
-            if (format == null) {
-                format = monthFormat.format(timestamp.getTime());
-                monthCache.put(month, format);
+    public String label(FileInfo file, Resources res, int id) {
+        if (id > 0) {
+            try {
+                return res.getString(id);
+            } catch (Resources.NotFoundException e) {
+                return null;
             }
-            return format;
         }
-
-        return res.getString((int) id);
+        if (id >= -12) {
+            return monthLabels[-id];
+        }
+        return String.valueOf(-id);
     }
 
-    static final class Year {
-
-        final int value;
-
-        Year(int value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof Year && ((Year) o).value == value;
-        }
-
-        @Override
-        public int hashCode() {
-            return value;
-        }
-    }
-
-    static final class Month {
-
-        final int value;
-
-        Month(int value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof Month && ((Month) o).value == value;
-        }
-
-        @Override
-        public int hashCode() {
-            return value;
-        }
-    }
 }

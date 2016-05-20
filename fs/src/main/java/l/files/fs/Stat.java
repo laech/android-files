@@ -26,6 +26,10 @@ public interface Stat extends Parcelable {
 
     Instant lastModifiedTime();
 
+    long lastModifiedEpochSecond();
+
+    int lastModifiedNanoOfSecond();
+
     Set<Permission> permissions();
 
 }

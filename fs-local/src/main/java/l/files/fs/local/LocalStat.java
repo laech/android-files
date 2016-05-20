@@ -120,6 +120,16 @@ final class LocalStat implements l.files.fs.Stat {
     }
 
     @Override
+    public long lastModifiedEpochSecond() {
+        return mtime();
+    }
+
+    @Override
+    public int lastModifiedNanoOfSecond() {
+        return mtime_nsec();
+    }
+
+    @Override
     public long sizeOnDisk() {
         return blocks() * 512;
     }

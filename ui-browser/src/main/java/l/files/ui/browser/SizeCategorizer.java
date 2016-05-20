@@ -9,6 +9,7 @@ import l.files.ui.base.fs.FileInfo;
  * Categorizes by file size (descending order).
  */
 final class SizeCategorizer extends BaseCategorizer {
+
     private static final long ZERO = 0;
     private static final long KB_1 = 1024;
     private static final long MB_1 = KB_1 * 1024;
@@ -27,8 +28,8 @@ final class SizeCategorizer extends BaseCategorizer {
             };
 
     @Override
-    public Object id(final FileInfo file) {
-        final Stat stat = file.selfStat();
+    public int id(FileInfo file) {
+        Stat stat = file.selfStat();
         if (stat == null) {
             return R.string.__;
         }
@@ -37,8 +38,8 @@ final class SizeCategorizer extends BaseCategorizer {
             return R.string.__;
         }
 
-        final long size = stat.size();
-        for (final Group group : GROUPS) {
+        long size = stat.size();
+        for (Group group : GROUPS) {
             if (size >= group.minSize) {
                 return group.label;
             }
@@ -47,15 +48,11 @@ final class SizeCategorizer extends BaseCategorizer {
     }
 
     @Override
-    public String label(
-            final FileInfo file,
-            final Resources res,
-            final Object id) {
-        final int value = (int) id;
-        if (value == -1) {
+    public String label(FileInfo file, Resources res, int id) {
+        if (id == -1) {
             return null;
         }
-        return res.getString(value);
+        return res.getString(id);
     }
 
     private static class Group {
