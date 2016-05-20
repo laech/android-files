@@ -124,9 +124,8 @@ enum FileSort {
     abstract Categorizer categorizer();
 
     List<Object> sort(List<FileInfo> items, Resources res) {
-        List<FileInfo> sorted = new ArrayList<>(items);
-        Collections.sort(sorted, comparator());
-        return categorizer().categorize(res, sorted);
+        Collections.sort(items, comparator());
+        return categorizer().categorize(res, items);
     }
 
     private static abstract class StatComparator implements Comparator<FileInfo> {

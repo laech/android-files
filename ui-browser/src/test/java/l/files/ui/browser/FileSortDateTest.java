@@ -55,6 +55,8 @@ public final class FileSortDateTest extends FileSortTest {
         Name name = mock(Name.class);
         given(name.toString()).willReturn(nameStr);
         given(stat.lastModifiedTime()).willReturn(instant);
+        given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
+        given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
         given(stat.isDirectory()).willReturn(dir);
         given(stat.isRegularFile()).willReturn(!dir);
         given(fs.stat(eq(file), any(LinkOption.class))).willReturn(stat);

@@ -283,7 +283,10 @@ public final class DateCategorizerTest {
         Name name = mock(Name.class);
         given(name.toString()).willReturn(String.valueOf(time));
         given(file.name()).willReturn(name);
-        given(stat.lastModifiedTime()).willReturn(Instant.ofMillis(time));
+        Instant instant = Instant.ofMillis(time);
+        given(stat.lastModifiedTime()).willReturn(instant);
+        given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
+        given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
         return FileInfo.create(file, stat, null, null, new Provider<Collator>() {
             @Override
             public Collator get() {
