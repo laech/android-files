@@ -7,36 +7,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import l.files.fs.FileSystem;
 import l.files.fs.Name;
 import l.files.fs.Path;
 
-import static java.lang.System.arraycopy;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Files.UTF_8;
 
 final class LocalPath implements Path {
 
-    static final byte DOT = 46; // '.' in UTF-8
-    static final byte SEP = 47; // '/' in UTF-8
-
-    static final byte[][] EMPTY_NAMES = new byte[0][];
-
     /*
      * Binary representation of this path, normally it's whatever
      * returned from the native calls, unless when it's created
      * from java.lang.String.
-     *
-     * Example:
-     *
-     *   /         -> []              absolute=true
-     *   ""        -> []              absolute=false
-     *   /dev/null -> [[dev],[null]]  absolute=true
-     *   abc/hello -> [[abc],[hello]] absolute=false
      *
      * Using the original bytes from the OS means the path is
      * independent of charset encodings, avoiding byte loss when
@@ -51,13 +36,10 @@ final class LocalPath implements Path {
      *
      * This class is free of the above issue.
      */
-    private final byte[][] names;
+    final byte[] path;
 
-    private final boolean absolute;
-
-    private LocalPath(byte[][] names, boolean absolute) {
-        this.names = requireNonNull(names);
-        this.absolute = absolute;
+    private LocalPath(byte[] path) {
+        this.path = requireNonNull(path);
     }
 
     public static LocalPath of(File file) {
@@ -69,38 +51,22 @@ final class LocalPath implements Path {
     }
 
     public static LocalPath of(byte[] path) {
-        byte[][] names = toNames(path);
-        boolean absolute = path.length > 0 && path[0] == SEP;
-        return new LocalPath(names, absolute);
+        int length = lengthBySkippingPathSeparators(path, path.length);
+        if (length > 0 && length != path.length) {
+            path = Arrays.copyOfRange(path, 0, length);
+        }
+        return new LocalPath(path);
     }
 
     @Override
     public byte[] toByteArray() {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        toByteArray(out);
-        return out.toByteArray();
+        return path;
     }
 
     @Override
     public int toByteArray(OutputStream out) throws IOException {
-
-        int count = 0;
-        if (absolute) {
-            out.write(SEP);
-            count++;
-        }
-
-        for (int i = 0; i < names.length; i++) {
-            out.write(names[i]);
-            count += names[i].length;
-
-            if (i < names.length - 1) {
-                out.write(SEP);
-                count++;
-            }
-        }
-
-        return count;
+        out.write(path);
+        return path.length;
     }
 
     @Override
@@ -119,7 +85,7 @@ final class LocalPath implements Path {
 
     @Override
     public String toString() {
-        return new String(toByteArray(), UTF_8);
+        return new String(path, UTF_8);
     }
 
     @Override
@@ -129,22 +95,13 @@ final class LocalPath implements Path {
 
     @Override
     public int hashCode() {
-        int result = Arrays.deepHashCode(names);
-        return 31 * result + (absolute ? 1 : 0);
+        return Arrays.hashCode(path);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-        if (!(o instanceof LocalPath)) {
-            return false;
-        }
-        LocalPath that = (LocalPath) o;
-        return absolute == that.absolute &&
-                Arrays.deepEquals(names, that.names);
-
+        return o instanceof LocalPath &&
+                Arrays.equals(path, ((LocalPath) o).path);
     }
 
     @Override
@@ -157,93 +114,112 @@ final class LocalPath implements Path {
         if (name.isEmpty()) {
             return this;
         }
-        byte[][] newNames = Arrays.copyOf(names, names.length + 1);
-        newNames[newNames.length - 1] = ((LocalName) name).bytes;
-        return new LocalPath(newNames, absolute);
+        return resolve(name instanceof LocalName
+                ? ((LocalName) name).bytes
+                : name.toByteArray());
     }
 
     @Override
     public LocalPath resolve(byte[] path) {
-        byte[][] children = toNames(path);
-        if (children.length == 0) {
+        int len = lengthBySkippingPathSeparators(path, path.length);
+        if (len <= 0) {
             return this;
         }
-        byte[][] newNames = Arrays.copyOf(names, names.length + children.length);
-        arraycopy(children, 0, newNames, names.length, children.length);
-        return new LocalPath(newNames, absolute);
+        return new LocalPath(concatPaths(this.path, path, 0, len));
     }
 
-    private static byte[][] toNames(byte[] path) {
-
-        if (path.length == 0) {
-            return EMPTY_NAMES;
+    private static byte[] concatPaths(byte[] base, byte[] add, int addPos, int addLen) {
+        if (addLen == 0) {
+            return base;
         }
 
-        int separatorCount = 0;
-        for (byte b : path) {
-            if (b == SEP) {
-                separatorCount++;
-            }
+        byte[] joinedPath;
+        if (base.length == 0 || (base[base.length - 1] != '/' && add[addPos] != '/')) {
+            joinedPath = Arrays.copyOf(base, base.length + 1 + addLen);
+            joinedPath[base.length] = '/';
+            System.arraycopy(add, addPos, joinedPath, base.length + 1, addLen);
+
+        } else {
+            joinedPath = Arrays.copyOf(base, base.length + addLen);
+            System.arraycopy(add, addPos, joinedPath, base.length, addLen);
+
         }
 
-        if (separatorCount == 0) {
-            return new byte[][]{path};
-        }
-
-        List<byte[]> parts = new ArrayList<>(separatorCount + 1);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        for (byte b : path) {
-            if (b != SEP) {
-                out.write(b);
-            } else if (out.size() > 0) {
-                parts.add(out.toByteArray());
-                out.reset();
-            }
-        }
-        if (out.size() > 0) {
-            parts.add(out.toByteArray());
-        }
-
-        return parts.toArray(new byte[parts.size()][]);
+        return joinedPath;
     }
 
     @Override
     public LocalPath parent() {
-        if (absolute && names.length == 1) {
-            return new LocalPath(EMPTY_NAMES, true); // "/"
-        } else if (names.length < 2) {
-            return null;
+
+        int parentPathLength = path.length;
+        parentPathLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        parentPathLength = lengthBySkippingNonPathSeparators(path, parentPathLength);
+
+        int parentPathNoEndSeparatorLength = lengthBySkippingPathSeparators(path, parentPathLength);
+        if (parentPathNoEndSeparatorLength > 0) {
+            parentPathLength = parentPathNoEndSeparatorLength;
         }
-        byte[][] newNames = Arrays.copyOf(names, names.length - 1);
-        return new LocalPath(newNames, absolute);
+
+        if (parentPathLength > 0) {
+            return new LocalPath(Arrays.copyOfRange(path, 0, parentPathLength));
+        }
+
+        return null;
+    }
+
+    private static int lengthBySkippingPathSeparators(byte[] path, int fromLength) {
+        while (fromLength > 0 && path[fromLength - 1] == '/') {
+            fromLength--;
+        }
+        return fromLength;
+    }
+
+    private static int lengthBySkippingNonPathSeparators(byte[] path, int fromLength) {
+        while (fromLength > 0 && path[fromLength - 1] != '/') {
+            fromLength--;
+        }
+        return fromLength;
     }
 
     @Override
     public LocalName name() {
-        if (names.length == 0) {
-            return LocalName.wrap(new byte[0]);
+        int nameEnd = lengthBySkippingPathSeparators(path, path.length);
+        int nameStartPos = lengthBySkippingNonPathSeparators(path, nameEnd);
+        if (nameStartPos < 0) {
+            nameStartPos = 0;
         }
-        return LocalName.wrap(names[names.length - 1]);
+        return LocalName.wrap(Arrays.copyOfRange(path, nameStartPos, nameEnd));
     }
 
     @Override
     public boolean isHidden() {
-        return names.length > 0 &&
-                names[names.length - 1][0] == DOT;
+        int nameStartPos = path.length;
+        nameStartPos = lengthBySkippingPathSeparators(path, nameStartPos);
+        nameStartPos = lengthBySkippingNonPathSeparators(path, nameStartPos);
+        return nameStartPos >= 0 &&
+                nameStartPos < path.length &&
+                path[nameStartPos] == '.';
     }
 
     @Override
     public boolean startsWith(Path p) {
 
-        byte[][] thatNames = ((LocalPath) p).names;
-        byte[][] thisNames = names;
+        byte[] thisPath = path;
+        byte[] thatPath = ((LocalPath) p).path;
 
-        if (thatNames.length > thisNames.length) {
+        if (thatPath.length == 0 ||
+                thisPath.length < thatPath.length) {
             return false;
+
+        } else if (thisPath.length > thatPath.length) {
+            if (thisPath[thatPath.length] != '/' &&
+                    thatPath[thatPath.length - 1] != '/') {
+                return false;
+            }
         }
 
-        for (int i = 0; i < thatNames.length; i++) {
-            if (!Arrays.equals(thisNames[i], thatNames[i])) {
+        for (int i = 0; i < thatPath.length; i++) {
+            if (thisPath[i] != thatPath[i]) {
                 return false;
             }
         }
@@ -260,11 +236,11 @@ final class LocalPath implements Path {
         if (!startsWith(src)) {
             throw new IllegalArgumentException();
         }
-
-        int retainLen = names.length - src.names.length;
-        byte[][] newNames = Arrays.copyOf(dst.names, dst.names.length + retainLen);
-        arraycopy(names, src.names.length, newNames, dst.names.length, retainLen);
-        return new LocalPath(newNames, dst.absolute);
+        return new LocalPath(concatPaths(
+                dst.path,
+                path,
+                src.path.length,
+                path.length - src.path.length));
     }
 
     @Override
@@ -274,24 +250,14 @@ final class LocalPath implements Path {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (absolute ? 1 : 0));
-        dest.writeInt(names.length);
-        for (byte[] name : names) {
-            dest.writeByteArray(name);
-        }
+        dest.writeByteArray(path);
     }
 
     public static final Creator<LocalPath> CREATOR = new Creator<LocalPath>() {
 
         @Override
         public LocalPath createFromParcel(Parcel source) {
-            boolean absolute = source.readByte() == 1;
-            int len = source.readInt();
-            byte[][] names = new byte[len][];
-            for (int i = 0; i < len; i++) {
-                names[i] = source.createByteArray();
-            }
-            return new LocalPath(names, absolute);
+            return new LocalPath(source.createByteArray());
         }
 
         @Override

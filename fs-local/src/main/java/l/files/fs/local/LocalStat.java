@@ -99,9 +99,9 @@ final class LocalStat implements l.files.fs.Stat {
             try {
 
                 if (option == FOLLOW) {
-                    linux.Stat.stat(path.toByteArray(), stat);
+                    linux.Stat.stat(path.path, stat);
                 } else {
-                    linux.Stat.lstat(path.toByteArray(), stat);
+                    linux.Stat.lstat(path.path, stat);
                 }
                 buffer.set(stat);
                 break;

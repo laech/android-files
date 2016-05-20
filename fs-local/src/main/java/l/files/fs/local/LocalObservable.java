@@ -171,8 +171,7 @@ final class LocalObservable extends Native
     private volatile int fd = -1;
     private volatile int wd = -1;
 
-    private final Path root;
-    private final byte[] rootPathBytes;
+    private final LocalPath root;
 
     /**
      * If {@link #root} is a directory, its immediate child directories will
@@ -194,9 +193,8 @@ final class LocalObservable extends Native
     private final AtomicBoolean closed;
     private final AtomicBoolean released;
 
-    LocalObservable(Path root, Observer observer) {
+    LocalObservable(LocalPath root, Observer observer) {
         this.root = requireNonNull(root);
-        this.rootPathBytes = root.toByteArray();
         this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
@@ -215,7 +213,7 @@ final class LocalObservable extends Native
         requireNonNull(childrenConsumer);
 
         try {
-            if (!isProcfs(rootPathBytes)) {
+            if (!isProcfs(root.path)) {
                 fd = inotify.init(this, watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
@@ -273,7 +271,7 @@ final class LocalObservable extends Native
         try {
 
             int mask = ROOT_MASK | (opt == NOFOLLOW ? IN_DONT_FOLLOW : 0);
-            return inotify.addWatch(fd, rootPathBytes, mask);
+            return inotify.addWatch(fd, root.path, mask);
 
         } catch (Throwable e) {
             try {
@@ -299,7 +297,7 @@ final class LocalObservable extends Native
         }
 
         try {
-            DIR dir = Dirent.fdopendir(Fcntl.open(rootPathBytes, flags, 0));
+            DIR dir = Dirent.fdopendir(Fcntl.open(root.path, flags, 0));
             try {
                 Dirent entry = new Dirent();
                 while ((entry = Dirent.readdir(dir, entry)) != null) {
@@ -309,7 +307,7 @@ final class LocalObservable extends Native
                     }
 
                     byte[] name = Arrays.copyOf(entry.d_name, entry.d_name_len);
-                    Path child = root.resolve(name);
+                    LocalPath child = root.resolve(name);
                     if (!childrenConsumer.accept(child)) {
                         currentThread().interrupt();
                         break;
@@ -321,7 +319,7 @@ final class LocalObservable extends Native
 
                     try {
 
-                        byte[] childPath = child.toByteArray();
+                        byte[] childPath = child.path;
                         int wd = inotify.addWatch(fd, childPath, CHILD_DIR_MASK);
                         childDirs.put(wd, LocalName.wrap(name));
 
@@ -431,7 +429,7 @@ final class LocalObservable extends Native
         childDirs.removeAll(wds);
         if (wds.contains(wd)) {
             try {
-                wd = inotify.addWatch(fd, rootPathBytes, ROOT_MASK);
+                wd = inotify.addWatch(fd, root.path, ROOT_MASK);
             } catch (ErrnoException ignored) {
             }
         }
@@ -570,7 +568,7 @@ final class LocalObservable extends Native
 
         try {
 
-            byte[] path = root.resolve(name).toByteArray();
+            byte[] path = root.resolve(name).path;
             int wd = inotify.addWatch(fd, path, CHILD_DIR_MASK);
             childDirs.put(wd, LocalName.wrap(name));
 

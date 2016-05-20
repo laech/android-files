@@ -7,8 +7,6 @@ import java.util.Arrays;
 import l.files.fs.Name;
 
 import static l.files.fs.Files.UTF_8;
-import static l.files.fs.local.LocalPath.DOT;
-import static l.files.fs.local.LocalPath.SEP;
 
 final class LocalName implements Name {
 
@@ -16,7 +14,7 @@ final class LocalName implements Name {
 
     LocalName(byte[] bytes) {
         for (byte b : bytes) {
-            if (b == SEP) {
+            if (b == '/') {
                 throw new IllegalArgumentException();
             }
         }
@@ -33,7 +31,7 @@ final class LocalName implements Name {
 
     private int indexOfExtSeparator() {
         int i = bytes.length - 1;
-        while (i >= 0 && bytes[i] != DOT) {
+        while (i >= 0 && bytes[i] != '.') {
             i--;
         }
         return (i == -1 || i == 0 || i == bytes.length - 1) ? -1 : i;

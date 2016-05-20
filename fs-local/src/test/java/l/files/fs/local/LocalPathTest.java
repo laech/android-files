@@ -50,19 +50,6 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void hashCode_are_the_same_ignoring_ignorable_separators() throws Exception {
-        assertEquals(path("aa/").hashCode(), path("aa").hashCode());
-        assertEquals(path("a//").hashCode(), path("a/").hashCode());
-        assertEquals(path("//a").hashCode(), path("/a").hashCode());
-        assertEquals(path("///a//b").hashCode(), path("/a/b").hashCode());
-        assertEquals(path("///a///b////").hashCode(), path("/a/b/").hashCode());
-        assertEquals(path("a/b//").hashCode(), path("a/b/").hashCode());
-        assertEquals(path("/").hashCode(), path("/").hashCode());
-        assertEquals(path("////").hashCode(), path("/").hashCode());
-        assertEquals(path("").hashCode(), path("").hashCode());
-    }
-
-    @Test
     public void hashCode_are_different_if_bytes_are_different() throws Exception {
         LocalPath p1 = path("aa");
         LocalPath p2 = path("ab");
@@ -86,18 +73,6 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void equals_ignores_ignorable_separators() throws Exception {
-        assertEquals(path("aa/"), path("aa"));
-        assertEquals(path("a//"), path("a/"));
-        assertEquals(path("//a"), path("/a"));
-        assertEquals(path("/a//b"), path("/a/b"));
-        assertEquals(path("////a//b//"), path("/a/b/"));
-        assertEquals(path("/"), path("/"));
-        assertEquals(path("///"), path("/"));
-        assertEquals(path(""), path(""));
-    }
-
-    @Test
     public void equals_return_false_if_bytes_are_not_equal() throws Exception {
         LocalPath p1 = path("aa");
         LocalPath p2 = path("ab");
@@ -105,7 +80,7 @@ public final class LocalPathTest {
     }
 
     @Test
-    public void toString_returns_clean_path() throws Exception {
+    public void toString_returns_string_representation() throws Exception {
         assertEquals("c", path("c").toString());
         assertEquals("c", path("c/").toString());
         assertEquals("c", path("c///").toString());
@@ -115,15 +90,15 @@ public final class LocalPathTest {
         assertEquals("/", path("/").toString());
         assertEquals("", path("").toString());
         assertEquals("/a/b/c", path("/a/b/c").toString());
-        assertEquals("/a/b/c", path("///a///b///c").toString());
-        assertEquals("/a/./c", path("///a///.///c//").toString());
+        assertEquals("///a///b///c", path("///a///b///c").toString());
+        assertEquals("///a///.///c", path("///a///.///c//").toString());
     }
 
     @Test
     public void resolve_from_name() throws Exception {
         assertEquals("/a/b", path("/a").resolve(LocalName.of("b")).toString());
         assertEquals("/a/b", path("/a/b").resolve(LocalName.of("")).toString());
-        assertEquals("/a/b", path("/a///b/").resolve(LocalName.of("")).toString());
+        assertEquals("/a///b", path("/a///b/").resolve(LocalName.of("")).toString());
         assertEquals("/a/b", path("/a/").resolve(LocalName.of("b")).toString());
         assertEquals("a/b", path("a").resolve(LocalName.of("b")).toString());
     }
@@ -132,15 +107,15 @@ public final class LocalPathTest {
     public void resolve_from_byte_paths() throws Exception {
         assertEquals("/a/b", path("/a").resolve(bytes("b")).toString());
         assertEquals("/a/b", path("/a").resolve(bytes("b///")).toString());
-        assertEquals("/a/b", path("////a").resolve(bytes("b///")).toString());
+        assertEquals("////a/b", path("////a").resolve(bytes("b///")).toString());
         assertEquals("/a/b", path("/a/b").resolve(bytes("")).toString());
-        assertEquals("/a/b", path("/a///b/").resolve(bytes("")).toString());
+        assertEquals("/a///b", path("/a///b/").resolve(bytes("")).toString());
         assertEquals("/a/b", path("/a/").resolve(bytes("b")).toString());
-        assertEquals("/a/b", path("///a//").resolve(bytes("b/")).toString());
+        assertEquals("///a/b", path("///a//").resolve(bytes("b/")).toString());
         assertEquals("a/b", path("a").resolve(bytes("b")).toString());
         assertEquals("a/b", path("a").resolve(bytes("/b")).toString());
         assertEquals("a/b", path("a").resolve(bytes("/b/")).toString());
-        assertEquals("a/b", path("a").resolve(bytes("///b///")).toString());
+        assertEquals("a///b", path("a").resolve(bytes("///b///")).toString());
         assertEquals("/a/b", path("/a").resolve(bytes("/b")).toString());
     }
 
@@ -196,6 +171,8 @@ public final class LocalPathTest {
     @Test
     public void startsWith_returns_false_for_non_ancestor_non_self_paths() throws Exception {
         assertFalse(path("/a/b").startsWith(path("/b")));
+        assertFalse(path("/aa/b").startsWith(path("/a")));
+        assertFalse(path("/aa/b").startsWith(path("")));
     }
 
     @Test

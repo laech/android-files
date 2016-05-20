@@ -2,15 +2,12 @@ package l.files.fs.local;
 
 import android.test.AndroidTestCase;
 
-import junit.framework.TestCase;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
-import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 
@@ -22,8 +19,8 @@ import static l.files.fs.TraversalCallback.Result.CONTINUE;
 
 public abstract class PathBaseTest extends AndroidTestCase {
 
-    private Path dir1;
-    private Path dir2;
+    private LocalPath dir1;
+    private LocalPath dir2;
 
     private File createTempFolder() throws IOException {
         File dir = File.createTempFile(getClass().getSimpleName(), null);
@@ -32,10 +29,10 @@ public abstract class PathBaseTest extends AndroidTestCase {
         return dir;
     }
 
-    protected final Path dir1() {
+    protected final LocalPath dir1() {
         if (dir1 == null) {
             try {
-                dir1 = Paths.get(createTempFolder());
+                dir1 = LocalPath.of(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -43,10 +40,10 @@ public abstract class PathBaseTest extends AndroidTestCase {
         return dir1;
     }
 
-    protected final Path dir2() {
+    protected final LocalPath dir2() {
         if (dir2 == null) {
             try {
-                dir2 = Paths.get(createTempFolder());
+                dir2 = LocalPath.of(createTempFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
