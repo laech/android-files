@@ -48,6 +48,7 @@ final class ThumbnailDrawable extends Drawable {
     void setBitmap(Bitmap bitmap) {
         if (bitmap == null) {
             shader = null;
+            width = height = -1;
         } else {
             shader = new BitmapShader(bitmap, CLAMP, CLAMP);
             width = bitmap.getWidth();
