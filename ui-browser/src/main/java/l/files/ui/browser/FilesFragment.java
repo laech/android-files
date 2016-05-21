@@ -144,22 +144,21 @@ public final class FilesFragment
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
-        adapter = new FilesAdapter(
-                getActivity(),
-                selection(),
-                actionModeProvider(),
-                actionModeCallback(),
-                (OnOpenFileListener) getActivity());
 
         int spanCount = getResources().getInteger(R.integer.files_grid_columns);
         recycler = find(android.R.id.list, this);
-        recycler.setAdapter(adapter);
         recycler.setHasFixedSize(true);
         recycler.setItemViewCacheSize(spanCount * 3);
         recycler.setItemAnimator(null);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(spanCount, VERTICAL));
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_FILE, 50);
         recycler.getRecycledViewPool().setMaxRecycledViews(VIEW_TYPE_HEADER, 50);
+        recycler.setAdapter(adapter = new FilesAdapter(
+                recycler,
+                selection(),
+                actionModeProvider(),
+                actionModeCallback(),
+                (OnOpenFileListener) getActivity()));
 
         setupOptionsMenu();
         setHasOptionsMenu(true);

@@ -8,6 +8,7 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.DisplayMetrics;
@@ -17,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +49,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
 
-    private final Context context;
+    private final RecyclerView recyclerView;
     private final Preview decorator;
 
     private final ActionModeProvider actionModeProvider;
@@ -62,20 +64,37 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     private int textWidth;
 
     FilesAdapter(
-            Context context,
+            RecyclerView recyclerView,
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
             OnOpenFileListener listener) {
 
-        this.context = requireNonNull(context);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
         this.selection = requireNonNull(selection);
-        this.decorator = Preview.get(context);
+        this.decorator = Preview.get(recyclerView.getContext());
         this.layouts = FileTextLayouts.get();
+        this.recyclerView = requireNonNull(recyclerView);
+        this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
+            @Override
+            public void onScrollStateChanged(RecyclerView view, int newState) {
+                super.onScrollStateChanged(view, newState);
+
+                if (newState != RecyclerView.SCROLL_STATE_IDLE) {
+                    return;
+                }
+
+                for (int i = 0; i < view.getChildCount(); i++) {
+                    Object tag = view.getChildAt(i).getTag();
+                    if (tag instanceof FileHolder) {
+                        ((FileHolder) tag).executePendingUpdate();
+                    }
+                }
+            }
+        });
     }
 
     private Rect calculateThumbnailConstraint(Context context, CardView card) {
@@ -151,12 +170,18 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
         private Decode task;
 
+        private boolean pendingUpdateTask;
+        private Rect pendingUpdateSize;
+        private WeakReference<Bitmap> pendingUpdatePreview;
+        private WeakReference<Bitmap> pendingUpdateBlurredThumbnail;
+
         FileHolder(View itemView) {
             super(itemView, selection, actionModeProvider, actionModeCallback);
             this.content = find(android.R.id.content, this);
             this.blur = find(R.id.blur, this);
             this.itemView.setOnClickListener(this);
             this.itemView.setOnLongClickListener(this);
+            this.itemView.setTag(this);
         }
 
         @Override
@@ -169,9 +194,47 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             listener.onOpen(file.selfPath(), file.linkTargetOrSelfStat());
         }
 
+        void executePendingUpdate() {
+
+            if (pendingUpdateTask) {
+                Path file = previewPath();
+                Stat stat = previewStat();
+                task = decorator.get(file, stat, constraint, this, Using.FILE_EXTENSION);
+            }
+
+            if (pendingUpdateBlurredThumbnail != null) {
+                Bitmap bitmap = pendingUpdateBlurredThumbnail.get();
+                if (bitmap != null) {
+                    backgroundBlurFadeIn(bitmap);
+                }
+            }
+
+            if (pendingUpdatePreview != null) {
+                Bitmap bitmap = pendingUpdatePreview.get();
+                if (bitmap != null) {
+                    content.set(layouts, item(), textWidth, bitmap);
+                    content.startPreviewTransition();
+                }
+            } else if (pendingUpdateSize != null) {
+                updateContent(scaleSize(pendingUpdateSize));
+            }
+
+            clearPendingUpdates();
+        }
+
+        private void clearPendingUpdates() {
+            pendingUpdateTask = false;
+            pendingUpdateSize = null;
+            pendingUpdatePreview = null;
+            pendingUpdateBlurredThumbnail = null;
+        }
+
         @Override
         public void bind(FileInfo file) {
             super.bind(file);
+
+            clearPendingUpdates();
+
             if (constraint == null) {
                 constraint = calculateThumbnailConstraint(context(), (CardView) itemView);
                 textWidth = constraint.width() - content.getPaddingStart() - content.getPaddingEnd();
@@ -196,10 +259,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             if (task != null) {
                 task.cancelAll();
+                task = null;
             }
 
-            Path file = previewFile();
-            Stat stat = item().linkTargetOrSelfStat();
+            Path file = previewPath();
+            Stat stat = previewStat();
             if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
                 backgroundBlurClear();
                 return null;
@@ -216,7 +280,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 return thumbnail;
             }
 
-            task = decorator.get(file, stat, constraint, this, using);
+            if (canInterruptScrollState()) {
+                task = decorator.get(file, stat, constraint, this, using);
+            } else {
+                pendingUpdateTask = true;
+            }
 
             Rect size = decorator.getSize(file, stat, constraint, false);
             if (size != null) {
@@ -226,8 +294,33 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             return null;
         }
 
-        private Path previewFile() {
+        private boolean canInterruptScrollState() {
+            /*
+             * SCROLL_STATE_IDLE: view not being scrolled
+             * SCROLL_STATE_DRAGGING: finger touching screen, dragging
+             * SCROLL_STATE_SETTLING: finger no longer touching screen, view scrolling
+             *
+             * Don't perform anything expensive like decoding thumbnails
+             * in background during SCROLL_STATE_SETTLING as that will interrupt
+             * the scrolling animation making the app janky and unresponsive,
+             * especially on older device.
+             *
+             * Doing work in background during SCROLL_STATE_DRAGGING is okay as
+             * there is only so much screen space you can drag at once, and user
+             * dragging speed is relatively slow. Updating thumbnails during dragging
+             * is actually wanted otherwise user will have to lift finger to see
+             * things updated which is annoying.
+             */
+            return recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE ||
+                    recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING;
+        }
+
+        private Path previewPath() {
             return item().linkTargetOrSelfPath();
+        }
+
+        private Stat previewStat() {
+            return item().linkTargetOrSelfStat();
         }
 
         private Bitmap getCachedThumbnail(Path path, Stat stat) {
@@ -270,29 +363,42 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
         @Override
         public void onSizeAvailable(Path item, Stat stat, Rect size) {
-            if (item.equals(previewFile())) {
-                updateContent(scaleSize(size));
+            if (item.equals(previewPath())) {
+                Rect scaledSize = scaleSize(size);
+                if (canInterruptScrollState()) {
+                    updateContent(scaledSize);
+                } else {
+                    pendingUpdateSize = scaledSize;
+                }
             }
         }
 
         @Override
         public void onPreviewAvailable(Path item, Stat stat, Bitmap bm) {
-            if (item.equals(previewFile())) {
-                updateContent(bm);
-                content.startPreviewTransition();
+            if (item.equals(previewPath())) {
+                if (canInterruptScrollState()) {
+                    updateContent(bm);
+                    content.startPreviewTransition();
+                } else {
+                    pendingUpdatePreview = new WeakReference<>(bm);
+                }
             }
         }
 
         @Override
         public void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail) {
-            if (path.equals(previewFile())) {
-                backgroundBlurFadeIn(thumbnail);
+            if (path.equals(previewPath())) {
+                if (canInterruptScrollState()) {
+                    backgroundBlurFadeIn(thumbnail);
+                } else {
+                    pendingUpdateBlurredThumbnail = new WeakReference<>(thumbnail);
+                }
             }
         }
 
         @Override
         public void onPreviewFailed(Path item, Stat stat, Using used) {
-            if (item.equals(previewFile())) {
+            if (item.equals(previewPath())) {
                 updateContent(null);
             }
         }
