@@ -27,20 +27,21 @@ final class ThumbnailTransitionDrawable extends TransitionDrawable {
 
     void setSize(int width, int height) {
         sizedColorDrawable.setSize(width, height);
+        thumbnailDrawable.setBitmap(null);
     }
 
     void setBitmap(Bitmap bitmap) {
         thumbnailDrawable.setBitmap(bitmap);
         if (bitmap == null) {
-            setSize(0, 0);
+            sizedColorDrawable.setSize(0, 0);
         } else {
-            setSize(bitmap.getWidth(), bitmap.getHeight());
+            sizedColorDrawable.setSize(bitmap.getWidth(), bitmap.getHeight());
         }
     }
 
     boolean hasVisibleContent() {
-        return sizedColorDrawable.getIntrinsicWidth() > 0 &&
-                sizedColorDrawable.getIntrinsicHeight() > 0 ||
+        return (sizedColorDrawable.getIntrinsicWidth() > 0 &&
+                sizedColorDrawable.getIntrinsicHeight() > 0) ||
                 thumbnailDrawable.getBitmapShader() != null;
     }
 

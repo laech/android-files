@@ -53,6 +53,9 @@ public final class FileView extends View implements Drawable.Callback {
 
     private boolean showLinkIcon;
 
+    private int width;
+    private int height;
+
     {
         Context context = getContext();
         Resources res = getResources();
@@ -372,9 +375,18 @@ public final class FileView extends View implements Drawable.Callback {
                     + getPaddingBottom());
         }
 
-        setMinimumWidth(width);
-        setMinimumHeight(height);
-        invalidate();
+        if (this.width != width || this.height != height) {
+            this.width = width;
+            this.height = height;
+            requestLayout();
+        } else {
+            invalidate();
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(width, height);
     }
 
     private boolean shouldShowLinkIcon(FileInfo item) {
