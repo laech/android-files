@@ -2,7 +2,6 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,9 +33,8 @@ enum FileSort {
 
         @Override
         List<Object> sort(List<FileInfo> items, Resources res) {
-            List<FileInfo> result = new ArrayList<>(items);
-            Collections.sort(result);
-            return Collections.<Object>unmodifiableList(result);
+            Collections.sort(items);
+            return Collections.<Object>unmodifiableList(items);
         }
     },
 
