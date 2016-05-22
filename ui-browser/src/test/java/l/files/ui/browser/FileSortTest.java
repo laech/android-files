@@ -1,20 +1,17 @@
 package l.files.ui.browser;
 
-import com.ibm.icu.text.Collator;
-
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import l.files.base.Provider;
 import l.files.fs.Files;
 import l.files.fs.Name;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.text.Collators;
 
 import static java.util.Collections.shuffle;
 import static java.util.Collections.sort;
@@ -48,7 +45,7 @@ abstract class FileSortTest {
             Locale locale,
             Path... files) throws IOException {
 
-        final Collator collator = Collators.of(locale);
+        final Collator collator = Collator.getInstance(locale);
         final List<FileInfo> expected = new ArrayList<>(files.length);
         for (Path file : files) {
             Stat stat;
@@ -57,12 +54,7 @@ abstract class FileSortTest {
             } catch (IOException e) {
                 stat = null;
             }
-            expected.add(FileInfo.create(file, stat, null, null, new Provider<Collator>() {
-                @Override
-                public Collator get() {
-                    return collator;
-                }
-            }));
+            expected.add(FileInfo.create(file, stat, null, null, collator));
         }
         return expected;
     }

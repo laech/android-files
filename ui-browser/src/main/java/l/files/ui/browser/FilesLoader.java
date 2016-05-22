@@ -7,22 +7,19 @@ import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.ibm.icu.text.Collator;
-
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
-import l.files.base.Provider;
 import l.files.fs.BatchObserver;
 import l.files.fs.Event;
 import l.files.fs.FileSystem;
@@ -32,7 +29,6 @@ import l.files.fs.Observation;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.text.Collators;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -54,24 +50,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
     private final ConcurrentMap<Name, FileInfo> data;
     private final Path root;
 
-    private final Provider<Collator> collator = new Provider<Collator>() {
-
-        // Delay initialization Collator classes until they are needed
-        // the static initialization of the collator classes for the first
-        // time is expensive, so do it in background thread
-        private Collator instance;
-
-        @Override
-        public Collator get() {
-            Collator collator = instance;
-            if (collator == null) {
-                collator = instance = Collators.of(Locale.getDefault());
-            }
-            return collator;
-        }
-
-    };
-
+    private final Collator collator;
 
     private volatile FileSort sort;
     private volatile boolean showHidden;
@@ -139,6 +118,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.showHidden = showHidden;
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
+        this.collator = Collator.getInstance();
     }
 
     int approximateChildTotal() {

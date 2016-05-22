@@ -4,11 +4,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.widget.TextView;
 
-import com.ibm.icu.text.CharsetDetector;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 
 import l.files.base.io.Closer;
 import l.files.fs.Files;
@@ -27,6 +28,7 @@ import static android.util.TypedValue.applyDimension;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
+import static l.files.fs.Files.UTF_8;
 import static l.files.fs.media.MediaTypes.detectByFileExtension;
 
 final class DecodeText extends DecodeThumbnail {
@@ -115,14 +117,16 @@ final class DecodeText extends DecodeThumbnail {
         Closer closer = Closer.create();
         try {
 
+            // TODO support more charsets
             InputStream in = closer.register(Files.newBufferedInputStream(path));
-            Reader reader = closer.register(new CharsetDetector().getReader(in, null));
-            if (reader != null) {
-                char[] buffer = new char[limit];
-                int count = reader.read(buffer);
-                if (count > -1) {
-                    return String.valueOf(buffer, 0, count);
-                }
+            CharsetDecoder decoder = UTF_8.newDecoder()
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .onMalformedInput(CodingErrorAction.REPORT);
+            Reader reader = new InputStreamReader(in, decoder);
+            char[] buffer = new char[limit];
+            int count = reader.read(buffer);
+            if (count != -1) {
+                return new String(buffer, 0, count);
             }
 
         } catch (Throwable e) {

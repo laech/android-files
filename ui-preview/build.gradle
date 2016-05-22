@@ -24,7 +24,6 @@ dependencies {
     compile project(':fs-media')
     compile project(':ui-preview-pdf')
     compile "com.android.support:support-v4:$supportLibVersion"
-    compile "com.ibm.icu:icu4j:$icu4jVersion"
 
     androidTestCompile project(':testing-fs')
 

@@ -3,13 +3,12 @@ package l.files.ui.browser;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
-import com.ibm.icu.text.Collator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,7 +16,6 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import l.files.base.Provider;
 import l.files.fs.Instant;
 import l.files.fs.Name;
 import l.files.fs.Path;
@@ -287,12 +285,7 @@ public final class DateCategorizerTest {
         given(stat.lastModifiedTime()).willReturn(instant);
         given(stat.lastModifiedEpochSecond()).willReturn(instant.seconds());
         given(stat.lastModifiedNanoOfSecond()).willReturn(instant.nanos());
-        return FileInfo.create(file, stat, null, null, new Provider<Collator>() {
-            @Override
-            public Collator get() {
-                return collator;
-            }
-        });
+        return FileInfo.create(file, stat, null, null, collator);
     }
 
     private void assertCategory(String expected, FileInfo... stats) {

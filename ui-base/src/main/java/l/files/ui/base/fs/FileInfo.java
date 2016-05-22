@@ -2,25 +2,23 @@ package l.files.ui.base.fs;
 
 import android.support.annotation.Nullable;
 
-import com.ibm.icu.text.Collator;
-
 import java.io.IOException;
+import java.text.Collator;
 
 import l.files.base.Objects;
-import l.files.base.Provider;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
+import l.files.ui.base.text.CollationKey;
 
-import static java.lang.Math.min;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
 public final class FileInfo implements Comparable<FileInfo> {
 
-    private Provider<Collator> collator;
-    private byte[] collationKey;
+    private final Collator collator;
+    private CollationKey collationKey;
     private Boolean readable;
     private String basicMediaType;
 
@@ -33,12 +31,14 @@ public final class FileInfo implements Comparable<FileInfo> {
             Path selfPath,
             @Nullable Stat selfStat,
             @Nullable Path linkTargetPath,
-            @Nullable Stat linkTargetStat) {
+            @Nullable Stat linkTargetStat,
+            Collator collator) {
 
         this.selfPath = requireNonNull(selfPath);
         this.selfStat = selfStat;
         this.linkTargetPath = linkTargetPath;
         this.linkTargetStat = linkTargetStat;
+        this.collator = requireNonNull(collator);
     }
 
     public boolean isReadable() {
@@ -92,26 +92,17 @@ public final class FileInfo implements Comparable<FileInfo> {
         return linkTargetPath() != null ? linkTargetPath() : selfPath();
     }
 
-    private byte[] collationKey() {
+    private CollationKey collationKey() {
         if (collationKey == null) {
-            collationKey = collator.get()
-                    .getCollationKey(selfPath().name().toString())
-                    .toByteArray();
+            collationKey = CollationKey.create(
+                    collator, selfPath().name().toString());
         }
         return collationKey;
     }
 
     @Override
     public int compareTo(FileInfo that) {
-        byte[] bytes = collationKey();
-        byte[] other = that.collationKey();
-        int minSize = min(bytes.length, other.length);
-        for (int i = 0; i < minSize; ++i) {
-            if (bytes[i] != other[i]) {
-                return (bytes[i] & 0xFF) - (other[i] & 0xFF);
-            }
-        }
-        return bytes.length - other.length;
+        return collationKey().compareTo(that.collationKey());
     }
 
     @Override
@@ -151,9 +142,8 @@ public final class FileInfo implements Comparable<FileInfo> {
             @Nullable Stat stat,
             @Nullable Path target,
             @Nullable Stat targetStat,
-            Provider<Collator> collator) {
-        FileInfo item = new FileInfo(path, stat, target, targetStat);
-        item.collator = collator;
-        return item;
+            Collator collator) {
+        return new FileInfo(path, stat, target, targetStat, collator);
     }
+
 }
