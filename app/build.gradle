@@ -9,7 +9,7 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 17
+        versionCode 19
         versionName '4.1'
     }
 
@@ -58,6 +58,32 @@ android {
         }
     }
 
+}
+
+// See https://sites.google.com/a/android.com/tools/tech-docs/new-build-system/user-guide/apk-splits
+// See https://developer.android.com/google/play/publishing/multiple-apks.html#VersionCodes
+// Codes must be ordered so that newer API of the same type should have higher version code
+// armeabi < armeabi-v7a < arm64-v8a
+// x86 < x86_64
+// mips < mips64
+
+ext.abiCodes = [
+        'armeabi'    : 1,
+        'armeabi-v7a': 2,
+        'arm64-v8a'  : 3,
+        'x86'        : 4,
+        'x86_64'     : 5,
+        'mips'       : 6,
+        'mips64'     : 7,
+]
+
+import com.android.build.OutputFile
+
+android.applicationVariants.all { variant ->
+    variant.outputs.eachWithIndex { output, index ->
+        output.versionCodeOverride = android.defaultConfig.versionCode * 1000 +
+                project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+    }
 }
 
 dependencies {
