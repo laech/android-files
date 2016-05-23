@@ -80,9 +80,18 @@ ext.abiCodes = [
 import com.android.build.OutputFile
 
 android.applicationVariants.all { variant ->
-    variant.outputs.eachWithIndex { output, index ->
+    variant.outputs.each { output ->
         output.versionCodeOverride = android.defaultConfig.versionCode * 1000 +
                 project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+    }
+}
+
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'debug') {
+        variant.outputs.each { output ->
+            output.versionNameOverride =
+                    android.defaultConfig.versionName + "-" + output.baseName
+        }
     }
 }
 
