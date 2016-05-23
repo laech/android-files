@@ -9,8 +9,8 @@ android {
         applicationId 'l.files'
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 16
-        versionName '4.0.4'
+        versionCode 17
+        versionName '4.1'
     }
 
     signingConfigs {
@@ -50,6 +50,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
+    }
+
+    splits {
+        abi {
+            enable true
+        }
     }
 
 }
