@@ -6,6 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingEnd="26dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="26dp"
     android:paddingStart="16dp"
     android:paddingTop="22dp"
     app:errorEnabled="true"

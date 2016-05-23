@@ -5,6 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/files_item_space_vertical"
     android:layout_marginEnd="@dimen/files_item_space_horizontal"
+    android:layout_marginLeft="@dimen/files_item_space_horizontal"
+    android:layout_marginRight="@dimen/files_item_space_horizontal"
     android:layout_marginStart="@dimen/files_item_space_horizontal"
     android:layout_marginTop="@dimen/files_item_space_vertical"
     android:foreground="?attr/selectableItemBackground"
@@ -23,6 +25,8 @@
         android:layout_margin="@dimen/files_item_card_inner_space"
         android:paddingBottom="12dp"
         android:paddingEnd="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
         android:paddingStart="12dp"
         android:paddingTop="16dp" />
 

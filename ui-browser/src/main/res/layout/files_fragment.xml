@@ -11,6 +11,8 @@
         android:clipToPadding="false"
         android:paddingBottom="16dp"
         android:paddingEnd="@dimen/files_list_space"
+        android:paddingLeft="@dimen/files_list_space"
+        android:paddingRight="@dimen/files_list_space"
         android:paddingStart="@dimen/files_list_space"
         android:paddingTop="8dp"
         android:scrollbarStyle="outsideOverlay"

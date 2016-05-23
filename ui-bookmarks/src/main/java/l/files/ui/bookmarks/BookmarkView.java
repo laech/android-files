@@ -67,7 +67,7 @@ public final class BookmarkView extends FrameLayout {
 
         int height = getMeasuredHeight();
 
-        float iconX = getPaddingStart();
+        float iconX = getPaddingLeft();
         float iconY = (height - iconSize) / 2 + iconSize;
         canvas.drawText(icon, iconX, iconY, iconPaint);
 
@@ -75,7 +75,7 @@ public final class BookmarkView extends FrameLayout {
         float titleY = (height - titleSize) / 2 + titleSize - titlePaddingBottom;
         if (ellipsize) {
             ellipsize = false;
-            float width = getMeasuredWidth() - titleX - getPaddingEnd();
+            float width = getMeasuredWidth() - titleX - getPaddingRight();
             title = TextUtils.ellipsize(title, titlePaint, width, END).toString();
         }
         canvas.drawText(title, titleX, titleY, titlePaint);
