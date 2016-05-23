@@ -125,7 +125,7 @@ public final class FileView extends View implements Drawable.Callback {
         if (stat.isDirectory()) {
             return defaultDirectoryIconStringId();
         } else {
-            return fileIconStringId(item.basicMediaType());
+            return fileIconStringId(item.basicMediaType(getContext()));
         }
     }
 

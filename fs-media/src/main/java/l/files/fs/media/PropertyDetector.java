@@ -1,5 +1,7 @@
 package l.files.fs.media;
 
+import android.content.Context;
+
 import l.files.fs.Path;
 import l.files.fs.Stat;
 
@@ -14,7 +16,7 @@ final class PropertyDetector extends BasePropertyDetector {
     }
 
     @Override
-    String detectFile(Path path, Stat stat) {
+    String detectFile(Context context, Path path, Stat stat) {
         return ExtensionDetector.INSTANCE.detect(path.name().ext());
     }
 

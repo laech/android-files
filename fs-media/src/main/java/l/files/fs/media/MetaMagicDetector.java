@@ -1,7 +1,9 @@
 package l.files.fs.media;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MimeTypes;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -23,11 +25,12 @@ final class MetaMagicDetector extends TikaDetector {
     }
 
     @Override
-    String detectFile(Path path, Closer closer) throws IOException {
+    String detectFile(MimeTypes types, Path path, Closer closer) throws IOException {
         Metadata meta = new Metadata();
         meta.add(RESOURCE_NAME_KEY, path.name().toString());
         InputStream in = closer.register(newInputStream(path));
-        return TikaHolder.tika.detect(in, meta);
+        return types.detect(new BufferedInputStream(in), meta)
+                .getBaseType().toString();
     }
 
 }

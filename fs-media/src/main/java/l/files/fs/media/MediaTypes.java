@@ -1,5 +1,7 @@
 package l.files.fs.media;
 
+import android.content.Context;
+
 import java.io.IOException;
 
 import l.files.fs.Path;
@@ -35,9 +37,9 @@ public final class MediaTypes {
      * without reading the content of this file.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    public static String detectByProperties(Path path, Stat stat)
+    public static String detectByProperties(Context context, Path path, Stat stat)
             throws IOException {
-        return PropertyDetector.INSTANCE.detect(path, stat).intern();
+        return PropertyDetector.INSTANCE.detect(context, path, stat).intern();
     }
 
     public static String detectByFileExtension(String ext) {
@@ -48,9 +50,9 @@ public final class MediaTypes {
      * Detects the content type of this file based on its content.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    public static String detectByContent(Path path, Stat stat)
+    public static String detectByContent(Context context, Path path, Stat stat)
             throws IOException {
-        return MagicDetector.INSTANCE.detect(path, stat).intern();
+        return MagicDetector.INSTANCE.detect(context, path, stat).intern();
     }
 
     /**
@@ -58,9 +60,9 @@ public final class MediaTypes {
      * and its content.
      * Returns {@link #MEDIA_TYPE_OCTET_STREAM} if unknown.
      */
-    public static String detect(Path path, Stat stat)
+    public static String detect(Context context, Path path, Stat stat)
             throws IOException {
-        return MetaMagicDetector.INSTANCE.detect(path, stat).intern();
+        return MetaMagicDetector.INSTANCE.detect(context, path, stat).intern();
     }
 
 }

@@ -1,5 +1,6 @@
 package l.files.ui.base.fs;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
@@ -52,11 +53,11 @@ public final class FileInfo implements Comparable<FileInfo> {
         return readable;
     }
 
-    public String basicMediaType() {
+    public String basicMediaType(Context context) {
         if (basicMediaType == null) {
             try {
                 basicMediaType = MediaTypes.detectByProperties(
-                        selfPath(), linkTargetOrSelfStat());
+                        context, selfPath(), linkTargetOrSelfStat());
             } catch (IOException e) {
                 basicMediaType = MEDIA_TYPE_OCTET_STREAM;
             }
