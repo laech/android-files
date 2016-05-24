@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include "util.h"
 
 static jclass dir_class;
@@ -39,6 +40,13 @@ void Java_linux_Dirent_init(JNIEnv *env, jclass class) {
 }
 
 jobject Java_linux_Dirent_fdopendir(JNIEnv *env, jclass class, jint fd) {
+
+    // fdopendir(fd) succeeds on Nexus S even though fd is invalid,
+    // this check prevents that.
+    if (-1 == fcntl(fd, F_GETFD)) {
+        throw_errno_exception(env);
+        return NULL;
+    }
 
     DIR *dir = fdopendir(fd);
     if (NULL == dir) {
