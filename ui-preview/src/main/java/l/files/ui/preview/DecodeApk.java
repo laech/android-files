@@ -13,7 +13,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Bitmap.createBitmap;
 
 final class DecodeApk extends DecodeThumbnail {
 

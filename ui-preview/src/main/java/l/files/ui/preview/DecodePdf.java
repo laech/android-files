@@ -1,7 +1,6 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 
 import java.io.Closeable;
@@ -14,7 +13,6 @@ import l.files.fs.Path;
 import l.files.fs.Stat;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
 import static android.util.TypedValue.COMPLEX_UNIT_PT;
 import static android.util.TypedValue.applyDimension;
@@ -119,6 +117,7 @@ final class DecodePdf extends DecodeThumbnail {
 
             Rect scaledSize = originalSize.scale(constraint);
             Bitmap bitmap = createBitmap(
+                    context.displayMetrics,
                     scaledSize.width(),
                     scaledSize.height(),
                     ARGB_8888);

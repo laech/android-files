@@ -18,7 +18,6 @@ import l.files.fs.Stat;
 import l.files.fs.media.MediaTypes;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Typeface.MONOSPACE;

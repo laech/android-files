@@ -2,6 +2,7 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.util.DisplayMetrics;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -149,6 +150,17 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
 
     @Nullable
     abstract Result decode() throws IOException;
+
+    static Bitmap createBitmap(
+            DisplayMetrics display,
+            int width,
+            int height,
+            Bitmap.Config config) {
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, config);
+        bitmap.setDensity(display.densityDpi);
+        return bitmap;
+    }
 
     static final class Result {
         final Bitmap maybeScaled;
