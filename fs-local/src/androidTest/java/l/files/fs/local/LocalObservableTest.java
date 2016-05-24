@@ -41,6 +41,7 @@ import l.files.fs.Permission;
 import l.files.testing.Executable;
 import l.files.testing.Tests;
 
+import static android.app.DownloadManager.COLUMN_REASON;
 import static android.app.DownloadManager.COLUMN_STATUS;
 import static android.app.DownloadManager.STATUS_SUCCESSFUL;
 import static android.content.Context.DOWNLOAD_SERVICE;
@@ -138,8 +139,11 @@ public final class LocalObservableTest extends PathBaseTest {
                                 // Need to wait until finish, this also ensures
                                 // downloadFile is cleanly deleted after test,
                                 // an observation was that it won't be delete otherwise
-                                int statusColumn = cursor.getColumnIndex(COLUMN_STATUS);
-                                assertEquals(STATUS_SUCCESSFUL, cursor.getInt(statusColumn));
+                                assertEquals(
+                                        cursor.getString(cursor.getColumnIndex(COLUMN_REASON)),
+                                        STATUS_SUCCESSFUL,
+                                        cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS)));
+
                             } finally {
                                 cursor.close();
                             }
