@@ -7,7 +7,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,7 +64,7 @@ import static linux.Vfs.PROC_SUPER_MAGIC;
 import static linux.Vfs.statfs;
 
 final class LocalObservable extends Native
-        implements Runnable, Observation, InotifyTracker.Callback {
+        implements Runnable, Observation {
 
     /*
      * This classes uses inotify for monitoring file system events. This
@@ -208,11 +207,6 @@ final class LocalObservable extends Native
         this.tag = tag;
     }
 
-    void start(LinkOption option, Consumer<? super Path> childrenConsumer)
-            throws IOException, InterruptedException {
-        start(option, childrenConsumer, -1);
-    }
-
     void start(LinkOption option, Consumer<? super Path> childrenConsumer, int watchLimit)
             throws IOException, InterruptedException {
 
@@ -221,7 +215,7 @@ final class LocalObservable extends Native
 
         try {
             if (!isProcfs(root.path)) {
-                fd = inotify.init(this, watchLimit);
+                fd = inotify.init(watchLimit);
                 wd = inotifyAddWatchWillCloseOnError(option);
             } else {
                 close();
@@ -255,7 +249,7 @@ final class LocalObservable extends Native
             if (Files.stat(root, option).isDirectory() &&
                     !traverseChildren(option, childrenConsumer)) {
 
-                notifyIncompleteObservationOrClose();
+                release();
             }
 
         } catch (Throwable e) {
@@ -430,16 +424,16 @@ final class LocalObservable extends Native
         }
     }
 
-    @Override
-    public void onWatchesReleased(Set<Integer> wds) {
+    private void release() {
         released.set(true);
-        childDirs.removeAll(wds);
-        if (wds.contains(wd)) {
+        for (int wd : childDirs.keySet()) {
             try {
-                wd = inotify.addWatch(fd, root.path, ROOT_MASK);
-            } catch (ErrnoException ignored) {
+                inotify.removeWatch(fd, wd);
+            } catch (ErrnoException e) {
+                e.printStackTrace();
             }
         }
+        childDirs.clear();
         notifyIncompleteObservationOrClose();
     }
 
@@ -466,7 +460,7 @@ final class LocalObservable extends Native
 
     private native void observe(int fd);
 
-    // Also called from native code
+    @SuppressWarnings("unused") // Called from native code
     private void onEvent(int wd, int event, byte[] child) {
         try {
             handleEvent(wd, event, child);
@@ -588,7 +582,7 @@ final class LocalObservable extends Native
                     || e.errno == ENOMEM
                     || e.errno == EACCES) {
 
-                notifyIncompleteObservationOrClose();
+                release();
 
             } else {
                 throw ErrnoExceptions.toIOException(e);

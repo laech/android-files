@@ -10,10 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import linux.ErrnoException;
 import linux.Unistd;
 
-import static l.files.base.Objects.requireNonNull;
 import static l.files.base.Throwables.addSuppressed;
 import static linux.Errno.EAGAIN;
-import static linux.Errno.ENOMEM;
 import static linux.Errno.ENOSPC;
 import static linux.Inotify.inotify_add_watch;
 import static linux.Inotify.inotify_init;
@@ -50,24 +48,10 @@ final class InotifyTracker {
         }
     }
 
-    private boolean makeRoomFor(int fd) {
-        Entry largest = null;
-        for (Entry entry : entries.values()) {
-            if (largest == null || largest.size() < entry.size()) {
-                largest = entry;
-            }
-        }
-        if (largest != null) {
-            largest.release();
-            return largest.fd() != fd;
-        }
-        return false;
-    }
-
-    int init(Callback obj, int watchLimit) throws ErrnoException {
+    int init(int watchLimit) throws ErrnoException {
 
         int fd = inotify_init();
-        entries.put(fd, new Entry(fd, obj, watchLimit));
+        entries.put(fd, new Entry(fd, watchLimit));
 
         try {
 
@@ -104,37 +88,22 @@ final class InotifyTracker {
     int addWatch(int fd, byte[] path, int mask) throws ErrnoException {
 
         int wd;
-        try {
 
-            while (true) {
-                try {
+        while (true) {
+            try {
 
-                    Entry entry = entries.get(fd);
-                    if (entry != null && entry.watchLimit > -1 && entry.watchLimit <= entry.size()) {
-                        // Throw the same error as native code to help testing.
-                        throw new ErrnoException(ENOSPC);
-                    }
-
-                    wd = inotify_add_watch(fd, path, mask);
-                    break;
-                } catch (ErrnoException e) {
-                    if (e.errno != EAGAIN) {
-                        throw e;
-                    }
+                Entry entry = entries.get(fd);
+                if (entry != null && entry.watchLimit > -1 && entry.watchLimit <= entry.size()) {
+                    // Throw the same error as native code to help testing.
+                    throw new ErrnoException(ENOSPC);
                 }
-            }
 
-        } catch (ErrnoException e) {
-
-            if (e.errno == ENOSPC || e.errno == ENOMEM) {
-
-                if (!makeRoomFor(fd)) {
+                wd = inotify_add_watch(fd, path, mask);
+                break;
+            } catch (ErrnoException e) {
+                if (e.errno != EAGAIN) {
                     throw e;
                 }
-                wd = internalAddWatchRetry(fd, path, mask);
-
-            } else {
-                throw e;
             }
         }
 
@@ -157,18 +126,6 @@ final class InotifyTracker {
         }
 
         return wd;
-    }
-
-    private int internalAddWatchRetry(int fd, byte[] path, int mask) throws ErrnoException {
-        while (true) {
-            try {
-                return inotify_add_watch(fd, path, mask);
-            } catch (ErrnoException e) {
-                if (e.errno != EAGAIN) {
-                    throw e;
-                }
-            }
-        }
     }
 
     private void notifyAddWatch(int fd, byte[] path, int mask, int wd) {
@@ -250,17 +207,11 @@ final class InotifyTracker {
 
         private final int fd;
         private final Set<Integer> wds = new HashSet<>();
-        private final Callback callback;
         private final int watchLimit;
 
-        private Entry(int fd, Callback callback, int watchLimit) {
+        private Entry(int fd, int watchLimit) {
             this.fd = fd;
-            this.callback = requireNonNull(callback);
             this.watchLimit = watchLimit;
-        }
-
-        int fd() {
-            return fd;
         }
 
         void add(int wd) throws ErrnoException {
@@ -300,18 +251,7 @@ final class InotifyTracker {
                 }
             }
 
-            callback.onWatchesReleased(copy);
         }
-
-    }
-
-    interface Callback {
-
-        /**
-         * Called when this instance's watches have been removed
-         * forcibly due to system limits.
-         */
-        void onWatchesReleased(Set<Integer> wds);
 
     }
 

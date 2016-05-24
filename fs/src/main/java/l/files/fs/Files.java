@@ -191,21 +191,12 @@ public final class Files {
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> consumer)
-            throws IOException, InterruptedException {
-
-        return observe(path, option, observer, consumer, null);
-    }
-
-    public static Observation observe(
-            Path path,
-            LinkOption option,
-            Observer observer,
             Consumer<? super Path> consumer,
-            String logTag)
+            String logTag,
+            int watchLimit)
             throws IOException, InterruptedException {
 
-        return path.fileSystem().observe(path, option, observer, consumer, logTag);
+        return path.fileSystem().observe(path, option, observer, consumer, logTag, watchLimit);
     }
 
     public static Observation observe(
@@ -219,50 +210,8 @@ public final class Files {
             public boolean accept(Path entry) throws IOException {
                 return true;
             }
-        });
+        }, null, -1);
 
-    }
-
-    public static Observation observe(
-            Path path,
-            LinkOption option,
-            BatchObserver batchObserver,
-            Consumer<? super Path> childrenConsumer,
-            long batchInterval,
-            TimeUnit batchInternalUnit)
-            throws IOException, InterruptedException {
-
-        return observe(
-                path,
-                option,
-                batchObserver,
-                childrenConsumer,
-                batchInterval,
-                batchInternalUnit,
-                true
-        );
-    }
-
-    public static Observation observe(
-            Path path,
-            LinkOption option,
-            BatchObserver batchObserver,
-            Consumer<? super Path> childrenConsumer,
-            long batchInterval,
-            TimeUnit batchInternalUnit,
-            boolean quickNotifyFirstEvent)
-            throws IOException, InterruptedException {
-
-        return observe(
-                path,
-                option,
-                batchObserver,
-                childrenConsumer,
-                batchInterval,
-                batchInternalUnit,
-                quickNotifyFirstEvent,
-                null
-        );
     }
 
     public static Observation observe(
@@ -273,7 +222,8 @@ public final class Files {
             long batchInterval,
             TimeUnit batchInternalUnit,
             boolean quickNotifyFirstEvent,
-            String tag)
+            String tag,
+            int watchLimit)
             throws IOException, InterruptedException {
 
         return new BatchObserverNotifier(
@@ -281,7 +231,8 @@ public final class Files {
                 batchInterval,
                 batchInternalUnit,
                 quickNotifyFirstEvent,
-                tag
+                tag,
+                watchLimit
         ).start(path, option, childrenConsumer);
     }
 

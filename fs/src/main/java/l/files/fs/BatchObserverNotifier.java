@@ -46,13 +46,15 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
     private volatile long quickNotifyLastRunNanos;
 
     private final String tag;
+    private final int watchLimit;
 
     BatchObserverNotifier(
             BatchObserver batchObserver,
             long batchInterval,
             TimeUnit batchInternalUnit,
             boolean quickNotifyFirstEvent,
-            String tag) {
+            String tag,
+            int watchLimit) {
         this.batchObserver = batchObserver;
         this.batchInterval = batchInterval;
         this.batchInternalUnit = batchInternalUnit;
@@ -60,6 +62,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
         this.quickNotifyFirstEvent = quickNotifyFirstEvent;
         this.childrenChanged = new HashMap<>();
         this.tag = tag;
+        this.watchLimit = watchLimit;
     }
 
     Observation start(
@@ -73,7 +76,7 @@ final class BatchObserverNotifier implements Observer, Observation, Runnable {
 
         try {
 
-            observation = Files.observe(path, option, this, childrenConsumer, tag);
+            observation = Files.observe(path, option, this, childrenConsumer, tag, watchLimit);
             if (!observation.isClosed()) {
                 checker = service.scheduleWithFixedDelay(
                         this, batchInterval, batchInterval, batchInternalUnit);

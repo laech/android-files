@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import l.files.base.Provider;
 import l.files.fs.FileSystem;
@@ -539,7 +540,15 @@ final class UiFileActivity {
         return this;
     }
 
-    UiFileActivity assertListMatchesFileSystem(final Path dir)
+    UiFileActivity assertListMatchesFileSystem(Path dir)
+            throws IOException {
+        return assertListMatchesFileSystem(dir, 1, MINUTES);
+    }
+
+    UiFileActivity assertListMatchesFileSystem(
+            final Path dir,
+            final int timeout,
+            final TimeUnit timeoutUnit)
             throws IOException {
 
         await(new Callable<Void>() {
@@ -577,7 +586,7 @@ final class UiFileActivity {
 
             }
 
-        }, 1, MINUTES);
+        }, timeout, timeoutUnit);
 
         return this;
     }

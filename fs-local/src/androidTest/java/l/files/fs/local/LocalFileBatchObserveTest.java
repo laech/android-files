@@ -52,7 +52,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                     10,
                     MILLISECONDS,
                     false,
-                    "LocalFileBatchObserveTest.test_notifies_self_change"));
+                    "LocalFileBatchObserveTest.test_notifies_self_change",
+                    -1));
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
 
@@ -90,7 +91,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                     500,
                     MILLISECONDS,
                     false,
-                    "LocalFileBatchObserveTest.test_notifies_children_change");
+                    "LocalFileBatchObserveTest.test_notifies_children_change",
+                    -1);
             closer.register(observation);
             assertFalse(observation.isClosed());
 
@@ -132,7 +134,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                     500,
                     MILLISECONDS,
                     false,
-                    "LocalFileBatchObserveTest.test_notifies_latest_event"));
+                    "LocalFileBatchObserveTest.test_notifies_latest_event",
+                    -1));
 
             Files.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
             Files.delete(file);
@@ -167,7 +170,8 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
                     500,
                     MILLISECONDS,
                     false,
-                    "LocalFileBatchObserveTest.test_notifies_self_and_children_change"));
+                    "LocalFileBatchObserveTest.test_notifies_self_and_children_change",
+                    -1));
 
             verify(consumer).accept(child);
 

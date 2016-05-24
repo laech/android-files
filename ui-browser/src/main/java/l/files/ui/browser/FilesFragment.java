@@ -67,10 +67,12 @@ public final class FilesFragment
     public static final String TAG = FilesFragment.class.getSimpleName();
 
     private static final String ARG_DIRECTORY = "directory";
+    private static final String ARG_WATCH_LIMIT = "watch_limit";
 
-    public static FilesFragment create(Path directory) {
-        Bundle bundle = new Bundle(1);
+    public static FilesFragment create(Path directory, int watchLimit) {
+        Bundle bundle = new Bundle(2);
         bundle.putParcelable(ARG_DIRECTORY, directory);
+        bundle.putInt(ARG_WATCH_LIMIT, watchLimit);
 
         FilesFragment browser = new FilesFragment();
         browser.setArguments(bundle);
@@ -78,6 +80,7 @@ public final class FilesFragment
     }
 
     private Path directory;
+    private int watchLimit;
     private FilesAdapter adapter;
 
     public RecyclerView recycler;
@@ -91,7 +94,6 @@ public final class FilesFragment
             Activity activity = getActivity();
             if (activity == null
                     || activity.isFinishing()
-                    || activity.isDestroyed()
                     || isRemoving()
                     || isDetached()) {
                 return;
@@ -144,6 +146,7 @@ public final class FilesFragment
         super.onActivityCreated(savedInstanceState);
 
         directory = getArguments().getParcelable(ARG_DIRECTORY);
+        watchLimit = getArguments().getInt(ARG_WATCH_LIMIT, -1);
 
         int spanCount = getResources().getInteger(R.integer.files_grid_columns);
         recycler = find(android.R.id.list, this);
@@ -263,7 +266,8 @@ public final class FilesFragment
                 context,
                 directory,
                 getSort(context),
-                getShowHiddenFiles(context)
+                getShowHiddenFiles(context),
+                watchLimit
         );
     }
 

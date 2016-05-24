@@ -22,6 +22,7 @@ import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
 import static l.files.fs.TraversalCallback.Result.CONTINUE;
 import static l.files.ui.browser.FilesActivity.EXTRA_DIRECTORY;
+import static l.files.ui.browser.FilesActivity.EXTRA_WATCH_LIMIT;
 
 public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<FilesActivity> {
 
@@ -95,7 +96,13 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
     }
 
     Intent newIntent(Path dir) {
-        return new Intent(ACTION_MAIN).putExtra(EXTRA_DIRECTORY, dir);
+        return newIntent(dir, -1);
+    }
+
+    Intent newIntent(Path dir, int watchLimit) {
+        return new Intent(ACTION_MAIN)
+                .putExtra(EXTRA_DIRECTORY, dir)
+                .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
     }
 
     Path createCaseInsensitiveFileSystemDir(String name) throws IOException {

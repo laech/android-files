@@ -94,13 +94,15 @@ public interface FileSystem {
      * @param childrenConsumer consumer will be called for all immediate
      *                         children of {@code path}
      * @param logTag           tag for debug logging
+     * @param watchLimit       limit the number of watch descriptors, or -1
      */
     Observation observe(
             Path path,
             LinkOption option,
             Observer observer,
             Consumer<? super Path> childrenConsumer,
-            String logTag)
+            String logTag,
+            int watchLimit)
             throws IOException, InterruptedException;
 
     void list(

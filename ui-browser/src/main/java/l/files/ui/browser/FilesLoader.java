@@ -37,7 +37,7 @@ import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.Event.DELETE;
 import static l.files.fs.LinkOption.FOLLOW;
@@ -45,10 +45,13 @@ import static l.files.fs.LinkOption.NOFOLLOW;
 
 final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
+    static final int BATCH_UPDATE_MILLIS = 1000;
+
     private static final Handler handler = new Handler(getMainLooper());
 
     private final ConcurrentMap<Name, FileInfo> data;
     private final Path root;
+    private final int watchLimit;
 
     private final Collator collator;
 
@@ -110,7 +113,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             Context context,
             Path root,
             FileSort sort,
-            boolean showHidden) {
+            boolean showHidden,
+            int watchLimit) {
         super(context);
 
         this.root = requireNonNull(root, "root");
@@ -119,6 +123,7 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         this.data = new ConcurrentHashMap<>();
         this.executor = newSingleThreadExecutor();
         this.collator = Collator.getInstance();
+        this.watchLimit = watchLimit;
     }
 
     int approximateChildTotal() {
@@ -202,7 +207,16 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
 
     private List<Path> observe() throws IOException, InterruptedException {
         List<Path> children = new ArrayList<>();
-        observation = Files.observe(root, FOLLOW, listener, collectInto(children), 1, SECONDS);
+        observation = Files.observe(
+                root,
+                FOLLOW,
+                listener,
+                collectInto(children),
+                BATCH_UPDATE_MILLIS,
+                MILLISECONDS,
+                true,
+                null,
+                watchLimit);
         return children;
     }
 

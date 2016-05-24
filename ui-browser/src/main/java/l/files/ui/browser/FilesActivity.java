@@ -51,6 +51,7 @@ public final class FilesActivity extends BaseActivity implements
     public static boolean DEBUG_UI = false;
 
     public static final String EXTRA_DIRECTORY = "directory";
+    public static final String EXTRA_WATCH_LIMIT = "watch_limit";
 
     private DrawerLayout drawer;
 
@@ -109,7 +110,7 @@ public final class FilesActivity extends BaseActivity implements
                     .beginTransaction()
                     .replace(
                             R.id.content,
-                            FilesFragment.create(initialDirectory()),
+                            FilesFragment.create(getInitialDirectory(), getWatchLimit()),
                             FilesFragment.TAG)
                     .commit();
         }
@@ -146,7 +147,7 @@ public final class FilesActivity extends BaseActivity implements
         super.onDestroy();
     }
 
-    private Path initialDirectory() {
+    private Path getInitialDirectory() {
         Path dir = getIntent().getParcelableExtra(EXTRA_DIRECTORY);
         if (dir == null
                 && getIntent().getData() != null
@@ -155,6 +156,10 @@ public final class FilesActivity extends BaseActivity implements
             dir = Paths.get(getIntent().getData().getPath());
         }
         return dir == null ? DIR_HOME : dir;
+    }
+
+    private int getWatchLimit() {
+        return getIntent().getIntExtra(EXTRA_WATCH_LIMIT, -1);
     }
 
     @Override
@@ -276,7 +281,7 @@ public final class FilesActivity extends BaseActivity implements
             @Override
             protected void onPostExecute(Object result) {
                 super.onPostExecute(result);
-                if (!isDestroyed() && !isFinishing()) {
+                if (!isFinishing()) {
                     if (result instanceof Stat) {
                         doShow(path, (Stat) result);
                     } else {
@@ -316,7 +321,7 @@ public final class FilesActivity extends BaseActivity implements
         if (fragment.directory().equals(path)) {
             return;
         }
-        FilesFragment f = FilesFragment.create(path);
+        FilesFragment f = FilesFragment.create(path, getWatchLimit());
         getSupportFragmentManager()
                 .beginTransaction()
                 .setBreadCrumbTitle(path.name().toString())
