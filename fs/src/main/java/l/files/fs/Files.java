@@ -159,7 +159,7 @@ public final class Files {
 
     /**
      * Performs a depth first traverse of this tree.
-     * <p>
+     * <p/>
      * e.g. traversing the follow tree:
      * <pre>
      *     a
@@ -194,7 +194,18 @@ public final class Files {
             Consumer<? super Path> consumer)
             throws IOException, InterruptedException {
 
-        return path.fileSystem().observe(path, option, observer, consumer);
+        return observe(path, option, observer, consumer, null);
+    }
+
+    public static Observation observe(
+            Path path,
+            LinkOption option,
+            Observer observer,
+            Consumer<? super Path> consumer,
+            String logTag)
+            throws IOException, InterruptedException {
+
+        return path.fileSystem().observe(path, option, observer, consumer, logTag);
     }
 
     public static Observation observe(
@@ -242,11 +253,35 @@ public final class Files {
             boolean quickNotifyFirstEvent)
             throws IOException, InterruptedException {
 
+        return observe(
+                path,
+                option,
+                batchObserver,
+                childrenConsumer,
+                batchInterval,
+                batchInternalUnit,
+                quickNotifyFirstEvent,
+                null
+        );
+    }
+
+    public static Observation observe(
+            Path path,
+            LinkOption option,
+            BatchObserver batchObserver,
+            Consumer<? super Path> childrenConsumer,
+            long batchInterval,
+            TimeUnit batchInternalUnit,
+            boolean quickNotifyFirstEvent,
+            String tag)
+            throws IOException, InterruptedException {
+
         return new BatchObserverNotifier(
                 batchObserver,
                 batchInterval,
                 batchInternalUnit,
-                quickNotifyFirstEvent
+                quickNotifyFirstEvent,
+                tag
         ).start(path, option, childrenConsumer);
     }
 

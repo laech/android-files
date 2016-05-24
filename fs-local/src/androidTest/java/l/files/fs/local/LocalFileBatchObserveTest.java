@@ -44,7 +44,15 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS, false));
+            closer.register(Files.observe(
+                    dir1(),
+                    NOFOLLOW,
+                    observer,
+                    consumer,
+                    10,
+                    MILLISECONDS,
+                    false,
+                    "LocalFileBatchObserveTest.test_notifies_self_change"));
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
 
@@ -74,7 +82,15 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            Observation observation = Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false);
+            Observation observation = Files.observe(
+                    dir1(),
+                    NOFOLLOW,
+                    observer,
+                    consumer,
+                    500,
+                    MILLISECONDS,
+                    false,
+                    "LocalFileBatchObserveTest.test_notifies_children_change");
             closer.register(observation);
             assertFalse(observation.isClosed());
 
@@ -83,7 +99,7 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
             Files.delete(c);
             Files.createFile(d);
 
-            verify(observer, timeout(100)).onLatestEvents(
+            verify(observer, timeout(10000)).onLatestEvents(
                     false,
                     new HashMap<Name, Event>() {{
                         put(a.name(), MODIFY);
@@ -108,13 +124,21 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
         Closer closer = Closer.create();
         try {
 
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 30, MILLISECONDS, false));
+            closer.register(Files.observe(
+                    dir1(),
+                    NOFOLLOW,
+                    observer,
+                    consumer,
+                    500,
+                    MILLISECONDS,
+                    false,
+                    "LocalFileBatchObserveTest.test_notifies_latest_event"));
 
             Files.setLastModifiedTime(file, NOFOLLOW, Instant.ofMillis(1));
             Files.delete(file);
             Files.createFile(file);
 
-            verify(observer, timeout(100)).onLatestEvents(
+            verify(observer, timeout(10000)).onLatestEvents(
                     false,
                     new HashMap<Name, Event>() {{
                         put(file.name(), CREATE);
@@ -135,28 +159,36 @@ public final class LocalFileBatchObserveTest extends PathBaseTest {
 
         Closer closer = Closer.create();
         try {
-            closer.register(Files.observe(dir1(), NOFOLLOW, observer, consumer, 10, MILLISECONDS, false));
+            closer.register(Files.observe(
+                    dir1(),
+                    NOFOLLOW,
+                    observer,
+                    consumer,
+                    500,
+                    MILLISECONDS,
+                    false,
+                    "LocalFileBatchObserveTest.test_notifies_self_and_children_change"));
 
             verify(consumer).accept(child);
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(1));
             Files.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(2));
 
-            verify(observer, timeout(100)).onLatestEvents(
+            verify(observer, timeout(10000)).onLatestEvents(
                     true,
                     new HashMap<Name, Event>() {{
                         put(child.name(), MODIFY);
                     }});
 
             Files.setLastModifiedTime(child, NOFOLLOW, Instant.ofMillis(3));
-            verify(observer, timeout(100)).onLatestEvents(
+            verify(observer, timeout(10000)).onLatestEvents(
                     false,
                     new HashMap<Name, Event>() {{
                         put(child.name(), MODIFY);
                     }});
 
             Files.setLastModifiedTime(dir1(), NOFOLLOW, Instant.ofMillis(4));
-            verify(observer, timeout(100)).onLatestEvents(
+            verify(observer, timeout(10000)).onLatestEvents(
                     true, Collections.<Name, Event>emptyMap());
 
             verifyNoMoreInteractions(observer);

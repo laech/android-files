@@ -173,6 +173,8 @@ final class LocalObservable extends Native
 
     private final LocalPath root;
 
+    private final String tag;
+
     /**
      * If {@link #root} is a directory, its immediate child directories will
      * also be watched since creation of files inside a child directory will
@@ -194,11 +196,16 @@ final class LocalObservable extends Native
     private final AtomicBoolean released;
 
     LocalObservable(LocalPath root, Observer observer) {
+        this(root, observer, null);
+    }
+
+    LocalObservable(LocalPath root, Observer observer, String tag) {
         this.root = requireNonNull(root);
         this.observerRef = new WeakReference<>(requireNonNull(observer));
         this.thread = new AtomicReference<>(null);
         this.closed = new AtomicBoolean(false);
         this.released = new AtomicBoolean(false);
+        this.tag = tag;
     }
 
     void start(LinkOption option, Consumer<? super Path> childrenConsumer)
@@ -682,7 +689,9 @@ final class LocalObservable extends Native
 //            }
 //        }
 //
-//        android.util.Log.v(getClass().getSimpleName(), "fd=" + fd +
+//        android.util.Log.v(getClass().getSimpleName(), "" +
+//                "tag=" + tag +
+//                ", fd=" + fd +
 //                ", wd=" + wd +
 //                ", event=" + eventNames(event) +
 //                ", parent=" + path +

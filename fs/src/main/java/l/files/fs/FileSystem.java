@@ -93,12 +93,14 @@ public interface FileSystem {
      *                         of the link target
      * @param childrenConsumer consumer will be called for all immediate
      *                         children of {@code path}
+     * @param logTag           tag for debug logging
      */
     Observation observe(
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> childrenConsumer)
+            Consumer<? super Path> childrenConsumer,
+            String logTag)
             throws IOException, InterruptedException;
 
     void list(

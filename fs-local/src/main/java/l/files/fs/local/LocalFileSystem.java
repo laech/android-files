@@ -280,10 +280,11 @@ public final class LocalFileSystem extends Native implements FileSystem {
             Path path,
             LinkOption option,
             Observer observer,
-            Consumer<? super Path> childrenConsumer)
+            Consumer<? super Path> childrenConsumer,
+            String logTag)
             throws IOException, InterruptedException {
 
-        LocalObservable observable = new LocalObservable((LocalPath) path, observer);
+        LocalObservable observable = new LocalObservable((LocalPath) path, observer, logTag);
         observable.start(option, childrenConsumer);
         return observable;
     }
