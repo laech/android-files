@@ -380,6 +380,7 @@ public final class LocalObservableTest extends PathBaseTest {
             Tracker tracker = closer.register(registerMockTracker());
             LocalObservable observation = closer.register(new LocalObservable(dir1(), observer));
             observation.start(FOLLOW, consumer, limit);
+            verify(observer, never()).onIncompleteObservation();
             assertFalse(observation.isClosed());
             for (int i = 0; i < limit; i++) {
                 createRandomChildDir(dir1());
