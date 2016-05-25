@@ -8,7 +8,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.1.0'
     }
 
-    ext.minSdkVersion = 17
+    ext.minSdkVersion = 16
     // Cannot target API 23 until request permission at runtime is implemented
     ext.targetSdkVersion = 22
     ext.compileSdkVersion = 23
