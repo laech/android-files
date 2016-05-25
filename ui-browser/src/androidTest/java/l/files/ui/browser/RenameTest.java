@@ -63,7 +63,7 @@ public class RenameTest extends BaseFilesActivityTest {
 
         rename(from).setFilename(to.name().toString()).ok();
 
-        timeout(1, SECONDS, new Executable() {
+        timeout(10, SECONDS, new Executable() {
             @Override
             public void execute() throws Exception {
                 assertFalse(exists(from, NOFOLLOW));
