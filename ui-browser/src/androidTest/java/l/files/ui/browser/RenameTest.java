@@ -1,5 +1,7 @@
 package l.files.ui.browser;
 
+import android.util.Log;
+
 import l.files.fs.Path;
 import l.files.fs.Permission;
 
@@ -19,7 +21,14 @@ public class RenameTest extends BaseFilesActivityTest {
 
     public void test_can_rename_to_same_name_but_difference_casing() throws Exception {
 
-        Path dir = createCaseInsensitiveFileSystemDir("can_rename_to_same_name_but_difference_casing");
+        Path dir;
+        try {
+            dir = createCaseInsensitiveFileSystemDir("can_rename_to_same_name_but_difference_casing");
+        } catch (CannotRenameFileToDifferentCasing e) {
+            Log.i("RenameTest", "skipping test_can_rename_to_same_name_but_difference_casing()", e);
+            return;
+        }
+
         try {
 
             Path src = createFile(dir.resolve("file.txt"));

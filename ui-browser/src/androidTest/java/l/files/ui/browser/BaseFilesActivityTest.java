@@ -105,6 +105,12 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
                 .putExtra(EXTRA_WATCH_LIMIT, watchLimit);
     }
 
+    static final class CannotRenameFileToDifferentCasing extends RuntimeException {
+        CannotRenameFileToDifferentCasing(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
     Path createCaseInsensitiveFileSystemDir(String name) throws IOException {
 
         /*
@@ -130,11 +136,12 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
 
             Files.move(src, dst);
             List<Path> actual = Files.list(dir, NOFOLLOW, new ArrayList<Path>());
+            List<Path> expected = singletonList(dst);
             assertEquals(1, actual.size());
-            assertEquals(
-                    "Assuming the file can be renamed to different casing",
-                    singletonList(dst),
-                    actual);
+            if (!expected.equals(actual)) {
+                throw new CannotRenameFileToDifferentCasing(
+                        "\nexpected: " + expected + "\nactual: " + actual);
+            }
 
             setActivityIntent(newIntent(dir));
 

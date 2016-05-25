@@ -3,6 +3,7 @@ package l.files.ui.browser;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -47,7 +48,14 @@ public final class NavigationTest extends BaseFilesActivityTest {
 
     public void test_can_see_file_renamed_to_different_casing() throws Exception {
 
-        Path dir = createCaseInsensitiveFileSystemDir("can_see_file_renamed_to_different_casing");
+        Path dir;
+        try {
+            dir = createCaseInsensitiveFileSystemDir("can_see_file_renamed_to_different_casing");
+        } catch (CannotRenameFileToDifferentCasing e) {
+            Log.d("NavigationTest", "skipping test_can_see_file_renamed_to_different_casing()", e);
+            return;
+        }
+
         try {
 
             Path src = createDir(dir.resolve("a"));
