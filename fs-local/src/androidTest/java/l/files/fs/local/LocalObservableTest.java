@@ -172,6 +172,32 @@ public final class LocalObservableTest extends PathBaseTest {
         return Paths.get(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
     }
 
+    public void test_able_to_continue_observing_existing_dirs_when_new_dir_added_is_not_observable()
+            throws Exception {
+
+        Path readableDir = dir1().resolve("readable");
+        Path unreadableDir = dir1().resolve("unreadable");
+
+        Files.createDir(readableDir);
+
+        Closer closer = Closer.create();
+        try {
+
+            Recorder recorder = closer.register(observe(dir1(), FOLLOW));
+            recorder.awaitModifyByCreateFile(readableDir, "aa");
+            recorder.await(CREATE, unreadableDir, newCreateDir(
+                    unreadableDir, EnumSet.of(OWNER_EXECUTE, OWNER_WRITE)));
+
+            recorder.awaitNoEvent(newCreateFile(unreadableDir.resolve("zz")));
+            recorder.awaitModifyByCreateFile(readableDir, "ab");
+
+        } catch (Throwable e) {
+            throw closer.rethrow(e);
+        } finally {
+            closer.close();
+        }
+    }
+
     public void test_able_to_observe_the_rest_of_the_files_when_some_are_not_observable()
             throws Exception {
 
@@ -400,29 +426,22 @@ public final class LocalObservableTest extends PathBaseTest {
                 wdsAdded.capture()
         );
 
-        order.verify(tracker, times(maxUserWatches)).onWatchRemoved(
+        order.verify(tracker, times(maxUserWatches - 1)).onWatchRemoved(
                 eq(fd.getValue()),
                 wdsRemoved.capture()
         );
 
-        assertValuesEqual(wdsAdded, wdsRemoved);
-
-        order.verify(tracker).onWatchAdded(
-                eq(fd.getValue()),
-                any(byte[].class),
-                anyInt(),
-                anyInt()
-        );
+        int rootWd = wdsAdded.getAllValues().get(0);
+        List<Integer> expectedWdsRemoved = new ArrayList<>(wdsAdded.getAllValues());
+        expectedWdsRemoved.remove((Object) rootWd);
+        assertValuesEqual(expectedWdsRemoved, wdsRemoved.getAllValues());
         order.verifyNoMoreInteractions();
 
     }
 
-    private static <T extends Comparable<T>> void assertValuesEqual(
-            ArgumentCaptor<T> captor1,
-            ArgumentCaptor<T> captor2) {
-
-        List<T> xs = new ArrayList<>(captor1.getAllValues());
-        List<T> ys = new ArrayList<>(captor2.getAllValues());
+    private static <T extends Comparable<? super T>> void assertValuesEqual(
+            List<T> xs,
+            List<T> ys) {
         Collections.sort(xs);
         Collections.sort(ys);
         assertEquals(xs, ys);
@@ -1081,6 +1100,18 @@ public final class LocalObservableTest extends PathBaseTest {
             @Override
             public Void call() throws Exception {
                 Files.createDir(dir);
+                return null;
+            }
+        };
+    }
+
+    private static Callable<Void> newCreateDir(
+            final Path dir,
+            final Set<Permission> permissions) {
+        return new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                Files.createDir(dir, permissions);
                 return null;
             }
         };

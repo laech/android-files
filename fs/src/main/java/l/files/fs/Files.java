@@ -108,6 +108,11 @@ public final class Files {
         return path;
     }
 
+    public static Path createDir(Path path, Set<Permission> permissions) throws IOException {
+        path.fileSystem().createDir(path, permissions);
+        return path;
+    }
+
     /**
      * Creates this file as a file and creates any missing parents. This
      * will throw the same exceptions as {@link #createFile(Path)} except

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -36,7 +37,9 @@ import static java.util.Collections.singletonList;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.LinkOption.FOLLOW;
 import static l.files.fs.LinkOption.NOFOLLOW;
+import static l.files.fs.Permission.OWNER_EXECUTE;
 import static l.files.fs.Permission.OWNER_READ;
+import static l.files.fs.Permission.OWNER_WRITE;
 import static l.files.fs.local.LocalFileSystem.permissionsFromMode;
 
 public final class FilesTest extends PathBaseTest {
@@ -358,7 +361,7 @@ public final class FilesTest extends PathBaseTest {
         assertTrue(Files.stat(dir, NOFOLLOW).isDirectory());
     }
 
-    public void test_createDirectory_correctPermissions() throws Exception {
+    public void test_createDirectory_correctDefaultPermissions() throws Exception {
         Path actual = dir1().resolve("a");
         Files.createDir(actual);
 
@@ -375,6 +378,22 @@ public final class FilesTest extends PathBaseTest {
                 permissionsFromMode(stat.st_mode),
                 Files.stat(actual, NOFOLLOW).permissions()
         );
+    }
+
+    public void test_createDirectory_withSpecifiedPermissions() throws Exception {
+
+        for (Set<Permission> permissions : asList(
+                Permission.none(),
+                EnumSet.of(OWNER_READ),
+                EnumSet.of(OWNER_WRITE),
+                EnumSet.of(OWNER_EXECUTE),
+                EnumSet.of(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE))) {
+
+            String name = String.valueOf(Math.random());
+            Path dir = Files.createDir(dir1().resolve(name), permissions);
+            Stat stat = Files.stat(dir, NOFOLLOW);
+            assertEquals(permissions, stat.permissions());
+        }
     }
 
     public void test_createDirectories() throws Exception {

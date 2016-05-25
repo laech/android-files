@@ -28,6 +28,13 @@ public interface FileSystem {
 
     void createDir(Path path) throws IOException;
 
+    /**
+     * Creates directory with specified permissions,
+     * the set of permissions with be restricted so
+     * the resulting permissions may not be the same.
+     */
+    void createDir(Path path, Set<Permission> permissions) throws IOException;
+
     void createFile(Path path) throws IOException;
 
     /**

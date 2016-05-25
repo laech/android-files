@@ -91,6 +91,14 @@ public final class LocalFileSystem extends Native implements FileSystem {
         return unmodifiableSet(permissions);
     }
 
+    private static int permissionsToMode(Set<Permission> permissions) {
+        int mode = 0;
+        for (Permission permission : permissions) {
+            mode |= PERMISSION_BITS[permission.ordinal()];
+        }
+        return mode;
+    }
+
     @Override
     public String scheme() {
         return "file";
@@ -113,13 +121,8 @@ public final class LocalFileSystem extends Native implements FileSystem {
     public void setPermissions(Path path, Set<Permission> permissions)
             throws IOException {
 
-
-        int mode = 0;
-        for (Permission permission : permissions) {
-            mode |= PERMISSION_BITS[permission.ordinal()];
-        }
         try {
-            chmod(((LocalPath) path).path, mode);
+            chmod(((LocalPath) path).path, permissionsToMode(permissions));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }
@@ -167,6 +170,15 @@ public final class LocalFileSystem extends Native implements FileSystem {
         try {
             // Same permission bits as java.io.File.mkdir() on Android
             mkdir(((LocalPath) path).path, S_IRWXU);
+        } catch (ErrnoException e) {
+            throw ErrnoExceptions.toIOException(e, path);
+        }
+    }
+
+    @Override
+    public void createDir(Path path, Set<Permission> permissions) throws IOException {
+        try {
+            mkdir(((LocalPath) path).path, permissionsToMode(permissions));
         } catch (ErrnoException e) {
             throw ErrnoExceptions.toIOException(e, path);
         }

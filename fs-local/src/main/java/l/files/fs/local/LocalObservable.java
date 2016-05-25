@@ -246,10 +246,8 @@ final class LocalObservable extends Native
                 thread.start();
             }
 
-            if (Files.stat(root, option).isDirectory() &&
-                    !traverseChildren(option, childrenConsumer)) {
-
-                release();
+            if (Files.stat(root, option).isDirectory()) {
+                traverseChildren(option, childrenConsumer);
             }
 
         } catch (Throwable e) {
@@ -284,13 +282,12 @@ final class LocalObservable extends Native
         }
     }
 
-    private boolean traverseChildren(
+    private void traverseChildren(
             LinkOption option,
             Consumer<? super Path> childrenConsumer)
             throws IOException, InterruptedException {
 
         boolean limitReached = fd == -1;
-        boolean someFailed = false;
 
         int flags = O_DIRECTORY;
         if (option == NOFOLLOW) {
@@ -301,7 +298,7 @@ final class LocalObservable extends Native
             DIR dir = Dirent.fdopendir(Fcntl.open(root.path, flags, 0));
             try {
                 Dirent entry = new Dirent();
-                while ((entry = Dirent.readdir(dir, entry)) != null) {
+                while (!isClosed() && (entry = Dirent.readdir(dir, entry)) != null) {
 
                     if (isSelfOrParent(entry)) {
                         continue;
@@ -325,18 +322,7 @@ final class LocalObservable extends Native
                         childDirs.put(wd, LocalName.wrap(name));
 
                     } catch (ErrnoException e) {
-
-                        if (e.errno == ENOENT) {
-                            // Ignore
-                        } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
-                            limitReached = true;
-
-                        } else if (e.errno == EACCES) {
-                            someFailed = true;
-
-                        } else {
-                            throw ErrnoExceptions.toIOException(e);
-                        }
+                        handleAddChildDirWatchFailure(e);
                     }
 
                     if (currentThread().isInterrupted()) {
@@ -354,7 +340,6 @@ final class LocalObservable extends Native
             throw new InterruptedException();
         }
 
-        return !limitReached && !someFailed;
     }
 
     @Override
@@ -424,7 +409,7 @@ final class LocalObservable extends Native
         }
     }
 
-    private void release() {
+    private void releaseChildWatches() {
         released.set(true);
         for (int wd : childDirs.keySet()) {
             try {
@@ -574,19 +559,24 @@ final class LocalObservable extends Native
             childDirs.put(wd, LocalName.wrap(name));
 
         } catch (ErrnoException e) {
+            handleAddChildDirWatchFailure(e);
+        }
+    }
 
-            if (e.errno == ENOENT) {
-                // Ignore
+    private void handleAddChildDirWatchFailure(ErrnoException e) throws IOException {
+        if (e.errno == ENOENT) {
+            // Ignore
 
-            } else if (e.errno == ENOSPC
-                    || e.errno == ENOMEM
-                    || e.errno == EACCES) {
+        } else if (e.errno == ENOSPC || e.errno == ENOMEM) {
 
-                release();
+            releaseChildWatches();
 
-            } else {
-                throw ErrnoExceptions.toIOException(e);
-            }
+        } else if ( e.errno == EACCES) {
+
+            notifyIncompleteObservationOrClose();
+
+        } else {
+            throw ErrnoExceptions.toIOException(e);
         }
     }
 
