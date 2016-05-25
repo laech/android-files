@@ -298,7 +298,7 @@ final class LocalObservable extends Native
             DIR dir = Dirent.fdopendir(Fcntl.open(root.path, flags, 0));
             try {
                 Dirent entry = new Dirent();
-                while (!isClosed() && (entry = Dirent.readdir(dir, entry)) != null) {
+                while ((entry = Dirent.readdir(dir, entry)) != null) {
 
                     if (isSelfOrParent(entry)) {
                         continue;
