@@ -2,6 +2,7 @@ package l.files.ui.browser;
 
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
 import android.widget.EditText;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -137,7 +138,9 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     private CharSequence error() {
-        return ((TextInputLayout) dialog().findViewById(R.id.text_layout)).getError();
+        View view = dialog().findViewById(R.id.text_layout);
+        assertNotNull(view);
+        return ((TextInputLayout) view).getError();
     }
 
     EditText editText() {
@@ -145,12 +148,18 @@ abstract class UiFileCreation<T extends UiFileCreation> {
     }
 
     private AlertDialog dialog() {
-        return fragment().getDialog();
+        AlertDialog dialog = fragment().getDialog();
+        assertNotNull(dialog);
+        return dialog;
     }
 
     private FileCreationFragment fragment() {
-        return (FileCreationFragment) context.activity().getSupportFragmentManager()
+        FileCreationFragment fragment = (FileCreationFragment) context
+                .activity()
+                .getSupportFragmentManager()
                 .findFragmentByTag(tag);
+        assertNotNull(fragment);
+        return fragment;
     }
 
     T assertFilename(final CharSequence name) {
