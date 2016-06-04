@@ -2,7 +2,7 @@
 <resources>
     <color name="activated_highlight">#aa009688</color>
     <color name="activated_background">#ff009688</color>
-    <color name="color_primary_dark">#616161</color>
-    <color name="color_primary">#757575</color>
+    <color name="color_primary_dark">#818181</color>
+    <color name="color_primary">#959595</color>
     <color name="window_background">#e0e0e0</color>
 </resources>
