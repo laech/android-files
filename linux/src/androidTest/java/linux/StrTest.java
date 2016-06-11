@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
 
+import static android.test.MoreAsserts.assertMatchesRegex;
 import static android.test.MoreAsserts.assertNotEqual;
 import static linux.Errno.*;
 import static linux.Str.strerror;
@@ -19,7 +20,7 @@ public final class StrTest extends TestCase {
         assertEquals("ENXIO", "No such device or address", strerror(ENXIO));
         assertEquals("E2BIG", "Argument list too long", strerror(E2BIG));
         assertEquals("ENOEXEC", "Exec format error", strerror(ENOEXEC));
-        assertEquals("EBADF", "Bad file number", strerror(EBADF));
+        assertMatchesRegex("EBADF", "Bad file number|Bad file descriptor", strerror(EBADF));
         assertEquals("ECHILD", "No child processes", strerror(ECHILD));
         assertEquals("EAGAIN", "Try again", strerror(EAGAIN));
         assertEquals("EWOULDBLOCK", "Try again", strerror(EWOULDBLOCK));
