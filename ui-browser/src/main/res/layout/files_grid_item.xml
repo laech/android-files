@@ -11,7 +11,8 @@
     android:layout_marginTop="@dimen/files_item_space_vertical"
     android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="@dimen/files_item_card_radius"
-    app:cardElevation="1dp">
+    app:cardElevation="1dp"
+    app:cardPreventCornerOverlap="false">
 
     <View
         android:id="@+id/blur"
