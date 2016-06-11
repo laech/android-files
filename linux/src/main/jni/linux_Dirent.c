@@ -107,9 +107,8 @@ void Java_linux_Dirent_closedir(JNIEnv *env, jclass class, jobject dir) {
     DIR *dirp = get_dir(env, dir);
     if (NULL != dirp) {
         closedir(dirp);
+        (*env)->SetBooleanField(env, dir, dir_field_closed, JNI_TRUE);
     }
-
-    (*env)->SetBooleanField(env, dir, dir_field_closed, JNI_TRUE);
 
 }
 
