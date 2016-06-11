@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.app.NotificationCompat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,10 +22,10 @@ import l.files.operations.TaskState.Pending;
 import l.files.operations.TaskState.Running;
 import l.files.operations.TaskState.Success;
 
-import static android.app.Notification.PRIORITY_LOW;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.PendingIntent.getActivity;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static android.support.v4.app.NotificationCompat.PRIORITY_LOW;
 import static java.util.Collections.unmodifiableMap;
 import static l.files.operations.OperationService.newCancelPendingIntent;
 import static l.files.operations.TaskKind.COPY;
@@ -154,11 +155,13 @@ public final class NotificationProvider implements TaskListener {
                 .build();
     }
 
-    private Notification.Builder newProgressNotificationBuilder(
-            Context context, TaskState state) {
-
+    private NotificationCompat.Builder newProgressNotificationBuilder(
+            Context context,
+            TaskState state
+    ) {
         TaskStateViewer viewer = getViewer(state);
-        return new Notification.Builder(context)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        builder
                 .setPriority(PRIORITY_LOW)
                 .setSmallIcon(viewer.getSmallIcon(context))
                 /*
@@ -168,17 +171,19 @@ public final class NotificationProvider implements TaskListener {
                 .setWhen(state.time().time())
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
-                .addAction(
+                .addAction(new NotificationCompat.Action(
                         R.drawable.ic_cancel_black_24dp,
                         context.getString(android.R.string.cancel),
-                        newCancelPendingIntent(context, state.task().id()));
+                        newCancelPendingIntent(context, state.task().id())
+                ));
+        return builder;
     }
 
     private Notification newFailureNotification(Context context, Failed state) {
         Intent intent = getFailureIntent(context, state);
         PendingIntent pending = getActivity(
                 context, state.task().id(), intent, FLAG_UPDATE_CURRENT);
-        return new Notification.Builder(context)
+        return new NotificationCompat.Builder(context)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentTitle(getTitle(intent))
                 .setContentIntent(pending)
