@@ -125,7 +125,8 @@ public final class PremiumLock implements ServiceConnection {
 
     public boolean isUnlocked() {
         return pref.getBoolean(PREF_KEY_PREMIUM_UNLOCKED, false) ||
-                "l.files.browser.test".equals(activity.getPackageName());
+                // Enable for UI tests
+                "l.files.ui.browser.test".equals(activity.getPackageName());
     }
 
     public void showPurchaseDialog() {
