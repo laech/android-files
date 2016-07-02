@@ -12,9 +12,10 @@ import java.util.Collection;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
+import l.files.premium.PremiumActionModeItem;
+import l.files.premium.PremiumLock;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.selection.Selection;
-import l.files.ui.base.view.ActionModeItem;
 
 import static android.content.Intent.ACTION_SEND_MULTIPLE;
 import static android.content.Intent.EXTRA_STREAM;
@@ -22,13 +23,18 @@ import static android.content.Intent.createChooser;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.fs.media.MediaTypes.MEDIA_TYPE_OCTET_STREAM;
 
-final class Share extends ActionModeItem implements Selection.Callback {
+final class Share extends PremiumActionModeItem
+        implements Selection.Callback {
 
     private final Selection<?, FileInfo> selection;
     private final Context context;
 
-    Share(Selection<?, FileInfo> selection, Context context) {
-        super(R.id.share);
+    Share(
+            PremiumLock premiumLock,
+            Selection<?, FileInfo> selection,
+            Context context
+    ) {
+        super(R.id.share, premiumLock);
         this.selection = requireNonNull(selection);
         this.context = requireNonNull(context);
     }
@@ -84,7 +90,7 @@ final class Share extends ActionModeItem implements Selection.Callback {
     }
 
     @Override
-    protected void onItemSelected(ActionMode mode, MenuItem item) {
+    protected void doOnItemSelected(ActionMode mode, MenuItem item) {
         context.startActivity(createChooser(
                 createShareIntent(),
                 context.getText(R.string.share)));

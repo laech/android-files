@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import java.io.IOException;
 import java.util.List;
 
+import l.files.premium.PremiumLock;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;
@@ -59,6 +60,8 @@ public final class FilesActivity extends BaseActivity implements
     private Toolbar toolbar;
     private Spinner title;
     private DrawerArrowDrawable navigationIcon;
+
+    private PremiumLock premiumLock;
 
     public List<Path> hierarchy() {
         return hierarchy.get();
@@ -121,11 +124,26 @@ public final class FilesActivity extends BaseActivity implements
                 updateToolBar();
             }
         });
+
+        premiumLock = new PremiumLock(this);
+        premiumLock.onCreate();
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
+    protected void onDestroy() {
+        premiumLock.onDestroy();
+        getSupportFragmentManager().removeOnBackStackChangedListener(this);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        premiumLock.onActivityResult(requestCode, resultCode, data);
+    }
+
+    PremiumLock getPremiumLock() {
+        return premiumLock;
     }
 
     @Override
@@ -139,12 +157,6 @@ public final class FilesActivity extends BaseActivity implements
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-    @Override
-    protected void onDestroy() {
-        getSupportFragmentManager().removeOnBackStackChangedListener(this);
-        super.onDestroy();
     }
 
     private Path getInitialDirectory() {

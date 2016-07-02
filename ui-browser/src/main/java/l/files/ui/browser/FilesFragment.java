@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -24,6 +23,8 @@ import java.util.List;
 
 import l.files.base.Provider;
 import l.files.fs.Path;
+import l.files.premium.ConsumeTestPurchasesOnDebug;
+import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
@@ -200,15 +201,17 @@ public final class FilesFragment
     }
 
     private void setupOptionsMenu() {
-        FragmentActivity context = getActivity();
-        FragmentManager manager = context.getSupportFragmentManager();
+        FilesActivity activity = (FilesActivity) getActivity();
+        PremiumLock premiumLock = activity.getPremiumLock();
+        FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
                 new Refresh(autoRefreshDisable(), refresh()),
-                new Bookmark(directory, context),
+                new Bookmark(directory, activity),
                 new NewDirMenu(manager, directory),
-                new Paste(context, directory),
+                new Paste(activity, directory),
                 new SortMenu(manager),
-                new ShowHiddenFilesMenu(context)
+                new ShowHiddenFilesMenu(activity),
+                new ConsumeTestPurchasesOnDebug(premiumLock)
         ));
     }
 
@@ -239,17 +242,19 @@ public final class FilesFragment
 
     @Override
     protected ActionMode.Callback actionModeCallback() {
-        FragmentManager manager = getActivity().getSupportFragmentManager();
+        FilesActivity activity = (FilesActivity) getActivity();
+        PremiumLock premiumLock = activity.getPremiumLock();
+        FragmentManager manager = activity.getSupportFragmentManager();
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new Info(selection(), manager, directory()),
                 new SelectAllAction(this),
-                new Cut(selection()),
-                new Copy(selection()),
-                new Delete(selection(), manager),
-                new RenameAction(selection(), manager),
-                new Share(selection(), getActivity())
+                new Cut(premiumLock, selection()),
+                new Copy(premiumLock, selection()),
+                new Delete(premiumLock, selection(), manager),
+                new RenameAction(premiumLock, selection(), manager),
+                new Share(premiumLock, selection(), activity)
         );
     }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="thank_you">Thank you!</string>
+    <string name="billing_canceled">Billing canceled.</string>
+    <string name="billing_failed">Billing failed.</string>
+    <string name="unlock_premium">Unlock Premium Features</string>
+    <string name="would_you_like_to_unlock">Would you like to purchase premium features to support development?</string>
+    <string name="consume_test_purchases">Consume Test Purchases</string>
+
+</resources>
