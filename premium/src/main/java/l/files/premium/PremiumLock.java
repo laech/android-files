@@ -101,8 +101,8 @@ public final class PremiumLock implements ServiceConnection {
 
             Toast.makeText(
                     activity,
-                    R.string.thank_you,
-                    LENGTH_SHORT
+                    R.string.billing_thank_you,
+                    LENGTH_LONG
             ).show();
 
         } else if (resultCode == RESULT_CANCELED) {
