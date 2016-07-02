@@ -207,7 +207,7 @@ public final class FilesFragment
         setOptionsMenu(OptionsMenus.compose(
                 new Refresh(autoRefreshDisable(), refresh()),
                 new Bookmark(directory, activity),
-                new NewDirMenu(manager, directory),
+                new NewDirMenu(premiumLock, manager, directory),
                 new Paste(activity, directory),
                 new SortMenu(manager),
                 new ShowHiddenFilesMenu(activity),
