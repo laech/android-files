@@ -12,8 +12,8 @@ buildscript {
     // Cannot target API 23 until request permission at runtime is implemented
     ext.targetSdkVersion = 22
     ext.compileSdkVersion = 23
-    ext.buildToolsVersion = "23.0.3"
-    ext.supportLibVersion = "23.4.0"
+    ext.buildToolsVersion = "24"
+    ext.supportLibVersion = "24.0.0"
 
 }
 
