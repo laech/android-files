@@ -32,18 +32,15 @@ import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.base.Objects.requireNonNull;
-import static l.files.premium.BuildConfig.DEBUG;
 
 public final class PremiumLock implements ServiceConnection {
 
-    private static final int REQUEST_CODE = 216534973;
+    private static final int REQUEST_CODE = 123;
     private static final int BILLING_API_VERSION = 3;
     private static final String PREF_KEY_PREMIUM_UNLOCKED = "premium_unlocked";
     private static final String ITEM_TYPE_INAPP = "inapp";
 
-    private static final String SKU_PREMIUM = DEBUG
-            ? "android.test.purchased"
-            : "l.files.premium";
+    private final String skuPremium;
 
     private final Activity activity;
     private final SharedPreferences pref;
@@ -52,6 +49,9 @@ public final class PremiumLock implements ServiceConnection {
     public PremiumLock(Activity activity) {
         this.activity = requireNonNull(activity);
         this.pref = getDefaultSharedPreferences(activity);
+        this.skuPremium = isDebugBuild()
+                ? "android.test.purchased"
+                : "l.files.premium";
     }
 
     public Activity getActivity() {
@@ -171,7 +171,7 @@ public final class PremiumLock implements ServiceConnection {
         Bundle intent = billingService.getBuyIntent(
                 BILLING_API_VERSION,
                 activity.getPackageName(),
-                SKU_PREMIUM,
+                skuPremium,
                 ITEM_TYPE_INAPP,
                 null
         );
@@ -186,6 +186,12 @@ public final class PremiumLock implements ServiceConnection {
                     0,
                     0
             );
+        } else {
+            Toast.makeText(
+                    activity,
+                    R.string.billing_unavailable,
+                    LENGTH_LONG
+            ).show();
         }
     }
 
@@ -227,7 +233,7 @@ public final class PremiumLock implements ServiceConnection {
                 pref.edit()
                         .putBoolean(
                                 PREF_KEY_PREMIUM_UNLOCKED,
-                                items.contains(SKU_PREMIUM)
+                                items.contains(skuPremium)
                         )
                         .apply();
             }
@@ -237,9 +243,7 @@ public final class PremiumLock implements ServiceConnection {
 
     void consumeTestPurchases() throws RemoteException, JSONException {
 
-        ApplicationInfo app = activity.getApplicationInfo();
-        boolean debug = 0 != (app.flags & FLAG_DEBUGGABLE);
-        if (!debug) {
+        if (!isDebugBuild()) {
             throw new IllegalStateException("Only available for debug build.");
         }
 
@@ -273,5 +277,12 @@ public final class PremiumLock implements ServiceConnection {
             }
 
         }
+
+        new UpdatePurchaseStatus().execute();
+    }
+
+    private boolean isDebugBuild() {
+        ApplicationInfo app = activity.getApplicationInfo();
+        return 0 != (app.flags & FLAG_DEBUGGABLE);
     }
 }
