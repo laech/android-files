@@ -42,12 +42,10 @@ public final class FilesApp extends Application {
 
         if (level >= TRIM_MEMORY_RUNNING_CRITICAL) {
             Preview.get(this).clearThumbnailCache();
-            System.gc();
         }
 
         if (level >= TRIM_MEMORY_MODERATE) {
             Preview.get(this).clearBlurredThumbnailCache();
-            System.gc();
         }
 
         if (DEBUG) {

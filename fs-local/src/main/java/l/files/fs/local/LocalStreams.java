@@ -109,9 +109,8 @@ final class LocalStreams {
 
     private static FileDescriptor toFileDescriptor(int fd) {
 
-        FileDescriptor descriptor = new FileDescriptor();
-
         try {
+            FileDescriptor descriptor = new FileDescriptor();
             Method setter = FileDescriptor.class.getMethod("setInt$", int.class);
             setter.setAccessible(true);
             setter.invoke(descriptor, fd);
@@ -122,6 +121,7 @@ final class LocalStreams {
         }
 
         try {
+            FileDescriptor descriptor = new FileDescriptor();
             Field field = FileDescriptor.class.getField("descriptor");
             field.setAccessible(true);
             field.set(descriptor, fd);
@@ -130,7 +130,7 @@ final class LocalStreams {
         } catch (IllegalAccessException ignored) {
         }
 
-        return descriptor;
+        return null;
     }
 
     private static void close(InvalidateFd instance) throws IOException {

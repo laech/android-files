@@ -1,6 +1,7 @@
 package l.files.ui.browser;
 
 import android.content.Context;
+import android.os.Looper;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -11,6 +12,8 @@ import java.util.Locale;
 
 import l.files.fs.Stat;
 
+import static android.os.Looper.getMainLooper;
+import static android.os.Looper.myLooper;
 import static android.text.format.DateFormat.getDateFormat;
 import static android.text.format.DateFormat.getTimeFormat;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
@@ -44,13 +47,21 @@ final class DateFormatter {
             | FORMAT_ABBREV_MONTH
             | FORMAT_NO_YEAR;
 
+    private final Looper mainLooper;
+
     DateFormatter(Context context) {
         this.context = requireNonNull(context);
         this.dateFormat = getDateFormat(context);
         this.timeFormat = getTimeFormat(context);
+        this.mainLooper = getMainLooper();
     }
 
     String apply(Stat file) {
+
+        if (myLooper() != mainLooper) {
+            throw new IllegalStateException("Can only be called on the UI thread.");
+        }
+
         long millis = file.lastModifiedTime().to(MILLISECONDS);
 
         tempDate.setTime(millis);

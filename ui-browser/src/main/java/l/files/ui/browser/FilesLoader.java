@@ -319,8 +319,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
         synchronized (this) {
             if (observing) {
                 closeable = observation;
-                observation = null;
-                observing = false;
             }
         }
         if (closeable != null) {

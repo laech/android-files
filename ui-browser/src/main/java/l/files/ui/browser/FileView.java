@@ -21,6 +21,8 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
+import static android.os.Looper.getMainLooper;
+import static android.os.Looper.myLooper;
 import static android.support.v4.content.ContextCompat.getColorStateList;
 import static l.files.ui.base.fs.FileIcons.defaultDirectoryIconStringId;
 import static l.files.ui.base.fs.FileIcons.fileIconStringId;
@@ -57,6 +59,10 @@ public final class FileView extends View implements Drawable.Callback {
     private int height;
 
     {
+        if (myLooper() != getMainLooper()) {
+            throw new IllegalStateException("Can only be called on the UI thread.");
+        }
+
         Context context = getContext();
         Resources res = getResources();
 

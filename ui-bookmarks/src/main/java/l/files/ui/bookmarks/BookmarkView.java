@@ -11,6 +11,8 @@ import l.files.ui.base.fs.FileIcons;
 
 import static android.graphics.Color.WHITE;
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
+import static android.os.Looper.getMainLooper;
+import static android.os.Looper.myLooper;
 import static android.text.TextUtils.TruncateAt.END;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.applyDimension;
@@ -30,6 +32,10 @@ public final class BookmarkView extends FrameLayout {
     private boolean ellipsize;
 
     {
+        if (myLooper() != getMainLooper()) {
+            throw new IllegalStateException("Can only be called on the UI thread.");
+        }
+
         if (iconPaint == null) {
 
             iconSize = applyDimension(COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics());

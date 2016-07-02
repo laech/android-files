@@ -30,7 +30,7 @@ public final class LocalPathTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] bytes = path.getBytes(UTF_8);
         assertEquals(bytes.length, path(path).toByteArray(out));
-        assertEquals(new String(bytes), out.toString("UTF-8"));
+        assertEquals(new String(bytes, UTF_8), out.toString("UTF-8"));
     }
 
     @Test

@@ -37,7 +37,7 @@ public final class SortDialog
         dialog.dismiss();
     }
 
-    class SorterAdapter extends ArrayAdapter<FileSort> {
+    private static class SorterAdapter extends ArrayAdapter<FileSort> {
 
         SorterAdapter(Context context) {
             super(context, R.layout.sort_by_item, FileSort.values());
