@@ -17,8 +17,6 @@ public final class FilesApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        FilesActivity.DEBUG_UI = DEBUG;
-
         if (DEBUG) {
             StrictMode.setThreadPolicy(
                     new ThreadPolicy.Builder()

@@ -20,11 +20,11 @@ import android.widget.Spinner;
 import java.io.IOException;
 import java.util.List;
 
-import l.files.premium.PremiumLock;
 import l.files.fs.Files;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Stat;
+import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.preview.Preview;
@@ -48,8 +48,6 @@ public final class FilesActivity extends BaseActivity implements
         OnBackStackChangedListener,
         OnItemSelectedListener,
         OnOpenFileListener {
-
-    public static boolean DEBUG_UI = false;
 
     public static final String EXTRA_DIRECTORY = "directory";
     public static final String EXTRA_WATCH_LIMIT = "watch_limit";
