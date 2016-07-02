@@ -266,11 +266,6 @@ public final class DateCategorizerTest {
                 file(millis(midnight) + DAYS.toMillis(1)));
     }
 
-    @Test
-    public void modifiedUnknownPast() {
-        assertCategory(res.getString(R.string.__), file(-1L), file(0L));
-    }
-
     private FileInfo file(Calendar time) {
         return file(time.getTimeInMillis());
     }

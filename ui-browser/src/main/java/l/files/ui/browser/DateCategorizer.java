@@ -61,7 +61,6 @@ final class DateCategorizer extends BaseCategorizer {
         }
 
         long seconds = stat.lastModifiedEpochSecond();
-        if (seconds < SECONDS_PER_MINUTE) return R.string.__;
         if (seconds >= startSecondOfTomorrow) return R.string.future;
         if (seconds >= startSecondOfToday) return R.string.today;
         if (seconds >= startSecondOfYesterday) return R.string.yesterday;
