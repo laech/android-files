@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -25,8 +26,10 @@ import java.util.List;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.LENGTH_SHORT;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.premium.BuildConfig.DEBUG;
@@ -44,7 +47,7 @@ public final class PremiumLock implements ServiceConnection {
 
     private final Activity activity;
     private final SharedPreferences pref;
-    private IInAppBillingService billingService;
+    private volatile IInAppBillingService billingService;
 
     public PremiumLock(Activity activity) {
         this.activity = requireNonNull(activity);
@@ -58,7 +61,9 @@ public final class PremiumLock implements ServiceConnection {
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         billingService = IInAppBillingService.Stub.asInterface(service);
-        new UpdatePurchaseStatus().execute(THREAD_POOL_EXECUTOR);
+        if (billingService != null) {
+            new UpdatePurchaseStatus().execute(THREAD_POOL_EXECUTOR);
+        }
     }
 
     @Override
@@ -75,9 +80,7 @@ public final class PremiumLock implements ServiceConnection {
     }
 
     public void onDestroy() {
-        if (billingService != null) {
-            activity.unbindService(this);
-        }
+        activity.unbindService(this);
     }
 
     public void onActivityResult(
@@ -121,7 +124,8 @@ public final class PremiumLock implements ServiceConnection {
     }
 
     public boolean isUnlocked() {
-        return pref.getBoolean(PREF_KEY_PREMIUM_UNLOCKED, false);
+        return pref.getBoolean(PREF_KEY_PREMIUM_UNLOCKED, false) ||
+                "l.files.browser.test".equals(activity.getPackageName());
     }
 
     public void showPurchaseDialog() {
@@ -137,13 +141,23 @@ public final class PremiumLock implements ServiceConnection {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        if (billingService == null) {
+                            Toast.makeText(
+                                    activity,
+                                    R.string.billing_unavailable,
+                                    LENGTH_LONG
+                            ).show();
+                            return;
+                        }
+
                         try {
                             startActivityForPurchase();
-                        } catch (Exception e) {
+                        } catch (RemoteException | SendIntentException e) {
                             Toast.makeText(
                                     activity,
                                     e.getMessage(),
-                                    LENGTH_SHORT
+                                    LENGTH_LONG
                             ).show();
                         }
                     }
@@ -197,8 +211,7 @@ public final class PremiumLock implements ServiceConnection {
             super.onPostExecute(o);
 
             if (o instanceof Throwable) {
-                String message = ((Throwable) o).getMessage();
-                Toast.makeText(activity, message, LENGTH_SHORT).show();
+                ((Throwable) o).printStackTrace();
                 return;
             }
 
@@ -223,7 +236,18 @@ public final class PremiumLock implements ServiceConnection {
 
     void consumeTestPurchases() throws RemoteException, JSONException {
 
-        Bundle result = billingService.getPurchases(
+        ApplicationInfo app = activity.getApplicationInfo();
+        boolean debug = 0 != (app.flags & FLAG_DEBUGGABLE);
+        if (!debug) {
+            throw new IllegalStateException("Only available for debug build.");
+        }
+
+        IInAppBillingService service = billingService;
+        if (service == null) {
+            throw new IllegalStateException("Billing service not available.");
+        }
+
+        Bundle result = service.getPurchases(
                 BILLING_API_VERSION,
                 activity.getPackageName(),
                 ITEM_TYPE_INAPP,
@@ -240,7 +264,7 @@ public final class PremiumLock implements ServiceConnection {
             JSONObject object = new JSONObject(json);
             String productId = object.getString("productId");
             if ("android.test.purchased".equals(productId)) {
-                billingService.consumePurchase(
+                service.consumePurchase(
                         BILLING_API_VERSION,
                         activity.getPackageName(),
                         object.getString("purchaseToken")
