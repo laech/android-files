@@ -41,7 +41,11 @@ import l.files.ui.operations.actions.Cut;
 import l.files.ui.operations.actions.Delete;
 import l.files.ui.operations.actions.Paste;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.support.v4.content.ContextCompat.checkSelfPermission;
 import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -66,6 +70,12 @@ public final class FilesFragment
         Selectable {
 
     public static final String TAG = FilesFragment.class.getSimpleName();
+
+    private static final int PERM_REQ_EXTERNAL_STORAGE_INIT = 1;
+    private static final int PERM_REQ_EXTERNAL_STORAGE_REFRESH = 2;
+
+    private static final String[] PERM_EXTERNAL_STORAGE =
+            new String[]{WRITE_EXTERNAL_STORAGE};
 
     private static final String ARG_DIRECTORY = "directory";
     private static final String ARG_WATCH_LIMIT = "watch_limit";
@@ -138,7 +148,10 @@ public final class FilesFragment
 
     @Override
     public View onCreateView(
-            LayoutInflater inflater, ViewGroup container, Bundle state) {
+            LayoutInflater inflater,
+            ViewGroup container,
+            Bundle state
+    ) {
         return inflater.inflate(R.layout.files_fragment, container, false);
     }
 
@@ -168,7 +181,16 @@ public final class FilesFragment
         setHasOptionsMenu(true);
 
         handler.postDelayed(checkProgress, 1000);
-        getLoaderManager().initLoader(0, null, this);
+
+        if (hasPermission(READ_EXTERNAL_STORAGE)) {
+            initLoad();
+        } else {
+            requestPermissions(
+                    PERM_EXTERNAL_STORAGE,
+                    PERM_REQ_EXTERNAL_STORAGE_INIT
+            );
+        }
+
         Preferences.register(getActivity(), this);
     }
 
@@ -178,11 +200,49 @@ public final class FilesFragment
         Preferences.unregister(getActivity(), this);
     }
 
+    private boolean hasPermission(String permission) {
+        int state = checkSelfPermission(getActivity(), permission);
+        return state == PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String[] permissions,
+            int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+        );
+
+        // Not checking grant results, load error will show in view
+        switch (requestCode) {
+
+            case PERM_REQ_EXTERNAL_STORAGE_INIT:
+                initLoad();
+                break;
+
+            case PERM_REQ_EXTERNAL_STORAGE_REFRESH:
+                restartLoad();
+                break;
+
+        }
+    }
+
+    private void initLoad() {
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void restartLoad() {
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
     private ProgressBar progressBar;
 
     private ProgressBar inflateProgressBar() {
         if (progressBar == null) {
-            //noinspection ConstantConditions
             ViewStub stub = (ViewStub) getView().findViewById(R.id.progress_stub);
             progressBar = (ProgressBar) stub.inflate().findViewById(android.R.id.progress);
         }
@@ -193,7 +253,6 @@ public final class FilesFragment
 
     private TextView inflateEmptyView() {
         if (emptyView == null) {
-            //noinspection ConstantConditions
             ViewStub stub = (ViewStub) getView().findViewById(R.id.empty_stub);
             emptyView = (TextView) stub.inflate().findViewById(android.R.id.empty);
         }
@@ -219,7 +278,14 @@ public final class FilesFragment
         return new Runnable() {
             @Override
             public void run() {
-                getLoaderManager().restartLoader(0, null, FilesFragment.this);
+                if (hasPermission(READ_EXTERNAL_STORAGE)) {
+                    restartLoad();
+                } else {
+                    requestPermissions(
+                            PERM_EXTERNAL_STORAGE,
+                            PERM_REQ_EXTERNAL_STORAGE_REFRESH
+                    );
+                }
             }
         };
     }
@@ -294,7 +360,6 @@ public final class FilesFragment
 
             updateSelection(data);
             adapter.setItems(data.items());
-            //noinspection ThrowableResultOfMethodCallIgnored
             if (data.exception() != null) {
                 inflateEmptyView().setText(message(data.exception()));
                 inflateEmptyView().setVisibility(VISIBLE);
