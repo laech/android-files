@@ -12,7 +12,7 @@ buildscript {
     ext.targetSdkVersion = 23
     ext.compileSdkVersion = 23
     ext.buildToolsVersion = "24"
-    ext.supportLibVersion = "24.0.0"
+    ext.supportLibVersion = "23.4.0"
 
 }
 
