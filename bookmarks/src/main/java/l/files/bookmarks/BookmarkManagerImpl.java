@@ -2,7 +2,10 @@ package l.files.bookmarks;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.util.Base64;
+import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,27 +30,26 @@ import static l.files.fs.LinkOption.FOLLOW;
 
 final class BookmarkManagerImpl extends BookmarkManager {
 
-    // TODO don't use URI string any, use bytes
+    private static final String TAG = BookmarkManagerImpl.class.getSimpleName();
 
-    private static final String PREF_KEY = "bookmarks";
-
-    private static final Set<String> DEFAULTS = buildDefaults();
+    private static final String PREF_KEY_V1 = "bookmarks";
+    private static final String PREF_KEY_V2 = "bookmarks2";
 
     @SuppressLint("SdCardPath")
-    private static Set<String> buildDefaults() {
-        Set<String> defaults = new HashSet<>();
-        defaults.add(getExternalStorageDirectory().toURI().toString());
-        defaults.add(uri(DIRECTORY_DCIM));
-        defaults.add(uri(DIRECTORY_MUSIC));
-        defaults.add(uri(DIRECTORY_MOVIES));
-        defaults.add(uri(DIRECTORY_PICTURES));
-        defaults.add(uri(DIRECTORY_DOWNLOADS));
-        defaults.add(new java.io.File("/sdcard2").toURI().toString());
+    private static Set<Path> createDefaultBookmarks() {
+        Set<Path> defaults = new HashSet<>();
+        defaults.add(Paths.get(getExternalStorageDirectory()));
+        defaults.add(externalStoragePath(DIRECTORY_DCIM));
+        defaults.add(externalStoragePath(DIRECTORY_MUSIC));
+        defaults.add(externalStoragePath(DIRECTORY_MOVIES));
+        defaults.add(externalStoragePath(DIRECTORY_PICTURES));
+        defaults.add(externalStoragePath(DIRECTORY_DOWNLOADS));
+        defaults.add(Paths.get(new File("/sdcard2")));
         return unmodifiableSet(defaults);
     }
 
-    private static String uri(String name) {
-        return new java.io.File(getExternalStorageDirectory(), name).toURI().toString();
+    private static Path externalStoragePath(String name) {
+        return Paths.get(new File(getExternalStorageDirectory(), name));
     }
 
     private final Set<Path> bookmarks;
@@ -60,7 +62,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
         this.bookmarks = new CopyOnWriteArraySet<>();
     }
 
-    private Set<Path> toPaths(Set<String> uriStrings) {
+    private Set<Path> toPathsV1(Set<String> uriStrings) {
         Set<Path> paths = new HashSet<>();
         for (String uriString : uriStrings) {
             try {
@@ -77,6 +79,46 @@ final class BookmarkManagerImpl extends BookmarkManager {
             }
         }
         return paths;
+    }
+
+
+    private static Set<String> encode(Collection<? extends Path> bookmarks) {
+        Set<String> encoded = new HashSet<>();
+        for (Path path : bookmarks) {
+            encoded.add(encode(path));
+        }
+        return unmodifiableSet(encoded);
+    }
+
+    private static String encode(Path path) {
+        return path.fileSystem().scheme() + ":"
+                + Base64.encodeToString(path.toByteArray(), Base64.DEFAULT);
+    }
+
+    private static Path decode(String encoded) {
+        String[] parts = encoded.split(":");
+        if (parts.length == 2) {
+            return Paths.get(parts[0], Base64.decode(parts[1], Base64.DEFAULT));
+        } else {
+            throw new IllegalArgumentException("Invalid bookmark: " + encoded);
+        }
+    }
+
+    private static Set<Path> decode(Collection<String> encoded) {
+        Set<Path> bookmarks = new HashSet<>();
+        for (String element : encoded) {
+            try {
+                Path path = decode(element);
+                if (Files.exists(path, FOLLOW)) {
+                    bookmarks.add(path);
+                }
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, "Invalid bookmark: " + element, e);
+            } catch (IOException e) {
+                // TODO should bookmarks that don't exist be removed or kept?
+            }
+        }
+        return unmodifiableSet(bookmarks);
     }
 
     @Override
@@ -104,16 +146,8 @@ final class BookmarkManagerImpl extends BookmarkManager {
     }
 
     private void saveBookmarksAndNotify() {
-        pref.edit().putStringSet(PREF_KEY, toUriStrings(bookmarks)).apply();
+        pref.edit().putStringSet(PREF_KEY_V2, encode(bookmarks)).apply();
         notifyListeners();
-    }
-
-    private Set<String> toUriStrings(Set<? extends Path> bookmarks) {
-        Set<String> uris = new HashSet<>();
-        for (Path bookmark : bookmarks) {
-            uris.add(bookmark.toUri().toString());
-        }
-        return uris;
     }
 
     private void notifyListeners() {
@@ -137,20 +171,30 @@ final class BookmarkManagerImpl extends BookmarkManager {
         return unmodifiableSet(new HashSet<>(bookmarks));
     }
 
-    public Set<Path> loadBookmarks() {
-        return toPaths(pref.getStringSet(PREF_KEY, DEFAULTS));
+    Set<Path> loadBookmarks() {
+        Set<String> encodedPaths = pref.getStringSet(PREF_KEY_V2, null);
+        if (encodedPaths != null) {
+            return decode(encodedPaths);
+        }
+        Set<String> pathsV1 = pref.getStringSet(PREF_KEY_V1, null);
+        if (pathsV1 != null) {
+            return toPathsV1(pathsV1);
+        }
+        return createDefaultBookmarks();
     }
 
     @Override
     public void registerBookmarkChangedListener(
-            BookmarkChangedListener listener) {
+            BookmarkChangedListener listener
+    ) {
         requireNonNull(listener);
         listeners.add(listener);
     }
 
     @Override
     public void unregisterBookmarkChangedListener(
-            BookmarkChangedListener listener) {
+            BookmarkChangedListener listener
+    ) {
         requireNonNull(listener);
         listeners.remove(listener);
     }

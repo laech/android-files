@@ -30,12 +30,16 @@ public final class Paths {
     }
 
     public static Path get(byte[] localPath) {
+        return get("file", localPath);
+    }
+
+    public static Path get(String scheme, byte[] path) {
         for (FileSystem fs : Holder.FILE_SYSTEMS) {
-            if (fs.scheme().equals("file")) {
-                return fs.path(localPath);
+            if (fs.scheme().equals(scheme)) {
+                return fs.path(path);
             }
         }
-        throw new IllegalArgumentException(Arrays.toString(localPath));
+        throw new IllegalArgumentException(Arrays.toString(path));
     }
 
     private static class Holder {
