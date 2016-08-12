@@ -237,7 +237,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             if (constraint == null) {
                 constraint = calculateThumbnailConstraint(context(), (CardView) itemView);
-                textWidth = constraint.width() - content.getPaddingStart() - content.getPaddingEnd();
+                textWidth = constraint.width() - content.getPaddingLeft() - content.getPaddingRight();
             }
 
             ((CardView) itemView).setCardBackgroundColor(WHITE);

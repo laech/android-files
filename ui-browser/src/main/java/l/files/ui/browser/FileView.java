@@ -261,7 +261,7 @@ public final class FileView extends View implements Drawable.Callback {
 
     private void drawName(Canvas canvas, int color, float dxPreview) {
         canvas.translate(
-                getPaddingStart() - dxPreview,
+                getPaddingLeft() - dxPreview,
                 preview.hasVisibleContent()
                         ? preview.getIntrinsicHeight() + namePaddingTop
                         : getPaddingTop() + fileTypeIconSize + namePaddingTop
@@ -350,7 +350,7 @@ public final class FileView extends View implements Drawable.Callback {
 
         this.showLinkIcon = shouldShowLinkIcon(item);
 
-        int width = textWidth + getPaddingStart() + getPaddingEnd();
+        int width = textWidth + getPaddingLeft() + getPaddingRight();
         this.name = layouts.getName(getContext(), item, textWidth);
         this.link = layouts.getLink(getContext(), item, textWidth);
         this.summary = layouts.getSummary(getContext(), item, textWidth);
