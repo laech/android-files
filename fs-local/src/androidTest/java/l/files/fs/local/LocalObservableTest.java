@@ -1,11 +1,5 @@
 package l.files.fs.local;
 
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
-import android.database.Cursor;
-import android.net.Uri;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
@@ -38,18 +32,9 @@ import l.files.fs.Observer;
 import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
-import l.files.testing.Executable;
-import l.files.testing.Tests;
 
-import static android.app.DownloadManager.COLUMN_REASON;
-import static android.app.DownloadManager.COLUMN_STATUS;
-import static android.app.DownloadManager.STATUS_SUCCESSFUL;
-import static android.content.Context.DOWNLOAD_SERVICE;
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-import static android.os.Environment.getExternalStoragePublicDirectory;
 import static java.lang.Integer.parseInt;
 import static java.lang.Math.random;
-import static java.lang.System.currentTimeMillis;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -82,95 +67,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 public final class LocalObservableTest extends PathBaseTest {
-
-    /*
-     * TODO
-     *
-     * New bug affecting Android M (API 23) inotify, meaning some events will
-     * not be delivered.
-     *
-     * Examples:
-     *
-     *  - File download via DownloadManager
-     *  - 'touch file' using adb shell
-     *
-     * Issues:
-     *
-     *  - https://code.google.com/p/android/issues/detail?id=189231
-     *  - https://code.google.com/p/android-developer-preview/issues/detail?id=3099
-     */
-    public void test_notifies_files_downloaded_by_download_manager() throws Exception {
-
-        final Closer closer = Closer.create();
-        final Path downloadDir = downloadsDir();
-        final Path downloadFile = downloadDir.resolve(
-                "test_notifies_files_downloaded_by_download_manager-" +
-                        currentTimeMillis());
-        try {
-
-            closer.register(new Closeable() {
-                @Override
-                public void close() throws IOException {
-                    Files.deleteIfExists(downloadFile);
-                }
-            });
-
-            Recorder observer = closer.register(observe(downloadDir));
-            observer.await(CREATE, downloadFile, new Callable<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-
-                    assertFalse(Files.exists(downloadFile, NOFOLLOW));
-
-                    final Uri src = Uri.parse("https://www.google.com");
-                    final Uri dst = Uri.parse(downloadFile.toUri().toString());
-                    final Request request = new Request(src).setDestinationUri(dst);
-                    final long id = downloadManager().enqueue(request);
-
-                    Tests.timeout(60, SECONDS, new Executable() {
-                        @Override
-                        public void execute() throws Exception {
-
-                            Query query = new Query().setFilterById(id);
-                            Cursor cursor = downloadManager().query(query);
-                            try {
-                                assertTrue(cursor.moveToFirst());
-                                // Need to wait until finish, this also ensures
-                                // downloadFile is cleanly deleted after test,
-                                // an observation was that it won't be delete otherwise
-                                assertEquals(
-                                        cursor.getString(cursor.getColumnIndex(COLUMN_REASON)),
-                                        STATUS_SUCCESSFUL,
-                                        cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS)));
-
-                            } finally {
-                                cursor.close();
-                            }
-                            assertTrue(Files.exists(downloadFile, NOFOLLOW));
-                        }
-                    });
-
-                    return null;
-
-                }
-
-            });
-
-        } catch (Throwable e) {
-            throw closer.rethrow(e);
-        } finally {
-            closer.close();
-        }
-    }
-
-    private DownloadManager downloadManager() {
-        return (DownloadManager) getContext().getSystemService(DOWNLOAD_SERVICE);
-    }
-
-    private Path downloadsDir() {
-        return Paths.get(getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS));
-    }
 
     public void test_able_to_continue_observing_existing_dirs_when_new_dir_added_is_not_observable()
             throws Exception {
