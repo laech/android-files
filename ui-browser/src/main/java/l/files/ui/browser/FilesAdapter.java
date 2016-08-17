@@ -290,7 +290,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             Path file = previewPath();
             Stat stat = previewStat();
-            // TODO revisit this if no decoder is added for new file type existing files will still be marked as not previewable
+            // TODO revisit this if new decoder is added for new file type, existing files will still be marked as not previewable
             // if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
             if (stat == null) {
                 backgroundBlurClear();

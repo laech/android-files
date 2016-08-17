@@ -12,6 +12,7 @@ import static java.util.Locale.ENGLISH;
 final class DecodeChain extends Decode {
 
     private static final Previewer[] PREVIEWERS = {
+            DecodeSvg.PREVIEWER,
             DecodeImage.PREVIEWER,
             DecodePdf.PREVIEWER,
             DecodeApk.PREVIEWER,
@@ -38,9 +39,10 @@ final class DecodeChain extends Decode {
             Preview.Using using,
             Preview context) {
 
-        if (!context.isPreviewable(path, stat, constraint)) {
-            return null;
-        }
+// TODO revisit this if new decoder is added for new file type, existing files will still be marked as not previewable
+//        if (!context.isPreviewable(path, stat, constraint)) {
+//            return null;
+//        }
 
         if (using == Using.FILE_EXTENSION) {
             String extensionInLowercase = path.name().ext().toLowerCase(ENGLISH);

@@ -19,6 +19,8 @@
 # Tika references optional libs
 -dontwarn org.apache.tika.**
 
+-dontwarn com.caverock.androidsvg.**
+
 # Defined as l_files_operations_listeners
 -keep class l.files.ui.operations.NotificationProvider
 

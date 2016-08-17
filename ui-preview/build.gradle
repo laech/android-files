@@ -28,6 +28,7 @@ dependencies {
     compile project(':fs')
     compile project(':fs-media')
     compile project(':ui-preview-pdf')
+    compile 'com.caverock:androidsvg:1.2.1'
     compile "com.android.support:support-v4:$supportLibVersion"
 
     androidTestCompile project(':testing-fs')

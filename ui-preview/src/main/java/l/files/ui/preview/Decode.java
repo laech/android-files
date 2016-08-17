@@ -120,11 +120,12 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
     }
 
     private boolean checkPreviewable() {
-        if (context.isPreviewable(path, stat, constraint)) {
+// TODO revisit this if new decoder is added for new file type, existing files will still be marked as not previewable
+//        if (context.isPreviewable(path, stat, constraint)) {
             return true;
-        }
-        publishProgress(NoPreview.INSTANCE);
-        return false;
+//        }
+//        publishProgress(NoPreview.INSTANCE);
+//        return false;
     }
 
     private boolean checkThumbnailMemCache() {

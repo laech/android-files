@@ -36,6 +36,10 @@ public final class PreviewTest extends PathBaseTest {
         return new Preview(getContext(), dir2().resolve(String.valueOf(nanoTime())));
     }
 
+    public void test_preview_svg() throws Throwable {
+        testPreviewSuccessForTestFile("preview_test.svg");
+    }
+
     public void test_preview_pdf() throws Throwable {
         testPreviewSuccessForTestFile("preview_test.pdf");
     }
