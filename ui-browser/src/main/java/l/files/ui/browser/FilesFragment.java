@@ -23,7 +23,7 @@ import java.util.List;
 
 import l.files.base.Provider;
 import l.files.fs.Path;
-import l.files.premium.ConsumeTestPurchasesOnDebug;
+import l.files.premium.ConsumeTestPurchasesOnDebugMenu;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
@@ -33,13 +33,22 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
 import l.files.ui.base.view.ClearSelectionOnDestroyActionMode;
 import l.files.ui.base.view.CountSelectedItemsAction;
-import l.files.ui.bookmarks.actions.Bookmark;
+import l.files.ui.bookmarks.menus.BookmarkMenu;
 import l.files.ui.browser.FilesLoader.Result;
-import l.files.ui.info.actions.Info;
-import l.files.ui.operations.actions.Copy;
-import l.files.ui.operations.actions.Cut;
-import l.files.ui.operations.actions.Delete;
-import l.files.ui.operations.actions.Paste;
+import l.files.ui.browser.action.RenameAction;
+import l.files.ui.browser.action.SelectAllAction;
+import l.files.ui.browser.action.Selectable;
+import l.files.ui.browser.action.ShareAction;
+import l.files.ui.browser.menu.NewDirMenu;
+import l.files.ui.browser.menu.RefreshMenu;
+import l.files.ui.browser.menu.ShowHiddenFilesMenu;
+import l.files.ui.browser.menu.SortMenu;
+import l.files.ui.browser.preference.Preferences;
+import l.files.ui.info.action.InfoAction;
+import l.files.ui.operations.action.CopyAction;
+import l.files.ui.operations.action.CutAction;
+import l.files.ui.operations.action.DeleteAction;
+import l.files.ui.operations.menu.PasteMenu;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -55,10 +64,10 @@ import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_HEADER;
-import static l.files.ui.browser.Preferences.getShowHiddenFiles;
-import static l.files.ui.browser.Preferences.getSort;
-import static l.files.ui.browser.Preferences.isShowHiddenFilesKey;
-import static l.files.ui.browser.Preferences.isSortKey;
+import static l.files.ui.browser.preference.Preferences.getShowHiddenFiles;
+import static l.files.ui.browser.preference.Preferences.getSort;
+import static l.files.ui.browser.preference.Preferences.isShowHiddenFilesKey;
+import static l.files.ui.browser.preference.Preferences.isSortKey;
 
 public final class FilesFragment
 
@@ -265,13 +274,13 @@ public final class FilesFragment
         PremiumLock premiumLock = activity.getPremiumLock();
         FragmentManager manager = activity.getSupportFragmentManager();
         setOptionsMenu(OptionsMenus.compose(
-                new Refresh(autoRefreshDisable(), refresh()),
-                new Bookmark(directory, activity),
+                new RefreshMenu(autoRefreshDisable(), refresh()),
+                new BookmarkMenu(directory, activity),
                 new NewDirMenu(premiumLock, manager, directory),
-                new Paste(activity, directory),
+                new PasteMenu(activity, directory),
                 new SortMenu(manager),
                 new ShowHiddenFilesMenu(activity),
-                new ConsumeTestPurchasesOnDebug(premiumLock)
+                new ConsumeTestPurchasesOnDebugMenu(premiumLock)
         ));
     }
 
@@ -315,13 +324,13 @@ public final class FilesFragment
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
-                new Info(selection(), manager, directory()),
+                new InfoAction(selection(), manager, directory()),
                 new SelectAllAction(this),
-                new Cut(premiumLock, selection()),
-                new Copy(premiumLock, selection()),
-                new Delete(premiumLock, selection(), manager),
+                new CutAction(premiumLock, selection()),
+                new CopyAction(premiumLock, selection()),
+                new DeleteAction(premiumLock, selection(), manager),
                 new RenameAction(premiumLock, selection(), manager),
-                new Share(premiumLock, selection(), activity)
+                new ShareAction(premiumLock, selection(), activity)
         );
     }
 

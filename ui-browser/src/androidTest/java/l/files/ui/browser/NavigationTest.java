@@ -15,6 +15,7 @@ import l.files.fs.Path;
 import l.files.fs.Paths;
 import l.files.fs.Permission;
 import l.files.fs.Stat;
+import l.files.ui.browser.widget.FileView;
 
 import static android.test.MoreAsserts.assertNotEqual;
 import static android.text.format.DateFormat.getDateFormat;

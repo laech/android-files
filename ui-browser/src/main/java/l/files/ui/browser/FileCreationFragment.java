@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import l.files.fs.Files;
 import l.files.fs.Path;
+import l.files.ui.browser.widget.Toaster;
 
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE;
@@ -104,7 +105,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         return (AlertDialog) super.getDialog();
     }
 
-    void restartChecker() {
+    protected void restartChecker() {
         getLoaderManager().restartLoader(LOADER_CHECKER, null, checkerCallback);
     }
 
@@ -120,7 +121,7 @@ public abstract class FileCreationFragment extends AppCompatDialogFragment
         return editText;
     }
 
-    Button getOkButton() {
+    protected Button getOkButton() {
         return getDialog().getButton(BUTTON_POSITIVE);
     }
 

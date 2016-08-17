@@ -24,6 +24,7 @@ import l.files.fs.Stat;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.FileLabels;
 import l.files.ui.base.view.Views;
+import l.files.ui.browser.widget.FileView;
 
 import static android.support.v4.view.GravityCompat.START;
 import static android.view.KeyEvent.KEYCODE_BACK;

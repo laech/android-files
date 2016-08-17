@@ -13,7 +13,7 @@ import l.files.ui.base.fs.FileInfo;
 
 import static java.lang.System.currentTimeMillis;
 
-enum FileSort {
+public enum FileSort {
 
     NAME(R.string.name) {
         @Override
@@ -113,7 +113,7 @@ enum FileSort {
         this.labelId = labelId;
     }
 
-    String getLabel(Resources res) {
+    public String getLabel(Resources res) {
         return res.getString(labelId);
     }
 

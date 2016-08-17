@@ -27,6 +27,9 @@ import l.files.fs.Stat;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.OnOpenFileListener;
+import l.files.ui.browser.menu.ActionBarDrawerToggleMenu;
+import l.files.ui.browser.menu.GoBackOnHomePressedMenu;
+import l.files.ui.browser.menu.NewTabMenu;
 import l.files.ui.preview.Preview;
 
 import static android.content.ContentResolver.SCHEME_FILE;
@@ -99,8 +102,8 @@ public final class FilesActivity extends BaseActivity implements
         actionBar.setDisplayShowTitleEnabled(false);
 
         setOptionsMenu(OptionsMenus.compose(
-                new ActionBarDrawerToggleAction(drawer, getSupportFragmentManager()),
-                new GoBackOnHomePressedAction(this),
+                new ActionBarDrawerToggleMenu(drawer, getSupportFragmentManager()),
+                new GoBackOnHomePressedMenu(this),
                 new NewTabMenu(this)
         ));
 

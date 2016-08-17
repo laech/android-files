@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.support.v7.app.AlertDialog;
 import android.widget.ListView;
 
+import l.files.ui.browser.menu.SortDialog;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 import static l.files.base.Objects.requireNonNull;

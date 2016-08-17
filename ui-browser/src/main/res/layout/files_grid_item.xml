@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<l.files.ui.browser.ActivatedCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<l.files.ui.browser.widget.ActivatedCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <l.files.ui.browser.FileView
+    <l.files.ui.browser.widget.FileView
         android:id="@android:id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,4 +31,4 @@
         android:paddingStart="12dp"
         android:paddingTop="16dp" />
 
-</l.files.ui.browser.ActivatedCardView>
+</l.files.ui.browser.widget.ActivatedCardView>
