@@ -50,6 +50,7 @@ import static android.support.v7.widget.StaggeredGridLayoutManager.VERTICAL;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
@@ -359,7 +360,19 @@ public final class FilesFragment
             }
 
             updateSelection(data);
-            adapter.setItems(data.items());
+
+            // TODO make this cleaner
+            List<Object> items;
+            if (!((FilesActivity) getActivity()).getPremiumLock().isUnlocked()) {
+                items = new ArrayList<>();
+                items.add(Ad.INSTANCE);
+                items.addAll(data.items());
+                items = unmodifiableList(items);
+            } else {
+                items = data.items();
+            }
+            adapter.setItems(items);
+
             if (data.exception() != null) {
                 inflateEmptyView().setText(message(data.exception()));
                 inflateEmptyView().setVisibility(VISIBLE);

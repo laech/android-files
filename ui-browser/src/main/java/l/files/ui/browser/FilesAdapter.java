@@ -18,9 +18,15 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.NativeExpressAdView;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -38,6 +44,7 @@ import l.files.ui.preview.Rect;
 import static android.graphics.Color.WHITE;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
@@ -48,6 +55,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     static final int VIEW_TYPE_FILE = 0;
     static final int VIEW_TYPE_HEADER = 1;
+    static final int VIEW_TYPE_AD = 2;
 
     private final RecyclerView recyclerView;
     private final Preview decorator;
@@ -116,18 +124,32 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position) instanceof FileInfo
-                ? VIEW_TYPE_FILE
-                : VIEW_TYPE_HEADER;
+        Object item = getItem(position);
+        if (item instanceof FileInfo) {
+            return VIEW_TYPE_FILE;
+        } else if (item instanceof Header) {
+            return VIEW_TYPE_HEADER;
+        } else if (item instanceof Ad) {
+            return VIEW_TYPE_AD;
+        } else {
+            throw new IllegalArgumentException(String.valueOf(item));
+        }
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        return viewType == VIEW_TYPE_FILE
-                ? new FileHolder(inflater.inflate(R.layout.files_grid_item, parent, false))
-                : new HeaderHolder(inflater.inflate(R.layout.files_grid_header, parent, false));
+        switch (viewType) {
+            case VIEW_TYPE_FILE:
+                return new FileHolder(inflater.inflate(R.layout.files_grid_item, parent, false));
+            case VIEW_TYPE_HEADER:
+                return new HeaderHolder(inflater.inflate(R.layout.files_grid_header, parent, false));
+            case VIEW_TYPE_AD:
+                return new AdHolder(inflater.inflate(R.layout.files_grid_ad, parent, false));
+            default:
+                throw new IllegalArgumentException(String.valueOf(viewType));
+        }
     }
 
     @Override
@@ -135,8 +157,12 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         Object item = getItem(position);
         if (item instanceof Header) {
             ((HeaderHolder) holder).bind((Header) item);
-        } else {
+        } else if (item instanceof FileInfo) {
             ((FileHolder) holder).bind((FileInfo) item);
+        } else if (item instanceof Ad) {
+            ((AdHolder) holder).bind();
+        } else {
+            throw new IllegalArgumentException(String.valueOf(item));
         }
     }
 
@@ -264,7 +290,9 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             Path file = previewPath();
             Stat stat = previewStat();
-            if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
+            // TODO revisit this if no decoder is added for new file type existing files will still be marked as not previewable
+            // if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
+            if (stat == null) {
                 backgroundBlurClear();
                 return null;
             }
@@ -419,6 +447,62 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                 ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
             }
         }
+    }
+
+    static final class AdHolder extends ViewHolder {
+
+        private static final AtomicBoolean init = new AtomicBoolean();
+
+        private final NativeExpressAdView adView;
+        private boolean adLoaded;
+
+        AdHolder(View itemView) {
+            super(itemView);
+
+            // TODO need to call destroy/pause on ad view?
+            Context context = itemView.getContext();
+            adView = new NativeExpressAdView(context);
+            adView.setAdUnitId(getAdUnitId(context));
+            adView.setAdSize(calculateAdSize(itemView));
+            ((ViewGroup) itemView).addView(adView);
+
+            if (init.compareAndSet(false, true)) {
+                MobileAds.initialize(
+                        context.getApplicationContext(),
+                        itemView.getResources().getString(R.string.ad_app_id));
+            }
+        }
+
+        private static String getAdUnitId(Context context) {
+            return context.getString(R.string.ad_unit_browser_express_id);
+        }
+
+        private static AdSize calculateAdSize(View itemView) {
+            // width: 280dp - 1200dp, height: 80dp - 612dp
+            Resources res = itemView.getResources();
+            DisplayMetrics metrics = res.getDisplayMetrics();
+            int pad = res.getDimensionPixelSize(R.dimen.files_item_space_horizontal);
+            int widthDp = (int) ((metrics.widthPixels - pad * 2) / metrics.density);
+            return new AdSize(widthDp, 80);
+        }
+
+        void bind() {
+            if (adLoaded) {
+                return;
+            }
+            adLoaded = true;
+
+            adView.loadAd(new AdRequest.Builder()
+                    .addTestDevice(DEVICE_ID_EMULATOR)
+                    .addTestDevice("3D33A77247CFB6111C37C7D2B50E325A") // Nexus 5X
+                    .build());
+
+            LayoutParams params = itemView.getLayoutParams();
+            if (params instanceof StaggeredGridLayoutManager.LayoutParams) {
+                ((StaggeredGridLayoutManager.LayoutParams) params).setFullSpan(true);
+            }
+        }
+
     }
 
 }

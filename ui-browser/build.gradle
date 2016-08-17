@@ -32,6 +32,7 @@ dependencies {
     compile project(':ui-operations')
     compile project(':ui-bookmarks')
     compile project(':premium')
+    compile 'com.google.firebase:firebase-ads:9.4.0'
 
     androidTestCompile project(':testing-fs')
 
