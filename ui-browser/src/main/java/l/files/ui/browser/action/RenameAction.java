@@ -6,27 +6,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.fs.Path;
-import l.files.premium.PremiumActionModeItem;
-import l.files.premium.PremiumLock;
 import l.files.ui.base.selection.Selection;
+import l.files.ui.base.view.ActionModeItem;
 import l.files.ui.browser.R;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.base.Objects.requireNonNull;
 
-public final class RenameAction extends PremiumActionModeItem
+public final class RenameAction extends ActionModeItem
         implements Selection.Callback {
 
     private final Selection<Path, ?> selection;
     private final FragmentManager manager;
 
     public RenameAction(
-            PremiumLock premiumLock,
             Selection<Path, ?> selection,
-            FragmentManager manager
-    ) {
-        super(R.id.rename, premiumLock);
+            FragmentManager manager) {
+        super(R.id.rename);
         this.manager = requireNonNull(manager, "manager");
         this.selection = requireNonNull(selection, "selection");
     }
@@ -59,7 +56,7 @@ public final class RenameAction extends PremiumActionModeItem
     }
 
     @Override
-    protected void doOnItemSelected(ActionMode mode, MenuItem item) {
+    protected void onItemSelected(ActionMode mode, MenuItem item) {
         Path file = selection.keys().iterator().next();
         RenameFragment.create(file).show(manager, RenameFragment.TAG);
     }

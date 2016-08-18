@@ -5,25 +5,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import l.files.fs.Path;
-import l.files.premium.PremiumLock;
-import l.files.premium.PremiumOptionsMenuAction;
+import l.files.ui.base.app.OptionsMenuAction;
 import l.files.ui.browser.R;
 
 import static android.view.Menu.NONE;
 import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 import static l.files.base.Objects.requireNonNull;
 
-public final class NewDirMenu extends PremiumOptionsMenuAction {
+public final class NewDirMenu extends OptionsMenuAction {
 
     private final Path directory;
     private final FragmentManager manager;
 
     public NewDirMenu(
-            PremiumLock premiumLock,
             FragmentManager manager,
-            Path directory
-    ) {
-        super(R.id.new_dir, premiumLock);
+            Path directory) {
+        super(R.id.new_dir);
         this.manager = requireNonNull(manager, "manager");
         this.directory = requireNonNull(directory, "directory");
     }
@@ -36,7 +33,7 @@ public final class NewDirMenu extends PremiumOptionsMenuAction {
     }
 
     @Override
-    protected void doOnItemSelected(MenuItem item) {
+    protected void onItemSelected(MenuItem item) {
         NewDirFragment.create(directory).show(manager, NewDirFragment.TAG);
     }
 }

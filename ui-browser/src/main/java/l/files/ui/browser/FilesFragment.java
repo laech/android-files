@@ -276,7 +276,7 @@ public final class FilesFragment
         setOptionsMenu(OptionsMenus.compose(
                 new RefreshMenu(autoRefreshDisable(), refresh()),
                 new BookmarkMenu(directory, activity),
-                new NewDirMenu(premiumLock, manager, directory),
+                new NewDirMenu(manager, directory),
                 new PasteMenu(activity, directory),
                 new SortMenu(manager),
                 new ShowHiddenFilesMenu(activity),
@@ -319,19 +319,17 @@ public final class FilesFragment
     @Override
     protected ActionMode.Callback actionModeCallback() {
         FilesActivity activity = (FilesActivity) getActivity();
-        PremiumLock premiumLock = activity.getPremiumLock();
         FragmentManager manager = activity.getSupportFragmentManager();
         return ActionModes.compose(
                 new CountSelectedItemsAction(selection()),
                 new ClearSelectionOnDestroyActionMode(selection()),
                 new InfoAction(selection(), manager, directory()),
                 new SelectAllAction(this),
-                new CutAction(premiumLock, selection()),
-                new CopyAction(premiumLock, selection()),
-                new DeleteAction(premiumLock, selection(), manager),
-                new RenameAction(premiumLock, selection(), manager),
-                new ShareAction(premiumLock, selection(), activity)
-        );
+                new CutAction(selection()),
+                new CopyAction(selection()),
+                new DeleteAction(selection(), manager),
+                new RenameAction(selection(), manager),
+                new ShareAction(selection(), activity));
     }
 
     @Override
