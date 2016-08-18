@@ -10,6 +10,8 @@ import static l.files.ui.base.view.Views.find;
 
 final class HeaderViewHolder extends RecyclerView.ViewHolder {
 
+    static final int LAYOUT_ID = R.layout.files_grid_header;
+
     private final TextView title;
 
     HeaderViewHolder(View itemView) {

@@ -1,10 +1,13 @@
 package l.files.ui.browser;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -19,6 +22,8 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
 
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
@@ -90,7 +95,7 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             case VIEW_TYPE_FILE:
                 return new FileViewHolder(
-                        inflater.inflate(R.layout.files_grid_item, parent, false),
+                        inflater.inflate(FileViewHolder.LAYOUT_ID, parent, false),
                         recyclerView,
                         selection,
                         actionModeProvider,
@@ -99,11 +104,11 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             case VIEW_TYPE_HEADER:
                 return new HeaderViewHolder(
-                        inflater.inflate(R.layout.files_grid_header, parent, false));
+                        inflater.inflate(HeaderViewHolder.LAYOUT_ID, parent, false));
 
             case VIEW_TYPE_AD:
                 return new AdViewHolder(
-                        inflater.inflate(R.layout.files_grid_ad, parent, false));
+                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false));
 
             default:
                 throw new IllegalArgumentException(String.valueOf(viewType));
@@ -144,6 +149,20 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
             }
         }
         selection.addAll(files);
+    }
+
+    static int calculateCardContentWidthPixels(CardView card, int columns) {
+        Resources res = card.getResources();
+        DisplayMetrics metrics = res.getDisplayMetrics();
+        float cardSpace = SDK_INT >= LOLLIPOP
+                ? 0
+                : card.getPaddingLeft() + card.getPaddingRight();
+        return (int) (
+                (metrics.widthPixels - res.getDimension(R.dimen.files_list_space) * 2) / columns
+                        - res.getDimension(R.dimen.files_item_space_horizontal) * 2
+                        - res.getDimension(R.dimen.files_item_card_inner_space) * 2
+                        - cardSpace
+        );
     }
 
 }

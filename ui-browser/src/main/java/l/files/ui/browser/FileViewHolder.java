@@ -1,6 +1,5 @@
 package l.files.ui.browser;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -27,16 +26,17 @@ import l.files.ui.preview.Preview;
 import l.files.ui.preview.Rect;
 
 import static android.graphics.Color.WHITE;
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.base.Objects.requireNonNull;
 import static l.files.ui.base.view.Views.find;
+import static l.files.ui.browser.FilesAdapter.calculateCardContentWidthPixels;
 import static l.files.ui.preview.Preview.Using.FILE_EXTENSION;
 
 final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         implements Preview.Callback {
+
+    static final int LAYOUT_ID = R.layout.files_grid_item;
 
     private final RecyclerView recyclerView;
     private final Preview decorator;
@@ -129,7 +129,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         clearPendingUpdates();
 
         if (constraint == null) {
-            constraint = calculateThumbnailConstraint(context(), (CardView) itemView);
+            constraint = calculateThumbnailConstraint((CardView) find(R.id.card, this));
             textWidth = constraint.width()
                     - content.getPaddingLeft()
                     - content.getPaddingRight();
@@ -139,19 +139,11 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
         updateContent(retrievePreview(FILE_EXTENSION));
     }
 
-    private Rect calculateThumbnailConstraint(Context context, CardView card) {
-        Resources res = context.getResources();
+    private Rect calculateThumbnailConstraint(CardView card) {
+        Resources res = card.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
         int columns = res.getInteger(R.integer.files_grid_columns);
-        float cardSpace = SDK_INT >= LOLLIPOP
-                ? 0
-                : card.getPaddingLeft() + card.getPaddingRight();
-        int maxThumbnailWidth = (int) (
-                (metrics.widthPixels - res.getDimension(R.dimen.files_list_space) * 2) / columns
-                        - res.getDimension(R.dimen.files_item_space_horizontal) * 2
-                        - res.getDimension(R.dimen.files_item_card_inner_space) * 2
-                        - cardSpace
-        );
+        int maxThumbnailWidth = calculateCardContentWidthPixels(card, columns);
         int maxThumbnailHeight = (int) (metrics.heightPixels * 1.5);
         return Rect.of(maxThumbnailWidth, maxThumbnailHeight);
     }

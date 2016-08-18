@@ -3,6 +3,7 @@
 
     <string name="ad_app_id">ca-app-pub-3251738373408970~7732248243</string>
     <string name="ad_unit_browser_express_id">ca-app-pub-3251738373408970/2349786248</string>
+    <string name="ad">Ad</string>
 
     <string name="share">Share</string>
     <string name="refresh">Refresh</string>
