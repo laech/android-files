@@ -28,6 +28,7 @@ import static android.text.format.Formatter.formatShortFileSize;
 import static java.lang.System.currentTimeMillis;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static l.files.fs.Files.UTF_8;
 import static l.files.fs.Files.appendUtf8;
 import static l.files.fs.Files.createDir;
@@ -183,8 +184,10 @@ public final class NavigationTest extends BaseFilesActivityTest {
         appendUtf8(file, file.toString());
 
         Context c = getActivity();
-        String date = getTimeFormat(c).format(new Date());
-        String size = formatShortFileSize(c, stat(file, NOFOLLOW).size());
+        Stat stat = stat(file, NOFOLLOW);
+        long lastModifiedMillis = stat.lastModifiedTime().to(MILLISECONDS);
+        String date = getTimeFormat(c).format(new Date(lastModifiedMillis));
+        String size = formatShortFileSize(c, stat.size());
         String expected = c.getString(R.string.x_dot_y, date, size);
         screen().assertSummary(file, expected);
     }
