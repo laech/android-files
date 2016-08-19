@@ -78,8 +78,13 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
         return activity;
     }
 
+    private static boolean permissionAllowed;
+
     private void allowPermissionsIfNeeded() {
-        if (SDK_INT >= M) {
+
+        // Only do this once otherwise will slow down every test
+        if (SDK_INT >= M && !permissionAllowed) {
+            permissionAllowed = true;
             UiDevice device = UiDevice.getInstance(getInstrumentation());
             UiObject allowPermissions = device.findObject(new UiSelector().resourceId(
                     "com.android.packageinstaller:id/permission_allow_button"));
