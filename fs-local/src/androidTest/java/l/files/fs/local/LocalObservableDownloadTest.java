@@ -5,6 +5,7 @@ import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -164,7 +165,8 @@ public final class LocalObservableDownloadTest extends PathBaseTest {
     }
 
     private DownloadManager downloadManager() {
-        return (DownloadManager) getContext().getSystemService(DOWNLOAD_SERVICE);
+        return (DownloadManager) InstrumentationRegistry.getContext()
+                .getSystemService(DOWNLOAD_SERVICE);
     }
 
     private Path downloadsDir() {
