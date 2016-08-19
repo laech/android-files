@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<l.files.ui.browser.widget.ActivatedCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<l.files.ui.browser.widget.ActivatedCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card"
     android:layout_width="match_parent"
@@ -13,7 +14,8 @@
     android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="@dimen/files_item_card_radius"
     app:cardElevation="1dp"
-    app:cardPreventCornerOverlap="false">
+    app:cardPreventCornerOverlap="false"
+    app:cardUseCompatPadding="true">
 
     <View
         android:id="@+id/blur"

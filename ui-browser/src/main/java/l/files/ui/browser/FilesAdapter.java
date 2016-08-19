@@ -24,8 +24,6 @@ import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.widget.StableAdapter;
 import l.files.ui.browser.action.Selectable;
 
-import static android.os.Build.VERSION.SDK_INT;
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static l.files.base.Objects.requireNonNull;
 
 final class FilesAdapter extends StableAdapter<Object, ViewHolder>
@@ -174,14 +172,12 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
     static int calculateCardContentWidthPixels(CardView card, int columns) {
         Resources res = card.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
-        float cardSpace = SDK_INT >= LOLLIPOP
-                ? 0
-                : card.getPaddingLeft() + card.getPaddingRight();
+        float padding = card.getPaddingLeft() + card.getPaddingRight();
         return (int) (
                 (metrics.widthPixels - res.getDimension(R.dimen.files_list_space) * 2) / columns
                         - res.getDimension(R.dimen.files_item_space_horizontal) * 2
                         - res.getDimension(R.dimen.files_item_card_inner_space) * 2
-                        - cardSpace
+                        - padding
         );
     }
 }

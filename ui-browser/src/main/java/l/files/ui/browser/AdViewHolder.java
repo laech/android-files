@@ -1,14 +1,12 @@
 package l.files.ui.browser;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -19,7 +17,6 @@ import com.google.android.gms.ads.NativeExpressAdView;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import l.files.premium.PremiumLock;
-import l.files.ui.base.fs.FileIcons;
 
 import static com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR;
 import static l.files.ui.base.view.Views.find;
@@ -87,9 +84,9 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void configureRemoveAdView(final PremiumLock premiumLock) {
-        AssetManager assets = itemView.getContext().getAssets();
-        TextView removeAdView = find(R.id.remove_ad, this);
-        removeAdView.setTypeface(FileIcons.font(assets));
+        View removeAdView = find(R.id.remove_ad, this);
+        removeAdView.setScaleX(0.75f);
+        removeAdView.setScaleY(0.75f);
         removeAdView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +104,7 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
         adView.loadAd(new AdRequest.Builder()
                 .addTestDevice(DEVICE_ID_EMULATOR)
                 .addTestDevice("3D33A77247CFB6111C37C7D2B50E325A") // Nexus 5X
+                .addTestDevice("9024A3F0F3A31DB1A51170245F7901B2") // Galaxy Nexus
                 .addTestDevice("C30D27509816043FE18E3D2859175A61") // Nexus S
                 .build());
 

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="horizontal"
-    android:paddingBottom="4dp">
+    android:layout_height="wrap_content">
 
     <android.support.v7.widget.CardView
         android:id="@+id/card"
@@ -20,7 +17,8 @@
         android:layout_marginStart="@dimen/files_item_space_horizontal"
         android:layout_marginTop="@dimen/files_item_space_vertical"
         app:cardCornerRadius="@dimen/files_item_card_radius"
-        app:cardElevation="1dp">
+        app:cardElevation="1dp"
+        app:cardUseCompatPadding="true">
 
         <TextView
             android:layout_width="match_parent"
@@ -32,26 +30,23 @@
 
     </android.support.v7.widget.CardView>
 
-    <android.support.v7.widget.CardView
+    <android.support.v4.widget.Space
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:layout_below="@id/card" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/remove_ad"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        app:cardBackgroundColor="#ccc"
-        app:cardCornerRadius="15dp"
-        app:cardElevation="2dp">
-
-        <TextView
-            android:id="@+id/remove_ad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:text="@string/ic_close"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
-
-    </android.support.v7.widget.CardView>
+        android:maxHeight="10dp"
+        android:maxWidth="10dp"
+        android:src="@drawable/ic_close_white_48dp"
+        app:backgroundTint="#ccc"
+        app:elevation="2dp"
+        app:fabSize="mini"
+        app:useCompatPadding="true" />
 
 </RelativeLayout>
