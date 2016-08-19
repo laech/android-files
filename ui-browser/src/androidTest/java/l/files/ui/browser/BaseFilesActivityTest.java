@@ -1,6 +1,10 @@
 package l.files.ui.browser;
 
 import android.content.Intent;
+import android.support.test.uiautomator.UiDevice;
+import android.support.test.uiautomator.UiObject;
+import android.support.test.uiautomator.UiObjectNotFoundException;
+import android.support.test.uiautomator.UiSelector;
 import android.test.ActivityInstrumentationTestCase2;
 
 import java.io.File;
@@ -17,6 +21,8 @@ import l.files.fs.Permission;
 import l.files.fs.TraversalCallback;
 
 import static android.content.Intent.ACTION_MAIN;
+import static android.os.Build.VERSION.SDK_INT;
+import static android.os.Build.VERSION_CODES.M;
 import static android.os.Environment.getExternalStorageDirectory;
 import static java.util.Collections.singletonList;
 import static l.files.fs.LinkOption.NOFOLLOW;
@@ -63,6 +69,28 @@ public class BaseFilesActivityTest extends ActivityInstrumentationTestCase2<File
         }
         dir = null;
         super.tearDown();
+    }
+
+    @Override
+    public FilesActivity getActivity() {
+        FilesActivity activity = super.getActivity();
+        allowPermissionsIfNeeded();
+        return activity;
+    }
+
+    private void allowPermissionsIfNeeded() {
+        if (SDK_INT >= M) {
+            UiDevice device = UiDevice.getInstance(getInstrumentation());
+            UiObject allowPermissions = device.findObject(new UiSelector().resourceId(
+                    "com.android.packageinstaller:id/permission_allow_button"));
+            if (allowPermissions.exists()) {
+                try {
+                    allowPermissions.click();
+                } catch (UiObjectNotFoundException e) {
+                    throw new AssertionError(e);
+                }
+            }
+        }
     }
 
     private TraversalCallback<Path> delete() {
