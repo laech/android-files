@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
 
 android {
 
@@ -106,4 +105,12 @@ dependencies {
     compile project(':fs-local')
     compile project(':ui-browser')
 
+    // This is here so that the 'com.google.gms.google-services'
+    // can detect the version used
+    compile "com.google.firebase:firebase-ads:$firebaseVersion"
+
 }
+
+// Need this at bottom of file otherwise it won't be able
+// to detect the google libs version
+apply plugin: 'com.google.gms.google-services'
