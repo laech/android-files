@@ -3,7 +3,6 @@ package l.files.premium;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
@@ -13,7 +12,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -123,6 +121,10 @@ public final class PremiumLock implements ServiceConnection {
         }
     }
 
+    public static boolean isPremiumPreferenceKey(String key) {
+        return PREF_KEY_PREMIUM_UNLOCKED.equals(key);
+    }
+
     public boolean isUnlocked() {
         return pref.getBoolean(PREF_KEY_PREMIUM_UNLOCKED, false) ||
                 // Enable for UI tests
@@ -135,35 +137,17 @@ public final class PremiumLock implements ServiceConnection {
             return;
         }
 
-        new AlertDialog.Builder(activity)
-                .setTitle(R.string.unlock_premium)
-                .setMessage(R.string.would_you_like_to_unlock)
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+        if (billingService == null) {
+            int msg = R.string.billing_unavailable;
+            Toast.makeText(activity, msg, LENGTH_LONG).show();
+            return;
+        }
 
-                        if (billingService == null) {
-                            Toast.makeText(
-                                    activity,
-                                    R.string.billing_unavailable,
-                                    LENGTH_LONG
-                            ).show();
-                            return;
-                        }
-
-                        try {
-                            startActivityForPurchase();
-                        } catch (RemoteException | SendIntentException e) {
-                            Toast.makeText(
-                                    activity,
-                                    e.getMessage(),
-                                    LENGTH_LONG
-                            ).show();
-                        }
-                    }
-                })
-                .show();
+        try {
+            startActivityForPurchase();
+        } catch (RemoteException | SendIntentException e) {
+            Toast.makeText(activity, e.getMessage(), LENGTH_LONG).show();
+        }
     }
 
     private void startActivityForPurchase() throws RemoteException, SendIntentException {

@@ -11,10 +11,12 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import l.files.fs.Path;
+import l.files.premium.PremiumLock;
 import l.files.ui.base.fs.FileInfo;
 import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.Selection;
@@ -41,13 +43,17 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
     private final OnOpenFileListener listener;
 
+    private final PremiumLock premiumLock;
+
     FilesAdapter(
             RecyclerView recyclerView,
             Selection<Path, FileInfo> selection,
             ActionModeProvider actionModeProvider,
             ActionMode.Callback actionModeCallback,
-            OnOpenFileListener listener) {
+            OnOpenFileListener listener,
+            PremiumLock premiumLock) {
 
+        this.premiumLock = requireNonNull(premiumLock);
         this.actionModeProvider = requireNonNull(actionModeProvider);
         this.actionModeCallback = requireNonNull(actionModeCallback);
         this.listener = requireNonNull(listener);
@@ -108,7 +114,8 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
 
             case VIEW_TYPE_AD:
                 return new AdViewHolder(
-                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false));
+                        inflater.inflate(AdViewHolder.LAYOUT_ID, parent, false),
+                        premiumLock);
 
             default:
                 throw new IllegalArgumentException(String.valueOf(viewType));
@@ -151,6 +158,19 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
         selection.addAll(files);
     }
 
+    void removeAd() {
+        List<Object> oldItems = items();
+        List<Object> newItems = new ArrayList<>(oldItems.size());
+        for (Object item : oldItems) {
+            if (!(item instanceof Ad)) {
+                newItems.add(item);
+            }
+        }
+        if (newItems.size() != oldItems.size()) {
+            setItems(newItems);
+        }
+    }
+
     static int calculateCardContentWidthPixels(CardView card, int columns) {
         Resources res = card.getResources();
         DisplayMetrics metrics = res.getDisplayMetrics();
@@ -164,5 +184,4 @@ final class FilesAdapter extends StableAdapter<Object, ViewHolder>
                         - cardSpace
         );
     }
-
 }

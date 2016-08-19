@@ -1,19 +1,25 @@
 package l.files.ui.browser;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.NativeExpressAdView;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import l.files.premium.PremiumLock;
+import l.files.ui.base.fs.FileIcons;
 
 import static com.google.android.gms.ads.AdRequest.DEVICE_ID_EMULATOR;
 import static l.files.ui.base.view.Views.find;
@@ -28,7 +34,7 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
     private final NativeExpressAdView adView;
     private boolean adLoaded;
 
-    AdViewHolder(View itemView) {
+    AdViewHolder(View itemView, PremiumLock premiumLock) {
         super(itemView);
 
         // TODO need to call destroy/pause on ad view?
@@ -37,13 +43,29 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
         adView = new NativeExpressAdView(context);
         adView.setAdUnitId(getAdUnitId(context));
         adView.setAdSize(calculateAdSize(card));
+        adView.setAdListener(newAdListener());
         card.addView(adView);
+
+        configureRemoveAdView(premiumLock);
 
         if (init.compareAndSet(false, true)) {
             MobileAds.initialize(
                     context.getApplicationContext(),
                     itemView.getResources().getString(R.string.ad_app_id));
         }
+    }
+
+    private AdListener newAdListener() {
+        return new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                int duration = adView.getResources().getInteger(
+                        android.R.integer.config_shortAnimTime);
+                adView.setAlpha(0);
+                adView.animate().alpha(1).setDuration(duration);
+            }
+        };
     }
 
     private static String getAdUnitId(Context context) {
@@ -62,6 +84,18 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
             widthDp = 280;
         }
         return new AdSize(widthDp, 80);
+    }
+
+    private void configureRemoveAdView(final PremiumLock premiumLock) {
+        AssetManager assets = itemView.getContext().getAssets();
+        TextView removeAdView = find(R.id.remove_ad, this);
+        removeAdView.setTypeface(FileIcons.font(assets));
+        removeAdView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                premiumLock.showPurchaseDialog();
+            }
+        });
     }
 
     void bind() {

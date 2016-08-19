@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="billing_thank_you">Premium features unlocked. Thank you!</string>
+    <string name="billing_thank_you">Thank you!</string>
     <string name="billing_canceled">In-app purchase canceled.</string>
     <string name="billing_failed">In-app purchase failed.</string>
     <string name="billing_unavailable">Google Play service not available.</string>
-    <string name="unlock_premium">Unlock Premium Features</string>
-    <string name="would_you_like_to_unlock">Would you like to purchase premium features to support development?</string>
     <string name="consume_test_purchases">Consume Test Purchases</string>
 
 </resources>

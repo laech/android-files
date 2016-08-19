@@ -27,7 +27,6 @@ import l.files.premium.ConsumeTestPurchasesOnDebugMenu;
 import l.files.premium.PremiumLock;
 import l.files.ui.base.app.OptionsMenus;
 import l.files.ui.base.fs.FileInfo;
-import l.files.ui.base.fs.OnOpenFileListener;
 import l.files.ui.base.selection.SelectionModeFragment;
 import l.files.ui.base.view.ActionModeProvider;
 import l.files.ui.base.view.ActionModes;
@@ -60,6 +59,7 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static l.files.premium.PremiumLock.isPremiumPreferenceKey;
 import static l.files.ui.base.fs.IOExceptions.message;
 import static l.files.ui.base.view.Views.find;
 import static l.files.ui.browser.FilesAdapter.VIEW_TYPE_FILE;
@@ -185,7 +185,8 @@ public final class FilesFragment
                 selection(),
                 actionModeProvider(),
                 actionModeCallback(),
-                (OnOpenFileListener) getActivity()));
+                (FilesActivity) getActivity(),
+                ((FilesActivity) getActivity()).getPremiumLock()));
 
         setupOptionsMenu();
         setHasOptionsMenu(true);
@@ -416,7 +417,7 @@ public final class FilesFragment
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-        Activity activity = getActivity();
+        FilesActivity activity = (FilesActivity) getActivity();
         if (activity == null) {
             return;
         }
@@ -428,8 +429,13 @@ public final class FilesFragment
 
         if (isShowHiddenFilesKey(key)) {
             loader.setShowHidden(getShowHiddenFiles(activity));
+
         } else if (isSortKey(key)) {
             loader.setSort(getSort(activity));
+
+        } else if (isPremiumPreferenceKey(key)
+                && activity.getPremiumLock().isUnlocked()) {
+            adapter.removeAd();
         }
     }
 

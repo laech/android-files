@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingBottom="4dp">
 
     <android.support.v7.widget.CardView
         android:id="@+id/card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/files_item_space_vertical"
+        android:layout_marginBottom="20dp"
         android:layout_marginEnd="@dimen/files_item_space_horizontal"
         android:layout_marginLeft="@dimen/files_item_space_horizontal"
         android:layout_marginRight="@dimen/files_item_space_horizontal"
@@ -29,8 +30,31 @@
             android:gravity="center"
             android:text="@string/ad"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorTertiary" />
+            android:textColor="#aaa" />
 
     </android.support.v7.widget.CardView>
 
-</FrameLayout>
+    <android.support.v7.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="12dp"
+        android:layout_marginRight="12dp"
+        app:cardBackgroundColor="#ccc"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp">
+
+        <TextView
+            android:id="@+id/remove_ad"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="@string/ic_close"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
