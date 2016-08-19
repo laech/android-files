@@ -19,10 +19,8 @@
         android:layout_marginRight="@dimen/files_item_space_horizontal"
         android:layout_marginStart="@dimen/files_item_space_horizontal"
         android:layout_marginTop="@dimen/files_item_space_vertical"
-        android:foreground="?attr/selectableItemBackground"
         app:cardCornerRadius="@dimen/files_item_card_radius"
-        app:cardElevation="1dp"
-        app:cardPreventCornerOverlap="false">
+        app:cardElevation="1dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -39,16 +37,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
         app:cardBackgroundColor="#ccc"
         app:cardCornerRadius="15dp"
         app:cardElevation="2dp">
 
         <TextView
             android:id="@+id/remove_ad"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
             android:text="@string/ic_close"

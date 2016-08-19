@@ -53,7 +53,8 @@ public final class ManualInspectionTest extends InstrumentationTestCase {
                 "will_scale_down.jpg",
                 "test.pdf",
                 "test.mp4",
-                "test.m4a");
+                "test.m4a",
+                "test.svg");
 
         for (String res : resources) {
             Path file = dir.resolve(res);

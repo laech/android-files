@@ -107,6 +107,7 @@ final class AdViewHolder extends RecyclerView.ViewHolder {
         adView.loadAd(new AdRequest.Builder()
                 .addTestDevice(DEVICE_ID_EMULATOR)
                 .addTestDevice("3D33A77247CFB6111C37C7D2B50E325A") // Nexus 5X
+                .addTestDevice("C30D27509816043FE18E3D2859175A61") // Nexus S
                 .build());
 
         ViewGroup.LayoutParams params = itemView.getLayoutParams();
