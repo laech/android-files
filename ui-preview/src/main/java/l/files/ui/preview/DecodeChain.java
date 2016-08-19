@@ -11,6 +11,9 @@ import static java.util.Locale.ENGLISH;
 
 final class DecodeChain extends Decode {
 
+    // Need to update NoPreview cache version to invalidate
+    // cache when we add a new decoder so existing files
+    // marked as not previewable will get re-evaluated.
     private static final Previewer[] PREVIEWERS = {
             DecodeSvg.PREVIEWER,
             DecodeImage.PREVIEWER,
@@ -39,10 +42,9 @@ final class DecodeChain extends Decode {
             Preview.Using using,
             Preview context) {
 
-// TODO revisit this if new decoder is added for new file type, existing files will still be marked as not previewable
-//        if (!context.isPreviewable(path, stat, constraint)) {
-//            return null;
-//        }
+        if (!context.isPreviewable(path, stat, constraint)) {
+            return null;
+        }
 
         if (using == Using.FILE_EXTENSION) {
             String extensionInLowercase = path.name().ext().toLowerCase(ENGLISH);
