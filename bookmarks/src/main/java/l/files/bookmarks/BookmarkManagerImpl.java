@@ -75,7 +75,7 @@ final class BookmarkManagerImpl extends BookmarkManager {
                     // Remove bookmarks that no longer exist
                 }
             } catch (URISyntaxException | IllegalArgumentException e) {
-                e.printStackTrace();
+                Log.w(TAG, "Invalid URI: " + uriString, e);
             }
         }
         return paths;

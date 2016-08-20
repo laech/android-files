@@ -2,6 +2,7 @@ package l.files.ui.preview;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -146,7 +147,8 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         try {
             thumbnail = context.getThumbnailFromDisk(path, stat, constraint, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(),
+                    "Failed to get disk thumbnail for " + path, e);
         }
 
         if (thumbnail != null) {

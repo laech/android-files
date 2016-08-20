@@ -2,6 +2,7 @@ package l.files.ui.preview;
 
 import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -97,7 +98,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 try {
                     readIfNeeded();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(PersistenceCache.this.getClass().getSimpleName(),
+                            "Failed to read cache.", e);
                 }
                 return null;
             }
@@ -157,7 +159,8 @@ abstract class PersistenceCache<V> extends MemCache<V> {
                 try {
                     writeIfNeeded();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(PersistenceCache.this.getClass().getSimpleName(),
+                            "Failed to write cache.", e);
                 }
                 return null;
             }

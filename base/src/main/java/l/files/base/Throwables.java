@@ -1,5 +1,7 @@
 package l.files.base;
 
+import android.util.Log;
+
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
 
@@ -12,7 +14,8 @@ public final class Throwables {
         if (SDK_INT >= KITKAT) {
             e.addSuppressed(suppressed);
         } else {
-            suppressed.printStackTrace();
+            Log.w(Throwables.class.getSimpleName(),
+                    "addSuppressed(...)", e);
         }
     }
 

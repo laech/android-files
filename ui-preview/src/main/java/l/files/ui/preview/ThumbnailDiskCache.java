@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -72,7 +73,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 try {
                     cleanup();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(getClass().getSimpleName(),
+                            "Failed to cleanup.", e);
                 }
             }
         });
@@ -108,7 +110,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
 
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(getClass().getSimpleName(),
+                            "Failed to delete " + path, e);
                 }
 
                 return CONTINUE;
@@ -227,8 +230,9 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 public boolean accept(Path path) {
                     try {
                         Files.delete(path);
-                    } catch (IOException ignored) {
-                        ignored.printStackTrace();
+                    } catch (IOException e) {
+                        Log.w(getClass().getSimpleName(),
+                                "Failed to purge " + path, e);
                     }
                     return true;
                 }
@@ -269,7 +273,8 @@ final class ThumbnailDiskCache extends Cache<Bitmap> {
                 try {
                     put(path, stat, constraint, thumbnail);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.w(getClass().getSimpleName(),
+                            "Failed to put " + path, e);
                 }
             }
         }

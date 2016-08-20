@@ -3,6 +3,7 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,8 +111,10 @@ final class DecodeImage extends DecodeThumbnail {
             decodeStream(in, null, options);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(),
+                    "Failed to decode bitmap for " + path, e);
             return null;
+
         } catch (Throwable e) {
             throw closer.rethrow(e);
         } finally {

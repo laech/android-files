@@ -2,6 +2,7 @@ package l.files.ui.info;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -54,10 +55,12 @@ final class CalculateSizeLoader
         currentSizeOnDisk = 0;
 
         for (Name child : children) {
+            Path path = dir.resolve(child);
             try {
-                Files.traverse(dir.resolve(child), NOFOLLOW, this);
+                Files.traverse(path, NOFOLLOW, this);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to traverse " + path, e);
             }
         }
 
@@ -93,7 +96,8 @@ final class CalculateSizeLoader
 
     @Override
     public void onException(Path path, IOException e) throws IOException {
-        e.printStackTrace();
+        Log.w(getClass().getSimpleName(),
+                "Failed to visit " + path, e);
     }
 
     int currentCount() {

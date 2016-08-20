@@ -90,7 +90,6 @@ final class DecodeSvg extends DecodeThumbnail {
             return new Result(bitmap, originalSize);
 
         } catch (Throwable e) {
-            e.printStackTrace();
             throw closer.rethrow(e);
         } finally {
             closer.close();

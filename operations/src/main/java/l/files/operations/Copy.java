@@ -1,5 +1,7 @@
 package l.files.operations;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -138,7 +140,8 @@ final class Copy extends Paste {
             try {
                 Files.delete(dst);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to delete file on failure " + dst, ex);
             }
 
             if (!(e instanceof ClosedByInterruptException) &&
@@ -157,7 +160,8 @@ final class Copy extends Paste {
         try {
             Files.setLastModifiedTime(dst, NOFOLLOW, src.lastModifiedTime());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(),
+                    "Failed to set last modified time " + dst, e);
         }
     }
 

@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -200,7 +201,8 @@ public final class PremiumLock implements ServiceConnection {
             super.onPostExecute(o);
 
             if (o instanceof Throwable) {
-                ((Throwable) o).printStackTrace();
+                Log.w(PremiumLock.class.getSimpleName(),
+                        "Failed to get purchases.", (Throwable) o);
                 return;
             }
 

@@ -1,6 +1,7 @@
 package l.files.ui.preview;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -124,7 +125,8 @@ final class DecodeChain extends Decode {
         try {
             return MediaTypes.detectByContent(context.context, path, stat);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(),
+                    "Failed to detect media type for " + path, e);
             return null;
         }
     }

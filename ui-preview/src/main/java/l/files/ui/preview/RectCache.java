@@ -1,5 +1,7 @@
 package l.files.ui.preview;
 
+import android.util.Log;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -23,8 +25,10 @@ final class RectCache extends PersistenceCache<Rect> {
         int height = in.readInt();
         try {
             return Rect.of(width, height);
+
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(),
+                    "Invalid size " + width + "x" + height, e);
             return null;
         }
     }

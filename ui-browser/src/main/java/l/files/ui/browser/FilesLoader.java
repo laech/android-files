@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.OperationCanceledException;
 import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
+import android.util.Log;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;
@@ -192,7 +193,6 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
                 children = visit();
             }
         } catch (IOException e) {
-            e.printStackTrace();
             return Result.of(e);
 
         } catch (InterruptedException e) {
@@ -303,7 +303,8 @@ final class FilesLoader extends AsyncTaskLoader<FilesLoader.Result> {
             try {
                 closeable.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to close on reset " + root, e);
             }
         }
 

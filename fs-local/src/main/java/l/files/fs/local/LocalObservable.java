@@ -1,6 +1,7 @@
 package l.files.fs.local;
 
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -415,7 +416,10 @@ final class LocalObservable extends Native
             try {
                 inotify.removeWatch(fd, wd);
             } catch (ErrnoException e) {
-                e.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to remove watch on release" +
+                                ", fd=" + fd +
+                                ", wd=" + wd, e);
             }
         }
         childDirs.clear();
@@ -542,7 +546,9 @@ final class LocalObservable extends Native
             try {
                 close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to close on notify event, "
+                                + kind + ", " + name, e);
             }
         }
     }
@@ -571,7 +577,7 @@ final class LocalObservable extends Native
 
             releaseChildWatches();
 
-        } else if ( e.errno == EACCES) {
+        } else if (e.errno == EACCES) {
 
             notifyIncompleteObservationOrClose();
 
@@ -588,7 +594,8 @@ final class LocalObservable extends Native
             try {
                 close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(getClass().getSimpleName(),
+                        "Failed to close on incomplete observation.", e);
             }
         }
     }

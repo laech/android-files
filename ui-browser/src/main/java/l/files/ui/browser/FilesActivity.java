@@ -286,7 +286,6 @@ public final class FilesActivity extends BaseActivity implements
                 try {
                     return Files.stat(path, FOLLOW);
                 } catch (IOException e) {
-                    e.printStackTrace();
                     return e;
                 }
             }
