@@ -3,7 +3,6 @@ package l.files.ui.preview;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -90,9 +89,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         try {
             result = decode();
         } catch (Exception e) {
-            Log.w(getClass().getSimpleName(),
-                    "Failed to decode " + path, e);
-            publishProgress(NoPreview.INSTANCE);
+            publishProgress(new NoPreview(e));
             return null;
         }
 
@@ -104,7 +101,7 @@ Caused by: java.lang.OutOfMemoryError: Failed to allocate a 942852 byte allocati
         }
 
         if (result == null) {
-            publishProgress(NoPreview.INSTANCE);
+            publishProgress(NoPreview.FAILURE_UNAVAILABLE);
             return null;
         }
 

@@ -2,12 +2,14 @@ package l.files.ui.browser;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import java.lang.ref.WeakReference;
@@ -168,7 +170,7 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
 
         Path file = previewPath();
         Stat stat = previewStat();
-         if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
+        if (stat == null || !decorator.isPreviewable(file, stat, constraint)) {
             backgroundBlurClear();
             return null;
         }
@@ -301,9 +303,17 @@ final class FileViewHolder extends SelectionModeViewHolder<Path, FileInfo>
     }
 
     @Override
-    public void onPreviewFailed(Path item, Stat stat, Preview.Using used) {
+    public void onPreviewFailed(
+            Path item,
+            Stat stat,
+            Preview.Using used,
+            @Nullable Throwable cause) {
+
         if (item.equals(previewPath())) {
             updateContent(null);
         }
+
+        Log.w(getClass().getSimpleName(),
+                "No preview " + item, cause);
     }
 }

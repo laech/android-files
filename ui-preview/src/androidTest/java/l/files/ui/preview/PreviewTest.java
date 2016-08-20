@@ -135,11 +135,29 @@ public final class PreviewTest extends PathBaseTest {
         Decode task = newPreview().get(file, stat, Rect.of(100, 100), callback, using);
         assertNotNull(task);
 
-        int millis = 60000;
-        verify(callback, timeout(millis)).onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
-        verify(callback, timeout(millis)).onBlurredThumbnailAvailable(eq(file), eq(stat), notNull(Bitmap.class));
-        verify(callback, timeout(millis)).onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
-        verify(callback, never()).onPreviewFailed(eq(file), eq(stat), any(Using.class));
+        try {
+
+            int millis = 60000;
+
+            verify(callback, timeout(millis))
+                    .onPreviewAvailable(eq(file), eq(stat), notNull(Bitmap.class));
+
+            verify(callback, timeout(millis))
+                    .onBlurredThumbnailAvailable(eq(file), eq(stat), notNull(Bitmap.class));
+
+            verify(callback, timeout(millis))
+                    .onSizeAvailable(eq(file), eq(stat), notNull(Rect.class));
+
+        } catch (AssertionError e) {
+
+            verify(callback, never()).onPreviewFailed(
+                    any(Path.class),
+                    any(Stat.class),
+                    any(Using.class),
+                    any(Throwable.class));
+
+            throw e;
+        }
 
         task.awaitAll(1, MINUTES);
     }

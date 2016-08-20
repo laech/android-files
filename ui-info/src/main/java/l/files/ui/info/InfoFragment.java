@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -173,7 +174,7 @@ public final class InfoFragment
     }
 
     @Override
-    public void onPreviewFailed(Path file, Stat stat, Using used) {
+    public void onPreviewFailed(Path path, Stat stat, Using used, @Nullable Throwable cause) {
         image.setVisibility(GONE);
     }
 

@@ -188,7 +188,7 @@ public final class Preview {
 
         void onBlurredThumbnailAvailable(Path path, Stat stat, Bitmap thumbnail);
 
-        void onPreviewFailed(Path path, Stat stat, Using used);
+        void onPreviewFailed(Path path, Stat stat, Using used, @Nullable Throwable cause);
 
     }
 

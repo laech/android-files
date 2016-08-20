@@ -1,7 +1,8 @@
 package l.files.ui.preview;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
+
+import java.io.IOException;
 
 import l.files.fs.Path;
 import l.files.fs.Stat;
@@ -9,6 +10,7 @@ import l.files.fs.media.MediaTypes;
 import l.files.ui.preview.Preview.Using;
 
 import static java.util.Locale.ENGLISH;
+import static l.files.ui.preview.Preview.Using.MEDIA_TYPE;
 
 final class DecodeChain extends Decode {
 
@@ -71,7 +73,7 @@ final class DecodeChain extends Decode {
                             stat,
                             constraint,
                             callback,
-                            Using.MEDIA_TYPE,
+                            MEDIA_TYPE,
                             context).executeOnPreferredExecutor();
                 }
             }
@@ -83,7 +85,7 @@ final class DecodeChain extends Decode {
                 stat,
                 constraint,
                 callback,
-                Using.MEDIA_TYPE,
+                MEDIA_TYPE,
                 context
         ).executeOnPreferredExecutor();
     }
@@ -91,43 +93,32 @@ final class DecodeChain extends Decode {
     @Override
     Object onDoInBackground() {
 
-        String media = checkMediaType();
-        if (media != null) {
+        try {
+            String media = checkMediaType();
+            context.putMediaType(path, stat, constraint, media);
             for (Previewer previewer : PREVIEWERS) {
                 if (previewer.acceptsMediaType(path, media)) {
                     publishProgress(previewer.create(
-                            path, stat, constraint, callback, Using.MEDIA_TYPE, context));
-                    return null;
+                            path, stat, constraint, callback, MEDIA_TYPE, context));
+                    break;
                 }
             }
+        } catch (IOException e) {
+            publishProgress(new NoPreview(e));
         }
-
-        publishProgress(NoPreview.INSTANCE);
 
         return null;
     }
 
-    private String checkMediaType() {
+    private String checkMediaType() throws IOException {
         String media = context.getMediaType(path, stat, constraint, true);
         if (media == null) {
             media = decodeMedia();
-            if (media != null) {
-                context.putMediaType(path, stat, constraint, media);
-            }
-        }
-        if (media == null) {
-            publishProgress(NoPreview.INSTANCE);
         }
         return media;
     }
 
-    private String decodeMedia() {
-        try {
-            return MediaTypes.detectByContent(context.context, path, stat);
-        } catch (Exception e) {
-            Log.w(getClass().getSimpleName(),
-                    "Failed to detect media type for " + path, e);
-            return null;
-        }
+    private String decodeMedia() throws IOException {
+        return MediaTypes.detectByContent(context.context, path, stat);
     }
 }

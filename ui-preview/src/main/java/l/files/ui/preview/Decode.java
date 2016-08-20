@@ -114,7 +114,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
     private boolean checkIsCache() {
         if (path.startsWith(context.cacheDir)) {
-            publishProgress(NoPreview.INSTANCE);
+            publishProgress(NoPreview.FAILURE_UNAVAILABLE);
             return true;
         }
         return false;
@@ -124,7 +124,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
         if (context.isPreviewable(path, stat, constraint)) {
             return true;
         }
-        publishProgress(NoPreview.INSTANCE);
+        publishProgress(NoPreview.FAILURE_UNAVAILABLE);
         return false;
     }
 
@@ -200,7 +200,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
 
             } else if (value instanceof NoPreview) {
                 if (using == MEDIA_TYPE) {
-                    callback.onPreviewFailed(path, stat, using);
+                    callback.onPreviewFailed(path, stat, using, ((NoPreview) value).failure);
                     context.putPreviewable(path, stat, constraint, false);
 
                 } else {
@@ -209,7 +209,7 @@ public abstract class Decode extends AsyncTask<Object, Object, Object> {
                     if (sub != null) {
                         subs.add(sub);
                     } else {
-                        callback.onPreviewFailed(path, stat, using);
+                        callback.onPreviewFailed(path, stat, using, ((NoPreview) value).failure);
                         context.putPreviewable(path, stat, constraint, false);
                     }
                 }
